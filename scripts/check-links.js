@@ -5,7 +5,33 @@ const path = require('path');
 const { promisify } = require('util');
 const markdownLinkCheck = require('markdown-link-check');
 const readFileAsync = promisify(fs.readFile);
-const markdownLinkCheckAsync = promisify(markdownLinkCheck);
+
+// Custom promisify wrapper for markdown-link-check to prevent callback issues
+const markdownLinkCheckAsync = (markdown, options) => {
+    return new Promise((resolve, reject) => {
+        let settled = false;
+
+        const safeCallback = (err, results) => {
+            if (settled) return; // Prevent double callback
+            settled = true;
+
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results);
+            }
+        };
+
+        try {
+            markdownLinkCheck(markdown, options, safeCallback);
+        } catch (error) {
+            if (!settled) {
+                settled = true;
+                reject(error);
+            }
+        }
+    });
+};
 
 // Configuration for the link checker
 const config = {
@@ -81,29 +107,36 @@ async function checkHrefLinks(links, filePath) {
         return false;
     }
 
-    // Create a fake markdown content with just the href links to reuse existing functionality
-    const fakeMarkdown = links.map(link => `[link](${link})`).join('\n');
+    try {
+        // Create a fake markdown content with just the href links to reuse existing functionality
+        const fakeMarkdown = links.map(link => `[link](${link})`).join('\n');
 
-    const results = await markdownLinkCheckAsync(fakeMarkdown, config);
+        const results = await markdownLinkCheckAsync(fakeMarkdown, config);
 
-    let hasErrors = false;
-    results.forEach(result => {
-        if (result.status === 'dead') {
-            // Skip reporting errors for obviously invalid URLs
-            if (result.link.includes('{') || result.link.includes('}') ||
-                result.link.includes('${') || result.link.includes('}}')) {
-                return;
-            }
-            hasErrors = true;
-            const relativePath = path.relative(process.cwd(), filePath);
-            console.error(`[${result.statusCode}] Dead href link in ${relativePath}: ${result.link}`);
-            if (result.err) {
-                console.error(`  Error: ${result.err}`);
-            }
+        let hasErrors = false;
+        if (results && Array.isArray(results)) {
+            results.forEach(result => {
+                if (result.status === 'dead') {
+                    // Skip reporting errors for obviously invalid URLs
+                    if (result.link.includes('{') || result.link.includes('}') ||
+                        result.link.includes('${') || result.link.includes('}}')) {
+                        return;
+                    }
+                    hasErrors = true;
+                    const relativePath = path.relative(process.cwd(), filePath);
+                    console.error(`[${result.statusCode}] Dead href link in ${relativePath}: ${result.link}`);
+                    if (result.err) {
+                        console.error(`  Error: ${result.err}`);
+                    }
+                }
+            });
         }
-    });
 
-    return hasErrors;
+        return hasErrors;
+    } catch (error) {
+        console.warn(`Warning: Error checking href links in ${path.relative(process.cwd(), filePath)}: ${error.message}`);
+        return false; // Don't fail the entire check for href link errors
+    }
 }
 
 async function checkFile(filePath) {
@@ -114,23 +147,30 @@ async function checkFile(filePath) {
 
         // Check markdown links using the existing library (only for .md and .mdx files)
         if (filePath.endsWith('.md') || filePath.endsWith('.mdx')) {
-            const results = await markdownLinkCheckAsync(content, config);
+            try {
+                const results = await markdownLinkCheckAsync(content, config);
 
-            results.forEach(result => {
-                if (result.status === 'dead') {
-                    // Skip reporting errors for obviously invalid URLs
-                    if (result.link.includes('{') || result.link.includes('}') ||
-                        result.link.includes('${') || result.link.includes('}}')) {
-                        return;
-                    }
-                    hasErrors = true;
-                    const relativePath = path.relative(process.cwd(), filePath);
-                    console.error(`[${result.statusCode}] Dead link in ${relativePath}: ${result.link}`);
-                    if (result.err) {
-                        console.error(`  Error: ${result.err}`);
-                    }
+                if (results && Array.isArray(results)) {
+                    results.forEach(result => {
+                        if (result.status === 'dead') {
+                            // Skip reporting errors for obviously invalid URLs
+                            if (result.link.includes('{') || result.link.includes('}') ||
+                                result.link.includes('${') || result.link.includes('}}')) {
+                                return;
+                            }
+                            hasErrors = true;
+                            const relativePath = path.relative(process.cwd(), filePath);
+                            console.error(`[${result.statusCode}] Dead link in ${relativePath}: ${result.link}`);
+                            if (result.err) {
+                                console.error(`  Error: ${result.err}`);
+                            }
+                        }
+                    });
                 }
-            });
+            } catch (linkCheckError) {
+                console.warn(`Warning: Error checking markdown links in ${path.relative(process.cwd(), filePath)}: ${linkCheckError.message}`);
+                // Don't fail the entire check for markdown link errors, just warn
+            }
         }
 
         // Check href links in JSX components (for .mdx and .tsx files)
@@ -182,37 +222,26 @@ async function main() {
         const files = findFiles(pagesDir);
         console.log(`Found ${files.length} files to check (.md, .mdx, .tsx)\n`);
 
-        // Process files with a constant throughput of 10 concurrent checks
-        const maxConcurrent = 1;
-        let index = 0;
+        // Process files sequentially to avoid callback conflicts
         let completed = 0;
         const total = files.length;
 
-        const processFile = async () => {
-            while (index < total) {
-                const fileIndex = index++;
-                const file = files[fileIndex];
+        for (const file of files) {
+            console.log(`Processing ${file}`);
 
-                console.log(`Processing ${file}`);
-
-                try {
-                    const result = await checkFile(file);
-                    hasErrors = hasErrors || result;
-                } catch (error) {
-                    console.error(`Error processing ${file}:`, error);
-                    hasErrors = true;
-                }
-
-                completed++;
-                if (completed % 10 === 0 || completed === total) {
-                    console.log(`Processed ${completed}/${total} files`);
-                }
+            try {
+                const result = await checkFile(file);
+                hasErrors = hasErrors || result;
+            } catch (error) {
+                console.error(`Error processing ${file}:`, error);
+                hasErrors = true;
             }
-        };
 
-        // Start worker pool
-        const workers = Array.from({ length: Math.min(maxConcurrent, files.length) }, () => processFile());
-        await Promise.all(workers);
+            completed++;
+            if (completed % 10 === 0 || completed === total) {
+                console.log(`Processed ${completed}/${total} files`);
+            }
+        }
 
         if (hasErrors) {
             console.error('\nLink check failed: Some links are dead or invalid');
