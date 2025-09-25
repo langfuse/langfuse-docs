@@ -22,7 +22,7 @@ export default {
     type: "menu",
     items: {
       observability: {
-        title: "Observability",
+        title: "LLM Observability",
         href: "/docs/observability/overview",
       },
       prompts: {
