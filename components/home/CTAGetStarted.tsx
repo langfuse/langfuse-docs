@@ -42,7 +42,7 @@ export default function CTAGetStarted() {
                   >
                     <BarChart3 className="h-5 w-5 text-primary flex-shrink-0" />
                     <div className="flex-1 text-left min-w-0">
-                      <h4 className="font-semibold text-foreground">
+                      <h4 className="font-semibold text-foreground text-wrap">
                         Integrate Observability (15 min)
                       </h4>
                       <p className="text-sm text-primary/70 text-wrap">
@@ -65,7 +65,7 @@ export default function CTAGetStarted() {
                   >
                     <FileText className="h-5 w-5 text-primary flex-shrink-0" />
                     <div className="flex-1 text-left min-w-0">
-                      <h4 className="font-semibold text-foreground">
+                      <h4 className="font-semibold text-foreground text-wrap">
                         Integrate Prompt Management (5 min)
                       </h4>
                       <p className="text-sm text-primary/70 text-wrap">
@@ -88,7 +88,7 @@ export default function CTAGetStarted() {
                   >
                     <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
                     <div className="flex-1 text-left min-w-0">
-                      <h4 className="font-semibold text-foreground">
+                      <h4 className="font-semibold text-foreground text-wrap">
                         Run Evaluations (15-30 min)
                       </h4>
                       <p className="text-sm text-primary/70 text-wrap">
@@ -119,7 +119,7 @@ export default function CTAGetStarted() {
                   <Link href="/docs/demo" className="flex items-center gap-4">
                     <Eye className="h-5 w-5 text-primary flex-shrink-0" />
                     <div className="flex-1 text-left min-w-0">
-                      <h4 className="font-semibold text-foreground">
+                      <h4 className="font-semibold text-foreground text-wrap">
                         Explore Example Project (1 min)
                       </h4>
                       <p className="text-sm text-primary/70 text-wrap">
@@ -140,7 +140,7 @@ export default function CTAGetStarted() {
                   <Link href="/watch-demo" className="flex items-center gap-4">
                     <Play className="h-5 w-5 text-primary flex-shrink-0" />
                     <div className="flex-1 text-left min-w-0">
-                      <h4 className="font-semibold text-foreground">
+                      <h4 className="font-semibold text-foreground text-wrap">
                         Watch Walkthroughs (20 min)
                       </h4>
                       <p className="text-sm text-primary/70 text-wrap">
@@ -160,7 +160,7 @@ export default function CTAGetStarted() {
                   <Link href="/docs" className="flex items-center gap-4">
                     <BookOpen className="h-5 w-5 text-primary flex-shrink-0" />
                     <div className="flex-1 text-left min-w-0">
-                      <h4 className="font-semibold text-foreground">
+                      <h4 className="font-semibold text-foreground text-wrap">
                         Read Documentation
                       </h4>
                       <p className="text-sm text-primary/70 text-wrap">

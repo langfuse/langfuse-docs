@@ -262,7 +262,7 @@ export default function OpenSource() {
       <div className="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-3 w-full max-w-6xl mx-auto px-5">
         <Changelog />
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <StatBox
             title="Latest Release"
             mainValue={
