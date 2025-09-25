@@ -75,11 +75,11 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
         </div>
 
         {/* Row B: Code block + Product screenshot */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 h-[28rem] overflow-y-hidden border-t border-dashed">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-y-hidden border-t border-dashed">
           {/* Code block */}
-          <div className="lg:col-span-6 order-2 lg:order-1 max-h-full min-h-full border-r border-dashed">
-            <div className="relative max-h-full bg-background">
-              <div className="flex flex-row items-center w-max-full overflow-x-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2 pt-1">
+          <div className="lg:col-span-6 order-2 lg:order-1 border-r border-dashed">
+            <div className="relative bg-background aspect-[3/2] flex flex-col">
+              <div className="flex flex-row items-center w-max-full overflow-x-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2 pt-1 flex-shrink-0">
                 <div
                   className={cn([
                     "text-xs border-b border-transparent p-2  cursor-pointer",
@@ -103,21 +103,24 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
                   JS/TS SDK
                 </div>
               </div>
-              <CodeBlock
-                code={activeCodeSnippet}
-                language={feature.code.language}
-                className="relative rounded-none border-none"
-                customStyle={{
-                  fontSize: "0.725rem",
-                  borderRadius: "0",
-                }}
-              ></CodeBlock>
+              <div className="flex-1 overflow-hidden">
+                <CodeBlock
+                  code={activeCodeSnippet}
+                  language={feature.code.language}
+                  className="relative rounded-none border-none h-full"
+                  customStyle={{
+                    fontSize: "0.725rem",
+                    borderRadius: "0",
+                    height: "100%",
+                  }}
+                ></CodeBlock>
+              </div>
             </div>
           </div>
 
           {/* Product screenshot */}
           <div className="lg:col-span-6 order-1 lg:order-2">
-            <div className="relative h-full w-full">
+            <div className="relative w-full aspect-[3/2]">
               {/* Light theme image */}
               <Image
                 src={feature.image.light}
