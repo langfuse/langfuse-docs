@@ -8,6 +8,9 @@ import { CTASocial } from "./CTASocial";
 const FeatureBento = dynamic(() => import("./FeatureBento"), {
   ssr: false,
 });
+const FeatureTabsSection = dynamic(() => import("./FeatureTabsSection"), {
+  ssr: false,
+});
 const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
   ssr: false,
 });
@@ -25,6 +28,7 @@ export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
       <Hero />
+      <FeatureTabsSection />
       <Usage />
       <FeatureBento />
       <IntegrationsGrid />
