@@ -36,8 +36,6 @@ interface CustomerCarouselProps {
   path?: string;
   title?: string;
   description?: string;
-  autoAdvance?: boolean;
-  autoAdvanceInterval?: number;
   showDots?: boolean;
   loop?: boolean;
   className?: string;
@@ -47,27 +45,27 @@ export const CustomerCarousel = ({
   path = "/customers",
   title,
   description,
-  autoAdvance = false,
-  autoAdvanceInterval = 5000,
   showDots = true,
   loop = false,
   className = "",
 }: CustomerCarouselProps) => {
-  const customerStories = useMemo(() => {
-    const stories = (getPagesUnderRoute(path) as Array<CustomerStory>)
+  // Memoize the original filtered stories to avoid repeated getPagesUnderRoute calls
+  const originalStories = useMemo(() => {
+    return (getPagesUnderRoute(path) as Array<CustomerStory>)
       .filter((page) => page.frontMatter?.showInCustomerIndex !== false);
-    
+  }, [path]);
+
+  const customerStories = useMemo(() => {
     // For infinite loop, duplicate items to ensure smooth looping
-    if (loop && stories.length > 0) {
-      return [...stories, ...stories, ...stories];
+    if (loop && originalStories.length > 0) {
+      return [...originalStories, ...originalStories, ...originalStories];
     }
     
-    return stories;
-  }, [path, loop]);
+    return originalStories;
+  }, [originalStories, loop]);
 
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
-  const [count, setCount] = useState(0);
   const [isInView, setIsInView] = useState<boolean[]>([]);
 
   useEffect(() => {
@@ -75,31 +73,12 @@ export const CustomerCarousel = ({
       return;
     }
 
-    setCount(api.scrollSnapList().length);
     
     // If looping is enabled, start at the middle set of items first
-    if (loop) {
-      const originalStories = (getPagesUnderRoute(path) as Array<CustomerStory>)
-        .filter((page) => page.frontMatter?.showInCustomerIndex !== false);
-      if (originalStories.length > 0) {
-        api.scrollTo(originalStories.length);
-      }
+    if (loop && originalStories.length > 0) {
+      api.scrollTo(originalStories.length);
     }
     
-    // Set initial state after potential scroll with a small delay to ensure rendering
-    const timeoutId = setTimeout(() => {
-      const initialCurrent = api.selectedScrollSnap() + 1;
-      setCurrent(initialCurrent);
-
-      // Initialize visibility state - center one item with partial side items
-      const initialIsInView = customerStories.map((_, index) => {
-        const currentIndex = initialCurrent - 1;
-        // Show current item fully, and adjacent items partially
-        return index >= currentIndex - 1 && index <= currentIndex + 1;
-      });
-      setIsInView(initialIsInView);
-    }, 100);
-
     // Set up the select event handler
     const handleSelect = () => {
       const newCurrent = api.selectedScrollSnap() + 1;
@@ -114,14 +93,32 @@ export const CustomerCarousel = ({
       setIsInView(newIsInView);
     };
 
+    // Set up the reInit event handler for initial state
+    const handleReInit = () => {
+      const initialCurrent = api.selectedScrollSnap() + 1;
+      setCurrent(initialCurrent);
+
+      // Initialize visibility state - center one item with partial side items
+      const initialIsInView = customerStories.map((_, index) => {
+        const currentIndex = initialCurrent - 1;
+        // Show current item fully, and adjacent items partially
+        return index >= currentIndex - 1 && index <= currentIndex + 1;
+      });
+      setIsInView(initialIsInView);
+    };
+
     api.on("select", handleSelect);
+    api.on("reInit", handleReInit);
+
+    // Trigger initial state setup
+    handleReInit();
 
     // Cleanup function
     return () => {
-      clearTimeout(timeoutId);
       api.off("select", handleSelect);
+      api.off("reInit", handleReInit);
     };
-  }, [api, loop, path, customerStories]);
+  }, [api, loop, originalStories, customerStories]);
 
   if (customerStories.length === 0) {
     return null;
@@ -158,7 +155,7 @@ export const CustomerCarousel = ({
         >
           <CarouselContent className="-ml-4">
             {customerStories.map((story, index) => (
-              <CarouselItem key={story.route} className="pl-4 basis-1/2">
+              <CarouselItem key={`${story.route}-${index}`} className="pl-4 basis-1/2">
                 <Link 
                   href={story.route} 
                   className={`group block bg-card border rounded-lg p-8 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-500 cursor-pointer flex flex-col h-full min-h-[300px] ${
@@ -288,12 +285,7 @@ export const CustomerCarousel = ({
         {/* Dots Indicator */}
         {showDots && (
           <div className="flex justify-center mt-6 space-x-2">
-            {(() => {
-              // Get the original stories for dots (not duplicated)
-              const originalStories = (getPagesUnderRoute(path) as Array<CustomerStory>)
-                .filter((page) => page.frontMatter?.showInCustomerIndex !== false);
-              
-              return originalStories.map((_, index) => (
+            {originalStories.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => {
@@ -310,8 +302,7 @@ export const CustomerCarousel = ({
                   }`}
                   aria-label={`Go to customer story ${index + 1}`}
                 />
-              ));
-            })()}
+              ))}
           </div>
         )}
       </div>
