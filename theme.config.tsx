@@ -17,6 +17,7 @@ import { AvailabilityBanner } from "./components/availability";
 import { Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import { LangTabs } from "./components/LangTabs";
+import IconYoutube from "./components/icons/youtube";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -32,12 +33,11 @@ const config: DocsThemeConfig = {
         <a
           className="p-1 hidden lg:inline-block hover:opacity-80"
           target="_blank"
-          href="https://discord.langfuse.com"
-          aria-label="Langfuse Discord"
+          href="https://www.youtube.com/@langfuse"
+          aria-label="Langfuse YouTube"
         >
-          <IconDiscord className="h-7 w-7" />
+          <IconYoutube className="h-7 w-7" />
         </a>
-
         <a
           className="p-1 hidden lg:inline-block hover:opacity-80"
           target="_blank"
