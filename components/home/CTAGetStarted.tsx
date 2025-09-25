@@ -1,13 +1,7 @@
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import { Button } from "../ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import Link from "next/link";
 import Image from "next/image";
 import phLight from "./img/ph_product_of_the_day_light.png";
@@ -21,13 +15,10 @@ import {
   FileText,
   CheckCircle2,
   Eye,
-  MessageCircle,
-  ExternalLink,
-  ArrowDown,
   Play,
 } from "lucide-react";
 
-export function CTAGetStarted() {
+export default function CTAGetStarted() {
   return (
     <HomeSection>
       {/* Social/Award Links */}
