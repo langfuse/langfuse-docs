@@ -84,10 +84,11 @@ export const CustomerCarousel = ({
       const newCurrent = api.selectedScrollSnap() + 1;
       setCurrent(newCurrent);
       
-      // Update visibility for fade effect - center one item with partial side items
+      // Update visibility for fade effect
       const newIsInView = customerStories.map((_, index) => {
         const currentIndex = newCurrent - 1;
-        // Show current item fully, and adjacent items partially
+        // On mobile (basis-full), only show current item
+        // On desktop (md:basis-1/2), show current + adjacent items
         return index >= currentIndex - 1 && index <= currentIndex + 1;
       });
       setIsInView(newIsInView);
@@ -98,10 +99,11 @@ export const CustomerCarousel = ({
       const initialCurrent = api.selectedScrollSnap() + 1;
       setCurrent(initialCurrent);
 
-      // Initialize visibility state - center one item with partial side items
+      // Initialize visibility state
       const initialIsInView = customerStories.map((_, index) => {
         const currentIndex = initialCurrent - 1;
-        // Show current item fully, and adjacent items partially
+        // On mobile (basis-full), only show current item
+        // On desktop (md:basis-1/2), show current + adjacent items
         return index >= currentIndex - 1 && index <= currentIndex + 1;
       });
       setIsInView(initialIsInView);
@@ -153,16 +155,16 @@ export const CustomerCarousel = ({
           }}
           className="w-full"
         >
-          <CarouselContent className="-ml-4">
+          <CarouselContent className="-ml-2 md:-ml-4">
             {customerStories.map((story, index) => (
-              <CarouselItem key={`${story.route}-${index}`} className="pl-4 basis-1/2">
+              <CarouselItem key={`${story.route}-${index}`} className="pl-2 md:pl-4 basis-full md:basis-1/2">
                 <Link 
                   href={story.route} 
-                  className={`group block bg-card border rounded-lg p-8 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-500 cursor-pointer flex flex-col h-full min-h-[300px] ${
+                  className={`group block bg-card border rounded-lg p-4 md:p-8 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-500 cursor-pointer flex flex-col h-full min-h-[250px] md:min-h-[300px] ${
                     index === current - 1 
                       ? 'opacity-100' 
                       : isInView[index] 
-                        ? 'opacity-50' 
+                        ? 'opacity-20 md:opacity-50' 
                         : 'opacity-20'
                   }`}
                 >
