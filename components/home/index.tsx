@@ -1,6 +1,5 @@
 import { Background } from "../Background";
 import { Hero } from "./Hero";
-import Security from "./Security";
 import { Usage } from "./Usage";
 import dynamic from "next/dynamic";
 
@@ -14,6 +13,9 @@ const OpenSource = dynamic(() => import("./OpenSource"), {
   ssr: false,
 });
 const Pricing = dynamic(() => import("./Pricing"), {
+  ssr: false,
+});
+const Security = dynamic(() => import("./Security"), {
   ssr: false,
 });
 const WallOfLove = dynamic(() => import("./WallOfLove"), {
@@ -39,9 +41,6 @@ export const Home = () => (
       <Pricing />
       <WallOfLove />
       <CTAGetStarted />
-      {/* <FromTheBlog /> */}
-      {/* <CTA /> */}
-      {/* <Footer /> */}
     </main>
     <Background />
   </>
