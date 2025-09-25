@@ -53,7 +53,7 @@ function DiscussionItem({ discussion }: { discussion: Discussion }) {
 // Scrolling discussions background component
 function ScrollingDiscussions({
   discussions,
-  speed = "75s",
+  speed = "30s",
 }: {
   discussions: Discussion[];
   speed?: string;
@@ -159,7 +159,7 @@ const supportDiscussions =
       (a, b) =>
         new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
     ) || [];
-const supportDiscussionsTop50 = supportDiscussions.slice(0, 50);
+const supportDiscussionsTop50 = supportDiscussions.slice(0, 20);
 
 const ideasDiscussions =
   discussionsData.categories
@@ -169,7 +169,7 @@ const ideasDiscussions =
         new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
     ) || [];
 
-const ideasDiscussionsTop50 = ideasDiscussions.slice(0, 50);
+const ideasDiscussionsTop50 = ideasDiscussions.slice(0, 20);
 
 // Calculate metrics
 const supportCount = supportDiscussions.length;
