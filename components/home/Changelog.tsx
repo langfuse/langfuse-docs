@@ -27,10 +27,7 @@ export default function Changelog({ className }: { className?: string }) {
 
   return (
     <div
-      className={cn(
-        "rounded border p-5 max-w-lg mx-5 sm:mx-auto bg-card",
-        className
-      )}
+      className={cn("rounded border p-5 bg-card", className)}
       role="region" // Added role for the container
       aria-labelledby="changelog-heading" // Added aria-labelledby to reference the heading
     >
