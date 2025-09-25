@@ -1,4 +1,4 @@
-// icon:discord | Fontawesome https://fontawesome.com/ | Fontawesome
+// icon:youtube | Fontawesome https://fontawesome.com/ | Fontawesome
 function IconYoutube(props: React.SVGProps<SVGSVGElement>) {
   return (
     <>
