@@ -17,6 +17,58 @@ export default {
     type: "page",
     display: "hidden",
   },
+  product: {
+    title: "Product",
+    type: "menu",
+    items: {
+      observability: {
+        title: "Observability",
+        href: "/docs/observability/overview",
+      },
+      prompts: {
+        title: "Prompt Management",
+        href: "/docs/prompt-management/overview",
+      },
+      evaluation: {
+        title: "Evaluation",
+        href: "/docs/evaluation/overview",
+      },
+    },
+  },
+  resources: {
+    title: "Resources",
+    type: "menu",
+    items: {
+      blog: {
+        title: "Blog",
+        href: "/blog",
+      },
+      changelog: {
+        title: "Changelog",
+        href: "/changelog",
+      },
+      roadmap: {
+        title: "Roadmap",
+        href: "/docs/roadmap",
+      },
+      customers: {
+        title: "Customers",
+        href: "/customers",
+      },
+      exampleproject: {
+        title: "Example Project",
+        href: "/docs/demo",
+      },
+      walkthroughs: {
+        title: "Walkthroughs",
+        href: "/watch-demo",
+      },
+      support: {
+        title: "Support",
+        href: "/support",
+      },
+    },
+  },
   docs: {
     type: "page",
     title: "Docs",
@@ -62,6 +114,7 @@ export default {
     theme: {
       layout: "full",
     },
+    display: "hidden",
   },
   blog: {
     title: "Blog",
@@ -69,6 +122,7 @@ export default {
     theme: {
       layout: "full",
     },
+    display: "hidden",
   },
   customers: {
     title: "Customers",
@@ -85,6 +139,7 @@ export default {
       layout: "full",
       timestamp: false,
     },
+    display: "hidden",
   },
   "talk-to-us": {
     type: "page",
