@@ -32,7 +32,7 @@ interface CustomerStory {
   name: string;
 }
 
-interface CustomerCarouselStandaloneProps {
+interface CustomerCarouselProps {
   path?: string;
   title?: string;
   description?: string;
@@ -43,7 +43,7 @@ interface CustomerCarouselStandaloneProps {
   className?: string;
 }
 
-export const CustomerCarouselStandalone = ({
+export const CustomerCarousel = ({
   path = "/customers",
   title,
   description,
@@ -52,7 +52,7 @@ export const CustomerCarouselStandalone = ({
   showDots = true,
   loop = false,
   className = "",
-}: CustomerCarouselStandaloneProps) => {
+}: CustomerCarouselProps) => {
   const customerStories = useMemo(() => {
     const stories = (getPagesUnderRoute(path) as Array<CustomerStory>)
       .filter((page) => page.frontMatter?.showInCustomerIndex !== false);

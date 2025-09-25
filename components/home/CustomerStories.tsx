@@ -1,6 +1,6 @@
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
-import { CustomerCarouselStandalone } from "../customers/CustomerCarousel";
+import { CustomerCarousel } from "../customers/CustomerCarousel";
 
 export const CustomerStories = () => {
   return (
@@ -17,7 +17,7 @@ export const CustomerStories = () => {
           },
         ]}
       />
-      <CustomerCarouselStandalone 
+      <CustomerCarousel 
         path="/customers"
         showDots={true}
         loop={true}
