@@ -99,7 +99,6 @@ interface StatBoxProps {
   linkText?: string;
   isExternal?: boolean;
   discussions?: Discussion[];
-  scrollSpeed?: string;
 }
 
 function StatBox({
