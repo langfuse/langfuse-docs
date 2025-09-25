@@ -31,16 +31,16 @@ const CTAGetStarted = dynamic(() => import("./CTAGetStarted"), {
 export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
-      <Hero />
+      {/* <Hero />
       <Usage />
       <FeatureBento />
-      <IntegrationsGrid />
+      <IntegrationsGrid /> */}
       <OpenSource />
-      <Security />
+      {/* <Security />
       <CustomerStories />
       <Pricing />
       <WallOfLove />
-      <CTAGetStarted />
+      <CTAGetStarted /> */}
     </main>
     <Background />
   </>
