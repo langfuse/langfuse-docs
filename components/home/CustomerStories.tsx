@@ -2,7 +2,7 @@ import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import { CustomerCarousel } from "../customers/CustomerCarousel";
 
-export const CustomerStories = () => {
+export default function CustomerStories() {
   return (
     <HomeSection>
       <Header
@@ -17,13 +17,7 @@ export const CustomerStories = () => {
           },
         ]}
       />
-      <CustomerCarousel 
-        path="/customers"
-        showDots={true}
-        loop={true}
-      />
+      <CustomerCarousel path="/customers" showDots={true} loop={true} />
     </HomeSection>
   );
-};
-
-export default CustomerStories;
+}

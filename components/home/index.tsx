@@ -4,7 +4,6 @@ import Security from "./Security";
 import { Usage } from "./Usage";
 import dynamic from "next/dynamic";
 import { CTASocial } from "./CTASocial";
-import CustomerStories from "./CustomerStories";
 
 const FeatureBento = dynamic(() => import("./FeatureBento"), {
   ssr: false,
@@ -19,6 +18,9 @@ const Pricing = dynamic(() => import("./Pricing"), {
   ssr: false,
 });
 const WallOfLove = dynamic(() => import("./WallOfLove"), {
+  ssr: false,
+});
+const CustomerStories = dynamic(() => import("./CustomerStories"), {
   ssr: false,
 });
 
