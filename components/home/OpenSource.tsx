@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import Changelog from "./Changelog";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
-import { ChartContainer, ChartConfig } from "../ui/chart";
-import { AreaChart, Area } from "recharts";
 import ShimmerButton from "../magicui/shimmer-button";
 import IconGithub from "../icons/github";
 import { StarCount } from "../GitHubBadge";
@@ -12,63 +10,81 @@ import { StarCount } from "../GitHubBadge";
 import { GITHUB_STARS } from "../../src/github-stars";
 import discussionsData from "../../src/langfuse_github_discussions.json";
 
+// Discussion item interface
+interface Discussion {
+  number: number;
+  title: string;
+  href: string;
+  created_at: string;
+  updated_at: string;
+  upvotes: number;
+  comment_count: number;
+  resolved: boolean;
+  labels: string[];
+  author: {
+    login: string;
+    html_url: string;
+  };
+  category: string;
+}
+
+// Individual discussion item component
+function DiscussionItem({ discussion }: { discussion: Discussion }) {
+  return (
+    <div className="flex flex-col space-y-1 p-3 border-b border-border/10 text-xs">
+      <div className="font-medium text-foreground/30 truncate leading-relaxed">
+        {discussion.title}
+      </div>
+      <div className="flex items-center justify-between text-foreground/20">
+        <span className="truncate max-w-[60%]">@{discussion.author.login}</span>
+        <div className="flex items-center space-x-2 text-[10px]">
+          {discussion.resolved && <span className="text-green-500/50">✓</span>}
+          <span>{discussion.upvotes}↑</span>
+          <span>{discussion.comment_count}💬</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Scrolling discussions background component
+function ScrollingDiscussions({
+  discussions,
+  speed = "75s",
+}: {
+  discussions: Discussion[];
+  speed?: string;
+}) {
+  return (
+    <div className="absolute inset-0 overflow-hidden opacity-50 pointer-events-none">
+      <div
+        className="animate-marquee-vertical space-y-0"
+        style={
+          {
+            "--duration": speed,
+            "--gap": "0px",
+            animationDirection: "reverse",
+          } as React.CSSProperties
+        }
+      >
+        {/* Duplicate discussions to create seamless loop */}
+        {[...discussions].map((discussion, index) => (
+          <DiscussionItem
+            key={`${discussion.number}-${index}`}
+            discussion={discussion}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // API response interface
 interface ReleaseData {
   repo: string;
   latestRelease?: string;
   publishedAt?: string;
   url?: string;
-}
-
-// Helper function to create time-series data from discussions
-function createTimeSeriesData(discussions: any[], days = 365, groupByDays = 7) {
-  const now = new Date();
-  const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-
-  // Create array of date groups for the specified period
-  const dateMap = new Map();
-  const totalGroups = Math.ceil(days / groupByDays);
-
-  for (let i = 0; i < totalGroups; i++) {
-    const groupStartDate = new Date(
-      startDate.getTime() + i * groupByDays * 24 * 60 * 60 * 1000
-    );
-    const groupEndDate = new Date(
-      Math.min(
-        groupStartDate.getTime() + (groupByDays - 1) * 24 * 60 * 60 * 1000,
-        now.getTime()
-      )
-    );
-
-    const dateKey = groupStartDate.toISOString().split("T")[0];
-    dateMap.set(dateKey, {
-      date: dateKey,
-      count: 0,
-      startDate: groupStartDate,
-      endDate: groupEndDate,
-    });
-  }
-
-  // Count discussions by creation date, grouping by the specified interval
-  discussions.forEach((discussion) => {
-    const discussionDate = new Date(discussion.created_at);
-    if (discussionDate >= startDate) {
-      // Find which group this discussion belongs to
-      Array.from(dateMap.entries()).forEach(([dateKey, group]) => {
-        if (
-          discussionDate >= group.startDate &&
-          discussionDate <= group.endDate
-        ) {
-          group.count += 1;
-        }
-      });
-    }
-  });
-
-  return Array.from(dateMap.values()).map(({ date, count }) => ({
-    date,
-    count,
-  }));
 }
 
 // Reusable StatBox component
@@ -79,7 +95,8 @@ interface StatBoxProps {
   linkHref: string;
   linkText?: string;
   isExternal?: boolean;
-  chartData?: Array<{ date: string; count: number }>;
+  discussions?: Discussion[];
+  scrollSpeed?: string;
 }
 
 function StatBox({
@@ -89,18 +106,11 @@ function StatBox({
   linkHref,
   linkText = "View all →",
   isExternal = false,
-  chartData,
+  discussions,
 }: StatBoxProps) {
   const linkProps = isExternal
     ? { target: "_blank", rel: "noopener noreferrer" }
     : {};
-
-  const chartConfig = {
-    count: {
-      label: "Count",
-      color: "hsl(var(--primary))",
-    },
-  } satisfies ChartConfig;
 
   return (
     <div className="rounded border bg-card overflow-hidden h-full flex flex-col">
@@ -109,50 +119,11 @@ function StatBox({
         <h3>{title}</h3>
       </div>
 
-      {/* Main Content Section with Background Chart */}
+      {/* Main Content Section with Background Discussions */}
       <div className="flex-1 relative">
-        {/* Background Chart */}
-        {chartData && (
-          <div className="absolute inset-0 opacity-15 pointer-events-none">
-            <ChartContainer config={chartConfig} className="h-full w-full">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient
-                    id="chartGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="0%"
-                      stopColor="var(--color-count)"
-                      stopOpacity={0.8}
-                    />
-                    <stop
-                      offset="50%"
-                      stopColor="var(--color-count)"
-                      stopOpacity={0.3}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor="var(--color-count)"
-                      stopOpacity={0.05}
-                    />
-                  </linearGradient>
-                </defs>
-                <Area
-                  type="monotone"
-                  dataKey="count"
-                  stroke="var(--color-count)"
-                  strokeWidth={2}
-                  fill="url(#chartGradient)"
-                  dot={false}
-                  activeDot={false}
-                />
-              </AreaChart>
-            </ChartContainer>
-          </div>
+        {/* Background Discussions */}
+        {discussions && discussions.length > 0 && (
+          <ScrollingDiscussions discussions={discussions} />
         )}
 
         {/* Foreground Content */}
@@ -179,19 +150,27 @@ function StatBox({
 }
 
 const supportDiscussions =
-  discussionsData.categories.find((cat) => cat.category === "Support")
-    ?.discussions || [];
+  discussionsData.categories
+    .find((cat) => cat.category === "Support")
+    ?.discussions.sort(
+      (a, b) =>
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    ) || [];
+const supportDiscussionsTop50 = supportDiscussions.slice(0, 50);
+
 const ideasDiscussions =
-  discussionsData.categories.find((cat) => cat.category === "Ideas")
-    ?.discussions || [];
+  discussionsData.categories
+    .find((cat) => cat.category === "Ideas")
+    ?.discussions.sort(
+      (a, b) =>
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    ) || [];
+
+const ideasDiscussionsTop50 = ideasDiscussions.slice(0, 50);
 
 // Calculate metrics
 const supportCount = supportDiscussions.length;
 const ideasCount = ideasDiscussions.length;
-
-// Create chart data for discussions
-const supportChartData = createTimeSeriesData(supportDiscussions);
-const ideasChartData = createTimeSeriesData(ideasDiscussions);
 
 // Get latest activity times
 const getLatestActivity = (discussions: any[]) => {
@@ -317,7 +296,7 @@ export default function OpenSource() {
             subtitle={`threads (last ${formatTimeDiff(latestSupportActivity)})`}
             linkHref="/gh-support"
             isExternal={true}
-            chartData={supportChartData}
+            discussions={supportDiscussionsTop50}
           />
 
           <StatBox
@@ -326,7 +305,7 @@ export default function OpenSource() {
             subtitle={`last thread ${formatTimeDiff(latestIdeasActivity)}`}
             linkHref="/ideas"
             isExternal={true}
-            chartData={ideasChartData}
+            discussions={ideasDiscussionsTop50}
           />
         </div>
       </div>
