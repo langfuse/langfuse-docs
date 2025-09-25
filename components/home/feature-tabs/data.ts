@@ -9,8 +9,8 @@ import {
 import type { FeatureTabData } from "./types";
 
 // Import existing images from the bento grid
-import bentoTracePng from "../img/bento_trace.png";
-import bentoTraceDarkPng from "../img/bento_trace_dark.png";
+import bentoTracePng from "../img/feature_tracing_2.png";
+import bentoTraceDarkPng from "../img/feature_tracing_2.png";
 import bentoMetricsPng from "../img/bento_metrics.png";
 import bentoMetricsDarkPng from "../img/bento_metrics_dark.png";
 import bentoPromptPng from "../img/bento_prompt_management.png";
@@ -22,7 +22,7 @@ export const featureTabsData: FeatureTabData[] = [
     icon: TextQuote,
     title: "Observability",
     subtitle: "Trace every LLM call with cost & latency.",
-    body: "Langfuse captures complete traces across your LLM stack (requests, tools, retries), tagged by user/session, with timing and token cost. Use trace → observation hierarchy to inspect failures and performance regressions.",
+    body: "Capture complete traces across your LLM stack (requests, tools, retries), tagged by user/session, with timing and token cost. Use traces to inspect failures and performance regressions.",
     docsHref: "/docs/observability/overview",
     videoHref: "/watch-demo?tab=observability",
     image: {

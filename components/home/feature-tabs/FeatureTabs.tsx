@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { TabButton } from "./TabButton";
@@ -13,6 +15,7 @@ interface FeatureTabsProps {
 
 export const FeatureTabs = ({ features, defaultTab = "observability" }: FeatureTabsProps) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [previewTab, setPreviewTab] = useState(defaultTab);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const tabListRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -102,7 +105,13 @@ export const FeatureTabs = ({ features, defaultTab = "observability" }: FeatureT
     }
   }, [focusedIndex]);
 
-  const activeFeature = features.find(f => f.id === activeTab) || features[0];
+  const activeFeature = useMemo(() => {
+    if (previewTab) {
+      return features.find(f => f.id === previewTab) || features[0];
+    }
+    return features.find(f => f.id === activeTab) || features[0];
+  }, [activeTab, previewTab,features]);
+
 
   return (
     <div className="w-full">
@@ -114,7 +123,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability" }: FeatureT
         className={cn(" overflow-x-sroll")}
         onKeyDown={handleKeyDown}
       >
-        <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide border-b border-border snap-x snap-mandatory gap-2 sm:gap-1 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide  border-border snap-x snap-mandatory gap-2 sm:gap-1 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {features.map((feature, index) => (
             <TabButton
               key={feature.id}
@@ -122,6 +131,14 @@ export const FeatureTabs = ({ features, defaultTab = "observability" }: FeatureT
               feature={feature}
               isActive={activeTab === feature.id}
               onClick={() => handleTabChange(feature.id)}
+              onMouseEnter={() => {
+                console.log("mouse enter", feature.id);
+                setPreviewTab(feature.id);
+              }}
+              onMouseLeave={() => {
+                console.log("mouse leave", feature.id);
+                setPreviewTab(null);
+              }}
               tabIndex={focusedIndex === index ? 0 : -1}
               className="snap-center"
             />
@@ -129,10 +146,8 @@ export const FeatureTabs = ({ features, defaultTab = "observability" }: FeatureT
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="mt-12">
         <TabContent feature={activeFeature} isActive={true} />
-      </div>
+
     </div>
   );
 };
