@@ -241,6 +241,7 @@ function processLinks(links) {
         // Skip obvious non-URL patterns
         if (trimmedLink.match(/^[a-zA-Z0-9_-]+$/) || // Just a word/identifier
             trimmedLink.startsWith('javascript:') ||
+            trimmedLink.startsWith('vbscript:') ||
             trimmedLink.startsWith('mailto:') ||
             trimmedLink.startsWith('tel:') ||
             trimmedLink.startsWith('data:') ||
