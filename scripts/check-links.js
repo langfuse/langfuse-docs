@@ -11,25 +11,25 @@ const readFileAsync = promisify(fs.readFile);
 
 // Configuration options
 const CONFIG = {
-    // File processing concurrency
-    maxFileConcurrency: 20,        // Number of files to process simultaneously
-    fileBatchDelay: 10,            // Delay between file batches (ms)
+    // File processing concurrency - much higher for local dev server
+    maxFileConcurrency: 50,        // Number of files to process simultaneously
+    fileBatchDelay: 0,             // Delay between file batches (ms) - no delay needed locally
 
-    // Link checking concurrency  
-    maxLinkConcurrency: 20,        // Number of links to check simultaneously per file
-    linkBatchDelay: 10,            // Delay between link batches (ms)
+    // Link checking concurrency - much higher for local dev server
+    maxLinkConcurrency: 100,       // Number of links to check simultaneously per file
+    linkBatchDelay: 0,             // Delay between link batches (ms) - no delay needed locally
 
-    // Link checking timeouts
-    linkTimeout: 10000,            // Timeout for individual link checks (ms)
+    // Link checking timeouts - much lower for local requests
+    linkTimeout: 2000,             // Timeout for individual link checks (ms) - 2s is plenty for local
 
     // Progress reporting
-    progressInterval: 10,          // Report progress every N files
+    progressInterval: 20,          // Report progress every N files
     debugLogging: false,           // Enable/disable per-file processing logs
 };
 
-// Simple, robust link checker with GET fallback
+// Optimized link checker for local dev server
 async function checkLink(url, timeout = CONFIG.linkTimeout) {
-    // Try HEAD request first
+    // For localhost, HEAD requests usually work fine, but if they fail, fallback to GET
     const headResult = await makeRequest(url, 'HEAD', timeout);
 
     // If HEAD fails with method-related errors, try GET
@@ -59,7 +59,8 @@ async function makeRequest(url, method, timeout) {
                 method: method,
                 timeout: timeout,
                 headers: {
-                    'User-Agent': 'link-checker'
+                    'User-Agent': 'link-checker',
+                    'Connection': 'keep-alive' // Reuse connections for better performance
                 }
             };
 
@@ -306,8 +307,8 @@ async function checkFileLinks(filePath) {
             );
             results.push(...batchResults);
 
-            // Configured delay between batches
-            if (i + maxConcurrent < processedLinks.length) {
+            // Skip delay for local dev server (CONFIG.linkBatchDelay = 0)
+            if (CONFIG.linkBatchDelay > 0 && i + maxConcurrent < processedLinks.length) {
                 await new Promise(resolve => setTimeout(resolve, CONFIG.linkBatchDelay));
             }
         }
@@ -393,8 +394,8 @@ async function main() {
                 console.log(`Processed ${completed}/${files.length} files`);
             }
 
-            // Configured delay between batches
-            if (i + maxConcurrent < files.length) {
+            // Skip delay for local dev server (CONFIG.fileBatchDelay = 0)
+            if (CONFIG.fileBatchDelay > 0 && i + maxConcurrent < files.length) {
                 await new Promise(resolve => setTimeout(resolve, CONFIG.fileBatchDelay));
             }
         }
