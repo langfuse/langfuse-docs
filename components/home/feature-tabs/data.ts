@@ -9,9 +9,8 @@ import {
 import type { FeatureTabData } from "./types";
 
 // Import existing images from the bento grid
-import bentoTracePng from "../img/feature_tracing_2.png";
-import bentoTraceDarkPng from "../img/feature_tracing_2.png";
-import bentoMetricsPng from "../img/bento_metrics.png";
+import observabilityPng from "components/home/feature-tabs/img/observability-2.png";
+import costPng from "components/home/feature-tabs/img/cost.png";
 import bentoMetricsDarkPng from "../img/bento_metrics_dark.png";
 import bentoPromptPng from "../img/bento_prompt_management.png";
 import bentoPromptDarkPng from "../img/bento_prompt_management_dark.png";
@@ -26,8 +25,8 @@ export const featureTabsData: FeatureTabData[] = [
     docsHref: "/docs/observability/overview",
     videoHref: "/watch-demo?tab=observability",
     image: {
-      light: bentoTracePng,
-      dark: bentoTraceDarkPng,
+      light: observabilityPng,
+      dark: observabilityPng,
       alt: "Langfuse observability trace detail view showing nested observations with latency and cost"
     },
     code: {
@@ -74,8 +73,8 @@ generation.end(
     docsHref: "/docs/analytics",
     videoHref: "/watch-demo?tab=metrics",
     image: {
-      light: bentoMetricsPng,
-      dark: bentoMetricsDarkPng,
+      light: costPng,
+      dark: costPng,
       alt: "Langfuse analytics dashboard showing cost and latency metrics over time"
     },
     code: {
@@ -178,8 +177,8 @@ langfuse.generation(
     docsHref: "/docs/evaluation/overview",
     videoHref: "/watch-demo?tab=evaluation",
     image: {
-      light: bentoTracePng, // Placeholder - needs evaluation screenshot
-      dark: bentoTraceDarkPng,
+      light: observabilityPng, // Placeholder - needs evaluation screenshot
+      dark: observabilityPng,
       alt: "Langfuse evaluation interface showing feedback and scores"
     },
     code: {
@@ -232,8 +231,8 @@ langfuse.score(
     body: "Experiment with different prompts, models, and parameters in an interactive playground. Compare outputs, iterate on prompts, and save successful configurations.",
     docsHref: "/docs/prompt-management/features/playground",
     image: {
-      light: bentoTracePng, // Placeholder - needs playground screenshot
-      dark: bentoTraceDarkPng,
+      light: observabilityPng, // Placeholder - needs playground screenshot
+      dark: observabilityPng,
       alt: "Langfuse playground interface for testing prompts and models"
     },
     code: {
@@ -280,8 +279,8 @@ for config in test_configs:
     body: "Access all Langfuse features programmatically through our comprehensive REST API. Integrate with your existing workflows, build custom dashboards, and automate your LLM operations.",
     docsHref: "/docs/api",
     image: {
-      light: bentoTracePng, // Placeholder - needs API documentation screenshot
-      dark: bentoTraceDarkPng,
+      light: observabilityPng, // Placeholder - needs API documentation screenshot
+      dark: observabilityPng,
       alt: "Langfuse API documentation and examples"
     },
     code: {

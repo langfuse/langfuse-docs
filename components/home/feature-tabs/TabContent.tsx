@@ -75,9 +75,9 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
         </div>
 
         {/* Row B: Code block + Product screenshot */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 h-[28rem] overflow-y-hidden border-t border-solid">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-y-hidden border-t border-solid">
           {/* Code block */}
-          <div className="lg:col-span-6 order-2 lg:order-1 h-[28rem] flex flex-col border-r border-solid">
+          <div className="lg:col-span-6 order-2 lg:order-1 aspect-[3/2] flex flex-col border-r border-solid">
             <div className="relative bg-background flex-shrink-0">
               <div className="flex flex-row items-center overflow-x-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2 pt-1">
                 <div
@@ -122,7 +122,7 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
 
           {/* Product screenshot */}
           <div className="lg:col-span-6 order-1 lg:order-2">
-            <div className="relative h-full w-full">
+            <div className="relative w-full aspect-[3/2]">
               {/* Light theme image */}
               <Image
                 src={feature.image.light}
