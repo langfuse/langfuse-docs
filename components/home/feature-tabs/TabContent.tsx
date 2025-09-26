@@ -25,7 +25,7 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
   }
 
   return (
-    <Card className="p-0 mt-0">
+    <Card className="p-0 mt-0 bg-background border-radius-none">
       <CardContent
         role="tabpanel"
         id={`tabpanel-${feature.id}`}
@@ -33,7 +33,7 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
         className="space-y-8 p-0"
       >
         {/* Row A: Value text + Docs/Video links */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-8 pt-8 h-32">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-8 pt-8 min-h-32">
           {/* Value paragraph */}
           <div className="lg:col-span-8">
             <p className="text-lg leading-relaxed font-bold">{feature.title}</p>
@@ -75,11 +75,11 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
         </div>
 
         {/* Row B: Code block + Product screenshot */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 h-[28rem] overflow-y-hidden border-t border-dashed">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 h-[28rem] overflow-y-hidden border-t border-solid">
           {/* Code block */}
-          <div className="lg:col-span-6 order-2 lg:order-1 max-h-full min-h-full border-r border-dashed">
-            <div className="relative max-h-full bg-background">
-              <div className="flex flex-row items-center w-max-full overflow-x-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2 pt-1">
+          <div className="lg:col-span-6 order-2 lg:order-1 h-[28rem] flex flex-col border-r border-solid">
+            <div className="relative bg-background flex-shrink-0">
+              <div className="flex flex-row items-center overflow-x-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2 pt-1">
                 <div
                   className={cn([
                     "text-xs border-b border-transparent p-2  cursor-pointer",
@@ -103,13 +103,18 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
                   JS/TS SDK
                 </div>
               </div>
+            </div>
+            <div className="flex-1 min-h-0 overflow-auto ">
               <CodeBlock
                 code={activeCodeSnippet}
                 language={feature.code.language}
-                className="relative rounded-none border-none"
+                className="relative overflow-scroll rounded-none border-none h-full [&_pre]:!overflow-auto [&_pre]:!height-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-min-content"
                 customStyle={{
                   fontSize: "0.725rem",
                   borderRadius: "0",
+                  height: "auto",
+                  width: "fit-content",
+                  maxWidth: "unset`",
                 }}
               ></CodeBlock>
             </div>

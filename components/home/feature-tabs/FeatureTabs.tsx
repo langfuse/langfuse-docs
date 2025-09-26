@@ -123,7 +123,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability" }: FeatureT
         className={cn(" overflow-x-sroll")}
         onKeyDown={handleKeyDown}
       >
-        <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide  border-border snap-x snap-mandatory gap-2 sm:gap-1 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide  border-border snap-x snap-mandatory gap-0  px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {features.map((feature, index) => (
             <TabButton
               key={feature.id}
