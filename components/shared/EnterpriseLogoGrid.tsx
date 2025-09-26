@@ -112,7 +112,7 @@ const LogoImage = ({
 
 // Customer story badge component
 const CustomerStoryBadge = () => (
-  <div className="absolute top-0 right-0 md:top-2 md:right-2 z-50 pointer-events-none">
+  <div className="absolute top-0 right-0 md:top-2 md:right-2 z-10 pointer-events-none">
     <div className="inline-flex items-center justify-center text-blue-500 md:bg-blue-500 md:text-white text-xs rounded-full md:w-6 md:h-6 group-hover:w-auto group-hover:h-auto group-hover:px-3 group-hover:py-1 px-2 py-1 md:px-0 md:py-0 transition-all duration-200">
       <span className="md:hidden whitespace-nowrap">Read Story</span>
       <span className="hidden md:group-hover:inline">Read Customer Story</span>
