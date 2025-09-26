@@ -117,7 +117,7 @@ export const TabContent = ({ feature, isActive, className }: TabContentProps) =>
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-h-0 overflow-y-scroll h-content">
+              <div className="flex-1 min-h-0 overflow-y-scroll h-content overflow-x-hidden">
                 <CodeBlock
                   code={activeCodeSnippet}
                   language={feature.code.language}

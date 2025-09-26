@@ -26,6 +26,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   const [isInViewport, setIsInViewport] = useState(false);
   const [isAutoTransitioning, setIsAutoTransitioning] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const tabListRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -205,7 +206,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
   }, []);
 
   const startAutoAdvance = useCallback(() => {
-    if (!defaultAutoAdvance?.enabled || isAutoAdvancePaused) {
+    if (!defaultAutoAdvance?.enabled || isAutoAdvancePaused || isHovered) {
       return;
     }
 
@@ -221,6 +222,9 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
     let currentStep = 0;
 
     progressTimerRef.current = setInterval(() => {
+      // Pause progress when hovered
+      if (isHovered) return;
+
       currentStep++;
       const progress = (currentStep / totalSteps) * 100;
       setAutoAdvanceProgress(Math.min(progress, 100));
@@ -235,13 +239,16 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
 
     // Set main timer
     autoAdvanceTimerRef.current = setTimeout(() => {
-      advanceToNextTab();
+      // Only advance if not hovered
+      if (!isHovered) {
+        advanceToNextTab();
+      }
     }, defaultAutoAdvance.intervalMs);
-  }, [defaultAutoAdvance?.enabled, defaultAutoAdvance?.intervalMs, advanceToNextTab, isAutoAdvancePaused]);
+  }, [defaultAutoAdvance?.enabled, defaultAutoAdvance?.intervalMs, advanceToNextTab, isAutoAdvancePaused, isHovered]);
 
   // Auto-advance effect
   useEffect(() => {
-    if (defaultAutoAdvance?.enabled && !isAutoAdvancePaused && isInViewport) {
+    if (defaultAutoAdvance?.enabled && !isAutoAdvancePaused && isInViewport && !isHovered) {
       startAutoAdvance();
     }
 
@@ -249,7 +256,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
       if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current);
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
     };
-  }, [activeTab, defaultAutoAdvance?.enabled, startAutoAdvance, isAutoAdvancePaused, isInViewport]);
+  }, [activeTab, defaultAutoAdvance?.enabled, startAutoAdvance, isAutoAdvancePaused, isInViewport, isHovered]);
 
   const activeFeature = useMemo(() => {
     const displayedTab = previewTab || activeTab;
@@ -283,9 +290,11 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
                   onClick={() => handleTabChange(feature.id)}
                   onMouseEnter={() => {
                     setPreviewTab(feature.id);
+                    setIsHovered(true);
                   }}
                   onMouseLeave={() => {
                     setPreviewTab(null);
+                    setIsHovered(false);
                   }}
                   tabIndex={focusedIndex === index ? 0 : -1}
                   className="snap-center"
@@ -299,7 +308,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
             <div className="w-full h-0.5 overflow-hidden ">
               {!isAutoAdvancePaused && isInViewport ? (
                 <div
-                  className="h-full bg-primary/5 transition-all duration-[50ms] ease-in-out rounded-lg"
+                  className="h-full bg-primary/15 transition-all duration-[50ms] ease-in-out rounded-lg"
                   style={{ width: `${autoAdvanceProgress}%` }}
                 />
               ) : (

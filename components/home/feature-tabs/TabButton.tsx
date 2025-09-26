@@ -8,6 +8,8 @@ export interface TabButtonProps {
   feature: FeatureTabData;
   isActive: boolean;
   onClick: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 export const TabButton = forwardRef<HTMLButtonElement, TabButtonProps>(
