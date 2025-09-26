@@ -1,6 +1,16 @@
 import type { StaticImageData } from "next/image";
 import type { LucideIcon } from "lucide-react";
 
+export type CodeSnippets = {
+  python?: string;
+  javascript?: string;
+};
+
+export interface StatementItem {
+  title: string;
+  description: string;
+}
+
 export interface FeatureTabData {
   id: string;
   icon: LucideIcon;
@@ -14,11 +24,23 @@ export interface FeatureTabData {
     dark: StaticImageData;
     alt: string;
   };
-  code: {
+  code?: {
     language: string;
-    snippet: string;
+    snippets: CodeSnippets;
   };
-  quickstartHref: string;
+  statements?: StatementItem[];
+  quickstartHref?: string;
+}
+
+export interface AutoAdvanceConfig {
+  enabled: boolean;
+  intervalMs: number;
+}
+
+export interface FeatureTabsProps {
+  features: FeatureTabData[];
+  defaultTab?: string;
+  autoAdvance?: AutoAdvanceConfig;
 }
 
 export interface TabContentProps {

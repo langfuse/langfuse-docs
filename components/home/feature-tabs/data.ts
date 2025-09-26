@@ -31,7 +31,8 @@ export const featureTabsData: FeatureTabData[] = [
     },
     code: {
       language: "python",
-      snippet: `from langfuse import Langfuse
+      snippets: {
+        python: `from langfuse import Langfuse
 
 # Initialize Langfuse client
 langfuse = Langfuse()
@@ -61,6 +62,37 @@ generation.end(
         "total_tokens": 20
     }
 )`,
+        javascript: `import { Langfuse } from "langfuse";
+
+// Initialize Langfuse client
+const langfuse = new Langfuse();
+
+// Create a trace for your LLM application
+const trace = langfuse.trace({
+  name: "chat-completion",
+  userId: "user-123",
+  sessionId: "session-456",
+  metadata: { environment: "production" }
+});
+
+// Track the LLM call
+const generation = trace.generation({
+  name: "openai-completion",
+  model: "gpt-4",
+  input: [{ role: "user", content: "What is the capital of France?" }],
+  metadata: { temperature: 0.7 }
+});
+
+// Complete the generation with output and usage
+generation.end({
+  output: "The capital of France is Paris.",
+  usage: {
+    inputTokens: 12,
+    outputTokens: 8,
+    totalTokens: 20
+  }
+});`
+      }
     },
     quickstartHref: "/docs/get-started",
   },
@@ -79,7 +111,8 @@ generation.end(
     },
     code: {
       language: "python",
-      snippet: `from langfuse import Langfuse
+      snippets: {
+        python: `from langfuse import Langfuse
 
 langfuse = Langfuse()
 
@@ -113,6 +146,41 @@ langfuse.score(
     name="accuracy",
     value=0.88
 )`,
+        javascript: `import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+// Track metrics with custom tags for filtering
+const trace = langfuse.trace({
+  name: "document-qa",
+  tags: ["production", "document-processing"],
+  metadata: { documentType: "legal" }
+});
+
+const generation = trace.generation({
+  name: "answer-generation",
+  model: "gpt-4-turbo",
+  input: "What are the key terms in this contract?",
+  usage: {
+    inputTokens: 1500,
+    outputTokens: 300,
+    totalTokens: 1800
+  }
+});
+
+// Add custom scores for quality tracking
+langfuse.score({
+  traceId: trace.id,
+  name: "relevance",
+  value: 0.95
+});
+
+langfuse.score({
+  traceId: trace.id,
+  name: "accuracy",
+  value: 0.88
+});`
+      }
     },
     quickstartHref: "/docs/analytics",
   },
@@ -131,7 +199,8 @@ langfuse.score(
     },
     code: {
       language: "python",
-      snippet: `from langfuse import Langfuse
+      snippets: {
+        python: `from langfuse import Langfuse
 
 langfuse = Langfuse()
 
@@ -165,6 +234,43 @@ langfuse.generation(
         "output_tokens": response.usage.completion_tokens
     }
 )`,
+        javascript: `import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+// Fetch the latest prompt version
+const prompt = await langfuse.getPrompt("customer-support-chat");
+
+// Compile prompt with variables
+const compiled = prompt.compile({
+  customerName: "Alice Johnson",
+  issueType: "billing",
+  urgency: "high"
+});
+
+// Use with OpenAI
+import OpenAI from "openai";
+const openai = new OpenAI();
+
+const response = await openai.chat.completions.create({
+  model: "gpt-4",
+  messages: compiled.toOpenaiMessages(),
+  temperature: prompt.config?.temperature || 0.7
+});
+
+// Track usage back to Langfuse
+langfuse.generation({
+  name: "support-response",
+  prompt: prompt,
+  input: compiled.toOpenaiMessages(),
+  output: response.choices[0].message.content,
+  model: "gpt-4",
+  usage: {
+    inputTokens: response.usage.prompt_tokens,
+    outputTokens: response.usage.completion_tokens
+  }
+});`
+      }
     },
     quickstartHref: "/docs/prompt-management/get-started",
   },
@@ -183,7 +289,8 @@ langfuse.generation(
     },
     code: {
       language: "python",
-      snippet: `from langfuse import Langfuse
+      snippets: {
+        python: `from langfuse import Langfuse
 
 langfuse = Langfuse()
 
@@ -220,6 +327,45 @@ langfuse.score(
     name="helpfulness",
     value=score
 )`,
+        javascript: `import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+// Create a trace with evaluation data
+const trace = langfuse.trace({ name: "customer-query" });
+
+const generation = trace.generation({
+  name: "response",
+  input: "How do I reset my password?",
+  output: "You can reset your password by clicking the 'Forgot Password' link on the login page.",
+  model: "gpt-4"
+});
+
+// Add user feedback
+langfuse.score({
+  traceId: trace.id,
+  name: "user-feedback",
+  value: 1,  // thumbs up
+  comment: "Helpful response"
+});
+
+// Run automated evaluation
+function evaluateHelpfulness(inputText, outputText) {
+  // Your evaluation logic
+  return 0.85;
+}
+
+const score = evaluateHelpfulness(
+  generation.input,
+  generation.output
+);
+
+langfuse.score({
+  traceId: trace.id,
+  name: "helpfulness",
+  value: score
+});`
+      }
     },
     quickstartHref: "/docs/evaluation/get-started",
   },
@@ -235,40 +381,24 @@ langfuse.score(
       dark: observabilityPng,
       alt: "Langfuse playground interface for testing prompts and models",
     },
-    code: {
-      language: "python",
-      snippet: `from langfuse import Langfuse
-
-langfuse = Langfuse()
-
-# Test prompt variations in playground
-prompt_v1 = langfuse.get_prompt("product-description", version=1)
-prompt_v2 = langfuse.get_prompt("product-description", version=2)
-
-# Compare different models and configurations
-test_configs = [
-    {"model": "gpt-4", "temperature": 0.3},
-    {"model": "gpt-3.5-turbo", "temperature": 0.7},
-    {"model": "claude-3-sonnet", "temperature": 0.5}
-]
-
-product_data = {
-    "name": "Wireless Headphones",
-    "features": ["noise-cancelling", "20h battery", "bluetooth 5.0"]
-}
-
-for config in test_configs:
-    compiled = prompt_v2.compile(**product_data)
-
-    # Generate and track in playground session
-    response = langfuse.generation(
-        name=f"playground-test-{config['model']}",
-        prompt=prompt_v2,
-        input=compiled,
-        model=config["model"],
-        model_parameters={"temperature": config["temperature"]}
-    )`,
-    },
+    statements: [
+      {
+        title: "Interactive Testing Environment",
+        description: "Test different prompts, models, and parameters in real-time with immediate feedback and comparison capabilities."
+      },
+      {
+        title: "Model Comparison",
+        description: "Compare outputs from different LLM providers (OpenAI, Anthropic, Cohere, etc.) side-by-side to find the best model for your use case."
+      },
+      {
+        title: "Prompt Iteration",
+        description: "Iterate on prompt templates with variable substitution, test edge cases, and refine your prompts before deployment."
+      },
+      {
+        title: "Save & Deploy",
+        description: "Save successful prompt configurations as versioned templates and deploy them directly to your applications."
+      }
+    ],
     quickstartHref: "/docs/prompt-management/features/playground",
   },
   {
@@ -285,7 +415,8 @@ for config in test_configs:
     },
     code: {
       language: "javascript",
-      snippet: `// Using the Langfuse REST API
+      snippets: {
+        javascript: `// Using the Langfuse REST API
 const LANGFUSE_BASE_URL = "https://cloud.langfuse.com";
 const API_KEY = process.env.LANGFUSE_PUBLIC_KEY;
 const SECRET_KEY = process.env.LANGFUSE_SECRET_KEY;
@@ -320,6 +451,45 @@ async function createTrace(traceData) {
 
   return response.json();
 }`,
+        python: `import requests
+import base64
+import os
+
+# Using the Langfuse REST API
+LANGFUSE_BASE_URL = "https://cloud.langfuse.com"
+API_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
+SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
+
+# Create authorization header
+auth_string = f"{API_KEY}:{SECRET_KEY}"
+auth_bytes = base64.b64encode(auth_string.encode()).decode()
+
+headers = {
+    'Authorization': f'Basic {auth_bytes}',
+    'Content-Type': 'application/json'
+}
+
+# Fetch traces with filtering
+def get_traces():
+    response = requests.get(
+        f"{LANGFUSE_BASE_URL}/api/public/traces",
+        headers=headers
+    )
+    return response.json()['data']
+
+# Create a new trace via API
+def create_trace(trace_data):
+    response = requests.post(
+        f"{LANGFUSE_BASE_URL}/api/public/traces",
+        headers=headers,
+        json={
+            "name": trace_data["name"],
+            "userId": trace_data["userId"],
+            "metadata": trace_data["metadata"]
+        }
+    )
+    return response.json()`
+      }
     },
     quickstartHref: "/docs/api-and-data-platform/overview",
   },
