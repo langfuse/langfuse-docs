@@ -1,6 +1,6 @@
 import { Cards } from "nextra/components";
 import { Users } from "lucide-react";
-import { TEAMS_PATHS } from "@/pages/handbook/_meta";
+import { TEAMS_PATHS, TEAMS_FIRST_PAGES } from "@/pages/handbook/_meta";
 
 export const TeamsIndex = () => {
   return (
@@ -8,7 +8,7 @@ export const TeamsIndex = () => {
       <Cards num={3}>
         {Object.entries(TEAMS_PATHS).map(([path, title]) => (
           <Cards.Card
-            href={`/handbook/${path}`}
+            href={`/handbook/${path}/${TEAMS_FIRST_PAGES[path]}`}
             key={path}
             title={title}
             icon={<Users size={20} />}
