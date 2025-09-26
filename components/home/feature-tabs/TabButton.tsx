@@ -9,7 +9,7 @@ export const TabButton = forwardRef<HTMLButtonElement, TabButtonProps>(
     const Icon = feature.icon;
 
     return (
-      <div className="px-0.5" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+      <div className="px-0.5 group" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
         <Button
           ref={ref}
           role="tab"
@@ -19,7 +19,8 @@ export const TabButton = forwardRef<HTMLButtonElement, TabButtonProps>(
           onClick={onClick}
           variant="ghost"
           className={cn([
-            isActive ? "bg-primary/10 text-accent-foreground" : "",
+            "group-hover:bg-primary/5 group-hover:text-accent-foreground focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:outline-none",
+            isActive ? "bg-primary/10 text-accent-foreground group-hover:bg-primary/10 group-hover:text-accent-foreground" : "",
             className,
           ])}
           {...props}
