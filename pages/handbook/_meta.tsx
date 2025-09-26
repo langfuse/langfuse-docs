@@ -6,6 +6,12 @@ export const TEAMS_PATHS = {
   operations: "Operations",
 };
 
+export const TEAMS_FIRST_PAGES = {
+  "product-engineering": "documentation",
+  gtm: "overview",
+  operations: "entity-structure",
+};
+
 export default {
   "-- Main Handbook": {
     type: "separator",
