@@ -35,7 +35,12 @@ export const TabContent = ({ feature, isActive, className }: TabContentProps) =>
   return (
     <>
       {/* Row A: Value text + Docs/Video links */}
-      <div className={cn("grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-6 pt-6 pb-6 lg:h-36 lg:overflow-y-hidden", className)}>
+      <div
+        className={cn(
+          "grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-6 pt-6 pb-6 lg:h-36 lg:overflow-y-hidden",
+          className
+        )}
+      >
         {/* Value paragraph */}
         <div className="lg:col-span-8">
           <p className="text-lg leading-relaxed font-bold">{feature.title}</p>
@@ -79,7 +84,7 @@ export const TabContent = ({ feature, isActive, className }: TabContentProps) =>
           {feature.code ? (
             // Code block section
             <>
-              <div className="relative bg-background flex-shrink-0 w-full min-w-full max-w-full justify-between flex flex-row items-center overflow-x-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="relative bg-background flex-shrink-0 w-full min-w-full max-w-full justify-between flex flex-row items-center overflow-x-scroll ">
                 <div className="flex flex-row items-center px-2 pt-1">
                   {availableLanguages.map((lang) => (
                     <div
@@ -112,11 +117,11 @@ export const TabContent = ({ feature, isActive, className }: TabContentProps) =>
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-h-0 overflow-auto">
+              <div className="flex-1 min-h-0 overflow-y-scroll h-content">
                 <CodeBlock
                   code={activeCodeSnippet}
                   language={feature.code.language}
-                  className="relative overflow-scroll rounded-none border-none h-full [&_pre]:!overflow-auto [&_pre]:!height-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-min-content"
+                  className="relative overflow-x-scroll rounded-none border-none [&_pre]:!overflow-auto [&_pre]:!height-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-min-content"
                   customStyle={{
                     fontSize: "0.725rem",
                     borderRadius: "0",
@@ -129,7 +134,7 @@ export const TabContent = ({ feature, isActive, className }: TabContentProps) =>
             </>
           ) : feature.statements ? (
             // Statements section
-            <div className="flex-1 p-4 overflow-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex-1 p-4 overflow-auto">
               <div className="space-y-4">
                 {feature.statements.map((statement, index) => (
                   <div
