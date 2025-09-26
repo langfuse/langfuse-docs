@@ -159,7 +159,7 @@ langfuse.flush()
     Each of these factors contributes to developing AI systems that are effective, ethical, and aligned with human values and needs.
 
 
-Check your [Langfuse Traces Dashboard](https://cloud.langfuse.com/traces) to confirm that the spans and logs have been recorded.
+Check your Langfuse Traces Dashboard to confirm that the spans and logs have been recorded.
 
 Example trace in Langfuse:
 
