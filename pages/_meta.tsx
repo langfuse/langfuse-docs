@@ -97,6 +97,11 @@ export default {
     title: "FAQ",
     // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
   },
+  handbook: {
+    type: "page",
+    title: "Handbook",
+    // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
+  },
   pricing: {
     title: "Pricing",
     type: "page",
@@ -162,15 +167,6 @@ export default {
     title: "Support",
     type: "page",
     display: "hidden",
-  },
-  why: {
-    title: "Why Langfuse",
-    type: "page",
-    display: "hidden",
-    theme: {
-      typesetting: "article",
-      timestamp: false,
-    },
   },
   enterprise: {
     title: "Enterprise",
