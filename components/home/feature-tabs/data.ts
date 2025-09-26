@@ -8,12 +8,11 @@ import {
 } from "lucide-react";
 import type { FeatureTabData } from "./types";
 
-// Import existing images from the bento grid
 import observabilityPng from "components/home/feature-tabs/img/observability-2.png";
 import costPng from "components/home/feature-tabs/img/cost.png";
-import bentoMetricsDarkPng from "../img/bento_metrics_dark.png";
-import bentoPromptPng from "../img/bento_prompt_management.png";
-import bentoPromptDarkPng from "../img/bento_prompt_management_dark.png";
+import PromptPng from "components/home/feature-tabs/img/prompt.png";
+import EvalsPng from "components/home/feature-tabs/img/evals-wide.png"
+import PlaygroundPng from "components/home/feature-tabs/img/playground.png"
 
 export const featureTabsData: FeatureTabData[] = [
   {
@@ -193,9 +192,9 @@ langfuse.score({
     docsHref: "/docs/prompt-management/overview",
     videoHref: "/watch-demo?tab=prompt",
     image: {
-      light: bentoPromptPng,
-      dark: bentoPromptDarkPng,
-      alt: "Langfuse prompt management interface showing versioned prompts",
+      light: PromptPng,
+      dark: PromptPng,
+      alt: "Langfuse prompt management interface showing versioned prompts"
     },
     code: {
       language: "python",
@@ -283,9 +282,9 @@ langfuse.generation({
     docsHref: "/docs/evaluation/overview",
     videoHref: "/watch-demo?tab=evaluation",
     image: {
-      light: observabilityPng, // Placeholder - needs evaluation screenshot
-      dark: observabilityPng,
-      alt: "Langfuse evaluation interface showing feedback and scores",
+      light: EvalsPng, // Placeholder - needs evaluation screenshot
+      dark: EvalsPng,
+      alt: "Langfuse evaluation interface showing feedback and scores"
     },
     code: {
       language: "python",
@@ -377,9 +376,9 @@ langfuse.score({
     body: "Experiment with different prompts, models, and parameters in an interactive playground. Compare outputs, iterate on prompts, and save successful configurations.",
     docsHref: "/docs/prompt-management/features/playground",
     image: {
-      light: observabilityPng, // Placeholder - needs playground screenshot
-      dark: observabilityPng,
-      alt: "Langfuse playground interface for testing prompts and models",
+      light: PlaygroundPng, // Placeholder - needs playground screenshot
+      dark: PlaygroundPng,
+      alt: "Langfuse playground interface for testing prompts and models"
     },
     statements: [
       {
