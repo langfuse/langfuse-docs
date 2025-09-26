@@ -1,0 +1,240 @@
+---
+source: Jupyter Notebook
+title: Evaluating Multi-Turn Conversations
+description: This cookbook will show you how to evaluate your chatbot responses at any specific point in an ongoing conversation (N+1 Evaluations)
+category: Evaluation
+sidebarTitle: Evaluating Multi-Turn Conversations
+---
+
+# Evaluating Multi-Turn Conversations
+
+When looking at your traces, sometimes you realize that at a specific part of a user's conversation your chatbot application fails to give the right answer to the user. It could be because your application is not making the right tool calls, or not remembering earlier parts of the conversation, or other issues.
+
+You might wonder what the percentage of conversations have this same issue, which would involve examining sometimes prohibitvly large number of conversation traces to determine if it's an actual problem your users are experiencing or not. You might also wonder how to determine if the solution you're implementing is actually solving the problem for all the different scenarios.
+
+This cookbook will show you how to evaluate your chatbot responses at any specific point in an ongoing conversation, a.k.a. **N+1 Evaluations**. You will learn:
+- how to find the relevant traces quickly
+- create datasets from real user conversations
+- systematically measure whether your improvements actually work.
+
+### About this cookbook
+
+The example below builds a simple cooking assistant chatbot. Even if your setup is not similar, you will still learn the general process of N+1 Evaluations.
+
+The first part will setup an application and generate some traces in Langfuse, but you can follow along with your own application and existing conversation traces.
+
+----
+
+Not using Langfuse yet? [Get started](https://langfuse.com/docs/get-started) by capturing LLM events.
+
+## Setup
+
+In this example, we'll build a cooking assistant chatbot and then debug the problem where the chatbot does not remember the user's dietary restriction from earlier parts of the conversation.
+
+### Step 1 - Create a chat app and generate traces in Langfuse
+
+First you need to install Langfuse via pip and then set the environment variables.
+
+
+```python
+# Install the packages
+%pip install langfuse --upgrade
+```
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-123"
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-123"
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your openai key
+os.environ["OPENAI_API_KEY"] = 'sk-proj-123'
+```
+
+Now we'll create a simple cooking assistant chatbot that uses OpenAI as the LLM and trace it with Langfuse.
+
+
+```python
+# This is a simple cooking assistant chatbot traced with Langfuse and uses OpenAI as the LLM.
+from langfuse.openai import openai
+from langfuse import get_client, observe
+
+class SimpleChat:
+    def __init__(self, model="gpt-3.5-turbo"):
+        self.conversation_history = [
+          {
+            "role": "system",
+            "content": "You are a helpful cooking assistant that answers questions about recipes and cooking."
+          }
+        ]
+        self.model = model
+
+    @observe
+    def add_message(self, messages):
+        """
+        Args:
+            messages: Either a string (single user message) or a list of message dictionaries
+        """
+        try:
+            # Handle both string and array inputs
+            if isinstance(messages, str):
+                messages = [{"role": "user", "content": messages}]
+
+            # Add messages to history
+            self.conversation_history.extend(messages)
+
+            # Call OpenAI API using the new client
+            response = openai.chat.completions.create(
+                model=self.model,
+                messages=self.conversation_history,
+                max_tokens=500,
+                temperature=0.7
+            )
+
+            # Extract and add assistant response
+            assistant_message = response.choices[0].message.content
+            self.conversation_history.append({"role": "assistant", "content": assistant_message})
+            get_client().update_current_trace(input=messages, output=assistant_message)
+
+            return assistant_message
+
+        except Exception as e:
+            return f"Error: {str(e)}"
+
+    def show_history(self):
+        import json
+        print("Conversation history:")
+        print(json.dumps(self.conversation_history, indent=2))
+        print()
+
+    def clear_history(self):
+        self.conversation_history = [
+          {
+            "role": "system",
+            "content": "You are a helpful cooking assistant that answers questions about recipes and cooking."
+          }
+        ]
+        print("Conversation cleared!")
+
+# Create a chat instance
+chat = SimpleChat()
+```
+
+We'll now add a few conversation traces to Langfuse.
+
+<Callout type="info">
+   Technically, we're creating fake/synthetic conversation examples here, not using real ones from actual users. Creating synthetic conversations is a different evaluation method that we'll explain separately in another post. For now, let's pretend these are real conversations from your chatbot.
+</Callout>
+
+
+```python
+messages = [
+    { "role": "user", "content": "I watched this documentary called Dominion over the weekend. Haven't been able to get those images out of my head."},
+    { "role": "assistant", "content": "That documentary is definitely powerful and can be quite affecting. How are you processing what you saw?"},
+    { "role": "user", "content": "It's made me rethink a lot of things about what I put in my body. I keep thinking about the animals. Anyway, I'm trying to eat more protein for my workouts - can you give me a recipe for beef stir fry?"},
+]
+
+chat.add_message(messages)
+chat.clear_history()
+
+messages = [
+    { "role": "user", "content": "My doctor scared me at my checkup yesterday. Said my blood pressure numbers are getting into dangerous territory and I need to make changes."},
+    { "role": "assistant", "content": "That must have been concerning to hear. Did your doctor give you specific guidance about what changes to make?"},
+    { "role": "user", "content": "Something about cutting back on salt and processed foods, but honestly half of what she said went over my head. I'm stressed and just want some good comfort food. Can you give me a recipe for loaded nachos?"},
+]
+
+chat.add_message(messages)
+chat.clear_history()
+
+messages = [
+    { "role": "user", "content": "I'm hosting a potluck this weekend and one of my coworkers is coming. She's super high-maintenance about food - always asking about ingredients and reading every label."},
+    { "role": "assistant", "content": "It sounds like she might have some food allergies or sensitivities. Do you know what specific things she needs to avoid?"},
+    { "role": "user", "content": "Yeah, she's one of those people who can't have nuts or shellfish - says it could literally kill her. Drama much?"},
+]
+
+chat.add_message(messages)
+chat.clear_history()
+
+print("Successfully added conversation traces to Langfuse!")
+```
+
+You should now be able to see the traces in the Langfuse UI.
+
+![Traces](https://cdn.abedraba.com/step1-traces.png)
+
+### Step 2 - Find conversation traces with the same issue
+
+Now that we have some conversation traces, let's assume a typical debugging scenario where you are inspecting traces and manually evaluating the conversations. **Looking at the data is the most important part of any evaluation process**.
+
+You will notice that the first two conversation traces have a recipe question from the user with the chatbot failing to address the user's new dietary restrictions. Assuming that we're seeing a pattern of this same issue in our traces (and that we have a lot more than just 3 conversation).
+
+
+You can create an [LLM-as-a-Judge](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge) to find all traces that have this same issue. Once you run it against your existing traces, you'll see that your traces have a score of 1 or 0 depending on whether they have the conversation history up to the point where the chatbot's response is incorrect.
+
+![Check LLM-as-a-Judge output](https://cdn.abedraba.com/step2-check-llm-as-a-judge-output.png)
+
+### Step 3 - Create a Dataset with your conversation traces
+
+Let's now create a dataset consisting of the conversation history up to the point where the chatbot's response is incorrect. In this case, we'll call it `recipe-questions` and we'll add the conversation traces to it. You can load all the traces that are already marked with score 1.0 from the previous step by the LLM-as-a-Judge.
+
+![Adding traces to dataset](https://cdn.abedraba.com/step3-add-traces-to-dataset.gif)
+
+### Step 4 - Create a scoring mechanism to evaluate the chatbot's responses
+
+The goal now is to use the historical conversations we've compiled in the previous step to pass them to our chatbot, so we can generate responses and then score them to see if the answers were a pass or a fail. With the scores, we can evaluate if changes over time are improving the system or not.
+
+First step is to create a scoring mechanism that will score the responses from the chatbot. For that, we'll create another LLM-as-a-Judge evaluator for this to run only against dataset runs:
+
+### Step 5 - Run your production LLM-app against the dataset
+
+Use the following code to create [Dataset Experiments](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk). This will run the chatbot against the dataset and score the responses using the LLM-as-a-Judge evaluator we created in the previous step.
+
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+dataset = langfuse.get_dataset("recipe-questions")
+
+def run_task(*, item, **kwargs):
+    messages = item.input
+    response = chat.add_message(messages)
+    return response
+
+result = dataset.run_experiment(
+    name="recipe-questions-and-answers",
+    description="Evaluating the chatbot's ability to remember the user's dietary restriction",
+    task=run_task
+)
+
+get_client().flush()
+```
+
+Now you can see the Dataset Runs in the Langfuse UI, and the average score for the entire run as well as the scores for each item in the Dataset Run. You can click on the Dataset Run to see each item run and understand the reason behind the score.
+
+![Scored Dataset Run](https://cdn.abedraba.com/step5-scored-run.png)
+
+### Step 6 - Improve your chatbot and evaluate again
+
+Now that you have a scoring mechanism, you can improve your chatbot and evaluate again. You can use the same dataset and evaluate the scores again to see if the improvements are working.
+
+
+
+## Conclusion
+
+This notebook demonstrated a systematic approach to evaluating multi-turn conversations, specifically focusing on identifying and addressing issues where a chatbot might fail to retain crucial information from earlier in the conversation.
+
+The key steps covered were:
+
+1.  **Setting up a chat application and generating traces:** We created a simple cooking assistant chatbot and used Langfuse to trace its interactions, simulating real user conversations.
+2.  **Finding relevant traces:** We discussed how to use tools like LLM-as-a-Judge within Langfuse to quickly identify conversation traces exhibiting the specific issue we wanted to evaluate (in this case, the chatbot forgetting dietary restrictions).
+3.  **Creating a dataset:** We showed how to create a dataset from these identified traces, capturing the conversation history up to the point of the incorrect response. This dataset serves as a standardized test set.
+4.  **Creating a scoring mechanism:** We established an LLM-as-a-Judge evaluator specifically for dataset runs to automatically score the chatbot's responses based on whether they correctly address the identified issue.
+5.  **Running the application against the dataset:** We executed the chatbot against the created dataset using Langfuse's experiment feature, generating new responses and obtaining scores for each conversation.
+6.  **Improving and re-evaluating:** The final step highlighted the iterative nature of this process, where you can make improvements to your chatbot and then re-run the experiment with the same dataset to measure the impact of your changes and confirm whether the issue has been resolved.
+
+By following these steps, you can move beyond manual inspection and establish a robust, data-driven process for evaluating and improving your multi-turn chatbot's performance on specific, recurring issues identified in real user conversations. This allows you to systematically measure the effectiveness of your fixes and ensure a better user experience.
