@@ -21,6 +21,10 @@ export default {
     title: "Product",
     type: "menu",
     items: {
+      overview: {
+        title: "Overview",
+        href: "/docs",
+      },
       observability: {
         title: "LLM Observability",
         href: "/docs/observability/overview",
