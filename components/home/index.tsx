@@ -2,7 +2,6 @@ import { Background } from "../Background";
 import { Hero } from "./Hero";
 import { Usage } from "./Usage";
 import dynamic from "next/dynamic";
-
 const FeatureBento = dynamic(() => import("./FeatureBento"), {
   ssr: false,
 });
