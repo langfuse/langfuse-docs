@@ -1,5 +1,4 @@
 export { FeatureTabs } from "./FeatureTabs";
-export { TabButton } from "./TabButton";
-export { TabContent } from "./TabContent";
+export { TabButton, type TabButtonProps } from "./TabButton";
+export { TabContent, type TabContentProps } from "./TabContent";
 export { featureTabsData } from "./data";
-export type { FeatureTabData, TabContentProps, TabButtonProps } from "./types";

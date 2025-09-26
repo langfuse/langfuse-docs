@@ -1,16 +1,20 @@
 import { useState, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { CodeBlock, CodeBlockCopyButton } from "@/components/ai-elements/code-block";
+import { CodeBlock,  } from "@/components/ai-elements/code-block";
 import { cn } from "@/lib/utils";
 import { ExternalLink, BookOpen, Play, Code2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { TabContentProps } from "./types";
+import type { FeatureTabData } from "./types";
 
+export interface TabContentProps {
+  feature: FeatureTabData;
+  isActive: boolean;
+  className?: string;
+}
 
-export const TabContent = ({ feature, isActive }: TabContentProps) => {
+export const TabContent = ({ feature, isActive, className }: TabContentProps) => {
   const [activeLanguage, setActiveLanguage] = useState<"python" | "javascript">("python");
 
   const activeCodeSnippet = useMemo(() => {
@@ -31,7 +35,7 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
   return (
     <>
       {/* Row A: Value text + Docs/Video links */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-6 pt-6 pb-6 lg:h-36 lg:overflow-y-hidden">
+      <div className={cn("grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-6 pt-6 pb-6 lg:h-36 lg:overflow-y-hidden", className)}>
         {/* Value paragraph */}
         <div className="lg:col-span-8">
           <p className="text-lg leading-relaxed font-bold">{feature.title}</p>
@@ -125,10 +129,13 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
             </>
           ) : feature.statements ? (
             // Statements section
-            <div className="flex-1 p-4 overflow-auto">
+            <div className="flex-1 p-4 overflow-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="space-y-4">
                 {feature.statements.map((statement, index) => (
-                  <div key={index} className="space-y-2 border border-solid border-border p-4 rounded-md hover:bg-muted/10">
+                  <div
+                    key={index}
+                    className="space-y-2 border border-solid border-border p-4 rounded-md hover:bg-muted/10"
+                  >
                     <h4 className="text-sm font-semibold text-foreground">
                       {statement.title}
                     </h4>
@@ -139,14 +146,8 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
                 ))}
               </div>
             </div>
-          ) : (
-            // Fallback empty state
-            <div className="flex-1 flex items-center justify-center p-6">
-              <p className="text-muted-foreground text-sm">
-                No content available
-              </p>
-            </div>
-          )}
+          ) : // Fallback empty state
+          null}
         </div>
 
         {/* Product screenshot */}

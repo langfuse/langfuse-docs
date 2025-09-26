@@ -36,20 +36,3 @@ export interface AutoAdvanceConfig {
   enabled: boolean;
   intervalMs: number;
 }
-
-export interface FeatureTabsProps {
-  features: FeatureTabData[];
-  defaultTab?: string;
-  autoAdvance?: AutoAdvanceConfig;
-}
-
-export interface TabContentProps {
-  feature: FeatureTabData;
-  isActive: boolean;
-}
-
-export interface TabButtonProps {
-  feature: FeatureTabData;
-  isActive: boolean;
-  onClick: () => void;
-}
