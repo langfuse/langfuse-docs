@@ -114,13 +114,15 @@ async function makeRequest(url, method, timeout) {
     });
 }
 
-// Extract markdown links
+// Extract markdown links: [text](url)
 function extractMarkdownLinks(content) {
-    const linkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
     const links = [];
+
+    // Standard markdown links: [text](url)
+    const markdownRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
     let match;
 
-    while ((match = linkRegex.exec(content)) !== null) {
+    while ((match = markdownRegex.exec(content)) !== null) {
         const url = match[2].trim();
         if (url && !url.startsWith('#')) { // Skip anchors
             links.push(url);
@@ -130,23 +132,81 @@ function extractMarkdownLinks(content) {
     return links;
 }
 
-// Extract href links from JSX
+// Extract href links from HTML/JSX attributes
 function extractHrefLinks(content) {
-    const hrefRegex = /href=["']([^"']+)["']/g;
     const links = [];
-    let match;
 
-    while ((match = hrefRegex.exec(content)) !== null) {
-        const href = match[1];
-        if (href.startsWith('/')) {
-            links.push(href);
-        } else if (href.startsWith('https://langfuse.com')) {
-            const relativePath = href.replace('https://langfuse.com', '') || '/';
-            links.push(relativePath);
+    // Match various href patterns:
+    // href="url", href='url', href={`url`}, href={"url"}
+    const patterns = [
+        // Standard href with quotes
+        /href=["']([^"']+)["']/g,
+        // Template literals in JSX: href={`/path`}
+        /href=\{`([^`]+)`\}/g,
+        // String literals in JSX: href={"/path"}
+        /href=\{"([^"]+)"\}/g,
+        /href=\{'([^']+)'\}/g,
+        // Without braces but with template literals (less common)
+        /href=`([^`]+)`/g
+    ];
+
+    for (const regex of patterns) {
+        let match;
+        regex.lastIndex = 0; // Reset regex state
+        while ((match = regex.exec(content)) !== null) {
+            const href = match[1].trim();
+            if (href && !href.startsWith('#') && !href.includes('${')) {
+                links.push(href);
+            }
         }
     }
 
     return links;
+}
+
+// Extract Next.js Link component hrefs
+function extractNextJsLinks(content) {
+    const links = [];
+
+    // Match Next.js Link components: <Link href="...">
+    const patterns = [
+        // <Link href="/path">
+        /<Link\s+href=["']([^"']+)["'][^>]*>/g,
+        // <Link href={"/path"}>
+        /<Link\s+href=\{"([^"]+)"\}[^>]*>/g,
+        /<Link\s+href=\{'([^']+)'\}[^>]*>/g,
+        // <Link href={`/path`}>
+        /<Link\s+href=\{`([^`]+)`\}[^>]*>/g
+    ];
+
+    for (const regex of patterns) {
+        let match;
+        regex.lastIndex = 0; // Reset regex state
+        while ((match = regex.exec(content)) !== null) {
+            const href = match[1].trim();
+            if (href && !href.startsWith('#') && !href.includes('${')) {
+                links.push(href);
+            }
+        }
+    }
+
+    return links;
+}
+
+// Extract all types of links from content
+function extractAllLinks(content, filePath) {
+    let allLinks = [];
+
+    // Always extract markdown links (works in .md, .mdx, and even in JSX comments)
+    allLinks = allLinks.concat(extractMarkdownLinks(content));
+
+    // Extract href attributes for HTML/JSX files
+    if (filePath.endsWith('.mdx') || filePath.endsWith('.tsx') || filePath.endsWith('.ts')) {
+        allLinks = allLinks.concat(extractHrefLinks(content));
+        allLinks = allLinks.concat(extractNextJsLinks(content));
+    }
+
+    return allLinks;
 }
 
 // Process and normalize links
@@ -154,33 +214,70 @@ function processLinks(links) {
     const processedLinks = [];
 
     for (const link of links) {
-        // Skip template literals and variables
-        if (link.includes('${') || link.includes('{{') || link.includes('}}') ||
-            link.includes('{') || link.includes('}') || link.includes('[') || link.includes(']')) {
+        // Skip empty or invalid links
+        if (!link || typeof link !== 'string') {
+            continue;
+        }
+
+        const trimmedLink = link.trim();
+        if (!trimmedLink) {
+            continue;
+        }
+
+        // Skip template literals, variables, and dynamic content
+        if (trimmedLink.includes('${') ||
+            trimmedLink.includes('{{') ||
+            trimmedLink.includes('}}') ||
+            trimmedLink.includes('{') ||
+            trimmedLink.includes('}') ||
+            trimmedLink.includes('[') ||
+            trimmedLink.includes(']') ||
+            trimmedLink.includes('<%') ||
+            trimmedLink.includes('%>')) {
+            continue;
+        }
+
+        // Skip obvious non-URL patterns
+        if (trimmedLink.match(/^[a-zA-Z0-9_-]+$/) || // Just a word/identifier
+            trimmedLink.startsWith('javascript:') ||
+            trimmedLink.startsWith('mailto:') ||
+            trimmedLink.startsWith('tel:') ||
+            trimmedLink.startsWith('data:') ||
+            trimmedLink.startsWith('blob:') ||
+            trimmedLink.startsWith('file:')) {
             continue;
         }
 
         // Skip specific paths that redirect to external sites
-        if (link === '/ph') {
+        if (trimmedLink === '/ph') {
             continue;
         }
 
-        let processedLink = link;
+        let processedLink = trimmedLink;
 
         // Convert relative paths to localhost URLs
-        if (link.startsWith('/')) {
-            processedLink = `http://localhost:3333${link}`;
-        } else if (link.startsWith('https://langfuse.com')) {
-            processedLink = link.replace('https://langfuse.com', 'http://localhost:3333');
-        } else if (!link.startsWith('http://') && !link.startsWith('https://')) {
-            // Skip non-HTTP links (like mailto:, etc.)
+        if (trimmedLink.startsWith('/')) {
+            processedLink = `http://localhost:3333${trimmedLink}`;
+        } else if (trimmedLink.startsWith('https://langfuse.com')) {
+            processedLink = trimmedLink.replace('https://langfuse.com', 'http://localhost:3333');
+        } else if (trimmedLink.startsWith('http://langfuse.com')) {
+            processedLink = trimmedLink.replace('http://langfuse.com', 'http://localhost:3333');
+        } else if (!trimmedLink.startsWith('http://') && !trimmedLink.startsWith('https://')) {
+            // Skip non-HTTP links that aren't relative paths
             continue;
-        } else if (!link.includes('localhost:3333') && !link.includes('langfuse.com')) {
-            // Skip external links
+        } else if (!trimmedLink.includes('localhost:3333') && !trimmedLink.includes('langfuse.com')) {
+            // Skip external links (not langfuse.com or localhost)
             continue;
         }
 
-        processedLinks.push(processedLink);
+        // Final validation - make sure it's a valid URL format
+        try {
+            new URL(processedLink);
+            processedLinks.push(processedLink);
+        } catch (error) {
+            // Skip invalid URLs
+            continue;
+        }
     }
 
     return [...new Set(processedLinks)]; // Remove duplicates
@@ -189,20 +286,9 @@ function processLinks(links) {
 async function checkFileLinks(filePath) {
     try {
         const content = await readFileAsync(filePath, 'utf8');
-        let allLinks = [];
 
-        // Extract markdown links (for .md and .mdx files)
-        if (filePath.endsWith('.md') || filePath.endsWith('.mdx')) {
-            const markdownLinks = extractMarkdownLinks(content);
-            allLinks = allLinks.concat(markdownLinks);
-        }
-
-        // Extract href links (for .mdx and .tsx files)
-        if (filePath.endsWith('.mdx') || filePath.endsWith('.tsx')) {
-            const hrefLinks = extractHrefLinks(content);
-            allLinks = allLinks.concat(hrefLinks);
-        }
-
+        // Extract all types of links using the unified function
+        const allLinks = extractAllLinks(content, filePath);
         const processedLinks = processLinks(allLinks);
 
         if (processedLinks.length === 0) {
@@ -254,7 +340,7 @@ async function main() {
 
                 if (stat.isDirectory()) {
                     results = results.concat(findFiles(filePath));
-                } else if (file.endsWith('.md') || file.endsWith('.mdx') || file.endsWith('.tsx')) {
+                } else if (file.endsWith('.md') || file.endsWith('.mdx') || file.endsWith('.tsx') || file.endsWith('.ts')) {
                     results.push(filePath);
                 }
             }
@@ -263,7 +349,7 @@ async function main() {
         };
 
         const files = findFiles(pagesDir);
-        console.log(`Found ${files.length} files to check (.md, .mdx, .tsx)\n`);
+        console.log(`Found ${files.length} files to check (.md, .mdx, .tsx, .ts)\n`);
 
         // Process files with configured concurrency
         const maxConcurrent = CONFIG.maxFileConcurrency;
