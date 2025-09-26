@@ -42,6 +42,8 @@ import {
 } from "@/components/ai-elements/tool";
 import { LangfuseWeb } from "langfuse";
 import { FeedbackDialog } from "./FeedbackPopover";
+import { BotAvatar } from "./BotAvatar";
+import { UserAvatar } from "./UserAvatar";
 
 const eulangfuseWebClient = new LangfuseWeb({
   baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
@@ -154,7 +156,10 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                     })}
                   </Sources>
                 )}
-                <Message from={message.role} key={message.id}>
+                <div className="flex items-start gap-3">
+                  {message.role === "assistant" && <BotAvatar />}
+                  <div className="flex-1">
+                    <Message from={message.role} key={message.id}>
                   <MessageContent>
                     {message.parts.map((part, i) => {
                       if (part.type === "text") {
@@ -239,6 +244,9 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                     })}
                   </MessageContent>
                 </Message>
+                  </div>
+                  {message.role === "user" && <UserAvatar />}
+                </div>
               </div>
             ))}
             {status === "submitted" && <Loader />}
