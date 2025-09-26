@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { TabButton } from "./TabButton";
 import { TabContent } from "./TabContent";
 import type { FeatureTabData } from "./types";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface FeatureTabsProps {
   features: FeatureTabData[];
@@ -114,16 +115,20 @@ export const FeatureTabs = ({ features, defaultTab = "observability" }: FeatureT
 
 
   return (
+    <Card className="p-0 mt-0 bg-background border-radius-none">
+      <CardContent
+        className="space-y-8 p-0 border-radius-none"
+      >
     <div className="w-full">
       {/* Tab List */}
       <div
         ref={tabListRef}
         role="tablist"
         aria-label="Feature navigation"
-        className={cn(" overflow-x-sroll")}
+        className={cn(" overflow-x-sroll p-2 border-b border-solid")}
         onKeyDown={handleKeyDown}
       >
-        <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide  border-border snap-x snap-mandatory gap-0  px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide  border-border snap-x snap-mandatory gap-1 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {features.map((feature, index) => (
             <TabButton
               key={feature.id}
@@ -149,5 +154,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability" }: FeatureT
         <TabContent feature={activeFeature} isActive={true} />
 
     </div>
+    </CardContent>
+    </Card>
   );
 };

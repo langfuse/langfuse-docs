@@ -27,7 +27,7 @@ export const featureTabsData: FeatureTabData[] = [
     image: {
       light: observabilityPng,
       dark: observabilityPng,
-      alt: "Langfuse observability trace detail view showing nested observations with latency and cost"
+      alt: "Langfuse observability trace detail view showing nested observations with latency and cost",
     },
     code: {
       language: "python",
@@ -60,9 +60,9 @@ generation.end(
         "output_tokens": 8,
         "total_tokens": 20
     }
-)`
+)`,
     },
-    quickstartHref: "/docs/get-started"
+    quickstartHref: "/docs/get-started",
   },
   {
     id: "metrics",
@@ -75,7 +75,7 @@ generation.end(
     image: {
       light: costPng,
       dark: costPng,
-      alt: "Langfuse analytics dashboard showing cost and latency metrics over time"
+      alt: "Langfuse analytics dashboard showing cost and latency metrics over time",
     },
     code: {
       language: "python",
@@ -112,9 +112,9 @@ langfuse.score(
     trace_id=trace.id,
     name="accuracy",
     value=0.88
-)`
+)`,
     },
-    quickstartHref: "/docs/analytics"
+    quickstartHref: "/docs/analytics",
   },
   {
     id: "prompt-management",
@@ -127,7 +127,7 @@ langfuse.score(
     image: {
       light: bentoPromptPng,
       dark: bentoPromptDarkPng,
-      alt: "Langfuse prompt management interface showing versioned prompts"
+      alt: "Langfuse prompt management interface showing versioned prompts",
     },
     code: {
       language: "python",
@@ -164,9 +164,9 @@ langfuse.generation(
         "input_tokens": response.usage.prompt_tokens,
         "output_tokens": response.usage.completion_tokens
     }
-)`
+)`,
     },
-    quickstartHref: "/docs/prompt-management/get-started"
+    quickstartHref: "/docs/prompt-management/get-started",
   },
   {
     id: "evaluation",
@@ -179,7 +179,7 @@ langfuse.generation(
     image: {
       light: observabilityPng, // Placeholder - needs evaluation screenshot
       dark: observabilityPng,
-      alt: "Langfuse evaluation interface showing feedback and scores"
+      alt: "Langfuse evaluation interface showing feedback and scores",
     },
     code: {
       language: "python",
@@ -219,9 +219,9 @@ langfuse.score(
     trace_id=trace.id,
     name="helpfulness",
     value=score
-)`
+)`,
     },
-    quickstartHref: "/docs/evaluation/get-started"
+    quickstartHref: "/docs/evaluation/get-started",
   },
   {
     id: "playground",
@@ -233,7 +233,7 @@ langfuse.score(
     image: {
       light: observabilityPng, // Placeholder - needs playground screenshot
       dark: observabilityPng,
-      alt: "Langfuse playground interface for testing prompts and models"
+      alt: "Langfuse playground interface for testing prompts and models",
     },
     code: {
       language: "python",
@@ -267,9 +267,9 @@ for config in test_configs:
         input=compiled,
         model=config["model"],
         model_parameters={"temperature": config["temperature"]}
-    )`
+    )`,
     },
-    quickstartHref: "/docs/prompt-management/features/playground"
+    quickstartHref: "/docs/prompt-management/features/playground",
   },
   {
     id: "public-api",
@@ -281,7 +281,7 @@ for config in test_configs:
     image: {
       light: observabilityPng, // Placeholder - needs API documentation screenshot
       dark: observabilityPng,
-      alt: "Langfuse API documentation and examples"
+      alt: "Langfuse API documentation and examples",
     },
     code: {
       language: "javascript",
@@ -319,8 +319,8 @@ async function createTrace(traceData) {
   });
 
   return response.json();
-}`
+}`,
     },
-    quickstartHref: "/docs/api"
-  }
+    quickstartHref: "/docs/api-and-data-platform/overview",
+  },
 ];

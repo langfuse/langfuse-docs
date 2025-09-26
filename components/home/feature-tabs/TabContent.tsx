@@ -25,15 +25,9 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
   }
 
   return (
-    <Card className="p-0 mt-0 bg-background border-radius-none">
-      <CardContent
-        role="tabpanel"
-        id={`tabpanel-${feature.id}`}
-        aria-labelledby={`tab-${feature.id}`}
-        className="space-y-8 p-0"
-      >
+    <>
         {/* Row A: Value text + Docs/Video links */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-8 pt-8 min-h-32">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-6 pt-6 pb-6 min-h-32">
           {/* Value paragraph */}
           <div className="lg:col-span-8">
             <p className="text-lg leading-relaxed font-bold">{feature.title}</p>
@@ -145,7 +139,8 @@ export const TabContent = ({ feature, isActive }: TabContentProps) => {
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+       {/* </CardContent>
+     </Card> */}
+    </>
   );
 };
