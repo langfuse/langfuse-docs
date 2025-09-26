@@ -1,16 +1,24 @@
 import { MenuSubSeparator } from "@/components/MenuSubSeparator";
 
-export const TEAMS_PATHS = {
-  "product-engineering": "Product Engineering",
-  gtm: "GTM",
-  operations: "Operations",
+export const TEAMS_CONFIG = {
+  "product-engineering": {
+    title: "Product Engineering",
+    firstPage: "documentation",
+  },
+  gtm: {
+    title: "GTM",
+    firstPage: "overview",
+  },
+  operations: {
+    title: "Operations",
+    firstPage: "entity-structure",
+  },
 };
 
-export const TEAMS_FIRST_PAGES = {
-  "product-engineering": "documentation",
-  gtm: "overview",
-  operations: "entity-structure",
-};
+// Derived object for backwards compatibility with Nextra meta
+export const TEAMS_PATHS = Object.fromEntries(
+  Object.entries(TEAMS_CONFIG).map(([path, config]) => [path, config.title])
+);
 
 export default {
   "-- Main Handbook": {

@@ -1,16 +1,16 @@
 import { Cards } from "nextra/components";
 import { Users } from "lucide-react";
-import { TEAMS_PATHS, TEAMS_FIRST_PAGES } from "@/pages/handbook/_meta";
+import { TEAMS_CONFIG } from "@/pages/handbook/_meta";
 
 export const TeamsIndex = () => {
   return (
     <div className="my-6">
       <Cards num={3}>
-        {Object.entries(TEAMS_PATHS).map(([path, title]) => (
+        {Object.entries(TEAMS_CONFIG).map(([path, config]) => (
           <Cards.Card
-            href={`/handbook/${path}/${TEAMS_FIRST_PAGES[path]}`}
+            href={`/handbook/${path}/${config.firstPage}`}
             key={path}
-            title={title}
+            title={config.title}
             icon={<Users size={20} />}
             arrow
           />
