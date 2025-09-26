@@ -6,7 +6,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
-import { Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink, Info } from "lucide-react";
+import Link from "next/link";
 
 const LogoContextMenu: React.FC<{
   open: boolean;
@@ -39,6 +40,12 @@ const LogoContextMenu: React.FC<{
           <DropdownMenuItem onClick={(e) => handleAction(e, "/", false)}>
             <ExternalLink size={14} className="mr-2" />
             Open in new tab
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/about" onClick={() => setOpen(false)}>
+              <Info size={14} className="mr-2" />
+              About
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
