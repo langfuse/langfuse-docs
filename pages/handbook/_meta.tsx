@@ -1,9 +1,18 @@
 import { MenuSubSeparator } from "@/components/MenuSubSeparator";
 
-export const TEAMS_PATHS = {
-  "product-engineering": "Product Engineering",
-  gtm: "GTM",
-  operations: "Operations",
+export const TEAMS = {
+  "product-engineering": {
+    name: "Product Engineering",
+    firstPage: "documentation",
+  },
+  gtm: {
+    name: "GTM",
+    firstPage: "overview",
+  },
+  operations: {
+    name: "Operations",
+    firstPage: "entity-structure",
+  },
 };
 
 export default {
@@ -18,5 +27,7 @@ export default {
     type: "separator",
     title: <MenuSubSeparator>Teams</MenuSubSeparator>,
   },
-  ...TEAMS_PATHS,
+  ...Object.fromEntries(
+    Object.entries(TEAMS).map(([key, value]) => [key, value.name])
+  ),
 };
