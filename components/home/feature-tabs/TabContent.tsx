@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
-import { CodeBlock,  } from "@/components/ai-elements/code-block";
+import { CodeBlock } from "@/components/ai-elements/code-block";
 import { cn } from "@/lib/utils";
 import { ExternalLink, BookOpen, Play, Code2 } from "lucide-react";
 import Image from "next/image";
@@ -14,8 +14,14 @@ export interface TabContentProps {
   className?: string;
 }
 
-export const TabContent = ({ feature, isActive, className }: TabContentProps) => {
-  const [activeLanguage, setActiveLanguage] = useState<"python" | "javascript">("python");
+export const TabContent = ({
+  feature,
+  isActive,
+  className,
+}: TabContentProps) => {
+  const [activeLanguage, setActiveLanguage] = useState<"python" | "javascript">(
+    "python"
+  );
 
   const activeCodeSnippet = useMemo(() => {
     if (!feature.code?.snippets) return "";
@@ -27,12 +33,11 @@ export const TabContent = ({ feature, isActive, className }: TabContentProps) =>
     return Object.keys(feature.code.snippets) as ("python" | "javascript")[];
   }, [feature.code?.snippets]);
 
-  const displayMode = feature.displayMode || 'default';
+  const displayMode = feature.displayMode || "default";
 
   if (!isActive) {
     return null;
   }
-
 
   // Default mode: Original layout with header + split content
   return (
