@@ -289,14 +289,13 @@ const result = await langfuse.experiment.run({
     icon: MessageSquare,
     title: "Annotations",
     subtitle: "Add manual feedback and corrections.",
-    body: "Create manual annotations to provide feedback, corrections, and improvements to your LLM outputs. Use annotations to build high-quality datasets and improve model performance.",
+    body: "Create manual annotations to provide feedback, corrections, and improvements to your LLM outputs. Use annotations to build high-quality datasets and set a baseline for automated evals.",
     docsHref: "/docs/evaluation/evaluation-methods/annotation",
     image: {
       light: AnnotationPng,
       dark: AnnotationPng,
       alt: "Langfuse annotation interface for manual feedback and corrections",
     },
-    quickstartHref: "/docs/prompt-management/features/playground",
     displayMode: "image-only",
   },
   {
