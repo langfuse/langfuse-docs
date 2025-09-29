@@ -92,6 +92,7 @@ const PLAN_CONFIGS: PlanConfig[] = [
   { name: "Core", baseFee: 29 },
   { name: "Pro", baseFee: 199 },
   { name: "Pro + Teams", baseFee: 499 },
+  { name: "Enterprise", baseFee: 2499 },
 ];
 
 // Utility functions
@@ -518,7 +519,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Everything in Pro and Teams add-on",
         <>
           100k units / month included, additional:{" "}
-          <GraduatedPricingWithCalculator planName="Pro" />
+          <GraduatedPricingWithCalculator planName="Enterprise" />
         </>,
         "Audit Logs",
         "SCIM API",
