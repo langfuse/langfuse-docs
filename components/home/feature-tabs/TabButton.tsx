@@ -27,8 +27,8 @@ export const TabButton = forwardRef<HTMLButtonElement, TabButtonProps>(
           onClick={onClick}
           variant="ghost"
           className={cn([
-            "group-hover:bg-primary/5 group-hover:text-accent-foreground focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:outline-none",
-            isActive ? "bg-primary/10 text-accent-foreground group-hover:bg-primary/10 group-hover:text-accent-foreground" : "",
+            "group-hover:bg-secondary/50 group-hover:text-accent-foreground focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:outline-none",
+            isActive ? "bg-secondary text-accent-foreground group-hover:bg-secondary group-hover:text-accent-foreground" : "",
             className,
           ])}
           {...props}
