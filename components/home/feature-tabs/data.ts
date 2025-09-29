@@ -31,7 +31,6 @@ export const featureTabsData: FeatureTabData[] = [
       alt: "Langfuse observability trace detail view showing nested observations with latency and cost",
     },
     code: {
-      language: "python",
       snippets: {
         python: `from langfuse import observe
 
@@ -91,7 +90,6 @@ export default observe(handleRequest);`,
       alt: "Langfuse analytics dashboard showing cost and latency metrics over time",
     },
     code: {
-      language: "python",
       snippets: {
         python: `from langfuse import Langfuse
 
@@ -179,7 +177,6 @@ langfuse.score({
       alt: "Langfuse prompt management interface showing versioned prompts",
     },
     code: {
-      language: "python",
       snippets: {
         python: `from langfuse import get_client
 from langfuse.openai import openai
@@ -272,7 +269,6 @@ langfuse.generation({
       alt: "Langfuse evaluation interface showing feedback and scores",
     },
     code: {
-      language: "python",
       snippets: {
         python: `from langfuse import Langfuse
 
@@ -381,7 +377,6 @@ langfuse.score({
       alt: "Langfuse API documentation and examples",
     },
     code: {
-      language: "javascript",
       snippets: {
         javascript: `// Using the Langfuse REST API
 const LANGFUSE_BASE_URL = "https://cloud.langfuse.com";

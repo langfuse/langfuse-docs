@@ -90,7 +90,7 @@ export const TabContent = ({
           <div className="flex-1 min-h-0 overflow-y-scroll h-content overflow-x-hidden pt-[36px]">
             <CodeBlock
               code={activeCodeSnippet}
-              language={feature.code?.language || "typescript"}
+              language={activeLanguage}
               className="bg-card relative overflow-x-scroll rounded-none border-none [&_pre]:!overflow-auto [&_pre]:!height-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-min-content"
               customStyle={{
                 fontSize: "0.725rem",
@@ -176,7 +176,7 @@ export const TabContent = ({
                 <div className="flex-1 min-h-0 overflow-y-scroll h-content overflow-x-hidden pt-[36px]">
                   <CodeBlock
                     code={activeCodeSnippet}
-                    language={feature.code.language}
+                    language={activeLanguage}
                     className="bg-card relative overflow-x-scroll rounded-none border-none [&_pre]:!overflow-auto [&_pre]:!height-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-min-content"
                     customStyle={{
                       fontSize: "0.725rem",

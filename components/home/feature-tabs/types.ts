@@ -27,7 +27,6 @@ export interface FeatureTabData {
     alt: string;
   };
   code?: {
-    language: string;
     snippets: CodeSnippets;
   };
   statements?: StatementItem[];
