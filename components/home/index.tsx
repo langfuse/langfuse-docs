@@ -9,10 +9,6 @@ import { CTASocial } from "./CTASocial";
 
 import { Usage } from "./Usage";
 
-const FeatureBento = dynamic(() => import("./FeatureBento"), {
-  ssr: false,
-});
-
 const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
   ssr: false,
 });
@@ -32,7 +28,6 @@ export const Home = () => (
       <Hero />
       <FeatureTabsSection />
       <Usage />
-      <FeatureBento />
       <IntegrationsGrid />
       <OpenSource />
       <Security />
