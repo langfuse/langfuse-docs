@@ -102,10 +102,10 @@ export const TabContent = ({ feature, isActive, className }: TabContentProps) =>
           />
         </div>
       )}
-      { displayMode === "code-only" && (
+      {displayMode === "code-only" && (
         // Code-only: Full width code block
         <div className="w-full aspect-[12/5] flex flex-col border-t border-solid">
-          <div className="relative bg-background flex-shrink-0 w-full min-w-full max-w-full justify-between flex flex-row items-center overflow-x-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="relative bg-card flex-shrink-0 w-full min-w-full max-w-full justify-between flex flex-row items-center overflow-x-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="flex flex-row items-center px-2 pt-1">
               {availableLanguages.map((lang) => (
                 <div
@@ -142,13 +142,14 @@ export const TabContent = ({ feature, isActive, className }: TabContentProps) =>
             <CodeBlock
               code={activeCodeSnippet}
               language={feature.code?.language || "typescript"}
-              className="relative overflow-x-scroll rounded-none border-none [&_pre]:!overflow-auto [&_pre]:!height-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-min-content"
+              className="bg-card relative overflow-x-scroll rounded-none border-none [&_pre]:!overflow-auto [&_pre]:!height-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-min-content"
               customStyle={{
                 fontSize: "0.725rem",
                 borderRadius: "0",
                 height: "auto",
                 width: "fit-content",
                 maxWidth: "unset",
+                background: "hsl(var(--card))",
               }}
             />
           </div>
@@ -185,10 +186,10 @@ export const TabContent = ({ feature, isActive, className }: TabContentProps) =>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-y-hidden border-t border-solid">
           {/* Code block or Statements */}
           <div className="lg:col-span-6 order-2 lg:order-1 aspect-[6/5] flex flex-col border-r border-solid">
-            {feature.code ? ( 
+            {feature.code ? (
               // Code block section (takes precedence over feature statements)
               <>
-                <div className="relative bg-background flex-shrink-0 w-full min-w-full max-w-full justify-between flex flex-row items-center overflow-x-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="relative bg-card flex-shrink-0 w-full min-w-full max-w-full justify-between flex flex-row items-center overflow-x-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <div className="flex flex-row items-center px-2 pt-1">
                     {availableLanguages.map((lang) => (
                       <div
@@ -225,13 +226,14 @@ export const TabContent = ({ feature, isActive, className }: TabContentProps) =>
                   <CodeBlock
                     code={activeCodeSnippet}
                     language={feature.code.language}
-                    className="relative overflow-x-scroll rounded-none border-none [&_pre]:!overflow-auto [&_pre]:!height-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-min-content"
+                    className="bg-card relative overflow-x-scroll rounded-none border-none [&_pre]:!overflow-auto [&_pre]:!height-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-min-content"
                     customStyle={{
                       fontSize: "0.725rem",
                       borderRadius: "0",
                       height: "auto",
                       width: "fit-content",
                       maxWidth: "unset",
+                      background: "hsl(var(--card))",
                     }}
                   />
                 </div>
