@@ -277,10 +277,10 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
             ref={tabListRef}
             role="tablist"
             aria-label="Feature navigation"
-            className="p-2 border-b border-solid [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="p-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             onKeyDown={handleKeyDown}
           >
-            <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide border-border snap-x snap-mandatory gap-0 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-0 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {features.map((feature, index) => (
                 <TabButton
                   key={feature.id}
@@ -305,7 +305,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
 
           {/* Auto-advance progress indicator - always maintains height */}
           {defaultAutoAdvance?.enabled && (
-            <div className="w-full h-0.5 overflow-hidden ">
+            <div className="w-full h-0.5 overflow-hidden border-b-0.5 border-solid border-border">
               {!isAutoAdvancePaused && isInViewport ? (
                 <div
                   className="h-full bg-primary/15 transition-all duration-[50ms] ease-in-out rounded-lg"

@@ -15,7 +15,7 @@ import PromptPng from "components/home/feature-tabs/img/prompt.png";
 import EvalsPng from "components/home/feature-tabs/img/evals-wide.png"
 import PlaygroundPng from "components/home/feature-tabs/img/playground.png"
 
-export const featureTabsData: FeatureTabData[] = [
+export const  featureTabsData: FeatureTabData[] = [
   {
     id: "observability",
     icon: TextQuote,
@@ -414,7 +414,7 @@ langfuse.score({
       }
     ],
     quickstartHref: "/docs/prompt-management/features/playground",
-    displayMode: "feature-only",
+    displayMode: "image-only",
   },
   {
     id: "public-api",
