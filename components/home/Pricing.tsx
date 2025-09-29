@@ -729,7 +729,7 @@ const sections: Section[] = [
             Hobby: "50k units",
             Core: "100k units",
             Pro: "100k units",
-            Enterprise: "Custom",
+            Enterprise: "100k units",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -747,7 +747,20 @@ const sections: Section[] = [
             Hobby: false,
             Core: <GraduatedPricingWithCalculator planName="Core" />,
             Pro: <GraduatedPricingWithCalculator planName="Pro" />,
-            Enterprise: "Custom",
+            Enterprise: <GraduatedPricingWithCalculator planName="Enterprise" />,
+          },
+        },
+      },
+      {
+        name: "Custom Usage Pricing",
+        description:
+          "Higher volumes can be discounted under a yearly commitment under the Enterprise plan.",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: YEARLY_COMMITMENT,
           },
         },
       },
@@ -1441,7 +1454,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: "Monthly",
             Pro: "Monthly",
-            Enterprise: "Custom",
+            Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
