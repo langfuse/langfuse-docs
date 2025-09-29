@@ -1,0 +1,221 @@
+---
+title: Get Started with Evaluation
+sidebarTitle: Evaluate an Application
+description: Set up your first LLM evaluation in Langfuse to measure and improve performance.
+---
+
+# Get Started with Evaluation
+
+This quickstart helps you set up your first evaluation in Langfuse to measure and improve your LLM application's performance.
+
+<Steps>
+
+## Get API keys
+
+1. [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
+2. Create new API credentials in the project settings.
+
+## Create your first trace
+
+Before evaluating, you need to have traces in Langfuse. If you haven't traced your application yet, follow the [Trace an Application](/docs/get-started/tracing) quickstart first.
+
+## Add a score to a trace
+
+Scores are the foundation of evaluation in Langfuse. You can add scores manually, programmatically, or using LLM-as-a-Judge.
+
+### Manual scoring (via UI)
+
+1. Navigate to a trace in the Langfuse UI
+2. Click on "Add score" button
+3. Enter a name (e.g., "accuracy", "helpfulness") and value (e.g., 0-1 scale)
+4. Save the score
+
+### Programmatic scoring
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Score an existing trace
+langfuse.score(
+    trace_id="your-trace-id",
+    name="accuracy", 
+    value=0.8,
+    comment="Correct answer with good explanation"
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+// Score an existing trace
+langfuse.score({
+  traceId: "your-trace-id",
+  name: "accuracy",
+  value: 0.8,
+  comment: "Correct answer with good explanation"
+});
+```
+
+</Tab>
+<Tab>
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -H "X-Langfuse-Public-Key: your-public-key" \
+  -H "X-Langfuse-Secret-Key: your-secret-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "traceId": "your-trace-id",
+    "name": "accuracy",
+    "value": 0.8,
+    "comment": "Correct answer with good explanation"
+  }'
+```
+
+</Tab>
+</LangTabs>
+
+## Set up LLM-as-a-Judge [#llm-judge]
+
+For automated evaluation at scale, use LLM-as-a-Judge evaluators:
+
+1. Navigate to **Evaluation** → **Evaluators** in the Langfuse UI
+2. Click **Create evaluator**
+3. Choose a template (e.g., "Helpfulness", "Factual Accuracy") or create custom
+4. Configure the evaluator settings
+5. Test on sample traces
+6. Save and enable the evaluator
+
+The evaluator will automatically score new traces matching your criteria.
+
+## Run your first experiment [#experiment]
+
+Experiments help you systematically evaluate different versions of your application:
+
+1. **Create a dataset**
+   - Go to **Datasets** → **New dataset**
+   - Add test cases with inputs and expected outputs
+   
+2. **Run an experiment via UI**
+   - Navigate to your dataset
+   - Click **Run experiment**
+   - Select prompt and model configuration
+   - Choose evaluators to apply
+   - Run the experiment
+
+3. **Compare results**
+   - View side-by-side comparisons of different runs
+   - Analyze score distributions
+   - Identify improvements or regressions
+
+</Steps>
+
+## What's Next?
+
+Now that you've set up basic evaluation:
+
+- **[Human Annotations](/docs/evaluation/evaluation-methods/annotation)** - Set up manual review workflows
+- **[Custom Scores](/docs/evaluation/evaluation-methods/custom-scores)** - Implement domain-specific evaluation metrics
+- **[Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)** - Automate experiment runs in your CI/CD pipeline
+- **[Datasets](/docs/evaluation/experiments/datasets)** - Build comprehensive test sets for your application
+
+## Example: End-to-End Evaluation
+
+Here's a complete example of tracing and evaluating an LLM call:
+
+<LangTabs items={["Python", "JavaScript"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+from openai import OpenAI
+
+# Initialize clients
+langfuse = get_client()
+openai = OpenAI()
+
+# Create a trace and get response
+trace = langfuse.trace(name="customer-support-chat")
+messages = [{"role": "user", "content": "How do I reset my password?"}]
+
+generation = trace.generation(
+    name="chat-completion",
+    model="gpt-4",
+    input=messages
+)
+
+response = openai.chat.completions.create(
+    model="gpt-4",
+    messages=messages
+)
+
+generation.end(output=response.choices[0].message.content)
+
+# Add evaluation scores
+langfuse.score(
+    trace_id=trace.id,
+    name="helpfulness",
+    value=0.9
+)
+
+langfuse.score(
+    trace_id=trace.id,
+    name="response_time",
+    value=response.usage.total_tokens / 100  # Normalized score
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+import OpenAI from "openai";
+
+// Initialize clients
+const langfuse = new Langfuse();
+const openai = new OpenAI();
+
+// Create a trace and get response
+const trace = langfuse.trace({ name: "customer-support-chat" });
+const messages = [{ role: "user", content: "How do I reset my password?" }];
+
+const generation = trace.generation({
+  name: "chat-completion",
+  model: "gpt-4",
+  input: messages
+});
+
+const response = await openai.chat.completions.create({
+  model: "gpt-4",
+  messages
+});
+
+generation.end({ output: response.choices[0].message.content });
+
+// Add evaluation scores
+langfuse.score({
+  traceId: trace.id,
+  name: "helpfulness",
+  value: 0.9
+});
+
+langfuse.score({
+  traceId: trace.id,
+  name: "response_time",
+  value: response.usage.total_tokens / 100 // Normalized score
+});
+```
+
+</Tab>
+</LangTabs>
