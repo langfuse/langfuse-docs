@@ -78,7 +78,7 @@ export default observe(handleRequest);`,
     icon: LineChart,
     title: "Metrics",
     subtitle: "Track cost, latency, and quality.",
-    body: "Monitor your LLM application's performance with comprehensive metrics dashboards. Track costs, latencies, token usage, and quality scores across models, users, and time periods.",
+    body: "Monitor your LLM application's performance with comprehensive metrics dashboards and APIs. Track costs, latencies, token usage, and quality scores across models, users, and time periods.",
     docsHref: "/docs/analytics",
     videoHref: "/watch-demo?tab=metrics",
     image: {
@@ -88,74 +88,49 @@ export default observe(handleRequest);`,
     },
     code: {
       snippets: {
-        python: `from langfuse import Langfuse
+        python: `# The metrics API enables querying of custom aggregations
+# Example: Total LLM cost for each user over the last 30 days
 
-langfuse = Langfuse()
+import json, time
+from langfuse import get_client
 
-# Track metrics with custom tags for filtering
-trace = langfuse.trace(
-    name="document-qa",
-    tags=["production", "document-processing"],
-    metadata={"document_type": "legal"}
-)
+langfuse = get_client()
+now = int(time.time() * 1000)                     # ms
+from_ms = now - 30 * 24 * 60 * 60 * 1000          # 30 days ago
 
-generation = trace.generation(
-    name="answer-generation",
-    model="gpt-4-turbo",
-    input="What are the key terms in this contract?",
-    usage={
-        "input_tokens": 1500,
-        "output_tokens": 300,
-        "total_tokens": 1800
-    }
-)
+# Construct the query object
+query = {
+  "view": "traces",
+  "dimensions": [{"field": "userId"}],
+  "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+  "fromTimestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(from_ms/1000)),
+  "toTimestamp":   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now/1000)),
+  "orderBy": [{"field": "totalCost_sum", "direction": "desc"}],
+}
 
-# Add custom scores for quality tracking
-langfuse.score(
-    trace_id=trace.id,
-    name="relevance",
-    value=0.95
-)
+# Get metrics from Langfuse API
+res = langfuse.api.metrics.metrics(query=json.dumps(query))`,
+        javascript: `// Metrics API enables querying of custom aggregations
+// Example: Total LLM cost for each user over the last 30 days
+        
+import { LangfuseClient } from "@langfuse/client";
+const langfuse = new LangfuseClient();
 
-langfuse.score(
-    trace_id=trace.id,
-    name="accuracy",
-    value=0.88
-)`,
-        javascript: `import { Langfuse } from "langfuse";
+const now = Date.now();
+const from = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-const langfuse = new Langfuse();
-
-// Track metrics with custom tags for filtering
-const trace = langfuse.trace({
-  name: "document-qa",
-  tags: ["production", "document-processing"],
-  metadata: { documentType: "legal" }
+// Construct the query object
+const query = JSON.stringify({
+  view: "traces",
+  dimensions: [{ field: "userId" }],
+  metrics: [{ measure: "totalCost", aggregation: "sum" }],
+  fromTimestamp: from,
+  toTimestamp: new Date(now).toISOString(),
+  orderBy: [{ field: "totalCost_sum", direction: "desc" }],
 });
 
-const generation = trace.generation({
-  name: "answer-generation",
-  model: "gpt-4-turbo",
-  input: "What are the key terms in this contract?",
-  usage: {
-    inputTokens: 1500,
-    outputTokens: 300,
-    totalTokens: 1800
-  }
-});
-
-// Add custom scores for quality tracking
-langfuse.score({
-  traceId: trace.id,
-  name: "relevance",
-  value: 0.95
-});
-
-langfuse.score({
-  traceId: trace.id,
-  name: "accuracy",
-  value: 0.88
-});`,
+// Get metrics from Langfuse API
+const res = await langfuse.api.metrics.metrics({query});`,
       },
     },
     quickstartHref: "/docs/analytics",
@@ -165,7 +140,7 @@ langfuse.score({
     icon: GitPullRequestArrow,
     title: "Prompt Management",
     subtitle: "Version and deploy prompts with low latency.",
-    body: "Manage prompts collaboratively with version control, deploy them instantly, and retrieve them with low latency in your applications. Support for templates, variables, and A/B testing.",
+    body: "Version-control prompts collaboratively, deploy/roll-back instantly to different environments, support for templates, variables, and A/B testing. Cached client-side for 0 latency/availability impact.",
     docsHref: "/docs/prompt-management/overview",
     videoHref: "/watch-demo?tab=prompt",
     image: {
