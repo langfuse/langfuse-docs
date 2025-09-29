@@ -6,7 +6,6 @@ import {
   FlaskConical,
   Globe,
   MessageSquare,
-  BarChart3,
 } from "lucide-react";
 import type { FeatureTabData } from "./types";
 
@@ -51,28 +50,29 @@ def summarize(text: str) -> str:
         ],
     )
     return res.choices[0].message.content`,
-        javascript: `import OpenAI from "openai";
-import { observeOpenAI } from "@langfuse/openai";
-import { startActiveObservation } from "@langfuse/tracing";
+        javascript: `// TODO: set up global Langfuse OTel exporter
 
-// assumes OTEL + LangfuseSpanProcessor is set up at app start
+import { observe } from "@langfuse/tracing";
+import OpenAI from "openai";
+import { observeOpenAI } from "@langfuse/openai";
+
+// Wrap OpenAI client for Langfuse auto-instrumentation
+// Integrations for many other llm/agent libraries are available
 const openai = observeOpenAI(new OpenAI());
 
-export async function handleRequest(userInput: string) {
-  return await startActiveObservation("handle-request", async (span) => {
-    span.update({ input: { userInput } }); // attach inputs to the trace
-    const res = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: "Reply concisely." },
-        { role: "user", content: userInput },
-      ],
-    });
-    const output = res.choices[0].message.content;
-    span.update({ output });
-    return output;
+async function handleRequest(userInput: string) {
+  const res = await openai.chat.completions.create({
+    model: "gpt-5",
+    messages: [
+      { role: "system", content: "Reply concisely." },
+      { role: "user", content: userInput },
+    ],
   });
-}`,
+  return res.choices[0].message.content;
+}
+  
+// Wrap the function with observe to trace timings, nested calls, and I/O
+export default observe(handleRequest);`,
       },
     },
     quickstartHref: "/docs/observability/get-started",
