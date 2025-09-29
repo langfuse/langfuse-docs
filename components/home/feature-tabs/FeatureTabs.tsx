@@ -17,7 +17,7 @@ export interface FeatureTabsProps {
 
 export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvance }: FeatureTabsProps) => {
   // Default auto-advance configuration
-  const defaultAutoAdvance = autoAdvance || { enabled: true, intervalMs: 6000 };
+  const defaultAutoAdvance = autoAdvance || { enabled: true, intervalMs: 10000 };
 
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [previewTab, setPreviewTab] = useState<string | null>(null);
@@ -190,7 +190,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
       setTimeout(() => {
         setIsAutoTransitioning(false);
       }, 50);
-    }, 300);
+    }, 100);
   }, [features, activeTab, defaultAutoAdvance?.enabled, isAutoAdvancePaused]);
 
   const pauseAutoAdvance = useCallback(() => {
@@ -321,14 +321,11 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
             <div
               className={`${
                 isAutoTransitioning
-                  ? 'transition-opacity duration-250 ease-in-out opacity-0'
-                  : 'transition-opacity duration-250 ease-in-out opacity-100'
+                  ? "transition-opacity duration-100 ease-in-out opacity-30"
+                  : "transition-opacity duration-200 ease-in-out opacity-100"
               }`}
             >
-              <TabContent
-                feature={activeFeature}
-                isActive={true}
-              />
+              <TabContent feature={activeFeature} isActive={true} />
             </div>
           </div>
         </div>

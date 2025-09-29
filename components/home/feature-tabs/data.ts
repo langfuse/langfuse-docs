@@ -5,6 +5,7 @@ import {
   ThumbsUp,
   FlaskConical,
   Globe,
+  BarChart3,
 } from "lucide-react";
 import type { FeatureTabData } from "./types";
 
@@ -184,6 +185,20 @@ langfuse.score({
     quickstartHref: "/docs/analytics",
   },
   {
+    id: "dashboards",
+    icon: BarChart3,
+    title: "Dashboards",
+    subtitle: "Visual insights at a glance.",
+    body: "Get comprehensive insights into your LLM application performance with customizable dashboards. Track key metrics, identify trends, and monitor the health of your AI systems.",
+    docsHref: "/docs/analytics/daily-metrics",
+    image: {
+      light: costPng,
+      dark: costPng,
+      alt: "Langfuse analytics dashboard with comprehensive metrics visualization"
+    },
+    displayMode: "image-only",
+  },
+  {
     id: "prompt-management",
     icon: GitPullRequestArrow,
     title: "Prompt Management",
@@ -282,7 +297,7 @@ langfuse.generation({
     docsHref: "/docs/evaluation/overview",
     videoHref: "/watch-demo?tab=evaluation",
     image: {
-      light: EvalsPng, // Placeholder - needs evaluation screenshot
+      light: EvalsPng,
       dark: EvalsPng,
       alt: "Langfuse evaluation interface showing feedback and scores"
     },
@@ -399,6 +414,7 @@ langfuse.score({
       }
     ],
     quickstartHref: "/docs/prompt-management/features/playground",
+    displayMode: "feature-only",
   },
   {
     id: "public-api",
@@ -491,5 +507,6 @@ def create_trace(trace_data):
       }
     },
     quickstartHref: "/docs/api-and-data-platform/overview",
+    displayMode: "code-only",
   },
 ];

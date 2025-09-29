@@ -11,6 +11,8 @@ export interface StatementItem {
   description: string;
 }
 
+export type TabDisplayMode = 'default' | 'code-only' | 'feature-only' | 'image-only';
+
 export interface FeatureTabData {
   id: string;
   icon: LucideIcon;
@@ -30,6 +32,7 @@ export interface FeatureTabData {
   };
   statements?: StatementItem[];
   quickstartHref?: string;
+  displayMode?: TabDisplayMode;
 }
 
 export interface AutoAdvanceConfig {
