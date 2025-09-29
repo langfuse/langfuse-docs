@@ -5,8 +5,10 @@ import { Background } from "../Background";
 import { Hero } from "./Hero";
 import { FeatureTabsSection } from "./FeatureTabsSection";
 
-import { Usage } from "./Usage";
-
+// Dynamic imports for everything that is below the fold
+const Usage = dynamic(() => import("./Usage"), {
+  ssr: false,
+});
 const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
   ssr: false,
 });
