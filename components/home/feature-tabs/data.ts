@@ -267,28 +267,7 @@ langfuse.generation({
       dark: PlaygroundPng,
       alt: "Langfuse playground interface for testing prompts and models",
     },
-    statements: [
-      {
-        title: "Interactive Testing Environment",
-        description:
-          "Test different prompts, models, and parameters in real-time with immediate feedback and comparison capabilities.",
-      },
-      {
-        title: "Model Comparison",
-        description:
-          "Compare outputs from different LLM providers (OpenAI, Anthropic, Cohere, etc.) side-by-side to find the best model for your use case.",
-      },
-      {
-        title: "Prompt Iteration",
-        description:
-          "Iterate on prompt templates with variable substitution, test edge cases, and refine your prompts before deployment.",
-      },
-      {
-        title: "Save & Deploy",
-        description:
-          "Save successful prompt configurations as versioned templates and deploy them directly to your applications.",
-      },
-    ],
+    displayMode: "image-only",
     quickstartHref: "/docs/prompt-management/features/playground",
   },
   {
@@ -398,28 +377,6 @@ langfuse.score({
       dark: AnnotationPng,
       alt: "Langfuse annotation interface for manual feedback and corrections",
     },
-    statements: [
-      {
-        title: "Interactive Testing Environment",
-        description:
-          "Test different prompts, models, and parameters in real-time with immediate feedback and comparison capabilities.",
-      },
-      {
-        title: "Model Comparison",
-        description:
-          "Compare outputs from different LLM providers (OpenAI, Anthropic, Cohere, etc.) side-by-side to find the best model for your use case.",
-      },
-      {
-        title: "Prompt Iteration",
-        description:
-          "Iterate on prompt templates with variable substitution, test edge cases, and refine your prompts before deployment.",
-      },
-      {
-        title: "Save & Deploy",
-        description:
-          "Save successful prompt configurations as versioned templates and deploy them directly to your applications.",
-      },
-    ],
     quickstartHref: "/docs/prompt-management/features/playground",
     displayMode: "image-only",
   },
