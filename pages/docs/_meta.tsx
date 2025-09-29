@@ -9,6 +9,12 @@ export default {
   demo: "Interactive Demo",
   "ask-ai": "Ask AI",
 
+  "-- Get Started": {
+    type: "separator",
+    title: "Get Started",
+  },
+  "get-started": "Get Started",
+
   "-- Products": {
     type: "separator",
     title: "Products",

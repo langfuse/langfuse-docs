@@ -1,0 +1,142 @@
+---
+title: Get Started with Evaluation
+sidebarTitle: Evaluate an application
+description: Get started evaluating your LLM application with Langfuse in minutes.
+---
+
+# Get Started with Evaluation
+
+This quickstart helps you evaluate your LLM application to measure quality, identify issues, and continuously improve performance.
+
+<Steps>
+
+## Get API keys
+
+1. [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
+2. Create new API credentials in the project settings.
+
+## Choose your evaluation approach
+
+Langfuse supports two main evaluation approaches:
+
+### Online Evaluation (Production)
+
+Evaluate your application on real production data:
+
+<LangTabs items={["LLM-as-a-Judge", "Human Annotations", "Custom Scores"]}>
+
+<Tab>
+
+Use AI models to automatically evaluate production traces:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Configure LLM-as-a-Judge evaluator for production traces
+# See the LLM-as-a-Judge docs for detailed setup
+```
+
+[Learn more about LLM-as-a-Judge →](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+
+</Tab>
+
+<Tab>
+
+Collect human feedback through the Langfuse UI:
+
+1. Navigate to your traces in the Langfuse dashboard
+2. Click on any trace to open details
+3. Add annotations using the built-in annotation tools
+4. Track feedback patterns over time
+
+[Learn more about Human Annotations →](/docs/evaluation/evaluation-methods/annotation)
+
+</Tab>
+
+<Tab>
+
+Implement custom evaluation logic via API:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Score a trace
+langfuse.score(
+    trace_id="your-trace-id",
+    name="accuracy",
+    value=0.95,
+    comment="High accuracy on factual questions"
+)
+```
+
+[Learn more about Custom Scores →](/docs/evaluation/evaluation-methods/custom-scores)
+
+</Tab>
+
+</LangTabs>
+
+### Offline Evaluation (Development)
+
+Test your application systematically using datasets:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Create a dataset for testing
+dataset = langfuse.create_dataset(
+    name="QA Test Dataset",
+    description="Test cases for Q&A functionality"
+)
+
+# Add test items
+langfuse.create_dataset_item(
+    dataset_name="QA Test Dataset",
+    input={"question": "What is Langfuse?"},
+    expected_output="Langfuse is an open-source LLM engineering platform."
+)
+
+# Run experiments to test your application
+# See the experiments docs for detailed setup
+```
+
+[Learn more about Experiments →](/docs/evaluation/experiments/overview)
+
+## View evaluation results
+
+Navigate to the Langfuse dashboard to:
+
+- View individual scores on traces
+- Analyze aggregate metrics
+- Compare performance across versions
+- Track improvements over time
+
+</Steps>
+
+## What's next?
+
+<Cards num={3}>
+  <Card
+    title="Evaluation Methods"
+    href="/docs/evaluation/evaluation-methods/data-model"
+    description="Explore different ways to evaluate your LLM application"
+    arrow
+  />
+  <Card
+    title="Create Datasets"
+    href="/docs/evaluation/experiments/datasets"
+    description="Build test datasets for systematic evaluation"
+    arrow
+  />
+  <Card
+    title="Run Experiments"
+    href="/docs/evaluation/experiments/overview"
+    description="Test prompt versions and models systematically"
+    arrow
+  />
+</Cards>
