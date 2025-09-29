@@ -1,9 +1,12 @@
-import { Background } from "../Background";
-import { Hero } from "./Hero";
-import { Usage } from "./Usage";
 import dynamic from "next/dynamic";
 
-const FeatureBento = dynamic(() => import("./FeatureBento"), {
+// Non-dynamic imports for everyhting that renders on top
+import { Background } from "../Background";
+import { Hero } from "./Hero";
+import { FeatureTabsSection } from "./FeatureTabsSection";
+
+// Dynamic imports for everything that is below the fold
+const Usage = dynamic(() => import("./Usage"), {
   ssr: false,
 });
 const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
@@ -32,8 +35,8 @@ export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
       <Hero />
+      <FeatureTabsSection />
       <Usage />
-      <FeatureBento />
       <IntegrationsGrid />
       <OpenSource />
       <Security />
