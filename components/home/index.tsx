@@ -1,9 +1,7 @@
 import { Background } from "../Background";
 import { Hero } from "./Hero";
-import Security from "./Security";
 import { Usage } from "./Usage";
 import dynamic from "next/dynamic";
-import { CTASocial } from "./CTASocial";
 
 const FeatureBento = dynamic(() => import("./FeatureBento"), {
   ssr: false,
@@ -17,7 +15,16 @@ const OpenSource = dynamic(() => import("./OpenSource"), {
 const Pricing = dynamic(() => import("./Pricing"), {
   ssr: false,
 });
+const Security = dynamic(() => import("./Security"), {
+  ssr: false,
+});
 const WallOfLove = dynamic(() => import("./WallOfLove"), {
+  ssr: false,
+});
+const CustomerStories = dynamic(() => import("./CustomerStories"), {
+  ssr: false,
+});
+const CTAGetStarted = dynamic(() => import("./CTAGetStarted"), {
   ssr: false,
 });
 
@@ -30,12 +37,10 @@ export const Home = () => (
       <IntegrationsGrid />
       <OpenSource />
       <Security />
+      <CustomerStories />
       <Pricing />
       <WallOfLove />
-      <CTASocial />
-      {/* <FromTheBlog /> */}
-      {/* <CTA /> */}
-      {/* <Footer /> */}
+      <CTAGetStarted />
     </main>
     <Background />
   </>
