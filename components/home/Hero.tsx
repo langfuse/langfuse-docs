@@ -14,7 +14,7 @@ export function Hero() {
       {/* HERO */}
       <div className="flex flex-col items-center justify-center gap-5 md:min-h-[calc(min(calc(60vh-100px),60vw))] pb-10 lg:pt-10 2xl:pt-20">
         {/* Badges */}
-        <div className="flex flex-row gap-10 items-center justify-start  flex-wrap">
+        <div className="flex flex-row gap-10 items-center justify-start scale-[80%] flex-wrap">
           <div className="max-w-full w-52 px-1">
             <ProductHuntBadge />
           </div>
