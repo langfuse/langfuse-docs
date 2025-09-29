@@ -167,6 +167,7 @@ const nextraConfig = withNextra({
       beforeFiles: [
         // Serve markdown for paths without file extensions when Accept header explicitly requests markdown
         // Only serves markdown when Accept header contains text/markdown, text/plain, or application/markdown
+        // AND does NOT contain text/html (to prevent serving markdown to browsers)
         // This regex matches paths that don't end with a file extension (no dot in the last segment)
         // Excludes /api and /_next routes
         {
@@ -175,7 +176,7 @@ const nextraConfig = withNextra({
             {
               type: "header",
               key: "accept",
-              value: ".*(text/markdown|text/plain|application/markdown).*",
+              value: "^(?!.*text/html).*(text/markdown|text/plain|application/markdown).*",
             },
           ],
           destination: "/md-src/:path*.md",
