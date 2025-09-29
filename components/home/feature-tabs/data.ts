@@ -5,7 +5,7 @@ import {
   ThumbsUp,
   FlaskConical,
   Globe,
-  BarChart3,
+  MessageSquare,
 } from "lucide-react";
 import type { FeatureTabData } from "./types";
 
@@ -14,6 +14,7 @@ import costPng from "components/home/feature-tabs/img/cost.png";
 import PromptPng from "components/home/feature-tabs/img/prompt.png";
 import EvalsPng from "components/home/feature-tabs/img/evals-wide.png"
 import PlaygroundPng from "components/home/feature-tabs/img/playground.png"
+import AnnotationPng from "components/home/feature-tabs/img/Annotation.png"
 
 export const  featureTabsData: FeatureTabData[] = [
   {
@@ -289,6 +290,38 @@ langfuse.generation({
     quickstartHref: "/docs/prompt-management/get-started",
   },
   {
+    id: "playground",
+    icon: FlaskConical,
+    title: "Playground",
+    subtitle: "Test prompts and models interactively.",
+    body: "Experiment with different prompts, models, and parameters in an interactive playground. Compare outputs, iterate on prompts, and save successful configurations.",
+    docsHref: "/docs/prompt-management/features/playground",
+    image: {
+      light: PlaygroundPng, // Placeholder - needs playground screenshot
+      dark: PlaygroundPng,
+      alt: "Langfuse playground interface for testing prompts and models"
+    },
+    statements: [
+      {
+        title: "Interactive Testing Environment",
+        description: "Test different prompts, models, and parameters in real-time with immediate feedback and comparison capabilities."
+      },
+      {
+        title: "Model Comparison",
+        description: "Compare outputs from different LLM providers (OpenAI, Anthropic, Cohere, etc.) side-by-side to find the best model for your use case."
+      },
+      {
+        title: "Prompt Iteration",
+        description: "Iterate on prompt templates with variable substitution, test edge cases, and refine your prompts before deployment."
+      },
+      {
+        title: "Save & Deploy",
+        description: "Save successful prompt configurations as versioned templates and deploy them directly to your applications."
+      }
+    ],
+    quickstartHref: "/docs/prompt-management/features/playground",
+  },
+  {
     id: "evaluation",
     icon: ThumbsUp,
     title: "Evaluation",
@@ -384,16 +417,16 @@ langfuse.score({
     quickstartHref: "/docs/evaluation/get-started",
   },
   {
-    id: "playground",
-    icon: FlaskConical,
-    title: "Playground",
-    subtitle: "Test prompts and models interactively.",
-    body: "Experiment with different prompts, models, and parameters in an interactive playground. Compare outputs, iterate on prompts, and save successful configurations.",
-    docsHref: "/docs/prompt-management/features/playground",
+    id: "annotations",
+    icon: MessageSquare,
+    title: "Annotations",
+    subtitle: "Add manual feedback and corrections.",
+    body: "Create manual annotations to provide feedback, corrections, and improvements to your LLM outputs. Use annotations to build high-quality datasets and improve model performance.",
+    docsHref: "/docs/evaluation/evaluation-methods/annotation",
     image: {
-      light: PlaygroundPng, // Placeholder - needs playground screenshot
-      dark: PlaygroundPng,
-      alt: "Langfuse playground interface for testing prompts and models"
+      light: AnnotationPng,
+      dark: AnnotationPng,
+      alt: "Langfuse annotation interface for manual feedback and corrections"
     },
     statements: [
       {
