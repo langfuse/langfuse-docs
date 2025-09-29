@@ -10,7 +10,7 @@ import {
 import type { FeatureTabData } from "./types";
 
 import observabilityPng from "components/home/feature-tabs/img/observability-2.png";
-import costPng from "components/home/feature-tabs/img/cost.png";
+import metricsPng from "components/home/feature-tabs/img/metrics.png";
 import PromptPng from "components/home/feature-tabs/img/prompt.png";
 import EvalsPng from "components/home/feature-tabs/img/evals-wide.png";
 import PlaygroundPng from "components/home/feature-tabs/img/playground.png";
@@ -85,8 +85,8 @@ export default observe(handleRequest);`,
     docsHref: "/docs/analytics",
     videoHref: "/watch-demo?tab=metrics",
     image: {
-      light: costPng,
-      dark: costPng,
+      light: metricsPng,
+      dark: metricsPng,
       alt: "Langfuse analytics dashboard showing cost and latency metrics over time",
     },
     code: {
