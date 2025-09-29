@@ -114,6 +114,22 @@ const nextraConfig = withNextra({
           { key: "Content-Type", value: "text/markdown; charset=utf-8" },
         ],
       },
+      // Also apply headers to the md-src directory (used by rewrites)
+      {
+        source: "/md-src/:path*.md",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex" },
+          { key: "Content-Type", value: "text/markdown; charset=utf-8" },
+          { key: "Vary", value: "Accept" },
+        ],
+      },
+      // Add Vary: Accept to paths that might serve different content based on Accept header
+      {
+        source: "/:path((?:[^/.]+(?:/[^/.]+)*)/?)",
+        headers: [
+          { key: "Vary", value: "Accept" },
+        ],
+      },
     ];
 
     // Do not index Vercel preview deployments
@@ -146,12 +162,29 @@ const nextraConfig = withNextra({
   async rewrites() {
     // Serve any ".md" path by mapping to the static copy in public/md-src
     // Example: /docs.md -> /md-src/docs.md, /docs/observability/overview.md -> /md-src/docs/observability/overview.md
-    return [
-      {
-        source: "/:path*.md",
-        destination: "/md-src/:path*.md",
-      },
-    ];
+    return {
+      beforeFiles: [
+        // Serve markdown for paths without file extensions when Accept header doesn't include text/html
+        // This regex matches paths that don't end with a file extension (no dot in the last segment)
+        {
+          source: "/:path((?:[^/.]+(?:/[^/.]+)*)/?)",
+          has: [
+            {
+              type: "header",
+              key: "accept",
+              value: "^(?!.*text/html).*$",
+            },
+          ],
+          destination: "/md-src/:path*.md",
+        },
+      ],
+      afterFiles: [
+        {
+          source: "/:path*.md",
+          destination: "/md-src/:path*.md",
+        },
+      ],
+    };
   },
 });
 
