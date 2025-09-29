@@ -40,8 +40,10 @@ export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
   );
 };
 
-export const UsageSection = () => (
-  <HomeSection>
-    <Usage />
-  </HomeSection>
-);
+export default function UsageSection() {
+  return (
+    <HomeSection>
+      <Usage />
+    </HomeSection>
+  );
+}
