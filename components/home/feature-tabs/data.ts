@@ -181,40 +181,28 @@ langfuse.score({
     code: {
       language: "python",
       snippets: {
-        python: `from langfuse import Langfuse
+        python: `from langfuse import get_client
+from langfuse.openai import openai
 
-langfuse = Langfuse()
+langfuse = get_client()
 
-# Fetch the latest prompt version
-prompt = langfuse.get_prompt("customer-support-chat")
+# Fetches the latest **production** version and caches it client-side.
+# The SDK revalidates in the background, so subsequent calls are instant.
+prompt = langfuse.get_prompt("support-reply")
 
-# Compile prompt with variables
-compiled = prompt.compile(
-    customer_name="Alice Johnson",
-    issue_type="billing",
-    urgency="high"
+# Prompt can contain variables and placeholders
+# Filled at runtime via compile
+compiled = prompt.compile(tone="friendly")
+
+res = openai.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": compiled},
+        {"role": "user", "content": "My order arrived damaged."},
+    ],
 )
-
-# Use with OpenAI
-import openai
-response = openai.chat.completions.create(
-    model="gpt-4",
-    messages=compiled.to_openai_messages(),
-    temperature=prompt.config.get("temperature", 0.7)
-)
-
-# Track usage back to Langfuse
-langfuse.generation(
-    name="support-response",
-    prompt=prompt,
-    input=compiled.to_openai_messages(),
-    output=response.choices[0].message.content,
-    model="gpt-4",
-    usage={
-        "input_tokens": response.usage.prompt_tokens,
-        "output_tokens": response.usage.completion_tokens
-    }
-)`,
+print(res.choices[0].message.content)
+`,
         javascript: `import { Langfuse } from "langfuse";
 
 const langfuse = new Langfuse();
