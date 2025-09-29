@@ -266,7 +266,10 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
 
 
   return (
-    <Card ref={containerRef} className="p-0 mt-0 bg-card border-radius-none">
+    <Card
+      ref={containerRef}
+      className="p-0 mt-0 bg-card border-radius-none overflow-hidden"
+    >
       <CardContent className="space-y-8 p-0 border-radius-none overflow-hidden">
         <div className="w-full">
           {/* Tab List */}
