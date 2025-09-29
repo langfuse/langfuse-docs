@@ -19,8 +19,9 @@ const CONFIG = {
     maxLinkConcurrency: 100,       // Number of links to check simultaneously per file
     linkBatchDelay: 0,             // Delay between link batches (ms) - no delay needed locally
 
-    // Link checking timeouts - much lower for local requests
-    linkTimeout: 2000,             // Timeout for individual link checks (ms) - 2s is plenty for local
+    // Link checking timeouts
+    linkTimeout: 2000,             // Timeout for localhost link checks (ms) - 2s is plenty for local
+    externalLinkTimeout: 10000,    // Timeout for external link checks (ms) - 10s for external services
 
     // Progress reporting
     progressInterval: 20,          // Report progress every N files
@@ -304,7 +305,13 @@ async function checkFileLinks(filePath) {
         for (let i = 0; i < processedLinks.length; i += maxConcurrent) {
             const batch = processedLinks.slice(i, i + maxConcurrent);
             const batchResults = await Promise.all(
-                batch.map(link => checkLink(link))
+                batch.map(link => {
+                    // Use longer timeout for external links (non-localhost)
+                    const timeout = link.includes('localhost:3333')
+                        ? CONFIG.linkTimeout
+                        : CONFIG.externalLinkTimeout;
+                    return checkLink(link, timeout);
+                })
             );
             results.push(...batchResults);
 
