@@ -128,8 +128,8 @@ export function WatchDemoPage() {
   return (
     <HomeSection className="px-0">
       <Header
-        title="Langfuse Demo"
-        description="End-to-end demo of all Langfuse platform features"
+        title="Walkthroughs"
+        description="End-to-end walkthroughs of all Langfuse platform features"
         h="h1"
       />
       <div className="flex flex-col gap-8 items-center">

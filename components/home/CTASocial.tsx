@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { UsersMarquee } from "./UsersMarquee";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import phLight from "./img/ph_product_of_the_day_light.png";
