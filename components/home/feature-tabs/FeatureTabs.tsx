@@ -3,11 +3,11 @@
 import { useMemo } from "react";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/router";
 import { TabButton } from "./TabButton";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { Card, CardContent } from "@/components/ui/card";
-
 
 export interface FeatureTabsProps {
   features: FeatureTabData[];
@@ -15,11 +15,27 @@ export interface FeatureTabsProps {
   autoAdvance?: AutoAdvanceConfig;
 }
 
-export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvance }: FeatureTabsProps) => {
+export const FeatureTabs = ({
+  features,
+  defaultTab = "observability",
+  autoAdvance,
+}: FeatureTabsProps) => {
   // Default auto-advance configuration
-  const defaultAutoAdvance = autoAdvance || { enabled: true, intervalMs: 10000 };
+  const defaultAutoAdvance = autoAdvance || {
+    enabled: true,
+    intervalMs: 10000,
+  };
 
-  const [activeTab, setActiveTab] = useState(defaultTab);
+  const router = useRouter();
+
+  // Get current tab from query param or default to defaultTab
+  const activeTab = (() => {
+    const tab = router.query.tab as string;
+    if (tab && features.some((f) => f.id === tab)) {
+      return tab;
+    }
+    return defaultTab;
+  })();
   const [previewTab, setPreviewTab] = useState<string | null>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [isAutoAdvancePaused, setIsAutoAdvancePaused] = useState(false);
@@ -34,22 +50,13 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Handle deep linking via URL hash
+  // Update focused index when active tab changes
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      const matchedFeature = features.find(f => f.id === hash);
-      if (matchedFeature) {
-        setActiveTab(hash);
-        const index = features.findIndex(f => f.id === hash);
-        setFocusedIndex(index);
-      }
-    };
-
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [features]);
+    const index = features.findIndex((f) => f.id === activeTab);
+    if (index !== -1) {
+      setFocusedIndex(index);
+    }
+  }, [activeTab, features]);
 
   // Viewport detection for auto-advance
   useEffect(() => {
@@ -66,7 +73,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
         },
         {
           root: null,
-          rootMargin: '50px',
+          rootMargin: "50px",
           threshold: [0, 0.1, 0.25, 0.5],
         }
       );
@@ -89,22 +96,20 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
     };
   }, []);
 
-  // Update URL hash when tab changes
+  // Handle tab change and update URL query param
   const handleTabChange = (tabId: string) => {
     if (activeTab === tabId) return; // Prevent unnecessary transitions
-
-    // Immediate change for user navigation - no animation
-    setActiveTab(tabId);
-    const index = features.findIndex(f => f.id === tabId);
-    setFocusedIndex(index);
 
     // Pause auto-advance on manual interaction
     pauseAutoAdvance();
 
-    // Update URL hash without triggering navigation
-    if (window.location.hash.replace('#', '') !== tabId) {
-      window.history.pushState(null, '', `#${tabId}`);
-    }
+    // Update URL query param
+    const query = { ...router.query };
+    query.tab = tabId;
+
+    router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+    });
   };
 
   // Keyboard navigation
@@ -113,24 +118,24 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
     let newIndex = focusedIndex;
 
     switch (key) {
-      case 'ArrowLeft':
+      case "ArrowLeft":
         event.preventDefault();
         newIndex = focusedIndex > 0 ? focusedIndex - 1 : features.length - 1;
         break;
-      case 'ArrowRight':
+      case "ArrowRight":
         event.preventDefault();
         newIndex = focusedIndex < features.length - 1 ? focusedIndex + 1 : 0;
         break;
-      case 'Home':
+      case "Home":
         event.preventDefault();
         newIndex = 0;
         break;
-      case 'End':
+      case "End":
         event.preventDefault();
         newIndex = features.length - 1;
         break;
-      case 'Enter':
-      case ' ':
+      case "Enter":
+      case " ":
         event.preventDefault();
         handleTabChange(features[focusedIndex].id);
         return;
@@ -152,11 +157,14 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
         const tabListRect = tabList.getBoundingClientRect();
         const activeTabRect = activeTabButton.getBoundingClientRect();
 
-        if (activeTabRect.left < tabListRect.left || activeTabRect.right > tabListRect.right) {
+        if (
+          activeTabRect.left < tabListRect.left ||
+          activeTabRect.right > tabListRect.right
+        ) {
           activeTabButton.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest',
-            inline: 'center'
+            behavior: "smooth",
+            block: "nearest",
+            inline: "center",
           });
         }
       }
@@ -169,7 +177,7 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
       return;
     }
 
-    const currentIndex = features.findIndex(f => f.id === activeTab);
+    const currentIndex = features.findIndex((f) => f.id === activeTab);
     const nextIndex = (currentIndex + 1) % features.length;
     const nextTab = features[nextIndex];
 
@@ -177,21 +185,28 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
 
     // Small delay to allow fade out
     setTimeout(() => {
-      setActiveTab(nextTab.id);
-      setFocusedIndex(nextIndex);
       setAutoAdvanceProgress(0);
 
-      // Update URL hash
-      if (window.location.hash.replace('#', '') !== nextTab.id) {
-        window.history.pushState(null, '', `#${nextTab.id}`);
-      }
+      // Update URL query param
+      const query = { ...router.query };
+      query.tab = nextTab.id;
+
+      router.replace({ pathname: router.pathname, query }, undefined, {
+        shallow: true,
+      });
 
       // Allow fade in
       setTimeout(() => {
         setIsAutoTransitioning(false);
       }, 50);
     }, 100);
-  }, [features, activeTab, defaultAutoAdvance?.enabled, isAutoAdvancePaused]);
+  }, [
+    features,
+    activeTab,
+    defaultAutoAdvance?.enabled,
+    isAutoAdvancePaused,
+    router,
+  ]);
 
   const pauseAutoAdvance = useCallback(() => {
     setIsAutoAdvancePaused(true);
@@ -218,7 +233,9 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
 
     // Start progress indicator
     const progressInterval = 50; // Update every 50ms
-    const totalSteps = Math.ceil(defaultAutoAdvance.intervalMs / progressInterval);
+    const totalSteps = Math.ceil(
+      defaultAutoAdvance.intervalMs / progressInterval
+    );
     let currentStep = 0;
 
     progressTimerRef.current = setInterval(() => {
@@ -244,26 +261,43 @@ export const FeatureTabs = ({ features, defaultTab = "observability", autoAdvanc
         advanceToNextTab();
       }
     }, defaultAutoAdvance.intervalMs);
-  }, [defaultAutoAdvance?.enabled, defaultAutoAdvance?.intervalMs, advanceToNextTab, isAutoAdvancePaused, isHovered]);
+  }, [
+    defaultAutoAdvance?.enabled,
+    defaultAutoAdvance?.intervalMs,
+    advanceToNextTab,
+    isAutoAdvancePaused,
+    isHovered,
+  ]);
 
   // Auto-advance effect
   useEffect(() => {
-    if (defaultAutoAdvance?.enabled && !isAutoAdvancePaused && isInViewport && !isHovered) {
+    if (
+      defaultAutoAdvance?.enabled &&
+      !isAutoAdvancePaused &&
+      isInViewport &&
+      !isHovered
+    ) {
       startAutoAdvance();
     }
 
     return () => {
-      if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current);
+      if (autoAdvanceTimerRef.current)
+        clearTimeout(autoAdvanceTimerRef.current);
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
     };
-  }, [activeTab, defaultAutoAdvance?.enabled, startAutoAdvance, isAutoAdvancePaused, isInViewport, isHovered]);
+  }, [
+    activeTab,
+    defaultAutoAdvance?.enabled,
+    startAutoAdvance,
+    isAutoAdvancePaused,
+    isInViewport,
+    isHovered,
+  ]);
 
   const activeFeature = useMemo(() => {
     const displayedTab = previewTab || activeTab;
-    return features.find(f => f.id === displayedTab) || features[0];
+    return features.find((f) => f.id === displayedTab) || features[0];
   }, [activeTab, previewTab, features]);
-
-
 
   return (
     <Card
