@@ -1,28 +1,29 @@
 ---
-description: Information on AI powered features within Langfuse and their data implications.
+title: Security & Compliance of Langfuse AI Features
+description: Information on AI-powered features within Langfuse and their data implications.
 ---
 
 # AI Powered Features Within Langfuse
 
-Langfuse offers AI-powered features within the product to the benefit of the users.
+Langfuse offers AI-powered features within the product to simplify and speed up your workflows.
 
-All AI powered features are opt-in by default.
-The opt-in is managed at the organization level by an admin or owner and the setting thus applies to all users and projects within the organization.
+## Opt-in
 
-## Available AI Powered Features
-A list of available AI powered features within Langfuse. There is no guarantee that this list is always up-to-date or comprehensive.
-- Natural language based filter builder for tables
+All AI-powered features require an opt-in; they are not enabled by default. The opt-in is managed at the organization level and can be changed by an [admin or owner](/docs/administration/rbac).
+
+The setting applies to all users and projects within the organization.
+
+## Available AI Features
+
+Non-exhaustive list of available AI features in Langfuse:
+
+- Natural language-based filter builder for tables
 
 ## Data Privacy
 
-Langfuse's AI features are powered by models hosted on AWS Bedrock.
+Langfuse's AI features are powered by models hosted on AWS Bedrock:
 
-We use models in the same AWS region as the respective Langfuse instance is hosted in.
-The model provider has a zero data retention policy, no logging, provider isolation and does not train on your data, see [here](https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html).
-Data is never shared with third parties, such as the model developer.
-
-AWS Bedrock is fully HIPAA, SOC2 and ISO 27001 compliant, see [here](https://aws.amazon.com/bedrock/security-compliance/) for more details.
-
-## Contact
-
-For questions about AI features security, please contact compliance@langfuse.com
+- We use models in the same AWS region as your [Langfuse data region](/security/data-regions).
+- Amazon Bedrock has a zero data retention policy, no logging, provider isolation, and does not train on your data. See [Bedrock data protection](https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html) for more details.
+- Data is never shared with third parties, such as the model developer.
+- AWS Bedrock is fully HIPAA, SOC2 and ISO 27001 compliant. See [Bedrock security and compliance](https://aws.amazon.com/bedrock/security-compliance/) and our [compliance overview](/security) for more details.
