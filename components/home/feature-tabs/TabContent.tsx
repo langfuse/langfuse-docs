@@ -108,7 +108,7 @@ export const TabContent = ({
                 asChild
                 variant="outline"
                 size="xs"
-                className="justify-start items-center self-end"
+                className="justify-start items-center self-end  bg-card"
               >
                 <Link href={feature.quickstartHref}>
                   <Code2 size={16} />
