@@ -229,80 +229,56 @@ async function handleRequest(userInput: string) {
     },
     code: {
       snippets: {
-        python: `from langfuse import Langfuse
+        python: `from langfuse import get_client, Evaluation
+from langfuse.openai import OpenAI
 
-langfuse = Langfuse()
+langfuse = get_client()
+dataset = langfuse.get_dataset("capital_cities") # fetch dataset with examples
 
-# Create a trace with evaluation data
-trace = langfuse.trace(name="customer-query")
+def task(*, item, **_): # TODO: call your own application logic here
+    r = OpenAI().chat.completions.create(
+        model="gpt-5",
+        messages=[{"role": "user", "content": item["input"]}],
+    )
+    return r.choices[0].message.content
 
-generation = trace.generation(
-    name="response",
-    input="How do I reset my password?",
-    output="You can reset your password by clicking the 'Forgot Password' link on the login page.",
-    model="gpt-4"
+def accuracy_eval(*, input, output, expected_output, **_):
+    ok = expected_output.lower() in output.lower()
+    return Evaluation(name="accuracy", value=1.0 if ok else 0.0)
+
+# Experiment runner iterates dataset items, traces calls, and applies evaluators
+result = langfuse.run_experiment(
+    name="Capitals - simple implementation",
+    data=dataset.items,
+    task=task,
+    evaluators=[accuracy_eval],
 )
+print(result.format())`,
+        javascript: `import { LangfuseClient } from "@langfuse/client";
+import OpenAI from "openai";
 
-# Add user feedback
-langfuse.score(
-    trace_id=trace.id,
-    name="user-feedback",
-    value=1,  # thumbs up
-    comment="Helpful response"
-)
+const langfuse = new LangfuseClient();
+const dataset = await langfuse.dataset.get("capital_cities");
 
-# Run automated evaluation
-def evaluate_helpfulness(input_text, output_text):
-    # Your evaluation logic
-    return 0.85
+const task = async (item: { input: string }) => {
+  const res = await new OpenAI().chat.completions.create({
+    model: "gpt-5",
+    messages: [{ role: "user", content: item.input }],
+  });
+  return res.choices[0].message.content;
+};
 
-score = evaluate_helpfulness(
-    generation.input,
-    generation.output
-)
-
-langfuse.score(
-    trace_id=trace.id,
-    name="helpfulness",
-    value=score
-)`,
-        javascript: `import { Langfuse } from "langfuse";
-
-const langfuse = new Langfuse();
-
-// Create a trace with evaluation data
-const trace = langfuse.trace({ name: "customer-query" });
-
-const generation = trace.generation({
-  name: "response",
-  input: "How do I reset my password?",
-  output: "You can reset your password by clicking the 'Forgot Password' link on the login page.",
-  model: "gpt-4"
+const accuracy = async ({ output, expectedOutput }: any) => ({
+  name: "accuracy",
+  value: output.toLowerCase() === expectedOutput.toLowerCase() ? 1 : 0,
 });
 
-// Add user feedback
-langfuse.score({
-  traceId: trace.id,
-  name: "user-feedback",
-  value: 1,  // thumbs up
-  comment: "Helpful response"
-});
-
-// Run automated evaluation
-function evaluateHelpfulness(inputText, outputText) {
-  // Your evaluation logic
-  return 0.85;
-}
-
-const score = evaluateHelpfulness(
-  generation.input,
-  generation.output
-);
-
-langfuse.score({
-  traceId: trace.id,
-  name: "helpfulness",
-  value: score
+// Experiment runner: loops over dataset items, traces runs, applies evaluators
+const result = await langfuse.experiment.run({
+  name: "Capitals — smoke test",
+  data: dataset.items,
+  task,
+  evaluators: [accuracy],
 });`,
       },
     },
