@@ -92,6 +92,7 @@ const PLAN_CONFIGS: PlanConfig[] = [
   { name: "Core", baseFee: 29 },
   { name: "Pro", baseFee: 199 },
   { name: "Pro + Teams", baseFee: 499 },
+  { name: "Enterprise", baseFee: 2499 },
 ];
 
 // Utility functions
@@ -410,13 +411,14 @@ type Tier = {
   };
   addOn?: {
     name: string;
-    price: string;
+    price?: string;
     mainFeatures: string[];
   };
   learnMore?: string;
 };
 
 const TEAMS_ADDON = "Teams add-on";
+const YEARLY_COMMITMENT = "Yearly Commitment";
 
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
@@ -490,8 +492,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Prioritized in-app support",
       ],
       addOn: {
-        name: "Teams",
-        price: "$300",
+        name: "Teams Add-on",
+        price: "$300/mo",
         mainFeatures: [
           "Enterprise SSO (e.g. Okta)",
           "SSO enforcement",
@@ -507,23 +509,37 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-enterprise",
       href: "/talk-to-us",
       featured: false,
-      description: "Enterprise-grade support and security features.",
-      price: "Custom",
+      description:
+        "For large scale teams. Enterprise-grade support and security.",
+      price: "$2499",
       calloutLink: {
         text: "Enterprise FAQ",
         href: "/enterprise",
       },
       mainFeatures: [
-        "Everything in Pro and Teams add-on",
+        "Everything in Pro + Teams",
+        <>
+          100k units / month included, additional:{" "}
+          <GraduatedPricingWithCalculator planName="Enterprise" />
+        </>,
+        "Audit Logs",
+        "SCIM API",
         "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
-        "Custom Terms & DPA",
         "Dedicated support engineer",
-        "Architecture reviews",
-        "Billing via AWS Marketplace",
-        "Billing via Invoice",
       ],
+      addOn: {
+        name: "Yearly Commitment",
+        mainFeatures: [
+          "Custom Volume Pricing",
+          "Custom Terms & DPA",
+          "Architecture reviews",
+          "Billing via AWS Marketplace",
+          "Billing via Invoice",
+          "Vendor Onboarding",
+        ],
+      },
       cta: "Talk to sales",
     },
   ],
@@ -713,7 +729,7 @@ const sections: Section[] = [
             Hobby: "50k units",
             Core: "100k units",
             Pro: "100k units",
-            Enterprise: "Custom",
+            Enterprise: "100k units",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -731,7 +747,21 @@ const sections: Section[] = [
             Hobby: false,
             Core: <GraduatedPricingWithCalculator planName="Core" />,
             Pro: <GraduatedPricingWithCalculator planName="Pro" />,
-            Enterprise: "Custom",
+            Enterprise: (
+              <GraduatedPricingWithCalculator planName="Enterprise" />
+            ),
+          },
+        },
+      },
+      {
+        name: "Custom Usage Pricing",
+        description: "Custom volume based pricing for large-scale projects.",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: "Available with " + YEARLY_COMMITMENT,
           },
         },
       },
@@ -1205,7 +1235,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: "n/a",
             Core: "48h",
-            Pro: "48h (24h with Teams add-on)",
+            Pro: "48h, Teams add-on: 24h",
             Enterprise: "Custom",
           },
         },
@@ -1233,6 +1263,7 @@ const sections: Section[] = [
     features: [
       {
         name: "Data region",
+        href: "/security/data-regions",
         tiers: {
           cloud: {
             Hobby: "US or EU",
@@ -1343,6 +1374,19 @@ const sections: Section[] = [
         },
       },
       {
+        name: "SCIM API for automated user provisioning",
+        href: "/docs/administration/scim-and-org-api",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
         name: "Organization Creators",
         href: "/self-hosting/administration/organization-creators",
         tiers: {
@@ -1395,7 +1439,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: "Self-serve",
             Pro: "Self-serve",
-            Enterprise: "Sales",
+            Enterprise: "Self-serve, Contact sales for " + YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
@@ -1425,7 +1469,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: "Monthly",
             Pro: "Monthly",
-            Enterprise: "Custom",
+            Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
@@ -1440,7 +1484,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: false,
             Pro: false,
-            Enterprise: true,
+            Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
@@ -1461,7 +1505,7 @@ const sections: Section[] = [
             Hobby: "Standard T&Cs",
             Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
-            Enterprise: "Custom",
+            Enterprise: "Custom with " + YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
@@ -1510,7 +1554,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: false,
             Pro: false,
-            Enterprise: true,
+            Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -1610,19 +1654,17 @@ export default function Pricing({
           <InfoIcon className="inline-block size-3 ml-1" />
         </HoverCardTrigger>
         <HoverCardContent className="w-60 text-xs">
-          <p>
-            {description}
-            {href && (
-              <span>
-                {" "}
-                (
-                <Link href={href} className="underline" target="_blank">
-                  learn more
-                </Link>
-                )
-              </span>
-            )}
-          </p>
+          {description}
+          {href && (
+            <span>
+              {" "}
+              (
+              <Link href={href} className="underline" target="_blank">
+                learn more
+              </Link>
+              )
+            </span>
+          )}
         </HoverCardContent>
       </HoverCard>
     );
@@ -1637,15 +1679,24 @@ export default function Pricing({
       return (
         <div className="text-sm leading-6 text-center break-words">
           {value}
-          {value === TEAMS_ADDON && (
+          {value.includes(TEAMS_ADDON) && (
             <HoverCard>
               <HoverCardTrigger>
                 <InfoIcon className="inline-block size-3 ml-1" />
               </HoverCardTrigger>
               <HoverCardContent className="w-60">
-                <p className="text-sm">
-                  Available as part of the Teams add-on on the Pro plan.
-                </p>
+                Available as part of the Teams add-on on the Pro plan.
+              </HoverCardContent>
+            </HoverCard>
+          )}
+          {value.includes(YEARLY_COMMITMENT) && (
+            <HoverCard>
+              <HoverCardTrigger>
+                <InfoIcon className="inline-block size-3 ml-1" />
+              </HoverCardTrigger>
+              <HoverCardContent className="w-60">
+                Available when committing to a yearly contract on the Enterprise
+                plan.
               </HoverCardContent>
             </HoverCard>
           )}
@@ -1820,8 +1871,8 @@ export default function Pricing({
                   <div className="border-t"></div>
                   <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
                     <ul className="space-y-2.5 text-sm">
-                      {tier.mainFeatures.map((feature) => (
-                        <li key={feature} className="flex space-x-2">
+                      {tier.mainFeatures.map((feature, index) => (
+                        <li key={index} className="flex space-x-2">
                           <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
                           <span className="text-muted-foreground">
                             {feature}
@@ -1836,11 +1887,13 @@ export default function Pricing({
                         </div>
                         <div className="flex justify-between items-center mb-2">
                           <span className="font-bold text-sm text-primary">
-                            {tier.addOn.name} Add-on
+                            {tier.addOn.name}
                           </span>
-                          <span className="font-bold text-sm text-primary">
-                            {tier.addOn.price}/mo
-                          </span>
+                          {tier.addOn.price && (
+                            <span className="font-bold text-sm text-primary">
+                              {tier.addOn.price}
+                            </span>
+                          )}
                         </div>
                         <ul className="mt-1 space-y-1 text-sm">
                           {tier.addOn.mainFeatures.map((feature) => (
@@ -2186,7 +2239,7 @@ const faqs = [
     question: "When do I get billed?",
     answer:
       "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
-  },  
+  },
   {
     question: "Can I self-host Langfuse?",
     answer:
@@ -2210,12 +2263,12 @@ const faqs = [
   {
     question: "Can I redline the contracts?",
     answer:
-      "Yes, we offer customized contracts for Langfuse Enterprise customers. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
+      "Yes, we offer customized contracts for Langfuse Enterprise customers with a yearly commitment. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
     question: "Do you offer billing via AWS Marketplace?",
     answer:
-      "Yes, all Langfuse Enterprise plans are available via AWS Marketplace (private offer). This applies to both Langfuse Cloud and Self-Hosted deployments. Please contact us at enterprise@langfuse.com for more details.",
+      "Yes, Langfuse Enterprise plans with a yearly commitment are available via AWS Marketplace (private offer). This applies to both Langfuse Cloud and Self-Hosted deployments. Please contact us at enterprise@langfuse.com for more details.",
   },
 ];
 

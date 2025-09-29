@@ -24,6 +24,7 @@ export type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
   language: string;
   showLineNumbers?: boolean;
   children?: ReactNode;
+  customStyle?: React.CSSProperties;
 };
 
 export const CodeBlock = ({
@@ -32,9 +33,20 @@ export const CodeBlock = ({
   showLineNumbers = false,
   className,
   children,
+  customStyle = {},
   ...props
-}: CodeBlockProps) => (
-  <CodeBlockContext.Provider value={{ code }}>
+}: CodeBlockProps) => {
+
+  const defaultStyle = {
+    margin: 0,
+    padding: '1rem',
+    fontSize: '0.875rem',
+    background: 'hsl(var(--background))',
+    color: 'hsl(var(--foreground))',
+  }
+
+  return (
+      <CodeBlockContext.Provider value={{ code }}>
     <div
       className={cn(
         'relative w-full overflow-hidden rounded-md border bg-background text-foreground',
@@ -47,11 +59,8 @@ export const CodeBlock = ({
           language={language}
           style={oneLight}
           customStyle={{
-            margin: 0,
-            padding: '1rem',
-            fontSize: '0.875rem',
-            background: 'hsl(var(--background))',
-            color: 'hsl(var(--foreground))',
+            ...defaultStyle,
+            ...customStyle,
           }}
           showLineNumbers={showLineNumbers}
           lineNumberStyle={{
@@ -60,7 +69,7 @@ export const CodeBlock = ({
             minWidth: '2.5rem',
           }}
           codeTagProps={{
-            className: 'font-mono text-sm',
+            className: 'font-mono',
           }}
           className="dark:hidden overflow-hidden"
         >
@@ -70,11 +79,8 @@ export const CodeBlock = ({
           language={language}
           style={oneDark}
           customStyle={{
-            margin: 0,
-            padding: '1rem',
-            fontSize: '0.875rem',
-            background: 'hsl(var(--background))',
-            color: 'hsl(var(--foreground))',
+            ...defaultStyle,
+            ...customStyle,
           }}
           showLineNumbers={showLineNumbers}
           lineNumberStyle={{
@@ -83,7 +89,7 @@ export const CodeBlock = ({
             minWidth: '2.5rem',
           }}
           codeTagProps={{
-            className: 'font-mono text-sm',
+            className: 'font-mono',
           }}
           className="hidden dark:block overflow-hidden"
         >
@@ -97,7 +103,8 @@ export const CodeBlock = ({
       </div>
     </div>
   </CodeBlockContext.Provider>
-);
+  )
+}
 
 export type CodeBlockCopyButtonProps = ComponentProps<typeof Button> & {
   onCopy?: () => void;
