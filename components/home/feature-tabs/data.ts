@@ -275,7 +275,7 @@ const accuracy = async ({ output, expectedOutput }: any) => ({
 
 // Experiment runner: loops over dataset items, traces runs, applies evaluators
 const result = await langfuse.experiment.run({
-  name: "Capitals — smoke test",
+  name: "Capitals - simple implementation",
   data: dataset.items,
   task,
   evaluators: [accuracy],
