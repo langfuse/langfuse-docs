@@ -219,7 +219,7 @@ async function handleRequest(userInput: string) {
     icon: ThumbsUp,
     title: "Evaluation",
     subtitle: "Collect feedback and run evaluations.",
-    body: "Collect user feedback, create manual annotations, and run automated evaluation functions. Build datasets from production data to continuously improve your LLM applications.",
+    body: "Run online/offline evals, via UI (experiment with prompts/models) and via SDKs (experiment with end-to-end application). Build datasets from traces to continuously improve your evals. View results in UI.",
     docsHref: "/docs/evaluation/overview",
     videoHref: "/watch-demo?tab=evaluation",
     image: {
