@@ -303,8 +303,8 @@ const result = await langfuse.experiment.run({
     icon: Globe,
     title: "Public API",
     subtitle: "Full REST API access to all features.",
-    body: "Access all Langfuse features programmatically through our comprehensive REST API. Integrate with your existing workflows, build custom dashboards, and automate your LLM operations.",
-    docsHref: "/docs/api",
+    body: "Access all Langfuse features and data programmatically through our API. Integrate with your existing workflows, build custom interfaces and dashboards, and automate your workflows.",
+    docsHref: "/docs/api-and-data-platform/overview",
     image: {
       light: observabilityPng, // Placeholder - needs API documentation screenshot
       dark: observabilityPng,
@@ -387,7 +387,6 @@ def create_trace(trace_data):
     return response.json()`,
       },
     },
-    quickstartHref: "/docs/api-and-data-platform/overview",
     displayMode: "code-only",
   },
 ];
