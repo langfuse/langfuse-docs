@@ -411,7 +411,7 @@ type Tier = {
   };
   addOn?: {
     name: string;
-    price: string;
+    price?: string;
     mainFeatures: string[];
   };
   learnMore?: string;
@@ -509,14 +509,15 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-enterprise",
       href: "/talk-to-us",
       featured: false,
-      description: "For large scale enterprise teams. Enterprise-grade support and security features.",
+      description:
+        "For large scale teams. Enterprise-grade support and security.",
       price: "$2499",
       calloutLink: {
         text: "Enterprise FAQ",
         href: "/enterprise",
       },
       mainFeatures: [
-        "Everything in Pro and Teams add-on",
+        "Everything in Pro + Teams",
         <>
           100k units / month included, additional:{" "}
           <GraduatedPricingWithCalculator planName="Enterprise" />
@@ -527,17 +528,16 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Uptime SLA",
         "Support SLA",
         "Dedicated support engineer",
-        
       ],
       addOn: {
         name: "Yearly Commitment",
         mainFeatures: [
-        "Custom Volume Pricing",
-        "Custom Terms & DPA",
-        "Architecture reviews",
-        "Billing via AWS Marketplace",
-        "Billing via Invoice",
-        "Vendor Onboarding"
+          "Custom Volume Pricing",
+          "Custom Terms & DPA",
+          "Architecture reviews",
+          "Billing via AWS Marketplace",
+          "Billing via Invoice",
+          "Vendor Onboarding",
         ],
       },
       cta: "Talk to sales",
@@ -747,20 +747,21 @@ const sections: Section[] = [
             Hobby: false,
             Core: <GraduatedPricingWithCalculator planName="Core" />,
             Pro: <GraduatedPricingWithCalculator planName="Pro" />,
-            Enterprise: <GraduatedPricingWithCalculator planName="Enterprise" />,
+            Enterprise: (
+              <GraduatedPricingWithCalculator planName="Enterprise" />
+            ),
           },
         },
       },
       {
         name: "Custom Usage Pricing",
-        description:
-          "Higher volumes can be discounted under a yearly commitment under the Enterprise plan.",
+        description: "Custom volume based pricing for large-scale projects.",
         tiers: {
           cloud: {
             Hobby: false,
             Core: false,
             Pro: false,
-            Enterprise: YEARLY_COMMITMENT,
+            Enterprise: "Available with " + YEARLY_COMMITMENT,
           },
         },
       },
@@ -1234,7 +1235,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: "n/a",
             Core: "48h",
-            Pro: "48h (24h with Teams add-on)",
+            Pro: "48h, Teams add-on: 24h",
             Enterprise: "Custom",
           },
         },
@@ -1262,6 +1263,7 @@ const sections: Section[] = [
     features: [
       {
         name: "Data region",
+        href: "/security/data-regions",
         tiers: {
           cloud: {
             Hobby: "US or EU",
@@ -1372,6 +1374,19 @@ const sections: Section[] = [
         },
       },
       {
+        name: "SCIM API for automated user provisioning",
+        href: "/docs/administration/scim-and-org-api",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
         name: "Organization Creators",
         href: "/self-hosting/administration/organization-creators",
         tiers: {
@@ -1424,7 +1439,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: "Self-serve",
             Pro: "Self-serve",
-            Enterprise: "Sales",
+            Enterprise: "Self-serve, Contact sales for " + YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
@@ -1664,7 +1679,7 @@ export default function Pricing({
       return (
         <div className="text-sm leading-6 text-center break-words">
           {value}
-          {value === TEAMS_ADDON && (
+          {value.includes(TEAMS_ADDON) && (
             <HoverCard>
               <HoverCardTrigger>
                 <InfoIcon className="inline-block size-3 ml-1" />
@@ -1674,13 +1689,14 @@ export default function Pricing({
               </HoverCardContent>
             </HoverCard>
           )}
-          {value === YEARLY_COMMITMENT && (
+          {value.includes(YEARLY_COMMITMENT) && (
             <HoverCard>
               <HoverCardTrigger>
                 <InfoIcon className="inline-block size-3 ml-1" />
               </HoverCardTrigger>
               <HoverCardContent className="w-60">
-                Available when committing to a yearly contract on the Enterprise plan.
+                Available when committing to a yearly contract on the Enterprise
+                plan.
               </HoverCardContent>
             </HoverCard>
           )}
@@ -1698,9 +1714,7 @@ export default function Pricing({
       );
     } else {
       return (
-        <div className="text-sm leading-6 text-center break-words">
-          {value}
-        </div>
+        <div className="text-sm leading-6 text-center break-words">{value}</div>
       );
     }
   };
@@ -1875,9 +1889,11 @@ export default function Pricing({
                           <span className="font-bold text-sm text-primary">
                             {tier.addOn.name}
                           </span>
-                          <span className="font-bold text-sm text-primary">
-                            {tier.addOn.price}
-                          </span>
+                          {tier.addOn.price && (
+                            <span className="font-bold text-sm text-primary">
+                              {tier.addOn.price}
+                            </span>
+                          )}
                         </div>
                         <ul className="mt-1 space-y-1 text-sm">
                           {tier.addOn.mainFeatures.map((feature) => (
@@ -2223,7 +2239,7 @@ const faqs = [
     question: "When do I get billed?",
     answer:
       "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
-  },  
+  },
   {
     question: "Can I self-host Langfuse?",
     answer:
