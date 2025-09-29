@@ -80,7 +80,6 @@ export default observe(handleRequest);`,
     subtitle: "Track cost, latency, and quality.",
     body: "Monitor your LLM application's performance with comprehensive metrics dashboards and APIs. Track costs, latencies, token usage, and quality scores across models, users, and time periods.",
     docsHref: "/docs/metrics/overview",
-    videoHref: "/watch-demo?tab=metrics",
     image: {
       light: metricsPng,
       dark: metricsPng,
@@ -282,7 +281,6 @@ const result = await langfuse.experiment.run({
 });`,
       },
     },
-    quickstartHref: "/docs/evaluation/get-started",
   },
   {
     id: "annotations",
