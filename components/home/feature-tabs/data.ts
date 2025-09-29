@@ -183,59 +183,46 @@ from langfuse.openai import openai
 
 langfuse = get_client()
 
-# Fetches the latest **production** version and caches it client-side.
-# The SDK revalidates in the background, so subsequent calls are instant.
-prompt = langfuse.get_prompt("support-reply")
+def handle_request(user_input: str) -> str:
+  # Fetches the latest 'production' version if no 'label' is provided
+  # Caches client-side, revalidates in background, instant subsequent calls
+  prompt = langfuse.get_prompt("support-reply", type="chat")
 
-# Prompt can contain variables and placeholders
-# Filled at runtime via compile
-compiled = prompt.compile(tone="friendly")
+  # Prompt can contain variables and placeholders
+  # Filled at runtime via compile()
+  compiled_prompt = prompt.compile(tone="friendly", input=user_input)
 
-res = openai.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "system", "content": compiled},
-        {"role": "user", "content": "My order arrived damaged."},
-    ],
-)
-print(res.choices[0].message.content)
+  # Works with any model, supports text and chat message formats
+  res = openai.chat.completions.create(
+      model="gpt-5",
+      messages=compiled_prompt,
+  )
+  return res.choices[0].message.content
 `,
-        javascript: `import { Langfuse } from "langfuse";
-
-const langfuse = new Langfuse();
-
-// Fetch the latest prompt version
-const prompt = await langfuse.getPrompt("customer-support-chat");
-
-// Compile prompt with variables
-const compiled = prompt.compile({
-  customerName: "Alice Johnson",
-  issueType: "billing",
-  urgency: "high"
-});
-
-// Use with OpenAI
+        javascript: `import { LangfuseClient } from "@langfuse/client";
 import OpenAI from "openai";
+
+const langfuse = new LangfuseClient();
 const openai = new OpenAI();
 
-const response = await openai.chat.completions.create({
-  model: "gpt-4",
-  messages: compiled.toOpenaiMessages(),
-  temperature: prompt.config?.temperature || 0.7
-});
+async function handleRequest(userInput: string) {
+  // Fetches the latest 'production' version if no 'label' is provided
+  // Caches client-side, revalidates in background, instant subsequent calls
+  const prompt = await langfuse.prompt.get("support-reply", { type: "chat" });
 
-// Track usage back to Langfuse
-langfuse.generation({
-  name: "support-response",
-  prompt: prompt,
-  input: compiled.toOpenaiMessages(),
-  output: response.choices[0].message.content,
-  model: "gpt-4",
-  usage: {
-    inputTokens: response.usage.prompt_tokens,
-    outputTokens: response.usage.completion_tokens
-  }
-});`,
+  // Prompt can contain variables and placeholders
+  // Filled at runtime via compile()
+  const compiledPrompt = prompt.compile({ tone: "friendly", input: userInput });
+
+  // Works with any model, supports text and chat message formats
+  const res = await openai.chat.completions.create({
+    model: "gpt-5",
+    messages: compiledPrompt,
+  });
+  
+  return res.choices[0].message.content;
+}
+`,
       },
     },
     quickstartHref: "/docs/prompt-management/get-started",
