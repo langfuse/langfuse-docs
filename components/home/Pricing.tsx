@@ -1490,7 +1490,7 @@ const sections: Section[] = [
             Hobby: "Standard T&Cs",
             Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
-            Enterprise: YEARLY_COMMITMENT,
+            Enterprise: "Custom with " + YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
@@ -2247,12 +2247,12 @@ const faqs = [
   {
     question: "Can I redline the contracts?",
     answer:
-      "Yes, we offer customized contracts for Langfuse Enterprise customers. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
+      "Yes, we offer customized contracts for Langfuse Enterprise customers with a yearly commitment. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
     question: "Do you offer billing via AWS Marketplace?",
     answer:
-      "Yes, all Langfuse Enterprise plans are available via AWS Marketplace (private offer). This applies to both Langfuse Cloud and Self-Hosted deployments. Please contact us at enterprise@langfuse.com for more details.",
+      "Yes, Langfuse Enterprise plans with a yearly commitment are available via AWS Marketplace (private offer). This applies to both Langfuse Cloud and Self-Hosted deployments. Please contact us at enterprise@langfuse.com for more details.",
   },
 ];
 
