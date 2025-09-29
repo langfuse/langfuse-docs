@@ -316,18 +316,21 @@ const result = await langfuse.experiment.run({
 
 langfuse = get_client()
 
-# Fetch list of traces with optional filters & pagination
+# Get list of traces with optional filters & pagination
 traces = langfuse.api.trace.list(limit=100, user_id="user_123", tags=["production"])
 
-# Fetch a single trace by ID
+# Get a single trace by ID
 trace = langfuse.api.trace.get("traceId")
 
-# Fetch observations for a specific trace
+# Get observations for a specific trace
 observations = langfuse.api.observations.get_many(trace_id="traceId", type="GENERATION", limit=50)
 
-# Fetch sessions and scores
+# Get sessions and scores
 sessions = langfuse.api.sessions.list(limit=20)
 scores = langfuse.api.score_v_2.get(limit=20)
+
+# Get aggregated metrics (see other tab)
+metrics = langfuse.api.metrics.metrics(...)
 
 # Many more APIs are available
 # See the API reference or SDK docs for more details`,
@@ -335,22 +338,21 @@ scores = langfuse.api.score_v_2.get(limit=20)
 
 const langfuse = new LangfuseClient();
 
-// Fetch list of traces with optional filters & pagination
+// Get list of traces with optional filters & pagination
 const traces = await langfuse.api.trace.list({ limit: 100 });
 
-// Fetch a single trace by ID
+// Get a single trace by ID
 const trace = await langfuse.api.trace.get("traceId");
 
-// Fetch observations for a specific trace
-const observations = await langfuse.api.observations.getMany({
-  traceId: "traceId",
-  type: "GENERATION",
-  limit: 50,
-});
+// Get observations for a specific trace
+const observations = await langfuse.api.observations.getMany({traceId: "traceId", type: "GENERATION", limit: 50});
 
-// Fetch sessions and scores
+// Get sessions and scores
 const sessions = await langfuse.api.sessions.list({ limit: 20 });
 const scores = await langfuse.api.scoreV2.get({ limit: 20 });
+
+// Get aggregated metrics (see other tab)
+const metrics = await langfuse.api.metrics.metrics({...});
 
 // Many more APIs are available
 // See the API reference or SDK docs for more details`,
