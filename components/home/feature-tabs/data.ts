@@ -312,79 +312,48 @@ const result = await langfuse.experiment.run({
     },
     code: {
       snippets: {
-        javascript: `// Using the Langfuse REST API
-const LANGFUSE_BASE_URL = "https://cloud.langfuse.com";
-const API_KEY = process.env.LANGFUSE_PUBLIC_KEY;
-const SECRET_KEY = process.env.LANGFUSE_SECRET_KEY;
+        python: `from langfuse import get_client
 
-// Fetch traces with filtering
-async function getTraces() {
-  const response = await fetch(\`\${LANGFUSE_BASE_URL}/api/public/traces\`, {
-    headers: {
-      'Authorization': \`Basic \${btoa(API_KEY + ':' + SECRET_KEY)}\`,
-      'Content-Type': 'application/json'
-    }
-  });
+langfuse = get_client()
 
-  const data = await response.json();
-  return data.data;
-}
+# Fetch list of traces with optional filters & pagination
+traces = langfuse.api.trace.list(limit=100, user_id="user_123", tags=["production"])
 
-// Create a new trace via API
-async function createTrace(traceData) {
-  const response = await fetch(\`\${LANGFUSE_BASE_URL}/api/public/traces\`, {
-    method: 'POST',
-    headers: {
-      'Authorization': \`Basic \${btoa(API_KEY + ':' + SECRET_KEY)}\`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: traceData.name,
-      userId: traceData.userId,
-      metadata: traceData.metadata
-    })
-  });
+# Fetch a single trace by ID
+trace = langfuse.api.trace.get("traceId")
 
-  return response.json();
-}`,
-        python: `import requests
-import base64
-import os
+# Fetch observations for a specific trace
+observations = langfuse.api.observations.get_many(trace_id="traceId", type="GENERATION", limit=50)
 
-# Using the Langfuse REST API
-LANGFUSE_BASE_URL = "https://cloud.langfuse.com"
-API_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
-SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
+# Fetch sessions and scores
+sessions = langfuse.api.sessions.list(limit=20)
+scores = langfuse.api.score_v_2.get(limit=20)
 
-# Create authorization header
-auth_string = f"{API_KEY}:{SECRET_KEY}"
-auth_bytes = base64.b64encode(auth_string.encode()).decode()
+# Many more APIs are available
+# See the API reference or SDK docs for more details`,
+        javascript: `import { LangfuseClient } from "@langfuse/client";
 
-headers = {
-    'Authorization': f'Basic {auth_bytes}',
-    'Content-Type': 'application/json'
-}
+const langfuse = new LangfuseClient();
 
-# Fetch traces with filtering
-def get_traces():
-    response = requests.get(
-        f"{LANGFUSE_BASE_URL}/api/public/traces",
-        headers=headers
-    )
-    return response.json()['data']
+// Fetch list of traces with optional filters & pagination
+const traces = await langfuse.api.trace.list({ limit: 100 });
 
-# Create a new trace via API
-def create_trace(trace_data):
-    response = requests.post(
-        f"{LANGFUSE_BASE_URL}/api/public/traces",
-        headers=headers,
-        json={
-            "name": trace_data["name"],
-            "userId": trace_data["userId"],
-            "metadata": trace_data["metadata"]
-        }
-    )
-    return response.json()`,
+// Fetch a single trace by ID
+const trace = await langfuse.api.trace.get("traceId");
+
+// Fetch observations for a specific trace
+const observations = await langfuse.api.observations.getMany({
+  traceId: "traceId",
+  type: "GENERATION",
+  limit: 50,
+});
+
+// Fetch sessions and scores
+const sessions = await langfuse.api.sessions.list({ limit: 20 });
+const scores = await langfuse.api.scoreV2.get({ limit: 20 });
+
+// Many more APIs are available
+// See the API reference or SDK docs for more details`,
       },
     },
     displayMode: "code-only",
