@@ -124,8 +124,9 @@ const nextraConfig = withNextra({
         ],
       },
       // Add Vary: Accept to paths that might serve different content based on Accept header
+      // Excludes /api and /_next routes
       {
-        source: "/:path((?:[^/.]+(?:/[^/.]+)*)/?)",
+        source: "/:path((?!api/)(?!_next/)(?:[^/.]+(?:/[^/.]+)*)/?)",
         headers: [
           { key: "Vary", value: "Accept" },
         ],
@@ -164,15 +165,17 @@ const nextraConfig = withNextra({
     // Example: /docs.md -> /md-src/docs.md, /docs/observability/overview.md -> /md-src/docs/observability/overview.md
     return {
       beforeFiles: [
-        // Serve markdown for paths without file extensions when Accept header doesn't include text/html
+        // Serve markdown for paths without file extensions when Accept header explicitly requests markdown
+        // Only serves markdown when Accept header contains text/markdown, text/plain, or application/markdown
         // This regex matches paths that don't end with a file extension (no dot in the last segment)
+        // Excludes /api and /_next routes
         {
-          source: "/:path((?:[^/.]+(?:/[^/.]+)*)/?)",
+          source: "/:path((?!api/)(?!_next/)(?:[^/.]+(?:/[^/.]+)*)/?)",
           has: [
             {
               type: "header",
               key: "accept",
-              value: "^(?!.*text/html).*$",
+              value: ".*(text/markdown|text/plain|application/markdown).*",
             },
           ],
           destination: "/md-src/:path*.md",
