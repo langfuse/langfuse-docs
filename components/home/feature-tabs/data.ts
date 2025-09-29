@@ -22,7 +22,7 @@ export const featureTabsData: FeatureTabData[] = [
     icon: TextQuote,
     title: "Observability",
     subtitle: "Trace every LLM call with cost & latency.",
-    body: "Capture complete traces across your LLM stack (requests, tools, retries), tagged by user/session, with timing and token cost. Use traces to inspect failures and performance regressions.",
+    body: "Capture complete traces of your LLM applications/agents. Use traces to inspect failures and build eval datasets. Based on OpenTelemetry with support for all popular LLM/agent libraries.",
     docsHref: "/docs/observability/overview",
     videoHref: "/watch-demo?tab=observability",
     image: {
@@ -39,9 +39,8 @@ export const featureTabsData: FeatureTabData[] = [
 from langfuse.openai import openai
 
 @observe()  # decorate any function; all nested calls are auto-linked
-def summarize(text: str) -> str:
+def handle_request(text: str) -> str:
     res = openai.chat.completions.create(
-        name="summary",
         model="gpt-5",
         messages=[
             {"role": "system", "content": "Summarize in one sentence."},
@@ -49,9 +48,7 @@ def summarize(text: str) -> str:
         ],
     )
     return res.choices[0].message.content`,
-        javascript: `// TODO: set up global Langfuse OTel exporter
-
-import { observe } from "@langfuse/tracing";
+        javascript: `import { observe } from "@langfuse/tracing";
 import OpenAI from "openai";
 import { observeOpenAI } from "@langfuse/openai";
 
