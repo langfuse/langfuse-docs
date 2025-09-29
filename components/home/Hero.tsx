@@ -10,9 +10,9 @@ import { HomeSection } from "./components/HomeSection";
 
 export function Hero() {
   return (
-    <HomeSection>
+    <HomeSection className="pt-20 lg:pt-32 pb-0 lg:pb-0 ">
       {/* HERO */}
-      <div className="flex flex-col items-start justify-center gap-3 md:min-h-[calc(min(calc(60vh-100px),60vw))] pb-12 lg:py-20">
+      <div className="flex flex-col items-start justify-center gap-3 md:min-h-[calc(min(calc(60vh-100px),60vw))] pb-2 lg:pt-4 2xl:pt-20">
         <h1 className="text-4xl sm:text-7xl lg:text-8xl font-bold font-mono">
           Open Source
           <br />
@@ -45,44 +45,39 @@ export function Hero() {
             <Link href="/docs">View docs</Link>
           </Button>
         </div>
-      </div>
-      {/* Badges */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4 items-center justify-items-center my-10 flex-wrap">
-        <Link href="https://github.com/langfuse/langfuse">
-          <img
-            alt="Langfuse Github stars"
-            src="https://img.shields.io/github/stars/langfuse/langfuse?label=langfuse&style=social"
-          />
-        </Link>
-        <a
-          href="https://www.ycombinator.com/companies/langfuse"
-          className="flex flex-col sm:flex-row items-center gap-x-2 gap-y-1"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <div className="text-primary/70 text-sm">Backed by</div>
-          <YCLogo />
-        </a>
-        <a
-          href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            src={GoldenKittyAwardSVG}
-            alt="Langfuse won #1 Golden Kitty in AI Infra Category"
-            className="block dark:hidden"
-          />
-          <Image
-            src={GoldenKittyAwardSVGWhite}
-            alt="Langfuse won #1 Golden Kitty in AI Infra Category"
-            className="hidden dark:block"
-          />
-        </a>
-        <div className="max-w-full w-52 px-1">
-          <ProductHuntBadge />
+        {/* Badges */}
+        <div className="flex flex-row gap-10 items-center justify-start my-6 flex-wrap">
+          <div className="max-w-full w-52 px-1">
+            <ProductHuntBadge />
+          </div>
+          <a
+            href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              src={GoldenKittyAwardSVG}
+              alt="Langfuse won #1 Golden Kitty in AI Infra Category"
+              className="block dark:hidden"
+            />
+            <Image
+              src={GoldenKittyAwardSVGWhite}
+              alt="Langfuse won #1 Golden Kitty in AI Infra Category"
+              className="hidden dark:block"
+            />
+          </a>
+          <a
+            href="https://www.ycombinator.com/companies/langfuse"
+            className="flex flex-col sm:flex-row items-center gap-x-2 gap-y-1"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <div className="text-primary/70 text-sm">Backed by</div>
+            <YCLogo />
+          </a>
         </div>
       </div>
+
       {/* <div className="aspect-video bg-blue-200"></div>
       <Video
         src="https://static.langfuse.com/docs-videos/langfuse-10min-demo-4k-60fps.mp4"

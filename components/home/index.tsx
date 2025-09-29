@@ -1,16 +1,18 @@
+import dynamic from "next/dynamic";
+import Security from "./Security";
+
+// Non-dynamic imports for everyhting that renders on top
 import { Background } from "../Background";
 import { Hero } from "./Hero";
-import Security from "./Security";
-import { Usage } from "./Usage";
-import dynamic from "next/dynamic";
+import { FeatureTabsSection } from "./FeatureTabsSection";
 import { CTASocial } from "./CTASocial";
+
+import { Usage } from "./Usage";
 
 const FeatureBento = dynamic(() => import("./FeatureBento"), {
   ssr: false,
 });
-const FeatureTabsSection = dynamic(() => import("./FeatureTabsSection"), {
-  ssr: false,
-});
+
 const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
   ssr: false,
 });
