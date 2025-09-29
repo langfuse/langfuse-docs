@@ -79,7 +79,7 @@ export default observe(handleRequest);`,
     title: "Metrics",
     subtitle: "Track cost, latency, and quality.",
     body: "Monitor your LLM application's performance with comprehensive metrics dashboards and APIs. Track costs, latencies, token usage, and quality scores across models, users, and time periods.",
-    docsHref: "/docs/analytics",
+    docsHref: "/docs/metrics/overview",
     videoHref: "/watch-demo?tab=metrics",
     image: {
       light: metricsPng,
@@ -133,7 +133,7 @@ const query = JSON.stringify({
 const res = await langfuse.api.metrics.metrics({query});`,
       },
     },
-    quickstartHref: "/docs/analytics",
+    quickstartHref: "/docs/metrics/overview",
   },
   {
     id: "prompt-management",
@@ -204,7 +204,7 @@ async function handleRequest(userInput: string) {
     icon: FlaskConical,
     title: "Playground",
     subtitle: "Test prompts and models interactively.",
-    body: "Experiment with different prompts, models, and parameters in an interactive playground. Compare outputs, iterate on prompts, and save successful configurations.",
+    body: "Experiment with different prompts, models, and parameters in an interactive playground. Compare outputs, iterate on prompts, and save successful configurations to prompt management.",
     docsHref: "/docs/prompt-management/features/playground",
     image: {
       light: PlaygroundPng, // Placeholder - needs playground screenshot
