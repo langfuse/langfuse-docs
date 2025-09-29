@@ -417,6 +417,7 @@ type Tier = {
 };
 
 const TEAMS_ADDON = "Teams add-on";
+const YEARLY_COMMITMENT = "Yearly Commitment";
 
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
@@ -490,8 +491,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Prioritized in-app support",
       ],
       addOn: {
-        name: "Teams",
-        price: "$300",
+        name: "Teams Add-on",
+        price: "$300/mo",
         mainFeatures: [
           "Enterprise SSO (e.g. Okta)",
           "SSO enforcement",
@@ -507,23 +508,37 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-enterprise",
       href: "/talk-to-us",
       featured: false,
-      description: "Enterprise-grade support and security features.",
-      price: "Custom",
+      description: "For large scale enterprise teams. Enterprise-grade support and security features.",
+      price: "$2499",
       calloutLink: {
         text: "Enterprise FAQ",
         href: "/enterprise",
       },
       mainFeatures: [
         "Everything in Pro and Teams add-on",
+        <>
+          100k units / month included, additional:{" "}
+          <GraduatedPricingWithCalculator planName="Pro" />
+        </>,
+        "Audit Logs",
+        "SCIM API",
         "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
-        "Custom Terms & DPA",
         "Dedicated support engineer",
+        
+      ],
+      addOn: {
+        name: "Yearly Commitment",
+        mainFeatures: [
+        "Custom Volume Pricing",
+        "Custom Terms & DPA",
         "Architecture reviews",
         "Billing via AWS Marketplace",
         "Billing via Invoice",
-      ],
+        "Vendor Onboarding"
+        ],
+      },
       cta: "Talk to sales",
     },
   ],
@@ -1440,7 +1455,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: false,
             Pro: false,
-            Enterprise: true,
+            Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
@@ -1461,7 +1476,7 @@ const sections: Section[] = [
             Hobby: "Standard T&Cs",
             Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
-            Enterprise: "Custom",
+            Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
@@ -1510,7 +1525,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: false,
             Pro: false,
-            Enterprise: true,
+            Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -1610,19 +1625,17 @@ export default function Pricing({
           <InfoIcon className="inline-block size-3 ml-1" />
         </HoverCardTrigger>
         <HoverCardContent className="w-60 text-xs">
-          <p>
-            {description}
-            {href && (
-              <span>
-                {" "}
-                (
-                <Link href={href} className="underline" target="_blank">
-                  learn more
-                </Link>
-                )
-              </span>
-            )}
-          </p>
+          {description}
+          {href && (
+            <span>
+              {" "}
+              (
+              <Link href={href} className="underline" target="_blank">
+                learn more
+              </Link>
+              )
+            </span>
+          )}
         </HoverCardContent>
       </HoverCard>
     );
@@ -1643,9 +1656,17 @@ export default function Pricing({
                 <InfoIcon className="inline-block size-3 ml-1" />
               </HoverCardTrigger>
               <HoverCardContent className="w-60">
-                <p className="text-sm">
-                  Available as part of the Teams add-on on the Pro plan.
-                </p>
+                Available as part of the Teams add-on on the Pro plan.
+              </HoverCardContent>
+            </HoverCard>
+          )}
+          {value === YEARLY_COMMITMENT && (
+            <HoverCard>
+              <HoverCardTrigger>
+                <InfoIcon className="inline-block size-3 ml-1" />
+              </HoverCardTrigger>
+              <HoverCardContent className="w-60">
+                Available when committing to a yearly contract on the Enterprise plan.
               </HoverCardContent>
             </HoverCard>
           )}
@@ -1663,7 +1684,9 @@ export default function Pricing({
       );
     } else {
       return (
-        <div className="text-sm leading-6 text-center break-words">{value}</div>
+        <div className="text-sm leading-6 text-center break-words">
+          {value}
+        </div>
       );
     }
   };
@@ -1820,8 +1843,8 @@ export default function Pricing({
                   <div className="border-t"></div>
                   <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
                     <ul className="space-y-2.5 text-sm">
-                      {tier.mainFeatures.map((feature) => (
-                        <li key={feature} className="flex space-x-2">
+                      {tier.mainFeatures.map((feature, index) => (
+                        <li key={index} className="flex space-x-2">
                           <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
                           <span className="text-muted-foreground">
                             {feature}
@@ -1836,10 +1859,10 @@ export default function Pricing({
                         </div>
                         <div className="flex justify-between items-center mb-2">
                           <span className="font-bold text-sm text-primary">
-                            {tier.addOn.name} Add-on
+                            {tier.addOn.name}
                           </span>
                           <span className="font-bold text-sm text-primary">
-                            {tier.addOn.price}/mo
+                            {tier.addOn.price}
                           </span>
                         </div>
                         <ul className="mt-1 space-y-1 text-sm">
