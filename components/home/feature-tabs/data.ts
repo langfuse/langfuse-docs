@@ -6,17 +6,18 @@ import {
   FlaskConical,
   Globe,
   MessageSquare,
+  BarChart3,
 } from "lucide-react";
 import type { FeatureTabData } from "./types";
 
 import observabilityPng from "components/home/feature-tabs/img/observability-2.png";
 import costPng from "components/home/feature-tabs/img/cost.png";
 import PromptPng from "components/home/feature-tabs/img/prompt.png";
-import EvalsPng from "components/home/feature-tabs/img/evals-wide.png"
-import PlaygroundPng from "components/home/feature-tabs/img/playground.png"
-import AnnotationPng from "components/home/feature-tabs/img/Annotation.png"
+import EvalsPng from "components/home/feature-tabs/img/evals-wide.png";
+import PlaygroundPng from "components/home/feature-tabs/img/playground.png";
+import AnnotationPng from "components/home/feature-tabs/img/Annotation.png";
 
-export const  featureTabsData: FeatureTabData[] = [
+export const featureTabsData: FeatureTabData[] = [
   {
     id: "observability",
     icon: TextQuote,
@@ -33,69 +34,48 @@ export const  featureTabsData: FeatureTabData[] = [
     code: {
       language: "python",
       snippets: {
-        python: `from langfuse import Langfuse
+        python: `from langfuse import observe
 
-# Initialize Langfuse client
-langfuse = Langfuse()
+# drop-in wrapper adds OpenTelemetry tracing to OpenAI
+# many other llm/agent integrations are available
+from langfuse.openai import openai
 
-# Create a trace for your LLM application
-trace = langfuse.trace(
-    name="chat-completion",
-    user_id="user-123",
-    session_id="session-456",
-    metadata={"environment": "production"}
-)
+@observe()  # decorate any function; all nested calls are auto-linked
+def summarize(text: str) -> str:
+    res = openai.chat.completions.create(
+        name="summary",
+        model="gpt-5",
+        messages=[
+            {"role": "system", "content": "Summarize in one sentence."},
+            {"role": "user", "content": text},
+        ],
+    )
+    return res.choices[0].message.content`,
+        javascript: `import OpenAI from "openai";
+import { observeOpenAI } from "@langfuse/openai";
+import { startActiveObservation } from "@langfuse/tracing";
 
-# Track the LLM call
-generation = trace.generation(
-    name="openai-completion",
-    model="gpt-4",
-    input=[{"role": "user", "content": "What is the capital of France?"}],
-    metadata={"temperature": 0.7}
-)
+// assumes OTEL + LangfuseSpanProcessor is set up at app start
+const openai = observeOpenAI(new OpenAI());
 
-# Complete the generation with output and usage
-generation.end(
-    output="The capital of France is Paris.",
-    usage={
-        "input_tokens": 12,
-        "output_tokens": 8,
-        "total_tokens": 20
-    }
-)`,
-        javascript: `import { Langfuse } from "langfuse";
-
-// Initialize Langfuse client
-const langfuse = new Langfuse();
-
-// Create a trace for your LLM application
-const trace = langfuse.trace({
-  name: "chat-completion",
-  userId: "user-123",
-  sessionId: "session-456",
-  metadata: { environment: "production" }
-});
-
-// Track the LLM call
-const generation = trace.generation({
-  name: "openai-completion",
-  model: "gpt-4",
-  input: [{ role: "user", content: "What is the capital of France?" }],
-  metadata: { temperature: 0.7 }
-});
-
-// Complete the generation with output and usage
-generation.end({
-  output: "The capital of France is Paris.",
-  usage: {
-    inputTokens: 12,
-    outputTokens: 8,
-    totalTokens: 20
-  }
-});`
-      }
+export async function handleRequest(userInput: string) {
+  return await startActiveObservation("handle-request", async (span) => {
+    span.update({ input: { userInput } }); // attach inputs to the trace
+    const res = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: "Reply concisely." },
+        { role: "user", content: userInput },
+      ],
+    });
+    const output = res.choices[0].message.content;
+    span.update({ output });
+    return output;
+  });
+}`,
+      },
     },
-    quickstartHref: "/docs/get-started",
+    quickstartHref: "/docs/observability/get-started",
   },
   {
     id: "metrics",
@@ -180,24 +160,10 @@ langfuse.score({
   traceId: trace.id,
   name: "accuracy",
   value: 0.88
-});`
-      }
+});`,
+      },
     },
     quickstartHref: "/docs/analytics",
-  },
-  {
-    id: "dashboards",
-    icon: BarChart3,
-    title: "Dashboards",
-    subtitle: "Visual insights at a glance.",
-    body: "Get comprehensive insights into your LLM application performance with customizable dashboards. Track key metrics, identify trends, and monitor the health of your AI systems.",
-    docsHref: "/docs/analytics/daily-metrics",
-    image: {
-      light: costPng,
-      dark: costPng,
-      alt: "Langfuse analytics dashboard with comprehensive metrics visualization"
-    },
-    displayMode: "image-only",
   },
   {
     id: "prompt-management",
@@ -210,7 +176,7 @@ langfuse.score({
     image: {
       light: PromptPng,
       dark: PromptPng,
-      alt: "Langfuse prompt management interface showing versioned prompts"
+      alt: "Langfuse prompt management interface showing versioned prompts",
     },
     code: {
       language: "python",
@@ -284,8 +250,8 @@ langfuse.generation({
     inputTokens: response.usage.prompt_tokens,
     outputTokens: response.usage.completion_tokens
   }
-});`
-      }
+});`,
+      },
     },
     quickstartHref: "/docs/prompt-management/get-started",
   },
@@ -299,25 +265,29 @@ langfuse.generation({
     image: {
       light: PlaygroundPng, // Placeholder - needs playground screenshot
       dark: PlaygroundPng,
-      alt: "Langfuse playground interface for testing prompts and models"
+      alt: "Langfuse playground interface for testing prompts and models",
     },
     statements: [
       {
         title: "Interactive Testing Environment",
-        description: "Test different prompts, models, and parameters in real-time with immediate feedback and comparison capabilities."
+        description:
+          "Test different prompts, models, and parameters in real-time with immediate feedback and comparison capabilities.",
       },
       {
         title: "Model Comparison",
-        description: "Compare outputs from different LLM providers (OpenAI, Anthropic, Cohere, etc.) side-by-side to find the best model for your use case."
+        description:
+          "Compare outputs from different LLM providers (OpenAI, Anthropic, Cohere, etc.) side-by-side to find the best model for your use case.",
       },
       {
         title: "Prompt Iteration",
-        description: "Iterate on prompt templates with variable substitution, test edge cases, and refine your prompts before deployment."
+        description:
+          "Iterate on prompt templates with variable substitution, test edge cases, and refine your prompts before deployment.",
       },
       {
         title: "Save & Deploy",
-        description: "Save successful prompt configurations as versioned templates and deploy them directly to your applications."
-      }
+        description:
+          "Save successful prompt configurations as versioned templates and deploy them directly to your applications.",
+      },
     ],
     quickstartHref: "/docs/prompt-management/features/playground",
   },
@@ -332,7 +302,7 @@ langfuse.generation({
     image: {
       light: EvalsPng,
       dark: EvalsPng,
-      alt: "Langfuse evaluation interface showing feedback and scores"
+      alt: "Langfuse evaluation interface showing feedback and scores",
     },
     code: {
       language: "python",
@@ -411,8 +381,8 @@ langfuse.score({
   traceId: trace.id,
   name: "helpfulness",
   value: score
-});`
-      }
+});`,
+      },
     },
     quickstartHref: "/docs/evaluation/get-started",
   },
@@ -426,25 +396,29 @@ langfuse.score({
     image: {
       light: AnnotationPng,
       dark: AnnotationPng,
-      alt: "Langfuse annotation interface for manual feedback and corrections"
+      alt: "Langfuse annotation interface for manual feedback and corrections",
     },
     statements: [
       {
         title: "Interactive Testing Environment",
-        description: "Test different prompts, models, and parameters in real-time with immediate feedback and comparison capabilities."
+        description:
+          "Test different prompts, models, and parameters in real-time with immediate feedback and comparison capabilities.",
       },
       {
         title: "Model Comparison",
-        description: "Compare outputs from different LLM providers (OpenAI, Anthropic, Cohere, etc.) side-by-side to find the best model for your use case."
+        description:
+          "Compare outputs from different LLM providers (OpenAI, Anthropic, Cohere, etc.) side-by-side to find the best model for your use case.",
       },
       {
         title: "Prompt Iteration",
-        description: "Iterate on prompt templates with variable substitution, test edge cases, and refine your prompts before deployment."
+        description:
+          "Iterate on prompt templates with variable substitution, test edge cases, and refine your prompts before deployment.",
       },
       {
         title: "Save & Deploy",
-        description: "Save successful prompt configurations as versioned templates and deploy them directly to your applications."
-      }
+        description:
+          "Save successful prompt configurations as versioned templates and deploy them directly to your applications.",
+      },
     ],
     quickstartHref: "/docs/prompt-management/features/playground",
     displayMode: "image-only",
@@ -536,8 +510,8 @@ def create_trace(trace_data):
             "metadata": trace_data["metadata"]
         }
     )
-    return response.json()`
-      }
+    return response.json()`,
+      },
     },
     quickstartHref: "/docs/api-and-data-platform/overview",
     displayMode: "code-only",
