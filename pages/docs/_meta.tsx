@@ -14,20 +14,16 @@ export default {
     title: "Get Started",
   },
   "observability-quickstart": {
-    title: "Trace an Application",
+    title: "Start Tracing",
     href: "/docs/observability/get-started",
   },
   "prompt-management-quickstart": {
-    title: "Fetch a Prompt",
+    title: "Fetch Prompts",
     href: "/docs/prompt-management/get-started",
   },
   "evals-quickstart": {
-    title: "Start Evaluating Traces",
-    href: "/docs/evaluation/evaluation-methods/llm-as-a-judge",
-  },
-  "experiments-quickstart": {
-    title: "Run an Experiment",
-    href: "/docs/evaluation/experiments/experiments-via-ui",
+    title: "Start Evaluating",
+    href: "/docs/evaluation/overview",
   },
 
   "-- Products": {
