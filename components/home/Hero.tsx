@@ -12,9 +12,9 @@ export function Hero() {
   return (
     <HomeSection className="py-0 pt-0 lg:py-0 lg:pt-0 pb-0 lg:pb-0 first:pt-4">
       {/* HERO */}
-      <div className="flex flex-col items-center justify-center gap-5 md:min-h-[calc(min(calc(60vh-100px),60vw))] pb-10 lg:pt-10 2xl:pt-20">
+      <div className="flex flex-col items-center justify-center gap-5 md:min-h-[calc(min(calc(60vh-100px),60vw))] pb-10 pt-5 lg:pt-10 2xl:pt-20">
         {/* Badges */}
-        <div className="flex flex-row gap-10 items-center justify-start scale-[80%] flex-wrap">
+        <div className="flex-row gap-10 items-center justify-start scale-[80%] flex-wrap hidden sm:flex">
           <div className="max-w-full w-52 px-1">
             <ProductHuntBadge />
           </div>
@@ -46,10 +46,10 @@ export function Hero() {
             <YCLogo />
           </a>
         </div>
-        <h1 className="text-2xl sm:text-6xl lg:text-8xl font-bold font-mono text-center">
-          Open Source LLM Engineering Platform
+        <h1 className="text-4xl sm:text-7xl lg:text-8xl font-bold font-mono text-center text-balance lg:text-wrap">
+          Open Source LLM&nbsp;Engineering Platform
         </h1>
-        <span className="mt-2 text-primary/70 text-xl sm:text-xl lg:text-2xl md:text-balance font-semibold max-w-screen-lg text-center">
+        <span className="mt-2 text-primary/70 text-base sm:text-xl lg:text-3xl md:text-balance font-semibold max-w-screen-lg text-center px-4">
           <Link href="/docs/observability/overview" className="underline">
             Traces
           </Link>
