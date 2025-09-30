@@ -14,13 +14,13 @@ tags: [evaluation]
 To understand detailed properties of the `ScoreConfig` object, see [Scores Data Model](/docs/evaluation/evaluation-methods/data-model#score-config).
 
 ## Via SDK
-### Create a Score Config
+### Create or Update a Score Config
 
-To create a `scoreConfig` via the Langfuse SDK you need to use the `api` property on the Langfuse client as specified [here](/docs/api-and-data-platform/features/public-api#access-via-sdks). The specific `POST` and `GET` API endpoints are documented in the [API reference](/docs/api).
+To create or update a `scoreConfig` via the Langfuse SDK you need to use the `api` property on the Langfuse client as specified [here](/docs/api-and-data-platform/features/public-api#access-via-sdks). The specific `POST`, `PATCH` and `GET` API endpoints are documented in the [API reference](/docs/api).
 
 ### Use a Score Config
 
-Using `ScoreConfig` via the SDK most commonly happens in the context of [Custom Evaluation via API/SDK (find instructions how to do that here)](/docs/evaluation/evaluation-methods/custom-scores#score-ingestion-referencing-configs-via-sdk). 
+Using `ScoreConfig` via the SDK most commonly happens in the context of [Custom Evaluation via API/SDK (find instructions how to do that here)](/docs/evaluation/evaluation-methods/custom-scores#score-ingestion-referencing-configs-via-sdk).
 
 ## Via Langfuse UI
 ### Create a Score Config
@@ -53,6 +53,28 @@ Click **"submit"** to create the score config.
 Using `ScoreConfig` via the UI most commonly happens in the context of [Human Annotation](/docs/evaluation/evaluation-methods/annotation). 
 
 
+### Update a score config
+
+<Steps>
+
+#### Go to Project Settings
+Navigate to `Your Project` > `Project Settings` > `Scores / Evaluation` and click on the "edit" icon of the score config you want to update.
+
+<Frame border className="mt-2" fullWidth>
+  ![Score Configs](/images/docs/modify_score_config.png)
+</Frame>
+
+#### Update score config
+
+- Score configs may be updated at any time.
+- All existing score data remains unaffected when you update a score config.
+- When creating new scores, they must comply with the current score config schema at the time of creation.
+- When updating existing scores (such as changing score values or comments), they must comply with the score config schema that is active at the time of the update.
+- You can always delete scores regardless of whether their associated score config has been modified or archived. 
+</Steps>
+
+
+
 ### Archive a score config
 
 <Steps>
@@ -61,7 +83,7 @@ Using `ScoreConfig` via the UI most commonly happens in the context of [Human An
 Navigate to `Your Project` > `Project Settings` > `Scores / Evaluation` and click on the "archive" icon of the score config you want to archive.
 
 <Frame border className="mt-2" fullWidth>
-  ![Score Configs](/images/docs/archive_score_config.png)
+  ![Score Configs](/images/docs/modify_score_config.png)
 </Frame>
 
 #### Archive score config
