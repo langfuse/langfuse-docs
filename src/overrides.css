@@ -145,3 +145,34 @@ li:has(> .subseparator) {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+/* Enable hover for navigation menu dropdowns */
+.nextra-nav-container nav > div > button[aria-expanded="false"]:hover + div[data-radix-popper-content-wrapper],
+.nextra-nav-container nav > div > button[aria-expanded="true"] + div[data-radix-popper-content-wrapper],
+.nextra-nav-container nav > div > div[data-radix-popper-content-wrapper]:hover {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Show dropdown on button hover */
+.nextra-nav-container nav > div:has(> button[aria-expanded]):hover > div[data-radix-popper-content-wrapper] {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Keep button highlighted when dropdown is visible */
+.nextra-nav-container nav > div:hover > button[aria-expanded] {
+  background-color: var(--tw-gray-100);
+}
+
+/* Dark mode button highlight */
+.dark .nextra-nav-container nav > div:hover > button[aria-expanded] {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Ensure smooth transitions */
+.nextra-nav-container nav > div > div[data-radix-popper-content-wrapper] {
+  transition: opacity 150ms ease, visibility 150ms ease;
+}
