@@ -361,7 +361,7 @@ type Tier = {
   priceUnit?: string;
   mainFeatures: (string | React.ReactNode)[];
   cta: string;
-  ctaCallout?: {
+  secondaryCta?: {
     text: string;
     href: string;
   };
@@ -470,7 +470,7 @@ const tiers: Tier[] = [
   {
     name: "Enterprise",
     id: "tier-enterprise",
-    href: "/talk-to-us",
+    href: "https://cloud.langfuse.com",
     featured: false,
     description:
       "For large scale teams. Enterprise-grade support and security.",
@@ -503,7 +503,11 @@ const tiers: Tier[] = [
         "Vendor Onboarding",
       ],
     },
-    cta: "Talk to sales",
+    cta: "Sign up",
+    secondaryCta: {
+      text: "Talk to sales",
+      href: "/talk-to-us",
+    },
   },
 ];
 
@@ -1514,36 +1518,22 @@ export default function Pricing({
                     </div>
 
                     <div>
-                      {tier.ctaCallout ? (
-                        <div className="flex gap-2">
-                          <Button
-                            className="flex-1"
-                            variant={tier.featured ? "default" : "outline"}
-                            asChild
-                          >
-                            <Link href={tier.href}>{tier.cta}</Link>
-                          </Button>
-                          <Button
-                            className="flex-1"
-                            variant="secondary"
-                            asChild
-                          >
-                            <Link href={tier.ctaCallout.href}>
-                              {tier.ctaCallout.text}
+                      <div className={tier.secondaryCta ? "flex gap-2" : ""}>
+                        <Button
+                          className={tier.secondaryCta ? "flex-1" : "w-full"}
+                          variant={tier.featured ? "default" : "outline"}
+                          asChild
+                        >
+                          <Link href={tier.href}>{tier.cta}</Link>
+                        </Button>
+                        {tier.secondaryCta && (
+                          <Button variant="outline" asChild>
+                            <Link href={tier.secondaryCta.href}>
+                              {tier.secondaryCta.text}
                             </Link>
                           </Button>
-                        </div>
-                      ) : (
-                        <>
-                          <Button
-                            className="w-full"
-                            variant={tier.featured ? "default" : "outline"}
-                            asChild
-                          >
-                            <Link href={tier.href}>{tier.cta}</Link>
-                          </Button>
-                        </>
-                      )}
+                        )}
+                      </div>
                     </div>
 
                     {/* Callouts for different tiers - always render container for alignment */}
@@ -1610,25 +1600,6 @@ export default function Pricing({
 
             {isPricingPage && (
               <>
-                {/* Special offers callout */}
-                <div className="mt-4 mb-4 text-center">
-                  <div className="inline-flex items-center gap-6 px-4 py-2 bg-muted/30 rounded-full text-sm text-muted-foreground">
-                    <Link
-                      href="/startups"
-                      className="hover:text-primary transition-colors underline"
-                    >
-                      Startup discounts available
-                    </Link>
-                    <span className="text-muted-foreground/50">|</span>
-                    <Link
-                      href="/research"
-                      className="hover:text-primary transition-colors underline"
-                    >
-                      Academic & research benefits
-                    </Link>
-                  </div>
-                </div>
-
                 {/* Feature comparison (up to lg) */}
                 <section
                   aria-labelledby="mobile-comparison-heading"
@@ -1823,7 +1794,11 @@ export default function Pricing({
               <Link href="/pricing" className="underline">
                 pricing page
               </Link>
-              .
+              . You can also{" "}
+              <Link href="/self-hosting" className="underline">
+                self-host
+              </Link>{" "}
+              Langfuse OSS.
             </div>
           </>
         )}
