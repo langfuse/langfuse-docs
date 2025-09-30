@@ -10,6 +10,7 @@ export default {
     href: "/docs/audit-logs",
     newWindow: true,
   },
+  "ai-features": "AI Features",
   encryption: "Encryption",
   "data-regions": "Data Regions & Availability",
   networking: "Networking & IP Ranges",
