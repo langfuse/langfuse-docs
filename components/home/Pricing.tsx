@@ -1941,6 +1941,11 @@ const faqs = [
       "Yes, we offer customized contracts for Langfuse Enterprise customers with a yearly commitment. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
+    question: "Where is the data stored?",
+    answer:
+      "Langfuse Cloud is hosted on AWS and data is stored in the US or EU depending on your selection. See our <a class='underline' href='/security'>security and privacy documentation</a> for more details.",
+  },
+  {
     question: "I have security questions, where to start?",
     answer:
       "We publish almost all of our security documentation and controls. Please refer to our <a class='underline' href='/security'>security documentation</a> for more details.",
