@@ -7,7 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Plus, Minus, ExternalLink, InfoIcon } from "lucide-react";
+import {
+  Check,
+  Plus,
+  Minus,
+  ExternalLink,
+  InfoIcon,
+  Calculator,
+} from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { Header } from "../Header";
@@ -31,324 +38,23 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { TrustedBy } from "./components/TrustedBy";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { useRouter } from "next/router";
+import { PricingCalculator } from "./PricingCalculator";
 import { trustedByData } from "@/data/trusted-by";
 
-// Graduated pricing tiers
-const pricingTiers = [
-  { min: 0, max: 100000, rate: 0, description: "0-100k units" },
-  { min: 100001, max: 1000000, rate: 8, description: "0-1M units" },
-  { min: 1000001, max: 10000000, rate: 7, description: "1-10M units" },
-  {
-    min: 10000001,
-    max: 50000000,
-    rate: 6.5,
-    description: "10-50M units",
-  },
-  { min: 50000001, max: Infinity, rate: 6, description: "50M+ units" },
-];
-
-// Calculate graduated pricing
-const calculateGraduatedPrice = (events: number): number => {
-  if (events <= 100000) return 0; // First 100k are free
-
-  let totalCost = 0;
-  let processedEvents = 100000; // Start after free tier
-
-  for (let i = 1; i < pricingTiers.length; i++) {
-    const tier = pricingTiers[i];
-    if (events <= processedEvents) break;
-
-    const tierStart = Math.max(processedEvents, tier.min);
-    const tierEnd = tier.max === Infinity ? events : Math.min(events, tier.max);
-    const eventsInTier = tierEnd - tierStart;
-
-    if (eventsInTier > 0) {
-      totalCost += (eventsInTier / 100000) * tier.rate;
-      processedEvents = tierEnd;
-    }
-  }
-
-  return Math.round(totalCost * 100) / 100;
-};
-
-// Plan configuration
-type PlanConfig = {
-  name: string;
-  baseFee: number;
-};
-
-const PLAN_CONFIGS: PlanConfig[] = [
-  { name: "Core", baseFee: 29 },
-  { name: "Pro", baseFee: 199 },
-  { name: "Pro + Teams", baseFee: 499 },
-  { name: "Enterprise", baseFee: 2499 },
-];
-
-// Utility functions
-const formatNumber = (num: number) => num.toLocaleString();
-
-const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-
-const formatEventsInput = (value: string) => {
-  const numbersOnly = value.replace(/\D/g, "");
-  return numbersOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
-
-// Calculate events and cost for a specific tier
-const calculateTierBreakdown = (
-  events: number,
-  tier: (typeof pricingTiers)[0],
-  index: number
-) => {
-  let eventsInTier = 0;
-  let costForTier = 0;
-  let tierRate = "";
-
-  if (index === 0) {
-    // Free tier
-    eventsInTier = Math.min(events, 100000);
-    costForTier = 0;
-    tierRate = "Free";
-  } else {
-    // Paid tiers
-    if (events > tier.min) {
-      // Fix: Adjust tierStart to be exactly tier.min for correct boundary calculation
-      const tierStart = tier.min;
-      const tierEnd =
-        tier.max === Infinity ? events : Math.min(events, tier.max);
-      eventsInTier = Math.max(0, tierEnd - tierStart + 1);
-      costForTier = (eventsInTier / 100000) * tier.rate;
-    }
-    tierRate = `$${tier.rate}/100k`;
-  }
-
-  return { eventsInTier, costForTier, tierRate };
-};
-
-// Reusable graduated pricing text with calculator
-const GraduatedPricingWithCalculator = ({ planName }: { planName: string }) => {
-  const planConfig = PLAN_CONFIGS.find((p) => p.name === planName);
+// Reusable graduated pricing text with calculator link
+const GraduatedPricingText = () => {
   return (
     <>
       $8/100k units. Lower with volume (
-      <PricingCalculatorModal
-        baseFee={planConfig?.baseFee || 0}
-        planName={planName}
-      />
+      <Link
+        href="#pricing-calculator"
+        className="inline-flex items-center hover:text-primary underline"
+      >
+        <Calculator className="size-3 mr-0.5" />
+        calculator
+      </Link>
       )
     </>
-  );
-};
-
-// Pricing Calculator Modal Component
-const PricingCalculatorModal = ({
-  baseFee = 0,
-  planName = "plan",
-}: {
-  baseFee?: number;
-  planName?: string;
-}) => {
-  const router = useRouter();
-  const [monthlyEvents, setMonthlyEvents] = useState<string>("200,000");
-  const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
-  const [selectedPlan, setSelectedPlan] = useState<string>(planName);
-  const [currentBaseFee, setCurrentBaseFee] = useState<number>(baseFee);
-
-  // Read open state from URL
-  const isOpen = router.query.calculatorOpen === "true";
-
-  // Calculate price when events change
-  useEffect(() => {
-    const events = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
-    setCalculatedPrice(calculateGraduatedPrice(events));
-  }, [monthlyEvents]);
-
-  const handleOpenChange = (open: boolean) => {
-    const query = { ...router.query };
-    if (open) {
-      query.calculatorOpen = "true";
-    } else {
-      delete query.calculatorOpen;
-    }
-    router.replace({ pathname: router.pathname, query }, undefined, {
-      shallow: true,
-    });
-  };
-
-  const handlePlanChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newPlanName = e.target.value;
-    const newPlan = PLAN_CONFIGS.find((plan) => plan.name === newPlanName);
-    setSelectedPlan(newPlanName);
-    setCurrentBaseFee(newPlan?.baseFee || 0);
-  };
-
-  const handleEventsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMonthlyEvents(formatEventsInput(e.target.value));
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <span className="text-sm hover:text-primary underline cursor-pointer">
-          pricing calculator
-        </span>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Pricing Calculator</DialogTitle>
-          <DialogDescription>
-            Enter your monthly billable units to see the graduated pricing
-            breakdown
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="plan">Plan</Label>
-            <select
-              id="plan"
-              value={selectedPlan}
-              onChange={handlePlanChange}
-              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {PLAN_CONFIGS.map((plan) => (
-                <option key={plan.name} value={plan.name}>
-                  {plan.name}{" "}
-                  {plan.baseFee > 0 ? `($${plan.baseFee}/month)` : ""}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <Label htmlFor="events" className="flex items-center gap-1">
-              Monthly Units
-              <Link
-                href="/docs/tracing-data-model#billable-units"
-                target="_blank"
-              >
-                <InfoIcon className="size-3" />
-              </Link>
-            </Label>
-            <Input
-              id="events"
-              type="text"
-              value={monthlyEvents}
-              onChange={handleEventsChange}
-              placeholder="Enter number of units per month"
-              className="mt-1"
-            />
-          </div>
-
-          <div className="bg-muted p-6 rounded">
-            {currentBaseFee > 0 ? (
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-4 text-lg font-medium">
-                  <div className="text-center">
-                    <div className="text-primary">
-                      {formatCurrency(currentBaseFee)}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {selectedPlan} Base
-                    </div>
-                  </div>
-                  <div className="text-muted-foreground">+</div>
-                  <div className="text-center">
-                    <div className="text-primary">
-                      {formatCurrency(calculatedPrice)}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Usage
-                    </div>
-                  </div>
-                  <div className="text-muted-foreground">=</div>
-                  <div className="text-center">
-                    <div className="text-primary">
-                      {formatCurrency(calculatedPrice + currentBaseFee)}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Total
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center">
-                <div className="text-center">
-                  <div className="text-lg font-medium text-primary">
-                    {formatCurrency(calculatedPrice)}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Total Usage Cost
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Breakdown */}
-          <div className="space-y-2">
-            <div className="font-medium text-sm">Pricing tiers:</div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-left">Tier</TableHead>
-                  <TableHead className="text-right">Rate</TableHead>
-                  <TableHead className="text-right">Your Units</TableHead>
-                  <TableHead className="text-right">Cost</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pricingTiers.map((tier, index) => {
-                  const events = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
-                  const { eventsInTier, costForTier, tierRate } =
-                    calculateTierBreakdown(events, tier, index);
-
-                  return (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {tier.description}
-                      </TableCell>
-                      <TableCell className="text-right">{tierRate}</TableCell>
-                      <TableCell className="text-right">
-                        {eventsInTier > 0 ? formatNumber(eventsInTier) : "—"}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {eventsInTier > 0 ? formatCurrency(costForTier) : "—"}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {/* Total row */}
-                <TableRow className="border-t-2">
-                  <TableCell className="font-semibold">Total</TableCell>
-                  <TableCell className="text-right"></TableCell>
-                  <TableCell className="text-right">{monthlyEvents}</TableCell>
-                  <TableCell className="text-right font-semibold text-primary">
-                    {formatCurrency(calculatedPrice)}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 };
 
@@ -458,8 +164,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "Everything in Hobby",
         <>
-          100k units / month included, additional:{" "}
-          <GraduatedPricingWithCalculator planName="Core" />
+          100k units / month included, additional: <GraduatedPricingText />
         </>,
         "90 days data access",
         "Unlimited users",
@@ -482,8 +187,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "Everything in Core",
         <>
-          100k units / month included, additional:{" "}
-          <GraduatedPricingWithCalculator planName="Pro" />
+          100k units / month included, additional: <GraduatedPricingText />
         </>,
         "Unlimited data access",
         "Unlimited annotation queues",
@@ -519,8 +223,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "Everything in Pro + Teams",
         <>
-          100k units / month included, additional:{" "}
-          <GraduatedPricingWithCalculator planName="Enterprise" />
+          100k units / month included, additional: <GraduatedPricingText />
         </>,
         "Audit Logs",
         "SCIM API",
@@ -745,11 +448,9 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: <GraduatedPricingWithCalculator planName="Core" />,
-            Pro: <GraduatedPricingWithCalculator planName="Pro" />,
-            Enterprise: (
-              <GraduatedPricingWithCalculator planName="Enterprise" />
-            ),
+            Core: <GraduatedPricingText />,
+            Pro: <GraduatedPricingText />,
+            Enterprise: <GraduatedPricingText />,
           },
         },
       },
@@ -2123,7 +1824,8 @@ export default function Pricing({
           <>
             <div className="relative">
               <div className="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
-                <DiscountOverview className="mt-0" />
+                <PricingCalculator />
+                <DiscountOverview className="mt-16" />
                 <PricingFAQ />
               </div>
             </div>
