@@ -1903,7 +1903,7 @@ const faqs = [
   {
     question: "What is the easiest way to try Langfuse?",
     answer:
-      "You can view the <a class='underline' href='/demo'>public demo project</a> or sign up for a <a class='underline' href='https://cloud.langfuse.com'>free account</a> to try Langfuse with your own data. The Hobby plan is completeley free and does not require a credit card.",
+      "You can view the <a class='underline' href='/demo'>public example project</a> or sign up for a <a class='underline' href='https://cloud.langfuse.com'>free account</a> to try Langfuse with your own data. The Hobby plan is completeley free and does not require a credit card.",
   },
   {
     question: "What is a billable unit?",
@@ -1926,19 +1926,14 @@ const faqs = [
       "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
   },
   {
-    question: "Can I self-host Langfuse?",
+    question: "Can I self-host Langfuse for free?",
     answer:
-      "Yes, Langfuse is open source and you can run Langfuse <a class='underline' href='/self-hosting/deployment/docker-compose'>locally using docker compose<a/> or for <a class='underline' href='/self-hosting'>production use via docker<a/> and a standalone database.",
+      "Yes, Langfuse is open source and you can self-host Langfuse for free. Use docker compose to run Langfuse locally, or use one of our templates to self-host Langfuse in production on Kubernetes. Check out the <a class='underline' href='/self-hosting'>self-hosting documentation</a> to learn more.",
   },
   {
     question: "Where is the data stored?",
     answer:
       "Langfuse Cloud is hosted on AWS and data is stored in the US or EU depending on your selection. See our <a class='underline' href='/security'>security and privacy documentation</a> for more details.",
-  },
-  {
-    question: "Do you offer discounts?",
-    answer:
-      "Yes, we offer discounts for startups (request <a class='underline' href='https://forms.gle/eJAYjRWeCZU1Mn6j8'>here</a>), students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
   },
   {
     question: "How can I manage my subscription?",
