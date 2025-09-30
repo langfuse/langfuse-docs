@@ -104,8 +104,7 @@ const calculateTierBreakdown = (
     tierRate = "Free";
   } else {
     // Paid tiers
-    if (events > tier.min) {
-      // Fix: Adjust tierStart to be exactly tier.min for correct boundary calculation
+    if (events >= tier.min) {
       const tierStart = tier.min;
       const tierEnd =
         tier.max === Infinity ? events : Math.min(events, tier.max);
