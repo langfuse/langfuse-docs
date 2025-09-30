@@ -9,6 +9,27 @@ export default {
   demo: "Interactive Demo",
   "ask-ai": "Ask AI",
 
+  "-- Get Started": {
+    type: "separator",
+    title: "Get Started",
+  },
+  "observability-quickstart": {
+    title: "Trace an Application",
+    href: "/docs/observability/get-started",
+  },
+  "prompt-management-quickstart": {
+    title: "Fetch a Prompt",
+    href: "/docs/prompt-management/get-started",
+  },
+  "evals-quickstart": {
+    title: "Start Evaluating Traces",
+    href: "/docs/evaluation/evaluation-methods/llm-as-a-judge",
+  },
+  "experiments-quickstart": {
+    title: "Run an Experiment",
+    href: "/docs/evaluation/experiments/experiments-via-ui",
+  },
+
   "-- Products": {
     type: "separator",
     title: "Products",
