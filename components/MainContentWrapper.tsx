@@ -18,6 +18,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
+import { NavHoverEnhancer } from "./NavHoverEnhancer";
 
 const pathsWithoutFooterWidgets = [
   "/imprint",
@@ -162,6 +163,7 @@ export const MainContentWrapper = (props) => {
 
   return (
     <>
+      <NavHoverEnhancer />
       {(versionLabel || shouldShowCopyButton) && (
         <div className="flex items-center gap-2 flex-wrap mt-5">
           {versionLabel && (
