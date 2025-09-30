@@ -7,14 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Check,
-  Plus,
-  Minus,
-  ExternalLink,
-  InfoIcon,
-  Calculator,
-} from "lucide-react";
+import { Check, Plus, Minus, ExternalLink, InfoIcon } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { Header } from "../Header";
@@ -46,12 +39,8 @@ const GraduatedPricingText = () => {
   return (
     <>
       $8/100k units. Lower with volume (
-      <Link
-        href="#pricing-calculator"
-        className="inline-flex items-center hover:text-primary underline"
-      >
-        <Calculator className="size-3 mr-0.5" />
-        calculator
+      <Link href="#pricing-calculator" className="hover:text-primary underline">
+        pricing calculator
       </Link>
       )
     </>
