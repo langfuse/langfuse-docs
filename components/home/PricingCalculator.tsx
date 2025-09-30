@@ -23,7 +23,7 @@ import { InfoIcon } from "lucide-react";
 // Graduated pricing tiers
 const pricingTiers = [
   { min: 0, max: 100000, rate: 0, description: "0-100k units" },
-  { min: 100001, max: 1000000, rate: 8, description: "0-1M units" },
+  { min: 100001, max: 1000000, rate: 8, description: "100k-1M units" },
   { min: 1000001, max: 10000000, rate: 7, description: "1-10M units" },
   {
     min: 10000001,
