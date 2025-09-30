@@ -9,6 +9,23 @@ export default {
   demo: "Interactive Demo",
   "ask-ai": "Ask AI",
 
+  "-- Get Started": {
+    type: "separator",
+    title: "Get Started",
+  },
+  "observability-quickstart": {
+    title: "Start Tracing",
+    href: "/docs/observability/get-started",
+  },
+  "prompt-management-quickstart": {
+    title: "Fetch Prompts",
+    href: "/docs/prompt-management/get-started",
+  },
+  "evals-quickstart": {
+    title: "Start Evaluating",
+    href: "/docs/evaluation/overview",
+  },
+
   "-- Products": {
     type: "separator",
     title: "Products",
