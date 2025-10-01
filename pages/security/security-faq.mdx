@@ -1,6 +1,6 @@
 ---
 title: Security FAQ
-description: Answers to common questions about Langfuse's security practices. 
+description: Answers to common questions about Langfuse's security practices.
 ---
 
 # Security FAQ
@@ -10,6 +10,7 @@ This page addresses frequently asked questions and common security topics for La
 If you don't find a solution to your issue here, try using [Ask AI](/docs/ask-ai) for instant answers or reach out to security@langfuse.com
 
 ## Application Security
+
 > **How is data encrypted in transit and at rest?**
 
 TLS 1.2+ protects traffic; all stored data uses AES‑256 encryption. See [encryption documentation](/security/encryption) and [self-hosted encryption](/self-hosting/configuration/encryption) for more details.
@@ -28,7 +29,7 @@ Langfuse Cloud is multi-tenant only. For strict infrastructure-level isolation, 
 
 > **How is tenant isolation enforced?**
 
-Logical data isolation is technically achieved by associating every piece of data with a specific projectId and pen-tested yearly. This unique identifier acts as a key to partition data within the database, ensuring that all information, from traces and observations to scores and datasets, is explicitly linked to a single project. Access to other projects' data is prevented through a role-based access control (RBAC) system built on ProjectMembership. Users are granted access to projects through these memberships, each of which defines their role and permissions within that specific project. See [RBAC documentation](/docs/rbac) for more details. The application logic then uses the user's authenticated session to filter all database queries by their authorized projectIds, effectively creating a secure wall between different projects' data. Self-hosted deployments can use a dedicated database. 
+Logical data isolation is technically achieved by associating every piece of data with a specific projectId and pen-tested yearly. This unique identifier acts as a key to partition data within the database, ensuring that all information, from traces and observations to scores and datasets, is explicitly linked to a single project. Access to other projects' data is prevented through a role-based access control (RBAC) system built on ProjectMembership. Users are granted access to projects through these memberships, each of which defines their role and permissions within that specific project. See [RBAC documentation](/docs/rbac) for more details. The application logic then uses the user's authenticated session to filter all database queries by their authorized projectIds, effectively creating a secure wall between different projects' data.
 
 > **Can customers pin data to specific regions?**
 
@@ -40,7 +41,7 @@ Yes. EU, US and HIPAA‑ready US zones are available, and self‑hosted deployme
 
 OIDC SSO, email/password, and SCIM provisioning; MFA or passkeys can be enforced via your IdP. See auth documentation for more details.
 
->**What authentication methods are used for SDK and API access?**
+> **What authentication methods are used for SDK and API access?**
 
 The REST API uses Basic Auth with a pair of API keys: the public key (username) and secret key (password). These keys are created in the project settings, are hashed before storage and can be rotated. JWTs are not used.
 
@@ -58,10 +59,9 @@ Langfuse runs on AWS in isolated VPCs with WAF and AWS Shield for DDoS mitigatio
 
 Langfuse uses DataDog and Sentry to monitor its application and environments. All cloud audit logs are automatically written into a seperate, locked-down account. In addition, we have automated systems in place to alert us about anomalous usage.
 
->**How often does Langfuse rotate its API keys?**
+> **How often does Langfuse rotate its API keys?**
 
-Langfuse uses short-lived api keys where possible. For long-lived API keys we rotate them every 90 days. 
-
+Langfuse uses short-lived api keys where possible. For long-lived API keys we rotate them every 90 days.
 
 ## Software Development Lifecycle
 
@@ -79,15 +79,15 @@ Our Software Development Life Cycle (SDLC) policy establishes a consistent proce
 
 24 × 7 monitoring triggers an on‑call engineer; affected customers are notified and post‑mortems are published for larger incidents. See [incident and breach](/security/incident-and-breach) documentation for more details.
 
->**Whats the RTO, RPO and how does Langfuse keep backups?**
+> **Whats the RTO, RPO and how does Langfuse keep backups?**
 
-Please check out the [details here](/security/data-regions#business-continuity--availability). 
+Please check out the [details here](/security/data-regions#business-continuity--availability).
 
->**How does your disaster recovery plan look like?**
+> **How does your disaster recovery plan look like?**
 
 Our Disaster Recovery Plan outlines the procedures for recovering services following a catastrophic event and is formally activated by leadership when critical systems are projected to be unavailable for an extended period. The recovery phase involves systematically replicating our entire infrastructure in an alternate environment, conducting rigorous testing, and deploying the new environment to production by updating DNS records. The final reconstitution phase aims to restore full operations within 24 hours of the disaster, ensuring a seamless transition and secure handling of all temporary resources.
 
->**How does your business continuity plan look like?**
+> **How does your business continuity plan look like?**
 
 Our Business Continuity Plan establishes a framework to ensure operational resilience and recovery following a major disruption, built upon a formal Business Impact Analysis that defines a Recovery Time Objective (RTO) and Recovery Point Objective (RPO) for each critical process. For our cloud application, our strategy relies on the resilience of our cloud providers and regular data backups to meet our defined recovery objectives. In the event of a physical worksite disruption, our personnel are equipped to work remotely, ensuring that core business and development operations can continue without interruption. The plan defines a clear line of succession for decision-making authority and is tested at least annually to validate its effectiveness and ensure a rapid response.
 
@@ -144,4 +144,3 @@ No. Langfuse does not repurpose customer data for external benchmarks or model t
 > **Do you ever use customer data to train models or analytics?**
 
 No. Customer traces and prompts are processed only to provide the Langfuse service and are never used to train internal or third‑party ML models. See [security overview](/docs/security/overview) for more details.
-
