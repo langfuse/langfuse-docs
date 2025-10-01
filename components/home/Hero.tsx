@@ -76,7 +76,7 @@ export function Hero() {
             <Link href="/docs">View docs</Link>
           </Button>
           <Button variant="secondary" size="lg" asChild>
-            <Link href="/self-hosting">Deploy self-hosted</Link>
+            <Link href="/self-hosting">Self-host</Link>
           </Button>
         </div>
       </div>
