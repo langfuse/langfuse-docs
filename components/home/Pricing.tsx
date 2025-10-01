@@ -1812,9 +1812,9 @@ export default function Pricing({
         {isPricingPage ? (
           <>
             <div className="relative">
-              <div className="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
+              <div className="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8 mt-16">
                 <PricingCalculator />
-                <DiscountOverview className="mt-16" />
+                <DiscountOverview />
                 <PricingFAQ />
               </div>
             </div>
@@ -1861,11 +1861,8 @@ const discounts = [
   },
 ];
 
-const DiscountOverview = ({ className }: { className?: string }) => (
-  <div
-    className={cn("mx-auto max-w-7xl px-6 lg:px-8 pt-8", className)}
-    id="discounts"
-  >
+const DiscountOverview = () => (
+  <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-8 mt-8" id="discounts">
     <div className="mx-auto max-w-4xl">
       <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary">
         Discounts
