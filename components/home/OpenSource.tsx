@@ -12,6 +12,8 @@ import discussionsData from "../../src/langfuse_github_discussions.json";
 import IconAWS from "../icons/aws";
 import IconAzure from "../icons/azure";
 import IconGCP from "../icons/gcp";
+import IconDocker from "../icons/docker";
+import IconKubernetes from "../icons/kubernetes";
 
 // Discussion item interface
 interface Discussion {
@@ -304,7 +306,9 @@ export default function OpenSource() {
                   >
                     <Link href="/self-hosting/deployment/docker-compose">
                       <span className="flex items-center gap-2">
-                        <span>🐳</span>
+                        <span>
+                          <IconDocker />
+                        </span>
                         Docker Compose
                       </span>
                     </Link>
@@ -318,7 +322,9 @@ export default function OpenSource() {
                   >
                     <Link href="/self-hosting/deployment/kubernetes-helm">
                       <span className="flex items-center gap-2">
-                        <span>⚓</span>
+                        <span>
+                          <IconKubernetes />
+                        </span>
                         Kubernetes (Helm)
                       </span>
                     </Link>
