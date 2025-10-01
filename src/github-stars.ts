@@ -1,1 +1,1 @@
-export const GITHUB_STARS = 16627;
+export const GITHUB_STARS = 16683;
