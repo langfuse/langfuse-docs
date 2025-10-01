@@ -799,6 +799,7 @@ const sections: Section[] = [
       },
       {
         name: "SLA",
+        href: "/enterprise#faq",
         tiers: {
           cloud: {
             Hobby: false,
@@ -932,6 +933,7 @@ const sections: Section[] = [
       },
       {
         name: "Support SLA",
+        href: "/enterprise#faq",
         tiers: {
           cloud: {
             Hobby: false,
