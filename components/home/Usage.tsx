@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
   const stats = [
-    { name: "SDK installs / month", value: 11_800_000, showPlus: true },
+    { name: "SDK installs / month", value: 14_800_000, showPlus: true },
     { name: "GitHub stars", value: getGitHubStars(), showPlus: false },
     { name: "Docker pulls", value: 6_000_000, showPlus: true },
   ];
