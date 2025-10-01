@@ -13,7 +13,7 @@ export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
 
   return (
     <div className={cn(!noPadding && "py-14")}>
-      <h2 className="text-center text-lg font-semibold leading-8 mb-8">
+      <h2 className="text-center text-lg font-semibold leading-8 mb-8 text-balance">
         Teams building complex LLM apps rely on Langfuse
       </h2>
       <div className="flex flex-col gap-8">
