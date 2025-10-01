@@ -4,8 +4,7 @@ Our internal analytics across teams/functions is based on a central analytics st
 
 ## Goals
 
-- A maintainable path from raw product data → dbt-modeled **marts** in BigQuery → **Metabase** dashboards. Underlying systems change, the core business metrics need to be maintainable/testable.
-- Keep logic in **dbt**, keep **Metabase** simple (no ad-hoc SQL on raw tables).
+- A maintainable path from raw product data to core business/product metrics. The core business metrics need to be maintainable/testable while underlying systems change.
 - If we discuss a metric, it is clearly understood and documented what it means and how it is calculated.
 
 ## Data Flow
@@ -69,7 +68,7 @@ The Langfuse analytics stack consists of multiple data sources that feed into Bi
 
 ## Adding a new metric
 
-### Golden rules
+### "Rules"
 
 - ✅ Put business logic in **dbt**.
 - ✅ Build dashboards on **marts** only.

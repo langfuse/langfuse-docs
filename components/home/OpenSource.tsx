@@ -12,6 +12,8 @@ import discussionsData from "../../src/langfuse_github_discussions.json";
 import IconAWS from "../icons/aws";
 import IconAzure from "../icons/azure";
 import IconGCP from "../icons/gcp";
+import IconDocker from "../icons/docker";
+import IconKubernetes from "../icons/kubernetes";
 
 // Discussion item interface
 interface Discussion {
@@ -174,19 +176,6 @@ const ideasDiscussionsTop50 = ideasDiscussions.slice(0, 20);
 const supportCount = supportDiscussions.length;
 const ideasCount = ideasDiscussions.length;
 
-// Get latest activity times
-const getLatestActivity = (discussions: any[]) => {
-  if (discussions.length === 0) return null;
-  const latest = discussions.reduce((latest, discussion) => {
-    const discussionDate = new Date(discussion.updated_at);
-    return discussionDate > latest ? discussionDate : latest;
-  }, new Date(0));
-  return latest;
-};
-
-const latestSupportActivity = getLatestActivity(supportDiscussions);
-const latestIdeasActivity = getLatestActivity(ideasDiscussions);
-
 export default function OpenSource() {
   const [releaseData, setReleaseData] = useState<ReleaseData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -317,7 +306,9 @@ export default function OpenSource() {
                   >
                     <Link href="/self-hosting/deployment/docker-compose">
                       <span className="flex items-center gap-2">
-                        <span>🐳</span>
+                        <span>
+                          <IconDocker />
+                        </span>
                         Docker Compose
                       </span>
                     </Link>
@@ -331,7 +322,9 @@ export default function OpenSource() {
                   >
                     <Link href="/self-hosting/deployment/kubernetes-helm">
                       <span className="flex items-center gap-2">
-                        <span>⚓</span>
+                        <span>
+                          <IconKubernetes />
+                        </span>
                         Kubernetes (Helm)
                       </span>
                     </Link>
@@ -390,18 +383,18 @@ export default function OpenSource() {
           </div>
 
           <StatBox
-            title="# Community Q&A"
+            title="Community Q&A"
             mainValue={supportCount.toLocaleString()}
-            subtitle={`threads (last ${formatTimeDiff(latestSupportActivity)})`}
+            subtitle="threads"
             linkHref="/gh-support"
             isExternal={true}
             discussions={supportDiscussionsTop50}
           />
 
           <StatBox
-            title="# Feature Discussions"
+            title="Roadmap Discussions"
             mainValue={ideasCount.toLocaleString()}
-            subtitle={`threads (last ${formatTimeDiff(latestIdeasActivity)})`}
+            subtitle="threads"
             linkHref="/ideas"
             isExternal={true}
             discussions={ideasDiscussionsTop50}
