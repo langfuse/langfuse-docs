@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -34,28 +34,44 @@ const pricingTiers = [
   { min: 50000001, max: Infinity, rate: 6, description: "50M+ units" },
 ];
 
-// Calculate graduated pricing
-const calculateGraduatedPrice = (events: number): number => {
-  if (events <= 100000) return 0; // First 100k are free
+// Calculate pricing breakdown for all tiers
+type TierBreakdown = {
+  tier: (typeof pricingTiers)[0];
+  eventsInTier: number;
+  costForTier: number;
+  tierRate: string;
+};
 
-  let totalCost = 0;
-  let processedEvents = 100000; // Start after free tier
+const calculatePricingBreakdown = (events: number): TierBreakdown[] => {
+  return pricingTiers.map((tier, index) => {
+    let eventsInTier = 0;
+    let costForTier = 0;
+    let tierRate = "";
 
-  for (let i = 1; i < pricingTiers.length; i++) {
-    const tier = pricingTiers[i];
-    if (events <= processedEvents) break;
-
-    const tierStart = Math.max(processedEvents, tier.min);
-    const tierEnd = tier.max === Infinity ? events : Math.min(events, tier.max);
-    const eventsInTier = tierEnd - tierStart;
-
-    if (eventsInTier > 0) {
-      totalCost += (eventsInTier / 100000) * tier.rate;
-      processedEvents = tierEnd;
+    if (index === 0) {
+      // Free tier
+      eventsInTier = Math.min(events, 100000);
+      costForTier = 0;
+      tierRate = "Free";
+    } else {
+      // Paid tiers
+      if (events >= tier.min) {
+        const tierStart = tier.min;
+        const tierEnd =
+          tier.max === Infinity ? events : Math.min(events, tier.max);
+        eventsInTier = Math.max(0, tierEnd - tierStart + 1);
+        costForTier = (eventsInTier / 100000) * tier.rate;
+      }
+      tierRate = `$${tier.rate}/100k`;
     }
-  }
 
-  return Math.round(totalCost * 100) / 100;
+    return {
+      tier,
+      eventsInTier,
+      costForTier,
+      tierRate,
+    };
+  });
 };
 
 // Plan configuration
@@ -87,53 +103,31 @@ const formatEventsInput = (value: string) => {
   return numbersOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-// Calculate events and cost for a specific tier
-const calculateTierBreakdown = (
-  events: number,
-  tier: (typeof pricingTiers)[0],
-  index: number
-) => {
-  let eventsInTier = 0;
-  let costForTier = 0;
-  let tierRate = "";
-
-  if (index === 0) {
-    // Free tier
-    eventsInTier = Math.min(events, 100000);
-    costForTier = 0;
-    tierRate = "Free";
-  } else {
-    // Paid tiers
-    if (events >= tier.min) {
-      const tierStart = tier.min;
-      const tierEnd =
-        tier.max === Infinity ? events : Math.min(events, tier.max);
-      eventsInTier = Math.max(0, tierEnd - tierStart + 1);
-      costForTier = (eventsInTier / 100000) * tier.rate;
-    }
-    tierRate = `$${tier.rate}/100k`;
-  }
-
-  return { eventsInTier, costForTier, tierRate };
-};
-
 export function PricingCalculator({
   initialPlan = "Core",
 }: {
   initialPlan?: string;
 }) {
   const [monthlyEvents, setMonthlyEvents] = useState<string>("200,000");
-  const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
   const [selectedPlan, setSelectedPlan] = useState<string>(initialPlan);
   const [currentBaseFee, setCurrentBaseFee] = useState<number>(
     PLAN_CONFIGS.find((p) => p.name === initialPlan)?.baseFee || 0
   );
 
-  // Calculate price when events change
-  useEffect(() => {
+  // Calculate pricing breakdown (single source of truth)
+  const pricingBreakdown = useMemo(() => {
     const events = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
-    setCalculatedPrice(calculateGraduatedPrice(events));
+    return calculatePricingBreakdown(events);
   }, [monthlyEvents]);
+
+  // Derive total cost from breakdown
+  const calculatedPrice = useMemo(() => {
+    const total = pricingBreakdown.reduce(
+      (sum, item) => sum + item.costForTier,
+      0
+    );
+    return Math.round(total * 100) / 100;
+  }, [pricingBreakdown]);
 
   const handlePlanChange = (value: string) => {
     const newPlan = PLAN_CONFIGS.find((plan) => plan.name === value);
@@ -255,11 +249,9 @@ export function PricingCalculator({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pricingTiers.map((tier, index) => {
-                    const events =
-                      parseInt(monthlyEvents.replace(/,/g, "")) || 0;
-                    const { eventsInTier, costForTier, tierRate } =
-                      calculateTierBreakdown(events, tier, index);
+                  {pricingBreakdown.map((breakdown, index) => {
+                    const { tier, eventsInTier, costForTier, tierRate } =
+                      breakdown;
 
                     return (
                       <TableRow key={index}>
