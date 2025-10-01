@@ -75,6 +75,9 @@ export function Hero() {
           <Button variant="secondary" size="lg" asChild>
             <Link href="/docs">View docs</Link>
           </Button>
+          <Button variant="secondary" size="lg" asChild>
+            <Link href="/self-hosting">Deploy self-hosted</Link>
+          </Button>
         </div>
       </div>
 
