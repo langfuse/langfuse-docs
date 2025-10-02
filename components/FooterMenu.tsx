@@ -243,6 +243,7 @@ const FooterMenu = () => {
                     <Link
                       href={item.href}
                       className="text-sm hover:text-primary/80"
+                      prefetch={false}
                     >
                       {item.name}
                     </Link>
