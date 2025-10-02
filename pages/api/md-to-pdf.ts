@@ -8,6 +8,31 @@ const ALLOWED_HOSTNAMES = [
   "github.com",
 ];
 
+/**
+ * Remove anchor tags from headings (e.g., [#anchor-id])
+ * These are useful for web navigation but not needed in PDFs
+ */
+function removeAnchorTags(content: string): string {
+  // Match [#anchor-id] at the end of headings
+  return content.replace(/\s*\[#[\w-]+\]/g, "");
+}
+
+/**
+ * Process MDX Callout components and convert them to HTML divs
+ * Supports types: info, warn, warning, error, danger
+ */
+function processCallouts(content: string): string {
+  // Match <Callout type="...">...</Callout> (including self-closing and multiline)
+  const calloutRegex =
+    /<Callout\s+type=["'](\w+)["']\s*>([\s\S]*?)<\/Callout>/g;
+
+  return content.replace(calloutRegex, (match, type, innerContent) => {
+    // The innerContent might contain markdown that will be processed later
+    // Wrap it in a special div that we'll style
+    return `<div class="callout callout-${type}">${innerContent}</div>`;
+  });
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -61,8 +86,14 @@ export default async function handler(
       ""
     );
 
+    // Remove anchor tags from headings (not needed in PDF)
+    markdownContent = removeAnchorTags(markdownContent);
+
     // Convert markdown to HTML
-    const htmlContent = await marked.parse(markdownContent);
+    let htmlContent = await marked.parse(markdownContent);
+
+    // Process Callout components in the HTML
+    htmlContent = processCallouts(htmlContent);
 
     // Create a complete HTML document with styling
     const fullHtml = `
@@ -158,6 +189,35 @@ export default async function handler(
             .source-url strong {
               color: #24292e;
               font-weight: 600;
+            }
+            /* Callout component styles */
+            .callout {
+              padding: 16px;
+              margin: 16px 0;
+              border-radius: 6px;
+              border-left: 4px solid;
+              background-color: #f6f8fa;
+              page-break-inside: avoid;
+            }
+            .callout p:first-child {
+              margin-top: 0;
+            }
+            .callout p:last-child {
+              margin-bottom: 0;
+            }
+            .callout-info {
+              border-left-color: #0969da;
+              background-color: #ddf4ff;
+            }
+            .callout-warn,
+            .callout-warning {
+              border-left-color: #d4a72c;
+              background-color: #fff8dc;
+            }
+            .callout-error,
+            .callout-danger {
+              border-left-color: #cf222e;
+              background-color: #ffebe9;
             }
           </style>
         </head>
