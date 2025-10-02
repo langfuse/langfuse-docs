@@ -53,4 +53,5 @@ export default {
     href: "/privacy",
     newWindow: true,
   },
+  nda: "NDA",
 };
