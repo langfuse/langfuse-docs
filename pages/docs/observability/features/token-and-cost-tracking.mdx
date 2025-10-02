@@ -11,7 +11,7 @@ sidebarTitle: Token & Cost Tracking
   UI](https://static.langfuse.com/250108_model_cost_breakdown.gif)
 </Frame>
 
-Langfuse tracks the usage and costs of your LLM generations and provides breakdowns by usage types.
+Langfuse tracks the usage and costs of your LLM generations and provides breakdowns by usage types. Use and cost can be tracked on observations of type `generation` and `embedding`, see [here](docs/observability/features/observation-types).
 
 - **Usage details**: number of units consumed per usage type
 - **Cost details**: USD cost per usage type
@@ -441,6 +441,7 @@ For more details, see [the OpenAI guide](https://platform.openai.com/docs/guides
 ## Troubleshooting
 
 - If you change the model definition, the updated costs will only be applied to new generations logged to Langfuse.
+- Only observations of type `generation` and `embedding` can track costs and usage.
 
 ## GitHub Discussions
 

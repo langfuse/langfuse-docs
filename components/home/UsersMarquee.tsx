@@ -114,7 +114,7 @@ const UserLogo = ({ user }: { user: User }) => {
 export const UsersMarquee = () => {
   return (
     <HomeSection className="pt-2 sm:pt-2 lg:pt-2 xl:pt-2">
-      <h2 className="text-center text-lg font-semibold leading-8 mb-6">
+      <h2 className="text-center text-lg font-semibold leading-8 mb-6 text-balance">
         Teams building complex LLM apps rely on Langfuse
       </h2>
       <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden">

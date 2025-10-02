@@ -1,6 +1,7 @@
 export type TrustedByCustomer = {
   name: string;
   logo: string;
+  caseStudyUrl?: string;
 };
 
 export type TrustedByData = {
@@ -11,26 +12,38 @@ export type TrustedByData = {
 
 export const trustedByData: TrustedByData = {
   cloud: {
-    "Hobby": [
+    Hobby: [
       // No logos assigned to Hobby plan yet
     ],
-    "Core": [
+    Core: [
       //{ name: "Knowunity", logo: "/images/customers/picing-logos/knowunity.png" },
       { name: "Kombo", logo: "/images/customers/picing-logos/kombo.png" },
       { name: "Draftbit", logo: "/images/customers/picing-logos/draftbit.png" },
       //{ name: "GoDaddy", logo: "/images/customers/picing-logos/godaddy.png" },
     ],
-    "Pro": [
+    Pro: [
       { name: "Twilio", logo: "/images/customers/picing-logos/twilio.png" },
-      { name: "SumUp", logo: "/images/customers/picing-logos/sumup.png" },
+      {
+        name: "SumUp",
+        logo: "/images/customers/picing-logos/sumup.png",
+        caseStudyUrl: "/customers/sumup",
+      },
       //{ name: "Brevo", logo: "/images/customers/picing-logos/brevo.png" },
-      
     ],
-    "Enterprise": [
-      { name: "Khan Academy", logo: "/images/customers/picing-logos/khanacademy.png" },
+    Enterprise: [
+      {
+        name: "Khan Academy",
+        logo: "/images/customers/picing-logos/khanacademy.png",
+        caseStudyUrl: "/customers/khan-academy",
+      },
+      {
+        name: "Merck Group",
+        logo: "/images/customers/picing-logos/merckgroup.png",
+        caseStudyUrl: "/customers/merckgroup",
+      },
       //{ name: "Cinc Systems", logo: "/images/customers/picing-logos/cincsystems.png" },
       //{ name: "HG Capital", logo: "/images/customers/picing-logos/hgcapital.png" },
       //{ name: "Dixa", logo: "/images/customers/picing-logos/dixa.png" },
     ],
   },
-}; 
+};
