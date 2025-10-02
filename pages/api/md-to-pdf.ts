@@ -1,6 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { marked } from "marked";
 
+// Allowed hostnames for markdown sourcing. Only fetch markdown from trusted hosts.
+const ALLOWED_HOSTNAMES = [
+  "raw.githubusercontent.com", // GitHub raw files
+  "github.com",                // GitHub
+  "gitlab.com",                // GitLab
+  // Add more if other trusted sources are needed
+];
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -22,6 +30,14 @@ export default async function handler(
     } catch (error) {
       return res.status(400).json({
         error: "Invalid URL format",
+      });
+    }
+
+    // Check hostname against allow-list to prevent SSRF
+    if (!ALLOWED_HOSTNAMES.includes(markdownUrl.hostname)) {
+      return res.status(400).json({
+        error: `Fetching from ${markdownUrl.hostname} is not permitted.`,
+        allowed: ALLOWED_HOSTNAMES
       });
     }
 
