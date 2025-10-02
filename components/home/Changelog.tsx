@@ -27,14 +27,11 @@ export default function Changelog({ className }: { className?: string }) {
 
   return (
     <div
-      className={cn(
-        "rounded border p-5 max-w-lg mx-5 sm:mx-auto bg-card",
-        className
-      )}
+      className={cn("rounded border p-5 bg-card", className)}
       role="region" // Added role for the container
       aria-labelledby="changelog-heading" // Added aria-labelledby to reference the heading
     >
-      <div className="px-5 py-2 text-center -mt-5 -mx-5 mb-5 border-b font-medium">
+      <div className="px-5 py-2 text-center -mt-5 -mx-5 mb-5 border-b font-medium text-xs sm:text-base">
         <h3 id="changelog-heading">Changelog</h3>{" "}
         {/* Added id to the heading */}
       </div>

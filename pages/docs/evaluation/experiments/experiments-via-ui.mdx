@@ -204,12 +204,20 @@ Dataset Runs are currently started from the detail page of a dataset.
 2. **Select** the prompt you want to use
 3. **Set up or select** the LLM connection you want to use
 4. **Select** the dataset you want to use
-5. **Optionally select** the evaluator you want to use
-6. **Click on** `Create` to trigger the Dataset Run
+5. **Optionally configure structured output** - Toggle on to enforce a JSON schema response format
+   - Select an existing schema from your project or create a new one
+   - Schemas can be created and saved in the [Playground](/docs/playground) and reused here
+   - View/edit schemas using the eye icon next to the schema selector
+6. **Optionally select** the evaluator you want to use
+7. **Click on** `Create` to trigger the Dataset Run
 
 <Frame border>
   ![New Experiment Button](/images/docs/configure_dataset_run.png)
 </Frame>
+
+<Callout type="info">
+**Structured output** ensures that LLM responses conform to a specific JSON schema. This is useful when you need consistent, parseable outputs for evaluation or downstream processing. The same schemas you define in the Playground are available for use in experiments.
+</Callout>
 
 This will trigger the Dataset Run and you will be redirected to the Dataset Runs page. The run might take a few seconds or minutes to complete depending on the prompt complexity and dataset size.
 
