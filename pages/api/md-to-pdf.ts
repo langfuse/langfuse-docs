@@ -254,46 +254,49 @@ export default async function handler(
       });
     }
 
-    const page = await browser.newPage();
-    await page.setContent(fullHtml, { waitUntil: "networkidle0" });
+    try {
+      const page = await browser.newPage();
+      await page.setContent(fullHtml, { waitUntil: "networkidle0" });
 
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: {
-        top: "1cm",
-        right: "1cm",
-        bottom: "1cm",
-        left: "1cm",
-      },
-    });
+      const pdf = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: {
+          top: "1cm",
+          right: "1cm",
+          bottom: "1cm",
+          left: "1cm",
+        },
+      });
 
-    await browser.close();
+      // Extract filename from URL
+      const pathname = markdownUrl.pathname;
+      const filename = pathname.split("/").pop() || "document.md";
+      const pdfFilename = filename.replace(/\.mdx?$/i, ".pdf");
 
-    // Extract filename from URL
-    const pathname = markdownUrl.pathname;
-    const filename = pathname.split("/").pop() || "document.md";
-    const pdfFilename = filename.replace(/\.mdx?$/i, ".pdf");
+      // Determine content disposition (default to inline)
+      const contentDisposition =
+        disposition === "download" ? "attachment" : "inline";
 
-    // Determine content disposition (default to inline)
-    const contentDisposition =
-      disposition === "download" ? "attachment" : "inline";
+      // Set response headers
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `${contentDisposition}; filename="${pdfFilename}"`
+      );
+      res.setHeader("Content-Length", pdf.length);
+      // Cache for 60 seconds on CDN, serve stale while revalidating for 24 hours
+      res.setHeader(
+        "Cache-Control",
+        "public, s-maxage=60, stale-while-revalidate=86400"
+      );
 
-    // Set response headers
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `${contentDisposition}; filename="${pdfFilename}"`
-    );
-    res.setHeader("Content-Length", pdf.length);
-    // Cache for 60 seconds on CDN, serve stale while revalidating for 24 hours
-    res.setHeader(
-      "Cache-Control",
-      "public, s-maxage=60, stale-while-revalidate=86400"
-    );
-
-    // Send the PDF as a buffer
-    res.status(200).end(pdf);
+      // Send the PDF as a buffer
+      res.status(200).end(pdf);
+    } finally {
+      // Ensure browser is always closed, even if an error occurs
+      await browser.close();
+    }
   } catch (error) {
     console.error("Error generating PDF:", error);
     res.status(500).json({
