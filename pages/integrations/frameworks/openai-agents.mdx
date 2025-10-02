@@ -17,11 +17,11 @@ This notebook demonstrates how to **integrate Langfuse** into your **OpenAI Agen
 
 ## 1. Install Dependencies
 
-Below we install the `openai-agents` library (the OpenAI Agents SDK), and the `pydantic-ai[logfire]` OpenTelemetry instrumentation.
+Below we install the `openai-agents` library (the OpenAI Agents SDK), and the [OpenInference OpenAI Agents instrumentation](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-openai-agents) library.
 
 
 ```python
-%pip install openai-agents langfuse nest_asyncio "pydantic-ai[logfire]"
+%pip install openai-agents langfuse nest_asyncio openinference-instrumentation-openai-agents
 ```
 
 ## 2. Configure Environment & Langfuse Credentials
@@ -44,25 +44,19 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 ## 3. Instrumenting the Agent
 
-Pydantic Logfire offers an instrumentation for the OpenAi Agent SDK. We use this to send traces to Langfuse.
-
 
 ```python
 import nest_asyncio
 nest_asyncio.apply()
 ```
 
+Now, we initialize the [OpenInference OpenAI Agents instrumentation](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-openai-agents). This third-party instrumentation automatically captures OpenAI Agents operations and exports OpenTelemetry (OTel) spans to Langfuse.
+
 
 ```python
-import logfire
+from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
 
-# Configure logfire instrumentation.
-logfire.configure(
-    service_name='my_agent_service',
-    send_to_logfire=False,
-)
-# This method automatically patches the OpenAI Agents SDK to send logs via OTLP to Langfuse.
-logfire.instrument_openai_agents()
+OpenAIAgentsInstrumentor().instrument()
 ```
 
 Now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
@@ -105,7 +99,7 @@ await loop.create_task(main())
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace.png)
 
-**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c7330da67c08219bd1c75b7a6d?timestamp=2025-03-14T08%3A31%3A00.365Z&observation=81e525d819153eed)
+**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/483a2afb22b41ee49d7d1e5b41b4967a?timestamp=2025-09-30T09%3A01%3A29.194Z&observation=e3e3580728f3fec4)
 
 Clicking the link above (or your own project link) lets you view all sub-spans, token usage, latencies, etc., for debugging or optimization.
 
@@ -145,7 +139,7 @@ print(result.final_output)
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace-handoff.png)
 
-**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c74429a6d0489e9259703a1148?timestamp=2025-03-14T08%3A31%3A04.745Z&observation=e83609282c443b0d)
+**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c376e44920527b875add9d97b4ed9312?observation=94a1dc00d7067ae8&timestamp=2025-09-30T09%3A03%3A51.191Z)
 
 ## 6. Functions Example
 
@@ -178,7 +172,7 @@ await loop.create_task(main())
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace-function.png)
 
-**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c74a162f93387d9261b01f9ca9?timestamp=2025-03-14T08%3A31%3A06.262Z&observation=0e2988966786cdf4)
+**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/fee618f96dc31e0ca38b2f7b26eb8b29?timestamp=2025-09-30T09%3A03%3A59.962Z&observation=5b99c3e3411ed17b)
 
 When viewing the trace, you’ll see a span capturing the function call `get_weather` and the arguments passed.
 
@@ -207,7 +201,7 @@ await loop.create_task(main())
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace-grouped.png)
 
-**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c7523686ff7667b85673d033bf?timestamp=2025-03-14T08%3A31%3A08.342Z&observation=d69e377f62b1d331)
+**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/afa1ae379b6c3a5333e2bab357f31cdc?timestamp=2025-09-30T09%3A04%3A06.678Z&observation=496efdc060a5399b)
 
 Each child call is represented as a sub-span under the top-level **Joke workflow** span, making it easy to see the entire conversation or sequence of calls.
 
@@ -223,37 +217,35 @@ If you manage your prompt with [Langfuse Prompt Management](https://langfuse.com
 ```python
 from contextvars import ContextVar
 from typing import Optional
-from opentelemetry import context as context_api
+from opentelemetry import context as context_api, trace
+from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import Span, SpanProcessor
 
 prompt_info_var = ContextVar("prompt_info", default=None)
 
+# Make sure to set the name of the generation spans in your trace
 class LangfuseProcessor(SpanProcessor):
-    def on_start(
-        self,
-        span: 'Span',
-        parent_context: Optional[context_api.Context] = None,
-    ) -> None:
-        if span.name.startswith('Responses API'): # The name of the generation spans in your OpenAI Agent trace 
+    def on_start(self, span: "Span", parent_context: Optional[context_api.Context] = None) -> None:
+        if span.name.startswith("response"): # The name of the generation spans in your trace 
             prompt_info = prompt_info_var.get()
             if prompt_info:
-                span.set_attribute('langfuse.prompt.name', prompt_info.get("name"))
-                span.set_attribute('langfuse.prompt.version', prompt_info.get("version"))
+                span.set_attribute("langfuse.prompt.name", prompt_info.get("name"))
+                span.set_attribute("langfuse.prompt.version", prompt_info.get("version"))
+
+
+# 1) Register your processor BEFORE instantiating Langfuse
+trace.get_tracer_provider().add_span_processor(LangfuseProcessor())
+
+# 2) Now bring up Langfuse (it will attach its own span processor/exporter to the same provider)
+from langfuse import Langfuse, get_client
+langfuse = get_client()
 ```
 
 
 ```python
-import logfire
-from langfuse import get_client
+from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
 
-logfire.configure(
-    service_name='my_agent_service',
-    additional_span_processors=[LangfuseProcessor()], # Passing the LangfuseProcessor to the logfire configuration will automatically link the prompt to the trace
-    send_to_logfire=False,
-)
-
-logfire.instrument_openai_agents()
-langfuse = get_client()
+OpenAIAgentsInstrumentor().instrument()
 ```
 
 

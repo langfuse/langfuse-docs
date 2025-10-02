@@ -10,13 +10,13 @@ import { ToAppButton } from "./components/ToAppButton";
 import { DocsContributors } from "./components/DocsContributors";
 import { COOKBOOK_ROUTE_MAPPING } from "./lib/cookbook_route_mapping";
 import { GeistSans } from "geist/font/sans";
-import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
 import { AvailabilityBanner } from "./components/availability";
 import { Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import { LangTabs } from "./components/LangTabs";
+// import IconYoutube from "./components/icons/youtube";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -29,15 +29,14 @@ const config: DocsThemeConfig = {
   navbar: {
     extraContent: (
       <>
-        <a
+        {/* <a
           className="p-1 hidden lg:inline-block hover:opacity-80"
           target="_blank"
-          href="https://discord.langfuse.com"
-          aria-label="Langfuse Discord"
+          href="https://www.youtube.com/@langfuse"
+          aria-label="Langfuse YouTube"
         >
-          <IconDiscord className="h-7 w-7" />
-        </a>
-
+          <IconYoutube className="h-7 w-7" />
+        </a> */}
         <a
           className="p-1 hidden lg:inline-block hover:opacity-80"
           target="_blank"
@@ -126,6 +125,8 @@ const config: DocsThemeConfig = {
         ? "%s - Langfuse Blog"
         : asPath.startsWith("/docs/guides/")
         ? "%s - Langfuse Guides"
+        : asPath.startsWith("/handbook/")
+        ? "%s - Langfuse Handbook"
         : "%s - Langfuse";
 
     const isDev =

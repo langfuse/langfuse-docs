@@ -10,6 +10,7 @@ export default {
     href: "/docs/audit-logs",
     newWindow: true,
   },
+  "ai-features": "AI Features",
   encryption: "Encryption",
   "data-regions": "Data Regions & Availability",
   networking: "Networking & IP Ranges",
@@ -28,6 +29,7 @@ export default {
   soc2: "SOC 2 Type II",
   iso27001: "ISO 27001",
   hipaa: "HIPAA",
+  "compliance-faq": "Compliance FAQ",
   "-- Privacy": {
     type: "separator",
     title: "Privacy",
@@ -51,4 +53,5 @@ export default {
     href: "/privacy",
     newWindow: true,
   },
+  nda: "NDA",
 };
