@@ -6,14 +6,14 @@ import { cn } from "@/lib/utils";
 
 export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
   const stats = [
-    { name: "SDK installs / month", value: 11_800_000, showPlus: true },
+    { name: "SDK installs / month", value: 14_800_000, showPlus: true },
     { name: "GitHub stars", value: getGitHubStars(), showPlus: false },
     { name: "Docker pulls", value: 6_000_000, showPlus: true },
   ];
 
   return (
     <div className={cn(!noPadding && "py-14")}>
-      <h2 className="text-center text-lg font-semibold leading-8 mb-8">
+      <h2 className="text-center text-lg font-semibold leading-8 mb-8 text-balance">
         Teams building complex LLM apps rely on Langfuse
       </h2>
       <div className="flex flex-col gap-8">

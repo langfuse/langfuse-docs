@@ -101,6 +101,7 @@ export const FeatureTabs = ({
   }, [router.query.tab, features, defaultTab]);
 
   const tabListRef = useRef<HTMLDivElement>(null);
+  const tabListScrollRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -204,8 +205,8 @@ export const FeatureTabs = ({
 
   // Scroll active tab into view (for mobile)
   useEffect(() => {
-    if (tabListRef.current && tabRefs.current[state.focusedIndex]) {
-      const tabList = tabListRef.current;
+    if (tabListScrollRef.current && tabRefs.current[state.focusedIndex]) {
+      const tabList = tabListScrollRef.current;
       const activeTabButton = tabRefs.current[state.focusedIndex];
 
       if (activeTabButton) {
@@ -216,10 +217,16 @@ export const FeatureTabs = ({
           activeTabRect.left < tabListRect.left ||
           activeTabRect.right > tabListRect.right
         ) {
-          activeTabButton.scrollIntoView({
+          // Calculate the scroll position needed
+          const scrollLeft =
+            activeTabButton.offsetLeft -
+            tabList.clientWidth / 2 +
+            activeTabButton.clientWidth / 2;
+
+          // Smooth scroll the container only (not the viewport)
+          tabList.scrollTo({
+            left: scrollLeft,
             behavior: "smooth",
-            block: "nearest",
-            inline: "center",
           });
         }
       }
@@ -370,7 +377,10 @@ export const FeatureTabs = ({
             className="p-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             onKeyDown={handleKeyDown}
           >
-            <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-0 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div
+              ref={tabListScrollRef}
+              className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-0 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
               {features.map((feature, index) => (
                 <TabButton
                   key={feature.id}
