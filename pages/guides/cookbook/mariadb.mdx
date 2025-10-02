@@ -1,7 +1,14 @@
+---
+title: Langfuse Integration with MariaDB Vector Store Documentation
+sidebarTitle: MariaDB
+description: Guide on integrating Langfuse for tracing with a MariaDB vector store using LangChain and Sentence Transformers.
+category: Integrations
+---
+
 # Langfuse Integration with MariaDB Vector Store Documentation
 
 ## Overview
-This document describes a Python script (`main.py`) that integrates Langfuse for tracing with a MariaDB vector store using LangChain and Sentence Transformers. The script demonstrates how to:
+This document describes a Python script (`main.py`) that integrates Langfuse for tracing with a [MariaDB](https://mariadb.org/) vector store using LangChain and Sentence Transformers. The script demonstrates how to:
 - Initialize a Sentence Transformer model for embeddings.
 - Set up Langfuse for tracing application logic.
 - Configure a MariaDB vector store.
@@ -32,16 +39,23 @@ To run the script, ensure the following are installed and configured:
 - **Langfuse Account**: Sign up at [Langfuse](https://cloud.langfuse.com) to obtain `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY`.
 
 ## Installation
+
 1. Clone the repository or copy the script to your local environment.
+
 2. Install the required Python packages:
+
    ```bash
    pip install langfuse langchain-mariadb langchain-community sentence-transformers python-dotenv
    ```
+
 3. Set up the `.env` file with your credentials.
+
 4. Ensure MariaDB is running and accessible at `localhost` with the database `langchain` created.
 
 ## Code Structure
 The script (`main.py`) is structured as follows:
+
+<Steps>
 
 ### 1. Importing Dependencies
 ```python
@@ -77,7 +91,9 @@ model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 os.environ["LANGFUSE_PUBLIC_KEY"] = os.getenv("LANGFUSE_PUBLIC_KEY")
 os.environ["LANGFUSE_SECRET_KEY"] = os.getenv("LANGFUSE_SECRET_KEY")
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+
 langfuse = get_client()
+
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
 else:
@@ -131,21 +147,30 @@ langfuse.flush()
 ```
 Ensures all trace data is sent to the Langfuse server.
 
+</Steps>
+
 ## Usage
+
 1. Ensure MariaDB is running and the `langchain` database exists.
+
 2. Populate the `.env` file with your Langfuse and MariaDB credentials.
+
 3. Run the script:
+
    ```bash
    python main.py
    ```
 4. Expected output:
+
    - Confirmation of Langfuse authentication.
    - Search results from the MariaDB vector store, e.g.:
      ```
      Langfuse client is authenticated and ready!
      Search results: [Document(page_content='The sun is a star.'), Document(page_content='The moon is a natural satellite.')]
      ```
+
 5. Check the Langfuse dashboard (`https://cloud.langfuse.com`) for trace details under the `mariadb-trace` span.
+
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a6ddd9dc-6dcb-4e52-913d-e8c3bf89c8d7" />
 
 
@@ -166,12 +191,3 @@ Ensures all trace data is sent to the Langfuse server.
 - **No Search Results**:
   - Verify that documents were added successfully to the vector store.
   - Ensure the query is relevant to the stored documents.
-
-## Future Improvements
-- Add error handling for MariaDB connections and query failures.
-- Support dynamic document ingestion from external sources.
-- Enhance Langfuse tracing with additional metadata (e.g., search latency, result count).
-- Allow configuration of the Sentence Transformer model via command-line arguments.
-
-## License
-This script is provided under the MIT License. See the repository's `LICENSE` file for details.
