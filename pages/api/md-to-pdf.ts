@@ -298,7 +298,7 @@ export default async function handler(
     console.error("Error generating PDF:", error);
     res.status(500).json({
       error: "Internal server error while generating PDF",
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: "An unexpected error occurred.",
     });
   }
 }
