@@ -273,6 +273,10 @@ function processLinks(links) {
             continue;
         }
 
+        // Do not validate pdf download links
+        if (processedLink.startsWith("http://localhost:3333/api/md-to-pdf"))
+            continue;
+
         // Final validation - make sure it's a valid URL format
         try {
             new URL(processedLink);
