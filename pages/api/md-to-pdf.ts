@@ -3,10 +3,9 @@ import { marked } from "marked";
 
 // Allowed hostnames for markdown sourcing. Only fetch markdown from trusted hosts.
 const ALLOWED_HOSTNAMES = [
-  "raw.githubusercontent.com", // GitHub raw files
-  "github.com",                // GitHub
-  "gitlab.com",                // GitLab
-  // Add more if other trusted sources are needed
+  "langfuse.com",
+  "raw.githubusercontent.com",
+  "github.com",
 ];
 
 export default async function handler(
@@ -37,7 +36,7 @@ export default async function handler(
     if (!ALLOWED_HOSTNAMES.includes(markdownUrl.hostname)) {
       return res.status(400).json({
         error: `Fetching from ${markdownUrl.hostname} is not permitted.`,
-        allowed: ALLOWED_HOSTNAMES
+        allowed: ALLOWED_HOSTNAMES,
       });
     }
 
