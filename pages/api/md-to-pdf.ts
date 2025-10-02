@@ -32,8 +32,12 @@ export default async function handler(
       });
     }
 
-    // Check hostname against allow-list to prevent SSRF
-    if (!ALLOWED_HOSTNAMES.includes(markdownUrl.hostname)) {
+    // Check hostname against allow-list to prevent SSRF in production
+    // Skip in dev to allow for tests against devserver
+    if (
+      process.env.NODE_ENV !== "development" &&
+      !ALLOWED_HOSTNAMES.includes(markdownUrl.hostname)
+    ) {
       return res.status(400).json({
         error: `Fetching from ${markdownUrl.hostname} is not permitted.`,
         allowed: ALLOWED_HOSTNAMES,
