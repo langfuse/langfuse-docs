@@ -37,7 +37,7 @@ Create a project in [Langfuse](https://cloud.langfuse.com) and get your API keys
 
 ### Add environment variables
 
-Create or update your `.env.development` file with the following variables:
+Create or update your `.env.development` (or `.env`) file with the following variables:
 
 ```bash
 # Your LLM API key
@@ -46,15 +46,15 @@ OPENAI_API_KEY=your-api-key
 # Langfuse credentials
 LANGFUSE_SECRET_KEY=sk-lf-...
 LANGFUSE_PUBLIC_KEY=pk-lf-...
-LANGFUSE_HOST=https://cloud.langfuse.com # Optional. Defaults to https://cloud.langfuse.com
+LANGFUSE_BASE_URL=https://cloud.langfuse.com # Optional. Defaults to https://cloud.langfuse.com
 ```
 
-### Install the `langfuse-vercel` package
+### Install the `@mastra/langfuse` package
 
-Add the `langfuse-vercel` package to your project:
+Add the `@mastra/langfuse` package to your project:
 
 ```bash
-npm install langfuse-vercel
+npm install @mastra/langfuse
 ```
 
 ### Set up an agent
@@ -84,32 +84,30 @@ Create or update your Mastra instance configuration to register the agent and co
 
 ```typescript
 import { Mastra } from "@mastra/core";
-import { LangfuseExporter } from "langfuse-vercel";
+import { LangfuseExporter } from "@mastra/langfuse";
 import { chefAgent } from "./agents/chefAgent";
 
 export const mastra = new Mastra({
   agents: { chefAgent },
-  telemetry: {
-    serviceName: "ai", // this must be set to "ai" so that the LangfuseExporter thinks it's an AI SDK trace
-    enabled: true,
-    export: {
-      type: "custom",
-      exporter: new LangfuseExporter({
-        publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-        secretKey: process.env.LANGFUSE_SECRET_KEY,
-        baseUrl: process.env.LANGFUSE_HOST,
-      }),
+  observability: {
+    configs: {
+      langfuse: {
+        serviceName: "my-service",
+        exporters: [
+          new LangfuseExporter({
+            publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+            secretKey: process.env.LANGFUSE_SECRET_KEY!,
+            baseUrl: process.env.LANGFUSE_BASE_URL,
+            options: {
+              environment: process.env.NODE_ENV,
+            },
+          }),
+        ],
+      },
     },
   },
 });
 ```
-
-{" "}
-
-<Callout type="info">
-  The `telemetry.serviceName` field must be set to "ai" so that the
-  LangfuseExporter thinks it's an AI SDK trace.
-</Callout>
 
 ### Run mastra dev server
 
@@ -131,6 +129,54 @@ Here's an example of a trace:
 
 </Steps>
 
+## Configuration Options
+
+### Realtime vs Batch Mode
+
+The Langfuse exporter supports two modes for sending traces:
+
+- **Realtime (development)**: Flushes after each event for immediate visibility.
+
+```ts
+new LangfuseExporter({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+  secretKey: process.env.LANGFUSE_SECRET_KEY!,
+  realtime: true, // Flush after each event
+})
+```
+
+- **Batch (production, default)**: Buffers and sends in batches for better throughput.
+
+```ts
+new LangfuseExporter({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+  secretKey: process.env.LANGFUSE_SECRET_KEY!,
+  realtime: false, // Default behavior
+})
+```
+
+### Complete Configuration
+
+```ts
+new LangfuseExporter({
+  // Required credentials
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+  secretKey: process.env.LANGFUSE_SECRET_KEY!,
+
+  // Optional settings
+  baseUrl: process.env.LANGFUSE_BASE_URL, // Defaults to https://cloud.langfuse.com
+  realtime: process.env.NODE_ENV === "development",
+  logLevel: "info", // debug | info | warn | error
+
+  // Langfuse-specific options
+  options: {
+    environment: process.env.NODE_ENV,
+    version: process.env.APP_VERSION,
+    release: process.env.GIT_COMMIT,
+  },
+})
+```
+
 ## Troubleshooting
 
 - **NextJS Integration Issues**: If you encounter issues when using Mastra with Langfuse in NextJS applications, refer to the [Mastra NextJS tracing documentation](https://mastra.ai/en/docs/observability/nextjs-tracing) for NextJS-specific configuration and setup instructions.
@@ -138,7 +184,6 @@ Here's an example of a trace:
 
 ## References
 
-- [Project Repository](https://github.com/akuya-ekorot/langfuse-mastra)
-- [Mastra Documentation](https://mastra.ai/docs)
-- [Langfuse Documentation](https://langfuse.com/docs)
-- [langfuse-vercel package](https://www.npmjs.com/package/langfuse-vercel)
+- **Mastra Langfuse Exporter**: [Docs](https://mastra.ai/en/docs/observability/ai-tracing/exporters/langfuse), [npm](https://www.npmjs.com/package/@mastra/langfuse)
+- **Mastra Documentation**: https://mastra.ai/docs
+- **Langfuse Documentation**: https://langfuse.com/docs
