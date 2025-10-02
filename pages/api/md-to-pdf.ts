@@ -222,6 +222,11 @@ export default async function handler(
       `${contentDisposition}; filename="${pdfFilename}"`
     );
     res.setHeader("Content-Length", pdf.length);
+    // Cache for 60 seconds on CDN, serve stale while revalidating for 24 hours
+    res.setHeader(
+      "Cache-Control",
+      "public, s-maxage=60, stale-while-revalidate=86400"
+    );
 
     // Send the PDF as a buffer
     res.status(200).end(pdf);
