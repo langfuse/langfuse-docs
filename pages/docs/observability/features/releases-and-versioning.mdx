@@ -49,24 +49,6 @@ langfuse = Langfuse(release="v2.1.24")
 client = get_client()
 ```
 
-You can also update the trace's release after creation:
-
-```python
-from langfuse import observe, get_client
-
-@observe()
-def process_data():
-    # Get the client and update the current trace
-    langfuse = get_client()
-    langfuse.update_current_trace(release="v2.1.24")
-    # ...
-
-# With context managers
-langfuse = get_client()
-with langfuse.start_as_current_span(name="my-operation") as span:
-    span.update_trace(release="v2.1.24")
-```
-
 </Tab>
 <Tab>
 
