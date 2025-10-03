@@ -1093,7 +1093,7 @@ import { LangfuseClient } from "@langfuse/client";
 const langfuse = new LangfuseClient();
 
 for (const item of dataset.items) {
-  // execute application function and get langfuseObject (trace/span/generation/event)
+  // execute application function and get langfuseObject (trace/span/generation/event, and other observation types: see /docs/observability/features/observation-types)
   // output also returned as it is used to evaluate the run
   // you can also link using ids, see sdk reference for details
   const [span, output] = await myLlmApplication.run(item.input);

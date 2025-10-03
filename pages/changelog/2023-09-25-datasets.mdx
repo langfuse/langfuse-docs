@@ -24,7 +24,7 @@ _Run experiment on dataset_
 dataset = langfuse.get_dataset("<dataset_name>")
 
 for item in dataset.items:
-    # execute application function and get Langfuse parent observation (span/generation/event)
+    # execute application function and get Langfuse parent observation (span/generation/event, and other observation types: see /docs/observability/features/observation-types)
     # output also returned as it is used to evaluate the run
     generation, output = my_llm_application.run(item.input)
 
@@ -50,7 +50,7 @@ for item in dataset.items:
 const dataset = await langfuse.getDataset("<dataset_name>");
 
 for (const item of dataset.items) {
-  // execute application function and get Langfuse parent observation (span/generation/event)
+  // execute application function and get Langfuse parent observation (span/generation/event, and other observation types: see /docs/observability/features/observation-types)
   // output also returned as it is used to evaluate the run
   const [generation, output] = await myLlmApplication.run(item.input);
 
