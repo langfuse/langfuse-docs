@@ -3,7 +3,7 @@
 echo "Updating cookbook docs... (needs to be executed from the root directory)"
 
 # Convert notebooks to markdown using uv with inline dependencies
-uv run --with nbconvert --python 3.11 -- python -m nbconvert --to markdown cookbook/*.ipynb
+uv run --with nbconvert --python 3.12 -- python -m nbconvert --to markdown cookbook/*.ipynb
 
 # delete all files in pages/guides/cookbook/
 echo "Deleting all files in pages/guides/cookbook/"
@@ -12,6 +12,6 @@ find ./pages/guides/cookbook/ -type f -not -name "index.mdx" -not -name "_meta.t
 
 # script needs to be executed from the root directory
 echo "Moving docs..."
-uv run --python 3.11 -- python ./scripts/move_docs.py
+uv run --python 3.12 -- python ./scripts/move_docs.py
 
 echo "Done!"
