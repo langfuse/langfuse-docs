@@ -138,31 +138,51 @@ function VideoPlayer({
   const [countdown, setCountdown] = useState(5);
   const [isDismissed, setIsDismissed] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const progressCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isApiReady, setIsApiReady] = useState(false);
 
   const checkVideoProgress = useCallback(() => {
     if (!playerRef.current || !hasNextVideo) return;
 
-    const checkInterval = setInterval(() => {
+    // Clear any existing progress check interval
+    if (progressCheckIntervalRef.current) {
+      clearInterval(progressCheckIntervalRef.current);
+    }
+
+    progressCheckIntervalRef.current = setInterval(() => {
       if (!playerRef.current) {
-        clearInterval(checkInterval);
+        if (progressCheckIntervalRef.current) {
+          clearInterval(progressCheckIntervalRef.current);
+          progressCheckIntervalRef.current = null;
+        }
         return;
       }
 
-      const currentTime = playerRef.current.getCurrentTime();
-      const duration = playerRef.current.getDuration();
-      const timeRemaining = duration - currentTime;
+      try {
+        const currentTime = playerRef.current.getCurrentTime();
+        const duration = playerRef.current.getDuration();
+        const timeRemaining = duration - currentTime;
 
-      // Show overlay when 10 seconds remaining
-      if (timeRemaining <= 10 && timeRemaining > 0 && !isDismissed) {
-        setShowOverlay(true);
-      }
+        // Show overlay when 10 seconds remaining
+        if (timeRemaining <= 10 && timeRemaining > 0 && !isDismissed) {
+          setShowOverlay(true);
+        }
 
-      // Stop checking if video is paused or ended
-      const state = playerRef.current.getPlayerState();
-      if (state !== 1) {
-        // Not playing
-        clearInterval(checkInterval);
+        // Stop checking if video is paused or ended
+        const state = playerRef.current.getPlayerState();
+        if (state !== 1) {
+          // Not playing
+          if (progressCheckIntervalRef.current) {
+            clearInterval(progressCheckIntervalRef.current);
+            progressCheckIntervalRef.current = null;
+          }
+        }
+      } catch (e) {
+        // Player methods failed, likely destroyed - clear interval
+        if (progressCheckIntervalRef.current) {
+          clearInterval(progressCheckIntervalRef.current);
+          progressCheckIntervalRef.current = null;
+        }
       }
     }, 500);
   }, [hasNextVideo, isDismissed]);
@@ -313,14 +333,22 @@ function VideoPlayer({
     setCountdown(5);
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (progressCheckIntervalRef.current) {
+      clearInterval(progressCheckIntervalRef.current);
+      progressCheckIntervalRef.current = null;
     }
   }, [videoId]);
 
-  // Cleanup interval on unmount
+  // Cleanup intervals on unmount
   useEffect(() => {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+      }
+      if (progressCheckIntervalRef.current) {
+        clearInterval(progressCheckIntervalRef.current);
       }
     };
   }, []);
