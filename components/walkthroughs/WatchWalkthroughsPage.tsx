@@ -59,6 +59,7 @@ function VideoPlayer({
           clearInterval(progressCheckIntervalRef.current);
           progressCheckIntervalRef.current = null;
         }
+        isCheckingProgressRef.current = false;
         return;
       }
 
