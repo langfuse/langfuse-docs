@@ -291,13 +291,6 @@ export function WatchWalkthroughsPage() {
     return WALKTHROUGH_TABS[0].id;
   })();
 
-  // Get current tab index
-  const currentTabIndex = WALKTHROUGH_TABS.findIndex(
-    (tab) => tab.id === activeTab
-  );
-  const hasNextVideo = currentTabIndex < WALKTHROUGH_TABS.length - 1;
-  const nextTab = hasNextVideo ? WALKTHROUGH_TABS[currentTabIndex + 1] : null;
-
   // Handle tab change and update URL query param
   const handleTabChange = (value: string) => {
     const query = { ...router.query };
@@ -307,13 +300,6 @@ export function WatchWalkthroughsPage() {
     router.replace({ pathname: router.pathname, query }, undefined, {
       shallow: true,
     });
-  };
-
-  // Handle next video
-  const handleNextVideo = () => {
-    if (hasNextVideo && nextTab) {
-      handleTabChange(nextTab.id);
-    }
   };
 
   return (
@@ -342,47 +328,58 @@ export function WatchWalkthroughsPage() {
             ))}
           </TabsList>
 
-          {WALKTHROUGH_TABS.map((tab) => (
-            <TabsContent
-              key={tab.id}
-              value={tab.id}
-              className="mt-2 p-4 border rounded bg-card"
-            >
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold mb-2">{tab.title}</h3>
-                <p>{tab.description}</p>
-                <Quote
-                  quote={tab.cta}
-                  authorName="Marc Klingen"
-                  authorTitle="Co-founder and CEO"
-                  authorImageSrc="/images/people/marcklingen.jpg"
-                  className="mt-4"
+          {WALKTHROUGH_TABS.map((tab, index) => {
+            const tabHasNextVideo = index < WALKTHROUGH_TABS.length - 1;
+            const tabNextTab = tabHasNextVideo
+              ? WALKTHROUGH_TABS[index + 1]
+              : null;
+
+            return (
+              <TabsContent
+                key={tab.id}
+                value={tab.id}
+                className="mt-2 p-4 border rounded bg-card"
+              >
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-2">{tab.title}</h3>
+                  <p>{tab.description}</p>
+                  <Quote
+                    quote={tab.cta}
+                    authorName="Marc Klingen"
+                    authorTitle="Co-founder and CEO"
+                    authorImageSrc="/images/people/marcklingen.jpg"
+                    className="mt-4"
+                  />
+                </div>
+                <VideoPlayer
+                  videoId={tab.videoId}
+                  title={`Langfuse ${tab.label.toLowerCase()} video`}
+                  hasNextVideo={tabHasNextVideo}
+                  nextVideoTitle={tabNextTab ? tabNextTab.title : undefined}
+                  onNextVideo={() => {
+                    if (tabHasNextVideo && tabNextTab) {
+                      handleTabChange(tabNextTab.id);
+                    }
+                  }}
                 />
-              </div>
-              <VideoPlayer
-                videoId={tab.videoId}
-                title={`Langfuse ${tab.label.toLowerCase()} video`}
-                hasNextVideo={hasNextVideo}
-                nextVideoTitle={nextTab ? nextTab.title : undefined}
-                onNextVideo={handleNextVideo}
-              />
-              <div className="mt-4">
-                <div className="text-sm font-medium mb-1">Learn more:</div>
-                <ul className="list-disc list pl-6">
-                  {tab.learnMoreLinks.map((item) => (
-                    <li key={`${tab.id}-${item.href}`} className="my-2">
-                      <Link
-                        className="_text-primary-600 _underline _decoration-from-font [text-underline-position:from-font]"
-                        href={item.href}
-                      >
-                        <span className="">{item.title}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </TabsContent>
-          ))}
+                <div className="mt-4">
+                  <div className="text-sm font-medium mb-1">Learn more:</div>
+                  <ul className="list-disc list pl-6">
+                    {tab.learnMoreLinks.map((item) => (
+                      <li key={`${tab.id}-${item.href}`} className="my-2">
+                        <Link
+                          className="_text-primary-600 _underline _decoration-from-font [text-underline-position:from-font]"
+                          href={item.href}
+                        >
+                          <span className="">{item.title}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </TabsContent>
+            );
+          })}
         </Tabs>
       </div>
     </HomeSection>
