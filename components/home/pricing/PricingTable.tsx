@@ -1128,7 +1128,7 @@ export function PricingPlans() {
   return (
     <div
       className={cn(
-        "mt-12 grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
+        "mt-12 grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-3 lg:items-stretch",
         tiers.length === 5 && "md:grid-cols-5",
         tiers.length === 4 && "md:grid-cols-4",
         tiers.length === 3 && "md:grid-cols-3",
