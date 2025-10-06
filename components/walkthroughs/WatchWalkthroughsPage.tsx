@@ -1,6 +1,6 @@
 import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Quote } from "@/components/Quote";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -37,7 +37,6 @@ function VideoPlayer({
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showOverlay, setShowOverlay] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
   const progressCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isCheckingProgressRef = useRef(false);
   const [isApiReady, setIsApiReady] = useState(false);
@@ -69,7 +68,7 @@ function VideoPlayer({
         const timeRemaining = duration - currentTime;
 
         // Show overlay when 10 seconds remaining
-        if (timeRemaining <= 10 && timeRemaining > 0 && !isDismissed) {
+        if (timeRemaining <= 10 && timeRemaining > 0) {
           setShowOverlay(true);
         }
 
@@ -92,17 +91,17 @@ function VideoPlayer({
         isCheckingProgressRef.current = false;
       }
     }, 500);
-  }, [hasNextVideo, isDismissed]);
+  }, [hasNextVideo]);
 
   const handleVideoEnd = useCallback(() => {
-    if (!hasNextVideo || isDismissed) {
+    if (!hasNextVideo) {
       onVideoEnd?.();
       return;
     }
 
     // Show overlay without countdown
     setShowOverlay(true);
-  }, [hasNextVideo, isDismissed, onVideoEnd]);
+  }, [hasNextVideo, onVideoEnd]);
 
   const onPlayerStateChange = useCallback(
     (event: any) => {
@@ -210,19 +209,12 @@ function VideoPlayer({
 
   const handleNextClick = () => {
     setShowOverlay(false);
-    setIsDismissed(false);
     onNextVideo?.();
-  };
-
-  const handleDismiss = () => {
-    setShowOverlay(false);
-    setIsDismissed(true);
   };
 
   // Reset overlay state when videoId changes
   useEffect(() => {
     setShowOverlay(false);
-    setIsDismissed(false);
     if (progressCheckIntervalRef.current) {
       clearInterval(progressCheckIntervalRef.current);
       progressCheckIntervalRef.current = null;
@@ -262,15 +254,6 @@ function VideoPlayer({
               >
                 Play Next
                 <ArrowRight className="size-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDismiss}
-                className="h-auto px-2 hover:bg-muted"
-                aria-label="Dismiss next video suggestion"
-              >
-                <X className="size-4" />
               </Button>
             </div>
           </div>
