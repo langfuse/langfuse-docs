@@ -135,9 +135,7 @@ function VideoPlayer({
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showOverlay, setShowOverlay] = useState(false);
-  const [countdown, setCountdown] = useState(5);
   const [isDismissed, setIsDismissed] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isApiReady, setIsApiReady] = useState(false);
 
@@ -193,23 +191,9 @@ function VideoPlayer({
       return;
     }
 
-    // Show overlay with countdown
+    // Show overlay without countdown
     setShowOverlay(true);
-    setCountdown(5);
-
-    intervalRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-          }
-          onNextVideo?.();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [hasNextVideo, isDismissed, onVideoEnd, onNextVideo]);
+  }, [hasNextVideo, isDismissed, onVideoEnd]);
 
   const onPlayerStateChange = useCallback(
     (event: any) => {
@@ -310,18 +294,12 @@ function VideoPlayer({
   }, [isApiReady, videoId, initPlayer]);
 
   const handleNextClick = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
     setShowOverlay(false);
     setIsDismissed(false);
     onNextVideo?.();
   };
 
   const handleDismiss = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
     setShowOverlay(false);
     setIsDismissed(true);
   };
@@ -330,11 +308,6 @@ function VideoPlayer({
   useEffect(() => {
     setShowOverlay(false);
     setIsDismissed(false);
-    setCountdown(5);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
     if (progressCheckIntervalRef.current) {
       clearInterval(progressCheckIntervalRef.current);
       progressCheckIntervalRef.current = null;
@@ -344,9 +317,6 @@ function VideoPlayer({
   // Cleanup intervals on unmount
   useEffect(() => {
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
       if (progressCheckIntervalRef.current) {
         clearInterval(progressCheckIntervalRef.current);
       }
@@ -374,11 +344,6 @@ function VideoPlayer({
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
-              {countdown > 0 && (
-                <div className="text-sm font-medium text-muted-foreground min-w-[3ch] text-center tabular-nums">
-                  {countdown}s
-                </div>
-              )}
               <Button
                 onClick={handleNextClick}
                 size="sm"
