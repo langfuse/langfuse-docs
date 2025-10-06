@@ -1,5 +1,6 @@
 // Define the order of chapters for consistent sorting
 export const CHAPTER_ORDER = [
+  "mission",
   "customers",
   "why",
   "open-source",
