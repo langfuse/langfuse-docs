@@ -59,3 +59,5 @@ export function PricingPage({
     </HomeSection>
   );
 }
+
+export default PricingPage;
