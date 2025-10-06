@@ -18,11 +18,11 @@ export default {
     href: "/docs/observability/get-started",
   },
   "prompt-management-quickstart": {
-    title: "Fetch Prompts",
+    title: "Use Prompt Management",
     href: "/docs/prompt-management/get-started",
   },
   "evals-quickstart": {
-    title: "Start Evaluating",
+    title: "Set up Evals",
     href: "/docs/evaluation/overview",
   },
 

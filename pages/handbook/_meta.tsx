@@ -22,11 +22,11 @@ export default {
   },
   index: "Overview",
   chapters: "Chapters",
-  "working-at-langfuse": "Working at Langfuse",
-  "-- Teams": {
+  "-- Resources": {
     type: "separator",
-    title: <MenuSubSeparator>Teams</MenuSubSeparator>,
+    title: <MenuSubSeparator>Resources</MenuSubSeparator>,
   },
+  "working-at-langfuse": "Working at Langfuse",
   ...Object.fromEntries(
     Object.entries(TEAMS).map(([key, value]) => [key, value.name])
   ),
