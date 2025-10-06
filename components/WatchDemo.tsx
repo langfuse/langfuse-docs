@@ -137,10 +137,14 @@ function VideoPlayer({
   const [showOverlay, setShowOverlay] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const progressCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isCheckingProgressRef = useRef(false);
   const [isApiReady, setIsApiReady] = useState(false);
 
   const checkVideoProgress = useCallback(() => {
-    if (!playerRef.current || !hasNextVideo) return;
+    if (!playerRef.current || !hasNextVideo || isCheckingProgressRef.current)
+      return;
+
+    isCheckingProgressRef.current = true;
 
     // Clear any existing progress check interval
     if (progressCheckIntervalRef.current) {
@@ -174,6 +178,7 @@ function VideoPlayer({
             clearInterval(progressCheckIntervalRef.current);
             progressCheckIntervalRef.current = null;
           }
+          isCheckingProgressRef.current = false;
         }
       } catch (e) {
         // Player methods failed, likely destroyed - clear interval
@@ -181,6 +186,7 @@ function VideoPlayer({
           clearInterval(progressCheckIntervalRef.current);
           progressCheckIntervalRef.current = null;
         }
+        isCheckingProgressRef.current = false;
       }
     }, 500);
   }, [hasNextVideo, isDismissed]);
@@ -209,6 +215,12 @@ function VideoPlayer({
     [checkVideoProgress, handleVideoEnd]
   );
 
+  // Use a ref to avoid reinitializing the player when callbacks change
+  const onPlayerStateChangeRef = useRef(onPlayerStateChange);
+  useEffect(() => {
+    onPlayerStateChangeRef.current = onPlayerStateChange;
+  }, [onPlayerStateChange]);
+
   const initPlayer = useCallback(() => {
     if (!containerRef.current || !window.YT || !window.YT.Player) return;
 
@@ -234,13 +246,13 @@ function VideoPlayer({
           rel: 0,
         },
         events: {
-          onStateChange: onPlayerStateChange,
+          onStateChange: (event: any) => onPlayerStateChangeRef.current(event),
         },
       });
     } catch (e) {
       console.error("Error initializing YouTube player:", e);
     }
-  }, [videoId, onPlayerStateChange]);
+  }, [videoId]);
 
   // Load YouTube IFrame API
   useEffect(() => {
@@ -312,16 +324,8 @@ function VideoPlayer({
       clearInterval(progressCheckIntervalRef.current);
       progressCheckIntervalRef.current = null;
     }
+    isCheckingProgressRef.current = false;
   }, [videoId]);
-
-  // Cleanup intervals on unmount
-  useEffect(() => {
-    return () => {
-      if (progressCheckIntervalRef.current) {
-        clearInterval(progressCheckIntervalRef.current);
-      }
-    };
-  }, []);
 
   return (
     <div className="relative w-full aspect-[16/9] rounded border overflow-hidden">
@@ -332,7 +336,11 @@ function VideoPlayer({
       />
 
       {showOverlay && hasNextVideo && (
-        <div className="absolute top-0 left-0 right-0 bg-background/95 backdrop-blur-md z-10 border-b shadow-lg">
+        <div
+          className="absolute top-0 left-0 right-0 bg-background/95 backdrop-blur-md z-10 border-b shadow-lg"
+          role="alert"
+          aria-live="polite"
+        >
           <div className="flex items-center justify-between gap-4 px-4 py-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="text-sm font-medium whitespace-nowrap text-muted-foreground">
@@ -357,6 +365,7 @@ function VideoPlayer({
                 size="sm"
                 onClick={handleDismiss}
                 className="h-auto px-2 hover:bg-muted"
+                aria-label="Dismiss next video suggestion"
               >
                 <X className="size-4" />
               </Button>
