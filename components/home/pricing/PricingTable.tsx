@@ -210,7 +210,7 @@ const tiers: Tier[] = [
     },
     cta: "Sign up",
     secondaryCta: {
-      text: "Talk to sales",
+      text: "Sales",
       href: "/talk-to-us",
     },
   },
@@ -1152,7 +1152,7 @@ export function PricingPlans() {
             </div>
           )}
 
-          <CardHeader className="p-4 lg:p-6 text-left">
+          <CardHeader className="p-3 lg:p-4 text-left">
             <CardTitle className="text-lg text-foreground font-semibold">
               {tier.name}
             </CardTitle>
@@ -1169,7 +1169,7 @@ export function PricingPlans() {
               )}
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0 px-4 lg:px-6">
+          <CardContent className="p-0 px-3 lg:px-4">
             {/* Price information */}
             <div className="h-[60px] flex items-baseline">
               <span className="font-bold text-3xl">{tier.price}</span>
@@ -1202,7 +1202,7 @@ export function PricingPlans() {
             </div>
 
             {/* Callouts for different tiers - always render container for alignment */}
-            <div className="p-6 h-[30px] flex items-center justify-center">
+            <div className="p-4 h-[30px] flex items-center justify-center">
               {tier.calloutLink ? (
                 <div className="text-xs text-muted-foreground text-center">
                   <Link
@@ -1220,7 +1220,7 @@ export function PricingPlans() {
           <div className="border-t"></div>
           <TrustedBy customers={trustedByData.cloud[tier.name]} />
           <div className="border-t"></div>
-          <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
+          <CardFooter className="p-3 lg:p-4 flex-col items-start gap-2">
             <ul className="space-y-2.5 text-sm">
               {tier.mainFeatures.map((feature, index) => (
                 <li key={index} className="flex space-x-2">
@@ -1230,7 +1230,7 @@ export function PricingPlans() {
               ))}
             </ul>
             {tier.addOn && (
-              <div className="mt-3 border rounded pt-4 p-3 relative w-full">
+              <div className="mt-3 border rounded pt-3 p-2 relative w-full">
                 <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 -top-0 bg-card px-2 text-xs text-muted-foreground">
                   + optional
                 </div>
