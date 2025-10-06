@@ -1500,7 +1500,10 @@ export function PricingTable() {
               {sections.map((section) => (
                 <React.Fragment key={section.name}>
                   <TableRow className="bg-muted/50">
-                    <TableCell colSpan={5} className="font-medium">
+                    <TableCell
+                      colSpan={tiers.length + 1}
+                      className="font-medium"
+                    >
                       {section.name}
                       <FeatureDetails
                         description={section.description}
