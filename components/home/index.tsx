@@ -15,7 +15,7 @@ const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
 const OpenSource = dynamic(() => import("./OpenSource"), {
   ssr: false,
 });
-const Pricing = dynamic(() => import("./pricing/Pricing"), {
+const Pricing = dynamic(() => import("./pricing"), {
   ssr: false,
 });
 const Security = dynamic(() => import("./Security"), {

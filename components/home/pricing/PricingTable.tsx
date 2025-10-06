@@ -76,6 +76,24 @@ const YEARLY_COMMITMENT = "Yearly Commitment";
 
 const tiers: Tier[] = [
   {
+    name: "OSS",
+    id: "tier-oss",
+    href: "/self-hosting",
+    featured: false,
+    description:
+      "Self-host all core Langfuse features for free without any limitations.",
+    price: "Free",
+    mainFeatures: [
+      "MIT License",
+      "All core platform features and APIs (observability, evaluation, prompt management, datasets, etc.)",
+      "Scalability of Langfuse Cloud",
+      "Deployment docs & Helm chart",
+      "Enterprise SSO and RBAC",
+      "Community support",
+    ],
+    cta: "Deployment Guide",
+  },
+  {
     name: "Hobby",
     id: "tier-hobby",
     href: "https://cloud.langfuse.com",
@@ -219,6 +237,7 @@ const sections: Section[] = [
         name: "Traces and Graphs (Agents)",
         href: "/docs/observability/overview",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -229,6 +248,7 @@ const sections: Section[] = [
         name: "Session Tracking (Chats/Threads)",
         href: "/docs/observability/features/sessions",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -239,6 +259,7 @@ const sections: Section[] = [
         name: "User Tracking",
         href: "/docs/observability/features/users",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -249,6 +270,7 @@ const sections: Section[] = [
         name: "Token and Cost Tracking",
         href: "/docs/observability/features/token-and-cost-tracking",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -261,6 +283,7 @@ const sections: Section[] = [
           "Langfuse integrates natively with many LLM providers and agent frameworks such as LangChain, LlamaIndex, LangGraph, CrewAI, Semantic Kernel, ...",
         href: "/integrations",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -271,6 +294,7 @@ const sections: Section[] = [
         name: "SDKs (Python, JavaScript)",
         href: "/docs/observability/sdk/overview",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -283,6 +307,7 @@ const sections: Section[] = [
           "Use Langfuse as an OpenTelemetry backend. Thereby you can use any OpenTelemetry compatible SDKs (Java, Go, etc.) to send traces to Langfuse. This also increases compatibility with many frameworks and LLM providers.",
         href: "/docs/opentelemetry/get-started",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -293,6 +318,7 @@ const sections: Section[] = [
         name: "Proxy-based Logging (via LiteLLM)",
         href: "/integrations/gateways/litellm",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -303,6 +329,7 @@ const sections: Section[] = [
         name: "Custom via API",
         href: "/api-and-data-platform/features/public-api",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -315,6 +342,7 @@ const sections: Section[] = [
           "Billable units are the collection of created traces, observations, and scores in Langfuse.",
         href: "/docs/observability/data-model",
         tiers: {
+          OSS: "Unlimited",
           Hobby: "50k units",
           Core: "100k units",
           Pro: "100k units",
@@ -328,6 +356,7 @@ const sections: Section[] = [
         href: "/docs/observability/data-model",
         tiers: {
           cloud: {
+            OSS: "n/a",
             Hobby: false,
             Core: <GraduatedPricingText />,
             Pro: <GraduatedPricingText />,
@@ -339,6 +368,7 @@ const sections: Section[] = [
         name: "Custom Usage Pricing",
         description: "Custom volume based pricing for large-scale projects.",
         tiers: {
+          OSS: "n/a",
           Hobby: false,
           Core: false,
           Pro: false,
@@ -349,6 +379,7 @@ const sections: Section[] = [
         name: "Multi-modal",
         href: "/docs/observability/features/multi-modality",
         tiers: {
+          OSS: true,
           Hobby: "Free while in beta",
           Core: "Free while in beta",
           Pro: "Free while in beta",
@@ -358,6 +389,7 @@ const sections: Section[] = [
       {
         name: "Access to historical data",
         tiers: {
+          OSS: "n/a",
           Hobby: "30 days",
           Core: "90 days",
           Pro: "Unlimited",
@@ -368,6 +400,7 @@ const sections: Section[] = [
         name: "Ingestion throughput",
         href: "/faq/all/api-limits",
         tiers: {
+          OSS: "n/a",
           Hobby: "1,000 requests / min",
           Core: "4,000 requests / min",
           Pro: "20,000 requests / min",
@@ -385,6 +418,7 @@ const sections: Section[] = [
         description: "Manage prompts via UI, API, SDKs",
         href: "/docs/prompt-management/get-started",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -394,6 +428,7 @@ const sections: Section[] = [
       {
         name: "Prompt Fetching",
         tiers: {
+          OSS: "Unlimited",
           Hobby: "Unlimited",
           Core: "Unlimited",
           Pro: "Unlimited",
@@ -405,6 +440,7 @@ const sections: Section[] = [
         description: "Deploy and rollback prompts to different environments",
         href: "/docs/prompt-management/features/prompt-version-control",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -417,6 +453,7 @@ const sections: Section[] = [
           "Create shared snippets that can be reused in different prompts",
         href: "/docs/prompt-management/features/composability",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -428,6 +465,7 @@ const sections: Section[] = [
         description: "Use prompts with 0 latency and uptime impact",
         href: "/docs/prompt-management/features/caching",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -439,6 +477,7 @@ const sections: Section[] = [
         description: "Test prompts in a sandbox environment",
         href: "/docs/prompt-management/features/playground",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -450,6 +489,7 @@ const sections: Section[] = [
         description: "Run structured experiments on new prompt versions",
         href: "/docs/evaluation/dataset-runs/native-run",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -462,6 +502,7 @@ const sections: Section[] = [
           "Trigger webhooks for prompt changes and integrate with Slack",
         href: "/docs/prompt-management/features/webhooks-slack-integrations",
         tiers: {
+          OSS: true,
           Hobby: true,
           Core: true,
           Pro: true,
@@ -474,6 +515,7 @@ const sections: Section[] = [
           "Prevent certain prompt labels from being modified or deleted by non-admins/owners",
         href: "/docs/prompt-management/get-started#protected-prompt-labels",
         tiers: {
+          OSS: false,
           Hobby: false,
           Core: false,
           Pro: TEAMS_ADDON,
@@ -1087,6 +1129,7 @@ export function PricingPlans() {
     <div
       className={cn(
         "mt-12 grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
+        tiers.length === 5 && "md:grid-cols-5",
         tiers.length === 4 && "md:grid-cols-4",
         tiers.length === 3 && "md:grid-cols-3",
         tiers.length === 2 && "md:grid-cols-2"
