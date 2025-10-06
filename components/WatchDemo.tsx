@@ -1,11 +1,28 @@
 import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, CheckCircle2, FileText, PlayCircle } from "lucide-react";
+import {
+  BarChart3,
+  CheckCircle2,
+  FileText,
+  PlayCircle,
+  ArrowRight,
+  X,
+} from "lucide-react";
 import { Quote } from "@/components/Quote";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Cards as NextraCards } from "nextra/components";
 import { HomeSection } from "./home/components/HomeSection";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+
+// Declare YouTube IFrame API types
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
 
 const DEMO_TABS = [
   {
@@ -15,8 +32,7 @@ const DEMO_TABS = [
     description:
       "Get an overview of the complete Langfuse platform and learn how it helps teams build better LLM applications through observability, prompt management, and evaluation.",
     icon: PlayCircle,
-    videoSrc:
-      "https://www.youtube-nocookie.com/embed/zzOlFH0iD0k?si=7-0CQ_19-kgjmuEB",
+    videoId: "zzOlFH0iD0k",
     cta: "Any questions after watching this video? Consider watching the other videos, check out the resources at the bottom of the page, or reach out to us.",
     learnMoreLinks: [
       { title: "Technical documentation", href: "/docs" },
@@ -38,8 +54,7 @@ const DEMO_TABS = [
     description:
       "Learn how to trace, monitor, and debug your LLM applications with comprehensive observability features including traces, generations, and performance metrics.",
     icon: BarChart3,
-    videoSrc:
-      "https://www.youtube-nocookie.com/embed/pTneXS_m1rk?si=tldcmS8TvZSkrL8m",
+    videoId: "pTneXS_m1rk",
     cta: "Any questions after watching this video? Check out the resources at the bottom of the page, or reach out to us.",
     learnMoreLinks: [
       {
@@ -68,8 +83,7 @@ const DEMO_TABS = [
     description:
       "Discover how to manage, version, and optimize your prompts with collaborative editing, A/B testing, and seamless integration with your applications.",
     icon: FileText,
-    videoSrc:
-      "https://www.youtube-nocookie.com/embed/KGyj_NJgKDY?si=UbUDinSYl01doQFQ",
+    videoId: "KGyj_NJgKDY",
     cta: "Any questions after watching this video? Check out the resources at the bottom of the page, or reach out to us.",
     learnMoreLinks: [
       {
@@ -89,8 +103,7 @@ const DEMO_TABS = [
     description:
       "Explore how to systematically evaluate your LLM applications using datasets, scoring methods, and automated evaluation workflows to ensure quality and performance.",
     icon: CheckCircle2,
-    videoSrc:
-      "https://www.youtube-nocookie.com/embed/hlgfW0IyREc?si=PTj8K2cDbnumIpBL",
+    videoId: "hlgfW0IyREc",
     cta: "Any questions after watching this video? Check out the resources at the bottom of the page, or reach out to us.",
     learnMoreLinks: [
       {
@@ -101,6 +114,266 @@ const DEMO_TABS = [
     ],
   },
 ];
+
+interface VideoPlayerProps {
+  videoId: string;
+  title: string;
+  onVideoEnd?: () => void;
+  hasNextVideo: boolean;
+  nextVideoTitle?: string;
+  onNextVideo?: () => void;
+}
+
+function VideoPlayer({
+  videoId,
+  title,
+  onVideoEnd,
+  hasNextVideo,
+  nextVideoTitle,
+  onNextVideo,
+}: VideoPlayerProps) {
+  const playerRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+  const [isDismissed, setIsDismissed] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isApiReady, setIsApiReady] = useState(false);
+
+  const checkVideoProgress = useCallback(() => {
+    if (!playerRef.current || !hasNextVideo) return;
+
+    const checkInterval = setInterval(() => {
+      if (!playerRef.current) {
+        clearInterval(checkInterval);
+        return;
+      }
+
+      const currentTime = playerRef.current.getCurrentTime();
+      const duration = playerRef.current.getDuration();
+      const timeRemaining = duration - currentTime;
+
+      // Show overlay when 10 seconds remaining
+      if (timeRemaining <= 10 && timeRemaining > 0 && !isDismissed) {
+        setShowOverlay(true);
+      }
+
+      // Stop checking if video is paused or ended
+      const state = playerRef.current.getPlayerState();
+      if (state !== 1) {
+        // Not playing
+        clearInterval(checkInterval);
+      }
+    }, 500);
+  }, [hasNextVideo, isDismissed]);
+
+  const handleVideoEnd = useCallback(() => {
+    if (!hasNextVideo || isDismissed) {
+      onVideoEnd?.();
+      return;
+    }
+
+    // Show overlay with countdown
+    setShowOverlay(true);
+    setCountdown(5);
+
+    intervalRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+          onNextVideo?.();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [hasNextVideo, isDismissed, onVideoEnd, onNextVideo]);
+
+  const onPlayerStateChange = useCallback(
+    (event: any) => {
+      // Playing
+      if (event.data === 1) {
+        checkVideoProgress();
+      }
+      // Ended
+      if (event.data === 0) {
+        handleVideoEnd();
+      }
+    },
+    [checkVideoProgress, handleVideoEnd]
+  );
+
+  const initPlayer = useCallback(() => {
+    if (!containerRef.current || !window.YT || !window.YT.Player) return;
+
+    // Destroy existing player if it exists
+    if (playerRef.current) {
+      try {
+        playerRef.current.destroy();
+      } catch (e) {
+        // Ignore errors during destruction
+      }
+    }
+
+    // Clear the container to ensure clean state
+    if (containerRef.current) {
+      containerRef.current.innerHTML = "";
+    }
+
+    try {
+      playerRef.current = new window.YT.Player(containerRef.current, {
+        videoId: videoId,
+        playerVars: {
+          modestbranding: 1,
+          rel: 0,
+        },
+        events: {
+          onStateChange: onPlayerStateChange,
+        },
+      });
+    } catch (e) {
+      console.error("Error initializing YouTube player:", e);
+    }
+  }, [videoId, onPlayerStateChange]);
+
+  // Load YouTube IFrame API
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Check if API is already loaded
+    if (window.YT && window.YT.Player) {
+      setIsApiReady(true);
+      return;
+    }
+
+    // Load the API if not already loaded
+    if (!document.getElementById("youtube-iframe-api")) {
+      const tag = document.createElement("script");
+      tag.id = "youtube-iframe-api";
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+      window.onYouTubeIframeAPIReady = () => {
+        setIsApiReady(true);
+      };
+    } else {
+      // Script exists but API might not be ready yet
+      const checkApi = setInterval(() => {
+        if (window.YT && window.YT.Player) {
+          setIsApiReady(true);
+          clearInterval(checkApi);
+        }
+      }, 100);
+
+      return () => clearInterval(checkApi);
+    }
+  }, []);
+
+  // Initialize player when API is ready and videoId changes
+  useEffect(() => {
+    if (isApiReady && videoId) {
+      initPlayer();
+    }
+
+    return () => {
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {
+          // Ignore errors during cleanup
+        }
+      }
+    };
+  }, [isApiReady, videoId, initPlayer]);
+
+  const handleNextClick = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    setShowOverlay(false);
+    setIsDismissed(false);
+    onNextVideo?.();
+  };
+
+  const handleDismiss = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    setShowOverlay(false);
+    setIsDismissed(true);
+  };
+
+  // Reset overlay state when videoId changes
+  useEffect(() => {
+    setShowOverlay(false);
+    setIsDismissed(false);
+    setCountdown(5);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  }, [videoId]);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="relative w-full aspect-[16/9] rounded border overflow-hidden">
+      <div
+        ref={containerRef}
+        className="absolute inset-0 w-full h-full"
+        title={title}
+      />
+
+      {showOverlay && hasNextVideo && (
+        <div className="absolute top-0 left-0 right-0 bg-background/95 backdrop-blur-md z-10 border-b shadow-lg">
+          <div className="flex items-center justify-between gap-4 px-4 py-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="text-sm font-medium whitespace-nowrap text-muted-foreground">
+                Watch next:
+              </div>
+              <div className="text-sm font-medium text-foreground truncate">
+                {nextVideoTitle}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {countdown > 0 && (
+                <div className="text-sm font-medium text-muted-foreground min-w-[3ch] text-center tabular-nums">
+                  {countdown}s
+                </div>
+              )}
+              <Button
+                onClick={handleNextClick}
+                size="sm"
+                className="whitespace-nowrap gap-1.5"
+              >
+                Play Next
+                <ArrowRight className="size-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDismiss}
+                className="h-auto px-2 hover:bg-muted"
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function WatchDemoPage() {
   const router = useRouter();
@@ -114,6 +387,11 @@ export function WatchDemoPage() {
     return DEMO_TABS[0].id;
   })();
 
+  // Get current tab index
+  const currentTabIndex = DEMO_TABS.findIndex((tab) => tab.id === activeTab);
+  const hasNextVideo = currentTabIndex < DEMO_TABS.length - 1;
+  const nextTab = hasNextVideo ? DEMO_TABS[currentTabIndex + 1] : null;
+
   // Handle tab change and update URL query param
   const handleTabChange = (value: string) => {
     const query = { ...router.query };
@@ -123,6 +401,13 @@ export function WatchDemoPage() {
     router.replace({ pathname: router.pathname, query }, undefined, {
       shallow: true,
     });
+  };
+
+  // Handle next video
+  const handleNextVideo = () => {
+    if (hasNextVideo && nextTab) {
+      handleTabChange(nextTab.id);
+    }
   };
 
   return (
@@ -168,15 +453,12 @@ export function WatchDemoPage() {
                   className="mt-4"
                 />
               </div>
-              <iframe
-                width="100%"
-                className="aspect-[16/9] rounded border w-full"
-                src={tab.videoSrc}
+              <VideoPlayer
+                videoId={tab.videoId}
                 title={`Langfuse ${tab.label.toLowerCase()} video`}
-                frameBorder={0}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
+                hasNextVideo={hasNextVideo}
+                nextVideoTitle={nextTab ? nextTab.title : undefined}
+                onNextVideo={handleNextVideo}
               />
               <div className="mt-4">
                 <div className="text-sm font-medium mb-1">Learn more:</div>
