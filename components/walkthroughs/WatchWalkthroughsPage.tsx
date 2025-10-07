@@ -42,8 +42,9 @@ function VideoPlayer({
   const [isApiReady, setIsApiReady] = useState(false);
 
   const checkVideoProgress = useCallback(() => {
-    if (!playerRef.current || !hasNextVideo || isCheckingProgressRef.current)
-      return;
+    if (!playerRef.current || !hasNextVideo) return;
+
+    if (isCheckingProgressRef.current) return;
 
     isCheckingProgressRef.current = true;
 
