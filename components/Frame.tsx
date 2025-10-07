@@ -66,13 +66,11 @@ const ImageZoomModal = ({
 export const Frame = ({
   children,
   className,
-  border = false,
   fullWidth = false,
   transparent = false,
 }: {
   children: React.ReactNode;
   className?: string;
-  border?: boolean;
   fullWidth?: boolean;
   transparent?: boolean;
 }) => {
@@ -138,17 +136,15 @@ export const Frame = ({
         ref={frameRef}
         className={cn(
           "my-4",
-          border &&
-            "p-1 md:p-2 bg-gradient-to-tr from-blue-300/50 via-green-200/50 to-yellow-300/50 inline-block rounded",
+          "border rounded inline-block overflow-hidden",
           className
         )}
       >
         <div
           className={cn(
-            "inline rounded overflow-hidden bg-primary/5 max-w-2xl [&>*]:mt-0 [&>*]:mb-0 [&>img]:block [&>img]:w-full [&>img]:h-auto [&>img]:leading-none [&>img]:align-top",
+            "inline bg-primary/5 max-w-2xl [&>*]:mt-0 [&>*]:mb-0 [&>img]:block [&>img]:w-full [&>img]:h-auto [&>img]:leading-none [&>img]:align-top",
             fullWidth && "max-w-full",
-            transparent && "bg-transparent",
-            border
+            transparent && "bg-transparent"
           )}
         >
           {children}
