@@ -6,22 +6,25 @@ export type TrustedByCustomer = {
 
 export type TrustedByData = {
   cloud: {
-    [planName: string]: TrustedByCustomer[];
+    [tierId: string]: TrustedByCustomer[];
   };
 };
 
 export const trustedByData: TrustedByData = {
   cloud: {
-    Hobby: [
+    "tier-oss": [
+      // No logos assigned to OSS tier yet
+    ],
+    "tier-hobby": [
       // No logos assigned to Hobby plan yet
     ],
-    Core: [
+    "tier-core": [
       //{ name: "Knowunity", logo: "/images/customers/picing-logos/knowunity.png" },
       { name: "Kombo", logo: "/images/customers/picing-logos/kombo.png" },
       { name: "Draftbit", logo: "/images/customers/picing-logos/draftbit.png" },
       //{ name: "GoDaddy", logo: "/images/customers/picing-logos/godaddy.png" },
     ],
-    Pro: [
+    "tier-pro": [
       { name: "Twilio", logo: "/images/customers/picing-logos/twilio.png" },
       {
         name: "SumUp",
@@ -30,7 +33,7 @@ export const trustedByData: TrustedByData = {
       },
       //{ name: "Brevo", logo: "/images/customers/picing-logos/brevo.png" },
     ],
-    Enterprise: [
+    "tier-enterprise": [
       {
         name: "Khan Academy",
         logo: "/images/customers/picing-logos/khanacademy.png",

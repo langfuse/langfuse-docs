@@ -37,7 +37,7 @@ export function TrustedBy({
   className = "",
 }: TrustedByProps) {
   return (
-    <div className={`px-4 lg:px-6 h-[64px] flex items-center ${className}`}>
+    <div className={`px-3 lg:px-4 h-[56px] flex items-center ${className}`}>
       <div className="flex items-center w-full">
         <div className="text-xs text-muted-foreground">Trusted by:</div>
         <div className="flex items-center pl-4">
