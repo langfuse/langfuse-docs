@@ -5,7 +5,7 @@ const faqs = [
   {
     question: "What is the easiest way to try Langfuse?",
     answer:
-      "You can view the <a class='underline' href='/demo'>public example project</a> or sign up for a <a class='underline' href='https://cloud.langfuse.com'>free account</a> to try Langfuse with your own data. The Hobby plan is completeley free and does not require a credit card.",
+      "You can view the <a class='underline' href='/demo'>public example project</a> or sign up for a <a class='underline' href='https://cloud.langfuse.com'>free account</a> to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.",
   },
   {
     question: "Can I self-host Langfuse for free?",
