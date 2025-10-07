@@ -14,6 +14,7 @@ In this guide, we will show you how to use the LiteLLM Proxy to capture LLM call
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM observability platform that helps you trace, monitor, and debug your LLM applications.
 
 ---
+
 There are three ways to integrate LiteLLM with Langfuse:
 
 1. Sending logs via the LiteLLM Proxy to capture all LLM calls going through the proxy.
@@ -26,7 +27,6 @@ There are three ways to integrate LiteLLM with Langfuse:
   Integration](/integrations/frameworks/litellm-sdk) page.
 </Callout>
 ---
-
 
 ## LiteLLM Proxy
 
@@ -75,7 +75,8 @@ curl -X POST "http://0.0.0.0:4000/v1/chat/completions" \
 **5. See the LiteLLM generations in Langfuse**
 
 <Frame className="rounded-lg overflow-hidden">
-![LiteLLM Proxy Trace](/images/cookbook/integration_litellm/litellm-proxy-trace.png)
+  ![LiteLLM Proxy
+  Trace](/images/cookbook/integration_litellm/litellm-proxy-trace.png)
 </Frame>
 
 [Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9a9de57946027786cdda14480860ebf3?timestamp=2025-09-30T16%3A36%3A58.741Z&observation=7df5f09bb6a6bea4)
@@ -96,11 +97,10 @@ You can add additional Langfuse attributes to the requests in order to group req
 
 </Callout>
 
-<Frame border>
+<Frame>
   ![Set Langfuse as callback in Proxy
   UI](https://langfuse.com/images/docs/litellm-ui.png)
 </Frame>
-
 
 </Tab>
 </Tabs>

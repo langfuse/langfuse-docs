@@ -12,7 +12,8 @@ You can define multiple placeholders in a prompt and resolve them with different
 Message Placeholders are also supported in the [Playground](/docs/playground) and [Prompt Experiments](/docs/datasets/prompt-experiments).
 
 <Callout type="info">
-To use placeholders in your application, you need at least `langfuse >= 3.1.0` (python) or `langfuse >= 3.38.0` (js).
+  To use placeholders in your application, you need at least `langfuse >= 3.1.0`
+  (python) or `langfuse >= 3.38.0` (js).
 </Callout>
 
 <Steps>
@@ -22,7 +23,7 @@ To use placeholders in your application, you need at least `langfuse >= 3.1.0` (
 <LangTabs items={["UI","Python SDK", "JS/TS SDK"]}>
 <Tab>
 
-<Frame border fullWidth>
+<Frame fullWidth>
   ![Prompt placeholder in prompt editor](/images/docs/prompt-placeholder.png)
 </Frame>
 
@@ -173,12 +174,9 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 const langfuse = new LangfuseClient();
 
 // Get current `production` version
-const langfusePrompt = await langfuse.prompt.get(
-  "movie-critic-chat",
-  {
-    type: "chat",
-  }
-);
+const langfusePrompt = await langfuse.prompt.get("movie-critic-chat", {
+  type: "chat",
+});
 
 // Using langchain, you can obtain a ChatPromptTemplate with MessagesPlaceholder objects for unresolved placeholders
 const langchainPrompt = ChatPromptTemplate.fromTemplate(
