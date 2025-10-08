@@ -281,11 +281,11 @@ await langfuse.flush();
 
 By default, Langfuse allows for multiple scores of the same `name` on the same trace. This is useful if you'd like to track the evolution of a score over time or if e.g. you've received multiple user feedback scores on the same trace.
 
-In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and add this as an `id` when creating the score, e.g. `<trace_id>-<score_name>`.
+In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and add this as an `id` (JS/TS) / `score_id` (Python) when creating the score, e.g. `<trace_id>-<score_name>`.
 
 ### Enforcing a Score Config
 
-Score configs are helpful when you want to standardize your scores for future analysis. 
+Score configs are helpful when you want to standardize your scores for future analysis.
 
 To enforce a score config, you can provide a `configId` when creating a score to reference a `ScoreConfig` that was previously created. `Score Configs` can be defined in the Langfuse UI or via our API. [See our guide on how to create and manage score configs](/faq/all/manage-score-configs).
 
@@ -494,7 +494,7 @@ Certain score properties might be inferred based on your input:
 Detailed Examples:
 
 <Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
-<Tab> 
+<Tab>
 For example, let's assume you'd like to ingest a numeric score to measure **accuracy**. We have included a table of possible score ingestion scenarios below.
 
 | Value   | Data Type | Config Id | Description                                                 | Inferred Data Type | Valid                            |
@@ -536,6 +536,6 @@ For example, let's assume you'd like to ingest a boolean score to measure **help
 
 ## Update Existing Scores via API/SDKs [#update]
 
-When creating a score, you can provide an optional `id` parameter. This will update the score if it already exists within your project.
+When creating a score, you can provide an optional `id` (JS/TS) / `score_id` (Python) parameter. This will update the score if it already exists within your project.
 
 If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter as an idempotency key when initially creating the score.
