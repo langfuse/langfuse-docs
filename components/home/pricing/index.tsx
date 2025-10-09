@@ -97,28 +97,7 @@ export function PricingPage({
             <PricingPlans variant={variant} />
 
             {isPricingPage && (
-              <>
-                {/* Special offers callout */}
-                <div className="mt-4 mb-4 text-center">
-                  <div className="inline-flex items-center gap-6 px-4 py-2 bg-muted/30 rounded-full text-sm text-muted-foreground">
-                    <Link
-                      href="/startups"
-                      className="hover:text-primary transition-colors underline"
-                    >
-                      Startup discounts available
-                    </Link>
-                    <span className="text-muted-foreground/50">|</span>
-                    <Link
-                      href="/research"
-                      className="hover:text-primary transition-colors underline"
-                    >
-                      Academic & research benefits
-                    </Link>
-                  </div>
-                </div>
-
-                <PricingTable variant={variant} isPricingPage={isPricingPage} />
-              </>
+              <PricingTable variant={variant} isPricingPage={isPricingPage} />
             )}
           </div>
         </div>
