@@ -2,11 +2,13 @@
 title: "How did we get here?"
 ---
 
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
 # How did we get here?
 
 Langfuse has grown a lot over the last few years. This is a high-level overview of how we got here. If you really want more details, check out the [changelog](/changelog).
 
-## Milestones
+## Timeline
 
 <Steps>
 
@@ -100,9 +102,21 @@ The Langfuse community grew a lot and we reached 10,000 GitHub Stars on GitHub. 
 
 ### May 2025: Launch Week 3
 
-Todo, learn more [here](/blog/2025-05-19-launch-week-3)
+Powered by the scalability of Langfuse v3, the tracing volume grew rapidly. In [Launch Week 3](/blog/2025-05-19-launch-week-3), we focused on making this data more accessible and actionable. We released:
 
-### Jun 2025: OpenTelemetry
+- Full-text search
+- Saved/shared table views
+- Custom dashboards
+
+Custom dashboards were a very popular request that we wanted to build for a very long time. First we did not have the capacity, and then the data volume Langfuse processed was infeasible to plot on postgres-backed Langfuse v2. We wrote more about how we built them [here](/blog/2025-05-21-customizable-dashboards).
+
+### Jun 2025: Doubling Down on Open Source
+
+In [June 2025](/blog/2025-06-04-open-sourcing-langfuse-product), we made a pivotal decision: all Langfuse product features were open sourced under the MIT license. Capabilities that were previously reserved for commercial users, such as LLM-as-a-Judge evaluations, annotation queues, prompt experiments, and the playground, became freely available for anyone to self-host.
+
+This marked a major expansion of our open core. Now, only essential Enterprise Security and Platform features (like SCIM, Audit Logs, and Data Retention Policies) remain under a commercial license. Our [goal](/handbook/core/mission) is to empower engineering teams to build ambitious LLM applications with robust [open source](/handbook/chapters/open-source) tools.
+
+### Jun - Aug 2025: OpenTelemetry
 
 In 2025, we went all-in on OpenTelemetry for the Observability product to increase openness, scalability, vendor-neutrality and interoperability.
 We launched:
@@ -111,7 +125,7 @@ We launched:
 - Python SDK v3 (OpenTelemetry-based)
 - JS SDK v4 (OpenTelemetry-based)
 
-### Jul - Sep 2025: Graduated Pricing + Price Drop + Self-serve Enterprise
+### Sep 2025: Graduated Pricing + Price Drop + Self-serve Enterprise
 
 Over these months we grew rapidly on the business side, and decided to make a couple of changes that felt right to us:
 
@@ -125,6 +139,10 @@ Over these months we grew rapidly on the business side, and decided to make a co
 
 - Short term: [Roadmap](/roadmap)
 - Long term: [Why does Langfuse exist?](/handbook/core/mission)
+
+Want to keep up? Subscribe to our mailing list:
+
+<ProductUpdateSignup source="Handbook Story" className="mt-4" />
 
 ## Community Metrics
 
