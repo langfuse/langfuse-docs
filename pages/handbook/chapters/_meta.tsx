@@ -2,7 +2,7 @@
 export const CHAPTER_ORDER = [
   "mission",
   "customers",
-  "history",
+  "story",
   "why",
   "open-source",
   "monetization",
