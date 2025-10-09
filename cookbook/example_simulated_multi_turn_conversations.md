@@ -128,14 +128,6 @@ chat.add_message("I want to make a chocolate cake")
 
 ![Traced Application](https://langfuse.com/images/cookbook/example-simulated-multi-turn-conversations/traced-application.png)
 
-### Step 2 - Create a structured Dataset of different user scenarios
-
-You want to define dimensions that make sense for your use case. For example, here are ones that I often use for B2C applications:
-
-Features: Specific functionalities of your AI product.
-Scenarios: Situations or problems the AI may encounter and needs to handle.
-Personas: Representative user profiles with distinct characteristics and needs.
-
 ### Step 2 - Create a structured Dataset of user scenarios
 
 Define relevant dimensions for your use case, such as:
@@ -239,8 +231,7 @@ def generate_synthetic_conversation(persona: str, scenario: str, max_turns: int 
 
     # Create simulated user
     # The system prompt should include the scenario so the user naturally introduces it
-    system_prompt = f"""
-    You are a user in the following situation:
+    system_prompt = f"""You are a user in the following situation:
     {scenario}
 
     You have these characteristics:
@@ -335,9 +326,9 @@ Once you run the experiment, you should see the results in your Dataset runs tab
 
 ### Step 5 - Run evaluations against your Dataset runs
 
-To evaluate the output, you can create [LLM-as-a-Judge](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge) that runs against your Dataset Runs and scores the output, giving an invidual score and reason for the specific scenario/persona pair and an overall average score for the entire dataset run.
+To evaluate the output, you can create [LLM-as-a-Judge](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge) that runs against your Dataset Runs and scores the output, giving an individual score and reason for the specific scenario/persona pair and an overall average score for the entire dataset run.
 
-In this case, I create a simple "Conciseness" evluator from the pre-made library of evaluators, but you could create one (or multiple of them!) that evaluate based on your use-case and needs. In the following image, you can see the overall score assigned to multiple Dataset runs, and how over time that score improves given changes to the prompt.
+In this case, I create a simple "Conciseness" evaluator from the pre-made library of evaluators, but you could create one (or multiple of them!) that evaluate based on your use-case and needs. In the following image, you can see the overall score assigned to multiple Dataset runs, and how over time that score improves given changes to the prompt.
 
 ![Dataset Runs](https://langfuse.com/images/cookbook/example-simulated-multi-turn-conversations/evaluated-runs.png)
 
@@ -347,4 +338,4 @@ In this case, I create a simple "Conciseness" evluator from the pre-made library
 
 This notebook demonstrated a systematic approach to simulate and evaluate multi-turn conversations, specifically addressing use-cases and scenarios that are relevant to the chatbot.
 
-You can read more about for effective ways to create datasets for experiments [here](https://hamel.dev/blog/posts/llm-judge/#step-2-create-a-dataset).
+You can read more about effective ways to create datasets for experiments [here](https://hamel.dev/blog/posts/llm-judge/#step-2-create-a-dataset).
