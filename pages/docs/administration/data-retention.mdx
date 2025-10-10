@@ -40,6 +40,9 @@ We use the following properties per entity to decide whether they are outside th
 
 Deleted assets cannot be recovered.
 
+The retention policy applies to the respective data, independent of any references.
+For example, if a dataset references a trace but the trace is e.g. deleted after 30 days, the dataset run item will point to a non-existent trace.
+
 ## Self-hosted Instances
 
 To use the Data Retention feature in a self-hosted environment, you need to grant `s3:DeleteObject` to the Langfuse IAM role on all buckets (see [Blob Storage (S3) docs](/self-hosting/deployment/infrastructure/blobstorage)).
