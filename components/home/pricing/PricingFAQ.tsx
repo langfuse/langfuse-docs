@@ -33,6 +33,11 @@ const faqs = [
       "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
   },
   {
+    question: "Can I set up alerts on the usage fees?",
+    answer:
+      "Yes, you can configure spend alerts to receive email notifications when your organization's spending exceeds predefined monetary thresholds. This helps you monitor costs and take action before unexpected charges occur. Navigate to your organization settings and the Billing tab to configure spend alerts. Learn more in our <a class='underline' href='/docs/administration/spend-alerts'>spend alerts documentation</a>.",
+  },
+  {
     question: "How can I manage my subscription?",
     answer:
       "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='/billing-portal'>Customer Portal</a>.",
