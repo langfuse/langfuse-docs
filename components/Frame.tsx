@@ -135,8 +135,7 @@ export const Frame = ({
       <div
         ref={frameRef}
         className={cn(
-          "my-4",
-          "border rounded inline-block overflow-hidden",
+          "mt-4 border rounded inline-block overflow-hidden",
           className
         )}
       >
