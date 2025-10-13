@@ -1,7 +1,7 @@
 ---
 title: "Evaluating Multi-Turn Conversations"
 description: "A practical guide of the different ways to evaluate multi-turn conversation agents (a.k.a. chatbots)"
-ogImage: /images/blog/2025-10-09-evaluating-multi-turn-conversations/evaluating-multi-turn-conversations.png
+ogImage: /images/blog/2025-10-09-evaluating-multi-turn-conversations/conversational-evals.png
 tag: guide
 date: 2025/10/09
 author: "Abdallah"
@@ -20,11 +20,11 @@ If you're building a chatbot, you've probably experienced this: everything works
 
 The problem? You're flying blind. You need evaluation systems, and you need them yesterday.
 
-I've written two cookbooks on evaluating multi-turn conversations that tackle this from different angles. This post will help you understand when to use each approach—and why you probably need both.
+We've created two notevbooks on evaluating multi-turn conversations that tackle this from different angles. This post will help you understand when to use each approach, and why you probably need both.
 
 (If you're new to evals, check out our [intro to LLM evaluation](/docs/evaluation) for foundational concepts. And if code's your thing, both methods include Jupyter notebooks to get you started.)
 
-### The Problem: Your Chatbot Has Memory Problems
+### The Problem
 
 Multi-turn conversations are deceptively hard. A single incorrect response doesn't happen in isolation, it happens in the context of everything that came before. Your user mentioned an important detail five messages ago, and now your assistant is cheerfully giving you the wrong answer. Oops.
 
@@ -43,7 +43,7 @@ N+1 evaluation means taking a conversation up to turn N, then evaluating what ha
 - You're making targeted fixes and want to verify they work
 
 
-### The Process
+### Process
 
 Let's say you notice your cooking assistant keeps forgetting dietary restrictions. Here's how you debug it systematically:
 
@@ -120,7 +120,7 @@ See the [Simulated Conversations](/docs/guides/cookbook/example_simulated_multi_
 
 From building both systems, here's what I've learned:
 
-**Remove ALL friction from looking at data**: You cannot outsource this to tooling alone. Build custom views that show you everything you need on one screen. If you're context-switching between tools to understand what happened, you're doing it wrong.
+**Remove ALL friction from [looking at data](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications)**: You cannot outsource this to tooling alone. Build custom views that show you everything you need on one screen. If you're context-switching between tools to understand what happened, you're doing it wrong.
 
 **Start simple**: Don't build elaborate scoring systems with multiple metrics immediately. Binary pass/fail is often enough to start.
 
