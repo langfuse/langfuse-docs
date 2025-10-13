@@ -25,7 +25,7 @@ export default {
     title: <MenuSubSeparator>Configuration</MenuSubSeparator>,
   },
   "llm-connection": {},
-  "usage-alerts": {},
+  "spend-alerts": {},
   "-- Misc": {
     type: "separator",
     title: <MenuSubSeparator>Misc</MenuSubSeparator>,
