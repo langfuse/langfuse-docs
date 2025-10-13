@@ -57,8 +57,8 @@ def my_task(*, item, **kwargs):
 
 # Run experiment on local data
 local_data = [
-    {"input": "What is the capital of France?"},
-    {"input": "What is the capital of Germany?"},
+    {"input": "What is the capital of France?", "expected_output": "Paris"},
+    {"input": "What is the capital of Germany?", "expected_output": "Berlin"},
 ]
 
 result = langfuse.run_experiment(
@@ -98,8 +98,8 @@ const langfuse = new LangfuseClient();
 
 // Run experiment on local data
 const localData: ExperimentItem[] = [
-  { input: "What is the capital of France?" },
-  { input: "What is the capital of Germany?" },
+  { input: "What is the capital of France?", expected_output: "Paris" },
+  { input: "What is the capital of Germany?", expected_output: "Berlin" },
 ];
 
 // Define your task function
@@ -487,9 +487,9 @@ from langfuse.openai import OpenAI
 
 # Test data for European capitals
 test_data = [
-    {"input": "What is the capital of France?", "expected": "Paris"},
-    {"input": "What is the capital of Germany?", "expected": "Berlin"},
-    {"input": "What is the capital of Spain?", "expected": "Madrid"},
+    {"input": "What is the capital of France?", "expected_output": "Paris"},
+    {"input": "What is the capital of Germany?", "expected_output": "Berlin"},
+    {"input": "What is the capital of Spain?", "expected_output": "Madrid"},
 ]
 
 def geography_task(*, item, **kwargs):
@@ -587,9 +587,9 @@ import { LangfuseSpanProcessor } from "@langfuse/otel";
 
 // Test data for European capitals
 const testData: ExperimentItem[] = [
-  { input: "What is the capital of France?", expected: "Paris" },
-  { input: "What is the capital of Germany?", expected: "Berlin" },
-  { input: "What is the capital of Spain?", expected: "Madrid" },
+  { input: "What is the capital of France?", expected_output: "Paris" },
+  { input: "What is the capital of Germany?", expected_output: "Berlin" },
+  { input: "What is the capital of Spain?", expected_output: "Madrid" },
 ];
 
 let otelSdk: NodeSDK;
