@@ -108,8 +108,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         href: "/pricing#discounts",
       },
       calloutLink: {
-        text: "Startup? Get 50% off",
-        href: "/startups",
+        text: "Discounts: Startups, EDU, OSS",
+        href: "/pricing#discounts",
       },
       mainFeatures: [
         "Everything in Hobby",
@@ -131,8 +131,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       description:
         "For scaling projects. Unlimited history, high rate limits, all features.",
       calloutLink: {
-        text: "Startup? Get 50% off",
-        href: "/startups",
+        text: "Discounts: Startups, EDU, OSS",
+        href: "/pricing#discounts",
       },
       mainFeatures: [
         "Everything in Core",
