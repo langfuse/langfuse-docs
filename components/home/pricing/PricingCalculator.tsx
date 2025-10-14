@@ -189,30 +189,30 @@ export function PricingCalculator({
             </div>
           </div>
 
-          <div className="border bg-secondary p-6 rounded-lg">
+          <div className="border bg-secondary p-4 sm:p-6 rounded-lg">
             {currentBaseFee > 0 ? (
               <div className="text-center">
-                <div className="flex items-center justify-center gap-4 text-lg font-medium">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-base sm:text-lg font-medium">
                   <div className="text-center">
-                    <div className="text-primary text-2xl font-bold">
+                    <div className="text-primary text-xl sm:text-2xl font-bold">
                       {formatCurrency(currentBaseFee)}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {selectedPlan} Base
                     </div>
                   </div>
-                  <div className="text-muted-foreground text-xl">+</div>
+                  <div className="text-muted-foreground text-lg sm:text-xl">+</div>
                   <div className="text-center">
-                    <div className="text-primary text-2xl font-bold">
+                    <div className="text-primary text-xl sm:text-2xl font-bold">
                       {formatCurrency(calculatedPrice)}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       Usage
                     </div>
                   </div>
-                  <div className="text-muted-foreground text-xl">=</div>
+                  <div className="text-muted-foreground text-lg sm:text-xl">=</div>
                   <div className="text-center">
-                    <div className="text-primary text-2xl font-bold">
+                    <div className="text-primary text-xl sm:text-2xl font-bold">
                       {formatCurrency(calculatedPrice + currentBaseFee)}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
@@ -224,7 +224,7 @@ export function PricingCalculator({
             ) : (
               <div className="text-center">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-primary">
+                  <div className="text-2xl sm:text-3xl font-bold text-primary">
                     {formatCurrency(calculatedPrice)}
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">

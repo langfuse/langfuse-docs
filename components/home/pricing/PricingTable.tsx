@@ -225,7 +225,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       cta: "Deployment guide",
       addOn: {
         name: "Enterprise",
-        price: "Custom",
+        price: "Custom Pricing",
         mainFeatures: [
           "All Open Source features",
           "Project-level RBAC",
