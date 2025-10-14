@@ -1,0 +1,26 @@
+---
+date: 2025-10-10
+title: Advanced Filtering for Public Traces API
+description: The traces endpoint in public API now supports complex JSON-based filtering. 
+author: Valeriy
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Use the new `filter` parameter to filter traces by any field. This enables more sophisticated and flexible trace queries.
+
+## Key features
+
+- **JSON-encoded filtering**: Pass complex filter objects supporting datetime, string, number, and array filter types
+- **Full backward compatibility**: Legacy query parameters continue to work; advanced filters take precedence when both are provided
+- **Schema validation**: Built-in validation ensures filter parameters are correctly formatted
+- **Filter merging**: Advanced and legacy filters can be combined seamlessly
+
+This enhancement allows you to perform more precise data retrieval from the public API while maintaining compatibility with existing integrations.
+
+**Learn more**
+
+- [Public API Documentation](/docs/api)
+- [Traces API Reference](https://api.reference.langfuse.com/#tag/trace/get/api/public/traces)

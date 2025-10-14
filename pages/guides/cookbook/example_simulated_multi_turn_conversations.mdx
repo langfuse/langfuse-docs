@@ -1,0 +1,360 @@
+---
+source: Jupyter Notebook
+title: Evaluating Multi-Turn Conversations (Simulation)
+description: This guide shows how to evaluate conversational applications by simulating conversations and using LLM-as-a-Judge evaluators
+category: Evaluation
+sidebarTitle: Evaluating Multi-Turn Conversations (Simulation)
+---
+
+# Evaluating Multi-Turn Conversations (Simulation)
+
+<iframe
+  width="100%"
+  className="aspect-[15.94/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube.com/embed/3ODizwXu-uk"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+AI applications with conversational interfaces, such as chatbots, engage in multiple interactions with a user, which are also known as conversation turns. There are multiple ways of evaluating the performance of these apps in a structured way, like [N+1 Evaluations](https://langfuse.com/guides/cookbook/example_evaluating_multi_turn_conversations).
+
+In this cookbook we'll cover how to use agents that simulate a user having a conversation with your chatbot, and measure the output of these conversations. We'll cover:
+
+- Creating structured datasets of features to test, scenarios, personas...
+- Using [OpenEvals](https://github.com/langchain-ai/openevals) to simulate a specific use-case.
+- Running the simulations against the production application
+- Evaluating the output of the simulation with an [LLM-as-a-Judge](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge).
+
+---
+
+Not using Langfuse yet? [Get started](https://langfuse.com/docs/get-started) by capturing LLM events.
+
+## Setup
+
+In this example, we’ll build a cooking assistant chatbot and then simulate conversations against it.
+
+### Step 1 - Create a chat app and generate traces in Langfuse
+
+First you need to install Langfuse via pip and then set the environment variables.
+
+
+
+```python
+%pip install langfuse openevals --upgrade
+```
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-1234"
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-1234"
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your openai key
+os.environ["OPENAI_API_KEY"] = 'sk-proj-1234'
+```
+
+Now we’ll create a simple cooking assistant chatbot that uses OpenAI as the LLM and trace it with Langfuse.
+
+
+```python
+# This is a simple cooking assistant chatbot traced with Langfuse and uses OpenAI as the LLM.
+from langfuse.openai import openai
+from langfuse import get_client, observe
+
+
+
+class SimpleChat:
+    def __init__(self, model="gpt-3.5-turbo"):
+        self.conversation_history = [
+          {
+            "role": "system",
+            "content": "You are a helpful cooking assistant that answers questions about recipes and cooking."
+          }
+        ]
+        self.model = model
+
+    @observe
+    def add_message(self, messages):
+        """
+        Args:
+            messages: Either a string (single user message) or a list of message dictionaries
+        """
+        try:
+            # Handle both string and array inputs
+            if isinstance(messages, str):
+                messages = [{"role": "user", "content": messages}]
+
+            # Add messages to history
+            self.conversation_history.extend(messages)
+
+            # Call OpenAI API using the new client
+            response = openai.chat.completions.create(
+                model=self.model,
+                messages=self.conversation_history,
+                max_tokens=500,
+                temperature=0.7
+            )
+
+            # Extract and add assistant response
+            assistant_message = response.choices[0].message.content
+            self.conversation_history.append({"role": "assistant", "content": assistant_message})
+            get_client().update_current_trace(input=messages, output=assistant_message)
+
+            return assistant_message
+
+        except Exception as e:
+            return f"Error: {str(e)}"
+
+    def show_history(self):
+        import json
+        print("Conversation history:")
+        print(json.dumps(self.conversation_history, indent=2))
+        print()
+
+    def clear_history(self):
+        self.conversation_history = [
+          {
+            "role": "system",
+            "content": "You are a helpful cooking assistant that answers questions about recipes and cooking."
+          }
+        ]
+        print("Conversation cleared!")
+
+# Create a chat instance
+chat = SimpleChat()
+```
+
+Now if you run a simple question, you should see traces in Langfuse:
+
+
+```python
+chat.add_message("I want to make a chocolate cake")
+```
+
+
+
+
+    'That sounds delicious! Do you have a specific recipe in mind, or would you like me to suggest one for you?'
+
+
+
+![Traced Application](https://langfuse.com/images/cookbook/example-simulated-multi-turn-conversations/traced-application.png)
+
+### Step 2 - Create a structured Dataset of user scenarios
+
+Define relevant dimensions for your use case, such as:
+
+- **Features**: Specific functionalities of your AI product.
+- **Scenarios**: Situations or problems the AI may encounter and needs to handle.
+- **Personas**: Representative user profiles with distinct characteristics and needs.
+
+For our cooking assistant chatbot, we'll create pairs of Scenarios and Personas, as follows:
+
+| Persona | Scenario |
+|---------|----------|
+| A nervous first-time host cooking multiple dishes for a dinner party at 6:30 PM. Anxious about timing, unfamiliar with multitasking in the kitchen, needs reassurance and asks many clarifying questions. | It's 4:30 PM and they need to coordinate: roasted chicken (1.5 hours), roasted vegetables (45 min), mashed potatoes (30 min), and gravy. They only have one oven and are worried everything won't be ready on time. |
+| A stressed home cook whose beef stroganoff sauce just curdled when they added sour cream. Guests arrive in 20 minutes. Frustrated, urgent, needs quick realistic solutions. | The sour cream curdled in the hot pan, making the sauce grainy and separated. They have heavy cream, butter, flour, beef broth, and more sour cream available. Need to know if it can be salvaged or if they need a backup plan. |
+
+You can add more columns for your specific use-case, like adding data to test against your system. For example, if you're running a customer service chatbot for a logistics company, you might want to simulate the scenario of providing a non-existent order tracking ID to see how your chatbot handles the scenario.
+
+Once you've defined your dataset, create it in [Langfuse's Dataset](https://langfuse.com/docs/evaluation/experiments/datasets), this way you can assign performance scores to measure how the system improves on the dataset with every new update:
+
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+dataset = langfuse.create_dataset(
+    name="simulated-conversations",
+    description="Synthetic conversations from persona/scenario pairs"
+)
+
+langfuse.create_dataset_item(
+    dataset_name="simulated-conversations",
+    input={
+      "persona": "A nervous first-time host cooking multiple dishes for a dinner party at 6:30 PM. Anxious about timing, unfamiliar with multitasking in the kitchen, needs reassurance and asks many clarifying questions.",
+      "scenario": "It's 4:30 PM and they need to coordinate: roasted chicken (1.5 hours), roasted vegetables (45 min), mashed potatoes (30 min), and gravy. They only have one oven and are worried everything won't be ready on time."
+    }
+)
+
+langfuse.create_dataset_item(
+  dataset_name="simulated-conversations",
+  input={
+    "persona": "A stressed home cook whose beef stroganoff sauce just curdled when they added sour cream. Guests arrive in 20 minutes. Frustrated, urgent, needs quick realistic solutions.",
+    "scenario": "The sour cream curdled in the hot pan, making the sauce grainy and separated. They have heavy cream, butter, flour, beef broth, and more sour cream available. Need to know if it can be salvaged or if they need a backup plan."
+  }
+)
+```
+
+### Step 3 - Prepare your application to run against the simulator
+
+The OpenEvals library requires a specific input and output format. It also needs conversation history management, which is why we'll store instances of our chatbot together with a `thread_id` provided by OpenEvals.
+
+
+```python
+from openevals.simulators import run_multiturn_simulation, create_llm_simulated_user
+
+def create_app_wrapper():
+    """
+    Creates an app function that works with OpenEvals multiturn simulation.
+    Manages conversation history per thread_id internally.
+
+    OpenEvals expects:
+    - Input: ChatCompletionMessage (dict-like with 'role' and 'content')
+    - Output: ChatCompletionMessage (dict-like with 'role' and 'content')
+    """
+    # Store chat instances per thread
+    chat_instances = {}
+
+    def app(inputs, *, thread_id: str, **kwargs):
+        if thread_id not in chat_instances:
+            chat_instances[thread_id] = SimpleChat()
+
+        chat = chat_instances[thread_id]
+
+        # inputs is a message dict/object with 'role' and 'content'
+        # Access content - handle both dict and object
+        content = inputs.get("content") if isinstance(inputs, dict) else inputs.content
+
+        response_text = chat.add_message(content)
+
+        return {
+            "role": "assistant",
+            "content": response_text
+        }
+
+    return app
+
+def generate_synthetic_conversation(persona: str, scenario: str, max_turns: int = 3):
+    """
+    Generate a synthetic conversation from persona/scenario pair.
+
+    Args:
+        persona: User characteristics/personality
+        scenario: The cooking situation
+        max_turns: Max conversation turns
+
+    Returns:
+        Simulation result with trajectory and evaluation scores
+    """
+    # Create app function (manages chat instances internally)
+    app = create_app_wrapper()
+
+    # Create simulated user
+    # The system prompt should include the scenario so the user naturally introduces it
+    system_prompt = f"""You are a user in the following situation:
+    {scenario}
+
+    You have these characteristics:
+    {persona}
+
+    Start the conversation by naturally describing your situation and asking for help. Then behave naturally based on your emotional state and ask follow-up questions."""
+
+    user = create_llm_simulated_user(
+        system=system_prompt,
+        model="openai:gpt-4o-mini",
+    )
+
+    # Run simulation (evaluators will be configured in Langfuse)
+    result = run_multiturn_simulation(
+        app=app,
+        user=user,
+        max_turns=max_turns,
+    )
+
+    return result
+```
+
+### Step 4 - Run an experiment
+
+We'll use Langfuse's [Dataset Experiments SDK](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk) to fetch the scenario/persona pairs we've created and trace and store the output of the experiment so we can then evaluate.
+
+
+```python
+from langfuse import get_client
+
+def run_dataset_experiment(dataset_name: str, experiment_name: str):
+    """
+    Load persona/scenario pairs from Langfuse Dataset and run experiment.
+
+    Args:
+        dataset_name: Name of dataset in Langfuse containing persona/scenario pairs
+        experiment_name: Name for this experiment run
+    """
+    langfuse = get_client()
+    dataset = langfuse.get_dataset(dataset_name)
+
+    print(f"Loaded dataset '{dataset_name}' with {len(dataset.items)} items")
+
+    def run_task(*, item, **kwargs):
+        """
+        Task function for Langfuse experiment.
+        Item input should be: {"persona": "...", "scenario": "..."}
+        """
+        # Extract persona and scenario from dataset item
+        persona = item.input.get("persona")
+        scenario = item.input.get("scenario")
+
+        if not persona or not scenario:
+            raise ValueError(f"Dataset item must have 'persona' and 'scenario' fields. Got: {item.input}")
+
+        print(f"\nGenerating conversation for scenario: {scenario[:80]}...")
+
+        result = generate_synthetic_conversation(
+            persona=persona,
+            scenario=scenario
+        )
+
+        return {
+            "trajectory": result["trajectory"],
+            "num_turns": len([m for m in result["trajectory"] if m.get("role") == "user"])
+        }
+
+    print(f"\nRunning experiment '{experiment_name}'...")
+    result = dataset.run_experiment(
+        name=experiment_name,
+        description="Synthetic conversations from persona/scenario pairs",
+        task=run_task
+    )
+
+    get_client().flush()
+
+    print(f"\n✅ Experiment complete!")
+    print(f"View results in Langfuse: {os.environ.get('LANGFUSE_HOST')}")
+
+    return result
+
+
+run_dataset_experiment(
+  dataset_name="simulated-conversations",
+  experiment_name="synthetic-conversations-v1"
+)
+```
+
+Once you run the experiment, you should see the results in your Dataset runs tab:
+
+![Dataset Runs](https://langfuse.com/images/cookbook/example-simulated-multi-turn-conversations/dataset-run.png)
+
+### Step 5 - Run evaluations against your Dataset runs
+
+To evaluate the output, you can create [LLM-as-a-Judge](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge) that runs against your Dataset Runs and scores the output, giving an individual score and reason for the specific scenario/persona pair and an overall average score for the entire dataset run.
+
+In this case, I create a simple "Conciseness" evaluator from the pre-made library of evaluators, but you could create one (or multiple of them!) that evaluate based on your use-case and needs. In the following image, you can see the overall score assigned to multiple Dataset runs, and how over time that score improves given changes to the prompt.
+
+![Dataset Runs](https://langfuse.com/images/cookbook/example-simulated-multi-turn-conversations/evaluated-runs.png)
+
+
+
+### Conclusion
+
+This notebook demonstrated a systematic approach to simulate and evaluate multi-turn conversations, specifically addressing use-cases and scenarios that are relevant to the chatbot.
+
+You can read more about effective ways to create datasets for experiments [here](https://hamel.dev/blog/posts/llm-judge/#step-2-create-a-dataset).

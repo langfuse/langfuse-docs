@@ -202,15 +202,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "js-sdk-v4-ga",
+    key: "langfuse-town-hall-q4-2025",
     dismissible: true,
     content: (
-      <Link href="/changelog/2025-08-28-typescript-sdk-v4-ga">
+      <Link href="https://luma.com/vwezwpqh">
         {/* mobile */}
-        <span className="sm:hidden">TypeScript SDK v4 GA →</span>
+        <span className="sm:hidden">Thursday: Town Hall →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse TypeScript SDK v4 is here →
+          Thursday: Virtual Town Hall – New Features + Q4 Roadmap →
         </span>
       </Link>
     ),
