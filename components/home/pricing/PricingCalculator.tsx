@@ -271,7 +271,14 @@ export function PricingCalculator({
                   {/* Total row */}
                   <TableRow className="border-t-2 bg-muted/30">
                     <TableCell className="font-semibold">Total</TableCell>
-                    <TableCell className="text-right"></TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {(() => {
+                        const totalUnits = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
+                        if (totalUnits === 0) return "—";
+                        const avgRate = (calculatedPrice / totalUnits) * 100000;
+                        return formatCurrency(avgRate) + "/100k";
+                      })()}
+                    </TableCell>
                     <TableCell className="text-right font-semibold">
                       {monthlyEvents}
                     </TableCell>
