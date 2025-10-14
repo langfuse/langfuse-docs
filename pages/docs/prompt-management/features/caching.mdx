@@ -146,7 +146,7 @@ sequenceDiagram
 
 The caching duration is configurable if you wish to reduce network overhead of the Langfuse Client. The default cache TTL is 60 seconds. After the TTL expires, the SDKs will refetch the prompt in the background and update the cache. Refetching is done asynchronously and does not block the application.
 
-<Tabs items={["Python", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -171,13 +171,13 @@ const prompt = await langfuse.prompt.get("movie-critic", {
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ## Optional: Disable caching [#disable-caching]
 
 You can disable caching by setting the `cacheTtlSeconds` to `0`. This will ensure that the prompt is fetched from the Langfuse API on every call. This is recommended for non-production use cases where you want to ensure that the prompt is always up to date with the latest version in Langfuse.
 
-<Tabs items={["Python", "JS/TS"]} >
+<LangTabs items={["Python SDK", "JS/TS SDK"]} >
 <Tab>
 
 ```python
@@ -204,7 +204,7 @@ const prompt = await langfuse.prompt.get("movie-critic", {
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Optional: Guaranteed availability of prompts [#guaranteed-availability]
 

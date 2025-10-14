@@ -16,7 +16,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   date="August 13, 2025"
 />
 
-While many AI startups have built their applications around closed source model APIs, a growing number are turning to self-hosted open source or custom models—especially in sectors that handle sensitive data like healthcare and legal. 
+While many AI startups have built their applications around closed source model APIs, a growing number are turning to self-hosted open source or custom models—especially in sectors that handle sensitive data like healthcare and legal.
 
 Self-hosted models allow companies to retain full control over their data and fully customize the model to their application, making it an attractive choice for both privacy and competitive edge.
 
@@ -46,9 +46,9 @@ With [Shadeform](https://www.shadeform.ai/)’s multi-cloud GPU marketplace and 
 
 Here’s how the script works:
 
-- Creates a local deployment of Langfuse inside the GPU instance.  
-- Starts a vLLM server––the current gold standard inference engine––with a specified Hugging Face model.  
-- Feeds a series of prompts to the model.  
+- Creates a local deployment of Langfuse inside the GPU instance.
+- Starts a vLLM server––the current gold standard inference engine––with a specified Hugging Face model.
+- Feeds a series of prompts to the model.
 - Langfuse traces each chat completion and records latency, tokens, and tokens/second.
 
 Once the script completes, you’ll be able to view the results from the Langfuse UI.
@@ -67,10 +67,10 @@ Once you have an account and can access the platform, you can find the benchmark
 
 Before we begin, we’ll want to save the template as a copy.
 
-To do this, click “Save as a Copy” in the top right corner. 
+To do this, click “Save as a Copy” in the top right corner.
 
-<Frame border>
-![1](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/12.png)
+<Frame>
+  ![1](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/12.png)
 </Frame>
 
 Your copy of the template can be found in the “Templates” tab on the navigation bar under “My Resources”.
@@ -79,26 +79,26 @@ Your copy of the template can be found in the “Templates” tab on the navigat
 
 To customize your template, click on your copy of the template, and then click “Edit” in the top right corner.
 
-<Frame border>
-![2](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/11.png)
+<Frame>
+  ![2](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/11.png)
 </Frame>
 
 Scroll down to the section titled “Environment Variables”.
 
-Start by replacing the HUGGINGFACE\_ACCESS\_TOKEN value with your own.
+Start by replacing the HUGGINGFACE_ACCESS_TOKEN value with your own.
 
-Next, replace the MODEL\_ID value with the id of the Hugging Face model you want to evaluate, e.g. deepseek-ai/DeepSeek-R1.
+Next, replace the MODEL_ID value with the id of the Hugging Face model you want to evaluate, e.g. deepseek-ai/DeepSeek-R1.
 
-<Frame border>
-![3](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/07.png)
+<Frame>
+  ![3](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/07.png)
 </Frame>
 
 (Optional) If you want to customize the batch of prompts used to benchmark the model, scroll down to the “Startup Script” section.
 
 Find the section of the script titled — BENCHMARKING SCRIPT SETUP —. Here, you’ll find a list of prompts that you can customize to your needs.
 
-<Frame border>
-![4](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/10.png)
+<Frame>
+  ![4](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/10.png)
 </Frame>
 
 When you finish configuring the script, click “Update Template” at the bottom.
@@ -107,22 +107,22 @@ When you finish configuring the script, click “Update Template” at the botto
 
 Click “Compute Marketplace” on the navigation bar, scroll down, and filter the results by “Cloud”.
 
-<Frame border>
-![5](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/08.png)
+<Frame>
+  ![5](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/08.png)
 </Frame>
 
 Next, find a GPU instance you want to test on (e.g. 8x H200) and click “Launch”.
 
-<Frame border>
-![6](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/09.png)
+<Frame>
+  ![6](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/09.png)
 </Frame>
 
 ### Deploy the template and wait for the script to complete
 
 Find the field titled “Template” towards the top of the launch page and select your copy of the benchmarking template.
 
-<Frame border>
-![7](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/06.png)
+<Frame>
+  ![7](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/06.png)
 </Frame>
 
 Once your configurations populate, click “Deploy”.
@@ -131,8 +131,8 @@ The script should take around 15-30 minutes to complete depending on the model a
 
 You should see the following message once everything has finished: “Benchmarking complete, view the results at: \<instance-ip\>:3000”
 
-<Frame border>
-![8](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/05.png)
+<Frame>
+  ![8](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/05.png)
 </Frame>
 
 ### Access the Langfuse UI to see the benchmark results
@@ -156,28 +156,28 @@ Here, you will see a table with each trace labeled "Prompt n" based on the order
 
 The table will show you the latency (time it took to generate), the total tokens used, as well as the tokens per second.
 
-<Frame border>
-![12](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/03.png)
+<Frame>
+  ![12](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/03.png)
 </Frame>
 
 Clicking on a trace will show the details of each response.
 
-<Frame border>
-![13](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/02.png)
+<Frame>
+  ![13](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/02.png)
 </Frame>
 
 ### (Optional): Run additional tests
 
 If you want to run additional benchmarks in the same session, you’ll need to SSH into the instance.
 
-To SSH, click on the instance in the “Running Instances” tab. 
+To SSH, click on the instance in the “Running Instances” tab.
 
 Scrolling down, you’ll find a “Get Private Key” button.
 
 Click this button and follow the instructions on screen.
 
-<Frame border>
-![14](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/01.png)
+<Frame>
+  ![14](/images/blog/2025-08-13-evaluating-model-performance-accross-clouds-with-shadeform-and-langfuse/01.png)
 </Frame>
 
 Once you have successfully SSH’d into the instance, you can copy the python benchmarking script from the template into a new .py file and edit as needed before running.
@@ -193,4 +193,3 @@ Simply repeat steps 5 & 6 for the next cloud you want to evaluate.
 ## Summary
 
 Self-hosted models offer significant advantages over closed source API solutions, especially for companies handling sensitive data. But, choosing the right cloud to deploy your model in can be both time and resource intensive. This automated benchmarking script simplifies performance evaluation across cloud environments, enabling companies to confidently select the optimal deployment solution based on real-world metrics.
-

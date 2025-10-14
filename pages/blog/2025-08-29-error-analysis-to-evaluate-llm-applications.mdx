@@ -16,6 +16,17 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["jannikmaierhoefer"]}
 />
 
+<iframe
+  width="100%"
+  className="aspect-[15.94/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube-nocookie.com/embed/Q_-3rJ1kjXA?si=bgctoSEq_9FGxxVq"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
 To improve your LLM app, you must understand **how it fails**. Aggregate metrics won't tell you if your system retrieves the wrong documents or if the model's tone alienates users. **Error analysis** provides this crucial context.
 
 _The framework in this guide is adapted from Hamel Husain's [Eval FAQ](https://hamel.dev/blog/posts/evals-faq/why-is-error-analysis-so-important-in-llm-evals-and-how-is-it-performed.html)._
@@ -120,7 +131,7 @@ import {
 
 After annotating all traces, the next step is to structure your free-text comments into a coherent taxonomy.
 
-Export your comments from the Langfuse annotation job (you can query your comments via the Langfuse API). You can use an LLM to perform an initial clustering of these notes into related themes. Review and manually refine the LLM's output to ensure the categories are distinct, comprehensive, and accurately reflect your application's specific issues.
+Export your comments from the Langfuse annotation job (you can [query your comments via the Langfuse API](https://colab.research.google.com/drive/1ErETZNWHyOjkG262bZHh-j3Vo9z83qUj)). You can use an LLM to perform an initial clustering of these notes into related themes. Review and manually refine the LLM's output to ensure the categories are distinct, comprehensive, and accurately reflect your application's specific issues.
 
 For our docs chatbot, we used the following prompt on our exported annotations:
 
@@ -164,4 +175,10 @@ This error analysis produces a quantified, application-specific understanding of
 
 The structured failure modes you defined serve as the foundation for building automated evaluators, which can scale this analysis across your application. However, before setting up automated evaluators, ensure you first address the obvious issues encountered during the error analysis. You can typically go through multiple rounds of this process before reaching a plateau.
 
-In the upcoming blog post, we will set up automated evaluators and use them to continuously improve our demo chatbot.
+In the next blog post, we will set up automated evaluators and use them to continuously improve our demo chatbot:
+
+import { FileCode } from "lucide-react";
+
+<Cards num={1}>
+  <Card title="Automated Evaluations" href="/blog/2025-09-05-automated-evaluations" icon={<FileCode />} arrow />
+</Cards>

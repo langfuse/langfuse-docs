@@ -35,7 +35,7 @@ This means:
 
 ## Usage
 
-<Tabs items={["Python SDK", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
 <Tab title="Python SDK">
 
 ```python
@@ -131,15 +131,15 @@ completion = openai.chat.completions.create(
 </Tab>
 <Tab>
 
+```bash filename=".env"
+LANGFUSE_TRACING_ENVIRONMENT=production
+```
+
 ```ts
 import OpenAI from "openai";
 import { observeOpenAI } from "@langfuse/openai";
 
-const openai = observeOpenAI(new OpenAI(), {
-  clientInitParams: {
-    environment: "production",
-  },
-});
+const openai = observeOpenAI(new OpenAI());
 ```
 
 See [OpenAI Integration (JS/TS)](/integrations/model-providers/openai-js) for more details.
@@ -161,9 +161,7 @@ from langfuse.callback import CallbackHandler
 
 # Either set the environment variable or the constructor parameter. The latter takes precedence.
 os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
-handler = CallbackHandler(
-  environment="production"
-)
+handler = CallbackHandler()
 ```
 
 </Tab>
@@ -200,13 +198,19 @@ export function register() {
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ## Filtering
 
 In the Langfuse UI, you can filter events by environment using the environment filter in the navigation bar. This filter applies across all views in Langfuse.
 
 See our [API Reference](/docs/api) for details on how to filter by environment on our API.
+
+## Managing Environments
+
+Environments are created the first time data is ingested with a given `environment` value and are persistent. They cannot currently be deleted or renamed via the UI.
+
+For guidance on how to structure, separate, and work with multiple environments across projects and stages, see the FAQ: [Managing different environments](/faq/all/managing-different-environments).
 
 ## Best Practices
 

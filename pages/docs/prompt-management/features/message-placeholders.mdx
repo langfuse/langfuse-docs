@@ -12,17 +12,18 @@ You can define multiple placeholders in a prompt and resolve them with different
 Message Placeholders are also supported in the [Playground](/docs/playground) and [Prompt Experiments](/docs/datasets/prompt-experiments).
 
 <Callout type="info">
-To use placeholders in your application, you need at least `langfuse >= 3.1.0` (python) or `langfuse >= 3.38.0` (js).
+  To use placeholders in your application, you need at least `langfuse >= 3.1.0`
+  (python) or `langfuse >= 3.38.0` (js).
 </Callout>
 
 <Steps>
 
 ## Create prompt with placeholders
 
-<Tabs items={["UI","Python", "JS/TS"]}>
+<LangTabs items={["UI","Python SDK", "JS/TS SDK"]}>
 <Tab>
 
-<Frame border fullWidth>
+<Frame fullWidth>
   ![Prompt placeholder in prompt editor](/images/docs/prompt-placeholder.png)
 </Frame>
 
@@ -71,14 +72,14 @@ await langfuse.prompt.create({
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Resolve placeholders at runtime
 
 In the SDKs, use the `.compile(variables, placeholders)` method on a `ChatPromptClient` to set the values to be filled in for the placeholders.
 The filled in messages should be of the `ChatMessage` format with a `role` and `content` property, but custom formats are also accepted as `compile` does not validate the format of the messages.
 
-<Tabs items={["Python", "JS/TS", "LangChain (Python)", "LangChain (JS/TS)"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "LangChain (Python)", "LangChain (JS/TS)"]}>
 <Tab>
 
 ```python
@@ -173,12 +174,9 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 const langfuse = new LangfuseClient();
 
 // Get current `production` version
-const langfusePrompt = await langfuse.prompt.get(
-  "movie-critic-chat",
-  {
-    type: "chat",
-  }
-);
+const langfusePrompt = await langfuse.prompt.get("movie-critic-chat", {
+  type: "chat",
+});
 
 // Using langchain, you can obtain a ChatPromptTemplate with MessagesPlaceholder objects for unresolved placeholders
 const langchainPrompt = ChatPromptTemplate.fromTemplate(
@@ -193,6 +191,6 @@ const langchainPrompt = ChatPromptTemplate.fromTemplate(
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 </Steps>

@@ -1,0 +1,63 @@
+---
+title: Single Sign-On (SSO)
+sidebarTitle: Authentication & SSO
+description: Overview of Single Sign-On (SSO) methods in Langfuse
+---
+
+# Authentication & SSO
+
+By default, Langfuse supports email/password and social logins (Sign in with Google, GitHub, Microsoft).
+
+For increased security, you can also configure Enterprise SSO (e.g. Okta, Azure AD, Keycloak etc.) via OIDC.
+
+<Callout type="info">
+
+For more details on authorization, please refer to the [RBAC docs](/docs/administration/rbac).
+
+</Callout>
+
+<Callout type="info">
+
+For self-hosted instances, please refer to the [Self-hosted Authentication and SSO guide](/self-hosting/security/authentication-and-sso).
+
+</Callout>
+
+## Email/Password authentication
+
+By default, Langfuse uses email and password authentication. Langfuse enforces standard password complexity requirements.
+
+If you signed up with a social login, you can add a password via the "reset password" link in the login page.
+
+## Social Logins
+
+For simplified access, users can sign in using their existing social accounts:
+
+- Google
+- GitHub
+- Azure AD (Entra ID)
+
+For security reasons, Langfuse does not support switching between social logins or signing up with a social login after signing up with email/password.
+
+## Enterprise SSO & SSO Enforcement [#sso]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
+Langfuse supports **Enterprise SSO** (e.g. Okta, Azure AD, Keycloak etc.) via OIDC. Please reach out to [support](/support) to enable this feature.
+
+Details:
+
+- **Migration:** Existing users who signed up with an email/password or social logins are automatically migrated to the Enterprise SSO provider once it is set up.
+- **Authorization:** Enterprise SSO does not automatically provision [roles](/docs/administration/rbac) for new users upon signup. Users must be invited to an organization, either through the UI (settings > members) or the [SCIM API](/docs/administration/scim-and-org-api).
+- **Signing in:** To sign in with an Enterprise SSO provider, please (1) enter your email address, and (2) press "Continue". You will be redirected to the Enterprise SSO provider to authenticate.
+
+<Frame className="max-w-lg">
+  ![SSO Sign-in Flow](/images/security/sso-signin.png)
+</Frame>

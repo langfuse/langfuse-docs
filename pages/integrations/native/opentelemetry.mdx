@@ -15,7 +15,7 @@ As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attrib
 
 ## OpenTelemetry native Langfuse SDK v3
 
-The quickest path to start tracing with Langfuse is the new **OTEL-native Langfuse SDK v3**. The SDK is a thin layer on top of the official OpenTelemetry client that automatically converts all emitted spans into rich Langfuse observations (spans, generations, events) and adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring.
+The quickest path to start tracing with Langfuse is the new **OTEL-native Langfuse SDK v3**. The SDK is a thin layer on top of the official OpenTelemetry client that automatically converts all emitted spans into rich Langfuse observations (spans, generations, events, and [other observation types](/docs/observability/features/observation-types)) and adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring.
 
 Because it lives in the shared OpenTelemetry context, any other library that is already instrumented with OTEL (HTTP frameworks, databases, GenAI instrumentation like OpenLLMetry/OpenLIT, etc.) will seamlessly show up in the same Langfuse traces without additional configuration.
 
@@ -357,7 +357,7 @@ These attributes are applied to individual observations (spans) within a trace (
 
 The [type of observation](/docs/observability/features/observation-types)
 
-- `langfuse.observation.type`: `"span" | "generation" | "event"`, default: `"span"`
+- `langfuse.observation.type`: `"span" | "generation" | "event"`, default: `"span"`. Additional types are supported; see [observation types](/docs/observability/features/observation-types).
 - Any span that includes an attribute mapped to `model` is considered an LLM call and thus tracked as a `generation` observation.
 
 #### `level`

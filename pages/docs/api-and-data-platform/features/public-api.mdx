@@ -82,7 +82,7 @@ When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `g
 
 </Callout>
 
-<Tabs items={["Python SDK", "JS/TS SDK", "Java SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "Java SDK"]}>
 <Tab>
 
 When using the [Python SDK](/docs/sdk/python/sdk-v3):
@@ -108,12 +108,12 @@ await langfuse.async_api.*
 <Tab>
 
 ```ts
-import { Langfuse } from "langfuse"
+import { LangfuseClient } from '@langfuse/client';
 
-const langfuse = new Langfuse()
+const langfuse = new LangfuseClient();
 ...
 // fetch a trace
-await langfuse.api.traceGet(traceId)
+await langfuse.api.trace.get(traceId);
 
 // explore more endpoints via Intellisense
 langfuse.api.*
@@ -166,7 +166,7 @@ try {
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Ingest Traces via the API
 

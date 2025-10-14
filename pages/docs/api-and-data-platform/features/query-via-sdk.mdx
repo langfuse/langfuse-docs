@@ -26,7 +26,13 @@ New data is typically available for querying within 15-30 seconds of ingestion, 
 
 Via the [SDKs](/docs/sdk/overview) for Python and JS/TS you can easily query the API without having to write the HTTP requests yourself.
 
-<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Callout type="info">
+
+If you need aggregated metrics (e.g., counts, costs, usage) rather than individual entities, consider the [Metrics API](/docs/metrics/features/metrics-api). It is optimized for aggregate queries and higher rate limits.
+
+</Callout>
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 
 ```bash
@@ -92,7 +98,7 @@ query = """
   "toTimestamp": "2025-05-13T00:00:00Z"
 }
 """
- 
+
 langfuse.api.metrics.metrics(query = query)
 ```
 
@@ -127,9 +133,8 @@ npm install @langfuse/client
 
 ```ts
 import { LangfuseClient } from "@langfuse/client";
- 
-const langfuse = new LangfuseClient();
 
+const langfuse = new LangfuseClient();
 
 // Fetch list of traces, supports filters and pagination
 const traces = await langfuse.api.trace.list();
@@ -158,14 +163,7 @@ const score = await langfuse.api.scoreV2.getById("scoreId");
 // Explore more entities via Intellisense
 ```
 
-JS/TS SDK reference including all available filters:
-
-- [`fetchTraces()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchTraces)
-- [`fetchTrace()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchTrace)
-- [`fetchObservations()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchObservations)
-- [`fetchObservation()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchObservation)
-- [`fetchSessions()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchSessions)
+The above examples show the current JavaScript SDK API methods. All methods support filters and pagination as shown in the code examples.
 
 </Tab>
-</Tabs>
-
+</LangTabs>

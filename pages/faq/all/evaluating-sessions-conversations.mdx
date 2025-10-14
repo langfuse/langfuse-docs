@@ -1,0 +1,30 @@
+---
+title: How to evaluate sessions/conversations?
+tags: [evaluation, observability]
+---
+
+# How to evaluate sessions/conversations?
+
+This guide explains how to evaluate entire [sessions](/docs/observability/features/sessions) (such as conversations, threads, etc.), rather than just individual traces.
+The information here applies to all [evaluation methods](/docs/evaluation/overview) supported by Langfuse.
+
+Scores in Langfuse can be assigned to traces, observations, or sessions (see the [data model](/docs/evaluation/evaluation-methods/data-model)).
+
+## Session-level scores
+
+1. You can add a [custom score](/docs/evaluation/evaluation-methods/custom-scores) that references the session ID.
+2. You can annotate the session using [annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues).
+
+## Trace-level LLM-as-a-Judge evaluators
+
+[LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) can be applied to traces.
+They cannot be applied directly to sessions, as Langfuse does not inherently know when a session has concluded.
+
+It is recommended to evaluate the session using a trace-level LLM-as-a-Judge evaluator. Ensure that the trace contains the complete conversation history. This is typically the case if the conversation is used as input to an LLM call within a trace (i.e., conversation history or short-term memory). You can select this specific information from the observation when setting up the evaluator.
+
+You can either:
+
+1. Evaluate the session on every trace.
+2. Or apply a special [tag](/docs/observability/features/tags) to the final trace of the session (e.g., `conversation_end`) and configure the evaluator to only run on traces with this tag. This approach can help reduce evaluation costs and make metrics more stable.
+
+In both cases, the score will be assigned to the trace.

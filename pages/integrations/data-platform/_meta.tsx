@@ -1,7 +1,7 @@
 export default {
   "public-api": {
     title: "Public API",
-    href: "/docs/api",
+    href: "/docs/api-and-data-platform/features/public-api",
   },
   "exports-to-s3": {
     title: "Exports to S3",
@@ -14,5 +14,9 @@ export default {
   "prompt-webhooks": {
     title: "Prompt Webhooks",
     href: "/docs/prompts/get-started#webhooks",
+  },
+  "export-blob-storage": {
+    title: "Export to Blob Storage (e.g., S3)",
+    href: "/docs/api-and-data-platform/features/export-to-blob-storage",
   },
 };

@@ -37,7 +37,7 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 Langfuse uses `default` as the cluster name if CLICKHOUSE_CLUSTER_ENABLED is set to `true`.
 You can overwrite this by setting `CLICKHOUSE_CLUSTER_NAME` to a different value.
 In that case, the database migrations will not apply correctly as they cannot run dynamically for different clusters.
-You must set `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED = false` and run ClickHouse migrations manually.
+You must set `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED = true` and run ClickHouse migrations manually.
 Clone the Langfuse repository, adjust the cluster name in `./packages/shared/clickhouse/migrations/clustered/*.sql` and run `cd ./packages/shared && sh ./clickhouse/scripts/up.sh`
 to manually apply the migrations.
 

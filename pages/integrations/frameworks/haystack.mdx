@@ -1,127 +1,117 @@
 ---
+source: Jupyter Notebook
+title: Observability for Haystack with Langfuse
 sidebarTitle: Haystack
-seoTitle: Open Source Observability for Haystack
+description: Discover how to integrate Langfuse with Deepset's Haystack for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
+category: Integrations
 logo: /images/integrations/haystack_icon.png
-description: Langfuse integration to easily observe and monitor pipelines built with Haystack, an open-source Python framework developed by deepset.
 ---
 
-# 🌾 Haystack Integration
+# Observability for Haystack
 
-This integration allows you to easily [trace](/docs/tracing) your Haystack pipelines in the Langfuse UI.
+This cookbook demonstrates how to use [Langfuse](https://langfuse.com) to gain real-time observability for your [Haystack Application](https://haystack.deepset.ai/).
 
-> [Haystack](https://haystack.deepset.ai/) is the open-source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
+>  **What is Haystack?** [Haystack](https://haystack.deepset.ai/) is the open-source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
 
-<CloudflareVideo
-  videoId="36a42457d879923f84681f8fe62443e4"
-  aspectRatio={16 / 10.26}
-  title="Haystack Trace"
-  className="mt-8"
-  gifStyle
-/>
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is the open source LLM engineering platform. It helps teams to collaboratively manage prompts, trace applications, debug problems, and evaluate their LLM system in production.
 
-Thanks to the team at deepset for developing this integration (`langfuse-haystack` package). These docs are adapted from their write up, which you can read [here](https://haystack.deepset.ai/blog/langfuse-integration).
+## Get Started
 
-## How Can Langfuse Help?
-
-The `langfuse-haystack` package integrates [tracing](/docs/tracing) capabilities into Haystack (2.x) pipelines using Langfuse.
-
-This can be helpful in the following ways:
-
-- Capture comprehensive details of the execution trace and model performance
-  - Latency
-  - Token usage
-  - Cost
-  - Scores
-- Capture the full context of the execution, independently observe retrieval and summarization
-- Build fine-tuning and testing datasets
-- Monitor model performance
-- Pinpoint areas for improvement
-
-## Installation and Setup
+We'll walk through a simple example of using Haystack and integrating it with Langfuse.
 
 <Steps>
+### Step 1: Install Dependencies
 
-### Install packages
 
-Install Haystack, Langfuse and the integration package.
-
-```bash
-pip install haystack-ai langfuse-haystack langfuse
+```python
+%pip install haystack-ai langfuse openinference-instrumentation-haystack
 ```
 
-### Set Environment Variables
+### Step 2: Set Up Environment Variables
 
-1. Langfuse: You can find your Langfuse public and private API keys in the project settings.
-2. Haystack: Enable `HAYSTACK_CONTENT_TRACING_ENABLED`. **You must set this variable before importing `LangfuseConnector`.**
+Configure your Langfuse API keys. You can get them by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).
+
 
 ```python
 import os
 
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# Enable Haystack content tracing
-os.environ["HAYSTACK_CONTENT_TRACING_ENABLED"] = "True"
+# Your openai and serperdev api key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ["SERPERDEV_API_KEY"] = "..."
 ```
 
-### Add `LangfuseConnector` to your pipeline
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-Add `LangfuseConnector` to the pipeline as a tracer. There's no need to connect it to any other component. The LangfuseConnector will automatically trace the operations and data flow within the pipeline. Then add the other components, like the text embedder, retriever, prompt builder and the model, and connect them together in the order they will be used in the pipeline.
 
 ```python
-from haystack import Pipeline
-from haystack_integrations.components.connectors.langfuse import LangfuseConnector
-
-# Example pipeline
-example_pipeline = Pipeline()
-
-# Add LangfuseConnector to the pipeline
-example_pipeline.add_component("tracer", LangfuseConnector("Example Pipeline"))
-
-# Add other components and use the pipeline
-# ...
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
 
+### Step 3: Initialize Haystack Instrumentation
+
+Now, we initialize the [OpenInference Haystack instrumentation](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-haystack). This third-party instrumentation automatically captures Haystack operations and exports OpenTelemetry (OTel) spans to Langfuse.
+
+
+```python
+from openinference.instrumentation.haystack import HaystackInstrumentor
+
+# Instrument the Haystack application
+HaystackInstrumentor().instrument()
+```
+
+### Step 4: Create a Simple Haystack Application
+
+Now we create a simple Haystack application using an OpenAI model and the SerperDev search API. 
+
+
+```python
+import os
+
+from haystack.components.agents import Agent
+from haystack.components.generators.chat import OpenAIChatGenerator
+from haystack.dataclasses import ChatMessage
+from haystack.tools import ComponentTool
+from haystack.components.websearch import SerperDevWebSearch
+
+search_tool = ComponentTool(component=SerperDevWebSearch())
+
+basic_agent = Agent(
+    chat_generator=OpenAIChatGenerator(model="gpt-4o-mini"),
+    system_prompt="You are a helpful web agent.",
+    tools=[search_tool],
+)
+
+result = basic_agent.run(messages=[ChatMessage.from_user("When was the first version of Haystack released?")])
+
+print(result['last_message'].text)
+
+langfuse.flush()
+
+```
+
+### Step 5: View Traces in Langfuse
+
+After running your workflow, log in to [Langfuse](https://cloud.langfuse.com) to explore the generated traces. You will see logs for each workflow step along with metrics such as token counts, latencies, and execution paths. 
+
+![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration_haystack/haystack-example-trace.png)
+
+_[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c1097813c1089faa5ac718bbd0695c73?timestamp=2025-09-02T09%3A53%3A35.005Z&display=details&observation=fdbb095a5e21466b)_
 </Steps>
 
-<Callout type="info" emoji="✨">
-  Done! Traces and metrics from your Haystack application are now automatically
-  tracked in Langfuse. Whenever you run your application, traces and metrics are
-  immediately visible in the Langfuse UI.
-</Callout>
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
-## Example Usage
-
-We compiled a cookbook to showcase the integration:
-
-import { FileCode } from "lucide-react";
-
-<Cards num={3}>
-  <Card
-    title="Cookbook"
-    href="/guides/cookbook/integration_haystack"
-    icon={<FileCode />}
-  />
-</Cards>
-
-## Introduction Video
-
-<CloudflareVideo
-  videoId="aaa30e674c281a9c9591af03b5f668d2"
-  aspectRatio={16 / 10}
-  title="Haystack Integration Overview"
-/>
-
-## Acknowledgement
-
-We're thrilled to collaborate with the Haystack team to give the best possible experience to devs when building complex RAG applications. Thanks to them for developing this intgeration.
-
-## GitHub Discussions
-
-import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
-
-<GhDiscussionsPreview labels={["integration-haystack"]} />
+<LearnMore />

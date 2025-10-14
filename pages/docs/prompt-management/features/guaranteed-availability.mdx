@@ -28,7 +28,7 @@ To guarantee 100% availability, there are two options:
 
 Pre-fetch prompts on application startup and exit the application if the prompt is not available.
 
-<Tabs items={["Python (Flask)", "JS/TS (Express)"]}>
+<LangTabs items={["Python (Flask)", "JS/TS (Express)"]}>
 <Tab>
 
 ```python
@@ -97,13 +97,13 @@ app.listen(3000, () => {
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Option 2: Fallback [#fallback]
 
 Provide a fallback prompt that will be used in these cases:
 
-<Tabs items={["Python", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python /fallback="Do you like {{movie}}?"/ /fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]/
@@ -151,4 +151,4 @@ prompt.isFallback;
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>

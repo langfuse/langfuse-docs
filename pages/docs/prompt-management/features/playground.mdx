@@ -7,9 +7,7 @@ sidebarTitle: Playground
 
 Test and iterate on your prompts directly in the Langfuse Prompt Playground. Tweak the prompt and model parameters to see how different models respond to these input changes. This allows you to quickly iterate on your prompts and optimize them for the best results in your LLM app without having to switch between tools or use any code.
 
-<Frame border fullWidth>
-  ![LLM Playground](/images/docs/playground-overview.png)
-</Frame>
+<Frame fullWidth>![LLM Playground](/images/docs/playground-overview.png)</Frame>
 
 ## Core features
 
@@ -17,8 +15,8 @@ Test and iterate on your prompts directly in the Langfuse Prompt Playground. Twe
 
 Compare multiple prompt variants alongside each other. Execute them all at once or focus on a single variant. Each variant keeps its own LLM settings, variables, tool definitions, and placeholders so you can immediately see the impact of every change.
 
-<CloudflareVideo
-  videoId="08cc4e34b6211f8f316a67df0a69c354"
+<Video
+  src="https://static.langfuse.com/docs-videos/playground-side-by-side-comparison.mp4"
   gifStyle
   aspectRatio={16 / 9}
 />
@@ -27,8 +25,8 @@ Compare multiple prompt variants alongside each other. Execute them all at once 
 
 You can open a prompt you created with [Langfuse Prompt Management](/docs/prompt-management/get-started) in the playground.
 
-<CloudflareVideo
-  videoId="31ea87009df96bcc685b0dc9bebe35a2"
+<Video
+  src="https://static.langfuse.com/docs-videos/playground-open-prompt.mp4"
   gifStyle
   aspectRatio={16 / 9}
 />
@@ -37,8 +35,8 @@ You can open a prompt you created with [Langfuse Prompt Management](/docs/prompt
 
 When you're satisfied with your prompt, you can save it to Prompt Management by clicking the save button.
 
-<CloudflareVideo
-  videoId="62427de4ef956d2d3119058c40e1a344"
+<Video
+  src="https://static.langfuse.com/docs-videos/playground-save-prompt.mp4"
   gifStyle
   aspectRatio={16 / 9}
 />
@@ -47,8 +45,8 @@ When you're satisfied with your prompt, you can save it to Prompt Management by 
 
 You can open a generation from [Langfuse Observability](/docs/observability) in the playground by clicking the `Open in Playground` button in the generation details page.
 
-<CloudflareVideo
-  videoId="31ea87009df96bcc685b0dc9bebe35a2"
+<Video
+  src="https://static.langfuse.com/docs-videos/playground-open-prompt.mp4"
   gifStyle
   aspectRatio={16 / 9}
 />
@@ -57,7 +55,23 @@ You can open a generation from [Langfuse Observability](/docs/observability) in 
 
 The Langfuse Playground supports tool calling and structured output schemas, enabling you to define, test, and validate LLM executions that rely on tool calls and enforce specific response formats.
 
-<CloudflareVideo videoId="8a19028067239a8e9ffe929d6dfd426e" gifStyle />
+<Callout type="info">
+  Currently, Langfuse supports opening tool-type observations in the playground
+  only when they are in the OpenAI ChatML format. If you’d like to see support
+  for additional formats, feel free to add your request to our [public
+  roadmap](https://langfuse.com/ideas).
+</Callout>
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded mt-10"
+  src="https://www.youtube-nocookie.com/embed/IkSK5Kz-Pt8?si=ksiM2YzZC84HEJC_"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
 
 **Tool Calling**
 
@@ -75,7 +89,7 @@ The Langfuse Playground supports tool calling and structured output schemas, ena
 
 You can add prompt variables in the playground to simulate different inputs to your prompt.
 
-<Frame border fullWidth>
+<Frame fullWidth>
   ![Add prompt variables](/images/docs/playground-variables.png)
 </Frame>
 
@@ -83,7 +97,7 @@ You can add prompt variables in the playground to simulate different inputs to y
 
 You can use your favorite model by adding the API key for the model you want to use in the Langfuse project settings. You can learn how to set up an LLM connection [here](/docs/administration/llm-connection).
 
-<Frame border fullWidth>
+<Frame fullWidth>
   ![Select the model you want to
   use](/images/docs/playground-model-selection.png)
 </Frame>

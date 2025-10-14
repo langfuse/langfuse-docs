@@ -7,15 +7,15 @@ sidebarTitle: User Tracking
 
 The Users view provides an overview of all users. It also offers an in-depth look into individual users.
 
-<CloudflareVideo
-  videoId="1c8ab99f53799bcb24ce11982065a7d9"
+<Video
+  src="https://static.langfuse.com/docs-videos/tracing-users.mp4"
   aspectRatio={1696 / 1080}
   gifStyle
 />
 
 It's easy to map data in Langfuse to individual users. Just pass a unique identifier as the `userId` when you create a `trace`. This can be a username, email, or any other unique identifier. The `userId` is optional, but using it helps you get more from Langfuse. See the integration docs to learn more.
 
-<Tabs items={["Python SDK", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -217,22 +217,20 @@ You can set the `userId` via the override configs, see the [Flowise Integration 
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ## View all users
 
 The user list provides an overview of all users that have been tracked by Langfuse. It makes it simple to segment by overall token usage, number of traces, and user feedback.
 
-<Frame border fullWidth>
-  ![User List](/images/docs/users-list.png)
-</Frame>
+<Frame fullWidth>![User List](/images/docs/users-list.png)</Frame>
 
 ## Individual user view
 
 The individual user view provides an in-depth look into a single user. Explore aggregated metrics or view all traces and feedback for a user.
 
-<CloudflareVideo
-  videoId="f87b1175dfeeb7fdcbd8db04655a10b1"
+<Video
+  src="https://static.langfuse.com/docs-videos/user-table.mp4"
   aspectRatio={1592 / 1080}
   gifStyle
 />

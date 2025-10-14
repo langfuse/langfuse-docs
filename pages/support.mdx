@@ -1,119 +1,86 @@
 ---
 title: "Support"
-description: "The Langfuse team and community can help you with questions and issues."
+description: Overview of available support options for Langfuse.
 ---
 
-# Support at Langfuse
+# Support
 
-<Callout type="info">
-  Langfuse is an open-source project and we are building in public. We love
-  feedback as the project and space develops quickly. We strive to offer
-  comprehensive information and support through public, indexed, and searchable
-  channels. If your request is not sensitive, please use [GitHub
-  Discussions](/gh-support).
-</Callout>
+> Langfuse is Open Source. If you have a question, it's likely someone else has it, too. We'd love to answer in the open and use **[GitHub Discussions](/gh-support)** whenever possible.
 
-## Finding an answer to your question
+| Support type               |      Self-Hosted (OSS)       |        Langfuse Cloud        | Enterprise |
+| -------------------------- | :--------------------------: | :--------------------------: | :--------: |
+| **Ask AI**                 |              ✅              |              ✅              |     ✅     |
+| **Community (GitHub)**     |              ✅              |              ✅              |     ✅     |
+| **In-app Support**         |                              |              ✅              |     ✅     |
+| **Dedicated Slack**        |                              |          Teams Plan          |     ✅     |
+| **Support SLO**            |                              |                              |     [✅](/enterprise#faq)     |
+| **Onboarding support**     |                              |                              |     ✅     |
+| **Architectural guidance** |                              |                              |     ✅     |
+| **Security assessment**    | Standard assessment provided | Standard assessment provided |     ✅     |
 
-- Our [documentation](/docs) is the best place to start looking for answers. It is comprehensive, and we invest significant time into maintaining it. You can also suggest edits to the docs via GitHub.
-- Use "Ask AI" to get instant answers to your questions:
+---
 
-import InkeepEmbeddedChat from "@/components/inkeep/InkeepEmbeddedChat";
+## Ask AI [#ask-ai]
 
-<div className="h-5" />
-<InkeepEmbeddedChat />
+Langfuse Ask AI can answer many questions about Langfuse, how to integrate, and security/compliance of Langfuse Cloud.
 
-## Support Channel Availability
+import { Bot } from "lucide-react";
 
-The availability of support channels varies depending on your plan.
+<Cards num={1}>
+  <Card title="Ask AI" href="/ask-ai" icon={<Bot />} arrow />
+</Cards>
 
-| Plan                    | GitHub Discussions | Chat | Email | Slack | Dedicated | SLO    |
-| ----------------------- | ------------------ | ---- | ----- | ----- | --------- | ------ |
-| Self-Hosted Open Source | ✅                 | ❌   | ❌    | ❌    | ❌        | n/a    |
-| Cloud Hobby             | ✅                 | ❌   | ❌    | ❌    | ❌        | n/a    |
-| Cloud Core              | ✅                 | ✅   | ❌    | ❌    | ❌        | 48h    |
-| Cloud Pro               | ✅                 | ✅   | ✅    | ✅    | ❌        | 48h    |
-| Cloud Teams             | ✅                 | ✅   | ✅    | ✅    | ❌        | 24h    |
-| Cloud Enterprise        | ✅                 | ✅   | ✅    | ✅    | ✅        | Custom |
-| Self-Hosted Enterprise  | ✅                 | ✅   | ✅    | ✅    | ✅        | Custom |
+## Community (GitHub) [#community]
 
-## GitHub Discussions
+Langfuse is Open Source. If you have a question, it's likely someone else has it, too. We'd love to answer in the open on GitHub whenever possible.
 
-<AvailabilityBanner
-  availability={{
-    hobby: "full",
-    core: "full",
-    pro: "full",
-    enterprise: "full",
-    selfHosted: "full",
-  }}
-/>
+import { MessageCircle, Bug, Lightbulb } from "lucide-react";
 
-GitHub Discussions is the best support channel as it allows to discuss questions in public which makes it easier to find answers to similar questions.
-Maintainers are actively monitoring GitHub Discussions and will respond to your question as soon as possible.
+<Cards num={3}>
+  <Card
+    title="Ask a question"
+    href="/gh-support"
+    icon={<MessageCircle />}
+    arrow
+  />
+  <Card title="Report a bug" href="/issues" icon={<Bug />} arrow />
+  <Card title="Suggest a feature" href="/ideas" icon={<Lightbulb />} arrow />
+</Cards>
 
-- **Ask any question in our [public Q&A](/gh-support) on GitHub Discussions.** Please include as much detail as possible (e.g. code snippets, screenshots, background information) to help us understand your question.
-- [Request a feature](/ideas) on GitHub Discussions.
-- [Report a Bug](/issues) on GitHub Issues.
+## In‑app Support [#in-app]
 
-<details>
-<summary>Recent GitHub Discussions</summary>
+> Available to **Cloud Core, Pro, Teams, and Enterprise** customers.
 
-import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+Open the (1) _support_ widget in the Langfuse UI and (2) select _Email a support engineer_. We’ll route your request to the right team and reply via email.
 
-<GhDiscussionsPreview defaultSort="recent" />
-</details>
+<Frame className="rounded-lg overflow-hidden">
+  ![In-app Support](/images/support/in-app-support.png)
+</Frame>
 
-## Chat
+## Dedicated Slack [#slack]
 
-<AvailabilityBanner
-  availability={{
-    hobby: "not-available",
-    core: "full",
-    pro: "full",
-    enterprise: "full",
-    selfHosted: "ee",
-  }}
-/>
+> Available to **Cloud Teams and Enterprise** customers.
 
-import { showChat } from "@/components/supportChat";
+For qualifying customers, we provide support via Slack Connect. This brings all parties together on both sides and makes collaboration much faster for everyone involved.
 
-Within Langfuse Cloud, you can use the in-app chat widget to get help from the Langfuse team. Alternatively, you can <button onClick={showChat} className="nextra-focus _text-primary-600 _underline hover:_no-underline _decoration-from-font [text-underline-position:from-font] cursor-pointer">create a support ticket here</button>.
+You will directly chat with the engineers building Langfuse to find the best solutions to your questions.
 
-## Email
+Please reach out via the in-app support to request a private Slack channel for your team.
 
-<AvailabilityBanner
-  availability={{
-    hobby: "not-available",
-    core: "not-available",
-    pro: "full",
-    enterprise: "full",
-    selfHosted: "ee",
-  }}
-/>
+## Onboarding & Architectural Guidance [#onboarding]
 
-Email via support@langfuse.com
+> Available on **Enterprise** plans. Ask your account team.
 
-## Private Slack Channel
+We can help teams get value from Langfuse quickly:
 
-<AvailabilityBanner
-  availability={{
-    hobby: "not-available",
-    core: "not-available",
-    pro: "full",
-    enterprise: "full",
-    selfHosted: "ee",
-  }}
-/>
+- Onboarding workshops and Q\&A for new teams
+- Best‑practice setup for tracing, evaluations, and prompt management
+- Architectural reviews when integrating Langfuse into your existing platform
 
-You can request a private Slack Connect Channel via support@langfuse.com. Please share the list of users you'd like to invite to the channel.
+## Security Assessment [#security]
 
-## Community Discord
+We maintain a comprehensive set of internal [security policies and documentation](/security) that address key requirements for GDPR, SOC 2, and HIPAA compliance.
 
-[![Discord](https://img.shields.io/discord/1111061815649124414?style=flat&logo=discord&logoColor=white)](/discord)
+For Enterprise customers, we are glad to support your security assessment process. This may involve empowering your internal team (who retain responsibility for information security when self-hosting), or responding to your questions and updating our policies as needed.
 
-Over 3,400 users are on our [Discord Server](/discord). It's a great place to ask questions to fellow users, share your projects, and get to know each other.
-
-<Callout type="info">
-  Please note: The Langfuse team does not provide dedicated support on Discord.
-</Callout>
+Please check out the [security and compliance overview](/security) for more details.

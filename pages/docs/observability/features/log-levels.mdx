@@ -9,11 +9,11 @@ Traces can have a lot of observations ([data model](/docs/tracing#introduction-t
 
 In addition to the level, you can also include a `statusMessage` to provide additional context.
 
-<Frame border fullWidth>
+<Frame fullWidth>
   ![Trace log level and statusMessage](/images/docs/trace-log-level.png)
 </Frame>
 
-<Tabs items={["Python SDK", "JS/TS", "OpenAI SDK", "Langchain"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK", "Langchain"]}>
 <Tab>
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
@@ -93,16 +93,13 @@ import { startActiveObservation, startObservation } from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
   span.update({
-    input: { query: "What is the capital of France?" }
+    input: { query: "What is the capital of France?" },
   });
 
-  updateActiveObservation(
-    {
-      level: "WARNING",
-      statusMessage: "This is a warning",
-    },
-  );
-
+  updateActiveObservation({
+    level: "WARNING",
+    statusMessage: "This is a warning",
+  });
 });
 ```
 
@@ -113,13 +110,10 @@ import { observe, updateActiveObservation } from "@langfuse/tracing";
 
 // An existing function
 async function fetchData(source: string) {
-
-  updateActiveObservation(
-    {
-      level: "WARNING",
-      statusMessage: "This is a warning",
-    },
-  );
+  updateActiveObservation({
+    level: "WARNING",
+    statusMessage: "This is a warning",
+  });
 
   // ... logic to fetch data
   return { data: `some data from ${source}` };
@@ -127,7 +121,7 @@ async function fetchData(source: string) {
 
 // Wrap the function to trace it
 const tracedFetchData = observe(fetchData, {
-  name: "observe-wrapper"
+  name: "observe-wrapper",
 });
 
 const result = await tracedFetchData("API");
@@ -138,16 +132,16 @@ When creating spans manually:
 ```ts
 import { startObservation } from "@langfuse/tracing";
 
-const span = startObservation('manual-observation', {
-  input: { query: 'What is the capital of France?' },
+const span = startObservation("manual-observation", {
+  input: { query: "What is the capital of France?" },
 });
 
 span.update({
   level: "WARNING",
-  statusMessage: "This is a warning"
+  statusMessage: "This is a warning",
 });
 
-span.update({ output: 'Paris'}).end();
+span.update({ output: "Paris" }).end();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
@@ -164,14 +158,14 @@ When using the [LangChain Integration](/integrations/frameworks/langchain), `lev
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ## Filter Trace by Log Level
 
 When viewing a single trace, you can filter the observations by log level.
 
-<CloudflareVideo
-  videoId="70f03a9919ed0b3f4807aecfccaffc2c"
+<Video
+  src="https://static.langfuse.com/docs-videos/250210-trace-log-level-filter.mp4"
   aspectRatio={16 / 9}
   gifStyle
 />

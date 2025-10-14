@@ -2,7 +2,7 @@ import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import Image from "next/image";
 import { type Page } from "nextra";
-import { CloudflareVideo, Video } from "../Video";
+import { Video } from "../Video";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Head from "next/head";
@@ -142,16 +142,10 @@ export const ChangelogIndex = ({
             </div>
             <div className="md:col-span-3">
               <Link key={page.route} href={page.route} className="block group">
-                {page.frontMatter?.ogCloudflareVideo ? (
-                  <CloudflareVideo
-                    videoId={page.frontMatter?.ogCloudflareVideo}
-                    gifStyle
-                    aspectRatio={16 / 9}
-                    className="mb-14 rounded relative overflow-hidden shadow-md group-hover:shadow-lg ring-0 border-0"
-                  />
-                ) : page.frontMatter?.ogVideo ? (
+                {page.frontMatter?.ogVideo ? (
                   <Video
                     src={page.frontMatter.ogVideo}
+                    aspectRatio={16 / 9}
                     gifStyle
                     className="mb-14 rounded relative overflow-hidden shadow-md group-hover:shadow-lg ring-0 border-0"
                   />

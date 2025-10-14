@@ -25,7 +25,7 @@ Note that all trace deletions will delete related entities like scores and obser
 
 ### Single Trace
 
-<Tabs items={["UI", "API"]}>
+<LangTabs items={["Langfuse UI", "API"]}>
 
 <Tab>
 
@@ -48,11 +48,11 @@ See [reference](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ### Batch of Traces
 
-<Tabs items={["UI", "API"]}>
+<LangTabs items={["Langfuse UI", "API"]}>
 
 <Tab>
 
@@ -74,11 +74,11 @@ See [reference](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ### Delete by Query
 
-<Tabs items={["UI"]}>
+<LangTabs items={["Langfuse UI"]}>
 
 <Tab>
 
@@ -92,7 +92,7 @@ Then select `Delete` in the `Actions` dropdown.
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ### Limitations
 
@@ -104,7 +104,7 @@ To verify that your data got deleted, you will have to query it again.
 
 ## Deleting a Project
 
-<Tabs items={["UI"]}>
+<LangTabs items={["Langfuse UI"]}>
 
 <Tab>
 
@@ -115,16 +115,17 @@ Within the next minutes, all related data is irreversibly removed from our syste
 
 <Callout type="warning">
   Deleting a project is irreversible and all data will be removed. Be cautious
-  when executing this action.
+  when executing this action. After confirming the deletion, it will take up to
+  5 minutes for the project to be deleted.
 </Callout>
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ## Deleting an Organization
 
-<Tabs items={["UI"]}>
+<LangTabs items={["Langfuse UI"]}>
 
 <Tab>
 
@@ -135,11 +136,25 @@ The organization and all associated user information will be removed from our sy
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ## Deleting a User Account (Cloud)
 
-To delete your user account, please message us at support@langfuse.com.
+<LangTabs items={["Langfuse UI"]}>
+
+<Tab>
+
+Users can delete their own account from the Account Settings page. Navigate to Account Settings from the user menu in the bottom right.
+
+If you are the sole owner of an organization, you must first transfer ownership to another user or delete the organization before you can delete your account.
+
+<Frame className="my-10">
+  ![Delete user account](/images/docs/delete-account-settings.png)
+</Frame>
+
+</Tab>
+
+</LangTabs>
 
 ## Deleting a User Account (Self-Host)
 

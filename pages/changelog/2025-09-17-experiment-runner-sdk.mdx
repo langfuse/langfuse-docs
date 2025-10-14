@@ -1,0 +1,167 @@
+---
+date: 2025-09-17
+title: Experiment Runner SDK
+description: New high-level SDK abstraction for running experiments on datasets with automatic tracing, concurrent execution, and flexible evaluation.
+author: Hassieb
+ogImage: /images/changelog/2025-09-12-experiment-sdk.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Both the Python and JS/TS SDKs now provide a high-level abstraction for running experiments on datasets. The dataset can be both local or hosted on Langfuse. Using the Experiment runner is the recommended way to run an experiment on a dataset with our SDK.
+
+**Key Features**
+
+The experiment runner automatically handles:
+
+- **Concurrent execution** of tasks with configurable limits
+- **Automatic tracing** of all executions for observability
+- **Flexible evaluation** with both item-level and run-level evaluators
+- **Error isolation** so individual failures don't stop the experiment
+- **Traces in Langfuse** even though the core task function is not instrumented by automatic input / return value capture
+- **Dataset integration** for easy comparison and tracking
+
+**Example**
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+from langfuse.openai import OpenAI
+
+# Initialize client
+langfuse = get_client()
+
+# Define your task function
+def my_task(*, item, **kwargs):
+    question = item["input"]
+
+    response = OpenAI().chat.completions.create(
+        model="gpt-4.1", messages=[{"role": "user", "content": question}]
+    )
+
+    return response.choices[0].message.content
+
+# Run experiment on local data
+local_data = [
+    {"input": "What is the capital of France?"},
+    {"input": "What is the capital of Germany?"},
+]
+
+result = langfuse.run_experiment(
+    name="Geography Quiz",
+    description="Testing basic functionality",
+    data=local_data,
+    task=my_task,
+)
+
+# Pretty print results
+print(result.format())
+```
+
+This prints:
+
+```
+1. Item 1:
+   Input:    What is the capital of France?
+   Actual:   The capital of France is Paris.
+
+   Trace ID: e52488cb13d426f55a2a7c178d4cb0d0
+
+2. Item 2:
+   Input:    What is the capital of Germany?
+   Actual:   The capital of Germany is **Berlin**.
+
+   Trace ID: 188cd8fc165446fa957a7c15423cbe0e
+
+──────────────────────────────────────────────────
+📊 Geography Quiz - Testing basic functionality
+2 items
+```
+
+
+</Tab>
+<Tab>
+
+```typescript
+import { OpenAI } from "openai";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import {
+  LangfuseClient,
+  ExperimentTask,
+  ExperimentItem,
+} from "@langfuse/client";
+import { observeOpenAI } from "@langfuse/openai";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Initialize OpenTelemetry
+const otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+otelSdk.start();
+
+// Initialize client
+const langfuse = new LangfuseClient();
+
+// Define your task function
+const myTask: ExperimentTask = async (item) => {
+  const question = item.input;
+
+  const response = await observeOpenAI(new OpenAI()).chat.completions.create({
+    model: "gpt-4.1",
+    messages: [{ role: "user", content: question }],
+  });
+
+  return response.choices[0].message.content;
+};
+
+// Run experiment on local data
+const localData: ExperimentItem[] = [
+  { input: "What is the capital of France?" },
+  { input: "What is the capital of Germany?" },
+];
+
+const result = await langfuse.experiment.run({
+  name: "Geography Quiz",
+  description: "Testing basic functionality",
+  data: localData,
+  task: myTask,
+});
+
+console.log(await result.format());
+
+// Important: shut down OpenTelemetry to ensure traces are sent to Langfuse
+await otelSdk.shutdown();
+```
+
+This prints:
+
+```
+1. Item 1:
+   Input:    What is the capital of France?
+   Expected: null
+   Actual:   The capital of France is **Paris**.
+
+   Trace:
+   https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f8e12f19b4114621106512b923a1170f
+
+2. Item 2:
+   Input:    What is the capital of Germany?
+   Expected: null
+   Actual:   The capital of Germany is **Berlin**.
+
+   Trace:
+   https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9852ca4665ceea9f83c2acfccf1b4052
+
+──────────────────────────────────────────────────
+📊 Geography Quiz - Testing basic functionality
+2 items
+```
+
+</Tab>
+</LangTabs>
+
+**Get Started**
+
+Learn more about the experiment runner incl. how to use it with Langfuse datasets, adding evaluators and more in our [remote dataset runs documentation](/docs/evaluation/dataset-runs/remote-run#experiment-runner-sdk).

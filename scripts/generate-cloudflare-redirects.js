@@ -60,7 +60,7 @@ function convertPattern(nextjsPattern, isDestination = false) {
 /**
  * Generate _redirects file content
  */
-function generateRedirectsContent(nonPermanentRedirects, permanentRedirects) {
+function generateRedirectsContent(nonPermanentRedirects) {
     const lines = [];
 
     // Add header comment
@@ -69,24 +69,13 @@ function generateRedirectsContent(nonPermanentRedirects, permanentRedirects) {
     lines.push('# Format: source destination [status]');
     lines.push('');
 
-    // Add non-permanent redirects (302)
+
     if (nonPermanentRedirects.length > 0) {
-        lines.push('# Non-permanent redirects (302)');
+        lines.push('# All redirects (302)');
         nonPermanentRedirects.forEach(([source, destination]) => {
             const convertedSource = convertPattern(source, false);      // source pattern
             const convertedDestination = convertPattern(destination, true); // destination pattern
             lines.push(`${convertedSource} ${convertedDestination} 302`);
-        });
-        lines.push('');
-    }
-
-    // Add permanent redirects (301)
-    if (permanentRedirects.length > 0) {
-        lines.push('# Permanent redirects (301)');
-        permanentRedirects.forEach(([source, destination]) => {
-            const convertedSource = convertPattern(source, false);      // source pattern
-            const convertedDestination = convertPattern(destination, true); // destination pattern
-            lines.push(`${convertedSource} ${convertedDestination} 301`);
         });
         lines.push('');
     }
@@ -138,9 +127,11 @@ async function main() {
 
         console.log(`📝 Found ${nonPermanentRedirects.length} non-permanent redirects`);
         console.log(`📝 Found ${permanentRedirects.length} permanent redirects`);
+        console.log(`📝 Total redirects (all converted to 302): ${nonPermanentRedirects.length + permanentRedirects.length}`);
 
         // Generate _redirects content
-        const content = generateRedirectsContent(nonPermanentRedirects, permanentRedirects);
+        const allRedirects = [...nonPermanentRedirects, ...permanentRedirects];
+        const content = generateRedirectsContent(allRedirects);
 
         // Write the file
         const redirectsFile = writeRedirectsFile(content);

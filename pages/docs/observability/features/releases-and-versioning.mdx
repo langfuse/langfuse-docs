@@ -35,7 +35,7 @@ The SDKs look for a `release` in the following order:
 
 ### Initialization
 
-<Tabs items={["Python SDK", "JS/TS", "Environment variable"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "Environment variable"]}>
 
 <Tab title="Python SDK">
 
@@ -47,24 +47,6 @@ from langfuse import Langfuse, get_client
 # Set the release when initializing the client
 langfuse = Langfuse(release="v2.1.24")
 client = get_client()
-```
-
-You can also update the trace's release after creation:
-
-```python
-from langfuse import observe, get_client
-
-@observe()
-def process_data():
-    # Get the client and update the current trace
-    langfuse = get_client()
-    langfuse.update_current_trace(release="v2.1.24")
-    # ...
-
-# With context managers
-langfuse = get_client()
-with langfuse.start_as_current_span(name="my-operation") as span:
-    span.update_trace(release="v2.1.24")
 ```
 
 </Tab>
@@ -85,10 +67,9 @@ The SDKs will look for a `LANGFUSE_RELEASE` environment variable. Use it to conf
 LANGFUSE_RELEASE = "<release_tag>" # <- github sha or other identifier
 ```
 
-
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 **Automatically on popular platforms**
 
@@ -108,9 +89,9 @@ flowchart LR
     A1 --> A2
 ```
 
-The `version` parameter can be added to `traces` and all observation types (`span`, `generation`, `event`). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
+The `version` parameter can be added to `traces` and all observation types (e.g., `span`, `generation`, `event`, and [other observation types](/docs/observability/features/observation-types)). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
 
-<Tabs items={["Python SDK", "JS/TS", "Langchain (Python)","Langchain (JS)"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langchain (Python)","Langchain (JS)"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -187,10 +168,10 @@ const handler = new CallbackHandler({
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 _Version parameter in Langfuse interface_
 
-<Frame border>
+<Frame>
   ![Version on single generation](/images/blog/update-august-2023/version.jpg)
 </Frame>

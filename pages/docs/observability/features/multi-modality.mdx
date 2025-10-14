@@ -6,12 +6,6 @@ sidebarTitle: Multi-Modality
 
 # Multi-Modality and Attachments
 
-<Callout type="info">
-
-Support for media attachments to traces is currently in beta. Please report any [issues](/issues) and add feature requests to this ongoing [discussion thread](https://github.com/orgs/langfuse/discussions/3004).
-
-</Callout>
-
 Langfuse supports multi-modal traces including **text, images, audio, and other attachments**.
 
 By default, **[base64 encoded data URIs](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data#syntax) are handled automatically by the Langfuse SDKs**. They are extracted from the payloads commonly used in multi-modal LLMs, uploaded to Langfuse's object storage, and linked to the trace.
@@ -34,7 +28,7 @@ import MultiModalImageGallery from "@/components-mdx/multi-modal-image-gallery.m
 
 ### Langfuse Cloud
 
-Multi-modal attachments on Langfuse Cloud are free while in beta. We will be rolling out a new pricing metric to account for the additional storage and compute costs associated with large multi-modal traces in the coming weeks.
+Multi-modal attachments on Langfuse Cloud are currently free on Langfuse Cloud. We reserve the option to roll out a new pricing metric to account for the additional storage and compute costs associated with large multi-modal traces in the near-term future.
 
 ### Self-hosting
 
@@ -109,7 +103,7 @@ Supported formats:
 
 If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, or metadata. See the multi-modal documentation for examples.
 
-<Tabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 ```python
 from langfuse import get_client, observe
@@ -166,17 +160,17 @@ with langfuse.start_as_current_span(name="analyze-document") as span: # Include 
 ```typescript
 import fs from "fs";
 import { LangfuseMedia } from "@langfuse/core";
- 
+
 // Wrap media in LangfuseMedia class
 const wrappedMedia = new LangfuseMedia({
   source: "bytes",
   contentBytes: fs.readFileSync(new URL("./bitcoin.pdf", import.meta.url)),
   contentType: "application/pdf",
 });
- 
+
 // Optionally, access media via wrappedMedia.obj
 console.log(wrappedMedia.obj);
- 
+
 // Include media in any trace or observation
 const span3 = startObservation("media-pdf-generation");
 
@@ -191,7 +185,7 @@ span3.end();
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ### API
 
@@ -256,7 +250,7 @@ Based on this token, the Langfuse UI can automatically detect the `mediaId` and 
 
 When dealing with traces, observations, or dataset items that include media references, you can convert them back to their base64 data URI format using the `resolve_media_references` utility method provided by the Langfuse client. This is particularly useful for reinserting the original content during fine-tuning, dataset runs, or replaying a generation. The utility method traverses the parsed object and returns a deep copy with all media reference strings replaced by the corresponding base64 data URI representations.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
+<LangTabs items={["Python SDK", "Python SDK (v2)", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -325,7 +319,7 @@ resolved_trace = langfuse.resolve_media_references(
 
 ```typescript
 import { LangfuseClient } from "@langfuse/client";
- 
+
 const langfuse = new LangfuseClient()
 
 // Example object with media references
@@ -352,7 +346,7 @@ const resolvedTrace = await langfuse.resolveMediaReferences({
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## GitHub Discussions
 

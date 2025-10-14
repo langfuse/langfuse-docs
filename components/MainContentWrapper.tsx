@@ -31,6 +31,8 @@ const pathsWithCopyAsMarkdownButton = [
   "/guide",
   "/faq",
   "/integrations",
+  "/handbook",
+  "/security",
 ];
 const isCustomerStory = (pathname: string) =>
   pathname.startsWith("/customers/");

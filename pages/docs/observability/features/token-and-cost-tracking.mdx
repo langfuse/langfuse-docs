@@ -6,12 +6,12 @@ sidebarTitle: Token & Cost Tracking
 
 # Model Usage & Cost Tracking
 
-<Frame fullWidth border>
+<Frame fullWidth>
   ![Model cost breakdown in Langfuse
   UI](https://static.langfuse.com/250108_model_cost_breakdown.gif)
 </Frame>
 
-Langfuse tracks the usage and costs of your LLM generations and provides breakdowns by usage types.
+Langfuse tracks the usage and costs of your LLM generations and provides breakdowns by usage types. Usage and cost can be tracked on observations of [type](/docs/observability/features/observation-types) `generation` and `embedding`.
 
 - **Usage details**: number of units consumed per usage type
 - **Cost details**: USD cost per usage type
@@ -49,7 +49,7 @@ If available in the LLM response, ingesting usage and/or cost is the most accura
 
 Many of the Langfuse integrations automatically capture usage details and cost details data from the LLM response. If this does not work as expected, please create an [issue](/issue) on GitHub.
 
-<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 When using the `@observe()` decorator:
@@ -153,11 +153,16 @@ with langfuse.start_as_current_generation(
 When using the context manager:
 
 ```ts /usageDetails/, /costDetails/
-import { startActiveObservation, startObservation, updateActiveTrace, updateActiveObservation } from "@langfuse/tracing";
+import {
+  startActiveObservation,
+  startObservation,
+  updateActiveTrace,
+  updateActiveObservation,
+} from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
   span.update({
-    input: { query: "What is the capital of France?" }
+    input: { query: "What is the capital of France?" },
   });
 
   // This generation will automatically be a child of "user-request"
@@ -167,7 +172,7 @@ await startActiveObservation("context-manager", async (span) => {
       model: "gpt-4",
       input: [{ role: "user", content: "What is the capital of France?" }],
     },
-    { asType: "generation" },
+    { asType: "generation" }
   );
 
   // ... LLM call logic ...
@@ -202,23 +207,26 @@ import { observe, updateActiveObservation } from "@langfuse/tracing";
 
 // An existing function
 async function fetchData(source: string) {
-  updateActiveObservation({
-    usageDetails: {
-      input: 10,
-      output: 5,
-      cache_read_input_tokens: 2,
-      some_other_token_count: 10,
-      total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+  updateActiveObservation(
+    {
+      usageDetails: {
+        input: 10,
+        output: 5,
+        cache_read_input_tokens: 2,
+        some_other_token_count: 10,
+        total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+      },
+      costDetails: {
+        // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
+        input: 1,
+        output: 1,
+        cache_read_input_tokens: 0.5,
+        some_other_token_count: 1,
+        total: 3.5,
+      },
     },
-    costDetails: {
-      // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
-      input: 1,
-      output: 1,
-      cache_read_input_tokens: 0.5,
-      some_other_token_count: 1,
-      total: 3.5,
-    }
-}, { asType: "generation" })
+    { asType: "generation" }
+  );
 
   // ... logic to fetch data
   return { data: `some data from ${source}` };
@@ -236,18 +244,18 @@ const result = await tracedFetchData("API");
 When creating spans manually:
 
 ```ts /usageDetails/, /costDetails/
-const span = startObservation('manual-observation', {
-  input: { query: 'What is the capital of France?' },
+const span = startObservation("manual-observation", {
+  input: { query: "What is the capital of France?" },
 });
 
 const generation = span.startObservation(
-  'llm-call',
+  "llm-call",
   {
-    model: 'gpt-4',
-    input: [{ role: 'user', content: 'What is the capital of France?' }],
-    output: { content: 'The capital of France is Paris.' },
+    model: "gpt-4",
+    input: [{ role: "user", content: "What is the capital of France?" }],
+    output: { content: "The capital of France is Paris." },
   },
-  { asType: "generation" },
+  { asType: "generation" }
 );
 
 generation.update({
@@ -265,7 +273,7 @@ generation.update({
     cache_read_input_tokens: 0.5,
     some_other_token_count: 1,
     total: 3.5,
-  }
+  },
 });
 
 generation
@@ -280,13 +288,13 @@ span.update({ output: "Successfully answered user request." }).end();
 You can also update the usage and cost via `generation.update()`.
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ### Compatibility with OpenAI
 
 For increased compatibility with OpenAI, you can also use the OpenAI Usage schema. `prompt_tokens` will be mapped to `input`, `completion_tokens` will be mapped to `output`, and `total_tokens` will be mapped to `total`. The keys nested in `prompt_tokens_details` will be flattened with an `input_` prefix and `completion_tokens_details` will be flattened with an `output_` prefix.
 
-<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -342,7 +350,7 @@ const generation = langfuse.generation({
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 You can also ingest OpenAI-style usage via `generation.update()` and `generation.end()`.
 
@@ -376,10 +384,13 @@ Langfuse automatically calculates cost for ingested generations at the time of i
 
 You can flexibly add your own model definitions to Langfuse. This is especially useful for self-hosted or fine-tuned models which are not included in the list of Langfuse maintained models.
 
-<Tabs items={["UI", "API"]}>
+<LangTabs items={["Langfuse UI", "API"]}>
 
 <Tab>
-  <Frame border>![Add model in UI](/images/docs/create-model.gif)</Frame>
+  <Frame>
+    ![Add model in
+    UI](https://static.langfuse.com/docs-legacy-gifs/create-model.gif)
+  </Frame>
 </Tab>
 
 <Tab>
@@ -395,7 +406,7 @@ DELETE /api/public/models/{id}
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 Models are matched to generations based on:
 
@@ -429,7 +440,8 @@ For more details, see [the OpenAI guide](https://platform.openai.com/docs/guides
 
 ## Troubleshooting
 
-**Usage and cost are missing for historical generations**. Except for changes in prices, Langfuse does not retroactively infer usage and cost for existing generations when model definitions are changed. You can request a batch job (Langfuse Cloud) or run a [script](/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2) (self-hosting) to apply new model definitions to existing generations.
+- If you change the model definition, the updated costs will only be applied to new generations logged to Langfuse.
+- Only observations of type `generation` and `embedding` can track costs and usage.
 
 ## GitHub Discussions
 

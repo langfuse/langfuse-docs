@@ -14,8 +14,8 @@ import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-
 
 [Langfuse Tracing](/docs/tracing) integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/how_to/#callbacks), [JS](https://js.langchain.com/docs/how_to/#callbacks)). The Langfuse SDK automatically captures detailed traces of your Langchain executions, creating properly nested observations for chains, LLMs, tools, and retrievers. This allows you to monitor, analyze and debug your LangChain applications with full observability.
 
-<CloudflareVideo
-  videoId="dbe2ea8e8d64f27126a3734fa51cd0e7"
+<Video
+  src="https://static.langfuse.com/docs-videos/langgraph-overview.mp4"
   gifStyle
   className="max-w-2xl"
 />
@@ -24,7 +24,7 @@ import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-
   This documentation has been updated to show examples for the new **[Python SDK
   v3](/docs/sdk/python/sdk-v3)**. If you are looking for documentation for the
   Python SDK version 2, [see
-  here.](https://github.com/langfuse/langfuse-docs/blob/1c264cd5216d3e1008f0da2e33c11e44ae1d9d1c/pages/integrations/frameworks/langchain.mdx)
+  here.](https://python-sdk-v2.docs-snapshot.langfuse.com/integrations/frameworks/langchain)
 </Callout>
 
 ## Add Langfuse to your Langchain Application
@@ -178,7 +178,7 @@ We are interested in your feedback! Raise an issue on [GitHub](/ideas) to reques
 
 ### Configuration Options
 
-<Tabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 The `CallbackHandler` does not accept any constructor arguments for trace attributes or global settings.
@@ -202,13 +202,13 @@ The following optional constructor arguments are supported:
 | `enabled`   | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                        |
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ### Dynamic Trace Attributes
 
 You can set trace attributes dynamically for each LangChain execution. The approach differs between SDK versions:
 
-<Tabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 With Python SDK, you have two options to set trace attributes dynamically:
@@ -295,13 +295,13 @@ await chain.invoke(
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ### Predefined Trace ID + Add Evaluation or User Feedback Score
 
 **Predefined Trace ID**
 
-<Tabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 To score a Langchain execution, you can capture the trace ID for the score by either wrapping the execution in a span that sets a predefined trace ID, or retrieve the last trace ID a callback handler has created via `langfuse_handler.last_trace_id`.
@@ -361,13 +361,13 @@ await chain.invoke(
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 **Add Score to Trace**
 
 There are multiple ways to score a trace in Python SDK. See [Scoring documentation](/docs/scores/overview) for more details.
 
-<Tabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -416,9 +416,9 @@ langfuse.create_score(
 
 ```typescript
 import { LangfuseClient } from "@langfuse/client";
- 
-const langfuse = new LangfuseClient()
- 
+
+const langfuse = new LangfuseClient();
+
 langfuse.score.create({
   id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   traceId: message.traceId,
@@ -428,13 +428,13 @@ langfuse.score.create({
   dataType: "NUMERIC", // optional, inferred if not provided
   comment: "Factually correct", // optional
 });
- 
+
 // Flush the scores in short-lived environments
 await langfuse.flush();
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ### Interoperability with Langfuse SDKs [#interoperability]
 
@@ -449,7 +449,7 @@ The Langchain integration works seamlessly with the Langfuse SDK to create compr
 
 Learn more about the structure of a trace [here](/docs/tracing).
 
-<Tabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 **Using the `@observe()` decorator:**
@@ -575,7 +575,7 @@ const langfuseHandlerTrace = new CallbackHandler({
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 If you pass these callback handlers to your Langchain code, the events will be nested under the respective trace or span in the Langfuse.
 
@@ -587,7 +587,7 @@ The Langfuse SDKs queue and batch events in the background to reduce the number 
 
 If you are running a short-lived application, you need to shutdown Langfuse to ensure that all events are flushed before the application exits.
 
-<Tabs items={["Python", "JS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -605,11 +605,11 @@ await langfuseHandler.shutdownAsync();
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 If you want to flush events synchronously at a certain point, you can use the `flush` method. This will wait for all events that are still in the background queue to be sent to the Langfuse API. This is usually discouraged in production environments.
 
-<Tabs items={["Python", "JS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -627,7 +627,7 @@ await langfuseHandler.flushAsync();
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ### Serverless environments (JS/TS)
 
@@ -642,7 +642,7 @@ Read more about awaiting callbacks here in the [Langchain docs](https://js.langc
 
 Please add the `model` keyword argument to the `AzureOpenAI` or `AzureChatOpenAI` class to have the model name parsed correctly in Langfuse.
 
-<Tabs items={["Python", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -667,7 +667,7 @@ const llm = new AzureChatOpenAI({
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Upgrade Paths for Langchain Integration [#upgrade-paths]
 

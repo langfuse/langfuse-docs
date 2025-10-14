@@ -1,0 +1,67 @@
+---
+title: Zapier Integration with Langfuse
+sidebarTitle: Zapier
+logo: /images/integrations/zapier_icon.png
+description: "Automate your LLM engineering workflows by integrating Langfuse with Zapier. Use the Langfuse Public API to administer projects and fetch prompts."
+---
+
+# Integration: Zapier
+
+> [Zapier](https://zapier.com/) is a workflow automation platform that connects your apps and services together.
+
+Integrate Langfuse with Zapier to automate your LLM engineering workflows. You can use the Langfuse Public API via Zapier to administer projects, fetch prompts, and trigger actions based on events in your Langfuse account.
+
+## Prerequisites
+
+- An active Langfuse account (available on the free Hobby plan or any paid plan)
+- A Zapier account
+
+## Scope of Integration
+
+By leveraging the [Langfuse Public API](/docs/api-and-data-platform/features/public-api) through Zapier, you can:
+
+- Administer projects
+- Fetch prompts
+- Make custom API requests to interact with traces, evaluations, and other Langfuse features
+
+For more details on available API endpoints, refer to the [Public API documentation](/docs/api-and-data-platform/features/public-api).
+
+## Get Started
+
+<Steps>
+
+### Step 1: Connect Langfuse to Zapier
+
+1. Navigate to the [Apps page](https://zapier.com/app/connections) on Zapier
+2. Click on "+ Add connection"
+3. In the dialog box, search for and select "Langfuse"
+4. Click "Add connection"
+5. A new browser tab or window will open. Enter your Langfuse Public Key and Secret Key, and select your data region
+6. Click "Yes, Continue to Langfuse"
+
+Your Langfuse account is now successfully connected to Zapier.
+
+### Step 2: Create a Zap
+
+Once connected, you can create Zaps using Langfuse triggers and actions:
+
+**Available Triggers:**
+
+- **New Project**: Triggers when a new project is created in your Langfuse account
+
+**Available Actions:**
+
+- **API Request (Beta)**: Make raw HTTP requests to the Langfuse API, enabling you to create or update records, fetch data, and more
+
+</Steps>
+
+## Example Use Cases
+
+- **Prompt Management Automation**: Automatically sync prompt updates to your documentation or notify your team via Slack when new prompt versions are created
+- **Project Setup**: Trigger onboarding workflows when new Langfuse projects are created
+- **Custom Integrations**: Use the API Request action to build custom workflows that interact with traces, scores, and other Langfuse data
+
+## Learn More
+
+- [Langfuse Public API Documentation](/docs/api-and-data-platform/features/public-api)
+- [Zapier Help Center: How to get started with Langfuse on Zapier](https://help.zapier.com/hc/en-us/articles/39458665773581-How-to-get-started-with-Langfuse-on-Zapier)
