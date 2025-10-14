@@ -244,7 +244,7 @@ if __name__ == "__main__":
 
 ## Section II – Migrating Traces, Observations & Scores
 
-This section handles the core tracing data: traces, their nested observations (spans, generations, events, and [other observation types](/docs/observability/features/observation-types)), and associated scores.
+This section handles the core tracing data: traces, their nested observations (spans, generations, events), and associated scores.
 
 
 ```python
