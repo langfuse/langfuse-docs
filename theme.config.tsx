@@ -207,10 +207,10 @@ const config: DocsThemeConfig = {
     content: (
       <Link href="https://luma.com/vwezwpqh">
         {/* mobile */}
-        <span className="sm:hidden">Langfuse Town Hall →</span>
+        <span className="sm:hidden">Thursday: Town Hall →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Town Hall – New Features and Q4 Roadmap →
+          Thursday: Virtual Town Hall – New Features + Q4 Roadmap →
         </span>
       </Link>
     ),
