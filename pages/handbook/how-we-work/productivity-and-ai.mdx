@@ -19,21 +19,67 @@ We build a team of strong ICs who are autonomous and highly leveraged with AI. I
 
 You can find some examples in this blog post: [How we use LLMs to scale Langfuse](/blog/2025-04-24-how-we-use-llms-to-scale-langfuse)
 
-## Collaborative Productivity Notes
+### Core Habits & Best Practices
 
-Notes on what works for us, will be updated soonish based on a session during our annual offsite.
+Our AI usage is guided by several key principles. We start drafts **dictation-first** using speech-to-text tools to capture thoughts quickly. When a model's output quality drops, we **switch models** immediately - often between GPT, Claude, and Gemini variants.
 
-### AI
+For coding, we **plan before generating code**, often using Test-Driven Development (TDD) and always reviewing changes patch-by-patch instead of auto-accepting large features. To ground the AI, we **inject context** by feeding it repository files, documentation, and project tickets. We offload large research or process-heavy tasks to **agent modes** and use **meeting transcripts** for follow-ups and knowledge capture. All significant work is tracked in **Linear** to maintain context across iterations.
 
-- Cursor
-  - Use Plan Mode
-  - Use background agents via Linear/Slack integrations
-  - Default to MAX mode
-  - Amend cursor rules over time
+To ensure quality, we start written content with a **human-made outline** to reduce generic AI filler.
 
-### Non-AI
+### Tool Stack by Function
 
-- Raycast: Clipboard history, AI _Improve Writing_, calendar to one-click join meetings and be alerted when new meeting starts
-- CleanShot X: Screenshots with CI
-- ScreenStudio for demos
-- Window manager options: Rectangle (OSS), Raycast window manager feature
+We use a variety of specialized tools for different tasks.
+
+-   **Dictation**: Superwhisper, MacWhisper, and the ChatGPT app's speech-to-text are common for fast input.
+
+-   **Coding & IDEs**: **Cursor** is our primary AI-native editor, valued for its git integration and parallel agents. We also use **Claude Code** for its strong planning mode and **Warp** terminal for command-line help.
+
+-   **Research & Browsing**: ChatGPT's agent mode handles deep research, while **Dia Browser** is used for multi-context customer operations. **Raycast AI** provides quick lookups.
+
+-   **Project Management**: **Linear** is central for planning and context. **ChatGPT Projects** helps manage long-term research with document uploads.
+
+-   **Email & Comms**: **Superhuman AI** drafts quick, low-stakes emails. For more complex messages or copy, we use LLMs for formatting assistance.
+
+### Coding
+
+Our coding workflow emphasizes structure and safety.
+
+1.  **Plan**: We start by writing an implementation plan in a **Linear** issue and pasting it into the agent.
+
+2.  **Context**: We load the repository context using a `files-to-prompt` CLI tool or by connecting to documentation servers.
+
+3.  **Implement**: We run agents in parallel tabs in **Cursor** for isolated changes and review each patch before staging it. We avoid auto-accepting large features.
+
+4.  **Quality Control**: For well-defined problems, we have the agent write tests first. We use "thinking budget" cues and switch models if progress stalls.
+
+### Writing
+
+To create high-quality technical content, we follow a clear process.
+
+1.  **Outline**: A human always creates the initial structure and key points.
+
+2.  **Research**: We use Gemini to summarize a few high-quality source articles.
+
+3.  **Draft**: We use a detailed "anti-slop" prompt that instructs the model to be concise and information-dense.
+
+4.  **Refine**: We generate drafts from multiple models (e.g., Gemini and ChatGPT) and blend the best parts.
+
+### Sales & Customer Operations
+
+AI streamlines our sales and support cycles. Before calls, we load calendar invites into an LLM for background research on attendees. Afterward, we feed call transcripts into Gemini for coaching and generating follow-ups. Agent modes are used to complete lengthy due-diligence questionnaires.
+
+For support questions on billing, we use Dia Browser to view support tickets and Stripe data side-by-side, enabling fast, informed replies.
+
+
+### Essential Productivity Tools
+
+Several non-AI tools are critical to our workflow:
+
+- Raycast: Used for clipboard history, quick writing improvements, and one-click meeting joins from its calendar integration.
+
+- CleanShot X: Handles all screenshot and annotation needs.
+
+- ScreenStudio: Our choice for recording product demos.
+
+- Window Managers: Tools like Rectangle or Raycast's built-in feature are key for workspace organization.
