@@ -102,6 +102,13 @@ export default {
     title: "Handbook",
     // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
   },
+  changelog: {
+    type: "page",
+    title: "Changelog",
+    theme: {
+      layout: "full",
+    },
+  },
   pricing: {
     title: "Pricing",
     type: "page",
@@ -112,14 +119,6 @@ export default {
   "pricing-self-host": {
     title: "Pricing (self-hosted)",
     type: "page",
-    theme: {
-      layout: "full",
-    },
-    display: "hidden",
-  },
-  changelog: {
-    type: "page",
-    title: "Changelog",
     theme: {
       layout: "full",
     },
