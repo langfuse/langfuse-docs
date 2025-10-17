@@ -62,12 +62,12 @@ const categoryConfig = {
         title: "Vercel AI SDK",
       },
       {
-        route: "/integrations/gateways/litellm",
+        route: "/integrations/frameworks/google-adk",
         frontMatter: {
-          title: "LiteLLM Proxy",
-          logo: "/images/integrations/litellm_icon.png",
+          title: "Google ADK",
+          logo: "/images/integrations/google_adk_icon.png",
         },
-        title: "LiteLLM Proxy",
+        title: "Google ADK",
       },
       {
         route: "/integrations/frameworks/pydantic-ai",
