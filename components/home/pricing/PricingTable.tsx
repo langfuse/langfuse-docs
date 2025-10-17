@@ -238,7 +238,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         ],
         cta: {
           text: "Talk to sales",
-          href: "/talk-to-us",
+          href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
         },
         calloutLink: {
           text: "Enterprise FAQ",
