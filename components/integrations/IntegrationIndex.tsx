@@ -238,7 +238,7 @@ export const IntegrationIndex = () => {
                 </Cards>
               )}
               {featured && featured.length > 0 && (
-                <div className="my-6 border-t border-slate-200 dark:border-slate-800" />
+                <div className="my-6 border-t border-border" />
               )}
               <Cards num={3}>
                 {pages
