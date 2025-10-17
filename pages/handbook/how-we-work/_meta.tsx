@@ -1,5 +1,5 @@
 export default {
-  culture: "Culture",
+  principles: "Principles",
   meetings: "Meetings",
   ownership: "Ownership",
   "productivity-and-ai": "Productivity & AI",
