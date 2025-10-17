@@ -188,6 +188,18 @@ Notes:
 - Without specifying `AUTH_WORKOS_ORGANIZATION_ID` or `AUTH_WORKOS_CONNECTION_ID`, users will see two login options and must provide their organization or connection ID.
 - If you specify either variable, only one login button appears with that default setting. You cannot specify both variables simultaneously.
 
+### WordPress
+
+[NextAuth WordPress Provider Docs](https://next-auth.js.org/providers/wordpress)
+
+| Configuration      | Value                                                                    |
+| ------------------ | ------------------------------------------------------------------------ |
+| Required Variables | `AUTH_WORDPRESS_CLIENT_ID`<br/>`AUTH_WORDPRESS_CLIENT_SECRET`            |
+| Optional Variables | See [additional configuration](#additional-configuration) section below. |
+| OAuth Redirect URL | `/api/auth/callback/wordpress`                                           |
+
+Provider: `WORDPRESS`
+
 ### Custom OAuth Provider
 
 [NextAuth Custom OAuth Provider Docs](https://next-auth.js.org/configuration/providers/oauth#using-a-custom-provider) ([source](https://github.com/langfuse/langfuse/blob/main/web/src/server/auth.ts))

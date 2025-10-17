@@ -1,13 +1,15 @@
-import { MenuSubSeparator } from "@/components/MenuSubSeparator";
-
 export const TEAMS = {
   "product-engineering": {
     name: "Product Engineering",
-    firstPage: "documentation",
+    firstPage: "principles",
   },
-  gtm: {
-    name: "GTM",
+  "sales-and-cs": {
+    name: "Sales & CS",
     firstPage: "overview",
+  },
+  support: {
+    name: "Support",
+    firstPage: "support",
   },
   operations: {
     name: "Operations",
@@ -16,17 +18,24 @@ export const TEAMS = {
 };
 
 export default {
-  "-- Main Handbook": {
+  "-- Handbook": {
     type: "separator",
-    title: <MenuSubSeparator>Main Handbook</MenuSubSeparator>,
+    title: "Handbook",
   },
   index: "Overview",
   chapters: "Chapters",
+  "-- Working at Langfuse": {
+    type: "separator",
+    title: "Working at Langfuse",
+  },
+  "how-we-work": "How we work",
+  "how-we-hire": "How we hire",
+  "perks-and-pay": "Perks and Pay",
+  "tools-and-processes": "Tool & Processes",
   "-- Resources": {
     type: "separator",
-    title: <MenuSubSeparator>Resources</MenuSubSeparator>,
+    title: "Resources",
   },
-  "working-at-langfuse": "Working at Langfuse",
   ...Object.fromEntries(
     Object.entries(TEAMS).map(([key, value]) => [key, value.name])
   ),

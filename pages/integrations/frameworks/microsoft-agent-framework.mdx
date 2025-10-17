@@ -1,0 +1,149 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Trace the Microsoft Agent Framework with Langfuse
+sidebarTitle: Microsoft Agent Framework
+logo: /images/integrations/microsoft_icon.svg
+description: Learn how to use Langfuse to monitor Microsoft Agent Framework to debug and evaluate your AI agents
+category: Integrations
+---
+
+# Trace the Microsoft Agent Framework with Langfuse
+
+This notebook demonstrates how to **integrate Langfuse** into your **Microsoft Agent Framework** workflow to monitor, debug and evaluate your AI agents.
+
+> **What is the Microsoft Agent Framework?**: The [Microsoft Agent Framework](https://github.com/microsoft/agent-framework) is an open-source framework for building intelligent agents. It provides a comprehensive set of tools for creating agents that can interact with various services, execute tasks, and handle complex workflows. The framework supports multiple LLM providers including Azure OpenAI and OpenAI, and offers built-in observability through OpenTelemetry.
+
+> **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
+
+## 1. Install Dependencies
+
+Below we install the `agent-framework` library (the Microsoft Agent Framework) and `langfuse` for observability.
+
+
+```python
+%pip install agent-framework langfuse --pre
+```
+
+## 2. Configure Environment & Langfuse Credentials
+
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your Azure OpenAI credentials
+os.environ["AZURE_OPENAI_API_KEY"] = "your-azure-openai-key"
+os.environ["AZURE_OPENAI_ENDPOINT"] = "https://your-resource.openai.azure.com/"
+os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT_NAME"] = "gpt-5-mini"
+os.environ["OPENAI_CHAT_MODEL_ID"] = "gpt-5-mini"
+```
+
+## 3. Initialize Langfuse Client
+
+Initialize the Langfuse client to verify the connection. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+## 4. Enable Observability
+
+The Microsoft Agent Framework includes built-in observability support through OpenTelemetry. Enable it by calling `setup_observability()` which automatically exports traces to Langfuse.
+
+<Callout type="info" emoji="ℹ️">
+**Note:** Set `enable_sensitive_data=True` to capture full request/response data including function arguments and results.
+</Callout>
+
+
+
+```python
+from agent_framework.observability import setup_observability
+
+setup_observability(enable_sensitive_data=True)
+```
+
+## 5. Hello World Example with Tool
+
+Below we create a **weather agent** using the Microsoft Agent Framework with Azure OpenAI. The agent has access to a `get_weather` function tool that it can call to retrieve weather information.
+
+
+```python
+import asyncio
+from random import randint
+from typing import Annotated
+from agent_framework.azure import AzureOpenAIChatClient
+from pydantic import Field
+
+def get_weather(
+    location: Annotated[str, Field(description="The location to get the weather for.")],
+) -> str:
+    """Get the weather for a given location."""
+    conditions = ["sunny", "cloudy", "rainy", "stormy"]
+    return f"The weather in {location} is {conditions[randint(0, 3)]} with a high of {randint(10, 30)}°C."
+
+async def main():
+    # Create an agent with Azure OpenAI
+    async with AzureOpenAIChatClient().create_agent(
+        instructions="You are a helpful weather agent.",
+        tools=get_weather,
+    ) as agent:
+        query = "What's the weather like in Seattle?"
+        print(f"User: {query}")
+        result = await agent.run(query)
+        print(f"Agent: {result}\n")
+
+# Run the agent
+await main()
+```
+
+## 6. Using OpenAI Directly
+
+The Microsoft Agent Framework also supports using OpenAI directly (not through Azure). Simply use `OpenAIResponsesClient` instead of `AzureOpenAIChatClient`.
+
+
+```python
+# Required for OpenAI API access
+os.environ["OPENAI_API_KEY"]="sk-proj-..."
+os.environ["OPENAI_RESPONSES_MODEL_ID"]="gpt-5-mini" 
+```
+
+
+```python
+from agent_framework.openai import OpenAIResponsesClient
+
+async def main():
+    async with OpenAIResponsesClient().create_agent(
+        instructions="You are a helpful assistant.",
+        tools=get_weather,
+    ) as agent:
+        query = "What's the weather in Tokyo?"
+        print(f"User: {query}")
+        result = await agent.run(query)
+        print(f"Agent: {result}\n")
+
+await main()
+```
+
+## 7. See Traces in Langfuse
+
+![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_microsoft-agent-framework/microsoft-agent-framework-example-race.png)
+
+[Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/be1c92eff9fb3b055890b623cd1fd528?timestamp=2025-10-16T12%3A20%3A34.078Z&observation=76606daddd0bb678)
