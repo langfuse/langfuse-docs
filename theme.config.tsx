@@ -201,20 +201,20 @@ const config: DocsThemeConfig = {
     Callout,
     Video,
   },
-  // banner: {
-  //   key: "langfuse-q4-2025-roadmap",
-  //   dismissible: true,
-  //   content: (
-  //     <Link href="https://luma.com/vwezwpqh">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">Thursday: Town Hall →</span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         Thursday: Virtual Town Hall – New Features + Q4 Roadmap →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "langfuse-q4-2025-townhall-recording",
+    dismissible: true,
+    content: (
+      <Link href="https://www.youtube.com/embed/jgSPV2CLvAo">
+        {/* mobile */}
+        <span className="sm:hidden">Q4 Town Hall →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+          Langfuse Town Hall – New Features + Q4 Roadmap →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;
