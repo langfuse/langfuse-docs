@@ -208,9 +208,6 @@ export const IntegrationIndex = () => {
               {featured && featured.length > 0 && (
                 <Cards num={3}>
                   {featured
-                    .filter(
-                      (f) => !pages.some((p) => p.route === f.route)
-                    )
                     .slice(0, 6)
                     .map((page) => (
                       <Cards.Card
