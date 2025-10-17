@@ -237,15 +237,13 @@ export const IntegrationIndex = () => {
                     ))}
                 </Cards>
               )}
-              {featured && featured.length > 0 && (
-                <div className="my-6 border-t border-border" />
-              )}
-              <Cards num={3}>
-                {pages
-                  .filter(
-                    (p) => !(featured || []).some((f) => f.route === p.route)
-                  )
-                  .map((page) => (
+              <div className={featured && featured.length > 0 ? "mt-8" : ""}>
+                <Cards num={3}>
+                  {pages
+                    .filter(
+                      (p) => !(featured || []).some((f) => f.route === p.route)
+                    )
+                    .map((page) => (
                   <Cards.Card
                     href={page.route}
                     key={page.route}
@@ -268,7 +266,8 @@ export const IntegrationIndex = () => {
                     {""}
                   </Cards.Card>
                 ))}
-              </Cards>
+                </Cards>
+              </div>
             </div>
           );
         })}
