@@ -32,6 +32,55 @@ const categoryConfig = {
     description: "Native integrations with Langfuse",
     additionalLinks: additionalLinksFromMeta(nativeIntegrationsMeta),
   },
+  top: {
+    title: "Top integrations",
+    description: "Most popular integrations with Langfuse",
+    // Explicit list across categories
+    additionalLinks: [
+      {
+        route: "/integrations/frameworks/langchain",
+        frontMatter: {
+          title: "LangChain & LangGraph",
+          logo: "/images/integrations/langchain_icon.png",
+        },
+      },
+      {
+        route: "/integrations/model-providers/openai-py",
+        frontMatter: {
+          title: "OpenAI (Python)",
+          logo: "/images/integrations/openai_icon.svg",
+        },
+      },
+      {
+        route: "/integrations/frameworks/vercel-ai-sdk",
+        frontMatter: {
+          title: "Vercel AI SDK",
+          logo: "/images/integrations/vercel_ai_sdk_icon.png",
+        },
+      },
+      {
+        route: "/integrations/gateways/litellm",
+        frontMatter: {
+          title: "LiteLLM Proxy",
+          logo: "/images/integrations/litellm_icon.png",
+        },
+      },
+      {
+        route: "/integrations/frameworks/pydantic-ai",
+        frontMatter: {
+          title: "Pydantic AI",
+          logo: "/images/integrations/pydantic_ai_icon.svg",
+        },
+      },
+      {
+        route: "/integrations/frameworks/openai-agents",
+        frontMatter: {
+          title: "OpenAI Agents",
+          logo: "/images/integrations/openai_icon.svg",
+        },
+      },
+    ],
+  },
   frameworks: {
     title: "Frameworks",
     description: "Integrate with popular AI frameworks",
