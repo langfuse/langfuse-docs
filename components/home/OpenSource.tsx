@@ -132,7 +132,7 @@ function StatBox({
 
         {/* Foreground Content */}
         <div className="relative z-10 flex flex-col justify-center items-center space-y-1 px-2 py-4 h-full">
-          <div className="text-center bg-background/40 backdrop-blur-[2px] rounded-md px-3 py-2">
+          <div className="text-center px-3 py-2">
             <div className="font-bold text-primary text-3xl sm:text-4xl">
               {mainValue}
             </div>

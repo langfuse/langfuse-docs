@@ -33,7 +33,7 @@ export function ScheduleDemoPage() {
     <section className="flex flex-col gap-10 w-full min-h-screen items-center pt-10">
       <Header
         title="Talk to us"
-        description="Learn more about Langfuse by meeting one of the founders"
+        description="Learn more about Langfuse by meeting the GTM team"
         h="h1"
         buttons={[
           {

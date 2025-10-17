@@ -1,0 +1,66 @@
+---
+date: 2025-10-16
+title: LLM-as-a-Judge Execution Tracing & Enhanced Observability
+description: Every LLM-as-a-Judge evaluator execution now creates a trace, allowing you to inspect the exact prompts, responses, and token usage for each evaluation.
+author: Hassieb
+ogImage: /images/changelog/2025-10-16-llm-as-a-judge-execution-tracing.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We're excited to announce a major enhancement to Langfuse's LLM-as-a-Judge evaluations: **full tracing of evaluator executions**. Every time an LLM-as-a-Judge evaluator runs, we now create a detailed trace that captures the complete LLM interaction, giving you unprecedented visibility into how your evaluations are performing.
+
+**What's New**
+
+Every LLM-as-a-Judge evaluator execution going forward is linked to a Langfuse trace of the underlying LLM call. This means you can:
+
+- **Debug evaluation prompts**: See exactly what prompt was sent to the judge LLM
+- **Inspect model responses**: View the complete response including score and reasoning
+- **Monitor token usage**: Track costs and performance for each evaluator execution
+- **Trace evaluation history**: Navigate from any score back to its source LLM interaction
+
+**How to access execution traces**: There are four ways to navigate to an evaluator execution trace:
+
+1. **Score tooltip in trace view**: For LLM-as-a-Judge scores, hover over any score badge and click "View execution trace"
+
+<Frame fullWidth>
+  ![Score tooltip with execution trace link](/images/docs/evaluation/eval-execution-traces-score-tooltip.png)
+</Frame>
+
+2. **Tracing table**: Filter the environment to `langfuse-llm-as-a-judge` to view all evaluator execution traces
+
+<Frame fullWidth>
+  ![Tracing table filtered to langfuse-llm-as-a-judge environment](/images/docs/evaluation/eval-execution-traces-tracing-table.png)
+</Frame>
+
+3. **Scores table**: Enable the "Execution Trace" column in the scores table to see all evaluator executions
+
+<Frame fullWidth>
+  ![Scores table with execution trace column](/images/docs/evaluation/eval-execution-traces-scores-table.png)
+</Frame>
+
+4. **Evaluator logs table**: View execution trace IDs in the evaluator logs for detailed execution history
+
+<Frame fullWidth>
+  ![Evaluator logs with execution traces](/images/docs/evaluation/eval-execution-traces-logs-table.png)
+</Frame>
+
+**Why This Matters**
+
+Previously, debugging failed evaluations or understanding why a judge gave a particular score required guesswork. Now, with full tracing:
+
+1. **Trust your evaluations**: Verify that the judge received the correct input and made sound judgments
+2. **Optimize costs**: Identify expensive evaluation patterns and optimize your prompts
+3. **Faster debugging**: Instantly see what went wrong when an evaluation fails
+4. **Audit trail**: Complete history of every evaluation decision for compliance and analysis
+
+**Getting Started**
+
+This feature is automatically enabled for all LLM-as-a-Judge executions going forward.
+
+## Learn More
+
+- [LLM-as-a-Judge Documentation](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+- [Understanding Evaluator Execution Traces](/docs/evaluation/evaluation-methods/llm-as-a-judge#trace-evaluator-executions)
