@@ -1,7 +1,7 @@
 export const TEAMS = {
   "product-engineering": {
     name: "Product Engineering",
-    firstPage: "documentation",
+    firstPage: "principles",
   },
   "sales-and-cs": {
     name: "Sales & CS",
