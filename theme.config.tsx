@@ -205,7 +205,7 @@ const config: DocsThemeConfig = {
     key: "langfuse-q4-2025-townhall-recording",
     dismissible: true,
     content: (
-      <Link href="https://www.youtube.com/embed/jgSPV2CLvAo">
+      <Link href="https://www.youtube.com/watch?v=jgSPV2CLvAo">
         {/* mobile */}
         <span className="sm:hidden">Q4 Town Hall →</span>
         {/* desktop */}
