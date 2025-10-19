@@ -40,7 +40,6 @@ export interface Guide {
   title: string;
   link: string;
   dependsOn?: GuideId[];
-  estimatedTimeMinutes?: number;
 }
 
 export interface JTBD {
@@ -84,7 +83,6 @@ export interface Plan {
   guideOrder: GuideId[];
   nodes: PlanNode[];
   edges: PlanEdge[];
-  minutesTotal: number;
 }
 
 // ============================================================================
@@ -203,44 +201,6 @@ export function topoSort(guideIds: GuideId[]): GuideId[] {
 }
 
 /**
- * Calculate critical path minutes (longest dependency chain)
- */
-export function criticalPathMinutes(guideIds: GuideId[]): number {
-  const memo = new Map<GuideId, number>();
-
-  function calculatePath(id: GuideId): number {
-    if (memo.has(id)) {
-      return memo.get(id)!;
-    }
-
-    const guide = Guides[id];
-    if (!guide) return 0;
-
-    const ownMinutes = guide.estimatedTimeMinutes || 0;
-    let maxDepPath = 0;
-
-    if (guide.dependsOn) {
-      guide.dependsOn.forEach((depId) => {
-        if (guideIds.includes(depId)) {
-          maxDepPath = Math.max(maxDepPath, calculatePath(depId));
-        }
-      });
-    }
-
-    const total = ownMinutes + maxDepPath;
-    memo.set(id, total);
-    return total;
-  }
-
-  let maxPath = 0;
-  guideIds.forEach((id) => {
-    maxPath = Math.max(maxPath, calculatePath(id));
-  });
-
-  return maxPath;
-}
-
-/**
  * Build a plan from selected JTBD IDs
  * Generates nodes, edges, and topological order
  */
@@ -352,15 +312,11 @@ export function buildPlan(selectedJtbdIds: JtbdId[]): Plan {
   // Topological order
   const guideOrder = topoSort(guideIds);
 
-  // Calculate critical path
-  const minutesTotal = criticalPathMinutes(guideIds);
-
   return {
     selectedJtbd: selectedJtbdIds,
     guideOrder,
     nodes,
     edges,
-    minutesTotal,
   };
 }
 
@@ -378,15 +334,12 @@ export function planToMarkdown(plan: Plan): string {
     }
   });
 
-  md += `\n## Setup Checklist (${plan.minutesTotal} min estimated)\n\n`;
+  md += `\n## Setup Checklist\n\n`;
 
   plan.guideOrder.forEach((guideId, index) => {
     const guide = Guides[guideId];
     if (guide) {
-      const minutes = guide.estimatedTimeMinutes
-        ? ` (${guide.estimatedTimeMinutes} min)`
-        : "";
-      md += `${index + 1}. [ ] ${guide.title}${minutes}\n`;
+      md += `${index + 1}. [ ] ${guide.title}\n`;
     }
   });
 

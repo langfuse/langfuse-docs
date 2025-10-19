@@ -107,8 +107,6 @@ export function GraphCanvas({ plan }: GraphCanvasProps) {
         position: { x, y },
         data: {
           title: node.title,
-          minutes: node.minutes,
-          kind: node.kind,
         },
         sourcePosition: Position.Right,
         targetPosition: Position.Left,

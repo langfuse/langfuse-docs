@@ -18,7 +18,6 @@ import { GraphCanvas } from "@/components/onboarding/GraphCanvas";
 import { Checklist } from "@/components/onboarding/Checklist";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 
 type Screen = "selector" | "plan";
 
@@ -248,33 +247,6 @@ export function OnboardingPage() {
 
         {screen === "plan" && plan && (
           <div className="space-y-6">
-            {/* Plan overview */}
-            <div className="rounded-lg border bg-card p-6">
-              <h2 className="text-2xl font-semibold mb-4">
-                Your Onboarding Plan
-              </h2>
-              <div className="grid sm:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <div className="text-muted-foreground">Selected Goals</div>
-                  <div className="text-2xl font-bold">
-                    {plan.selectedJtbd.length}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Setup Steps</div>
-                  <div className="text-2xl font-bold">
-                    {plan.guideOrder.length}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Estimated Time</div>
-                  <div className="text-2xl font-bold">
-                    {plan.minutesTotal} min
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* View toggle */}
             <Tabs
               value={viewMode}

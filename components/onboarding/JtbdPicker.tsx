@@ -82,22 +82,6 @@ export function JtbdPicker({
                           {label}
                         </Badge>
                       ))}
-
-                      {jtbd.estimatedEffort?.minutes && (
-                        <Badge
-                          variant="secondary"
-                          className="text-xs flex items-center gap-1"
-                        >
-                          <Clock className="h-3 w-3" />
-                          {jtbd.estimatedEffort.minutes} min
-                        </Badge>
-                      )}
-
-                      {jtbd.estimatedEffort?.bucket && (
-                        <Badge variant="secondary" className="text-xs">
-                          Size: {jtbd.estimatedEffort.bucket}
-                        </Badge>
-                      )}
                     </div>
                   </div>
                 </div>

@@ -62,14 +62,6 @@ export function Checklist({ plan, progress, onToggleDone }: ChecklistProps) {
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
-
-        {/* Summary */}
-        <div className="flex items-center gap-2 mt-3">
-          <Badge variant="secondary" className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {plan.minutesTotal} min total
-          </Badge>
-        </div>
       </CardHeader>
 
       <CardContent>
@@ -108,19 +100,6 @@ export function Checklist({ plan, progress, onToggleDone }: ChecklistProps) {
                           Depends on: {guide.dependsOn.length} guide
                           {guide.dependsOn.length !== 1 ? "s" : ""}
                         </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {guide.kind && (
-                        <Badge variant="outline" className="text-xs">
-                          {guide.kind}
-                        </Badge>
-                      )}
-                      {guide.estimatedTimeMinutes && (
-                        <Badge variant="secondary" className="text-xs">
-                          {guide.estimatedTimeMinutes}m
-                        </Badge>
                       )}
                     </div>
                   </div>
