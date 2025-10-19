@@ -1,0 +1,157 @@
+import React, { useMemo } from "react";
+import {
+  ReactFlow,
+  Node,
+  Edge,
+  Background,
+  Controls,
+  MarkerType,
+  Position,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { Plan } from "./data";
+import { Badge } from "@/components/ui/badge";
+import { Clock, BookOpen, Target, FileText } from "lucide-react";
+
+// Custom node components
+function GuideNode({ data }: { data: any }) {
+  return (
+    <div className="px-4 py-3 rounded-lg border-2 border-primary bg-card shadow-md min-w-[200px]">
+      <div className="flex items-start gap-2">
+        <FileText className="h-4 w-4 mt-1 text-primary flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-sm mb-2">{data.title}</div>
+          <div className="flex flex-wrap gap-1">
+            {data.kind && (
+              <Badge variant="secondary" className="text-xs">
+                {data.kind}
+              </Badge>
+            )}
+            {data.minutes && (
+              <Badge
+                variant="outline"
+                className="text-xs flex items-center gap-1"
+              >
+                <Clock className="h-3 w-3" />
+                {data.minutes}m
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReadingNode({ data }: { data: any }) {
+  return (
+    <div className="px-3 py-2 rounded-md border border-muted-foreground/30 bg-muted/50 shadow-sm min-w-[160px]">
+      <div className="flex items-center gap-2">
+        <BookOpen className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <div className="text-sm text-muted-foreground font-medium">
+          {data.title}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function JtbdNode({ data }: { data: any }) {
+  return (
+    <div className="px-4 py-3 rounded-lg border-2 border-green-500 bg-green-50 dark:bg-green-950 shadow-md min-w-[200px]">
+      <div className="flex items-start gap-2">
+        <Target className="h-4 w-4 mt-1 text-green-600 dark:text-green-400 flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-sm text-green-900 dark:text-green-100">
+            {data.title}
+          </div>
+          {data.minutes && (
+            <Badge variant="outline" className="text-xs mt-2">
+              <Clock className="h-3 w-3 mr-1" />
+              {data.minutes}m
+            </Badge>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const nodeTypes = {
+  guide: GuideNode,
+  reading: ReadingNode,
+  jtbd: JtbdNode,
+};
+
+interface GraphCanvasProps {
+  plan: Plan;
+}
+
+export function GraphCanvas({ plan }: GraphCanvasProps) {
+  const { nodes, edges } = useMemo(() => {
+    // Convert plan nodes to React Flow nodes with simple layout
+    const flowNodes: Node[] = plan.nodes.map((node, index) => {
+      // Simple layout: readings left, guides center, jtbds right
+      let x = 250; // center
+      if (node.type === "reading") {
+        x = 50; // left
+      } else if (node.type === "jtbd") {
+        x = 500; // right
+      }
+
+      const y = index * 120; // Vertical spacing
+
+      return {
+        id: node.id,
+        type: node.type,
+        position: { x, y },
+        data: {
+          title: node.title,
+          minutes: node.minutes,
+          kind: node.kind,
+        },
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
+      };
+    });
+
+    // Convert plan edges to React Flow edges
+    const flowEdges: Edge[] = plan.edges.map((edge, index) => ({
+      id: `${edge.from}-${edge.to}-${index}`,
+      source: edge.from,
+      target: edge.to,
+      type: edge.kind === "informs" ? "default" : "default",
+      style: {
+        strokeWidth: 2,
+        stroke: edge.kind === "informs" ? "#94a3b8" : "#64748b",
+        strokeDasharray: edge.kind === "informs" ? "5,5" : undefined,
+      },
+      animated: edge.kind === "supports",
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: edge.kind === "informs" ? "#94a3b8" : "#64748b",
+      },
+    }));
+
+    return { nodes: flowNodes, edges: flowEdges };
+  }, [plan]);
+
+  return (
+    <div className="w-full h-[600px] border rounded-lg bg-background">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        fitView
+        minZoom={0.5}
+        maxZoom={1.5}
+        defaultEdgeOptions={{
+          animated: false,
+        }}
+      >
+        <Background />
+        <Controls />
+      </ReactFlow>
+    </div>
+  );
+}
