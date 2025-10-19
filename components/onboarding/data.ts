@@ -9,11 +9,16 @@ const GUIDE_IDS = [
   "guide.setup-tracing",
   "guide.setup-sdk",
   "guide.add-scores",
+  "guide.error-analysis",
 ] as const;
 
-const JTBD_IDS = ["jtbd.trace-negative-feedback"] as const;
+const JTBD_IDS = [
+  "jtbd.act-on-negative-feedback",
+  "jtbd.track-llm-costs",
+  "jtbd.offline-evaluation",
+] as const;
 
-const READING_IDS = ["reading.observability-concepts"] as const;
+const READING_IDS = ["reading.anthropic-context-engineering"] as const;
 
 const PRESET_IDS = ["preset.support-chat"] as const;
 
@@ -32,44 +37,31 @@ export type PresetId = (typeof PRESET_IDS)[number];
 
 export interface Guide {
   id: GuideId;
-  slug: string;
-  owner: string;
   title: string;
-  kind: "setup" | "howto";
+  link: string;
   dependsOn?: GuideId[];
   estimatedTimeMinutes?: number;
 }
 
 export interface JTBD {
   id: JtbdId;
-  slug: string;
-  owner: string;
   title: string;
   valueStatement: string;
   requiresGuides: GuideId[];
   recommendedReadings?: ReadingId[];
   labels?: string[];
-  estimatedEffort?: {
-    minutes?: number;
-    bucket?: "S" | "M" | "L";
-  };
-  tags?: string[];
 }
 
 export interface Reading {
   id: ReadingId;
-  slug: string;
-  owner: string;
+  author: string;
   title: string;
   link: string;
-  category: "concept" | "case-study" | "reference";
-  level: "intro" | "intermediate" | "deep";
+  category: "blog post" | "course" | "case-study";
 }
 
 export interface PersonaPreset {
   id: PresetId;
-  slug: string;
-  owner: string;
   name: string;
   summary: string;
   includesJtbd: JtbdId[];
@@ -78,8 +70,6 @@ export interface PersonaPreset {
 export interface PlanNode {
   id: string;
   title: string;
-  minutes?: number;
-  kind?: Guide["kind"];
   type: "guide" | "reading" | "jtbd";
 }
 
@@ -104,70 +94,72 @@ export interface Plan {
 export const Guides: Record<GuideId, Guide> = {
   "guide.setup-tracing": {
     id: "guide.setup-tracing",
-    slug: "setup-tracing",
-    owner: "engineering",
     title: "Setup Tracing",
-    kind: "setup",
-    estimatedTimeMinutes: 15,
+    link: "/docs/tracing/setup",
   },
   "guide.setup-sdk": {
     id: "guide.setup-sdk",
-    slug: "setup-sdk",
-    owner: "engineering",
     title: "Setup Langfuse SDK",
-    kind: "setup",
-    estimatedTimeMinutes: 10,
+    link: "/docs/sdk/setup",
   },
   "guide.add-scores": {
     id: "guide.add-scores",
-    slug: "add-scores",
-    owner: "engineering",
     title: "Add Custom Scores",
-    kind: "howto",
+    link: "/docs/evaluation/evaluation-methods/custom-scores",
     dependsOn: ["guide.setup-tracing"],
-    estimatedTimeMinutes: 20,
+  },
+  "guide.error-analysis": {
+    id: "guide.error-analysis",
+    title: "Error Analysis",
+    link: "/blog/2025-08-29-error-analysis-to-evaluate-llm-applications",
+    dependsOn: ["guide.setup-tracing"],
   },
 };
 
 export const JTBDs: Record<JtbdId, JTBD> = {
-  "jtbd.trace-negative-feedback": {
-    id: "jtbd.trace-negative-feedback",
-    slug: "trace-negative-feedback",
-    owner: "product",
-    title: "Track traces with negative feedback",
+  "jtbd.act-on-negative-feedback": {
+    id: "jtbd.act-on-negative-feedback",
+    title: "Act on Negative Feedback",
     valueStatement:
-      "Monitor and analyze user feedback to identify problematic interactions",
+      "Monitor and analyze user feedback to identify problematic interactions. Use traces for error analysis to improve agent/applications based on feedback.",
     requiresGuides: ["guide.setup-tracing", "guide.add-scores"],
-    recommendedReadings: ["reading.observability-concepts"],
+    recommendedReadings: ["reading.anthropic-context-engineering"],
     labels: ["observability"],
-    estimatedEffort: {
-      minutes: 35,
-      bucket: "M",
-    },
-    tags: ["feedback", "monitoring"],
+  },
+  "jtbd.track-llm-costs": {
+    id: "jtbd.track-llm-costs",
+    title: "Track LLM costs",
+    valueStatement: "Track the costs of LLM usage",
+    requiresGuides: ["guide.setup-tracing"],
+    recommendedReadings: ["reading.anthropic-context-engineering"],
+    labels: ["costs"],
+  },
+  "jtbd.offline-evaluation": {
+    id: "jtbd.offline-evaluation",
+    title: "Offline evaluation",
+    valueStatement: "Evaluate LLM applications offline",
+    requiresGuides: ["guide.setup-tracing"],
+    recommendedReadings: ["reading.anthropic-context-engineering"],
+    labels: ["evaluation"],
   },
 };
 
 export const Readings: Record<ReadingId, Reading> = {
-  "reading.observability-concepts": {
-    id: "reading.observability-concepts",
-    slug: "observability-concepts",
-    owner: "docs",
-    title: "Observability Concepts",
-    link: "/docs/observability/overview",
-    category: "concept",
-    level: "intro",
+  "reading.anthropic-context-engineering": {
+    id: "reading.anthropic-context-engineering",
+    author: "Anthropic",
+    title: "Context Engineering",
+    link: "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+    category: "blog post",
   },
 };
 
 export const Presets: Record<PresetId, PersonaPreset> = {
   "preset.support-chat": {
     id: "preset.support-chat",
-    slug: "support-chat",
-    owner: "product",
     name: "Support Chat Team",
     summary: "PM/Engineering teams building customer support chat applications",
-    includesJtbd: ["jtbd.trace-negative-feedback"],
+    includesJtbd: ["jtbd.act-on-negative-feedback"],
   },
 };
 
@@ -300,8 +292,6 @@ export function buildPlan(selectedJtbdIds: JtbdId[]): Plan {
       nodes.push({
         id: guide.id,
         title: guide.title,
-        minutes: guide.estimatedTimeMinutes,
-        kind: guide.kind,
         type: "guide",
       });
     }
@@ -312,7 +302,6 @@ export function buildPlan(selectedJtbdIds: JtbdId[]): Plan {
     nodes.push({
       id: jtbd.id,
       title: jtbd.title,
-      minutes: jtbd.estimatedEffort?.minutes,
       type: "jtbd",
     });
   });
