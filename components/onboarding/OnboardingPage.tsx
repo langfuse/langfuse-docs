@@ -17,7 +17,6 @@ import { Toolbar } from "@/components/onboarding/Toolbar";
 import { GraphCanvas } from "@/components/onboarding/GraphCanvas";
 import { Checklist } from "@/components/onboarding/Checklist";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type Screen = "selector" | "plan";
 
@@ -205,26 +204,7 @@ export function OnboardingPage() {
   const jtbdsList = useMemo(() => Object.values(JTBDs), []);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-card">
-        <div className="container max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold mb-2">Langfuse Onboarding</h1>
-          <p className="text-muted-foreground">
-            Choose your goals and get a personalized path to success
-          </p>
-        </div>
-      </div>
-
-      {/* Success message */}
-      {copyLinkSuccess && (
-        <div className="container max-w-7xl mx-auto px-4 py-4">
-          <Alert>
-            <AlertDescription>Link copied to clipboard!</AlertDescription>
-          </Alert>
-        </div>
-      )}
-
+    <div>
       {/* Content */}
       <div className="container max-w-7xl mx-auto px-4 py-8">
         {screen === "selector" && (

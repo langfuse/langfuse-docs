@@ -7,6 +7,8 @@ import {
   Controls,
   MarkerType,
   Position,
+  useNodesState,
+  useEdgesState,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Plan } from "./data";
@@ -88,9 +90,9 @@ interface GraphCanvasProps {
 }
 
 export function GraphCanvas({ plan }: GraphCanvasProps) {
-  const { nodes, edges } = useMemo(() => {
-    // Convert plan nodes to React Flow nodes with simple layout
-    const flowNodes: Node[] = plan.nodes.map((node, index) => {
+  // Prepare initial nodes and edges
+  const initialNodes = useMemo(() => {
+    return plan.nodes.map((node, index) => {
       // Simple layout: readings left, guides center, jtbds right
       let x = 250; // center
       if (node.type === "reading") {
@@ -112,13 +114,14 @@ export function GraphCanvas({ plan }: GraphCanvasProps) {
         targetPosition: Position.Left,
       };
     });
+  }, [plan.nodes]);
 
-    // Convert plan edges to React Flow edges
-    const flowEdges: Edge[] = plan.edges.map((edge, index) => ({
+  const initialEdges = useMemo(() => {
+    return plan.edges.map((edge, index) => ({
       id: `${edge.from}-${edge.to}-${index}`,
       source: edge.from,
       target: edge.to,
-      type: edge.kind === "informs" ? "default" : "default",
+      type: "default" as const,
       style: {
         strokeWidth: 2,
         stroke: edge.kind === "informs" ? "#94a3b8" : "#64748b",
@@ -130,26 +133,56 @@ export function GraphCanvas({ plan }: GraphCanvasProps) {
         color: edge.kind === "informs" ? "#94a3b8" : "#64748b",
       },
     }));
+  }, [plan.edges]);
 
-    return { nodes: flowNodes, edges: flowEdges };
-  }, [plan]);
+  // Create a unique key based on plan to force re-mount when plan changes
+  const planKey = useMemo(() => {
+    return plan.selectedJtbd.join("-");
+  }, [plan.selectedJtbd]);
 
   return (
-    <div className="w-full h-[600px] border rounded-lg bg-background">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
+    <div
+      key={planKey}
+      className="w-full h-[600px] border rounded-lg bg-background"
+    >
+      <GraphCanvasInner
+        initialNodes={initialNodes}
+        initialEdges={initialEdges}
         nodeTypes={nodeTypes}
-        fitView
-        minZoom={0.5}
-        maxZoom={1.5}
-        defaultEdgeOptions={{
-          animated: false,
-        }}
-      >
-        <Background />
-        <Controls />
-      </ReactFlow>
+      />
     </div>
+  );
+}
+
+// Inner component that gets re-mounted when plan changes
+function GraphCanvasInner({
+  initialNodes,
+  initialEdges,
+  nodeTypes,
+}: {
+  initialNodes: Node[];
+  initialEdges: Edge[];
+  nodeTypes: any;
+}) {
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+
+  return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      nodeTypes={nodeTypes}
+      fitView
+      minZoom={0.5}
+      maxZoom={1.5}
+      defaultEdgeOptions={{
+        animated: false,
+      }}
+    >
+      <Background />
+      <Controls />
+    </ReactFlow>
   );
 }
