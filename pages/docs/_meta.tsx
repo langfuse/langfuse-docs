@@ -13,6 +13,7 @@ export default {
     type: "separator",
     title: "Get Started",
   },
+  onboarding: "Onboarding",
   "observability-quickstart": {
     title: "Start Tracing",
     href: "/docs/observability/get-started",
