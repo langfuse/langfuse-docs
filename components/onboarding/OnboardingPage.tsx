@@ -59,52 +59,54 @@ export function OnboardingPage() {
     setProgress(loadProgress());
   }, []);
 
-  // Parse URL params on mount
+  // Parse URL params and sync with state
   useEffect(() => {
     if (!router.isReady) return;
 
     const planParam = router.query.plan as string | undefined;
-    const presetParam = router.query.preset as string | undefined;
+    const showPlanParam = router.query.showPlan as string | undefined;
 
+    // Parse JTBDs from URL
     if (planParam) {
       const jtbdIds = planParam
         .split(",")
         .filter((id) => JTBDs[id as JtbdId]) as JtbdId[];
       if (jtbdIds.length > 0) {
         setSelectedJtbdIds(jtbdIds);
-        // Auto-advance to plan screen
-        try {
-          const generatedPlan = buildPlan(jtbdIds);
-          setPlan(generatedPlan);
-          setScreen("plan");
-        } catch (e) {
-          console.error("Failed to build plan:", e);
+
+        // Only show plan screen if showPlan=true in URL
+        if (showPlanParam === "true") {
+          try {
+            const generatedPlan = buildPlan(jtbdIds);
+            setPlan(generatedPlan);
+            setScreen("plan");
+          } catch (e) {
+            console.error("Failed to build plan:", e);
+          }
         }
       }
-    }
-
-    if (presetParam && Presets[presetParam]) {
-      setSelectedPresetIds([presetParam]);
-      const preset = Presets[presetParam];
-      setSelectedJtbdIds(preset.includesJtbd);
     }
   }, [router.isReady, router.query]);
 
   // Update URL when selection changes
   const updateUrl = (jtbdIds: JtbdId[], presetIds: PresetId[]) => {
-    const params = new URLSearchParams();
+    const query: Record<string, string> = {};
+
     if (jtbdIds.length > 0) {
-      params.set("plan", jtbdIds.join(","));
+      query.plan = jtbdIds.join(",");
     }
     if (presetIds.length > 0) {
-      params.set("preset", presetIds[0]); // Only support one preset for now
+      query.preset = presetIds[0]; // Only support one preset for now
     }
 
-    const newUrl = params.toString()
-      ? `${router.pathname}?${params.toString()}`
-      : router.pathname;
+    // Preserve showPlan if it exists
+    if (router.query.showPlan) {
+      query.showPlan = router.query.showPlan as string;
+    }
 
-    router.replace(newUrl, undefined, { shallow: true });
+    router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+    });
   };
 
   const handleTogglePreset = (presetId: PresetId) => {
@@ -160,13 +162,20 @@ export function OnboardingPage() {
   const handleReset = () => {
     setSelectedPresetIds([]);
     setSelectedJtbdIds([]);
-    updateUrl([], []);
+    // Clear all query params
+    router.replace({ pathname: router.pathname, query: {} }, undefined, {
+      shallow: true,
+    });
   };
 
   const handleCopyLink = () => {
+    const query = new URLSearchParams({
+      plan: selectedJtbdIds.join(","),
+      showPlan: "true",
+    });
     const url = `${window.location.origin}${
-      window.location.pathname
-    }?plan=${selectedJtbdIds.join(",")}`;
+      router.pathname
+    }?${query.toString()}`;
     navigator.clipboard.writeText(url).then(() => {
       setCopyLinkSuccess(true);
       setTimeout(() => setCopyLinkSuccess(false), 2000);
@@ -178,6 +187,16 @@ export function OnboardingPage() {
       const generatedPlan = buildPlan(selectedJtbdIds);
       setPlan(generatedPlan);
       setScreen("plan");
+
+      // Add showPlan=true to URL
+      router.replace(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, showPlan: "true" },
+        },
+        undefined,
+        { shallow: true }
+      );
     } catch (e) {
       console.error("Failed to build plan:", e);
       alert("Error building plan. Please check the console for details.");
@@ -186,6 +205,14 @@ export function OnboardingPage() {
 
   const handleBack = () => {
     setScreen("selector");
+
+    // Remove showPlan from URL
+    const { showPlan, ...queryWithoutShowPlan } = router.query;
+    router.replace(
+      { pathname: router.pathname, query: queryWithoutShowPlan },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const handleToggleDone = (guideId: GuideId) => {
