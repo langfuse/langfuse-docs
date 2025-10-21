@@ -28,140 +28,185 @@ Langfuse integrates with Langchain using Langchain Callbacks ([Python](https://p
     "JS/TS SDK",
   ]}
 >
-  <Tab title="Python SDK">
+<Tab title="Python SDK">
 
-  ### Step 1: Install Dependencies
+<Steps>
+### Install Dependencies
 
-  ```bash
-  pip install langfuse langchain langchain_openai langgraph
-  ```
+```bash
+pip install langfuse langchain langchain_openai langgraph
+```
 
-  ### Step 2: Configure Langfuse Callback Handler
+### Initialize Langfuse Callback Handler
 
-  Next, set up your Langfuse API keys. You can get these keys by signing up for a free Langfuse Cloud account or by self-hosting Langfuse. These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
-  ```bash
-  export LANGFUSE_PUBLIC_KEY="your-public-key"
-  export LANGFUSE_SECRET_KEY="your-secret-key"
-  export LANGFUSE_HOST="https://cloud.langfuse.com"  # Optional: defaults to https://cloud.langfuse.com
+```bash
+export LANGFUSE_PUBLIC_KEY="your-public-key"
+export LANGFUSE_SECRET_KEY="your-secret-key"
+export LANGFUSE_HOST="https://cloud.langfuse.com"  # Optional: defaults to https://cloud.langfuse.com
 
-  export OPENAI_API_KEY="your-openai-api-key"
-  ```
-  With the environment variables set, we can now initialize the Langfuse client and the Langfuse CallbackHandler. You can also use [constructor arguments](/docs/sdk/python/setup#initialize-client) to initialize the Langfuse client.
+export OPENAI_API_KEY="your-openai-api-key"
+```
+With the environment variables set, we can now initialize the Langfuse client and the Langfuse CallbackHandler. You can also use [constructor arguments](/docs/sdk/python/setup#initialize-client) to initialize the Langfuse client.
 
-  ```python
-  from langfuse import get_client
-  from langfuse.langchain import CallbackHandler
+```python
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
+
+# Initialize Langfuse client
+langfuse = get_client()
+
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
+langfuse_handler = CallbackHandler()
+```
+
+### LangChain Example
+
+```python /config={"callbacks":[langfuse_handler]}/
+from langchain.agents import create_agent
+
+def get_weather(city: str) -> str:
+    """Get weather for a given city."""
+    return f"It's always sunny in {city}!"
+
+agent = create_agent(
+    model="openai:gpt-4",
+    tools=[get_weather],
+    system_prompt="You are a helpful assistant",
+)
+
+# Run the agent
+agent.invoke(
+    {"messages": [{"role": "user", "content": "what is the weather in sf"}]},
+    config={"callbacks":[langfuse_handler]}
+)
+```
+
+### See Traces in Langfuse
+
+After executing the application, navigate to your [Langfuse Trace Table](https://cloud.langfuse.com/). You will find detailed traces of the application’s execution, providing insights into the LLM calls, retrieval operations, inputs, outputs, and performance metrics.
+
+![Example trace in Langfuse](/images/cookbook/integration-langchain/langchain-example-trace.png)
+
+[Example trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f409d99f1204374f3c12a1b44441f21e?timestamp=2025-10-21T14%3A01%3A18.661Z)
+
+</Steps>
+</Tab>
+<Tab title="JS/TS SDK">
+
+<Steps>
+### Install Dependencies
+
+```bash
+npm install @langfuse/core @langfuse/langchain
+```
+
+### Set Up Environment
+
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY = "sk-lf-..."
+LANGFUSE_PUBLIC_KEY = "pk-lf-..."
+LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# LANGFUSE_BASE_URL = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+OPENAI_API_KEY = "sk-proj-..."
+```
+
+With the environment variables set, we can now initialize the `langfuseSpanProcessor` which is passed to the main OpenTelemetry SDK that orchestrates tracing.
+
+
+```typescript
+import { ChatOpenAI } from "npm:@langchain/openai"
+import { PromptTemplate } from "npm:@langchain/core/prompts"
+
+const model = new ChatOpenAI({});
+const promptTemplate = PromptTemplate.fromTemplate(
+  "Tell me a joke about {topic}"
+);
+```
+
+### Initialize Langfuse Callback Handler
+
+Instantiate the CallbackHandler and pass it to your chain’s `.invoke()` or `.stream()` method in the callbacks array. All operations within the chain will be traced as nested observations.
+
+```typescript
+import { CallbackHandler } from "@langfuse/langchain";
  
-  # Initialize Langfuse client
-  langfuse = get_client()
- 
-  # Initialize Langfuse CallbackHandler for Langchain (tracing)
-  langfuse_handler = CallbackHandler()
-  ```
+// 1. Initialize the Langfuse callback handler
+const langfuseHandler = new CallbackHandler({
+  sessionId: "user-session-123",
+  userId: "user-abc",
+  tags: ["langchain-test"],
+});
+```
 
-  ### Step 3a: Basic LangChain Example
+### LangChain Example
 
-  Let's create a simple LangChain example. We'll use the `ChatOpenAI` model and the `ChatPromptTemplate` to create a chain.
+```typescript
+import { ChatOpenAI } from "npm:@langchain/openai"
+import { PromptTemplate } from "npm:@langchain/core/prompts"
 
-  ```python
-  from langchain_openai import ChatOpenAI
-  from langchain_core.prompts import ChatPromptTemplate
-  
-  # Create your LangChain components
-  llm = ChatOpenAI(model_name="gpt-4o")
-  prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
-  chain = prompt | llm
-  
-  # Run your chain with Langfuse tracing
-  response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
-  print(response.content)
-  ```
+const model = new ChatOpenAI({});
+  const promptTemplate = PromptTemplate.fromTemplate(
+    "Tell me a joke about {topic}"
+  );
+```
 
-  ### Step 4: See Traces in Langfuse
+```typescript /{ callbacks: [langfuseHandler] }/
+import { RunnableSequence } from "npm:@langchain/core/runnables";
 
-  After executing the application, navigate to your [Langfuse Trace Table](https://cloud.langfuse.com/). You will find detailed traces of the application’s execution, providing insights into the LLM calls, retrieval operations, inputs, outputs, and performance metrics.
+const chain = RunnableSequence.from([promptTemplate, model]);
 
-  
+const res = await chain.invoke(
+    { topic: "bears" },
+    { callbacks: [langfuseHandler] }
+);
 
+console.log(res.content)
+```
 
+### See Traces in Langfuse
 
-  </Tab>
-  <Tab title="JS/TS SDK">
+After executing the application, navigate to your [Langfuse Trace Table](https://cloud.langfuse.com/). You will find detailed traces of the application’s execution, providing insights into the LLM calls, retrieval operations, inputs, outputs, and performance metrics.
 
-    ```bash
-    npm i @langfuse/langchain
-    ```
+![Langfuse Trace](https://langfuse.com/images/cookbook/example-js-sdk/js_integration_langchain_trace.png)
 
-    <Env />
-
-    ```ts
-    import { CallbackHandler } from "@langfuse/langchain";
-
-    const langfuseHandler = new CallbackHandler();
-
-    // Your Langchain code
-
-    // Add Langfuse handler as callback to `run` or `invoke`
-    await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
-    ```
-
-  </Tab>
+[Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f24dedd6c8cdd7560e127669aebf50d0?timestamp=2025-10-21T14%3A18%3A11.397Z&observation=aab050e7933ee07a)
+</Steps>
+</Tab>
 </Tabs>
 
 
 
-## End-to-end Examples
+## Example Notebooks
 
 import { FileCode, GitPullRequestArrow } from "lucide-react";
 
-<Cards num={3}>
+<Cards num={2}>
   <Card
-    title="Example (Python)"
+    title="LangChain (Python)"
     href="/guides/cookbook/integration_langchain"
     icon={<FileCode />}
   />
   <Card
-    title="Example (JS/TS)"
+    title="LangChain (JS/TS)"
     href="/guides/cookbook/js_integration_langchain"
     icon={<FileCode />}
   />
   <Card
-    title="Example LangGraph (Python)"
+    title="LangGraph (Python)"
     href="/guides/cookbook/integration_langgraph"
     icon={<FileCode />}
   />
   <Card
-    title="Trace and Evaluate LangGraph Agents (Python)"
+    title="Evaluate LangGraph Agents (Python)"
     href="/guides/cookbook/example_langgraph_agents"
     icon={<FileCode />}
   />
-  <Card
-    title="Example LangServe (Python)"
-    href="/guides/cookbook/integration_langserve"
-    icon={<FileCode />}
-  />
 </Cards>
-
-## Supported LangChain interfaces
-
-| Feature/interface | Python | JS/TS |
-| ----------------- | ------ | ----- |
-| LCEL              | ✅     | ✅    |
-| `invoke()`        | ✅     | ✅    |
-| `run()`           | ✅     | ✅    |
-| `call()`          | ✅     | ✅    |
-| `predict()`       | ✅     | ✅    |
-| async             | ✅     | ✅    |
-| `batch()`         | ✅     | (✅)  |
-| streaming         | ✅     | ✅    |
-
-We are interested in your feedback! Raise an issue on [GitHub](/ideas) to request support for additional interfaces.
-
-## Supported LangChain features
-
-- **🕸️ LangGraph**: Works with Langfuse Integration. Requires Python 3.11+ ([GH issue](https://github.com/langfuse/langfuse/issues/1926)). See notebook for [example integration](/guides/cookbook/integration_langgraph).
-- **🏓 LangServe**: See notebook for [example integration](/integrations/frameworks/langserve).
 
 ## Additional Configuration
 
