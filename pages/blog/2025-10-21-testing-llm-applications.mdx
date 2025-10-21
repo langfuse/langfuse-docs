@@ -1,0 +1,301 @@
+---
+title: "Testing for LLM Applications: A Practical Guide"
+date: 2025/10/21
+description: A practical guide to implementing automated tests for LLM applications using datasets and experiment runners.
+ogImage: #TODO @jannik: Add og image
+tag: guide
+author: Abdallah
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Testing for LLM Applications: A Practical Guide"
+  description="A practical guide to implementing automated tests for LLM applications using datasets and experiment runners."
+  date="October 21, 2025"
+  authors={["aabedraba"]}
+/>
+
+Testing LLM applications presents unique challenges. Unlike traditional software where outputs are deterministic, LLMs produce varied responses that can't be verified with simple equality checks. Yet the need for systematic testing remains critical—how do you ensure your AI application works reliably across deployments?
+
+This guide shows you how to implement automated tests for LLM applications using datasets and experiment runners, inspired by [Hamel Husain's testing framework](https://hamel.dev/blog/posts/evals/#level-1-unit-tests).
+
+## Understanding Testing vs Evaluation in LLM Applications
+
+Before diving in, let's clarify some terminology that often causes confusion:
+
+### Testing vs Evaluation
+
+**Testing** typically means running automated checks that produce pass/fail results. You write assertions like `assert result == expected` and your test suite tells you if something broke.
+
+**Evaluation** is about measuring quality. How accurate is your model? How helpful are the responses? These are scored on continuous scales rather than binary pass/fail.
+
+Traditional testing relies on predictable outputs. You assert that `add(2, 3)` returns `5`. But when you ask an LLM "What is the capital of France?", you might get "Paris", "The capital is Paris", "Paris, France", or a longer explanation. All are correct, but none match exactly.
+
+This variability doesn't mean we can't test LLM applications—it means we need different testing strategies. In LLM applications, these concepts blend together. You "test" your application by "evaluating" its outputs with scoring functions. A test passes if the evaluation score meets your threshold.
+
+### Unit Tests vs What We're Building
+
+Hamel Husain calls this approach "Level 1: Unit Tests" in his framework, and we'll use similar terminology. However, it's worth noting that these aren't traditional unit tests:
+
+**Traditional unit tests**:
+- Test isolated code units
+- Deterministic (same input = same output)
+- Fast, no external dependencies
+
+**LLM application tests**:
+- Test application behavior
+- Non-deterministic (same input can produce different outputs)
+- Slower execution
+
+Think of these as **automated regression tests** that verify your LLM application maintains acceptable quality as you make changes. The "unit" being tested is your application's behavior on specific inputs.
+
+## The Solution: Datasets + Experiment Runners + Evaluators
+
+The approach combines three components:
+
+1. **Datasets**: Collections of input/output pairs that represent your test cases
+2. **Experiment Runners**: Execute your LLM application against the dataset
+3. **Evaluators**: Score the outputs programmatically instead of checking exact matches
+
+Let's see how this works in practice.
+
+## Example: Testing a Geography Question Answering System
+
+Here's a complete example testing an LLM application that answers geography questions, using Langfuse's Experiment Runner SDK and local test data.
+
+First, setup the environment variables:
+
+```sh
+# .env file
+OPENAI_API_KEY=your_openai_api_key
+LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
+LANGFUSE_SECRET_KEY=your_langfuse_secret_key
+LANGFUSE_HOST=https://cloud.langfuse.com
+```
+
+You can export the environment variables to your shell:
+
+```
+export $(grep -v '^#' .env)
+```
+
+Now create the test file:
+
+```python
+# test_geography_experiment.py
+import pytest
+from langfuse import get_client, Evaluation, Langfuse
+from langfuse.openai import OpenAI
+
+# Each test case includes both the input and expected output. The expected output
+# serves as a reference for evaluation, not as an exact string match.
+test_data = [
+    {"input": "What is the capital of France?", "expected_output": "Paris"},
+    {"input": "What is the capital of Germany?", "expected_output": "Berlin"},
+    {"input": "What is the capital of Spain?", "expected_output": "Madrid"},
+]
+
+# The task function wraps your LLM application logic. It receives each test item and 
+# returns the LLM's response. This should be your full LLM application logic.
+def geography_task(*, item, **kwargs):
+    """Task function that answers geography questions"""
+    question = item["input"]
+    response = OpenAI().chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": question}]
+    )
+    return response.choices[0].message.content
+
+# This evaluator checks if the expected answer appears anywhere in the output, accounting 
+# for LLM verbosity. You could also use more sophisticated evaluators, including LLM-as-a-judge 
+# for semantic similarity.
+def accuracy_evaluator(*, input, output, expected_output, **kwargs):
+    """Evaluator that checks if the expected answer is in the output"""
+    if expected_output and expected_output.lower() in output.lower():
+        return Evaluation(name="accuracy", value=1.0)
+    
+    return Evaluation(name="accuracy", value=0.0)
+
+# Run-level evaluators aggregate scores across all test items, giving you a single
+# metric to assert against.
+def average_accuracy_evaluator(*, item_results, **kwargs):
+    """Run evaluator that calculates average accuracy across all items"""
+    accuracies = [
+        eval.value for result in item_results
+        for eval in result.evaluations if eval.name == "accuracy"
+    ]
+    
+    if not accuracies:
+        return Evaluation(name="avg_accuracy", value=None)
+    
+    avg = sum(accuracies) / len(accuracies)
+    
+    return Evaluation(name="avg_accuracy", value=avg, comment=f"Average accuracy: {avg:.2%}")
+
+@pytest.fixture
+def langfuse_client() -> Langfuse:
+    """Initialize Langfuse client for testing"""
+    return get_client()
+
+def test_geography_accuracy_passes(langfuse_client: Langfuse):
+    """Test that passes when accuracy is above threshold"""
+    result = langfuse_client.run_experiment(
+        name="Geography Test - Should Pass",
+        data=test_data,
+        task=geography_task,
+        evaluators=[accuracy_evaluator],
+        run_evaluators=[average_accuracy_evaluator]
+    )
+    
+    # Access the run evaluator result directly
+    avg_accuracy = next(
+        eval.value for eval in result.run_evaluations
+        if eval.name == "avg_accuracy"
+    )
+    
+    # Assert minimum accuracy threshold
+    assert avg_accuracy >= 0.8, f"Average accuracy {avg_accuracy:.2f} below threshold 0.8"
+```
+
+<Callout type="info">
+    **Set Appropriate Thresholds**: Not all tests need 100% accuracy. Set realistic thresholds based on your application's requirements:
+
+    ```python
+    # Strict threshold for critical functionality
+    assert avg_accuracy >= 0.95, "Critical tests must have 95%+ accuracy"
+
+    # Relaxed threshold for experimental features
+    assert avg_accuracy >= 0.70, "Experimental feature needs improvement"
+    ```
+</Callout>
+
+You can run the test with:
+
+```sh
+pip install pytest langfuse openai
+pytest test_geography_experiment.py -v
+```
+
+## Running Tests in CI/CD
+
+You can integrate these tests into your continuous integration pipeline.
+
+### GitHub Actions Example
+
+First, setup the environment variables in your Github Actions secrets: 
+
+![Github Actions secrets](/images/blog/2025-10-21-testing-llm-applications/github-actions-secrets.png)
+
+
+```yaml
+name: LLM Application Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        pip install pytest langfuse
+    
+    - name: Run LLM unit tests
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+        LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+        LANGFUSE_HOST: ${{ secrets.LANGFUSE_HOST }}
+      run: |
+        pytest test_geography_experiment.py -v
+```
+
+## Using Remote Datasets with LLM-as-a-Judge
+
+For more advanced testing, you can use [remote datasets](https://langfuse.com/docs/evaluation/experiments/datasets) stored in Langfuse:
+
+```python {11,12}
+import pytest
+from langfuse import get_client, Langfuse
+
+@pytest.fixture
+def langfuse_client() -> Langfuse:
+    return get_client()
+
+def test_with_remote_dataset(langfuse_client: Langfuse):
+    """Test using a dataset stored in Langfuse with LLM-as-a-judge evaluation"""
+    
+    # Fetch dataset from Langfuse
+    dataset = langfuse_client.get_dataset("geography-questions")
+    
+    def task(*, item, **kwargs):
+        question = item.input
+        response = OpenAI().chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": question}]
+        )
+        return response.choices[0].message.content
+    
+    # Run experiment - Langfuse automatically applies configured evaluators
+    result = dataset.run_experiment(
+        name="Geography Test with Remote Dataset",
+        description="Testing geography QA with LLM-as-a-judge",
+        task=task
+    )
+    
+    # The LLM-as-a-judge evaluator runs automatically in Langfuse
+    # Results are visible in the Langfuse UI
+    langfuse_client.flush()
+```
+
+You can then see the result of LLM-as-a-judge evaluation and the aggregated score in the Langfuse UI:
+
+![LLM-as-a-judge evaluation and aggregated score](/images/blog/2025-10-21-testing-llm-applications/llm-as-a-judge-results.png)
+
+### Benefits of Remote Datasets
+
+1. **Centralized test management**: Update test cases without code changes
+2. **LLM-as-a-judge evaluators**: Configure semantic evaluation in the Langfuse UI (see [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge))
+3. **Historical tracking**: Compare results across runs to detect regressions
+4. **Team collaboration**: Share datasets across team members
+
+When using remote datasets, all experiment results are tracked in Langfuse:
+
+- View individual test case results with scores and reasoning
+- Compare experiment runs over time
+- Track which code changes improved or degraded performance
+- Share results with team members through the Langfuse dashboard
+
+We wrote two guides covering how to test chatbots and conversational applications with remote datasets and LLM-as-a-judge evaluators:
+
+- **[Evaluating Multi-Turn Conversations](https://langfuse.com/guides/cookbook/example_evaluating_multi_turn_conversations)**: Test specific points in ongoing conversations (N+1 evaluations), useful for debugging issues where context is lost across turns
+- **[Simulating Multi-Turn Conversations](https://langfuse.com/guides/cookbook/example_simulated_multi_turn_conversations)**: Generate synthetic conversations with AI agents to test various scenarios and personas
+
+## Next Steps
+
+Ready to implement automated testing for your LLM application? Start by identifying 3-5 critical functionalities, create a small dataset with expected behaviors, and run your first experiment. We'd love to hear about your testing approach—join the conversation in our [GitHub Discussion](https://github.com/langfuse/langfuse/discussions), and explore our learning resources below.
+
+## Learn More About Testing with Langfuse
+
+import { FileCode, BookOpen, Video, Users, Joystick } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Datasets Documentation" href="/docs/evaluation/experiments/datasets" icon={<BookOpen />} arrow />
+  <Card title="Experiment Runner SDK" href="/docs/evaluation/experiments/experiments-via-sdk" icon={<FileCode />} arrow />
+  <Card title="Evaluating Multi-Turn Conversations" href="/guides/cookbook/example_evaluating_multi_turn_conversations" icon={<Joystick />} arrow />
+  <Card title="Simulating Multi-Turn Conversations" href="/guides/cookbook/example_simulated_multi_turn_conversations" icon={<Users />} arrow />
+  <Card title="Hamel Husain's Eval Framework" href="https://hamel.dev/blog/posts/evals/#level-1-unit-tests" icon={<Users />} arrow />
+</Cards>
