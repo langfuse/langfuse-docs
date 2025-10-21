@@ -249,7 +249,7 @@ export function PricingCalculator({
                     <TableHead className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         Your Units
-                        <Link
+                        <Link aria-label="Learn more about billable units"
                           href="/docs/observability/data-model#billable-units"
                           target="_blank"
                         >
