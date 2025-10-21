@@ -8,108 +8,108 @@ logo: /images/integrations/langchain_icon.png
 import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
 import GetStartedLangchainPythonEnv from "@/components-mdx/get-started-langchain-python-env.mdx";
 import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-env.mdx";
+import Env from "@/components-mdx/env-js.mdx";
 
-# Observability & Tracing for LangChain & LangGraph (Python & JS/TS)
+# LangChain & LangGraph Integration
 
-[Langfuse Tracing](/docs/tracing) integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/how_to/#callbacks), [JS](https://js.langchain.com/docs/how_to/#callbacks)). The Langfuse SDK automatically captures detailed traces of your Langchain executions, creating properly nested observations for chains, LLMs, tools, and retrievers. This allows you to monitor, analyze and debug your LangChain applications with full observability.
+Langfuse integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/how_to/#callbacks), [JS](https://js.langchain.com/docs/how_to/#callbacks)). The Langfuse SDK automatically captures detailed traces of your Langchain executions, creating properly nested observations for chains, LLMs, tools, and retrievers. This allows you to monitor, analyze and debug your LangChain applications with full observability.
 
-<Callout type="info">
-  This documentation has been updated to show examples for the new **[Python SDK
-  v3](/docs/sdk/python/sdk-v3)**. If you are looking for documentation for the
-  Python SDK version 2, [see
-  here.](https://python-sdk-v2.docs-snapshot.langfuse.com/integrations/frameworks/langchain)
-</Callout>
+> **What is Langchain?** [Langchain](https://python.langchain.com/docs/get_started/introduction/) is an open-source framework that helps developers build applications powered by large language models (LLMs) by providing tools to connect models with external data, APIs, and logic. It simplifies building complex AI workflows like chatbots, agents, and retrieval-augmented generation (RAG) pipelines.
 
-## Add Langfuse to your Langchain Application
+> **What is Langgraph?** [Langgraph](https://python.langchain.com/docs/get_started/introduction/) LangGraph is a framework built on top of LangChain that makes it easier to design and run stateful, multi-step AI agents using a graph-based architecture.
 
-You can configure the integration via (1) constructor arguments or (2) environment variables. Get your Langfuse credentials from the Langfuse dashboard.
+> **What is Langfuse?**  [Langfuse](/) is a platform for observability and tracing of LLM applications. It captures everything happening during an LLM interaction: inputs, outputs, tool usage, retries, latencies and costs and allows you to evaluate and debug your application.
+
+## Getting Started
 
 <Tabs
   items={[
-    "Python (env)",
-    "Python (constructor args)",
-    "JS (env)",
+    "Python SDK",
+    "JS/TS SDK",
   ]}
 >
-  <Tab>
-    Set environment variables:
+  <Tab title="Python SDK">
 
-    ```bash
-    export LANGFUSE_PUBLIC_KEY="your-public-key"
-    export LANGFUSE_SECRET_KEY="your-secret-key"
-    export LANGFUSE_HOST="https://cloud.langfuse.com"  # Optional: defaults to https://cloud.langfuse.com
-    ```
+  ### Step 1: Install Dependencies
 
-    ```bash
-    pip install langfuse
-    ```
+  ```bash
+  pip install langfuse langchain langchain_openai langgraph
+  ```
 
-    ```python
-    from langfuse.langchain import CallbackHandler
-    from langchain_openai import ChatOpenAI
-    from langchain_core.prompts import ChatPromptTemplate
+  ### Step 2: Configure Langfuse Callback Handler
 
-    # Initialize the Langfuse handler
-    langfuse_handler = CallbackHandler()
+  Next, set up your Langfuse API keys. You can get these keys by signing up for a free Langfuse Cloud account or by self-hosting Langfuse. These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
-    # Create your LangChain components
-    llm = ChatOpenAI(model_name="gpt-4o")
-    prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
-    chain = prompt | llm
+  ```bash
+  export LANGFUSE_PUBLIC_KEY="your-public-key"
+  export LANGFUSE_SECRET_KEY="your-secret-key"
+  export LANGFUSE_HOST="https://cloud.langfuse.com"  # Optional: defaults to https://cloud.langfuse.com
 
-    # Run your chain with Langfuse tracing
-    response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
-    print(response.content)
-    ```
+  export OPENAI_API_KEY="your-openai-api-key"
+  ```
+  With the environment variables set, we can now initialize the Langfuse client and the Langfuse CallbackHandler. You can also use [constructor arguments](/docs/sdk/python/setup#initialize-client) to initialize the Langfuse client.
 
-  </Tab>
-  <Tab>
-    ```bash
-    pip install langfuse
-    ```
+  ```python
+  from langfuse import get_client
+  from langfuse.langchain import CallbackHandler
+ 
+  # Initialize Langfuse client
+  langfuse = get_client()
+ 
+  # Initialize Langfuse CallbackHandler for Langchain (tracing)
+  langfuse_handler = CallbackHandler()
+  ```
 
-    ```python
-    from langfuse import Langfuse, get_client
-    from langfuse.langchain import CallbackHandler
-    from langchain_openai import ChatOpenAI  # Example LLM
-    from langchain_core.prompts import ChatPromptTemplate
+  ### Step 3a: Basic LangChain Example
 
-    # Initialize Langfuse client with constructor arguments
-    Langfuse(
-        public_key="your-public-key",
-        secret_key="your-secret-key",
-        host="https://cloud.langfuse.com"  # Optional: defaults to https://cloud.langfuse.com
-    )
+  Let's create a simple LangChain example. We'll use the `ChatOpenAI` model and the `ChatPromptTemplate` to create a chain.
 
-    # Get the configured client instance
-    langfuse = get_client()
+  ```python
+  from langchain_openai import ChatOpenAI
+  from langchain_core.prompts import ChatPromptTemplate
+  
+  # Create your LangChain components
+  llm = ChatOpenAI(model_name="gpt-4o")
+  prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+  chain = prompt | llm
+  
+  # Run your chain with Langfuse tracing
+  response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
+  print(response.content)
+  ```
 
-    # Initialize the Langfuse handler
-    langfuse_handler = CallbackHandler()
+  ### Step 4: See Traces in Langfuse
 
-    # Create your LangChain components
-    llm = ChatOpenAI(model_name="gpt-4o")
-    prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
-    chain = prompt | llm
+  After executing the application, navigate to your [Langfuse Trace Table](https://cloud.langfuse.com/). You will find detailed traces of the application’s execution, providing insights into the LLM calls, retrieval operations, inputs, outputs, and performance metrics.
 
-    # Run your chain with Langfuse tracing
-    response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
-    print(response.content)
+  
 
-    # Flush events to Langfuse in short-lived applications
-    langfuse.flush()
-    ```
+
 
   </Tab>
-  <Tab>
-    <GetStartedLangchainJsEnv />
+  <Tab title="JS/TS SDK">
+
+    ```bash
+    npm i @langfuse/langchain
+    ```
+
+    <Env />
+
+    ```ts
+    import { CallbackHandler } from "@langfuse/langchain";
+
+    const langfuseHandler = new CallbackHandler();
+
+    // Your Langchain code
+
+    // Add Langfuse handler as callback to `run` or `invoke`
+    await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+    ```
+
   </Tab>
 </Tabs>
 
-<Callout type="info" emoji="✨">
-  Done. Now you can explore detailed traces and metrics in the Langfuse
-  dashboard.
-</Callout>
+
 
 ## End-to-end Examples
 
