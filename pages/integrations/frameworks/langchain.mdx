@@ -12,9 +12,9 @@ import Env from "@/components-mdx/env-js.mdx";
 
 # LangChain & LangGraph Integration
 
-Langfuse integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/how_to/#callbacks), [JS](https://js.langchain.com/docs/how_to/#callbacks)). The Langfuse SDK automatically captures detailed traces of your Langchain executions, creating properly nested observations for chains, LLMs, tools, and retrievers. This allows you to monitor, analyze and debug your LangChain applications with full observability.
+Langfuse integrates with Langchain using Langchain Callbacks. The Langfuse SDK automatically captures detailed traces of your Langchain executions, LLMs, tools, and retrievers to evaluate and debug your application.
 
-> **What is Langchain?** [Langchain](https://python.langchain.com/docs/get_started/introduction/) is an open-source framework that helps developers build applications powered by large language models (LLMs) by providing tools to connect models with external data, APIs, and logic. It simplifies building complex AI workflows like chatbots, agents, and retrieval-augmented generation (RAG) pipelines.
+> **What is Langchain?** [Langchain](https://python.langchain.com/docs/get_started/introduction/) is an open-source framework that helps developers build applications powered by large language models (LLMs) by providing tools to connect models with external data, APIs, and logic.
 
 > **What is Langgraph?** [Langgraph](https://python.langchain.com/docs/get_started/introduction/) LangGraph is a framework built on top of LangChain that makes it easier to design and run stateful, multi-step AI agents using a graph-based architecture.
 
@@ -41,14 +41,16 @@ pip install langfuse langchain langchain_openai langgraph
 
 Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
-```bash
-export LANGFUSE_PUBLIC_KEY="your-public-key"
-export LANGFUSE_SECRET_KEY="your-secret-key"
-export LANGFUSE_HOST="https://cloud.langfuse.com"  # Optional: defaults to https://cloud.langfuse.com
+```bash filename=".env"
+LANGFUSE_SECRET_KEY = "sk-lf-..."
+LANGFUSE_PUBLIC_KEY = "pk-lf-..."
+LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# LANGFUSE_BASE_URL = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-export OPENAI_API_KEY="your-openai-api-key"
+OPENAI_API_KEY = "sk-proj-..."
 ```
-With the environment variables set, we can now initialize the Langfuse client and the Langfuse CallbackHandler. You can also use [constructor arguments](/docs/sdk/python/setup#initialize-client) to initialize the Langfuse client.
+
+With the environment variables set, we can now initialize the Langfuse Client and the CallbackHandler. You can also use [constructor arguments](/docs/sdk/python/setup#initialize-client) to initialize the Langfuse client.
 
 ```python
 from langfuse import get_client
@@ -63,23 +65,27 @@ langfuse_handler = CallbackHandler()
 
 ### LangChain Example
 
+<Callout type="info">
+Instrumenting LangGraph follows the same pattern. Simply pass the `langfuse_handler` to the agent invocation. ([Example Notebook](/guides/cookbook/integration_langgraph)).
+</Callout>
+
 ```python /config={"callbacks":[langfuse_handler]}/
 from langchain.agents import create_agent
 
-def get_weather(city: str) -> str:
-    """Get weather for a given city."""
-    return f"It's always sunny in {city}!"
+def add_numbers(a: int, b: int) -> int:
+    """Add two numbers together and return the result."""
+    return a + b
 
 agent = create_agent(
-    model="openai:gpt-4",
-    tools=[get_weather],
-    system_prompt="You are a helpful assistant",
+    model="openai:gpt-5-mini",
+    tools=[add_numbers],
+    system_prompt="You are a helpful math tutor who can do calculations using the provided tools.",
 )
 
 # Run the agent
 agent.invoke(
-    {"messages": [{"role": "user", "content": "what is the weather in sf"}]},
-    config={"callbacks":[langfuse_handler]}
+    {"messages": [{"role": "user", "content": "what is 42 + 58?"}]},
+    config={"callbacks": [langfuse_handler]}
 )
 ```
 
@@ -144,6 +150,10 @@ const langfuseHandler = new CallbackHandler({
 ```
 
 ### LangChain Example
+
+<Callout type="info">
+Instrumenting LangGraph follows the same pattern. Simply pass the `langfuseHandler` to the agent invocation.
+</Callout>
 
 ```typescript
 import { ChatOpenAI } from "npm:@langchain/openai"
