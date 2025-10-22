@@ -147,6 +147,8 @@ export function PricingCalculator({
       <p className="text-base text-muted-foreground mb-6">
         Enter your monthly billable units to see the graduated pricing
         breakdown.
+
+        
       </p>
       <Card>
         <CardContent className="space-y-6 pt-6">
@@ -244,7 +246,17 @@ export function PricingCalculator({
                   <TableRow>
                     <TableHead className="text-left">Tier</TableHead>
                     <TableHead className="text-right">Rate</TableHead>
-                    <TableHead className="text-right">Your Units</TableHead>
+                    <TableHead className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        Your Units
+                        <Link aria-label="Learn more about billable units"
+                          href="/docs/observability/data-model#billable-units"
+                          target="_blank"
+                        >
+                          <InfoIcon className="size-3" />
+                        </Link>
+                      </div>
+                    </TableHead>
                     <TableHead className="text-right">Cost</TableHead>
                   </TableRow>
                 </TableHeader>
