@@ -34,7 +34,7 @@ Install Temporal SDK, OpenTelemetry packages, and Langfuse:
 
 
 ```python
-%pip install temporalio openai langfuse openinference-instrumentation-openai-agents
+%pip install temporalio openai openai-agents langfuse openinference-instrumentation-openai-agents
 ```
 
 ## 2. Configure Environment & API Keys
@@ -59,6 +59,13 @@ os.environ["TEMPORAL_HOST"] = "localhost:7233"
 os.environ.setdefault("TEMPORAL_NAMESPACE", "default")
 os.environ.setdefault("TEMPORAL_TASK_QUEUE", "agents-task-queue")
 ```
+
+
+
+
+    'agents-task-queue'
+
+
 
 ## 3. OpenTelemetry Tracing for OpenAI Agents
 
@@ -238,6 +245,8 @@ class ResearchManager:
 
 
 ```python
+from temporalio import workflow
+
 @workflow.defn
 class ResearchWorkflow:
     @workflow.run
@@ -247,16 +256,7 @@ class ResearchWorkflow:
 
 ## 7. Run the Workflow
 
-As of Step 3, only OpenAI Agents executions send OpenTelemetry spans to Langfuse by default.
-To also capture Temporal workflow steps, enable Temporal’s OpenTelemetry integration by importing:
-
-```
-from temporalio.contrib.opentelemetry import TracingInterceptor
-````
-
-and adding `interceptors=[TracingInterceptor()]` to the Temporal client and worker. 
-
-When you execute the research workflow, both Temporal and OpenAI Agents will send OTel spans to Langfuse.
+When you execute the research workflow, both Temporal `OpenAIAgentsPlugin` and the OpenInference `OpenAIAgentsInstrumentor` will send OTel spans to Langfuse.
 
 **Note**: This requires a running Temporal server. You can start a local dev server with:
 ```bash
@@ -269,7 +269,6 @@ import sys
 import os
 from temporalio.client import Client
 from temporalio.worker import Worker
-from temporalio.contrib.opentelemetry import TracingInterceptor
 from temporalio.contrib.openai_agents import OpenAIAgentsPlugin
 from temporalio.worker import UnsandboxedWorkflowRunner
 
@@ -284,16 +283,14 @@ async def main():
         namespace=os.environ.get("TEMPORAL_NAMESPACE", "default"),
         api_key=api_key or None,
         tls=tls,
-        plugins=[plugin],
-        interceptors=[TracingInterceptor()] # Expose Temporal OTel spans
+        plugins=[plugin]
     )
 
     worker = Worker(
         client,
         task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
         workflows=[ResearchWorkflow],
-        workflow_runner=UnsandboxedWorkflowRunner(),
-        interceptors=[TracingInterceptor()],  # Expose Temporal OTel spans
+        workflow_runner=UnsandboxedWorkflowRunner()
     )
 
     async with worker:
@@ -321,4 +318,4 @@ After running the workflow, you can view the complete trace in Langfuse. The tra
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_temporal/temporal-research-workflow-trace.png)
 
-**Example Trace**: [View in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/87c6a2bd1cfca4cf08ad3504e51b020d?timestamp=2025-10-14T12%3A30%3A00.508Z&observation=a699566e938a97c9)
+**Example Trace**: [View in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/02c0ff139fa7df3142e4bd436d72c09b?timestamp=2025-10-22T09:05:59.516Z)
