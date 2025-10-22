@@ -26,10 +26,8 @@ import os
 
 # Set your Langfuse API keys
 LANGFUSE_SECRET_KEY="sk-lf-..."
-LANGFUSE_PUBLIC_KEY="pk-lf-..."
-# 🇪🇺 EU region
-LANGFUSE_HOST="https://cloud.langfuse.com"
-# 🇺🇸 US region
+LANGFUSE_PUBLIC_KEY="pk-lf-..." # 🇪🇺 EU region
+LANGFUSE_HOST="https://cloud.langfuse.com" # 🇺🇸 US region
 # LANGFUSE_HOST="https://us.cloud.langfuse.com"
 
 # Set your Anannas API key
@@ -127,8 +125,9 @@ def analyze_sentiment(summary: str):
 text_to_analyze = "Anannas AI provides a unified gateway to access hundreds of LLM models with built-in observability and automatic fallback routing."
 analyze_text(text_to_analyze)
 ```
-
+<Frame>
 ![Example trace in Langfuse](/images/docs/anannas-example-trace.png)
+</Frame>
 
 _Example trace showing nested LLM calls through Anannas AI gateway in Langfuse_
 
