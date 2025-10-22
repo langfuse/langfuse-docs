@@ -5,6 +5,7 @@ export default {
     type: "separator",
     title: <MenuSubSeparator>Essential</MenuSubSeparator>,
   },
+  "attribute-propagation": {},
   sessions: {},
   users: {},
   environments: {},

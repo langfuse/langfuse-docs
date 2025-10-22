@@ -173,9 +173,9 @@ We are interested in your feedback! Raise an issue on [GitHub](/ideas) to reques
 The `CallbackHandler` does not accept any constructor arguments for trace attributes or global settings.
 
 - **Global settings** (like `sample_rate`, `tracing_enabled`) must be set when initializing the Langfuse client via `Langfuse()` constructor or environment variables
-- **Trace attributes** (like `user_id`, `session_id`, `tags`) can be set either:
+- **Trace attributes** (like `user_id`, `session_id`, `metadata`) can be set either:
   - Via metadata fields in chain invocation (`langfuse_user_id`, `langfuse_session_id`, `langfuse_tags`)
-  - Via an enclosing span using `span.update_trace()` as shown in the examples above
+  - Via `propagate_attributes()` context manager as shown in the examples below
 
 </Tab>
 <Tab>
@@ -229,10 +229,10 @@ response = chain.invoke(
 )
 ```
 
-**Option 2: Via enclosing span (for more control):**
+**Option 2: Via `propagate_attributes()` (for more control):**
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -244,18 +244,22 @@ llm = ChatOpenAI(model_name="gpt-4o")
 prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
 chain = prompt | llm
 
-# Set trace attributes dynamically via enclosing span
+# Set trace attributes dynamically via propagate_attributes
 with langfuse.start_as_current_span(name="dynamic-langchain-trace") as span:
-    span.update_trace(
+    # ✅ Set attributes on current span AND all children (including Langchain spans)
+    with propagate_attributes(
         user_id="random-user",
         session_id="random-session",
-        tags=["random-tag-1", "random-tag-2"],
-        input={"animal": "dog"}
-    )
+        metadata={
+            "langchain_version": "0-3-0",
+            "chain_type": "llm-chain"
+        }
+    ):
+        span.update(input={"animal": "dog"})
 
-    response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
+        response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
 
-    span.update_trace(output={"response": response.content})
+        span.update(output={"response": response.content})
 ```
 
 </Tab>
@@ -296,7 +300,7 @@ await chain.invoke(
 To score a Langchain execution, you can capture the trace ID for the score by either wrapping the execution in a span that sets a predefined trace ID, or retrieve the last trace ID a callback handler has created via `langfuse_handler.last_trace_id`.
 
 ```python
-from langfuse import get_client, Langfuse
+from langfuse import get_client, Langfuse, propagate_attributes
 from langfuse.langchain import CallbackHandler
 
 langfuse = get_client()
@@ -312,18 +316,17 @@ with langfuse.start_as_current_span(
     name="langchain-request",
     trace_context={"trace_id": predefined_trace_id}
 ) as span:
-    span.update_trace(
-        user_id="user_123",
-        input={"person": "Ada Lovelace"}
-    )
+    # ✅ Set attributes on current span AND all children (including Langchain spans)
+    with propagate_attributes(user_id="user_123"):
+        span.update(input={"person": "Ada Lovelace"})
 
-    # LangChain execution will be part of this trace
-    response = chain.invoke(
-        {"person": "Ada Lovelace"},
-        config={"callbacks": [langfuse_handler]}
-    )
+        # LangChain execution will be part of this trace
+        response = chain.invoke(
+            {"person": "Ada Lovelace"},
+            config={"callbacks": [langfuse_handler]}
+        )
 
-    span.update_trace(output={"response": response})
+        span.update(output={"response": response})
 
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
@@ -444,46 +447,48 @@ Learn more about the structure of a trace [here](/docs/tracing).
 **Using the `@observe()` decorator:**
 
 ```python
-from langfuse import observe, get_client
+from langfuse import observe, get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
-@observe() # Automatically log function as a trace to Langfuse
-def process_user_query(user_input: str):
+@observe(name="user-query-processing") # Automatically log function as a trace to Langfuse
+def process_user_query(user_input: str, user_id: str, session_id: str):
     langfuse = get_client()
 
-    # Update trace attributes
-    langfuse.update_current_trace(
-        name="user-query-processing",
-        session_id="session-1234",
-        user_id="user-5678",
-        input={"query": user_input}
-    )
+    # ✅ Set attributes on current span AND all children (including Langchain spans)
+    with propagate_attributes(
+        session_id=session_id,
+        user_id=user_id,
+        metadata={
+            "query_type": "user-question",
+            "interface": "api"
+        }
+    ):
+        # Initialize the Langfuse handler - automatically inherits the current trace context
+        langfuse_handler = CallbackHandler()
 
-    # Initialize the Langfuse handler - automatically inherits the current trace context
-    langfuse_handler = CallbackHandler()
+        # Your Langchain code - will be nested under the @observe trace
+        llm = ChatOpenAI(model_name="gpt-4o")
+        prompt = ChatPromptTemplate.from_template("Respond to: {input}")
+        chain = prompt | llm
 
-    # Your Langchain code - will be nested under the @observe trace
-    llm = ChatOpenAI(model_name="gpt-4o")
-    prompt = ChatPromptTemplate.from_template("Respond to: {input}")
-    chain = prompt | llm
+        result = chain.invoke({"input": user_input}, config={"callbacks": [langfuse_handler]})
 
-    result = chain.invoke({"input": user_input}, config={"callbacks": [langfuse_handler]})
-
-    # Update trace with final output
-    langfuse.update_current_trace(output={"response": result.content})
-
-    return result.content
+        return result.content
 
 # Usage
-answer = process_user_query("What is the capital of France?")
+answer = process_user_query(
+    "What is the capital of France?",
+    user_id="user-5678",
+    session_id="session-1234"
+)
 ```
 
 **Using context managers:**
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -492,38 +497,42 @@ langfuse = get_client()
 
 # Create a trace via Langfuse spans and use Langchain within it
 with langfuse.start_as_current_span(name="multi-step-process") as root_span:
-    # Update trace attributes
-    root_span.update_trace(
+    # ✅ Set attributes on current span AND all children (including Langchain spans)
+    with propagate_attributes(
         session_id="session-1234",
         user_id="user-5678",
-        input={"user_query": "Explain quantum computing"}
-    )
+        metadata={
+            "workflow_type": "multi-step",
+            "query_complexity": "high"
+        }
+    ):
+        root_span.update(input={"user_query": "Explain quantum computing"})
 
-    # Initialize the Langfuse handler
-    langfuse_handler = CallbackHandler()
+        # Initialize the Langfuse handler
+        langfuse_handler = CallbackHandler()
 
-    # Step 1: Initial processing (custom logic)
-    with langfuse.start_as_current_span(name="input-preprocessing") as prep_span:
-        processed_input = "Simplified: Explain quantum computing"
-        prep_span.update(output={"processed_query": processed_input})
+        # Step 1: Initial processing (custom logic)
+        with langfuse.start_as_current_span(name="input-preprocessing") as prep_span:
+            processed_input = "Simplified: Explain quantum computing"
+            prep_span.update(output={"processed_query": processed_input})
 
-    # Step 2: LangChain processing
-    llm = ChatOpenAI(model_name="gpt-4o")
-    prompt = ChatPromptTemplate.from_template("Answer this question: {input}")
-    chain = prompt | llm
+        # Step 2: LangChain processing
+        llm = ChatOpenAI(model_name="gpt-4o")
+        prompt = ChatPromptTemplate.from_template("Answer this question: {input}")
+        chain = prompt | llm
 
-    result = chain.invoke(
-        {"input": processed_input},
-        config={"callbacks": [langfuse_handler]}
-    )
+        result = chain.invoke(
+            {"input": processed_input},
+            config={"callbacks": [langfuse_handler]}
+        )
 
-    # Step 3: Post-processing (custom logic)
-    with langfuse.start_as_current_span(name="output-postprocessing") as post_span:
-        final_result = f"Response: {result.content}"
-        post_span.update(output={"final_response": final_result})
+        # Step 3: Post-processing (custom logic)
+        with langfuse.start_as_current_span(name="output-postprocessing") as post_span:
+            final_result = f"Response: {result.content}"
+            post_span.update(output={"final_response": final_result})
 
-    # Update trace output
-    root_span.update_trace(output={"final_answer": final_result})
+        # Update trace output
+        root_span.update(output={"final_answer": final_result})
 ```
 
 </Tab>
@@ -684,13 +693,13 @@ Langfuse and Langchain are under active development. Thus, we are constantly imp
 
 Python SDK v3 introduces a completely revised Langfuse core with a new **observability API**. While the LangChain integration still relies on a `CallbackHandler`, nearly all ergonomics have changed. The table below highlights the most important breaking changes:
 
-| Topic               | v2                                                                | v3                                                                     |
-| ------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Package import      | `from langfuse.callback import CallbackHandler`                   | `from langfuse.langchain import CallbackHandler`                       |
-| Client handling     | Multiple instantiated clients                                     | Singleton pattern, access via `get_client()`                           |
-| Trace/Span context  | `CallbackHandler` optionally accepted `root` to group runs        | Use context managers `with langfuse.start_as_current_span(...)`        |
-| Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Use `metadata["langfuse_user_id"]` OR `span.update_trace(user_id=...)` |
-| Constructor args    | `CallbackHandler(sample_rate=..., user_id=...)`                   | No constructor args – use Langfuse client or spans                     |
+| Topic               | v2                                                                | v3                                                                           |
+| ------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Package import      | `from langfuse.callback import CallbackHandler`                   | `from langfuse.langchain import CallbackHandler`                             |
+| Client handling     | Multiple instantiated clients                                     | Singleton pattern, access via `get_client()`                                 |
+| Trace/Span context  | `CallbackHandler` optionally accepted `root` to group runs        | Use context managers `with langfuse.start_as_current_span(...)`              |
+| Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Use `metadata["langfuse_user_id"]` OR `propagate_attributes(user_id=...)` |
+| Constructor args    | `CallbackHandler(sample_rate=..., user_id=...)`                   | No constructor args – use Langfuse client or spans                           |
 
 Minimal migration example:
 
@@ -732,11 +741,13 @@ response = chain.invoke(
     }
 )
 
-# 3. Option 2: Wrap LangChain execution in a span (for more control)
+# 3. Option 2: Wrap LangChain execution with propagate_attributes (for more control)
+# from langfuse import propagate_attributes
 # with langfuse.start_as_current_span(name="tell-joke") as span:
-#     span.update_trace(user_id="user_123", input={"topic": "cats"})
-#     response = chain.invoke({"topic": "cats"}, config={"callbacks": [handler]})
-#     span.update_trace(output={"joke": response.content})
+#     with propagate_attributes(user_id="user_123"):
+#         span.update(input={"topic": "cats"})
+#         response = chain.invoke({"topic": "cats"}, config={"callbacks": [handler]})
+#         span.update(output={"joke": response.content})
 
 # (Optional) Flush events in short-lived scripts
 langfuse.flush()

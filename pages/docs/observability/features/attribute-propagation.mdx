@@ -1,0 +1,577 @@
+---
+description: Set correlating attributes (user_id, session_id, metadata) that propagate to all spans for accurate analytics and cost tracking
+sidebarTitle: Attribute Propagation
+---
+
+# Attribute Propagation
+
+Attribute propagation allows you to set trace-level attributes like `user_id`, `session_id`, and `metadata` that automatically apply to the currently active span AND all child spans created within the context. This ensures complete attribute coverage across your entire trace hierarchy, enabling accurate analytics, cost tracking, and session grouping.
+
+## Core Concept
+
+When you set attributes using `propagate_attributes()` / `propagateAttributes()`, they are applied to:
+1. **The currently active span** (if one exists when you call it)
+2. **ALL child spans** created within the context
+
+This ensures complete attribute coverage across your entire trace hierarchy, which is critical for:
+- **User analytics**: Queries like "cost per user" need `user_id` on all spans
+- **Session grouping**: Session replay requires `session_id` on all observations
+- **Metadata filtering**: Custom dimensions need consistent coverage across traces
+
+**Impact comparison:**
+
+- ❌ **Old approach** (`update_trace()`): Sets attribute on ONE span only → Langfuse backend propagates to trace entity (today) → Child spans excluded from aggregation queries → Incomplete analytics
+- ❌ **Old approach (future)**: Server-side propagation removed → Attribute only on ONE span → No trace entity update → Even worse analytics
+- ✅ **New approach** (`propagate_attributes()`): Sets attributes on current span AND all children → Complete data coverage → Accurate analytics now and in the future
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
+# ❌ OLD: Only sets user_id on the root span
+with langfuse.start_as_current_span(name="workflow") as span:
+    span.update_trace(user_id="user_123")  # Only on THIS span
+    child1 = do_work()  # ❌ No user_id
+    child2 = call_llm()  # ❌ No user_id
+
+# ✅ NEW: Sets user_id on root span AND all children
+with langfuse.start_as_current_span(name="workflow") as span:
+    with propagate_attributes(user_id="user_123"):
+        # ✅ "workflow" span has user_id
+        child1 = do_work()  # ✅ Has user_id
+        child2 = call_llm()  # ✅ Has user_id
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+
+// ❌ OLD: Only sets userId on the root span
+await startActiveObservation("workflow", async (span) => {
+  span.updateTrace({ userId: "user_123" });  // Only on THIS span
+  await doWork();  // ❌ No userId
+  await callLLM();  // ❌ No userId
+});
+
+// ✅ NEW: Sets userId on root span AND all children
+await startActiveObservation("workflow", async (span) => {
+  await propagateAttributes({
+    userId: "user_123"
+  }, async () => {
+    // ✅ "workflow" span has userId
+    await doWork();  // ✅ Has userId
+    await callLLM();  // ✅ Has userId
+  });
+});
+```
+
+</Tab>
+</LangTabs>
+
+## Basic Usage
+
+The most common pattern is to use `propagate_attributes()` within a context manager after creating a span.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="user-workflow") as span:
+    # Authenticate user first
+    user = authenticate_request(request)
+
+    # ✅ Set attributes on current span AND all children
+    with propagate_attributes(
+        user_id=user.id,
+        session_id=request.session_id,
+        metadata={
+            "customer_tier": "premium",
+            "feature_flag_new_ui": "enabled",
+            "ab_test_variant": "variant_a"
+        }
+    ):
+        # The "user-workflow" span now has user_id, session_id, and metadata
+        # All child spans created here will also have these attributes
+        result = process_request(request)      # Has all attributes
+        llm_response = call_llm(result)        # Has all attributes
+        final_output = post_process(llm_response)  # Has all attributes
+
+    span.update(output=final_output)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+
+await startActiveObservation("user-workflow", async (span) => {
+  // Authenticate user first
+  const user = await authenticateRequest(request);
+
+  // ✅ Set attributes on current span AND all children
+  await propagateAttributes({
+    userId: user.id,
+    sessionId: request.sessionId,
+    metadata: {
+      customer_tier: "premium",
+      feature_flag_new_ui: "enabled",
+      ab_test_variant: "variant_a"
+    }
+  }, async () => {
+    // The "user-workflow" span now has userId, sessionId, and metadata
+    // All child spans created here will also have these attributes
+    const result = await processRequest(request);      // Has all attributes
+    const llmResponse = await callLLM(result);        // Has all attributes
+    const finalOutput = await postProcess(llmResponse); // Has all attributes
+
+    span.update({ output: finalOutput });
+  });
+});
+```
+
+</Tab>
+</LangTabs>
+
+## With Decorators / Observe Wrapper
+
+You can use `propagate_attributes()` with the `@observe` decorator (Python) or `observe()` wrapper (TypeScript) to automatically trace functions.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import observe, propagate_attributes
+
+@observe()
+def handle_user_request(request):
+    user = authenticate(request)
+
+    # Propagate attributes to the current observation AND all children
+    with propagate_attributes(
+        user_id=user.id,
+        session_id=request.session_id,
+        metadata={"request_source": "mobile_app"}
+    ):
+        # The "handle_user_request" span has these attributes
+        # All child functions also get these attributes
+        return process_pipeline(request)
+
+@observe()
+def process_pipeline(request):
+    # This span automatically has user_id, session_id, and metadata
+    step1 = data_processing(request)  # Also has all attributes
+    step2 = llm_call(step1)           # Also has all attributes
+    return step2
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { observe, propagateAttributes } from "@langfuse/tracing";
+
+const handleUserRequest = observe(async (request: Request) => {
+  const user = await authenticate(request);
+
+  // Propagate attributes to the current observation AND all children
+  return await propagateAttributes({
+    userId: user.id,
+    sessionId: request.sessionId,
+    metadata: { request_source: "mobile_app" }
+  }, async () => {
+    // The "handle_user_request" span has these attributes
+    // All child functions also get these attributes
+    return await processPipeline(request);
+  });
+}, { name: 'handle-user-request' });
+
+const processPipeline = observe(async (request: Request) => {
+  // This span automatically has userId, sessionId, and metadata
+  const step1 = await dataProcessing(request);  // Also has all attributes
+  const step2 = await llmCall(step1);           // Also has all attributes
+  return step2;
+}, { name: 'process-pipeline' });
+```
+
+</Tab>
+</LangTabs>
+
+## Calling Before or After Span Creation
+
+You can call `propagate_attributes()` either before or after creating a span. The behavior differs slightly:
+
+- **After span creation**: Attributes apply to the current span AND all children
+- **Before span creation**: Attributes only apply to children (no current span exists yet)
+
+**Best practice:** Call `propagate_attributes()` after you have an active span and after you've obtained the necessary context (user authentication, session creation, etc.). This ensures the parent span and all children have the attributes.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
+# Option 1: Call after span creation (RECOMMENDED)
+# Attributes apply to current span + children
+with langfuse.start_as_current_span(name="workflow") as span:
+    with propagate_attributes(user_id="user_123"):
+        # ✅ "workflow" span now has user_id
+        # ✅ All children will also have user_id
+        child = do_work()
+
+# Option 2: Call before span creation
+# Attributes only apply to children
+with propagate_attributes(user_id="user_123"):
+    # No active span yet, so attributes stored in context only
+    with langfuse.start_as_current_span(name="workflow") as span:
+        # ✅ "workflow" span gets user_id from context
+        # ✅ All children will also have user_id
+        child = do_work()
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+
+// Option 1: Call after span creation (RECOMMENDED)
+// Attributes apply to current span + children
+await startActiveObservation("workflow", async (span) => {
+  await propagateAttributes({
+    userId: "user_123"
+  }, async () => {
+    // ✅ "workflow" span now has userId
+    // ✅ All children will also have userId
+    await doWork();
+  });
+});
+
+// Option 2: Call before span creation
+// Attributes only apply to children
+await propagateAttributes({
+  userId: "user_123"
+}, async () => {
+  // No active span yet, so attributes stored in context only
+  await startActiveObservation("workflow", async (span) => {
+    // ✅ "workflow" span gets userId from context
+    // ✅ All children will also have userId
+    await doWork();
+  });
+});
+```
+
+</Tab>
+</LangTabs>
+
+## Cross-Service Propagation
+
+For microservices architectures, enable the `as_baggage` / `asBaggage` parameter to propagate attributes via HTTP headers using OpenTelemetry baggage. This allows attributes to flow across service boundaries.
+
+<Callout type="warning">
+**Security Note:** When `as_baggage=True` / `asBaggage: true`, attribute values are added to HTTP headers on ALL outbound requests made within the context. Only use this with non-sensitive values and when you need cross-service tracing.
+</Callout>
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client, propagate_attributes
+import requests
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="service-a-request"):
+    with propagate_attributes(
+        user_id="user_123",
+        session_id="session_abc",
+        as_baggage=True  # Adds to HTTP headers
+    ):
+        # The current span has user_id and session_id
+        # HTTP calls to other services will include these in headers
+        response = requests.post(
+            "https://service-b.example.com/api",
+            json={"data": "payload"}
+        )
+        # Service B can extract these from headers and continue the trace
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+
+await startActiveObservation("service-a-request", async (span) => {
+  await propagateAttributes({
+    userId: "user_123",
+    sessionId: "session_abc",
+    asBaggage: true  // Adds to HTTP headers
+  }, async () => {
+    // The current span has userId and sessionId
+    // HTTP calls to other services will include these in headers
+    const response = await fetch(
+      "https://service-b.example.com/api",
+      {
+        method: "POST",
+        body: JSON.stringify({ data: "payload" })
+      }
+    );
+    // Service B can extract these from headers and continue the trace
+  });
+});
+```
+
+</Tab>
+</LangTabs>
+
+## Parameters
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| `user_id` | `Optional[str]` | User identifier. Must be US-ASCII string ≤200 characters. Use for per-user analytics and cost tracking. |
+| `session_id` | `Optional[str]` | Session identifier. Must be US-ASCII string ≤200 characters. Use for grouping related traces (e.g., conversation threads). |
+| `metadata` | `Optional[Dict[str, str]]` | Additional key-value metadata. Keys and values must be US-ASCII strings ≤200 characters each. Use for custom dimensions like feature flags, A/B test variants, customer tiers, or deployment regions. |
+| `as_baggage` | `bool` | If True, propagates via OpenTelemetry baggage for cross-service tracing. **Security warning:** Values are added to HTTP headers. Default: False. |
+
+</Tab>
+<Tab>
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| `userId` | `string \| undefined` | User identifier. Must be US-ASCII string ≤200 characters. Use for per-user analytics and cost tracking. |
+| `sessionId` | `string \| undefined` | Session identifier. Must be US-ASCII string ≤200 characters. Use for grouping related traces (e.g., conversation threads). |
+| `metadata` | `Record<string, string> \| undefined` | Additional key-value metadata. Keys and values must be US-ASCII strings ≤200 characters each. Use for custom dimensions like feature flags, A/B test variants, customer tiers, or deployment regions. |
+| `asBaggage` | `boolean \| undefined` | If true, propagates via OpenTelemetry baggage for cross-service tracing. **Security warning:** Values are added to HTTP headers. Default: false. |
+
+</Tab>
+</LangTabs>
+
+**Important constraints:**
+- All values must be US-ASCII strings
+- Maximum length: 200 characters per value
+- Invalid values are dropped with a warning
+- Call `propagate_attributes()` as early as possible in your trace for complete coverage
+
+## Migration from Deprecated Methods
+
+The old `update_trace()` and `update_current_trace()` (Python) / `updateActiveTrace()` and `updateTrace()` (TypeScript) methods are deprecated for setting `user_id`, `session_id`, and `metadata`.
+
+**Why migration is necessary:**
+
+- **Current behavior:** These methods set attributes on a single span. The Langfuse backend currently propagates these to the trace entity server-side. However, child spans do NOT receive these attributes, causing incomplete data in aggregation queries.
+- **Future behavior:** In a future version, server-side propagation will be removed. After this change, attributes will ONLY exist on the single span where you called the method, not on the trace entity or child spans.
+- **Impact:** Without migration, queries like "cost per user" or "traces per session" will return incomplete or incorrect results.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+**Before (deprecated):**
+```python
+with langfuse.start_as_current_span(name="workflow") as span:
+    span.update_trace(
+        user_id="user_123",
+        session_id="session_456"
+    )  # ❌ Only sets on THIS span
+    child = do_work()  # ❌ Child won't have user_id or session_id
+```
+
+**After (recommended):**
+```python
+with langfuse.start_as_current_span(name="workflow") as span:
+    with propagate_attributes(
+        user_id="user_123",
+        session_id="session_456"
+    ):
+        # ✅ Sets on "workflow" span AND all children
+        child = do_work()  # ✅ Child has user_id and session_id
+```
+
+</Tab>
+<Tab>
+
+**Before (deprecated):**
+```ts
+await startActiveObservation("workflow", async (span) => {
+  span.updateTrace({
+    userId: "user_123",
+    sessionId: "session_456"
+  });  // ❌ Only sets on THIS span
+  await doWork();  // ❌ Child won't have userId or sessionId
+});
+```
+
+**After (recommended):**
+```ts
+await startActiveObservation("workflow", async (span) => {
+  await propagateAttributes({
+    userId: "user_123",
+    sessionId: "session_456"
+  }, async () => {
+    // ✅ Sets on "workflow" span AND all children
+    await doWork();  // ✅ Child has userId and sessionId
+  });
+});
+```
+
+</Tab>
+</LangTabs>
+
+## Trace-Level vs Observation-Level
+
+It's important to distinguish between **trace-level attributes** (propagated to all spans) and **observation-level attributes** (set on a single span only).
+
+**When to use each:**
+
+- **Trace-level attributes** (via `propagate_attributes()`): For dimensions that apply to the entire workflow
+  - User identity (`user_id`)
+  - Session grouping (`session_id`)
+  - Feature flags, A/B test variants
+  - Customer tiers, deployment regions
+  - Request sources (mobile app, web, API)
+
+- **Observation-level attributes** (via `span.update()`): For operation-specific details
+  - Request IDs, correlation IDs
+  - Step-specific metadata
+  - Retry counts, attempt numbers
+  - Cache status for a specific operation
+  - LLM provider request IDs
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="process-request") as root_span:
+    # ✅ Trace-level: Applies to current span AND all children
+    with propagate_attributes(
+        user_id="user_123",
+        session_id="session_456",
+        metadata={
+            "deployment_region": "us-east-1",
+            "customer_tier": "premium"
+        }
+    ):
+        # ❌ Observation-level: Only on THIS span
+        root_span.update(metadata={
+            "request_id": "req-abc-123",
+            "cache_status": "miss"
+        })
+
+        with root_span.start_as_current_generation(
+            name="generate-response",
+            model="gpt-4o"
+        ) as gen:
+            # This generation has trace-level metadata (deployment_region, customer_tier)
+            # But NOT the parent's observation-level metadata (request_id, cache_status)
+
+            # ❌ Observation-level: Only on THIS generation
+            gen.update(metadata={
+                "llm_provider_request_id": "chatcmpl-xyz",
+                "temperature": "0.7"
+            })
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+
+await startActiveObservation("process-request", async (rootSpan) => {
+  // ✅ Trace-level: Applies to current span AND all children
+  await propagateAttributes({
+    userId: "user_123",
+    sessionId: "session_456",
+    metadata: {
+      deployment_region: "us-east-1",
+      customer_tier: "premium"
+    }
+  }, async () => {
+    // ❌ Observation-level: Only on THIS span
+    rootSpan.update({
+      metadata: {
+        request_id: "req-abc-123",
+        cache_status: "miss"
+      }
+    });
+
+    await rootSpan.startActiveGeneration("generate-response", async (gen) => {
+      gen.update({ model: "gpt-4o" });
+
+      // This generation has trace-level metadata (deployment_region, customer_tier)
+      // But NOT the parent's observation-level metadata (request_id, cache_status)
+
+      // ❌ Observation-level: Only on THIS generation
+      gen.update({
+        metadata: {
+          llm_provider_request_id: "chatcmpl-xyz",
+          temperature: "0.7"
+        }
+      });
+    });
+  });
+});
+```
+
+</Tab>
+</LangTabs>
+
+## Why This Matters for Analytics
+
+Complete attribute coverage across all spans in a trace is critical for accurate analytics and cost tracking:
+
+### User Analytics
+Queries like "total cost per user" or "traces per user" need the `user_id` attribute on ALL observations in a trace. Without `propagate_attributes()`, child spans are excluded from these queries, resulting in:
+- Incomplete cost calculations (missing LLM generation costs from child spans)
+- Inaccurate usage metrics (child operations not counted)
+- Broken user segmentation (some operations not tagged to users)
+
+**Example impact:** A user query that spawns 5 LLM calls. With the old approach, only the root span has `user_id`, so the 5 LLM costs are excluded from "cost per user" calculations.
+
+### Session Grouping
+Session replay and conversation threads require ALL observations to share the same `session_id`. Without `propagate_attributes()`:
+- Child spans are excluded from session-based queries
+- Session replay shows incomplete traces (missing nested operations)
+- Conversation context is broken across multiple turns
+
+**Example impact:** A chat conversation with 10 messages. Each message creates child spans for retrieval and LLM calls. Without propagation, session replay only shows the root spans, missing all the actual LLM interactions.
+
+### Metadata Filtering
+Custom dimensions like feature flags, A/B test variants, or deployment regions need consistent coverage for accurate filtering and aggregation:
+- Queries filtered by metadata miss child spans without the attribute
+- Aggregations group data incorrectly when coverage is incomplete
+- Feature flag analysis shows partial data
+
+**Example impact:** Filtering traces by `feature_flag=new_ui` to measure performance. Without propagation, nested operations aren't included, making the analysis incomplete.
+
+### Cost Tracking
+Accurate per-user or per-session cost calculations require all LLM generations to be tagged with the appropriate attributes. Without complete coverage:
+- User cost reports are underestimated (missing nested LLM calls)
+- Budget alerts don't fire correctly
+- Cost attribution is broken across teams or customers
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-attribute-propagation"]} />

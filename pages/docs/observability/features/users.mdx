@@ -13,120 +13,44 @@ The Users view provides an overview of all users. It also offers an in-depth loo
   gifStyle
 />
 
-It's easy to map data in Langfuse to individual users. Just pass a unique identifier as the `userId` when you create a `trace`. This can be a username, email, or any other unique identifier. The `userId` is optional, but using it helps you get more from Langfuse. See the integration docs to learn more.
+It's easy to map data in Langfuse to individual users. Just pass a unique identifier as the `user_id` / `userId` when you create a trace. This can be a username, email, or any other unique identifier. The `user_id` / `userId` is optional, but using it helps you get more from Langfuse.
+
+Use `propagate_attributes()` / `propagateAttributes()` to ensure the user identifier applies to all spans in the trace, enabling accurate per-user analytics and cost tracking. See the [Attribute Propagation](/docs/observability/features/attribute-propagation) page for comprehensive examples and best practices.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
-When using the `@observe()` decorator:
 
 ```python
-from langfuse import observe, get_client
-
-langfuse = get_client()
+from langfuse import observe, propagate_attributes
 
 @observe()
 def process_user_request(user_query):
-    # Add user_id to the current trace
-    langfuse.update_current_trace(user_id="user_12345")
+    user = authenticate(user_query)
 
-    # ...your processing logic...
-    return result
+    with propagate_attributes(user_id=user.id):
+        return process_pipeline(user_query)
 ```
 
-When creating spans directly:
-
-```python
-from langfuse import get_client
-
-langfuse = get_client()
-
-# You can set the user_id when creating the root span via update_trace
-with langfuse.start_as_current_span(
-    name="process-user-request"
-) as root_span:
-    # Add user_id to the trace
-    root_span.update_trace(user_id="user_12345")
-
-    # All spans in this trace will be associated with this user
-    with root_span.start_as_current_generation(
-        name="generate-response",
-        model="gpt-4o"
-    ) as gen:
-        # ...generate response...
-        pass
-```
-
-You can also update the user_id of the current trace without a direct reference to a span:
-
-```python
-with langfuse.start_as_current_span(name="handle-user-interaction"):
-    # Add user_id to the current trace
-    langfuse.update_current_trace(user_id="user_12345")
-```
+See [Attribute Propagation](/docs/observability/features/attribute-propagation) for more details.
 
 </Tab>
 <Tab title="JS/TS SDK">
 
-When using the context manager:
-
 ```ts
-import {
-  startActiveObservation,
-  startObservation,
-  updateActiveTrace,
-} from "@langfuse/tracing";
+import { observe, propagateAttributes } from "@langfuse/tracing";
 
-await startActiveObservation("context-manager", async (span) => {
-  span.update({
-    input: { query: "What is the capital of France?" },
-  });
+const processUserRequest = observe(async (userQuery: string) => {
+  const user = await authenticate(userQuery);
 
-  updateActiveTrace({
-    userId: "user-123",
+  return await propagateAttributes({
+    userId: user.id
+  }, async () => {
+    return await processPipeline(userQuery);
   });
-});
+}, { name: 'process-user-request' });
 ```
 
-When using the `observe` wrapper:
-
-```ts
-import { observe, updateActiveTrace } from "@langfuse/tracing";
-
-// An existing function
-async function fetchData(source: string) {
-  updateActiveTrace({
-    userId: "user-123",
-  });
-
-  // ... logic to fetch data
-  return { data: `some data from ${source}` };
-}
-
-// Wrap the function to trace it
-const tracedFetchData = observe(fetchData, {
-  name: "observe-wrapper",
-});
-
-const result = await tracedFetchData("API");
-```
-
-When creating spans manually:
-
-```ts
-import { startObservation } from "@langfuse/tracing";
-
-const span = startObservation("manual-observation", {
-  input: { query: "What is the capital of France?" },
-});
-
-span.updateTrace({
-  userId: "user-123",
-});
-
-span.update({ output: "Paris" }).end();
-```
-
-See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+See [Attribute Propagation](/docs/observability/features/attribute-propagation) for more details.
 
 </Tab>
 <Tab>

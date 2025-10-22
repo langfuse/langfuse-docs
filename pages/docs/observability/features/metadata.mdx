@@ -13,148 +13,99 @@ We strongly discourage writing the same key multiple times within your instrumen
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
-When using the `@observe()` decorator:
+
+### Trace-Level Metadata (Propagated to All Spans)
+
+Use `propagate_attributes()` to set metadata that applies to the current span AND all child spans:
 
 ```python
-from langfuse import observe, get_client
-
-langfuse = get_client()
+from langfuse import observe, propagate_attributes
 
 @observe()
-def process_data():
-    # Access the client and update the current trace metadata
-
-    # Add metadata to the trace level
-    langfuse.update_current_trace(
-        metadata={"source": "api", "version": "1.2.3"}
-    )
-
-    # Add metadata to the current span level
-    langfuse.update_current_span(
-        metadata={"processing_stage": "initial"}
-    )
-
-    # Process data...
-    return result
+def process_user_request(request):
+    with propagate_attributes(metadata={
+        "customer_tier": "premium",
+        "ab_test_variant": "variant_a"
+    }):
+        return process_pipeline(request)
 ```
 
-When creating spans directly:
+See [Attribute Propagation](/docs/observability/features/attribute-propagation) for more details.
+
+### Observation-Level Metadata (Single Span Only)
+
+Use `.update(metadata={...})` to set metadata on a single span:
 
 ```python
 from langfuse import get_client
 
 langfuse = get_client()
 
-# Add metadata at trace level
-with langfuse.start_as_current_span(
-    name="process-request"
-) as root_span:
-    # Add metadata to the trace
-    root_span.update_trace(metadata={"request_id": "req_12345"})
-
-    # Add metadata to the current span
-    root_span.update(metadata={"stage": "parsing"})
-
-    # Create a child span with metadata
-    with root_span.start_as_current_generation(
-        name="generate-response",
-        model="gpt-4o",
-        metadata={"temperature": 0.7, "max_tokens": 1000}
-    ) as gen:
-        # Update metadata later if needed
-        gen.update(metadata={"completion_type": "creative"})
-```
-
-You can add new keys to the metadata object by continuously updating the entity.
-We strongly discourage writing the same top-level key multiple times as this will produce an undefined behaviour.
-
-```python
 with langfuse.start_as_current_span(name="operation") as span:
-    # First write
-    span.update(metadata={"status": "started"})
-
-    # Additional key - will be merged with previous metadata
-    span.update(metadata={"error": "Failed to process"})
-
-    # Final metadata will be {"status": "started", "error": "Failed to process"}
+    # Observation-level: only on THIS span
+    span.update(metadata={
+        "request_id": "req-abc-123",
+        "retry_count": "2"
+    })
 ```
+
+<Callout type="info">
+**When to use each:**
+
+- **Trace-level metadata** (via `propagate_attributes()`): For dimensions that apply to the entire workflow - feature flags, experiment variants, user properties, deployment context. See [Attribute Propagation](/docs/observability/features/attribute-propagation#trace-level-vs-observation-level) for details.
+- **Observation-level metadata** (via `span.update()`): For operation-specific details - retry counts, step information, operation-specific parameters
+</Callout>
 
 </Tab>
 <Tab title="JS/TS SDK">
 
-When using the context manager:
+### Trace-Level Metadata (Propagated to All Spans)
+
+Use `propagateAttributes()` to set metadata that applies to the current span AND all child spans:
 
 ```ts
-import {
-  startActiveObservation,
-  startObservation,
-  updateActiveTrace,
-} from "@langfuse/tracing";
+import { observe, propagateAttributes } from "@langfuse/tracing";
 
-await startActiveObservation("context-manager", async (span) => {
-  // observation metadata
+const processUserRequest = observe(async (request: Request) => {
+  return await propagateAttributes({
+    metadata: {
+      customer_tier: "premium",
+      ab_test_variant: "variant_a"
+    }
+  }, async () => {
+    return await processPipeline(request);
+  });
+}, { name: 'process-user-request' });
+```
+
+See [Attribute Propagation](/docs/observability/features/attribute-propagation) for more details.
+
+### Observation-Level Metadata (Single Span Only)
+
+Use `.update({ metadata: {...} })` to set metadata on a single span:
+
+```ts
+import { startActiveObservation } from "@langfuse/tracing";
+
+await startActiveObservation("operation", async (span) => {
+  // Observation-level: only on THIS span
   span.update({
-    input: { query: "What is the capital of France?" },
-  });
-
-  // trace metadata
-  updateActiveTrace({
-    metadata: { key: "value" },
+    metadata: {
+      request_id: "req-abc-123",
+      retry_count: "2"
+    }
   });
 });
 ```
 
-When using the `observe` wrapper:
+<Callout type="info">
+**When to use each:**
 
-```ts
-import {
-  observe,
-  updateActiveTrace,
-  updateActiveObservation,
-} from "@langfuse/tracing";
+- **Trace-level metadata** (via `propagateAttributes()`): For dimensions that apply to the entire workflow - feature flags, experiment variants, user properties, deployment context. See [Attribute Propagation](/docs/observability/features/attribute-propagation#trace-level-vs-observation-level) for details.
+- **Observation-level metadata** (via `span.update({ metadata: {...} })`): For operation-specific details - retry counts, step information, operation-specific parameters
 
-// An existing function
-async function fetchData(source: string) {
-  // observation metadata
-  updateActiveObservation({
-    metadata: { key: "value" },
-  });
-
-  // trace metadata
-  updateActiveTrace({
-    metadata: { key: "value" },
-  });
-
-  // ... logic to fetch data
-  return { data: `some data from ${source}` };
-}
-
-// Wrap the function to trace it
-const tracedFetchData = observe(fetchData, {
-  name: "observe-wrapper",
-});
-
-const result = await tracedFetchData("API");
-```
-
-When creating spans manually:
-
-```ts
-import { startObservation } from "@langfuse/tracing";
-
-const span = startObservation("manual-observation", {
-  input: { query: "What is the capital of France?" },
-  metadata: { key: "value" },
-});
-
-span.updateTrace({
-  metadata: { key: "value" },
-});
-
-span.update({ output: "Paris" }).end();
-```
-
-See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+**Important:** All metadata values must be strings (US-ASCII, ≤200 characters). Convert numbers, booleans, etc. to strings.
+</Callout>
 
 </Tab>
 <Tab title="OpenAI (Python v2)">

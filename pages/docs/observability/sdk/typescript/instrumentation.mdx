@@ -389,66 +389,32 @@ span.update({ output: "Successfully answered user request." }).end();
   missing observations in Langfuse.
 </Callout>
 
-### Updating Traces
+### Setting Trace Attributes
 
-Often, you might not have all the information about a trace (like a `userId` or `sessionId`) when you start it. The SDK lets you add or update trace-level attributes at any point during its execution.
+Use `propagateAttributes()` to set trace-level attributes (`userId`, `sessionId`, `metadata`) that apply to the current span and all child spans. See the [Attribute Propagation](/docs/observability/features/attribute-propagation) page for comprehensive documentation.
 
-#### `.updateTrace()` on an observation
+<Callout type="warning">
+**Deprecated:** `updateTrace()` and `updateActiveTrace()` only set attributes on a single span. Migrate to `propagateAttributes()` for complete coverage. See [migration guide](/docs/observability/features/attribute-propagation#migration-from-deprecated-methods).
+</Callout>
 
-When you create an observation manually with `startObservation`, the returned object has an `.updateTrace()` method. You can call this at any time before the root span ends to apply attributes to the entire trace.
+#### Other Trace Attributes
 
-```typescript /updateTrace/
-import { startObservation } from "@langfuse/tracing";
+For other trace-level attributes like `name`, `version`, `tags`, `public`, `input`, and `output`, you can use `updateTrace()` on an observation object:
 
-// Start a trace without knowing the user yet
-const rootSpan = startObservation("data-processing");
-
-// ... some initial steps ...
-
-// Later, once the user is authenticated, update the trace
-const userId = "user-123";
-const sessionId = "session-abc";
-rootSpan.updateTrace({
-  userId: userId,
-  sessionId: sessionId,
-  tags: ["authenticated-user"],
-  metadata: { plan: "premium" },
-});
-
-// ... continue with the rest of the trace ...
-const generation = rootSpan.startObservation(
-  "llm-call",
-  {},
-  { asType: "generation" }
-);
-
-generation.end();
-
-rootSpan.end();
-```
-
-#### `updateActiveTrace()`
-
-When you're inside a callback from `startActiveObservation`, or a function wrapped with `observe`, you might not have a direct reference to an observation object. In these cases, use the `updateActiveTrace()` function. It automatically finds the currently active trace in the context and applies the new attributes.
-
-```typescript /updateActiveTrace/
-import { startActiveObservation, updateActiveTrace } from "@langfuse/tracing";
-
-await startActiveObservation("user-request", async (span) => {
-  // Initial part of the request
-  span.update({ input: { path: "/api/process" } });
-
-  // Simulate fetching user data
-  await new Promise((resolve) => setTimeout(resolve, 50));
-  const user = { id: "user-5678", name: "Jane Doe" };
-
-  // Update the active trace with the user's information
-  updateActiveTrace({
-    userId: user.id,
-    metadata: { userName: user.name },
+```typescript
+await startActiveObservation('workflow', async (span) => {
+  // These attributes apply to the trace entity, not individual observations
+  span.updateTrace({
+    name: 'user-workflow',
+    version: '1.2.3',
+    tags: ['production', 'feature-x'],
+    public: false,
+    input: { query: 'user question' },
+    output: { answer: 'result' }
   });
-
-  // ... continue logic ...
-  span.update({ output: { status: "success" } }).end();
 });
 ```
+
+<Callout type="warning">
+**Note:** Setting `name`, `version`, `tags`, `public`, `input`, and `output` via `updateTrace()` relies on server-side propagation to the trace entity. This functionality will be removed in a future version. We are evaluating alternatives for setting these attributes in a future-proof way.
+</Callout>

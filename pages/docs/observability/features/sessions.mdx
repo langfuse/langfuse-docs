@@ -13,125 +13,47 @@ graph LR
     A(Session) -->|1:n, sessionId| B(Trace)
 ```
 
-Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
+Add a `session_id` / `sessionId` when creating a trace. This can be any string that you use to identify the session (e.g., chat ID, conversation thread ID). All traces with the same `session_id` / `sessionId` will be grouped together.
+
+Use `propagate_attributes()` / `propagateAttributes()` to ensure the session identifier applies to all spans in the trace, enabling accurate session grouping and replay functionality. See the [Attribute Propagation](/docs/observability/features/attribute-propagation) page for comprehensive examples and best practices.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 
 <Tab title="Python SDK (v3)">
-When using the `@observe()` decorator:
 
 ```python
-from langfuse import observe, get_client
+from langfuse import observe, propagate_attributes
 
 @observe()
-def process_request():
-    # Get the client
-    langfuse = get_client()
-
-    # Add to the current trace
-    langfuse.update_current_trace(session_id="your-session-id")
-
-    # ...your processing logic...
-    return result
+def handle_chat_message(message, chat_id):
+    with propagate_attributes(session_id=chat_id):
+        context = load_conversation_history(chat_id)
+        response = generate_response(message, context)
+        save_to_history(chat_id, message, response)
+        return response
 ```
 
-When creating spans directly:
-
-```python
-from langfuse import get_client
-
-langfuse = get_client()
-
-# You can set the session_id when creating the root span
-with langfuse.start_as_current_span(
-    name="process-chat-message"
-) as root_span:
-    # Add session_id to the trace
-    root_span.update_trace(session_id="chat-session-123")
-
-    # All spans in this trace will belong to the same session
-    with root_span.start_as_current_generation(
-        name="generate-response",
-        model="gpt-4o"
-    ) as gen:
-        # ...generate response...
-        pass
-```
-
-You can also update the session_id of the current trace without a direct reference to a span:
-
-```python
-with langfuse.start_as_current_span(name="another-operation"):
-    # Add to the current trace
-    langfuse.update_current_trace(session_id="your-session-id")
-```
+See [Attribute Propagation](/docs/observability/features/attribute-propagation) for more details.
 
 </Tab>
 <Tab title="JS/TS SDK">
 
-When using the context manager:
-
 ```ts
-import {
-  startActiveObservation,
-  startObservation,
-  updateActiveTrace,
-} from "@langfuse/tracing";
+import { observe, propagateAttributes } from "@langfuse/tracing";
 
-await startActiveObservation("context-manager", async (span) => {
-  span.update({
-    input: { query: "What is the capital of France?" },
+const handleChatMessage = observe(async (message: string, chatId: string) => {
+  return await propagateAttributes({
+    sessionId: chatId
+  }, async () => {
+    const context = await loadConversationHistory(chatId);
+    const response = await generateResponse(message, context);
+    await saveToHistory(chatId, message, response);
+    return response;
   });
-
-  // set sessionId on the trace
-  updateActiveTrace({
-    sessionId: "session-123",
-  });
-});
+}, { name: 'handle-chat-message' });
 ```
 
-When using the `observe` wrapper:
-
-```ts
-import { observe, updateActiveTrace } from "@langfuse/tracing";
-
-// An existing function
-async function fetchData(source: string) {
-  // set sessionId on the trace
-  updateActiveTrace({
-    sessionId: "session-123",
-  });
-
-  // ... logic to fetch data
-  return { data: `some data from ${source}` };
-}
-
-// Wrap the function to trace it
-const tracedFetchData = observe(fetchData, {
-  name: "observe-wrapper",
-});
-
-const result = await tracedFetchData("API");
-```
-
-When creating spans manually:
-
-```ts
-import { startObservation } from "@langfuse/tracing";
-
-const span = startObservation("manual-observation", {
-  input: { query: "What is the capital of France?" },
-});
-
-// set sessionId on the trace
-span.updateTrace({
-  sessionId: "session-123",
-});
-
-span.update({ output: "Paris" }).end();
-```
-
-See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+See [Attribute Propagation](/docs/observability/features/attribute-propagation) for more details.
 
 </Tab>
 <Tab>

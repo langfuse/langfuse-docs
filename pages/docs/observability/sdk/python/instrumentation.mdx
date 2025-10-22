@@ -324,45 +324,32 @@ with langfuse.start_as_current_span(name="data-processing"):
 
 ### Setting Trace Attributes
 
-Trace-level attributes apply to the entire trace, not just a single observation. You can set or update these using:
+Use `propagate_attributes()` to set trace-level attributes (`user_id`, `session_id`, `metadata`) that apply to the current span and all child spans. See the [Attribute Propagation](/docs/observability/features/attribute-propagation) page for comprehensive documentation.
 
-- The `.update_trace()` method on any `LangfuseSpan` or `LangfuseGeneration` object within that trace.
-- `langfuse.update_current_trace()` to update the trace associated with the currently active observation.
+<Callout type="warning">
+**Deprecated:** `update_trace()` and `update_current_trace()` only set attributes on a single span. Migrate to `propagate_attributes()` for complete coverage. See [migration guide](/docs/observability/features/attribute-propagation#migration-from-deprecated-methods).
+</Callout>
 
-**Trace attribute parameters:**
+#### Other Trace Attributes
 
-| Parameter    | Type                  | Description                                                      |
-| :----------- | :-------------------- | :--------------------------------------------------------------- |
-| `name`       | `Optional[str]`       | Name for the trace.                                              |
-| `user_id`    | `Optional[str]`       | ID of the user associated with this trace.                       |
-| `session_id` | `Optional[str]`       | Session identifier for grouping related traces.                  |
-| `version`    | `Optional[str]`       | Version of your application/service for this trace.              |
-| `input`      | `Optional[Any]`       | Overall input for the entire trace.                              |
-| `output`     | `Optional[Any]`       | Overall output for the entire trace.                             |
-| `metadata`   | `Optional[Any]`       | Additional metadata for the trace.                               |
-| `tags`       | `Optional[List[str]]` | List of tags to categorize the trace.                            |
-| `public`     | `Optional[bool]`      | Whether the trace should be publicly accessible (if configured). |
-
-**Example: Setting Multiple Trace Attributes**
+For other trace-level attributes like `name`, `version`, `tags`, `public`, `input`, and `output`, you can use `update_trace()` on a span object:
 
 ```python
-from langfuse import get_client
-
-langfuse = get_client()
-
-with langfuse.start_as_current_span(name="initial-operation") as span:
-    # Set trace attributes early
+with langfuse.start_as_current_span(name="workflow") as span:
+    # These attributes apply to the trace entity, not individual observations
     span.update_trace(
-        user_id="user_xyz",
-        session_id="session_789",
-        tags=["beta-feature", "llm-chain"]
+        name="user-workflow",
+        version="1.2.3",
+        tags=["production", "feature-x"],
+        public=False,
+        input={"query": "user question"},
+        output={"answer": "result"}
     )
-    # ...
-    # Later, from another span in the same trace:
-    with span.start_as_current_generation(name="final-generation") as gen:
-        # ...
-        langfuse.update_current_trace(output={"final_status": "success"}, public=True)
 ```
+
+<Callout type="warning">
+**Note:** Setting `name`, `version`, `tags`, `public`, `input`, and `output` via `update_trace()` relies on server-side propagation to the trace entity. This functionality will be removed in a future version. We are evaluating alternatives for setting these attributes in a future-proof way.
+</Callout>
 
 ### Trace Input/Output Behavior
 
