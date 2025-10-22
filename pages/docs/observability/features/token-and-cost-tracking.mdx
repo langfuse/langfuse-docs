@@ -6,9 +6,9 @@ sidebarTitle: Token & Cost Tracking
 
 # Model Usage & Cost Tracking
 
-<Frame fullWidth>
+<Frame>
   ![Model cost breakdown in Langfuse
-  UI](https://static.langfuse.com/250108_model_cost_breakdown.gif)
+  UI](/images/docs/costs-and-usage-example.png)
 </Frame>
 
 Langfuse tracks the usage and costs of your LLM generations and provides breakdowns by usage types. Usage and cost can be tracked on observations of [type](/docs/observability/features/observation-types) `generation` and `embedding`.
@@ -387,10 +387,15 @@ You can flexibly add your own model definitions to Langfuse. This is especially 
 <LangTabs items={["Langfuse UI", "API"]}>
 
 <Tab>
-  <Frame>
-    ![Add model in
-    UI](https://static.langfuse.com/docs-legacy-gifs/create-model.gif)
-  </Frame>
+
+To add a custom model definition in the Langfuse UI, you can either click on the "+" sign next to the model name or navigate to the **Project Settings > Models** to add a new model definition. 
+
+Then you can add the prices per token type and save the model definition. Now all **new traces** with this model will have the correct token usage and cost inferred.
+
+  <Video
+  src="https://static.langfuse.com/docs-videos/2025-10-20-custom-model-definition-169.mp4"
+  aspectRatio={16 / 9}
+/>
 </Tab>
 
 <Tab>
@@ -442,6 +447,8 @@ For more details, see [the OpenAI guide](https://platform.openai.com/docs/guides
 
 - If you change the model definition, the updated costs will only be applied to new generations logged to Langfuse.
 - Only observations of type `generation` and `embedding` can track costs and usage.
+- If you use OpenRouter, Langfuse can directly capture the OpenRouter cost information. Learn more [here](/integrations/gateways/openrouter#cost-tracking).
+- If you use LiteLLM, Langfuse directly captures the cost information returned in each LiteLLM response.
 
 ## GitHub Discussions
 

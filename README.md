@@ -53,6 +53,23 @@ To embed a "gif", actually embed a video and use `gifMode` (`<Video src="" gifMo
 
 Interested in stack of Q&A docs chatbot? Checkout the [blog post](https://langfuse.com/blog/qa-chatbot-for-langfuse-docs) for implementation details (all open source)
 
+## LLM Features
+
+The docs site includes four interconnected features designed to make documentation accessible to LLMs and AI tools:
+
+1. **Markdown URL endpoints** (`.md` suffix): Append `.md` to any URL (e.g., `/docs.md`) to get raw markdown. Built at compile time via `scripts/copy_md_sources.js` which copies all `.mdx` files from `/pages` to `/public/md-src/` as static `.md` files with inlined MDX components.
+
+2. **Copy as Markdown button**: UI button on docs pages that fetches the `.md` endpoint and copies to clipboard for pasting into ChatGPT/Claude/Cursor.
+
+3. **Export as PDF links**: API endpoint `/api/md-to-pdf` that fetches markdown from `.md` URLs and converts to PDF using Puppeteer. Used on legal pages (terms, privacy, DPA, etc.).
+
+4. **MCP Server**: Model Context Protocol server at `/api/mcp` with three tools:
+   - `searchLangfuseDocs`: RAG search via Inkeep API
+   - `getLangfuseDocsPage`: Fetches specific page markdown from `.md` URLs
+   - `getLangfuseOverview`: Returns `llms.txt` overview
+
+All three user-facing features (Copy, PDF, MCP) depend on the same foundation of pre-built static markdown files, making them fast, cacheable, and reliable. See [RESEARCH-LLM-FEATURES.md](./RESEARCH-LLM-FEATURES.md) for detailed implementation details.
+
 ## Bundle analysis
 
 Run `pnpm run analyze` to analyze the bundle size of the production build using `@next/bundle-analyzer`.
