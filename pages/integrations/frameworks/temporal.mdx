@@ -48,8 +48,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -92,7 +92,7 @@ langfuse = get_client()
 if langfuse.auth_check():
     print("✅ Langfuse client is authenticated and ready!")
 else:
-    print("❌ Authentication failed. Please check your credentials and host.")
+    print("❌ Authentication failed. Please check your credentials and base URL.")
 ```
 
 ## 5. Define Temporal Activities
