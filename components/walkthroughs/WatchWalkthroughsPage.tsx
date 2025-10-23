@@ -143,6 +143,7 @@ function VideoPlayer({
 
     try {
       playerRef.current = new window.YT.Player(containerRef.current, {
+        host: "https://www.youtube-nocookie.com",
         videoId: videoId,
         playerVars: {
           modestbranding: 1,
