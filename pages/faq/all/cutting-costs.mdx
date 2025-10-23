@@ -1,6 +1,6 @@
 ---
 title: How do I cut my Langfuse Cloud bill?
-tags: [cloud]
+tags: [platform, cloud]
 ---
 
 # How do I cut my Langfuse Cloud bill?
@@ -29,6 +29,7 @@ Every observation within a trace counts toward your unit total. Some observation
 2. Update your integration/instrumentation to exclude these observations.
    - For most integrations, you define which observations are created. Thus, you can remove them by updating your instrumentation.
    - If you use the Python SDK (v3, OpenTelemetry-based), all OpenTelemetry spans are exported to Langfuse by default. If some observations are not relevant, you can [filter out observations by instrumentation scope](/docs/sdk/python/sdk-v3#filtering-by-instrumentation-scope).
+   - If you use the JS SDK (v4, OpenTelemetry-based), you can [filter out irrelevant spans and observations](/docs/observability/sdk/typescript/advanced-usage#filtering-spans). 
 
 ## Option 2: Sample fewer traces
 
@@ -38,6 +39,12 @@ Keeping all traces is often valuable for LLM application development. Unlike tra
 - Retaining all traces supports model distillation efforts down the line.
 
 However, if your application operates at significant scale, sampling can be a reasonable cost-cutting strategy. Check out the [sampling docs](/docs/tracing-features/sampling) to learn more.
+
+## Get notified before costs spike
+
+You can [set up spend alerts](/docs/administration/spend-alerts) to receive email notifications when your Langfuse Cloud organization exceeds predefined monetary thresholds.
+This helps you monitor spending and take action before unexpected costs occur.
+You can configure spend alerts within your organization settings.
 
 ---
 

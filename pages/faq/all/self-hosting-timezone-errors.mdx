@@ -1,0 +1,10 @@
+---
+title: Timezone errors in self-hosted Langfuse
+tags: [self-hosting]
+---
+
+# Timezone errors in self-hosted Langfuse
+
+Langfuse is engineered to run in the UTC timezone and expects that all infrastructure components default to UTC.
+Especially Postgres and ClickHouse settings that overwrite the UTC default are not supported and may lead to unexpected behavior.
+If you would like us to consider supporting other timezones, please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046).

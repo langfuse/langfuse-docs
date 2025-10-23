@@ -8,7 +8,7 @@ import {
 const features = [
   {
     icon: TextQuote,
-    title: "Tracing",
+    title: "Observability",
     items: [
       "Log traces",
       "Lowest level transparency",
@@ -26,7 +26,7 @@ const features = [
   },
   {
     icon: ThumbsUp,
-    title: "Evals",
+    title: "Evaluation",
     items: [
       "Measure output quality",
       "Monitor production health",

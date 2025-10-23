@@ -1,0 +1,25 @@
+---
+title: Why do I see 524 errors on Langfuse API calls?
+tags: [platform, api]
+---
+
+# Why do I see 524 errors on Langfuse API calls?
+
+The 524 error class on Langfuse Cloud indicates that your request timed out because ClickHouse ran out of resources or out of time while processing your query.
+This typically occurs when queries scan too much data due to overly broad filter conditions.
+The main patch for those errors is adding narrow time-frame conditions to reduce the amount of data to be scanned.
+
+## General Approaches
+
+To prevent 524 errors across all API endpoints:
+
+1. **Always use timestamp filters**: Add `fromTimestamp` and `toTimestamp` parameters to limit the time range
+2. **Add specific filters**: Use `userId`, `sessionId`, `name`, `tags`, or other filters to narrow your query
+
+## Optimizations for GET /api/public/traces
+
+The [`GET /api/public/traces`](https://api.reference.langfuse.com/#tag/trace/get/api/public/traces) endpoint is particularly susceptible to 524 errors.
+Follow these best practices:
+
+- **Add timestamp filters**: E.g. run `GET /api/public/traces?page=1&limit=10&fromTimestamp=2025-10-16T00:00:00.000Z&toTimestamp=2025-10-17T00:00:00.000Z`.
+- **Use the `fields` parameter**: Request only the data you need to avoid expensive joins (e.g. `GET /api/public/traces?fields=core,io`).

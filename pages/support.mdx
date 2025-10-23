@@ -1,61 +1,86 @@
 ---
 title: "Support"
-description: "The Langfuse team and community can help you with questions and issues."
+description: Overview of available support options for Langfuse.
 ---
 
-# Support at Langfuse
+# Support
 
-<Callout type="info">
-  Langfuse is an open-source project and we are building in public. We love
-  feedback as the project and space develops quickly. We strive to offer
-  comprehensive information and support through public, indexed, and searchable
-  channels. If your request is not sensitive, please use [GitHub
-  Discussions](/gh-support).
-</Callout>
+> Langfuse is Open Source. If you have a question, it's likely someone else has it, too. We'd love to answer in the open and use **[GitHub Discussions](/gh-support)** whenever possible.
 
-## Finding an answer to your question
+| Support type               |      Self-Hosted (OSS)       |        Langfuse Cloud        | Enterprise |
+| -------------------------- | :--------------------------: | :--------------------------: | :--------: |
+| **Ask AI**                 |              ✅              |              ✅              |     ✅     |
+| **Community (GitHub)**     |              ✅              |              ✅              |     ✅     |
+| **In-app Support**         |                              |              ✅              |     ✅     |
+| **Dedicated Slack**        |                              |          Teams Plan          |     ✅     |
+| **Support SLO**            |                              |                              |     [✅](/enterprise#faq)     |
+| **Onboarding support**     |                              |                              |     ✅     |
+| **Architectural guidance** |                              |                              |     ✅     |
+| **Security assessment**    | Standard assessment provided | Standard assessment provided |     ✅     |
 
-- Our [documentation](/docs) is the best place to start looking for answers. It is comprehensive, and we invest significant time into maintaining it. You can also suggest edits to the docs via GitHub.
-- Use "Ask AI" to get instant answers to your questions:
+---
 
-import InkeepEmbeddedChat from "@/components/inkeep/InkeepEmbeddedChat";
+## Ask AI [#ask-ai]
 
-<div className="h-5" />
-<InkeepEmbeddedChat />
+Langfuse Ask AI can answer many questions about Langfuse, how to integrate, and security/compliance of Langfuse Cloud.
 
-## Public Support Channels
+import { Bot } from "lucide-react";
 
-- **Ask any question in our [public Q&A](/gh-support) on GitHub Discussions.** Please include as much detail as possible (e.g. code snippets, screenshots, background information) to help us understand your question.
-- [Request a feature](/ideas) on GitHub Discussions.
-- [Report a Bug](/issues) on GitHub Issues.
-- For time-sensitive queries, ping us via the in-app chat widget.
+<Cards num={1}>
+  <Card title="Ask AI" href="/ask-ai" icon={<Bot />} arrow />
+</Cards>
 
-### Recent GitHub Discussions
+## Community (GitHub) [#community]
 
-import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+Langfuse is Open Source. If you have a question, it's likely someone else has it, too. We'd love to answer in the open on GitHub whenever possible.
 
-<GhDiscussionsPreview defaultSort="recent" />
+import { MessageCircle, Bug, Lightbulb } from "lucide-react";
 
-## Private Support Channels
+<Cards num={3}>
+  <Card
+    title="Ask a question"
+    href="/gh-support"
+    icon={<MessageCircle />}
+    arrow
+  />
+  <Card title="Report a bug" href="/issues" icon={<Bug />} arrow />
+  <Card title="Suggest a feature" href="/ideas" icon={<Lightbulb />} arrow />
+</Cards>
 
-import { showChat } from "@/components/supportChat";
+## In‑app Support [#in-app]
 
-For more sensitive or private matters, you can reach out to us directly. Please consider the public channels first.
+> Available to **Cloud Core, Pro, Teams, and Enterprise** customers.
 
-- Email via support@langfuse.com
-- Create a <button onClick={showChat} className="nextra-focus _text-primary-600 _underline hover:_no-underline _decoration-from-font [text-underline-position:from-font] cursor-pointer">support ticket</button>
-- [Schedule a Call](/talk-to-us) for sales or partnerships inquiries. Please provide a little context about why you'd like to speak.
-- Pro/Teams/Enterprise plan users: private Slack Connect channel with the Langfuse team. Request an invite via support@langfuse.com
+Open the (1) _support_ widget in the Langfuse UI and (2) select _Email a support engineer_. We’ll route your request to the right team and reply via email.
 
-## Community Discord
+<Frame className="rounded-lg overflow-hidden">
+  ![In-app Support](/images/support/in-app-support.png)
+</Frame>
 
-[![Discord](https://img.shields.io/discord/1111061815649124414?style=flat&logo=discord&logoColor=white)](/discord)
+## Dedicated Slack [#slack]
 
-Over 3,400 users are on our [Discord Server](/discord). It's a great place to ask questions, share your projects, and get to know other Langfuse users.
+> Available to **Cloud Teams and Enterprise** customers.
 
-<Callout type="info">
-  Please note: The Langfuse team does not provide dedicated support on Discord.
-  Please use our [GitHub Discussions](/ideas) or Email (support@langfuse.com) if
-  your request is sensitive. Feel free to cross-post from GitHub to Discord to
-  raise awareness for your issue or question.
-</Callout>
+For qualifying customers, we provide support via Slack Connect. This brings all parties together on both sides and makes collaboration much faster for everyone involved.
+
+You will directly chat with the engineers building Langfuse to find the best solutions to your questions.
+
+Please reach out via the in-app support to request a private Slack channel for your team.
+
+## Onboarding & Architectural Guidance [#onboarding]
+
+> Available on **Enterprise** plans. Ask your account team.
+
+We can help teams get value from Langfuse quickly:
+
+- Onboarding workshops and Q\&A for new teams
+- Best‑practice setup for tracing, evaluations, and prompt management
+- Architectural reviews when integrating Langfuse into your existing platform
+
+## Security Assessment [#security]
+
+We maintain a comprehensive set of internal [security policies and documentation](/security) that address key requirements for GDPR, SOC 2, and HIPAA compliance.
+
+For Enterprise customers, we are glad to support your security assessment process. This may involve empowering your internal team (who retain responsibility for information security when self-hosting), or responding to your questions and updating our policies as needed.
+
+Please check out the [security and compliance overview](/security) for more details.

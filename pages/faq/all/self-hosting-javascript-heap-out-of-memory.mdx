@@ -1,0 +1,17 @@
+---
+title: JavaScript heap out of memory error in self-hosted Langfuse
+tags: [self-hosting]
+---
+
+# JavaScript heap out of memory error in self-hosted Langfuse
+
+If you are experiencing JavaScript heap out of memory errors within your applications, it indicates that the application thinks it has less memory available than it does.
+An example case is that your container has 2 GiB of memory, whereas the Node.js application uses the default max-old-space-size of 1.7 GiB.
+This would surface as an error message like
+
+> FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+
+To address this issue, we recommend that you configure `NODE_OPTIONS=--max-old-space-size=${var.memory}` on the Langfuse Web and the Langfuse Worker containers.
+Use the available memory in MiB as the value for `var.memory`, e.g. 4096 for 4 GiB of memory.
+The value should be equal or above the memory limit of the container.
+This ensures that your container orchestrator kills the pod gracefully if the memory limit is exceeded, instead of the application terminating abruptly.

@@ -1,0 +1,26 @@
+---
+title: How to enable or disable Langfuse tracing?
+tags: [observability]
+---
+
+# How to enable or disable Langfuse tracing?
+
+All Langfuse SDKs and integrations are designed to be non-intrusive. You can add Langfuse tracing to your application while being able to enable it only in specific environments.
+
+## Default Behavior
+
+By default, Langfuse tracing is **enabled** if you use one of the Langfuse SDKs and an API key is set.
+
+## Disabling Tracing
+
+You can manually disable tracing by setting the `LANGFUSE_TRACING_ENABLED` environment variable to `false`:
+
+```bash
+export LANGFUSE_TRACING_ENABLED=false
+```
+
+Or in your application configuration:
+
+```bash
+LANGFUSE_TRACING_ENABLED=false
+```

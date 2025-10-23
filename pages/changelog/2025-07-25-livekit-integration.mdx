@@ -1,0 +1,34 @@
+---
+title: LiveKit Agents Tracing Integration
+description: Trace real-time voice AI agents and multimodal conversations built with LiveKit Agents via OpenTelemetry and Langfuse
+date: 2025-07-25
+author: Marc
+ogImage: /images/changelog/2025-07-25-livekit-integration.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We've added a new [LiveKit Agents integration guide](/integrations/frameworks/livekit) that shows how to trace real-time voice AI applications built with LiveKit Agents using Langfuse.
+
+[LiveKit Agents](https://docs.livekit.io/agents/) is an open-source Python and Node.js framework for building production-grade multimodal and voice AI agents. The integration leverages LiveKit's built-in OpenTelemetry support to send comprehensive telemetry data to Langfuse.
+
+The integration captures traces for key agent activities including:
+
+- Session management
+- Agent turns and conversations
+- LLM node executions
+- Function tool calls
+- Text-to-speech processing
+- End-of-turn detection
+- Performance metrics
+
+## Get started
+
+import { Book, FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="LiveKit Agents Documentation" href="/integrations/frameworks/livekit" icon={<Book />} />
+  <Card title="End-to-End Example" href="https://github.com/livekit/agents/blob/main/examples/voice_agents/langfuse_trace.py" icon={<FileCode />} />
+</Cards>

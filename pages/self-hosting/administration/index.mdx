@@ -1,0 +1,44 @@
+---
+title: Administration Overview (self-hosted)
+description: Comprehensive overview of administration capabilities for self-hosted Langfuse deployments.
+label: "Version: v3"
+sidebarTitle: Overview
+---
+
+# Administration Overview (self-hosted)
+
+Self-hosted Langfuse provides comprehensive administration capabilities to manage your deployment, users, organizations, and data.
+
+<Callout type="info">
+
+Please familiarize yourself with the [RBAC](/docs/administration/rbac) documentation before using the following features.
+
+</Callout>
+
+Some of these features are only available in the [Enterprise Edition](/pricing-self-host) and are marked with `(EE)`.
+
+## User & Access Management
+
+- **[Automated Access Provisioning](/self-hosting/administration/automated-access-provisioning)**: Auto-assign new users to a default organization/project
+- **[Organization Creators](/self-hosting/administration/organization-creators)** (EE): Restrict who can create organizations
+- **[Admin API (SCIM)](/docs/administration/scim-and-org-api)**: Enterprise user provisioning and bulk operations
+
+## Organization & Project Management
+
+- **[Headless Initialization](/self-hosting/administration/headless-initialization)**: Automate resource creation (single org, project, user, apikey) via environment variables, e.g., for CI/CD.
+- **[Organization Management API](/self-hosting/administration/organization-management-api)** (EE): REST API for programmatic organization management
+- **[Admin API](/docs/administration/scim-and-org-api)**: Manage projects via the organization-scoped admin API
+
+## Interface & Branding
+
+- **[UI Customization](/self-hosting/administration/ui-customization)** (EE): Co-branding, custom links, module visibility, LLM API defaults
+
+## Data & Security
+
+- **[Audit Logs](/docs/administration/audit-logs)** (EE): Comprehensive activity tracking for compliance
+- **[Data Deletion](/docs/administration/data-deletion)**: Flexible data removal (traces, projects, organizations, users)
+- **[Data Retention](/docs/administration/data-retention)**: Automated lifecycle management with configurable policies
+
+## APIs & Monitoring
+
+- **[LLM Connections](/docs/administration/llm-connection)**: Manage connections to OpenAI, Anthropic, Azure, and more. Either via the UI or the API.

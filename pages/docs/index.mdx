@@ -8,12 +8,13 @@ description: Langfuse is an open source LLM engineering platform. It includes ob
 Langfuse is an **open-source LLM engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow. Langfuse is open, self-hostable, and extensible ([_why langfuse?_](/why)).
 
 import { FeatureOverview } from "@/components/FeatureOverview";
+import { TextQuote, GitPullRequestArrow, ThumbsUp, FlaskConical } from "lucide-react";
 
 <FeatureOverview />
 
-## Tracing
+## Observability [#observability]
 
-[Tracing](/docs/tracing) is essential for understanding and debugging LLM applications. Unlike traditional software, LLM applications involve complex, non-deterministic interactions that can be challenging to monitor and debug. Langfuse provides comprehensive tracing capabilities that help you understand exactly what's happening in your application.
+[Observability](/docs/observability/overview) is essential for understanding and debugging LLM applications. Unlike traditional software, LLM applications involve complex, non-deterministic interactions that can be challenging to monitor and debug. Langfuse provides comprehensive tracing capabilities that help you understand exactly what's happening in your application.
 
 - Traces include all LLM and non-LLM calls, including retrieval, embedding, API calls, and more
 - Support for tracking multi-turn conversations as sessions and user tracking
@@ -22,22 +23,56 @@ import { FeatureOverview } from "@/components/FeatureOverview";
 
 Want to see an example? Play with the [interactive demo](/docs/demo).
 
-## Prompt Management
+<Callout type="info" emoji="🎥">
 
-Prompt Management is critical in building effective LLM applications. Langfuse provides tools to help you manage, version, and optimize your prompts throughout the development lifecycle.
+Want to learn more? [**Watch end-to-end walkthrough**](/watch-demo) of Langfuse Observability and how to integrate it with your application.
 
-- [Get started](/docs/prompts/get-started) with prompt management
+</Callout>
+
+import TracingOverview from "@/components-mdx/tracing-overview-gifs.mdx";
+
+<div className="h-6" />
+<TracingOverview />
+
+## Prompt Management [#prompts]
+
+[Prompt Management](/docs/prompt-management/overview) is critical in building effective LLM applications. Langfuse provides tools to help you manage, version, and optimize your prompts throughout the development lifecycle.
+
+- [Get started](/docs/prompt-management/get-started) with prompt management
 - Manage, version, and optimize your prompts throughout the development lifecycle
-- Test prompts interactively in the [LLM Playground](/docs/playground)
-- Run [prompt experiments](/docs/datasets/prompt-experiments) against datasets in order to test new prompt versions directly within Langfuse
+- Test prompts interactively in the [LLM Playground](/docs/prompt-management/features/playground)
+- Run [Experiments](/docs/evaluation/features/prompt-experiments) against datasets to test new prompt versions directly within Langfuse
 
-## Evaluations
+<Callout type="info" emoji="🎥">
 
-Evaluations are crucial for ensuring the quality and reliability of your LLM applications. Langfuse provides flexible evaluation tools that adapt to your specific needs, whether you're testing in development or monitoring production performance.
+Want to learn more? [**Watch end-to-end walkthrough**](/watch-demo?tab=prompt) of Langfuse Prompt Management and how to integrate it with your application.
 
-- Get started with different [evaluation methods](/docs/scores/overview): LLM-as-a-judge, user feedback, manual labeling, or custom
+</Callout>
+
+import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
+
+<div className="h-6" />
+<PromptOverview />
+
+## Evaluation [#evaluation]
+
+[Evaluation](/docs/evaluation/overview) is crucial for ensuring the quality and reliability of your LLM applications. Langfuse provides flexible evaluation tools that adapt to your specific needs, whether you're testing in development or monitoring production performance.
+
+- Get started with different [evaluation methods](/docs/evaluation/overview): LLM-as-a-judge, user feedback, manual labeling, or custom
 - Identify issues early by running evaluations on production traces
-- Create and manage [Datasets](/docs/datasets) for systematic testing in development that ensure your application performs reliably across different scenarios
+- Create and manage [Datasets](/docs/evaluation/features/datasets) for systematic testing in development that ensure your application performs reliably across different scenarios
+- Run [Experiments](/docs/evaluation/experiments/overview) to systematically test your LLM application
+
+<Callout type="info" emoji="🎥">
+
+Want to learn more? [**Watch end-to-end walkthrough**](/watch-demo?tab=evaluation) of Langfuse Evaluation and how to use it to improve your LLM application.
+
+</Callout>
+
+import EvaluationOverview from "@/components-mdx/evaluation-overview-gifs.mdx";
+
+<div className="h-6" />
+<EvaluationOverview />
 
 ## Where to start?
 
@@ -62,6 +97,40 @@ _Simplified lifecycle from PoC to production:_
   lifecycle](/images/docs/features-dark.png)
 </Frame>
 
+## Quickstarts
+
+Get up and running with Langfuse in minutes. Choose the path that best fits your current needs:
+
+<Cards num={1}>
+  <Card
+    icon={<TextQuote size="24" />}
+    title="Integrate LLM Application/Agent Tracing"
+    href="/docs/observability/get-started"
+    arrow
+  />
+  <Card
+    icon={<GitPullRequestArrow size="24" />}
+    title="Integrate Prompt Management"
+    href="/docs/prompt-management/get-started"
+    arrow
+  />
+  <Card
+    icon={<ThumbsUp size="24" />}
+    title="Setup Evaluations"
+    href="/docs/evaluation/overview"
+    arrow
+  />
+</Cards>
+
+## Why Langfuse?
+
+- **Open source:** Fully open source with public API for custom integrations
+- **Production optimized:** Designed with minimal performance overhead
+- **Best-in-class SDKs:** Native SDKs for Python and JavaScript
+- **Framework support:** Integrated with popular frameworks like OpenAI SDK, LangChain, and LlamaIndex
+- **Multi-modal:** Support for tracing text, images and other modalities
+- **Full platform:** Suite of tools for the complete LLM application development lifecycle
+
 ## Community & Contact
 
 We actively develop Langfuse in [open source](/open-source) together with our community:
@@ -69,8 +138,8 @@ We actively develop Langfuse in [open source](/open-source) together with our co
 - Contribute and vote on the Langfuse [roadmap](/docs/roadmap).
 - Ask questions on [GitHub Discussions](/gh-support) or private [support channels](/support).
 - Report bugs via [GitHub Issues](/issue).
-- Chat with the Langfuse maintainers and community on [Discord](/discord).
-- [Why people choose Langfuse](/why)
+- Chat with the community on [Discord](/discord).
+- [Why people choose Langfuse?](/why)
 
 Langfuse evolves quickly, check out the [changelog](/changelog) for the latest updates. Subscribe to the **mailing list** to get notified about new major features:
 

@@ -24,7 +24,7 @@ One of the biggest challenges in agent development is striking the right balance
 
 [LangGraph](https://github.com/langchain-ai/langgraph) extends the well-known [LangChain](https://github.com/langchain-ai/langchain) library into a graph-based architecture that treats agent steps like nodes in a directed acyclic graph. Each node handles a prompt or sub-task, and edges control data flow and transitions. This is helpful for complex, multi-step tasks where you need precise control over branching and error handling. LangGraph's DAG philosophy makes it easier to visualize or debug how decisions flow from one step to another, and you still inherit a ton of useful tooling and integrations from LangChain.
 
-<CloudflareVideo videoId="dbe2ea8e8d64f27126a3734fa51cd0e7" gifStyle />
+<Video src="https://static.langfuse.com/docs-videos/langgraph-overview.mp4" gifStyle />
 _[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a8b0cc9e-da3b-485f-a642-35431a6f9289)_
 
 [How to trace LangGraph agents with Langfuse →](/guides/cookbook/integration_langgraph)
@@ -35,7 +35,7 @@ Developers who prefer to model AI tasks in stateful workflows often gravitate to
 
 The [OpenAI Agents SDK](https://github.com/openai/openai-agents-python) is the latest entrant in the field. It packages OpenAI's capabilities into a more structured toolset for building agents that can reason, plan, and call external APIs or functions. By providing a specialized agent runtime and a straightforward API for assigning roles, tools, and triggers, OpenAI aims to simplify multi-step or multi-agent orchestration. While it's still evolving, developers appreciate the familiar style of prompts and the native integration with OpenAI's model endpoints.
 
-<CloudflareVideo videoId="1b048205cbf89ad4f14adf6248e970f7" gifStyle />
+<Video src="https://static.langfuse.com/docs-videos/openai-agents-sdk-trace.mp4" gifStyle />
 _[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c74429a6d0489e9259703a1148?timestamp=2025-03-14T08%3A31%3A04.745Z&observation=e83609282c443b0d)_
 
 [How to trace the OpenAI Agents SDK with Langfuse →](/integrations/frameworks/openai-agents)
@@ -115,7 +115,7 @@ If you're solving data-heavy tasks—like question answering on private document
 
 ## Strands Agents
 
-[Strands Agents SDK](https://strandsagents.com) is AWS's toolkit for building AI agents that can tap into **Amazon Bedrock** and other AWS services. It puts a strong focus on production readiness by shipping first-class OpenTelemetry tracing and native integrations with Bedrock models. That means you get end-to-end observability out of the box while still enjoying a clean, declarative API for defining agent behavior.
+[Strands Agents SDK](https://strandsagents.com) is a model-agnostic agent framework that runs anywhere and supports multiple model providers with reasoning and tool use, including **Amazon Bedrock**, Anthropic, OpenAI, Ollama, and others via LiteLLM. It emphasizes production readiness with first-class OpenTelemetry tracing and optional deep AWS integrations. This gives you end-to-end observability with a clean, declarative API for defining agent behavior. For a deeper technical overview of its agent architectures and observability, see AWS’s [technical deep dive](https://aws.amazon.com/blogs/machine-learning/amazon-strands-agents-sdk-a-technical-deep-dive-into-agent-architectures-and-observability/).
 
 <Frame fullWidth>
   ![Strands Agents trace visualization in
@@ -126,11 +126,11 @@ _[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz0
 
 [How to trace Strands Agents with Langfuse →](/integrations/frameworks/strands-agents)
 
-If you are already running on AWS or want tight coupling with Bedrock's model catalog, Strands Agents gives you a production-grade starting point that pairs nicely with Langfuse's observability pipeline.
+Strands Agents runs anywhere (AWS, other clouds, or on-prem). If you’re on AWS, you can opt into deep Bedrock integrations; otherwise, use any provider (Anthropic, OpenAI, Ollama, etc.) via LiteLLM—while still pairing nicely with Langfuse’s observability pipeline.
 
 ## 🐍 Pydantic AI Agents
 
-[Pydantic AI](https://pydantic-ai.readthedocs.io/en/latest/) brings Pydantic's famous **type safety** and ergonomic developer experience to agent development. You define your agent's inputs, tool signatures, and outputs as Python types, and the framework handles validation plus OpenTelemetry instrumentation under the hood. The result is FastAPI-style DX for GenAI applications.
+[Pydantic AI](https://ai.pydantic.dev/) brings Pydantic's famous **type safety** and ergonomic developer experience to agent development. You define your agent's inputs, tool signatures, and outputs as Python types, and the framework handles validation plus OpenTelemetry instrumentation under the hood. The result is FastAPI-style DX for GenAI applications.
 
 <Frame fullWidth>
   ![Pydantic AI trace visualization in
@@ -145,19 +145,19 @@ If you're a Python developer who values explicit type contracts, tests, and quic
 
 ## Comparison Table
 
-| **Framework**                                                                      | **Core Paradigm**                    | **Primary Strength**                         | **Best For**                                                                           |
-| ---------------------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **[LangGraph](https://www.langchain.com/langgraph)**                               | Graph-based workflow of prompts      | Explicit DAG control, branching, debugging   | Complex multi-step tasks with branching, advanced error handling                       |
-| **[OpenAI Agents SDK](https://openai.github.io/openai-agents-python/)**            | High-level OpenAI toolchain          | Integrated tools such as web and file search | Teams relying on OpenAI's ecosystem who want official support & specialized features   |
-| **[Smolagents](https://huggingface.co/docs/smolagents/en/index)**                  | Code-centric minimal agent loop      | Simple setup, direct code execution          | Quick automation tasks without heavy orchestration overhead                            |
-| **[CrewAI](https://www.crewai.com/)**                                              | Multi-agent collaboration (crews)    | Parallel role-based workflows, memory        | Complex tasks requiring multiple specialists working together                          |
-| **[AutoGen](https://microsoft.github.io/autogen/stable/)**                         | Asynchronous multi-agent chat        | Live conversations, event-driven             | Scenarios needing real-time concurrency, multiple LLM "voices" interacting             |
-| **[Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/)** | Skill-based, enterprise integrations | Multi-language, enterprise compliance        | Enterprise settings, .NET ecosystems, or large orgs needing robust skill orchestration |
-| **[LlamaIndex Agents](https://www.llamaindex.ai/)**                                | RAG with integrated indexing         | Retrieval + agent synergy                    | Use-cases that revolve around extensive data lookup, retrieval, and knowledge fusion   |
-| **[Strands Agents](https://strandsagents.com)**                                  | AWS-centric agent toolkit            | Native Bedrock & AWS integrations           | AWS-hosted or serverless agent applications needing deep Bedrock support              |
-| **[Pydantic AI](https://pydantic-ai.readthedocs.io/en/latest/)**                 | Type-safe Python agent framework     | Strong type safety & FastAPI-style DX       | Python developers wanting structured, validated agent logic                          |
+| **Framework**                                                                      | **Core Paradigm**                    | **Primary Strength**                                              | **Best For**                                                                                        |
+| ---------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **[LangGraph](https://www.langchain.com/langgraph)**                               | Graph-based workflow of prompts      | Explicit DAG control, branching, debugging                        | Complex multi-step tasks with branching, advanced error handling                                    |
+| **[OpenAI Agents SDK](https://openai.github.io/openai-agents-python/)**            | High-level OpenAI toolchain          | Integrated tools such as web and file search                      | Teams relying on OpenAI's ecosystem who want official support & specialized features                |
+| **[Smolagents](https://huggingface.co/docs/smolagents/en/index)**                  | Code-centric minimal agent loop      | Simple setup, direct code execution                               | Quick automation tasks without heavy orchestration overhead                                         |
+| **[CrewAI](https://www.crewai.com/)**                                              | Multi-agent collaboration (crews)    | Parallel role-based workflows, memory                             | Complex tasks requiring multiple specialists working together                                       |
+| **[AutoGen](https://microsoft.github.io/autogen/stable/)**                         | Asynchronous multi-agent chat        | Live conversations, event-driven                                  | Scenarios needing real-time concurrency, multiple LLM "voices" interacting                          |
+| **[Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/)** | Skill-based, enterprise integrations | Multi-language, enterprise compliance                             | Enterprise settings, .NET ecosystems, or large orgs needing robust skill orchestration              |
+| **[LlamaIndex Agents](https://www.llamaindex.ai/)**                                | RAG with integrated indexing         | Retrieval + agent synergy                                         | Use-cases that revolve around extensive data lookup, retrieval, and knowledge fusion                |
+| **[Strands Agents](https://strandsagents.com)**                                    | Model-agnostic agent toolkit         | Runs anywhere; multi-model via LiteLLM; strong OTEL observability | Teams needing provider-flexible agents (Bedrock, Anthropic, OpenAI, Ollama) with production tracing |
+| **[Pydantic AI](https://ai.pydantic.dev/)**                                        | Type-safe Python agent framework     | Strong type safety & FastAPI-style DX                             | Python developers wanting structured, validated agent logic                                         |
 
-As you can see there are very different approaches to these agent frameworks. Graph-based solutions like LangGraph give you precise control, while conversation-based solutions like AutoGen give you natural, flexible dialogues. Role-based orchestration from CrewAI can tackle complex tasks through a "cast" of specialized agents, whereas Smolagents is ideal for minimal code-driven patterns. Semantic Kernel is positioned in the enterprise space, and LlamaIndex Agents shine for retrieval-centric applications. The OpenAI Agents SDK appeals to users already confident in the OpenAI stack. Strands Agents and Pydantic AI are tailored for AWS and Python environments.
+As you can see there are very different approaches to these agent frameworks. Graph-based solutions like LangGraph give you precise control, while conversation-based solutions like AutoGen give you natural, flexible dialogues. Role-based orchestration from CrewAI can tackle complex tasks through a "cast" of specialized agents, whereas Smolagents is ideal for minimal code-driven patterns. Semantic Kernel is positioned in the enterprise space, and LlamaIndex Agents shine for retrieval-centric applications. The OpenAI Agents SDK appeals to users already confident in the OpenAI stack. Strands Agents is model-agnostic with optional deep AWS integrations, and Pydantic AI is tailored for Python environments.
 
 ## When to Use Each Framework
 
@@ -187,10 +187,12 @@ flowchart TD
     D -->|"RAG-based retrieval (doc search)"| L["LlamaIndex\n(Retrieving data)"]
     D -->|"Code-gen agent (lightweight)"| M["SmolAgents\n(Small code approach)"]
     D -->|"Generic OpenAI approach"| N["OpenAI Agents SDK"]
+    D -->|"Provider-flexible agent SDK"| Y["Strands Agents\n(Model-agnostic)"]
 
     %% MULTI-AGENT BRANCH
     F -->|Graph-based & fine-grained control| G["LangGraph\n(DAG of nodes)"]
     F -->|Role-based, collaborative crew| H["CrewAI\n(Multi-role synergy)"]
+    F -->|Provider-flexible with OTEL| Y["Strands Agents\n(Model-agnostic)"]
 
     C -->|"Conversation-based (chat & tool calls)"| E["AutoGen (Microsoft)"]
     C -->|"Planner-based (multi-step task)"| X["Semantic Kernel (Microsoft)"]

@@ -16,10 +16,9 @@ We've built an integration to make it easy to answer questions like:
 - _"How does the LLM feature impact my conversion rates?"_
 - _"Does the user feedback that I capture in Langfuse correlate with the user behavior that I see in PostHog?"_
 
-<CloudflareVideo
-  videoId="24f7e625588a979f380effedda66a8ac"
+<Video
+  src="https://static.langfuse.com/docs-videos/posthog-integration.mp4"
   aspectRatio={16 / 9.53}
-  title="PostHog Integration"
 />
 
 ## Get started
@@ -30,7 +29,7 @@ We've built an integration to make it easy to answer questions like:
 
 Configure this integration in your Langfuse project settings. You will need to provide your PostHog Hostname and API key.
 
-<Frame border className="max-w-lg block">
+<Frame className="max-w-lg block">
   ![Posthog Integration Settings](/images/docs/posthog-settings.png)
 </Frame>
 
@@ -38,7 +37,7 @@ Configure this integration in your Langfuse project settings. You will need to p
 
 Once integrated, you can build a dashboard in PostHog to visualize your Langfuse metrics (see [reference below](#details)). Use the _AI Metrics_ template to get started with a pre-built dashboard that includes the most common metrics from Langfuse.
 
-<Frame border className="max-w-xs block">
+<Frame className="max-w-xs block">
   ![PostHog Dashboard Template](/images/docs/posthog-template.png)
 </Frame>
 
@@ -46,8 +45,8 @@ Once integrated, you can build a dashboard in PostHog to visualize your Langfuse
 
 ## Example PostHog Dashboard
 
-<CloudflareVideo
-  videoId="2ea2c1967dcaa8ce925467a187c7a2ef"
+<Video
+  src="https://static.langfuse.com/docs-videos/posthog-intgeration-dashboard.mp4"
   aspectRatio={16 / 9}
   gifStyle
 />
@@ -101,6 +100,7 @@ Is there any additional information that would be helpful? You can request more 
 - `timestamp`: The start time of the generation.
 - `langfuse_generation_name`: The name of the generation.
 - `langfuse_trace_name`: Name of the trace related to the generation.
+- `langfuse_trace_id`: The unique identifier of the trace related to the generation.
 - `langfuse_url`: The URL of the generation on the host platform.
 - `langfuse_id`: Unique identifier of the generation.
 - `langfuse_cost_usd`: Computed total cost of the generation.
@@ -125,8 +125,12 @@ Is there any additional information that would be helpful? You can request more 
 - `timestamp`: The time when the score event occurred.
 - `langfuse_score_name`: The name associated with the score.
 - `langfuse_score_value`: The value of the score.
+- `langfuse_score_string_value`: The string value of the score. For BOOLEAN and CATEGORICAL scores, this will be the string representation of the value.
+- `langfuse_score_data_type`: The data type of the score (NUMERIC, BOOLEAN, CATEGORICAL).
 - `langfuse_score_comment`: Any comments attached with the score.
+- `langfuse_score_metadata`: Any metadata attached with the score.
 - `langfuse_trace_name`: The name of the trace associated with the score.
+- `langfuse_trace_id`: The unique identifier of the trace associated with the score.
 - `langfuse_id`: The unique identification of the score.
 - `langfuse_session_id`: The session identification related to the score's trace.
 - `langfuse_project_id`: The project identification linked with the score's trace.

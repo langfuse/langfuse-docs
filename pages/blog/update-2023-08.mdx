@@ -130,9 +130,9 @@ Releases are available for all SDKs. They can be added in three ways (in order o
    LANGFUSE_RELEASE = "ba7816b..." # <- github sha or other identifier
    ```
 
-3. Automatically from a list of known release environment variables, e.g. Vercel, Heroku, Netlify. See the full list of support environment variables for [JS/TS](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) and [Python](https://github.com/langfuse/langfuse-python/blob/main/langfuse/_utils/environment.py).
+3. Automatically from a list of known release environment variables, e.g. Vercel, Heroku, Netlify. See the full list of support environment variables for [JS/TS](https://github.com/langfuse/langfuse-js/blob/v3-stable/langfuse-core/src/release-env.ts) and [Python](https://github.com/langfuse/langfuse-python/blob/main/langfuse/_utils/environment.py).
 
-<Frame border>
+<Frame>
   ![Picture release in traces
   table](/images/blog/update-august-2023/release.jpg)
 </Frame>
@@ -141,9 +141,9 @@ Learn more → [Python](/docs/sdk/python#releases-and-versions), [JS/TS](/docs/s
 
 ### Versions
 
-When making changes to prompts and chains, you can add `version` parameter to `span`, `generation` or `event`. The version can then be used to understand the effect of changes using [Langfuse analytics](/docs/analytics).
+When making changes to prompts and chains, you can add `version` parameter to `span`, `generation` or `event` (and [other observation types](/docs/observability/features/observation-types)). The version can then be used to understand the effect of changes using [Langfuse analytics](/docs/analytics).
 
-<Frame border>
+<Frame>
   ![Version on single generation](/images/blog/update-august-2023/version.jpg)
 </Frame>
 
@@ -151,7 +151,7 @@ When making changes to prompts and chains, you can add `version` parameter to `s
 
 Our users spend a lot of time on the Traces table to find the Traces they want to take a close look at. We added filtering options on `metadata` and `userId` to make navigating easier.
 
-<Frame border>
+<Frame>
   ![User reporting](/images/blog/update-august-2023/traces-table.gif)
 </Frame>
 
@@ -159,9 +159,7 @@ Our users spend a lot of time on the Traces table to find the Traces they want t
 
 We've added USD cost calculation for tokens. This is helpful to understand the cost of your LLM app per execution broken down by different LLM calls in the app. We calculate the cost based on the model and the number of tokens used.
 
-<Frame border>
-  ![User reporting](/images/blog/update-august-2023/costs.gif)
-</Frame>
+<Frame>![User reporting](/images/blog/update-august-2023/costs.gif)</Frame>
 
 ~~ Here is a list of all the models we support so far. If you are missing a model, please let us know on [Discord](/discord). ~~
 Update February 2024: Please refer to [Model Usage and Cost](https://langfuse.com/docs/model-usage-and-cost) for the latest info on how to calculate accurate costs.
@@ -170,7 +168,7 @@ Update February 2024: Please refer to [Model Usage and Cost](https://langfuse.co
 
 We improved our analytics by creating a chart to the dashboard to visualize the token usage by model over time.
 
-<Frame border>
+<Frame>
   ![User reporting](/images/blog/update-august-2023/token-chart.gif)
 </Frame>
 
@@ -233,7 +231,7 @@ To reduce the friction of self-hosting, we now publish Docker images for the Lan
 docker pull ghcr.io/langfuse/langfuse
 ```
 
-For detailed instructions, see [self-hosting](/self-hosting) and [local setup](/self-hosting/local) documentation.
+For detailed instructions, see [self-hosting](/self-hosting) and [local setup](/self-hosting/deployment/docker-compose) documentation.
 
 ## 🚢 What's Next?
 

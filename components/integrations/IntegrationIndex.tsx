@@ -11,138 +11,169 @@ import {
   Code,
   Database,
 } from "lucide-react";
+import nativeIntegrationsMeta from "../../pages/integrations/native/_meta";
+import dataPlatformIntegrationsMeta from "../../pages/integrations/data-platform/_meta";
 
-// Pages that are not in the integrations directory, but are still integrations
-const nativeIntegrations = [
-  {
-    route: "/docs/sdk/python/sdk-v3",
-    title: "Python SDK",
-    logo: undefined,
-  },
-  {
-    route: "/docs/sdk/typescript/guide",
-    title: "JS/TS SDK",
-    logo: undefined,
-  },
-  {
-    route: "/docs/opentelemetry",
-    title: "OpenTelemetry",
-    logo: "/images/integrations/opentelemetry_icon.svg",
-  },
-].map((page) => ({
-  ...page,
-  frontMatter: { title: page.title, logo: page.logo },
-}));
-
-const dataIntegrations = [
-  {
-    route: "/docs/api",
-    title: "Public API",
-    logo: undefined,
-  },
-  {
-    route: "/docs/query-traces#blob-storage",
-    title: "Exports to S3",
-    logo: undefined,
-  },
-  {
-    route: "/docs/analytics/metrics-api",
-    title: "Metrics API",
-    logo: undefined,
-  },
-  {
-    route: "/docs/prompts/get-started#webhooks",
-    title: "Prompt Webhooks",
-    logo: undefined,
-  },
-].map((page) => ({
-  ...page,
-  frontMatter: { title: page.title, logo: page.logo },
-}));
+/**
+ * Transforms meta config entries into integration page objects
+ */
+function additionalLinksFromMeta(metaConfig: Record<string, any>) {
+  return Object.entries(metaConfig)
+    .filter(([_, config]) => config.href)
+    .map(([_, config]) => ({
+      route: config.href,
+      frontMatter: { title: config.title, logo: config.logo },
+    }));
+}
 
 const categoryConfig = {
   native: {
     title: "Native",
-    icon: <Code />,
     description: "Native integrations with Langfuse",
-    pages: nativeIntegrations,
+    additionalLinks: additionalLinksFromMeta(nativeIntegrationsMeta),
   },
   frameworks: {
     title: "Frameworks",
-    icon: <Puzzle />,
     description: "Integrate with popular AI frameworks",
+    // Featured links shown first, separated by a divider from the rest
+    featuredLinks: [
+      {
+        route: "/integrations/frameworks/langchain",
+        frontMatter: {
+          title: "LangChain & LangGraph",
+          logo: "/images/integrations/langchain_icon.png",
+        },
+        title: "LangChain & LangGraph",
+      },
+      {
+        route: "/integrations/model-providers/openai-py",
+        frontMatter: {
+          title: "OpenAI (Python)",
+          logo: "/images/integrations/openai_icon.svg",
+        },
+        title: "OpenAI (Python)",
+      },
+      {
+        route: "/integrations/frameworks/vercel-ai-sdk",
+        frontMatter: {
+          title: "Vercel AI SDK",
+          logo: "/images/integrations/vercel_ai_sdk_icon.png",
+        },
+        title: "Vercel AI SDK",
+      },
+      {
+        route: "/integrations/frameworks/google-adk",
+        frontMatter: {
+          title: "Google ADK",
+          logo: "/images/integrations/google_adk_icon.png",
+        },
+        title: "Google ADK",
+      },
+      {
+        route: "/integrations/frameworks/pydantic-ai",
+        frontMatter: {
+          title: "Pydantic AI",
+          logo: "/images/integrations/pydantic_ai_icon.svg",
+        },
+        title: "Pydantic AI",
+      },
+      {
+        route: "/integrations/frameworks/openai-agents",
+        frontMatter: {
+          title: "OpenAI Agents",
+          logo: "/images/integrations/openai_icon.svg",
+        },
+        title: "OpenAI Agents",
+      },
+    ],
   },
   "model-providers": {
     title: "Model Providers",
-    icon: <Server />,
     description: "Direct integrations with AI model providers",
   },
   gateways: {
     title: "Gateways",
-    icon: <Globe />,
     description: "Connect through API gateways and proxies",
   },
   "no-code": {
     title: "No-Code",
-    icon: <Wrench />,
     description: "No-code agent builders and tools",
   },
   analytics: {
     title: "Analytics",
-    icon: <ChartBar />,
     description:
       "Analytics tools that can visualize Langfuse traces and metrics",
   },
   data: {
     title: "Data Platform",
-    icon: <Database />,
     description:
       "Use Langfuse data and metrics in your own application and data platform",
-    pages: dataIntegrations,
+    additionalLinks: additionalLinksFromMeta(dataPlatformIntegrationsMeta),
   },
   other: {
     title: "Other",
-    icon: <RectangleEllipsis />,
     description: "Other integrations",
   },
 };
+
+type IntegrationPage = Page & { frontMatter: any };
+type ProcessedIntegrationPage = IntegrationPage & { title: string };
+
+/**
+ * Loads pages from the filesystem for a given category
+ */
+function loadFilesystemPages(category: string): IntegrationPage[] {
+  try {
+    const pages = getPagesUnderRoute(
+      `/integrations/${category}`
+    ) as IntegrationPage[];
+    // Filter out category index pages and only keep actual integration pages
+    return pages.filter(
+      (page) =>
+        page.route !== `/integrations/${category}` &&
+        page.route !== `/integrations/${category}/index`
+    );
+  } catch (error) {
+    // Category directory doesn't exist or has no pages
+    return [];
+  }
+}
+
+/**
+ * Processes pages by adding title and sorting alphabetically
+ */
+function processPages(pages: IntegrationPage[]): ProcessedIntegrationPage[] {
+  return pages
+    .map((page) => ({
+      ...page,
+      title:
+        page.frontMatter?.sidebarTitle || page.frontMatter?.title || page.name,
+    }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
 
 export const IntegrationIndex = () => {
   // Infer category order from the keys of categoryConfig, preserving their order of appearance
   const categoryOrder = Object.keys(categoryConfig);
 
-  // Get pages from each category directory individually
-  const categorizedPages = {} as Record<
-    string,
-    Array<Page & { frontMatter: any }>
-  >;
+  // Get pages from each category by merging filesystem and additional links
+  const categorizedPages = {} as Record<string, ProcessedIntegrationPage[]>;
 
   categoryOrder.forEach((category) => {
     const config = categoryConfig[category];
 
-    // Use predefined pages if they exist, otherwise load from filesystem
-    if (config.pages && config.pages.length > 0) {
-      categorizedPages[category] = config.pages as Array<
-        Page & { frontMatter: any }
-      >;
-    } else {
-      try {
-        const pages = getPagesUnderRoute(`/integrations/${category}`) as Array<
-          Page & { frontMatter: any }
-        >;
-        // Filter out any category index pages and only keep actual integration pages
-        const filteredPages = pages.filter(
-          (page) =>
-            page.route !== `/integrations/${category}` &&
-            page.route !== `/integrations/${category}/index`,
-        );
+    // Always load from filesystem
+    const filesystemPages = loadFilesystemPages(category);
 
-        if (filteredPages.length > 0) {
-          categorizedPages[category] = filteredPages;
-        }
-      } catch (error) {
-        // Silently skip categories with no pages
-      }
+    // Merge with additional links if they exist
+    const mergedPages = [
+      ...(config.additionalLinks ?? []),
+      ...(filesystemPages ?? []),
+    ];
+
+    // Only include categories that have pages
+    if (mergedPages.length > 0) {
+      categorizedPages[category] = processPages(mergedPages);
     }
   });
 
@@ -151,11 +182,14 @@ export const IntegrationIndex = () => {
       {categoryOrder
         .filter(
           (category) =>
-            categorizedPages[category] && categorizedPages[category].length > 0,
+            categorizedPages[category] && categorizedPages[category].length > 0
         )
         .map((category) => {
           const config = categoryConfig[category];
           const pages = categorizedPages[category];
+          const featured = (categoryConfig as any)[category]?.featuredLinks as
+            | ProcessedIntegrationPage[]
+            | undefined;
 
           return (
             <div key={category} className="my-10">
@@ -170,40 +204,67 @@ export const IntegrationIndex = () => {
                   </p>
                 </div>
               </div>
-              <Cards num={3}>
-                {pages
-                  .map((page) => ({
-                    ...page,
-                    title:
-                      page.frontMatter?.sidebarTitle ||
-                      page.frontMatter?.title ||
-                      page.name,
-                  }))
-                  .sort((a, b) => a.title.localeCompare(b.title))
-                  .map((page) => (
-                    <Cards.Card
-                      href={page.route}
-                      key={page.route}
-                      title={page.title}
-                      icon={
-                        page.frontMatter?.logo ? (
-                          <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
-                            <img
-                              src={page.frontMatter.logo}
-                              alt=""
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                        ) : (
-                          config.icon
-                        )
-                      }
-                      arrow
-                    >
-                      {""}
-                    </Cards.Card>
-                  ))}
-              </Cards>
+              {/* Featured (non-duplicated) */}
+              {featured && featured.length > 0 && (
+                <Cards num={3}>
+                  {featured
+                    .slice(0, 6)
+                    .map((page) => (
+                      <Cards.Card
+                        href={page.route}
+                        key={page.route}
+                        title={page.title}
+                        icon={
+                          (page as any).frontMatter?.logo ? (
+                            <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
+                              <img
+                                src={(page as any).frontMatter.logo}
+                                alt=""
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          ) : (
+                            config.icon
+                          )
+                        }
+                        arrow
+                      >
+                        {""}
+                      </Cards.Card>
+                    ))}
+                </Cards>
+              )}
+              <div className={featured && featured.length > 0 ? "mt-8" : ""}>
+                <Cards num={3}>
+                  {pages
+                    .filter(
+                      (p) => !(featured || []).some((f) => f.route === p.route)
+                    )
+                    .map((page) => (
+                  <Cards.Card
+                    href={page.route}
+                    key={page.route}
+                    title={page.title}
+                    icon={
+                      page.frontMatter?.logo ? (
+                        <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
+                          <img
+                            src={page.frontMatter.logo}
+                            alt=""
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        config.icon
+                      )
+                    }
+                    arrow
+                  >
+                    {""}
+                  </Cards.Card>
+                ))}
+                </Cards>
+              </div>
             </div>
           );
         })}

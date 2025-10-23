@@ -1,0 +1,65 @@
+---
+title: Health and Readiness Check Endpoints
+description: Monitor the health and readiness of your Langfuse self-hosted deployment
+sidebarTitle: "Health and Readiness Check"
+---
+
+# Health and Readiness Check Endpoints
+
+Langfuse provides monitoring endpoints to check the health and readiness of your self-hosted deployment. These endpoints are essential for load balancers, orchestration systems, and monitoring tools.
+
+## Overview
+
+| Container           | Endpoint             | Purpose                                              |
+| ------------------- | -------------------- | ---------------------------------------------------- |
+| **langfuse-web**    | `/api/public/health` | Check if the web service is healthy                  |
+| **langfuse-web**    | `/api/public/ready`  | Check if the web service is ready to receive traffic |
+| **langfuse-worker** | `/api/health`        | Check if the worker service is healthy               |
+
+## Health Check Endpoints
+
+Health checks verify that the application is running and operational.
+
+### Web Container Health Check
+
+```bash
+curl http://localhost:3000/api/public/health
+```
+
+**Default Behavior:**
+
+- By default, this endpoint only checks if the API is running
+- It does **not** validate database connectivity to allow serving traffic even when the database is temporarily unavailable
+- To include database connectivity in the health check, add the query parameter:
+  ```bash
+  curl http://localhost:3000/api/public/health?failIfDatabaseUnavailable=true
+  ```
+
+**Response Codes:**
+
+- `200 OK` - API is functioning normally (and database is reachable if parameter is used)
+- `503 Service Unavailable` - API is not functioning or database is unreachable (when parameter is used)
+
+### Worker Container Health Check
+
+```bash
+curl http://localhost:3030/api/health
+```
+
+**Response Codes:**
+
+- `200 OK` - Worker service is functioning normally and database connection is successful
+- `503 Service Unavailable` - Worker service is not functioning or cannot connect to the database
+
+## Readiness Check Endpoint
+
+The readiness check indicates whether the web application is ready to receive traffic, particularly useful during graceful shutdowns.
+
+```bash
+curl http://localhost:3000/api/public/ready
+```
+
+**Response Codes:**
+
+- `200 OK` - Application is ready to serve traffic
+- `500 Internal Server Error` - Application has received a shutdown signal (SIGTERM or SIGINT) and should not receive new traffic

@@ -1,4 +1,4 @@
-<Tabs items={["Python", "JS/TS", "UI"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
 <Tab>
 
 ```python
@@ -19,13 +19,17 @@ langfuse.create_dataset_item(
 )
 ```
 
-_See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for details on how to initialize the Python client._
+_See [Python SDK](/docs/sdk/python/sdk-v3) docs for details on how to initialize the Python client._
 
 </Tab>
 <Tab>
 
 ```ts
-langfuse.createDatasetItem({
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+await langfuse.api.datasetItems.create({
   datasetName: "<dataset_name>",
   // any JS object or value
   input: {
@@ -42,10 +46,41 @@ langfuse.createDatasetItem({
 });
 ```
 
+_See [JS/TS SDK](/docs/sdk/typescript/guide) docs for details on how to initialize the JS/TS client._
+
 </Tab>
+
 <Tab>
+<Tabs items={["Add item", "Import CSV", "Add from trace"]}>
 
-Datasets > Items: `+ New item`
+<Tab>
+  <Video
+    src="https://static.langfuse.com/docs-videos/dataset-item-create.mp4"
+    aspectRatio={16 / 9}
+    gifStyle
+  />
+</Tab>
+
+<Tab>
+  <Video
+    src="https://static.langfuse.com/docs-videos/dataset-item-upload.mp4"
+    aspectRatio={16 / 9}
+    gifStyle
+  />
+  _Dataset uploads are meant to upload the input and expected output. If you already have generated outputs, please use the [Experiments SDK](/docs/evaluation/experiments/experiments-via-sdk)._
 
 </Tab>
+
+<Tab>
+  <Video
+    src="https://static.langfuse.com/docs-videos/datasets-add-from-trace.mp4"
+    aspectRatio={16 / 9}
+    gifStyle
+  />
+</Tab>
+
 </Tabs>
+
+</Tab>
+
+</LangTabs>

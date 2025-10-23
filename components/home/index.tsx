@@ -1,11 +1,12 @@
+import dynamic from "next/dynamic";
+
+// Non-dynamic imports for everyhting that renders on top
 import { Background } from "../Background";
 import { Hero } from "./Hero";
-import Security from "./Security";
-import { Usage } from "./Usage";
-import dynamic from "next/dynamic";
-import { CTASocial } from "./CTASocial";
+import { FeatureTabsSection } from "./FeatureTabsSection";
 
-const FeatureBento = dynamic(() => import("./FeatureBento"), {
+// Dynamic imports for everything that is below the fold
+const Usage = dynamic(() => import("./Usage"), {
   ssr: false,
 });
 const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
@@ -14,10 +15,19 @@ const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
 const OpenSource = dynamic(() => import("./OpenSource"), {
   ssr: false,
 });
-const Pricing = dynamic(() => import("./Pricing"), {
+const Pricing = dynamic(() => import("./pricing"), {
+  ssr: false,
+});
+const Security = dynamic(() => import("./Security"), {
   ssr: false,
 });
 const WallOfLove = dynamic(() => import("./WallOfLove"), {
+  ssr: false,
+});
+const CustomerStories = dynamic(() => import("./CustomerStories"), {
+  ssr: false,
+});
+const CTAGetStarted = dynamic(() => import("./CTAGetStarted"), {
   ssr: false,
 });
 
@@ -25,17 +35,15 @@ export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
       <Hero />
+      <FeatureTabsSection />
       <Usage />
-      <FeatureBento />
       <IntegrationsGrid />
       <OpenSource />
       <Security />
+      <CustomerStories />
       <Pricing />
       <WallOfLove />
-      <CTASocial />
-      {/* <FromTheBlog /> */}
-      {/* <CTA /> */}
-      {/* <Footer /> */}
+      <CTAGetStarted />
     </main>
     <Background />
   </>

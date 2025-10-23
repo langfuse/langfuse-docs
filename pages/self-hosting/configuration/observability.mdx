@@ -1,0 +1,16 @@
+---
+title: Observability via OpenTelemetry
+description: You can use OpenTelemetry for observability into the Langfuse application.
+sidebarTitle: "Observability"
+---
+
+# Observability via OpenTelemetry
+
+Langfuse uses OpenTelemetry to provide observability into the application.
+If you want to include Langfuse into your own tracing setup, you can configure the following environment variables to send spans to your own collector:
+
+| Variable                      | Required / Default      | Description                                                                                       |
+| ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------- |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4318` | The OTLP collector endpoint Langfuse should send traces to. Path is /v1/traces.                   |
+| `OTEL_SERVICE_NAME`           | `web/worker`            | Name of the service within your APM tool.                                                         |
+| `OTEL_TRACE_SAMPLING_RATIO`   | `1`                     | The sampling ratio for traces. A value of `1` means all traces are sent. Must be between 0 and 1. |

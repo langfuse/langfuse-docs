@@ -1,16 +1,18 @@
 // pages/api/mcp.ts
 import { createMcpHandler } from "@vercel/mcp-adapter";
-import { z } from "zod";
+import * as z from "zod/v3";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
 
 // Initialize PostHog client for server-side tracking
-const posthog = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY || "", {
-  host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
-  flushAt: 1,
-  flushInterval: 0,
-});
+const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
+  ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
+      flushAt: 1,
+      flushInterval: 0,
+    })
+  : undefined;
 
 // Helper function for PostHog tracking
 const trackMcpToolUsage = async (
@@ -21,7 +23,7 @@ const trackMcpToolUsage = async (
   return waitUntil(
     (async () => {
       try {
-        posthog.capture({
+        posthog?.capture({
           distinctId: "docs-mcp-server",
           event: "docs_mcp:execute_tool",
           properties: {
@@ -33,7 +35,7 @@ const trackMcpToolUsage = async (
         });
 
         // Ensure events are flushed before function shutdown
-        await posthog.flush();
+        await posthog?.flush();
       } catch (error) {
         console.error("Error tracking PostHog event:", error);
       }
@@ -44,12 +46,12 @@ const trackMcpToolUsage = async (
 // Create the MCP handler using Vercel's adapter
 const mcpHandler = createMcpHandler(
   (server) => {
-    // Define the searchDocs tool
+    // @ts-ignore
     server.tool(
       "searchLangfuseDocs",
-      "Search Langfuse documentation for relevant information. Whenever there are questions about Langfuse, use this tool to get relevant documentation chunks.",
+      "Semantic search (RAG) over the Langfuse documentation. Use this whenever the user asks a broader question that cannot be answered by a specific single page. Returns a concise answer synthesized from relevant docs. The raw provider response is included in _meta. Prefer this before guessing. If a specific page is needed call getLangfuseDocsPage first.",
       {
-        query: z.string().describe("Natural-language question from the user"),
+        query: z.string().describe("The user’s question in natural language. Include helpful context like SDK/language (e.g., Python v3, JS v4), self-hosted vs cloud, and short error messages (trim long stack traces). Keep under ~600 characters."),
       },
       async ({ query }) => {
         try {
@@ -120,10 +122,86 @@ const mcpHandler = createMcpHandler(
       }
     );
 
+    // Define the getLangfuseDocsPage tool
+    // @ts-ignore
+    server.tool(
+      "getLangfuseDocsPage",
+      "Fetch the raw Markdown for a single Langfuse docs page. Accepts a docs path (e.g., /docs/observability/overview) or a full https://langfuse.com URL. Returns the exact Markdown (may include front matter). Use when you need a specific page content (Integration, Features, API, etc.) or code samples. Prefer searchLangfuseDocs for broader questions where there is not one specific page about it.",
+      {
+        pathOrUrl: z
+          .string()
+          .describe(
+            "Docs path starting with “/” (e.g., /docs/observability/overview) or a full URL on https://langfuse.com. Do not include anchors (#...) or queries (?foo=bar) — they will be ignored."
+          ),
+      },
+      async ({ pathOrUrl }) => {
+        const normalizePath = (input: string): string => {
+          try {
+            if (/^https?:\/\//i.test(input)) {
+              const u = new URL(input);
+              return u.pathname || "/";
+            }
+          } catch {}
+          // Ensure leading slash
+          return input.startsWith("/") ? input : `/${input}`;
+        };
+
+        try {
+          const pathname = normalizePath(pathOrUrl.trim());
+          // If already ends with .md, use as-is; else append .md
+          const mdPath = pathname.endsWith(".md") ? pathname : `${pathname}.md`;
+          // Always fetch from production domain (mirrors static build output)
+          const base = "https://langfuse.com";
+          const mdUrl = `${base}${mdPath}`;
+
+          const res = await fetch(mdUrl, {
+            headers: { Accept: "text/markdown" },
+          });
+          if (!res.ok) {
+            throw new Error(`Failed to fetch ${mdUrl}: ${res.status}`);
+          }
+          const markdown = await res.text();
+
+          trackMcpToolUsage("getLangfuseDocsPage", "success", {
+            path: pathname,
+            length: markdown.length,
+          });
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: markdown,
+              },
+            ],
+            _meta: { url: mdUrl },
+          };
+        } catch (error) {
+          trackMcpToolUsage("getLangfuseDocsPage", "error", {
+            input: pathOrUrl,
+            error_message:
+              error instanceof Error ? error.message : "Unknown error",
+          });
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Error fetching docs page markdown: ${
+                  error instanceof Error ? error.message : "Unknown error"
+                }`,
+              },
+            ],
+            isError: true,
+          };
+        }
+      }
+    );
+
     // Define the getLangfuseOverview tool
+    // @ts-ignore
     server.tool(
       "getLangfuseOverview",
-      "Get an initial overview of Langfuse documentation and features by fetching the llms.txt file from langfuse.com",
+      "Get a high-level, machine-readable index by downloading https://langfuse.com/llms.txt. Use this at the start of a session when needed to discover key docs endpoints or to seed follow-up calls to searchLangfuseDocs or getLangfuseDocsPage.Returns the plain text contents of llms.txt. Avoid repeated calls within the same session.",
       {
         // No parameters needed for this tool
       },
@@ -237,8 +315,3 @@ export default async function handler(
     res.end();
   }
 }
-
-/* TypeScript checks:
-   tsc --noEmit                     (Next.js already runs this)
-   All exports are default for Next.js API Routes.                  :contentReference[oaicite:4]{index=4}
-*/

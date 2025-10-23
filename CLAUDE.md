@@ -80,7 +80,7 @@ This is a **Nextra-based documentation site** for Langfuse built with Next.js. K
 ### Development Notes
 
 - Development server runs on port 3333 (not standard 3000)
-- Requires Node.js 20+
+- Requires Node.js 22
 - Uses pnpm as package manager
 - Auto-generates contributor data and GitHub stars before builds
 - Extensive redirect configuration for URL management

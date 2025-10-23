@@ -1,0 +1,50 @@
+---
+description: Fully typed and async SDKs to integrate with Langfuse for Python and Typescript.
+---
+
+# Langfuse SDKs
+
+The Langfuse SDKs are the recommended way to integrate with Langfuse for custom instrumentation.
+
+Properties:
+
+- Based on OpenTelemetry, so you can use any OTEL-based instrumentation library for your LLM.
+- Fully async requests, using Langfuse adds almost no latency
+- Accurate latency tracking using synchronous timestamps
+- IDs available for downstream use
+- Great DX when nesting observations
+- Cannot break your application, all errors are caught and logged
+- Interoperable with Langfuse [integrations](/integrations)
+
+## Python
+
+<div className="flex flex-row flex-wrap gap-2 mt-2">
+  <a href="https://github.com/langfuse/langfuse-python">
+    <img
+      alt="GitHub repository langfuse/langfuse-python"
+      src="https://img.shields.io/badge/repo-langfuse--python-blue?style=flat-square&logo=GitHub"
+    />
+  </a>
+  <a href="https://pypi.org/project/langfuse/">
+    <img
+      src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi+langfuse"
+      alt="PyPi langfuse"
+    />
+  </a>
+</div>
+
+Please see our [Python SDK documentation](/docs/observability/sdk/python/overview) on how to get started.
+
+## JS/TS
+
+import JSSDKPackages from "@/components-mdx/js-sdk-packages.mdx";
+
+<JSSDKPackages />
+
+Please see our [TypeScript SDK documentation](/docs/observability/sdk/typescript/overview) on how to get started.
+
+## Other Languages
+
+Via the public API, you can integrate with Langfuse from any language.
+
+For tracing, use the OpenTelemetry SDK of your choice and send traces to the [Langfuse OTel Endpoint](/integrations/native/opentelemetry).

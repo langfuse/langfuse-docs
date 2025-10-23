@@ -1,14 +1,28 @@
-<Tabs items={["Langfuse UI", "Python", "JS/TS"]}>
+<LangTabs items={["Langfuse UI", "Python SDK", "JS/TS SDK", "API"]}>
 <Tab>
 
-<CloudflareVideo
-  videoId="a7f111d588feb35b347e05557bfcf46d"
-  aspectRatio={1392 / 1080}
+Use the Langfuse UI to create a new prompt or update an existing one.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/create-update-prompts.mp4%20MOVED%20TO%20R2.mp4"
+  aspectRatio={16 / 9}
   gifStyle
 />
 
 </Tab>
 <Tab>
+
+import Env from "@/components-mdx/env-python.mdx";
+
+```bash
+pip install langfuse
+```
+
+Add your Langfuse credentials as environment variables.
+
+<Env />
+
+Use the Python SDK to create a new prompt or update an existing one.
 
 ```python
 # Create a text prompt
@@ -41,15 +55,54 @@ langfuse.create_prompt(
 )
 ```
 
-If you already have a prompt with the same name, the prompt will be added as a new version.
+If you already have a prompt with the same `name`, the prompt will be added as a new version.
 
 </Tab>
 
 <Tab>
 
+```bash
+npm i @langfuse/client
+```
+
+<Tabs items={["Environment variables", "Constructor parameters"]}>
+<Tab>
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY = "sk-lf-...";
+LANGFUSE_PUBLIC_KEY = "pk-lf-...";
+LANGFUSE_BASE_URL = "https://cloud.langfuse.com"; 🇪🇺 EU region
+# LANGFUSE_BASE_URL = "https://us.cloud.langfuse.com"; 🇺🇸 US region
+```
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient({
+  secretKey: "sk-lf-...",
+  publicKey: "pk-lf-...",
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+});
+```
+
+</Tab>
+</Tabs>
+
+Use the JS/TS SDK to create a new prompt or update an existing one.
+
 ```ts
 // Create a text prompt
-await langfuse.createPrompt({
+await langfuse.prompt.create({
   name: "movie-critic",
   type: "text",
   prompt: "As a {{criticlevel}} critic, do you like {{movie}}?",
@@ -62,7 +115,7 @@ await langfuse.createPrompt({
 });
 
 // Create a chat prompt
-await langfuse.createPrompt({
+await langfuse.prompt.create({
   name: "movie-critic-chat",
   type: "chat",
   prompt: [
@@ -78,8 +131,48 @@ await langfuse.createPrompt({
 });
 ```
 
-If you already have a prompt with the same name, the prompt will be added as a new version.
+If you already have a prompt with the same `name`, the prompt will be added as a new version.
 
 </Tab>
 
-</Tabs>
+<Tab>
+
+Use the [Public API](https://api.reference.langfuse.com/#tag/prompts/post/api/public/v2/prompts) to create a new prompt or update an existing one.
+
+```bash
+curl https://cloud.langfuse.com/api/public/v2/prompts \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "type": "chat",
+  "name": "",
+  "prompt": [
+    {
+      "type": "chatmessage",
+      "role": "",
+      "content": ""
+    }
+  ],
+  "config": null,
+  "labels": [
+    ""
+  ],
+  "tags": [
+    ""
+  ],
+  "commitMessage": null
+}'
+
+```
+
+<Cards num={1}>
+  <Card
+    title="API Reference"
+    href="https://api.reference.langfuse.com/#tag/prompts/post/api/public/v2/prompts"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+</LangTabs>

@@ -1,0 +1,136 @@
+---
+title: Observability for mcp-use with Langfuse
+sidebarTitle: mcp-use
+logo: /images/integrations/mcp-use_icon.svg
+description: Monitor and trace your mcp-use agents and tool executions with Langfuse for comprehensive observability and debugging capabilities.
+category: Integrations
+---
+
+# mcp-use Integration with Langfuse
+
+[**mcp-use**](https://docs.mcp-use.com) is a platform that implements the Model Context Protocol (MCP), an open standard developed by Anthropic for connecting AI agents to external data sources and tools. With Langfuse integration, you can monitor and trace your mcp-use agent interactions for enhanced observability.
+
+> **What is MCP (Model Context Protocol)?** MCP is an open standard that enables AI agents to securely connect to external data sources and tools. It standardizes how AI applications communicate with external services, making it easier to build context-aware AI agents that can interact with databases, APIs, and other tools.
+
+> **What is mcp-use?** mcp-use is a platform that implements the Model Context Protocol, providing developers with tools to build and deploy AI agents that can seamlessly interact with external systems while maintaining proper governance and security.
+
+## Integration
+
+<Steps>
+
+### Prerequisites
+
+- A Langfuse project (sign up at [cloud.langfuse.com](https://cloud.langfuse.com) or self-host)
+
+### Setup Langfuse Integration
+
+1. **Get your Langfuse API keys** from your Langfuse project settings page.
+
+2. **Configure Langfuse in mcp-use** by navigating to your mcp-use platform settings and adding your Langfuse credentials in the observability section:
+
+   ```bash
+   # Environment variables for mcp-use
+   LANGFUSE_PUBLIC_KEY=pk-lf-...
+   LANGFUSE_SECRET_KEY=sk-lf-...
+   LANGFUSE_HOST=https://cloud.langfuse.com  # or your self-hosted URL
+   ```
+
+3. **Enable observability** in your mcp-use configuration to start sending traces to Langfuse.
+
+### What Gets Traced
+
+With the Langfuse integration enabled, mcp-use automatically captures:
+
+- **Agent Interactions**: Complete conversations and agent decision-making processes
+- **Tool Executions**: Detailed traces of external tool calls and their results
+- **Context Usage**: How context is managed and utilized across interactions
+- **Performance Metrics**: Latency, token usage, and execution times
+- **Error Handling**: Failed requests and error recovery processes
+
+### Viewing Traces in Langfuse
+
+Once configured, you'll see detailed traces in your Langfuse dashboard that include:
+
+- **MCP Protocol Messages**: Request/response patterns between agents and tools
+- **Tool Call Chains**: Visualization of how agents invoke external tools
+- **Context Flow**: How context is passed and maintained across interactions
+- **Resource Access**: Details about external data sources and API calls
+
+Example trace structure:
+
+```
+Agent Request
+├── Context Preparation
+├── Tool Discovery
+├── External Tool Call
+│   ├── API Request
+│   └── Response Processing
+└── Agent Response
+```
+
+</Steps>
+
+## Benefits
+
+The mcp-use and Langfuse integration provides:
+
+- **Complete Observability**: Full visibility into agent behavior and tool usage
+- **Performance Optimization**: Identify bottlenecks in tool execution and context handling
+- **Debugging Support**: Trace failures and understand agent decision-making
+- **Security Monitoring**: Track data access patterns and tool permissions
+- **Cost Management**: Monitor token usage and API call patterns
+
+## Configuration Options
+
+### Advanced Settings
+
+You can customize the integration with additional configuration options:
+
+```javascript
+// Example configuration for enhanced tracing
+{
+  "observability": {
+    "langfuse": {
+      "enabled": true,
+      "traceLevel": "detailed", // basic, detailed, verbose
+      "captureToolInputs": true,
+      "captureToolOutputs": true,
+      "captureContext": true,
+      "filterSensitiveData": true
+    }
+  }
+}
+```
+
+### Metadata Enrichment
+
+mcp-use can automatically enrich traces with metadata about:
+
+- Agent configurations and capabilities
+- Tool permissions and access levels
+- Context sources and data lineage
+- User sessions and interaction patterns
+
+## Best Practices
+
+1. **Monitor Tool Performance**: Use Langfuse dashboards to track tool execution times and success rates
+2. **Analyze Context Usage**: Understand how context affects agent performance and accuracy
+3. **Set Up Alerts**: Configure alerts for failed tool executions or performance degradation
+4. **Review Security Patterns**: Regularly audit tool access patterns and data usage
+5. **Optimize Workflows**: Use trace data to identify and eliminate unnecessary tool calls
+
+## Troubleshooting
+
+If traces aren't appearing in Langfuse:
+
+1. **Verify Credentials**: Ensure your Langfuse API keys are correct and have proper permissions
+2. **Check Network**: Confirm mcp-use can reach your Langfuse instance (firewall/proxy settings)
+3. **Review Configuration**: Validate that observability is enabled in your mcp-use settings
+4. **Check Logs**: Review mcp-use logs for any integration errors or warnings
+
+## Learn More
+
+- [mcp-use Documentation](https://docs.mcp-use.com)
+- [mcp-use Observability Guide](https://docs.mcp-use.com/development/observability)
+- [Model Context Protocol Specification](https://modelcontextprotocol.io)
+- [Langfuse Tracing Guide](/docs/tracing)

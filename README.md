@@ -10,7 +10,7 @@ You can easily contribute to the docs using GitHub Codespaces. Just click on the
 
 ## Local Development
 
-Pre-requisites: Node.js 20+, pnpm v9.5.0
+Pre-requisites: Node.js 22, pnpm v9.5.0
 
 1. Optional: Create env based on [.env.template](./.env.template)
 2. Run `pnpm i` to install the dependencies.
@@ -38,11 +38,11 @@ We store all images in the `public/images/` directory. To use them in the markdo
 
 ### Videos / Gifs
 
-We use Cloudflare Video as a video hosting provider. Ping one of the maintainers to upload a video to Cloudflare Video and get the video id.
+We use a bucket on Cloudflare R2 to store all video. It is hosted on https://static.langfuse.com/docs-videos. Ping one of the maintainers to upload a video to the bucket and get the src.
 
-To embed a video, use the CloudflareVideo component and set a title and fixed aspect ratio.
+To embed a video, use the Video component and set a title and fixed aspect ratio. Point src to the mp4 file in the bucket.
 
-To embed a "gif", actually embed a video via the CloudflareVideo component and use `gifMode` (`<CloudflareVideo videoId="" gifMode />`). This will look like a gif, but at a much smaller file size and higher quality.
+To embed a "gif", actually embed a video and use `gifMode` (`<Video src="" gifMode />`). This will look like a gif, but at a much smaller file size and higher quality.
 
 ## Stack
 
@@ -52,6 +52,23 @@ To embed a "gif", actually embed a video via the CloudflareVideo component and u
 - [Tailwind CSS](https://tailwindcss.com/)
 
 Interested in stack of Q&A docs chatbot? Checkout the [blog post](https://langfuse.com/blog/qa-chatbot-for-langfuse-docs) for implementation details (all open source)
+
+## LLM Features
+
+The docs site includes four interconnected features designed to make documentation accessible to LLMs and AI tools:
+
+1. **Markdown URL endpoints** (`.md` suffix): Append `.md` to any URL (e.g., `/docs.md`) to get raw markdown. Built at compile time via `scripts/copy_md_sources.js` which copies all `.mdx` files from `/pages` to `/public/md-src/` as static `.md` files with inlined MDX components.
+
+2. **Copy as Markdown button**: UI button on docs pages that fetches the `.md` endpoint and copies to clipboard for pasting into ChatGPT/Claude/Cursor.
+
+3. **Export as PDF links**: API endpoint `/api/md-to-pdf` that fetches markdown from `.md` URLs and converts to PDF using Puppeteer. Used on legal pages (terms, privacy, DPA, etc.).
+
+4. **MCP Server**: Model Context Protocol server at `/api/mcp` with three tools:
+   - `searchLangfuseDocs`: RAG search via Inkeep API
+   - `getLangfuseDocsPage`: Fetches specific page markdown from `.md` URLs
+   - `getLangfuseOverview`: Returns `llms.txt` overview
+
+All three user-facing features (Copy, PDF, MCP) depend on the same foundation of pre-built static markdown files, making them fast, cacheable, and reliable. See [RESEARCH-LLM-FEATURES.md](./RESEARCH-LLM-FEATURES.md) for detailed implementation details.
 
 ## Bundle analysis
 

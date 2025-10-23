@@ -1,0 +1,105 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for Google Vertex AI with Langfuse
+sidebarTitle: Google Vertex AI
+logo: /images/integrations/vertexai_icon.png
+description: Learn how to integrate Langfuse with Google Vertex AI for comprehensive tracing and debugging of your AI conversations.
+category: Integrations
+---
+
+# Trace Google Vertex AI Models in Langfuse
+
+This notebook shows how to trace and observe models queried via the Google Vertex API service. 
+
+> **What is Google Vertex AI?**  [Google Vertex AI](https://cloud.google.com/vertex-ai?hl=en) is Google Cloud’s unified platform for building, deploying, and managing machine learning and generative AI with managed services, SDKs, and APIs. It streamlines everything from data prep and training to tuning and prediction, and provides access to foundation models like Gemini with enterprise-grade security and MLOps tooling.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
+
+
+<Steps>
+## Step 1: Install Dependencies
+
+Before you begin, install the necessary packages in your Python environment:
+
+
+
+```python
+%pip install langfuse google-cloud-aiplatform openinference-instrumentation-vertexai
+```
+
+## Step 2: Configure Langfuse SDK
+
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+
+Also set your Google Vertex API credentials which uses Application Default Credentials (ADC) from a service account key file.
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Get your Google Vertex API key
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "your-service-account-key.json"
+```
+
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+
+# Initialise Langfuse client and verify connectivity
+langfuse = get_client()
+assert langfuse.auth_check(), "Langfuse auth failed - check your keys ✋"
+```
+
+## Step 3: OpenTelemetry Instrumentation
+
+Use the [`VertexAIInstrumentor`](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-vertexai) library to wrap Google Vertex SDK calls and send OpenTelemetry spans to Langfuse.
+
+
+```python
+from openinference.instrumentation.vertexai import VertexAIInstrumentor
+
+VertexAIInstrumentor().instrument()
+```
+
+## Step 4: Run an Example
+
+
+```python
+import vertexai
+from vertexai.generative_models import GenerativeModel
+
+# Initialize the SDK (use your project and region)
+vertexai.init(project="your-project-id", location="europe-central2")
+
+# Pick a Gemini model available in your region (examples: "gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.5-flash")
+model = GenerativeModel("gemini-2.5-flash")
+
+# Single-shot generation
+resp = model.generate_content("What is Langfuse?")
+print(resp.text)
+
+# (Optional) Streaming
+for chunk in model.generate_content("Why is LLM observability important?", stream=True):
+    print(chunk.text, end="")
+```
+
+### View Traces in Langfuse
+
+After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the agent conversations, LLM calls, inputs, outputs, and performance metrics. 
+
+![Langfuse Trace](https://langfuse.com/images/cookbook/integration_vertexai/vertexai-trace.png)
+
+[See trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/308aca9bc430ad872d474fc545889ee2?timestamp=2025-07-25T07:35:01.172Z&display=details)
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />

@@ -1,0 +1,36 @@
+---
+title: "Entity structure"
+---
+
+# Entity structure
+
+We have two companies, a parent company in the US (Finto Technologies Inc.) and a 100% owned subsidiary, Langfuse GmbH, in Germany.
+
+For most intents and purposes, Langfuse GmbH is the operating entity. It is the company we use to operate our business, enter into contracts with clients, rent servers etc. Our US entity employs our team in San Francisco, raises funds and oversees our German operating company.
+
+See [imprint](/imprint) for details on both entities.
+
+```mermaid
+graph TD
+    subgraph "US Entity"
+        A["Finto Technologies Inc<br/>Delaware, USA"]
+        E["Clemens Rawert<br/>President"]
+        D["Marc Klingen<br/>Secretary"]
+        C["Max Deichmann"]
+    end
+
+    subgraph "German Entity"
+        B["Langfuse GmbH<br/>Operations, IP & Services<br/>Berlin, Germany"]
+        F["Max Deichmann<br/>Managing Director"]
+        G["Marc Klingen<br/>Managing Director"]
+    end
+
+    A --> |100%| B
+
+    A -.-> C
+    A -.-> D
+    A -.-> E
+
+    B -.-> F
+    B -.-> G
+```

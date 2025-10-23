@@ -1,0 +1,85 @@
+---
+title: Caching (self-hosted)
+description: Langfuse provides caching for API keys and prompts to improve performance and reduce database load.
+label: "Version: v3"
+sidebarTitle: "Caching"
+---
+
+# Caching Features
+
+Langfuse includes built-in caching capabilities for API keys and prompts to improve performance and reduce database load.
+These features are enabled by default and can be configured or disabled as needed (starting with v3.81.0).
+
+## Overview
+
+Caching in Langfuse helps optimize performance by storing frequently accessed data in Redis, reducing the need for repeated database queries. This is particularly beneficial for:
+
+- **API key validation**: Reduces database lookups for every API request
+- **Prompt retrieval**: Speeds up prompt fetching for applications that frequently access the same prompts
+
+## API Key Caching
+
+API key caching stores validated API keys in Redis to avoid repeated database lookups during authentication.
+This significantly improves response times for ingestion requests.
+API keys are never stored in plaintext; only their hashed values are cached.
+
+### Default Behavior
+
+- **Status**: Enabled by default
+- **TTL**: 300 seconds (5 minutes)
+- **Scope**: All API key validations
+
+### Configuration
+
+| Variable                             | Default | Description                                 |
+| ------------------------------------ | ------- | ------------------------------------------- |
+| `LANGFUSE_CACHE_API_KEY_ENABLED`     | `true`  | Enable or disable API key caching           |
+| `LANGFUSE_CACHE_API_KEY_TTL_SECONDS` | `300`   | Time-to-live for cached API keys in seconds |
+
+### Disabling API Key Caching
+
+To disable API key caching, set the following environment variable:
+
+```bash
+LANGFUSE_CACHE_API_KEY_ENABLED=false
+```
+
+## Prompt Caching
+
+Prompt caching stores frequently accessed prompts in Redis to improve retrieval performance for applications that regularly fetch the same prompts.
+
+### Default Behavior
+
+- **Status**: Enabled by default
+- **TTL**: 300 seconds (5 minutes)
+- **Scope**: All prompt retrievals via API
+
+### Configuration
+
+| Variable                            | Default | Description                                |
+| ----------------------------------- | ------- | ------------------------------------------ |
+| `LANGFUSE_CACHE_PROMPT_ENABLED`     | `true`  | Enable or disable prompt caching           |
+| `LANGFUSE_CACHE_PROMPT_TTL_SECONDS` | `300`   | Time-to-live for cached prompts in seconds |
+
+### Disabling Prompt Caching
+
+To disable prompt caching, set the following environment variable:
+
+```bash
+LANGFUSE_CACHE_PROMPT_ENABLED=false
+```
+
+## Cache Invalidation
+
+Langfuse automatically handles cache invalidation to ensure data consistency:
+
+- **API keys**: Cached API keys are invalidated when the key is deleted, disabled, or its permissions change
+- **Prompts**: Cached prompts are invalidated when a prompt is updated, deleted, or a new version is published
+
+## Migration from Previous Versions
+
+<Callout type="info">
+  If you're upgrading from a previous version of Langfuse, these caching
+  features will be automatically enabled with default settings. No additional
+  configuration is required unless you want to customize the behavior.
+</Callout>

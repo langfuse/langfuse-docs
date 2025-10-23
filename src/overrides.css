@@ -28,6 +28,16 @@
   display: none !important;
 }
 
+.nextra-nav-container>nav>div>a[href="/handbook"] {
+  display: none !important;
+}
+
+@media (max-width: 1024px) {
+  .nextra-nav-container>nav>div>a[href="/changelog"] {
+    display: none !important;
+  }
+}
+
 /* Less gap in desktop menu */
 .nextra-menu-desktop {
   gap: 0.1rem;
@@ -37,6 +47,11 @@
   button {
     padding: 0.225rem 0.5rem !important;
   }
+
+  /* Make first-level folder names bold */
+  /* >li>button:first-child {
+    font-weight: 600;
+  } */
 }
 
 .nextra-menu-desktop>li:not(:has(*)) {
@@ -129,4 +144,10 @@ details>summary {
   --muted-green: 84 81% 44%;
   --muted-magenta: 330 90% 70%;
   --muted-blue: 239 84% 67%;
+}
+
+/* Remove margin from subseparator parent */
+li:has(> .subseparator) {
+  margin: 0 !important;
+  padding: 0 !important;
 }

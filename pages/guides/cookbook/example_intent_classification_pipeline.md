@@ -43,8 +43,6 @@ warnings.filterwarnings("ignore")
 
 Install the necessary packages:
 
-_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
-
 
 ```python
 # Install Langfuse
@@ -426,7 +424,7 @@ langfuse = Langfuse()
 
 ### 1. Fetch traces from Langfuse
 
-We will fetch 15,000 messages sent to the demo application in order to create meaningful clusters.
+We will fetch 15,000 messages sent to the demo application to create meaningful clusters.
 
 
 ```python

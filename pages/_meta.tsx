@@ -17,6 +17,62 @@ export default {
     type: "page",
     display: "hidden",
   },
+  product: {
+    title: "Product",
+    type: "menu",
+    items: {
+      overview: {
+        title: "Overview",
+        href: "/docs",
+      },
+      observability: {
+        title: "LLM Observability",
+        href: "/docs/observability/overview",
+      },
+      prompts: {
+        title: "Prompt Management",
+        href: "/docs/prompt-management/overview",
+      },
+      evaluation: {
+        title: "Evaluation",
+        href: "/docs/evaluation/overview",
+      },
+    },
+  },
+  resources: {
+    title: "Resources",
+    type: "menu",
+    items: {
+      blog: {
+        title: "Blog",
+        href: "/blog",
+      },
+      changelog: {
+        title: "Changelog",
+        href: "/changelog",
+      },
+      roadmap: {
+        title: "Roadmap",
+        href: "/docs/roadmap",
+      },
+      customers: {
+        title: "Customers",
+        href: "/customers",
+      },
+      exampleproject: {
+        title: "Example Project",
+        href: "/docs/demo",
+      },
+      walkthroughs: {
+        title: "Walkthroughs",
+        href: "/watch-demo",
+      },
+      support: {
+        title: "Support",
+        href: "/support",
+      },
+    },
+  },
   docs: {
     type: "page",
     title: "Docs",
@@ -41,6 +97,18 @@ export default {
     title: "FAQ",
     // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
   },
+  handbook: {
+    type: "page",
+    title: "Handbook",
+    // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
+  },
+  changelog: {
+    type: "page",
+    title: "Changelog",
+    theme: {
+      layout: "full",
+    },
+  },
   pricing: {
     title: "Pricing",
     type: "page",
@@ -56,19 +124,13 @@ export default {
     },
     display: "hidden",
   },
-  changelog: {
-    type: "page",
-    title: "Changelog",
-    theme: {
-      layout: "full",
-    },
-  },
   blog: {
     title: "Blog",
     type: "page",
     theme: {
       layout: "full",
     },
+    display: "hidden",
   },
   customers: {
     title: "Customers",
@@ -85,6 +147,7 @@ export default {
       layout: "full",
       timestamp: false,
     },
+    display: "hidden",
   },
   "talk-to-us": {
     type: "page",
@@ -104,15 +167,6 @@ export default {
     type: "page",
     display: "hidden",
   },
-  why: {
-    title: "Why Langfuse",
-    type: "page",
-    display: "hidden",
-    theme: {
-      typesetting: "article",
-      timestamp: false,
-    },
-  },
   enterprise: {
     title: "Enterprise",
     type: "page",
@@ -124,6 +178,15 @@ export default {
   },
   startups: {
     title: "Startups",
+    type: "page",
+    display: "hidden",
+    theme: {
+      typesetting: "article",
+      timestamp: false,
+    },
+  },
+  research: {
+    title: "Research",
     type: "page",
     display: "hidden",
     theme: {

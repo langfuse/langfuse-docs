@@ -24,7 +24,7 @@ const menuItems: {
         href: "/docs/scores/overview",
       },
       {
-        name: "Manual Annotation",
+        name: "Human Annotation",
         href: "/docs/scores/annotation",
       },
       {
@@ -90,7 +90,7 @@ const menuItems: {
       },
       {
         name: "API",
-        href: "/docs/api",
+        href: "/docs/api-and-data-platform/features/public-api",
       },
     ],
   },
@@ -161,6 +161,10 @@ const menuItems: {
       {
         name: "About us",
         href: "/about",
+      },
+      {
+        name: "Customers",
+        href: "/customers",
       },
       { name: "Support", href: "/support" },
       {
@@ -239,6 +243,7 @@ const FooterMenu = () => {
                     <Link
                       href={item.href}
                       className="text-sm hover:text-primary/80"
+                      prefetch={false}
                     >
                       {item.name}
                     </Link>

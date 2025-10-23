@@ -193,9 +193,11 @@ for mapping in mappings:
              dest_path_str = os.path.join("pages", name_without_ext + output_extension)
         destination_paths_to_write.append(dest_path_str)
     
-    guide_dest_filename = filename_base_no_ext + output_extension 
-    guide_dest_path_str = os.path.join("pages", "guides", "cookbook", guide_dest_filename)
-    destination_paths_to_write.append(guide_dest_path_str)
+    # Only add to guides/cookbook if the mapping is marked as a guide (default True)
+    if mapping.get('isGuide', True):
+        guide_dest_filename = filename_base_no_ext + output_extension
+        guide_dest_path_str = os.path.join("pages", "guides", "cookbook", guide_dest_filename)
+        destination_paths_to_write.append(guide_dest_path_str)
 
     for full_destination_path in destination_paths_to_write:
         os.makedirs(os.path.dirname(full_destination_path), exist_ok=True)

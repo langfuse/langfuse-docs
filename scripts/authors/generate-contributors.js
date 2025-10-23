@@ -3,21 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-
-// Configuration
-const PATHS = {
-    contributors: path.join(__dirname, '../../data/generated/contributors.json'),
-    docs: path.join(__dirname, '../../pages/docs'),
-    selfHosting: path.join(__dirname, '../../pages/self-hosting'),
-    security: path.join(__dirname, '../../pages/security')
-};
-
-const GITHUB_CONFIG = {
-    repo: 'langfuse/langfuse-docs',
-    apiBase: 'https://api.github.com',
-    batchSize: 10,
-    batchDelay: 100
-};
+const { CONFIG } = require('./config');
 
 // Single cache for all GitHub API responses
 const cache = new Map();
@@ -38,7 +24,7 @@ async function fetchFromGitHub(endpoint) {
     }
 
     try {
-        const response = await fetch(`${GITHUB_CONFIG.apiBase}${endpoint}`, { headers });
+        const response = await fetch(`${CONFIG.github.apiBase}${endpoint}`, { headers });
 
         if (!response.ok) {
             if (response.status === 404) return null;
@@ -76,7 +62,7 @@ const resolveContributor = async (email, commitSha) => {
     }
 
     // Use GitHub API to get the actual GitHub username
-    const commitData = await fetchFromGitHub(`/repos/${GITHUB_CONFIG.repo}/commits/${commitSha}`);
+    const commitData = await fetchFromGitHub(`/repos/${CONFIG.github.repo}/commits/${commitSha}`);
     const githubUsername = commitData?.author?.login || null;
 
     // Cache the result for this email
@@ -90,13 +76,13 @@ const resolveContributor = async (email, commitSha) => {
 // Batch processing helper
 async function processBatch(items, processor) {
     const results = [];
-    for (let i = 0; i < items.length; i += GITHUB_CONFIG.batchSize) {
-        const batch = items.slice(i, i + GITHUB_CONFIG.batchSize);
+    for (let i = 0; i < items.length; i += CONFIG.github.batchSize) {
+        const batch = items.slice(i, i + CONFIG.github.batchSize);
         const batchResults = await Promise.all(batch.map(processor));
         results.push(...batchResults.filter(Boolean));
 
-        if (i + GITHUB_CONFIG.batchSize < items.length) {
-            await new Promise(resolve => setTimeout(resolve, GITHUB_CONFIG.batchDelay));
+        if (i + CONFIG.github.batchSize < items.length) {
+            await new Promise(resolve => setTimeout(resolve, CONFIG.github.batchDelay));
         }
     }
     return results;
@@ -108,8 +94,9 @@ async function analyzeContributors() {
     const startTime = Date.now();
 
     // Get git history
+    const gitPaths = CONFIG.sections.map(section => section.gitPath).join(' ');
     const gitOutput = execSync(
-        `git log --pretty=format:"%H|%ae|%ad" --date=iso --no-merges --name-only -- pages/docs/ pages/self-hosting/ pages/security/`,
+        `git log --pretty=format:"%H|%ae|%ad" --date=iso --no-merges --name-only -- ${gitPaths}`,
         { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }
     );
 
@@ -132,7 +119,7 @@ async function analyzeContributors() {
                 emailsNeedingAPI.add(currentCommit.email);
             }
         } else if (line.trim() && currentCommit &&
-            (line.startsWith('pages/docs/') || line.startsWith('pages/self-hosting/') || line.startsWith('pages/security/')) &&
+            CONFIG.sections.some(section => line.startsWith(section.gitPath)) &&
             !line.includes('_meta.')) {
             commits.push({
                 ...currentCommit,
@@ -159,7 +146,7 @@ async function analyzeContributors() {
         await processBatch(Array.from(emailsNeedingAPI), async (email) => {
             const commitSha = emailToCommitSha.get(email);
             if (commitSha) {
-                const commitData = await fetchFromGitHub(`/repos/${GITHUB_CONFIG.repo}/commits/${commitSha}`);
+                const commitData = await fetchFromGitHub(`/repos/${CONFIG.github.repo}/commits/${commitSha}`);
                 const githubUsername = commitData?.author?.login || null;
                 emailToUsernameCache.set(email, githubUsername);
             }
@@ -173,20 +160,16 @@ async function analyzeContributors() {
     const fileContributors = {};
 
     for (const commit of commits) {
-        let urlPath;
-        if (commit.filePath.startsWith('pages/docs/')) {
-            urlPath = `/docs/${commit.filePath.replace('pages/docs/', '').replace(/\.(mdx?|tsx?)$/, '')}`;
-        } else if (commit.filePath.startsWith('pages/self-hosting/')) {
-            urlPath = `/self-hosting/${commit.filePath.replace('pages/self-hosting/', '').replace(/\.(mdx?|tsx?)$/, '')}`;
-        } else if (commit.filePath.startsWith('pages/security/')) {
-            urlPath = `/security/${commit.filePath.replace('pages/security/', '').replace(/\.(mdx?|tsx?)$/, '')}`;
-        } else {
-            continue; // Skip if path doesn't match expected patterns
-        }
+        // Find matching section for this file path
+        const section = CONFIG.sections.find(s => commit.filePath.startsWith(s.gitPath));
+        if (!section) continue; // Skip if path doesn't match any configured section
+
+        // Convert file path to URL path
+        const urlPath = `${section.urlPrefix}/${commit.filePath.replace(section.gitPath, '').replace(/\.(mdx?|tsx?)$/, '')}`;
 
         const contributor = await resolveContributor(commit.email, commit.hash);
 
-        if (contributor) {
+        if (contributor && !CONFIG.excludedContributors.includes(contributor)) {
             if (!fileContributors[urlPath]) fileContributors[urlPath] = {};
 
             // Keep most recent contribution date
@@ -213,9 +196,10 @@ async function analyzeContributors() {
         }
     };
 
-    findPages(PATHS.docs, '', '/docs');
-    findPages(PATHS.selfHosting, '', '/self-hosting');
-    findPages(PATHS.security, '', '/security');
+    // Scan all configured sections for current pages
+    CONFIG.sections.forEach(section => {
+        findPages(section.dirPath, '', section.urlPrefix);
+    });
 
     const result = {};
     for (const [urlPath, contributorDates] of Object.entries(fileContributors)) {
@@ -241,7 +225,7 @@ async function main() {
             .sort()
             .reduce((acc, key) => ({ ...acc, [key]: contributors[key] }), {});
 
-        fs.writeFileSync(PATHS.contributors, JSON.stringify(sorted, null, 2));
+        fs.writeFileSync(CONFIG.contributors, JSON.stringify(sorted, null, 2));
         console.log('✅ Generated contributors.json');
 
     } catch (error) {
