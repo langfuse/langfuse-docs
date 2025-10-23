@@ -172,6 +172,8 @@ function VideoPlayer({
       const tag = document.createElement("script");
       tag.id = "youtube-iframe-api";
       tag.src = "https://www.youtube.com/iframe_api";
+      // Mark as necessary for CookieYes to allow loading
+      tag.setAttribute("data-cookieyes", "necessary");
       const firstScriptTag = document.getElementsByTagName("script")[0];
       firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
