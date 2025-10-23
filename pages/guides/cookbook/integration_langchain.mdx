@@ -1,0 +1,192 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Cookbook: Langchain Integration
+sidebarTitle: Cookbook: Langchain Integration
+logo: /images/integrations/langchain_icon.png
+description: Cookbook with examples of the Langfuse Integration for Langchain (Python).
+category: Integrations
+---
+
+# Cookbook: Langchain Integration
+
+This is a cookbook with examples of the Langfuse Integration for Langchain (Python).
+
+Follow the [integration guide](https://langfuse.com/integrations/frameworks/langchain) to add this integration to your Langchain project. The integration also supports Langchain JS.
+
+## Step 1: Install Dependencies
+
+
+```python
+%pip install langfuse langchain langchain_openai langchain_community --upgrade --q
+```
+
+## Step 2: Initialize Langfuse Callback Handler
+
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+With the environment variables set, we can now initialize the Langfuse Client and the CallbackHandler. You can also use [constructor arguments](/docs/sdk/python/setup#initialize-client) to initialize the Langfuse client.
+
+
+```python
+  from langfuse import get_client
+  from langfuse.langchain import CallbackHandler
+ 
+  # Initialize Langfuse client
+  langfuse = get_client()
+ 
+  # Initialize Langfuse CallbackHandler for Langchain (tracing)
+  langfuse_handler = CallbackHandler()
+```
+
+## Examples
+
+### LangChain Agent
+
+
+```python
+from langchain.agents import create_agent
+
+def add_numbers(a: int, b: int) -> int:
+    """Add two numbers together and return the result."""
+    return a + b
+
+agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=[add_numbers],
+    system_prompt="You are a helpful math tutor who can do calculations using the provided tools.",
+)
+
+# Run the agent
+agent.invoke(
+    {"messages": [{"role": "user", "content": "what is 42 + 58?"}]},
+    config={"callbacks": [langfuse_handler]}
+)
+```
+
+**See Traces in Langfuse:**
+
+After executing the application, navigate to your [Langfuse Trace Table](https://cloud.langfuse.com/). You will find detailed traces of the application’s execution, providing insights into the LLM calls, retrieval operations, inputs, outputs, and performance metrics.
+
+![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-langchain/langchain-example-trace.png)
+
+[Example trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f409d99f1204374f3c12a1b44441f21e?timestamp=2025-10-21T14%3A01%3A18.661Z)
+
+#### Runnable methods
+
+Runnables are units of work that can be invoked, batched, streamed, transformed and composed.
+
+The examples below show how to use the following methods with Langfuse:
+
+- invoke/ainvoke: Transforms a single input into an output.
+- batch/abatch: Efficiently transforms multiple inputs into outputs.
+- stream/astream: Streams output from a single input as it’s produced.
+
+
+```python
+# Async Invoke
+await chain2.ainvoke({"person": "biden", "language": "german"}, config={"callbacks":[langfuse_handler]})
+
+# Batch
+chain2.batch([{"person": "elon musk", "language": "english"}, {"person": "mark zuckerberg", "language": "english"}], config={"callbacks":[langfuse_handler]})
+
+# Async Batch
+await chain2.abatch([{"person": "jeff bezos", "language": "english"}, {"person": "tim cook", "language": "english"}], config={"callbacks":[langfuse_handler]})
+
+# Stream
+for chunk in chain2.stream({"person": "steve jobs", "language": "english"}, config={"callbacks":[langfuse_handler]}):
+    print("Streaming chunk:", chunk)
+
+# Async Stream
+async for chunk in chain2.astream({"person": "bill gates", "language": "english"}, config={"callbacks":[langfuse_handler]}):
+    print("Async Streaming chunk:", chunk)
+
+```
+
+### RetrievalQA
+
+![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/cookbook/integration_langchain/langchain_qa_retrieval.png)
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/84e1ac07dedbce3b2a236b6ece6950d9?timestamp=2025-06-11T09:29:10.248Z&display=details)
+
+
+```python
+import os
+os.environ["SERPAPI_API_KEY"] = "..."
+```
+
+
+```python
+%pip install unstructured selenium langchain-chroma --upgrade
+```
+
+
+```python
+from langchain_community.document_loaders import SeleniumURLLoader
+from langchain_chroma import Chroma
+from langchain_text_splitters import CharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from langchain.chains import RetrievalQA
+
+langfuse_handler = CallbackHandler()
+
+urls = [
+    "https://raw.githubusercontent.com/langfuse/langfuse-docs/main/public/state_of_the_union.txt",
+]
+loader = SeleniumURLLoader(urls=urls)
+llm = OpenAI()
+documents = loader.load()
+text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+texts = text_splitter.split_documents(documents)
+embeddings = OpenAIEmbeddings()
+docsearch = Chroma.from_documents(texts, embeddings)
+query = "What did the president say about Ketanji Brown Jackson"
+chain = RetrievalQA.from_chain_type(
+    llm,
+    retriever=docsearch.as_retriever(search_kwargs={"k": 1}),
+)
+
+chain.invoke(query, config={"callbacks":[langfuse_handler]})
+```
+
+### AzureOpenAI
+
+
+```python
+os.environ["AZURE_OPENAI_ENDPOINT"] = "<Azure OpenAI endpoint>"
+os.environ["AZURE_OPENAI_API_KEY"] = "<Azure OpenAI API key>"
+os.environ["OPENAI_API_TYPE"] = "azure"
+os.environ["OPENAI_API_VERSION"] = "2023-09-01-preview"
+```
+
+
+```python
+from langchain_openai import AzureChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langfuse.langchain import CallbackHandler
+ 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
+langfuse_handler = CallbackHandler()
+
+prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
+model = AzureChatOpenAI(
+    deployment_name="gpt-4o",
+    model_name="gpt-4o",
+)
+chain = prompt | model
+
+chain.invoke({"person": "Satya Nadella"}, config={"callbacks":[langfuse_handler]})
+```
