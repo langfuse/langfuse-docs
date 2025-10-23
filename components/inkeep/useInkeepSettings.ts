@@ -48,7 +48,7 @@ const useInkeepSettings = (): InkeepSharedSettings => {
   const posthog = usePostHog();
   const router = useRouter();
 
-  const currentTab = useMemo(() => {
+  const tabOfCurrentDocsSection = useMemo(() => {
     return inkeepCustomTabsToSlugs.find((t) => {
       const slugs = Array.isArray(t.slug) ? t.slug : [t.slug];
       return slugs.some((slug) => router.pathname.startsWith(slug));
@@ -93,15 +93,11 @@ const useInkeepSettings = (): InkeepSharedSettings => {
     placeholder: "Search...",
     tabs: inkeepCustomTabsToSlugs
       .map((t) => t.tab)
-      .concat(["GitHub", "All"])
-      // show current tab first
-      .sort((a, b) => {
-        if (a === currentTab) return -1;
-        if (b === currentTab) return 1;
-        return 0;
-      })
-      // add isAlwaysVisible to current tab
-      .map((t) => (t === currentTab ? [t, { isAlwaysVisible: true }] : t)),
+      .concat(["All", "GitHub"])
+      // add isAlwaysVisible to current website section
+      .map((t) =>
+        t === tabOfCurrentDocsSection ? [t, { isAlwaysVisible: true }] : t
+      ),
   };
 
   const disclaimerSettings: AIChatDisclaimerSettings = {

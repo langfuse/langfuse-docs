@@ -53,6 +53,14 @@ docker build -t langfuse/langfuse --build-arg NEXT_PUBLIC_BASE_PATH=/langfuse-ba
 
 When Deploying Langfuse according to one of the deployment guides, replace the prebuilt image for the web container (`langfuse/langfuse`) with the image you built from source.
 
+<Callout type="warning">
+  **Kubernetes/Helm deployments:** When using a custom base path with
+  Kubernetes/Helm, you must update the liveness and readiness probe paths to
+  include the custom base path. Update these in your Helm
+  `values.yaml` file under `langfuse.web.livenessProbe.path` and
+  `langfuse.web.readinessProbe.path`.
+</Callout>
+
 ### Connect to Langfuse
 
 Once your Langfuse instance is running, you can access both the API and console through your configured custom base path. When connecting via SDKs, make sure to include the custom base path in the hostname.
