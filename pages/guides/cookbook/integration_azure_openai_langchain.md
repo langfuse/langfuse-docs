@@ -23,7 +23,7 @@ import os
 # get keys for your project from https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # for EU data region
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # for EU data region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # for US data region
 
 # your azure openai configuration

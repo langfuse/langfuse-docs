@@ -29,7 +29,7 @@ from langfuse.llama_index import LlamaIndexCallbackHandler
 langfuse_callback_handler = LlamaIndexCallbackHandler(
     public_key="pk-lf-...",
     secret_key="sk-lf-...",
-    base_url="https://cloud.langfuse.com"
+    host="https://cloud.langfuse.com"
 )
 Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 ```

@@ -58,9 +58,9 @@ Langflow with Langfuse (published by Langflow)_
 export LANGFUSE_SECRET_KEY=sk-lf...
 export LANGFUSE_PUBLIC_KEY=pk-lf...
 
-export LANGFUSE_BASE_URL="https://cloud.langfuse.com"  # 🇪🇺 for EU data region
-# export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇺🇸 for US data region
-# export LANGFUSE_BASE_URL="http://localhost:3000" # 🏠 for self-hosters
+export LANGFUSE_HOST="https://cloud.langfuse.com"  # 🇪🇺 for EU data region
+# export LANGFUSE_HOST="https://cloud.langfuse.com" # 🇺🇸 for US data region
+# export LANGFUSE_HOST="http://localhost:3000" # 🏠 for self-hosters
 
 # Install Langflow
 pip install langflow
@@ -72,7 +72,7 @@ python -m langflow run
 Alternatively, you can run the Langflow CLI command with the environment variables set:
 
 ```
-LANGFUSE_SECRET_KEY=secret_key LANGFUSE_PUBLIC_KEY=public_key LANGFUSE_BASE_URL="http://localhost:3000" langflow
+LANGFUSE_SECRET_KEY=secret_key LANGFUSE_PUBLIC_KEY=public_key LANGFUSE_HOST="http://localhost:3000" langflow
 ```
 
 </Tab>
@@ -143,7 +143,7 @@ services:
 +     # Tokens are to be created in Langfuse, then copy-pasted here. Then restart docker-compose.
 +     - LANGFUSE_SECRET_KEY=sk-lf-...
 +     - LANGFUSE_PUBLIC_KEY=pk-lf-...
-+     - LANGFUSE_BASE_URL="http://langfuse-server:3000"
++     - LANGFUSE_HOST="http://langfuse-server:3000"
     command: langflow run --host 0.0.0.0
 
   # https://github.com/langfuse/langfuse/blob/main/docker-compose.yml
@@ -312,7 +312,7 @@ volumes:
 To test the connectivity between Langflow and Langfuse, run the following command:
 
 ```sh
-docker compose exec langflow python -c "import requests, os; addr = os.environ.get('LANGFUSE_BASE_URL'); print(addr); res = requests.get(addr, timeout=5); print(res.status_code)"
+docker compose exec langflow python -c "import requests, os; addr = os.environ.get('LANGFUSE_HOST'); print(addr); res = requests.get(addr, timeout=5); print(res.status_code)"
 
 # which should output the following:
 # http://langfuse-server:3000
