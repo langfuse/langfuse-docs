@@ -21,7 +21,7 @@ import os
 # Get keys for your project
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"
 
 # OpenAI key
 os.environ["OPENAI_API_KEY"] = ""

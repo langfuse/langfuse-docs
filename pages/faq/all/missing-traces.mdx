@@ -9,7 +9,7 @@ Langfuse runs all tracing integrations asynchronously ([learn more](/docs/tracin
 
 1. **Verify Integration**: Ensure that your application is correctly integrated with Langfuse. Follow the [quickstart guide](/docs/get-started) to verify your setup.
 2. **Check API Credentials**: Ensure that the API credentials used in your application match those configured in your Langfuse project settings. Set them before importing or instantiating the Langfuse SDKs. If you’re using Jupyter Notebook, try restarting the kernel or session.
-3. **Inspect Tracing Configuration**: Ensure that your tracing configuration is correctly set up. For example, verify that the `LANGFUSE_HOST` (Python) or `LANGFUSE_BASEURL` (JS/TS) is set to the correct endpoint.
+3. **Inspect Tracing Configuration**: Ensure that your tracing configuration is correctly set up. For example, verify that the `LANGFUSE_BASE_URL` (Python) or `LANGFUSE_BASEURL` (JS/TS) is set to the correct endpoint.
 4. **Review Logs**: Check the logs of your application to see if there are any errors related to Langfuse. This can help identify issues with the integration or network connectivity. Optionally, you can enable debug logging to get more detailed information.
 5. **Manual Flushing**: If you are using short-lived applications like serverless functions, local batch scripts or Jupyter Notebooks, ensure that you are manually flushing the events before the application exits. This is important to avoid losing events. Read more on this [here](/docs/tracing).
 6. **Network Issues**: Check for any network issues that might be preventing your application from sending data to Langfuse. Ensure that your firewall or network settings allow outbound connections to Langfuse endpoints.

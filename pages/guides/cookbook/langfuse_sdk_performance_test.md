@@ -30,7 +30,7 @@ import os
 
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_HOST"] = ""
+os.environ["LANGFUSE_BASE_URL"] = ""
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
