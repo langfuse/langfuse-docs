@@ -251,9 +251,20 @@ function VideoPlayer({
             This video is hosted on YouTube. Cookies are required to display the
             video player.
           </p>
-          <Button className="cky-banner-element" variant="secondary">
-            Open Cookie Consent Manager
-          </Button>
+          <div className="flex gap-2 flex-col justify-center items-center">
+            <Button className="cky-banner-element" variant="secondary">
+              Enable Cookies
+            </Button>
+            <Button asChild variant="ghost">
+              <a
+                href={`https://www.youtube.com/watch?v=${videoId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open on YouTube
+              </a>
+            </Button>
+          </div>
         </div>
       </div>
 
