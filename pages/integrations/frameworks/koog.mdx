@@ -23,8 +23,8 @@ Koog provides built-in support for exporting agent traces to Langfuse. With Lang
 4. Set environment variables. Add the following variables to your environment:
 
 ```bash
-   export LANGFUSE_HOST="https://cloud.langfuse.com" # 🇪🇺 EU region
-   # export LANGFUSE_HOST="https://us.cloud.langfuse.com" # 🇺🇸 US region
+   export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+   # export LANGFUSE_BASE_URL="https://us.cloud.langfuse.com" # 🇺🇸 US region
 
    export LANGFUSE_PUBLIC_KEY="pk-lf-..."
    export LANGFUSE_SECRET_KEY="sk-lf-..."
@@ -81,6 +81,6 @@ For more details on Langfuse OTLP tracing, see the [Langfuse OpenTelemetry Docs]
 ## Troubleshooting
 
 - **No traces appear in Langfuse**
-  - Double-check that `LANGFUSE_HOST`, `LANGFUSE_PUBLIC_KEY`, and `LANGFUSE_SECRET_KEY` are set in your environment.
-  - If running on self-hosted Langfuse, confirm that the `LANGFUSE_HOST` is reachable from your application environment.
+  - Double-check that `LANGFUSE_BASE_URL`, `LANGFUSE_PUBLIC_KEY`, and `LANGFUSE_SECRET_KEY` are set in your environment.
+  - If running on self-hosted Langfuse, confirm that the `LANGFUSE_BASE_URL` is reachable from your application environment.
   - Verify that the public/secret key pair belongs to the correct project.
