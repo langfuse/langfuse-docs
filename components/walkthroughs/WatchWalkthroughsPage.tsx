@@ -241,13 +241,25 @@ function VideoPlayer({
     <div className="relative w-full aspect-[16/9] rounded border overflow-hidden">
       <div
         ref={containerRef}
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full z-10"
         title={title}
       />
 
+      <div className="absolute inset-0 flex items-center justify-center bg-muted/50 backdrop-blur-sm z-0">
+        <div className="max-w-md mx-4 p-6 rounded-lg border bg-card shadow-lg text-center">
+          <p className="text-sm text-muted-foreground mb-4">
+            This video is hosted on YouTube. Cookies are required to display the
+            video player.
+          </p>
+          <Button className="cky-banner-element" variant="secondary">
+            Open Cookie Consent Manager
+          </Button>
+        </div>
+      </div>
+
       {showOverlay && hasNextVideo && (
         <div
-          className="absolute top-0 left-0 right-0 bg-background/95 backdrop-blur-md z-10 border-b shadow-lg"
+          className="absolute top-0 left-0 right-0 bg-background/95 backdrop-blur-md z-20 border-b shadow-lg"
           role="alert"
           aria-live="polite"
         >
