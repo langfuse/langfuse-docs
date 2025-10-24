@@ -2,7 +2,7 @@
 title: "Testing for LLM Applications: A Practical Guide"
 date: 2025/10/21
 description: A practical guide to implementing automated tests for LLM applications using datasets and experiment runners.
-ogImage: #TODO @jannik: Add og image
+ogImage: /images/blog/2025-10-21-testing-llm-applications/testing.png
 tag: guide
 author: Abdallah
 ---
@@ -20,11 +20,9 @@ Testing LLM applications presents unique challenges. Unlike traditional software
 
 This guide shows you how to implement automated tests for LLM applications using datasets and experiment runners, inspired by [Hamel Husain's testing framework](https://hamel.dev/blog/posts/evals/#level-1-unit-tests).
 
-## Understanding Testing vs Evaluation in LLM Applications
+## Testing vs. Evaluation in LLM Applications
 
 Before diving in, let's clarify some terminology that often causes confusion:
-
-### Testing vs Evaluation
 
 **Testing** typically means running automated checks that produce pass/fail results. You write assertions like `assert result == expected` and your test suite tells you if something broke.
 
@@ -71,7 +69,7 @@ First, setup the environment variables:
 OPENAI_API_KEY=your_openai_api_key
 LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
 LANGFUSE_SECRET_KEY=your_langfuse_secret_key
-LANGFUSE_HOST=https://cloud.langfuse.com
+LANGFUSE_BASE_URL=https://cloud.langfuse.com
 ```
 
 You can export the environment variables to your shell:
@@ -279,16 +277,16 @@ When using remote datasets, all experiment results are tracked in Langfuse:
 - Track which code changes improved or degraded performance
 - Share results with team members through the Langfuse dashboard
 
-We wrote two guides covering how to test chatbots and conversational applications with remote datasets and LLM-as-a-judge evaluators:
+We published two guides covering how to test chatbots and conversational applications with remote datasets and LLM-as-a-judge evaluators:
 
 - **[Evaluating Multi-Turn Conversations](https://langfuse.com/guides/cookbook/example_evaluating_multi_turn_conversations)**: Test specific points in ongoing conversations (N+1 evaluations), useful for debugging issues where context is lost across turns
 - **[Simulating Multi-Turn Conversations](https://langfuse.com/guides/cookbook/example_simulated_multi_turn_conversations)**: Generate synthetic conversations with AI agents to test various scenarios and personas
 
 ## Next Steps
 
-Ready to implement automated testing for your LLM application? Start by identifying 3-5 critical functionalities, create a small dataset with expected behaviors, and run your first experiment. We'd love to hear about your testing approach—join the conversation in our [GitHub Discussion](https://github.com/langfuse/langfuse/discussions), and explore our learning resources below.
+Ready to implement automated testing for your LLM application? Start by [identifying 3-5 critical functionalities](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications), create a small dataset with expected behaviors, and run your first experiment. We'd love to hear about your testing approach—join the conversation in our [GitHub Discussion](https://github.com/langfuse/langfuse/discussions), and explore our learning resources below.
 
-## Learn More About Testing with Langfuse
+## Learn More
 
 import { FileCode, BookOpen, Video, Users, Joystick } from "lucide-react";
 
@@ -297,5 +295,4 @@ import { FileCode, BookOpen, Video, Users, Joystick } from "lucide-react";
   <Card title="Experiment Runner SDK" href="/docs/evaluation/experiments/experiments-via-sdk" icon={<FileCode />} arrow />
   <Card title="Evaluating Multi-Turn Conversations" href="/guides/cookbook/example_evaluating_multi_turn_conversations" icon={<Joystick />} arrow />
   <Card title="Simulating Multi-Turn Conversations" href="/guides/cookbook/example_simulated_multi_turn_conversations" icon={<Users />} arrow />
-  <Card title="Hamel Husain's Eval Framework" href="https://hamel.dev/blog/posts/evals/#level-1-unit-tests" icon={<Users />} arrow />
 </Cards>
