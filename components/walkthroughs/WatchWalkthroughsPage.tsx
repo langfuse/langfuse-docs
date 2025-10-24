@@ -241,7 +241,7 @@ function VideoPlayer({
     <div className="relative w-full aspect-[16/9] rounded border overflow-hidden">
       <div
         ref={containerRef}
-        className="absolute inset-0 w-full h-full z-10"
+        className="absolute inset-0 w-full h-full z-10 pointer-events-none [&>*]:pointer-events-auto"
         title={title}
       />
 
