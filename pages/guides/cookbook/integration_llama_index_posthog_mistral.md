@@ -82,8 +82,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-5855d85e-3943-497e-bd10-f50ad414bcba" 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-aec2d812-0e49-4f45-a1db-7f6fe6d8a108" 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. get_client() initializes the Langfuse client using the credentials provided in the environment variables.

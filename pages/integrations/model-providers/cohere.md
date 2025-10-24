@@ -34,8 +34,8 @@ import os
 
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Set your Cohere API key from your Cohere account settings
 os.environ["COHERE_API_KEY"] = "..."

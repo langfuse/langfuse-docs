@@ -95,12 +95,19 @@ export default async function handler(
     // Process Callout components in the HTML
     htmlContent = processCallouts(htmlContent);
 
+    // Extract filename for title and later use
+    const pathname = markdownUrl.pathname;
+    const filename = pathname.split("/").pop() || "document.md";
+    const baseFilename = filename.replace(/\.mdx?$/i, "");
+    const documentTitle = `Langfuse - ${baseFilename}`;
+
     // Create a complete HTML document with styling
     const fullHtml = `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="UTF-8">
+          <title>${documentTitle}</title>
           <style>
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -269,10 +276,8 @@ export default async function handler(
         },
       });
 
-      // Extract filename from URL
-      const pathname = markdownUrl.pathname;
-      const filename = pathname.split("/").pop() || "document.md";
-      const pdfFilename = filename.replace(/\.mdx?$/i, ".pdf");
+      // Use the filename extracted earlier
+      const pdfFilename = `${documentTitle}.pdf`;
 
       // Determine content disposition (default to inline)
       const contentDisposition =

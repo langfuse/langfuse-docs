@@ -143,6 +143,7 @@ function VideoPlayer({
 
     try {
       playerRef.current = new window.YT.Player(containerRef.current, {
+        host: "https://www.youtube-nocookie.com",
         videoId: videoId,
         playerVars: {
           modestbranding: 1,
@@ -150,6 +151,17 @@ function VideoPlayer({
         },
         events: {
           onStateChange: (event: any) => onPlayerStateChangeRef.current(event),
+          onReady: (event: any) => {
+            // Add cookieyes attribute to the iframe element
+            try {
+              const iframe = event.target.getIframe();
+              if (iframe) {
+                iframe.setAttribute("data-cookieyes", "necessary");
+              }
+            } catch (e) {
+              console.error("Error setting cookieyes attribute:", e);
+            }
+          },
         },
       });
     } catch (e) {
@@ -172,6 +184,8 @@ function VideoPlayer({
       const tag = document.createElement("script");
       tag.id = "youtube-iframe-api";
       tag.src = "https://www.youtube.com/iframe_api";
+      // Mark as necessary for CookieYes to allow loading
+      tag.setAttribute("data-cookieyes", "necessary");
       const firstScriptTag = document.getElementsByTagName("script")[0];
       firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
