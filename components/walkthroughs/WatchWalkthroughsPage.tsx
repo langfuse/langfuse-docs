@@ -151,6 +151,17 @@ function VideoPlayer({
         },
         events: {
           onStateChange: (event: any) => onPlayerStateChangeRef.current(event),
+          onReady: (event: any) => {
+            // Add cookieyes attribute to the iframe element
+            try {
+              const iframe = event.target.getIframe();
+              if (iframe) {
+                iframe.setAttribute("data-cookieyes", "necessary");
+              }
+            } catch (e) {
+              console.error("Error setting cookieyes attribute:", e);
+            }
+          },
         },
       });
     } catch (e) {
