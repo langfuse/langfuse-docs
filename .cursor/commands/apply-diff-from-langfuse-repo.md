@@ -2,7 +2,7 @@
 
 I made changes in the langfuse/langfuse repository. I want to update the documentation in this repository to reflect those changes.
 
-# Instructions
+## Instructions
 
 1. Get the diff compared to main branch from the langfuse/langfuse repository. You can find it in ../langfuse (same parent folder, sibling to langfuse-docs)
 2. Study the diff and reason about the changes. What has changed? What's new? What's removed?
