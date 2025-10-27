@@ -20,6 +20,7 @@ In Langfuse you can use [Annotation Queues](#annotation-queues) to streamline wo
 - **Annotation data consistency**: Create score configurations for annotation workflows to ensure that all team members are using standardized scoring criteria. Hereby configure categorical, numerical or binary score types to capture different aspects of your data.
 - **Evaluation of new product features**: This feature can be useful for new use cases where no other scores have been allocated yet.
 - **Benchmarking of other scores**: Establish a human baseline score that can be used as a benchmark to compare and evaluate other scores. This can provide a clear standard of reference and enhance the objectivity of your performance evaluations.
+- **Curate evaluation data**: Flag high-quality examples from production logs or experiment runs to include in future evaluations and test datasets.
 
 ## Annotation of Single Traces, Sessions and Observations [#single-object]
 
@@ -184,6 +185,45 @@ You will see an annotation task for each item in the queue.
 ### Manage Annotation Queues via API
 
 You can enqueue, manage and dequeue annotation tasks via the [API](/docs/api). This allows for scaling and automating your annotation workflows.
+
+## Annotate from Experiment Compare View [#annotate-experiments]
+
+When running [experiments via UI](/docs/evaluation/experiments/experiments-via-ui) or via [SDK](/docs/evaluation/experiments/experiments-via-SDK), you can annotate results directly from the experiment compare view. This workflow integrates experiment evaluation with human feedback collection.
+
+**Benefits**
+
+- **Seamless workflow**: Run experiments, review results side-by-side, and add human annotations without switching views
+- **Full context**: Annotate while viewing experiment inputs, outputs, and automated scores together
+- **Efficient review**: Navigate through all experiment items systematically to ensure complete coverage
+- **Optimistic updates**: UI reflects your annotations immediately while data persists in the background
+
+**How to Annotate Experiments**
+
+<Steps>
+
+### Prerequisites
+
+1. **Create score configs**: Set up [score configurations](/faq/all/manage-score-configs) for the dimensions you want to evaluate
+2. **Run an experiment**: Execute an [experiment via UI](/docs/evaluation/experiments/experiments-via-ui) or [SDK](/docs/evaluation/experiments/experiments-via-SDK) to generate results to review
+
+### Navigate to Compare View
+
+1. **Go to** `Your Project` > `Datasets`
+2. **Select** your dataset
+3. **Click on** the experiment run(s) you want to review
+4. **Open** the compare view to see results side-by-side
+
+### Annotate Experiment Items
+
+1. **Select a row** in the compare view to open the trace detail view
+2. **Click** `Annotate` to open the annotation form
+3. **Assign scores** based on your configured score dimensions
+4. **Add comments** (optional) to provide context for your team
+5. **Navigate** to the next item by clicking `Annotate` on another row
+
+The compare view maintains full experiment context—inputs, outputs, and automated scores—while you review each item. Summary metrics update as you add annotation scores, allowing you to track progress across the experiment.
+
+</Steps>
 
 ## GitHub Discussions
 
