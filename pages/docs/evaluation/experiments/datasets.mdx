@@ -39,6 +39,65 @@ import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx
 <CreateDatasetItem />
 </Steps>
 
+## Dataset Folders
+
+Datasets can be organized into virtual folders to group datasets serving similar use cases.
+To create a folder, add slashes (`/`) to a dataset name. The UI shows every segment ending with a `/` as a folder automatically.
+
+### Create and fetch a dataset in a folder
+
+Use the Langfuse UI or SDK to create and fetch a dataset in a folder by adding a slash (`/`) to a dataset name.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<Tab>
+
+```python
+from urllib.parse import quote
+
+# When using the dataset name as a path parameter, use URL encoding
+dataset_name = "evaluation/qa-dataset"
+encoded_name = quote(dataset_name, safe="")  # "evaluation%2Fqa-dataset"
+
+# Fetch a dataset in a folder
+langfuse.get_dataset(
+    name=encoded_name
+)
+
+```
+
+This fetches a dataset named `qa-dataset` in a folder named `evaluation`. The full dataset name remains `evaluation/qa-dataset`.
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// When using the dataset name as a path parameter, use URL encoding
+const datasetName = "evaluation/qa-dataset";
+const encodedName = encodeURIComponent(datasetName); // "evaluation%2Fqa-dataset"
+
+// Fetch a dataset in a folder
+await langfuse.dataset.get(encodedName);
+
+```
+
+This fetches a dataset named `qa-dataset` in a folder named `evaluation`. The full dataset name remains `evaluation/qa-dataset`.
+
+</Tab>
+<Tab>
+
+In the UI, create a dataset and use a slash (`/`) in the name field to organize it into a folder. Fetch it by navigating to the folder, clicking on the folder name and clicking on the dataset name in the list.
+
+</Tab>
+</LangTabs>
+
+<Callout type="info">
+**URL Encoding**: When using dataset names with slashes as path parameters in the API, use URL encoding. For example, in Python: `urllib.parse.quote(name, safe="")`, in TypeScript: `encodeURIComponent(name)`.
+</Callout>
+
 ## Create synthetic datasets
 
 Frequently, you want to create synthetic examples to test your application to bootstrap your dataset. LLMs are great at generating these by prompting for common questions/tasks.
