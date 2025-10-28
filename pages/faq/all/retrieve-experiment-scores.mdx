@@ -15,68 +15,11 @@ Langfuse supports two types of experiment scores:
 1. **Experiment-level scores**: Overall metrics for the entire experiment run (e.g., precision, recall, F1-scores). These scores are immutable and represent aggregate performance. [Learn more about run-level scores](/changelog/2025-05-07-run-level-scores).
 2. **Experiment-item-level scores**: Scores for individual items within an experiment (e.g., per-generated-output evaluations).
 
-## Via UI Export
-
-The Langfuse UI provides export functionality for experiment scores.
-
-**Export locations:**
-- **Dataset runs page**: Export dataset run metrics across multiple experiments
-- **Dataset detail page**: Export dataset run metrics for a specific dataset's experiments
-
-{/* <Frame fullWidth>
-  ![Export experiments from UI](/images/faq/export-experiment-scores-ui.png)
-</Frame> */}
-
-The exported data includes both experiment-level and experiment-item-level scores.
-
 ## Via API/SDK
 
 ### Experiment-Level Scores
 
-Fetch experiment-level scores using the Langfuse SDK or scores API with the `datasetRunId` parameter:
-
-<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
-<Tab>
-
-```python
-from langfuse import Langfuse
-
-langfuse = Langfuse()
-
-# Fetch experiment-level scores
-scores = langfuse.list_scores(
-    data_type="NUMERIC",  # optional: filter by score type
-    dataset_run_id="<experiment_run_id>"
-)
-```
-
-</Tab>
-<Tab>
-
-```ts
-import { LangfuseClient } from "@langfuse/client";
-
-const langfuse = new LangfuseClient();
-
-// Fetch experiment-level scores
-const scores = await langfuse.score.list({
-  dataType: "NUMERIC",  // optional: filter by score type
-  datasetRunId: "<experiment_run_id>"
-});
-```
-
-</Tab>
-<Tab>
-
-```bash
-GET https://api.langfuse.com/api/public/v2/scores?datasetRunId=<experiment_run_id>
-```
-
-[API Reference](https://api.reference.langfuse.com/#tag/scorev2/get/api/public/v2/scores)
-
-</Tab>
-</LangTabs>
-
+Support coming soon: Fetch experiment-level scores using the Langfuse SDK or scores API with the `datasetRunId` parameter.
 See the [Scores Data Model](/docs/evaluation/evaluation-methods/data-model) for details on score properties.
 
 ### Experiment-Item-Level Scores
