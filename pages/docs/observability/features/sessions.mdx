@@ -22,7 +22,7 @@ Add a `sessionId` when creating/updating a trace. This can be any string that yo
 <Tab title="Python SDK (v3)">
 When using the `@observe()` decorator:
 
-```python
+```python /propagate_attributes(session_id="your-session-id")/
 from langfuse import observe, propagate_attributes
 
 @observe()
@@ -36,7 +36,7 @@ def process_request():
 
 When creating observations directly:
 
-```python
+```python /propagate_attributes(session_id="chat-session-123")/
 from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
@@ -60,7 +60,7 @@ with langfuse.start_as_current_span(
 
 When using the context manager:
 
-```ts
+```ts /propagateAttributes/
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
@@ -83,7 +83,7 @@ await startActiveObservation("context-manager", async (span) => {
 
 When using the `observe` wrapper:
 
-```ts
+```ts /propagateAttributes/
 import { observe, propagateAttributes } from "@langfuse/tracing";
 
 const processChatMessage = observe(
@@ -106,7 +106,7 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab>
 
-```python
+```python /propagate_attributes(session_id="your-session-id")/
 from langfuse import get_client, propagate_attributes
 from langfuse.openai import openai
 
@@ -129,7 +129,7 @@ with langfuse.start_as_current_span(name="openai-call"):
 </Tab>
 <Tab>
 
-```python
+```python /propagate_attributes(session_id="your-session-id")/
 from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 
@@ -151,7 +151,7 @@ with langfuse.start_as_current_span(name="langchain-call"):
 
 Use `propagateAttributes()` with the CallbackHandler:
 
-```ts
+```ts /propagateAttributes/
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 import { CallbackHandler } from "langfuse-langchain";
 

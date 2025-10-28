@@ -26,7 +26,7 @@ Use `propagate_attributes()` to ensure metadata is automatically applied to all 
 <Tab>
 When using the `@observe()` decorator:
 
-```python
+```python /propagate_attributes/
 from langfuse import observe, propagate_attributes
 
 @observe()
@@ -42,7 +42,7 @@ def process_data():
 
 When creating observations directly:
 
-```python
+```python /propagate_attributes(metadata={"request_id": "req_12345", "region": "us-east-1"})/
 from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
@@ -64,7 +64,7 @@ with langfuse.start_as_current_span(name="process-request") as root_span:
 
 When using the context manager:
 
-```ts
+```ts /propagateAttributes/
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
@@ -87,7 +87,7 @@ await startActiveObservation("context-manager", async (span) => {
 
 When using the `observe` wrapper:
 
-```ts
+```ts /propagateAttributes/
 import { observe, propagateAttributes } from "@langfuse/tracing";
 
 const processData = observe(
@@ -113,7 +113,7 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab title="OpenAI (Python v2)">
 
-```python
+```python /propagate_attributes/
 from langfuse import get_client, propagate_attributes
 from langfuse.openai import openai
 
@@ -138,7 +138,7 @@ with langfuse.start_as_current_span(name="openai-call"):
 </Tab>
 <Tab title="OpenAI (JS/TS)">
 
-```ts
+```ts /propagateAttributes/
 import OpenAI from "openai";
 import { observeOpenAI } from "@langfuse/openai";
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
@@ -163,7 +163,7 @@ await startActiveObservation("openai-call", async () => {
 </Tab>
 <Tab>
 
-```python
+```python /propagate_attributes/
 from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 
@@ -184,7 +184,7 @@ with langfuse.start_as_current_span(name="langchain-call"):
 </Tab>
 <Tab title="Langchain (JS/TS)">
 
-```ts
+```ts /propagateAttributes/
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 import { CallbackHandler } from "langfuse-langchain";
 

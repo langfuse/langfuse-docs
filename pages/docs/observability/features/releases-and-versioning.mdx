@@ -94,6 +94,7 @@ flowchart LR
 The `version` parameter can be added to `traces` and all observation types (e.g., `span`, `generation`, `event`, and [other observation types](/docs/observability/features/observation-types)). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
 
 **Trace-Level vs Observation-Level Versions:**
+
 - **Trace-level version (propagated)**: Use `propagate_attributes()` / `propagateAttributes()` to ensure version is applied to **all spans** in the trace
 - **Observation-level version (specific)**: Set `version` during observation creation or via `update()` to mark a specific span/generation only
 
@@ -103,7 +104,7 @@ The `version` parameter can be added to `traces` and all observation types (e.g.
 
 When using the `@observe()` decorator:
 
-```python
+```python /propagate_attributes(version="1.0")/
 from langfuse import observe, propagate_attributes
 
 @observe()
@@ -117,7 +118,7 @@ def process_data():
 
 When creating spans directly:
 
-```python
+```python /propagate_attributes(version="1.0")/
 from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
@@ -151,22 +152,26 @@ with langfuse.start_as_current_span(
 
 **Trace-Level Version (Propagated):**
 
-```ts
+```ts /propagateAttributes/
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
 await startActiveObservation("process-data", async (span) => {
   // Propagate version to all child spans
-  await propagateAttributes({
-    version: "1.0",
-  }, async () => {
-    // All spans created here automatically have version="1.0"
-    const generation = startObservation("guess-countries",
-      { model: "gpt-4" },
-      { asType: "generation" }
-    );
-    // This generation automatically has version="1.0"
-    generation.end();
-  });
+  await propagateAttributes(
+    {
+      version: "1.0",
+    },
+    async () => {
+      // All spans created here automatically have version="1.0"
+      const generation = startObservation(
+        "guess-countries",
+        { model: "gpt-4" },
+        { asType: "generation" }
+      );
+      // This generation automatically has version="1.0"
+      generation.end();
+    }
+  );
 });
 ```
 
@@ -176,7 +181,7 @@ await startActiveObservation("process-data", async (span) => {
 // Set version for a specific generation only
 langfuse.generation({
   name: "guess-countries",
-  version: "1.0",  // Only this generation has version="1.0"
+  version: "1.0", // Only this generation has version="1.0"
 });
 ```
 

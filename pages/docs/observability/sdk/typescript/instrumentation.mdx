@@ -454,7 +454,9 @@ await startActiveObservation("user-request", async (span) => {
 ```
 
 <Callout type="info">
-**Note:** For `userId`, `sessionId`, `metadata`, and `version`, consider using `propagateAttributes()` (see below) to ensure these attributes are applied to **all spans**, not just the trace object.
+  **Note:** For `userId`, `sessionId`, `metadata`, and `version`, consider using
+  `propagateAttributes()` (see below) to ensure these attributes are applied to
+  **all spans**, not just the trace object.
 </Callout>
 
 ### Propagating Trace Attributes
@@ -463,47 +465,53 @@ For certain trace attributes (`userId`, `sessionId`, `metadata`, `version`), you
 
 Use the `propagateAttributes()` function to automatically propagate these attributes to all child spans:
 
-```typescript
-import {
-  startActiveObservation,
-  propagateAttributes
-} from "@langfuse/tracing";
+```typescript /propagateAttributes/
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
 await startActiveObservation("user-workflow", async (span) => {
-  await propagateAttributes({
-    userId: "user_123",
-    sessionId: "session_abc",
-    metadata: { experiment: "variant_a", env: "prod" },
-    version: "1.0"
-  }, async () => {
-    // All spans created here inherit these attributes
-    const generation = startObservation("llm-call",
-      { model: "gpt-4" },
-      { asType: "generation" }
-    );
-    // This generation automatically has userId, sessionId, metadata, version
-    generation.end();
-  });
+  await propagateAttributes(
+    {
+      userId: "user_123",
+      sessionId: "session_abc",
+      metadata: { experiment: "variant_a", env: "prod" },
+      version: "1.0",
+    },
+    async () => {
+      // All spans created here inherit these attributes
+      const generation = startObservation(
+        "llm-call",
+        { model: "gpt-4" },
+        { asType: "generation" }
+      );
+      // This generation automatically has userId, sessionId, metadata, version
+      generation.end();
+    }
+  );
 });
 ```
 
 <Callout type="warning">
-**Important Timing:** Call `propagateAttributes()` as early as possible in your trace. Only the currently active span and spans created within the callback will have these attributes. Pre-existing spans will NOT be updated.
+  **Important Timing:** Call `propagateAttributes()` as early as possible in
+  your trace. Only the currently active span and spans created within the
+  callback will have these attributes. Pre-existing spans will NOT be updated.
 </Callout>
 
 **Attribute Restrictions:**
+
 - **Values**: Must be strings ≤200 characters
 - **Metadata Keys**: Alphanumeric characters only (no whitespace or special characters)
 - **Metadata Values**: Same as other values (strings, ≤200 chars)
 - Invalid values are dropped with a warning logged
 
 **Propagatable Attributes:**
+
 - `userId` - User identifier
 - `sessionId` - Session identifier
 - `metadata` - Key-value metadata (both keys and values must be strings)
 - `version` - Version identifier
 
 **Non-Propagatable Attributes** (use `updateTrace()` instead):
+
 - `tags` - Array of tags
 - `name` - Trace name
 - `input` / `output` - Trace input/output
@@ -513,25 +521,30 @@ await startActiveObservation("user-workflow", async (span) => {
 
 For distributed tracing across multiple services, use the `asBaggage` parameter to propagate attributes via HTTP headers:
 
-```typescript
+```typescript /propagateAttributes/
 import { propagateAttributes, startActiveObservation } from "@langfuse/tracing";
 import fetch from "node-fetch";
 
 await startActiveObservation("api-request", async () => {
-  await propagateAttributes({
-    userId: "user_123",
-    sessionId: "session_abc",
-    asBaggage: true  // Propagate via HTTP headers
-  }, async () => {
-    // HTTP request to Service B
-    const response = await fetch("https://service-b.example.com/api");
-    // userId and sessionId are now in HTTP headers
-  });
+  await propagateAttributes(
+    {
+      userId: "user_123",
+      sessionId: "session_abc",
+      asBaggage: true, // Propagate via HTTP headers
+    },
+    async () => {
+      // HTTP request to Service B
+      const response = await fetch("https://service-b.example.com/api");
+      // userId and sessionId are now in HTTP headers
+    }
+  );
 });
 ```
 
 <Callout type="warning">
-**Security Warning:** When `asBaggage: true`, attribute values are added to HTTP headers on ALL outbound requests. Only enable for non-sensitive values and when you need cross-service tracing.
+  **Security Warning:** When `asBaggage: true`, attribute values are added to
+  HTTP headers on ALL outbound requests. Only enable for non-sensitive values
+  and when you need cross-service tracing.
 </Callout>
 
 **Migration from updateTrace():**
@@ -541,10 +554,13 @@ await startActiveObservation("api-request", async () => {
 span.updateTrace({ userId: "user_123", sessionId: "session_abc" });
 
 // New approach (propagates to all child spans)
-await propagateAttributes({
-  userId: "user_123",
-  sessionId: "session_abc"
-}, async () => {
-  // All child spans now have these attributes
-});
+await propagateAttributes(
+  {
+    userId: "user_123",
+    sessionId: "session_abc",
+  },
+  async () => {
+    // All child spans now have these attributes
+  }
+);
 ```

@@ -365,7 +365,9 @@ with langfuse.start_as_current_span(name="initial-operation") as span:
 ```
 
 <Callout type="info">
-**Note:** For `user_id`, `session_id`, `metadata`, and `version`, consider using `propagate_attributes()` (see below) to ensure these attributes are applied to **all spans**, not just the trace object.
+  **Note:** For `user_id`, `session_id`, `metadata`, and `version`, consider
+  using `propagate_attributes()` (see below) to ensure these attributes are
+  applied to **all spans**, not just the trace object.
 </Callout>
 
 ### Propagating Trace Attributes
@@ -377,7 +379,7 @@ Use the `propagate_attributes()` context manager to automatically propagate thes
 <Tabs items={["Context Manager", "With @observe Decorator"]}>
 <Tab title="Context Manager">
 
-```python
+```python /propagate_attributes/
 from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
@@ -402,7 +404,7 @@ with langfuse.start_as_current_span(name="user-workflow") as span:
 </Tab>
 <Tab title="With @observe Decorator">
 
-```python
+```python /propagate_attributes/
 from langfuse import observe, propagate_attributes
 
 @observe()
@@ -427,22 +429,28 @@ def call_llm():
 </Tabs>
 
 <Callout type="warning">
-**Important Timing:** Call `propagate_attributes()` as early as possible in your trace. Only the currently active span and spans created after entering this context will have these attributes. Pre-existing spans will NOT be updated.
+  **Important Timing:** Call `propagate_attributes()` as early as possible in
+  your trace. Only the currently active span and spans created after entering
+  this context will have these attributes. Pre-existing spans will NOT be
+  updated.
 </Callout>
 
 **Attribute Restrictions:**
+
 - **Values**: Must be strings ≤200 characters
 - **Metadata Keys**: Alphanumeric characters only (no whitespace or special characters)
 - **Metadata Values**: Same as other values (strings, ≤200 chars)
 - Invalid values are dropped with a warning logged
 
 **Propagatable Attributes:**
+
 - `user_id` - User identifier
 - `session_id` - Session identifier
 - `metadata` - Key-value metadata (both keys and values must be strings)
 - `version` - Version identifier
 
 **Non-Propagatable Attributes** (use `update_trace()` instead):
+
 - `tags` - List of tags
 - `name` - Trace name
 - `input` / `output` - Trace input/output
@@ -454,7 +462,7 @@ def call_llm():
 
 For distributed tracing across multiple services, use the `as_baggage` parameter to propagate attributes via HTTP headers:
 
-```python
+```python /propagate_attributes/
 from langfuse import get_client, propagate_attributes
 import requests
 
@@ -475,7 +483,9 @@ with langfuse.start_as_current_span(name="api-request"):
 ```
 
 <Callout type="warning">
-**Security Warning:** When `as_baggage=True`, attribute values are added to HTTP headers on ALL outbound requests. Only enable for non-sensitive values and when you need cross-service tracing.
+  **Security Warning:** When `as_baggage=True`, attribute values are added to
+  HTTP headers on ALL outbound requests. Only enable for non-sensitive values
+  and when you need cross-service tracing.
 </Callout>
 
 **Migration from update_trace():**
@@ -741,6 +751,7 @@ response = client.chat.completions.create(
 ```
 
 The special metadata fields are:
+
 - `langfuse_session_id`: Sets the session ID for the trace
 - `langfuse_user_id`: Sets the user ID for the trace
 - `langfuse_tags`: Sets tags for the trace (should be a list of strings)
@@ -813,6 +824,7 @@ response = chain.invoke(
 ```
 
 The special metadata fields are:
+
 - `langfuse_session_id`: Sets the session ID for the trace
 - `langfuse_user_id`: Sets the user ID for the trace
 - `langfuse_tags`: Sets tags for the trace (should be a list of strings)
@@ -934,7 +946,6 @@ The Langfuse SDK seamlessly integrates with any third-party library that uses Op
 
 For example, if you're using OpenTelemetry-instrumented databases, HTTP clients, or other services alongside your LLM operations, all these spans will be correctly organized within your traces in Langfuse.
 
-
 <Tabs items={["Example Anthropic", "Example LlamaIndex"]}>
 
 <Tab>
@@ -1000,4 +1011,3 @@ Learn more in the [Llamaindex integration](/integrations/frameworks/llamaindex) 
 </Tab>
 
 </Tabs>
-
