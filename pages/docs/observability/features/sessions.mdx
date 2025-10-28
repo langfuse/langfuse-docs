@@ -27,14 +27,14 @@ from langfuse import observe, propagate_attributes
 
 @observe()
 def process_request():
-    # Propagate session_id to all child spans
+    # Propagate session_id to all child observations
     with propagate_attributes(session_id="your-session-id"):
-        # All nested operations automatically inherit session_id
+        # All nested observations automatically inherit session_id
         result = process_chat_message()
         return result
 ```
 
-When creating spans directly:
+When creating observations directly:
 
 ```python
 from langfuse import get_client, propagate_attributes
@@ -44,9 +44,9 @@ langfuse = get_client()
 with langfuse.start_as_current_span(
     name="process-chat-message"
 ) as root_span:
-    # Propagate session_id to all child spans
+    # Propagate session_id to all child observations
     with propagate_attributes(session_id="chat-session-123"):
-        # All spans created here automatically have session_id
+        # All observations created here automatically have session_id
         with root_span.start_as_current_generation(
             name="generate-response",
             model="gpt-4o"
@@ -61,23 +61,23 @@ with langfuse.start_as_current_span(
 When using the context manager:
 
 ```ts
-import {
-  startActiveObservation,
-  propagateAttributes,
-} from "@langfuse/tracing";
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" },
   });
 
-  // Propagate sessionId to all child spans
-  await propagateAttributes({
-    sessionId: "session-123",
-  }, async () => {
-    // All spans created here automatically have sessionId
-    // ... your logic ...
-  });
+  // Propagate sessionId to all child observations
+  await propagateAttributes(
+    {
+      sessionId: "session-123",
+    },
+    async () => {
+      // All observations created here automatically have sessionId
+      // ... your logic ...
+    }
+  );
 });
 ```
 
@@ -86,17 +86,17 @@ When using the `observe` wrapper:
 ```ts
 import { observe, propagateAttributes } from "@langfuse/tracing";
 
-const processChatMessage = observe(async (message: string) => {
-  // Propagate sessionId to all child spans
-  return await propagateAttributes(
-    { sessionId: "session-123" },
-    async () => {
-      // All nested operations automatically inherit sessionId
+const processChatMessage = observe(
+  async (message: string) => {
+    // Propagate sessionId to all child observations
+    return await propagateAttributes({ sessionId: "session-123" }, async () => {
+      // All nested observations automatically inherit sessionId
       const result = await processMessage(message);
       return result;
-    }
-  );
-}, { name: "process-chat-message" });
+    });
+  },
+  { name: "process-chat-message" }
+);
 
 const result = await processChatMessage("Hello!");
 ```
@@ -113,7 +113,7 @@ from langfuse.openai import openai
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="openai-call"):
-    # Propagate session_id to all spans including OpenAI generation
+    # Propagate session_id to all observations including OpenAI generation
     with propagate_attributes(session_id="your-session-id"):
         completion = openai.chat.completions.create(
             name="test-chat",
@@ -137,7 +137,7 @@ langfuse = get_client()
 handler = CallbackHandler()
 
 with langfuse.start_as_current_span(name="langchain-call"):
-    # Propagate session_id to all spans
+    # Propagate session_id to all observations
     with propagate_attributes(session_id="your-session-id"):
         # Pass handler to the chain invocation
         chain.invoke(
@@ -158,16 +158,19 @@ import { CallbackHandler } from "langfuse-langchain";
 const langfuseHandler = new CallbackHandler();
 
 await startActiveObservation("langchain-call", async () => {
-  // Propagate sessionId to all spans
-  await propagateAttributes({
-    sessionId: "your-session-id",
-  }, async () => {
-    // Pass handler to the chain invocation
-    await chain.invoke(
-      { input: "<user_input>" },
-      { callbacks: [langfuseHandler] }
-    );
-  });
+  // Propagate sessionId to all observations
+  await propagateAttributes(
+    {
+      sessionId: "your-session-id",
+    },
+    async () => {
+      // Pass handler to the chain invocation
+      await chain.invoke(
+        { input: "<user_input>" },
+        { callbacks: [langfuseHandler] }
+      );
+    }
+  );
 });
 ```
 
