@@ -785,6 +785,14 @@ const sections: Section[] = [
         },
       },
       {
+        name: "Mixpanel Integration",
+        href: "/integrations/analytics/mixpanel",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true },
+        },
+      },
+      {
         name: "Scheduled Batch Export to Blob Storage",
         href: "/docs/api-and-data-platform/features/query-via-sdk#blob-storage",
         tiers: {
