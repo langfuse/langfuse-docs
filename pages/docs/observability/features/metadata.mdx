@@ -8,18 +8,19 @@ import { PropagationRestrictionsCallout } from "@/components/PropagationRestrict
 # Metadata
 
 Traces and observations (see [Langfuse Data Model](/docs/tracing-data-model)) can be enriched with metadata to better understand your users, application, and experiments.
-Metadata can be added to traces in the form of arbitrary JSON.
+Metadata can be added in the form of arbitrary JSON.
 
-**Trace-Level vs Span-Level Metadata:**
-- **Trace-level metadata**: Use `propagate_attributes()` / `propagateAttributes()` to ensure metadata is applied to **all spans** in the trace
-- **Span-level metadata**: Use `update()` / `updateActiveObservation()` to add metadata to a specific span/observation only
+**Trace-Level vs Observation-Level Metadata:**
+
+- **Trace-level metadata**: Use `propagate_attributes()` / `propagateAttributes()` to ensure metadata is applied to **all observations** in the trace
+- **Observation-level metadata**: Use `update()` / `updateActiveObservation()` to add metadata to a specific observation only
 
 Metadata updates are merged based on the top-level key.
 We strongly discourage writing the same key multiple times within your instrumentation.
 
 ## Trace-Level Metadata (Propagated)
 
-Use `propagate_attributes()` to ensure metadata is automatically applied to all spans:
+Use `propagate_attributes()` to ensure metadata is automatically applied to all observations within the context:
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
@@ -30,7 +31,7 @@ from langfuse import observe, propagate_attributes
 
 @observe()
 def process_data():
-    # Propagate metadata to all child spans
+    # Propagate metadata to all child observations
     with propagate_attributes(
         metadata={"source": "api", "region": "us-east-1", "user_tier": "premium"}
     ):
@@ -39,7 +40,7 @@ def process_data():
         return result
 ```
 
-When creating spans directly:
+When creating observations directly:
 
 ```python
 from langfuse import get_client, propagate_attributes
@@ -47,9 +48,9 @@ from langfuse import get_client, propagate_attributes
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="process-request") as root_span:
-    # Propagate metadata to all child spans
+    # Propagate metadata to all child observations
     with propagate_attributes(metadata={"request_id": "req_12345", "region": "us-east-1"}):
-        # All spans created here automatically have this metadata
+        # All observations created here automatically have this metadata
         with root_span.start_as_current_generation(
             name="generate-response",
             model="gpt-4o"
@@ -64,23 +65,23 @@ with langfuse.start_as_current_span(name="process-request") as root_span:
 When using the context manager:
 
 ```ts
-import {
-  startActiveObservation,
-  propagateAttributes,
-} from "@langfuse/tracing";
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" },
   });
 
-  // Propagate metadata to all child spans
-  await propagateAttributes({
-    metadata: { source: "api", region: "us-east-1", userTier: "premium" },
-  }, async () => {
-    // All spans created here automatically have this metadata
-    // ... your logic ...
-  });
+  // Propagate metadata to all child observations
+  await propagateAttributes(
+    {
+      metadata: { source: "api", region: "us-east-1", userTier: "premium" },
+    },
+    async () => {
+      // All observations created here automatically have this metadata
+      // ... your logic ...
+    }
+  );
 });
 ```
 
@@ -89,17 +90,20 @@ When using the `observe` wrapper:
 ```ts
 import { observe, propagateAttributes } from "@langfuse/tracing";
 
-const processData = observe(async (data: string) => {
-  // Propagate metadata to all child spans
-  return await propagateAttributes(
-    { metadata: { source: "api", region: "us-east-1" } },
-    async () => {
-      // All nested operations automatically inherit this metadata
-      const result = await performProcessing(data);
-      return result;
-    }
-  );
-}, { name: "process-data" });
+const processData = observe(
+  async (data: string) => {
+    // Propagate metadata to all child observations
+    return await propagateAttributes(
+      { metadata: { source: "api", region: "us-east-1" } },
+      async () => {
+        // All nested observations automatically inherit this metadata
+        const result = await performProcessing(data);
+        return result;
+      }
+    );
+  },
+  { name: "process-data" }
+);
 
 const result = await processData("input");
 ```
@@ -140,16 +144,19 @@ import { observeOpenAI } from "@langfuse/openai";
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
 await startActiveObservation("openai-call", async () => {
-  // Propagate metadata to all spans
-  await propagateAttributes({
-    metadata: { source: "api", region: "us-east-1" },
-  }, async () => {
-    const res = await observeOpenAI(new OpenAI()).chat.completions.create({
-      messages: [{ role: "system", content: "Tell me a story about a dog." }],
-      model: "gpt-3.5-turbo",
-      max_tokens: 300,
-    });
-  });
+  // Propagate metadata to all observations
+  await propagateAttributes(
+    {
+      metadata: { source: "api", region: "us-east-1" },
+    },
+    async () => {
+      const res = await observeOpenAI(new OpenAI()).chat.completions.create({
+        messages: [{ role: "system", content: "Tell me a story about a dog." }],
+        model: "gpt-3.5-turbo",
+        max_tokens: 300,
+      });
+    }
+  );
 });
 ```
 
@@ -164,7 +171,7 @@ langfuse = get_client()
 langfuse_handler = CallbackHandler()
 
 with langfuse.start_as_current_span(name="langchain-call"):
-    # Propagate metadata to all spans
+    # Propagate metadata to all child observations
     with propagate_attributes(
         metadata={"foo": "bar", "baz": "qux"}
     ):
@@ -184,15 +191,18 @@ import { CallbackHandler } from "langfuse-langchain";
 const langfuseHandler = new CallbackHandler();
 
 await startActiveObservation("langchain-call", async () => {
-  // Propagate metadata to all spans
-  await propagateAttributes({
-    metadata: { key: "value" },
-  }, async () => {
-    await chain.invoke(
-      { input: "<user_input>" },
-      { callbacks: [langfuseHandler] }
-    );
-  });
+  // Propagate metadata to all child observations
+  await propagateAttributes(
+    {
+      metadata: { key: "value" },
+    },
+    async () => {
+      await chain.invoke(
+        { input: "<user_input>" },
+        { callbacks: [langfuseHandler] }
+      );
+    }
+  );
 });
 ```
 
@@ -207,9 +217,9 @@ You can set the `metadata` via the override configs, see the [Flowise Integratio
 
 <PropagationRestrictionsCallout attributes={["metadata"]} />
 
-## Span-Level Metadata (Non-Propagated)
+## Observation-Level Metadata (Non-Propagated)
 
-Use `update()` to add metadata to specific spans only:
+Use `update()` to add metadata to specific observations only:
 
 ```python
 # Python SDK
@@ -218,7 +228,7 @@ from langfuse import get_client
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="process-request") as root_span:
-    # Add metadata to this specific span only
+    # Add metadata to this specific observation only
     root_span.update(metadata={"stage": "parsing"})
 
     with root_span.start_as_current_generation(
@@ -231,7 +241,10 @@ with langfuse.start_as_current_span(name="process-request") as root_span:
 
 ```typescript
 // TypeScript SDK
-import { startActiveObservation, updateActiveObservation } from "@langfuse/tracing";
+import {
+  startActiveObservation,
+  updateActiveObservation,
+} from "@langfuse/tracing";
 
 await startActiveObservation("process-request", async (span) => {
   // Add metadata to the current active observation only
