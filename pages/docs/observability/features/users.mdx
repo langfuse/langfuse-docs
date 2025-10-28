@@ -21,19 +21,19 @@ It's easy to map data in Langfuse to individual users. Just pass a unique identi
 <Tab>
 When using the `@observe()` decorator:
 
-```python
+```python /propagate_attributes(user_id="user_12345")/
 from langfuse import observe, propagate_attributes
 
 @observe()
 def process_user_request(user_query):
-    # Propagate user_id to all child spans
+    # Propagate user_id to all child observations
     with propagate_attributes(user_id="user_12345"):
-        # All nested operations automatically inherit user_id
+        # All nested observations automatically inherit user_id
         result = process_query(user_query)
         return result
 ```
 
-When creating spans directly:
+When creating observations directly:
 
 ```python
 from langfuse import get_client, propagate_attributes
@@ -43,14 +43,14 @@ langfuse = get_client()
 with langfuse.start_as_current_span(
     name="process-user-request"
 ) as root_span:
-    # Propagate user_id to all child spans
+    # Propagate user_id to all child observations
     with propagate_attributes(user_id="user_12345"):
-        # All spans created here automatically have user_id
+        # All observations created here automatically have user_id
         with root_span.start_as_current_generation(
             name="generate-response",
             model="gpt-4o"
         ) as gen:
-            # This generation automatically has user_id
+            # This observation automatically has user_id
             pass
 ```
 
@@ -60,23 +60,23 @@ with langfuse.start_as_current_span(
 When using the context manager:
 
 ```ts
-import {
-  startActiveObservation,
-  propagateAttributes,
-} from "@langfuse/tracing";
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" },
   });
 
-  // Propagate userId to all child spans
-  await propagateAttributes({
-    userId: "user-123",
-  }, async () => {
-    // All spans created here automatically have userId
-    // ... your logic ...
-  });
+  // Propagate userId to all child observations
+  await propagateAttributes(
+    {
+      userId: "user-123",
+    },
+    async () => {
+      // All observations created here automatically have userId
+      // ... your logic ...
+    }
+  );
 });
 ```
 
@@ -86,17 +86,17 @@ When using the `observe` wrapper:
 import { observe, propagateAttributes } from "@langfuse/tracing";
 
 // An existing function
-const processUserRequest = observe(async (userQuery: string) => {
-  // Propagate userId to all child spans
-  return await propagateAttributes(
-    { userId: "user-123" },
-    async () => {
-      // All nested operations automatically inherit userId
+const processUserRequest = observe(
+  async (userQuery: string) => {
+    // Propagate userId to all child observations
+    return await propagateAttributes({ userId: "user-123" }, async () => {
+      // All nested observations automatically inherit userId
       const result = await processQuery(userQuery);
       return result;
-    }
-  );
-}, { name: "process-user-request" });
+    });
+  },
+  { name: "process-user-request" }
+);
 
 const result = await processUserRequest("some query");
 ```
@@ -113,7 +113,7 @@ from langfuse.openai import openai
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="openai-call"):
-    # Propagate user_id to all spans including OpenAI generation
+    # Propagate user_id to all observations including OpenAI generation
     with propagate_attributes(user_id="user_12345"):
         completion = openai.chat.completions.create(
             name="test-chat",
@@ -139,7 +139,7 @@ langfuse = get_client()
 handler = CallbackHandler()
 
 with langfuse.start_as_current_span(name="langchain-call"):
-    # Propagate user_id to all spans
+    # Propagate user_id to all observations
     with propagate_attributes(user_id="user_12345"):
         # Pass handler to the chain invocation
         chain.invoke(
@@ -160,16 +160,19 @@ import { CallbackHandler } from "langfuse-langchain";
 const langfuseHandler = new CallbackHandler();
 
 await startActiveObservation("langchain-call", async () => {
-  // Propagate userId to all spans
-  await propagateAttributes({
-    userId: "user-123",
-  }, async () => {
-    // Pass handler to the chain invocation
-    await chain.invoke(
-      { input: "<user_input>" },
-      { callbacks: [langfuseHandler] }
-    );
-  });
+  // Propagate userId to all observations
+  await propagateAttributes(
+    {
+      userId: "user-123",
+    },
+    async () => {
+      // Pass handler to the chain invocation
+      await chain.invoke(
+        { input: "<user_input>" },
+        { callbacks: [langfuseHandler] }
+      );
+    }
+  );
 });
 ```
 
