@@ -37,6 +37,7 @@ export function PropagationRestrictionsCallout({
             marginBottom: "1rem",
             paddingLeft: "1.5rem",
             lineHeight: "1.75",
+            listStyleType: "disc",
           }}
         >
           <li>
