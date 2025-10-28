@@ -26,20 +26,12 @@ export function PropagationRestrictionsCallout({
 
   return (
     <Callout type="info">
-      <div style={{ marginTop: "0.25rem" }}>
+      <div className="mt-1">
         <strong>Attribute Propagation Restrictions</strong>
-        <div style={{ marginTop: "0.75rem", marginBottom: "0.75rem" }}>
+        <div className="my-3">
           When propagating {formatAttributes(attributes)} to child spans:
         </div>
-        <ul
-          style={{
-            marginTop: "0.5rem",
-            marginBottom: "1rem",
-            paddingLeft: "1.5rem",
-            lineHeight: "1.75",
-            listStyleType: "disc",
-          }}
-        >
+        <ul className="mt-2 mb-4 pl-6 leading-7 list-disc">
           <li>
             Values must be <strong>strings ≤200 characters</strong>
           </li>
@@ -55,13 +47,7 @@ export function PropagationRestrictionsCallout({
           </li>
           <li>Invalid values are dropped with a warning</li>
         </ul>
-        <div
-          style={{
-            marginTop: "1rem",
-            paddingTop: "0.75rem",
-            borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-          }}
-        >
+        <div className="mt-4 pt-3 border-t border-border">
           <strong>Learn more:</strong> <a href={pythonLink}>Python SDK</a>
           {" | "}
           <a href={tsLink}>TypeScript SDK</a>
