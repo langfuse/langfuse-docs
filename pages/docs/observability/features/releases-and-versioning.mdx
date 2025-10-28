@@ -4,6 +4,8 @@ description: Langfuse allows for rapid iteration on LLM applications by providin
 sidebarTitle: Releases & Versioning
 ---
 
+import { PropagationRestrictionsCallout } from "@/components/PropagationRestrictionsCallout";
+
 # Releases & Versioning
 
 You can track the effect of changes to your LLM app on metrics in Langfuse. This allows you to:
@@ -91,22 +93,28 @@ flowchart LR
 
 The `version` parameter can be added to `traces` and all observation types (e.g., `span`, `generation`, `event`, and [other observation types](/docs/observability/features/observation-types)). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
 
+**Trace-Level vs Observation-Level Versions:**
+- **Trace-level version (propagated)**: Use `propagate_attributes()` / `propagateAttributes()` to ensure version is applied to **all spans** in the trace
+- **Observation-level version (specific)**: Set `version` during observation creation or via `update()` to mark a specific span/generation only
+
 <LangTabs items={["Python SDK", "JS/TS SDK", "Langchain (Python)","Langchain (JS)"]}>
 <Tab>
+**Trace-Level Version (Propagated):**
+
 When using the `@observe()` decorator:
 
 ```python
 from langfuse import observe, get_client
 
+langfuse = get_client()
+
 @observe()
 def process_data():
-    langfuse = get_client()
-
-    # Set version at trace level
-    langfuse.update_current_trace(version="1.0")
-
-    # Set version at observation level
-    langfuse.update_current_span(version="1.0")
+    # Propagate version to all child spans
+    with langfuse.propagate_attributes(version="1.0"):
+        # All nested operations automatically inherit version
+        result = perform_processing()
+        return result
 ```
 
 When creating spans directly:
@@ -116,36 +124,63 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-# Set version when creating a span
-with langfuse.start_as_current_span(
-    name="process-data",
-    version="1.0"
-) as span:
-    # Processing...
-
-    # Create a generation with version
-    with span.start_as_current_generation(
-        name="guess-countries",
-        model="gpt-4o",
-        version="1.0"
-    ) as generation:
-        # Generation code...
-        pass
+with langfuse.start_as_current_span(name="process-data") as span:
+    # Propagate version to all child spans
+    with langfuse.propagate_attributes(version="1.0"):
+        # All spans created here automatically have version="1.0"
+        with span.start_as_current_generation(
+            name="guess-countries",
+            model="gpt-4o"
+        ) as generation:
+            # This generation automatically has version="1.0"
+            pass
 ```
 
-The version parameter can be included in both spans and generations, and can be set either during creation or updated later.
+**Observation-Level Version (Specific to one observation):**
+
+```python
+# Set version when creating a specific span
+with langfuse.start_as_current_span(
+    name="process-data",
+    version="1.0"  # Only this span has version="1.0"
+) as span:
+    # Child spans do NOT inherit this version
+    pass
+```
 
 </Tab>
 <Tab>
 
-```ts /version: "1.0"/
-langfuse.generation({
-  name: "guess-countries",
-  version: "1.0",
+**Trace-Level Version (Propagated):**
+
+```ts
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+
+await startActiveObservation("process-data", async (span) => {
+  // Propagate version to all child spans
+  await propagateAttributes({
+    version: "1.0",
+  }, async () => {
+    // All spans created here automatically have version="1.0"
+    const generation = startObservation("guess-countries",
+      { model: "gpt-4" },
+      { asType: "generation" }
+    );
+    // This generation automatically has version="1.0"
+    generation.end();
+  });
 });
 ```
 
-`langfuse.trace()`, `langfuse.span()` and `langfuse.event()` also take an optional `version` parameter.
+**Observation-Level Version (Specific to one observation):**
+
+```ts
+// Set version for a specific generation only
+langfuse.generation({
+  name: "guess-countries",
+  version: "1.0",  // Only this generation has version="1.0"
+});
+```
 
 </Tab>
 <Tab>
@@ -169,6 +204,8 @@ const handler = new CallbackHandler({
 
 </Tab>
 </LangTabs>
+
+<PropagationRestrictionsCallout attributes={["version"]} />
 
 _Version parameter in Langfuse interface_
 

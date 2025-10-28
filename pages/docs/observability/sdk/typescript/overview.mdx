@@ -113,6 +113,7 @@ Building on OpenTelemetry is a core design choice for this SDK. It offers severa
 
 - **Standardization**: It aligns with the industry standard for observability, making it easier to integrate with existing monitoring and APM tools.
 - **Robust Context Management**: OpenTelemetry provides reliable [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/), ensuring that traces are correctly linked even in complex, asynchronous applications.
+- **Attribute Propagation**: Certain trace attributes (`userId`, `sessionId`, `metadata`, `version`) can be automatically propagated to all child spans using `propagateAttributes()`. This ensures consistent attribute coverage across all observations in a trace. See the [instrumentation docs](/docs/observability/sdk/typescript/instrumentation#propagating-trace-attributes) for details.
 - **Ecosystem & Interoperability**: You can leverage a vast ecosystem of third-party instrumentations. If a library you use supports OpenTelemetry, its traces can be sent to Langfuse automatically.
 
 ## Learn more

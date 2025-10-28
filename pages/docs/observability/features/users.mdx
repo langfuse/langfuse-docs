@@ -3,6 +3,8 @@ description: User-level LLM observability to track token usage, usage volume and
 sidebarTitle: User Tracking
 ---
 
+import { PropagationRestrictionsCallout } from "@/components/PropagationRestrictionsCallout";
+
 # User Tracking
 
 The Users view provides an overview of all users. It also offers an in-depth look into individual users.
@@ -26,11 +28,11 @@ langfuse = get_client()
 
 @observe()
 def process_user_request(user_query):
-    # Add user_id to the current trace
-    langfuse.update_current_trace(user_id="user_12345")
-
-    # ...your processing logic...
-    return result
+    # Propagate user_id to all child spans
+    with langfuse.propagate_attributes(user_id="user_12345"):
+        # All nested operations automatically inherit user_id
+        result = process_query(user_query)
+        return result
 ```
 
 When creating spans directly:
@@ -40,28 +42,18 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-# You can set the user_id when creating the root span via update_trace
 with langfuse.start_as_current_span(
     name="process-user-request"
 ) as root_span:
-    # Add user_id to the trace
-    root_span.update_trace(user_id="user_12345")
-
-    # All spans in this trace will be associated with this user
-    with root_span.start_as_current_generation(
-        name="generate-response",
-        model="gpt-4o"
-    ) as gen:
-        # ...generate response...
-        pass
-```
-
-You can also update the user_id of the current trace without a direct reference to a span:
-
-```python
-with langfuse.start_as_current_span(name="handle-user-interaction"):
-    # Add user_id to the current trace
-    langfuse.update_current_trace(user_id="user_12345")
+    # Propagate user_id to all child spans
+    with langfuse.propagate_attributes(user_id="user_12345"):
+        # All spans created here automatically have user_id
+        with root_span.start_as_current_generation(
+            name="generate-response",
+            model="gpt-4o"
+        ) as gen:
+            # This generation automatically has user_id
+            pass
 ```
 
 </Tab>
@@ -72,8 +64,7 @@ When using the context manager:
 ```ts
 import {
   startActiveObservation,
-  startObservation,
-  updateActiveTrace,
+  propagateAttributes,
 } from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
@@ -81,8 +72,12 @@ await startActiveObservation("context-manager", async (span) => {
     input: { query: "What is the capital of France?" },
   });
 
-  updateActiveTrace({
+  // Propagate userId to all child spans
+  await propagateAttributes({
     userId: "user-123",
+  }, async () => {
+    // All spans created here automatically have userId
+    // ... your logic ...
   });
 });
 ```
@@ -90,40 +85,22 @@ await startActiveObservation("context-manager", async (span) => {
 When using the `observe` wrapper:
 
 ```ts
-import { observe, updateActiveTrace } from "@langfuse/tracing";
+import { observe, propagateAttributes } from "@langfuse/tracing";
 
 // An existing function
-async function fetchData(source: string) {
-  updateActiveTrace({
-    userId: "user-123",
-  });
+const processUserRequest = observe(async (userQuery: string) => {
+  // Propagate userId to all child spans
+  return await propagateAttributes(
+    { userId: "user-123" },
+    async () => {
+      // All nested operations automatically inherit userId
+      const result = await processQuery(userQuery);
+      return result;
+    }
+  );
+}, { name: "process-user-request" });
 
-  // ... logic to fetch data
-  return { data: `some data from ${source}` };
-}
-
-// Wrap the function to trace it
-const tracedFetchData = observe(fetchData, {
-  name: "observe-wrapper",
-});
-
-const result = await tracedFetchData("API");
-```
-
-When creating spans manually:
-
-```ts
-import { startObservation } from "@langfuse/tracing";
-
-const span = startObservation("manual-observation", {
-  input: { query: "What is the capital of France?" },
-});
-
-span.updateTrace({
-  userId: "user-123",
-});
-
-span.update({ output: "Paris" }).end();
+const result = await processUserRequest("some query");
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
@@ -132,82 +109,70 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 <Tab>
 
 ```python
+from langfuse import get_client
 from langfuse.openai import openai
 
-completion = openai.chat.completions.create(
-  name="test-chat",
-  model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a calculator."},
-    {"role": "user", "content": "1 + 1 = "}],
-  temperature=0,
-  metadata={"langfuse_user_id": "user-id"}
-)
-```
+langfuse = get_client()
 
-</Tab>
-<Tab title="OpenAI (Python)">
-
-Use metadata in chain invocation:
-
-```python
-from langfuse.langchain import CallbackHandler
-
-handler = CallbackHandler()
-
-# Pass langfuse_user_id as metadata to the chain invocation
-chain.invoke(
-    {"animal": "dog"},
-    config={
-        "callbacks": [handler],
-        "metadata": {
-            "langfuse_user_id": "user-id",
-        },
-    },
-)
+with langfuse.start_as_current_span(name="openai-call"):
+    # Propagate user_id to all spans including OpenAI generation
+    with langfuse.propagate_attributes(user_id="user_12345"):
+        completion = openai.chat.completions.create(
+            name="test-chat",
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a calculator."},
+                {"role": "user", "content": "1 + 1 = "}
+            ],
+            temperature=0,
+        )
 ```
 
 </Tab>
 <Tab title="Langchain (Python)">
 
-When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `userId` to the constructor:
+Use `propagate_attributes()` with the CallbackHandler:
 
-```ts
-const handler = new CallbackHandler({
-  userId: "user-id",
-});
+```python
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
+
+langfuse = get_client()
+handler = CallbackHandler()
+
+with langfuse.start_as_current_span(name="langchain-call"):
+    # Propagate user_id to all spans
+    with langfuse.propagate_attributes(user_id="user_12345"):
+        # Pass handler to the chain invocation
+        chain.invoke(
+            {"animal": "dog"},
+            config={"callbacks": [handler]},
+        )
 ```
 
-You can also set the `userId` dynamically via the runnable configuration in the chain invocation:
+</Tab>
+<Tab title="Langchain (JS/TS)">
+
+Use `propagateAttributes()` with the CallbackHandler:
 
 ```ts
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 import { CallbackHandler } from "langfuse-langchain";
 
 const langfuseHandler = new CallbackHandler();
 
-// Your existing Langchain code to create the chain
-...
-
-// Pass langfuseUserId as metadata to the chain invocation to be parsed as the Langfuse user_id
-await chain.invoke(
-  { input: "<user_input>" },
-  { callbacks: [langfuseHandler], metadata: { langfuseUserId: "user-id" } }
-);
-```
-
-When using the integration with the JS SDK (see [interop docs](/integrations/frameworks/langchain#interoperability)), set `userId` via `langfuse.trace()`:
-
-```ts
-import { CallbackHandler, Langfuse } from "langfuse-langchain";
-const langfuse = new Langfuse();
-
-const trace = langfuse.trace({
-  userId: "user-id",
+await startActiveObservation("langchain-call", async () => {
+  // Propagate userId to all spans
+  await propagateAttributes({
+    userId: "user-123",
+  }, async () => {
+    // Pass handler to the chain invocation
+    await chain.invoke(
+      { input: "<user_input>" },
+      { callbacks: [langfuseHandler] }
+    );
+  });
 });
-const langfuseHandler = new CallbackHandler({ root: trace });
-
-// Add Langfuse handler as callback to your langchain chain/agent
-await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 ```
 
 </Tab>
@@ -218,6 +183,8 @@ You can set the `userId` via the override configs, see the [Flowise Integration 
 </Tab>
 
 </LangTabs>
+
+<PropagationRestrictionsCallout attributes={["userId"]} />
 
 ## View all users
 

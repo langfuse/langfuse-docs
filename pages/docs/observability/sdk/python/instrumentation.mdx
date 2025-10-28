@@ -364,6 +364,137 @@ with langfuse.start_as_current_span(name="initial-operation") as span:
         langfuse.update_current_trace(output={"final_status": "success"}, public=True)
 ```
 
+<Callout type="info">
+**Note:** For `user_id`, `session_id`, `metadata`, and `version`, consider using `propagate_attributes()` (see below) to ensure these attributes are applied to **all spans**, not just the trace object.
+</Callout>
+
+### Propagating Trace Attributes
+
+For certain trace attributes (`user_id`, `session_id`, `metadata`, `version`), you may want them to be automatically applied to **all spans** created within a trace, not just the trace object itself. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) operate on individual spans/observations.
+
+Use the `propagate_attributes()` context manager to automatically propagate these attributes to all child spans:
+
+<Tabs items={["Context Manager", "With @observe Decorator"]}>
+<Tab title="Context Manager">
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="user-workflow") as span:
+    # Propagate attributes to all child spans
+    with langfuse.propagate_attributes(
+        user_id="user_123",
+        session_id="session_abc",
+        metadata={"experiment": "variant_a", "env": "prod"},
+        version="1.0"
+    ):
+        # All spans created here inherit these attributes
+        with langfuse.start_as_current_generation(
+            name="llm-call",
+            model="gpt-4o"
+        ) as gen:
+            # This generation automatically has user_id, session_id, metadata, version
+            pass
+```
+
+</Tab>
+<Tab title="With @observe Decorator">
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe()
+def my_llm_pipeline(user_id: str, session_id: str):
+    # Propagate early in the trace
+    with langfuse.propagate_attributes(
+        user_id=user_id,
+        session_id=session_id,
+        metadata={"pipeline": "main"}
+    ):
+        # All nested @observe functions inherit these attributes
+        result = call_llm()
+        return result
+
+@observe()
+def call_llm():
+    # This automatically has user_id, session_id, metadata from parent
+    pass
+```
+
+</Tab>
+</Tabs>
+
+<Callout type="warning">
+**Important Timing:** Call `propagate_attributes()` as early as possible in your trace. Only the currently active span and spans created after entering this context will have these attributes. Pre-existing spans will NOT be updated.
+</Callout>
+
+**Attribute Restrictions:**
+- **Values**: Must be strings ≤200 characters
+- **Metadata Keys**: Alphanumeric characters only (no whitespace or special characters)
+- **Metadata Values**: Same as other values (strings, ≤200 chars)
+- Invalid values are dropped with a warning logged
+
+**Propagatable Attributes:**
+- `user_id` - User identifier
+- `session_id` - Session identifier
+- `metadata` - Key-value metadata (both keys and values must be strings)
+- `version` - Version identifier
+
+**Non-Propagatable Attributes** (use `update_trace()` instead):
+- `tags` - List of tags
+- `name` - Trace name
+- `input` / `output` - Trace input/output
+- `public` - Public visibility flag
+
+**Nesting Behavior:** Nesting `propagate_attributes()` contexts is possible but discouraged. Inner contexts will overwrite outer values for the same keys.
+
+#### Advanced: Cross-Service Propagation
+
+For distributed tracing across multiple services, use the `as_baggage` parameter to propagate attributes via HTTP headers:
+
+```python
+from langfuse import get_client
+import requests
+
+langfuse = get_client()
+
+# Service A - originating service
+with langfuse.start_as_current_span(name="api-request"):
+    with langfuse.propagate_attributes(
+        user_id="user_123",
+        session_id="session_abc",
+        as_baggage=True  # Propagate via HTTP headers
+    ):
+        # HTTP request to Service B
+        response = requests.get("https://service-b.example.com/api")
+        # user_id and session_id are now in HTTP headers
+
+# Service B will automatically extract and apply these attributes
+```
+
+<Callout type="warning">
+**Security Warning:** When `as_baggage=True`, attribute values are added to HTTP headers on ALL outbound requests. Only enable for non-sensitive values and when you need cross-service tracing.
+</Callout>
+
+**Migration from update_trace():**
+
+```python
+# Old approach (only sets on trace, not on individual spans)
+span.update_trace(user_id="user_123", session_id="session_abc")
+
+# New approach (propagates to all child spans)
+with langfuse.propagate_attributes(
+    user_id="user_123",
+    session_id="session_abc"
+):
+    # All child spans now have these attributes
+    pass
+```
+
 ### Trace Input/Output Behavior
 
 In v3, trace input and output are automatically set from the **root observation** (first span/generation) by default. This differs from v2 where integrations could set trace-level inputs/outputs directly.
