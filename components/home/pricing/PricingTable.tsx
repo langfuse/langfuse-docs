@@ -785,6 +785,14 @@ const sections: Section[] = [
         },
       },
       {
+        name: "Mixpanel Integration",
+        href: "/integrations/analytics/mixpanel",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true },
+        },
+      },
+      {
         name: "Scheduled Batch Export to Blob Storage",
         href: "/docs/api-and-data-platform/features/query-via-sdk#blob-storage",
         tiers: {
@@ -1276,7 +1284,8 @@ const FeatureCell = ({
               <InfoIcon className="inline-block size-3 ml-1" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
-              Available as part of the Enterprise add-on for self-hosted deployments.
+              Available as part of the Enterprise add-on for self-hosted
+              deployments.
             </HoverCardContent>
           </HoverCard>
         )}
@@ -1307,7 +1316,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
     <div
       className={cn(
         "mt-12",
-        selectedTiers.length === 1 
+        selectedTiers.length === 1
           ? "flex justify-center"
           : "grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
         selectedTiers.length === 4 && "md:grid-cols-4",
@@ -1555,10 +1564,12 @@ export function PricingTable({
           Feature comparison
         </h2>
 
-        <div className={cn(
-          "mx-auto space-y-16",
-          selectedTiers.length === 1 ? "max-w-xl" : "max-w-2xl"
-        )}>
+        <div
+          className={cn(
+            "mx-auto space-y-16",
+            selectedTiers.length === 1 ? "max-w-xl" : "max-w-2xl"
+          )}
+        >
           {selectedTiers.map((tier) => (
             <div
               key={tier.id}
@@ -1674,16 +1685,16 @@ export function PricingTable({
         )}
 
         <div className="relative">
-          <Table className={cn(
-            selectedTiers.length === 1 ? "w-full" : "w-full"
-          )}>
+          <Table
+            className={cn(selectedTiers.length === 1 ? "w-full" : "w-full")}
+          >
             <thead ref={headerRef} className="bg-muted">
               <tr>
-                <th 
+                <th
                   className={cn(
                     "text-left font-medium",
                     selectedTiers.length === 1 ? "w-7/12" : "w-3/12"
-                  )} 
+                  )}
                   scope="col"
                 ></th>
                 {selectedTiers.map((tier) => (
