@@ -1,0 +1,256 @@
+---
+title: How to retrieve experiment scores via UI or API/SDK?
+description: Learn how to export and retrieve experiment scores through the Langfuse UI or programmatically via API/SDK.
+tags: [evaluation, experiments]
+---
+
+# How to Retrieve Experiment Scores?
+
+<Callout type="info">
+**Terminology Note**: "Experiment" and "dataset run" are used interchangeably throughout Langfuse. We are moving toward deprecating the term "dataset run" in favor of "experiment", but both terms currently refer to the same concept.
+</Callout>
+
+Langfuse supports two types of experiment scores:
+
+1. **Experiment-level scores**: Overall metrics for the entire experiment run (e.g., precision, recall, F1-scores). These scores are immutable and represent aggregate performance. [Learn more about run-level scores](/changelog/2025-05-07-run-level-scores).
+2. **Experiment-item-level scores**: Scores for individual items within an experiment (e.g., per-generated-output evaluations).
+
+## Via UI Export
+
+The Langfuse UI provides export functionality for experiment scores.
+
+**Export locations:**
+- **Dataset runs page**: Export dataset run metrics across multiple experiments
+- **Dataset detail page**: Export dataset run metrics for a specific dataset's experiments
+
+{/* <Frame fullWidth>
+  ![Export experiments from UI](/images/faq/export-experiment-scores-ui.png)
+</Frame> */}
+
+The exported data includes both experiment-level and experiment-item-level scores.
+
+## Via API/SDK
+
+### Experiment-Level Scores
+
+Fetch experiment-level scores using the Langfuse SDK or scores API with the `datasetRunId` parameter:
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+# Fetch experiment-level scores
+scores = langfuse.list_scores(
+    data_type="NUMERIC",  # optional: filter by score type
+    dataset_run_id="<experiment_run_id>"
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// Fetch experiment-level scores
+const scores = await langfuse.score.list({
+  dataType: "NUMERIC",  // optional: filter by score type
+  datasetRunId: "<experiment_run_id>"
+});
+```
+
+</Tab>
+<Tab>
+
+```bash
+GET https://api.langfuse.com/api/public/v2/scores?datasetRunId=<experiment_run_id>
+```
+
+[API Reference](https://api.reference.langfuse.com/#tag/scorev2/get/api/public/v2/scores)
+
+</Tab>
+</LangTabs>
+
+See the [Scores Data Model](/docs/evaluation/evaluation-methods/data-model) for details on score properties.
+
+### Experiment-Item-Level Scores
+
+<Callout type="warning">
+**Current Workaround**: The method below is a workaround for retrieving experiment-item-level scores. We recommend:
+1. Using the [Experiment Runner SDK](/changelog/2025-09-17-experiment-runner-sdk) which provides direct access to all scores in context
+2. We may add a dedicated API route for experiment scores/metrics in the near future
+</Callout>
+
+To retrieve experiment-item-level scores programmatically:
+
+<Steps>
+
+### Step 1: Fetch the experiment run
+
+Get the experiment run details including all trace IDs:
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+from urllib.parse import quote
+
+langfuse = Langfuse()
+
+dataset_name = "your-dataset-name"
+run_name = "your-run-name"
+
+# URL encode names if they contain special characters
+encoded_dataset_name = quote(dataset_name, safe="")
+encoded_run_name = quote(run_name, safe="")
+
+# Fetch experiment run
+run = langfuse.get_dataset_run(
+    dataset_name=encoded_dataset_name,
+    run_name=encoded_run_name
+)
+
+# Extract trace IDs
+trace_ids = [item["trace_id"] for item in run["dataset_run_items"]]
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+const datasetName = "your-dataset-name";
+const runName = "your-run-name";
+
+// URL encode names if they contain special characters
+const encodedDatasetName = encodeURIComponent(datasetName);
+const encodedRunName = encodeURIComponent(runName);
+
+// Fetch experiment run
+const run = await langfuse.dataset.getRun({
+  datasetName: encodedDatasetName,
+  runName: encodedRunName
+});
+
+// Extract trace IDs
+const traceIds = run.datasetRunItems.map(item => item.traceId);
+```
+
+</Tab>
+<Tab>
+
+```bash
+GET https://api.langfuse.com/api/public/datasets/{datasetName}/runs/{runName}
+```
+
+[API Reference](https://api.reference.langfuse.com/#tag/datasets/get/api/public/datasets/{datasetName}/runs/{runName})
+
+</Tab>
+</LangTabs>
+
+### Step 2: Fetch scores for each trace
+
+Use the trace IDs to retrieve scores for each experiment item:
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
+<Tab>
+
+```python
+# Fetch trace details including scores
+for trace_id in trace_ids:
+    trace = langfuse.get_trace(trace_id)
+    scores = trace["scores"]
+
+    print(f"Trace {trace_id}: {scores}")
+```
+
+</Tab>
+<Tab>
+
+```ts
+// Fetch trace details including scores
+for (const traceId of traceIds) {
+  const trace = await langfuse.trace.get(traceId);
+  const scores = trace.scores;
+
+  console.log(`Trace ${traceId}:`, scores);
+}
+```
+
+</Tab>
+<Tab>
+
+```bash
+GET https://api.langfuse.com/api/public/traces/{traceId}
+```
+
+[API Reference](https://api.reference.langfuse.com/#tag/trace/get/api/public/traces/{traceId})
+
+</Tab>
+</LangTabs>
+
+</Steps>
+
+### Recommended: Use Experiment Runner SDK
+
+For a better developer experience, use the [Experiment Runner SDK](/changelog/2025-09-17-experiment-runner-sdk) which provides built-in access to all experiment scores and results:
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Run experiment with automatic score collection
+result = langfuse.run_experiment(
+    name="my-experiment",
+    data=my_dataset,
+    task=my_task,
+    evaluators=[my_evaluator]  # optional
+)
+
+# Access all scores directly
+print(result.format())  # includes all scores in formatted output
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// Run experiment with automatic score collection
+const result = await langfuse.experiment.run({
+  name: "my-experiment",
+  data: myDataset,
+  task: myTask,
+  evaluators: [myEvaluator]  // optional
+});
+
+// Access all scores directly
+console.log(await result.format());  // includes all scores in formatted output
+```
+
+</Tab>
+</LangTabs>
+
+## Related Resources
+
+- [Scores Data Model](/docs/evaluation/evaluation-methods/data-model)
+- [Run-Level Scores Changelog](/changelog/2025-05-07-run-level-scores)
+- [Experiment Runner SDK](/changelog/2025-09-17-experiment-runner-sdk)
+- [Experiments Documentation](/docs/evaluation/experiments/experiments-via-sdk)
