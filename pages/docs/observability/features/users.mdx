@@ -22,14 +22,12 @@ It's easy to map data in Langfuse to individual users. Just pass a unique identi
 When using the `@observe()` decorator:
 
 ```python
-from langfuse import observe, get_client
-
-langfuse = get_client()
+from langfuse import observe, propagate_attributes
 
 @observe()
 def process_user_request(user_query):
     # Propagate user_id to all child spans
-    with langfuse.propagate_attributes(user_id="user_12345"):
+    with propagate_attributes(user_id="user_12345"):
         # All nested operations automatically inherit user_id
         result = process_query(user_query)
         return result
@@ -38,7 +36,7 @@ def process_user_request(user_query):
 When creating spans directly:
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
@@ -46,7 +44,7 @@ with langfuse.start_as_current_span(
     name="process-user-request"
 ) as root_span:
     # Propagate user_id to all child spans
-    with langfuse.propagate_attributes(user_id="user_12345"):
+    with propagate_attributes(user_id="user_12345"):
         # All spans created here automatically have user_id
         with root_span.start_as_current_generation(
             name="generate-response",
@@ -109,14 +107,14 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 <Tab>
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.openai import openai
 
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="openai-call"):
     # Propagate user_id to all spans including OpenAI generation
-    with langfuse.propagate_attributes(user_id="user_12345"):
+    with propagate_attributes(user_id="user_12345"):
         completion = openai.chat.completions.create(
             name="test-chat",
             model="gpt-3.5-turbo",
@@ -134,7 +132,7 @@ with langfuse.start_as_current_span(name="openai-call"):
 Use `propagate_attributes()` with the CallbackHandler:
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 
 langfuse = get_client()
@@ -142,7 +140,7 @@ handler = CallbackHandler()
 
 with langfuse.start_as_current_span(name="langchain-call"):
     # Propagate user_id to all spans
-    with langfuse.propagate_attributes(user_id="user_12345"):
+    with propagate_attributes(user_id="user_12345"):
         # Pass handler to the chain invocation
         chain.invoke(
             {"animal": "dog"},

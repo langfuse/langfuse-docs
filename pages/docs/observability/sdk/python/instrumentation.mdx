@@ -370,7 +370,7 @@ with langfuse.start_as_current_span(name="initial-operation") as span:
 
 ### Propagating Trace Attributes
 
-For certain trace attributes (`user_id`, `session_id`, `metadata`, `version`), you may want them to be automatically applied to **all spans** created within a trace, not just the trace object itself. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) operate on individual spans/observations.
+For certain trace attributes (`user_id`, `session_id`, `metadata`, `version`), you may want them to be automatically applied to **all spans** created within a trace, not just the trace object itself. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) will soon operate on individual spans/observations.
 
 Use the `propagate_attributes()` context manager to automatically propagate these attributes to all child spans:
 
@@ -378,13 +378,13 @@ Use the `propagate_attributes()` context manager to automatically propagate thes
 <Tab title="Context Manager">
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="user-workflow") as span:
     # Propagate attributes to all child spans
-    with langfuse.propagate_attributes(
+    with propagate_attributes(
         user_id="user_123",
         session_id="session_abc",
         metadata={"experiment": "variant_a", "env": "prod"},
@@ -403,14 +403,12 @@ with langfuse.start_as_current_span(name="user-workflow") as span:
 <Tab title="With @observe Decorator">
 
 ```python
-from langfuse import observe, get_client
-
-langfuse = get_client()
+from langfuse import observe, propagate_attributes
 
 @observe()
 def my_llm_pipeline(user_id: str, session_id: str):
     # Propagate early in the trace
-    with langfuse.propagate_attributes(
+    with propagate_attributes(
         user_id=user_id,
         session_id=session_id,
         metadata={"pipeline": "main"}
@@ -457,14 +455,14 @@ def call_llm():
 For distributed tracing across multiple services, use the `as_baggage` parameter to propagate attributes via HTTP headers:
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 import requests
 
 langfuse = get_client()
 
 # Service A - originating service
 with langfuse.start_as_current_span(name="api-request"):
-    with langfuse.propagate_attributes(
+    with propagate_attributes(
         user_id="user_123",
         session_id="session_abc",
         as_baggage=True  # Propagate via HTTP headers
@@ -483,11 +481,13 @@ with langfuse.start_as_current_span(name="api-request"):
 **Migration from update_trace():**
 
 ```python
+from langfuse import propagate_attributes
+
 # Old approach (only sets on trace, not on individual spans)
 span.update_trace(user_id="user_123", session_id="session_abc")
 
 # New approach (propagates to all child spans)
-with langfuse.propagate_attributes(
+with propagate_attributes(
     user_id="user_123",
     session_id="session_abc"
 ):

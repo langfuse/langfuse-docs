@@ -104,14 +104,12 @@ The `version` parameter can be added to `traces` and all observation types (e.g.
 When using the `@observe()` decorator:
 
 ```python
-from langfuse import observe, get_client
-
-langfuse = get_client()
+from langfuse import observe, propagate_attributes
 
 @observe()
 def process_data():
     # Propagate version to all child spans
-    with langfuse.propagate_attributes(version="1.0"):
+    with propagate_attributes(version="1.0"):
         # All nested operations automatically inherit version
         result = perform_processing()
         return result
@@ -120,13 +118,13 @@ def process_data():
 When creating spans directly:
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="process-data") as span:
     # Propagate version to all child spans
-    with langfuse.propagate_attributes(version="1.0"):
+    with propagate_attributes(version="1.0"):
         # All spans created here automatically have version="1.0"
         with span.start_as_current_generation(
             name="guess-countries",

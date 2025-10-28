@@ -26,15 +26,13 @@ Use `propagate_attributes()` to ensure metadata is automatically applied to all 
 When using the `@observe()` decorator:
 
 ```python
-from langfuse import observe, get_client
-
-langfuse = get_client()
+from langfuse import observe, propagate_attributes
 
 @observe()
 def process_data():
     # Propagate metadata to all child spans
-    with langfuse.propagate_attributes(
-        metadata={"source": "api", "version": "1.2.3", "env": "prod"}
+    with propagate_attributes(
+        metadata={"source": "api", "region": "us-east-1", "user_tier": "premium"}
     ):
         # All nested operations automatically inherit this metadata
         result = perform_processing()
@@ -44,13 +42,13 @@ def process_data():
 When creating spans directly:
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="process-request") as root_span:
     # Propagate metadata to all child spans
-    with langfuse.propagate_attributes(metadata={"request_id": "req_12345", "env": "prod"}):
+    with propagate_attributes(metadata={"request_id": "req_12345", "region": "us-east-1"}):
         # All spans created here automatically have this metadata
         with root_span.start_as_current_generation(
             name="generate-response",
@@ -78,7 +76,7 @@ await startActiveObservation("context-manager", async (span) => {
 
   // Propagate metadata to all child spans
   await propagateAttributes({
-    metadata: { source: "api", version: "1.2.3", env: "prod" },
+    metadata: { source: "api", region: "us-east-1", userTier: "premium" },
   }, async () => {
     // All spans created here automatically have this metadata
     // ... your logic ...
@@ -94,7 +92,7 @@ import { observe, propagateAttributes } from "@langfuse/tracing";
 const processData = observe(async (data: string) => {
   // Propagate metadata to all child spans
   return await propagateAttributes(
-    { metadata: { source: "api", env: "prod" } },
+    { metadata: { source: "api", region: "us-east-1" } },
     async () => {
       // All nested operations automatically inherit this metadata
       const result = await performProcessing(data);
@@ -112,15 +110,15 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 <Tab title="OpenAI (Python v2)">
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.openai import openai
 
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="openai-call"):
     # Propagate metadata to all spans including OpenAI generation
-    with langfuse.propagate_attributes(
-        metadata={"source": "api", "env": "prod"}
+    with propagate_attributes(
+        metadata={"source": "api", "region": "us-east-1"}
     ):
         completion = openai.chat.completions.create(
             name="test-chat",
@@ -144,7 +142,7 @@ import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 await startActiveObservation("openai-call", async () => {
   // Propagate metadata to all spans
   await propagateAttributes({
-    metadata: { source: "api", env: "prod" },
+    metadata: { source: "api", region: "us-east-1" },
   }, async () => {
     const res = await observeOpenAI(new OpenAI()).chat.completions.create({
       messages: [{ role: "system", content: "Tell me a story about a dog." }],
@@ -159,7 +157,7 @@ await startActiveObservation("openai-call", async () => {
 <Tab>
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 
 langfuse = get_client()
@@ -167,7 +165,7 @@ langfuse_handler = CallbackHandler()
 
 with langfuse.start_as_current_span(name="langchain-call"):
     # Propagate metadata to all spans
-    with langfuse.propagate_attributes(
+    with propagate_attributes(
         metadata={"foo": "bar", "baz": "qux"}
     ):
         response = chain.invoke(
@@ -226,9 +224,9 @@ with langfuse.start_as_current_span(name="process-request") as root_span:
     with root_span.start_as_current_generation(
         name="generate-response",
         model="gpt-4o",
-        metadata={"temperature": 0.7}  # This metadata is only on this generation
+        metadata={"prompt_type": "creative"}  # This metadata is only on this generation
     ) as gen:
-        gen.update(metadata={"completion_type": "creative"})
+        gen.update(metadata={"response_language": "english"})
 ```
 
 ```typescript

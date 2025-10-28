@@ -23,14 +23,12 @@ Add a `sessionId` when creating/updating a trace. This can be any string that yo
 When using the `@observe()` decorator:
 
 ```python
-from langfuse import observe, get_client
-
-langfuse = get_client()
+from langfuse import observe, propagate_attributes
 
 @observe()
 def process_request():
     # Propagate session_id to all child spans
-    with langfuse.propagate_attributes(session_id="your-session-id"):
+    with propagate_attributes(session_id="your-session-id"):
         # All nested operations automatically inherit session_id
         result = process_chat_message()
         return result
@@ -39,7 +37,7 @@ def process_request():
 When creating spans directly:
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
@@ -47,7 +45,7 @@ with langfuse.start_as_current_span(
     name="process-chat-message"
 ) as root_span:
     # Propagate session_id to all child spans
-    with langfuse.propagate_attributes(session_id="chat-session-123"):
+    with propagate_attributes(session_id="chat-session-123"):
         # All spans created here automatically have session_id
         with root_span.start_as_current_generation(
             name="generate-response",
@@ -109,14 +107,14 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 <Tab>
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.openai import openai
 
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="openai-call"):
     # Propagate session_id to all spans including OpenAI generation
-    with langfuse.propagate_attributes(session_id="your-session-id"):
+    with propagate_attributes(session_id="your-session-id"):
         completion = openai.chat.completions.create(
             name="test-chat",
             model="gpt-3.5-turbo",
@@ -132,7 +130,7 @@ with langfuse.start_as_current_span(name="openai-call"):
 <Tab>
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 
 langfuse = get_client()
@@ -140,7 +138,7 @@ handler = CallbackHandler()
 
 with langfuse.start_as_current_span(name="langchain-call"):
     # Propagate session_id to all spans
-    with langfuse.propagate_attributes(session_id="your-session-id"):
+    with propagate_attributes(session_id="your-session-id"):
         # Pass handler to the chain invocation
         chain.invoke(
             {"animal": "dog"},

@@ -60,30 +60,6 @@ Example trace in Langfuse UI
 
 </div>
 
-#### Attribute Propagation
-
-Certain trace attributes can be **automatically propagated** from parent spans to all child spans using OpenTelemetry context propagation. This ensures consistent attribute coverage across all observations in a trace without manually setting them on each span.
-
-**Propagatable Attributes:**
-- `userId` / `user_id`: Identifies the user associated with the trace
-- `sessionId` / `session_id`: Groups related traces into a session
-- `metadata`: Custom key-value pairs for additional context
-- `version`: Tracks application or prompt versions
-
-**Non-Propagatable Attributes:**
-- `tags`: Must be set directly on the trace using `update_trace()` / `updateTrace()`
-- `name`: Specific to each observation
-- `input` / `output`: Specific to each observation
-- `public`: Visibility setting specific to each observation
-
-**Trace-Level vs Observation-Specific:**
-- **Trace-level attributes** (propagatable): Set once and automatically inherited by all child spans
-- **Observation-specific attributes** (non-propagatable): Must be set individually on each observation
-
-For implementation details and code examples, see:
-- [Python SDK: Propagating Trace Attributes](/docs/observability/sdk/python/instrumentation#propagating-trace-attributes)
-- [TypeScript SDK: Propagating Trace Attributes](/docs/observability/sdk/typescript/instrumentation#propagating-trace-attributes)
-
 #### Types
 
 Langfuse supports a number of LLM application specific [observation types](/docs/observability/features/observation-types):
