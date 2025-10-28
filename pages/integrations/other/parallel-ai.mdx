@@ -1,0 +1,197 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Monitor Parallel AI Tasks with Langfuse
+sidebarTitle: Parallel AI
+logo: /images/integrations/parallel_icon.svg
+description: Learn how to trace Parallel AI task execution using Langfuse to capture detailed observability data for your AI workflow operations.
+category: Integrations
+---
+
+# Parallel AI Integration
+
+In this guide, we'll show you how to integrate [Langfuse](https://langfuse.com) with [Parallel AI](https://parallel.ai/) to trace your AI task operations. By leveraging Langfuse's tracing capabilities, you can automatically capture details such as inputs, outputs, and execution times of your Parallel AI tasks.
+
+> **What is Parallel AI?** [Parallel AI](https://parallel.ai/) is an API service that enables you to execute AI tasks in parallel, optimizing workflow efficiency. It provides a powerful task API that allows you to run multiple AI operations concurrently, making it ideal for building scalable AI applications.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
+
+<Steps>
+## Get Started
+
+First, install the necessary Python packages:
+
+
+```python
+%pip install langfuse parallel-web openai
+```
+
+Next, configure your environment with your Parallel AI and Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting) and from the [Parallel AI dashboard](https://parallel.ai/).
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your Parallel AI key
+os.environ["PARALLEL_API_KEY"] = "..."
+
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+## Example 1: Tracing the Parallel Task API
+
+To monitor the Task API requests, we use the [Langfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators). In this example, the `@observe()` decorator captures the inputs, outputs, and execution time of the `parallel_task()` function. For more control over the data you are sending to Langfuse, you can use the [Context Manager or create manual observations](https://langfuse.com/docs/observability/sdk/python/instrumentation#custom-instrumentation) using the Python SDK.
+
+
+```python
+import os
+from parallel import Parallel
+from parallel.types import TaskSpecParam
+from langfuse import observe
+
+client = Parallel(api_key=os.environ["PARALLEL_API_KEY"])
+
+@observe(as_type="retriever")
+def parallel_task(input: str):
+    task_run = client.task_run.create(
+        input=input,
+        task_spec=TaskSpecParam(
+            output_schema="The founding date of the company in the format MM-YYYY"
+            ),
+        processor="base"
+    )
+    print(f"Run ID: {task_run.run_id}")
+
+    run_result = client.task_run.result(task_run.run_id, api_timeout=3600)
+    print(run_result.output)
+
+    return run_result.output
+
+parallel_task("Langfuse")
+```
+
+## Example 2: Tracing the Parallel Chat API
+
+You can trace the interactions with the Parallel Chat API by using the [Langfuse OpenAI wrapper](https://langfuse.com/integrations/model-providers/openai-py): 
+
+
+```python
+from langfuse.openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ["PARALLEL_API_KEY"],  # Your Parallel API key
+    base_url="https://api.parallel.ai"  # Parallel's API beta endpoint
+)
+
+response = client.chat.completions.create(
+    model="speed", # Parallel model name
+    name="Parallel AI Chat",
+    messages=[
+        {"role": "user", "content": "What does Parallel Web Systems do?"}
+    ],
+    response_format={
+        "type": "json_schema",
+        "json_schema": {
+            "name": "reasoning_schema",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "reasoning": {
+                        "type": "string",
+                        "description": "Think step by step to arrive at the answer",
+                    },
+                    "answer": {
+                        "type": "string",
+                        "description": "The direct answer to the question",
+                    },
+                    "citations": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Sources cited to support the answer",
+                    },
+                },
+            },
+        },
+    },
+)
+
+print(response.choices[0].message.content)
+```
+
+## Example 3: Parallel Search API and OpenAI
+
+You can also trace more complex workflows that involve summarizing the search results with OpenAI. Here we use the [Langfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to group both the Parallel AI search and the OpenAI generation into one trace. 
+
+
+```python
+import os
+from parallel import Parallel
+from langfuse.openai import OpenAI
+from langfuse import observe
+
+
+@observe()
+def search_and_summarize(objective, search_queries):
+    # 1. Parallel Search API
+    parallel_client = Parallel(api_key=os.environ["PARALLEL_API_KEY"])
+
+    @observe(as_type="retriever")
+    def search_with_parallel(objective, search_queries, num_results: int = 5):
+        """Search the web using Parallel AI and return results."""
+        search = parallel_client.beta.search(
+            objective=objective,
+            search_queries=search_queries,
+            processor="base",
+            max_results=num_results,
+            max_chars_per_result=6000
+        )
+        return search.results
+
+    results = search_with_parallel(objective, search_queries)
+    results_text = "\n\n".join(str(r) for r in results) if results else "No results."
+
+    # 2. Summarize with OpenAI
+    openai_client = OpenAI()
+    resp = openai_client.chat.completions.create(
+        model="gpt-5-mini",
+        messages=[
+            {"role": "system", "content": "Summarize the following search results clearly and concisely."},
+            {"role": "user", "content": results_text}
+        ]
+    )
+    return resp.choices[0].message.content
+
+# Example usage
+search_and_summarize(
+    objective="Explain what Langfuse is and highlight its main features for LLM application observability.",
+    search_queries=[
+        "Langfuse LLM observability",
+        "Langfuse features and documentation",
+        "Langfuse tracing evaluations dashboards"
+    ],
+)
+```
+
+## See Traces in Langfuse
+
+After executing the traced functions, log in to your [Langfuse Dashboard](https://cloud.langfuse.com) to view detailed trace logs. You'll be able to see:
+
+- Individual task creation and retrieval operations
+- Parallel execution patterns and timing
+- Input prompts and output results
+- Performance metrics for each task
+
+![Parallel AI Example trace in Langfuse UI](https://langfuse.com/images/cookbook/integration_parallel-ai/parallel-ai-example-trace.png)
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a664e35ab40a75d04cf6a262d0399f05?timestamp=2025-10-28T15%3A16%3A26.617Z&observation=13fc56583aafeb06)
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
