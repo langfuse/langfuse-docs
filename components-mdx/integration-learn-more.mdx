@@ -24,6 +24,8 @@ langfuse = get_client()
 
 @observe()
 def my_instrumented_function(input):
+
+    # Run your application here
     output = my_llm_call(input)
 
     langfuse.update_current_trace(
