@@ -1,6 +1,6 @@
 ---
 title: Sessions (Chats, Threads, etc.)
-description: Track LLM chat conversations or threads across multiple traces in a single session. Replay the entire interaction to debug or analyze the conversation.
+description: Track LLM chat conversations or threads across multiple observations and traces into a single session. Replay the entire interaction to debug or analyze the conversation.
 sidebarTitle: Sessions
 ---
 
@@ -8,14 +8,14 @@ import { PropagationRestrictionsCallout } from "@/components/PropagationRestrict
 
 # Sessions
 
-Many interactions with LLM applications span multiple traces. `Sessions` in Langfuse are a way to group these traces together and see a simple **session replay** of the entire interaction. Get started by adding a `sessionId` when creating a trace.
+Many interactions with LLM applications span multiple traces and observations. `Sessions` in Langfuse are a special a way to group these observations across traces together and see a simple **session replay** of the entire interaction. Get started by propagating the `sessionId` attribute across observations.
 
 ```mermaid
 graph LR
     A(Session) -->|1:n, sessionId| B(Trace)
 ```
 
-Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
+Propagate a `sessionId` across observations that span multiple traces. The `sessionId` can be any US-ASCII character string less than 200 characters that you use to identify the session. All observations with the same `sessionId` will be grouped together including their enclosing traces.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 
@@ -31,6 +31,7 @@ def process_request():
     with propagate_attributes(session_id="your-session-id"):
         # All nested observations automatically inherit session_id
         result = process_chat_message()
+
         return result
 ```
 

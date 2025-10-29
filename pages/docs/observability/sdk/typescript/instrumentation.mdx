@@ -456,14 +456,14 @@ await startActiveObservation("user-request", async (span) => {
 <Callout type="info">
   **Note:** For `userId`, `sessionId`, `metadata`, and `version`, consider using
   `propagateAttributes()` (see below) to ensure these attributes are applied to
-  **all spans**, not just the trace object.
+  **all observations**, not just the trace object.
 </Callout>
 
-### Propagating Trace Attributes
+### Propagating Attributes
 
-For certain trace attributes (`userId`, `sessionId`, `metadata`, `version`), you may want them to be automatically applied to **all spans** created within a trace, not just the trace object itself. This is important because Langfuse aggregation queries (e.g., filtering by userId, calculating costs by sessionId) will soon operate across spans/observations.
+Certain attributes (`userId`, `sessionId`, `metadata`, `version`) should be applied to **all spans** created within a some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by userId, calculating costs by sessionId) will soon operate on across individual observations rather than the trace level.)
 
-Use the `propagateAttributes()` function to automatically propagate these attributes to all child spans:
+Use the `propagateAttributes()` function to automatically propagate these attributes to all child observations:
 
 ```typescript /propagateAttributes/
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
@@ -492,8 +492,8 @@ await startActiveObservation("user-workflow", async (span) => {
 
 <Callout type="warning">
   **Important Timing:** Call `propagateAttributes()` as early as possible in
-  your trace. Only the currently active span and spans created within the
-  callback will have these attributes. Pre-existing spans will NOT be updated.
+  your trace. Only the currently active observation and observations created within the
+  callback will have these attributes. Pre-existing observations will NOT be updated.
 </Callout>
 
 **Attribute Restrictions:**
@@ -519,11 +519,10 @@ await startActiveObservation("user-workflow", async (span) => {
 
 #### Advanced: Cross-Service Propagation
 
-For distributed tracing across multiple services, use the `asBaggage` parameter to propagate attributes via HTTP headers:
+For distributed tracing across multiple services, use the `asBaggage` parameter (see [OpenTelemetry documentation](https://opentelemetry.io/docs/concepts/signals/baggage/) for more details) to propagate attributes via HTTP headers:
 
 ```typescript /propagateAttributes/
 import { propagateAttributes, startActiveObservation } from "@langfuse/tracing";
-import fetch from "node-fetch";
 
 await startActiveObservation("api-request", async () => {
   await propagateAttributes(
@@ -546,21 +545,3 @@ await startActiveObservation("api-request", async () => {
   HTTP headers on ALL outbound requests. Only enable for non-sensitive values
   and when you need cross-service tracing.
 </Callout>
-
-**Migration from updateTrace():**
-
-```typescript
-// Old approach (only sets on trace, not on individual spans)
-span.updateTrace({ userId: "user_123", sessionId: "session_abc" });
-
-// New approach (propagates to all child spans)
-await propagateAttributes(
-  {
-    userId: "user_123",
-    sessionId: "session_abc",
-  },
-  async () => {
-    // All child spans now have these attributes
-  }
-);
-```

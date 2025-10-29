@@ -33,7 +33,7 @@ The SDKs look for a `release` in the following order:
 
 1. SDK initialization
 2. Environment variable
-3. Automatically on popular platforms
+3. Automatically set release identifiers on popular deployment platforms
 
 ### Initialization
 
@@ -44,11 +44,10 @@ The SDKs look for a `release` in the following order:
 The Python SDK allows you to set the release when initializing the client:
 
 ```python
-from langfuse import Langfuse, get_client
+from langfuse import Langfuse
 
 # Set the release when initializing the client
 langfuse = Langfuse(release="v2.1.24")
-client = get_client()
 ```
 
 </Tab>
@@ -91,18 +90,11 @@ flowchart LR
     A1 --> A2
 ```
 
-The `version` parameter can be added to `traces` and all observation types (e.g., `span`, `generation`, `event`, and [other observation types](/docs/observability/features/observation-types)). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
-
-**Trace-Level vs Observation-Level Versions:**
-
-- **Trace-level version (propagated)**: Use `propagate_attributes()` / `propagateAttributes()` to ensure version is applied to **all spans** in the trace
-- **Observation-level version (specific)**: Set `version` during observation creation or via `update()` to mark a specific span/generation only
+The `version` parameter can be added to all observation types (e.g., `span`, `generation`, `event`, and [other observation types](/docs/observability/features/observation-types)). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "Langchain (Python)","Langchain (JS)"]}>
 <Tab>
-**Trace-Level Version (Propagated):**
-
-When using the `@observe()` decorator:
+**Set Version on all observations within a context:**
 
 ```python /propagate_attributes(version="1.0")/
 from langfuse import observe, propagate_attributes
@@ -113,6 +105,7 @@ def process_data():
     with propagate_attributes(version="1.0"):
         # All nested operations automatically inherit version
         result = perform_processing()
+
         return result
 ```
 
@@ -135,22 +128,22 @@ with langfuse.start_as_current_span(name="process-data") as span:
             pass
 ```
 
-**Observation-Level Version (Specific to one observation):**
+**Version on a specific observation:**
 
 ```python
-# Set version when creating a specific span
-with langfuse.start_as_current_span(
-    name="process-data",
-    version="1.0"  # Only this span has version="1.0"
-) as span:
-    # Child spans do NOT inherit this version
+from langfuse import get_client
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="process-data", version="1.0") as span:
+    # This span has version="1.0"
     pass
 ```
 
 </Tab>
 <Tab>
 
-**Trace-Level Version (Propagated):**
+**Propagating version to all observations within a context:**
 
 ```ts /propagateAttributes/
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
@@ -175,14 +168,18 @@ await startActiveObservation("process-data", async (span) => {
 });
 ```
 
-**Observation-Level Version (Specific to one observation):**
+**Version on a specific observation:**
 
 ```ts
-// Set version for a specific generation only
-langfuse.generation({
-  name: "guess-countries",
-  version: "1.0", // Only this generation has version="1.0"
-});
+import { startObservation } from "@langfuse/tracing";
+
+const generation = startObservation(
+  "guess-countries",
+  { model: "gpt-4" },
+  { asType: "generation" }
+);
+generation.update({ version: "1.0" });
+generation.end();
 ```
 
 </Tab>

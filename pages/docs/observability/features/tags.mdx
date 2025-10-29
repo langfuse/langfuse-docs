@@ -11,10 +11,6 @@ To tag a trace, add a list of tags to the tags field of the trace object.
 Tags are strings and a trace may have multiple tags.
 Trace tags can be added, but not removed.
 
-<Callout type="warning">
-**Tags are NOT propagatable**: Unlike `userId`, `sessionId`, `metadata`, and `version`, tags must be set using `update_trace()` / `updateTrace()` and are not automatically propagated to child spans. Tags are trace-level attributes only.
-</Callout>
-
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)"]}>
 <Tab>
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):

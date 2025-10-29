@@ -326,43 +326,23 @@ with langfuse.start_as_current_span(name="data-processing"):
 
 Trace-level attributes apply to the entire trace, not just a single observation. You can set or update these using:
 
+- the `propagate_attributes` context manager that sets attributes on all observations inside its context and on the trace
 - The `.update_trace()` method on any `LangfuseSpan` or `LangfuseGeneration` object within that trace.
 - `langfuse.update_current_trace()` to update the trace associated with the currently active observation.
 
 **Trace attribute parameters:**
 
-| Parameter    | Type                  | Description                                                      |
-| :----------- | :-------------------- | :--------------------------------------------------------------- |
-| `name`       | `Optional[str]`       | Name for the trace.                                              |
-| `user_id`    | `Optional[str]`       | ID of the user associated with this trace.                       |
-| `session_id` | `Optional[str]`       | Session identifier for grouping related traces.                  |
-| `version`    | `Optional[str]`       | Version of your application/service for this trace.              |
-| `input`      | `Optional[Any]`       | Overall input for the entire trace.                              |
-| `output`     | `Optional[Any]`       | Overall output for the entire trace.                             |
-| `metadata`   | `Optional[Any]`       | Additional metadata for the trace.                               |
-| `tags`       | `Optional[List[str]]` | List of tags to categorize the trace.                            |
-| `public`     | `Optional[bool]`      | Whether the trace should be publicly accessible (if configured). |
-
-**Example: Setting Multiple Trace Attributes**
-
-```python
-from langfuse import get_client
-
-langfuse = get_client()
-
-with langfuse.start_as_current_span(name="initial-operation") as span:
-    # Set trace attributes early
-    span.update_trace(
-        user_id="user_xyz",
-        session_id="session_789",
-        tags=["beta-feature", "llm-chain"]
-    )
-    # ...
-    # Later, from another span in the same trace:
-    with span.start_as_current_generation(name="final-generation") as gen:
-        # ...
-        langfuse.update_current_trace(output={"final_status": "success"}, public=True)
-```
+| Parameter    | Type                  | Description                                                      | Recommended Method |
+| :----------- | :-------------------- | :--------------------------------------------------------------- | :----------------- |
+| `name`       | `Optional[str]`       | Name for the trace.                                              | `update_trace()` |
+| `user_id`    | `Optional[str]`       | ID of the user associated with this trace.                       | `propagate_attributes()` |
+| `session_id` | `Optional[str]`       | Session identifier for grouping related traces.                  | `propagate_attributes()` |
+| `version`    | `Optional[str]`       | Version of your application/service for this trace.              | `propagate_attributes()` |
+| `input`      | `Optional[Any]`       | Overall input for the entire trace.                              | `update_trace()` |
+| `output`     | `Optional[Any]`       | Overall output for the entire trace.                             | `update_trace()` |
+| `metadata`   | `Optional[Any]`       | Additional metadata for the trace.                               | `propagate_attributes()` |
+| `tags`       | `Optional[List[str]]` | List of tags to categorize the trace.                            | `update_trace()` |
+| `public`     | `Optional[bool]`      | Whether the trace should be publicly accessible (if configured). | `update_trace()` |
 
 <Callout type="info">
   **Note:** For `user_id`, `session_id`, `metadata`, and `version`, consider
@@ -370,9 +350,9 @@ with langfuse.start_as_current_span(name="initial-operation") as span:
   applied to **all spans**, not just the trace object.
 </Callout>
 
-### Propagating Trace Attributes
+### Propagating Attributes
 
-For certain trace attributes (`user_id`, `session_id`, `metadata`, `version`), you may want them to be automatically applied to **all spans** created within a trace, not just the trace object itself. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) will soon operate on individual spans/observations.
+Certain attributes (`user_id`, `session_id`, `metadata`, `version`) should be applied to **all spans** created within a some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) will soon operate on across individual observations rather than the trace level.
 
 Use the `propagate_attributes()` context manager to automatically propagate these attributes to all child spans:
 
@@ -430,8 +410,8 @@ def call_llm():
 
 <Callout type="warning">
   **Important Timing:** Call `propagate_attributes()` as early as possible in
-  your trace. Only the currently active span and spans created after entering
-  this context will have these attributes. Pre-existing spans will NOT be
+  your trace. Only the currently active observation and observations created after entering
+  this context will have these attributes. Pre-existing observations will NOT be
   updated.
 </Callout>
 
@@ -456,11 +436,9 @@ def call_llm():
 - `input` / `output` - Trace input/output
 - `public` - Public visibility flag
 
-**Nesting Behavior:** Nesting `propagate_attributes()` contexts is possible but discouraged. Inner contexts will overwrite outer values for the same keys.
-
 #### Advanced: Cross-Service Propagation
 
-For distributed tracing across multiple services, use the `as_baggage` parameter to propagate attributes via HTTP headers:
+For distributed tracing across multiple services, use the `as_baggage` parameter (see [OpenTelemetry documentation](https://opentelemetry.io/docs/concepts/signals/baggage/) for more details) to propagate attributes via HTTP headers:
 
 ```python /propagate_attributes/
 from langfuse import get_client, propagate_attributes
@@ -487,23 +465,6 @@ with langfuse.start_as_current_span(name="api-request"):
   HTTP headers on ALL outbound requests. Only enable for non-sensitive values
   and when you need cross-service tracing.
 </Callout>
-
-**Migration from update_trace():**
-
-```python
-from langfuse import propagate_attributes
-
-# Old approach (only sets on trace, not on individual spans)
-span.update_trace(user_id="user_123", session_id="session_abc")
-
-# New approach (propagates to all child spans)
-with propagate_attributes(
-    user_id="user_123",
-    session_id="session_abc"
-):
-    # All child spans now have these attributes
-    pass
-```
 
 ### Trace Input/Output Behavior
 
