@@ -367,7 +367,7 @@ from langfuse import get_client, propagate_attributes
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="user-workflow") as span:
-    # Propagate attributes to all child observationss
+    # Propagate attributes to all child observations
     with propagate_attributes(
         user_id="user_123",
         session_id="session_abc",
