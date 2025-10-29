@@ -1,0 +1,175 @@
+---
+title: "RAG Observability and Evals"
+date: 2025/10/28
+description: A practical guide to RAG observability and evals.
+ogImage: /images/blog/2025-10-28-rag-observability-and-evals/header.png
+tag: guide
+author: Abdallah
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="RAG Observability and Evals"
+  description="A practical guide to RAG observability and evals."
+  date="October 28, 2025"
+  authors={["aabedraba"]}
+/>
+
+This article walks through a complete workflow for evaluating RAG applications, from setting up tracing to running experiments that help you make data-driven decisions. We'll use a sample application that answers questions about Langfuse documentation by retrieving relevant chunks and generating responses with an LLM. By the end, you'll understand how to trace your RAG pipeline, evaluate individual components like your retrieval strategy, and measure the quality of your final answers. The code examples are available in the [Langfuse Examples repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/rag).
+
+## 1. Tracing RAG Applications
+
+Setting up tracing with Langfuse takes just a few lines of code. After installing the SDK and setting your API keys, you can use decorators to automatically capture your function calls. The `@observe()` decorator wraps your RAG function and creates a trace for each invocation, capturing inputs, outputs, and timing information.
+
+![Tracing RAG Applications](/images/blog/2025-10-28-rag-observability-and-evals/rag-trace.png)
+
+Here's the core of our sample RAG application with tracing enabled. The `@observe()` decorator on the main function creates a trace for each question. Inside, we explicitly wrap the retrieval step with `start_as_current_observation` to capture what documents were retrieved: 
+
+```python {7, 11-18}
+from langfuse import get_client, observe
+from langfuse.langchain import CallbackHandler
+
+langfuse = get_client()
+langfuse_handler = CallbackHandler()
+
+@observe()  # Trace the RAG application
+def rag_bot(question: str) -> RagBotResponse:
+  retriever = get_retriever(urls, chunk_size=256, chunk_overlap=0)
+  
+  # Trace the document retrieval
+  with langfuse.start_as_current_observation(
+    name="retrieve_documents", 
+    input=question, 
+    as_type="retriever"
+  ) as span:
+    docs = retriever.invoke(question)
+    span.update(output=docs)
+  
+  # Generate answer with LLM
+  ai_msg = bot.invoke(
+    [
+      {"role": "system", "content": instructions},
+      {"role": "user", "content": question},
+    ],
+    config={"callbacks": [langfuse_handler]}
+  )
+  
+  return {"answer": ai_msg.content, "documents": docs}
+```
+
+## 2. Running Evaluations on RAG Pipelines
+
+### 2.1 Evaluating RAG Components: Optimizing Chunk Size
+
+Once you have tracing in place, the next question is how to actually improve your RAG pipeline. One of the most impactful decisions you'll make is how to chunk your documents. Chunk size affects everything: retrieval precision, context window usage, and answer quality. Too small and you lose important context; too large and you dilute the relevance signal for retrieval.
+
+**The key part is that you can evaluate components of your RAG pipeline independently from the full application**. This lets you rapidly test different chunking strategies without running expensive LLM calls every time. By isolating the retrieval component, you can iterate faster and make data-driven decisions about your document processing pipeline.
+
+To start, you need a dataset of questions and expected answers. You create this directly in the UI by adding items to a [Langfuse Dataset](/docs/evaluation/experiments/datasets). Each item contains a question as input and the expected answer as the reference output.
+
+![Creating a Dataset](/images/blog/2025-10-28-rag-observability-and-evals/rag-dataset.png)
+
+With your dataset ready, you can run experiments with [Langfuse's Experiment Runner](/docs/evaluation/experiments/experiments-via-sdk) testing different chunk configurations. You can make a combination of chunk size and chunk overlap to test different strategies. For example: 
+
+| Chunk Size | Chunk Overlap |
+| :--------- | :------------ |
+| 128        | 0             |
+| 128        | 64            |
+| 256        | 0             |
+| 256        | 128           |
+| 512        | 0             |
+| 512        | 256           |
+
+Here's how we run experiments for different chunk sizes:
+
+```python
+dataset = langfuse.get_dataset(name="rag_bot_evals")
+chunk_sizes = [128, 256, 512]
+
+for chunk_size in chunk_sizes:
+  dataset.run_experiment(
+    name=f"Chunk precision: chunk_size {chunk_size} and chunk_overlap 0",
+    task=create_retriever_task(chunk_size=chunk_size, chunk_overlap=0),
+    evaluators=[relevant_chunks_evaluator],
+  )
+```
+
+Now we need to evaluate whether the retrieved chunks are actually relevant to the question. We use an LLM-as-a-Judge approach where an LLM scores each retrieved chunk's relevance and provides an average relevance score:
+
+```python {1-12, 30}
+retrieval_relevance_instructions = """You are evaluating the relevance of a set of 
+chunks to a question. You will be given a QUESTION, an EXPECTED OUTPUT, and a set 
+of DOCUMENTS retrieved from the retriever.
+
+Here is the grade criteria to follow:
+(1) Your goal is to identify DOCUMENTS that are completely unrelated to the QUESTION
+(2) It is OK if the facts have SOME information that is unrelated as long as 
+it is close to the EXPECTED OUTPUT
+
+You should return a list of numbers, one for each chunk, indicating the relevance 
+of the chunk to the question.
+"""
+
+... # Define retrieval_relevance_llm
+
+# Define evaluation functions
+def relevant_chunks_evaluator(*, input, output, expected_output, metadata, **kwargs):
+  retrieval_relevance_result = retrieval_relevance_llm.invoke(
+    retrieval_relevance_instructions
+    + "\n\nQUESTION: "
+    + input["question"]
+    + "\n\nEXPECTED OUTPUT: "
+    + expected_output["answer"]
+    + "\n\nDOCUMENTS: "
+    + "\n\n".join(doc.page_content for doc in output["documents"])
+  )
+
+  # Calculate average relevance score
+  relevance_scores = retrieval_relevance_result["relevant"]
+  avg_score = sum(relevance_scores) / len(relevance_scores) if relevance_scores else 0
+
+  return Evaluation(
+    name="retrieval_relevance", 
+    value=avg_score, 
+    comment=retrieval_relevance_result.get("explanation", "")
+  )
+```
+
+Each experiment runs your retriever against every question in the dataset, evaluates the results, and stores the scores in Langfuse. You can then view all experiments side by side in the UI, comparing average relevance scores to see which configuration performs best. In this case, the combination of chunk size 256 and chunk overlap 0 had the highest average relevance score.
+
+![Experiments Results](/images/blog/2025-10-28-rag-observability-and-evals/chunk-size-performance.png)
+
+### 2.2 Evaluating the Complete RAG Application
+
+Component evaluation tells you if your retrieval is working, but it doesn't tell you if your users are getting good answers. That requires end-to-end evaluation of the complete RAG pipeline, from question to final response. You need to measure both whether the answer addresses the user's question and whether it stays faithful to the source documents.
+
+We use the same dataset but now run the complete RAG pipeline for each question. We then apply two complementary evaluations. The first evaluator measures answer correctness, checking whether the response actually addresses the user's question:
+
+```python
+def answer_correctness_evaluator(*, input, output, expected_output, **kwargs):
+  result = answer_correctness_llm.invoke(
+    "You are evaluating the correctness of an answer to a question with a score of 0 or 1." 
+    + "You will be given a QUESTION, an ANSWER, and an EXPECTED OUTPUT."
+    + "\n\nQUESTION: " + input["question"]
+    + "\n\nANSWER: " + output["answer"]
+    + "\n\nEXPECTED OUTPUT: " + expected_output["answer"]
+  )  
+  return Evaluation(name="answer_correctness", value=result["score"])
+```
+
+You can apply additional evaluators to the complete RAG pipeline depending on what matters for your use case. Common evaluations include faithfulness (checking if the answer is supported by the retrieved documents), groundedness (verifying claims can be traced back to sources), or relevance (measuring if the answer addresses what was actually asked). The key is measuring the aspects of quality that matter most to your users. Results can also be seen in the Langfuse UI: 
+
+![Complete RAG Pipeline Evaluation](/images/blog/2025-10-28-rag-observability-and-evals/relevance-result.png)
+
+Running the complete experiment applies all evaluators to every dataset item. The results give you average scores across your entire dataset for both metrics. You can drill into individual examples to see which questions are problematic and why. These insights are actionable: low relevance scores might lead you to improve your system prompt, while low faithfulness scores might indicate you need stronger grounding instructions.
+
+## 3. Conclusion
+
+Building reliable RAG applications requires systematic evaluation at multiple levels. Tracing provides visibility into your system's behavior, component evaluation helps you optimize individual pieces like retrieval, and end-to-end evaluation measures the user experience. The workflow gives you a repeatable process for making data-driven decisions where you measure changes against a consistent dataset and compare scores.
+
+The next step is applying this workflow to your own RAG application. Start with tracing to understand your system's current behavior, create a dataset of important questions, and begin evaluating. The code examples are available in the [Langfuse Examples repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/rag).
+
+## Acknowledgments
+
+Thanks to Abdellatif from Agentset for their insights on RAG evaluation patterns. Their article on [processing 5M documents in production](https://blog.abdellatif.io/production-rag-processing-5m-documents) was particularly helpful in shaping the approach covered here.
