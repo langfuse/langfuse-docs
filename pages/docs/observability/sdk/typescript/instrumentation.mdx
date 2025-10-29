@@ -461,7 +461,7 @@ await startActiveObservation("user-request", async (span) => {
 
 ### Propagating Trace Attributes
 
-For certain trace attributes (`userId`, `sessionId`, `metadata`, `version`), you may want them to be automatically applied to **all spans** created within a trace, not just the trace object itself. This is important because Langfuse aggregation queries (e.g., filtering by userId, calculating costs by sessionId) will soon operate on across spans/observations.
+For certain trace attributes (`userId`, `sessionId`, `metadata`, `version`), you may want them to be automatically applied to **all spans** created within a trace, not just the trace object itself. This is important because Langfuse aggregation queries (e.g., filtering by userId, calculating costs by sessionId) will soon operate across spans/observations.
 
 Use the `propagateAttributes()` function to automatically propagate these attributes to all child spans:
 
