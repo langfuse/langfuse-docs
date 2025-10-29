@@ -356,7 +356,7 @@ Trace-level attributes apply to the entire trace, not just a single observation.
 
 Certain attributes (`user_id`, `session_id`, `metadata`, `version`) should be applied to **all spans** created within some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) will soon operate across individual observations rather than the trace level.
 
-Use the `propagate_attributes()` context manager to automatically propagate these attributes to all child observationss:
+Use the `propagate_attributes()` context manager to automatically propagate these attributes to all child observations:
 
 <Tabs items={["Context Manager", "With @observe Decorator"]}>
 <Tab title="Context Manager">
