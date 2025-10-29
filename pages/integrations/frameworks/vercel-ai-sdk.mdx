@@ -28,7 +28,7 @@ Create a new file [`instrumentation.ts`](https://nextjs.org/docs/app/api-referen
 
 ```ts filename="instrumentation.ts"
 import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
-import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { registerOTel } from "@vercel/otel";
 
 // Optional: filter our NextJS infra spans
 const shouldExportSpan: ShouldExportSpan = (span) => {
@@ -39,20 +39,12 @@ export const langfuseSpanProcessor = new LangfuseSpanProcessor({
   shouldExportSpan,
 });
 
-const tracerProvider = new NodeTracerProvider({
-  spanProcessors: [langfuseSpanProcessor],
-});
-
-tracerProvider.register();
+export function register() {
+  registerOTel({
+    spanProcessors: [langfuseSpanProcessor],
+  });
+}
 ```
-
-<Callout>
-  If you are using Next.js, please use a manual OpenTelemetry setup via the
-  `NodeTracerProvider` rather than via `registerOTel` from `@vercel/otel`. This
-  is because [the `@vercel/otel` package does not yet support the OpenTelemetry
-  JS SDK v2](https://github.com/vercel/otel/issues/154) on which the
-  `@langfuse/tracing` and `@langfuse/otel` packages are based.
-</Callout>
 
 ```ts filename="route.ts"
 import { streamText } from "ai";
@@ -156,7 +148,7 @@ const handler = async (req: Request) => {
     // ... other streamText options ...
     experimental_telemetry: {
       isEnabled: true,
-      metadata: { 
+      metadata: {
         langfusePrompt: prompt.toJSON() // This links the Generation to your prompt in Langfuse
       },
     },
