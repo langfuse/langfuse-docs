@@ -37,7 +37,7 @@ export function Hero() {
 
         <div className="flex gap-4 flex-wrap items-center justify-center my-4">
           <Button size="lg" variant="cta" asChild>
-            <Link href="/watch-demo">Watch Demo</Link>
+            <Link href="/demo">Try Example Project</Link>
           </Button>
           <Button variant="secondary" size="lg" asChild>
             <Link href="/docs">View docs</Link>
