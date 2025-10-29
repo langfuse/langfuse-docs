@@ -21,6 +21,9 @@ const usSpanProcessor = new LangfuseSpanProcessor({
 
 const spanProcessors = [euSpanProcessor, usSpanProcessor];
 
+export const flush = async () =>
+  Promise.all(spanProcessors.map((p) => p.forceFlush()));
+
 export function register() {
   registerOTel({
     spanProcessors,

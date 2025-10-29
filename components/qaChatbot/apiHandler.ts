@@ -17,6 +17,7 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { LangfuseClient } from "@langfuse/client";
 import { getActiveTraceId } from "@langfuse/tracing";
 import { after } from "next/server";
+import { flush } from "@/src/instrumentation";
 import { trace } from "@opentelemetry/api";
 
 const langfuseClient = new LangfuseClient({
@@ -121,6 +122,9 @@ export const handler = async (req: Request) => {
       trace.getActiveSpan().end();
     },
   });
+
+  // Schedule flush after request is finished
+  after(async () => await flush());
 
   return result.toUIMessageStreamResponse({
     generateMessageId: () => getActiveTraceId(),
