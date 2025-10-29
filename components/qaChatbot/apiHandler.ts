@@ -17,7 +17,6 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { LangfuseClient } from "@langfuse/client";
 import { getActiveTraceId } from "@langfuse/tracing";
 import { after } from "next/server";
-import { flush } from "@/src/instrumentation";
 import { trace } from "@opentelemetry/api";
 
 const langfuseClient = new LangfuseClient({
@@ -73,13 +72,21 @@ export const handler = async (req: Request) => {
   // Discover all tools exposed by the MCP server
   const tools = await mcpClient.tools();
 
-
-  const reasoningSummary = prompt.config
-    .reasoningSummary as 'low' | 'medium' | 'high' | undefined;
-  const textVerbosity = prompt.config
-    .textVerbosity as 'low' | 'medium' | 'high' | undefined;
-  const reasoningEffort = prompt.config
-    .reasoningEffort as 'low' | 'medium' | 'high' | undefined;
+  const reasoningSummary = prompt.config.reasoningSummary as
+    | "low"
+    | "medium"
+    | "high"
+    | undefined;
+  const textVerbosity = prompt.config.textVerbosity as
+    | "low"
+    | "medium"
+    | "high"
+    | undefined;
+  const reasoningEffort = prompt.config.reasoningEffort as
+    | "low"
+    | "medium"
+    | "high"
+    | undefined;
 
   const result = streamText({
     model: openai(String(prompt.config.model)),
@@ -114,9 +121,6 @@ export const handler = async (req: Request) => {
       trace.getActiveSpan().end();
     },
   });
-
-  // Schedule flush after request is finished
-  after(async () => await flush());
 
   return result.toUIMessageStreamResponse({
     generateMessageId: () => getActiveTraceId(),
