@@ -454,9 +454,11 @@ await startActiveObservation("user-request", async (span) => {
 ```
 
 <Callout type="info">
-  **Note:** For `userId`, `sessionId`, `metadata`, and `version`, consider using
+  **Note:** For `userId`, `sessionId`, `metadata`, and `version`, use
   `propagateAttributes()` (see below) to ensure these attributes are applied to
   **all observations**, not just the trace object.
+
+  In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagateAttributes` is the future-proof solution.
 </Callout>
 
 ### Propagating Attributes

@@ -348,6 +348,8 @@ Trace-level attributes apply to the entire trace, not just a single observation.
   **Note:** For `user_id`, `session_id`, `metadata`, and `version`, consider
   using `propagate_attributes()` (see below) to ensure these attributes are
   applied to **all spans**, not just the trace object.
+
+  In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagate_attributes` is the future-proof solution.
 </Callout>
 
 ### Propagating Attributes
