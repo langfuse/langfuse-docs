@@ -69,7 +69,7 @@ const completion = await tracedOpenAI.chat.completions.create({
 
 The Vercel AI SDK offers native instrumentation with OpenTelemetry. You can enable the Vercel AI SDK telemetry by passing `{ experimental_telemetry: { isEnabled: true }}` to your AI SDK function calls.
 
-The LangfuseSpanProcessor is automatically detecting multimodal data in your traces and is handling it automatically.
+The LangfuseSpanProcessor automatically detects and handles multimodal data in your traces.
 
 Here is a full example on how to set up tracing with the
 
@@ -344,7 +344,7 @@ const span = startObservation(
   }
 );
 
-// Create a nested span for a e.g. tool call
+// Create a nested span for, e.g., a tool call
 const toolCall = span.startObservation(
   // name
   "fetch-weather",
