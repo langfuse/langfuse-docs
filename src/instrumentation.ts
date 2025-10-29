@@ -1,5 +1,5 @@
 import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
-import { registerOTel } from "@vercel/otel";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 
 const shouldExportSpan: ShouldExportSpan = (span) => {
   return span.otelSpan.instrumentationScope.name !== "next.js";
@@ -21,8 +21,11 @@ const usSpanProcessor = new LangfuseSpanProcessor({
 
 const spanProcessors = [euSpanProcessor, usSpanProcessor];
 
-export function register() {
-  registerOTel({
-    spanProcessors,
-  });
-}
+export const flush = async () =>
+  Promise.all(spanProcessors.map((p) => p.forceFlush()));
+
+const tracerProvider = new NodeTracerProvider({
+  spanProcessors,
+});
+
+tracerProvider.register();
