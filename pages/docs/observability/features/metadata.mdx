@@ -115,7 +115,7 @@ from langfuse.openai import openai
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="openai-call"):
-    # Propagate metadata to all spans including OpenAI generation
+    # Propagate metadata to all observations including OpenAI generation
     with propagate_attributes(
         metadata={"source": "api", "region": "us-east-1"}
     ):

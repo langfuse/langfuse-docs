@@ -29,7 +29,7 @@ export function PropagationRestrictionsCallout({
       <div className="mt-1">
         <strong>Attribute Propagation Restrictions</strong>
         <div className="my-3">
-          When propagating {formatAttributes(attributes)} to child spans:
+          When propagating {formatAttributes(attributes)} to child observations:
         </div>
         <ul className="mt-2 mb-4 pl-6 leading-7 list-disc">
           <li>
@@ -42,8 +42,8 @@ export function PropagationRestrictionsCallout({
             </li>
           )}
           <li>
-            Call <strong>early in your trace</strong> to ensure all spans are
-            covered
+            Call <strong>early in your trace</strong> to ensure all observations
+            are covered
           </li>
           <li>Invalid values are dropped with a warning</li>
         </ul>

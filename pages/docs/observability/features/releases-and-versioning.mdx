@@ -101,7 +101,7 @@ from langfuse import observe, propagate_attributes
 
 @observe()
 def process_data():
-    # Propagate version to all child spans
+    # Propagate version to all child observations
     with propagate_attributes(version="1.0"):
         # All nested operations automatically inherit version
         result = perform_processing()
@@ -109,7 +109,7 @@ def process_data():
         return result
 ```
 
-When creating spans directly:
+When creating observations directly:
 
 ```python /propagate_attributes(version="1.0")/
 from langfuse import get_client, propagate_attributes
@@ -117,9 +117,9 @@ from langfuse import get_client, propagate_attributes
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="process-data") as span:
-    # Propagate version to all child spans
+    # Propagate version to all child observations
     with propagate_attributes(version="1.0"):
-        # All spans created here automatically have version="1.0"
+        # All observations created here automatically have version="1.0"
         with span.start_as_current_generation(
             name="guess-countries",
             model="gpt-4o"
@@ -149,13 +149,13 @@ with langfuse.start_as_current_span(name="process-data", version="1.0") as span:
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
 await startActiveObservation("process-data", async (span) => {
-  // Propagate version to all child spans
+  // Propagate version to all child observations
   await propagateAttributes(
     {
       version: "1.0",
     },
     async () => {
-      // All spans created here automatically have version="1.0"
+      // All observations created here automatically have version="1.0"
       const generation = startObservation(
         "guess-countries",
         { model: "gpt-4" },
