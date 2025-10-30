@@ -341,11 +341,11 @@ Trace-level attributes apply to the entire trace, not just a single observation.
 | `input`      | `Optional[Any]`       | Overall input for the entire trace.                              | `update_trace()` |
 | `output`     | `Optional[Any]`       | Overall output for the entire trace.                             | `update_trace()` |
 | `metadata`   | `Optional[Any]`       | Additional metadata for the trace.                               | `propagate_attributes()` |
-| `tags`       | `Optional[List[str]]` | List of tags to categorize the trace.                            | `update_trace()` |
+| `tags`       | `Optional[List[str]]` | List of tags to categorize the trace.                            | `propagate_attributes()` |
 | `public`     | `Optional[bool]`      | Whether the trace should be publicly accessible (if configured). | `update_trace()` |
 
 <Callout type="info">
-  **Note:** For `user_id`, `session_id`, `metadata`, and `version`, consider
+  **Note:** For `user_id`, `session_id`, `metadata`, `version`, and `tags`, consider
   using `propagate_attributes()` (see below) to ensure these attributes are
   applied to **all spans**, not just the trace object.
 
@@ -354,7 +354,7 @@ Trace-level attributes apply to the entire trace, not just a single observation.
 
 ### Propagating Attributes
 
-Certain attributes (`user_id`, `session_id`, `metadata`, `version`) should be applied to **all spans** created within some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) will soon operate across individual observations rather than the trace level.
+Certain attributes (`user_id`, `session_id`, `metadata`, `version`, `tags`) should be applied to **all spans** created within some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) will soon operate across individual observations rather than the trace level.
 
 Use the `propagate_attributes()` context manager to automatically propagate these attributes to all child observations:
 
@@ -430,10 +430,10 @@ def call_llm():
 - `session_id` - Session identifier
 - `metadata` - Key-value metadata (both keys and values must be strings)
 - `version` - Version identifier
+- `tags` - List of tag strings
 
 **Non-Propagatable Attributes** (use `update_trace()` instead):
 
-- `tags` - List of tags
 - `name` - Trace name
 - `input` / `output` - Trace input/output
 - `public` - Public visibility flag

@@ -464,7 +464,7 @@ await startActiveObservation("user-request", async (span) => {
 
 ### Propagating Attributes
 
-Certain attributes (`userId`, `sessionId`, `metadata`, `version`) should be applied to **all spans** created within some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by userId, calculating costs by sessionId) will soon operate across individual observations rather than the trace level.
+Certain attributes (`userId`, `sessionId`, `metadata`, `version`, `tags`) should be applied to **all spans** created within some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by userId, calculating costs by sessionId) will soon operate across individual observations rather than the trace level.
 
 Use the `propagateAttributes()` function to automatically propagate these attributes to all child observations:
 
@@ -512,10 +512,10 @@ await startActiveObservation("user-workflow", async (span) => {
 - `sessionId` - Session identifier
 - `metadata` - Key-value metadata (both keys and values must be strings)
 - `version` - Version identifier
+- `tags` - Array of tag strings
 
 **Non-Propagatable Attributes** (use `updateTrace()` instead):
 
-- `tags` - Array of tags
 - `name` - Trace name
 - `input` / `output` - Trace input/output
 - `public` - Public visibility flag

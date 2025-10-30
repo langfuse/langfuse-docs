@@ -1,11 +1,11 @@
 import { Callout } from "nextra/components";
 
 interface PropagationRestrictionsCalloutProps {
-  attributes?: ("userId" | "sessionId" | "metadata" | "version")[];
+  attributes?: ("userId" | "sessionId" | "metadata" | "version" | "tags")[];
 }
 
 export function PropagationRestrictionsCallout({
-  attributes = ["userId", "sessionId", "metadata", "version"],
+  attributes = ["userId", "sessionId", "metadata", "version", "tags"],
 }: PropagationRestrictionsCalloutProps) {
   const pythonLink =
     "/docs/observability/sdk/python/instrumentation#propagating-trace-attributes";
