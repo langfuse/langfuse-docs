@@ -429,6 +429,14 @@ rootSpan.end();
 
 #### `updateActiveTrace()`
 
+<Callout type="info">
+  **Note:** For `userId`, `sessionId`, `metadata`, and `version`, use
+  `propagateAttributes()` (see below) to ensure these attributes are applied to
+  **all observations**, not just the trace object.
+
+  In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagateAttributes` is the future-proof solution.
+</Callout>
+
 When you're inside a callback from `startActiveObservation`, or a function wrapped with `observe`, you might not have a direct reference to an observation object. In these cases, use the `updateActiveTrace()` function. It automatically finds the currently active trace in the context and applies the new attributes.
 
 ```typescript /updateActiveTrace/
@@ -453,13 +461,6 @@ await startActiveObservation("user-request", async (span) => {
 });
 ```
 
-<Callout type="info">
-  **Note:** For `userId`, `sessionId`, `metadata`, and `version`, use
-  `propagateAttributes()` (see below) to ensure these attributes are applied to
-  **all observations**, not just the trace object.
-
-  In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagateAttributes` is the future-proof solution.
-</Callout>
 
 ### Propagating Attributes
 
