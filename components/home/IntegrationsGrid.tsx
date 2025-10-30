@@ -259,10 +259,11 @@ const integrations: IntegrationTileProps[] = [
     href: "/integrations/no-code/dify",
     icon: (
       <Image
-        src="/images/integrations/dify_icon.png"
+        src="/images/integrations/dify_icon.svg"
         alt="Dify Icon"
         width={36}
         height={36}
+        className="dark:invert"
       />
     ),
   },
