@@ -4,6 +4,9 @@ description: Instrumentation methods for the TypeScript SDK.
 label: "Version: JS SDK v4"
 ---
 
+import GetStartedJsLangchain from "@/components-mdx/get-started/js-langchain.mdx";
+import { BookOpen, Code } from "lucide-react";
+
 # TypeScript SDK - Instrumentation
 
 To instrument your application to send traces to Langfuse, you can use
@@ -69,7 +72,7 @@ const completion = await tracedOpenAI.chat.completions.create({
 
 The Vercel AI SDK offers native instrumentation with OpenTelemetry. You can enable the Vercel AI SDK telemetry by passing `{ experimental_telemetry: { isEnabled: true }}` to your AI SDK function calls.
 
-The LangfuseSpanProcessor is automatically detecting multimodal data in your traces and is handling it automatically.
+The LangfuseSpanProcessor automatically detects and handles multimodal data in your traces.
 
 Here is a full example on how to set up tracing with the
 
@@ -181,47 +184,23 @@ Learn more about the AI SDK Telemetry in the [Vercel AI SDK documentation on Tel
 
 The `@langfuse/langchain` package offers a `CallbackHandler` to integrate Langfuse tracing into your LangChain applications.
 
-For an end-to-end example, see the [Langfuse + LangChain JS/TS Cookbook](https://langfuse.com/guides/cookbook/js_integration_langchain).
+<GetStartedJsLangchain />
 
-**Installation:**
+<Cards num={2}>
+  <Card
+    icon={<BookOpen />}
+    title="Documentation"
+    href="/integrations/frameworks/langchain"
+    arrow
+  />
+  <Card
+    icon={<Code />}
+    title="Notebook"
+    href="/guides/cookbook/js_integration_langchain"
+    arrow
+  />
+</Cards>
 
-```bash
-npm install @langfuse/core @langfuse/langchain
-```
-
-**Usage:**
-
-Instantiate the `CallbackHandler` and pass it to your chain's `.invoke()` or `.stream()` method in the `callbacks` array. All operations within the chain will be traced as nested observations.
-
-```typescript /CallbackHandler/ /langfuseHandler/
-import { ChatOpenAI } from "@langchain/openai";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { CallbackHandler } from "@langfuse/langchain";
-
-// 1. Initialize the Langfuse callback handler
-const langfuseHandler = new CallbackHandler({
-  sessionId: "user-session-123",
-  userId: "user-abc",
-  tags: ["langchain-test"],
-});
-
-// 2. Define your chain
-const model = new ChatOpenAI({ model: "gpt-4o" });
-const prompt = ChatPromptTemplate.fromTemplate("Tell me a joke about {topic}.");
-const chain = prompt.pipe(model);
-
-// 3. Add the handler to the callbacks array
-const result = await chain.invoke(
-  { topic: "developers" },
-  {
-    callbacks: [langfuseHandler],
-    // This becomes the trace name if no active OTEL span is in the context
-    runName: "joke-generator",
-  }
-);
-
-console.log(result.content);
-```
 
 </Tab>
 
@@ -344,7 +323,7 @@ const span = startObservation(
   }
 );
 
-// Create a nested span for a e.g. tool call
+// Create a nested span for, e.g., a tool call
 const toolCall = span.startObservation(
   // name
   "fetch-weather",

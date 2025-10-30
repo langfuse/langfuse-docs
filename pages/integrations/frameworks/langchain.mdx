@@ -125,13 +125,14 @@ With the environment variables set, we can now initialize the `langfuseSpanProce
 
 
 ```typescript
-import { ChatOpenAI } from "@langchain/openai"
-import { PromptTemplate } from "n@langchain/core/prompts"
-
-const model = new ChatOpenAI({});
-const promptTemplate = PromptTemplate.fromTemplate(
-  "Tell me a joke about {topic}"
-);
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+ 
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+ 
+sdk.start();
 ```
 
 ### Initialize Langfuse Callback Handler
@@ -155,27 +156,32 @@ const langfuseHandler = new CallbackHandler({
 Instrumenting LangGraph follows the same pattern. Simply pass the `langfuseHandler` to the agent invocation.
 </Callout>
 
-```typescript
-import { ChatOpenAI } from "@langchain/openai"
-import { PromptTemplate } from "@langchain/core/prompts"
-
-const model = new ChatOpenAI({});
-  const promptTemplate = PromptTemplate.fromTemplate(
-    "Tell me a joke about {topic}"
-  );
-```
-
 ```typescript /{ callbacks: [langfuseHandler] }/
-import { RunnableSequence } from "@langchain/core/runnables";
+import { createAgent, tool } from "@langchain/core/agents";
+import * as z from "zod";
 
-const chain = RunnableSequence.from([promptTemplate, model]);
-
-const res = await chain.invoke(
-    { topic: "bears" },
-    { callbacks: [langfuseHandler] }
+const getWeather = tool(
+  (input) => `It's always sunny in ${input.city}!`,
+  {
+    name: "get_weather",
+    description: "Get the weather for a given city",
+    schema: z.object({
+      city: z.string().describe("The city to get the weather for"),
+    }),
+  }
 );
 
-console.log(res.content)
+const agent = createAgent({
+  model: "openai:gpt-5-mini",
+  tools: [getWeather],
+});
+
+console.log(
+  await agent.invoke(
+    { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] }, 
+    { callbacks: [langfuseHandler] }
+    )
+);
 ```
 
 ### See Traces in Langfuse
@@ -184,7 +190,7 @@ After executing the application, navigate to your [Langfuse Trace Table](https:/
 
 ![Langfuse Trace](https://langfuse.com/images/cookbook/example-js-sdk/js_integration_langchain_trace.png)
 
-[Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f24dedd6c8cdd7560e127669aebf50d0?timestamp=2025-10-21T14%3A18%3A11.397Z&observation=aab050e7933ee07a)
+[Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2c1581dd9cecdafb6ca091b83d7ea99a?timestamp=2025-10-30T08:45:41.319Z)
 </Steps>
 </Tab>
 </Tabs>
