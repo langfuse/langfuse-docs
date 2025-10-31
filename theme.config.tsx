@@ -202,15 +202,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "langfuse-q4-2025-townhall-recording",
+    key: "langfuse-launch-week-4",
     dismissible: true,
     content: (
-      <Link href="https://www.youtube.com/watch?v=jgSPV2CLvAo">
+      <Link href="/blog/2025-10-29-launch-week-4">
         {/* mobile */}
-        <span className="sm:hidden">Q4 Town Hall →</span>
+        <span className="sm:hidden">Launch Week 4 →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Town Hall – New Features + Q4 Roadmap →
+          Langfuse Launch Week 4 – New Features Every Day →
         </span>
       </Link>
     ),

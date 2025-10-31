@@ -62,6 +62,22 @@ Need another provider? Langfuse uses Auth.js, which integrates with [many provid
 
 Provider: `AUTH0`
 
+### Authentik
+
+[NextAuth Authentik Provider Docs](https://next-auth.js.org/providers/authentik)
+
+| Configuration      | Value                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_AUTHENTIK_CLIENT_ID`<br/>`AUTH_AUTHENTIK_CLIENT_SECRET`<br/>`AUTH_AUTHENTIK_ISSUER` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.                  |
+| OAuth Redirect URL | `/api/auth/callback/authentik`                                                            |
+
+Provider: `AUTHENTIK`
+
+Notes:
+
+- The `AUTH_AUTHENTIK_ISSUER` must be in the format `https://<domain>/application/o/<slug>` without a trailing slash.
+
 ### AWS Cognito
 
 [NextAuth Cognito Provider Docs](https://next-auth.js.org/providers/cognito)
