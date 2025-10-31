@@ -29,7 +29,8 @@ export function PropagationRestrictionsCallout({
       <div className="mt-1">
         <strong>Attribute Propagation Restrictions</strong>
         <div className="my-3">
-          When propagating {formatAttributes(attributes)} to child observations:
+          We use Attribute Propagation to propagate {formatAttributes(attributes)} across all observations of a trace. We will use all observations with {formatAttributes(attributes)} to create {formatAttributes(attributes)}-level metrics.
+          Please consider the following when using Attribute Propagation:
         </div>
         <ul className="mt-2 mb-4 pl-6 leading-7 list-disc">
           <li>
