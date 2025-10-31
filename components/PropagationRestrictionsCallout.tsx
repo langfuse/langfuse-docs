@@ -44,7 +44,7 @@ export function PropagationRestrictionsCallout({
           )}
           <li>
             Call <strong>early in your trace</strong> to ensure all observations
-            are covered
+            are covered. This way you make sure that all Metrics in Langfuse are accurate.
           </li>
           <li>Invalid values are dropped with a warning</li>
         </ul>
