@@ -9,13 +9,11 @@ import { PropagationRestrictionsCallout } from "@/components/PropagationRestrict
 
 Observations (see [Langfuse Data Model](/docs/tracing-data-model)) can be enriched with metadata to help you better understand your application and to correlate observations in Langfuse.
 
-Metadata are key-value pairs. Values are limited to max 200 characters strings. Keys are limited to alphanumeric characters only.
-
 You can filter by metadata keys in the Langfuse UI and API.
 
 ## Propagated Metadata
 
-Use `propagate_attributes()` to ensure metadata is automatically applied to all observations within a context.
+Use `propagate_attributes()` to ensure metadata is automatically applied to all observations within a context. Propagated metadata are key-value pairs with values limited to max 200 characters strings. Keys are limited to alphanumeric characters only. If a metatadata value exceeds 200 characters, it will be dropped.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
@@ -208,6 +206,8 @@ You can set the `metadata` via the override configs, see the [Flowise Integratio
 
 </LangTabs>
 
+<PropagationRestrictionsCallout attributes={['metadata']}/>
+
 ## Non-Propagated Metadata
 
 You can also add metadata to specific observations only:
@@ -254,6 +254,7 @@ await startActiveObservation("process-request", async (span) => {
 
 </Tab>
 </LangTabs>
+
 
 ## GitHub Discussions
 

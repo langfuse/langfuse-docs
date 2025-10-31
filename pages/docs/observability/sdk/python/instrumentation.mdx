@@ -352,7 +352,7 @@ Trace-level attributes apply to the entire trace, not just a single observation.
   In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagate_attributes` is the future-proof solution.
 </Callout>
 
-### Propagating Attributes
+#### Propagating Attributes
 
 Certain attributes (`user_id`, `session_id`, `metadata`, `version`, `tags`) should be applied to **all spans** created within some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) will soon operate across individual observations rather than the trace level.
 
@@ -410,35 +410,12 @@ def call_llm():
 </Tab>
 </Tabs>
 
-<Callout type="warning">
-  **Important Timing:** Call `propagate_attributes()` as early as possible in
-  your trace. Only the currently active observation and observations created after entering
-  this context will have these attributes. Parent observations will NOT be
-  updated.
-</Callout>
+import { PropagationRestrictionsCallout } from "@/components/PropagationRestrictionsCallout";
 
-**Attribute Restrictions:**
+<PropagationRestrictionsCallout attributes={[]}/>
 
-- **Values**: Must be strings ≤200 characters
-- **Metadata Keys**: Alphanumeric characters only (no whitespace or special characters)
-- **Metadata Values**: Same as other values (strings, ≤200 chars)
-- Invalid values are dropped with a warning logged
 
-**Propagatable Attributes:**
-
-- `user_id` - User identifier
-- `session_id` - Session identifier
-- `metadata` - Key-value metadata (both keys and values must be strings)
-- `version` - Version identifier
-- `tags` - List of tag strings
-
-**Non-Propagatable Attributes** (use `update_trace()` instead):
-
-- `name` - Trace name
-- `input` / `output` - Trace input/output
-- `public` - Public visibility flag
-
-#### Advanced: Cross-Service Propagation
+##### Cross-Service Propagation
 
 For distributed tracing across multiple services, use the `as_baggage` parameter (see [OpenTelemetry documentation](https://opentelemetry.io/docs/concepts/signals/baggage/) for more details) to propagate attributes via HTTP headers:
 

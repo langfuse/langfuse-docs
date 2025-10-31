@@ -9,7 +9,7 @@ import { PropagationRestrictionsCallout } from "@/components/PropagationRestrict
 
 Tags allow you to categorize and filter observations and traces in Langfuse.
 
-Tags are strings (max 200 characters each) and an observation may have multiple tags. The full set of tags applied across all observations in a trace are automatically aggregated and added to the trace object in Langfuse.
+Tags are strings (max 200 characters each) and an observation may have multiple tags. The full set of tags applied across all observations in a trace are automatically aggregated and added to the trace object in Langfuse. If a tag exceeds 200 characters, it will be dropped.
 
 ## Propagating Tags to Observations
 
@@ -267,18 +267,6 @@ await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 </LangTabs>
 
 <PropagationRestrictionsCallout attributes={["tags"]} />
-
-## Working with Tags
-
-Tags enable you to flexibly categorize observations and traces. You can filter for tags in the Langfuse UI and [GET API](https://api.reference.langfuse.com/).
-
-When choosing tags, consider what aspects of your application you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'). See [Intent Classification Notebook](/docs/analytics/example-intent-classification) for an end-to-end example on how tags can be created programmatically.
-
-<Video
-  src="https://static.langfuse.com/docs-videos/trace-tags.mp4"
-  aspectRatio={1840 / 1080}
-  gifStyle
-/>
 
 ## GitHub Discussions
 
