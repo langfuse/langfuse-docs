@@ -16,7 +16,9 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["aabedraba"]}
 />
 
-This article walks through a complete workflow for evaluating RAG applications, from setting up tracing to running experiments that help you make data-driven decisions. We'll use a sample application that answers questions about Langfuse documentation by retrieving relevant chunks and generating responses with an LLM. By the end, you'll understand how to trace your RAG pipeline, evaluate individual components like your retrieval strategy, and measure the quality of your final answers. The code examples are available in the [Langfuse Examples repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/rag).
+This article walks through a complete workflow for evaluating RAG applications, from setting up tracing to running experiments that help you make data-driven decisions. We'll use a sample application that answers questions about Langfuse documentation by retrieving relevant chunks and generating responses with an LLM. 
+
+By the end, you'll understand how to trace your RAG pipeline, evaluate individual components like your retrieval strategy, and measure the quality of your final answers. The code examples are available in the [Langfuse Examples repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/rag).
 
 ## 1. Tracing RAG Applications
 
@@ -136,7 +138,9 @@ def relevant_chunks_evaluator(*, input, output, expected_output, metadata, **kwa
   )
 ```
 
-Each experiment runs your retriever against every question in the dataset, evaluates the results, and stores the scores in Langfuse. You can then view all experiments side by side in the UI, comparing average relevance scores to see which configuration performs best. In this case, the combination of chunk size 256 and chunk overlap 0 had the highest average relevance score.
+Each experiment runs your retriever against every question in the dataset, evaluates the results, and stores the scores in Langfuse. You can then view all experiments side by side in the UI, comparing average relevance scores to see which configuration performs best. 
+
+In this case, the combination of chunk size 256 and chunk overlap 0 had the highest average relevance score. However, please note that we used only 2 dataset items in this example and you should expect other results depending on your use case.
 
 ![Experiments Results](/images/blog/2025-10-28-rag-observability-and-evals/chunk-size-performance.png)
 
