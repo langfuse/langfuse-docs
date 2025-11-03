@@ -4,8 +4,7 @@ badge: Launch Week 4 🚀
 title: Mixpanel integration
 description: We teamed up with Mixpanel to integrate LLM-related product metrics into your existing Mixpanel dashboards.
 author: Marc
-ogImage: /images/changelog/2025-11-03-filter-sidebar.png
-showOgInHeader: false
+ogVideo: https://static.langfuse.com/docs-videos/mixpanel-dashboard-16-9.mp4
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -13,16 +12,6 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 <ChangelogHeader />
 
 On day 2 of [**Langfuse Launch Week 4**](/blog/2025-10-29-launch-week-4), we roll out this integration. You can configure it within your project settings by selecting your Mixpanel region and providing your Mixpanel Project Token. When activated, Langfuse sends metrics related to traces, generations, and scores to Mixpanel.
-
-<iframe
-  width="100%"
-  src="https://www.youtube-nocookie.com/embed/1tZnSRStBms?si=NBn30nAyN4cvOZvl"
-  title="Mixpanel Integration"
-  frameBorder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  className="aspect-video rounded border mt-6"
-  allowFullScreen
-></iframe>
 
 This integration makes it easy to combine your regular product analytics with the LLM-specific metrics that Langfuse generates. This way, you can answer questions like:
 
@@ -33,15 +22,22 @@ This integration makes it easy to combine your regular product analytics with th
 
 Langfuse will sync all historical data from your project to Mixpanel, and after the initial sync, new data is automatically synced every hour (with a 30-minute delay) to keep your Mixpanel dashboards up to date.
 
+We've enabled the integration for the [Langfuse example project](/demo) and created a dashboard using the `AI Company Metrics` template by Mixpanel. You can view the dashboard [here](https://eu.mixpanel.com/p/V92wFA5YwNjKn9K9vcUmAX).
+
 ### Learn more
 
-import { FileCode } from "lucide-react";
+import { FileCode, Eye } from "lucide-react";
 
 <Cards num={3}>
   <Card
     title="Integration Docs"
     href="/integrations/analytics/mixpanel"
     icon={<FileCode />}
+  />
+  <Card
+    title="Dashboard Preview"
+    href="https://eu.mixpanel.com/p/V92wFA5YwNjKn9K9vcUmAX"
+    icon={<Eye />}
   />
 </Cards>
 
