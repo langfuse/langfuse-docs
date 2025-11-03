@@ -201,7 +201,6 @@ The `@langfuse/langchain` package offers a `CallbackHandler` to integrate Langfu
   />
 </Cards>
 
-
 </Tab>
 
 <Tab>
@@ -386,8 +385,7 @@ Often, you might not have all the information about a trace (like a `userId` or 
 - `input` / `output` - Trace input/output
 - `public` - Public visibility flag
 
-
-#### Propagating Attributes
+#### Propagating Attributes [#propagate-attributes]
 
 Certain attributes (`userId`, `sessionId`, `metadata`, `version`, `tags`) should be applied to **all spans** created within some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by userId, calculating costs by sessionId) will soon operate across individual observations rather than the trace level.
 
@@ -420,8 +418,7 @@ await startActiveObservation("user-workflow", async (span) => {
 
 import { PropagationRestrictionsCallout } from "@/components/PropagationRestrictionsCallout";
 
-<PropagationRestrictionsCallout attributes={[]}/>
-
+<PropagationRestrictionsCallout attributes={[]} />
 
 ##### Cross-Service Propagation
 
@@ -493,7 +490,8 @@ rootSpan.end();
   `propagateAttributes()` (see below) to ensure these attributes are applied to
   **all observations**, not just the trace object.
 
-  In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagateAttributes` is the future-proof solution.
+In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagateAttributes` is the future-proof solution.
+
 </Callout>
 
 When you're inside a callback from `startActiveObservation`, or a function wrapped with `observe`, you might not have a direct reference to an observation object. In these cases, use the `updateActiveTrace()` function. It automatically finds the currently active trace in the context and applies the new attributes.

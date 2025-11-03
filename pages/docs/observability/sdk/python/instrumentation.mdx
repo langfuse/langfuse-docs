@@ -352,7 +352,7 @@ Trace-level attributes apply to the entire trace, not just a single observation.
   In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagate_attributes` is the future-proof solution.
 </Callout>
 
-#### Propagating Attributes
+#### Propagating Attributes [#propagate-attributes]
 
 Certain attributes (`user_id`, `session_id`, `metadata`, `version`, `tags`) should be applied to **all spans** created within some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) will soon operate across individual observations rather than the trace level.
 
