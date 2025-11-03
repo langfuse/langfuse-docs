@@ -370,7 +370,87 @@ span.update({ output: "Successfully answered user request." }).end();
 
 ### Updating Traces
 
-Often, you might not have all the information about a trace (like a `userId` or `sessionId`) when you start it. The SDK lets you add or update trace-level attributes at any point during its execution.
+Often, you might not have all the information about a trace (like a `userId` or `sessionId`) when you start it. The SDK lets you add or update trace-level attributes either via attribute propagation across all observations or via the `updateTrace` method.
+
+**Propagatable Attributes:**
+
+- `userId` - User identifier
+- `sessionId` - Session identifier
+- `metadata` - Key-value metadata (both keys and values must be strings)
+- `version` - Version identifier
+- `tags` - Array of tag strings
+
+**Non-Propagatable Attributes** (use `updateTrace()` instead):
+
+- `name` - Trace name
+- `input` / `output` - Trace input/output
+- `public` - Public visibility flag
+
+
+#### Propagating Attributes
+
+Certain attributes (`userId`, `sessionId`, `metadata`, `version`, `tags`) should be applied to **all spans** created within some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by userId, calculating costs by sessionId) will soon operate across individual observations rather than the trace level.
+
+Use the `propagateAttributes()` function to automatically propagate these attributes to all child observations:
+
+```typescript /propagateAttributes/
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+
+await startActiveObservation("user-workflow", async (span) => {
+  await propagateAttributes(
+    {
+      userId: "user_123",
+      sessionId: "session_abc",
+      metadata: { experiment: "variant_a", env: "prod" },
+      version: "1.0",
+    },
+    async () => {
+      // All spans created here inherit these attributes
+      const generation = startObservation(
+        "llm-call",
+        { model: "gpt-4" },
+        { asType: "generation" }
+      );
+      // This generation automatically has userId, sessionId, metadata, version
+      generation.end();
+    }
+  );
+});
+```
+
+import { PropagationRestrictionsCallout } from "@/components/PropagationRestrictionsCallout";
+
+<PropagationRestrictionsCallout attributes={[]}/>
+
+
+##### Cross-Service Propagation
+
+For distributed tracing across multiple services, use the `asBaggage` parameter (see [OpenTelemetry documentation](https://opentelemetry.io/docs/concepts/signals/baggage/) for more details) to propagate attributes via HTTP headers:
+
+```typescript /propagateAttributes/
+import { propagateAttributes, startActiveObservation } from "@langfuse/tracing";
+
+await startActiveObservation("api-request", async () => {
+  await propagateAttributes(
+    {
+      userId: "user_123",
+      sessionId: "session_abc",
+      asBaggage: true, // Propagate via HTTP headers
+    },
+    async () => {
+      // HTTP request to Service B
+      const response = await fetch("https://service-b.example.com/api");
+      // userId and sessionId are now in HTTP headers
+    }
+  );
+});
+```
+
+<Callout type="warning">
+  **Security Warning:** When `asBaggage: true`, attribute values are added to
+  HTTP headers on ALL outbound requests. Only enable for non-sensitive values
+  and when you need cross-service tracing.
+</Callout>
 
 #### `.updateTrace()` on an observation
 
@@ -407,6 +487,14 @@ rootSpan.end();
 ```
 
 #### `updateActiveTrace()`
+
+<Callout type="info">
+  **Note:** For `userId`, `sessionId`, `metadata`, and `version`, use
+  `propagateAttributes()` (see below) to ensure these attributes are applied to
+  **all observations**, not just the trace object.
+
+  In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagateAttributes` is the future-proof solution.
+</Callout>
 
 When you're inside a callback from `startActiveObservation`, or a function wrapped with `observe`, you might not have a direct reference to an observation object. In these cases, use the `updateActiveTrace()` function. It automatically finds the currently active trace in the context and applies the new attributes.
 
