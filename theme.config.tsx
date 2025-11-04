@@ -202,15 +202,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "langfuse-launch-week-4-day-1",
+    key: "langfuse-launch-week-4-day-2",
     dismissible: true,
     content: (
       <Link href="/blog/2025-10-29-launch-week-4">
         {/* mobile */}
-        <span className="sm:hidden">New Filters for Tables and API →</span>
+        <span className="sm:hidden">Collaborate with your team directly in Langfuse →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Launch Week Day 1: New Filters for Tables and API →
+          Langfuse Launch Week Day 2: Collaborate with your team directly in Langfuse →
         </span>
       </Link>
     ),
