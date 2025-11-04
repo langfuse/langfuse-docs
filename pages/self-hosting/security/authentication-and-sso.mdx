@@ -245,6 +245,20 @@ Provider: `CUSTOM`
 Langfuse supports HTTP proxy settings for SSO providers.
 Configure `AUTH_HTTPS_PROXY` or `AUTH_HTTP_PROXY` to use a proxy for SSO provider requests.
 
+## IdP-Initiated SSO [#idp-initiated-sso]
+
+Langfuse supports **IdP-initiated SSO** (Identity Provider-initiated Single Sign-On), where users can start the SSO flow directly from their identity provider (e.g., Okta, Azure AD, Keycloak, etc.) instead of starting from Langfuse.
+
+To enable IdP-initiated SSO, configure your identity provider to redirect users to:
+
+```
+https://<YOUR_LANGFUSE_URL>/auth/sso-initiate?provider=<PROVIDER>
+```
+
+- Replace `<YOUR_LANGFUSE_URL>` with your Langfuse instance URL and `<PROVIDER>` with your configured provider name (e.g., `GOOGLE`, `GITHUB`, `AZURE_AD`, etc., see other variables of provider above).
+- Use the `Redirect to app to initiate login (OIDC Compliant)` option in your identity provider's settings.
+- IdP-initiated SSO is available on version `>=v3.126.0` of Langfuse.
+
 ## Additional configuration
 
 These are additional configuration variables. Replace `<PROVIDER>` with the provider name (e.g., `GOOGLE`, `GITHUB`, `AZURE_AD`, etc., see other variables of provider above).
