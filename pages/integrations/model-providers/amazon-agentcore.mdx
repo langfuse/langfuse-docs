@@ -1,0 +1,225 @@
+---
+sidebarTitle: Amazon Bedrock AgentCore
+seoTitle: Open Source Observability for Amazon Bedrock AgentCore
+description: Learn how to integrate Langfuse with Amazon Bedrock AgentCore for comprehensive tracing, evaluation, and continuous improvement of your AI agents.
+logo: /images/integrations/bedrock_icon.png
+---
+
+import { Cards } from "nextra/components";
+import { BookOpen, Workflow, TestTube, MonitorCheck } from "lucide-react";
+import { useData } from "nextra/hooks";
+import { Playground } from "nextra/components";
+
+# Integration: Amazon Bedrock AgentCore
+
+> **What is Amazon Bedrock AgentCore?** [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agents/) is a managed service that enables you to build, deploy, and manage AI agents in production. It provides containerized agent runtimes that can execute complex workflows, use tools, and interact with external APIs while leveraging foundation models from Amazon Bedrock.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source platform for LLM engineering. It provides tracing and monitoring capabilities for AI agents, helping developers debug, analyze, and optimize their products. Langfuse integrates with various tools and frameworks via native integrations, OpenTelemetry, and SDKs.
+
+## Get Started
+
+This guide shows you how to integrate Langfuse with Amazon Bedrock AgentCore to trace your agent executions using OpenTelemetry.
+
+<Steps>
+### Step 1: Install Dependencies
+
+Install the required Python packages for building and deploying AgentCore agents with Langfuse tracing:
+
+```python
+pip install bedrock-agentcore-starter-toolkit strands-agents[otel] langfuse boto3 mcp
+```
+
+### Step 2: Set Up Environment Variables
+
+Configure your AWS and Langfuse credentials:
+
+**2.1 Configure Langfuse Credentials and OTEL Exporter**
+
+```python
+import os
+import base64
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region (default)
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com"  # 🇺🇸 US region
+
+# Build Basic Auth header for OTEL
+langfuse_auth = base64.b64encode(
+    f"{os.environ['LANGFUSE_PUBLIC_KEY']}:{os.environ['LANGFUSE_SECRET_KEY']}".encode()
+).decode()
+
+# Configure OpenTelemetry endpoint & headers
+os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ["LANGFUSE_BASE_URL"] + "/api/public/otel"
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {langfuse_auth}"
+```
+
+**2.2 Configure AWS Credentials**
+
+Set your AWS credentials for accessing Bedrock services:
+
+```python
+os.environ["AWS_ACCESS_KEY_ID"] = "..."
+os.environ["AWS_SECRET_ACCESS_KEY"] = "..."
+os.environ["AWS_DEFAULT_REGION"] = "us-west-2"
+```
+
+### Step 3: Create Agent with Langfuse Tracing
+
+Create an AgentCore agent that integrates with Langfuse via OpenTelemetry. This example uses the Strands Agents SDK with MCP tools. Any other agent framework can be used with Langfuse, see [integration pages](/integrations) for guides on how to instrument other frameworks.
+
+```python
+from bedrock_agentcore.runtime import BedrockAgentCoreApp
+from strands import Agent
+from strands.models import BedrockModel
+from strands.telemetry import StrandsTelemetry
+from mcp.client.streamable_http import streamablehttp_client
+from strands.tools.mcp.mcp_client import MCPClient
+from langfuse import get_client
+
+# Initialize MCP client for tool access
+streamable_http_mcp_client = MCPClient(
+    lambda: streamablehttp_client("https://langfuse.com/api/mcp")
+)
+
+# Configure Bedrock model
+bedrock_model = BedrockModel(
+    model_id="us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+    region_name="us-west-2",
+    temperature=0.0,
+    max_tokens=4096
+)
+
+# Define system prompt
+system_prompt = """You are an experienced agent supporting developers with
+questions about Langfuse and LLM observability."""
+
+app = BedrockAgentCoreApp()
+
+@app.entrypoint
+def agent_entrypoint(payload):
+    """Agent entrypoint with Langfuse tracing"""
+    user_input = payload.get("prompt")
+    trace_id = payload.get("trace_id")
+    parent_obs_id = payload.get("parent_obs_id")
+
+    # Initialize Strands telemetry and setup OTLP exporter
+    strands_telemetry = StrandsTelemetry()
+    strands_telemetry.setup_otlp_exporter()
+
+    # Create agent with MCP tools
+    with streamable_http_mcp_client:
+        mcp_tools = streamable_http_mcp_client.list_tools_sync()
+
+        agent = Agent(
+            model=bedrock_model,
+            system_prompt=system_prompt,
+            tools=mcp_tools
+        )
+
+        # Execute within Langfuse trace context
+        with get_client().start_as_current_observation(
+            name='agentcore-agent',
+            trace_context={
+                "trace_id": trace_id,
+                "parent_observation_id": parent_obs_id
+            }
+        ):
+            response = agent(user_input)
+
+    return response.message['content'][0]['text']
+
+if __name__ == "__main__":
+    app.run()
+```
+
+### Step 4: Deploy and Invoke Agent
+
+Deploy your agent to Amazon Bedrock AgentCore and invoke it with trace context:
+
+```python
+from bedrock_agentcore_starter_toolkit import Runtime
+from langfuse import get_client
+import boto3
+import json
+
+# Deploy agent
+runtime = Runtime()
+runtime.configure(
+    entrypoint="./agent.py",
+    auto_create_execution_role=True,
+    auto_create_ecr=True,
+    agent_name="langfuse-traced-agent",
+    memory_mode='NO_MEMORY'
+)
+
+launch_result = runtime.launch(
+    env_vars={
+        "BEDROCK_MODEL_ID": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"],
+        "OTEL_EXPORTER_OTLP_HEADERS": os.environ["OTEL_EXPORTER_OTLP_HEADERS"],
+        "LANGFUSE_PROJECT_NAME": "your-project-name",
+        "SYSTEM_PROMPT": system_prompt
+    }
+)
+
+# Invoke agent with trace context
+client = boto3.client('bedrock-agentcore', region_name='us-west-2')
+
+# Get current trace context from Langfuse
+trace_id = get_client().get_current_trace_id()
+obs_id = get_client().get_current_observation_id()
+
+payload = json.dumps({
+    "prompt": "What is Langfuse and how does it help monitor LLM applications?",
+    "trace_id": trace_id,
+    "parent_obs_id": obs_id
+}).encode()
+
+response = client.invoke_agent_runtime(
+    agentRuntimeArn=launch_result.agent_arn,
+    runtimeSessionId="session-123",
+    payload=payload
+)
+```
+
+### Step 5: View Traces in Langfuse
+
+After running your agent, log in to [Langfuse](https://cloud.langfuse.com) to explore the generated traces. You will see:
+
+- Complete agent execution flows
+- LLM calls with token counts and costs
+- Tool usage and MCP interactions
+- Latency metrics at each step
+- Input/output data for debugging
+
+The traces provide comprehensive visibility into your agent's behavior in production.
+
+</Steps>
+
+## Example repository: Continuous Evaluation with AgentCore and Langfuse
+
+Building production-grade AI agents requires more than just tracing—it demands a systematic approach to continuous improvement through experimentation, testing, and monitoring. [@aristsakpinis93](https://github.com/aristsakpinis93) has created a comprehensive [example repository](https://github.com/aristsakpinis93/agentcore-langfuse-continous-eval-loop) that demonstrates this continuous evaluation loop with Amazon Bedrock AgentCore and Langfuse.
+
+_Continuous evaluation loop:_
+
+<Frame fullWidth>
+  ![Continuous evaluation loop](/images/docs/evaluation/online-offline-loop.png)
+</Frame>
+
+The repository covers three critical phases of the agent lifecycle:
+
+1. Experimentation & Hyperparameter Optimization
+2. QA & Testing with CI/CD
+3. Production Operations & Monitoring
+
+Please refer to the [README.md](https://github.com/aristsakpinis93/agentcore-langfuse-continous-eval-loop/blob/main/README.md) for more details.
+
+## Resources
+
+- [Amazon Bedrock AgentCore Documentation](https://aws.amazon.com/bedrock/agents/)
+- [Strands Agents SDK Documentation](https://strandsagents.com)
+- [Langfuse Evaluation Documentation](/docs/evaluation/overview)
+- [Langfuse Datasets & Experiments](/docs/evaluation/experiments/datasets)
+- [Complete Example Repository](https://github.com/aristsakpinis93/agentcore-langfuse-continous-eval-loop)
