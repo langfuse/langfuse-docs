@@ -1,0 +1,29 @@
+---
+date: 2025-11-04
+title: IdP-Initiated SSO Support
+description: Langfuse now supports IdP-initiated SSO, allowing users to start authentication directly from their identity provider (e.g., Okta, Azure AD, Keycloak)
+badge: Launch Week 4 🚀
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+This enables a more seamless authentication experience where users can click on the Langfuse application tile in their identity provider's dashboard and be automatically authenticated.
+
+## How It Works
+
+When configuring IdP-initiated SSO, you'll set up your identity provider to redirect users to:
+
+```
+<YOUR_LANGFUSE_INSTANCE_URL>/auth/sso-initiate?provider=<PROVIDER>
+```
+
+Langfuse will automatically detect the provider and initiate the SSO authentication flow. Users see a brief loading screen while being redirected to their identity provider for authentication.
+
+## Get Started
+
+**On Langfuse Cloud:** Reach out to [support](/support) to configure IdP-initiated SSO for your identity provider.
+
+**When self-hosting:** See the [self-hosted SSO documentation](/self-hosting/security/authentication-and-sso#idp-initiated-sso) for configuration instructions. IdP-initiated SSO is available on version `>=v3.126.0` of Langfuse.
