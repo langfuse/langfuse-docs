@@ -11,9 +11,21 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
+Our users increasingly trace agentic applications in Langfuse, so we want to make Langfuse better for understanding agents.
 
 ## What's New
 
+### Trace Log View
+We're rolling out a log view for traces. The log view is a concatenation of all data in the trace's observations. You can inspect all agent steps through just scrolling, allowing you to skim your agent behavior in full verbose detail. It also makes it very simple to search through an entire trace with Ctrl+F. Especially for very loopy agents, you can quickly find the interesting bits through searching.
+
+### Tool Call Rendering
+Tool calls are at the heart of agents. An agent is a LLM with available tools which it can repeatedly call. We now render all tools available to a LLM at the top of each `generation`. You can directly see if the LLM selected the correct tools. Clicking on the tool reveals the tool definition details, such as the description and the parameters. Then, in the chat UI, we show the called tools with the arguments used to call them alongside the call id. The tool numbering matches to help you identify the performed tool calls against the available tools.
+
+### Observation Types
+Observations now have one of ten semantic types. For now, the types visually highlight the purpose of the observation to easily distinguish them. Going forward, individual observation types will receive more specific features to help you understand traces better.
+
+### General Agent Graphs
+Finally, the agent graphs are now generally available. We infer the graph structure from observation timings and nesting. Graphs help you understand the flow of the agent's execution and you can use it to easily navigate through looping observations with the same name. Graphs are shown if your trace has any of the new observation types.
 
 ## Get started
 
