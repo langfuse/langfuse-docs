@@ -4,7 +4,7 @@ title: "Langfuse for Agents"
 badge: Launch Week 4 🚀
 description: Trace agents with beautifully rendered tool calls and understand their performance through Agent Evals.
 author: Nimar
-ogImage: /images/changelog/2025-11-05-...png
+ogImage: /images/changelog/2025-11-05-langfuse-for-agents/2025-11-05-agent-tools.png
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -15,17 +15,35 @@ Our users increasingly trace agentic applications in Langfuse, so we want to mak
 
 ## What's New
 
-### Trace Log View
-We're rolling out a log view for traces. The log view is a concatenation of all data in the trace's observations. You can inspect all agent steps through just scrolling, allowing you to skim your agent behavior in full verbose detail. It also makes it very simple to search through an entire trace with Ctrl+F. Especially for very loopy agents, you can quickly find the interesting bits through searching.
+### Agent Tools
+Tool calls are the heartbeat of agents. We now render all tools available to an LLM at the top of each generation, allowing you to instantly see if the LLM selected the right one.
+You can click on any tool to reveal its full definition, description, and parameters. In the Chat UI, we also now display called tools alongside their arguments and call IDs. The numbering matches the available tools list, making it easy to validate performed calls against available options. 
 
-### Tool Call Rendering
-Tool calls are at the heart of agents. An agent is a LLM with available tools which it can repeatedly call. We now render all tools available to a LLM at the top of each `generation`. You can directly see if the LLM selected the correct tools. Clicking on the tool reveals the tool definition details, such as the description and the parameters. Then, in the chat UI, we show the called tools with the arguments used to call them alongside the call id. The tool numbering matches to help you identify the performed tool calls against the available tools.
+<Frame>
+![Agent Tools](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-tools.png)
+</Frame>
+
+### Trace Log View
+We're rolling out a new Log View for traces—a single concatenation of all data in a trace's observations. You can now skim every agent step just by scrolling.
+This view also makes it simple to CMD/Ctrl+F through an entire trace. This is a superpower when you need to find specific details inside very loopy, verbose agents.
+
+<Frame>
+![Trace Log View](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-log.png)
+</Frame>
 
 ### Observation Types
-Observations now have one of ten semantic types. For now, the types visually highlight the purpose of the observation to easily distinguish them. Going forward, individual observation types will receive more specific features to help you understand traces better.
+We’ve expanded the supported observation types to bring more meaning to your spans. Now, you can easily identify the type of action an observation represents, such as tool calls, embeddings or agents.
 
-### General Agent Graphs
-Finally, the agent graphs are now generally available. We infer the graph structure from observation timings and nesting. Graphs help you understand the flow of the agent's execution and you can use it to easily navigate through looping observations with the same name. Graphs are shown if your trace has any of the new observation types.
+<Frame>
+![Observation Types](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-observation-types.png)
+</Frame>
+
+### Agent Graphs GA
+Agent graphs are now Generally Available and works with any agent framework or custom instrumentation. We infer the graph structure from observation timings and nesting to visualize the true flow of your agent's execution, especially useful for navigating complex looping observations.
+
+<Frame>
+![Agent Graphs](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-graphs.png)
+</Frame>
 
 ## Get started
 
