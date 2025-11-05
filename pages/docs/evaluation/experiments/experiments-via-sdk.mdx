@@ -150,6 +150,21 @@ Run experiments directly on datasets stored in Langfuse for automatic tracing an
 {/* PYTHON SDK */}
 
 ```python
+from langfuse import get_client
+from langfuse.openai import OpenAI
+ 
+# Initialize client
+langfuse = get_client()
+ 
+# Define your task function
+def my_task(*, item, **kwargs):
+    question = item.input # `run_experiment` passes a `DatasetItemClient` to the task function. The input of the dataset item is available as `item.input`.
+    response = OpenAI().chat.completions.create(
+        model="gpt-4.1", messages=[{"role": "user", "content": question}]
+    )
+ 
+    return response.choices[0].message.content
+
 # Get dataset from Langfuse
 dataset = langfuse.get_dataset("my-evaluation-dataset")
 
