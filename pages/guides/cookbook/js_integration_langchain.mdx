@@ -27,7 +27,7 @@ Deno.env.set("LANGFUSE_SECRET_KEY", "sk-lf-***");
 
 // Langfuse host configuration
 // For US data region, set this to "https://us.cloud.langfuse.com"
-Deno.env.set("LANGFUSE_HOST", "https://cloud.langfuse.com")
+Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
 
 // Set environment variables using Deno-specific syntax
 Deno.env.set("OPENAI_API_KEY", "sk-proj-***");
@@ -47,7 +47,7 @@ import { LangfuseSpanProcessor } from "npm:@langfuse/otel";
 export const langfuseSpanProcessor = new LangfuseSpanProcessor({
     publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
     secretKey: process.env.LANGFUSE_SECRET_KEY!,
-    baseUrl: process.env.LANGFUSE_HOST ?? 'https://cloud.langfuse.com', // Default to cloud if not specified
+    baseUrl: process.env.LANGFUSE_BASE_URL ?? 'https://cloud.langfuse.com', // Default to cloud if not specified
     environment: process.env.NODE_ENV ?? 'development', // Default to development if not specified
   });
  
@@ -69,7 +69,6 @@ Instantiate the CallbackHandler and pass it to your chain’s `.invoke()` or `.s
 ```typescript
 import { CallbackHandler } from "npm:@langfuse/langchain";
  
-// 1. Initialize the Langfuse callback handler
 const langfuseHandler = new CallbackHandler({
   sessionId: "user-session-123",
   userId: "user-abc",
@@ -77,54 +76,40 @@ const langfuseHandler = new CallbackHandler({
 });
 ```
 
-## Step 3: Langchain interfaces
+## Step 3: Langchain Example
 
-Langfuse supports the following Langchain JS interfaces
-
-- invoke
-- stream
-
-For this section we will use a very simple example prompt (from Langchain JS [docs](https://js.langchain.com/docs/expression_language/interface)) and ChatOpenAI. Langfuse works with any model.
+We create a simple agent that can answer questions and call tools. The agent will use OpenAI GPT-5-mini as its language model, a basic weather function as a tool, and a simple prompt to guide its behavior. All tools and model calls are traced in Langfuse.
 
 
 ```typescript
-import { ChatOpenAI } from "npm:@langchain/openai"
-import { PromptTemplate } from "npm:@langchain/core/prompts"
+import { createAgent, tool } from "npm:langchain";
+import * as z from "npm:zod";
 
-const model = new ChatOpenAI({});
-const promptTemplate = PromptTemplate.fromTemplate(
-  "Tell me a joke about {topic}"
+const getWeather = tool(
+  (input) => `It's always sunny in ${input.city}!`,
+  {
+    name: "get_weather",
+    description: "Get the weather for a given city",
+    schema: z.object({
+      city: z.string().describe("The city to get the weather for"),
+    }),
+  }
 );
+
+const agent = createAgent({
+  model: "openai:gpt-5-mini",
+  tools: [getWeather],
+});
 ```
 
-### using `invoke`
-
 
 ```typescript
-import { RunnableSequence } from "npm:@langchain/core/runnables";
-
-const chain = RunnableSequence.from([promptTemplate, model]);
-
-const res = await chain.invoke(
-    { topic: "bears" },
-    { callbacks: [langfuseHandler] }
+console.log(
+    await agent.invoke(
+        { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] }, 
+        { callbacks: [langfuseHandler] }
+    )
 );
-
-console.log(res.content)
-```
-
-### using `stream`
-
-
-```typescript
-const chain = promptTemplate.pipe(model);
-const stream = await chain.stream(
-    { topic: "bears" },
-    { callbacks: [langfuseHandler] }
-);
-for await (const chunk of stream) {
-  console.log(chunk?.content);
-}
 ```
 
 ## Step 4: Explore the trace in Langfuse
@@ -133,5 +118,5 @@ In the Langfuse interface, you can see a detailed trace of all steps in the Lang
 
 ![Langfuse Trace](https://langfuse.com/images/cookbook/example-js-sdk/js_integration_langchain_trace.png)
 
-[Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8633501eb9ad671eb65c7b131c52c427?display=details%3Ftimestamp%3D2025-08-25T13%3A26%3A28.319Z&observation=6a6e9b25ddfe845f)
+[Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2c1581dd9cecdafb6ca091b83d7ea99a?timestamp=2025-10-30T08:45:41.319Z)
 </Steps>

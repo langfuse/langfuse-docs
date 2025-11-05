@@ -326,43 +326,124 @@ with langfuse.start_as_current_span(name="data-processing"):
 
 Trace-level attributes apply to the entire trace, not just a single observation. You can set or update these using:
 
+- the `propagate_attributes` context manager that sets attributes on all observations inside its context and on the trace
 - The `.update_trace()` method on any `LangfuseSpan` or `LangfuseGeneration` object within that trace.
 - `langfuse.update_current_trace()` to update the trace associated with the currently active observation.
 
 **Trace attribute parameters:**
 
-| Parameter    | Type                  | Description                                                      |
-| :----------- | :-------------------- | :--------------------------------------------------------------- |
-| `name`       | `Optional[str]`       | Name for the trace.                                              |
-| `user_id`    | `Optional[str]`       | ID of the user associated with this trace.                       |
-| `session_id` | `Optional[str]`       | Session identifier for grouping related traces.                  |
-| `version`    | `Optional[str]`       | Version of your application/service for this trace.              |
-| `input`      | `Optional[Any]`       | Overall input for the entire trace.                              |
-| `output`     | `Optional[Any]`       | Overall output for the entire trace.                             |
-| `metadata`   | `Optional[Any]`       | Additional metadata for the trace.                               |
-| `tags`       | `Optional[List[str]]` | List of tags to categorize the trace.                            |
-| `public`     | `Optional[bool]`      | Whether the trace should be publicly accessible (if configured). |
+| Parameter    | Type                  | Description                                                      | Recommended Method |
+| :----------- | :-------------------- | :--------------------------------------------------------------- | :----------------- |
+| `name`       | `Optional[str]`       | Name for the trace.                                              | `update_trace()` |
+| `user_id`    | `Optional[str]`       | ID of the user associated with this trace.                       | `propagate_attributes()` |
+| `session_id` | `Optional[str]`       | Session identifier for grouping related traces.                  | `propagate_attributes()` |
+| `version`    | `Optional[str]`       | Version of your application/service for this trace.              | `propagate_attributes()` |
+| `input`      | `Optional[Any]`       | Overall input for the entire trace.                              | `update_trace()` |
+| `output`     | `Optional[Any]`       | Overall output for the entire trace.                             | `update_trace()` |
+| `metadata`   | `Optional[Any]`       | Additional metadata for the trace.                               | `propagate_attributes()` |
+| `tags`       | `Optional[List[str]]` | List of tags to categorize the trace.                            | `propagate_attributes()` |
+| `public`     | `Optional[bool]`      | Whether the trace should be publicly accessible (if configured). | `update_trace()` |
 
-**Example: Setting Multiple Trace Attributes**
+<Callout type="info">
+  **Note:** For `user_id`, `session_id`, `metadata`, `version`, and `tags`, consider
+  using `propagate_attributes()` (see below) to ensure these attributes are
+  applied to **all spans**, not just the trace object.
 
-```python
-from langfuse import get_client
+  In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagate_attributes` is the future-proof solution.
+</Callout>
+
+#### Propagating Attributes [#propagate-attributes]
+
+Certain attributes (`user_id`, `session_id`, `metadata`, `version`, `tags`) should be applied to **all spans** created within some execution scope. This is important because Langfuse aggregation queries (e.g., filtering by user_id, calculating costs by session_id) will soon operate across individual observations rather than the trace level.
+
+Use the `propagate_attributes()` context manager to automatically propagate these attributes to all child observations:
+
+<Tabs items={["Context Manager", "With @observe Decorator"]}>
+<Tab title="Context Manager">
+
+```python /propagate_attributes/
+from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="initial-operation") as span:
-    # Set trace attributes early
-    span.update_trace(
-        user_id="user_xyz",
-        session_id="session_789",
-        tags=["beta-feature", "llm-chain"]
-    )
-    # ...
-    # Later, from another span in the same trace:
-    with span.start_as_current_generation(name="final-generation") as gen:
-        # ...
-        langfuse.update_current_trace(output={"final_status": "success"}, public=True)
+with langfuse.start_as_current_span(name="user-workflow") as span:
+    # Propagate attributes to all child observations
+    with propagate_attributes(
+        user_id="user_123",
+        session_id="session_abc",
+        metadata={"experiment": "variant_a", "env": "prod"},
+        version="1.0"
+    ):
+        # All spans created here inherit these attributes
+        with langfuse.start_as_current_generation(
+            name="llm-call",
+            model="gpt-4o"
+        ) as gen:
+            # This generation automatically has user_id, session_id, metadata, version
+            pass
 ```
+
+</Tab>
+<Tab title="With @observe Decorator">
+
+```python /propagate_attributes/
+from langfuse import observe, propagate_attributes
+
+@observe()
+def my_llm_pipeline(user_id: str, session_id: str):
+    # Propagate early in the trace
+    with propagate_attributes(
+        user_id=user_id,
+        session_id=session_id,
+        metadata={"pipeline": "main"}
+    ):
+        # All nested @observe functions inherit these attributes
+        result = call_llm()
+        return result
+
+@observe()
+def call_llm():
+    # This automatically has user_id, session_id, metadata from parent
+    pass
+```
+
+</Tab>
+</Tabs>
+
+import { PropagationRestrictionsCallout } from "@/components/PropagationRestrictionsCallout";
+
+<PropagationRestrictionsCallout attributes={[]}/>
+
+
+##### Cross-Service Propagation
+
+For distributed tracing across multiple services, use the `as_baggage` parameter (see [OpenTelemetry documentation](https://opentelemetry.io/docs/concepts/signals/baggage/) for more details) to propagate attributes via HTTP headers:
+
+```python /propagate_attributes/
+from langfuse import get_client, propagate_attributes
+import requests
+
+langfuse = get_client()
+
+# Service A - originating service
+with langfuse.start_as_current_span(name="api-request"):
+    with propagate_attributes(
+        user_id="user_123",
+        session_id="session_abc",
+        as_baggage=True  # Propagate via HTTP headers
+    ):
+        # HTTP request to Service B
+        response = requests.get("https://service-b.example.com/api")
+        # user_id and session_id are now in HTTP headers
+
+# Service B will automatically extract and apply these attributes
+```
+
+<Callout type="warning">
+  **Security Warning:** When `as_baggage=True`, attribute values are added to
+  HTTP headers on ALL outbound requests. Only enable for non-sensitive values
+  and when you need cross-service tracing.
+</Callout>
 
 ### Trace Input/Output Behavior
 
@@ -610,6 +691,7 @@ response = client.chat.completions.create(
 ```
 
 The special metadata fields are:
+
 - `langfuse_session_id`: Sets the session ID for the trace
 - `langfuse_user_id`: Sets the user ID for the trace
 - `langfuse_tags`: Sets tags for the trace (should be a list of strings)
@@ -682,6 +764,7 @@ response = chain.invoke(
 ```
 
 The special metadata fields are:
+
 - `langfuse_session_id`: Sets the session ID for the trace
 - `langfuse_user_id`: Sets the user ID for the trace
 - `langfuse_tags`: Sets tags for the trace (should be a list of strings)
@@ -803,7 +886,6 @@ The Langfuse SDK seamlessly integrates with any third-party library that uses Op
 
 For example, if you're using OpenTelemetry-instrumented databases, HTTP clients, or other services alongside your LLM operations, all these spans will be correctly organized within your traces in Langfuse.
 
-
 <Tabs items={["Example Anthropic", "Example LlamaIndex"]}>
 
 <Tab>
@@ -869,4 +951,3 @@ Learn more in the [Llamaindex integration](/integrations/frameworks/llamaindex) 
 </Tab>
 
 </Tabs>
-

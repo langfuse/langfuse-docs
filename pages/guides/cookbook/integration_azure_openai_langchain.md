@@ -24,7 +24,7 @@ import os
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # for EU data region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # for US data region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # for US data region
 
 # your azure openai configuration
 os.environ["AZURE_OPENAI_ENDPOINT"] = "your Azure OpenAI endpoint"

@@ -51,8 +51,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -231,7 +231,7 @@ import base64
 import hashlib
 import uuid
 
-base_URL = os.getenv("LANGFUSE_HOST")
+base_URL = os.getenv("LANGFUSE_BASE_URL")
 public_key = os.getenv("LANGFUSE_PUBLIC_KEY")
 secret_key = os.getenv("LANGFUSE_SECRET_KEY")
 

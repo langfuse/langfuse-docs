@@ -1,0 +1,169 @@
+---
+title: Mixpanel for LLM Apps with Langfuse
+sidebarTitle: Mixpanel
+logo: /images/integrations/mixpanel_icon.svg
+description: Display your Langfuse metrics in Mixpanel dashboards.
+---
+
+# Mixpanel Integration
+
+[Mixpanel](https://mixpanel.com) is a popular choice for product analytics. While Langfuse offers [metrics](/docs/metrics/overview) out of the box, many of our users have asked for a way to **integrate their LLM related metrics that they capture with Langfuse into their Mixpanel dashboards**.
+
+End-to-end demo of the integration together with Ryan from Mixpanel:
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/2hZjU1XqxRQ?si=HnW_PX9nMfWHptEV"
+  title="Mixpanel integration"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6"
+  allowFullScreen
+></iframe>
+
+We've built an integration to make it easy to answer questions like:
+
+- _"Are my most active users also the ones who are most engaged with my LLM content?"_
+- _"Does interacting with the LLM feature relate to higher retention rates?"_
+- _"How does the LLM feature impact my conversion rates?"_
+- _"Does the user feedback that I capture in Langfuse correlate with the user behavior that I see in Mixpanel?"_
+
+## Example dashboard
+
+We've enabled the integration for the [Langfuse example project](/demo) and created a dashboard using the `AI Company KPIs` template by Mixpanel. Dashboard preview ([public link](https://eu.mixpanel.com/p/V92wFA5YwNjKn9K9vcUmAX)):
+
+<Video
+  src="https://static.langfuse.com/docs-videos/mixpanel-dashboard.mp4"
+  aspectRatio={1768 / 1080}
+  gifStyle
+/>
+
+## Get started
+
+<Steps>
+
+### Enable the integration
+
+Configure this integration in your Langfuse project settings. You will need to select your Mixpanel region and provide your Mixpanel Project Token.
+
+**Available Regions:**
+
+- US (api.mixpanel.com)
+- EU (api-eu.mixpanel.com)
+- India (api-in.mixpanel.com)
+
+You can find your Project Token in your Mixpanel project settings under "Project Settings" > "Project Token".
+
+### Initial sync
+
+Once integrated, Langfuse will sync all historical data from your project to Mixpanel. After the initial sync, new data is automatically synced every hour (with a 30-minute delay) to keep your Mixpanel dashboards up to date.
+
+### Build a dashboard in Mixpanel
+
+Once integrated, you can build dashboards in Mixpanel to visualize your Langfuse metrics (see [reference below](#details)).
+
+You can use the `AI Company KPIs` template to get started with a pre-built dashboard that includes many common metrics. See the dashboard preview above for an example.
+
+</Steps>
+
+## Integration details [#details]
+
+On an hourly schedule, Langfuse batches aggregated events and metrics to your Mixpanel instance.
+
+### Metadata matching
+
+Matching of metadata helps to join the data from Langfuse with the data from Mixpanel:
+
+| Langfuse                                                      | Mixpanel                  | Notes                                                                                                                       |
+| ------------------------------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| [`user_id`](/docs/observability/features/users)               | `distinct_id`, `$user_id` |                                                                                                                             |
+| `trace.timestamp`, `generation.started_at`, `score.timestamp` | `time`                    | Sent as milliseconds since epoch                                                                                            |
+| `trace.metadata.$mixpanel_session_id`                         | `session_id`              | Optional, you need to add the Mixpanel session id to your Langfuse trace [metadata](/docs/observability/features/metadata). |
+
+### Events
+
+The integration sends the following events to Mixpanel.
+
+Is there any additional information that would be helpful? You can request more events or properties [here](/ideas).
+
+#### Event: `[Langfuse] Trace`
+
+- `time`: Milliseconds since epoch when the event occurred.
+- `distinct_id`: User ID or anonymous identifier.
+- `$user_id`: User ID sent to Mixpanel's native user ID field.
+- `$insert_id`: Unique identifier for deduplication.
+- `session_id`: Optional session identifier (from `$mixpanel_session_id` in metadata, or falls back to Langfuse session_id).
+- `langfuse_trace_name`: The name of the trace.
+- `langfuse_url`: The URL of the trace.
+- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
+- `langfuse_id`: The unique identification of the trace.
+- `langfuse_cost_usd`: The total cost associated with the trace.
+- `langfuse_count_observations`: The number of observations in the trace.
+- `langfuse_session_id`: The session ID related to the event.
+- `langfuse_project_id`: An ID associated with the project related to the event.
+- `langfuse_user_id`: User ID related to the event. If it's null, it's marked as langfuse_unknown_user.
+- `langfuse_latency`: The latency of the event.
+- `langfuse_release`: Information relating to the event release.
+- `langfuse_version`: The version of the event.
+- `langfuse_tags`: Any tags associated with the event.
+- `langfuse_environment`: The environment associated with the trace.
+- `langfuse_event_version`: The integration version of Langfuse.
+
+#### Event: `[Langfuse] Generation`
+
+- `time`: Milliseconds since epoch when the generation started.
+- `distinct_id`: User ID or anonymous identifier.
+- `$user_id`: User ID sent to Mixpanel's native user ID field.
+- `$insert_id`: Unique identifier for deduplication.
+- `session_id`: Optional session identifier (from `$mixpanel_session_id` in metadata, or falls back to Langfuse session_id).
+- `langfuse_generation_name`: The name of the generation.
+- `langfuse_trace_name`: Name of the trace related to the generation.
+- `langfuse_trace_id`: The unique identifier of the trace related to the generation.
+- `langfuse_url`: The URL of the generation on the host platform.
+- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
+- `langfuse_id`: Unique identifier of the generation.
+- `langfuse_cost_usd`: Computed total cost of the generation.
+- `langfuse_input_units`: Number of tokens utilized in prompting the generation.
+- `langfuse_output_units`: Number of tokens produced by the generation.
+- `langfuse_total_units`: Total number of tokens consumed in the generation process.
+- `langfuse_session_id`: The session ID associated with the trace of the generation.
+- `langfuse_project_id`: The project identification where the generation happened.
+- `langfuse_user_id`: The user ID that started the trace linked to the generation. In case it's unavailable, it defaults to `langfuse_unknown_user`.
+- `langfuse_latency`: The observed latency of the generation.
+- `langfuse_time_to_first_token`: The time taken to generate the first token when streaming.
+- `langfuse_release`: Release information of the trace attached with the generation.
+- `langfuse_version`: The versioning info about the generation.
+- `langfuse_model`: The model used during this generation's process.
+- `langfuse_level`: The level associated with the generation.
+- `langfuse_tags`: Any tags attached to the trace of the generation.
+- `langfuse_environment`: The environment associated with the generation.
+- `langfuse_event_version`: The integration version with Langfuse.
+
+#### Event: `[Langfuse] Score`
+
+- `time`: Milliseconds since epoch when the score event occurred.
+- `distinct_id`: User ID or anonymous identifier.
+- `$user_id`: User ID sent to Mixpanel's native user ID field.
+- `$insert_id`: Unique identifier for deduplication.
+- `session_id`: Optional session identifier (from `$mixpanel_session_id` in metadata, or falls back to Langfuse session_id).
+- `langfuse_score_name`: The name associated with the score.
+- `langfuse_score_value`: The value of the score.
+- `langfuse_score_string_value`: The string value of the score. For BOOLEAN and CATEGORICAL scores, this will be the string representation of the value.
+- `langfuse_score_data_type`: The data type of the score (NUMERIC, BOOLEAN, CATEGORICAL).
+- `langfuse_score_comment`: Any comments attached with the score.
+- `langfuse_score_metadata`: Any metadata attached with the score.
+- `langfuse_trace_name`: The name of the trace associated with the score.
+- `langfuse_trace_id`: The unique identifier of the trace associated with the score.
+- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
+- `langfuse_id`: The unique identification of the score.
+- `langfuse_session_id`: The session identification related to the score's trace.
+- `langfuse_project_id`: The project identification linked with the score's trace.
+- `langfuse_user_id`: The user ID that triggered the trace tied with the score. If not available, defaults to `langfuse_unknown_user`.
+- `langfuse_release`: The release information of the trace associated with the score.
+- `langfuse_tags`: Any tags related to the trace of the score.
+- `langfuse_environment`: The environment associated with the score.
+- `langfuse_event_version`: The integration version with Langfuse.
+
+## Troubleshooting
+
+**Missing data in Mixpanel?** Please check that you have correctly selected the Mixpanel region and entered the Project Token in your Langfuse project settings. The integration syncs data every hour with a 30-minute delay, so there may be a short lag before new events appear. Reach out to us if you encounter any other issues with the integration.

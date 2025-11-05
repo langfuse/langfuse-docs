@@ -45,8 +45,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -147,7 +147,7 @@ _**Note**: This example is taken from the [RAGAS documentation](https://docs.rag
 
 
 ```python
-%git clone https://huggingface.co/datasets/explodinggradients/Sample_Docs_Markdown
+!git clone https://huggingface.co/datasets/explodinggradients/Sample_Docs_Markdown
 ```
 
 
@@ -271,6 +271,119 @@ If you prefer a more UI-based approach, check out [Hugging Face's Synthetic Data
 ![Hugging Face Dataset Generator](https://langfuse.com/images/cookbook/example-synthetic-datasets/hf-generator.png)
 
 ![Hugging Face Synthetic Dataset](https://langfuse.com/images/cookbook/example-synthetic-datasets/hf-dataset.png)
+
+### Example 5: RAG Dataset Generation
+
+If you have an existing vector database or prefer not to use specialized libraries like RAGAS or DeepEval, you can generate a RAG testset by directly looping through your vector store. This approach gives you full control over the generation process.
+
+This is useful when you:
+- Want lightweight code without additional dependencies
+- Need to customize the question generation logic
+
+
+```python
+import os
+ 
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+ 
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+
+```python
+# Install dependencies
+%pip install --upgrade langchain-community langchain-openai langchain-chroma langfuse "unstructured[md]"
+```
+
+
+```python
+# Clone an example document set
+!git clone https://huggingface.co/datasets/explodinggradients/Sample_Docs_Markdown
+```
+
+
+```python
+# Load the documents
+from langchain_community.document_loaders import DirectoryLoader
+ 
+path = "Sample_Docs_Markdown"
+loader = DirectoryLoader(path, glob="**/*.md")
+docs = loader.load()
+```
+
+
+```python
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+# Chunk the documents
+splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+chunks = splitter.split_documents(docs)
+
+# Create vector DB
+vectorstore = Chroma.from_documents(chunks, OpenAIEmbeddings())
+```
+
+
+```python
+# Generate questions
+import json
+
+# Get all chunks
+all_chunks = vectorstore.get()['documents'][:10] # Get the first 10 chunks
+llm = ChatOpenAI(model="gpt-4o-mini")
+
+test_items = []
+
+for chunk in all_chunks:
+    # Ask LLM to generate one question
+    response = llm.invoke(
+        f"Generate one natural question that can be answered using this text. "
+        f"Return only JSON: {{\"question\": \"...\", \"answer\": \"...\"}}\n\n{chunk}"
+    )
+    
+    # Parse response
+    content = response.content
+    if "```" in content:
+        content = content.split("```")[1].replace("json", "").strip()
+    
+    qa = json.loads(content)
+    test_items.append({
+        "question": qa["question"],
+        "answer": qa["answer"],
+        "context": chunk
+    })
+```
+
+
+```python
+# Push to Langfuse Dataset
+from langfuse import get_client
+
+langfuse = get_client()
+
+langfuse.create_dataset(name="simple_rag_testset")
+
+for item in test_items:
+    langfuse.create_dataset_item(
+        dataset_name="simple_rag_testset",
+        input=item["question"],
+        expected_output=item["answer"],
+        metadata={"context": item["context"]}
+    )
+
+print(f"✓ Created {len(test_items)} test items")
+```
+
+You can now evaluate your application using this dataset. Check our [RAG Observability and Evals](https://langfuse.com/blog/2025-10-28-rag-observability-and-evals) blogpost to learn more.
+
+![Custom RAG Dataset](https://langfuse.com/images/cookbook/example-synthetic-datasets/custom-rag-dataset.png)
 
 ## Next Steps
 

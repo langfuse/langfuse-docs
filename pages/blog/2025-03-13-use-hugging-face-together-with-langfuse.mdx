@@ -45,7 +45,7 @@ from langfuse import observe
 # Set up your environment variables
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"
 os.environ["HUGGINGFACE_ACCESS_TOKEN"] = "hf_..."
 
 # Initialize the OpenAI client pointing to the Hugging Face Inference API
@@ -162,7 +162,7 @@ print(df.head())
 # Initialize your Langfuse client (ensure you have your API key configured)
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"
 langfuse = Langfuse(api_key=os.getenv("LANGFUSE_SECRET_KEY"))
 
 # Create a new dataset in Langfuse

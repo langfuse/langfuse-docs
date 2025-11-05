@@ -1,0 +1,49 @@
+---
+date: 2025-11-04
+title: Amazon Bedrock AgentCore Integration
+description: Trace AI agents built with Amazon Bedrock AgentCore via OpenTelemetry and Langfuse
+author: Marc
+badge: Launch Week 4 🚀
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+**Day 2 of [Launch Week 4](/blog/2025-10-29-launch-week-4)** brings a new integration with [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agents/), enabling comprehensive observability for AI agents deployed on AWS infrastructure.
+
+Amazon Bedrock AgentCore is a managed service that enables you to build, deploy, and manage AI agents in production. With our new integration guide, you can now trace your AgentCore agents using OpenTelemetry and get full visibility into agent executions, LLM calls, tool usage, and MCP interactions.
+
+## What this enables
+
+The integration supports distributed tracing, allowing you to connect traces from your local development environment to production AgentCore deployments. This enables you to:
+
+- Monitor complete agent execution flows in production
+- Track LLM calls with token counts and costs
+- Debug tool usage and MCP interactions
+- Analyze latency metrics at each step
+- Maintain trace continuity across distributed systems
+
+We've also included a comprehensive [example repository](https://github.com/aristsakpinis93/agentcore-langfuse-continous-eval-loop) from [@aristsakpinis93](https://github.com/aristsakpinis93) that demonstrates a complete continuous evaluation loop with AgentCore and Langfuse, covering experimentation, QA testing, and production monitoring.
+
+## Learn more
+
+import { Calendar, FileCode, Github } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Integration Guide"
+    href="/integrations/frameworks/amazon-agentcore"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Example Repository"
+    href="https://github.com/aristsakpinis93/agentcore-langfuse-continous-eval-loop"
+    icon={<Github />}
+  />
+  <Card
+    title="See all Launch Week releases"
+    href="/blog/2025-10-29-launch-week-4"
+    icon={<Calendar />}
+  />
+</Cards>
