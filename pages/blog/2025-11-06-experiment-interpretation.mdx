@@ -29,7 +29,7 @@ Generally, it helps to think of **running experiments** as a CI pipeline for mod
 
 Before diving into these sections, let's assume an AI application is using `sonnet-4` (the baseline) in production. **The goal is to decide if** `sonnet-4.5` **(the candidate) is a clear improvement.** An experiment is run using `sonnet-4.5`. 
 
-We'll demonstrate running experiments via the Langfuse SDK. For other experiment execution methods please refer to \[link\]. 
+We'll demonstrate running experiments via the Langfuse SDK. For other experiment execution methods please refer to [docs](/docs/evaluation/experiments/overview#running-experiments). 
 
 ## Run experiment 
 
@@ -121,7 +121,7 @@ Averages can hide outliers. A 4% average improvement can hide a 16% regression o
 
 The goal is to build a high-priority worklist. Use the UI tools systematically:
 
-1. **Filtering:** This is the primary tool. Use column header summaries to filter for specific value failures (e.g., `Candidate Hallucination > 0.0`). 
+1. **Filtering:** This is the primary tool. Use column header summaries to filter for specific value failures (e.g., `Candidate Correctness < 0.3`). 
 2. **\[Coming soon\] Sorting:** Sort the table by the scores to surface the single worst-performing items immediately.
 
 This filtered, sorted list is the work queue.
@@ -147,7 +147,7 @@ Now, select a specific row from this list to open its **execution trace**. The t
 
 Automated evaluators help identify *that* a regression occurred (e.g., `correctness: 0.0`) but often fail to capture *why* in a structured way. This is the entry point for Human in the loop evaluation.
 
-Our goal is to convert expert human judgment into a structured, queryable `score`. Given our example, this might involve a two-stage annotation workflow. Note that annotation workflows strongly differ by use case. For more detail please see [https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications](https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications).  
+Our goal is to convert expert human judgment into a structured, queryable `score`. Given our example, this might involve a two-stage annotation workflow. Note that annotation workflows strongly differ by use case. For more detail please see our recent blog post on [Error Analysis](https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications).  
 
 1. First Pass (Engineer): Triage
 
