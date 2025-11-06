@@ -37,7 +37,7 @@ Running the experiment involves three components: the **task**, the **data**, an
 
 #### 1\. Task
 
-The task is the target function being tested. This is typically the AI application, a specific chain, or , more generally speaking, any function that accepts an input and returns an output. Given our example, we'd change our task definiton to use `sonnet-4.5`. 
+The task is the target function being tested. This is typically the AI application, a specific chain, or , more generally speaking, any function that accepts an input and returns an output. Given our example, we'd change our task definition to use `sonnet-4.5`. 
 
 #### 2\. Data
 
@@ -83,7 +83,7 @@ def accuracy_evaluator(*, input, output, expected_output, metadata, **kwargs):
 result = dataset.run_experiment(
     name="Production Model Test",
     description="Monthly evaluation of our production model",
-    task=my_task 
+    task=my_task, 
     evaluators=[accuracy_evaluator]
 )
  
@@ -105,7 +105,7 @@ First, review the **experiments table**. It tracks high-level metrics (avg. scor
 
 ### 2\. The Baseline Comparison (The "Diff")
 
-Locate your two most recent experiment runs in the table. Select both rows, the candidate run (`sonnet-4.5`) and the baseline run (`sonnet-4`), and click **Compare**. Set the baseline run as baseline in the UI. Our mental model for analysis in this view follows a 3-step drilldown: 
+Locate your two most recent experiment runs in the table. Select both rows, the candidate run (`sonnet-4.5`) and the baseline run (`sonnet-4`), and click **Compare**. Set the baseline run as baseline in the UI. Our mental model for analysis in this view follows a 3-step drill down: 
 
 #### Step 1: Review Aggregate Metrics
 
@@ -143,7 +143,7 @@ Now, select a specific row from this list to open its **execution trace**. The t
   title="Execution trace"
 />
 
-### 3\. **Actioning Results with Human Annotation**
+### 3\. **Exploring Results with Human Annotation**
 
 Automated evaluators help identify *that* a regression occurred (e.g., `correctness: 0.0`) but often fail to capture *why* in a structured way. This is the entry point for Human in the loop evaluation.
 
