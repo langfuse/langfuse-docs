@@ -31,23 +31,23 @@ Before diving into these sections, let's assume an AI application is using `sonn
 
 We'll demonstrate running experiments via the Langfuse SDK. For other experiment execution methods please refer to \[link\]. 
 
-# Run experiment 
+## Run experiment 
 
 Running the experiment involves three components: the **task**, the **data**, and the **evaluators**.
 
-#### 1\. Task
+### 1\. Task
 
 The task is the target function being tested. This is typically the AI application, a specific chain, or , more generally speaking, any function that accepts an input and returns an output. Given our example, we'd change our task definition to use `sonnet-4.5`. 
 
-#### 2\. Data
+### 2\. Data
 
 The data provides the inputs for the task. This can be a simple local list of test cases or, more commonly, a **dataset managed in Langfuse**. Datasets provide a stable set of test cases —so called dataset items—  to run against different versions of the task. Optionally items track expected output for each single item. 
 
-#### 3\. Evaluators
+### 3\. Evaluators
 
 Evaluators score the quality of the task's output for a single item. They receive the input, output, and optional expected output, and produce scores (e.g., `relevance`, `correctness`). Often if expected output is provided evaluators compare actual and expected output. Diving deeper into evals is recommended \[link\]. 
 
-#### Managed Execution
+### Managed Execution
 
 Our experiment framework abstracts the execution logic. It automatically handles:
 
@@ -91,7 +91,7 @@ result = dataset.run_experiment(
 print(result.format())
 ```
 
-# Interpret experiments results 
+## Interpret experiments results 
 
 As we have successfully run our experiment, interpretation follows a top-down funnel:
 
@@ -100,7 +100,7 @@ As we have successfully run our experiment, interpretation follows a top-down fu
 First, review the **experiments table**. It tracks high-level metrics (avg. score, cost, latency) across all experiments for a given dataset. This view shows which experiments are potential improvements or clear regressions at a glance. Note that while some users will rely on score averages/counts to model the latter, some more sophisticated users ingest experiment-level scores such as Pass/Fail, F1, precision. 
 
 <Frame className="rounded-lg overflow-hidden">
-  ![Experiment table](/images/blog/2025-11-06-experiment-interpretation/experiment-table.png)
+  ![Experiments table](/images/blog/2025-11-06-experiment-interpretation/experiments-table.png)
 </Frame>
 
 ### 2\. The Baseline Comparison (The "Diff")
@@ -171,7 +171,7 @@ A Subject Matter Expert (SME) takes over, reviewing only the pre-filtered compar
 
 This workflow converts automated regression signals into a structured failure dataset, providing a clear, data-driven mandate for the next engineering iteration.
 
-### Takeaway
+## Takeaway
 
 Experiments provide a core feedback loop for AI engineering. They separate subjective tweaking from systematic development.
 
