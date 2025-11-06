@@ -1,8 +1,8 @@
 ---
-title: "XX"
+title: "Systematic Evaluation of AI Agents"
 date: 2025/11/06
 description: A practical guide to running and interpreting experiments in Langfuse. 
-ogImage: /images/blog/2025-09-05-automated-evaluations/automated-evaluations.png
+# ogImage: /images/blog/2025-09-05-automated-evaluations/automated-evaluations.png
 tag: guide
 author: Marlies
 ---
@@ -10,7 +10,7 @@ author: Marlies
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="XX"
+  title="Systematic Evaluation of AI Agents"
   description="A practical guide to running and interpreting experiments in Langfuse."
   date="November 6, 2025"
   authors={["marliesmayerhofer"]}
@@ -37,7 +37,7 @@ Running the experiment involves three components: the **task**, the **data**, an
 
 #### 1\. Task
 
-The task is the target function being tested. This is typically the AI application, a specific chain, or ,more generally speaking, any function that accepts an input and returns an output. Given our example, we'd change our task definiton to use `sonnet-4.5`. 
+The task is the target function being tested. This is typically the AI application, a specific chain, or , more generally speaking, any function that accepts an input and returns an output. Given our example, we'd change our task definiton to use `sonnet-4.5`. 
 
 #### 2\. Data
 
@@ -100,7 +100,7 @@ As we have successfully run our experiment, interpretation follows a top-down fu
 First, review the **experiments table**. It tracks high-level metrics (avg. score, cost, latency) across all experiments for a given dataset. This view shows which experiments are potential improvements or clear regressions at a glance. Note that while some users will rely on score averages/counts to model the latter, some more sophisticated users ingest experiment-level scores such as Pass/Fail, F1, precision. 
 
 <Frame className="rounded-lg overflow-hidden">
-  ![Experiment table](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/demo-chat.png)
+  ![Experiment table](/images/blog/2025-11-06-experiment-interpretation/experiment-table.png)
 </Frame>
 
 ### 2\. The Baseline Comparison (The "Diff")
@@ -112,7 +112,7 @@ Locate your two most recent experiment runs in the table. Select both rows, the 
 Navigate to the "Charts" tab. This view presents a high-level summary of relevant metrics and first signal how baseline and candidate experiment compare. An improvement in a given evaluation score may not be worth an unacceptable regression in cost. 
 
 <Frame className="rounded-lg overflow-hidden">
-  ![Experiment charts](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/demo-chat.png)
+  ![Experiment charts](/images/blog/2025-11-06-experiment-interpretation/compare-charts.png)
 </Frame>
 
 #### Step 2: Isolate Regressions and perform Root Cause Analysis 
@@ -126,15 +126,22 @@ The goal is to build a high-priority worklist. Use the UI tools systematically:
 
 This filtered, sorted list is the work queue.
 
-Now, select a specific row from this list to open its **execution trace**. The trace is the debugger. Analysis at this level has two parts:
+<Video
+  src="https://static.langfuse.com/docs-videos/2025-11-06-experiment-interpretation-compare-filter.mp4"
+  aspectRatio={16 / 9}
+  title="Compare view filtering"
+/>
 
-{/* Make this TWO gifs: filter + show execution trace */}
-<Frame className="rounded-lg overflow-hidden">
-  ![Execution trace](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/demo-chat.png)
-</Frame>
+Now, select a specific row from this list to open its **execution trace**. The trace is the debugger. Analysis at this level has two parts:
 
 * **Analyze the Output:** Compare the `Baseline Output` vs. the `Candidate Output` to understand the *behavioral* change that caused the regression.
 * **Validate the Evaluator:** Critically, check the evaluator's `score` against the `output`. Does the score seem correct? If a good output receives a bad score (or vice versa), the evaluator is broken. Fixing the evaluation logic is a prerequisite to trusting the experiment.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2025-11-06-experiment-interpretation-compare-trace.mp4"
+  aspectRatio={16 / 9}
+  title="Execution trace"
+/>
 
 ### 3\. **Actioning Results with Human Annotation**
 
@@ -156,11 +163,11 @@ A Subject Matter Expert (SME) takes over, reviewing only the pre-filtered compar
 * **Action:** Filter the experiment view for `score.review_status = 'fail'`.
 * **Annotation****:** The SME's task is failure classification. They review the failure and apply a second, more granular score (e.g., `failure_mode: Hallucination`, `failure_mode: Irrelevant`, `failure_mode: Formatting`).
 
-{/* Add gif for annoation drawer  */}
-<Frame className="rounded-lg overflow-hidden">
-  ![Chat
-  Interface](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/demo-chat.png)
-</Frame>
+<Video
+  src="https://static.langfuse.com/docs-videos/2025-11-06-experiment-interpretation-compare-annotation.mp4"
+  aspectRatio={16 / 9}
+  title="Annotation drawer"
+/>
 
 This workflow converts automated regression signals into a structured failure dataset, providing a clear, data-driven mandate for the next engineering iteration.
 
