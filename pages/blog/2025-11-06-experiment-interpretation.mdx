@@ -143,20 +143,20 @@ Now, select a specific row from this list to open its **execution trace**. The t
   title="Execution trace"
 />
 
-### 3\. **Exploring Results with Human Annotation**
+### 3\. Exploring Results with Human Annotation
 
 Automated evaluators help identify *that* a regression occurred (e.g., `correctness: 0.0`) but often fail to capture *why* in a structured way. This is the entry point for Human in the loop evaluation.
 
 Our goal is to convert expert human judgment into a structured, queryable `score`. Given our example, this might involve a two-stage annotation workflow. Note that annotation workflows strongly differ by use case. For more detail please see [https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications](https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications).  
 
-1. **First Pass (Engineer): Triage** 
+1. First Pass (Engineer): Triage
 
 The engineer, having isolated regressions in Step 2, performs a rapid first pass.
 
 * **Action:** Use **Annotation Mode** to efficiently navigate the filtered regression list. The engineer annotates the `sonnet-4.5` (candidate) outputs directly. The UI allows quickly navigating between annotation-ready cells by clicking the `Annotate` button in the output cell.
 * **Annotation:** Apply a simple triage score (e.g., `review_status: fail`). This marks the item and creates a worklist for deeper analysis.
 
-2. **Second Pass (Subject Matter Expert): Classification** 
+2. Second Pass (Subject Matter Expert): Classification 
 
 A Subject Matter Expert (SME) takes over, reviewing only the pre-filtered compare view (eg `Candidate review_status = fail`).
 
