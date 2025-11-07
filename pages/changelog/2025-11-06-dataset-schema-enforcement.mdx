@@ -1,0 +1,55 @@
+---
+date: 2025-11-08
+title: JSON Schema Enforcement for Dataset Items
+description: Define JSON schemas for your dataset inputs and expected outputs to ensure data quality and consistency across your test datasets.
+badge: Launch Week 4 🚀
+author: Hassieb
+ogImage: /images/changelog/2025-11-06-dataset-schema-enforcement.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now add **JSON Schema validation** to your datasets to ensure all dataset items conform to the expected structure. This helps maintain data quality, catch errors early, and ensure consistency across your team when building and maintaining test datasets.
+
+**Why use schema enforcement?**
+
+When building datasets for LLM application testing, it's easy for data inconsistencies to creep in—especially when multiple team members contribute or when importing data from various sources. Schema enforcement solves this by:
+
+- **Ensuring data quality**: All items must match your defined structure
+- **Catching errors early**: Invalid data is rejected before it enters your dataset
+- **Improving collaboration**: Shared schemas ensure everyone follows the same format
+- **Type safety**: Define exact structures for inputs and expected outputs
+- **Preventing test failures**: Experiments won't fail due to malformed test data
+
+**How it works**
+
+When you create or update a dataset, you can optionally define JSON schemas for the `input` and `expectedOutput` fields. Once set, Langfuse automatically validates all dataset items against these schemas:
+
+- ✅ Valid items are accepted
+- ❌ Invalid items are rejected with detailed error messages
+- 🔍 Validation happens on creation, updates, and CSV imports
+
+**Validation errors**
+
+When validation fails, Langfuse provides detailed error messages showing exactly what's wrong and where the issue is in your data structure. This makes it easy to identify and fix data issues before they affect your experiments.
+
+**Use cases**
+
+Schema enforcement is particularly useful for:
+
+- **Structured outputs**: Validate JSON responses from function calling or tool use
+- **Chat applications**: Ensure message arrays follow the correct format
+- **Team collaboration**: Maintain consistency when multiple people contribute to datasets
+- **Data imports**: Validate CSV uploads before adding items to datasets
+
+**Learn more**
+
+import { Book, Calendar } from "lucide-react";
+
+<Cards num={1}>
+  <Card title="Datasets Documentation" href="/docs/evaluation/experiments/datasets" icon={<Book />} />
+  <Card title="JSON Schema Specification" href="https://json-schema.org/" icon={<Book />} />
+  <Card title="See all Launch Week releases" href="/blog/2025-10-29-launch-week-4" icon={<Calendar />} />
+</Cards>
