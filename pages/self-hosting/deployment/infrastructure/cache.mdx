@@ -202,12 +202,6 @@ Redis Sentinel provides high availability for Redis deployments without the comp
 It automatically monitors Redis master and replica instances, handles failover, and provides service discovery.
 This makes it ideal for deployments that need automatic failover but don't require horizontal scaling across multiple shards.
 
-<Callout type="info">
-
-Sentinel mode and cluster mode are mutually exclusive. You cannot enable both simultaneously.
-
-</Callout>
-
 ### Configuration
 
 To enable Redis Sentinel mode, set the following environment variables:
@@ -220,12 +214,6 @@ REDIS_AUTH=your-redis-password  # if authentication is enabled on Redis
 REDIS_SENTINEL_PASSWORD=your-sentinel-password  # if authentication is enabled on Sentinels (optional)
 ```
 
-<Callout type="info">
-
-For production deployments, we recommend using at least 3 Sentinel instances to ensure quorum and avoid split-brain scenarios.
-
-</Callout>
-
 ### Example Configurations
 
 #### Self-hosted Redis with Sentinel
@@ -237,22 +225,11 @@ REDIS_SENTINEL_MASTER_NAME=langfuse-master
 REDIS_AUTH=your-redis-password
 ```
 
-#### Redis Sentinel with TLS
-
-```bash
-REDIS_SENTINEL_ENABLED=true
-REDIS_SENTINEL_NODES=sentinel1.example.com:26379,sentinel2.example.com:26379,sentinel3.example.com:26379
-REDIS_SENTINEL_MASTER_NAME=mymaster
-REDIS_AUTH=your-redis-password
-REDIS_TLS_ENABLED=true
-```
-
 <Callout type="warning">
 
 When using Redis Sentinel mode:
 
 - Ensure all Sentinel nodes are accessible from your Langfuse containers
-- Configure at least 3 Sentinel instances for production use
 - The `REDIS_SENTINEL_MASTER_NAME` must match the master name configured in your Sentinel setup
 - Set `maxmemory-policy=noeviction` on the Redis master and replicas to prevent queue job eviction
 - TLS configuration (if enabled) applies to connections to both Sentinels and Redis instances
