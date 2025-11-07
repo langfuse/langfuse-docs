@@ -1,303 +1,28 @@
 import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight } from "lucide-react";
 import { Quote } from "@/components/Quote";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { HomeSection } from "../home/components/HomeSection";
-import { useEffect, useRef, useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import { WALKTHROUGH_TABS } from "./constants";
-
-// Declare YouTube IFrame API types
-declare global {
-  interface Window {
-    YT: any;
-    onYouTubeIframeAPIReady: () => void;
-  }
-}
 
 interface VideoPlayerProps {
   videoId: string;
   title: string;
-  onVideoEnd?: () => void;
-  hasNextVideo: boolean;
-  nextVideoTitle?: string;
-  onNextVideo?: () => void;
 }
 
-function VideoPlayer({
-  videoId,
-  title,
-  onVideoEnd,
-  hasNextVideo,
-  nextVideoTitle,
-  onNextVideo,
-}: VideoPlayerProps) {
-  const playerRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [showOverlay, setShowOverlay] = useState(false);
-  const progressCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isCheckingProgressRef = useRef(false);
-  const [isApiReady, setIsApiReady] = useState(false);
-
-  const checkVideoProgress = useCallback(() => {
-    if (!playerRef.current || !hasNextVideo) return;
-
-    if (isCheckingProgressRef.current) return;
-
-    isCheckingProgressRef.current = true;
-
-    // Clear any existing progress check interval
-    if (progressCheckIntervalRef.current) {
-      clearInterval(progressCheckIntervalRef.current);
-    }
-
-    progressCheckIntervalRef.current = setInterval(() => {
-      if (!playerRef.current) {
-        if (progressCheckIntervalRef.current) {
-          clearInterval(progressCheckIntervalRef.current);
-          progressCheckIntervalRef.current = null;
-        }
-        isCheckingProgressRef.current = false;
-        return;
-      }
-
-      try {
-        const currentTime = playerRef.current.getCurrentTime();
-        const duration = playerRef.current.getDuration();
-        const timeRemaining = duration - currentTime;
-
-        // Show overlay when 10 seconds remaining
-        if (timeRemaining <= 10 && timeRemaining > 0) {
-          setShowOverlay(true);
-        }
-
-        // Stop checking if video is paused or ended
-        const state = playerRef.current.getPlayerState();
-        if (state !== 1) {
-          // Not playing
-          if (progressCheckIntervalRef.current) {
-            clearInterval(progressCheckIntervalRef.current);
-            progressCheckIntervalRef.current = null;
-          }
-          isCheckingProgressRef.current = false;
-        }
-      } catch (e) {
-        // Player methods failed, likely destroyed - clear interval
-        if (progressCheckIntervalRef.current) {
-          clearInterval(progressCheckIntervalRef.current);
-          progressCheckIntervalRef.current = null;
-        }
-        isCheckingProgressRef.current = false;
-      }
-    }, 500);
-  }, [hasNextVideo]);
-
-  const handleVideoEnd = useCallback(() => {
-    if (!hasNextVideo) {
-      onVideoEnd?.();
-      return;
-    }
-
-    // Show overlay without countdown
-    setShowOverlay(true);
-  }, [hasNextVideo, onVideoEnd]);
-
-  const onPlayerStateChange = useCallback(
-    (event: any) => {
-      // Playing
-      if (event.data === 1) {
-        checkVideoProgress();
-      }
-      // Ended
-      if (event.data === 0) {
-        handleVideoEnd();
-      }
-    },
-    [checkVideoProgress, handleVideoEnd]
-  );
-
-  // Use a ref to avoid reinitializing the player when callbacks change
-  const onPlayerStateChangeRef = useRef(onPlayerStateChange);
-  useEffect(() => {
-    onPlayerStateChangeRef.current = onPlayerStateChange;
-  }, [onPlayerStateChange]);
-
-  const initPlayer = useCallback(() => {
-    if (!containerRef.current || !window.YT || !window.YT.Player) return;
-
-    // Destroy existing player if it exists
-    if (playerRef.current) {
-      try {
-        playerRef.current.destroy();
-      } catch (e) {
-        // Ignore errors during destruction
-      }
-    }
-
-    // Clear the container to ensure clean state
-    if (containerRef.current) {
-      containerRef.current.innerHTML = "";
-    }
-
-    try {
-      playerRef.current = new window.YT.Player(containerRef.current, {
-        host: "https://www.youtube-nocookie.com",
-        videoId: videoId,
-        playerVars: {
-          modestbranding: 1,
-          rel: 0,
-        },
-        events: {
-          onStateChange: (event: any) => onPlayerStateChangeRef.current(event),
-          onReady: (event: any) => {
-            // Add cookieyes attribute to the iframe element
-            try {
-              const iframe = event.target.getIframe();
-              if (iframe) {
-                iframe.setAttribute("data-cookieyes", "necessary");
-              }
-            } catch (e) {
-              console.error("Error setting cookieyes attribute:", e);
-            }
-          },
-        },
-      });
-    } catch (e) {
-      console.error("Error initializing YouTube player:", e);
-    }
-  }, [videoId]);
-
-  // Load YouTube IFrame API
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    // Check if API is already loaded
-    if (window.YT && window.YT.Player) {
-      setIsApiReady(true);
-      return;
-    }
-
-    // Load the API if not already loaded
-    if (!document.getElementById("youtube-iframe-api")) {
-      const tag = document.createElement("script");
-      tag.id = "youtube-iframe-api";
-      tag.src = "https://www.youtube.com/iframe_api";
-      // Mark as necessary for CookieYes to allow loading
-      tag.setAttribute("data-cookieyes", "necessary");
-      const firstScriptTag = document.getElementsByTagName("script")[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-      window.onYouTubeIframeAPIReady = () => {
-        setIsApiReady(true);
-      };
-    } else {
-      // Script exists but API might not be ready yet
-      const checkApi = setInterval(() => {
-        if (window.YT && window.YT.Player) {
-          setIsApiReady(true);
-          clearInterval(checkApi);
-        }
-      }, 100);
-
-      return () => clearInterval(checkApi);
-    }
-  }, []);
-
-  // Initialize player when API is ready and videoId changes
-  useEffect(() => {
-    if (isApiReady && videoId) {
-      initPlayer();
-    }
-
-    return () => {
-      if (playerRef.current) {
-        try {
-          playerRef.current.destroy();
-        } catch (e) {
-          // Ignore errors during cleanup
-        }
-      }
-    };
-  }, [isApiReady, videoId, initPlayer]);
-
-  const handleNextClick = () => {
-    setShowOverlay(false);
-    onNextVideo?.();
-  };
-
-  // Reset overlay state when videoId changes
-  useEffect(() => {
-    setShowOverlay(false);
-    if (progressCheckIntervalRef.current) {
-      clearInterval(progressCheckIntervalRef.current);
-      progressCheckIntervalRef.current = null;
-    }
-    isCheckingProgressRef.current = false;
-  }, [videoId]);
-
+function VideoPlayer({ videoId, title }: VideoPlayerProps) {
   return (
-    <div className="relative w-full aspect-[16/9] rounded border overflow-hidden">
-      <div
-        ref={containerRef}
-        className="absolute inset-0 w-full h-full z-10 pointer-events-none [&>*]:pointer-events-auto"
-        title={title}
-      />
-
-      <div className="absolute inset-0 flex items-center justify-center bg-muted/50 backdrop-blur-sm z-0">
-        <div className="max-w-md mx-4 p-6 rounded-lg border bg-card shadow-lg text-center">
-          <p className="text-sm text-muted-foreground mb-4">
-            This video is hosted on YouTube. Cookies are required to display the
-            video player.
-          </p>
-          <div className="flex gap-2 flex-col justify-center items-center">
-            <Button className="cky-banner-element" variant="secondary">
-              Enable Cookies
-            </Button>
-            <Button asChild variant="ghost">
-              <a
-                href={`https://www.youtube.com/watch?v=${videoId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open on YouTube
-              </a>
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {showOverlay && hasNextVideo && (
-        <div
-          className="absolute top-0 left-0 right-0 bg-background/95 backdrop-blur-md z-20 border-b shadow-lg"
-          role="alert"
-          aria-live="polite"
-        >
-          <div className="flex items-center justify-between gap-4 px-4 py-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="text-sm font-medium whitespace-nowrap text-muted-foreground">
-                Watch next:
-              </div>
-              <div className="text-sm font-medium text-foreground truncate">
-                {nextVideoTitle}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Button
-                onClick={handleNextClick}
-                size="sm"
-                className="whitespace-nowrap gap-1.5"
-              >
-                Play Next
-                <ArrowRight className="size-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <iframe
+      width="100%"
+      className="aspect-[16/9] rounded mt-3"
+      src={`https://www.youtube-nocookie.com/embed/${videoId}`}
+      title={title}
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerPolicy="strict-origin-when-cross-origin"
+      allowFullScreen
+    />
   );
 }
 
@@ -325,7 +50,7 @@ export function WatchWalkthroughsPage() {
   };
 
   return (
-    <HomeSection className="px-0">
+    <HomeSection className="px-0 max-w-7xl">
       <Header
         title="Walkthroughs"
         description="End-to-end walkthroughs of all Langfuse platform features"
@@ -350,17 +75,12 @@ export function WatchWalkthroughsPage() {
             ))}
           </TabsList>
 
-          {WALKTHROUGH_TABS.map((tab, index) => {
-            const tabHasNextVideo = index < WALKTHROUGH_TABS.length - 1;
-            const tabNextTab = tabHasNextVideo
-              ? WALKTHROUGH_TABS[index + 1]
-              : null;
-
+          {WALKTHROUGH_TABS.map((tab) => {
             return (
               <TabsContent
                 key={tab.id}
                 value={tab.id}
-                className="mt-2 p-4 border rounded bg-card"
+                className="mt-2 p-4 border rounded bg-card max-w-2xl mx-auto"
               >
                 <div className="mb-6">
                   <h3 className="text-xl font-semibold mb-2">{tab.title}</h3>
@@ -376,13 +96,6 @@ export function WatchWalkthroughsPage() {
                 <VideoPlayer
                   videoId={tab.videoId}
                   title={`Langfuse ${tab.label.toLowerCase()} video`}
-                  hasNextVideo={tabHasNextVideo}
-                  nextVideoTitle={tabNextTab ? tabNextTab.title : undefined}
-                  onNextVideo={() => {
-                    if (tabHasNextVideo && tabNextTab) {
-                      handleTabChange(tabNextTab.id);
-                    }
-                  }}
                 />
                 <div className="mt-4">
                   <div className="text-sm font-medium mb-1">Learn more:</div>

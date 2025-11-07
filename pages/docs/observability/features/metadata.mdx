@@ -1,82 +1,55 @@
 ---
-description: Add any customer metadata to your traces to better understand your users, application and experiments.
+description: Add custom metadata to your observations to better understand and correlate your observations
 sidebarTitle: Metadata
 ---
 
+import { PropagationRestrictionsCallout } from "@/components/PropagationRestrictionsCallout";
+
 # Metadata
 
-Traces and observations (see [Langfuse Data Model](/docs/tracing-data-model)) can be enriched with metadata to better understand your users, application, and experiments.
-Metadata can be added to traces in the form of arbitrary JSON.
+Observations (see [Langfuse Data Model](/docs/tracing-data-model)) can be enriched with metadata to help you better understand your application and to correlate observations in Langfuse.
 
-Metadata updates are merged based on the top-level key.
-We strongly discourage writing the same key multiple times within your instrumentation.
+You can filter by metadata keys in the Langfuse UI and API.
+
+## Propagated Metadata
+
+Use `propagate_attributes()` to ensure metadata is automatically applied to all observations within a context. Propagated metadata are key-value pairs with values limited to max 200 characters strings. Keys are limited to alphanumeric characters only. If a metadata value exceeds 200 characters, it will be dropped.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
 When using the `@observe()` decorator:
 
-```python
-from langfuse import observe, get_client
-
-langfuse = get_client()
+```python /propagate_attributes/
+from langfuse import observe, propagate_attributes
 
 @observe()
 def process_data():
-    # Access the client and update the current trace metadata
-
-    # Add metadata to the trace level
-    langfuse.update_current_trace(
-        metadata={"source": "api", "version": "1.2.3"}
-    )
-
-    # Add metadata to the current span level
-    langfuse.update_current_span(
-        metadata={"processing_stage": "initial"}
-    )
-
-    # Process data...
-    return result
+    # Propagate metadata to all child observations
+    with propagate_attributes(
+        metadata={"source": "api", "region": "us-east-1", "user_tier": "premium"}
+    ):
+        # All nested observations automatically inherit this metadata
+        result = perform_processing()
+        return result
 ```
 
-When creating spans directly:
+When creating observations directly:
 
-```python
-from langfuse import get_client
+```python /propagate_attributes(metadata={"request_id": "req_12345", "region": "us-east-1"})/
+from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-# Add metadata at trace level
-with langfuse.start_as_current_span(
-    name="process-request"
-) as root_span:
-    # Add metadata to the trace
-    root_span.update_trace(metadata={"request_id": "req_12345"})
-
-    # Add metadata to the current span
-    root_span.update(metadata={"stage": "parsing"})
-
-    # Create a child span with metadata
-    with root_span.start_as_current_generation(
-        name="generate-response",
-        model="gpt-4o",
-        metadata={"temperature": 0.7, "max_tokens": 1000}
-    ) as gen:
-        # Update metadata later if needed
-        gen.update(metadata={"completion_type": "creative"})
-```
-
-You can add new keys to the metadata object by continuously updating the entity.
-We strongly discourage writing the same top-level key multiple times as this will produce an undefined behaviour.
-
-```python
-with langfuse.start_as_current_span(name="operation") as span:
-    # First write
-    span.update(metadata={"status": "started"})
-
-    # Additional key - will be merged with previous metadata
-    span.update(metadata={"error": "Failed to process"})
-
-    # Final metadata will be {"status": "started", "error": "Failed to process"}
+with langfuse.start_as_current_span(name="process-request") as root_span:
+    # Propagate metadata to all child observations
+    with propagate_attributes(metadata={"request_id": "req_12345", "region": "us-east-1"}):
+        # All observations created here automatically have this metadata
+        with root_span.start_as_current_generation(
+            name="generate-response",
+            model="gpt-4o"
+        ) as gen:
+            # This generation automatically has the metadata
+            pass
 ```
 
 </Tab>
@@ -84,74 +57,48 @@ with langfuse.start_as_current_span(name="operation") as span:
 
 When using the context manager:
 
-```ts
-import {
-  startActiveObservation,
-  startObservation,
-  updateActiveTrace,
-} from "@langfuse/tracing";
+```ts /propagateAttributes/
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
-  // observation metadata
   span.update({
     input: { query: "What is the capital of France?" },
   });
 
-  // trace metadata
-  updateActiveTrace({
-    metadata: { key: "value" },
-  });
+  // Propagate metadata to all child observations
+  await propagateAttributes(
+    {
+      metadata: { source: "api", region: "us-east-1", userTier: "premium" },
+    },
+    async () => {
+      // All observations created here automatically have this metadata
+      // ... your logic ...
+    }
+  );
 });
 ```
 
 When using the `observe` wrapper:
 
-```ts
-import {
-  observe,
-  updateActiveTrace,
-  updateActiveObservation,
-} from "@langfuse/tracing";
+```ts /propagateAttributes/
+import { observe, propagateAttributes } from "@langfuse/tracing";
 
-// An existing function
-async function fetchData(source: string) {
-  // observation metadata
-  updateActiveObservation({
-    metadata: { key: "value" },
-  });
+const processData = observe(
+  async (data: string) => {
+    // Propagate metadata to all child observations
+    return await propagateAttributes(
+      { metadata: { source: "api", region: "us-east-1" } },
+      async () => {
+        // All nested observations automatically inherit this metadata
+        const result = await performProcessing(data);
+        return result;
+      }
+    );
+  },
+  { name: "process-data" }
+);
 
-  // trace metadata
-  updateActiveTrace({
-    metadata: { key: "value" },
-  });
-
-  // ... logic to fetch data
-  return { data: `some data from ${source}` };
-}
-
-// Wrap the function to trace it
-const tracedFetchData = observe(fetchData, {
-  name: "observe-wrapper",
-});
-
-const result = await tracedFetchData("API");
-```
-
-When creating spans manually:
-
-```ts
-import { startObservation } from "@langfuse/tracing";
-
-const span = startObservation("manual-observation", {
-  input: { query: "What is the capital of France?" },
-  metadata: { key: "value" },
-});
-
-span.updateTrace({
-  metadata: { key: "value" },
-});
-
-span.update({ output: "Paris" }).end();
+const result = await processData("input");
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
@@ -159,121 +106,95 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab title="OpenAI (Python v2)">
 
-When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py), pass `metadata` as an additional argument:
-
-```python
+```python /propagate_attributes/
+from langfuse import get_client, propagate_attributes
 from langfuse.openai import openai
 
-completion = openai.chat.completions.create(
-  name="test-chat",
-  model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a calculator."},
-    {"role": "user", "content": "1 + 1 = "}],
-  temperature=0,
+langfuse = get_client()
 
-  # add metadata as additional argument
-  metadata={"key":"value"}
-)
+with langfuse.start_as_current_span(name="openai-call"):
+    # Propagate metadata to all observations including OpenAI generation
+    with propagate_attributes(
+        metadata={"source": "api", "region": "us-east-1"}
+    ):
+        completion = openai.chat.completions.create(
+            name="test-chat",
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a calculator."},
+                {"role": "user", "content": "1 + 1 = "}
+            ],
+            temperature=0,
+        )
 ```
 
 </Tab>
 <Tab title="OpenAI (JS/TS)">
 
-When using the [OpenAI SDK Integration (JS)](/integrations/model-providers/openai-js), pass `metadata` as an additional argument:
-
-```ts
+```ts /propagateAttributes/
 import OpenAI from "openai";
 import { observeOpenAI } from "@langfuse/openai";
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
-const res = await observeOpenAI(new OpenAI(), {
-  metadata: { someMetadataKey: "someValue" },
-}).chat.completions.create({
-  messages: [{ role: "system", content: "Tell me a story about a dog." }],
-  model: "gpt-3.5-turbo",
-  max_tokens: 300,
+await startActiveObservation("openai-call", async () => {
+  // Propagate metadata to all observations
+  await propagateAttributes(
+    {
+      metadata: { source: "api", region: "us-east-1" },
+    },
+    async () => {
+      const res = await observeOpenAI(new OpenAI()).chat.completions.create({
+        messages: [{ role: "system", content: "Tell me a story about a dog." }],
+        model: "gpt-3.5-turbo",
+        max_tokens: 300,
+      });
+    }
+  );
 });
 ```
 
 </Tab>
 <Tab>
 
-Option 1: Via metadata fields in chain invocation (simplest approach):
-
-```python
+```python /propagate_attributes/
+from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-
-langfuse_handler = CallbackHandler()
-
-llm = ChatOpenAI(model_name="gpt-4o")
-prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
-chain = prompt | llm
-
-# Set trace attributes dynamically via metadata
-response = chain.invoke(
-    {"topic": "cats"},
-    config={
-        "callbacks": [langfuse_handler],
-        "metadata": {
-            "foo": "bar",
-            "baz": "qux"
-        }
-    }
-)
-```
-
-Option 2: Via enclosing span (for more control):
-
-```python
-from langfuse import get_client
-from langfuse.langchain import CallbackHandler
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
 
 langfuse = get_client()
 langfuse_handler = CallbackHandler()
 
-llm = ChatOpenAI(model_name="gpt-4o")
-prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
-chain = prompt | llm
-
-# Set trace attributes dynamically via enclosing span
-with langfuse.start_as_current_span(name="dynamic-langchain-trace") as span:
-    span.update_trace(
+with langfuse.start_as_current_span(name="langchain-call"):
+    # Propagate metadata to all child observations
+    with propagate_attributes(
         metadata={"foo": "bar", "baz": "qux"}
-    )
-
-    response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
-
-    span.update_trace(output={"response": response.content})
+    ):
+        response = chain.invoke(
+            {"topic": "cats"},
+            config={"callbacks": [langfuse_handler]}
+        )
 ```
 
 </Tab>
 <Tab title="Langchain (JS/TS)">
 
-When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `metadata` to the constructor:
+```ts /propagateAttributes/
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+import { CallbackHandler } from "langfuse-langchain";
 
-```ts
-const handler = new CallbackHandler({
-  metadata: { key: "value" },
-});
-```
+const langfuseHandler = new CallbackHandler();
 
-When using the integration with the JS SDK (see [interop docs](/integrations/frameworks/langchain#interoperability)), set `metadata` via `langfuse.trace()`:
-
-```ts
-import { CallbackHandler, Langfuse } from "langfuse-langchain";
-const langfuse = new Langfuse();
-
-const trace = langfuse.trace({
-  metadata: { key: "value" },
-});
-const langfuseHandler = new CallbackHandler({ root: trace });
-
-// Add Langfuse handler as callback to your langchain chain/agent
-await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+// Propagate metadata to all child observations
+await propagateAttributes(
+  {
+    metadata: { key: "value" },
+  },
+  async () => {
+    await chain.invoke(
+      { input: "<user_input>" },
+      { callbacks: [langfuseHandler] }
+    );
+  }
+);
 ```
 
 </Tab>
@@ -284,6 +205,56 @@ You can set the `metadata` via the override configs, see the [Flowise Integratio
 </Tab>
 
 </LangTabs>
+
+<PropagationRestrictionsCallout attributes={['metadata']}/>
+
+## Non-Propagated Metadata
+
+You can also add metadata to specific observations only:
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+```python
+# Python SDK
+from langfuse import get_client
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(name="process-request") as root_span:
+    # Add metadata to this specific observation only
+    root_span.update(metadata={"stage": "parsing"})
+
+    # ... or access span via the current context
+    langfuse.update_current_span(metadata={"stage": "parsing"})
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+// TypeScript SDK
+import {
+  startActiveObservation,
+  updateActiveObservation,
+} from "@langfuse/tracing";
+
+await startActiveObservation("process-request", async (span) => {
+  // Add metadata to this specific observation only
+  span.update({
+    metadata: { stage: "parsing" },
+  })
+
+  // ... or access span via the current context
+  updateActiveObservation({
+    metadata: { stage: "parsing" },
+  });
+});
+```
+
+</Tab>
+</LangTabs>
+
 
 ## GitHub Discussions
 
