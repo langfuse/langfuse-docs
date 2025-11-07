@@ -1,0 +1,259 @@
+---
+title: Score Analytics
+description: Analyze and compare evaluation scores to validate reliability, uncover insights, and track quality trends in your LLM application. Visualize score distributions, measure agreement between evaluation methods, and monitor scores over time.
+sidebarTitle: Score Analytics
+---
+
+# Score Analytics
+
+Score Analytics provides a lightweight, zero-configuration way to analyze your evaluation data out of the box. Whether you're validating that different LLM judges produce consistent results, checking if human annotations align with automated evaluations, or exploring score distributions and trends, Score Analytics helps you build confidence in your evaluation process.
+
+<Frame fullWidth>
+  ![Score Analytics Dashboard](/images/docs/score-analytics-full-dashboard.png)
+</Frame>
+
+## Why use Score Analytics?
+
+Score Analytics complements Langfuse's [experiment SDK](/docs/evaluation/overview) and [self-serve dashboards](/docs/metrics/features/custom-dashboards) by offering instant, zero-configuration score analysis:
+
+- **Lightweight Setup**: No configuration needed—start analyzing scores immediately after they're ingested
+- **Quick Validation**: Compare scores from different sources (e.g., GPT-4 vs Gemini as judges) to measure agreement and ensure reliability
+- **Out-of-the-Box Insights**: Visualize distributions, track trends, and discover correlations without custom dashboard configuration
+- **Statistical Rigor**: Access industry-standard metrics like Pearson correlation, Cohen's Kappa, and F1 scores with built-in interpretation
+
+For advanced analyses requiring custom metrics or complex comparisons, use the [experiment SDK](/docs/evaluation/overview) for deeper investigation.
+
+
+## Getting Started
+
+<Steps>
+
+### Prerequisites
+
+Ensure you have [score data](/docs/evaluation/overview) in your Langfuse project from any evaluation method:
+- [Human annotations](/docs/evaluation/evaluation-methods/annotation)
+- [LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+- Custom scores ingested via [SDK](/docs/evaluation/evaluation-methods/custom-scores) or [API](/docs/api)
+
+### Navigate to Score Analytics
+
+1. **Go to** your project in Langfuse
+2. **Click on** `Scores` in the navigation menu
+3. **Select** the `Analytics` tab
+
+### Analyze a Single Score
+
+1. **Select a score** from the first dropdown menu
+2. **Choose** an object type to analyze (Traces, Observations, Sessions, or Dataset Run Items)
+3. **Set** a time range using the date picker (e.g., Past 90 days)
+4. **Review** the Statistics card showing total count, mean/mode, and standard deviation
+5. **Explore** the Distribution chart to see how score values are spread
+6. **Examine** the Trend Over Time chart to track temporal patterns
+
+<Frame fullWidth>
+  ![Single Score Analysis](/images/docs/score-analytics-boolean-single.png)
+</Frame>
+
+### Compare Two Scores
+
+1. **Select a second score** from the second dropdown menu (must be the same data type)
+2. **Review** the comparison metrics in the Statistics card:
+   - Matched count (scores attached to the same parent object)
+   - Correlation metrics (Pearson, Spearman)
+   - Error metrics (MAE, RMSE for numeric scores)
+   - Agreement metrics (Cohen's Kappa, F1, Overall Agreement for categorical/boolean)
+3. **Examine** the Score Comparison Heatmap:
+   - Strong diagonal patterns indicate good agreement
+   - Anti-diagonal patterns reveal negative correlations
+   - Scattered patterns suggest low alignment
+4. **Compare** distributions in the matched vs all tabs
+5. **Track** how both scores trend together over time
+
+<Frame fullWidth>
+  ![Boolean Score Comparison](/images/docs/score-analytics-boolean-compare.png)
+</Frame>
+
+</Steps>
+
+## Key Features
+
+### Multi-Data Type Support
+
+Score Analytics automatically adapts visualizations and metrics based on score data types:
+
+**Numeric Scores** (continuous values like 1-10 ratings)
+- **Distribution**: Histogram with 10 bins showing value ranges
+- **Comparison**: 10×10 heatmap showing correlation patterns
+- **Metrics**: Pearson correlation, Spearman correlation, MAE (Mean Absolute Error), RMSE (Root Mean Square Error)
+
+**Categorical Scores** (discrete categories like "good/bad/neutral")
+- **Distribution**: Bar chart showing count per category
+- **Comparison**: N×M confusion matrix showing how categories align
+- **Metrics**: Cohen's Kappa, F1 Score, Overall Agreement
+
+**Boolean Scores** (true/false binary values)
+- **Distribution**: Bar chart with 2 categories
+- **Comparison**: 2×2 confusion matrix
+- **Metrics**: Cohen's Kappa, F1 Score, Overall Agreement
+
+### Matched vs All Data Analysis
+
+Score Analytics provides two views for understanding your data:
+
+**Matched Data** (default tab)
+- Shows only parent objects (traces, observations, sessions, or dataset run items) that have both selected scores attached
+- Enables valid comparison between evaluation methods
+- A match exists when two scores relate to the same parent object
+- Use this view to measure agreement and correlation
+
+**All Data** (individual score tabs)
+- Shows complete distribution of each score independently
+- Reveals evaluation coverage (how many parent objects have each score)
+- Helps identify gaps in your evaluation strategy
+
+### Time-Based Analysis
+
+The Trend Over Time chart helps you monitor score patterns with:
+- **Configurable intervals**: From seconds to years (1s, 5s, 10s, 30s, 1m, 5m, 15m, 30m, 1h, 6h, 1d, 7d, 30d, 90d, 365d)
+- **Automatic interval selection**: Smart defaults based on your selected time range
+- **Gap filling**: Missing time periods are filled with zeros for consistent visualization
+- **Average calculations**: Subtitle shows overall average for the time period
+
+### Statistical Metrics
+
+Score Analytics provides industry-standard statistical metrics with interpretation guidance:
+
+**Correlation Metrics** (for numeric scores)
+
+<Callout type="info">
+**Pearson Correlation**: Measures linear relationship between scores. Values range from -1 (perfect negative) to 1 (perfect positive).
+- 0.9-1.0: Very Strong correlation
+- 0.7-0.9: Strong correlation
+- 0.5-0.7: Moderate correlation
+- Below 0.5: Weak correlation
+
+**Spearman Correlation**: Measures monotonic relationship (rank-based). More robust to outliers than Pearson.
+</Callout>
+
+**Error Metrics** (for numeric scores)
+
+<Callout type="info">
+**MAE (Mean Absolute Error)**: Average absolute difference between scores. Lower is better.
+
+**RMSE (Root Mean Square Error)**: Square root of average squared differences. Penalizes larger errors more than MAE.
+</Callout>
+
+**Agreement Metrics** (for categorical/boolean scores)
+
+<Callout type="info">
+**Cohen's Kappa**: Measures agreement adjusted for chance. Values range from -1 to 1.
+- 0.81-1.0: Almost Perfect agreement
+- 0.61-0.80: Substantial agreement
+- 0.41-0.60: Moderate agreement
+- Below 0.41: Fair to Slight agreement
+
+**F1 Score**: Harmonic mean of precision and recall. Values range from 0 to 1, with 1 being perfect.
+
+**Overall Agreement**: Simple percentage of matching classifications. Not adjusted for chance agreement.
+</Callout>
+
+## Example Use Cases
+
+### Validate LLM Judge Reliability
+
+**Scenario**: You use both GPT-4 and Gemini to evaluate helpfulness. Are they producing consistent results?
+
+**Workflow**:
+1. Select "helpfulness_gpt4-NUMERIC-EVAL" as score 1
+2. Select "helpfulness_gemini-NUMERIC-EVAL" as score 2
+3. Review Statistics card: Pearson correlation of 0.984 with "Very Strong" badge
+4. Examine heatmap: Strong diagonal pattern confirms alignment
+5. **Result**: Both judges agree strongly, your evaluation is reliable
+
+### Human vs AI Annotation Agreement
+
+**Scenario**: You have human annotations and AI evaluations for quality. Should you trust the AI?
+
+**Workflow**:
+1. Select "quality-CATEGORICAL-ANNOTATION" as score 1
+2. Select "quality-CATEGORICAL-EVAL" as score 2
+3. Check confusion matrix: Strong diagonal indicates good agreement
+4. Review Cohen's Kappa: 0.85 shows "Almost Perfect" agreement
+5. **Result**: AI evaluations align well with human judgment
+
+### Identify Negative Correlations
+
+**Scenario**: Understanding relationships between different application behaviors
+
+**Workflow**:
+1. Select "has_tool_use-BOOLEAN-EVAL" as score 1
+2. Select "has_hallucination-BOOLEAN-EVAL" as score 2
+3. Observe confusion matrix: Anti-diagonal pattern
+4. **Result**: When your agent uses tools, it hallucinates less frequently
+
+### Track Evaluation Coverage
+
+**Scenario**: How complete is your evaluation data?
+
+**Workflow**:
+1. Select any score
+2. Compare the "all" tab vs "matched" tab in Distribution
+3. Check total counts: 1,143 individual score 1 vs 567 matched pairs
+4. **Result**: Identify that ~50% of parent objects have both scores
+
+### Detect Quality Regressions
+
+**Scenario**: Did your model quality drop after a recent deployment?
+
+**Workflow**:
+1. Select a quality or performance score
+2. Set time range to include pre and post-deployment periods
+3. Review Trend Over Time chart for any dips or changes
+4. **Result**: Quickly spot quality regressions and investigate root causes
+
+## Current Limitations
+
+<Callout type="warning">
+**Beta Feature**: Score Analytics is currently in beta. Please report any issues or feedback.
+
+**Current Constraints**:
+- **Two scores maximum**: Currently supports comparing up to two scores at a time. For multi-way comparisons, perform pairwise analyses.
+- **Same data type only**: You can only compare scores of the same data type (numeric with numeric, categorical with categorical, boolean with boolean).
+- **Query truncation**: Very large queries (100k+ matched scores) may be truncated to maintain performance. Use time range or object type filters to narrow your analysis if needed.
+</Callout>
+
+## Tips and Best Practices
+
+**Choosing Scores to Compare**
+- Only scores of the same data type can be compared
+- Scores with different scales can be compared, but error metrics (MAE, RMSE) will be affected by scale differences
+- Choose scores that evaluate similar dimensions for meaningful comparisons
+
+**Interpreting Heatmaps**
+- **Diagonal patterns**: Indicate agreement (both scores assign similar values)
+- **Anti-diagonal patterns**: Indicate negative correlation (high values in one score correspond to low values in the other)
+- **Scattered patterns**: Indicate low correlation or noisy data
+- **Cell intensity**: Darker cells represent more data points in that bin combination
+
+**Understanding Matched Data**
+- Scores are always attached to one parent object (trace, observation, session, or dataset run item)
+- A match between scores exists when they relate to the same parent object
+- If matched count is much lower than individual counts, you have coverage gaps
+- Some evaluation methods may be selective (e.g., only annotating edge cases)
+
+## Learn More
+
+- [Score Configuration Management](/faq/all/manage-score-configs)
+- [Evaluation Overview](/docs/evaluation/overview)
+- [Human Annotation](/docs/evaluation/evaluation-methods/annotation)
+- [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+- [Custom Scores](/docs/evaluation/evaluation-methods/custom-scores)
+- [Custom Dashboards](/docs/metrics/features/custom-dashboards)
+- [Automated Evaluations Guide](https://langfuse.com/blog/2025-09-05-automated-evaluations)
+- [Experiment Interpretation Guide](https://langfuse.com/blog/2025-11-06-experiment-interpretation)
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-scores"]} />
