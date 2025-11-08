@@ -202,15 +202,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "langfuse-launch-week-4-day-5",
+    key: "langfuse-launch-week-4-day-6",
     dismissible: true,
     content: (
       <Link href="/changelog/2025-11-07-score-analytics-multi-score-comparison">
         {/* mobile */}
-        <span className="sm:hidden">Launch Week: Score Analytics →</span>
+        <span className="sm:hidden">Launch Week: Datasets →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Launch Week Day 5: Score Analytics →
+          Langfuse Launch Week Day 6: Dataset Schema Enforcement & Folders →
         </span>
       </Link>
     ),
