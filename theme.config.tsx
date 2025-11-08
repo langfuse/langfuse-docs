@@ -205,7 +205,7 @@ const config: DocsThemeConfig = {
     key: "langfuse-launch-week-4-day-6",
     dismissible: true,
     content: (
-      <Link href="/changelog/2025-11-07-score-analytics-multi-score-comparison">
+      <Link href="/blog/2025-10-29-launch-week-4#datasets">
         {/* mobile */}
         <span className="sm:hidden">Launch Week: Datasets →</span>
         {/* desktop */}
