@@ -27,25 +27,26 @@ Langfuse's infrastructure continuously evolves to support increasing scale and n
 ## Infrastructure Components
 
 ### Application Layer
-```
-┌─────────────────┐         ┌──────────────────┐
-│  Langfuse Web   │         │ Langfuse Worker  │
-│  (Next.js UI +  │ ──────> │ (Async Event     │
-│   API Layer)    │  Queue  │  Processing)     │
-└─────────────────┘         └──────────────────┘
+```mermaid
+graph LR
+    Web["Langfuse Web<br/>(Next.js UI + API Layer)"]
+    Worker["Langfuse Worker<br/>(Async Event Processing)"]
+
+    Web -->|Queue| Worker
 ```
 - **Web container (NextJs)**: Serves the UI application and all APIs.
 - **Worker container (Express)**: Processes ingestion events in the background and executes async tasks (e.g. exports, LLM as a Judge).
 
 
 ### Storage Layer
-```
-┌─────────────┐  ┌─────────────┐  ┌────────────┐  ┌─────────────┐
-│ PostgreSQL  │  │ ClickHouse  │  │   Redis    │  │  S3/Blob    │
-│  (OLTP)     │  │   (OLAP)    │  │  (Queue)   │  │  Storage    │
-└─────────────┘  └─────────────┘  └────────────┘  └─────────────┘
- Transactional    Observability     Event Queue    Raw Events +
- Data             Analytics                        Media Files
+```mermaid
+flowchart LR
+    Postgres["PostgreSQL<br/>(OLTP)<br/><br/>Transactional Data"]
+    ClickHouse["ClickHouse<br/>(OLAP)<br/><br/>Observability Analytics"]
+    Redis["Redis<br/>(Queue)<br/><br/>Event Queue"]
+    S3["S3/Blob Storage<br/><br/>Raw Events +<br/>Media Files"]
+
+    Postgres ~~~ ClickHouse ~~~ Redis ~~~ S3
 ```
 
 
@@ -62,7 +63,14 @@ Langfuse's infrastructure continuously evolves to support increasing scale and n
 Our production infrastructure is deployed across multiple AWS regions with a fully automated CI/CD pipeline. All infrastructure is managed using Terraform.
 
 ```mermaid
+---
+config:
+  flowchart:
+    subGraphTitleMargin:
+      bottom: 30
+---
 graph TB
+
 
     MR["Turborepo Monorepository (web/worker/shared code)"]
     Python["Python SDK"]
@@ -74,10 +82,10 @@ graph TB
 
     JS --> NPM
     Python --> PYPI
-  
+
 
     GHA["GitHub Actions"]
-    
+
     MR --> GHA
 
     TF["Terraform <br/>(private repository)"]
@@ -91,13 +99,26 @@ graph TB
         GHA -->|Build & Push| DockerHub["Docker Hub<br/>(OSS releases)"]
     end
     ECR -->|Deploy| VPN
-    subgraph VPN["<span style='display:block; width:100%; text-align:left; white-space: nowrap;'><i>Production (US, EU, HIPAA)</i></span>"]
+    subgraph VPN["<span style='display:block; width:100%; text-align:left; white-space: nowrap;'><i>Langfuse Cloud (US, EU, HIPAA)</i></span>"]
         ECS["AWS ECS Fargate (Web + Worker)"]
         ECS --> ElastiCache["ElastiCache Redis (Clustered)"]
         ECS --> S3[S3 Buckets]
         ECS --> Aurora[Aurora PostgreSQL]
         ECS --> CH[ClickHouse Cloud]
     end
+
+    subgraph OSS["OSS Deployment Templates"]
+        direction LR
+        DockerCompose["Docker Compose"]
+        AWSCustomer["AWS"]
+        AzureCustomer["Azure"]
+        GCPCustomer["GCP"]
+        HelmCharts["Helm Charts"]
+    end
+
+    DockerHub -->|Deploy| OSS
+
+
 
     subgraph "Observability"
         DataDog
