@@ -44,8 +44,6 @@ export const handler = async (req: Request) => {
     (part) => part.type === "text",
   )?.text;
 
-  updateActiveObservation({ input: inputText }, { asType: "generation" });
-
   updateActiveTrace({
     name: "QA-Chatbot",
     sessionId: chatId,
@@ -71,8 +69,26 @@ export const handler = async (req: Request) => {
   );
 
   // Discover all tools exposed by the MCP server
-  const tools = await mcpClient.tools();
+  const mcpTools = await mcpClient.tools();
 
+  // Wrap each tool with Langfuse observation tracking
+  const tools = Object.fromEntries(
+    Object.entries(mcpTools).map(([toolName, tool]) => [
+      toolName,
+      {
+        ...tool,
+        execute: observe(
+          async (args: any) => {
+            updateActiveObservation({ input: args }, { asType: "tool" });
+            const result = await (tool as any).execute(args);
+            updateActiveObservation({ output: result }, { asType: "tool" });
+            return result;
+          },
+          { name: toolName }
+        ),
+      },
+    ])
+  );
 
   const reasoningSummary = prompt.config
     .reasoningSummary as 'low' | 'medium' | 'high' | undefined;
@@ -107,7 +123,6 @@ export const handler = async (req: Request) => {
             .find((part: any) => part?.type === "text")?.text
         : (result as any).content;
 
-      updateActiveObservation({ output: latestText }, { asType: "generation" });
       updateActiveTrace({
         output: latestText,
       });
