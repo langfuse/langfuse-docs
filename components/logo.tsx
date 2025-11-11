@@ -11,6 +11,7 @@ const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
 
 export function Logo() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [badgeHover, setBadgeHover] = useState(false);
   return (
     <>
       <div className="flex items-center gap-2">
@@ -60,8 +61,12 @@ export function Logo() {
             buttonVariants({ variant: "cta", size: "pill" }),
             "ml-2 hidden lg:inline-flex h-6 px-2.5 text-[11px] font-medium"
           )}
+          onMouseEnter={() => setBadgeHover(true)}
+          onMouseLeave={() => setBadgeHover(false)}
+          onFocus={() => setBadgeHover(true)}
+          onBlur={() => setBadgeHover(false)}
         >
-          Hiring in Berlin and SF
+          {badgeHover ? "Looking for 🐐s!" : "Hiring in Berlin and SF"}
         </Link>
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
