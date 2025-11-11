@@ -1,7 +1,9 @@
 import Image from "next/image";
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "./ui/button";
 
 const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
   ssr: false,
@@ -54,9 +56,12 @@ export function Logo() {
         </Link>
         <Link
           href="/careers"
-          className="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-900 border transition-colors hidden lg:block"
+          className={cn(
+            buttonVariants({ variant: "cta", size: "pill" }),
+            "ml-2 hidden lg:inline-flex h-6 px-2.5 text-[11px] font-medium"
+          )}
         >
-          HIRING
+          Hiring in Berlin and SF
         </Link>
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
