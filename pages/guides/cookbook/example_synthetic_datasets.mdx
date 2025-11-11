@@ -388,7 +388,7 @@ You can now evaluate your application using this dataset. Check our [RAG Observa
 
 ### Example 6: Torque - Declarative Dataset Generation
 
-[Torque](https://github.com/qforge-dev/torque) is a declarative, typesafe DSL for building synthetic LLM datasets. It lets you compose conversations like React components, making it particularly useful for generating complex multi-turn conversations with tool calls.
+[Torque](https://github.com/qforge-dev/torque) is a declarative, typesafe DSL for building synthetic datasets. It lets you compose conversations like React components, making it particularly useful for generating complex multi-turn conversations with tool calls.
 
 This approach is ideal when you need:
 
@@ -450,11 +450,11 @@ const conversationSchema = () => {
     // Optional follow-up conversation (1-2 exchanges)
     times(between(1, 2), [
       generatedUser({
-        prompt: "Follow-up question or thank you",
+        prompt: "Follow-up question",
       }),
       generatedAssistant({
         prompt:
-          "Assistant responding to the user's follow-up question or thank you",
+          "Assistant responding to the user's follow-up question",
       }),
     ]),
   ];
@@ -464,17 +464,17 @@ const conversationSchema = () => {
 await generateDataset(conversationSchema, {
   count: 50,
   model: openai("gpt-5-mini"),
-  output: "data/torque_asynctool.jsonl",
+  output: "data/torque_tool.jsonl",
   seed: 42, // Reproducible generation
 });
 
 // Read generated JSONL and upload to Langfuse
 await langfuse.createDataset({
-  name: "torque_asynctool",
-  description: "AsyncTool conversations generated with Torque DSL",
+  name: "torque_tool",
+  description: "Tool calling conversations generated with Torque DSL",
 });
 
-const jsonlContent = await Bun.file("data/torque_asynctool.jsonl").text();
+const jsonlContent = await Bun.file("data/torque_tool.jsonl").text();
 const conversations = jsonlContent
   .trim()
   .split("\n")
@@ -482,7 +482,7 @@ const conversations = jsonlContent
 
 for (const conversation of conversations) {
   await langfuse.createDatasetItem({
-    datasetName: "torque_asynctool",
+    datasetName: "torque_tool",
     input: conversation.messages,
     metadata: {
       tool_used: conversation.messages.find((m) => m.role === "tool")?.name,
