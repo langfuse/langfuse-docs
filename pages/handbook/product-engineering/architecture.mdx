@@ -8,22 +8,6 @@ title: Architecture
 
 Langfuse's infrastructure continuously evolves to support increasing scale and new product features. We started on Vercel and Supabase with Next.js and Postgres, and have evolved to the distributed architecture described below. As our product and scale requirements grow, we'll continue to mature our infrastructure to meet those needs.
 
-## Data Flow Through Langfuse
-
-<Frame className="">
-  ![Architecture](/images/handbook/product-engineering/architecture.png)
-</Frame>
-
-
-
-### Ingestion Pipeline
-- **SDKs**: SDKs instrument the applications of our users. We built our own Python/JS SDKs which use OpenTelemetry under the hood.
-- **API**: SDKs send data to our API, which uploads the data to S3 and queues it for processing by the worker.
-- **Redis queue**: Decouples ingestion from processing. We only pass S3 references through Redis.
-- **Worker processing**: Asynchronously processes ingestion events, enriches events, flushes to ClickHouse.
-- **Dual database**: ClickHouse for analytical queries, Postgres for transactional data
-
-
 ## Infrastructure Components
 
 ### Application Layer
@@ -132,3 +116,14 @@ graph TB
     VPN --> Observability
 ```
 
+## Data Ingestion from SDKs
+
+<Frame className="">
+  ![Architecture](/images/handbook/product-engineering/architecture.png)
+</Frame>
+
+- **SDKs**: SDKs instrument the applications of our users. We built our own Python/JS SDKs which use OpenTelemetry under the hood.
+- **API**: SDKs send data to our API, which uploads the data to S3 and queues it for processing by the worker.
+- **Redis queue**: Decouples ingestion from processing. We only pass S3 references through Redis.
+- **Worker processing**: Asynchronously processes ingestion events, enriches events, flushes to ClickHouse.
+- **Dual database**: ClickHouse for analytical queries, Postgres for transactional data
