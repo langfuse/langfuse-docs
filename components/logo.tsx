@@ -1,9 +1,9 @@
+"use client";
+
 import Image from "next/image";
-import { useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "./ui/button";
+import { useState } from "react";
 
 const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
   ssr: false,
@@ -11,10 +11,9 @@ const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
 
 export function Logo() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [badgeHover, setBadgeHover] = useState(false);
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center">
         <Link
           href="/"
           onContextMenu={(e) => {
@@ -54,19 +53,6 @@ export function Logo() {
               }
             `}</style>
           </div>
-        </Link>
-        <Link
-          href="/careers"
-          className={cn(
-            buttonVariants({ variant: "cta", size: "pill" }),
-            "ml-2 hidden lg:inline-flex h-6 px-2.5 text-[11px] font-medium"
-          )}
-          onMouseEnter={() => setBadgeHover(true)}
-          onMouseLeave={() => setBadgeHover(false)}
-          onFocus={() => setBadgeHover(true)}
-          onBlur={() => setBadgeHover(false)}
-        >
-          {badgeHover ? "Looking for 🐐s!" : "Hiring in Berlin and SF"}
         </Link>
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
