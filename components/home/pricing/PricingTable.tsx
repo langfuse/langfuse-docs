@@ -149,6 +149,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
           100k units / month included, additional: <GraduatedPricingText />
         </>,
         "Unlimited data access",
+        "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
         "SOC2 & ISO27001 reports, BAA available (HIPAA)",
@@ -161,7 +162,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
           "Enterprise SSO (e.g. Okta)",
           "SSO enforcement",
           "Fine-grained RBAC",
-          "Data retention management",
           "Support via Dedicated Slack Channel",
         ],
       },
@@ -1012,7 +1012,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: false,
             Core: false,
-            Pro: TEAMS_ADDON,
+            Pro: true,
             Enterprise: true,
           },
           selfHosted: {
