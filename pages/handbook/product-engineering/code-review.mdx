@@ -1,0 +1,37 @@
+# Code Review
+
+## When a PR author should ask for review
+- Low risk (2 way door): go ahead and merge. Engineer is responsible for monitoring Datadog in case something goes wrong. Notify on-call engineer for roll-backs if required.
+- Product expert review: sometimes we build a larger change in someone else’s area of responsibility. Feel free to ask for feedback from [DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0).
+- Risk (1 way door): Assign Max as reviewer (Max sees open PR reviews in Linear, SLA 48h, ping if more urgent). **Non exhaustive list of PRs which require a review**: database migrations, changes in the public API, changes in SDK signatures, auth changes, major changes in the ingestion pipeline, larger infra changes. If you are unsure, ask Max for a review.
+- New joiners should get all their PRs reviewed for the first 1 month at least. This helps a lot with knowledge sharing and making sure we use abstractions within our code base the right way. Afterwards, we move towards no-review merges.
+
+
+## Responsibility of the PR author
+- Author is respobsible for the quality of the Pull Request. If something goes wrong, he has to fix it.
+- Author has to go through the comments from the reviewer but may decide to not accept a suggestion.
+
+
+## Responsibility of the reviewer
+- PR reviews need to have a turnaround of < 24h as it is important for us to unblock each other. If you get a PR to review during the morngine, please provide feedback same day.
+- Incomplete list of things to watch out for during review:
+  - Potential security issues (e.g. leaks data)
+  - Potential performance issues (e.g. slow queries)
+  - Potential bugs, unconsidered edge cases etc.
+  - Code quality of the implementation and adherence to our [principles](/handbook/product-engineering/principles)
+  - Check whether the code does what it is supposed to do.
+- What the review does not have to do:
+  - Understand the PR to the smallest detail.
+  - Run the code locally and test it end-to-end.
+
+
+## UI/UX reviews
+- For UI/UX changes, please involve Max or Marc for a review. Create a short video of the change and share it with the reviewer.
+- We can ship V0 to get things out the door quickly but we need to take the time to make the UI/UX great afterwards.
+
+
+## Clickhouse reviews
+- If you work on a more involved Clickhouse query, please get a Clickhoue DRI to review the PR. Ideally ask the DRI pre implementation on guidance.
+- For the review, have a query available to run on 
+- If you are not sure about the Clickhouse of a change, please ask the respective owner for a review.
+- If you are the owner of the Clickhouse, please review the PR accordingly.
