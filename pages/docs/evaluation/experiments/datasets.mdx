@@ -99,6 +99,82 @@ In the UI, create a dataset and use a slash (`/`) in the name field to organize 
   safe="")`, in TypeScript: `encodeURIComponent(name)`.
 </Callout>
 
+## Schema Enforcement
+
+Optionally add JSON Schema validation to your datasets to ensure all dataset items conform to a defined structure. This helps maintain data quality, catch errors early, and ensure consistency across your team.
+
+You can define JSON schemas for `input` and/or `expectedOutput` fields when creating or updating a dataset. Once set, all dataset items are automatically validated against these schemas. Valid items are accepted, invalid items are rejected with detailed error messages showing the validation issue.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<Tab>
+
+```python
+langfuse.create_dataset(
+    name="qa-conversations",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "messages": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "role": {"type": "string", "enum": ["user", "assistant", "system"]},
+                        "content": {"type": "string"}
+                    },
+                    "required": ["role", "content"]
+                }
+            }
+        },
+        "required": ["messages"]
+    },
+    expected_output_schema={
+        "type": "object",
+        "properties": {"response": {"type": "string"}},
+        "required": ["response"]
+    }
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+await langfuse.createDataset({
+  name: "qa-conversations",
+  inputSchema: {
+    type: "object",
+    properties: {
+      messages: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            role: { type: "string", enum: ["user", "assistant", "system"] },
+            content: { type: "string" }
+          },
+          required: ["role", "content"]
+        }
+      }
+    },
+    required: ["messages"]
+  },
+  expectedOutputSchema: {
+    type: "object",
+    properties: { response: { type: "string" } },
+    required: ["response"]
+  }
+});
+```
+
+</Tab>
+<Tab>
+
+Navigate to **Datasets** → **New Dataset** or edit an existing dataset → Expand **Schema Validation** section → Add your JSON schemas → Click **Save**.
+
+</Tab>
+</LangTabs>
+
 ## Create synthetic datasets
 
 Frequently, you want to create synthetic examples to test your application to bootstrap your dataset. LLMs are great at generating these by prompting for common questions/tasks.

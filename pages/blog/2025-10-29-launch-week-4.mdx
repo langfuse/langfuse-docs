@@ -100,27 +100,92 @@ We teamed up with Mixpanel to integrate LLM-related product metrics into your ex
 
 → **Get started with the Mixpanel integration [here](/integrations/analytics/mixpanel)**
 
+### Day 3: Langfuse for Agents
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/GX3s7eUJk6o?si=88GxAElNLTYhXRzg"
+  title="Langfuse for Agents"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6 max-w-xl"
+  allowFullScreen
+></iframe>
+
+We’re introducing a set of upgrades to make complex agents radically easier to understand and debug: 
+
+- **[Agent Tools](/changelog/2025-11-05-langfuse-for-agents#agent-tools)** now surface all tools available to the LLM at the top of each generation, with clickable definitions and a Chat UI that shows called tools, arguments, and call IDs aligned with the tools list so you can quickly verify the right ones were used. 
+- A new **[Trace Log View](/changelog/2025-11-05-langfuse-for-agents#trace-log-view)** lets you skim every agent step in a single concatenated stream, making it easy to find specific details in loopy, verbose agents. 
+- Expanded **[Observation Types](/changelog/2025-11-05-langfuse-for-agents#observation-types)** make it clear what each span represents, from tool calls to embeddings to agent steps. 
+- And with **[Agent Graphs](/changelog/2025-11-05-langfuse-for-agents#agent-graphs-ga)** now Generally Available for any framework or custom instrumentation, we infer graph structure from observation timings and nesting to visualize the real execution flow of your agents, especially in complex, looping scenarios.
+
+We also added a new [guide](/guides/cookbook/example_pydantic_ai_mcp_agent_evaluation) on how to evaluate LLM agents and their tools with Langfuse.
+
+### Day 4: Experiments in Langfuse
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/ltiXILTpoVg?si=fma5ZTzPGw71T5bf"
+  title="Experiments in Langfuse"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6 max-w-xl"
+  allowFullScreen
+></iframe>
+
+We're adding a set of new features to Dataset Experiments in Langfuse:
+
+- **[Annotations in Compare View](/changelog/2025-10-23-annotate-from-compare-view)** to scores and comments directly alongside experiment results.
+
+- **[Baseline Comparison](/changelog/2025-11-06-compare-view-baseline-support)** to set a specific run as a baseline to identify regressions in newer runs.
+
+- **[Compare View Filters](/changelog/2025-11-07-compare-view-filters)** to filter experiment results based on criteria, such as evaluator scores.
+
+- **[Experiment Runner SDK](/changelog/2025-09-17-experiment-runner-sdk)**, a high-level SDK abstraction for automatic tracing, concurrent execution, and flexible evaluation.
+
+We also added guides on [systematically interpreting experiment results](/blog/2025-11-06-experiment-interpretation) and [integrating Langfuse into CI/CD pipelines](/blog/2025-10-21-testing-llm-applications) for automated testing.
+
+
+### Day 5: Score Analytics [#score-analytics]
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/HSpayZnwHdw?si=GnkuPyeyyisaS6Hb"
+  title="Score Analytics with Multi-Score Comparison"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6 max-w-xl"
+  allowFullScreen
+></iframe>
+
+It's Day 5 of Langfuse Launch Week, and today we launch Score Analytics, a simple way to measure and align your evaluators. 
+
+Quickly answer questions like “Is my LLM-as-a-judge actually measuring what I expect?” and “How well does user feedback match our manually annotated data?”
+
+→ **[Learn more](/changelog/2025-11-07-score-analytics-multi-score-comparison)**
+
+### Day 6: Datasets in Langfuse [#datasets]
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/8L6_D3_vCw8?si=bw5C-MZBeyb94WGA"
+  title="Score Analytics with Multi-Score Comparison"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6 max-w-xl"
+  allowFullScreen
+></iframe>
+
+**Dataset Schema Enforcement**
+We are launching schema enforcement for dataset inputs and expected outputs. You can now define a schema that is enforced on all existing and new dataset items. This guarantees a consistent data structure, making datasets reliable and easier to consume in your experimentation workflows via the UI or the SDK.
+
+→ **[Learn more](/changelog/2025-11-06-dataset-schema-enforcement)**
+
+**Dataset Folders**
+As agents mature, test datasets multiply. Dataset Folders help you organize this complexity. Simply add slashes to your dataset names to automatically create folders. This allows you to structure datasets by agent capability, pipeline stage, or any workflow.
+
+→ **[Learn more](/changelog/2025-10-27-dataset-folders)**
+
 </Steps>
-
----
-
-### Don't Miss a Launch
-
-Be the first to know. Subscribe to our mailing list or follow us on [X](https://x.com/langfuse) or [LinkedIn](https://www.linkedin.com/company/langfuse) for the daily updates.
-
-<ProductUpdateSignup source="launch-week-4" className="my-2" />
-
----
-
-### Join Us Live!
-
-We're celebrating mid-week with a **[Virtual Community Hour](https://luma.com/oomgjebn)**. Join us on Wednesday, Nov 5th to chat with the team, see the new features in action, and ask questions.
-
-→ [Sign up here](https://luma.com/oomgjebn)
-
----
-
-_Want a taste of what's in store? Revisit [Launch Week #3](/blog/2025-05-19-launch-week-3) to see what we build._
 
 ## Learn More About Langfuse
 
