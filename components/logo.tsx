@@ -1,7 +1,9 @@
+"use client";
+
 import Image from "next/image";
-import { useState } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import { useState } from "react";
 
 const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
   ssr: false,
@@ -11,7 +13,7 @@ export function Logo() {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center">
         <Link
           href="/"
           onContextMenu={(e) => {
@@ -51,12 +53,6 @@ export function Logo() {
               }
             `}</style>
           </div>
-        </Link>
-        <Link
-          href="/careers"
-          className="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-900 border transition-colors hidden lg:block"
-        >
-          HIRING
         </Link>
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
