@@ -6,6 +6,7 @@ import {
   experimental_createMCPClient as createMCPClient,
   MCPTransport,
   stepCountIs,
+  Tool,
 } from "ai";
 import {
   observe,
@@ -19,6 +20,11 @@ import { getActiveTraceId } from "@langfuse/tracing";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
 import { trace } from "@opentelemetry/api";
+
+// Type definitions for MCP tools
+type MCPTool = Tool<unknown, unknown> & {
+  execute: (args: unknown) => Promise<unknown>;
+};
 
 const langfuseClient = new LangfuseClient({
   baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
@@ -73,21 +79,24 @@ export const handler = async (req: Request) => {
 
   // Wrap each tool with Langfuse observation tracking
   const tools = Object.fromEntries(
-    Object.entries(mcpTools).map(([toolName, tool]) => [
-      toolName,
-      {
-        ...tool,
-        execute: observe(
-          async (args: any) => {
-            updateActiveObservation({ input: args }, { asType: "tool" });
-            const result = await (tool as any).execute(args);
-            updateActiveObservation({ output: result }, { asType: "tool" });
-            return result;
-          },
-          { name: toolName }
-        ),
-      },
-    ])
+    Object.entries(mcpTools).map(([toolName, tool]) => {
+      const mcpTool = tool as MCPTool;
+      return [
+        toolName,
+        {
+          ...tool,
+          execute: observe(
+            async (args: unknown) => {
+              updateActiveObservation({ input: args }, { asType: "tool" });
+              const result = await mcpTool.execute(args);
+              updateActiveObservation({ output: result }, { asType: "tool" });
+              return result;
+            },
+            { name: toolName }
+          ),
+        },
+      ];
+    })
   );
 
   const reasoningSummary = prompt.config
