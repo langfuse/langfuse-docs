@@ -254,7 +254,39 @@ Furthermore, Langfuse uses attributes within the `langfuse.*` namespace to map O
   not work as expected or does not parse the correct attributes.
 </Callout>
 
-Below is a non-exhaustive mapping of Langfuse data model attributes to OpenTelemetry span attributes.
+### Propagating Trace Attributes to All Spans [#propagating-attributes]
+
+When using OpenTelemetry instrumentation to send traces to Langfuse, certain trace-level attributes should be propagated to **all spans** within a trace to enable accurate aggregations and filtering in Langfuse. These attributes include:
+
+- `userId` (via `langfuse.user.id` or `user.id`)
+- `sessionId` (via `langfuse.session.id` or `session.id`)
+- `metadata` (via `langfuse.trace.metadata.*` for top-level metadata keys)
+- `version` (via `langfuse.version`)
+- `release` (via `langfuse.release`)
+- `tags` (via `langfuse.trace.tags`)
+
+Starting in a future release, Langfuse aggregation queries and filters will operate across individual observations (spans) rather than just at the trace level. This means that if you want to filter or aggregate by these attributes, they must be present on each span in the trace. We strongly recommend implementing this propagation now to ensure compatibility with future versions of Langfuse.
+
+#### Using OpenTelemetry Baggage for Propagation
+
+The recommended approach for propagating these attributes across all spans is to use [OpenTelemetry Baggage](https://opentelemetry.io/docs/concepts/signals/baggage/) with a `BaggageSpanProcessor`. Baggage is a built-in OpenTelemetry mechanism for context propagation that automatically copies specified key-value pairs to all spans within a trace context.
+
+To implement this pattern:
+
+1. Set the desired attributes as baggage entries at the beginning of your trace
+2, Set the attributes on the currently active span
+3. Configure a `BaggageSpanProcessor` in your OpenTelemetry setup to automatically copy baggage entries to span attributes
+4. The processor will ensure all downstream spans in the trace context receive these attributes
+
+For implementation details and code examples, refer to the OpenTelemetry documentation for [Python](https://pypi.org/project/opentelemetry-processor-baggage/) and [JavaScript](https://www.npmjs.com/package/@opentelemetry/baggage-span-processor).
+
+<Callout type="warning">
+  **Security Consideration**: OpenTelemetry baggage is propagated across service boundaries and to third-party APIs. **Do not include sensitive information** (passwords, API keys, personal data, etc.) in baggage when using this approach, as it will be transmitted to all downstream services.
+</Callout>
+
+#### Alternative: Using Langfuse SDKs
+
+If you're using the [Langfuse SDKs](/docs/observability/sdk/overview) with OpenTelemetry integration, you can use the convenience methods `propagate_attributes()` (Python) or `propagateAttributes()` (TypeScript) which handle attribute propagation automatically. These methods provide a simpler interface and are the recommended approach when using Langfuse SDKs. 
 
 ### Trace-Level Attributes
 
