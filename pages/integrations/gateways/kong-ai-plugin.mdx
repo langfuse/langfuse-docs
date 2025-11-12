@@ -1,0 +1,427 @@
+---
+title: Kong API Gateway Integration
+sidebarTitle: Kong Gateway
+logo: /images/integrations/kong_icon.svg
+description: Learn how to integrate Langfuse with Kong API Gateway for comprehensive AI observability and distributed tracing of LLM applications
+category: Integrations
+---
+
+# Trace AI APIs through Kong API Gateway with Langfuse
+
+This guide demonstrates how to **integrate Langfuse** into your **Kong API Gateway** to automatically monitor, debug, and evaluate AI API calls without modifying your application code.
+
+> **What is Kong API Gateway?**: [Kong Gateway](https://konghq.com/) is a cloud-native, platform-agnostic, scalable API Gateway that manages APIs and microservices. It acts as a central point of control for API traffic, providing features like authentication, rate limiting, and monitoring.
+
+> **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
+
+## Features
+
+- **Zero-code instrumentation**: Automatic tracing for AI API calls proxied through Kong
+- **Multi-provider support**: OpenAI-compatible APIs, vLLM, and custom providers
+- **Rich context capture**: User sessions, conversations, and metadata
+- **Performance metrics**: Latency, throughput, and token-level analytics
+- **Non-blocking architecture**: Async operation with minimal overhead
+- **Production-ready**: Error resilience and graceful degradation
+
+### Supported AI Providers
+
+| Provider | Endpoints | Status |
+|----------|-----------|--------|
+| OpenAI-Compatible | `/v1/chat/completions`, `/v1/completions`, `/v1/embeddings` | ✅ |
+| vLLM | `/generate`, `/v1/completions` | ✅ |
+| Custom Providers | Extensible detection framework | ✅ |
+
+## 1. Install the Kong Plugin
+
+Below we install the Kong Langfuse Tracing plugin using one of the available methods.
+
+### Prerequisites
+
+- Kong Gateway 3.0+ installed and running
+- Langfuse account ([sign up](https://cloud.langfuse.com))
+- Access to Kong's Admin API
+
+### Option 1: Via LuaRocks (Recommended)
+
+```bash
+luarocks install kong-plugin-ai-tracing
+```
+
+### Option 2: From Source
+
+```bash
+git clone https://github.com/Ramtinboreili/kong-langfuse-tracing.git
+cd kong-langfuse-tracing
+luarocks make rockspec/kong-plugin-ai-tracing-1.0.0-1.rockspec
+```
+
+### Option 3: Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  kong:
+    image: kong:3.4
+    environment:
+      KONG_PLUGINS: bundled,ai-tracing
+      KONG_LUA_PACKAGE_PATH: /usr/local/kong/plugins/?.lua;;
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: postgres
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+    volumes:
+      - ./plugins/ai-tracing:/usr/local/kong/plugins/ai-tracing
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+```
+
+### Enable the Plugin in Kong
+
+Add the plugin to your Kong configuration:
+
+```bash
+# In kong.conf
+plugins = bundled,ai-tracing
+
+# Or via environment variable
+export KONG_PLUGINS=bundled,ai-tracing
+```
+
+Restart Kong Gateway to load the plugin.
+
+## 2. Configure Langfuse Credentials
+
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
+
+```bash
+# Get keys for your project from the project settings page
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+# export LANGFUSE_BASE_URL="https://us.cloud.langfuse.com" # 🇺🇸 US region
+```
+
+## 3. Enable Plugin on Kong Service
+
+Configure the plugin for your AI service using Kong's Admin API:
+
+```bash
+curl -X POST http://localhost:8001/services/YOUR_AI_SERVICE/plugins \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "ai-tracing",
+    "config": {
+      "langfuse_enabled": true,
+      "langfuse_public_key": "pk-lf-...",
+      "langfuse_secret_key": "sk-lf-...",
+      "langfuse_endpoint": "https://cloud.langfuse.com/api/public/ingestion",
+      "environment": "production"
+    }
+  }'
+```
+
+### Configuration Parameters
+
+| Parameter | Type | Default | Required | Description |
+|-----------|------|---------|----------|-------------|
+| `langfuse_enabled` | boolean | `false` | Yes | Enable/disable Langfuse integration |
+| `langfuse_public_key` | string | - | Yes | Your Langfuse public API key |
+| `langfuse_secret_key` | string | - | Yes | Your Langfuse secret API key |
+| `langfuse_endpoint` | string | `https://cloud.langfuse.com/api/public/ingestion` | No | Langfuse API endpoint |
+| `langfuse_timeout` | number | `5000` | No | HTTP timeout in milliseconds |
+| `environment` | string | `production` | No | Environment tag for filtering traces |
+| `log_level` | string | `info` | No | Logging verbosity (`debug`, `info`, `warn`, `error`) |
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+For self-hosted Langfuse instances, update `langfuse_endpoint` to your instance URL followed by `/api/public/ingestion`.
+</Callout>
+
+## 4. Hello World Example
+
+Below we make a simple AI request through Kong Gateway. The plugin automatically captures the request and creates a trace in Langfuse.
+
+```bash
+curl -X POST http://kong-gateway:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-12345" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [
+      {"role": "user", "content": "Explain quantum computing"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 500
+  }'
+```
+
+![Example trace in Langfuse](https://ramtindev.storage.c2.liara.space/Screenshot%201404-08-21%20at%2023.49.09.png)
+
+**Example**: [Langfuse Trace](https://langf.obs.thdev.ir/project/cmh8qafxl0001q8078e86to17/traces/83cd78211d41e1651e4f78fb072f8a49?timestamp=2025-10-29T13:48:40.000Z)
+
+Clicking the link above (or your own project link) lets you view all observations, token usage, latencies, etc., for debugging or optimization.
+
+## 5. Adding Context with Headers
+
+Enrich your traces with user and session context using HTTP headers. This allows you to filter and analyze traces by user, session, or conversation.
+
+```bash
+curl -X POST http://kong-gateway:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-12345" \
+  -H "X-Session-Id: session-abc" \
+  -H "X-Chat-Id: chat-789" \
+  -H "X-Organization-Id: org-acme" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [
+      {"role": "user", "content": "What is machine learning?"}
+    ]
+  }'
+```
+
+### Supported Context Headers
+
+| Header | Description | Example |
+|--------|-------------|---------|
+| `X-User-Id` | Unique user identifier | `user-12345` |
+| `X-Session-Id` | Session identifier | `session-abc` |
+| `X-Chat-Id` | Conversation/chat ID | `chat-789` |
+| `X-Message-Id` | Individual message ID | `msg-54321` |
+| `X-Organization-Id` | Organization context | `org-acme` |
+| `X-Project-Id` | Project identifier | `project-xyz` |
+
+![Example trace with context](https://ramtindev.storage.c2.liara.space/Screenshot%201404-08-22%20at%2000.24.54.png)
+
+**Example**: [Langfuse Trace](https://langf.obs.thdev.ir/project/cmh8qafxl0001q8078e86to17/traces/83cd78211d41e1651e4f78fb072f8a49?timestamp=2025-10-29T13%3A48%3A40.000Z&view=preview)
+
+## 6. Adding Metadata
+
+Include additional metadata in your request body for richer traces. This is useful for tracking features, experiments, or user-specific variables.
+
+```bash
+curl -X POST http://kong-gateway:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-12345" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [
+      {"role": "user", "content": "Recommend a movie"}
+    ],
+    "metadata": {
+      "user_id": "user-12345",
+      "chat_id": "chat-789",
+      "project_id": "project-xyz",
+      "features": {
+        "web_search": true,
+        "image_generation": false
+      },
+      "variables": {
+        "user_tier": "premium",
+        "language": "en"
+      }
+    }
+  }'
+```
+
+### Python / FastAPI Application
+
+```python
+import httpx
+from fastapi import FastAPI
+
+KONG_URL = "http://kong-gateway:8000"
+
+async def chat_with_ai(user_id: str, session_id: str, message: str):
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{KONG_URL}/v1/chat/completions",
+            json={
+                "model": "gpt-4",
+                "messages": [{"role": "user", "content": message}],
+                "metadata": {
+                    "user_id": user_id,
+                    "session_id": session_id
+                }
+            },
+            headers={
+                "Content-Type": "application/json",
+                "X-User-Id": user_id,
+                "X-Session-Id": session_id
+            }
+        )
+        return response.json()
+
+# Usage
+result = await chat_with_ai("user-123", "session-abc", "Hello!")
+print(result)
+```
+
+## Captured Data
+
+The plugin creates comprehensive traces in Langfuse with the following structure:
+
+```json
+{
+  "trace": {
+    "id": "trace-12345",
+    "name": "/v1/chat/completions",
+    "userId": "user-12345",
+    "sessionId": "session-abc",
+    "metadata": {
+      "provider": "openai_compatible",
+      "model": "gpt-4",
+      "status_code": 200,
+      "environment": "production",
+      "total_duration_ms": 1250,
+      "time_per_token_ms": 12.5,
+      "throughput_tokens_per_second": 80.0
+    }
+  },
+  "observations": [
+    {
+      "type": "generation",
+      "name": "chat_completion",
+      "usage": {
+        "promptTokens": 150,
+        "completionTokens": 25,
+        "totalTokens": 175
+      },
+      "metadata": {
+        "temperature": 0.7,
+        "max_tokens": 500,
+        "finish_reason": "stop"
+      }
+    }
+  ]
+}
+```
+
+### Performance Metrics
+
+- **Total Duration**: End-to-end request processing time
+- **Time per Token**: Average latency per generated token
+- **Throughput**: Tokens processed per second
+
+### Token Analytics
+
+- **Prompt Tokens**: Input token count
+- **Completion Tokens**: Output token count
+- **Total Tokens**: Combined usage
+- **Cost Tracking**: Monitor spending across requests
+
+## Environment-Specific Configuration
+
+You can configure different Langfuse projects for development, staging, and production environments.
+
+### Development Environment
+
+```bash
+curl -X POST http://localhost:8001/services/ai-service-dev/plugins \
+  --data "name=ai-tracing" \
+  --data "config.langfuse_enabled=true" \
+  --data "config.langfuse_public_key=pk-lf-dev-xxx" \
+  --data "config.langfuse_secret_key=sk-lf-dev-xxx" \
+  --data "config.environment=development" \
+  --data "config.log_level=debug"
+```
+
+### Production Environment
+
+```bash
+curl -X POST http://localhost:8001/services/ai-service-prod/plugins \
+  --data "name=ai-tracing" \
+  --data "config.langfuse_enabled=true" \
+  --data "config.langfuse_public_key=pk-lf-prod-xxx" \
+  --data "config.langfuse_secret_key=sk-lf-prod-xxx" \
+  --data "config.environment=production" \
+  --data "config.log_level=warn"
+```
+
+## Troubleshooting
+
+### Data Not Appearing in Langfuse
+
+1. **Verify Credentials**: Ensure your Langfuse API keys are correct
+2. **Check Connectivity**: Confirm Kong can reach the Langfuse endpoint
+
+```bash
+# View plugin status
+curl http://localhost:8001/services/YOUR_SERVICE/plugins | \
+  jq '.data[] | select(.name=="ai-tracing")'
+
+# Check Kong logs
+docker-compose logs kong | grep "ai-tracing"
+
+# Test Langfuse endpoint
+curl -I https://cloud.langfuse.com/api/public/ingestion
+```
+
+3. **Review Logs**: Check Kong logs for errors
+
+### Missing User Context
+
+- Ensure HTTP headers are properly set in requests
+- Verify header names match expected format (`X-User-Id`, not `X-UserId`)
+- Check that headers are forwarded through any proxies
+
+### Performance Issues
+
+- Monitor Kong metrics during high load
+- Adjust `langfuse_timeout` if experiencing timeouts
+- Check async timer performance in Kong logs
+
+### Enable Debug Logging
+
+```bash
+curl -X PATCH http://localhost:8001/plugins/PLUGIN_ID \
+  --data "config.log_level=debug"
+```
+
+## Advanced Usage
+
+### Custom AI Providers
+
+Extend the plugin to support additional AI providers by modifying the detection logic in `handler.lua`:
+
+```lua
+local function detect_ai_provider(path, headers)
+  if path:find("/v1/chat/completions") then
+    return "openai_compatible"
+  elseif path:find("/anthropic") then
+    return "anthropic"
+  elseif path:find("/cohere") then
+    return "cohere"
+  else
+    return "custom_provider"
+  end
+end
+```
+
+### Integration with Other Kong Plugins
+
+The AI tracing plugin works alongside other Kong plugins:
+
+- **Rate Limiting**: Combine with rate limiting for cost control
+- **Authentication**: Use with key-auth or JWT for user identification
+- **Request Transformer**: Modify requests before tracing
+
+<Callout type="warning">
+**Security Best Practices**:
+- Store Langfuse API keys securely (use Kong's vault integration or environment variables)
+- Review exported data for PII compliance
+- Restrict access to plugin configuration in production
+- Ensure Kong-Langfuse communication uses HTTPS
+- Consider data retention policies for sensitive content
+</Callout>
+
+## Resources
+
+- **GitHub Repository**: [kong-langfuse-tracing](https://github.com/Ramtinboreili/kong-langfuse-tracing)
+- **Kong Documentation**: [Kong Gateway Docs](https://docs.konghq.com/)
+- **Report Issues**: [GitHub Issues](https://github.com/Ramtinboreili/kong-langfuse-tracing/issues)
+- **Maintainer**: [Ramtin Boreili](https://github.com/Ramtinboreili) (ramtin.bor7hp@gmail.com)
+
+<LearnMore />
