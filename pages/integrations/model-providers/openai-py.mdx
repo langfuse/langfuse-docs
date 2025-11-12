@@ -130,7 +130,7 @@ If you are running a short-lived application, you need to flush Langfuse to ensu
 
 ```python
 from langfuse import get_client
-from langfuse.openai import openai
+from langfuse.openai import Openai
 
 # Flush via global client
 langfuse = get_client()
@@ -149,7 +149,7 @@ If you are having issues with the integration, you can enable debug mode to get 
 
 ```python
 from langfuse import Langfuse
-from langfuse.openai import openai
+from langfuse.openai import Openai
 
 # Enable debug via global client
 langfuse = Langfuse(debug=True)
@@ -167,7 +167,7 @@ export LANGFUSE_DEBUG=true
 
 ```python
 from langfuse import Langfuse
-from langfuse.openai import openai
+from langfuse.openai import Openai
 
 # Set sampling via global client (default is 1.0)
 langfuse = Langfuse(sample_rate=0.1)
@@ -185,7 +185,7 @@ You may disable sending traces to Langfuse by setting the appropriate flag.
 
 ```python
 from langfuse import Langfuse
-from langfuse.openai import openai
+from langfuse.openai import Openai
 
 # Disable via global client
 langfuse = Langfuse(tracing_enabled=False)
@@ -217,9 +217,9 @@ You have two options:
 **Option 1: Via metadata (simplest approach):**
 
 ```python
-from langfuse.openai import openai
+from langfuse.openai import Openai
 
-result = openai.chat.completions.create(
+result = Openai.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
         {"role": "system", "content": "You are a very accurate calculator."},
@@ -239,7 +239,7 @@ result = openai.chat.completions.create(
 
 ```python
 from langfuse import get_client
-from langfuse.openai import openai
+from langfuse.openai import Openai
 
 langfuse = get_client()
 
@@ -250,7 +250,7 @@ with langfuse.start_as_current_span(name="calculator-request") as span:
         tags=["calculator"]
     )
 
-    result = openai.chat.completions.create(
+    result = Openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a very accurate calculator."},
@@ -284,11 +284,11 @@ You can use any of the following options:
 
 ```python
 from langfuse import observe
-from langfuse.openai import openai
+from langfuse.openai import Openai
 
 @observe()
 def capital_poem_generator(country):
-  capital = openai.chat.completions.create(
+  capital = Openai.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
         {"role": "system", "content": "What is the capital of the country?"},
@@ -312,7 +312,7 @@ capital_poem_generator("Bulgaria")
 
 ```python
 from langfuse import get_client
-from langfuse.openai import openai
+from langfuse.openai import Openai
 
 langfuse = get_client()
 
@@ -324,7 +324,7 @@ with langfuse.start_as_current_span(name="capital-poem-generator") as span:
         tags=["poetry", "capital"]
     )
 
-    capital = openai.chat.completions.create(
+    capital = Openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "What is the capital of the country?"},
@@ -355,9 +355,9 @@ OpenAI returns the token usage on streamed responses only when in `stream_option
 
 ```python /stream_options={"include_usage": True}/
 from langfuse import get_client
-from langfuse.openai import openai
+from langfuse.openai import Openai
 
-client = openai.OpenAI()
+client = Openai.OpenAI()
 
 stream = client.chat.completions.create(
   model="gpt-4o",
@@ -389,7 +389,7 @@ If you rely on parsing Pydantic defintions for your `response_format`, you may l
 
 ```python
 from langfuse import get_client
-from langfuse.openai import openai
+from langfuse.openai import Openai
 from openai.lib._parsing._completions import type_to_response_format_param
 from pydantic import BaseModel
 
@@ -398,7 +398,7 @@ class CalendarEvent(BaseModel):
   date: str
   participants: list[str]
 
-completion = openai.chat.completions.create(
+completion = Openai.chat.completions.create(
     model="gpt-4o-2024-08-06",
     messages=[
         {"role": "system", "content": "Extract the event information."},
@@ -428,14 +428,14 @@ Learn more about how to get started [here](/integrations/model-providers/openai-
 
 ```diff
 - import openai
-+ from langfuse.openai import openai
++ from langfuse.openai import Openai
 ```
 
 ```python
 # Cause an error by attempting to use a host that does not exist.
 openai.base_url = "https://example.com"
 
-country = openai.chat.completions.create(
+country = Openai.chat.completions.create(
   name="will-error",
   model="gpt-3.5-turbo",
   messages=[
