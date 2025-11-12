@@ -39,6 +39,13 @@ flowchart LR
 - **Redis**: Stores event queue (BullMQ) and caching layer (API keys, prompts).
 - **S3**: Stores raw ingestion events and multi-modal attachments (images, audio).
 
+
+### Why do we need an OLAP database (Clickhouse) for observability data?
+- We built Langfuse initially on Postgres and eventually migrated to Clickhouse. We always knew that Postgres wont be the best fit for our observability data.
+- OLAP databases have a columnar layout. With that the database only scans data required to produce results for analytical queries (e.g. LLM cost over time).
+- We needed a multi-node database to scale our data insert.
+- As we are an open source product, we required a database which runs on an open source license.
+
 ---
 
 
