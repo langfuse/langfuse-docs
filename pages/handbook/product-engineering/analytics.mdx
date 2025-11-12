@@ -17,9 +17,11 @@ graph LR
     GS[Google Sheets] --> RAW
 
     %% Airbyte Sources
-    CH[ClickHouse] --> AB
-    CD[Core Data] --> AB
+    CH["ClickHouse<br/>(observability data e.g. observations)"] --> AB
+    CHB[ClickHouse billing data] --> AB
+    CD["Core Data<br/>(transactional data e.g. organizations, projects, users, etc.)"] --> AB
     SD[Stripe Data] --> AB
+    AWS[AWS billing data] --> AB
 
     %% Data Processing
     RAW[langfuse_raw - BigQuery ] --> DBT[dbt Cloud]
