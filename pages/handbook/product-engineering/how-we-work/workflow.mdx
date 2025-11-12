@@ -25,7 +25,9 @@ In case of uncertainty: Tag Max (24h SLA on Linear inbox). Everyone should have 
 
 ## Specification on how to build things
 
-We are building a complex product with many feature requirements and performance challenges. We want to achieve this with a small team of great engineers. We belive in "think before build" to make sure we do not need to build things multiple times and acvoid some tech debt on the way. As everyone is responsible for their features, everyone has to make technical and product trade offs.
+- We want to ship fast with a small team. To achieve this and maintain quality we need to balance individual agency and being able to move fast and smart design decisions early in the process.
+- As Langfuse has scaled to a platform processing billions of events, implementation strategy of features can have substantial impact on implementation effort, maintainability, user experience, cloud cost, and performance.
+- For such features, getting the right people early in one room is a massive time saver and allows us to ship fast and with high quality.
 
 ### Small/mid sized changes (e.g. adding a new filter to a table, adding a new field to a form…)
   - Engineer creates a Linear ticket with very brief notes or just a descriptive title
@@ -43,11 +45,11 @@ We are building a complex product with many feature requirements and performance
      - If things change in a meeting (also follow-up discussions), small note logged to Linear ticket / project.
      - Engineer needs to make sure to have relevant people in the room to make a decision ([DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0)).
      - Engineer needs to manage Linear project based on the outcome of the meeting.
-  3. Engineer may need input on UI/UX or Clickhouse queries
-     - Get quick feedback on implementation thoughts from respective owners ([DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0)).
-     - Based on the initial discussion, ask the owner for PR reviews if needed.
 
-
+### Ways of pulling help from others
+Engineers can ask others any time to help them with their work. 15 minutes of shared discussion can very much improve the overall output.
+- UI/UX: For larger UI/UX changes, it is helpful to get input from Max or Marc. Otherwise, draw a small sketch and ask anyone from the team for feedback. We have to take time to polish the UI/UX.
+- Clickhouse: For more complex Clickhouse queries, it is helpful to get input from the Clickhouse ([DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0)). Otherwise, we may end up with anti patterns in performance and maintainability.
 
 ## Implementation
 
