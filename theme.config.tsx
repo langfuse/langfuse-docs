@@ -1,7 +1,7 @@
 import React from "react";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
-import { Cards, Steps, Tabs, Callout } from "nextra/components";
 import { Logo } from "@/components/logo";
+import { Cards, Steps, Tabs, Callout } from "nextra/components";
 import { useRouter } from "next/router";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 import { Frame } from "./components/Frame";
@@ -13,13 +13,19 @@ import { GeistSans } from "geist/font/sans";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
 import { AvailabilityBanner } from "./components/availability";
-import { Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import { LangTabs } from "./components/LangTabs";
+import { Video } from "./components/Video";
+import { HiringBadge } from "@/components/HiringBadge";
 // import IconYoutube from "./components/icons/youtube";
 
 const config: DocsThemeConfig = {
-  logo: <Logo />,
+  logo: (
+    <div className="flex items-center gap-4">
+      <Logo />
+      <HiringBadge />
+    </div>
+  ),
   logoLink: false,
   main: MainContentWrapper,
   search: {
