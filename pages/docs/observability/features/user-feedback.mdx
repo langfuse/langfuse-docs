@@ -1,0 +1,138 @@
+---
+description: Collect user feedback on LLM outputs to improve model performance and user satisfaction.
+sidebarTitle: User Feedback
+---
+
+# User Feedback
+
+User feedback measures whether your AI actually helped users. Use it to find quality issues, build better evaluation datasets, and prioritize improvements based on real user experiences. In Langfuse, feedback is captured as [scores](/docs/scores) and linked to traces.
+
+<div className="flex gap-4 flex-col md:flex-row">
+  <Frame className="flex-1">![User Feedback Example](/images/docs/observability/user-feedback-example.png)</Frame>
+  <Frame className="flex-1">![Feedback Analysis](/images/docs/observability/user-feedback-score.png)</Frame>
+</div>
+
+## Feedback Types
+
+### Explicit Feedback
+
+Users directly rate responses through thumbs up/down, star ratings, or comments.
+| Pros | Cons |
+|------|------|
+| Clear signal about satisfaction | Low response rates |
+| Simple to implement | Unhappy users more likely to respond |
+| Easy to act on | Requires user action |
+
+### Implicit Feedback
+
+Derived from user behavior like time spent reading, copying output, accepting suggestions, or retrying queries.
+
+| Pros | Cons |
+|------|------|
+| High volume on every interaction | Harder to implement |
+| No user effort required | Ambiguous signals |
+| Reflects actual usage | Requires interpretation |
+
+Both work as [scores](/docs/scores) in Langfuse. Filter traces by score, build [annotation queues](/docs/scores/annotation), or use feedback as ground truth for automated evaluations.
+
+## Quick Start
+
+This example shows how to collect explicit user feedback from a chatbot built with Next.js and AI SDK. You can find the full implementation in the [Langfuse Example](https://github.com/langfuse/langfuse-examples/tree/main/applications/user-feedback) repository.
+
+### 1. Return trace ID to frontend
+
+Your backend sends the trace ID so frontend can link feedback to the trace.
+
+```typescript
+// app/api/chat/route.ts
+import { getActiveTraceId } from "@Langfuse/tracing";
+export const POST = observe(async (req: Request) => {
+  const result = streamText({
+    model: openai('gpt-4o-mini'),
+    messages: convertToModelMessages(messages),
+  });
+  return result.toUIMessageStreamResponse({
+    generateMessageId: () => getActiveTraceId() || "",
+  });
+});
+```
+
+### 2. Collect feedback in frontend
+
+Use Langfuse Web SDK to send feedback as a score.
+
+```typescript
+import { LangfuseWeb } from "langfuse";
+const langfuse = new LangfuseWeb({
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_HOST,
+});
+function FeedbackButtons({ messageId }: { messageId: string }) {
+  const handleFeedback = (value: number, comment?: string) => {
+    langfuse.score({
+      traceId: messageId,
+      name: "user-feedback",
+      value: value, // 1 for positive, 0 for negative
+      comment: comment,
+    });
+  };
+  return (
+    <div>
+      <button onClick={() => handleFeedback(1)}>:+1:</button>
+      <button onClick={() => handleFeedback(0)}>:-1:</button>
+    </div>
+  );
+}
+```
+
+### 3. View feedback in Langfuse
+
+Feedback appears as scores on traces. You can filter by `user-feedback < 1` to find low-rated responses.
+
+<Frame className="flex-1">![Feedback Analysis](/images/docs/observability/user-feedback-score.png)</Frame>
+
+## Server-side Feedback
+
+Record feedback from your backend when needed, such as after a user survey or follow-up interaction. You could also use this to log implicit feedback signals such as ticket closures or successful task completions.
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+# Check if customer support ticket was resolved successfully
+ticket_status = checkIfTicketClosed(ticket_id="ticket-456")
+if ticket_status.is_closed:
+    langfuse.score(
+        trace_id=ticket_status.trace_id,
+        name="ticket-resolution",
+        value=1,
+        comment=f"Ticket closed successfully after {ticket_status.resolution_time}"
+    )
+else:
+    langfuse.score(
+        trace_id=ticket_status.trace_id,
+        name="ticket-resolution",
+        value=0,
+        comment=f"Ticket escalated to human agent"
+    )
+```
+
+## Implicit Feedback with LLM-as-a-Judge
+
+Automatically evaluate every response for qualities like user sentiment, satisfaction, or engagement using LLMs as judges. This lets you gather large-scale feedback without user intervention.
+
+<Frame>![LLM-as-a-Judge evaluating tone](/images/docs/observability/llm-as-a-judge-feedback.png)</Frame>
+
+See [Model-based Evals](/docs/scores/model-based-evals) for implementation patterns and examples.
+
+## Example App
+
+The [user-feedback example](https://github.com/langfuse/langfuse-examples/tree/main/applications/user-feedback) shows a complete Next.js implementation with:
+- OpenTelemetry tracing
+- Thumbs up/down with optional comments
+- Session tracking across conversations
+
+## Related
+
+- [Scores](/docs/scores) - Core evaluation concept
+- [Model-based Evals](/docs/scores/model-based-evals) - LLM-as-a-Judge patterns
+- [Web SDK](/docs/sdk/typescript/guide-web) - Browser integration
