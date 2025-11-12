@@ -19,8 +19,17 @@ export function HiringBadge() {
       onMouseLeave={() => setIsHovered(false)}
       onFocus={() => setIsHovered(true)}
       onBlur={() => setIsHovered(false)}
+      style={{ width: "max-content" }}
     >
-      {isHovered ? "Looking for 🐐s!" : "Hiring in Berlin and SF"}
+      <span className={cn(isHovered && "invisible")}>Hiring in Berlin and SF</span>
+      <span
+        className={cn(
+          "absolute",
+          !isHovered && "invisible"
+        )}
+      >
+        Looking for 🐐s!
+      </span>
     </Link>
   );
 }
