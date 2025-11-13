@@ -175,7 +175,7 @@ langfuse.flush()
 - **Updating Observations**:
   - Use the `.update()` method on `LangfuseSpan` or `LangfuseGeneration` objects.
   - Update the currently active observation via `langfuse.update_current_span()` or `langfuse.update_current_generation()`.
-  - Update trace-level attributes via `span_obj.update_trace()` or `langfuse.update_current_trace()`.
+  - Update trace-level attributes via `propagate_attributes()`.
 - **Integrations (OpenAI, Langchain)**: Trace-level attributes (like `user_id`, `session_id`) are now managed by creating an enclosing Langfuse span around the integrated library calls.
 - **LlamaIndex**: There is no longer a Langfuse-specific LlamaIndex integration; [use third-party OTEL-based instrumentations](/docs/sdk/python/sdk-v3#third-party-integrations).
 

@@ -69,46 +69,49 @@ The observe decorator is capturing the args, kwargs and return value of decorate
 
 You can create spans or generations anywhere in your application. If you need more control than the `@observe` decorator, the primary way to do this is using context managers (with `with` statements), which ensure that observations are properly started and ended.
 
-- `langfuse.start_as_current_span()`: Creates a new span and sets it as the currently active observation in the OTel context for its duration. Any new observations created within this block will be its children.
-- `langfuse.start_as_current_generation()`: Similar to the above, but creates a specialized "generation" observation for LLM calls.
+- `langfuse.start_as_current_observation(as_type="span")`: Creates a new span and sets it as the currently active observation in the OTel context for its duration. Any new observations created within this block will be its children.
+- `langfuse.start_as_current_observation(as_type="generation")`: Similar to the above, but creates a specialized "generation" observation type for LLM calls. 
+- You can see an overview of the different observation types [here](/docs/observability/features/observation-types).
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
+    as_type="span",
     name="user-request-pipeline",
     input={"user_query": "Tell me a joke about OpenTelemetry"},
 ) as root_span:
     # This span is now active in the context.
 
-    # Add trace attributes
-    root_span.update_trace(
+    # Propagate trace attributes to all child observations
+    with propagate_attributes(
         user_id="user_123",
         session_id="session_abc",
         tags=["experimental", "comedy"]
-    )
+    ):
 
-    # Create a nested generation
-    with langfuse.start_as_current_generation(
-        name="joke-generation",
-        model="gpt-4o",
-        input=[{"role": "user", "content": "Tell me a joke about OpenTelemetry"}],
-        model_parameters={"temperature": 0.7}
-    ) as generation:
-        # Simulate an LLM call
-        joke_response = "Why did the OpenTelemetry collector break up with the span? Because it needed more space... for its attributes!"
-        token_usage = {"input_tokens": 10, "output_tokens": 25}
+      # Create a nested generation
+      with langfuse.start_as_current_observation(
+          as_type="generation",
+          name="joke-generation",
+          model="gpt-4o",
+          input=[{"role": "user", "content": "Tell me a joke about OpenTelemetry"}],
+          model_parameters={"temperature": 0.7}
+      ) as generation:
+          # Simulate an LLM call
+          joke_response = "Why did the OpenTelemetry collector break up with the span? Because it needed more space... for its attributes!"
+          token_usage = {"input_tokens": 10, "output_tokens": 25}
 
-        generation.update(
-            output=joke_response,
-            usage_details=token_usage
-        )
-        # Generation ends automatically here
+          generation.update(
+              output=joke_response,
+              usage_details=token_usage
+          )
+          # Generation ends automatically here
 
-    root_span.update(output={"final_joke": joke_response})
-    # Root span ends automatically here
+      root_span.update(output={"final_joke": joke_response})
+      # Root span ends automatically here
 ```
 
 </Tab>
@@ -650,7 +653,7 @@ The integration is fully interoperable with `@observe` and manual tracing method
 You can pass Langfuse-specific arguments directly to OpenAI client methods. These will be used to enrich the trace data.
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.openai import openai
 
 langfuse = get_client()
@@ -658,15 +661,17 @@ langfuse = get_client()
 client = openai.OpenAI()
 
 with langfuse.start_as_current_span(name="qna-bot-openai") as span:
-    langfuse.update_current_trace(tags=["qna-bot-openai"])
 
-    # This will be traced as a Langfuse generation
-    response = client.chat.completions.create(
-        name="qna-bot-openai",  # Custom name for this generation in Langfuse
-        metadata={"user_tier": "premium", "request_source": "web_api"}, # will be added to the Langfuse generation
-        model="gpt-4o",
-        messages=[{"role": "user", "content": "What is OpenTelemetry?"}],
-    )
+    with propagate_attributes(
+        tags=["qna-bot-openai"]
+    ):
+        # This will be traced as a Langfuse generation
+        response = client.chat.completions.create(
+            name="qna-bot-openai",  # Custom name for this generation in Langfuse
+            metadata={"user_tier": "premium", "request_source": "web_api"}, # will be added to the Langfuse generation
+            model="gpt-4o",
+            messages=[{"role": "user", "content": "What is OpenTelemetry?"}],
+        )
 ```
 
 **Setting trace attributes via metadata:**
@@ -709,7 +714,7 @@ Langfuse provides a callback handler for Langchain to trace its operations.
 Initialize the `CallbackHandler` and add it to your Langchain calls, either globally or per-call.
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI # Example LLM
 from langchain_core.prompts import ChatPromptTemplate
@@ -725,10 +730,12 @@ prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
 chain = prompt | llm
 
 with langfuse.start_as_current_span(name="joke-chain") as span:
-    langfuse.update_current_trace(tags=["joke-chain"])
 
-    response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
-    print(response)
+    with propagate_attributes(
+        tags=["joke-chain"]
+    ):
+        response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
+        print(response)
 ```
 
 **Setting trace attributes via metadata:**

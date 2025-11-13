@@ -38,7 +38,7 @@ from langfuse import observe
 
 
 ```python
-from langfuse import observe, get_client
+from langfuse import observe, get_client, propagate_attributes
 langfuse = get_client()
 
 # import openai
@@ -90,26 +90,27 @@ def rap_battle(turns: int = 5):
 
   print(f"Topic: {topic}")
 
-  langfuse.update_current_trace(
-     metadata={"topic":topic},
-     tags=["Launch Week 1"]
-  )
+  # Propagate attributes to all child observations
+  with propagate_attributes(
+      metadata={"topic":topic},
+      tags=["Launch Week 1"]
+  ):
 
-  messages = [
-      {"role": "system", "content": "We are all rap artist. When it is our turn, we drop a fresh line."},
-      {"role": "user", "content": f"Kick it off, today's topic is {topic}, here's the mic..."}
-  ]
+    messages = [
+        {"role": "system", "content": "We are all rap artist. When it is our turn, we drop a fresh line."},
+        {"role": "user", "content": f"Kick it off, today's topic is {topic}, here's the mic..."}
+    ]
 
-  for turn in range(turns):
-      completion = openai.chat.completions.create(
-        model="gpt-4o",
-        messages=messages,
-      )
-      rap_line = completion.choices[0].message.content
-      messages.append({"role": "assistant", "content": rap_line})
-      print(f"\nRap {turn}: {rap_line}")
+    for turn in range(turns):
+        completion = openai.chat.completions.create(
+          model="gpt-4o",
+          messages=messages,
+        )
+        rap_line = completion.choices[0].message.content
+        messages.append({"role": "assistant", "content": rap_line})
+        print(f"\nRap {turn}: {rap_line}")
 
-  summary = summarize_rap_langchain([message['content'] for message in messages])
+    summary = summarize_rap_langchain([message['content'] for message in messages])
 
   return summary
 ```
