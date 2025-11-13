@@ -17,6 +17,7 @@ import magicPatternsLight from "../home/img/magicpatterns_light.png";
 import magicPatternsDark from "../home/img/magicpatterns_dark.png";
 import merckLight from "../home/img/merck-dark.png";
 import merckDark from "../home/img/merck-light.png";
+import { cn } from "@/lib/utils";
 
 type CompanyLogo = {
   name: string;
@@ -111,27 +112,48 @@ const LogoImage = ({
 );
 
 // Customer story badge component
-const CustomerStoryBadge = () => (
-  <div className="absolute top-0 right-0 md:top-2 md:right-2 z-10 pointer-events-none">
-    <div className="inline-flex items-center justify-center text-blue-500 md:bg-blue-500 md:text-white text-xs rounded-full md:w-6 md:h-6 group-hover:w-auto group-hover:h-auto group-hover:px-3 group-hover:py-1 px-2 py-1 md:px-0 md:py-0 transition-all duration-200">
-      <span className="md:hidden whitespace-nowrap">Read Story</span>
-      <span className="hidden md:group-hover:inline">Read Customer Story</span>
-      <span className="hidden md:block group-hover:hidden w-2 h-2 bg-white rounded-full"></span>
+const CustomerStoryBadge = ({ small }: { small?: boolean }) => (
+  <div
+    className={cn(
+      "absolute top-0 right-0 z-10 pointer-events-none",
+      !small && "md:top-2 md:right-2"
+    )}
+  >
+    <div
+      className={cn(
+        "inline-flex items-center justify-center text-blue-500  text-xs rounded-full  group-hover:w-auto group-hover:h-auto group-hover:px-3 group-hover:py-1 px-2 py-1 transition-all duration-200",
+        !small && "md:bg-blue-500 md:text-white md:px-0 md:py-0 md:w-6 md:h-6"
+      )}
+    >
+      {small ? (
+        <span className="whitespace-nowrap">Read Story</span>
+      ) : (
+        <>
+          <span className="md:hidden whitespace-nowrap">Read Story</span>
+          <span className="hidden md:group-hover:inline">
+            Read Customer Story
+          </span>
+          <span className="hidden md:block group-hover:hidden w-2 h-2 bg-white rounded-full"></span>
+        </>
+      )}
     </div>
   </div>
 );
 
 interface EnterpriseLogoGridProps {
   className?: string;
+  small?: boolean;
 }
 
 export const EnterpriseLogoGrid = ({
   className = "",
+  small = false,
 }: EnterpriseLogoGridProps) => {
   // Shared CSS classes for grid cells
   const baseCellClasses =
     "relative overflow-hidden h-16 md:h-14 transition-all duration-200 py-4 px-4 md:py-8 md:px-14 border border-gray-200 dark:border-gray-800 bg-card -mr-px -mb-px flex items-center justify-center";
-  const clickableCellClasses = `${baseCellClasses} group hover:opacity-80 cursor-pointer`;
+  const smallCellClasses = "px-4 md:px-6 py-4 md:py-6";
+  const clickableCellClasses = "group hover:opacity-80 cursor-pointer";
 
   return (
     <div
@@ -147,7 +169,7 @@ export const EnterpriseLogoGrid = ({
               darkImage={company.darkImage}
               name={company.name}
             />
-            {company.customerStoryPath && <CustomerStoryBadge />}
+            {company.customerStoryPath && <CustomerStoryBadge small={small} />}
           </>
         );
 
@@ -155,7 +177,11 @@ export const EnterpriseLogoGrid = ({
           <Link
             key={company.name}
             href={company.customerStoryPath}
-            className={clickableCellClasses}
+            className={cn(
+              baseCellClasses,
+              clickableCellClasses,
+              small && smallCellClasses
+            )}
             aria-label={`Read ${company.name} customer story`}
             role="gridcell"
           >
@@ -164,7 +190,7 @@ export const EnterpriseLogoGrid = ({
         ) : (
           <div
             key={company.name}
-            className={baseCellClasses}
+            className={cn(baseCellClasses, small && smallCellClasses)}
             role="gridcell"
             aria-label={`${company.name} uses Langfuse`}
           >

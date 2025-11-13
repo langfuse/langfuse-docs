@@ -4,11 +4,19 @@ import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { getGitHubStars } from "@/lib/github-stars";
 import { cn } from "@/lib/utils";
 
+// Export usage stats constants
+export const SDK_INSTALLS_PER_MONTH = 14_800_000;
+export const DOCKER_PULLS = 6_000_000;
+
 export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
   const stats = [
-    { name: "SDK installs / month", value: 14_800_000, showPlus: true },
+    {
+      name: "SDK installs / month",
+      value: SDK_INSTALLS_PER_MONTH,
+      showPlus: true,
+    },
     { name: "GitHub stars", value: getGitHubStars(), showPlus: false },
-    { name: "Docker pulls", value: 6_000_000, showPlus: true },
+    { name: "Docker pulls", value: DOCKER_PULLS, showPlus: true },
   ];
 
   return (
