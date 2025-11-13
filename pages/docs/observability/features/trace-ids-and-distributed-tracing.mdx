@@ -310,8 +310,9 @@ with langfuse.start_as_current_span(
     name="langchain-request",
     trace_context={"trace_id": predefined_trace_id}
 ) as span:
+
+    with propagate_attributes(
     span.update_trace(
-        user_id="user_123",
         input={"person": "Ada Lovelace"}
     )
 
