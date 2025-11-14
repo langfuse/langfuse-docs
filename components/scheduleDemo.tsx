@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/router";
 import { Background } from "./Background";
 import { Header } from "./Header";
 import { ScheduleDemo } from "./CalComScheduleDemo";
-import { EnterpriseLogos } from "./EnterpriseLogos";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
 import Link from "next/link";
@@ -14,7 +13,6 @@ import Image from "next/image";
 import { WatchWalkthroughsPage } from "@/components/walkthroughs/WatchWalkthroughsPage";
 import { HomeSection } from "./home/components/HomeSection";
 import { EnterpriseLogoGrid } from "./shared/EnterpriseLogoGrid";
-import { cn } from "@/lib/utils";
 
 function SwitchToggle({
   checked,
@@ -48,13 +46,13 @@ function TeamMemberCard({
       <Image
         src={imageSrc}
         alt={alt}
-        width={48}
-        height={48}
+        width={36}
+        height={36}
         className="rounded-full aspect-square object-cover"
       />
       <div className="flex flex-col">
-        <span className="font-semibold">{name}</span>
-        <span className="text-sm text-muted-foreground">{title}</span>
+        <span className="text-sm font-semibold">{name}</span>
+        <span className="text-xs text-muted-foreground">{title}</span>
       </div>
     </div>
   );
@@ -198,7 +196,27 @@ function CalendarSection() {
 }
 
 export function ScheduleDemoPage() {
-  const [isDiscoverOpen, setIsDiscoverOpen] = useState(false);
+  const router = useRouter();
+
+  // Get current mode from query param
+  const isDiscoverOpen = (() => {
+    const mode = router.query.mode as string;
+    return mode === "discover";
+  })();
+
+  // Handle switch change and update URL query param
+  const handleSwitchChange = (checked: boolean) => {
+    const query = { ...router.query };
+    if (checked) {
+      query.mode = "discover";
+    } else {
+      delete query.mode;
+    }
+
+    router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+    });
+  };
 
   return (
     <HomeSection>
@@ -214,7 +232,7 @@ export function ScheduleDemoPage() {
           <div className="flex-1 flex flex-col gap-6">
             <SwitchToggle
               checked={isDiscoverOpen}
-              onCheckedChange={setIsDiscoverOpen}
+              onCheckedChange={handleSwitchChange}
             />
             {!isDiscoverOpen ? (
               <TalkToUsContent />
