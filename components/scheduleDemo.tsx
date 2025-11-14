@@ -100,14 +100,10 @@ function TalkToUsContent() {
         <strong className="font-semibold">
           {(DOCKER_PULLS / 1_000_000).toFixed(0)}M+ Docker pulls
         </strong>
-        .
+        . Selected customers who built great LLM applications with Langfuse:
       </p>
-      <div>
-        <p className="mb-3">
-          Some customers who built great LLM applications/agents with Lanfguse:
-        </p>
-        <EnterpriseLogoGrid small />
-      </div>
+      <EnterpriseLogoGrid small />
+
       <div className="mt-6">
         <p>We are looking forward to talk to you,</p>
         <div className="flex flex-col sm:flex-row gap-6 mt-4">
@@ -229,7 +225,7 @@ export function ScheduleDemoPage() {
       <div className="w-full max-w-6xl px-4">
         <div className="flex flex-col md:flex-row gap-10">
           {/* Left Column: Content based on switch */}
-          <div className="flex-1 flex flex-col gap-6">
+          <div className="flex-1 flex flex-col gap-4">
             <SwitchToggle
               checked={isDiscoverOpen}
               onCheckedChange={handleSwitchChange}
