@@ -163,7 +163,23 @@ function DiscoverYourselfContent() {
         </ul>
       </div>
       <div className="mt-2">
-        <p>Let us know if you have any questions, we are happy to help,</p>
+        <p>
+          Questions?{" "}
+          <Link
+            href="/ask-ai"
+            className="text-primary underline underline-offset-4 hover:text-primary/80 hover:underline-offset-2 transition-all font-medium"
+          >
+            Ask AI
+          </Link>{" "}
+          or{" "}
+          <Link
+            href="/support"
+            className="text-primary underline underline-offset-4 hover:text-primary/80 hover:underline-offset-2 transition-all font-medium"
+          >
+            reach out to us
+          </Link>
+          ,
+        </p>
         <div className="flex flex-col sm:flex-row gap-6 mt-4">
           <TeamMemberCard
             imageSrc="/images/people/jannikmaierhoefer.jpg"
