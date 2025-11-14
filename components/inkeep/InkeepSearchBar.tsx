@@ -22,7 +22,7 @@ export default function InkeepSearchBar() {
             key: "1",
             type: "style",
             value: css`
-              @media (max-width: 33em) {
+              @media (max-width: 1400px) {
                 .ikp-search-bar__button {
                   padding-inline: 7px;
                 }

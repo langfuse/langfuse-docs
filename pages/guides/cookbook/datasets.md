@@ -31,8 +31,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -221,7 +221,7 @@ from langchain_core.messages import HumanMessage
 def run_my_langchain_llm_app(input, system_message, callback_handler):
 
   # Create a trace via Langfuse spans and use Langchain within it
-  with langfuse.start_as_current_span(name="my-langchain-agent") as root_span:
+  with langfuse.start_as_current_observation(as_type="span", name="my-langchain-agent") as root_span:
         
     prompt = ChatPromptTemplate.from_messages(
       [("system", system_message), MessagesPlaceholder(variable_name="messages")]

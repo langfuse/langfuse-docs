@@ -24,7 +24,7 @@ Let's walk through a practical example of using CrewAI and integrating it with L
 
 
 ```python
-%pip install langfuse crewai openinference-instrumentation-crewai openinference-instrumentation-litellm
+%pip install langfuse crewai openinference-instrumentation-crewai
 ```
 
 ### Step 2: Configure Langfuse SDK
@@ -38,8 +38,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your OpenAI key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -67,10 +67,8 @@ Now, we initialize the [OpenInference instrumentation SDK](https://github.com/Ar
 
 ```python
 from openinference.instrumentation.crewai import CrewAIInstrumentor
-from openinference.instrumentation.litellm import LiteLLMInstrumentor
 
 CrewAIInstrumentor().instrument(skip_dep_check=True)
-LiteLLMInstrumentor().instrument()
 ```
 
 ### Step 4: Basic CrewAI Application
@@ -101,7 +99,7 @@ crew = Crew(
     tasks=[task1],
 )
 
-with langfuse.start_as_current_span(name="crewai-index-trace"):
+with langfuse.start_as_current_observation(as_type="span", name="crewai-index-trace"):
     result = crew.kickoff()
     print(result)
 
@@ -122,32 +120,40 @@ After executing the application, navigate to your Langfuse Trace Table. You will
 
 Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for analysis, debugging, and monitoring of your application's behavior across different users or sessions.
 
-The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`. 
+The following code demonstrates how to start a custom span with `langfuse.start_as_current_observation` and then update the trace associated with this span using `propagate_attributes()`. 
 
 **→ Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).**
 
 
 
 ```python
-with langfuse.start_as_current_span(
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(
+    as_type="span",
     name="crewai-index-trace",
     ) as span:
-    
-    # Run your application here
-    task_description = "Define the HTML for making a simple website with heading- Hello World! Langfuse monitors your CrewAI agent!"
-    result = crew.kickoff()
-    print(result)
 
-    # Pass additional attributes to the span
-    span.update_trace(
-        input=task_description,
-        output=str(result),
+    with propagate_attributes(
         user_id="user_123",
         session_id="session_abc",
         tags=["dev", "crewai"],
         metadata={"email": "user@langfuse.com"},
         version="1.0.0"
-        )
+    ):
+    
+        # Run your application here
+        task_description = "Define the HTML for making a simple website with heading- Hello World! Langfuse monitors your CrewAI agent!"
+        result = crew.kickoff()
+        print(result)
+
+        # Pass additional attributes to the span
+        span.update_trace(
+            input=task_description,
+            output=str(result),
+            )
 
 # Flush events in short-lived applications
 langfuse.flush()
@@ -165,7 +171,8 @@ In the example below, we demonstrate how to score a specific span for `relevance
 
 
 ```python
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
+    as_type="span",
     name="crewai-index-trace",
     ) as span:
     
@@ -218,7 +225,8 @@ crew_with_prompt = Crew(
 )
 
 # Run your application
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
+    as_type="span",
     name="crewai-index-trace",
     ) as span:
     
@@ -273,7 +281,7 @@ current_run_description="Evaluation run for CrewAI model on June 4th"
  
 # Assume 'your_application' is your instrumented application function
 def your_application(country):
-    with langfuse.start_as_current_span(name="crewai-trace") as span:
+    with langfuse.start_as_current_observation(as_type="span", name="crewai-trace") as span:
 
         # Define your agents with roles and goals
         geography_expert = Agent(

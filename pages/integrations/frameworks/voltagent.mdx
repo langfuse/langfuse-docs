@@ -46,7 +46,7 @@ OPENAI_API_KEY=your-api-key
 # Langfuse credentials
 LANGFUSE_SECRET_KEY=sk-lf-...
 LANGFUSE_PUBLIC_KEY=pk-lf-...
-LANGFUSE_HOST=https://cloud.langfuse.com # Optional. Defaults to https://cloud.langfuse.com
+LANGFUSE_BASE_URL=https://cloud.langfuse.com # Optional. Defaults to https://cloud.langfuse.com
 ```
 
 ### Install the `@voltagent/langfuse-exporter` package
@@ -71,7 +71,7 @@ import { LangfuseExporter } from "@voltagent/langfuse-exporter";
 const langfuseExporter = new LangfuseExporter({
   publicKey: process.env.LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.LANGFUSE_SECRET_KEY,
-  baseUrl: process.env.LANGFUSE_HOST,
+  baseUrl: process.env.LANGFUSE_BASE_URL,
 });
 
 const agent = new Agent({

@@ -1,5 +1,5 @@
 ```bash
-npm i @langfuse/langchain
+npm install @langfuse/core @langfuse/langchain
 ```
 
 import EnvJS from "@/components-mdx/env-js.mdx";
@@ -8,15 +8,52 @@ Add your Langfuse credentials to your environment variables. Make sure that you 
 
 <EnvJS />
 
-Initialize the Langfuse callback handler and add it to your chain.
+With the environment variables set, we can now initialize the `langfuseSpanProcessor` which is passed to the main OpenTelemetry SDK that orchestrates tracing.
 
-```ts {9}
+```ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+ 
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+ 
+sdk.start();
+```
+
+Finally, initialize the Langfuse `CallbackHandler` and add it to your chain.
+
+```typescript
 import { CallbackHandler } from "@langfuse/langchain";
-
+ 
+// Initialize the Langfuse CallbackHandler
 const langfuseHandler = new CallbackHandler();
+```
 
-// Your Langchain code
+```typescript /{ callbacks: [langfuseHandler] }/
+import { createAgent, tool } from "@langchain/core/agents";
+import * as z from "zod";
 
-// Add Langfuse handler as callback to `run` or `invoke`
-await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+const getWeather = tool(
+  (input) => `It's always sunny in ${input.city}!`,
+  {
+    name: "get_weather",
+    description: "Get the weather for a given city",
+    schema: z.object({
+      city: z.string().describe("The city to get the weather for"),
+    }),
+  }
+);
+
+const agent = createAgent({
+  model: "openai:gpt-5-mini",
+  tools: [getWeather],
+});
+
+console.log(
+    await agent.invoke(
+        { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] }, 
+        { callbacks: [langfuseHandler] }
+    )
+);
 ```

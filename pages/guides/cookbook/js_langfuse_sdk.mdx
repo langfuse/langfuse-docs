@@ -34,7 +34,7 @@ Deno.env.set("LANGFUSE_SECRET_KEY", "sk-lf-***");
 
 // Langfuse host configuration
 // For US data region, set this to "https://us.cloud.langfuse.com"
-Deno.env.set("LANGFUSE_HOST", "https://cloud.langfuse.com")
+Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
 
 // Set environment variables using Deno-specific syntax
 Deno.env.set("OPENAI_API_KEY", "sk-proj-***");
@@ -54,7 +54,7 @@ import { LangfuseSpanProcessor } from "npm:@langfuse/otel";
 export const langfuseSpanProcessor = new LangfuseSpanProcessor({
     publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
     secretKey: process.env.LANGFUSE_SECRET_KEY!,
-    baseUrl: process.env.LANGFUSE_HOST ?? 'https://cloud.langfuse.com', // Default to cloud if not specified
+    baseUrl: process.env.LANGFUSE_BASE_URL ?? 'https://cloud.langfuse.com', // Default to cloud if not specified
     environment: process.env.NODE_ENV ?? 'development', // Default to development if not specified
   });
  

@@ -43,7 +43,7 @@ Before you begin, install the necessary packages in your Python environment:
 Configure your **Langfuse** credentials and **Databricks** credentials as environment variables. Replace the dummy keys below with the real ones from your respective accounts.
 
  - `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY`: From your Langfuse Project Settings.
- - `LANGFUSE_HOST`: `https://cloud.langfuse.com` (EU region) or `https://us.cloud.langfuse.com` (US region).
+ - `LANGFUSE_BASE_URL`: `https://cloud.langfuse.com` (EU region) or `https://us.cloud.langfuse.com` (US region).
  - `DATABRICKS_TOKEN`: Your Databricks personal access token.
  - `DATABRICKS_HOST`: Your Databricks workspace URL (e.g., `https://dbc-xxxxxxx.cloud.databricks.com`).
 
@@ -55,7 +55,7 @@ import os
 # Example environment variables (replace with your actual keys/tokens)
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."  # your public key
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."  # your secret key
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # or https://us.cloud.langfuse.com
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # or https://us.cloud.langfuse.com
 
 os.environ["DATABRICKS_TOKEN"] = "dapi-..."  # Databricks personal access token
 os.environ["DATABRICKS_HOST"] = "https://dbc-XXXXX-XXXX.cloud.databricks.com"
@@ -133,8 +133,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 ```
 
@@ -209,8 +209,8 @@ from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
  
 langfuse = get_client()
 

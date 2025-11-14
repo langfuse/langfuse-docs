@@ -40,8 +40,8 @@ import os
 
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your OpenAI key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -88,7 +88,7 @@ from llama_index.llms.openai import OpenAI
 
 llm = OpenAI(model="gpt-4o")
  
-with langfuse.start_as_current_span(name="llama-index-trace"):
+with langfuse.start_as_current_observation(as_type="span", name="llama-index-trace"):
     response = llm.complete("Hello, world!")
     print(response)
  

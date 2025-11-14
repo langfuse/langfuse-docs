@@ -83,8 +83,8 @@ Add Langfuse credentials to your code
 openai.langfuse_public_key = "pk-lf-..."
 openai.langfuse_secret_key = "sk-lf-..."
 openai.langfuse_enabled = True # Default is True, set to False to disable Langfuse
-openai.langfuse_host = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# openai.langfuse_host = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+openai.LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# openai.LANGFUSE_BASE_URL = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Set openai key via attribute
 openai.api_key = "sk-..."
@@ -243,7 +243,7 @@ from langfuse.openai import openai
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="calculator-request") as span:
+with langfuse.start_as_current_observation(as_type="span", name="calculator-request") as span:
     span.update_trace(
         session_id="session_123",
         user_id="user_456",
@@ -311,34 +311,33 @@ capital_poem_generator("Bulgaria")
 **Option 2: Context Managers**
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.openai import openai
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="capital-poem-generator") as span:
-    # Set trace attributes
-    span.update_trace(
+with langfuse.start_as_current_observation(as_type="span", name="capital-poem-generator") as span:
+    # Propagate trace attributes to all child observations
+    with propagate_attributes(
         user_id="user_123",
         session_id="session_456",
         tags=["poetry", "capital"]
-    )
+    ):
+      capital = openai.chat.completions.create(
+          model="gpt-3.5-turbo",
+          messages=[
+              {"role": "system", "content": "What is the capital of the country?"},
+              {"role": "user", "content": "Bulgaria"}],
+          name="get-capital",
+      ).choices[0].message.content
 
-    capital = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "What is the capital of the country?"},
-            {"role": "user", "content": "Bulgaria"}],
-        name="get-capital",
-    ).choices[0].message.content
-
-    poem = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a poet. Create a poem about this city."},
-            {"role": "user", "content": capital}],
-        name="generate-poem",
-    ).choices[0].message.content
+      poem = openai.chat.completions.create(
+          model="gpt-3.5-turbo",
+          messages=[
+              {"role": "system", "content": "You are a poet. Create a poem about this city."},
+              {"role": "user", "content": capital}],
+          name="generate-poem",
+      ).choices[0].message.content
 ```
 
 ### OpenAI token usage on streamed responses

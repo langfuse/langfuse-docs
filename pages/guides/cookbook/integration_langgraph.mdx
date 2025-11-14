@@ -45,8 +45,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -506,7 +506,7 @@ from langchain_core.tools import tool
 def langgraph_research(question):
   """Conducts research for various topics."""
 
-  with langfuse.start_as_current_span(
+  with langfuse.start_as_current_observation(
       name="🤖-sub-research-agent",
       trace_context={"trace_id": predefined_trace_id}
   ) as span:
@@ -540,7 +540,7 @@ main_agent = create_react_agent(
 user_question = "What is Langfuse?"
 
 # Use the predefined trace ID with trace_context
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="🤖-main-agent",
     trace_context={"trace_id": predefined_trace_id}
 ) as span:
@@ -576,7 +576,8 @@ from langfuse import get_client
 langfuse = get_client()
  
 # Option 1: Use the yielded span object from the context manager
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
+    as_type="span",
     name="langgraph-request") as span:
     # ... LangGraph execution ...
  
@@ -589,7 +590,7 @@ with langfuse.start_as_current_span(
     )
  
 # Option 2: Use langfuse.score_current_trace() if still in context
-with langfuse.start_as_current_span(name="langgraph-request") as span:
+with langfuse.start_as_current_observation(as_type="span", name="langgraph-request") as span:
     # ... LangGraph execution ...
  
     # Score using current context
