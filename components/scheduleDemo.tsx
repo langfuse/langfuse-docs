@@ -14,6 +14,7 @@ import Image from "next/image";
 import { WatchWalkthroughsPage } from "@/components/walkthroughs/WatchWalkthroughsPage";
 import { HomeSection } from "./home/components/HomeSection";
 import { EnterpriseLogoGrid } from "./shared/EnterpriseLogoGrid";
+import { cn } from "@/lib/utils";
 
 function SwitchToggle({
   checked,
@@ -190,7 +191,7 @@ function DiscoverYourselfContent() {
 
 function CalendarSection() {
   return (
-    <div className="min-h-[300px] overflow-y-auto max-w-sm ml-auto rounded-lg border overflow-hidden">
+    <div className="min-h-[300px] overflow-y-auto max-w-sm mx-auto rounded-lg border overflow-hidden">
       <ScheduleDemo />
     </div>
   );
@@ -208,9 +209,9 @@ export function ScheduleDemoPage() {
       />
 
       <div className="w-full max-w-6xl px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+        <div className="flex flex-col md:flex-row gap-10">
           {/* Left Column: Content based on switch */}
-          <div className="flex flex-col gap-6">
+          <div className="flex-1 flex flex-col gap-6">
             <SwitchToggle
               checked={isDiscoverOpen}
               onCheckedChange={setIsDiscoverOpen}
@@ -223,7 +224,7 @@ export function ScheduleDemoPage() {
           </div>
 
           {/* Right Column: Calendar or Walkthroughs */}
-          <div className="flex flex-col gap-8">
+          <div className="flex-1">
             {!isDiscoverOpen ? <CalendarSection /> : <WatchWalkthroughsPage />}
           </div>
         </div>

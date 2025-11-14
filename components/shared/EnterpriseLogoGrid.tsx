@@ -152,12 +152,16 @@ export const EnterpriseLogoGrid = ({
   // Shared CSS classes for grid cells
   const baseCellClasses =
     "relative overflow-hidden h-16 md:h-14 transition-all duration-200 py-4 px-4 md:py-8 md:px-14 border border-gray-200 dark:border-gray-800 bg-card -mr-px -mb-px flex items-center justify-center";
-  const smallCellClasses = "px-4 md:px-6 py-4 md:py-6";
+  const smallCellClasses = "px-3 md:px-4 py-3 md:py-4";
   const clickableCellClasses = "group hover:opacity-80 cursor-pointer";
 
   return (
     <div
-      className={`grid grid-cols-2 md:grid-cols-4 auto-rows-fr ${className}`}
+      className={cn(
+        "grid grid-cols-2 md:grid-cols-4 auto-rows-fr",
+        small && "grid-cols-4",
+        className
+      )}
       role="grid"
       aria-label="Enterprise customers using Langfuse"
     >
