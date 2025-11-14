@@ -1,10 +1,10 @@
 export default {
   overview: "Overview",
-  tutorials: {
-    title: "Tutorials ↗",
-    href: "/guides/evaluation",
-  },
   "evaluation-methods": "Evaluation Methods",
   experiments: "Experiments",
+  tutorials: {
+    title: "Guides ↗",
+    href: "/guides/evaluation",
+  },
   "troubleshooting-and-faq": "Troubleshooting & FAQ",
 };

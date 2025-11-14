@@ -2,7 +2,7 @@
 title: "Evaluating LLM Applications: A Comprehensive Roadmap"
 date: 2025/11/12
 description: "A practical guide to systematically evaluating LLM applications through observability, error analysis, testing, synthetic datasets, and experiments."
-ogImage: /images/blog/2025-11-06-experiment-interpretation/experiment-interpretation.png
+ogImage: /images/blog/2025-11-09-evals/header-image.png
 tag: guide
 author: Abdallah
 ---
@@ -23,9 +23,10 @@ Building applications powered by LLMs is exciting, but ensuring they perform rel
 
 Inspired by iterative frameworks that emphasize debugging as a superpower (think rapid cycles of inspection, insight, and improvement), we'll guide you through foundational steps and advanced extensions. Each section highlights key ideas, with links to detailed implementations for when you're ready to dive deeper. Not every app needs every piece; pick what fits your use case, whether it's a simple Q&A tool or a complex agent.
 
-## Step 1: Start with Observability
+<Steps>
+## Start with Observability
 
-![Observability](/images/blog/2025-11-12-evals/observability.png)
+![Observability](/images/blog/2025-11-09-evals/observability.png)
 
 Everything begins with seeing what's happening under the hood. Observability tools log inputs, outputs, latencies, and metadata, turning black-box LLMs into inspectable systems. This isn't optional, it's the foundation for spotting patterns and measuring improvements.
 
@@ -37,7 +38,7 @@ Set this up early to inform later steps like error categorization or testing. Fo
 
 → **[See Observability in RAG pipelines](/blog/2025-10-28-rag-observability-and-evals)**
 
-## Step 2: Dive into Error Analysis
+## Dive into Error Analysis
 
 With observability in place, zoom in on failures. Error analysis involves reviewing traces to classify issues (hallucinations, irrelevance, formatting errors) and uncover root causes. This turns raw logs into actionable insights, prioritizing what to fix next.
 
@@ -45,7 +46,15 @@ For example, filter traces by low user satisfaction scores, tag common failure m
 
 → **[Error Analysis to Evaluate LLM Applications](https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications.md)**
 
-## Step 3: Build a Testing Foundation
+## Set up Automated Evaluators
+
+In AI development, iterating quickly is important. Manually annotating outputs after every modification is slow and expensive, especially when you want to integrate evaluations into a CI/CD pipeline.
+
+Automated evaluators solve this problem by providing a scalable way to measure and monitor your application’s failure modes, enabling a fast and effective development loop.
+
+→ **[Automated Evaluations of LLM Applications](/blog/2025-09-05-automated-evaluations)**
+
+## Build a Testing Foundation
 
 Now that you've identified pain points, formalize tests to prevent regressions. Testing LLM apps blends deterministic checks (e.g., output format) with probabilistic ones (e.g., semantic accuracy via LLM judges).
 
@@ -53,7 +62,7 @@ Testing isn't exhaustive: focus on high-impact areas. It complements observabili
 
 → **[Testing LLM Applications](/blog/2025-10-21-testing-llm-applications.md)**
 
-## Step 4: Scale with Synthetic Datasets
+## Scale with Synthetic Datasets
 
 Real data is ideal, but it's often limited. Synthetic datasets fill the gaps: Use LLMs to generate diverse inputs, amplifying your test coverage without waiting for users.
 
@@ -63,9 +72,9 @@ It's modular: use it when bootstrapping evals or stressing multi-component syste
 
 → **[Synthetic Dataset Generation for LLM Evaluation](/guides/cookbook/example_synthetic_datasets)**
 
-## Step 5: Run Experiments and Interpret Results
+## Run Experiments and Interpret Results
 
-![Experiments](/images/blog/2025-11-12-evals/experiments.png)
+![Experiments](/images/blog/2025-11-09-evals/experiments.png)
 
 To quantify progress, compare variants: prompts, models, or pipelines. Experiments measure metrics like accuracy or speed across datasets, revealing winners.
 
@@ -75,13 +84,15 @@ This step ties the flywheel together, turning insights into measurable gains.
 
 → **[Experiment Interpretation](/blog/2025-11-06-experiment-interpretation.md)**
 
+</Steps>
+
 ## Advanced Extensions: Tailor for Complex Apps
 
 For apps beyond one-shot queries, extend the basics.
 
 ### Handling Multi-Turn Conversations
 
-![Multi-turn chat](/images/blog/2025-11-12-evals/multi-turn-chat.png)
+![Multi-turn chat](/images/blog/2025-11-09-evals/multi-turn-chat.png)
 
 Conversational apps require evals that preserve context across turns. Evaluate coherence, memory, and resolution in full dialogues.
 
