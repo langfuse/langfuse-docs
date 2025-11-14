@@ -40,11 +40,12 @@ from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="process-request") as root_span:
+with langfuse.start_as_current_observation(as_type="span", name="process-request") as root_span:
     # Propagate metadata to all child observations
     with propagate_attributes(metadata={"request_id": "req_12345", "region": "us-east-1"}):
         # All observations created here automatically have this metadata
-        with root_span.start_as_current_generation(
+        with root_span.start_as_current_observation(
+            as_type="generation",
             name="generate-response",
             model="gpt-4o"
         ) as gen:
@@ -112,7 +113,7 @@ from langfuse.openai import openai
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="openai-call"):
+with langfuse.start_as_current_observation(as_type="span", name="openai-call"):
     # Propagate metadata to all observations including OpenAI generation
     with propagate_attributes(
         metadata={"source": "api", "region": "us-east-1"}
@@ -163,7 +164,7 @@ from langfuse.langchain import CallbackHandler
 langfuse = get_client()
 langfuse_handler = CallbackHandler()
 
-with langfuse.start_as_current_span(name="langchain-call"):
+with langfuse.start_as_current_observation(as_type="span", name="langchain-call"):
     # Propagate metadata to all child observations
     with propagate_attributes(
         metadata={"foo": "bar", "baz": "qux"}
@@ -220,7 +221,7 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_observation(name="process-request") as root_span:
+with langfuse.start_as_current_observation(as_type="span", name="process-request") as root_span:
     # Add metadata to this specific observation only
     root_span.update(metadata={"stage": "parsing"})
 

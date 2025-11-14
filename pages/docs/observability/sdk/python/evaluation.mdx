@@ -27,7 +27,7 @@ This page shows the evaluation methods that are supported by the Python SDK. Ple
 
     langfuse = get_client()
 
-    with langfuse.start_as_current_generation(name="summary_generation") as gen:
+    with langfuse.start_as_current_observation(as_type="generation", name="summary_generation") as gen:
         # ... LLM call ...
         gen.update(output="summary text...")
         # Score this specific generation
@@ -47,7 +47,7 @@ This page shows the evaluation methods that are supported by the Python SDK. Ple
 
     langfuse = get_client()
 
-    with langfuse.start_as_current_span(name="complex_task") as task_span:
+    with langfuse.start_as_current_observation(as_type="span", name="complex_task") as task_span:
         # ... perform task ...
         langfuse.score_current_span(name="task_component_quality", value=True, data_type="BOOLEAN")
         # ...

@@ -57,7 +57,7 @@ from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="my-trace") as span:
+with langfuse.start_as_current_observation(as_type="span", name="my-trace") as span:
     # Add additional attributes (user_id, session_id, metadata, version, tags) to all spans created within this execution scope
     with propagate_attributes(
         user_id="user_123",
@@ -70,7 +70,7 @@ with langfuse.start_as_current_span(name="my-trace") as span:
         result = call_llm("some input")
 
         # Update the trace input and output
-        langfuse.update_current_trace(
+        langfuse.start_as_current_observation(
             input=input,
             output=result,
         )

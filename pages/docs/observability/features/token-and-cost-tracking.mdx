@@ -117,7 +117,8 @@ import anthropic
 langfuse = get_client()
 anthropic_client = anthropic.Anthropic()
 
-with langfuse.start_as_current_generation(
+with langfuse.start_as_current_observation(
+    as_type="generation",
     name="anthropic-completion",
     model="claude-3-opus-20240229",
     input=[{"role": "user", "content": "Hello, Claude"}]
@@ -302,7 +303,8 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_generation(
+with langfuse.start_as_current_observation(
+    as_type="generation",
     name="openai-style-generation",
     model="gpt-4o"
 ) as generation:

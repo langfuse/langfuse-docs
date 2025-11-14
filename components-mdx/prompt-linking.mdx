@@ -32,7 +32,8 @@ langfuse = get_client()
 
 prompt = langfuse.get_prompt("movie-critic")
 
-with langfuse.start_as_current_generation(
+with langfuse.start_as_current_observation(
+    as_type="generation",
     name="movie-generation",
     model="gpt-4o",
     prompt=prompt
