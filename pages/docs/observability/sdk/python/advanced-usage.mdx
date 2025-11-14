@@ -31,7 +31,7 @@ def pii_masker(data: any, **kwargs) -> any:
 langfuse = Langfuse(mask=pii_masker)
 
 # Now, any input/output/metadata will be passed through pii_masker
-with langfuse.start_as_current_span(name="user-query", input={"email": "test@example.com", "query": "..."}) as span:
+with langfuse.start_as_current_observation(as_type="span", name="user-query", input={"email": "test@example.com", "query": "..."}) as span:
     # The 'email' field in the input will be masked.
     pass
 ```
@@ -208,7 +208,6 @@ def nested():
     # get_client call is context aware
     # if it runs inside another decorated function that has
     # langfuse_public_key passed, it does not need passing here again
-    get_client().update_current_trace(user_id='myuser')
 
 
 @observe
