@@ -116,11 +116,12 @@ from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="process-data") as span:
+with langfuse.start_as_current_observation(as_type="span", name="process-data") as span:
     # Propagate version to all child observations
     with propagate_attributes(version="1.0"):
         # All observations created here automatically have version="1.0"
-        with span.start_as_current_generation(
+        with span.start_as_current_observation(
+            as_type="generation",
             name="guess-countries",
             model="gpt-4o"
         ) as generation:
@@ -135,7 +136,7 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="process-data", version="1.0") as span:
+with langfuse.start_as_current_observation(as_type="span", name="process-data", version="1.0") as span:
     # This span has version="1.0"
     pass
 ```

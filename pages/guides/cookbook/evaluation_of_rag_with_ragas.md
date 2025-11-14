@@ -204,7 +204,7 @@ question = row['question']
 contexts = row['contexts']
 answer = row['answer']
 
-with langfuse.start_as_current_span(name="rag") as trace:
+with langfuse.start_as_current_observation(as_type="span", name="rag") as trace:
     # Store trace_id for later use
     trace_id = trace.trace_id
     
@@ -212,7 +212,7 @@ with langfuse.start_as_current_span(name="rag") as trace:
     # chunks = get_similar_chunks(question)
     
     # pass it as span
-    with trace.start_as_current_span(
+    with trace.start_as_current_observation(
         name="retrieval", 
         input={'question': question}, 
         output={'contexts': contexts}
@@ -222,7 +222,7 @@ with langfuse.start_as_current_span(name="rag") as trace:
     # use llm to generate a answer with the chunks
     # answer = get_response_from_llm(question, chunks)
     
-    with trace.start_as_current_span(
+    with trace.start_as_current_observation(
         name="generation", 
         input={'question': question, 'contexts': contexts}, 
         output={'answer': answer}
@@ -287,15 +287,15 @@ for interaction in fiqa_eval.select(range(10, 20)):
     contexts = interaction['contexts']
     answer = interaction['answer']
     
-    with langfuse.start_as_current_span(name="rag") as trace:
-        with trace.start_as_current_span(
+    with langfuse.start_as_current_observation(as_type="span", name="rag") as trace:
+        with trace.start_as_current_observation(
             name="retrieval",
             input={'question': question},
             output={'contexts': contexts}
         ):
             pass
         
-        with trace.start_as_current_span(
+        with trace.start_as_current_observation(
             name="generation",
             input={'question': question, 'contexts': contexts},
             output={'answer': answer}

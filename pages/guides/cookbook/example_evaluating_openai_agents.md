@@ -250,7 +250,7 @@ _[Link to the trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja
 
 Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for analysis, debugging, and monitoring of your application's behavior across different users or sessions.
 
-The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `propagate_attributes()`. 
+The following code demonstrates how to start a custom span with `langfuse.start_as_current_observation` and then update the trace associated with this span using `propagate_attributes()`. 
 
 **→ Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).**
 
@@ -262,7 +262,7 @@ langfuse = get_client()
 
 input_query = "Why is AI agent evaluation important?"
 
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="OpenAI-Agent-Trace",
     ) as span:
 
@@ -342,7 +342,8 @@ def on_feedback(button):
 user_input = input("Enter your question: ")
 
 # Run agent
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
+    as_type="span",
     name="OpenAI-Agent-Trace",
     ) as span:
     
@@ -425,7 +426,7 @@ agent = Agent(
 input_query = "Is eating carrots good for the eyes?"
 
 # Run agent
-with langfuse.start_as_current_span(name="OpenAI-Agent-Trace") as span:
+with langfuse.start_as_current_observation(as_type="span", name="OpenAI-Agent-Trace") as span:
     # Run your agent with a query
     result = Runner.run_sync(agent, input_query)
 
@@ -543,7 +544,7 @@ agent = Agent(
  
 # Assume 'run_openai_agent' is your instrumented application function
 def run_openai_agent(question):
-    with langfuse.start_as_current_generation(name="qna-llm-call") as generation:
+    with langfuse.start_as_current_observation(as_type="generation", name="qna-llm-call") as generation:
         # Simulate LLM call
         result = Runner.run_sync(agent, question)
  

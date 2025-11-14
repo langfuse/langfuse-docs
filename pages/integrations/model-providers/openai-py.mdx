@@ -243,7 +243,7 @@ from langfuse.openai import openai
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="calculator-request") as span:
+with langfuse.start_as_current_observation(as_type="span", name="calculator-request") as span:
     span.update_trace(
         session_id="session_123",
         user_id="user_456",
@@ -316,7 +316,7 @@ from langfuse.openai import openai
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="capital-poem-generator") as span:
+with langfuse.start_as_current_observation(as_type="span", name="capital-poem-generator") as span:
     # Propagate trace attributes to all child observations
     with propagate_attributes(
         user_id="user_123",

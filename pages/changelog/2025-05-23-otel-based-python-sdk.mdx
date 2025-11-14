@@ -74,7 +74,8 @@ langfuse_client = get_client()
 def process_data(query: str):
     # This span is automatically a child of "user-request-pipeline".
 
-    with langfuse_client.start_as_current_generation(
+    with langfuse_client.start_as_current_observation(
+        as_type="generation",
         name="joke-generation-llm",
         model="gpt-4o",
         input=[{"role": "user", "content": query}]
@@ -119,7 +120,7 @@ AnthropicInstrumentor().instrument()
 langfuse = get_client()
 anthropic_client = Anthropic()
 
-with langfuse.start_as_current_span(name="myspan"):
+with langfuse.start_as_current_observation(as_type="span", name="myspan"):
     # This will be traced as a Langfuse generation nested under the current span
     message = anthropic_client.messages.create(
         model="claude-3-7-sonnet-20250219",
@@ -150,7 +151,7 @@ LlamaIndexInstrumentor().instrument()
 langfuse = get_client()
 llm = OpenAI(model="gpt-4o")
 
-with langfuse.start_as_current_span(name="myspan"):
+with langfuse.start_as_current_observation(as_type="span", name="myspan"):
     response = llm.complete("Hello, world!")
     print(response)
 

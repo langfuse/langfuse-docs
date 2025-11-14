@@ -142,7 +142,7 @@ Below, we demonstrate this approach with the [GSM8K dataset](https://huggingface
 from opentelemetry.trace import format_trace_id
 
 def otel_helper_function(input):
-    with tracer.start_as_current_span("Otel-Trace") as span:
+    with tracer.start_as_current_observation("Otel-Trace") as span:
 
         # Your gen ai application logic here: (make sure this function is sending traces to Langfuse)
         output = your_application(input)

@@ -221,7 +221,7 @@ from langchain_core.messages import HumanMessage
 def run_my_langchain_llm_app(input, system_message, callback_handler):
 
   # Create a trace via Langfuse spans and use Langchain within it
-  with langfuse.start_as_current_span(name="my-langchain-agent") as root_span:
+  with langfuse.start_as_current_observation(as_type="span", name="my-langchain-agent") as root_span:
         
     prompt = ChatPromptTemplate.from_messages(
       [("system", system_message), MessagesPlaceholder(variable_name="messages")]
