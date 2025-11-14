@@ -50,21 +50,6 @@ export default function App({ Component, pageProps }) {
             src="https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js"
             strategy="beforeInteractive"
           />
-          {/* Reb2b */}
-          <Script
-            id="reb2b-loader"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `!function(key) {
-            if (window.reb2b) return;
-            window.reb2b = {loaded: true};
-            var s = document.createElement("script");
-            s.async = true;
-            s.src = "https://ddwl4m2hdecbv.cloudfront.net/b/" + key + "/" + key + ".js.gz";
-            document.getElementsByTagName("script")[0].parentNode.insertBefore(s, document.getElementsByTagName("script")[0]);
-          }("VN080HXER96J");`,
-            }}
-          />
         </>
       )}
     </div>

@@ -55,6 +55,8 @@ completion = openai.chat.completions.create(
 )
 ```
 
+[Link to trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/3e9d8ae6670747cb60b1434b97c3bfdb?timestamp=2025-11-13T14%3A28%3A51.831Z)
+
 ### Chat completion (image)
 
 Simple example using the OpenAI vision's functionality. Images may be passed in the `user` messages. 
@@ -85,6 +87,8 @@ completion = openai.chat.completions.create(
 Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ![Chat completion](https://langfuse.com/images/docs/multi-modal-trace.png)
+
+[Link to trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/b1dc51c45bc87df7d4b292717da072af?timestamp=2025-11-13T14%3A28%3A58.703Z&observation=e6af2e5e6f815256)
 
 ### Chat completion (streaming)
 
@@ -139,6 +143,8 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ![Chat completion](https://langfuse.com/images/docs/openai-chat.png)
 
+[Link to trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/00d7d6cd4278b6003fc79337cd6d4394?timestamp=2025-11-13T14%3A33%3A14.490Z&observation=79d778c36b344d7e)
+
 ### Functions
 
 Simple example using Pydantic to generate the function schema.
@@ -156,34 +162,43 @@ from pydantic import BaseModel
 class StepByStepAIResponse(BaseModel):
     title: str
     steps: List[str]
-schema = StepByStepAIResponse.schema() # returns a dict like JSON schema
+schema = StepByStepAIResponse.model_json_schema() # returns a dict like JSON schema
 ```
 
 
 ```python
+from openai import OpenAI
 import json
-response = openai.chat.completions.create(
-    name="test-function",
-    model="gpt-4o-0613",
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-5",
     messages=[
-       {"role": "user", "content": "Explain how to assemble a PC"}
+        {"role": "user", "content": "Explain how to assemble a PC"}
     ],
-    functions=[
+    tools=[
         {
-          "name": "get_answer_for_user_query",
-          "description": "Get user answer in series of steps",
-          "parameters": StepByStepAIResponse.schema()
+            "type": "function",
+            "function": {
+                "name": "get_answer_for_user_query",
+                "description": "Get user answer in a series of steps",
+                "parameters": StepByStepAIResponse.model_json_schema()
+            }
         }
     ],
-    function_call={"name": "get_answer_for_user_query"}
+    tool_choice={"type": "function", "function": {"name": "get_answer_for_user_query"}}
 )
 
-output = json.loads(response.choices[0].message.function_call.arguments)
+tool_call = response.choices[0].message.tool_calls[0]
+args = json.loads(tool_call.function.arguments)
 ```
 
 Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ![Function](https://langfuse.com/images/docs/openai-function.png)
+
+[Link to trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/cbbd69af7e00a939da55cbba80b2313e?timestamp=2025-11-13T14%3A38%3A08.304Z)
 
 
 ## Langfuse Features (User, Tags, Metadata, Session)
@@ -192,17 +207,21 @@ You can access additional Langfuse features by adding the relevant attributes to
 
 
 ```python
-completion_with_attributes = openai.chat.completions.create(
-  name="test-chat-with-attributes", # trace name
-  model="gpt-4o",
+from langfuse.openai import openai
+ 
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
   messages=[
-      {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
-      {"role": "user", "content": "1 + 1 = "}],
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
   temperature=0,
-  metadata={"someMetadataKey": "someValue"}, # trace metadata
-  tags=["tag1", "tag2"], # trace tags
-  user_id="user1234", # trace user id
-  session_id="session1234", # trace session id
+  metadata={
+    "langfuse_tags": ["tag-1", "tag-2"],
+    "langfuse_user_id": "user-123",
+    "langfuse_session_id": "session-123",
+    "langfuse_metadata": {"key": "value"}
+  }
 )
 ```
 
@@ -243,7 +262,6 @@ client.chat.completions.create(
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 1 = "}],
   temperature=0,
-  metadata={"someMetadataKey": "someValue"},
 )
 ```
 
@@ -287,37 +305,9 @@ def main(country: str, user_id: str, **kwargs) -> str:
 print(main("Bulgaria", "admin"))
 ```
 
-    In Sofia's embrace of time's gentle hand,  
-    Where ancient whispers in the cobblestones stand,  
-    The Vitosha's shadow kisses the town,  
-    As golden sunsets tie the day down.  
-    
-    Streets sing with echoes of footsteps past,  
-    Where stories linger, and memories cast,  
-    Beneath the banyan sky so wide,  
-    Cultures and histories peacefully collide.  
-    
-    The Alexander Nevsky, majestic and bold,  
-    A guardian of faith with domes of gold,  
-    Its silence speaks in volumes profound,  
-    In the heart of a city where old truths are found.  
-    
-    The rose-laden gardens in Boris' park,  
-    Perfume the air as day turns dark,  
-    While laughter and life dance at night,  
-    Under Sofia's tapestry of starlit light.  
-    
-    Markets bustle with the color of trade,  
-    Where lively exchanges and histories fade,  
-    A mosaic of tales in woven rhyme,  
-    Sofia stands timeless through passage of time.  
-    
-    
-
-
-Go to https://cloud.langfuse.com or your own instance to see your trace.
-
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
+
+[Link to trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/db22d0a442216b485abd83cc9df6d9ee?timestamp=2025-11-13T15:05:05.559Z)
 
 ## Fully featured: Interoperability with Langfuse SDK
 
@@ -332,41 +322,40 @@ Some of the functionality enabled by custom traces:
 
 ```python
 from langfuse.openai import openai
-from langfuse import observe, get_client
+from langfuse import observe, get_client, propagate_attributes
 langfuse = get_client()
 
 @observe() # decorator to automatically create trace and nest generations
 def main(country: str, user_id: str, **kwargs) -> str:
-    # nested generation 1: use openai to get capital of country
-    capital = openai.chat.completions.create(
-      name="geography-teacher",
-      model="gpt-4o",
-      messages=[
-          {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
-          {"role": "user", "content": country}],
-      temperature=0,
-    ).choices[0].message.content
 
-    # nested generation 2: use openai to write poem on capital
-    poem = openai.chat.completions.create(
-      name="poet",
-      model="gpt-4o",
-      messages=[
-          {"role": "system", "content": "You are a poet. Create a poem about a city."},
-          {"role": "user", "content": capital}],
-      temperature=1,
-      max_tokens=200,
-    ).choices[0].message.content
-
-    # rename trace and set attributes (e.g., medatata) as needed
-    langfuse.update_current_trace(
-        name="City poem generator",
+    # Propagate attributes to all child observations
+    with propagate_attributes(
         session_id="1234",
         user_id=user_id,
         tags=["tag1", "tag2"],
-        public=True,
         metadata = {"env": "development"}
-    )
+    ):
+
+      # nested generation 1: use openai to get capital of country
+      capital = openai.chat.completions.create(
+        name="geography-teacher",
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
+            {"role": "user", "content": country}],
+        temperature=0,
+      ).choices[0].message.content
+
+      # nested generation 2: use openai to write poem on capital
+      poem = openai.chat.completions.create(
+        name="poet",
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a poet. Create a poem about a city."},
+            {"role": "user", "content": capital}],
+        temperature=1,
+        max_tokens=200,
+      ).choices[0].message.content
 
     return poem
 
@@ -377,33 +366,7 @@ trace_id = langfuse.create_trace_id()
 print(main("Bulgaria", "admin", langfuse_observation_id=trace_id))
 ```
 
-    In the cradle of Balkan hills, she lies,  
-    A gem under cerulean skies,  
-    Sofia, where the ancient whispers blend,  
-    With modern souls, as time extends.
-    
-    Her heart beats with the rhythm of the past,  
-    Where cobblestones and new dreams cast,  
-    A tapestry of age and youth, entwined,  
-    In every corner, stories unsigned.
-    
-    The Vitosha stands like a guardian old,  
-    Whose peaks in winter snow enfold,  
-    The city below, glowing warm and bright,  
-    Under the embrace of evening light.
-    
-    St. Alexander’s domes in sunlight gleam,  
-    Golden crowns of a Byzantine dream,  
-    While beneath, a bustling world unfurls,  
-    In markets vast, where culture swirls.
-    
-    Winding streets where whispers linger,  
-    Liberty echoes from corner to finger,  
-    In the shadow of Soviet grandiosity,  
-    Bulgaria’s spirit claims its clarity.
-    
-    Cafés breathe tales in the aroma of brew,
-
+[Link to trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/0d73de5c936a1fce6c63bd5b20a7c0c2?timestamp=2025-11-13T15:13:27.879Z)
 
 ## Programmatically add scores
 
