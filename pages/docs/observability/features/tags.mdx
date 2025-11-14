@@ -40,11 +40,12 @@ from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="my-operation") as root_span:
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as root_span:
     # Apply tags to all child observations
     with propagate_attributes(tags=["tag-1", "tag-2"]):
         # All observations created here automatically have these tags
-        with root_span.start_as_current_generation(
+        with root_span.start_as_current_observation(
+            as_type="generation",
             name="llm-call",
             model="gpt-4o"
         ) as gen:
@@ -112,7 +113,7 @@ from langfuse.openai import openai
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="openai-call"):
+with langfuse.start_as_current_observation(as_type="span", name="openai-call"):
     # Apply tags to all observations including OpenAI generation
     with propagate_attributes(
         tags=["tag-1", "tag-2"]
@@ -179,7 +180,7 @@ from langfuse.langchain import CallbackHandler
 langfuse = get_client()
 langfuse_handler = CallbackHandler()
 
-with langfuse.start_as_current_span(name="langchain-call"):
+with langfuse.start_as_current_observation(as_type="span", name="langchain-call"):
     # Apply tags to all child observations
     with propagate_attributes(
         tags=["tag-1", "tag-2"]

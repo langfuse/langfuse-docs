@@ -52,9 +52,9 @@ def rag_bot(question: str) -> RagBotResponse:
   
   # Trace the document retrieval
   with langfuse.start_as_current_observation(
+    as_type="retriever",
     name="retrieve_documents", 
     input=question, 
-    as_type="retriever"
   ) as span:
     docs = retriever.invoke(question)
     span.update(output=docs)

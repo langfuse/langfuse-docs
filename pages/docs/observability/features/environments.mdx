@@ -50,7 +50,7 @@ os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
 langfuse = get_client()
 
 # All operations will now be associated with the "production" environment
-with langfuse.start_as_current_span(name="my-operation") as span:
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
     # Your code here
     pass
 
@@ -89,7 +89,7 @@ from opentelemetry.trace import Status, StatusCode
 
 tracer = trace.get_tracer(__name__)
 
-with tracer.start_as_current_span("my-operation") as span:
+with tracer.start_as_current_observation("my-operation") as span:
     # Set environment using Langfuse-specific attribute
     span.set_attribute("langfuse.environment", "staging")
 
