@@ -59,7 +59,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
   // Track user feedback for each message ID (1 = thumbs up, 0 = thumbs down, null = no feedback)
   const [userFeedback, setUserFeedback] = useState<Map<string, number | null>>(
-    new Map(),
+    new Map()
   );
 
   // Generate a unique chat ID that persists for this chat session
@@ -103,7 +103,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const handleFeedback = (
     messageId: string,
     value: number,
-    comment?: string,
+    comment?: string
   ) => {
     // Update the local state
     setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
@@ -122,9 +122,9 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
   return (
     <div className={className} {...props}>
-      <div className="flex flex-col h-[62vh] border-2 rounded-xl p-2">
-        <Conversation className="flex-1 overflow-y-hidden">
-          <ConversationContent>
+      <div className="flex flex-col h-[62vh] border border-border/40 rounded-2xl bg-gradient-to-br from-background via-background/95 to-muted/20 backdrop-blur-md shadow-xl shadow-black/10 dark:shadow-black/30 p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-black/15 dark:hover:shadow-black/40 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:via-transparent before:to-transparent before:pointer-events-none">
+        <Conversation className="flex-1 overflow-y-hidden relative z-10">
+          <ConversationContent className="space-y-2">
             {messages.map((message, messageIndex) => (
               <div key={message.id}>
                 {message.role === "assistant" && (
@@ -137,7 +137,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                               <SourcesTrigger
                                 count={
                                   message.parts.filter(
-                                    (part) => part.type === "source-url",
+                                    (part) => part.type === "source-url"
                                   ).length
                                 }
                               />
@@ -246,10 +246,14 @@ export const Chat = ({ className, ...props }: ChatProps) => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput onSubmit={handleSubmit} className="mt-4">
+        <PromptInput
+          onSubmit={handleSubmit}
+          className="mt-4 border-border/40 shadow-lg transition-all duration-200 hover:shadow-xl hover:border-primary/20 relative z-10"
+        >
           <PromptInputTextarea
             onChange={(e) => setInput(e.target.value)}
             value={input}
+            placeholder="Ask a question about Langfuse..."
           />
           <PromptInputToolbar>
             <PromptInputSubmit disabled={!input || !userId} status={status} />
