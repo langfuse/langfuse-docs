@@ -136,6 +136,8 @@ import {
   Joystick,
   ListOrdered,
 } from "lucide-react";
+import { Cards } from "nextra/components";
+import Image from "next/image";
 
 <Cards num={3}>
   <Card
@@ -156,6 +158,58 @@ import {
     icon={<MonitorPlay />}
   />
   <Card title="Example project" href="/docs/demo" icon={<Joystick />} />
+</Cards>
+
+## Videos/Podcasts
+
+If you prefer watching videos or listening to podcasts to get an impression, here are some suggestions:
+
+<Cards num={3}>
+  <Cards.Card
+    href="https://www.youtube.com/watch?v=3TqaDP63Qdk&t=13465s"
+    title="Typescript AI Conf: AI Observability Panel"
+    arrow
+  >
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/typescript-ai-conf.jpg"
+        alt="Typescript AI Conf: AI Observability Panel"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  </Cards.Card>
+  <Cards.Card
+    href="/blog/2025-10-29-launch-week-4"
+    title="Launch Week 4: Demos of new features"
+    arrow
+  >
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/launch-week-4-collage.jpg"
+        alt="Launch Week 4 Demos"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  </Cards.Card>
+  <Cards.Card
+    href="https://open.spotify.com/episode/1FYsw0LkkSXw6kDwTvl0rB?si=wDmCVebxTHSWBRbSNaSInA"
+    title="Startup Insider Podcast (🇩🇪 only): our story, how we work, what's next"
+    arrow
+  >
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/startup-insider-podcast.jpg"
+        alt="Startup Insider Podcast"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  </Cards.Card>
 </Cards>
 
 ## Public Metrics
