@@ -1,7 +1,7 @@
 ---
 title: Kong API Gateway Integration
 sidebarTitle: Kong Gateway
-logo: /images/integrations/kong_icon.svg
+logo: /images/integrations/kong-icon.svg
 description: Learn how to integrate Langfuse with Kong API Gateway for comprehensive AI observability and distributed tracing of LLM applications
 category: Integrations
 ---
@@ -157,9 +157,9 @@ curl -X POST http://kong-gateway:8000/v1/chat/completions \
   }'
 ```
 
-![Example trace in Langfuse](https://ramtindev.storage.c2.liara.space/Screenshot%201404-08-21%20at%2023.49.09.png)
-
-**Example**: [Langfuse Trace](https://langf.obs.thdev.ir/project/cmh8qafxl0001q8078e86to17/traces/83cd78211d41e1651e4f78fb072f8a49?timestamp=2025-10-29T13:48:40.000Z)
+<Frame>
+![Example trace in Langfuse](/images/cookbook/integration_kong/kong-example-trace-01.png)
+</Frame>
 
 Clicking the link above (or your own project link) lets you view all observations, token usage, latencies, etc., for debugging or optimization.
 
@@ -193,9 +193,9 @@ curl -X POST http://kong-gateway:8000/v1/chat/completions \
 | `X-Organization-Id` | Organization context | `org-acme` |
 | `X-Project-Id` | Project identifier | `project-xyz` |
 
-![Example trace with context](https://ramtindev.storage.c2.liara.space/Screenshot%201404-08-22%20at%2000.24.54.png)
-
-**Example**: [Langfuse Trace](https://langf.obs.thdev.ir/project/cmh8qafxl0001q8078e86to17/traces/83cd78211d41e1651e4f78fb072f8a49?timestamp=2025-10-29T13%3A48%3A40.000Z&view=preview)
+<Frame>
+![Example trace with context](/images/cookbook/integration_kong/kong-example-trace-02.png)
+</Frame>
 
 ## 6. Adding Metadata
 
@@ -423,5 +423,3 @@ The AI tracing plugin works alongside other Kong plugins:
 - **Kong Documentation**: [Kong Gateway Docs](https://docs.konghq.com/)
 - **Report Issues**: [GitHub Issues](https://github.com/Ramtinboreili/kong-langfuse-tracing/issues)
 - **Maintainer**: [Ramtin Boreili](https://github.com/Ramtinboreili) (ramtin.bor7hp@gmail.com)
-
-<LearnMore />
