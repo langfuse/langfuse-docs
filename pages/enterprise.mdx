@@ -8,23 +8,20 @@ Langfuse addresses key challenges when deploying LLM-based applications within a
 
 Langfuse is licensed as an open-core project. It's core product (tracing, observability, evals, prompt management and API/SDK endpoints) is MIT-licensed and freely available (also without limitation for commercial use).
 
----
-
 ## Your platform for enterprise-ready LLM applications
 
 Upgrade to Langfuse Enterprise Edition to address high security requirements and needs of platform teams to support billions of traces per month. With an Enterprise Agreement, you get access to additional support, features to address your specific needs and compliance requirements.
 
 Please refer to our [feature overview](/pricing-self-host) and the Enterprise Edition FAQ [here](/open-source#enterprise-edition-ee-faq).
 
-Langfuse is trusted by the best teams building LLM applications and AI agents and supported by the largest open source community:
-
 import { EnterpriseLogos } from "../components/EnterpriseLogos";
 import { Button } from "../components/ui/button";
 import Link from "next/link";
+import { CredibilitySentence } from "@/components/credibilitySentence";
+
+<CredibilitySentence />
 
 <EnterpriseLogos />
-
----
 
 ## Select Resources
 
@@ -35,23 +32,26 @@ import Link from "next/link";
 - [Enterprise Security FAQ](/security/security-faq)
 - Langfuse can be procured through the [AWS Marketplace](https://aws.amazon.com/marketplace/seller-profile?id=seller-nmyz7ju7oafxu) or per invoice.
 
----
-
 ## Talk to us
 
 Ready to get started with Langfuse Enterprise? We're here to help you find the right solution for your team.
 
-<div className="flex flex-col sm:flex-row gap-4 mt-6">
-  <Button size="lg" variant="outline" asChild>
-    <Link href="/talk-to-us">Talk to Enterprise team</Link>
-  </Button>
-  <Button size="lg" variant="secondary" asChild>
-    <Link href="mailto:enterprise@langfuse.com">
-      Email us: enterprise@langfuse.com
-    </Link>
-  </Button>
-</div>
----
+export function TalkToUsButton() {
+  return (
+    <div className="flex flex-col sm:flex-row gap-4 mt-6">
+      <Button size="lg" asChild>
+        <Link href="/talk-to-us">Talk to Enterprise team</Link>
+      </Button>
+      <Button size="lg" variant="outline" asChild>
+        <Link href="mailto:enterprise@langfuse.com">
+          Email us: enterprise@langfuse.com
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+<TalkToUsButton />
 
 ## Introduction to Langfuse
 
@@ -60,8 +60,6 @@ If you are new to Langfuse, watch these walkthroughs to get a thorough introduct
 import { WatchWalkthroughsCards } from "@/components/walkthroughs/WatchWalkthroughsCards";
 
 <WatchWalkthroughsCards />
-
----
 
 ## Resources
 
@@ -84,8 +82,6 @@ import { WatchWalkthroughsCards } from "@/components/walkthroughs/WatchWalkthrou
   - [Comparison](/pricing-self-host) of Open Source and Enterprise version
   - Langfuse Self-Hosting: EE [Terms and Conditions](/terms)
 
----
-
 ## Resellers and managed Langfuse deployments
 
 We [partner](https://www.shakudo.io/partners) with [Shakudo](https://www.shakudo.io/) who operates Langfuse Enterprise self-hosted on behalf of customers on their VPC.
@@ -94,24 +90,11 @@ In Japan & APAC, [GAO](https://www.gao-ai.com/) is a partner company based in To
 
 We are happy to introduce prospects to our contact at Shakudo and GAO for more information on self-hosted / managed self-hosting.
 
----
-
 ## Any questions?
 
 We're here to help you find the right solution for your use case.
 
-<div className="flex flex-col sm:flex-row gap-4 mt-6">
-  <Button size="lg" variant="outline" asChild>
-    <Link href="/talk-to-us">Talk to Enterprise Team</Link>
-  </Button>
-  <Button size="lg" variant="secondary" asChild>
-    <Link href="mailto:enterprise@langfuse.com">
-      Email us: enterprise@langfuse.com
-    </Link>
-  </Button>
-</div>
-
----
+<TalkToUsButton />
 
 ## FAQ
 
