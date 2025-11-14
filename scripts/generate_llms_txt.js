@@ -68,7 +68,8 @@ async function generateLLMsList() {
             if (urlsBySection[section].length > 0) {
                 markdownContent += `## ${section.charAt(0).toUpperCase() + section.slice(1)}\n\n`;
                 urlsBySection[section].forEach(({ title, url }) => {
-                    markdownContent += `- [${title}](${url})\n`;
+                    const mdUrl = url.endsWith('.md') ? url : `${url}.md`;
+                    markdownContent += `- [${title}](${mdUrl})\n`;
                 });
                 markdownContent += '\n';
             }
@@ -78,7 +79,8 @@ async function generateLLMsList() {
         if (urlsBySection.optional.length > 0) {
             markdownContent += '## Optional\n\n';
             urlsBySection.optional.forEach(({ title, url }) => {
-                markdownContent += `- [${title}](${url})\n`;
+                const mdUrl = url.endsWith('.md') ? url : `${url}.md`;
+                markdownContent += `- [${title}](${mdUrl})\n`;
             });
         }
 
