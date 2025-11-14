@@ -6,7 +6,6 @@ export default {
     title: <MenuSwitcher />,
   },
   index: "Overview",
-  evaluation: "Evaluation",
   cookbook: "Cookbooks",
   videos: "Videos",
 };
