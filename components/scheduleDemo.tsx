@@ -104,7 +104,7 @@ function TalkToUsContent() {
       </p>
       <EnterpriseLogoGrid small />
 
-      <div className="mt-6">
+      <div className="mt-2">
         <p>We are looking forward to talk to you,</p>
         <div className="flex flex-col sm:flex-row gap-6 mt-4">
           <TeamMemberCard
@@ -162,9 +162,9 @@ function DiscoverYourselfContent() {
           ))}
         </ul>
       </div>
-      <div className="mt-6">
+      <div className="mt-2">
         <p>Let us know if you have any questions, we are happy to help,</p>
-        <div className="flex flex-col sm:flex-row gap-6 mt-6">
+        <div className="flex flex-col sm:flex-row gap-6 mt-4">
           <TeamMemberCard
             imageSrc="/images/people/jannikmaierhoefer.jpg"
             name="Jannik Maierhöfer"
