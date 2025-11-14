@@ -1,23 +1,32 @@
 import { getGitHubStars } from "@/lib/github-stars";
 import { DOCKER_PULLS, SDK_INSTALLS_PER_MONTH } from "./home/Usage";
 
-export const CredibilitySentence = () => {
+export const CredibilitySentence = ({
+  bold = true,
+  className = "mt-6",
+}: {
+  bold?: boolean;
+  className?: string;
+}) => {
+  const Metric = bold ? "strong" : "span";
+  const metricClassName = bold ? "font-semibold" : "";
+
   return (
-    <p className="mt-6">
+    <p className={className}>
       Langfuse is the most widely adopted LLM Engineering platform with over{" "}
-      <strong className="font-semibold">
+      <Metric className={metricClassName}>
         {getGitHubStars().toLocaleString()} GitHub stars
-      </strong>
+      </Metric>
       ,{" "}
-      <strong className="font-semibold">
+      <Metric className={metricClassName}>
         {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(1)}M+ SDK installs per
         month
-      </strong>
+      </Metric>
       , and{" "}
-      <strong className="font-semibold">
+      <Metric className={metricClassName}>
         {(DOCKER_PULLS / 1_000_000).toFixed(0)}M+ Docker pulls
-      </strong>
-      . Selected customers who built great LLM applications with Langfuse:
+      </Metric>
+      .
     </p>
   );
 };

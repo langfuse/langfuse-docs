@@ -100,8 +100,9 @@ function TalkToUsContent() {
         <strong className="font-semibold">
           {(DOCKER_PULLS / 1_000_000).toFixed(0)}M+ Docker pulls
         </strong>
-        . Selected customers who built great LLM applications with Langfuse:
+        .
       </p>
+      <p>Selected customers who built great LLM applications with Langfuse:</p>
       <EnterpriseLogoGrid small />
 
       <div className="mt-2">
