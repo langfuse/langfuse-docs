@@ -21,16 +21,12 @@ export function HiringBadge() {
       onBlur={() => setIsHovered(false)}
       style={{ width: "max-content" }}
     >
-      <span className={cn(isHovered && "invisible")}>Hiring in Berlin and SF</span>
-      <span
-        className={cn(
-          "absolute",
-          !isHovered && "invisible"
-        )}
-      >
+      <span className={cn(isHovered && "invisible")}>
+        Hiring in Berlin and SF
+      </span>
+      <span className={cn("absolute", !isHovered && "invisible")}>
         Looking for 🐐s!
       </span>
     </Link>
   );
 }
-

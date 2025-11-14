@@ -10,18 +10,10 @@ export const WALKTHROUGH_TABS = [
     icon: PlayCircle,
     videoId: "zzOlFH0iD0k",
     cta: "Any questions after watching this video? Consider watching the other videos, check out the resources at the bottom of the page, or reach out to us.",
-    learnMoreLinks: [
-      { title: "Technical documentation", href: "/docs" },
-      { title: "Why Langfuse?", href: "/why" },
-      { title: "Interactive demo project", href: "/docs/demo" },
-      { title: "Enterprise resources", href: "/enterprise" },
-      {
-        title: "Create a free Langfuse Cloud account",
-        href: "https://cloud.langfuse.com",
-      },
-      { title: "Self-hosting documentation", href: "/self-hosting" },
-      { title: "Talk to us", href: "/talk-to-us" },
-    ],
+    docs: {
+      title: "Technical documentation",
+      href: "/docs",
+    },
   },
   {
     id: "observability",
@@ -32,25 +24,10 @@ export const WALKTHROUGH_TABS = [
     icon: BarChart3,
     videoId: "pTneXS_m1rk",
     cta: "Any questions after watching this video? Check out the resources at the bottom of the page, or reach out to us.",
-    learnMoreLinks: [
-      {
-        title: "Introduction to LLM/Agent Observability",
-        href: "/docs/observability",
-      },
-      {
-        title: "Get started guide",
-        href: "/docs/observability/get-started",
-      },
-      {
-        title:
-          "Integration overview (SDKs, Frameworks, Model providers, Gateways, OpenTelemetry)",
-        href: "/integrations",
-      },
-      {
-        title: "Observability data model",
-        href: "/docs/observability/data-model",
-      },
-    ],
+    docs: {
+      title: "Observability documentation",
+      href: "/docs/observability",
+    },
   },
   {
     id: "prompt",
@@ -61,16 +38,10 @@ export const WALKTHROUGH_TABS = [
     icon: FileText,
     videoId: "KGyj_NJgKDY",
     cta: "Any questions after watching this video? Check out the resources at the bottom of the page, or reach out to us.",
-    learnMoreLinks: [
-      {
-        title: "Introduction to Prompt Management",
-        href: "/docs/prompt-management",
-      },
-      {
-        title: "Get started guide",
-        href: "/docs/prompt-management/get-started",
-      },
-    ],
+    docs: {
+      title: "Prompt Management documentation",
+      href: "/docs/prompt-management",
+    },
   },
   {
     id: "evaluation",
@@ -81,12 +52,9 @@ export const WALKTHROUGH_TABS = [
     icon: CheckCircle2,
     videoId: "hlgfW0IyREc",
     cta: "Any questions after watching this video? Check out the resources at the bottom of the page, or reach out to us.",
-    learnMoreLinks: [
-      {
-        title:
-          "Introduction to Evaluation (online/offline, evaluation methods)",
-        href: "/docs/evaluation",
-      },
-    ],
+    docs: {
+      title: "Evaluation documentation",
+      href: "/docs/evaluation",
+    },
   },
 ];
