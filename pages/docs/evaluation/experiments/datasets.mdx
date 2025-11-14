@@ -54,18 +54,22 @@ Use the Langfuse UI or SDK to create and fetch a dataset in a folder by adding a
 ```python
 from urllib.parse import quote
 
-# When using the dataset name as a path parameter, use URL encoding
 dataset_name = "evaluation/qa-dataset"
 encoded_name = quote(dataset_name, safe="")  # "evaluation%2Fqa-dataset"
 
-# Fetch a dataset in a folder
+# When creating a dataset, use the full dataset name
+langfuse.create_dataset(
+    name=dataset_name,
+)
+
+# When fetching a dataset in a folder, use the encoded name
 langfuse.get_dataset(
     name=encoded_name
 )
 
 ```
 
-This fetches a dataset named `qa-dataset` in a folder named `evaluation`. The full dataset name remains `evaluation/qa-dataset`.
+This creates and fetches a dataset named `qa-dataset` in a folder named `evaluation`. The full dataset name remains `evaluation/qa-dataset`.
 
 </Tab>
 <Tab>
@@ -75,15 +79,17 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-// When using the dataset name as a path parameter, use URL encoding
 const datasetName = "evaluation/qa-dataset";
 const encodedName = encodeURIComponent(datasetName); // "evaluation%2Fqa-dataset"
 
-// Fetch a dataset in a folder
+// When creating a dataset, use the full dataset name
+await langfuse.dataset.create(datasetName);
+
+// When fetching a dataset in a folder, use the encoded name
 await langfuse.dataset.get(encodedName);
 ```
 
-This fetches a dataset named `qa-dataset` in a folder named `evaluation`. The full dataset name remains `evaluation/qa-dataset`.
+This creates and fetches a dataset named `qa-dataset` in a folder named `evaluation`. The full dataset name remains `evaluation/qa-dataset`.
 
 </Tab>
 <Tab>

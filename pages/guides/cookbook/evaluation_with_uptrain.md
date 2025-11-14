@@ -137,7 +137,7 @@ question = data[0]['question']
 context = data[0]['context']
 response = data[0]['response']
 
-with langfuse.start_as_current_span(name="uptrain trace") as trace:
+with langfuse.start_as_current_observation(as_type="span", name="uptrain trace") as trace:
     # Store trace_id for later use
     trace_id = trace.trace_id
     
@@ -145,7 +145,7 @@ with langfuse.start_as_current_span(name="uptrain trace") as trace:
     # chunks = get_similar_chunks(question)
     
     # pass it as span
-    with trace.start_as_current_span(
+    with trace.start_as_current_observation(
         name="retrieval", 
         input={'question': question}, 
         output={'context': context}
@@ -155,7 +155,7 @@ with langfuse.start_as_current_span(name="uptrain trace") as trace:
     # use llm to generate a answer with the chunks
     # answer = get_response_from_llm(question, chunks)
     
-    with trace.start_as_current_span(
+    with trace.start_as_current_observation(
         name="generation", 
         input={'question': question, 'context': context}, 
         output={'response': response}
@@ -181,15 +181,15 @@ To simulate a production environment, we will log our sample dataset to Langfuse
 
 ```python
 for interaction in data:
-    with langfuse.start_as_current_span(name="uptrain batch") as trace:
-        with trace.start_as_current_span(
+    with langfuse.start_as_current_observation(as_type="span", name="uptrain batch") as trace:
+        with trace.start_as_current_observation(
             name="retrieval",
             input={'question': interaction['question']},
             output={'context': interaction['context']}
         ):
             pass
         
-        with trace.start_as_current_span(
+        with trace.start_as_current_observation(
             name="generation",
             input={'question': interaction['question'], 'context': interaction['context']},
             output={'response': interaction['response']}
