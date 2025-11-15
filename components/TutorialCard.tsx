@@ -23,19 +23,20 @@ export function TutorialCard({
     <Link href={href} className="block h-full">
       <Card
         className={cn(
-          "h-full transition-all hover:shadow-md border bg-card",
+          "h-full transition-all duration-200 border bg-transparent hover:bg-muted/40 hover:border-gray-300 dark:hover:border-gray-600 group",
           className
         )}
       >
-        <CardContent className="p-6 flex flex-col h-full">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="text-muted-foreground mt-0.5">{icon}</div>
+        <CardContent className="p-4 flex flex-col h-full">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="text-muted-foreground flex items-center group-hover:text-primary transition-colors">
+              {icon}
+            </div>
             <h3 className="font-semibold text-lg leading-tight flex-1">
               {title}
             </h3>
-            <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
           </div>
-          <p className="text-sm text-muted-foreground mt-auto leading-relaxed">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {description}
           </p>
         </CardContent>
@@ -51,7 +52,9 @@ interface TutorialCardsProps {
 
 export function TutorialCards({ children, className }: TutorialCardsProps) {
   return (
-    <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-4 mt-6", className)}>
+    <div
+      className={cn("grid grid-cols-1 md:grid-cols-2 gap-4 mt-6", className)}
+    >
       {children}
     </div>
   );
