@@ -142,26 +142,28 @@ const CopyMarkdownButton = () => {
     }
   };
 
-  const handleOpenInChatGPT = () => {
+  const getChatGPTUrl = () => {
     const mdUrl = getMarkdownFullUrl();
     const prompt = `Read from ${mdUrl} so I can ask questions about it.`;
-    const url = `https://chatgpt.com/?hints=search&prompt=${encodeURIComponent(
-      prompt
-    )}`;
+    return `https://chatgpt.com/?hints=search&q=${encodeURIComponent(prompt)}`;
+  };
+
+  const getClaudeUrl = () => {
+    const mdUrl = getMarkdownFullUrl();
+    const prompt = `Read from ${mdUrl} so I can ask questions about it.`;
+    return `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
+  };
+
+  const handleChatGPTClick = () => {
     posthog?.capture("copy_page", {
       type: "chatgpt",
     });
-    window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const handleOpenInClaude = () => {
-    const mdUrl = getMarkdownFullUrl();
-    const prompt = `Read from ${mdUrl} so I can ask questions about it.`;
-    const url = `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
+  const handleClaudeClick = () => {
     posthog?.capture("copy_page", {
       type: "claude",
     });
-    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const isDisabled = copyState === "loading" || copyState === "copied";
@@ -232,41 +234,51 @@ const CopyMarkdownButton = () => {
               </span>
             </div>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={handleOpenInChatGPT}
-            className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
-          >
-            <IconChatGPT className="h-4 w-4 shrink-0" />
-            <div className="flex flex-col flex-1 min-w-0">
-              <span className="font-medium flex items-center gap-1">
-                Open in ChatGPT
-                <ExternalLink
-                  className="h-[1em] w-[1em] shrink-0"
-                  strokeWidth={1.7}
-                />
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Ask questions about this page
-              </span>
-            </div>
+          <DropdownMenuItem asChild>
+            <a
+              href={getChatGPTUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleChatGPTClick}
+              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+            >
+              <IconChatGPT className="h-4 w-4 shrink-0" />
+              <div className="flex flex-col flex-1 min-w-0">
+                <span className="font-medium flex items-center gap-1">
+                  Open in ChatGPT
+                  <ExternalLink
+                    className="h-[1em] w-[1em] shrink-0"
+                    strokeWidth={1.7}
+                  />
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Ask questions about this page
+                </span>
+              </div>
+            </a>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={handleOpenInClaude}
-            className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
-          >
-            <IconClaude className="h-4 w-4 shrink-0" />
-            <div className="flex flex-col flex-1 min-w-0">
-              <span className="font-medium flex items-center gap-1">
-                Open in Claude
-                <ExternalLink
-                  className="h-[1em] w-[1em] shrink-0"
-                  strokeWidth={1.7}
-                />
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Ask questions about this page
-              </span>
-            </div>
+          <DropdownMenuItem asChild>
+            <a
+              href={getClaudeUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleClaudeClick}
+              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+            >
+              <IconClaude className="h-4 w-4 shrink-0" />
+              <div className="flex flex-col flex-1 min-w-0">
+                <span className="font-medium flex items-center gap-1">
+                  Open in Claude
+                  <ExternalLink
+                    className="h-[1em] w-[1em] shrink-0"
+                    strokeWidth={1.7}
+                  />
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Ask questions about this page
+                </span>
+              </div>
+            </a>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
