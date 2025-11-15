@@ -1,17 +1,17 @@
 "use client";
 
-import { Background } from "./Background";
-import { Header } from "./Header";
-import { ScheduleDemo } from "./CalComScheduleDemo";
+import { Background } from "@/components/Background";
+import { Header } from "@/components/Header";
+import { ScheduleDemo } from "@/components/CalComScheduleDemo";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
 import Link from "next/link";
 import { SDK_INSTALLS_PER_MONTH, DOCKER_PULLS } from "@/components/home/Usage";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
-import { WatchWalkthroughsPage } from "@/components/walkthroughs/WatchWalkthroughsPage";
-import { HomeSection } from "./home/components/HomeSection";
-import { EnterpriseLogoGrid } from "./shared/EnterpriseLogoGrid";
+import { WatchWalkthroughs } from "@/components/watchOrBookDemo/WatchWalkthroughs";
+import { HomeSection } from "@/components/home/components/HomeSection";
+import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 
 function SwitchToggle({
   checked,
@@ -250,7 +250,7 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
 
           {/* Right Column: Calendar or Walkthroughs */}
           <div className={isDiscoverOpen ? "flex-1 md:flex-[0.6]" : "flex-1"}>
-            {!isDiscoverOpen ? <CalendarSection /> : <WatchWalkthroughsPage />}
+            {!isDiscoverOpen ? <CalendarSection /> : <WatchWalkthroughs />}
           </div>
         </div>
       </div>

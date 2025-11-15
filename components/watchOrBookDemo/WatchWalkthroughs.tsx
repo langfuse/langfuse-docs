@@ -25,7 +25,7 @@ function VideoPlayer({ videoId, title }: VideoPlayerProps) {
   );
 }
 
-export function WatchWalkthroughsPage() {
+export function WatchWalkthroughs() {
   const router = useRouter();
 
   // Get current tab from query param or default to first tab
