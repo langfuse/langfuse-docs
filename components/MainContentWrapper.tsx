@@ -145,9 +145,7 @@ const CopyMarkdownButton = () => {
   const getChatGPTUrl = () => {
     const mdUrl = getMarkdownFullUrl();
     const prompt = `Read from ${mdUrl} so I can ask questions about it.`;
-    return `https://chatgpt.com/?hints=search&prompt=${encodeURIComponent(
-      prompt
-    )}`;
+    return `https://chatgpt.com/?hints=search&q=${encodeURIComponent(prompt)}`;
   };
 
   const getClaudeUrl = () => {
