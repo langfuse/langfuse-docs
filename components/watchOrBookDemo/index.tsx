@@ -1,31 +1,44 @@
 "use client";
 
-import { useRouter } from "next/router";
-import { Background } from "./Background";
-import { Header } from "./Header";
-import { ScheduleDemo } from "./CalComScheduleDemo";
+import { Background } from "@/components/Background";
+import { Header } from "@/components/Header";
+import { ScheduleDemo } from "@/components/CalComScheduleDemo";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
 import Link from "next/link";
 import { SDK_INSTALLS_PER_MONTH, DOCKER_PULLS } from "@/components/home/Usage";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
-import { WatchWalkthroughsPage } from "@/components/walkthroughs/WatchWalkthroughsPage";
-import { HomeSection } from "./home/components/HomeSection";
-import { EnterpriseLogoGrid } from "./shared/EnterpriseLogoGrid";
+import { WatchWalkthroughs } from "@/components/watchOrBookDemo/WatchWalkthroughs";
+import { HomeSection } from "@/components/home/components/HomeSection";
+import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 
 function SwitchToggle({
   checked,
-  onCheckedChange,
+  page,
 }: {
   checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
+  page: "talk-to-us" | "watch-demo";
 }) {
+  const switchHref = page === "talk-to-us" ? "/watch-demo" : "/talk-to-us";
+
   return (
-    <div className="flex items-center gap-3 mb-1">
-      <span className="text-sm font-medium">Talk to us</span>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} alwaysOn />
-      <span className="text-sm font-medium">Discover yourself</span>
+    <div className="flex items-center justify-center md:justify-start gap-3 -mt-2 mb-6 md:mb-0">
+      <Link
+        href="/talk-to-us"
+        className="text-sm font-medium hover:text-primary transition-colors"
+      >
+        Talk to us
+      </Link>
+      <Link href={switchHref}>
+        <Switch checked={checked} alwaysOn />
+      </Link>
+      <Link
+        href="/watch-demo"
+        className="text-sm font-medium hover:text-primary transition-colors"
+      >
+        Discover yourself
+      </Link>
     </div>
   );
 }
@@ -107,7 +120,7 @@ function TalkToUsContent() {
 
       <div className="mt-2">
         <p>We are looking forward to talk to you,</p>
-        <div className="flex flex-col sm:flex-row gap-6 mt-4">
+        <div className="flex flex-col lg:flex-row gap-6 mt-4">
           <TeamMemberCard
             imageSrc="/images/people/akionuernberger.jpg"
             name="Akio Nuernberger"
@@ -181,7 +194,7 @@ function DiscoverYourselfContent() {
           </Link>
           ,
         </p>
-        <div className="flex flex-col sm:flex-row gap-6 mt-4">
+        <div className="flex flex-col lg:flex-row gap-6 mt-4">
           <TeamMemberCard
             imageSrc="/images/people/jannikmaierhoefer.jpg"
             name="Jannik Maierhöfer"
@@ -208,28 +221,8 @@ function CalendarSection() {
   );
 }
 
-export function ScheduleDemoPage() {
-  const router = useRouter();
-
-  // Get current mode from query param
-  const isDiscoverOpen = (() => {
-    const mode = router.query.mode as string;
-    return mode === "discover";
-  })();
-
-  // Handle switch change and update URL query param
-  const handleSwitchChange = (checked: boolean) => {
-    const query = { ...router.query };
-    if (checked) {
-      query.mode = "discover";
-    } else {
-      delete query.mode;
-    }
-
-    router.replace({ pathname: router.pathname, query }, undefined, {
-      shallow: true,
-    });
-  };
+export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
+  const isDiscoverOpen = page === "watch-demo";
 
   return (
     <HomeSection>
@@ -240,13 +233,14 @@ export function ScheduleDemoPage() {
       />
 
       <div className="w-full max-w-6xl px-4">
-        <div className="flex flex-col md:flex-row gap-10">
+        <div className="flex flex-col md:flex-row gap-14">
           {/* Left Column: Content based on switch */}
-          <div className="flex-1 flex flex-col gap-4">
-            <SwitchToggle
-              checked={isDiscoverOpen}
-              onCheckedChange={handleSwitchChange}
-            />
+          <div
+            className={`flex flex-col gap-4 ${
+              isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
+            }`}
+          >
+            <SwitchToggle checked={isDiscoverOpen} page={page} />
             {!isDiscoverOpen ? (
               <TalkToUsContent />
             ) : (
@@ -255,8 +249,8 @@ export function ScheduleDemoPage() {
           </div>
 
           {/* Right Column: Calendar or Walkthroughs */}
-          <div className="flex-1">
-            {!isDiscoverOpen ? <CalendarSection /> : <WatchWalkthroughsPage />}
+          <div className={isDiscoverOpen ? "flex-1 md:flex-[0.6]" : "flex-1"}>
+            {!isDiscoverOpen ? <CalendarSection /> : <WatchWalkthroughs />}
           </div>
         </div>
       </div>

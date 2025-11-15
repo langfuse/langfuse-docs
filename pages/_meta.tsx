@@ -142,12 +142,11 @@ export default {
   },
   "watch-demo": {
     type: "page",
-    title: "Demo",
-    theme: {
-      layout: "full",
-      timestamp: false,
-    },
+    title: "Watch Demo",
     display: "hidden",
+    theme: {
+      layout: "raw",
+    },
   },
   "talk-to-us": {
     type: "page",

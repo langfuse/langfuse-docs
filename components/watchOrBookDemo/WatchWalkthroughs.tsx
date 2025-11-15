@@ -25,7 +25,7 @@ function VideoPlayer({ videoId, title }: VideoPlayerProps) {
   );
 }
 
-export function WatchWalkthroughsPage() {
+export function WatchWalkthroughs() {
   const router = useRouter();
 
   // Get current tab from query param or default to first tab
@@ -55,7 +55,7 @@ export function WatchWalkthroughsPage() {
         onValueChange={handleTabChange}
         className="w-full"
       >
-        <TabsList className="h-auto p-2 gap-2 md:gap-4 flex-wrap justify-center mx-auto flex-row">
+        <TabsList className="h-auto p-2 gap-2 flex-wrap justify-center mx-auto flex-row">
           {WALKTHROUGH_TABS.map((tab) => (
             <TabsTrigger
               key={tab.id}
