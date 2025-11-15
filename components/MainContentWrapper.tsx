@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
 import { useConfig } from "nextra-theme-docs";
+import { usePostHog } from "posthog-js/react";
 import { Button } from "./ui/button";
 import {
   Copy as CopyIcon,
@@ -8,6 +9,9 @@ import {
   LifeBuoy,
   ThumbsDown,
   ThumbsUp,
+  ChevronDown,
+  ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Background } from "./Background";
@@ -18,6 +22,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import IconChatGPT from "./icons/chatgpt";
+import IconClaude from "./icons/claude";
+import IconMCP from "./icons/mcp";
 
 const pathsWithoutFooterWidgets = [
   "/imprint",
@@ -39,6 +53,7 @@ const isCustomerStory = (pathname: string) =>
 
 const CopyMarkdownButton = () => {
   const router = useRouter();
+  const posthog = usePostHog();
   const [copyState, setCopyState] = useState<
     "idle" | "loading" | "copied" | "error"
   >("idle");
@@ -54,6 +69,20 @@ const CopyMarkdownButton = () => {
     };
   }, []);
 
+  const getMarkdownUrl = () => {
+    let basePath = router.pathname;
+    if (basePath.startsWith("/")) basePath = basePath.substring(1);
+    if (basePath.endsWith("/")) basePath = basePath.slice(0, -1);
+    if (!basePath) basePath = "index"; // Handle root index page
+    return `/${basePath}.md`;
+  };
+
+  const getMarkdownFullUrl = () => {
+    if (typeof window === "undefined") return "";
+    const mdPath = getMarkdownUrl();
+    return `${window.location.origin}${mdPath}`;
+  };
+
   const handleCopy = async () => {
     // Clear any existing timeout before starting a new operation
     if (timeoutIdRef.current) {
@@ -64,12 +93,11 @@ const CopyMarkdownButton = () => {
     setCopyState("loading");
     setErrorMessage("");
 
-    let basePath = router.pathname;
-    if (basePath.startsWith("/")) basePath = basePath.substring(1);
-    if (basePath.endsWith("/")) basePath = basePath.slice(0, -1);
-    if (!basePath) basePath = "index"; // Handle root index page
+    posthog?.capture("copy_page", {
+      type: "copy",
+    });
 
-    const mdUrl = `/${basePath}.md`;
+    const mdUrl = getMarkdownUrl();
 
     try {
       const response = await fetch(mdUrl, {
@@ -114,10 +142,36 @@ const CopyMarkdownButton = () => {
     }
   };
 
-  let buttonText = "Copy as Markdown";
+  const handleOpenInChatGPT = () => {
+    const mdUrl = getMarkdownFullUrl();
+    const prompt = `Read from ${mdUrl} so I can ask questions about it.`;
+    const url = `https://chatgpt.com/?hints=search&prompt=${encodeURIComponent(
+      prompt
+    )}`;
+    posthog?.capture("copy_page", {
+      type: "chatgpt",
+    });
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleOpenInClaude = () => {
+    const mdUrl = getMarkdownFullUrl();
+    const prompt = `Read from ${mdUrl} so I can ask questions about it.`;
+    const url = `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
+    posthog?.capture("copy_page", {
+      type: "claude",
+    });
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const isDisabled = copyState === "loading" || copyState === "copied";
+  const isError = copyState === "error";
+
+  let buttonText = "Copy page";
   let ButtonIcon = CopyIcon;
   if (copyState === "loading") {
     buttonText = "Copying...";
+    ButtonIcon = Loader2;
   } else if (copyState === "copied") {
     buttonText = "Copied!";
     ButtonIcon = CheckIcon;
@@ -125,26 +179,124 @@ const CopyMarkdownButton = () => {
     buttonText = errorMessage;
   }
 
-  const isDisabled = copyState === "loading" || copyState === "copied";
-
   return (
-    <button
-      type="button"
-      disabled={isDisabled || copyState === "error"}
-      onClick={!isDisabled ? handleCopy : undefined}
-      className={cn(
-        "inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground",
-        isDisabled || copyState === "error"
-          ? "opacity-50 cursor-not-allowed"
-          : "cursor-pointer hover:bg-secondary/80",
-        copyState === "error"
-          ? "text-destructive-foreground bg-destructive hover:bg-destructive/80"
-          : ""
-      )}
-    >
-      {buttonText}
-      <ButtonIcon className="h-3 w-3 ml-1.5" />
-    </button>
+    <div className="inline-flex items-center rounded-md bg-secondary overflow-hidden">
+      <button
+        type="button"
+        disabled={isDisabled || isError}
+        onClick={handleCopy}
+        className={cn(
+          "inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-secondary-foreground",
+          isDisabled || isError
+            ? "opacity-50 cursor-not-allowed"
+            : "cursor-pointer hover:bg-secondary/80",
+          isError
+            ? "text-destructive-foreground bg-destructive hover:bg-destructive/80"
+            : ""
+        )}
+      >
+        <ButtonIcon
+          className={cn("h-3 w-3", copyState === "loading" && "animate-spin")}
+        />
+        <span>{buttonText}</span>
+      </button>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            disabled={isDisabled || isError}
+            className={cn(
+              "inline-flex items-center px-1 py-1 text-xs font-medium text-secondary-foreground border-l border-secondary-foreground/20",
+              isDisabled || isError
+                ? "opacity-50 cursor-not-allowed"
+                : "cursor-pointer hover:bg-secondary/80",
+              isError
+                ? "text-destructive-foreground bg-destructive hover:bg-destructive/80 border-destructive-foreground/20"
+                : ""
+            )}
+          >
+            <ChevronDown className="h-3 w-3" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[200px]">
+          <DropdownMenuItem
+            onClick={handleCopy}
+            disabled={isDisabled}
+            className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+          >
+            <CopyIcon className="h-4 w-4 shrink-0" />
+            <div className="flex flex-col">
+              <span className="font-medium">Copy page</span>
+              <span className="text-xs text-muted-foreground">
+                Copy page as Markdown for LLMs
+              </span>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleOpenInChatGPT}
+            className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+          >
+            <IconChatGPT className="h-4 w-4 shrink-0" />
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="font-medium flex items-center gap-1">
+                Open in ChatGPT
+                <ExternalLink
+                  className="h-[1em] w-[1em] shrink-0"
+                  strokeWidth={1.7}
+                />
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Ask questions about this page
+              </span>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleOpenInClaude}
+            className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+          >
+            <IconClaude className="h-4 w-4 shrink-0" />
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="font-medium flex items-center gap-1">
+                Open in Claude
+                <ExternalLink
+                  className="h-[1em] w-[1em] shrink-0"
+                  strokeWidth={1.7}
+                />
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Ask questions about this page
+              </span>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href="/docs/docs-mcp"
+              onClick={() => {
+                posthog?.capture("copy_page", {
+                  type: "mcp",
+                });
+              }}
+              target="_blank"
+              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+            >
+              <IconMCP className="h-4 w-4 shrink-0" />
+              <div className="flex flex-col flex-1 min-w-0">
+                <span className="font-medium flex items-center gap-1">
+                  Install Docs MCP server
+                  <ExternalLink
+                    className="h-[1em] w-[1em] shrink-0"
+                    strokeWidth={1.7}
+                  />
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Add to Cursor, Claude Code, VS Code, etc
+                </span>
+              </div>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 
