@@ -120,7 +120,7 @@ function TalkToUsContent() {
 
       <div className="mt-2">
         <p>We are looking forward to talk to you,</p>
-        <div className="flex flex-col sm:flex-row gap-6 mt-4">
+        <div className="flex flex-col lg:flex-row gap-6 mt-4">
           <TeamMemberCard
             imageSrc="/images/people/akionuernberger.jpg"
             name="Akio Nuernberger"
@@ -194,7 +194,7 @@ function DiscoverYourselfContent() {
           </Link>
           ,
         </p>
-        <div className="flex flex-col sm:flex-row gap-6 mt-4">
+        <div className="flex flex-col lg:flex-row gap-6 mt-4">
           <TeamMemberCard
             imageSrc="/images/people/jannikmaierhoefer.jpg"
             name="Jannik Maierhöfer"
