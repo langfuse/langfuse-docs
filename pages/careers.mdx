@@ -13,6 +13,7 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
+import { CredibilitySentence } from "@/components/credibilitySentence";
 
 <div className="md:container">
   <div className="flex flex-col items-center content-center text-center my-10 mb-20">
@@ -48,7 +49,7 @@ While LLMs improve a lot, we don't see enough applications in production. Buildi
 
 We are seeing strong traction (see metrics below), thus it is the right time to grow the team to build out our backend systems, product, and how we communicate with developers.
 
-We are backed by Lightspeed, General Catalyst, Y Combinator and angels. We are growing fast (see metrics below) and work with some of the best AI teams such as Samsara, Twilio, KhanAcademy and Rocket Money.
+We are backed by Lightspeed, General Catalyst, Y Combinator, and angels. We are growing fast (see metrics below) and work with some of the best AI teams such as Samsara, Twilio, Khan Academy, and Rocket Money.
 
 If complex technical problems & great developer experiences excite you, we'd love to hear from you.
 
@@ -101,14 +102,14 @@ import TeamMembers from "@/components-mdx/team-members.mdx";
       target="_blank"
       rel="noopener noreferrer"
     >
-      See open Roles
+      See open roles
     </a>
   </Button>
 </CTACard>
 
 ## Read our Handbook
 
-We publicly document our core principles and processes at Langfuse to align as a team, maintain transparency with our community, and to help you determine if you'd enjoy working here.
+We publicly document our core principles and processes at Langfuse to align as a team, maintain transparency with our community, and help you determine if you'd enjoy working here.
 
 ### Main Chapters
 
@@ -135,6 +136,8 @@ import {
   Joystick,
   ListOrdered,
 } from "lucide-react";
+import { Cards } from "nextra/components";
+import Image from "next/image";
 
 <Cards num={3}>
   <Card
@@ -157,9 +160,68 @@ import {
   <Card title="Example project" href="/docs/demo" icon={<Joystick />} />
 </Cards>
 
+## Videos/Podcasts
+
+If you prefer watching videos or listening to podcasts to get an impression, here are some suggestions:
+
+<Cards num={3}>
+  <Cards.Card
+    href="https://www.youtube.com/watch?v=3TqaDP63Qdk&t=13465s"
+    title="Typescript AI Conf: AI Observability Panel"
+    arrow
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/typescript-ai-conf.jpg"
+        alt="Typescript AI Conf: AI Observability Panel"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  </Cards.Card>
+  <Cards.Card
+    href="/blog/2025-10-29-launch-week-4"
+    title="Launch Week 4: Demos of new features"
+    arrow
+    target="_blank"
+  >
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/launch-week-4-collage.jpg"
+        alt="Launch Week 4 Demos"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  </Cards.Card>
+  <Cards.Card
+    href="https://open.spotify.com/episode/1FYsw0LkkSXw6kDwTvl0rB?si=wDmCVebxTHSWBRbSNaSInA"
+    title="Startup Insider Podcast (🇩🇪 only): our story, how we work, what's next"
+    arrow
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/startup-insider-podcast.jpg"
+        alt="Startup Insider Podcast"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  </Cards.Card>
+</Cards>
+
 ## Public Metrics
 
 import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.mdx";
+
+<CredibilitySentence bold={false} />
 
 <PublicMetricsDashboard />
 
@@ -176,7 +238,7 @@ import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.md
       target="_blank"
       rel="noopener noreferrer"
     >
-      See open Roles
+      See open roles
     </a>
   </Button>
 </CTACard>

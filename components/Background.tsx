@@ -1,7 +1,7 @@
 import { DotPattern } from "./magicui/dot-pattern";
 
 export const Background = () => (
-  <div className="absolute top-0 bottom-0 left-0 right-0 -z-50">
+  <div className="absolute top-0 bottom-0 left-0 right-0 -z-50 pointer-events-none">
     <DotPattern
       width={15}
       height={15}
