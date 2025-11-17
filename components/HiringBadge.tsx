@@ -84,7 +84,6 @@ export function HiringBadge() {
           left: 0, 
           width: "100vw", 
           height: "100vh",
-          pointerEvents: "none"
         }}>
           {goats.map((goat) => {
             if (!containerRef.current) return null;
