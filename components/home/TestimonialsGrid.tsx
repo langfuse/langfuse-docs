@@ -9,9 +9,14 @@ const PLATFORMS = {
     name: "X"
   },
   producthunt: {
-    logo: "/images/producthunt.png", 
+    logo: "/images/producthunt.png",
     color: "text-orange-600",
     name: "Product Hunt"
+  },
+  linkedin: {
+    logo: "/images/linkedin.png",
+    color: "text-muted-foreground",
+    name: "LinkedIn"
   }
 } as const;
 
