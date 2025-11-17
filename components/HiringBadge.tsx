@@ -60,7 +60,7 @@ export function HiringBadge() {
         href="/careers"
         className={cn(
           buttonVariants({ variant: "outline", size: "pill" }),
-          "inline-flex h-6 px-2.5 text-[11px] font-medium bg-white text-foreground hover:bg-accent/50 items-center gap-1.5 relative z-10"
+          "inline-flex h-6 px-2.5 text-[11px] font-medium bg-white dark:bg-muted text-foreground hover:bg-accent/50 dark:hover:bg-muted/80 items-center gap-1.5 relative z-10"
         )}
         onFocus={() => setIsHovered(true)}
         onBlur={() => setIsHovered(false)}
