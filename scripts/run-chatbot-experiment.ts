@@ -340,7 +340,7 @@ async function runAllExperiments() {
     
     console.log(`\nAll experiments complete: ${runName}`);
   } catch (error) {
-    console.error("❌ Experiment failed:", error);
+    console.error("Experiment failed:", error);
     throw error;
   } finally {
     // Flush Langfuse client
