@@ -225,14 +225,12 @@ const config: DocsThemeConfig = {
         {/* mobile */}
         <span className="sm:hidden">
           ⚠️ All Langfuse Cloud services are affected by a global Cloudflare
-          outage, we will share more details on our status page soon (vendor is
-          also affected by incident) ⚠️
+          outage, see status page for more details ⚠️
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
           ⚠️ All Langfuse Cloud services are affected by a global Cloudflare
-          outage, we will share more details on our status page soon (vendor is
-          also affected by incident) ⚠️
+          outage, see status page for more details ⚠️
         </span>
       </Link>
     ),
