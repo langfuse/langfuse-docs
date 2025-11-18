@@ -9,8 +9,6 @@ import {
   updateActiveObservation,
   updateActiveTrace,
 } from "@langfuse/tracing";
-import { after } from "next/server";
-import { flush } from "@/src/instrumentation";
 import { trace } from "@opentelemetry/api";
 import { langfuseClient } from "./apiHandler";
 
@@ -45,10 +43,8 @@ export const getProcessedPrompt = (prompt: Prompt, messages: UIMessage[]) => {
 
 export const chatbotStep = async (prompt: Prompt, messages: UIMessage[], mcpClient: MCPClient) => {
   const { compiledPrompt, promptConfig } = getProcessedPrompt(prompt, messages);
-
   // Discover all tools exposed by the MCP server
   const tools = await mcpClient.tools();
-
   const result = streamText({
     model: openai(String(promptConfig.model)),
     providerOptions: {
@@ -81,9 +77,6 @@ export const chatbotStep = async (prompt: Prompt, messages: UIMessage[], mcpClie
       trace.getActiveSpan().end();
     }
   });
-  
-  // Schedule flush after request is finished
-  after(async () => await flush());
 
   return result;
 }

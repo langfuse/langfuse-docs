@@ -13,6 +13,8 @@ import {
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 import { LangfuseClient } from "@langfuse/client";
 import { chatbotStep } from "./chatbotCore";
+import { after } from "next/server";
+import { flush } from "@/src/instrumentation";
 
 export const langfuseClient = new LangfuseClient({
   baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
@@ -66,6 +68,9 @@ export const handler = async (req: Request) => {
   );
 
   const result = await chatbotStep(prompt, messages, mcpClient);
+
+  // Schedule flush after request is finished
+  after(async () => await flush());
 
   return result.toUIMessageStreamResponse({
     generateMessageId: () => getActiveTraceId(),
