@@ -218,15 +218,21 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "langfuse-launch-week-4-summary",
+    key: "cloudflare-incident",
     dismissible: true,
     content: (
-      <Link href="/blog/2025-10-29-launch-week-4">
+      <Link href="https://status.langfuse.com/">
         {/* mobile */}
-        <span className="sm:hidden">Launch Week: All launches →</span>
+        <span className="sm:hidden">
+          ⚠️ All Langfuse Cloud services are affected by a global Cloudflare
+          outage, we will share more details on our status page soon (vendor is
+          also affected by incident) ⚠️
+        </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Launch Week: See all launches →
+          ⚠️ All Langfuse Cloud services are affected by a global Cloudflare
+          outage, we will share more details on our status page soon (vendor is
+          also affected by incident) ⚠️
         </span>
       </Link>
     ),
