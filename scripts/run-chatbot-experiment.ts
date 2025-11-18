@@ -168,7 +168,7 @@ Answer (true/false):`;
 async function isUnderstandable({ input, output, expectedOutput }: { input: any; output: ChatbotTaskResult; expectedOutput?: any }) {
   const inputStr = typeof input === "string" ? input : JSON.stringify(input);
   
-  const prompt = `Is the explanation easy to understand for the person asking the question? The answer should be on the same level of complexity as the question. For example, if the question is using complex jargon, the answer can contain that jargon as well. If the question is rather broad/simple, the answer should use simple to understand words or, if jargon is used, is should be explained in a way that a user new to this space can understand. The term Langfuse is the brand name and is not considered jargon. Answer with only "true" or "false".
+  const prompt = `Is the explanation easy to understand for the person asking the question? The answer should be on the same level of complexity as the question. For example, if the question is using complex jargon, the answer can contain that jargon as well. If the question is rather broad/simple, the answer should use simple to understand words or, if jargon is used, it should be explained in a way that a user new to this space can understand. The term Langfuse is the brand name and is not considered jargon. Answer with only "true" or "false".`;
   Question: ${inputStr}
   Response: ${output.text}
   Answer (true/false):`;
