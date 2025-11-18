@@ -224,13 +224,13 @@ const config: DocsThemeConfig = {
       <Link href="https://status.langfuse.com/">
         {/* mobile */}
         <span className="sm:hidden">
-          ⚠️ All Langfuse Cloud services are affected by a global Cloudflare
-          outage, see status page for more details ⚠️
+          Incident: Langfuse Cloud is affected by the global Cloudflare outage.
+          Currently, services are recovering, see status page for more details.
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          ⚠️ All Langfuse Cloud services are affected by a global Cloudflare
-          outage, see status page for more details ⚠️
+          Incident: Langfuse Cloud is affected by the global Cloudflare outage.
+          Currently, services are recovering, see status page for more details.
         </span>
       </Link>
     ),
