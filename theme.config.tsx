@@ -219,7 +219,7 @@ const config: DocsThemeConfig = {
   },
   banner: {
     key: "cloudflare-incident",
-    dismissible: true,
+    dismissible: false,
     content: (
       <Link href="https://status.langfuse.com/">
         {/* mobile */}
