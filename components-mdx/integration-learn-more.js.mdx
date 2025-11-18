@@ -1,0 +1,84 @@
+import { Tabs, Cards } from "nextra/components";
+import {
+  FileText,
+  ClipboardCheck,
+  Scale,
+  Database,
+  LayoutDashboard,
+  TestTube,
+} from "lucide-react";
+
+## Interoperability with the JS/TS SDK
+
+You can use this integration together with the Langfuse [JS/TS SDK](/docs/observability/sdk/typescript/overview) to add additional attributes to the trace.
+
+<Tabs items={["Observe Wrapper", "Context Manager"]}>
+<Tabs.Tab>
+
+The [`observe` wrapper](/docs/observability/sdk/typescript/instrumentation#observe-wrapper) is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a span or generation around the function call. You can use the updateActiveObservation function to add attributes to the observation from within the wrapped function.
+
+```typescript
+import { observe, propagateAttributes } from "@langfuse/tracing";
+ 
+// An existing function
+const processUserRequest = observe(
+  async (userQuery: string) => {
+    // Propagate userId to all child observations
+    return await propagateAttributes({ 
+        userId: "user-123"
+         }, async () => {
+        // All nested observations automatically inherit userId
+        const result = await processQuery(userQuery);
+        return result;
+    });
+  },
+  { name: "process-user-request" }
+);
+ 
+const result = await processUserRequest("some query");
+```
+
+Learn more about using the Decorator in the [Python SDK](/docs/observability/sdk/python/instrumentation#custom-instrumentation) docs.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+The [Context Manager](/docs/observability/sdk/python/instrumentation#custom-instrumentation) allows you to wrap your instrumented code using context managers (with `with` statements), which allows you to add additional attributes to the trace.
+
+To simplify nesting and context management, you can use startActiveObservation. These functions take a callback and automatically manage the observation’s lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
+
+This is the recommended approach for most use cases as it prevents context leakage and ensures observations are properly ended.
+
+```typescript
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+ 
+await startActiveObservation("context-manager", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" },
+  });
+ 
+  // Propagate userId to all child observations
+  await propagateAttributes(
+    {
+      userId: "user-123",
+    },
+    async () => {
+      // All observations created here automatically have userId
+      // ... your logic ...
+    }
+  );
+});
+```
+
+Learn more about using the Context Manager in the [JS/TS SDK](https://langfuse.com/docs/observability/sdk/typescript/instrumentation#context-management-with-callbacks) docs.
+
+</Tabs.Tab>
+</Tabs>
+
+## Next Steps
+
+Once you have instrumented your code, you can manage, evaluate and debug your application:
+
+import NextSteps from "@/components-mdx/get-started/next-steps.mdx";
+
+<NextSteps />
