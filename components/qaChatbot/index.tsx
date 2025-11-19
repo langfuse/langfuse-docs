@@ -222,8 +222,15 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           status !== "submitted" &&
                           status !== "streaming" &&
                           !hasStreamingParts;
+                        // Add spacing if next part is a different type (for consistent spacing between different types)
+                        const nextPart = message.parts[i + 1];
+                        const hasNextPartDifferentType =
+                          nextPart && nextPart.type !== "text";
                         return (
-                          <div key={`${message.id}-${i}`}>
+                          <div
+                            key={`${message.id}-${i}`}
+                            className={hasNextPartDifferentType ? "mb-4" : ""}
+                          >
                             <Response>{part.text}</Response>
                             {message.role === "assistant" &&
                               isLastMessage &&
@@ -269,10 +276,16 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         );
                       }
                       if (part.type === "reasoning") {
+                        // Add spacing if next part is a different type (for consistent spacing between different types)
+                        const nextPart = message.parts[i + 1];
+                        const hasNextPartDifferentType =
+                          nextPart && nextPart.type !== "reasoning";
                         return (
                           <Reasoning
                             key={`${message.id}-${i}`}
-                            className="w-full"
+                            className={
+                              hasNextPartDifferentType ? "w-full" : "w-full mb-0"
+                            }
                             isStreaming={part.state === "streaming"}
                           >
                             <ReasoningTrigger />
@@ -281,8 +294,15 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         );
                       }
                       if (part.type === "dynamic-tool") {
+                        // Add spacing if next part is a different type (for consistent spacing between different types)
+                        const nextPart = message.parts[i + 1];
+                        const hasNextPartDifferentType =
+                          nextPart && nextPart.type !== "dynamic-tool";
                         return (
-                          <Tool key={`${message.id}-${i}`}>
+                          <Tool
+                            key={`${message.id}-${i}`}
+                            className={hasNextPartDifferentType ? undefined : "mb-0"}
+                          >
                             <ToolHeader
                               type={`tool-${part.toolName}` as const}
                               state={part.state}
