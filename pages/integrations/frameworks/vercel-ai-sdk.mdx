@@ -17,31 +17,36 @@ This notebook demonstrates how to **integrate Langfuse** with the **Vercel AI SD
 
 
 <Steps>
+
 ## 1. Install Dependencies
 
 Install the Vercel AI SDK, OpenTelemetry, and Langfuse:
+
+```bash
 npm install ai
 npm install @ai-sdk/openai
 npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
+```
+
 ## 2. Configure Environment & API Keys
 
 Set up your Langfuse and OpenAI credentials. You can get Langfuse keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
+```bash filename=".env"
+LANGFUSE_SECRET_KEY = "sk-lf-..."
+LANGFUSE_PUBLIC_KEY = "pk-lf-..."
+LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# LANGFUSE_BASE_URL = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-```typescript
-Deno.env.set("LANGFUSE_PUBLIC_KEY", "pk-lf-");
-Deno.env.set("LANGFUSE_SECRET_KEY", "sk-lf-");
-Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); 
-Deno.env.set("OPENAI_API_KEY", "sk-proj-");
-
+OPENAI_API_KEY = "sk-proj-"
 ```
 
 ## 3. Initialize Langfuse
 
 
 ```typescript
-import { NodeSDK } from "npm:@opentelemetry/sdk-node";
-import { LangfuseSpanProcessor } from "npm:@langfuse/otel";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
  
 const sdk = new NodeSDK({
   spanProcessors: [new LangfuseSpanProcessor()],
@@ -56,8 +61,8 @@ The Vercel AI SDK offers native instrumentation with OpenTelemetry. You can enab
 
 
 ```typescript
-import { generateText } from "npm:ai";
-import { openai } from "npm:@ai-sdk/openai";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
 
 const { text } = await generateText({
   model: openai("gpt-5"),
@@ -66,13 +71,13 @@ const { text } = await generateText({
 });
 ```
 
-Example using tools.
+Another example using tools.
 
 
 ```typescript
-import { generateText, tool } from 'npm:ai';
-import { openai } from 'npm:@ai-sdk/openai';
-import { z } from 'npm:zod';
+import { generateText, tool } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { z } from 'zod';
  
 const { text } = await generateText({
   model: openai("gpt-5"),
@@ -103,7 +108,7 @@ After running the workflow, you can view the complete trace in Langfuse:
 
 </Steps>
 
-
+Learn more about the AI SDK Telemetry in the [Vercel AI SDK documentation on Telemetry](https://ai-sdk.dev/docs/ai-sdk-core/telemetry).
 
 ## Next.js Example
 
@@ -229,41 +234,9 @@ export const POST = observe(handler, {
 });
 ```
 
-Learn more about the AI SDK Telemetry in the [Vercel AI SDK documentation on Telemetry](https://ai-sdk.dev/docs/ai-sdk-core/telemetry).
+## Using Prompt Management
 
-### Using Prompt Management
-
-If you want to use [Langfuse Prompt Management](/docs/prompt-management) to link traces to prompt versions so you can understand how your prompts are performing and run experiments, you can do the following:
-
-
-```typescript
-// route.ts
-
-// ... existing imports ...
-import { LangfuseClient } from "@langfuse/client"; // Add this import
-
-const langfuse = new LangfuseClient();
-
-const handler = async (req: Request) => {
-  // ... existing code ...
-
-  // Add these lines to fetch and link a prompt
-  const prompt = await langfuse.prompt.get("my-prompt");
-
-  const result = streamText({
-    // ... other streamText options ...
-    experimental_telemetry: {
-      isEnabled: true,
-      metadata: { 
-        langfusePrompt: prompt.toJSON() // This links the Generation to your prompt in Langfuse
-      },
-    },
-    // ... rest of the configuration remains the same ...
-  });
-
-  // ... rest of the handler remains the same ...
-};
-```
+You can use [Langfuse Prompt Management](/docs/prompt-management) to manage and fetch prompts form Langfguse and link LLM generations to prompt versions so you can understand how your prompts are performing and run experiments. 
 
 The key changes are:
 1. Import the Langfuse client
@@ -271,12 +244,34 @@ The key changes are:
 3. Add the prompt to the observation metadata
 4. Pass `langfusePrompt: prompt.toJSON()` in the telemetry metadata
 
-### Short-lived environments
 
-In short-lived environments such as Vercel Cloud Functions, AWS Lambdas etc. you may force an export and flushing of spans after function execution and prior to environment freeze or shutdown by awaiting a call to the `forceFlush` method on the LangfuseExporter instance.
+```typescript
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { LangfuseClient } from "@langfuse/client"; // Add this import       
 
-## GitHub Discussions
+const langfuse = new LangfuseClient();
 
-import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+// Get current `production` version
+const prompt = await langfuse.prompt.get("movie-critic");
+ 
+// Insert variables into prompt template
+const compiledPrompt = prompt.compile({
+  someVariable: "example-variable",
+});
 
-<GhDiscussionsPreview labels={["integration-vercel-ai-sdk"]} />
+const { text } = await generateText({
+  model: openai("gpt-5"),
+  prompt: compiledPrompt,
+  experimental_telemetry: { 
+    isEnabled: true,
+    metadata: {
+      langfusePrompt: prompt.toJSON() // This links the Generation to your prompt in Langfuse
+    },
+  },
+});
+```
+
+import LearnMore from "@/components-mdx/integration-learn-more-js.mdx";
+
+<LearnMore />
