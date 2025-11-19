@@ -214,7 +214,14 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         const lastTextPartIndex =
                           textPartIndices[textPartIndices.length - 1];
                         const isLastTextPart = i === lastTextPartIndex;
-                        const isMessageComplete = status !== "submitted";
+                        // Check if message is complete: not submitted/streaming and no parts are streaming
+                        const hasStreamingParts = message.parts.some(
+                          (p) => "state" in p && p.state === "streaming"
+                        );
+                        const isMessageComplete =
+                          status !== "submitted" &&
+                          status !== "streaming" &&
+                          !hasStreamingParts;
                         return (
                           <div key={`${message.id}-${i}`}>
                             <Response>{part.text}</Response>
