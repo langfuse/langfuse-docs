@@ -73,11 +73,10 @@ export const Reasoning = memo(
       }
     }, [isStreaming, startTime, setDuration]);
 
-    // Auto-open when streaming starts, auto-close when streaming ends (once only)
+    // Keep collapsed by default - don't auto-open when streaming
+    // Auto-close when streaming ends (once only) if it was opened
     useEffect(() => {
-      if (isStreaming && !isOpen) {
-        setIsOpen(true);
-      } else if (!isStreaming && isOpen && !defaultOpen && !hasAutoClosedRef) {
+      if (!isStreaming && isOpen && !defaultOpen && !hasAutoClosedRef) {
         // Add a small delay before closing to allow user to see the content
         const timer = setTimeout(() => {
           setIsOpen(false);
@@ -122,6 +121,30 @@ export const ReasoningTrigger = memo(
     ...props
   }: ReasoningTriggerProps) => {
     const { isStreaming, isOpen, duration } = useReasoning();
+    const [dots, setDots] = useState("");
+
+    useEffect(() => {
+      if (!isStreaming) {
+        setDots("");
+        return;
+      }
+
+      let interval: NodeJS.Timeout;
+      let dotCount = 0;
+
+      const animateDots = () => {
+        dotCount = (dotCount % 3) + 1;
+        setDots(".".repeat(dotCount));
+      };
+
+      // Start immediately
+      animateDots();
+      interval = setInterval(animateDots, 500);
+
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    }, [isStreaming]);
 
     return (
       <CollapsibleTrigger
@@ -135,7 +158,10 @@ export const ReasoningTrigger = memo(
           <>
             <BrainIcon className="size-4" />
             {isStreaming || duration === 0 ? (
-              <p>Thinking...</p>
+              <p className="flex items-center">
+                <span>Thinking</span>
+                <span className="w-4 inline-block">{dots}</span>
+              </p>
             ) : (
               <p>Thought for {duration} seconds</p>
             )}
@@ -168,7 +194,7 @@ export const ReasoningContent = memo(
       )}
       {...props}
     >
-      <Response className="grid gap-2">{children}</Response>
+      <Response className="grid gap-2 text-muted-foreground italic">{children}</Response>
     </CollapsibleContent>
   )
 );
