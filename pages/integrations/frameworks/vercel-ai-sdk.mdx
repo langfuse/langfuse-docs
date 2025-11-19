@@ -43,6 +43,8 @@ OPENAI_API_KEY = "sk-proj-"
 
 ## 3. Initialize Langfuse
 
+The Langfuse TypeScript SDK’s tracing is built on top of OpenTelemetry, so you need to set up the OpenTelemetry SDK. The `LangfuseSpanProcessor` is the key component that sends traces to Langfuse.
+
 
 ```typescript
 import { NodeSDK } from "@opentelemetry/sdk-node";
