@@ -42,6 +42,7 @@ import {
 } from "@/components/ai-elements/tool";
 import { LangfuseWeb } from "langfuse";
 import { FeedbackDialog } from "./FeedbackPopover";
+import { cn } from "@/lib/utils";
 
 const eulangfuseWebClient = new LangfuseWeb({
   baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
@@ -121,8 +122,8 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   };
 
   return (
-    <div className={className} {...props}>
-      <div className="flex flex-col h-[62vh] border border-border/40 rounded-2xl bg-gradient-to-br from-background via-background/95 to-muted/20 backdrop-blur-md shadow-xl shadow-black/10 dark:shadow-black/30 p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-black/15 dark:hover:shadow-black/40 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:via-transparent before:to-transparent before:pointer-events-none">
+    <div className={cn("h-[62vh]", className)} {...props}>
+      <div className="flex flex-col h-full border border-border/40 rounded-2xl bg-gradient-to-br from-background via-background/95 to-muted/20 backdrop-blur-md shadow-xl shadow-black/10 dark:shadow-black/30 p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-black/15 dark:hover:shadow-black/40 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:via-transparent before:to-transparent before:pointer-events-none">
         <Conversation className="flex-1 overflow-y-hidden relative z-10">
           <ConversationContent className="space-y-2">
             {messages.map((message, messageIndex) => (
