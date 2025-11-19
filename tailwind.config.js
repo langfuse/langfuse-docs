@@ -77,6 +77,7 @@ module.exports = {
         marquee: "marquee var(--duration) linear infinite",
         grid: "grid 20s linear infinite",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
+        fall: "fall 1.5s linear forwards",
       },
       keyframes: {
         "accordion-down": {
@@ -132,6 +133,16 @@ module.exports = {
         slide: {
           to: {
             transform: "translate(calc(100cqw - 100%), 0)",
+          },
+        },
+        fall: {
+          "0%": {
+            transform: "translateY(0px) rotate(0deg)",
+            opacity: "1",
+          },
+          "100%": {
+            transform: "translateY(250px) rotate(360deg)",
+            opacity: "0",
           },
         },
       },

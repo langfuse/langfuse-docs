@@ -42,13 +42,15 @@ from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
+    as_type="span",
     name="process-chat-message"
 ) as root_span:
     # Propagate session_id to all child observations
     with propagate_attributes(session_id="chat-session-123"):
         # All observations created here automatically have session_id
-        with root_span.start_as_current_generation(
+        with root_span.start_as_current_observation(
+            as_type="generation",
             name="generate-response",
             model="gpt-4o"
         ) as gen:
@@ -113,7 +115,7 @@ from langfuse.openai import openai
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="openai-call"):
+with langfuse.start_as_current_observation(as_type="span", name="openai-call"):
     # Propagate session_id to all observations including OpenAI generation
     with propagate_attributes(session_id="your-session-id"):
         completion = openai.chat.completions.create(
@@ -137,7 +139,7 @@ from langfuse.langchain import CallbackHandler
 langfuse = get_client()
 handler = CallbackHandler()
 
-with langfuse.start_as_current_span(name="langchain-call"):
+with langfuse.start_as_current_observation(as_type="span", name="langchain-call"):
     # Propagate session_id to all observations
     with propagate_attributes(session_id="your-session-id"):
         # Pass handler to the chain invocation

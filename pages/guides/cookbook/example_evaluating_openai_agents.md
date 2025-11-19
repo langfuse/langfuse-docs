@@ -250,67 +250,52 @@ _[Link to the trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja
 
 Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for analysis, debugging, and monitoring of your application's behavior across different users or sessions.
 
-The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`. 
+The following code demonstrates how to start a custom span with `langfuse.start_as_current_observation` and then update the trace associated with this span using `propagate_attributes()`. 
 
 **→ Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).**
 
 
 ```python
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
 input_query = "Why is AI agent evaluation important?"
 
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="OpenAI-Agent-Trace",
     ) as span:
-    
-    # Run your application here
-    async def main(input_query):
-            agent = Agent(
-                name = "Assistant",
-                instructions = "You are a helpful assistant.",
-            )
 
-            result = await Runner.run(agent, input_query)
-            print(result.final_output)
-            return result
-
-    result = await main(input_query)
- 
-    # Pass additional attributes to the span
-    span.update_trace(
-        input=input_query,
-        output=result,
+    with propagate_attributes(
         user_id="user_123",
         session_id="my-agent-session",
         tags=["staging", "demo", "OpenAI Agent SDK"],
         metadata={"email": "user@langfuse.com"},
         version="1.0.0"
-        )
+    ):
+    
+        # Run your application here
+        async def main(input_query):
+                agent = Agent(
+                    name = "Assistant",
+                    instructions = "You are a helpful assistant.",
+                )
+
+                result = await Runner.run(agent, input_query)
+                print(result.final_output)
+                return result
+
+        result = await main(input_query)
+    
+        # Pass additional attributes to the span
+        span.update_trace(
+            input=input_query,
+            output=result,
+            )
  
 # Flush events in short-lived applications
 langfuse.flush()
 ```
-
-    09:56:52.232 OpenAI Agents trace: Agent workflow
-    09:56:52.233   Agent run: 'Assistant'
-    09:56:52.236     Responses API with 'gpt-4o'
-    AI agent evaluation is crucial for several reasons:
-    
-    1. **Performance Assessment**: It determines how well the AI meets its intended tasks and objectives. This ensures that the AI can perform at a level that is useful and reliable.
-    
-    2. **Safety and Reliability**: Evaluating AI helps identify and mitigate potential risks, bugs, or errors that could lead to unintended or harmful outcomes.
-    
-    3. **Fairness and Bias**: It helps detect and address biases in AI systems, ensuring fair treatment and reducing discrimination against specific groups.
-    
-    4. **Transparency and Accountability**: Evaluation provides insights into AI decision-making processes, which is vital for accountability and building trust with users and stakeholders.
-    
-    5. **Improvement and Optimization**: Through evaluation, developers can identify areas for improvement, optimize algorithms, and enhance the overall efficiency and effectiveness of AI systems.
-    
-    6. **Compliance and Regulation**: Ensures that AI systems comply with legal, ethical, and industry standards, which is increasingly important as regulations evolve.
-    
-    7. **User Experience**: Helps tailor AI systems to user needs by understanding how they interact with and perceive the AI’s performance.
-    
-    Overall, evaluation is a key component in the lifecycle of AI development, ensuring that systems are effective, ethical, and aligned with their intended purpose.
-
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-sdk-custom-attributes.png)
 
@@ -357,7 +342,8 @@ def on_feedback(button):
 user_input = input("Enter your question: ")
 
 # Run agent
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
+    as_type="span",
     name="OpenAI-Agent-Trace",
     ) as span:
     
@@ -440,7 +426,7 @@ agent = Agent(
 input_query = "Is eating carrots good for the eyes?"
 
 # Run agent
-with langfuse.start_as_current_span(name="OpenAI-Agent-Trace") as span:
+with langfuse.start_as_current_observation(as_type="span", name="OpenAI-Agent-Trace") as span:
     # Run your agent with a query
     result = Runner.run_sync(agent, input_query)
 
@@ -558,7 +544,7 @@ agent = Agent(
  
 # Assume 'run_openai_agent' is your instrumented application function
 def run_openai_agent(question):
-    with langfuse.start_as_current_generation(name="qna-llm-call") as generation:
+    with langfuse.start_as_current_observation(as_type="generation", name="qna-llm-call") as generation:
         # Simulate LLM call
         result = Runner.run_sync(agent, question)
  

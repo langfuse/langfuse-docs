@@ -8,6 +8,7 @@ import { Frame } from "./components/Frame";
 import { GithubMenuBadge } from "./components/GitHubBadge";
 import { ToAppButton } from "./components/ToAppButton";
 import { DocsContributors } from "./components/DocsContributors";
+import { Button } from "./components/ui/button";
 import { COOKBOOK_ROUTE_MAPPING } from "./lib/cookbook_route_mapping";
 import { GeistSans } from "geist/font/sans";
 import FooterMenu from "./components/FooterMenu";
@@ -62,6 +63,15 @@ const config: DocsThemeConfig = {
         </a>
 
         <GithubMenuBadge />
+
+        <Button
+          size="xs"
+          asChild
+          className="whitespace-nowrap"
+          variant="outline"
+        >
+          <Link href="/talk-to-us">Get Demo</Link>
+        </Button>
 
         <ToAppButton />
       </>
@@ -207,20 +217,24 @@ const config: DocsThemeConfig = {
     Callout,
     Video,
   },
-  banner: {
-    key: "langfuse-launch-week-4-summary",
-    dismissible: true,
-    content: (
-      <Link href="/blog/2025-10-29-launch-week-4">
-        {/* mobile */}
-        <span className="sm:hidden">Launch Week: All launches →</span>
-        {/* desktop */}
-        <span className="hidden sm:inline">
-          Langfuse Launch Week: See all launches →
-        </span>
-      </Link>
-    ),
-  },
+  // banner: {
+  //   key: "cloudflare-incident",
+  //   dismissible: false,
+  //   content: (
+  //     <Link href="https://status.langfuse.com/">
+  //       {/* mobile */}
+  //       <span className="sm:hidden">
+  //         Incident: Langfuse Cloud is affected by the global Cloudflare outage.
+  //         Currently, services are recovering, see status page for more details.
+  //       </span>
+  //       {/* desktop */}
+  //       <span className="hidden sm:inline">
+  //         Incident: Langfuse Cloud is affected by the global Cloudflare outage.
+  //         Currently, services are recovering, see status page for more details.
+  //       </span>
+  //     </Link>
+  //   ),
+  // },
 };
 
 export default config;

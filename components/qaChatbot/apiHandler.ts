@@ -1,6 +1,5 @@
 import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
 import {
-  convertToModelMessages,
   streamText,
   UIMessage,
   experimental_createMCPClient as createMCPClient,
@@ -54,7 +53,28 @@ export const handler = async (req: Request) => {
   });
 
   // Get prompt from Langfuse
-  const prompt = await tracedGetPrompt("langfuse-docs-assistant-text");
+  const prompt = await tracedGetPrompt("langfuse-docs-assistant-chat", {
+    type: "chat",
+  });
+
+  const reasoningSummary = prompt.config
+    .reasoningSummary as 'low' | 'medium' | 'high' | undefined;
+  const textVerbosity = prompt.config
+    .textVerbosity as 'low' | 'medium' | 'high' | undefined;
+  const reasoningEffort = prompt.config
+    .reasoningEffort as 'low' | 'medium' | 'high' | undefined;
+
+  // Convert UI messages format of Vercel AI SDK to: [{ role: "user", content: "text..." }]
+  const chatHistory = messages.map((msg) => ({
+    role: msg.role,
+    content: msg.parts
+      .filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join(""),
+  }));
+  
+  // Compile the prompt with chat history as a message placeholder
+  const compiledPrompt = prompt.compile({}, { chat_history: chatHistory });
 
   // Initialize MCP client using Streamable HTTP transport (works with our MCP server)
   const mcpClient = await startActiveObservation(
@@ -74,13 +94,6 @@ export const handler = async (req: Request) => {
   const tools = await mcpClient.tools();
 
 
-  const reasoningSummary = prompt.config
-    .reasoningSummary as 'low' | 'medium' | 'high' | undefined;
-  const textVerbosity = prompt.config
-    .textVerbosity as 'low' | 'medium' | 'high' | undefined;
-  const reasoningEffort = prompt.config
-    .reasoningEffort as 'low' | 'medium' | 'high' | undefined;
-
   const result = streamText({
     model: openai(String(prompt.config.model)),
     providerOptions: {
@@ -90,8 +103,7 @@ export const handler = async (req: Request) => {
         reasoningEffort,
       } satisfies OpenAIResponsesProviderOptions,
     },
-    system: prompt.prompt,
-    messages: convertToModelMessages(messages),
+    messages: compiledPrompt,
     tools,
     stopWhen: stepCountIs(10),
     experimental_telemetry: {

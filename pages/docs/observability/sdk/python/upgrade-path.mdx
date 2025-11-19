@@ -94,29 +94,30 @@ response = openai.chat.completions.create(
 **Option 2: Use enclosing span (for more control):**
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.openai import openai
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="chat-request") as span:
-    # Set trace attributes on the enclosing span
-    span.update_trace(
+with langfuse.start_as_current_observation(as_type="span", name="chat-request") as span:
+
+    with propagate_attributes(
         user_id="user_123",
         session_id="session_456",
         tags=["chat"],
-        # Explicit trace input/output for LLM-as-a-judge features
-        input={"query": "Hello"},
-    )
+    ):
 
-    response = openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": "Hello"}],
-        metadata={"source": "app"}
-    )
+        response = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": "Hello"}],
+            metadata={"source": "app"}
+        )
 
-    # Set trace output explicitly
-    span.update_trace(output={"response": response.choices[0].message.content})
+        # Set trace input and output explicitly
+        span.update_trace(
+            output={"response": response.choices[0].message.content},
+            input={"query": "Hello"},
+            )
 ```
 
 ### LangChain Integration
@@ -162,24 +163,27 @@ response = chain.invoke(
 **Option 2: Use enclosing span (for more control):**
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="langchain-request") as span:
-    span.update_trace(
+with langfuse.start_as_current_observation(as_type="span", name="langchain-request") as span:
+
+    with propagate_attributes(
         user_id="user_123",
         session_id="session_456",
         tags=["langchain"],
-        input={"query": "Hello"}  # Explicit trace input
-    )
+    ):
 
-    handler = CallbackHandler()
-    response = chain.invoke({"input": "Hello"}, config={"callbacks": [handler]})
+        handler = CallbackHandler()
+        response = chain.invoke({"input": "Hello"}, config={"callbacks": [handler]})
 
-    # Set trace output explicitly
-    span.update_trace(output={"response": response})
+        # Set trace input and output explicitly
+        span.update_trace(
+            input={"query": "Hello"},
+            output={"response": response}
+            )
 ```
 
 ### LlamaIndex Integration Users
@@ -198,7 +202,7 @@ response = index.as_query_engine().query("Hello")
 **v3 Migration:**
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 
 # Use third-party OTEL instrumentation
@@ -206,15 +210,18 @@ LlamaIndexInstrumentor().instrument()
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="llamaindex-query") as span:
-    span.update_trace(
+with langfuse.start_as_current_observation(as_type="span", name="llamaindex-query") as span:
+
+    with propagate_attributes(
         user_id="user_123",
-        input={"query": "Hello"}
-    )
+    ):
 
     response = index.as_query_engine().query("Hello")
 
-    span.update_trace(output={"response": str(response)})
+    span.update_trace(
+        input={"query": "Hello"},
+        output={"response": str(response)}
+        )
 ```
 
 ### Low-Level SDK Users
@@ -247,26 +254,34 @@ generation.end(output="Response")
 </Callout>
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
 # Use context managers instead of manual objects
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
+    as_type="span",
     name="my-trace",
     input={"query": "Hello"}  # Becomes trace input automatically
 ) as root_span:
-    # Set trace attributes
-    root_span.update_trace(user_id="user_123")
 
-    with langfuse.start_as_current_generation(
-        name="llm-call",
-        model="gpt-4o"
-    ) as generation:
-        generation.update(output="Response")
+    # Propagate trace attributes to all child observations
+    with propagate_attributes(
+        user_id="user_123",
+    ):
 
-    # If needed, override trace output
-    root_span.update_trace(output={"response": "Response"})
+        with langfuse.start_as_current_observation(
+            as_type="generation",
+            name="llm-call",
+            model="gpt-4o"
+        ) as generation:
+            generation.update(output="Response")
+
+        # If needed, override trace output
+        root_span.update_trace(
+            input={"query": "Hello"},
+            output={"response": "Response"}
+            )
 ```
 
 ## Key Migration Checklist
@@ -281,7 +296,7 @@ with langfuse.start_as_current_span(
 2. **Trace Attributes Pattern**:
 
    - **Option 1**: Use metadata fields (`langfuse_user_id`, `langfuse_session_id`, `langfuse_tags`) directly in integration calls
-   - **Option 2**: Move `user_id`, `session_id`, `tags` to enclosing spans and use `span.update_trace()` or `langfuse.update_current_trace()`
+   - **Option 2**: Move `user_id`, `session_id`, `tags` to `propagate_attributes()`
 
 3. **Trace Input/Output**:
 
@@ -291,7 +306,7 @@ with langfuse.start_as_current_span(
 4. **Context Managers**:
 
    - Replace manual `langfuse.trace()`, `trace.span()` with context managers if you want to use them
-   - Use `with langfuse.start_as_current_span()` instead
+   - Use `with langfuse.start_as_current_observation()` instead
 
 5. **LlamaIndex Migration**:
 
@@ -344,12 +359,12 @@ See the [datasets documentation](/docs/evaluation/dataset-runs/remote-run) for m
 
     - **v2**: Could be set directly on integration calls
     - **v3**: Must be set on enclosing spans
-    - **Migration**: Wrap integration calls with `langfuse.start_as_current_span()`
+    - **Migration**: Wrap integration calls with `langfuse.start_as_current_observation()`
 
 4.  **Creating Observations**:
 
     - **v2**: `langfuse.trace()`, `langfuse.span()`, `langfuse.generation()`
-    - **v3**: `langfuse.start_as_current_span()`, `langfuse.start_as_current_generation()`
+    - **v3**: `langfuse.start_as_current_observation()`
     - **Migration**: Use context managers, ensure `.end()` is called or use `with` statements
 
 5.  **IDs and Context**:

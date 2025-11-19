@@ -16,6 +16,7 @@ export default {
     type: "separator",
     title: <MenuSubSeparator>Advanced</MenuSubSeparator>,
   },
+  "user-feedback": {},
   "log-levels": {},
   "*": {
     layout: "default",

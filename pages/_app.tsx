@@ -40,13 +40,18 @@ export default function App({ Component, pageProps }) {
       <PostHogProvider client={posthog}>
         <Component {...pageProps} />
       </PostHogProvider>
-      <Hubspot />
-      <Script
-        id="cookieyes"
-        type="text/javascript"
-        src="https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js"
-        strategy="beforeInteractive"
-      />
+      {process.env.NODE_ENV === "production" && (
+        <>
+          <Hubspot />
+          {/* Cookieyes consent manager */}
+          <Script
+            id="cookieyes"
+            type="text/javascript"
+            src="https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js"
+            strategy="beforeInteractive"
+          />
+        </>
+      )}
     </div>
   );
 }

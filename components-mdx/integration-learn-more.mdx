@@ -18,27 +18,31 @@ You can use this integration together with the Langfuse [Python SDK](/docs/obser
 The [`@observe()` decorator](/docs/observability/sdk/python/instrumentation#custom-instrumentation) provides a convenient way to automatically wrap your instrumented code and add additional attributes to the trace.
 
 ```python
-from langfuse import observe, get_client
+from langfuse import observe, propagate_attributes, get_client
  
 langfuse = get_client()
-
+ 
 @observe()
-def my_instrumented_function(input):
-
-    # Run your application here
-    output = my_llm_call(input)
-
-    langfuse.update_current_trace(
-        input=input,
-        output=output,
+def my_llm_pipeline(input):
+    # Add additional attributes (user_id, session_id, metadata, version, tags) to all spans created within this execution scope
+    with propagate_attributes(
         user_id="user_123",
         session_id="session_abc",
         tags=["agent", "my-trace"],
         metadata={"email": "user@langfuse.com"},
         version="1.0.0"
-    )
+    ):
 
-    return output
+        # YOUR APPLICATION CODE HERE
+        result = call_llm(input)
+
+        # Update the trace input and output
+        langfuse.update_current_trace(
+            input=input,
+            output=result,
+        )
+
+        return result
 ```
 
 Learn more about using the Decorator in the [Python SDK](/docs/observability/sdk/python/instrumentation#custom-instrumentation) docs.
@@ -49,24 +53,26 @@ Learn more about using the Decorator in the [Python SDK](/docs/observability/sdk
 The [Context Manager](/docs/observability/sdk/python/instrumentation#custom-instrumentation) allows you to wrap your instrumented code using context managers (with `with` statements), which allows you to add additional attributes to the trace.
 
 ```python
-from langfuse import get_client
+from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="my-trace") as span:
-    
-    # Run your application here
-    output = my_llm_call(input)
-
-    # Pass additional attributes to the span
-    span.update_trace(
-        input=input,
-        output=output,
+with langfuse.start_as_current_observation(as_type="span", name="my-trace") as span:
+    # Add additional attributes (user_id, session_id, metadata, version, tags) to all spans created within this execution scope
+    with propagate_attributes(
         user_id="user_123",
         session_id="session_abc",
-        tags=["agent", "my-trace"],
-        metadata={"email": "user@langfuse.com"},
-        version="1.0.0"
+        metadata={"experiment": "variant_a", "env": "prod"},
+        version="1.0"
+    ):
+    
+        # YOUR APPLICATION CODE HERE
+        result = call_llm("some input")
+
+        # Update the trace input and output
+        langfuse.start_as_current_observation(
+            input=input,
+            output=result,
         )
 
 # Flush events in short-lived applications

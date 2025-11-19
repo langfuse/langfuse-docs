@@ -169,6 +169,16 @@ Provider: `KEYCLOAK`
 
 Thanks to [@RTae](https://github.com/RTae) for the initial contribution of Keycloak support!
 
+### JumpCloud
+
+| Configuration      | Value                                                                                                                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_JUMPCLOUD_CLIENT_ID`<br/>`AUTH_JUMPCLOUD_CLIENT_SECRET`<br/>`AUTH_JUMPCLOUD_ISSUER`                                                                        |
+| Optional Variables | `AUTH_JUMPCLOUD_SCOPE` (defaults to `"openid profile email"`)<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
+| OAuth Redirect URL | `/api/auth/callback/jumpcloud`                                                                                                                                   |
+
+Provider: `JUMPCLOUD`
+
 ### Okta
 
 [NextAuth Okta Provider Docs](https://next-auth.js.org/providers/okta)
@@ -247,7 +257,7 @@ Configure `AUTH_HTTPS_PROXY` or `AUTH_HTTP_PROXY` to use a proxy for SSO provide
 
 ## IdP-Initiated SSO [#idp-initiated-sso]
 
-Langfuse supports **IdP-initiated SSO** (Identity Provider-initiated Single Sign-On), where users can start the SSO flow directly from their identity provider (e.g., Okta, Azure AD, Keycloak, etc.) instead of starting from Langfuse.
+Langfuse supports **IdP-initiated SSO** (Identity Provider-initiated Single Sign-On), where users can start the SSO flow directly from their identity provider (e.g., Okta, Azure AD, Keycloak, JumpCloud, etc.) instead of starting from Langfuse.
 
 _Example of IdP-initiated SSO authentication flow (Okta):_
 
