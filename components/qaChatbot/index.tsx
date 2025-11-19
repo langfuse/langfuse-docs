@@ -207,12 +207,22 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         const isLastMessage =
                           messageIndex === messages.length - 1;
                         const isNotFirstMessage = messageIndex > 0;
+                        // Find the index of the last text part
+                        const textPartIndices = message.parts
+                          .map((p, idx) => (p.type === "text" ? idx : -1))
+                          .filter((idx) => idx !== -1);
+                        const lastTextPartIndex =
+                          textPartIndices[textPartIndices.length - 1];
+                        const isLastTextPart = i === lastTextPartIndex;
+                        const isMessageComplete = status !== "submitted";
                         return (
                           <div key={`${message.id}-${i}`}>
                             <Response>{part.text}</Response>
                             {message.role === "assistant" &&
                               isLastMessage &&
-                              isNotFirstMessage && (
+                              isNotFirstMessage &&
+                              isLastTextPart &&
+                              isMessageComplete && (
                                 <Actions className="mt-2">
                                   <Action
                                     onClick={() => regenerate()}
