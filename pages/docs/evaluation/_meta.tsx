@@ -4,7 +4,7 @@ export default {
   experiments: "Experiments",
   tutorials: {
     title: "Guides ↗",
-    href: "/guides/evaluation",
+    href: "/guides#evaluation-tutorials",
   },
   "troubleshooting-and-faq": "Troubleshooting & FAQ",
 };

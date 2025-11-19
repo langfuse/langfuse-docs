@@ -217,24 +217,24 @@ const config: DocsThemeConfig = {
     Callout,
     Video,
   },
-  banner: {
-    key: "cloudflare-incident",
-    dismissible: false,
-    content: (
-      <Link href="https://status.langfuse.com/">
-        {/* mobile */}
-        <span className="sm:hidden">
-          Incident: Langfuse Cloud is affected by the global Cloudflare outage.
-          Currently, services are recovering, see status page for more details.
-        </span>
-        {/* desktop */}
-        <span className="hidden sm:inline">
-          Incident: Langfuse Cloud is affected by the global Cloudflare outage.
-          Currently, services are recovering, see status page for more details.
-        </span>
-      </Link>
-    ),
-  },
+  // banner: {
+  //   key: "cloudflare-incident",
+  //   dismissible: false,
+  //   content: (
+  //     <Link href="https://status.langfuse.com/">
+  //       {/* mobile */}
+  //       <span className="sm:hidden">
+  //         Incident: Langfuse Cloud is affected by the global Cloudflare outage.
+  //         Currently, services are recovering, see status page for more details.
+  //       </span>
+  //       {/* desktop */}
+  //       <span className="hidden sm:inline">
+  //         Incident: Langfuse Cloud is affected by the global Cloudflare outage.
+  //         Currently, services are recovering, see status page for more details.
+  //       </span>
+  //     </Link>
+  //   ),
+  // },
 };
 
 export default config;
