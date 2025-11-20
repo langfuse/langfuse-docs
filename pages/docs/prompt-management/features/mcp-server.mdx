@@ -1,143 +1,95 @@
 ---
-title: Open Source MCP Server for Langfuse Prompts
+title: MCP Server for Prompts
 sidebarTitle: MCP Server
-description: This Model Context Protocol (MCP) server makes prompts managed collaboratively in Langfuse accessible to LLM Agent systems.
+description: Access and manage Langfuse prompts through the Model Context Protocol (MCP), enabling AI agents to work with your prompt library programmatically.
 ---
 
 # MCP Server for Langfuse Prompts
 
-The Langfuse Prompt [Model Context Protocol](https://github.com/modelcontextprotocol) (MCP) Server enables seamless integration between Langfuse's [Prompt Management](/docs/prompts/get-started) and LLM Agent systems. This server acts as a bridge, making collaboratively managed prompts easily accessible to AI agents and applications.
+The Langfuse [Model Context Protocol](https://modelcontextprotocol.io) (MCP) Server enables AI assistants and agents to interact with your [Prompt Management](/docs/prompt-management/overview) system. The server is built directly into Langfuse at `/api/public/mcp` (streamableHttp), no external setup or build steps required.
 
-The MCP Server is open source and available on [GitHub](https://github.com/langfuse/mcp-server-langfuse).
+## Available Tools
 
-## Demo
+The Langfuse MCP Server provides five tools for comprehensive prompt management in Claude Code and other MCP clients:
 
-This is a brief demo of the Langfuse Prompt MCP Server in action in Claude Desktop.
-
-<iframe
-  width="100%"
-  className="aspect-[16/9] rounded-lg border mt-4 w-full"
-  src="https://www.youtube-nocookie.com/embed/vkRq5lFAJsY"
-  title="Demo of the Langfuse Prompt MCP Server in action in Claude Desktop"
-  frameBorder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-  referrerPolicy="strict-origin-when-cross-origin"
-  allowFullScreen
-></iframe>
+<Frame className="max-w-4xl">
+  <img
+    src="/images/changelog/2025-11-20-native-mcp-server.png"
+    alt="Langfuse MCP Server tools in Claude Code showing 5 tools: getPrompt, listPrompts, createTextPrompt, createChatPrompt, and updatePromptLabels"
+  />
+</Frame>
 
 ## Features
 
-### MCP Prompt
+### Read Operations
 
-This server implements the [MCP Prompts specification](https://modelcontextprotocol.io/docs/concepts/prompts) for prompt discovery and retrieval.
+- **`getPrompt`** - Fetch a specific prompt by name
 
-- `prompts/list`: List all available prompts
+  - Optional `label` parameter (e.g., "production", "staging") - defaults to "production"
+  - Optional `version` parameter to get a specific version number
+  - Returns compiled prompt with metadata and configuration
 
-  - Optional cursor-based pagination
-  - Returns prompt names and their required arguments, limitation: all arguments are assumed to be optional and do not include descriptions as variables do not have specification in Langfuse
-  - Includes next cursor for pagination if there's more than 1 page of prompts
+- **`listPrompts`** - Browse all prompts in your project
+  - Optional filtering by `name`, `tag`, or `label`
+  - Cursor-based pagination for large prompt libraries
+  - Returns prompt metadata including available versions and labels
 
-- `prompts/get`: Get a specific prompt
+### Write Operations
 
-  - Transforms Langfuse prompts (text and chat) into MCP prompt objects
-  - Compiles prompt with provided variables
+- **`createTextPrompt`** - Create a new text prompt version
 
-### Tools
+  - Simple string content with `{{variable}}` template syntax
+  - Optional labels (e.g., `["production", "staging"]`)
+  - Optional config object for model settings
+  - Optional tags for organization
+  - Optional commit message to document changes
+  - Automatically increments version number
 
-To increase compatibility with other MCP clients that do not support the prompt capability, the server also exports tools that replicate the functionality of the MCP Prompts.
+- **`createChatPrompt`** - Create a new chat prompt version
 
-- `get-prompts`: List available prompts
+  - OpenAI-style message format with role and content
+  - Supports system, user, and assistant message roles
+  - Template variables work in message content
+  - Same label, config, tag, and commit message options as text prompts
 
-  - Optional `cursor` parameter for pagination
-  - Returns a list of prompts with their arguments
+- **`updatePromptLabels`** - Manage labels across prompt versions
+  - Move labels between versions (e.g., promote staging to production)
+  - Labels are unique—setting a label on one version removes it from others
+  - Cannot modify the auto-managed `latest` label
+  - Useful for deployment workflows and version control
 
-- `get-prompt`: Retrieve and compile a specific prompt
-  - Required `name` parameter: Name of the prompt to retrieve
-  - Optional `arguments` parameter: JSON object with prompt variables
+## Setup
 
-## Usage
+See the [MCP Server setup guide](/docs/api-and-data-platform/features/mcp-server#authentication) for complete instructions on authentication and client configuration.
 
-<Steps>
+## Example Workflows
 
-### Clone & Build MCP Server
+### Create a New Prompt
 
-Repo: [mcp-server-langfuse](https://github.com/langfuse/mcp-server-langfuse)
+Ask your AI agent:
 
-```bash
-git clone https://github.com/langfuse/mcp-server-langfuse.git
+> "Create a new text prompt called 'customer-email' with a friendly greeting template that includes name and product variables. Tag it as 'draft' and add a production label."
 
-cd mcp-server-langfuse
-npm install
-npm run build
-```
+The agent will use `createTextPrompt` to create the prompt version.
 
-### Add Server in MCP Client
+### Promote a Prompt to Production
 
-<Tabs items={["Claude Desktop", "Cursor"]}>
+> "Move the production label from version 2 to version 3 of the customer-email prompt"
 
-<Tab>
+The agent will use `updatePromptLabels` to update the label assignment.
 
-Configure [Claude for Desktop](https://claude.ai/download) by editing `claude_desktop_config.json`
+### Iterate on a Chat Prompt
 
-```json
-{
-  "mcpServers": {
-    "langfuse": {
-      "command": "node",
-      "args": ["<absolute-path>/build/index.js"],
-      "env": {
-        "LANGFUSE_PUBLIC_KEY": "your-public-key",
-        "LANGFUSE_SECRET_KEY": "your-secret-key",
-        "LANGFUSE_BASEURL": "https://cloud.langfuse.com"
-      }
-    }
-  }
-}
-```
+> "Create a new version of the code-review prompt with improved system instructions and add an example assistant message showing the review format"
 
-Make sure to replace the environment variables with your actual Langfuse API keys. The server will now be available to use in Claude Desktop.
+The agent will use `createChatPrompt` to create a new version with enhanced content after having fetched the prompt with `getPrompt`.
 
-</Tab>
+## Feedback
 
-<Tab>
+Share your experience with the Langfuse MCP server in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605). We'd love to hear your feedback and use cases.
 
-1. Open Cursor Settings (`Cmd/Ctrl + Shift + J`)
-2. Navigate to the **Tools & Integrations** tab in the left sidebar
-3. Click **"Add Custom MCP"**
-4. This will open the `mcp.json` configuration file
-5. Add your Langfuse MCP server configuration:
+## Learn More
 
-```json
-{
-  "mcpServers": {
-    "langfuse-prompts": {
-      "command": "node",
-      "args": ["<absolute-path>/build/index.js"],
-      "env": {
-        "LANGFUSE_PUBLIC_KEY": "your-public-key",
-        "LANGFUSE_SECRET_KEY": "your-secret-key",
-        "LANGFUSE_BASEURL": "https://cloud.langfuse.com"
-      }
-    }
-  }
-}
-```
-
-6. Save the file and restart Cursor
-7. The server should appear in the MCP settings with a green dot indicating it's active
-
-</Tab>
-
-</Tabs>
-
-</Steps>
-
-## Limitations
-
-The MCP Server is a work in progress and has some limitations:
-
-- Only prompts with a `production` label in Langfuse are returned
-- All arguments are assumed to be optional and do not include descriptions as variables do not have specification in Langfuse
-- List operations require fetching each prompt individually in the background to extract the arguments, this works but is not efficient
-
-Contributions are welcome! Please open an issue or a PR ([repo](https://github.com/langfuse/mcp-server-langfuse)) if you have any suggestions or feedback.
+- [MCP Server Overview](/docs/api-and-data-platform/features/mcp-server) - Complete MCP server documentation
+- [Prompt Management](/docs/prompt-management/overview) - Learn about Langfuse prompt features
+- [Model Context Protocol](https://modelcontextprotocol.io) - Official MCP documentation
