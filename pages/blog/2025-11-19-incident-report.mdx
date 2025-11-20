@@ -15,21 +15,29 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["maxdeichmann"]}
 />
 
-As an infrastructure provider for LLM observability, evaluations, and prompt management, ensuring continuous availability for our customers is our top priority. We hold ourselves accountable for the reliability of our service.
+On November 18th, Langfuse Cloud experienced a [multi-hour outage](https://status.langfuse.com/incident/768837) from 11:33am to 2:40pm UTC due to a global [Cloudflare incident](https://blog.cloudflare.com/18-november-2025-outage/). All API and UI traffic was unavailable during this period.
 
-On November 18th, our customers experienced a [multi-hour service outage](https://status.langfuse.com/incident/768837) (11:33am UTC - 02:40pm UTC) due to a global [Cloudflare outage](https://blog.cloudflare.com/18-november-2025-outage/). All API and UI traffic to Langfuse, including ingestion and prompt management, is routed through the Cloudflare proxy to our AWS Application Load Balancers (ALBs). During the outage, the Cloudflare proxy terminated all incoming requests with a 500 error code, preventing our infrastructure from serving those requests.
+This outage was unacceptable. While the root cause was a third-party infrastructure failure, we take full responsibility for our architecture's single point of failure. This report details what happened, our response, and the concrete steps we're taking to prevent similar incidents.
 
-We clearly did not meet our own expectations regarding the reliability of our infrastructure.
+## What Happened
+
+All API and UI traffic to Langfuse, including ingestion and prompt management, is routed through the Cloudflare proxy to our AWS Application Load Balancers (ALBs). During the Cloudflare outage, the proxy terminated all incoming requests with a 500 error code, preventing our infrastructure from serving those requests.
 
 ## Incident Overview
 
-During the [Cloudflare incident](https://www.cloudflarestatus.com/incidents/8gmgl950y3h7), calls to the Langfuse API and UI did not reach our infrastructure and returned error messages. We were first alerted to the incident at 11:33am UTC when our synthetic API tests detected that our health endpoints had stopped responding. At 11:48am UTC, Cloudflare acknowledged the incident on their status page. We observed intermittent service recovery, but most requests failed until full resolution around 2:40pm UTC.
+During the [Cloudflare incident](https://www.cloudflarestatus.com/incidents/8gmgl950y3h7), calls to the Langfuse API and UI did not reach our infrastructure and returned error messages. We were first alerted at 11:33am UTC when our synthetic API tests detected that our health endpoints had stopped responding. At 11:48am UTC, Cloudflare acknowledged the incident on their status page. We observed intermittent service recovery, but most requests failed until full resolution around 2:40pm UTC.
 
-Through this incident, we identified an overreliance on Cloudflare infrastructure, both within our internal systems and across our vendors. We were only able to report the incident on our status page at 12:11pm UTC, as our status page provider was also inaccessible due to the Cloudflare outage.
+Through this incident, we identified an overreliance on Cloudflare infrastructure, both within our internal systems and across our vendors. We could only report the incident on our status page at 12:11pm UTC, as our status page provider was also inaccessible due to the Cloudflare outage.
 
-We were unable to take immediate mitigating actions as Cloudflare acts as our registrar, DNS management tool, and proxy/gateway/WAF. Downtime of the Cloudflare dashboard prevented us from changing DNS or proxy settings for Langfuse Cloud domains. During a period of partial access to the Cloudflare dashboard, we considered removing Cloudflare proxying and directing traffic directly to our AWS ALBs. However, we decided against this as we saw traffic resuming and lacked test data on the potential fallout of such a change. With static assets not being cached, differing TLS requirements, and other potential unknowns, an unplanned and untested routing update was deemed too risky. In retrospect, this might have increased availability during the incident, but given the data available at the time, we stand by our decision to keep Cloudflare proxying active.
+## Response and Mitigation Attempts
 
-As a temporary mitigation for users, we published DNS-based bypasses of the Cloudflare proxy to our AWS ALBs at 02:06pm UTC on our status page.
+We were unable to take immediate mitigating actions as Cloudflare acts as our registrar, DNS management tool, and proxy/gateway/Web Application Firewall (WAF). Downtime of the Cloudflare dashboard prevented us from changing DNS or proxy settings for Langfuse Cloud domains.
+
+During a period of partial access to the Cloudflare dashboard, we considered removing Cloudflare proxying and directing traffic directly to our AWS ALBs. However, we decided against this change for several reasons. We observed traffic beginning to resume, and we lacked test data on the potential impact of such a major routing change. With static assets not being cached, differing TLS requirements, and other potential unknowns, we deemed an unplanned and untested routing update too risky during an active incident.
+
+In retrospect, this change might have increased availability during the incident. However, given the partial recovery we were observing and the risks of an untested configuration change, we stand by our decision to keep Cloudflare proxying active.
+
+As a temporary mitigation, we published DNS-based bypasses of the Cloudflare proxy to our AWS ALBs at 02:06pm UTC on our status page for customers requiring immediate access.
 
 <Frame className="mt-6">
   ![Uptime](/images/blog/2025-11-19-incident-report/2025-11-19-outage.png)
@@ -100,10 +108,15 @@ flowchart LR
 
 ## Moving Forward
 
-We are dedicated to providing a reliable and resilient service. While our alerting and incident handling were effective throughout this event, the nature of the outage limited our ability to act on our insights. Consequently, we will review our dependency on single vendors across both our own infrastructure and that of our suppliers.
+Having Cloudflare as a single point of failure without available mitigations is unacceptable. We are taking the following concrete actions:
 
-Having Cloudflare as a single point of failure without available mitigations is unacceptable. We will take measures to diversify and reduce our reliance on Cloudflare as a proxy, CDN, and WAF, and review its function as our registrar and DNS management solution.
+**Infrastructure Diversification**
 
-Additionally, we will review supporting communication tools, such as our status page vendor, to ensure their infrastructure is decoupled from Langfuse Cloud's sub-providers.
+- Assess alternatives for WAF and proxy functionality without relying on Cloudflare's infrastructure
+- Review and potentially migrate DNS management
 
-Thousands of teams rely on Langfuse to monitor and improve their LLM applications. This incident caused significant downtime and disruption for our users. We sincerely apologize for the impact this outage had and thank you for your trust and patience.
+**Communication Systems**
+
+- Migrate our status page to a provider with infrastructure decoupled from Cloudflare
+
+Thousands of teams rely on Langfuse to monitor and improve their LLM applications. This incident caused significant downtime and disruption for our users. We sincerely apologize for the impact this outage had and thank you for your continued trust and patience as we work to ensure this doesn't happen again.
