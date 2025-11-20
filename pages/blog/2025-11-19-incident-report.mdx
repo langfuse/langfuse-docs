@@ -1,7 +1,7 @@
 ---
 title: "Incident Report for Nov 18, 2025"
 date: 2025/11/19
-description: "Langfuse experienced a multi-hour service outage on November 18, 2025 due to a global CloudFlare outage."
+description: "Postmortem report for the outage which caused multiple hours of downtime."
 ogImage: /images/blog/2025-11-19-cloud-outage/cloudflare-outage.png
 tag: engineering
 author: Max
@@ -11,14 +11,13 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="Incident Report for Nov 18, 2025"
-  description="Langfuse experienced a multi-hour service outage on November 18, 2025 due to a global CloudFlare outage."
-  date="November 19, 2025"
+  description="Postmortem for the outage which caused multiple hours of downtime."
   authors={["maxdeichmann"]}
 />
 
-As an infrastructure provider for LLM observability and prompt management, ensuring continuous availability for our customers is our top priority.
+As an infrastructure provider for LLM observability, evaluations, and prompt management, ensuring continuous availability for our customers is our top priority. We are accountable for the reliability of our service.
 
-On November 18th, our customers experienced a [multi-hour service outage](https://status.langfuse.com/incident/768837) between 11:33am UTC and 02:40pm UTC due to a global [CloudFlare outage](https://blog.cloudflare.com/18-november-2025-outage/). All API and UI traffic to Langfuse, including ingestion and prompt management, are routed through the CloudFlare proxy to our AWS Application Load Balancers (ALBs). During the outage, the CloudFlare proxy terminated all incoming requests with a 500 error code, preventing our infrastructure from serving those requests.
+On November 18th, our customers experienced a [multi-hour service outage](https://status.langfuse.com/incident/768837) (11:33am UTC - 02:40pm UTC) due to a global [CloudFlare outage](https://blog.cloudflare.com/18-november-2025-outage/). All API and UI traffic to Langfuse, including ingestion and prompt management, are routed through the CloudFlare proxy to our AWS Application Load Balancers (ALBs). During the outage, the CloudFlare proxy terminated all incoming requests with a 500 error code, preventing our infrastructure from serving those requests.
 
 We clearly did not meet our own expectations the reliability of our infrastructure.
 
