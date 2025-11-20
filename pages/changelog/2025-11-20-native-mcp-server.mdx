@@ -1,0 +1,45 @@
+---
+date: 2025-11-20
+title: Native MCP Server with Write Operations
+description: Langfuse now includes a native Model Context Protocol (MCP) server with write capabilities, enabling AI agents to create and update prompts directly—no external setup required.
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We're excited to announce that Langfuse now includes a **native MCP server** built directly into the platform. This eliminates the need for external repositories and build steps while adding powerful write capabilities that enable AI agents to create and manage prompts programmatically.
+
+## What's New
+
+The native MCP server is available at `/api/public/mcp` and provides five tools for comprehensive prompt management:
+
+**Read Operations:**
+- `getPrompt` - Fetch specific prompts by name, label, or version
+- `listPrompts` - Browse all prompts with filtering and pagination
+
+**Write Operations:**
+- `createTextPrompt` - Create new text prompt versions
+- `createChatPrompt` - Create new chat prompt versions (OpenAI-style messages)
+- `updatePromptLabels` - Manage labels across prompt versions
+
+All write operations include automatic audit logging, giving you full visibility into changes made by AI agents.
+
+## Simplified Setup
+
+No more cloning repositories or running build commands. Simply configure your MCP client with BasicAuth credentials:
+
+```bash
+# Claude Code - one command
+claude mcp add --transport http langfuse https://cloud.langfuse.com/api/public/mcp \
+    --header "Authorization: Basic {your-base64-token}"
+```
+
+The native server uses a stateless architecture, ensuring clean separation between projects and reliable operation across all deployment types (Cloud, self-hosted, or local development).
+
+## Get Started
+
+- [MCP Server Documentation](/docs/api-and-data-platform/features/mcp-server) - Complete setup guide
+- [Prompt Management with MCP](/docs/prompt-management/features/mcp-server) - Prompt-specific workflows
+- [Model Context Protocol](https://modelcontextprotocol.io) - Learn about MCP

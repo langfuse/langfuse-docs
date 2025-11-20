@@ -1,0 +1,193 @@
+---
+title: MCP Server
+description: Native Model Context Protocol (MCP) server for Langfuse, enabling AI assistants to interact with your Langfuse data programmatically.
+---
+
+# MCP Server
+
+Langfuse includes a native [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that enables AI assistants and agents to interact with your Langfuse data programmatically. The server is built directly into Langfuse and requires no external setup or build steps.
+
+The MCP server provides tools for managing prompts with both read and write capabilities. All operations are scoped to your project via API key authentication and include automatic audit logging for write operations.
+
+## Architecture
+
+The Langfuse MCP server uses a **stateless per-request architecture**:
+
+- **Fresh server instance per request:** Each MCP request creates a new server instance
+- **Context captured in closures:** Authentication context is derived from your API key
+- **No session storage:** Server is discarded after request completes
+- **Project isolation:** Each API key is scoped to a specific project
+
+This design ensures clean separation between projects and reliable operation across all deployment types.
+
+## Available Tools
+
+The MCP server provides five tools for comprehensive prompt management:
+
+### Read Operations
+
+- **`getPrompt`** - Fetch a specific prompt by name with optional label or version
+  - Supports filtering by production/staging labels
+  - Returns compiled prompt with metadata
+  - Read-only operation (auto-approved by clients)
+
+- **`listPrompts`** - List all prompts in the project
+  - Optional filtering by name, tag, or label
+  - Cursor-based pagination support
+  - Returns prompt metadata and available versions
+
+### Write Operations
+
+- **`createTextPrompt`** - Create a new text prompt version
+  - Supports template variables with `{{variable}}` syntax
+  - Optional labels, config, tags, and commit message
+  - Automatic version incrementing
+
+- **`createChatPrompt`** - Create a new chat prompt version
+  - OpenAI-style message format (role + content)
+  - Supports system, user, and assistant roles
+  - Template variables in message content
+
+- **`updatePromptLabels`** - Manage labels across prompt versions
+  - Add or move labels between versions
+  - Labels are unique (auto-removed from other versions)
+  - Cannot modify the auto-managed `latest` label
+
+All write operations create audit log entries with before/after snapshots for full traceability.
+
+## Authentication
+
+The MCP server uses BasicAuth authentication with your Langfuse API keys.
+
+### 1. Get Your API Keys
+
+Navigate to your project settings and create or copy a **project-scoped API key**:
+
+- Public Key: `pk-lf-...`
+- Secret Key: `sk-lf-...`
+
+<Callout type="info">
+  Organization-level API keys are not supported. You must use project-scoped keys.
+</Callout>
+
+### 2. Encode Credentials
+
+Encode your API keys to base64 format:
+
+```bash
+echo -n "pk-lf-your-public-key:sk-lf-your-secret-key" | base64
+```
+
+This outputs your BasicAuth token (e.g., `cGstbGYt...`).
+
+### 3. Choose Your Langfuse URL
+
+**Langfuse Cloud:**
+- EU Region: `https://cloud.langfuse.com`
+- US Region: `https://us.langfuse.com`
+- HIPAA: `https://hipaa.langfuse.com`
+
+**Self-Hosted:**
+- Use your domain with HTTPS: `https://your-domain.com`
+
+**Local Development:**
+- `http://localhost:3000`
+
+## Client Setup
+
+<Tabs items={["Claude Code", "Cursor"]}>
+
+<Tab>
+
+### Claude Code
+
+Register the Langfuse MCP server with a single command:
+
+```bash
+# Langfuse Cloud (EU)
+claude mcp add --transport http langfuse https://cloud.langfuse.com/api/public/mcp \
+    --header "Authorization: Basic {your-base64-token}"
+
+# Langfuse Cloud (US)
+claude mcp add --transport http langfuse https://us.langfuse.com/api/public/mcp \
+    --header "Authorization: Basic {your-base64-token}"
+
+# Self-Hosted (HTTPS required)
+claude mcp add --transport http langfuse https://your-domain.com/api/public/mcp \
+    --header "Authorization: Basic {your-base64-token}"
+
+# Local Development
+claude mcp add --transport http langfuse http://localhost:3000/api/public/mcp \
+    --header "Authorization: Basic {your-base64-token}"
+```
+
+Replace `{your-base64-token}` with the base64-encoded credentials from step 2.
+
+### Verify
+
+In Claude Code, try: `List all prompts in the project`
+
+</Tab>
+
+<Tab>
+
+### Cursor
+
+Add to your Cursor MCP settings:
+
+1. Open Cursor Settings (`Cmd/Ctrl + Shift + J`)
+2. Navigate to **Tools & Integrations** tab
+3. Click **"Add Custom MCP"**
+4. Add your Langfuse MCP server configuration:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "langfuse": {
+        "url": "https://cloud.langfuse.com/api/public/mcp",
+        "headers": {
+          "Authorization": "Basic {your-base64-token}"
+        }
+      }
+    }
+  }
+}
+```
+
+Replace:
+- `https://cloud.langfuse.com` with your Langfuse URL (see [Choose Your Langfuse URL](#3-choose-your-langfuse-url))
+- `{your-base64-token}` with your encoded credentials
+
+5. Save the file and restart Cursor
+6. The server should appear in the MCP settings with a green dot indicating it's active
+
+</Tab>
+
+</Tabs>
+
+## Tool Annotations
+
+Tools include hints for MCP clients about their behavior:
+
+- **`readOnly: true`** - Safe operations that don't modify data (`getPrompt`, `listPrompts`)
+- **`destructive: true`** - Operations that create or modify data (`createTextPrompt`, `createChatPrompt`, `updatePromptLabels`)
+
+Clients like Claude Code can use these annotations to auto-approve read-only operations while requiring user confirmation for destructive operations.
+
+## Use Cases
+
+The MCP server enables powerful workflows for AI-assisted prompt management:
+
+- **Prompt Creation**: "Create a new chat prompt for customer support with system instructions and example messages"
+- **Version Management**: "Update the staging label to point to version 3 of the email-generation prompt"
+- **Prompt Discovery**: "List all prompts tagged with 'production' and show their latest versions"
+- **Iterative Development**: "Create a new version of the code-review prompt with improved instructions"
+
+All operations maintain full audit logs, making it easy to track changes made by AI agents.
+
+## Related Documentation
+
+- [Prompt Management with MCP](/docs/prompt-management/features/mcp-server) - Prompt-specific workflows and examples
+- [Prompt Management Overview](/docs/prompt-management/overview) - Learn about Langfuse prompt management
+- [Public API](/docs/api-and-data-platform/features/public-api) - REST API for programmatic access
