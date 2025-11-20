@@ -1,0 +1,112 @@
+import { Tabs, Cards } from "nextra/components";
+import {
+  FileText,
+  ClipboardCheck,
+  Scale,
+  Database,
+  LayoutDashboard,
+  TestTube,
+} from "lucide-react";
+
+## Interoperability with the JS/TS SDK
+
+You can use this integration together with the Langfuse [JS/TS SDK](/docs/observability/sdk/typescript/overview) to add additional attributes or group observations into a single trace.
+
+<Tabs items={["Context Manager", "Observe Wrapper"]}>
+<Tabs.Tab>
+
+The [Context Manager](/docs/observability/sdk/typescript/instrumentation#context-management-with-callbacks) allows you to wrap your instrumented code using context managers (with `with` statements), which allows you to add additional attributes to the trace. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
+
+```typescript
+import { startActiveObservation, propagateAttributes } from "npm:@langfuse/tracing";
+ 
+await startActiveObservation("context-manager", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" },
+  });
+ 
+  // Propagate userId to all child observations
+  await propagateAttributes(
+    {
+      userId: "user-123",
+      sessionId: "session-123",
+      metadata: {
+        source: "api",
+        region: "us-east-1",
+      },
+      tags: ["api", "user"],
+      version: "1.0.0",
+    },
+    async () => {
+        
+      // YOUR CODE HERE
+      const { text } = await generateText({
+        model: openai("gpt-5"),
+        prompt: "What is the capital of France?",
+        experimental_telemetry: { isEnabled: true },
+      });
+    }
+  );
+  span.update({ output: "Paris" });
+});
+```
+
+Learn more about using the Context Manager in the [JS/TS SDK](https://langfuse.com/docs/observability/sdk/typescript/instrumentation#context-management-with-callbacks) docs.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+The [`observe` wrapper](/docs/observability/sdk/typescript/instrumentation#observe-wrapper) is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a span or generation around the function call. You can use the `propagateAttributes` function to add attributes to the observation from within the wrapped function.
+
+```typescript
+import { observe, propagateAttributes } from "@langfuse/tracing";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+
+// An existing function
+const processUserRequest = observe(
+  async (userQuery: string) => {
+
+    // Propagate attributes to all child observations
+    return await propagateAttributes(
+      {
+        userId: "user-123",
+        sessionId: "session-123",
+        metadata: {
+          source: "api",
+          region: "us-east-1",
+        },
+        tags: ["api", "user"],
+        version: "1.0.0",
+      },
+      async () => {
+
+        // YOUR CODE HERE
+        const { text } = await generateText({
+          model: openai("gpt-5"),
+          prompt: userQuery,
+          experimental_telemetry: { isEnabled: true },
+        });
+
+        return text;
+      }
+    );
+  },
+  { name: "process-user-request" }
+);
+
+const result = await processUserRequest("some query");
+```
+
+Learn more about using the Decorator in the [JS/TS SDK docs](/docs/observability/sdk/typescript/instrumentation#observe-wrapper) docs.
+
+</Tabs.Tab>
+</Tabs>
+
+## Next Steps
+
+Once you have instrumented your code, you can manage, evaluate and debug your application:
+
+import NextSteps from "@/components-mdx/get-started/next-steps.mdx";
+
+<NextSteps />
