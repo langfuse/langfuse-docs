@@ -11,18 +11,15 @@ The MCP server provides tools for managing prompts with both read and write capa
 
 ## Architecture
 
-The Langfuse MCP server uses a **stateless per-request architecture**:
-
-- **Fresh server instance per request:** Each MCP request creates a new server instance
-- **Context captured in closures:** Authentication context is derived from your API key
-- **No session storage:** Server is discarded after request completes
-- **Project isolation:** Each API key is scoped to a specific project
-
-This design ensures clean separation between projects and reliable operation across all deployment types.
+The Langfuse MCP server uses a stateless architecture where each API key is scoped to a specific project. This ensures that all operations are automatically isolated to your project, providing secure multi-tenant operation.
 
 ## Available Tools
 
-The MCP server provides five tools for comprehensive prompt management:
+The MCP server provides five tools for comprehensive prompt management.
+
+<Callout type="warning">
+  **Both read and write tools are available by default.** If you only want to use read-only tools, configure your MCP client with an allowlist to restrict access to write operations (`createTextPrompt`, `createChatPrompt`, `updatePromptLabels`).
+</Callout>
 
 ### Read Operations
 
@@ -52,8 +49,6 @@ The MCP server provides five tools for comprehensive prompt management:
   - Add or move labels between versions
   - Labels are unique (auto-removed from other versions)
   - Cannot modify the auto-managed `latest` label
-
-All write operations create audit log entries with before/after snapshots for full traceability.
 
 ## Authentication
 
@@ -166,15 +161,6 @@ Replace:
 
 </Tabs>
 
-## Tool Annotations
-
-Tools include hints for MCP clients about their behavior:
-
-- **`readOnly: true`** - Safe operations that don't modify data (`getPrompt`, `listPrompts`)
-- **`destructive: true`** - Operations that create or modify data (`createTextPrompt`, `createChatPrompt`, `updatePromptLabels`)
-
-Clients like Claude Code can use these annotations to auto-approve read-only operations while requiring user confirmation for destructive operations.
-
 ## Use Cases
 
 The MCP server enables powerful workflows for AI-assisted prompt management:
@@ -184,7 +170,9 @@ The MCP server enables powerful workflows for AI-assisted prompt management:
 - **Prompt Discovery**: "List all prompts tagged with 'production' and show their latest versions"
 - **Iterative Development**: "Create a new version of the code-review prompt with improved instructions"
 
-All operations maintain full audit logs, making it easy to track changes made by AI agents.
+## Feedback
+
+We'd love to hear about your experience with the Langfuse MCP server. Share your feedback, ideas, and use cases in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605).
 
 ## Related Documentation
 

@@ -55,99 +55,9 @@ The Langfuse MCP Server provides five tools for comprehensive prompt management 
   - Cannot modify the auto-managed `latest` label
   - Useful for deployment workflows and version control
 
-All write operations create audit log entries with full before/after snapshots, giving you complete visibility into changes made by AI agents.
-
 ## Setup
 
-<Steps>
-
-### Get Your API Keys
-
-Navigate to your Langfuse project settings and create or copy a **project-scoped API key**:
-
-- Public Key: `pk-lf-...`
-- Secret Key: `sk-lf-...`
-
-<Callout type="info">
-  You must use project-scoped API keys. Organization-level keys are not supported.
-</Callout>
-
-### Encode Credentials
-
-Encode your API keys to base64 format:
-
-```bash
-echo -n "pk-lf-your-public-key:sk-lf-your-secret-key" | base64
-```
-
-This outputs your BasicAuth token (e.g., `cGstbGYt...`).
-
-### Configure Your MCP Client
-
-<Tabs items={["Claude Code", "Cursor"]}>
-
-<Tab>
-
-Register the Langfuse MCP server with a single command:
-
-```bash
-# Langfuse Cloud (EU)
-claude mcp add --transport http langfuse https://cloud.langfuse.com/api/public/mcp \
-    --header "Authorization: Basic {your-base64-token}"
-
-# Langfuse Cloud (US)
-claude mcp add --transport http langfuse https://us.langfuse.com/api/public/mcp \
-    --header "Authorization: Basic {your-base64-token}"
-
-# Self-Hosted (HTTPS required)
-claude mcp add --transport http langfuse https://your-domain.com/api/public/mcp \
-    --header "Authorization: Basic {your-base64-token}"
-
-# Local Development
-claude mcp add --transport http langfuse http://localhost:3000/api/public/mcp \
-    --header "Authorization: Basic {your-base64-token}"
-```
-
-Replace `{your-base64-token}` with your encoded credentials.
-
-**Verify:** In Claude Code, try: `List all prompts in the project`
-
-</Tab>
-
-<Tab>
-
-1. Open Cursor Settings (`Cmd/Ctrl + Shift + J`)
-2. Navigate to the **Tools & Integrations** tab
-3. Click **"Add Custom MCP"**
-4. Add your Langfuse MCP server configuration:
-
-```json
-{
-  "mcp": {
-    "servers": {
-      "langfuse": {
-        "url": "https://cloud.langfuse.com/api/public/mcp",
-        "headers": {
-          "Authorization": "Basic {your-base64-token}"
-        }
-      }
-    }
-  }
-}
-```
-
-Replace:
-- `https://cloud.langfuse.com` with your Langfuse instance URL
-- `{your-base64-token}` with your encoded credentials
-
-5. Save the file and restart Cursor
-6. The server should appear in the MCP settings with a green dot
-
-</Tab>
-
-</Tabs>
-
-</Steps>
+See the [MCP Server setup guide](/docs/api-and-data-platform/features/mcp-server#authentication) for complete instructions on authentication and client configuration.
 
 ## Example Workflows
 
@@ -170,6 +80,10 @@ The agent will use `updatePromptLabels` to update the label assignment.
 > "Create a new version of the code-review prompt with improved system instructions and add an example assistant message showing the review format"
 
 The agent will use `createChatPrompt` to create a new version with enhanced content.
+
+## Feedback
+
+Share your experience with the Langfuse MCP server in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605). We'd love to hear your feedback and use cases.
 
 ## Learn More
 
