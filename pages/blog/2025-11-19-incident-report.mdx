@@ -1,5 +1,5 @@
 ---
-title: "Langfuse Outage on November 18, 2025"
+title: "Incident Report for Nov 18, 2025"
 date: 2025/11/19
 description: "Langfuse experienced a multi-hour service outage on November 18, 2025 due to a global CloudFlare outage."
 ogImage: /images/blog/2025-11-19-cloud-outage/cloudflare-outage.png
@@ -10,13 +10,11 @@ author: Max
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="Langfuse Outage on November 18, 2025"
+  title="Incident Report for Nov 18, 2025"
   description="Langfuse experienced a multi-hour service outage on November 18, 2025 due to a global CloudFlare outage."
   date="November 19, 2025"
   authors={["maxdeichmann"]}
 />
-
-
 
 As an infrastructure provider for LLM observability and prompt management, ensuring continuous availability for our customers is our top priority.
 
@@ -28,26 +26,22 @@ We clearly did not meet our own expectations the reliability of our infrastructu
 
 During the [CloudFlare incident](https://www.cloudflarestatus.com/incidents/8gmgl950y3h7), API calls to the Langfuse UIs and APIs did not reach our infrastructure and returned an error message. We were first alerted about this incident at 11:33am UTC when our synthetic API tests detected that our health endpoints stopped responding. At 11:48am UTC CloudFlare acknowledged the incident on their status page. We observed the service recovered intermittently, but most of the requests failed until the full resolution around 2:40pm UTC.
 
-Within this incident we detected an overreliance on the CloudFlare infrastructure for our internal systems, but also across our vendors. We reported the incident at 12:11pm UTC on our status page as our status page provider was inaccessible due to the CloudFlare outage. 
+Within this incident we detected an overreliance on the CloudFlare infrastructure for our internal systems, but also across our vendors. We reported the incident at 12:11pm UTC on our status page as our status page provider was inaccessible due to the CloudFlare outage.
 
 We were also unable to take mitigating actions as CloudFlare acts as our registrar, DNS management tool, and as the proxy/gateway/WAF. The CloudFlare dashboard downtime prevented us from changing the DNS or proxy settings for the Langfuse Cloud domains. During a time of partial access to the CloudFlare dashboard, we have actively considered removing the CloudFlare proxying and directing all traffic directly to our AWS ALBs. We decided against this as we saw traffic resuming and had no test data on the potential fallout of this move. With static assets not being cached, different TLS requirements, and other potential unknowns, an unplanned and untested routing update was deemed too risky. In retrospect, this may have increased availability throughout the incident, but given our data points at the time, we stand by the decision to keep CloudFlare proxying active.
 
 As a potential mitigation for users, we published DNS-based bypasses of the CloudFlare proxy to our AWS ALBs at 02:06pm UTC on our status page.
 
-
-<Frame>
-  ![Uptime](/images/blog/2025-11-19-outage.png)
-</Frame>
+<Frame>![Uptime](/images/blog/2025-11-19-outage.png)</Frame>
 
 Uptime in UTC+1 from 12:00pm to 04:00pm for our US environment. The charts for the other data regions are effectively the same as they are all fronted by the same global Cloudflare network.
 
 ## Moving Forward
 
-We are dedicated to providing a reliable and resilient service. Our alerting and incident handling was positive throughout this event, but due to the outage we lacked the ability to act on our insights. Hence, we will review our dependency on single vendors across our own infrastructure and our suppliers. 
+We are dedicated to providing a reliable and resilient service. Our alerting and incident handling was positive throughout this event, but due to the outage we lacked the ability to act on our insights. Hence, we will review our dependency on single vendors across our own infrastructure and our suppliers.
 
 Having CloudFlare as a single-point of failure with no available mitigations is not acceptable to us and we will take measures to reduce our reliance on CloudFlare as a proxy, CDN and WAF, but also review its function as a registrar and DNS management solution.
 
 In addition, we will review supporting tools that we use for communication like our status page vendor to ensure that their infrastructure is decoupled from the Langfuse Cloud subproviders.
 
 We apologize for the impact this outage had on our users and thank you for your trust and patience.
-
