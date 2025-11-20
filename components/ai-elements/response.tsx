@@ -204,7 +204,7 @@ const components: Options["components"] = {
   ),
   a: ({ node, children, className, ...props }) => (
     <a
-      className={cn("font-medium text-primary underline", className)}
+      className={cn("font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline", className)}
       rel="noreferrer"
       target="_blank"
       {...props}
