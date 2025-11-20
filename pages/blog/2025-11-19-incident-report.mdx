@@ -41,6 +41,18 @@ As a temporary mitigation for users, we published DNS-based bypasses of the Clou
   the same global Cloudflare network)_
 </span>
 
+## Timeline (UTC)
+
+- **11:33** — Synthetic API tests detected that health endpoints stopped responding; automated alerts triggered
+- **11:48** — Cloudflare acknowledged the incident on their [status page](https://www.cloudflarestatus.com/incidents/8gmgl950y3h7)
+- **12:00** — Observed intermittent service recovery patterns across regions
+- **12:11** — Successfully posted incident report on our [status page](https://status.langfuse.com/incident/768837) (delayed due to status page provider also being affected by Cloudflare outage)
+- **~12:30** — Gained partial access to Cloudflare dashboard; evaluated removing Cloudflare proxying to route directly to AWS ALBs
+- **~13:00** — Decided against configuration changes due to observed recovery patterns and risks of untested modifications
+- **14:06** — Published DNS-based bypasses to AWS ALBs on status page as temporary mitigation for customers requiring immediate access
+- **14:40** — Observed full service resolution; monitoring confirmed stable recovery across all regions
+- **15:00** — Incident closed; continued monitoring maintained
+
 ## Infrastructure Architecture
 
 The following diagram illustrates our current infrastructure setup, showing how Cloudflare acts as a global proxy/WAF/gateway in front of our AWS infrastructure across all three regions (EU, US, and HIPAA). During the incident, this became a single point of failure.
@@ -94,4 +106,4 @@ Having Cloudflare as a single point of failure without available mitigations is 
 
 Additionally, we will review supporting communication tools, such as our status page vendor, to ensure their infrastructure is decoupled from Langfuse Cloud's sub-providers.
 
-We apologize for the impact this outage had on our users and thank you for your trust and patience.
+Thousands of teams rely on Langfuse to monitor and improve their LLM applications. This incident caused significant downtime and disruption for our users. We sincerely apologize for the impact this outage had and thank you for your trust and patience.
