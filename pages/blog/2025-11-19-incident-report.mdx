@@ -29,19 +29,68 @@ Through this incident, we identified an overreliance on Cloudflare infrastructur
 
 We were unable to take immediate mitigating actions as Cloudflare acts as our registrar, DNS management tool, and proxy/gateway/WAF. Downtime of the Cloudflare dashboard prevented us from changing DNS or proxy settings for Langfuse Cloud domains. During a period of partial access to the Cloudflare dashboard, we considered removing Cloudflare proxying and directing traffic directly to our AWS ALBs. However, we decided against this as we saw traffic resuming and lacked test data on the potential fallout of such a change. With static assets not being cached, differing TLS requirements, and other potential unknowns, an unplanned and untested routing update was deemed too risky. In retrospect, this might have increased availability during the incident, but given the data available at the time, we stand by our decision to keep Cloudflare proxying active.
 
-As a potential mitigation for users, we published DNS-based bypasses of the Cloudflare proxy to our AWS ALBs at 02:06pm UTC on our status page.
+As a temporary mitigation for users, we published DNS-based bypasses of the Cloudflare proxy to our AWS ALBs at 02:06pm UTC on our status page.
 
-<Frame>
+<Frame className="mt-6">
   ![Uptime](/images/blog/2025-11-19-incident-report/2025-11-19-outage.png)
 </Frame>
 
-Uptime in UTC+1 from 12:00pm to 04:00pm for our US environment. The charts for the other data regions are effectively the same as they are all fronted by the same global Cloudflare network.
+<span className="text-sm">
+  _Uptime in UTC+1 from 12:00pm to 04:00pm for our US environment. (The charts
+  for the other data regions are effectively the same as they are all fronted by
+  the same global Cloudflare network)_
+</span>
+
+## Infrastructure Architecture
+
+The following diagram illustrates our current infrastructure setup, showing how Cloudflare acts as a global proxy/WAF/gateway in front of our AWS infrastructure across all three regions (EU, US, and HIPAA). During the incident, this became a single point of failure.
+
+```mermaid
+---
+config:
+  flowchart:
+    subGraphTitleMargin:
+      bottom: 40
+---
+flowchart LR
+    Users["Users / SDKs / API Clients"]
+
+    subgraph CF["Cloudflare Global Network"]
+        CF_Services["Proxy / WAF / Gateway / DNS"]
+    end
+
+    subgraph US["AWS Region: US<br/>us.cloud.langfuse.com"]
+        direction TB
+        US_ALB["ALB"]
+        US_Service["Langfuse Service"]
+        US_ALB --> US_Service
+    end
+
+    subgraph EU["AWS Region: EU<br/>cloud.langfuse.com"]
+        direction TB
+        EU_ALB["ALB"]
+        EU_Service["Langfuse Service"]
+        EU_ALB --> EU_Service
+    end
+
+    subgraph HIPAA["AWS Region: HIPAA<br/>hipaa.cloud.langfuse.com"]
+        direction TB
+        HIPAA_ALB["ALB"]
+        HIPAA_Service["Langfuse Service"]
+        HIPAA_ALB --> HIPAA_Service
+    end
+
+    Users --> CF_Services
+    CF_Services --> US_ALB
+    CF_Services --> EU_ALB
+    CF_Services --> HIPAA_ALB
+```
 
 ## Moving Forward
 
 We are dedicated to providing a reliable and resilient service. While our alerting and incident handling were effective throughout this event, the nature of the outage limited our ability to act on our insights. Consequently, we will review our dependency on single vendors across both our own infrastructure and that of our suppliers.
 
-Having Cloudflare as a single point of failure without available mitigations is unacceptable. We will take measures to reduce our reliance on Cloudflare as a proxy, CDN, and WAF, and review its function as our registrar and DNS management solution.
+Having Cloudflare as a single point of failure without available mitigations is unacceptable. We will take measures to diversify and reduce our reliance on Cloudflare as a proxy, CDN, and WAF, and review its function as our registrar and DNS management solution.
 
 Additionally, we will review supporting communication tools, such as our status page vendor, to ensure their infrastructure is decoupled from Langfuse Cloud's sub-providers.
 
