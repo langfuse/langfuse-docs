@@ -1,29 +1,70 @@
 ---
-title: MCP Server
+title: Langfuse MCP Server
+sidebarTitle: MCP Server
 description: Native Model Context Protocol (MCP) server for Langfuse, enabling AI assistants to interact with your Langfuse data programmatically.
 ---
 
-# MCP Server
+# Langfuse MCP Server
 
-Langfuse includes a native [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that enables AI assistants and agents to interact with your Langfuse data programmatically. The server is built directly into Langfuse and requires no external setup or build steps.
+Langfuse includes a native [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that enables AI assistants and agents to interact with your Langfuse data programmatically.
 
-The MCP server provides tools for managing prompts with both read and write capabilities. All operations are scoped to your project via API key authentication and include automatic audit logging for write operations.
+Currently, the MCP server is available for [Prompt Management](/docs/prompt-management/overview) and will be extended to the rest of the Langfuse data platform in the future. If you have feedback or ideas for new tools, please [share them on GitHub](https://github.com/orgs/langfuse/discussions/10605).
 
-## Architecture
+## Configuration
 
-The Langfuse MCP server uses a stateless architecture where each API key is scoped to a specific project. This ensures that all operations are automatically isolated to your project, providing secure multi-tenant operation.
+The Langfuse MCP server uses a stateless architecture where each API key is scoped to a specific project. Use the following configuration to connect to the MCP server:
+
+<Tabs items={["Cloud EU", "Cloud US", "HIPAA US", "Self-Hosted"]}>
+
+<Tab>
+
+- Endpoint: `https://cloud.langfuse.com/api/public/mcp`
+- Transport: `streamableHttp`
+- Authentication: Basic Auth via authorization header
+
+</Tab>
+
+<Tab>
+
+- Endpoint: `https://us.langfuse.com/api/public/mcp`
+- Transport: `streamableHttp`
+- Authentication: Basic Auth via authorization header
+
+</Tab>
+
+<Tab>
+
+- Endpoint: `https://hipaa.langfuse.com/api/public/mcp`
+- Transport: `streamableHttp`
+- Authentication: Basic Auth via authorization header
+
+</Tab>
+
+<Tab>
+
+- Endpoint: `https://your-domain.com/api/public/mcp`
+- Transport: `streamableHttp`
+- Authentication: Basic Auth via authorization header
+
+</Tab>
+
+</Tabs>
 
 ## Available Tools
 
 The MCP server provides five tools for comprehensive prompt management.
 
 <Callout type="warning">
-  **Both read and write tools are available by default.** If you only want to use read-only tools, configure your MCP client with an allowlist to restrict access to write operations (`createTextPrompt`, `createChatPrompt`, `updatePromptLabels`).
+  **Both read and write tools are available by default.** If you only want to
+  use read-only tools, configure your MCP client with an allowlist to restrict
+  access to write operations (`createTextPrompt`, `createChatPrompt`,
+  `updatePromptLabels`).
 </Callout>
 
 ### Read Operations
 
 - **`getPrompt`** - Fetch a specific prompt by name with optional label or version
+
   - Supports filtering by production/staging labels
   - Returns compiled prompt with metadata
   - Read-only operation (auto-approved by clients)
@@ -36,11 +77,13 @@ The MCP server provides five tools for comprehensive prompt management.
 ### Write Operations
 
 - **`createTextPrompt`** - Create a new text prompt version
+
   - Supports template variables with `{{variable}}` syntax
   - Optional labels, config, tags, and commit message
   - Automatic version incrementing
 
 - **`createChatPrompt`** - Create a new chat prompt version
+
   - OpenAI-style message format (role + content)
   - Supports system, user, and assistant roles
   - Template variables in message content
@@ -50,92 +93,62 @@ The MCP server provides five tools for comprehensive prompt management.
   - Labels are unique (auto-removed from other versions)
   - Cannot modify the auto-managed `latest` label
 
-## Authentication
+## Set up
 
-The MCP server uses BasicAuth authentication with your Langfuse API keys.
+<Steps>
 
-### 1. Get Your API Keys
+### Get Authentication Header
 
-Navigate to your project settings and create or copy a **project-scoped API key**:
+1. Navigate to your project settings and create or copy a **project-scoped API key**:
+   - Public Key: `pk-lf-...`
+   - Secret Key: `sk-lf-...`
+2. Encode the credentials to base64 format:
+   ```bash filename="your-base64-token"
+   echo -n "pk-lf-your-public-key:sk-lf-your-secret-key" | base64
+   ```
 
-- Public Key: `pk-lf-...`
-- Secret Key: `sk-lf-...`
+### Client Setup
 
-<Callout type="info">
-  Organization-level API keys are not supported. You must use project-scoped keys.
-</Callout>
-
-### 2. Encode Credentials
-
-Encode your API keys to base64 format:
-
-```bash
-echo -n "pk-lf-your-public-key:sk-lf-your-secret-key" | base64
-```
-
-This outputs your BasicAuth token (e.g., `cGstbGYt...`).
-
-### 3. Choose Your Langfuse URL
-
-**Langfuse Cloud:**
-- EU Region: `https://cloud.langfuse.com`
-- US Region: `https://us.langfuse.com`
-- HIPAA: `https://hipaa.langfuse.com`
-
-**Self-Hosted:**
-- Use your domain with HTTPS: `https://your-domain.com`
-
-**Local Development:**
-- `http://localhost:3000`
-
-## Client Setup
-
-<Tabs items={["Claude Code", "Cursor"]}>
+<Tabs items={["Claude Code", "Cursor", "Other MCP Clients"]}>
 
 <Tab>
 
-### Claude Code
+1. Register the Langfuse MCP server with a single command, replace `{your-base64-token}` with your encoded credentials:
 
-Register the Langfuse MCP server with a single command:
+   ```bash filename="terminal" /{your-base64-token}/
+   # Langfuse Cloud (EU)
+   claude mcp add --transport http langfuse https://cloud.langfuse.com/api/public/mcp \
+       --header "Authorization: Basic {your-base64-token}"
 
-```bash
-# Langfuse Cloud (EU)
-claude mcp add --transport http langfuse https://cloud.langfuse.com/api/public/mcp \
-    --header "Authorization: Basic {your-base64-token}"
+   # Langfuse Cloud (US)
+   claude mcp add --transport http langfuse https://us.langfuse.com/api/public/mcp \
+       --header "Authorization: Basic {your-base64-token}"
 
-# Langfuse Cloud (US)
-claude mcp add --transport http langfuse https://us.langfuse.com/api/public/mcp \
-    --header "Authorization: Basic {your-base64-token}"
+   # Self-Hosted (HTTPS required)
+   claude mcp add --transport http langfuse https://your-domain.com/api/public/mcp \
+       --header "Authorization: Basic {your-base64-token}"
 
-# Self-Hosted (HTTPS required)
-claude mcp add --transport http langfuse https://your-domain.com/api/public/mcp \
-    --header "Authorization: Basic {your-base64-token}"
+   # Local Development
+   claude mcp add --transport http langfuse http://localhost:3000/api/public/mcp \
+       --header "Authorization: Basic {your-base64-token}"
+   ```
 
-# Local Development
-claude mcp add --transport http langfuse http://localhost:3000/api/public/mcp \
-    --header "Authorization: Basic {your-base64-token}"
-```
-
-Replace `{your-base64-token}` with the base64-encoded credentials from step 2.
-
-### Verify
-
-In Claude Code, try: `List all prompts in the project`
+2. Verify the connection by asking Claude Code to `list all prompts in the project`. Claude Code should use the `listPrompts` tool to return the list of prompts.
 
 </Tab>
 
 <Tab>
 
-### Cursor
-
-Add to your Cursor MCP settings:
-
 1. Open Cursor Settings (`Cmd/Ctrl + Shift + J`)
 2. Navigate to **Tools & Integrations** tab
 3. Click **"Add Custom MCP"**
-4. Add your Langfuse MCP server configuration:
+4. Add your Langfuse MCP server configuration, replace `{your-base64-token}` with your encoded credentials:
 
-```json
+<Tabs items={["Cloud EU", "Cloud US", "HIPAA US", "Self-Hosted"]}>
+
+<Tab>
+
+```json filename="mcp.json" /{your-base64-token}/
 {
   "mcp": {
     "servers": {
@@ -150,16 +163,83 @@ Add to your Cursor MCP settings:
 }
 ```
 
-Replace:
-- `https://cloud.langfuse.com` with your Langfuse URL (see [Choose Your Langfuse URL](#3-choose-your-langfuse-url))
-- `{your-base64-token}` with your encoded credentials
+</Tab>
+<Tab>
+
+```json filename="mcp.json" /{your-base64-token}/
+{
+  "mcp": {
+    "servers": {
+      "langfuse": {
+        "url": "https://us.cloud.langfuse.com/api/public/mcp",
+        "headers": {
+          "Authorization": "Basic {your-base64-token}"
+        }
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="mcp.json" /{your-base64-token}/
+{
+  "mcp": {
+    "servers": {
+      "langfuse": {
+        "url": "https://hipaa.cloud.langfuse.com/api/public/mcp",
+        "headers": {
+          "Authorization": "Basic {your-base64-token}"
+        }
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="mcp.json" /{your-base64-token}/
+{
+  "mcp": {
+    "servers": {
+      "langfuse": {
+        "url": "https://your-domain.com/api/public/mcp",
+        "headers": {
+          "Authorization": "Basic {your-base64-token}"
+        }
+      }
+    }
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 5. Save the file and restart Cursor
 6. The server should appear in the MCP settings with a green dot indicating it's active
 
 </Tab>
 
+<Tab>
+
+- Endpoint: `/api/public/mcp`
+  - EU: `https://cloud.langfuse.com/api/public/mcp`
+  - US: `https://us.langfuse.com/api/public/mcp`
+  - HIPAA: `https://hipaa.langfuse.com/api/public/mcp`
+  - Self-Hosted: `https://your-domain.com/api/public/mcp`
+- Transport: `streamableHttp`
+- Authentication: Basic Auth via authorization header
+  - `Authorization: Basic {your-base64-token}`
+
+</Tab>
 </Tabs>
+
+</Steps>
 
 ## Use Cases
 

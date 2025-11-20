@@ -1,7 +1,7 @@
 ---
 date: 2025-11-20
-title: Native MCP Server with Write Operations
-description: Langfuse now includes a native Model Context Protocol (MCP) server with write capabilities, enabling AI agents to create and update prompts directly—no external setup required.
+title: Hosted MCP Server for Langfuse Prompt Management
+description: Langfuse now includes a native Model Context Protocol (MCP) server with write capabilities, enabling AI agents to fetch and update prompts directly.
 author: Michael
 ogImage: /images/changelog/2025-11-20-native-mcp-server.png
 ---
@@ -12,7 +12,7 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 We're excited to announce that Langfuse now includes a **native MCP server** built directly into the platform. We release it with support for [Prompt Management](/docs/prompt-management/overview) and will extend it to the rest of the Langfuse data platform in the future.
 
-Our previous [Prompt MCP server](/changelog/2025-02-16-mcp-server-update) was a node package. The new one uses `StreamableHttp` to communicate with the Langfuse API directly, no need for building or installing any external dependencies.
+Our previous Prompt MCP server ([changelog](/changelog/2025-02-16-mcp-server-update)) was a node package. The new one uses `StreamableHttp` to communicate with the Langfuse API directly, no need for building or installing any external dependencies.
 
 ## What's New
 
@@ -40,6 +40,8 @@ claude mcp add --transport http langfuse https://cloud.langfuse.com/api/public/m
 ```
 
 The native server uses a stateless architecture, ensuring clean separation between projects and reliable operation across all deployment types (Cloud, self-hosted, or local development).
+
+See [documentation](/docs/api-and-data-platform/features/mcp-server) for more details.
 
 ## Feedback
 
