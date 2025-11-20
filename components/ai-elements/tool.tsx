@@ -9,7 +9,6 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
 import {
   Collapsible,
   CollapsibleContent,
@@ -23,7 +22,7 @@ export type ToolProps = ComponentProps<typeof Collapsible>;
 
 export const Tool = ({ className, ...props }: ToolProps) => (
   <Collapsible
-    className={cn("not-prose mb-4 w-full rounded-md border", className)}
+    className={cn("not-prose mb-4 w-full rounded-md", className)}
     {...props}
   />
 );
@@ -34,14 +33,7 @@ export type ToolHeaderProps = {
   className?: string;
 };
 
-const getStatusBadge = (status: ToolUIPart["state"]) => {
-  const labels = {
-    "input-streaming": "Pending",
-    "input-available": "Running",
-    "output-available": "Completed",
-    "output-error": "Error",
-  } as const;
-
+const getStatusIcon = (status: ToolUIPart["state"]) => {
   const icons = {
     "input-streaming": <CircleIcon className="size-4" />,
     "input-available": <ClockIcon className="size-4 animate-pulse" />,
@@ -49,12 +41,7 @@ const getStatusBadge = (status: ToolUIPart["state"]) => {
     "output-error": <XCircleIcon className="size-4 text-red-600" />,
   } as const;
 
-  return (
-    <Badge className="rounded-full text-xs gap-2" variant="secondary">
-      {icons[status]}
-      {labels[status]}
-    </Badge>
-  );
+  return icons[status];
 };
 
 export const ToolHeader = ({
@@ -64,15 +51,15 @@ export const ToolHeader = ({
   ...props
 }: ToolHeaderProps) => (
   <CollapsibleTrigger
-    className={cn("flex w-full items-center justify-between gap-4", className)}
+    className={cn("flex w-full items-center gap-4", className)}
     {...props}
   >
     <div className="flex items-center gap-2">
       <WrenchIcon className="size-4 text-muted-foreground" />
-      <span className="font-medium text-sm">{type}</span>
-      {getStatusBadge(state)}
+      <span className="font-medium text-sm text-muted-foreground">{type}</span>
+      {getStatusIcon(state)}
+      <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
     </div>
-    <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
   </CollapsibleTrigger>
 );
 
