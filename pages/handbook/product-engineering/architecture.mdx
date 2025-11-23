@@ -51,7 +51,7 @@ flowchart LR
 
 ## Production environments
 
-Our production infrastructure is deployed across multiple AWS regions with a fully automated CI/CD pipeline. All infrastructure is managed using Terraform.
+Our production infrastructure is deployed across multiple AWS regions with a fully automated CI/CD pipeline. All infrastructure is managed using Terraform. Cloudflare WAF (Web Application Firewall) serves as a central proxy in front of AWS.
 
 ```mermaid
 ---
@@ -90,6 +90,14 @@ graph TB
         GHA -->|Build & Push| DockerHub["Docker Hub<br/>(OSS releases)"]
     end
     ECR -->|Deploy| VPN
+    
+    subgraph CF["Cloudflare"]
+        WAF["WAF<br/>(Web Application Firewall)"]
+        Proxy["Central Proxy"]
+    end
+    
+    CF -->|Traffic| VPN
+    
     subgraph VPN["<span style='display:block; width:100%; text-align:left; white-space: nowrap;'><i>Langfuse Cloud (US, EU, HIPAA)</i></span>"]
         ECS["AWS ECS Fargate (Web + Worker)"]
         ECS --> ElastiCache["ElastiCache Redis (Clustered)"]
