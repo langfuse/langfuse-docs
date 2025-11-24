@@ -19,17 +19,6 @@ This notebook demonstrates how to **integrate Langfuse** with the **Vercel AI SD
 
 ## Steps to integrate Langfuse with the Vercel AI SDK
 
-### TL;DR
-Here's the flow of how Langfuse and the Vercel AI SDK work together:
-
-1. **You enable telemetry** in the AI SDK (`experimental_telemetry: { isEnabled: true }`)
-2. **The AI SDK creates spans** for each operation (model calls, tool executions, etc.)
-3. **The LangfuseSpanProcessor intercepts** these spans and sends them to Langfuse
-4. **Langfuse stores and visualizes** the data in traces you can explore
-
-This integration uses [OpenTelemetry](https://opentelemetry.io/docs/what-is-opentelemetry/), an observability standard. The Vercel AI SDK's telemetry feature is documented in the [Vercel AI SDK documentation on Telemetry](https://ai-sdk.dev/docs/ai-sdk-core/telemetry).
-
-Let's walk through the steps in more detail.
 
 <Steps>
 
