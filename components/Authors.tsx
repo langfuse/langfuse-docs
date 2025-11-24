@@ -29,7 +29,8 @@ export const Authors = (props: { authors?: string[] }) => {
       const author =
         allAuthors[authorName as keyof typeof allAuthors] ??
         Object.values(allAuthors).find(
-          (author) => author.firstName === authorName
+          (author) =>
+            author.firstName.toLowerCase() === authorName.toLowerCase()
         );
       if (!author) {
         throw new Error(
@@ -72,7 +73,7 @@ export const Author = (props: { author: string; hideLastName?: boolean }) => {
   const author =
     allAuthors[props.author as keyof typeof allAuthors] ??
     Object.values(allAuthors).find(
-      (author) => author.firstName === props.author
+      (author) => author.firstName.toLowerCase() === props.author.toLowerCase()
     );
 
   if (!author) {
@@ -113,7 +114,7 @@ export const AuthorAvatar = (props: { author: string }) => {
   const author =
     allAuthors[props.author as keyof typeof allAuthors] ??
     Object.values(allAuthors).find(
-      (author) => author.firstName === props.author
+      (author) => author.firstName.toLowerCase() === props.author.toLowerCase()
     );
 
   if (!author) return null;
