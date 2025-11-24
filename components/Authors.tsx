@@ -29,6 +29,9 @@ const findAuthor = (authorName: string): Author | undefined => {
     allAuthors[authorName as keyof typeof allAuthors] ??
     Object.values(allAuthors).find(
       (author) => author.firstName.toLowerCase() === authorName.toLowerCase()
+    ) ??
+    Object.values(allAuthors).find(
+      (author) => author.name.toLowerCase() === authorName.toLowerCase()
     )
   );
 };
