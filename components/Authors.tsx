@@ -67,7 +67,7 @@ export const Authors = (props: { authors?: string[] }) => {
         <Author
           author={author}
           key={author}
-          hideLastName={authors.length > 2}
+          hideLastName={authors.length > 1}
         />
       ))}
     </div>
