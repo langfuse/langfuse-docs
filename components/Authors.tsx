@@ -24,39 +24,32 @@ export const allAuthors: {
   [key: string]: Author;
 } = authorsData;
 
-const findAuthor = (authorName: string): Author | undefined => {
-  return (
+const findAuthor = (authorName: string): Author => {
+  const author =
     allAuthors[authorName as keyof typeof allAuthors] ??
     Object.values(allAuthors).find(
       (author) => author.firstName.toLowerCase() === authorName.toLowerCase()
     ) ??
     Object.values(allAuthors).find(
       (author) => author.name.toLowerCase() === authorName.toLowerCase()
-    )
-  );
+    );
+  if (!author) {
+    throw new Error(
+      `Author "${authorName}" is not present in allAuthors. Please check data/authors.json.`
+    );
+  }
+  return author;
 };
 
-export const Authors = (props: { authors?: string[] }) => {
-  if (props.authors) {
-    for (const authorName of props.authors) {
-      const author = findAuthor(authorName);
-      if (!author) {
-        throw new Error(
-          `Author "${authorName}" is not present in allAuthors. Please check data/authors.json.`
-        );
-      }
-    }
-  }
-  const authors = props.authors ?? [];
-
-  if (authors.length === 0) return null;
+export const Authors = (props: { authors: string[] }) => {
+  if (props.authors.length === 0) return null;
 
   // Show only overlapping avatars when there are more than 2 authors
-  if (authors.length > 2) {
+  if (props.authors.length > 2) {
     return (
       <div className="flex justify-center py-7 max-w-xl">
         <div className="flex -space-x-2">
-          {authors.map((author) => (
+          {props.authors.map((author) => (
             <AuthorAvatar author={author} key={author} />
           ))}
         </div>
@@ -66,11 +59,11 @@ export const Authors = (props: { authors?: string[] }) => {
 
   return (
     <div className="flex flex-wrap gap-x-10 gap-y-6 justify-center py-7 max-w-xl">
-      {authors.map((author) => (
+      {props.authors.map((author) => (
         <Author
           author={author}
           key={author}
-          hideLastName={authors.length > 1}
+          hideLastName={props.authors.length > 1}
         />
       ))}
     </div>
@@ -79,12 +72,6 @@ export const Authors = (props: { authors?: string[] }) => {
 
 export const Author = (props: { author: string; hideLastName?: boolean }) => {
   const author = findAuthor(props.author);
-
-  if (!author) {
-    throw new Error(
-      `Author "${props.author}" is not present in allAuthors. Please check data/authors.json.`
-    );
-  }
 
   return (
     <HoverCard openDelay={50} closeDelay={50}>
@@ -116,8 +103,6 @@ export const Author = (props: { author: string; hideLastName?: boolean }) => {
 
 export const AuthorAvatar = (props: { author: string }) => {
   const author = findAuthor(props.author);
-
-  if (!author) return null;
 
   return (
     <HoverCard openDelay={50} closeDelay={50}>
