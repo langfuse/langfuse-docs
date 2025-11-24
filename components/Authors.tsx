@@ -51,7 +51,7 @@ export const Authors = (props: { authors?: string[] }) => {
   // Show only overlapping avatars when there are more than 2 authors
   if (authors.length > 2) {
     return (
-      <div className="flex justify-center py-7 max-w-xl mx-auto">
+      <div className="flex justify-center py-7 max-w-xl">
         <div className="flex -space-x-2">
           {authors.map((author) => (
             <AuthorAvatar author={author} key={author} />
@@ -62,7 +62,7 @@ export const Authors = (props: { authors?: string[] }) => {
   }
 
   return (
-    <div className="flex flex-wrap gap-x-10 gap-y-6 justify-center py-7 max-w-xl mx-auto">
+    <div className="flex flex-wrap gap-x-10 gap-y-6 justify-center py-7 max-w-xl">
       {authors.map((author) => (
         <Author
           author={author}
