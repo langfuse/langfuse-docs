@@ -114,7 +114,7 @@ import { Separator } from "@/components/ui/separator";
 
 // ... imports
 
-const AuthorHoverCardContent = ({ author }: { author: any }) => {
+const AuthorHoverCardContent = ({ author }: { author: (typeof allAuthors)[keyof typeof allAuthors] }) => {
   return (
     <HoverCardContent className="w-56 p-0">
       <div className="flex flex-col gap-2 text-left w-full">
@@ -141,6 +141,7 @@ const AuthorHoverCardContent = ({ author }: { author: any }) => {
             <Link
               href={`https://twitter.com/${author.twitter}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
             >
               <Twitter className="h-4 w-4" />
@@ -151,6 +152,7 @@ const AuthorHoverCardContent = ({ author }: { author: any }) => {
             <Link
               href={`https://github.com/${author.github}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
             >
               <Github className="h-4 w-4" />
@@ -161,6 +163,7 @@ const AuthorHoverCardContent = ({ author }: { author: any }) => {
             <Link
               href={`https://www.linkedin.com/in/${author.linkedin}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
             >
               <Linkedin className="h-4 w-4" />
