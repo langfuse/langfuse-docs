@@ -10,7 +10,7 @@ export const BlogHeader = ({
   image,
   customerLogo,
 }: {
-  authors: (keyof typeof allAuthors)[];
+  authors: string[];
   title: string;
   description?: string;
   date?: string;
@@ -42,7 +42,9 @@ export const BlogHeader = ({
           />
         </div>
       )}
-      <h1 className="font-bold leading-snug text-balance text-foreground">{title}</h1>
+      <h1 className="font-bold leading-snug text-balance text-foreground">
+        {title}
+      </h1>
       <p className="text-primary/60 text-xl text-balance">{description}</p>
       <Authors authors={authors} />
     </div>

@@ -24,10 +24,16 @@ export const allAuthors: {
 } = authorsData;
 
 export const Authors = (props: { authors?: string[] }) => {
-  const authors =
-    props.authors?.filter((author) =>
-      Object.keys(allAuthors).includes(author)
-    ) ?? [];
+  if (props.authors) {
+    for (const author of props.authors) {
+      if (!(author in allAuthors)) {
+        throw new Error(
+          `Author "${author}" is not present in allAuthors. Please check data/authors.json.`
+        );
+      }
+    }
+  }
+  const authors = props.authors ?? [];
 
   if (authors.length === 0) return null;
 
@@ -64,7 +70,11 @@ export const Author = (props: { author: string; hideLastName?: boolean }) => {
       (author) => author.firstName === props.author
     );
 
-  if (!author) return null;
+  if (!author) {
+    throw new Error(
+      `Author "${props.author}" is not present in allAuthors. Please check data/authors.json.`
+    );
+  }
 
   return (
     <HoverCard openDelay={50} closeDelay={50}>
