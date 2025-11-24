@@ -8,6 +8,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Github, Linkedin, Twitter } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 type Author = {
   firstName: string;
@@ -23,15 +24,19 @@ export const allAuthors: {
   [key: string]: Author;
 } = authorsData;
 
+const findAuthor = (authorName: string): Author | undefined => {
+  return (
+    allAuthors[authorName as keyof typeof allAuthors] ??
+    Object.values(allAuthors).find(
+      (author) => author.firstName.toLowerCase() === authorName.toLowerCase()
+    )
+  );
+};
+
 export const Authors = (props: { authors?: string[] }) => {
   if (props.authors) {
     for (const authorName of props.authors) {
-      const author =
-        allAuthors[authorName as keyof typeof allAuthors] ??
-        Object.values(allAuthors).find(
-          (author) =>
-            author.firstName.toLowerCase() === authorName.toLowerCase()
-        );
+      const author = findAuthor(authorName);
       if (!author) {
         throw new Error(
           `Author "${authorName}" is not present in allAuthors. Please check data/authors.json.`
@@ -70,11 +75,7 @@ export const Authors = (props: { authors?: string[] }) => {
 };
 
 export const Author = (props: { author: string; hideLastName?: boolean }) => {
-  const author =
-    allAuthors[props.author as keyof typeof allAuthors] ??
-    Object.values(allAuthors).find(
-      (author) => author.firstName.toLowerCase() === props.author.toLowerCase()
-    );
+  const author = findAuthor(props.author);
 
   if (!author) {
     throw new Error(
@@ -111,11 +112,7 @@ export const Author = (props: { author: string; hideLastName?: boolean }) => {
 };
 
 export const AuthorAvatar = (props: { author: string }) => {
-  const author =
-    allAuthors[props.author as keyof typeof allAuthors] ??
-    Object.values(allAuthors).find(
-      (author) => author.firstName.toLowerCase() === props.author.toLowerCase()
-    );
+  const author = findAuthor(props.author);
 
   if (!author) return null;
 
@@ -140,10 +137,6 @@ export const AuthorAvatar = (props: { author: string }) => {
     </HoverCard>
   );
 };
-
-import { Separator } from "@/components/ui/separator";
-
-// ... imports
 
 const AuthorHoverCardContent = ({ author }: { author: Author }) => {
   return (
