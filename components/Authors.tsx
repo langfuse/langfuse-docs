@@ -9,10 +9,25 @@ import {
 } from "@/components/ui/hover-card";
 import { Github, Linkedin, Twitter } from "lucide-react";
 
-export const allAuthors = authorsData;
+type Author = {
+  firstName: string;
+  name: string;
+  title: string;
+  image: string;
+  twitter?: string;
+  github?: string;
+  linkedin?: string;
+};
 
-export const Authors = (props: { authors?: (keyof typeof allAuthors)[] }) => {
-  const authors = props.authors?.filter((author) => author in allAuthors) ?? [];
+export const allAuthors: {
+  [key: string]: Author;
+} = authorsData;
+
+export const Authors = (props: { authors?: string[] }) => {
+  const authors =
+    props.authors?.filter((author) =>
+      Object.keys(allAuthors).includes(author)
+    ) ?? [];
 
   if (authors.length === 0) return null;
 
@@ -114,7 +129,7 @@ import { Separator } from "@/components/ui/separator";
 
 // ... imports
 
-const AuthorHoverCardContent = ({ author }: { author: (typeof allAuthors)[keyof typeof allAuthors] }) => {
+const AuthorHoverCardContent = ({ author }: { author: Author }) => {
   return (
     <HoverCardContent className="w-56 p-0">
       <div className="flex flex-col gap-2 text-left w-full">
