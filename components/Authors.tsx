@@ -25,10 +25,15 @@ export const allAuthors: {
 
 export const Authors = (props: { authors?: string[] }) => {
   if (props.authors) {
-    for (const author of props.authors) {
-      if (!(author in allAuthors)) {
+    for (const authorName of props.authors) {
+      const author =
+        allAuthors[authorName as keyof typeof allAuthors] ??
+        Object.values(allAuthors).find(
+          (author) => author.firstName === authorName
+        );
+      if (!author) {
         throw new Error(
-          `Author "${author}" is not present in allAuthors. Please check data/authors.json.`
+          `Author "${authorName}" is not present in allAuthors. Please check data/authors.json.`
         );
       }
     }
