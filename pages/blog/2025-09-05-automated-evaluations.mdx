@@ -33,9 +33,9 @@ This guide describes a process to **build automated evaluators** for your applic
 
 ---
 
-I'll demonstrate this process using a [demo chatbot in the Langfuse documentation](/docs/demo) that uses the Vercel AI SDK and has access to a RAG tool to retrieve documents from the Langfuse documentation. The demo chat app logs traces into the Langfuse demo project and has already answered 19k user queries in the past year.
+I'll demonstrate this process using an [example chatbot in the Langfuse documentation](/docs/demo) that uses the Vercel AI SDK and has access to a RAG tool to retrieve documents from the Langfuse documentation. The example chat app logs traces into the Langfuse example project and has already answered 19k user queries in the past year.
 
-Here's the chat interface (you can find the demo chat app [here](/docs/demo)):
+Here's the chat interface (you can find the example chat app [here](/docs/demo)):
 
 <Frame className="rounded-lg overflow-hidden">
   ![Chat
@@ -52,7 +52,7 @@ Before building an evaluator, it's important to differentiate between two types 
 
 **Model Limitations:** The second type occur when the LLM fails to perform correctly despite receiving clear and precise instructions. These are the ideal candidates for automated evaluation because they represent the model's inherent limitations, not a misunderstanding of your intent.
 
-Let's apply this to the [Langfuse Demo App](/docs/demo). First, we fix some obvious issues by clarifying the prompt: "use a maximum of three bullet points" and "ask for more context when the user's query is ambiguous." With those fixed, we can focus on measuring the more complex model limitation failures we identified in the [previous blog post](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications):
+Let's apply this to the [Langfuse Example App](/docs/demo). First, we fix some obvious issues by clarifying the prompt: "use a maximum of three bullet points" and "ask for more context when the user's query is ambiguous." With those fixed, we can focus on measuring the more complex model limitation failures we identified in the [previous blog post](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications):
 
 * **Out of Scope**: The agent answers a question not related to Langfuse or the LLM/AI space.
 * **Generic Responses**: The answer is technically correct but doesn't resolve the user's issue. The metric is to assess if the agent's final answer is helpful and directly addresses the user's question.
@@ -78,7 +78,7 @@ A good LLM-as-a-Judge prompt is narrowly focused and well-structured:
 2.  **Pass/Fail Definitions**: Clearly define what constitutes a "Pass" (failure is absent) and a "Fail" (failure is present).
 3.  **Examples**: Include clear examples of both "Pass" and "Fail" cases.
 
-Here is an example prompt I use in our Demo App example to check if the agent's answer is within its scope:
+Here is an example prompt I use in our Example App to check if the agent's answer is within its scope:
 
 <Frame className="rounded-lg overflow-hidden">
   ![LLM-as-a-Judge Prompt](/images/blog/2025-09-05-automated-evaluations/prompt.png)
