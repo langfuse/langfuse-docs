@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { Page } from "nextra";
 import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
-import { Author } from "../Authors";
+import { Authors } from "../Authors";
 import { Video } from "../Video";
 import { useConfig } from "nextra-theme-docs";
 
@@ -26,6 +26,13 @@ export const ChangelogHeader = () => {
     showOgInHeader,
     badge,
   } = frontMatter;
+
+  // Parse comma-separated authors
+  const authors = author
+    ? author.includes(",")
+      ? author.split(",").map((a) => a.trim())
+      : [author.trim()]
+    : [];
 
   return (
     <div className="md:mt-10 flex flex-col gap-10">
@@ -54,7 +61,7 @@ export const ChangelogHeader = () => {
               {title}
             </h1>
           </div>
-          <Author author={author} />
+          <Authors authors={authors} />
         </div>
       </div>
 

@@ -11,6 +11,10 @@ export const TEAMS = {
     name: "Support",
     firstPage: "support",
   },
+  devrel: {
+    name: "DevRel",
+    firstPage: "community-hour",
+  },
   operations: {
     name: "Operations",
     firstPage: "entity-structure",

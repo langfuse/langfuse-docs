@@ -52,19 +52,16 @@ Use the Langfuse UI or SDK to create and fetch a dataset in a folder by adding a
 <Tab>
 
 ```python
-from urllib.parse import quote
-
 dataset_name = "evaluation/qa-dataset"
-encoded_name = quote(dataset_name, safe="")  # "evaluation%2Fqa-dataset"
 
 # When creating a dataset, use the full dataset name
 langfuse.create_dataset(
     name=dataset_name,
 )
 
-# When fetching a dataset in a folder, use the encoded name
+# When fetching a dataset in a folder, use the full dataset name
 langfuse.get_dataset(
-    name=encoded_name
+    name=dataset_name
 )
 
 ```
@@ -101,8 +98,7 @@ In the UI, create a dataset and use a slash (`/`) in the name field to organize 
 
 <Callout type="info">
   **URL Encoding**: When using dataset names with slashes as path parameters in
-  the API, use URL encoding. For example, in Python: `urllib.parse.quote(name,
-  safe="")`, in TypeScript: `encodeURIComponent(name)`.
+  the API or JS/TS SDK, use URL encoding. For example, in TypeScript: `encodeURIComponent(name)`.
 </Callout>
 
 ## Schema Enforcement
