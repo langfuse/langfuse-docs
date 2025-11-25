@@ -10,7 +10,7 @@ import {
 import { Github, Linkedin, Twitter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-type Author = {
+export type Author = {
   firstName: string;
   name: string;
   title: string;
@@ -126,9 +126,17 @@ export const AuthorAvatar = (props: { author: string }) => {
   );
 };
 
-const AuthorHoverCardContent = ({ author }: { author: Author }) => {
+export const AuthorHoverCardContent = ({
+  author,
+  side,
+  align,
+}: {
+  author: Author;
+  side?: "top" | "right" | "bottom" | "left";
+  align?: "start" | "center" | "end";
+}) => {
   return (
-    <HoverCardContent className="w-56 p-0">
+    <HoverCardContent className="w-56 p-0" side={side} align={align}>
       <div className="flex flex-col gap-2 text-left w-full">
         <div className="flex items-center gap-3 justify-start p-3 pb-1">
           <Image
