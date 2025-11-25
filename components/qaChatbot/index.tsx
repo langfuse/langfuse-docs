@@ -351,7 +351,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
           </div>
         </PromptInput>
         <p className="mt-6 text-xs text-muted-foreground text-center relative z-10 italic">
-          ⚠️ Warning: Do not enter sensitive information. All chat messages can be viewed in the public demo project. Responses may be inaccurate. Please check the documentation for details or reach out to us via the chat widget.
+          ⚠️ Warning: Do not enter sensitive information. All chat messages can be viewed in the public example project. Responses may be inaccurate. Please check the documentation for details or reach out to us via the chat widget.
         </p>
       </div>
     </div>

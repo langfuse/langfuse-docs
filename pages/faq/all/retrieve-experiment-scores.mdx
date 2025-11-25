@@ -79,7 +79,7 @@ const runName = "your-run-name";
 const encodedDatasetName = encodeURIComponent(datasetName);
 const encodedRunName = encodeURIComponent(runName);
 
-// Fetch experiment run
+// Fetch experiment run; must use encoded names for fetching runs
 const run = await langfuse.dataset.getRun({
   datasetName: encodedDatasetName,
   runName: encodedRunName
