@@ -3,7 +3,8 @@
 echo "Updating cookbook docs... (needs to be executed from the root directory)"
 
 # Convert notebooks to markdown using uv with inline dependencies
-uv run --with nbconvert --python 3.12 -- python -m nbconvert --to markdown cookbook/*.ipynb
+uv run --with nbconvert --python 3.12 -- python -m nbconvert --to markdown pages/integrations/cookbooks/*.ipynb
+uv run --with nbconvert --python 3.12 -- python -m nbconvert --to markdown pages/guides/cookbooks/*.ipynb
 
 # delete all files in pages/guides/cookbook/
 echo "Deleting all files in pages/guides/cookbook/"

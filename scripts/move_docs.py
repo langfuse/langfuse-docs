@@ -1,7 +1,7 @@
 import json
-import shutil
 import os
 import re
+from pathlib import Path
 
 # Function to transform custom metadata, tabs, callouts, steps, and components
 def transform_content_to_mdx(markdown_content):
@@ -140,78 +140,86 @@ def transform_content_to_mdx(markdown_content):
     return final_assembled_content, was_transformed_overall, metadata_was_processed
 
 # --- Main script execution logic (remains the same) ---
-try:
-    with open('./cookbook/_routes.json', 'r', encoding='utf-8') as file:
-        mappings = json.load(file)
-except FileNotFoundError:
-    print("Error: './cookbook/_routes.json' not found. Exiting.")
-    exit(1)
-except json.JSONDecodeError:
-    print("Error: Could not decode JSON from './cookbook/_routes.json'. Exiting.")
-    exit(1)
+COOKBOOK_SOURCES = [
+    {
+        "name": "integrations",
+        "notebook_dir": Path("pages/integrations/cookbooks"),
+    },
+    {
+        "name": "guides",
+        "notebook_dir": Path("pages/guides/cookbooks"),
+    },
+]
 
-for mapping in mappings:
-    notebook_filename = mapping.get('notebook')
-    if not notebook_filename:
-        print(f"Warning: Skipping mapping due to missing 'notebook' field: {mapping}")
-        continue
-
-    md_source_filename = notebook_filename.replace('.ipynb', '.md')
-    source_path = os.path.join('cookbook', md_source_filename)
-
-    if not os.path.exists(source_path):
-        print(f"Warning: Source file {source_path} not found. Skipping.")
-        continue
-
+def load_routes(routes_path: Path):
     try:
-        with open(source_path, 'r', encoding='utf-8') as f:
-            original_md_content = f.read()
-    except Exception as e:
-        print(f"Error reading source file {source_path}: {e}. Skipping.")
-        continue
-    
-    processed_content_final, was_transformed_final, metadata_found = transform_content_to_mdx(original_md_content)
-    
-    output_extension = ".mdx" if metadata_found else ".md"
-    
-    filename_base_no_ext = notebook_filename.replace('.ipynb', '')
+        with routes_path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        print(f"Error: '{routes_path}' not found. Skipping.")
+        return []
+    except json.JSONDecodeError:
+        print(f"Error: Could not decode JSON from '{routes_path}'. Skipping.")
+        return []
 
-    destination_paths_to_write = []
-    docs_path_value = mapping.get('docsPath')
-    if docs_path_value is not None:
-        path_parts = docs_path_value.split('/')
-        base_filename_from_docs_path = path_parts[-1]
-        if '.' in base_filename_from_docs_path:
-            name_without_ext = base_filename_from_docs_path.rsplit('.', 1)[0]
-        else:
-            name_without_ext = base_filename_from_docs_path
-        if len(path_parts) > 1:
-            dir_path_from_docs_path = os.path.join(*path_parts[:-1])
-            final_docs_path_filename_part = name_without_ext + output_extension
-            dest_path_str = os.path.join("pages", dir_path_from_docs_path, final_docs_path_filename_part)
-        else:
-             dest_path_str = os.path.join("pages", name_without_ext + output_extension)
-        destination_paths_to_write.append(dest_path_str)
-    
-    # Only add to guides/cookbook if the mapping is marked as a guide (default True)
-    if mapping.get('isGuide', True):
-        guide_dest_filename = filename_base_no_ext + output_extension
-        guide_dest_path_str = os.path.join("pages", "guides", "cookbook", guide_dest_filename)
-        destination_paths_to_write.append(guide_dest_path_str)
+for source in COOKBOOK_SOURCES:
+    notebook_dir = source["notebook_dir"]
+    routes_path = notebook_dir / "_routes.json"
+    mappings = load_routes(routes_path)
 
-    for full_destination_path in destination_paths_to_write:
-        os.makedirs(os.path.dirname(full_destination_path), exist_ok=True)
-        
-        print(f"Processing: {notebook_filename} -> {full_destination_path} (Overall Transformed: {was_transformed_final}, Metadata Found: {metadata_found})")
+    for mapping in mappings:
+        notebook_filename = mapping.get("notebook")
+        if not notebook_filename:
+            print(f"Warning: Skipping mapping due to missing 'notebook' field: {mapping}")
+            continue
+
+        md_source_filename = notebook_filename.replace(".ipynb", ".md")
+        source_path = notebook_dir / md_source_filename
+
+        if not source_path.exists():
+            print(f"Warning: Source file {source_path} not found. Skipping.")
+            continue
+
         try:
-            with open(full_destination_path, 'w', encoding='utf-8') as f_out:
-                f_out.write(processed_content_final)
+            original_md_content = source_path.read_text(encoding="utf-8")
         except Exception as e:
-            print(f"Error writing to destination file {full_destination_path}: {e}")
+            print(f"Error reading source file {source_path}: {e}. Skipping.")
+            continue
 
-    try:
-        os.remove(source_path)
-    except Exception as e:
-        print(f"Error removing source file {source_path}: {e}")
+        processed_content_final, was_transformed_final, metadata_found = transform_content_to_mdx(original_md_content)
+
+        output_extension = ".mdx" if metadata_found else ".md"
+        destinations = mapping.get("destinations", [])
+        destination_paths_to_write = []
+
+        for destination in destinations:
+            if not destination:
+                continue
+            destination = destination.strip().strip("/")
+            if not destination:
+                continue
+            destination_path = Path("pages") / Path(destination)
+            if destination_path.suffix in {".md", ".mdx"}:
+                final_destination_path = destination_path
+            else:
+                final_destination_path = destination_path.with_suffix(output_extension)
+            destination_paths_to_write.append(final_destination_path)
+
+        for full_destination_path in destination_paths_to_write:
+            os.makedirs(full_destination_path.parent, exist_ok=True)
+
+            print(
+                f"Processing: {notebook_filename} -> {full_destination_path} "
+                f"(Overall Transformed: {was_transformed_final}, Metadata Found: {metadata_found})"
+            )
+            try:
+                full_destination_path.write_text(processed_content_final, encoding="utf-8")
+            except Exception as e:
+                print(f"Error writing to destination file {full_destination_path}: {e}")
+
+        try:
+            source_path.unlink()
+        except Exception as e:
+            print(f"Error removing source file {source_path}: {e}")
 
 print("\nDone processing cookbook files!")

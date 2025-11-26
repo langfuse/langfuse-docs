@@ -14,4 +14,7 @@ export default {
   analytics: "Analytics",
   "data-platform": "Data Platform",
   other: "Other",
+  cookbooks: {
+    display: "hidden",
+  },
 };

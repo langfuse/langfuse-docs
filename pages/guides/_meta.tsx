@@ -6,6 +6,11 @@ export default {
     title: <MenuSwitcher />,
   },
   index: "Overview",
-  cookbook: "Cookbooks",
-  videos: "Videos",
+  cookbook: {
+    title: "Cookbooks",
+    display: "hidden",
+  },
+  cookbooks: {
+    display: "hidden",
+  },
 };
