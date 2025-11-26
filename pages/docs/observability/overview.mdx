@@ -11,23 +11,9 @@ As LLM applications become more complex with multi-step reasoning, tool calls, a
 
 Langfuse captures all of this automatically as you build. 
 
-## Understanding Traces, Sessions, and Observations
-
-Langfuse organizes an application's data into three core concepts:
-
-**Traces** represent a single execution through your application. For example, when a user asks a question to a chatbot, that interaction is captured as one trace. Each trace shows you the complete timeline of what happened under the hood.
-
-**Sessions** group related traces together. This is useful for applications involving multi-turn conversations or multi-step workflows. For example, achatbot conversation with three back-and-forth messages would be one session containing three traces.
-
-**Observations** are the individual steps within a trace. These include LLM generations, toolcalls, etc. Observations can be nested.
-
 <Frame fullWidth>
   <img src="/images/docs/tracing-overview.png" alt="Example of a trace showing nested observations: an initial model call, multiple tool executions, and a final summarization step. Each observation includes timing, inputs, outputs, and cost information." />
 </Frame>
-
-## Built on OpenTelemetry
-
-Langfuse is based on [OpenTelemetry](https://opentelemetry.io/), an open standard for collecting telemetry data from applications. This means you can use any OpenTelemetry-compatible instrumentation library to send data to Langfuse, and you can also send your Langfuse data to other platforms. You're not locked in: your instrumentation code remains portable and vendor-neutral.
 
 <Callout type="info" emoji="🎥">
 
@@ -35,135 +21,19 @@ Langfuse is based on [OpenTelemetry](https://opentelemetry.io/), an open standar
 
 </Callout>
 
+## Built on OpenTelemetry
 
-## How to get the most out of tracing
+Langfuse is based on [OpenTelemetry](https://opentelemetry.io/), an open standard for collecting telemetry data from applications. This means you can use any OpenTelemetry-compatible instrumentation library to send data to Langfuse, and you can also send your Langfuse data to other platforms. You're not locked in: your instrumentation code remains portable and vendor-neutral.
 
-Start by [setting up your first trace](/docs/observability/get-started). After that, the following features will help you get the most out of tracing:
+## Getting started
 
-#### Tracking token usage and costs
+Start by [setting up your first trace](/docs/observability/get-started).
 
-Langfuse automatically tracks token usage and calculates costs for all major model providers. You can create custom dashboards to visualize spending patterns by model, user, or feature. See the [token and cost tracking documentation](/docs/observability/features/token-and-cost-tracking) for details on custom pricing and cost analysis.
+Take a moment to understand the core concepts of tracing in Langfuse: [traces, sessions, and observations](/docs/observability/data-model).
 
-#### Sessions for multi-turn applications
-
-Use sessions to group related traces and understand the full context of conversations or workflows. This makes it easier to debug issues that span multiple interactions. Learn more in the [sessions documentation](/docs/observability/features/sessions).
-
-#### Prompt management
-
-When you use Langfuse's prompt management, traces automatically link to the prompt version that was used. This way you can compare metrics across prompt versions and understand the impact of changes immediately. Learn how to start [using prompt management here](/docs/prompt-management/get-started).
+Once you're up and running, you can start adding on more functionality to your traces. We recommend starting with the following:
+- [Grouping traces into sessions for multi-turn applications](/docs/observability/features/sessions)
+- [Splitting traces into environments for different stages of your application](/docs/observability/features/environments)
+- [Adding attributes to your traces so you can filter them in the future](/docs/observability/features/tags)
 
 
-## Where to start
-
-Follow the quickstart to add tracing to your LLM app.
-
-import { Rocket, BookOpen, Joystick } from "lucide-react";
-
-<Cards num={1}>
-  <Card
-    icon={<Rocket size="24" />}
-    title="Get Started with Tracing"
-    href="/docs/observability/get-started"
-    arrow
-  />
-  <Card
-    icon={<BookOpen size="24" />}
-    title="Understand the Data Model"
-    href="/docs/observability/data-model"
-    arrow
-  />
-  <Card
-    icon={<Joystick size="24" />}
-    title="Interactive demo"
-    href="/docs/demo"
-    arrow
-  />
-</Cards>
-
-## Core Features
-
-Essential tracing features that form the foundation of observability in Langfuse.
-
-import ObservabilityCoreFeatures from "@/components-mdx/observability-core-features.mdx";
-
-<ObservabilityCoreFeatures />
-
-## Advanced Features
-
-Extended capabilities for sophisticated tracing and analysis.
-
-import {
-  Users,
-  Tag,
-  MessagesSquare,
-  Images,
-  Braces,
-  GitGraph,
-  Globe,
-  Database,
-  FileDigit,
-  GitCompare,
-  MapPin,
-  BarChart3,
-  Filter,
-  BadgeDollarSign,
-  EyeOff,
-  MessageCircle,
-} from "lucide-react";
-
-<Cards num={2}>
-  <Card
-    title="Log Levels"
-    href="/docs/observability/features/log-levels"
-    icon={<BarChart3 />}
-    arrow
-  />
-  <Card
-    title="Multi-Modality"
-    href="/docs/observability/features/multi-modality"
-    icon={<Images />}
-    arrow
-  />
-  <Card
-    title="Releases & Versioning"
-    href="/docs/observability/features/releases-and-versioning"
-    icon={<GitGraph />}
-    arrow
-  />
-  <Card
-    title="Trace URLs"
-    href="/docs/observability/features/url"
-    icon={<Globe />}
-    arrow
-  />
-  <Card
-    title="Agent Graphs"
-    href="/docs/observability/features/agent-graphs"
-    icon={<GitCompare />}
-    arrow
-  />
-  <Card
-    title="Sampling"
-    href="/docs/observability/features/sampling"
-    icon={<Filter />}
-    arrow
-  />
-  <Card
-    title="Token & Cost Tracking"
-    href="/docs/observability/features/token-and-cost-tracking"
-    icon={<BadgeDollarSign />}
-    arrow
-  />
-  <Card
-    title="Masking"
-    href="/docs/observability/features/masking"
-    icon={<EyeOff />}
-    arrow
-  />
-  <Card
-    title="Comments"
-    href="/docs/observability/features/comments"
-    icon={<MessageCircle />}
-    arrow
-  />
-</Cards>
