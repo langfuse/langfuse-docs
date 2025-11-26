@@ -13,7 +13,7 @@ export const CredibilitySentence = ({
 
   return (
     <p className={className}>
-      Langfuse is the most widely adopted LLM Engineering platform with over{" "}
+      Langfuse is the most widely adopted LLM Engineering platform with{" "}
       <Metric className={metricClassName}>
         {getGitHubStars().toLocaleString()} GitHub stars
       </Metric>
