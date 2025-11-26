@@ -379,7 +379,7 @@ const sections: Section[] = [
         name: "Included usage",
         description:
           "Billable units are the collection of created traces, observations, and scores in Langfuse.",
-        href: "/docs/observability/data-model",
+        href: "/docs/administration/billable-units",
         tiers: {
           cloud: {
             Hobby: "50k units",
@@ -396,7 +396,7 @@ const sections: Section[] = [
         name: "Additional usage",
         description:
           "Billable units are the collection of created traces, observations, and scores in Langfuse. Pricing follows graduated tiers with lower rates at higher volumes.",
-        href: "/docs/observability/data-model",
+        href: "/docs/administration/billable-units",
         tiers: {
           cloud: {
             Hobby: false,

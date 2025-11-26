@@ -142,33 +142,3 @@ Example session in Langfuse UI
 </div>
 
 Using sessions is recommended for applications with multi-turn conversations or workflows. Please refer to the [Sessions](/docs/tracing-features/sessions) documentation to add sessions to your traces.
-
-## Scores
-
-[Scores](/docs/scores) are flexible objects used to evaluate traces, observations, sessions and dataset runs.
-
-They can be:
-
-- Numeric, categorical, or boolean values
-- Associated with a trace, a session, or a dataset run (one and only one is required)
-- For trace level scores only: Linked to a specific observation within a trace (optional)
-- Annotated with comments for additional context
-- Validated against a score configuration schema (optional)
-
-Typically, session-level scores are used for comprehensive evaluation of conversational experiences across multiple interactions, while trace-level scores are used for evaluation of a single interaction. Dataset run level scores are used for overall evaluation of a dataset run, e.g. precision, recall, F1-score.
-
-Please refer to the [scores documentation](/docs/scores) to get started. For more details on score types and attributes, refer to the [score data model](/docs/scores/data-model) documentation.
-
-## Billable Units
-
-Langfuse Cloud [pricing](/pricing) is based on the number of ingested units per billing period.
-
-`Units` = `Count of Traces` + `Count of Observations` + `Count of Scores`
-
-Use our [pricing calculator](/pricing?calculatorOpen=true) to estimate your monthly costs based on your expected usage.
-
-### FAQ
-
-**How can I track my Langfuse Cloud usage?** Use the Usage Monitoring Report in the Dashboards tab in Langfuse to analyze your Langfuse Cloud usage.
-
-**How can I optimize my Langfuse Cloud usage to reduce cost?** If your application scales and you want to optimize Langfuse Cloud cost, please check out [this guide](/faq/all/cutting-costs).

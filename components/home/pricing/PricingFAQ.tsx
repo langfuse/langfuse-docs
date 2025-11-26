@@ -15,7 +15,7 @@ const faqs = [
   {
     question: "What is a billable unit?",
     answer:
-      "A billable unit in Langfuse is any tracing data point you send to our platform - this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our <a class='underline' href='/docs/observability/data-model'>Langfuse Data Model docs</a>.",
+      "A billable unit in Langfuse is any tracing data point you send to our platform - this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our <a class='underline' href='/docs/administration/billable-units'>Langfuse Billable Units docs</a>.",
   },
   {
     question: "How does the graduated pricing work?",

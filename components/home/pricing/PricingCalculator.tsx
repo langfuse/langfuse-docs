@@ -175,7 +175,7 @@ export function PricingCalculator({
               <div className="flex items-center gap-1">
                 <Label htmlFor="events">Monthly Units</Label>
                 <Link
-                  href="/docs/observability/data-model#billable-units"
+                  href="/docs/administration/billable-units"
                   target="_blank"
                 >
                   <InfoIcon className="size-3" />
@@ -250,7 +250,7 @@ export function PricingCalculator({
                       <div className="flex items-center justify-end gap-1">
                         Your Units
                         <Link aria-label="Learn more about billable units"
-                          href="/docs/observability/data-model#billable-units"
+                          href="/docs/administration/billable-units"
                           target="_blank"
                         >
                           <InfoIcon className="size-3" />
