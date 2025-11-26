@@ -88,7 +88,7 @@ const UserLogo = ({ user }: { user: User }) => {
       href={user.href}
       className={cn(
         "relative h-12 sm:h-16 w-20 sm:w-36 cursor-pointer",
-        user.className
+        user.className,
       )}
       target="_blank"
       rel="noopener noreferrer"

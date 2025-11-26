@@ -8,20 +8,20 @@ In case of uncertainty: Tag Max (24h SLA on Linear inbox). Everyone should have 
 
 ### Issue States
 
-| State | Description |
-|-------|-------------|
-| **Triage** | - Unassigned, no labels or prios<br/>- Created via GitHub Issue integration or in Linear by non-engineering team members<br/>- Marc/Max subscribe, triage and assign, and add labels, and refine title<br/>- After assignment, Engineer dedupes with existing tickets and handles communications with users |
-| **Backlog** | - Everyone manages their backlogs in Linear<br/>- Issues always have a label. Use Linear views to look at all tickets of a label. We only create projects for work that has a clear end (no endless bucket of tickets)<br/>- Add user feedback to tickets or projects: If via Plain, use the "Link thread" feature. Link Linear issues to Plain threads straight from Plain. Snooze issues in Plain for which we want to review again e.g. next week<br/>- Only backlog what you plan/hope to do over the next 1-2 Quarters, rest GitHub Discussions<br/>- Add labels to product areas<br/>- Issue titles: Titles have to be good enough so that someone who reads a list of titles knows what each is about. Descriptions are optional. Write short and precise descriptions so everyone understands |
-| **Todo/Progress** | See priority table below for handling guidelines |
+| State             | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triage**        | - Unassigned, no labels or prios<br/>- Created via GitHub Issue integration or in Linear by non-engineering team members<br/>- Marc/Max subscribe, triage and assign, and add labels, and refine title<br/>- After assignment, Engineer dedupes with existing tickets and handles communications with users                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **Backlog**       | - Everyone manages their backlogs in Linear<br/>- Issues always have a label. Use Linear views to look at all tickets of a label. We only create projects for work that has a clear end (no endless bucket of tickets)<br/>- Add user feedback to tickets or projects: If via Plain, use the "Link thread" feature. Link Linear issues to Plain threads straight from Plain. Snooze issues in Plain for which we want to review again e.g. next week<br/>- Only backlog what you plan/hope to do over the next 1-2 Quarters, rest GitHub Discussions<br/>- Add labels to product areas<br/>- Issue titles: Titles have to be good enough so that someone who reads a list of titles knows what each is about. Descriptions are optional. Write short and precise descriptions so everyone understands |
+| **Todo/Progress** | See priority table below for handling guidelines                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ### Priority Levels
 
-| Priority | Timeline | Description | Examples |
-|----------|----------|-------------|----------|
-| **P0 (urgent)** | Drop everything and fix | - Security incidents (e.g. data breach)<br/>- Performance issues (ingestion delay, clickhouse CPU/memory issues)<br/>- Issues that have large scale impact and break our application | Traces table does not load, login broken |
-| **P1 (high)** | Same week resolution | - Issues with smaller scale impact<br/>- Improvements that are \<1h work and have a big impact for many customers; great to move fast on these to make users share more feedback as they are excited that we ship<br/>- Delight a user same day for a small change that helps them | Some edge case does not work for dashboards |
-| **P2 (mid)** | Same month resolution | - Fixes which are papercut for our users but do not have a wide range impact | Trace tree UI breaks when users have many scores |
-| **P3 (low)** | Backlog | - Addition to Langfuse which is nice to have but not urgent | Create new prompt based on non latest prompt version |
+| Priority        | Timeline                | Description                                                                                                                                                                                                                                                                        | Examples                                             |
+| --------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| **P0 (urgent)** | Drop everything and fix | - Security incidents (e.g. data breach)<br/>- Performance issues (ingestion delay, clickhouse CPU/memory issues)<br/>- Issues that have large scale impact and break our application                                                                                               | Traces table does not load, login broken             |
+| **P1 (high)**   | Same week resolution    | - Issues with smaller scale impact<br/>- Improvements that are \<1h work and have a big impact for many customers; great to move fast on these to make users share more feedback as they are excited that we ship<br/>- Delight a user same day for a small change that helps them | Some edge case does not work for dashboards          |
+| **P2 (mid)**    | Same month resolution   | - Fixes which are papercut for our users but do not have a wide range impact                                                                                                                                                                                                       | Trace tree UI breaks when users have many scores     |
+| **P3 (low)**    | Backlog                 | - Addition to Langfuse which is nice to have but not urgent                                                                                                                                                                                                                        | Create new prompt based on non latest prompt version |
 
 ## Specification on how to build things
 
@@ -30,40 +30,40 @@ In case of uncertainty: Tag Max (24h SLA on Linear inbox). Everyone should have 
 - For such features, getting the right people early in one room is a massive time saver and allows us to ship fast and with high quality.
 
 ### Small/mid sized changes (e.g. adding a new filter to a table, adding a new field to a form…)
-  - Engineer creates a Linear ticket with very brief notes or just a descriptive title
-  - Open to do brief discussions with Max if helpful to speed process up and reduce risk/uncertainty
-  - If you plan to have a reviewer of a change, please make sure to involve the reviewer in the planning process.
-  - Asking Claude Code or ChatGPT "what am I missing?" or "how would you build this?" is a great way to get feedback and reduce risk/uncertainty.
+
+- Engineer creates a Linear ticket with very brief notes or just a descriptive title
+- Open to do brief discussions with Max if helpful to speed process up and reduce risk/uncertainty
+- If you plan to have a reviewer of a change, please make sure to involve the reviewer in the planning process.
+- Asking Claude Code or ChatGPT "what am I missing?" or "how would you build this?" is a great way to get feedback and reduce risk/uncertainty.
 
 ### Large projects (e.g. supporting Agents in Langfuse, rebuilding SDKs ..)
-  1. Engineer does initial research and then schedules meeting with Marc/Max and other team members who have a lot of relevant context. Ideally, he creates a google doc or Lineat ticket with the initial research and a rough specification.
-  2. Meeting to make decisions and plan the implementation:
-     - Meeting usually starts with everyone reading and commenting to make sure we are all on the same page.
-     - Recorded \-\> meeting includes lots of details, good to generate spec/issue-description/working with Claude Code
-     - Discussion on timelines and how we can cut requirements to build faster
-     - Implementation plan afterwards, spin with Max if needed
-     - If things change in a meeting (also follow-up discussions), small note logged to Linear ticket / project.
-     - Engineer needs to make sure to have relevant people in the room to make a decision ([DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0)).
-     - Engineer needs to manage Linear project based on the outcome of the meeting.
+
+1. Engineer does initial research and then schedules meeting with Marc/Max and other team members who have a lot of relevant context. Ideally, he creates a google doc or Lineat ticket with the initial research and a rough specification.
+2. Meeting to make decisions and plan the implementation:
+   - Meeting usually starts with everyone reading and commenting to make sure we are all on the same page.
+   - Recorded \-\> meeting includes lots of details, good to generate spec/issue-description/working with Claude Code
+   - Discussion on timelines and how we can cut requirements to build faster
+   - Implementation plan afterwards, spin with Max if needed
+   - If things change in a meeting (also follow-up discussions), small note logged to Linear ticket / project.
+   - Engineer needs to make sure to have relevant people in the room to make a decision ([DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0)).
+   - Engineer needs to manage Linear project based on the outcome of the meeting.
 
 ### Ways of pulling help from others
+
 Engineers can ask others any time to help them with their work. 15 minutes of shared discussion can very much improve the overall output.
+
 - UI/UX: For larger UI/UX changes, it is helpful to get input from Max or Marc. Otherwise, draw a small sketch and ask anyone from the team for feedback. We have to take time to polish the UI/UX.
 - Clickhouse: For more complex Clickhouse queries, it is helpful to get input from the Clickhouse ([DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0)). Otherwise, we may end up with anti patterns in performance and maintainability.
 
 ## Implementation
 
-- No uncertainty: Engineer thinks about the challenges of the issue/feature and has a clear understanding of how to implement it.  
+- No uncertainty: Engineer thinks about the challenges of the issue/feature and has a clear understanding of how to implement it.
 - Uncertainty/questions: Tag Max on the Linear ticket with a clear question for the issue to get an answer / buy-in for the change.
-
-
 
 ## Releases
 
 - Complex changes/projects: need a release plan on which PRs to merge and release in which order.
 - Please always write [public docs](/docs) or [changelog posts](/changelog) when shipping something.
-
-
 
 ## Slack
 
@@ -73,33 +73,31 @@ Slack is extremely busy with many noisy channels. We do not want you to have too
 
 We all need to do busy work and at the same time need to make progress on the most important project we want to drive forward. Hence:
 
-- You should spend max 2h/day on coding bug fixes, support tickets and similar. Sometimes it is necessary and super important for our company to fix bugs. Yet, if you continuously spend more time than 2h/day on bug, talk to Max to get buy-in or distribute work in the team.  
+- You should spend max 2h/day on coding bug fixes, support tickets and similar. Sometimes it is necessary and super important for our company to fix bugs. Yet, if you continuously spend more time than 2h/day on bug, talk to Max to get buy-in or distribute work in the team.
 - If you are a reviewer on a PR, you have to review within 24h. Please see (/handbook/product-engineering/how-we-work/code-review) for more details.
-- You are expected to clear out your Plain inbox 2 times a day. Always acknowledge a request by a user ASAP and then look into it / work on a fix.  
+- You are expected to clear out your Plain inbox 2 times a day. Always acknowledge a request by a user ASAP and then look into it / work on a fix.
 - You are expected to clear out your Linear inbox once a day.
 
 ## Linear
 
 We use Linear as internal project planning / ticketing tool. It helps us to:
 
-- Collect user feedback in one place  
-- Discuss product requirements and implementation details  
-- Understand what work is left to finish a project  
-- Triage and prioritize bugs  
+- Collect user feedback in one place
+- Discuss product requirements and implementation details
+- Understand what work is left to finish a project
+- Triage and prioritize bugs
 - Reduce Linear/Slack knowledge split. Keep as much knowledge in Linear as possible.
 - Integrate with different tools (Plain, GitHub, Cursor, etc.) to make the workflow smoother.
 
 ### Conventions
 
-- Precise and brief titles for tickets anyone can understand. Goal: any engineer who reads a list of Linear tickets should be able to roughly understand what this is about.  
-- Labels:  
-  - Before creating a new label, please check that no existing Label is a match. For this, go to Langfuse settings.  
-  - When creating Labels, move them to the organization level. They are initially created on the project level.  
-  - Please use the “feat-...” labels for most of the Linear issues you create  
-  
+- Precise and brief titles for tickets anyone can understand. Goal: any engineer who reads a list of Linear tickets should be able to roughly understand what this is about.
+- Labels:
+  - Before creating a new label, please check that no existing Label is a match. For this, go to Langfuse settings.
+  - When creating Labels, move them to the organization level. They are initially created on the project level.
+  - Please use the “feat-...” labels for most of the Linear issues you create
 - Enable “assign to self on creation” in linear. Assign to self when creating from 3rd party tools.
 - Use labels everywhere. Before creating a new label, make sure to check first if another label is a good fit ([Link](https://linear.app/langfuse/settings/issue-labels)). Also, make sure to move labels to the workspace level always.
 - Plain:
   - Use the “Thread links” to connect Plain threads to Linear issues. When closing Linear tickets, resolve to tell the user that we fixed the issue / implemented the request. This step is super important as this is 2 minutes of effort and gives the impression that we ship fast
-- For internal (non user facing) Slack messages: use the Linear App in Slack to create an issue. This tracks slack channels on the Linear issues. Whenever we change the state of the ticket, users are notified.  
-
+- For internal (non user facing) Slack messages: use the Linear App in Slack to create an issue. This tracks slack channels on the Linear issues. Whenever we change the state of the ticket, users are notified.

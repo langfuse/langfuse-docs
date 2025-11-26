@@ -11,7 +11,7 @@ logo: /images/integrations/haystack_icon.png
 
 This cookbook demonstrates how to use [Langfuse](https://langfuse.com) to gain real-time observability for your [Haystack Application](https://haystack.deepset.ai/).
 
->  **What is Haystack?** [Haystack](https://haystack.deepset.ai/) is the open-source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
+> **What is Haystack?** [Haystack](https://haystack.deepset.ai/) is the open-source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is the open source LLM engineering platform. It helps teams to collaboratively manage prompts, trace applications, debug problems, and evaluate their LLM system in production.
 
@@ -22,7 +22,6 @@ We'll walk through a simple example of using Haystack and integrating it with La
 <Steps>
 ### Step 1: Install Dependencies
 
-
 ```python
 %pip install haystack-ai langfuse openinference-instrumentation-haystack
 ```
@@ -31,13 +30,12 @@ We'll walk through a simple example of using Haystack and integrating it with La
 
 Configure your Langfuse API keys. You can get them by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -48,12 +46,11 @@ os.environ["SERPERDEV_API_KEY"] = "..."
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -65,7 +62,6 @@ else:
 
 Now, we initialize the [OpenInference Haystack instrumentation](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-haystack). This third-party instrumentation automatically captures Haystack operations and exports OpenTelemetry (OTel) spans to Langfuse.
 
-
 ```python
 from openinference.instrumentation.haystack import HaystackInstrumentor
 
@@ -75,8 +71,7 @@ HaystackInstrumentor().instrument()
 
 ### Step 4: Create a Simple Haystack Application
 
-Now we create a simple Haystack application using an OpenAI model and the SerperDev search API. 
-
+Now we create a simple Haystack application using an OpenAI model and the SerperDev search API.
 
 ```python
 import os
@@ -105,11 +100,12 @@ langfuse.flush()
 
 ### Step 5: View Traces in Langfuse
 
-After running your workflow, log in to [Langfuse](https://cloud.langfuse.com) to explore the generated traces. You will see logs for each workflow step along with metrics such as token counts, latencies, and execution paths. 
+After running your workflow, log in to [Langfuse](https://cloud.langfuse.com) to explore the generated traces. You will see logs for each workflow step along with metrics such as token counts, latencies, and execution paths.
 
 ![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration_haystack/haystack-example-trace.png)
 
 _[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c1097813c1089faa5ac718bbd0695c73?timestamp=2025-09-02T09%3A53%3A35.005Z&display=details&observation=fdbb095a5e21466b)_
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

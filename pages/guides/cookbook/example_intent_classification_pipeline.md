@@ -15,6 +15,7 @@ Why is this useful?
 - Measuring the volume/intent is necessary to make sure that datasets used for offline/development evaluation are representative of production usage
 
 You can approach intent classification in two ways:
+
 - **Supervised approach**: You provide a model with labeled training data, and the model will output one of the pre-defined labels when making predictions.
 - **Unsupervised approach**: The model attempts to find clusters within the data, which you can then label appropriately.
 
@@ -35,14 +36,12 @@ Thank you [@thompsgj](https://github.com/thompsgj) for the contribution ([pr](ht
 
 Begin by setting up your environment. First, disable unwanted warnings:
 
-
 ```python
 import warnings
 warnings.filterwarnings("ignore")
 ```
 
 Install the necessary packages:
-
 
 ```python
 # Install Langfuse
@@ -54,7 +53,6 @@ Install the necessary packages:
 ```
 
 Configure your Langfuse project credentials (retrieve these from your [Langfuse Project Settings](https://cloud.langfuse.com)):
-
 
 ```python
 import os
@@ -68,7 +66,6 @@ os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU reg
 ```
 
 Select an embedding model from the Sentence Transformers library:
-
 
 ```python
 # Select embedding model
@@ -84,15 +81,14 @@ This section outlines the process of creating a supervised intent classification
 
 Initialize the Langfuse client:
 
-
 ```python
 from langfuse import Langfuse
 langfuse = Langfuse()
 ```
 
 #### Optional: Create dummy trace data
-If your project is empty, you can run the next two cells to create some simple dummy trace data to use for this notebook.  The remainder of this section expects a trace with a "message" key in the input.  You may need to adjust the notebook to your trace data's structure if you use data with another structure.
 
+If your project is empty, you can run the next two cells to create some simple dummy trace data to use for this notebook. The remainder of this section expects a trace with a "message" key in the input. You may need to adjust the notebook to your trace data's structure if you use data with another structure.
 
 ```python
 sample_utterances = [
@@ -110,14 +106,10 @@ for utterance in sample_utterances:
 
 Fetch data from your project
 
-
 ```python
 traces = langfuse.fetch_traces()
 traces.data[0].dict()
 ```
-
-
-
 
     {'id': '7e687860-55eb-47f0-b632-e568d5dfb57b',
      'timestamp': datetime.datetime(2024, 10, 8, 7, 7, 51, 549000, tzinfo=datetime.timezone.utc),
@@ -142,10 +134,7 @@ traces.data[0].dict()
      'metadata': None,
      'externalId': None}
 
-
-
 Construct a DataFrame for analysis:
-
 
 ```python
 traces_list = []
@@ -162,7 +151,6 @@ traces_df.head()
 
 Prepare a small labeled dataset:
 
-
 ```python
 import numpy as np
 from sklearn.base import TransformerMixin, BaseEstimator
@@ -174,7 +162,6 @@ from tqdm.notebook import tqdm
 ```
 
 Split the data and define an embedding transformer:
-
 
 ```python
 # Note: This is a very small dataset.
@@ -250,12 +237,10 @@ sample_data = {
 }
 ```
 
-
 ```python
 df = pd.DataFrame(sample_data)
 df.head()
 ```
-
 
 ```python
 X_train, X_test, y_train, y_test = train_test_split(
@@ -265,7 +250,6 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=14
 )
 ```
-
 
 ```python
 class Encoder(BaseEstimator, TransformerMixin):
@@ -279,7 +263,6 @@ class Encoder(BaseEstimator, TransformerMixin):
         return self
 ```
 
-
 ```python
 pipeline = Pipeline([
     ('encoder', Encoder()),
@@ -287,86 +270,56 @@ pipeline = Pipeline([
 ])
 ```
 
-
 ```python
 pipeline.fit(X_train, y_train)
 ```
-
 
 ```python
 y_pred = pipeline.predict(X_test)
 y_pred
 ```
 
-
-
-
     array(['greeting', 'menu', 'menu', 'greeting', 'restart', 'greeting',
            'restart', 'menu', 'greeting', 'greeting', 'restart', 'greeting',
            'menu', 'menu', 'menu'], dtype=object)
-
-
-
 
 ```python
 single_pred = pipeline.predict(["Please let's move on"])
 single_pred
 ```
 
-
-
-
     array(['menu'], dtype=object)
-
-
-
 
 ```python
 probas = pipeline.predict_proba(["Please let's move on"])
 probas
 ```
 
-
-
-
     array([[0.30275492, 0.39219684, 0.30504823]])
-
-
-
 
 ```python
 confidence_score = float(np.max(probas, axis=1)[0])
 confidence_score
 ```
 
-
-
-
     0.3921968431842116
-
-
-
 
 ```python
 print("\nClassification Report:\n", classification_report(y_test, y_pred))
 ```
 
-    
     Classification Report:
                    precision    recall  f1-score   support
-    
+
         greeting       0.83      1.00      0.91         5
             menu       0.67      1.00      0.80         4
          restart       1.00      0.50      0.67         6
-    
+
         accuracy                           0.80        15
        macro avg       0.83      0.83      0.79        15
     weighted avg       0.86      0.80      0.78        15
-    
-
 
 ### 3. Run predictions on traces
-
 
 ```python
 for index, row in traces_df.iterrows():
@@ -381,7 +334,6 @@ traces_df
 ```
 
 ### 4. Tag traces with labels
-
 
 ```python
 # Note: This will add to existing tags, not add duplicate tags.
@@ -402,7 +354,6 @@ The unsupervised intent classification pipeline demonstrates how to cluster and 
 
 We will use sample data from the [public example](https://langfuse.com/demo) project (RAG on Langfuse Documentation) to understand what people are most interested in when interacting with the example application.
 
-
 ```python
 import os
 
@@ -417,7 +368,6 @@ os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU reg
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
-
 ```python
 langfuse = Langfuse()
 ```
@@ -425,7 +375,6 @@ langfuse = Langfuse()
 ### 1. Fetch traces from Langfuse
 
 We will fetch 15,000 messages sent to the example application to create meaningful clusters.
-
 
 ```python
 PAGES_TO_FETCH = 300
@@ -436,14 +385,12 @@ for i in range(PAGES_TO_FETCH):
     traces.extend(traces_page.data)
 ```
 
-
 ```python
 traces_list = []
 for trace in traces:
     trace_info = [trace.id, trace.input]
     traces_list.append(trace_info)
 ```
-
 
 ```python
 import pandas as pd
@@ -453,7 +400,6 @@ cluster_traces_df.dropna(inplace=True) # drop traces with message = None
 ```
 
 ### 2. Embed messages
-
 
 ```python
 # naive implementation (batch=1)
@@ -477,9 +423,7 @@ cluster_traces_df["embeddings"] = embeddings
 
     Encoding batches: 100%|██████████| 30/30 [00:32<00:00,  1.09s/it]
 
-
 ### 3. Create clusters based on embeddings
-
 
 ```python
 import hdbscan
@@ -487,13 +431,9 @@ clusterer = hdbscan.HDBSCAN(min_cluster_size=10)
 cluster_traces_df["cluster"] = clusterer.fit_predict(cluster_traces_df["embeddings"].to_list())
 ```
 
-
 ```python
 cluster_traces_df["cluster"].value_counts().head(10).to_dict()
 ```
-
-
-
 
     {-1: 9005,
      0: 544,
@@ -506,10 +446,7 @@ cluster_traces_df["cluster"].value_counts().head(10).to_dict()
      58: 146,
      77: 133}
 
-
-
 ### 4. Derive cluster labels
-
 
 ```python
 import openai
@@ -561,13 +498,9 @@ for cluster in cluster_traces_df["cluster"].unique():
 
 ### 5. Inspect the clusters
 
-
 ```python
 cluster_traces_df["cluster_label"].value_counts().head(20).to_dict()
 ```
-
-
-
 
     {'greeting': 2199,
      'number_identifier': 544,
@@ -590,16 +523,10 @@ cluster_traces_df["cluster_label"].value_counts().head(20).to_dict()
      'affirmative': 35,
      'trace_in_langfuse': 34}
 
-
-
-
 ```python
 # explore the messages sent within a specific cluster
 cluster_traces_df[cluster_traces_df["cluster_label"]=="trace_in_langfuse"].message.head(20).to_dict()
 ```
-
-
-
 
     {21: 'how can i use the langfuse.trace function ?',
      828: 'What exactly is a trace in langfuse?',
@@ -622,10 +549,7 @@ cluster_traces_df[cluster_traces_df["cluster_label"]=="trace_in_langfuse"].messa
      7585: 'what is a trace in langfuse and how to create it?',
      7774: 'what is a trace in langfuse?'}
 
-
-
 ### 6. Add clusters as tags back to Langfuse
-
 
 ```python
 # add as labels back to langfuse
@@ -638,10 +562,10 @@ for index, row in cluster_traces_df.iterrows():
 
 ## Conclusion
 
-Each approach has its pros and cons.  
+Each approach has its pros and cons.
 
-The supervised approach requires a lot of effort upfront to prepare a labelled dataset of an appropriate size.  During inference, it will only be able to assign labels that it was trained on, so it will not handle new cases well.  However, the inference will be consistent.
+The supervised approach requires a lot of effort upfront to prepare a labelled dataset of an appropriate size. During inference, it will only be able to assign labels that it was trained on, so it will not handle new cases well. However, the inference will be consistent.
 
-The unsupervised approach offers more flexibility in working with unlabeled data.  It can output a variety of new labels you didn't define beforehand.  However, the labels may not be consistent between runs (ex., 'hello', 'greeting', or 'start_conversation').  Additionally, the clusters may be more or less permissive than if you had labelled the data.
+The unsupervised approach offers more flexibility in working with unlabeled data. It can output a variety of new labels you didn't define beforehand. However, the labels may not be consistent between runs (ex., 'hello', 'greeting', or 'start_conversation'). Additionally, the clusters may be more or less permissive than if you had labelled the data.
 
-Combining both approaches may be ideal.  Unsupervised intent classification can help you quickly get an overview of a large volume of data, helping you with initial exploratory analysis.  As you understand your trace data better and get more samples, you may benefit from running the supervised model on your data using the intent labels you most care about.  Or, you may want to use the embedded data stored in the vector database to run similarity searches and reuse the labels from previous runs on new instances!
+Combining both approaches may be ideal. Unsupervised intent classification can help you quickly get an overview of a large volume of data, helping you with initial exploratory analysis. As you understand your trace data better and get more samples, you may benefit from running the supervised model on your data using the intent labels you most care about. Or, you may want to use the embedded data stored in the vector database to run similarity searches and reuse the labels from previous runs on new instances!

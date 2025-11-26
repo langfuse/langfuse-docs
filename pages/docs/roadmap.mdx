@@ -25,7 +25,7 @@ export const ChangelogList = () => (
       .sort(
         (a, b) =>
           new Date(b.frontMatter.date).getTime() -
-          new Date(a.frontMatter.date).getTime()
+          new Date(a.frontMatter.date).getTime(),
       )
       .slice(0, 10)
       .map((page, i) => (
@@ -52,7 +52,7 @@ export const ChangelogList = () => (
                     month: "short",
                     day: "numeric",
                     timeZone: "UTC",
-                  }
+                  },
                 )})`
               : null}
           </span>

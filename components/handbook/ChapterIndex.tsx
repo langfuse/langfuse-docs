@@ -12,7 +12,7 @@ export const ChapterIndex = () => {
   const chapterPages = pages
     .filter(
       (page) =>
-        page.route !== "/handbook/chapters" && !page.route.includes("_meta")
+        page.route !== "/handbook/chapters" && !page.route.includes("_meta"),
     )
     .sort((a, b) => {
       // Extract the chapter name from the route (e.g., "/handbook/chapters/mission" -> "mission")

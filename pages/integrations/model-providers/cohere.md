@@ -18,13 +18,11 @@ This guide shows you how to integrate Cohere with Langfuse using the OpenAI SDK 
 
 Ensure you have the necessary Python packages installed:
 
-
 ```python
 %pip install openai langfuse
 ```
 
 ## Step 2: Set Up Environment Variables
-
 
 ```python
 import os
@@ -32,8 +30,8 @@ import os
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -44,7 +42,6 @@ os.environ["COHERE_API_KEY"] = "..."
 ## Step 3: Use Cohere with the OpenAI SDK
 
 Leverage the Compatibility API by replacing the base URL with Cohere's endpoint when initializing the client.
-
 
 ```python
 # Instead of importing openai directly, use Langfuse's drop-in replacement
@@ -59,7 +56,6 @@ client = openai.OpenAI(
 ## Step 4: Run an Example
 
 The example below demonstrates a basic chat completion request. All API calls are automatically traced by Langfuse.
-
 
 ```python
 response = client.chat.completions.create(

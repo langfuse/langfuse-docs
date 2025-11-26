@@ -34,7 +34,7 @@ const Circle = forwardRef<
       className={cn(
         "z-10 flex flex-row items-center gap-4 group",
         href ? "cursor-pointer" : "cursor-default",
-        className
+        className,
       )}
       title={"Langfuse " + title + " documentation"}
       href={href}
@@ -43,7 +43,7 @@ const Circle = forwardRef<
         <span
           className={cn(
             "w-[4.4rem] md:w-36 text-right text-sm md:text-base",
-            title.length > 20 && "text-xs md:text-xs"
+            title.length > 20 && "text-xs md:text-xs",
           )}
         >
           {title}
@@ -53,7 +53,7 @@ const Circle = forwardRef<
         ref={ref}
         className={cn(
           "flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 text-black",
-          href && "group-hover:bg-slate-200"
+          href && "group-hover:bg-slate-200",
         )}
       >
         {href && (
@@ -191,7 +191,11 @@ export default function Integrations() {
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inApiRef} title="API" href="/docs/api-and-data-platform/features/public-api">
+            <Circle
+              ref={inApiRef}
+              title="API"
+              href="/docs/api-and-data-platform/features/public-api"
+            >
               <Code className="h-6 w-6" />
             </Circle>
           </div>

@@ -51,7 +51,7 @@ jobs:
           # Add your test commands
           # npm test
           # python -m pytest
-          
+
   deploy:
     needs: test
     runs-on: ubuntu-latest
@@ -74,7 +74,7 @@ jobs:
     echo "Prompt: ${{ github.event.client_payload.prompt.name }}"
     echo "Version: ${{ github.event.client_payload.prompt.version }}"
     echo "Labels: ${{ github.event.client_payload.prompt.labels }}"
-    
+
 - name: Deploy only production prompts
   if: contains(github.event.client_payload.prompt.labels, 'production')
   run: echo "Deploying production prompt"
@@ -83,14 +83,15 @@ jobs:
 ### 2. Create GitHub Token for Actions
 
 **Steps:**
+
 1. **GitHub Settings > Developer settings > Personal access tokens**
 2. **Generate new token (classic or fine-grained)**
 3. **Select scope** (see table below)
 
-| Token Type | Required Permissions |
-|------------|-------------------|
+| Token Type                      | Required Permissions                                               |
+| ------------------------------- | ------------------------------------------------------------------ |
 | Personal Access Token (classic) | `repo` scope (public repos) or `public_repo` scope (private repos) |
-| Fine-grained PAT or GitHub App | `read` and `write` to `actions` |
+| Fine-grained PAT or GitHub App  | `read` and `write` to `actions`                                    |
 
 ### 3. Configure Langfuse Webhook for Actions
 
@@ -254,7 +255,7 @@ async def sync(event: LangfuseEvent) -> Dict[str, Any]:
         prompt_labels = event.prompt.get("labels", [])
         if config.REQUIRED_LABEL not in prompt_labels:
             return {"skipped": f"Prompt does not have required label '{config.REQUIRED_LABEL}'"}
-    
+
     api_endpoint = f"https://api.github.com/repos/{config.GITHUB_REPO_OWNER}/{config.GITHUB_REPO_NAME}/contents/{config.GITHUB_FILE_PATH}"
 
     request_headers = {

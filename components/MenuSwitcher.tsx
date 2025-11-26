@@ -32,7 +32,7 @@ export const MenuSwitcher = () => {
             <item.Icon className="w-7 h-7 p-1 border rounded group-hover:bg-border/30" />
             {item.title}
           </Link>
-        )
+        ),
       )}
     </div>
   );

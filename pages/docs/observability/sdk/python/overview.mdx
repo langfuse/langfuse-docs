@@ -28,50 +28,57 @@ There are three main ways of instrumenting your application with the new Langfus
 
 import GetStartedPythonSdk from "@/components-mdx/get-started/python-sdk.mdx";
 
-<GetStartedPythonSdk/>
+<GetStartedPythonSdk />
 
 ## Learn more
 
-import { Rocket, Plug, Beaker, Settings, LifeBuoy, BookOpen } from "lucide-react";
+import {
+  Rocket,
+  Plug,
+  Beaker,
+  Settings,
+  LifeBuoy,
+  BookOpen,
+} from "lucide-react";
 
 <Cards num={2}>
-    <Card
-        icon={<Rocket size="24" />}
-        title="Setup"
-        href="/docs/observability/sdk/python/setup"
-        arrow
-    />
-    <Card
-        icon={<Plug size="24" />}
-        title="Instrumentation"
-        href="/docs/observability/sdk/python/instrumentation"
-        arrow
-    />
-    <Card
-        icon={<Beaker size="24" />}
-        title="Evaluation"
-        href="/docs/observability/sdk/python/evaluation"
-        arrow
-    />
-    <Card
-        icon={<Settings size="24" />}
-        title="Advanced usage"
-        href="/docs/observability/sdk/python/advanced-usage"
-        arrow
-    />
-    <Card
-        icon={<LifeBuoy size="24" />}
-        title="Troubleshooting & FAQ"
-        href="/docs/observability/sdk/python/troubleshooting-and-faq"
-        arrow
-    />
-    <Card
-        icon={<BookOpen size="24" />}
-        title="Reference"
-        href="https://python.reference.langfuse.com"
-        newWindow
-        arrow
-    />
+  <Card
+    icon={<Rocket size="24" />}
+    title="Setup"
+    href="/docs/observability/sdk/python/setup"
+    arrow
+  />
+  <Card
+    icon={<Plug size="24" />}
+    title="Instrumentation"
+    href="/docs/observability/sdk/python/instrumentation"
+    arrow
+  />
+  <Card
+    icon={<Beaker size="24" />}
+    title="Evaluation"
+    href="/docs/observability/sdk/python/evaluation"
+    arrow
+  />
+  <Card
+    icon={<Settings size="24" />}
+    title="Advanced usage"
+    href="/docs/observability/sdk/python/advanced-usage"
+    arrow
+  />
+  <Card
+    icon={<LifeBuoy size="24" />}
+    title="Troubleshooting & FAQ"
+    href="/docs/observability/sdk/python/troubleshooting-and-faq"
+    arrow
+  />
+  <Card
+    icon={<BookOpen size="24" />}
+    title="Reference"
+    href="https://python.reference.langfuse.com"
+    newWindow
+    arrow
+  />
 </Cards>
 
 ## OTel and Langfuse
@@ -124,4 +131,3 @@ graph TD
 - **Attribute Propagation**: Certain trace attributes (`user_id`, `session_id`, `metadata`, `version`, `tags`) can be automatically propagated to all child observations using `propagate_attributes()`. This ensures consistent attribute coverage across all observations in a trace. See the [instrumentation docs](/docs/observability/sdk/python/instrumentation#propagating-trace-attributes) for details.
 
 The Langfuse SDK provides wrappers around OTel spans (`LangfuseSpan`, `LangfuseGeneration`) that offer convenient methods for interacting with Langfuse-specific features like scoring and media handling, while still being native OTel spans under the hood. You can also use these wrapper objects to add Langfuse trace attributes via `update_trace()` or use `propagate_attributes()` for automatic propagation to all child observationss.
-

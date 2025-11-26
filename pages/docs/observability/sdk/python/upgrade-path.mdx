@@ -9,7 +9,8 @@ category: SDKs
 The Python SDK v3 introduces significant improvements and changes compared to the legacy v2 SDK. It is **not fully backward compatible**. This comprehensive guide will help you migrate based on your current integration.
 
 <Callout type="info">
-  You can find a snapshot of the v2 SDK documentation [here](https://python-sdk-v2.docs-snapshot.langfuse.com/docs/observability/sdk/python/decorators).
+  You can find a snapshot of the v2 SDK documentation
+  [here](https://python-sdk-v2.docs-snapshot.langfuse.com/docs/observability/sdk/python/decorators).
 </Callout>
 
 **Core Changes to SDK v2:**
@@ -287,34 +288,28 @@ with langfuse.start_as_current_observation(
 ## Key Migration Checklist
 
 1. **Update Imports**:
-
    - Use `from langfuse import get_client` to access global client instance configured via environment variables
    - Use `from langfuse import Langfuse` to create a new client instance configured via constructor parameters
    - Use `from langfuse import observe` to import the observe decorator
    - Update integration imports: `from langfuse.langchain import CallbackHandler`
 
 2. **Trace Attributes Pattern**:
-
    - **Option 1**: Use metadata fields (`langfuse_user_id`, `langfuse_session_id`, `langfuse_tags`) directly in integration calls
    - **Option 2**: Move `user_id`, `session_id`, `tags` to `propagate_attributes()`
 
 3. **Trace Input/Output**:
-
    - **Critical for LLM-as-a-judge**: Explicitly set trace input/output
    - Don't rely on automatic derivation from root observation if you need specific values
 
 4. **Context Managers**:
-
    - Replace manual `langfuse.trace()`, `trace.span()` with context managers if you want to use them
    - Use `with langfuse.start_as_current_observation()` instead
 
 5. **LlamaIndex Migration**:
-
    - Replace Langfuse callback with third-party OTEL instrumentation
    - Install: `pip install openinference-instrumentation-llama-index`
 
 6. **ID Management**:
-
    - **No Custom Observation IDs**: v3 uses W3C Trace Context standard - you cannot set custom observation IDs
    - **Trace ID Format**: Must be 32-character lowercase hexadecimal (16 bytes)
    - **External ID Correlation**: Use `Langfuse.create_trace_id(seed=external_id)` to generate deterministic trace IDs from external systems
@@ -346,29 +341,24 @@ See the [datasets documentation](/docs/evaluation/dataset-runs/remote-run) for m
 ## Detailed Change Summary
 
 1.  **Core Change: OpenTelemetry Foundation**
-
     - Built on OpenTelemetry standards for better ecosystem compatibility
 
 2.  **Trace Input/Output Behavior**
-
     - **v2**: Integrations could set trace input/output directly
     - **v3**: Trace input/output derived from root observation by default
     - **Migration**: Explicitly set via `span.update_trace(input=..., output=...)`
 
 3.  **Trace Attributes Location**
-
     - **v2**: Could be set directly on integration calls
     - **v3**: Must be set on enclosing spans
     - **Migration**: Wrap integration calls with `langfuse.start_as_current_observation()`
 
 4.  **Creating Observations**:
-
     - **v2**: `langfuse.trace()`, `langfuse.span()`, `langfuse.generation()`
     - **v3**: `langfuse.start_as_current_observation()`
     - **Migration**: Use context managers, ensure `.end()` is called or use `with` statements
 
 5.  **IDs and Context**:
-
     - **v3**: W3C Trace Context format, automatic [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/)
     - **Migration**: Use `langfuse.get_current_trace_id()` instead of `get_trace_id()`
 
@@ -379,6 +369,3 @@ See the [datasets documentation](/docs/evaluation/dataset-runs/remote-run) for m
 ## Future support for v2
 
 We will continue to support the v2 SDK for the foreseeable future with critical bug fixes and security patches. We will not be adding any new features to the v2 SDK. You can find a snapshot of the v2 SDK documentation [here](https://python-sdk-v2.docs-snapshot.langfuse.com/docs/observability/sdk/python/decorators).
-
-
-

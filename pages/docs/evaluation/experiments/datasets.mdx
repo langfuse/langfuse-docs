@@ -98,7 +98,8 @@ In the UI, create a dataset and use a slash (`/`) in the name field to organize 
 
 <Callout type="info">
   **URL Encoding**: When using dataset names with slashes as path parameters in
-  the API or JS/TS SDK, use URL encoding. For example, in TypeScript: `encodeURIComponent(name)`.
+  the API or JS/TS SDK, use URL encoding. For example, in TypeScript:
+  `encodeURIComponent(name)`.
 </Callout>
 
 ## Schema Enforcement
@@ -153,19 +154,19 @@ await langfuse.createDataset({
           type: "object",
           properties: {
             role: { type: "string", enum: ["user", "assistant", "system"] },
-            content: { type: "string" }
+            content: { type: "string" },
           },
-          required: ["role", "content"]
-        }
-      }
+          required: ["role", "content"],
+        },
+      },
     },
-    required: ["messages"]
+    required: ["messages"],
   },
   expectedOutputSchema: {
     type: "object",
     properties: { response: { type: "string" } },
-    required: ["response"]
-  }
+    required: ["response"],
+  },
 });
 ```
 

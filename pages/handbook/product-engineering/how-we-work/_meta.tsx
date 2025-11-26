@@ -1,7 +1,7 @@
 export default {
-  "roadmapping": "Roadmapping",
-  "workflow": "Workflow",
-  "onboarding": "Onboarding",
+  roadmapping: "Roadmapping",
+  workflow: "Workflow",
+  onboarding: "Onboarding",
   "*": {
     layout: "default",
   },

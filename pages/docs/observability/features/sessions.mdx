@@ -79,7 +79,7 @@ await startActiveObservation("context-manager", async (span) => {
     async () => {
       // All observations created here automatically have sessionId
       // ... your logic ...
-    }
+    },
   );
 });
 ```
@@ -98,7 +98,7 @@ const processChatMessage = observe(
       return result;
     });
   },
-  { name: "process-chat-message" }
+  { name: "process-chat-message" },
 );
 
 const result = await processChatMessage("Hello!");
@@ -170,9 +170,9 @@ await startActiveObservation("langchain-call", async () => {
       // Pass handler to the chain invocation
       await chain.invoke(
         { input: "<user_input>" },
-        { callbacks: [langfuseHandler] }
+        { callbacks: [langfuseHandler] },
       );
-    }
+    },
   );
 });
 ```

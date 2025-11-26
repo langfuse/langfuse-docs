@@ -52,7 +52,7 @@ export const CustomerCarousel = ({
   // Memoize the original filtered stories to avoid repeated getPagesUnderRoute calls
   const originalStories = useMemo(() => {
     return (getPagesUnderRoute(path) as Array<CustomerStory>).filter(
-      (page) => page.frontMatter?.showInCustomerIndex !== false
+      (page) => page.frontMatter?.showInCustomerIndex !== false,
     );
   }, [path]);
 
@@ -165,8 +165,8 @@ export const CustomerCarousel = ({
                     index === current - 1
                       ? "opacity-100"
                       : isInView[index]
-                      ? "opacity-20 md:opacity-50"
-                      : "opacity-20"
+                        ? "opacity-20 md:opacity-50"
+                        : "opacity-20"
                   }`}
                 >
                   {/* Customer Logo */}

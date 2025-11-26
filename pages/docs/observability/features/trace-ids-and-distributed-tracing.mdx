@@ -174,7 +174,7 @@ const rootSpan = startObservation(
       spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
       traceFlags: 1, // mark trace as sampled
     },
-  }
+  },
 );
 
 // Later, you can regenerate the same traceId to score or retrieve the trace
@@ -183,7 +183,6 @@ const scoringTraceId = await createTraceId(externalId);
 ```
 
 Setting a parentSpanContext will detach the created span from the active span context as it no longer inherits from the current active span in the context.
-
 
 Learn more in the [JS/TS SDK](/docs/observability/sdk/typescript/advanced-usage#managing-trace-and-observation-ids) docs.
 

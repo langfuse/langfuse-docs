@@ -3,7 +3,7 @@ export default {
   architecture: {},
   analytics: {},
   "how-we-work": "How we work",
-  "playbooks": "Playbooks",
+  playbooks: "Playbooks",
   "*": {
     layout: "default",
   },

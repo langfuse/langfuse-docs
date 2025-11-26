@@ -20,7 +20,6 @@ In this guide, we'll show you how to integrate [Langfuse](https://langfuse.com) 
 
 First, install the necessary Python packages:
 
-
 ```python
 %pip install langfuse exa-py
 ```
@@ -29,13 +28,12 @@ First, install the necessary Python packages:
 
 Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting). You'll also need your Exa and OpenAI API key.
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -48,7 +46,6 @@ os.environ["OPENAI_API_KEY"] = "sk-..."
 
 With the environment variables set, we can now initialize the Exa and the Langfuse client.
 
-
 ```python
 from exa_py import Exa
 from langfuse import get_client
@@ -57,10 +54,9 @@ exa = Exa(api_key= os.environ["EXA_API_KEY"])
 langfuse = get_client()
 ```
 
-## Example 1: Trace Exa `search_and_contents` 
+## Example 1: Trace Exa `search_and_contents`
 
 To monitor your Exa search operations, we use the [Langfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators). In this example, the `@observe()` decorator captures the inputs, outputs, and execution time of the `search_with_exa()` function. For more control over the data you are sending to Langfuse, you can use the [Context Manager or create manual observations](https://langfuse.com/docs/observability/sdk/python/instrumentation#custom-instrumentation) using the Python SDK.
-
 
 ```python
 from langfuse import observe
@@ -87,8 +83,7 @@ for result in search_results.results:
 
 ## Example 2: Exa Search together with OpenAI
 
-You can also trace more complex workflows that involve summarizing the search results with OpenAI. Here we use the [Langfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to group both the Exa search and the OpenAI generation into one trace. 
-
+You can also trace more complex workflows that involve summarizing the search results with OpenAI. Here we use the [Langfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to group both the Exa search and the OpenAI generation into one trace.
 
 ```python
 import os
@@ -140,6 +135,7 @@ After executing the traced functions, log in to your [Langfuse Dashboard](https:
 ![Example trace in the Langfuse UI](https://langfuse.com/images/cookbook/integration_exa/exa-search-example-trace.png)
 
 [Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/27c03a05a881ae454f6612a99cc54a92?observation=5af197a22620dc4a&timestamp=2025-10-28T10:20:13.672Z)
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

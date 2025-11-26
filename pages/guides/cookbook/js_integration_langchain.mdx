@@ -19,7 +19,6 @@ Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.lang
 
 > **Note**: This cookbook uses **Deno.js** for execution, which requires different syntax for importing packages and setting environment variables. For Node.js applications, the setup process is similar but uses standard `npm` packages and `process.env`.
 
-
 ```typescript
 // Langfuse authentication keys
 Deno.env.set("LANGFUSE_PUBLIC_KEY", "pk-lf-***");
@@ -27,7 +26,7 @@ Deno.env.set("LANGFUSE_SECRET_KEY", "sk-lf-***");
 
 // Langfuse host configuration
 // For US data region, set this to "https://us.cloud.langfuse.com"
-Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
+Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com");
 
 // Set environment variables using Deno-specific syntax
 Deno.env.set("OPENAI_API_KEY", "sk-proj-***");
@@ -35,27 +34,26 @@ Deno.env.set("OPENAI_API_KEY", "sk-proj-***");
 
 With the environment variables set, we can now initialize the `langfuseSpanProcessor` which is passed to the main OpenTelemetry SDK that orchestrates tracing.
 
-
 ```typescript
 // Import required dependencies
-import 'npm:dotenv/config';
+import "npm:dotenv/config";
 import { NodeSDK } from "npm:@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "npm:@langfuse/otel";
- 
+
 // Export the processor to be able to flush it later
 // This is important for ensuring all spans are sent to Langfuse
 export const langfuseSpanProcessor = new LangfuseSpanProcessor({
-    publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
-    secretKey: process.env.LANGFUSE_SECRET_KEY!,
-    baseUrl: process.env.LANGFUSE_BASE_URL ?? 'https://cloud.langfuse.com', // Default to cloud if not specified
-    environment: process.env.NODE_ENV ?? 'development', // Default to development if not specified
-  });
- 
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+  secretKey: process.env.LANGFUSE_SECRET_KEY!,
+  baseUrl: process.env.LANGFUSE_BASE_URL ?? "https://cloud.langfuse.com", // Default to cloud if not specified
+  environment: process.env.NODE_ENV ?? "development", // Default to development if not specified
+});
+
 // Initialize the OpenTelemetry SDK with our Langfuse processor
 const sdk = new NodeSDK({
   spanProcessors: [langfuseSpanProcessor],
 });
- 
+
 // Start the SDK to begin collecting telemetry
 // The warning about crypto module is expected in Deno and doesn't affect basic tracing functionality. Media upload features will be disabled, but all core tracing works normally
 sdk.start();
@@ -65,10 +63,9 @@ sdk.start();
 
 Instantiate the CallbackHandler and pass it to your chain’s `.invoke()` or `.stream()` method in the callbacks array. All operations within the chain will be traced as nested observations.
 
-
 ```typescript
 import { CallbackHandler } from "npm:@langfuse/langchain";
- 
+
 const langfuseHandler = new CallbackHandler({
   sessionId: "user-session-123",
   userId: "user-abc",
@@ -80,21 +77,17 @@ const langfuseHandler = new CallbackHandler({
 
 We create a simple agent that can answer questions and call tools. The agent will use OpenAI GPT-5-mini as its language model, a basic weather function as a tool, and a simple prompt to guide its behavior. All tools and model calls are traced in Langfuse.
 
-
 ```typescript
 import { createAgent, tool } from "npm:langchain";
 import * as z from "npm:zod";
 
-const getWeather = tool(
-  (input) => `It's always sunny in ${input.city}!`,
-  {
-    name: "get_weather",
-    description: "Get the weather for a given city",
-    schema: z.object({
-      city: z.string().describe("The city to get the weather for"),
-    }),
-  }
-);
+const getWeather = tool((input) => `It's always sunny in ${input.city}!`, {
+  name: "get_weather",
+  description: "Get the weather for a given city",
+  schema: z.object({
+    city: z.string().describe("The city to get the weather for"),
+  }),
+});
 
 const agent = createAgent({
   model: "openai:gpt-5-mini",
@@ -102,13 +95,16 @@ const agent = createAgent({
 });
 ```
 
-
 ```typescript
 console.log(
-    await agent.invoke(
-        { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] }, 
-        { callbacks: [langfuseHandler] }
-    )
+  await agent.invoke(
+    {
+      messages: [
+        { role: "user", content: "What's the weather in San Francisco?" },
+      ],
+    },
+    { callbacks: [langfuseHandler] },
+  ),
 );
 ```
 
@@ -119,4 +115,5 @@ In the Langfuse interface, you can see a detailed trace of all steps in the Lang
 ![Langfuse Trace](https://langfuse.com/images/cookbook/example-js-sdk/js_integration_langchain_trace.png)
 
 [Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2c1581dd9cecdafb6ca091b83d7ea99a?timestamp=2025-10-30T08:45:41.319Z)
+
 </Steps>

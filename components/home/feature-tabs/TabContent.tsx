@@ -20,7 +20,7 @@ export const TabContent = ({
   className,
 }: TabContentProps) => {
   const [activeLanguage, setActiveLanguage] = useState<"python" | "javascript">(
-    "python"
+    "python",
   );
 
   const activeCodeSnippet = useMemo(() => {
@@ -258,7 +258,7 @@ export const TabContent = ({
       <div
         className={cn(
           "grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-6 pt-6 pb-6 lg:h-36 lg:overflow-y-hidden border-t border-solid border-border",
-          className
+          className,
         )}
       >
         {/* Value paragraph */}

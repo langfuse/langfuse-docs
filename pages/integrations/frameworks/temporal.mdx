@@ -18,11 +18,13 @@ This notebook demonstrates how to **integrate Langfuse** into your **Temporal wo
 ## Use Case: Deep Research Agent with Temporal
 
 In this example, we'll build a **deep research agent** that:
+
 - Uses Temporal workflows to orchestrate long-running research tasks
 - Leverages the OpenAI Agents SDK for research planning and content generation
 - Sends all observability data to Langfuse via OpenTelemetry
 
 This setup allows you to:
+
 - **Track workflow execution**: See all workflow runs, activities, and their status
 - **Monitor LLM calls**: View prompts, completions, token usage, and costs
 - **Debug failures**: Identify bottlenecks and errors in your research pipeline
@@ -32,7 +34,6 @@ This setup allows you to:
 
 Install Temporal SDK, OpenTelemetry packages, and Langfuse:
 
-
 ```python
 %pip install temporalio openai openai-agents langfuse openinference-instrumentation-openai-agents
 ```
@@ -41,13 +42,12 @@ Install Temporal SDK, OpenTelemetry packages, and Langfuse:
 
 Set up your Langfuse, Temporal, and OpenAI credentials. You can get Langfuse keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -60,17 +60,11 @@ os.environ.setdefault("TEMPORAL_NAMESPACE", "default")
 os.environ.setdefault("TEMPORAL_TASK_QUEUE", "agents-task-queue")
 ```
 
-
-
-
     'agents-task-queue'
-
-
 
 ## 3. OpenTelemetry Tracing for OpenAI Agents
 
 Use the [`OpenAIAgentsInstrumentor`](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-openai-agents/examples) library to wrap the OpenaAI Agents SDK and send OpenTelemetry spans to Langfuse.
-
 
 ```python
 from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
@@ -82,12 +76,11 @@ OpenAIAgentsInstrumentor().instrument()
 
 Verify the Langfuse connection:
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("✅ Langfuse client is authenticated and ready!")
@@ -98,7 +91,6 @@ else:
 ## 5. Define Temporal Activities
 
 Create activities that will be executed as part of the research workflow. Each activity represents a discrete step in the research process.
-
 
 ```python
 from __future__ import annotations
@@ -180,7 +172,6 @@ def new_writer_agent():
 
 Create a workflow that orchestrates the research activities. Temporal ensures the workflow executes reliably, even if failures occur.
 
-
 ```python
 class ResearchManager:
     def __init__(self):
@@ -243,7 +234,6 @@ class ResearchManager:
         return result.final_output_as(ReportData)
 ```
 
-
 ```python
 from temporalio import workflow
 
@@ -259,10 +249,10 @@ class ResearchWorkflow:
 When you execute the research workflow, both Temporal `OpenAIAgentsPlugin` and the OpenInference `OpenAIAgentsInstrumentor` will send OTel spans to Langfuse.
 
 **Note**: This requires a running Temporal server. You can start a local dev server with:
+
 ```bash
 temporal server start-dev
 ```
-
 
 ```python
 import sys

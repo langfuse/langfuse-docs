@@ -37,11 +37,13 @@ This variability doesn't mean we can't test LLM applications—it means we need 
 Hamel Husain calls this approach "Level 1: Unit Tests" in his framework, and we'll use similar terminology. However, it's worth noting that these aren't traditional unit tests:
 
 **Traditional unit tests**:
+
 - Test isolated code units
 - Deterministic (same input = same output)
 - Fast, no external dependencies
 
 **LLM application tests**:
+
 - Test application behavior
 - Non-deterministic (same input can produce different outputs)
 - Slower execution
@@ -94,7 +96,7 @@ test_data = [
     {"input": "What is the capital of Spain?", "expected_output": "Madrid"},
 ]
 
-# The task function wraps your LLM application logic. It receives each test item and 
+# The task function wraps your LLM application logic. It receives each test item and
 # returns the LLM's response. This should be your full LLM application logic.
 def geography_task(*, item, **kwargs):
     """Task function that answers geography questions"""
@@ -105,14 +107,14 @@ def geography_task(*, item, **kwargs):
     )
     return response.choices[0].message.content
 
-# This evaluator checks if the expected answer appears anywhere in the output, accounting 
-# for LLM verbosity. You could also use more sophisticated evaluators, including LLM-as-a-judge 
+# This evaluator checks if the expected answer appears anywhere in the output, accounting
+# for LLM verbosity. You could also use more sophisticated evaluators, including LLM-as-a-judge
 # for semantic similarity.
 def accuracy_evaluator(*, input, output, expected_output, **kwargs):
     """Evaluator that checks if the expected answer is in the output"""
     if expected_output and expected_output.lower() in output.lower():
         return Evaluation(name="accuracy", value=1.0)
-    
+
     return Evaluation(name="accuracy", value=0.0)
 
 # Run-level evaluators aggregate scores across all test items, giving you a single
@@ -123,12 +125,12 @@ def average_accuracy_evaluator(*, item_results, **kwargs):
         eval.value for result in item_results
         for eval in result.evaluations if eval.name == "accuracy"
     ]
-    
+
     if not accuracies:
         return Evaluation(name="avg_accuracy", value=None)
-    
+
     avg = sum(accuracies) / len(accuracies)
-    
+
     return Evaluation(name="avg_accuracy", value=avg, comment=f"Average accuracy: {avg:.2%}")
 
 @pytest.fixture
@@ -145,13 +147,13 @@ def test_geography_accuracy_passes(langfuse_client: Langfuse):
         evaluators=[accuracy_evaluator],
         run_evaluators=[average_accuracy_evaluator]
     )
-    
+
     # Access the run evaluator result directly
     avg_accuracy = next(
         eval.value for eval in result.run_evaluations
         if eval.name == "avg_accuracy"
     )
-    
+
     # Assert minimum accuracy threshold
     assert avg_accuracy >= 0.8, f"Average accuracy {avg_accuracy:.2f} below threshold 0.8"
 ```
@@ -166,6 +168,7 @@ def test_geography_accuracy_passes(langfuse_client: Langfuse):
     # Relaxed threshold for experimental features
     assert avg_accuracy >= 0.70, "Experimental feature needs improvement"
     ```
+
 </Callout>
 
 You can run the test with:
@@ -181,44 +184,43 @@ You can integrate these tests into your continuous integration pipeline.
 
 ### GitHub Actions Example
 
-First, setup the environment variables in your Github Actions secrets: 
+First, setup the environment variables in your Github Actions secrets:
 
 ![Github Actions secrets](/images/blog/2025-10-21-testing-llm-applications/github-actions-secrets.png)
-
 
 ```yaml
 name: LLM Application Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-    
-    - name: Install dependencies
-      run: |
-        pip install pytest langfuse openai
-    
-    - name: Run LLM unit tests
-      env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
-        LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
-        LANGFUSE_HOST: ${{ secrets.LANGFUSE_HOST }}
-      run: |
-        pytest test_geography_experiment.py -v
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install pytest langfuse openai
+
+      - name: Run LLM unit tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          LANGFUSE_HOST: ${{ secrets.LANGFUSE_HOST }}
+        run: |
+          pytest test_geography_experiment.py -v
 ```
 
 ## Using Remote Datasets with LLM-as-a-Judge
@@ -235,10 +237,10 @@ def langfuse_client() -> Langfuse:
 
 def test_with_remote_dataset(langfuse_client: Langfuse):
     """Test using a dataset stored in Langfuse with LLM-as-a-judge evaluation"""
-    
+
     # Fetch dataset from Langfuse
     dataset = langfuse_client.get_dataset("geography-questions")
-    
+
     def task(*, item, **kwargs):
         question = item.input
         response = OpenAI().chat.completions.create(
@@ -246,14 +248,14 @@ def test_with_remote_dataset(langfuse_client: Langfuse):
             messages=[{"role": "user", "content": question}]
         )
         return response.choices[0].message.content
-    
+
     # Run experiment - Langfuse automatically applies configured evaluators
     result = dataset.run_experiment(
         name="Geography Test with Remote Dataset",
         description="Testing geography QA with LLM-as-a-judge",
         task=task
     )
-    
+
     # The LLM-as-a-judge evaluator runs automatically in Langfuse
     # Results are visible in the Langfuse UI
     langfuse_client.flush()
@@ -291,8 +293,28 @@ Ready to implement automated testing for your LLM application? Start by [identif
 import { FileCode, BookOpen, Video, Users, Joystick } from "lucide-react";
 
 <Cards num={2}>
-  <Card title="Datasets Documentation" href="/docs/evaluation/experiments/datasets" icon={<BookOpen />} arrow />
-  <Card title="Experiment Runner SDK" href="/docs/evaluation/experiments/experiments-via-sdk" icon={<FileCode />} arrow />
-  <Card title="Evaluating Multi-Turn Conversations" href="/guides/cookbook/example_evaluating_multi_turn_conversations" icon={<Joystick />} arrow />
-  <Card title="Simulating Multi-Turn Conversations" href="/guides/cookbook/example_simulated_multi_turn_conversations" icon={<Users />} arrow />
+  <Card
+    title="Datasets Documentation"
+    href="/docs/evaluation/experiments/datasets"
+    icon={<BookOpen />}
+    arrow
+  />
+  <Card
+    title="Experiment Runner SDK"
+    href="/docs/evaluation/experiments/experiments-via-sdk"
+    icon={<FileCode />}
+    arrow
+  />
+  <Card
+    title="Evaluating Multi-Turn Conversations"
+    href="/guides/cookbook/example_evaluating_multi_turn_conversations"
+    icon={<Joystick />}
+    arrow
+  />
+  <Card
+    title="Simulating Multi-Turn Conversations"
+    href="/guides/cookbook/example_simulated_multi_turn_conversations"
+    icon={<Users />}
+    arrow
+  />
 </Cards>

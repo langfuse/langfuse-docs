@@ -20,6 +20,7 @@ This notebook demonstrates how to **integrate Langfuse** with the **Vercel AI SD
 ## Steps to integrate Langfuse with the Vercel AI SDK
 
 ### TL;DR
+
 Here's the flow of how Langfuse and the Vercel AI SDK work together:
 
 1. **You enable telemetry** in the AI SDK (`experimental_telemetry: { isEnabled: true }`)
@@ -44,7 +45,9 @@ npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 ```
 
 <Callout type="info">
-  _**Note:** While this example uses `@ai-sdk/openai`, you can use any AI provider supported by the Vercel AI SDK (Anthropic, Google, Mistral, etc.). The integration works the same way._
+  _**Note:** While this example uses `@ai-sdk/openai`, you can use any AI
+  provider supported by the Vercel AI SDK (Anthropic, Google, Mistral, etc.).
+  The integration works the same way._
 </Callout>
 
 ## 2. Configure Environment & API Keys
@@ -66,15 +69,14 @@ Langfuse's tracing is built on **[OpenTelemetry](https://opentelemetry.io)**. To
 
 **The LangfuseSpanProcessor** is the component that captures telemetry data (called "spans" in OpenTelemetry) and sends it to Langfuse for storage and visualization.
 
-
 ```typescript
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
- 
+
 const sdk = new NodeSDK({
   spanProcessors: [new LangfuseSpanProcessor()],
 });
- 
+
 sdk.start();
 ```
 
@@ -82,20 +84,19 @@ sdk.start();
 
 Simply pass `{ experimental_telemetry: { isEnabled: true }}` to your AI SDK functions. The AI SDK will automatically create telemetry spans, which the `LangfuseSpanProcessor` (from step 3) captures and sends to Langfuse.
 
-
 ```typescript
-import { generateText, tool } from 'ai';
-import { openai } from '@ai-sdk/openai';
-import { z } from 'zod';
- 
+import { generateText, tool } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { z } from "zod";
+
 const { text } = await generateText({
   model: openai("gpt-5.1"),
-  prompt: 'What is the weather like today in San Francisco?',
+  prompt: "What is the weather like today in San Francisco?",
   tools: {
     getWeather: tool({
-      description: 'Get the weather in a location',
+      description: "Get the weather in a location",
       inputSchema: z.object({
-        location: z.string().describe('The location to get the weather for'),
+        location: z.string().describe("The location to get the weather for"),
       }),
       execute: async ({ location }) => ({
         location,
@@ -127,13 +128,13 @@ To link a prompt to a trace, pass the prompt metadata in the `experimental_telem
 ```typescript
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { LangfuseClient } from "@langfuse/client"; // Add this import       
+import { LangfuseClient } from "@langfuse/client"; // Add this import
 
 const langfuse = new LangfuseClient();
 
 // Get current `production` version
 const prompt = await langfuse.prompt.get("movie-critic");
- 
+
 // Insert variables into prompt template
 const compiledPrompt = prompt.compile({
   someVariable: "example-variable",
@@ -142,10 +143,10 @@ const compiledPrompt = prompt.compile({
 const { text } = await generateText({
   model: openai("gpt-5"),
   prompt: compiledPrompt,
-  experimental_telemetry: { 
+  experimental_telemetry: {
     isEnabled: true,
     metadata: {
-      langfusePrompt: prompt.toJSON() // This links the Generation to your prompt in Langfuse
+      langfusePrompt: prompt.toJSON(), // This links the Generation to your prompt in Langfuse
     },
   },
 });
@@ -158,6 +159,7 @@ Once linked, you'll see the prompt version displayed in the trace details in Lan
 For production Next.js applications, you'll need a few additional configurations to handle streaming responses properly and ensure traces are sent before serverless functions terminate.
 
 This example shows how to:
+
 - Set up OpenTelemetry instrumentation in Next.js (using the `instrumentation.ts` file)
 - Handle streaming responses with proper span lifecycle
 - Add session and user tracking to traces
@@ -166,7 +168,6 @@ This example shows how to:
 ### Setup instrumentation
 
 Create a new file [`instrumentation.ts`](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation) in your project root. This file runs when your Next.js app starts up, initializing the OpenTelemetry setup:
-
 
 ```typescript
 // instrumentation.ts
@@ -200,12 +201,12 @@ tracerProvider.register();
 
 ### Create API route with streaming
 
-The example below shows a chat endpoint that uses the Langfuse `observe()` wrapper to create a trace, adds session and user metadata, and properly handles streaming responses. Concretely: 
+The example below shows a chat endpoint that uses the Langfuse `observe()` wrapper to create a trace, adds session and user metadata, and properly handles streaming responses. Concretely:
+
 - `observe()` creates a Langfuse trace around your handler
 - `updateActiveTrace()` adds session and user metadata for better trace organization
 - `forceFlush()` ensures traces are sent before the serverless function terminates
 - `endOnExit: false` keeps the observation open until the streaming response completes
-
 
 ```typescript
 // app/api/chat/route.ts
@@ -233,7 +234,7 @@ const handler = async (req: Request) => {
 
   // Set session id and user id on active trace
   const inputText = messages[messages.length - 1].parts.find(
-    (part) => part.type === "text"
+    (part) => part.type === "text",
   )?.text;
 
   // Add session and user context to the trace
@@ -243,8 +244,8 @@ const handler = async (req: Request) => {
 
   updateActiveTrace({
     name: "chat-message",
-    sessionId: chatId,  // Groups related messages together
-    userId,             // Track which user made the request
+    sessionId: chatId, // Groups related messages together
+    userId, // Track which user made the request
     input: inputText,
   });
 
@@ -269,7 +270,7 @@ const handler = async (req: Request) => {
     onError: async (error) => {
       updateActiveObservation({
         output: error,
-        level: "ERROR"
+        level: "ERROR",
       });
       updateActiveTrace({
         output: error,

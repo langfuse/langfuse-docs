@@ -15,7 +15,7 @@ const BentoGrid = ({
     <div
       className={cn(
         "grid w-full auto-rows-[13rem] grid-cols-3 gap-3",
-        className
+        className,
       )}
     >
       {children}
@@ -50,7 +50,7 @@ const BentoCard = ({
       "bg-white",
       // dark styles
       "transform-gpu dark:bg-transparent dark:backdrop-blur-md",
-      className
+      className,
     )}
   >
     {background}

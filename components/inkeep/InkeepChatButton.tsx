@@ -6,7 +6,7 @@ const ChatButton = dynamic(
   () => import("@inkeep/cxkit-react").then((mod) => mod.InkeepChatButton),
   {
     ssr: false,
-  }
+  },
 );
 
 export default function InkeepChatButton() {

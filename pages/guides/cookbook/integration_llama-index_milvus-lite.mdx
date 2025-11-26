@@ -14,16 +14,17 @@ This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse 
 ## Setup
 
 <Callout type="info" emoji="⚠️">
-_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+  _**Note:** This guide uses our Python SDK v2. We have a new, improved SDK
+  available based on OpenTelemetry. Please check out the [SDK
+  v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and
+  simpler to use SDK._
 </Callout>
-
 
 ```python
 %pip install llama-index "langfuse<3.0.0" llama-index-vector-stores-milvus --upgrade
 ```
 
 Initialize the integration. Get your API keys from the [Langfuse project settings](https://cloud.langfuse.com), and replace public_key secret_key with your key values. This example uses OpenAI for embeddings and chat completions, so you also need to specify your OpenAI key in environment variable.
-
 
 ```python
 import os
@@ -39,18 +40,16 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
-
 ```python
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
 from langfuse.llama_index import LlamaIndexCallbackHandler
- 
+
 langfuse_callback_handler = LlamaIndexCallbackHandler()
 Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 ```
 
 ## Index using Milvus Lite
-
 
 ```python
 from llama_index.core import Document
@@ -62,7 +61,6 @@ doc2 = Document(text="""
 Throughout his career, Silverstein has been celebrated for his diverse range of filmography and unique narrative technique. He masterfully blends suspense, human emotion, and subtle humor in his storylines. Among his notable works are "Fleeting Echoes," "Halcyon Dusk," and the Academy Award-winning sci-fi epic, "Event Horizon's Brink." His contribution to cinema revolves around examining human nature, the complexity of relationships, and probing reality and perception. Off-camera, he is a dedicated philanthropist living in Los Angeles with his wife and two children.
 """)
 ```
-
 
 ```python
 # Example index construction + LLM query
@@ -84,13 +82,11 @@ index = VectorStoreIndex.from_documents(
 
 ## Query
 
-
 ```python
 # Query
 response = index.as_query_engine().query("What did he do growing up?")
 print(response)
 ```
-
 
 ```python
 # Chat
@@ -100,7 +96,6 @@ print(response)
 
 ## Explore traces in Langfuse
 
-
 ```python
 # As we want to immediately see result in Langfuse, we need to flush the callback handler
 langfuse_callback_handler.flush()
@@ -109,13 +104,13 @@ langfuse_callback_handler.flush()
 Done! ✨ You see traces of your index and query in your Langfuse project.
 
 Example traces (public links):
+
 1. [Query](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2b26fc72-044f-4b0b-a3c3-485328975161)
 2. [Query (chat)](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/72503163-2b25-4693-9cc9-56190b8e32b9)
 
 Trace in Langfuse:
 
 ![Langfuse Traces](https://static.langfuse.com/llamaindex-langfuse-docs.gif)
-
 
 ## Interested in more advanced features?
 

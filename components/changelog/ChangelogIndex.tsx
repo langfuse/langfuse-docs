@@ -34,13 +34,13 @@ export const ChangelogIndex = ({
   ).sort(
     (a, b) =>
       new Date(b.frontMatter.date).getTime() -
-      new Date(a.frontMatter.date).getTime()
+      new Date(a.frontMatter.date).getTime(),
   );
 
   const totalPages = Math.ceil(allPages.length / itemsPerPage);
   const paginatedPages = allPages.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const renderPagination = () => {
@@ -101,7 +101,7 @@ export const ChangelogIndex = ({
                     {pageNumber}
                   </PaginationLink>
                 </PaginationItem>
-              )
+              ),
             )}
           </div>
           <PaginationItem>
@@ -174,7 +174,7 @@ export const ChangelogIndex = ({
                           month: "long",
                           day: "numeric",
                           timeZone: "UTC",
-                        }
+                        },
                       )
                     : null}
                   {page.frontMatter?.badge && (

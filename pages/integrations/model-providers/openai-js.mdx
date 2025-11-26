@@ -60,11 +60,11 @@ The Langfuse TypeScript SDK’s tracing is built on top of OpenTelemetry, so you
 ```typescript
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
- 
+
 const sdk = new NodeSDK({
   spanProcessors: [new LangfuseSpanProcessor()],
 });
- 
+
 sdk.start();
 ```
 
@@ -168,9 +168,9 @@ With [Langfuse Prompt management](/docs/prompts/get-started) you can effectively
 ```ts
 import { observeOpenAI } from "@langfuse/openai";
 import OpenAI from "openai";
- 
+
 const langfusePrompt = await langfuse.prompt.get("my-prompt"); // Fetch a previously created prompt
- 
+
 const res = await observeOpenAI(new OpenAI(), {
   langfusePrompt,
 }).completions.create({

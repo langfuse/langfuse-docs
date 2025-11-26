@@ -43,7 +43,7 @@ export function AvailabilityBanner(props: {
     .map((plan) => ({
       ...plan,
       availability: availabilities.find(
-        (availability) => availability.id === props.availability[plan.id]
+        (availability) => availability.id === props.availability[plan.id],
       ),
     }));
 

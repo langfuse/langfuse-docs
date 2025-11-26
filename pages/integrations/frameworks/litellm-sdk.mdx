@@ -27,7 +27,6 @@ There are three ways to integrate LiteLLM with Langfuse:
   Integration](/integrations/gateways/litellm) page.
 </Callout>
 
-
 ## Features
 
 - Automatic trace collection for all LiteLLM requests
@@ -50,15 +49,16 @@ There are three ways to integrate LiteLLM with Langfuse:
 
 ### Environment Variables
 
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `LANGFUSE_PUBLIC_KEY` | Yes | Your Langfuse public key | `pk-lf-...` |
-| `LANGFUSE_SECRET_KEY` | Yes | Your Langfuse secret key | `sk-lf-...` |
-| `LANGFUSE_OTEL_HOST` | No | OTEL endpoint host | `https://otel.my-langfuse.com` |
+| Variable              | Required | Description              | Example                        |
+| --------------------- | -------- | ------------------------ | ------------------------------ |
+| `LANGFUSE_PUBLIC_KEY` | Yes      | Your Langfuse public key | `pk-lf-...`                    |
+| `LANGFUSE_SECRET_KEY` | Yes      | Your Langfuse secret key | `sk-lf-...`                    |
+| `LANGFUSE_OTEL_HOST`  | No       | OTEL endpoint host       | `https://otel.my-langfuse.com` |
 
 ### Endpoint Resolution
 
 The integration automatically constructs the OTEL endpoint from `LANGFUSE_OTEL_HOST`
+
 - **Default (US)**: `https://us.cloud.langfuse.com/api/public/otel`
 - **EU Region**: `https://cloud.langfuse.com/api/public/otel`
 - **Self-hosted**: `{LANGFUSE_OTEL_HOST}/api/public/otel`
@@ -115,8 +115,8 @@ import base64
 import litellm
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_OTEL_HOST"] = "https://cloud.langfuse.com" # EU region
 # os.environ["LANGFUSE_OTEL_HOST"] = "https://us.cloud.langfuse.com" # US region
 # os.environ["LANGFUSE_OTEL_HOST"] = "https://otel.my-langfuse.company.com" # custom OTEL endpoint
@@ -219,9 +219,11 @@ This is automatically handled by the integration - you just need to provide the 
 ### Common Issues
 
 1. **Missing Credentials Error**
+
    ```
    ValueError: LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY must be set
    ```
+
    **Solution**: Ensure both environment variables are set with valid keys.
 
 2. **Connection Issues**
@@ -251,8 +253,8 @@ litellm._turn_on_debug()
 export LITELLM_LOG="DEBUG"
 ```
 
-
 This will show:
+
 - Endpoint resolution logic
 - Authentication header creation
 - OTEL trace submission details
@@ -262,4 +264,4 @@ This will show:
 - [Langfuse Documentation](https://langfuse.com/docs)
 - [Langfuse OpenTelemetry Guide](https://langfuse.com/integrations/native/opentelemetry)
 - [OpenTelemetry Python SDK](https://opentelemetry.io/docs/languages/python/)
-- [LiteLLM Observability](https://docs.litellm.ai/docs/observability/) 
+- [LiteLLM Observability](https://docs.litellm.ai/docs/observability/)

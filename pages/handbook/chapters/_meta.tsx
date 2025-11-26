@@ -11,5 +11,5 @@ export const CHAPTER_ORDER = [
 
 // Generate the default export from the chapter order array
 export default Object.fromEntries(
-  CHAPTER_ORDER.map((chapter) => [chapter, {}])
+  CHAPTER_ORDER.map((chapter) => [chapter, {}]),
 );

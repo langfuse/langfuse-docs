@@ -4,7 +4,7 @@ import useInkeepSettings from "./useInkeepSettings";
 
 const SearchBar = dynamic(
   () => import("@inkeep/cxkit-react").then((mod) => mod.InkeepSearchBar),
-  { ssr: false }
+  { ssr: false },
 );
 
 const css = String.raw;

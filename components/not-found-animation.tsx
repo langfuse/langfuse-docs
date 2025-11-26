@@ -79,5 +79,5 @@ export const NotFoundAnimation = dynamic(
   {
     ssr: false,
     loading: () => <div style={CANVAS_STYLES} />,
-  }
+  },
 );

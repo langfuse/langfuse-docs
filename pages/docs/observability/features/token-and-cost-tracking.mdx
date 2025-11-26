@@ -173,7 +173,7 @@ await startActiveObservation("context-manager", async (span) => {
       model: "gpt-4",
       input: [{ role: "user", content: "What is the capital of France?" }],
     },
-    { asType: "generation" }
+    { asType: "generation" },
   );
 
   // ... LLM call logic ...
@@ -226,7 +226,7 @@ async function fetchData(source: string) {
         total: 3.5,
       },
     },
-    { asType: "generation" }
+    { asType: "generation" },
   );
 
   // ... logic to fetch data
@@ -256,7 +256,7 @@ const generation = span.startObservation(
     input: [{ role: "user", content: "What is the capital of France?" }],
     output: { content: "The capital of France is Paris." },
   },
-  { asType: "generation" }
+  { asType: "generation" },
 );
 
 generation.update({
@@ -390,7 +390,7 @@ You can flexibly add your own model definitions to Langfuse. This is especially 
 
 <Tab>
 
-To add a custom model definition in the Langfuse UI, you can either click on the "+" sign next to the model name or navigate to the **Project Settings > Models** to add a new model definition. 
+To add a custom model definition in the Langfuse UI, you can either click on the "+" sign next to the model name or navigate to the **Project Settings > Models** to add a new model definition.
 
 Then you can add the prices per token type and save the model definition. Now all **new traces** with this model will have the correct token usage and cost inferred.
 

@@ -35,7 +35,7 @@ function processCallouts(content: string): string {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   try {
     // Get the markdown URL from query parameters
@@ -83,7 +83,7 @@ export default async function handler(
     // Strip frontmatter (YAML between --- delimiters)
     markdownContent = markdownContent.replace(
       /^---\r?\n[\s\S]*?\r?\n---\r?\n/,
-      ""
+      "",
     );
 
     // Remove anchor tags from headings (not needed in PDF)
@@ -287,13 +287,13 @@ export default async function handler(
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
-        `${contentDisposition}; filename="${pdfFilename}"`
+        `${contentDisposition}; filename="${pdfFilename}"`,
       );
       res.setHeader("Content-Length", pdf.length);
       // Cache for 60 seconds on CDN, serve stale while revalidating for 24 hours
       res.setHeader(
         "Cache-Control",
-        "public, s-maxage=60, stale-while-revalidate=86400"
+        "public, s-maxage=60, stale-while-revalidate=86400",
       );
 
       // Send the PDF as a buffer

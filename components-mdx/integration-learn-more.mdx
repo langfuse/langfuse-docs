@@ -19,9 +19,9 @@ The [`@observe()` decorator](/docs/observability/sdk/python/instrumentation#cust
 
 ```python
 from langfuse import observe, propagate_attributes, get_client
- 
+
 langfuse = get_client()
- 
+
 @observe()
 def my_llm_pipeline(input):
     # Add additional attributes (user_id, session_id, metadata, version, tags) to all spans created within this execution scope
@@ -65,7 +65,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-trace") as s
         metadata={"experiment": "variant_a", "env": "prod"},
         version="1.0"
     ):
-    
+
         # YOUR APPLICATION CODE HERE
         result = call_llm("some input")
 

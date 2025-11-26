@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   try {
     // Only allow GET requests for this endpoint
@@ -16,7 +16,7 @@ export default async function handler(
 
     if (!METABASE_SECRET_KEY) {
       console.error(
-        "Missing required environment variables: METABASE_SECRET_KEY"
+        "Missing required environment variables: METABASE_SECRET_KEY",
       );
       return res.status(500).json({ message: "Server configuration error" });
     }

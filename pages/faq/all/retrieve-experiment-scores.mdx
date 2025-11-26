@@ -7,7 +7,9 @@ tags: [evaluation, experiments]
 # How to Retrieve Experiment Scores?
 
 <Callout type="info">
-**Terminology Note**: "Experiment" and "dataset run" are used interchangeably throughout Langfuse. We are moving toward deprecating the term "dataset run" in favor of "experiment", but both terms currently refer to the same concept.
+  **Terminology Note**: "Experiment" and "dataset run" are used interchangeably
+  throughout Langfuse. We are moving toward deprecating the term "dataset run"
+  in favor of "experiment", but both terms currently refer to the same concept.
 </Callout>
 
 Langfuse supports two types of experiment scores:
@@ -25,9 +27,11 @@ See the [Scores Data Model](/docs/evaluation/evaluation-methods/data-model) for 
 ### Experiment-Item-Level Scores
 
 <Callout type="warning">
-**Current Workaround**: The method below is a workaround for retrieving experiment-item-level scores. We recommend:
-1. Using the [Experiment Runner SDK](/changelog/2025-09-17-experiment-runner-sdk) which provides direct access to all scores in context
-2. We may add a dedicated API route for experiment scores/metrics in the near future
+  **Current Workaround**: The method below is a workaround for retrieving
+  experiment-item-level scores. We recommend: 1. Using the [Experiment Runner
+  SDK](/changelog/2025-09-17-experiment-runner-sdk) which provides direct access
+  to all scores in context 2. We may add a dedicated API route for experiment
+  scores/metrics in the near future
 </Callout>
 
 To retrieve experiment-item-level scores programmatically:
@@ -82,11 +86,11 @@ const encodedRunName = encodeURIComponent(runName);
 // Fetch experiment run; must use encoded names for fetching runs
 const run = await langfuse.dataset.getRun({
   datasetName: encodedDatasetName,
-  runName: encodedRunName
+  runName: encodedRunName,
 });
 
 // Extract trace IDs
-const traceIds = run.datasetRunItems.map(item => item.traceId);
+const traceIds = run.datasetRunItems.map((item) => item.traceId);
 ```
 
 </Tab>
@@ -181,11 +185,11 @@ const result = await langfuse.experiment.run({
   name: "my-experiment",
   data: myDataset,
   task: myTask,
-  evaluators: [myEvaluator]  // optional
+  evaluators: [myEvaluator], // optional
 });
 
 // Access all scores directly
-console.log(await result.format());  // includes all scores in formatted output
+console.log(await result.format()); // includes all scores in formatted output
 ```
 
 </Tab>

@@ -12,22 +12,20 @@ category: Integrations
 Anthropic provides advanced language models like Claude, known for their safety, helpfulness, and strong reasoning capabilities. By combining Anthropic's models with **Langfuse**, you can trace, monitor, and analyze your AI workloads in development and production.
 
 This notebook demonstrates **two** different ways to use Anthropic models with Langfuse:
+
 1. **OpenTelemetry Instrumentation:** Use the [`AnthropicInstrumentor`](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) library to wrap Anthropic SDK calls and send OpenTelemetry spans to Langfuse.
 2. **OpenAI SDK:** Use Anthropic's OpenAI-compatible endpoints via [Langfuse's OpenAI SDK wrapper](https://langfuse.com/integrations/model-providers/openai-py).
 
 > **What is Anthropic?**  
-Anthropic is an AI safety company that develops Claude, a family of large language models designed to be helpful, harmless, and honest. Claude models excel at complex reasoning, analysis, and creative tasks.
+> Anthropic is an AI safety company that develops Claude, a family of large language models designed to be helpful, harmless, and honest. Claude models excel at complex reasoning, analysis, and creative tasks.
 
 > **What is Langfuse?**  
-[Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
-
+> [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
 
 <Steps>
 ## Step 1: Install Dependencies
 
 Before you begin, install the necessary packages in your Python environment:
-
-
 
 ```python
 %pip install anthropic openai langfuse opentelemetry-instrumentation-anthropic
@@ -39,13 +37,12 @@ Next, set up your Langfuse API keys. You can get these keys by signing up for a 
 
 Also set your Anthropic API ([Anthropic Console](https://console.anthropic.com/)).
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -54,12 +51,11 @@ os.environ["ANTHROPIC_API_KEY"] = "sk-ant-..."  # Your Anthropic API key
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-
 ```python
 from langfuse import get_client
 
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -69,18 +65,15 @@ else:
 
     Langfuse client is authenticated and ready!
 
-
 ## Approach 1: OpenTelemetry Instrumentation
 
 Use the [`AnthropicInstrumentor`](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) library to wrap Anthropic SDK calls and send OpenTelemetry spans to Langfuse.
-
 
 ```python
 from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
 
 AnthropicInstrumentor().instrument()
 ```
-
 
 ```python
 from anthropic import Anthropic
@@ -115,7 +108,6 @@ print(message.content)
 
 Anthropic provides [OpenAI-compatible endpoints](https://docs.anthropic.com/en/api/openai-sdk) that allow you to use the OpenAI SDK to interact with Claude models. This is particularly useful if you have existing code using the OpenAI SDK that you want to switch to Claude.
 
-
 ```python
 # Langfuse OpenAI client
 from langfuse.openai import OpenAI
@@ -138,15 +130,15 @@ print(response.choices[0].message.content)
 
 ### View Traces in Langfuse
 
-After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the agent conversations, LLM calls, inputs, outputs, and performance metrics. 
+After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the agent conversations, LLM calls, inputs, outputs, and performance metrics.
 
 ![Langfuse Trace](https://langfuse.com/images/cookbook/integration_anthropic/anthropic-example-trace.png)
 
-You can also view the trace in Langfuse here: 
+You can also view the trace in Langfuse here:
 
 - [Approach 1: OpenTelemetry Instrumentation](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/308aca9bc430ad872d474fc545889ee2?timestamp=2025-07-25T07:35:01.172Z&display=details)
 - [Approach 2: OpenAI SDK](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8e8da1b2c15036ed9c25b37c604f2d29?timestamp=2025-07-22T16:05:47.602Z&display=details)
-</Steps>
+  </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 

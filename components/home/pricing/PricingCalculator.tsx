@@ -111,7 +111,7 @@ export function PricingCalculator({
   const [monthlyEvents, setMonthlyEvents] = useState<string>("200,000");
   const [selectedPlan, setSelectedPlan] = useState<string>(initialPlan);
   const [currentBaseFee, setCurrentBaseFee] = useState<number>(
-    PLAN_CONFIGS.find((p) => p.name === initialPlan)?.baseFee || 0
+    PLAN_CONFIGS.find((p) => p.name === initialPlan)?.baseFee || 0,
   );
 
   // Calculate pricing breakdown (single source of truth)
@@ -124,7 +124,7 @@ export function PricingCalculator({
   const calculatedPrice = useMemo(() => {
     const total = pricingBreakdown.reduce(
       (sum, item) => sum + item.costForTier,
-      0
+      0,
     );
     return Math.round(total * 100) / 100;
   }, [pricingBreakdown]);
@@ -147,8 +147,6 @@ export function PricingCalculator({
       <p className="text-base text-muted-foreground mb-6">
         Enter your monthly billable units to see the graduated pricing
         breakdown.
-
-        
       </p>
       <Card>
         <CardContent className="space-y-6 pt-6">
@@ -203,7 +201,9 @@ export function PricingCalculator({
                       {selectedPlan} Base
                     </div>
                   </div>
-                  <div className="text-muted-foreground text-lg sm:text-xl">+</div>
+                  <div className="text-muted-foreground text-lg sm:text-xl">
+                    +
+                  </div>
                   <div className="text-center">
                     <div className="text-primary text-xl sm:text-2xl font-bold">
                       {formatCurrency(calculatedPrice)}
@@ -212,7 +212,9 @@ export function PricingCalculator({
                       Usage
                     </div>
                   </div>
-                  <div className="text-muted-foreground text-lg sm:text-xl">=</div>
+                  <div className="text-muted-foreground text-lg sm:text-xl">
+                    =
+                  </div>
                   <div className="text-center">
                     <div className="text-primary text-xl sm:text-2xl font-bold">
                       {formatCurrency(calculatedPrice + currentBaseFee)}
@@ -249,7 +251,8 @@ export function PricingCalculator({
                     <TableHead className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         Your Units
-                        <Link aria-label="Learn more about billable units"
+                        <Link
+                          aria-label="Learn more about billable units"
                           href="/docs/observability/data-model#billable-units"
                           target="_blank"
                         >
@@ -285,7 +288,8 @@ export function PricingCalculator({
                     <TableCell className="font-semibold">Total</TableCell>
                     <TableCell className="text-right font-semibold">
                       {(() => {
-                        const totalUnits = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
+                        const totalUnits =
+                          parseInt(monthlyEvents.replace(/,/g, "")) || 0;
                         if (totalUnits === 0) return "—";
                         const avgRate = (calculatedPrice / totalUnits) * 100000;
                         return formatCurrency(avgRate) + "/100k";

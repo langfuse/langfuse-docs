@@ -83,7 +83,7 @@ const ContributorCard = ({
 
 const processContributor = (username: string): ProcessedContributor => {
   const author = Object.values(allAuthors).find(
-    (author) => author.github === username
+    (author) => author.github === username,
   );
 
   if (author) {

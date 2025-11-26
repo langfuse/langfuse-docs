@@ -160,11 +160,11 @@ await startActiveObservation("process-data", async (span) => {
       const generation = startObservation(
         "guess-countries",
         { model: "gpt-4" },
-        { asType: "generation" }
+        { asType: "generation" },
       );
       // This generation automatically has version="1.0"
       generation.end();
-    }
+    },
   );
 });
 ```
@@ -177,7 +177,7 @@ import { startObservation } from "@langfuse/tracing";
 const generation = startObservation(
   "guess-countries",
   { model: "gpt-4" },
-  { asType: "generation" }
+  { asType: "generation" },
 );
 generation.update({ version: "1.0" });
 generation.end();

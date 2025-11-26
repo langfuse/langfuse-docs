@@ -41,7 +41,6 @@ By the end of this cookbook, you’ll be able to:
 - Evaluate these traces offline and incrementally
 - Add scores to existing Langfuse traces
 
-
 Conceptually, we will implement the following architecture:
 
 ```mermaid
@@ -62,8 +61,6 @@ Langfuse ->> User: Analyze evaluation scores via UI & API
 
 **Note**: While we’re using a Jupyter notebook for this cookbook, in production you'd use your preferred orchestration tool. Just make sure to extract the code into a .py file and ensure all dependencies are available at runtime.
 
-
-
 ## (Prep-work) Loading synthetic traces to Langfuse
 
 In this demo, we’ll build a mock application: a science communicator LLM that explains any topic in an engaging and approachable way.
@@ -72,18 +69,16 @@ Since we don’t have real user data, our first step is to create a synthetic da
 
 You can get your Langfuse API keys [here](https://cloud.langfuse.com/) and OpenAI API key [here](https://platform.openai.com/api-keys)
 
-
 ```python
 %pip install langfuse openai deepeval --upgrade
 ```
-
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -92,7 +87,6 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 Let's go ahead and generate a list of topic suggestions that we can later query to our application.
-
 
 ```python
 from langfuse.openai import openai
@@ -123,7 +117,6 @@ for topic in topics:
 ```
 
 Great job! You now have a list of interesting topics users might ask about. Next, let's have our science communicator LLM handle those queries and add the results to Langfuse. To keep things simple, we’ll use Langfuse’s `@observe()` decorator. This decorator automatically monitors all LLM calls (generations) nested in the function. We’re also using the `langfuse` class to label and tag the traces, making it easier to fetch them later.
-
 
 ```python
 from langfuse import observe, get_client, propagate_attributes
@@ -170,21 +163,20 @@ for topic in topics:
     print(f"Answer: {explain_concept(topic)} \n")
 ```
 
-Now you should see in the *Traces* section of the langfuse UI the traces you just added.
+Now you should see in the _Traces_ section of the langfuse UI the traces you just added.
 ![Trace with RAGAS scores](https://langfuse.com/images/cookbook/example-external-evaluation-pipelines/traces.png)
 
 Remember, the goal of this tutorial is to show you how to build an external evaluation pipeline. These pipelines will run in your CI/CD environment, or be run in a different orchestrated container service. No matter the environment you choose, three key steps always apply:
 
-
-1.   **Fetch Your Traces**: Get your application traces to your evaluation environment
-2.   **Run Your Evaluations**: Apply any evaluation logic you prefer
-3.   **Save Your Results**: Attach your evaluations back to the Langfuse trace used for calculating them.
+1.  **Fetch Your Traces**: Get your application traces to your evaluation environment
+2.  **Run Your Evaluations**: Apply any evaluation logic you prefer
+3.  **Save Your Results**: Attach your evaluations back to the Langfuse trace used for calculating them.
 
 For the rest of the notebook, we'll have one goal:
 
 ---
 
-🎯 Goal: ***Every day, at 5 am, our pipeline should evaluate 50 traces from the previous day***
+🎯 Goal: **_Every day, at 5 am, our pipeline should evaluate 50 traces from the previous day_**
 
 ---
 
@@ -193,7 +185,6 @@ For the rest of the notebook, we'll have one goal:
 Fetching traces from Langfuse is straightforward. Just set up the Langfuse client and use one of its functions to fetch the data. We'll take an incremental approach: first, we'll fetch the initial 10 traces and evaluate them. After that, we'll add our scores back into Langfuse and move on to the next batch of 10 traces. We'll keep this cycle going until we've processed a total of 50 traces.
 
 The `fetch_traces()` function has arguments to filter the traces by tags, timestamps, and beyond. We can also choose the number of samples for pagination. You can find more about other methods to [query traces](https://langfuse.com/docs/query-traces) in our docs.
-
 
 ```python
 from langfuse import get_client
@@ -220,10 +211,9 @@ print(f"Traces in first batch: {len(traces_batch)}")
 
     Traces in first batch: 10
 
-
 ## 2. Run your evaluations
 
-Langfuse can handle numerical, boolean and categorical (`string`) scores.  Wrapping your custom evaluation logic in a function is often a good practice. Evaluation functions should take a `trace` as input and yield a valid score. Let's begin with a simple example using a categorical score.
+Langfuse can handle numerical, boolean and categorical (`string`) scores. Wrapping your custom evaluation logic in a function is often a good practice. Evaluation functions should take a `trace` as input and yield a valid score. Let's begin with a simple example using a categorical score.
 
 ### 2.1. Categoric Evaluations
 
@@ -231,7 +221,6 @@ When analyzing the outputs of your LLM applications, you may want to evaluate tr
 
 We're building a science educator LLM that should sound engaging and positive.
 To ensure it hits the right notes, we'll evaluate the tone of its outputs to see if they match our intent. We'll draft an evaluation prompt ourselves (no library) to identify the three main tones in each model output.
-
 
 ```python
 template_tone_eval = """
@@ -303,7 +292,6 @@ print(f"Dominant tones: {test_tone_score}")
 
 Identifying human intents and tones can be tricky for language models. To handle this, we used a multi-shot prompt, which means giving the model several examples to learn from. Now let's wrap our code in an evaluation function for convenience.
 
-
 ```python
 def tone_score(trace):
     return openai.chat.completions.create(
@@ -327,10 +315,10 @@ Great! Now let's go ahead and create a numeric evaluation score.
 In this cookbook, we'll use the `Deepeval` framework ([docs](https://docs.confident-ai.com/docs/getting-started)) to handle our numeric evaluations. Deepeval provides scores ranging from zero to one for many common LLM metrics. Plus, you can create custom metrics by simply describing them in plain language. To ensure our app's responses are joyful and engaging, we'll define a custom 'joyfulness' score.
 
 You can use any evaluation library. These are popular ones:
+
 - OpenAI Evals ([GitHub](https://github.com/openai/evals))
 - Langchain Evaluators
 - [RAGAS](https://docs.ragas.io/en/latest/concepts/metrics/index.html) for RAG applications
-
 
 ```python
 from deepeval.metrics import GEval
@@ -366,7 +354,6 @@ Now we're done with defining our evaluation functions. Let's push those scores b
 
 Now that we have our evaluation functions ready, it’s time to put them to work. Use the Langfuse client to add scores to existing traces.
 
-
 ```python
 langfuse.create_score(
     trace_id=traces_batch[1].id,
@@ -383,7 +370,6 @@ And thus, you've added your first externally-evaluated score to Langfuse! Just 4
 Until now, we went through each of the necessary steps to build an external evaluation pipeline: Fetching traces, running the evaluations, and persisting the scores to Langfuse. Let's sum it up into a compact script that you could run in your evaluation pipeline.
 
 We'll fetch the data in batches of 10 traces and then iterate through each trace to score it and push the scores back to Langfuse. Note that this batch size is for demonstration purposes. In a production setup, you might want to process multiple batches in parallel to speed things up. Batching not only reduces the memory load on your system but also allows you to create checkpoints, so you can easily resume if something goes wrong.
-
 
 ```python
 import math

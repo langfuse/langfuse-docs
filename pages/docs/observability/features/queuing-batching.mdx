@@ -11,17 +11,20 @@ Langfuse's client SDKs and integrations are all designed to queue and batch requ
 
 All integrations have a sensible default configuration, but you can customize the batching behaviour to suit your needs.
 
-| Option (Python) [SDK constructor, Environment]  | Option (JS)          | Description                                              |
-| ----------------------------------------------- | -------------------- | -------------------------------------------------------- |
-| `flush_at`, `LANGFUSE_FLUSH_AT`                 | `flushAt`            | The maximum number of events to batch up before sending. |
-| `flush_interval`, `LANGFUSE_FLUSH_INTERVAL` (s) | `flushInterval` (seconds) | The maximum time to wait before sending a batch in seconds.         |
+| Option (Python) [SDK constructor, Environment]  | Option (JS)               | Description                                                 |
+| ----------------------------------------------- | ------------------------- | ----------------------------------------------------------- |
+| `flush_at`, `LANGFUSE_FLUSH_AT`                 | `flushAt`                 | The maximum number of events to batch up before sending.    |
+| `flush_interval`, `LANGFUSE_FLUSH_INTERVAL` (s) | `flushInterval` (seconds) | The maximum time to wait before sending a batch in seconds. |
 
 You can e.g. set `flushAt=1` to send every event immediately, or `flushInterval=1` to send every second.
 
 ### Manual flushing
 
 <Callout type="info">
-  In short-lived environments like serverless functions (e.g., Vercel Functions, AWS Lambda), you should explicitly flush the traces before the process exits or the runtime environment is frozen. If you do not flush the client, you may lose events.
+  In short-lived environments like serverless functions (e.g., Vercel Functions,
+  AWS Lambda), you should explicitly flush the traces before the process exits
+  or the runtime environment is frozen. If you do not flush the client, you may
+  lose events.
 </Callout>
 
 If you want to send a batch immediately, you can call the `flush` method on the client. In case of network issues, flush will log an error and retry the batch, it will never throw an exception.

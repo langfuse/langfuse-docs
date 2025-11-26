@@ -15,7 +15,7 @@ const LogoContextMenu: React.FC<{
   const handleAction = (
     e: React.MouseEvent,
     url: string,
-    isDownload: boolean
+    isDownload: boolean,
   ) => {
     e.preventDefault();
 

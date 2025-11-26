@@ -125,13 +125,13 @@ type ProcessedIntegrationPage = IntegrationPage & { title: string };
 function loadFilesystemPages(category: string): IntegrationPage[] {
   try {
     const pages = getPagesUnderRoute(
-      `/integrations/${category}`
+      `/integrations/${category}`,
     ) as IntegrationPage[];
     // Filter out category index pages and only keep actual integration pages
     return pages.filter(
       (page) =>
         page.route !== `/integrations/${category}` &&
-        page.route !== `/integrations/${category}/index`
+        page.route !== `/integrations/${category}/index`,
     );
   } catch (error) {
     // Category directory doesn't exist or has no pages
@@ -182,7 +182,7 @@ export const IntegrationIndex = () => {
       {categoryOrder
         .filter(
           (category) =>
-            categorizedPages[category] && categorizedPages[category].length > 0
+            categorizedPages[category] && categorizedPages[category].length > 0,
         )
         .map((category) => {
           const config = categoryConfig[category];
@@ -207,18 +207,47 @@ export const IntegrationIndex = () => {
               {/* Featured (non-duplicated) */}
               {featured && featured.length > 0 && (
                 <Cards num={3}>
-                  {featured
-                    .slice(0, 6)
+                  {featured.slice(0, 6).map((page) => (
+                    <Cards.Card
+                      href={page.route}
+                      key={page.route}
+                      title={page.title}
+                      icon={
+                        (page as any).frontMatter?.logo ? (
+                          <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
+                            <img
+                              src={(page as any).frontMatter.logo}
+                              alt=""
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          config.icon
+                        )
+                      }
+                      arrow
+                    >
+                      {""}
+                    </Cards.Card>
+                  ))}
+                </Cards>
+              )}
+              <div className={featured && featured.length > 0 ? "mt-8" : ""}>
+                <Cards num={3}>
+                  {pages
+                    .filter(
+                      (p) => !(featured || []).some((f) => f.route === p.route),
+                    )
                     .map((page) => (
                       <Cards.Card
                         href={page.route}
                         key={page.route}
                         title={page.title}
                         icon={
-                          (page as any).frontMatter?.logo ? (
+                          page.frontMatter?.logo ? (
                             <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
                               <img
-                                src={(page as any).frontMatter.logo}
+                                src={page.frontMatter.logo}
                                 alt=""
                                 className="w-full h-full object-contain"
                               />
@@ -232,37 +261,6 @@ export const IntegrationIndex = () => {
                         {""}
                       </Cards.Card>
                     ))}
-                </Cards>
-              )}
-              <div className={featured && featured.length > 0 ? "mt-8" : ""}>
-                <Cards num={3}>
-                  {pages
-                    .filter(
-                      (p) => !(featured || []).some((f) => f.route === p.route)
-                    )
-                    .map((page) => (
-                  <Cards.Card
-                    href={page.route}
-                    key={page.route}
-                    title={page.title}
-                    icon={
-                      page.frontMatter?.logo ? (
-                        <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
-                          <img
-                            src={page.frontMatter.logo}
-                            alt=""
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      ) : (
-                        config.icon
-                      )
-                    }
-                    arrow
-                  >
-                    {""}
-                  </Cards.Card>
-                ))}
                 </Cards>
               </div>
             </div>

@@ -132,7 +132,7 @@ const handler = async (req: Request) => {
 
   // Set session id and user id on active trace
   const inputText = messages[messages.length - 1].parts.find(
-    (part) => part.type === "text"
+    (part) => part.type === "text",
   )?.text;
 
   updateActiveObservation({
@@ -251,7 +251,7 @@ await startActiveObservation(
         model: "gpt-4",
         input: [{ role: "user", content: "What is the capital of France?" }],
       },
-      { asType: "generation" }
+      { asType: "generation" },
     );
     generation.update({
       usageDetails: { input: 10, output: 5 },
@@ -260,7 +260,7 @@ await startActiveObservation(
     generation.end();
 
     span.update({ output: "Successfully answered." });
-  }
+  },
 );
 ```
 
@@ -283,7 +283,7 @@ const tracedFetchData = observe(
   // method
   fetchData,
   // options, optional, see below
-  {}
+  {},
 );
 
 // Now, every time you call tracedFetchData, a span is created.
@@ -319,7 +319,7 @@ const span = startObservation(
   // params
   {
     input: { query: "What is the capital of France?" },
-  }
+  },
 );
 
 // Create a nested span for, e.g., a tool call
@@ -333,7 +333,7 @@ const toolCall = span.startObservation(
   // Specify observation type in asType
   // This will type the attributes argument accordingly
   // Default is 'span'
-  { asType: "tool" }
+  { asType: "tool" },
 );
 
 // Simulate work and end the tool call span
@@ -347,7 +347,7 @@ const generation = span.startObservation(
     model: "gpt-4",
     input: [{ role: "user", content: "What is the capital of France?" }],
   },
-  { asType: "generation" }
+  { asType: "generation" },
 );
 
 generation.update({
@@ -407,11 +407,11 @@ await startActiveObservation("user-workflow", async (span) => {
       const generation = startObservation(
         "llm-call",
         { model: "gpt-4" },
-        { asType: "generation" }
+        { asType: "generation" },
       );
       // This generation automatically has userId, sessionId, metadata, version
       generation.end();
-    }
+    },
   );
 });
 ```
@@ -438,7 +438,7 @@ await startActiveObservation("api-request", async () => {
       // HTTP request to Service B
       const response = await fetch("https://service-b.example.com/api");
       // userId and sessionId are now in HTTP headers
-    }
+    },
   );
 });
 ```
@@ -475,7 +475,7 @@ rootSpan.updateTrace({
 const generation = rootSpan.startObservation(
   "llm-call",
   {},
-  { asType: "generation" }
+  { asType: "generation" },
 );
 
 generation.end();

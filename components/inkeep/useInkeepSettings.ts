@@ -13,7 +13,7 @@ import { useMemo } from "react";
 
 const customAnalyticsCallback = (
   event: InkeepCallbackEvent,
-  posthog: PostHog
+  posthog: PostHog,
 ): void => {
   const { componentType, conversation } = event.properties;
   const messages = conversation?.messages || [];
@@ -69,7 +69,7 @@ const useInkeepSettings = (): InkeepSharedSettings => {
       const tab = inkeepCustomTabsToSlugs.find((t) => {
         const slugs = Array.isArray(t.slug) ? t.slug : [t.slug];
         return slugs.some((slug) =>
-          source.url.startsWith("https://langfuse.com" + slug)
+          source.url.startsWith("https://langfuse.com" + slug),
         );
       })?.tab;
       if (type === "searchResultItem") {
@@ -96,7 +96,7 @@ const useInkeepSettings = (): InkeepSharedSettings => {
       .concat(["All", "GitHub"])
       // add isAlwaysVisible to current website section
       .map((t) =>
-        t === tabOfCurrentDocsSection ? [t, { isAlwaysVisible: true }] : t
+        t === tabOfCurrentDocsSection ? [t, { isAlwaysVisible: true }] : t,
       ),
   };
 

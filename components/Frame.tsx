@@ -136,14 +136,14 @@ export const Frame = ({
         ref={frameRef}
         className={cn(
           "mt-4 border rounded inline-block overflow-hidden",
-          className
+          className,
         )}
       >
         <div
           className={cn(
             "inline bg-primary/5 max-w-2xl [&>*]:mt-0 [&>*]:mb-0 [&>img]:block [&>img]:w-full [&>img]:h-auto [&>img]:leading-none [&>img]:align-top",
             fullWidth && "max-w-full",
-            transparent && "bg-transparent"
+            transparent && "bg-transparent",
           )}
         >
           {children}

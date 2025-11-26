@@ -95,7 +95,7 @@ export const InlineCitationCarousel = ({
 export type InlineCitationCarouselContentProps = ComponentProps<"div">;
 
 export const InlineCitationCarouselContent = (
-  props: InlineCitationCarouselContentProps
+  props: InlineCitationCarouselContentProps,
 ) => <CarouselContent {...props} />;
 
 export type InlineCitationCarouselItemProps = ComponentProps<"div">;
@@ -116,7 +116,7 @@ export const InlineCitationCarouselHeader = ({
   <div
     className={cn(
       "flex items-center justify-between p-2 gap-2 bg-secondary rounded-t-md",
-      className
+      className,
     )}
     {...props}
   />
@@ -150,7 +150,7 @@ export const InlineCitationCarouselIndex = ({
     <div
       className={cn(
         "flex items-center flex-1 justify-end px-3 py-1 text-xs text-muted-foreground",
-        className
+        className,
       )}
       {...props}
     >
@@ -253,7 +253,7 @@ export const InlineCitationQuote = ({
   <blockquote
     className={cn(
       "border-l-2 border-muted pl-3 text-sm italic text-muted-foreground",
-      className
+      className,
     )}
     {...props}
   >

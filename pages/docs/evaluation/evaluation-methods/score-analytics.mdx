@@ -23,7 +23,6 @@ Score Analytics complements Langfuse's [experiment SDK](/docs/evaluation/overvie
 
 For advanced analyses requiring custom metrics or complex comparisons, use the [experiment SDK](/docs/evaluation/overview) for deeper investigation.
 
-
 ## Getting Started
 
 <Steps>
@@ -31,6 +30,7 @@ For advanced analyses requiring custom metrics or complex comparisons, use the [
 ### Prerequisites
 
 Ensure you have [score data](/docs/evaluation/overview) in your Langfuse project from any evaluation method:
+
 - [Human annotations](/docs/evaluation/evaluation-methods/annotation)
 - [LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge)
 - Custom scores ingested via [SDK](/docs/evaluation/evaluation-methods/custom-scores) or [API](/docs/api)
@@ -82,16 +82,19 @@ Ensure you have [score data](/docs/evaluation/overview) in your Langfuse project
 Score Analytics automatically adapts visualizations and metrics based on score data types:
 
 **Numeric Scores** (continuous values like 1-10 ratings)
+
 - **Distribution**: Histogram with 10 bins showing value ranges
 - **Comparison**: 10×10 heatmap showing correlation patterns
 - **Metrics**: Pearson correlation, Spearman correlation, MAE (Mean Absolute Error), RMSE (Root Mean Square Error)
 
 **Categorical Scores** (discrete categories like "good/bad/neutral")
+
 - **Distribution**: Bar chart showing count per category
 - **Comparison**: N×M confusion matrix showing how categories align
 - **Metrics**: Cohen's Kappa, F1 Score, Overall Agreement
 
 **Boolean Scores** (true/false binary values)
+
 - **Distribution**: Bar chart with 2 categories
 - **Comparison**: 2×2 confusion matrix
 - **Metrics**: Cohen's Kappa, F1 Score, Overall Agreement
@@ -101,12 +104,14 @@ Score Analytics automatically adapts visualizations and metrics based on score d
 Score Analytics provides two views for understanding your data:
 
 **Matched Data** (default tab)
+
 - Shows only parent objects (traces, observations, sessions, or dataset run items) that have both selected scores attached
 - Enables valid comparison between evaluation methods
 - A match exists when two scores relate to the same parent object
 - Use this view to measure agreement and correlation
 
 **All Data** (individual score tabs)
+
 - Shows complete distribution of each score independently
 - Reveals evaluation coverage (how many parent objects have each score)
 - Helps identify gaps in your evaluation strategy
@@ -114,6 +119,7 @@ Score Analytics provides two views for understanding your data:
 ### Time-Based Analysis
 
 The Trend Over Time chart helps you monitor score patterns with:
+
 - **Configurable intervals**: From minutes to years (5m, 30m, 1h, 3h, 1d, 7d, 30d, 90d, 1y)
 - **Automatic interval selection**: Smart defaults based on your selected time range
 - **Gap filling**: Missing time periods are filled with zeros for consistent visualization
@@ -133,6 +139,7 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 - Below 0.5: Weak correlation
 
 **Spearman Correlation**: Measures monotonic relationship (rank-based). More robust to outliers than Pearson.
+
 </Callout>
 
 **Error Metrics** (for numeric scores)
@@ -141,6 +148,7 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 **MAE (Mean Absolute Error)**: Average absolute difference between scores. Lower is better.
 
 **RMSE (Root Mean Square Error)**: Square root of average squared differences. Penalizes larger errors more than MAE.
+
 </Callout>
 
 **Agreement Metrics** (for categorical/boolean scores)
@@ -155,6 +163,7 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 **F1 Score**: Harmonic mean of precision and recall. Values range from 0 to 1, with 1 being perfect.
 
 **Overall Agreement**: Simple percentage of matching classifications. Not adjusted for chance agreement.
+
 </Callout>
 
 ## Example Use Cases
@@ -164,6 +173,7 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 **Scenario**: You use both GPT-4 and Gemini to evaluate helpfulness. Are they producing consistent results?
 
 **Workflow**:
+
 1. Select "helpfulness_gpt4-NUMERIC-EVAL" as score 1
 2. Select "helpfulness_gemini-NUMERIC-EVAL" as score 2
 3. Review Statistics card: Pearson correlation of 0.984 with "Very Strong" badge
@@ -175,6 +185,7 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 **Scenario**: You have human annotations and AI evaluations for quality. Should you trust the AI?
 
 **Workflow**:
+
 1. Select "quality-CATEGORICAL-ANNOTATION" as score 1
 2. Select "quality-CATEGORICAL-EVAL" as score 2
 3. Check confusion matrix: Strong diagonal indicates good agreement
@@ -186,6 +197,7 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 **Scenario**: Understanding relationships between different application behaviors
 
 **Workflow**:
+
 1. Select "has_tool_use-BOOLEAN-EVAL" as score 1
 2. Select "has_hallucination-BOOLEAN-EVAL" as score 2
 3. Observe confusion matrix: Anti-diagonal pattern
@@ -196,6 +208,7 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 **Scenario**: How complete is your evaluation data?
 
 **Workflow**:
+
 1. Select any score
 2. Compare the "all" tab vs "matched" tab in Distribution
 3. Check total counts: 1,143 individual score 1 vs 567 matched pairs
@@ -206,6 +219,7 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 **Scenario**: Did your model quality drop after a recent deployment?
 
 **Workflow**:
+
 1. Select a quality or performance score
 2. Set time range to include pre and post-deployment periods
 3. Review Trend Over Time chart for any dips or changes
@@ -217,25 +231,29 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 **Beta Feature**: Score Analytics is currently in beta. Please report any issues or feedback.
 
 **Current Constraints**:
+
 - **Two scores maximum**: Currently supports comparing up to two scores at a time. For multi-way comparisons, perform pairwise analyses.
 - **Same data type only**: You can only compare scores of the same data type (numeric with numeric, categorical with categorical, boolean with boolean).
 - **Sampling**: For performance optimization, queries expecting >100k scores (for either score1 or score2) automatically apply random sampling. This sampling approximates true random sampling and maintains statistical properties of your data. A visible indicator will show when sampling is active, and you can use time range or object type filters to narrow your analysis if you need the complete dataset.
-</Callout>
+  </Callout>
 
 ## Tips and Best Practices
 
 **Choosing Scores to Compare**
+
 - Only scores of the same data type can be compared
 - Scores with different scales can be compared, but error metrics (MAE, RMSE) will be affected by scale differences
 - Choose scores that evaluate similar dimensions for meaningful comparisons
 
 **Interpreting Heatmaps**
+
 - **Diagonal patterns**: Indicate agreement (both scores assign similar values)
 - **Anti-diagonal patterns**: Indicate negative correlation (high values in one score correspond to low values in the other)
 - **Scattered patterns**: Indicate low correlation or noisy data
 - **Cell intensity**: Darker cells represent more data points in that bin combination
 
 **Understanding Matched Data**
+
 - Scores are always attached to one parent object (trace, observation, session, or dataset run item)
 - A match between scores exists when they relate to the same parent object
 - If matched count is much lower than individual counts, you have coverage gaps

@@ -74,7 +74,7 @@ await startActiveObservation("context-manager", async (span) => {
     async () => {
       // All observations created here automatically have these tags
       // ... your logic ...
-    }
+    },
   );
 });
 ```
@@ -87,16 +87,13 @@ import { observe, propagateAttributes } from "@langfuse/tracing";
 const processData = observe(
   async (data: string) => {
     // Apply tags to all child observations
-    return await propagateAttributes(
-      { tags: ["tag-1", "tag-2"] },
-      async () => {
-        // All nested observations automatically have these tags
-        const result = await performProcessing(data);
-        return result;
-      }
-    );
+    return await propagateAttributes({ tags: ["tag-1", "tag-2"] }, async () => {
+      // All nested observations automatically have these tags
+      const result = await performProcessing(data);
+      return result;
+    });
   },
-  { name: "process-data" }
+  { name: "process-data" },
 );
 
 const result = await processData("input");
@@ -165,7 +162,7 @@ await startActiveObservation("openai-call", async () => {
         model: "gpt-3.5-turbo",
         max_tokens: 300,
       });
-    }
+    },
   );
 });
 ```
@@ -224,9 +221,9 @@ await propagateAttributes(
   async () => {
     await chain.invoke(
       { input: "<user_input>" },
-      { callbacks: [langfuseHandler] }
+      { callbacks: [langfuseHandler] },
     );
-  }
+  },
 );
 ```
 
@@ -241,11 +238,14 @@ const handler = new CallbackHandler({
 Or set tags dynamically via the runnable configuration in the chain invocation:
 
 ```ts
-const langfuseHandler = new CallbackHandler()
+const langfuseHandler = new CallbackHandler();
 const tags = ["tag-1", "tag-2"];
 
 // Pass config to the chain invocation to be parsed as Langfuse trace attributes
-await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler], tags: tags });
+await chain.invoke(
+  { input: "<user_input>" },
+  { callbacks: [langfuseHandler], tags: tags },
+);
 ```
 
 When using the integration with the JS SDK (see [interop docs](/integrations/frameworks/langchain#interoperability)), set tags via `langfuse.trace()`:

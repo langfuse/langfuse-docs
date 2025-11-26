@@ -11,7 +11,7 @@ export const getFaqPages = () => {
 export const getFilteredFaqPages = (
   faqPages: Array<Page & { frontMatter: any }>,
   tags: string[],
-  limit: number | undefined = undefined
+  limit: number | undefined = undefined,
 ) => {
   return faqPages
     .filter((page) => page.route !== "/faq/all")
@@ -20,7 +20,7 @@ export const getFilteredFaqPages = (
       return faqTags.some((tag) => tags.includes(tag));
     })
     .sort((a, b) =>
-      (a.frontMatter?.title || "").localeCompare(b.frontMatter?.title || "")
+      (a.frontMatter?.title || "").localeCompare(b.frontMatter?.title || ""),
     )
     .slice(0, limit);
 };

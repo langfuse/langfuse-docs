@@ -16,33 +16,41 @@ Our users increasingly trace agentic applications in Langfuse, so we want to mak
 ## What's New
 
 ### Agent Tools
+
 Tool calls are the heartbeat of agents. We now render all tools available to an LLM at the top of each generation, allowing you to instantly see if the LLM selected the right one.
-You can click on any tool to reveal its full definition, description, and parameters. In the Chat UI, we also now display called tools alongside their arguments and call IDs. The numbering matches the available tools list, making it easy to validate performed calls against available options. 
+You can click on any tool to reveal its full definition, description, and parameters. In the Chat UI, we also now display called tools alongside their arguments and call IDs. The numbering matches the available tools list, making it easy to validate performed calls against available options.
 
 <Frame>
-![Agent Tools](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-tools.png)
+  ![Agent
+  Tools](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-tools.png)
 </Frame>
 
 ### Trace Log View
+
 We're rolling out a new Log View for traces—a single concatenation of all data in a trace's observations. You can now skim every agent step just by scrolling.
 This view also makes it simple to CMD/Ctrl+F through an entire trace. This is a superpower when you need to find specific details inside very loopy, verbose agents.
 
 <Frame>
-![Trace Log View](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-log.png)
+  ![Trace Log
+  View](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-log.png)
 </Frame>
 
 ### Observation Types
+
 We’ve expanded the supported observation types to bring more meaning to your spans. Now, you can easily identify the type of action an observation represents, such as tool calls, embeddings or agents.
 
 <Frame>
-![Observation Types](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-observation-types.png)
+  ![Observation
+  Types](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-observation-types.png)
 </Frame>
 
 ### Agent Graphs GA
+
 Agent graphs are now Generally Available and works with any agent framework or custom instrumentation. We infer the graph structure from observation timings and nesting to visualize the true flow of your agent's execution, especially useful for navigating complex looping observations.
 
 <Frame>
-![Agent Graphs](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-graphs.png)
+  ![Agent
+  Graphs](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-graphs.png)
 </Frame>
 
 ## Get started
@@ -50,7 +58,19 @@ Agent graphs are now Generally Available and works with any agent framework or c
 import { Book, Calendar } from "lucide-react";
 
 <Cards num={1}>
-  <Card title="Observation Types Documentation" href="/docs/observability/features/observation-types" icon={<Book />} />
-    <Card title="Agent Graph Documentation" href="/docs/observability/features/observation-types" icon={<Book />} />
-  <Card title="See all Launch Week releases" href="/blog/2025-10-29-launch-week-4" icon={<Calendar />} />
+  <Card
+    title="Observation Types Documentation"
+    href="/docs/observability/features/observation-types"
+    icon={<Book />}
+  />
+  <Card
+    title="Agent Graph Documentation"
+    href="/docs/observability/features/observation-types"
+    icon={<Book />}
+  />
+  <Card
+    title="See all Launch Week releases"
+    href="/blog/2025-10-29-launch-week-4"
+    icon={<Calendar />}
+  />
 </Cards>

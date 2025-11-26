@@ -40,12 +40,9 @@ In this example, we’ll build a cooking assistant chatbot and then simulate con
 
 First you need to install Langfuse via pip and then set the environment variables.
 
-
-
 ```python
 %pip install langfuse openevals --upgrade
 ```
-
 
 ```python
 import os
@@ -61,7 +58,6 @@ os.environ["OPENAI_API_KEY"] = 'sk-proj-1234'
 ```
 
 Now we’ll create a simple cooking assistant chatbot that uses OpenAI as the LLM and trace it with Langfuse.
-
 
 ```python
 # This is a simple cooking assistant chatbot traced with Langfuse and uses OpenAI as the LLM.
@@ -133,17 +129,11 @@ chat = SimpleChat()
 
 Now if you run a simple question, you should see traces in Langfuse:
 
-
 ```python
 chat.add_message("I want to make a chocolate cake")
 ```
 
-
-
-
     'That sounds delicious! Do you have a specific recipe in mind, or would you like me to suggest one for you?'
-
-
 
 ![Traced Application](https://langfuse.com/images/cookbook/example-simulated-multi-turn-conversations/traced-application.png)
 
@@ -157,15 +147,14 @@ Define relevant dimensions for your use case, such as:
 
 For our cooking assistant chatbot, we'll create pairs of Scenarios and Personas, as follows:
 
-| Persona | Scenario |
-|---------|----------|
-| A nervous first-time host cooking multiple dishes for a dinner party at 6:30 PM. Anxious about timing, unfamiliar with multitasking in the kitchen, needs reassurance and asks many clarifying questions. | It's 4:30 PM and they need to coordinate: roasted chicken (1.5 hours), roasted vegetables (45 min), mashed potatoes (30 min), and gravy. They only have one oven and are worried everything won't be ready on time. |
-| A stressed home cook whose beef stroganoff sauce just curdled when they added sour cream. Guests arrive in 20 minutes. Frustrated, urgent, needs quick realistic solutions. | The sour cream curdled in the hot pan, making the sauce grainy and separated. They have heavy cream, butter, flour, beef broth, and more sour cream available. Need to know if it can be salvaged or if they need a backup plan. |
+| Persona                                                                                                                                                                                                   | Scenario                                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A nervous first-time host cooking multiple dishes for a dinner party at 6:30 PM. Anxious about timing, unfamiliar with multitasking in the kitchen, needs reassurance and asks many clarifying questions. | It's 4:30 PM and they need to coordinate: roasted chicken (1.5 hours), roasted vegetables (45 min), mashed potatoes (30 min), and gravy. They only have one oven and are worried everything won't be ready on time.              |
+| A stressed home cook whose beef stroganoff sauce just curdled when they added sour cream. Guests arrive in 20 minutes. Frustrated, urgent, needs quick realistic solutions.                               | The sour cream curdled in the hot pan, making the sauce grainy and separated. They have heavy cream, butter, flour, beef broth, and more sour cream available. Need to know if it can be salvaged or if they need a backup plan. |
 
 You can add more columns for your specific use-case, like adding data to test against your system. For example, if you're running a customer service chatbot for a logistics company, you might want to simulate the scenario of providing a non-existent order tracking ID to see how your chatbot handles the scenario.
 
 Once you've defined your dataset, create it in [Langfuse's Dataset](https://langfuse.com/docs/evaluation/experiments/datasets), this way you can assign performance scores to measure how the system improves on the dataset with every new update:
-
 
 ```python
 from langfuse import get_client
@@ -197,7 +186,6 @@ langfuse.create_dataset_item(
 ### Step 3 - Prepare your application to run against the simulator
 
 The OpenEvals library requires a specific input and output format. It also needs conversation history management, which is why we'll store instances of our chatbot together with a `thread_id` provided by OpenEvals.
-
 
 ```python
 from openevals.simulators import run_multiturn_simulation, create_llm_simulated_user
@@ -277,7 +265,6 @@ def generate_synthetic_conversation(persona: str, scenario: str, max_turns: int 
 
 We'll use Langfuse's [Dataset Experiments SDK](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk) to fetch the scenario/persona pairs we've created and trace and store the output of the experiment so we can then evaluate.
 
-
 ```python
 from langfuse import get_client
 
@@ -350,8 +337,6 @@ To evaluate the output, you can create [LLM-as-a-Judge](https://langfuse.com/doc
 In this case, I create a simple "Conciseness" evaluator from the pre-made library of evaluators, but you could create one (or multiple of them!) that evaluate based on your use-case and needs. In the following image, you can see the overall score assigned to multiple Dataset runs, and how over time that score improves given changes to the prompt.
 
 ![Dataset Runs](https://langfuse.com/images/cookbook/example-simulated-multi-turn-conversations/evaluated-runs.png)
-
-
 
 ### Conclusion
 

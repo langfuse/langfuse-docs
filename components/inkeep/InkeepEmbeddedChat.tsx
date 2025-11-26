@@ -7,7 +7,7 @@ const EmbeddedChat = dynamic(
   {
     ssr: false,
     loading: () => <div>loading...</div>, // optional: loading animation component
-  }
+  },
 );
 
 const css = String.raw;
@@ -21,8 +21,8 @@ function InkeepEmbeddedChat() {
       theme: {
         styles: [
           {
-            key: '1',
-            type: 'style',
+            key: "1",
+            type: "style",
             value: css`
               .ikp-ai-chat-wrapper {
                 width: 100%;

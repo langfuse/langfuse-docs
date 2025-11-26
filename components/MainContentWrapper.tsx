@@ -194,7 +194,7 @@ const CopyMarkdownButton = () => {
             : "cursor-pointer hover:bg-secondary/80",
           isError
             ? "text-destructive-foreground bg-destructive hover:bg-destructive/80"
-            : ""
+            : "",
         )}
       >
         <ButtonIcon
@@ -214,7 +214,7 @@ const CopyMarkdownButton = () => {
                 : "cursor-pointer hover:bg-secondary/80",
               isError
                 ? "text-destructive-foreground bg-destructive hover:bg-destructive/80 border-destructive-foreground/20"
-                : ""
+                : "",
             )}
           >
             <ChevronDown className="h-3 w-3" />
@@ -316,13 +316,13 @@ export const MainContentWrapper = (props) => {
   const router = useRouter();
   const { frontMatter } = useConfig();
   const cookbook = COOKBOOK_ROUTE_MAPPING.find(
-    (cookbook) => cookbook.path === router.pathname
+    (cookbook) => cookbook.path === router.pathname,
   );
 
   const versionLabel = frontMatter.label;
 
   const shouldShowCopyButton = pathsWithCopyAsMarkdownButton.some((prefix) =>
-    router.pathname.startsWith(prefix)
+    router.pathname.startsWith(prefix),
   );
 
   return (
@@ -346,7 +346,7 @@ export const MainContentWrapper = (props) => {
       {isCustomerStory(router.pathname) && <CustomerStoryCTA />}
       {!pathsWithoutFooterWidgets.some(
         (path) =>
-          router.pathname === path || router.pathname.startsWith(path + "/")
+          router.pathname === path || router.pathname.startsWith(path + "/"),
       ) ? (
         <div
           className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t dark:border-neutral-800"

@@ -165,7 +165,7 @@ import crypto from "crypto";
 export function verifyLangfuseSignature(
   rawBody: string,
   signatureHeader: string,
-  secret: string
+  secret: string,
 ): boolean {
   const [tsPair, sigPair] = signatureHeader.split(",");
   if (!tsPair || !sigPair) return false;
@@ -179,7 +179,7 @@ export function verifyLangfuseSignature(
 
   return crypto.timingSafeEqual(
     Buffer.from(receivedSig, "hex"),
-    Buffer.from(expectedSig, "hex")
+    Buffer.from(expectedSig, "hex"),
   );
 }
 ```

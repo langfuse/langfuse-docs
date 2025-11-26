@@ -17,18 +17,22 @@ This cookbook shows two ways to interact with Groq models and trace them with La
 By following these examples, you'll learn how to log and trace interactions with Groq language models, enabling you to debug and evaluate the performance of your AI-driven applications.
 
 <Callout type="info" emoji="ℹ️">
-**Note:** *Langfuse is also natively integrated with [LangChain](https://langfuse.com/integrations/frameworks/langchain), [LlamaIndex](https://langfuse.com/integrations/frameworks/llamaindex), [LiteLLM](https://langfuse.com/integrations/gateways/litellm), and [other frameworks](https://langfuse.com/integrations). If you use one of them, any use of Groq models is instrumented right away.*
+  **Note:** *Langfuse is also natively integrated with
+  [LangChain](https://langfuse.com/integrations/frameworks/langchain),
+  [LlamaIndex](https://langfuse.com/integrations/frameworks/llamaindex),
+  [LiteLLM](https://langfuse.com/integrations/gateways/litellm), and [other
+  frameworks](https://langfuse.com/integrations). If you use one of them, any
+  use of Groq models is instrumented right away.*
 </Callout>
 
 To get started, set up your environment variables for Langfuse and Groq:
-
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -38,10 +42,9 @@ os.environ["GROQ_API_KEY"] = "gsk_..."
 
 ## Option 1: Using the OpenAI SDK to interact with the Groq model
 
-**Note**: *This example shows how to use the OpenAI Python SDK. If you use JS/TS, have a look at our [OpenAI JS/TS SDK](https://langfuse.com/integrations/model-providers/openai-js).*
+**Note**: _This example shows how to use the OpenAI Python SDK. If you use JS/TS, have a look at our [OpenAI JS/TS SDK](https://langfuse.com/integrations/model-providers/openai-js)._
 
 ### Install Required Packages
-
 
 ```python
 %pip install langfuse openai --upgrade
@@ -50,7 +53,6 @@ os.environ["GROQ_API_KEY"] = "gsk_..."
 ### Import Necessary Modules
 
 Instead of importing `openai` directly, import it from `langfuse.openai`. Also, import any other necessary modules.
-
 
 ```python
 # Instead of: import openai
@@ -61,7 +63,6 @@ from langfuse.openai import OpenAI
 
 Initialize the OpenAI client but point it to the Groq model endpoint. Replace the access token with your own.
 
-
 ```python
 client = OpenAI(
     base_url="https://api.groq.com/openai/v1",
@@ -71,9 +72,7 @@ client = OpenAI(
 
 ### Chat Completion Request
 
-Use the `client` to make a chat completion request to the Groq model. 
-
-
+Use the `client` to make a chat completion request to the Groq model.
 
 ```python
 completion = client.chat.completions.create(
@@ -89,7 +88,7 @@ completion = client.chat.completions.create(
 print(completion.choices[0].message.content)
 ```
 
-*[Example trace in Langfuse](https://cloud.langfuse.com/project/cm0nywmaa005c3ol2msoisiho/traces/8c0fe015-2d87-46a8-87e6-e6bd439b35b5?timestamp=2025-01-10T12%3A55%3A11.990Z)*
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cm0nywmaa005c3ol2msoisiho/traces/8c0fe015-2d87-46a8-87e6-e6bd439b35b5?timestamp=2025-01-10T12%3A55%3A11.990Z)_
 
 ## Option 2: Using the OpenInference instrumentation
 
@@ -99,19 +98,16 @@ For more detailed guidance on the Groq SDK, please refer to the [Groq Documentat
 
 ### Install Required Packages
 
-
-
 ```python
 %pip install groq langfuse openinference-instrumentation-groq
 ```
-
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -120,7 +116,6 @@ os.environ["GROQ_API_KEY"] = "gsk_..."
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
-
 
 ```python
 from langfuse import get_client
@@ -134,7 +129,6 @@ assert langfuse.auth_check(), "Langfuse auth failed - check your keys ✋"
 
 Use the [OpenInference instrumentation library](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-groq) to wrap the Groq SDK calls and send OpenTelemetry spans to Langfuse.
 
-
 ```python
 from openinference.instrumentation.groq import GroqInstrumentor
 
@@ -143,14 +137,12 @@ GroqInstrumentor().instrument()
 
 ### Example LLM Call
 
-
 ```python
 from groq import Groq
 
 # Initialize Groq client
 groq_client = Groq(api_key=os.environ["GROQ_API_KEY"])
 ```
-
 
 ```python
 chat_completion = groq_client.chat.completions.create(
@@ -177,7 +169,7 @@ After running the example model call, you can see the traces in Langfuse. You wi
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-groq/single-trace-example.png)
 
-*[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/986dec33c084f29a2cf57fc35eec8668?timestamp=2025-08-06T07%3A41%3A00.503Z&display=details)*
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/986dec33c084f29a2cf57fc35eec8668?timestamp=2025-08-06T07%3A41%3A00.503Z&display=details)_
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 

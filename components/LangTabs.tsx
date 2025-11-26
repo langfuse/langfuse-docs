@@ -59,12 +59,12 @@ export function LangTabs(props: {
   const storedLabel = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,
-    store.getSnapshot
+    store.getSnapshot,
   );
 
   // Track the current active index separately
   const [currentIndex, setCurrentIndex] = React.useState<number>(
-    defaultIndex >= 0 && defaultIndex < items.length ? defaultIndex : 0
+    defaultIndex >= 0 && defaultIndex < items.length ? defaultIndex : 0,
   );
 
   const labels: (string | null)[] = useMemo(() => {
@@ -83,7 +83,7 @@ export function LangTabs(props: {
 
   const initialLabel = useMemo(
     () => labels[defaultIndex] ?? null,
-    [labels, defaultIndex]
+    [labels, defaultIndex],
   );
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export function LangTabs(props: {
     const target = storedLabel ?? initialLabel;
     if (target) {
       const idx = labels.findIndex(
-        (l) => typeof l === "string" && normalize(l) === normalize(target)
+        (l) => typeof l === "string" && normalize(l) === normalize(target),
       );
       if (idx !== -1) {
         setCurrentIndex(idx);

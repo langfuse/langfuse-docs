@@ -5,7 +5,6 @@ ogImage: /images/blog/2025-03-13-hugging-face-with-langfuse/hugging-face-with-la
 tag: guide
 date: 2025/03/13
 author: "Jannik"
-
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
@@ -128,11 +127,12 @@ This integration allows you to see detailed traces for each step your smolagent 
 ## 3) Hugging Face Models in Playground and Evaluators
 
 You can also use Hugging Face models in the [Langfuse Playground](/docs/playground) and for [LLM-as-a-Judge evaluators](/docs/scores/model-based-evals). This lets you test your prompts and use open source models for model-based evaluations.
- 
+
 To add a Hugging Face model in Langfuse, navigate to your project settings. Create a new model connection and select openai as the provider. Replace the API Base URL with the endpoint for the model (e.g. `https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct/v1/`). Add your Hugging Face access token to the API Key field. For the model name, you can use any arbitrary identifier.
 
 <Frame className="sm:w-1/2">
-![Hugging Face Playground in Langfuse](/images/cookbook/huggingface/add-hugging-face-to-playground.png)
+  ![Hugging Face Playground in
+  Langfuse](/images/cookbook/huggingface/add-hugging-face-to-playground.png)
 </Frame>
 
 Learn more about how to set up Langfuse’s [LLM-as-a-Judge evaluators](/docs/scores/model-based-evals) and the [Langfuse Playground](/docs/playground).
@@ -141,9 +141,9 @@ Learn more about how to set up Langfuse’s [LLM-as-a-Judge evaluators](/docs/sc
 
 ## 4) Hugging Face Datasets for Dataset Experiments
 
-Hugging Face offers a variety of datasets that can be used to evaluate LLMs and AI agents. These datasets can be used to run [Langfuse Dataset Experiments](/docs/datasets/overview). 
+Hugging Face offers a variety of datasets that can be used to evaluate LLMs and AI agents. These datasets can be used to run [Langfuse Dataset Experiments](/docs/datasets/overview).
 
-This example shows how you can bring Hugging Face datasets into your observability pipeline, allowing you to track performance and evaluation scores with Langfuse. 
+This example shows how you can bring Hugging Face datasets into your observability pipeline, allowing you to track performance and evaluation scores with Langfuse.
 
 First, we fetch a dataset from Hugging Face. In this case the [GSM8K dataset](https://huggingface.co/datasets/openai/gsm8k) containing math word problems.
 
@@ -185,7 +185,7 @@ for i, row in df.iterrows():
 
 ![Hugging Face Dataset in Langfuse](/images/cookbook/huggingface-agent-course/example-dataset.png)
 
-You can then loop over the dataset items to test your application for every dataset input. 
+You can then loop over the dataset items to test your application for every dataset input.
 
 ```python
 dataset = langfuse.get_dataset("<langfuse_dataset_name>")
@@ -210,6 +210,7 @@ for item in dataset.items:
 ```
 
 You can repeat this process with different:
+
 - Models (OpenAI GPT, local LLM, etc.)
 - Tools (search vs. no search)
 - Prompts (different system messages)
@@ -225,8 +226,8 @@ For more details on how to use Langfuse Dataset Experiments, check out the [docs
 
 ## 5) Deploy Langfuse on Hugging Face Spaces
 
-Langfuse can also be deployed directly on Hugging Face Spaces—combining the instant accessibility of Spaces with the power of Langfuse observability.  
- 
+Langfuse can also be deployed directly on Hugging Face Spaces—combining the instant accessibility of Spaces with the power of Langfuse observability.
+
 To deploy, simply create a new Hugging Face Space, select Docker as your SDK, and choose Langfuse as the template. You’ll need to set up persistent storage and configure the environment variables for secure operation.
 
 ![Hugging Face Spaces Deployment](/images/cookbook/huggingface/huggingface-space-setup.png)

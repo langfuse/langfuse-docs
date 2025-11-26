@@ -1321,7 +1321,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
           : "grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
         selectedTiers.length === 4 && "md:grid-cols-4",
         selectedTiers.length === 3 && "md:grid-cols-3",
-        selectedTiers.length === 2 && "md:grid-cols-2"
+        selectedTiers.length === 2 && "md:grid-cols-2",
       )}
     >
       {selectedTiers.map((tier) => (
@@ -1330,7 +1330,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
           className={cn(
             tier.featured && "border-primary",
             "relative h-full flex flex-col",
-            selectedTiers.length === 1 && "w-full max-w-lg"
+            selectedTiers.length === 1 && "w-full max-w-lg",
           )}
         >
           {/* Unlimited Users callout for Core and Pro */}
@@ -1515,7 +1515,7 @@ export function PricingTable({
         // Get the widths of each column
         const headerCells = headerRef.current.querySelectorAll("th");
         const widths = Array.from(headerCells).map(
-          (cell) => (cell as HTMLElement).getBoundingClientRect().width
+          (cell) => (cell as HTMLElement).getBoundingClientRect().width,
         );
         setColumnWidths(widths);
       }
@@ -1567,7 +1567,7 @@ export function PricingTable({
         <div
           className={cn(
             "mx-auto space-y-16",
-            selectedTiers.length === 1 ? "max-w-xl" : "max-w-2xl"
+            selectedTiers.length === 1 ? "max-w-xl" : "max-w-2xl",
           )}
         >
           {selectedTiers.map((tier) => (
@@ -1632,7 +1632,7 @@ export function PricingTable({
         aria-labelledby="comparison-heading"
         className={cn(
           "hidden lg:block bg-card rounded-lg overflow-hidden border mt-20",
-          selectedTiers.length === 1 && "max-w-4xl mx-auto"
+          selectedTiers.length === 1 && "max-w-4xl mx-auto",
         )}
         ref={tableRef}
       >
@@ -1693,7 +1693,7 @@ export function PricingTable({
                 <th
                   className={cn(
                     "text-left font-medium",
-                    selectedTiers.length === 1 ? "w-7/12" : "w-3/12"
+                    selectedTiers.length === 1 ? "w-7/12" : "w-3/12",
                   )}
                   scope="col"
                 ></th>
@@ -1702,7 +1702,7 @@ export function PricingTable({
                     key={tier.id}
                     className={cn(
                       "p-2 text-center text-lg text-foreground font-semibold",
-                      selectedTiers.length === 1 ? "w-5/12" : "w-2/12"
+                      selectedTiers.length === 1 ? "w-5/12" : "w-2/12",
                     )}
                     scope="col"
                   >

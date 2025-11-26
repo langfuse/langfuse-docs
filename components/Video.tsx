@@ -24,7 +24,7 @@ export const Video = ({
       aspectRatio={aspectRatio ? `${aspectRatio}` : undefined}
       className={cn(
         "my-4 overflow-hidden rounded-lg shadow-lg ring-1 ring-slate-700 bg-cover object-cover",
-        className
+        className,
       )}
     >
       <MediaProvider />

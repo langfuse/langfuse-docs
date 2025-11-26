@@ -14,7 +14,7 @@ export default async function handler(req: NextRequest) {
       {
         status: 400,
         statusText: "Bad Request",
-      }
+      },
     );
   }
 
@@ -28,7 +28,7 @@ export default async function handler(req: NextRequest) {
       {
         status: 400,
         statusText: "Bad Request",
-      }
+      },
     );
   }
 
@@ -48,7 +48,7 @@ export default async function handler(req: NextRequest) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${process.env.LOOPS_API_KEY}`,
         },
-      }
+      },
     );
 
     if (loopsResponse.status === 200 || loopsResponse.status === 409) {
@@ -60,7 +60,7 @@ export default async function handler(req: NextRequest) {
         {
           status: 500,
           statusText: "Internal Server Error",
-        }
+        },
       );
     }
   } catch (error) {
@@ -70,7 +70,7 @@ export default async function handler(req: NextRequest) {
       {
         status: 500,
         statusText: error.message ?? "Internal Server Error",
-      }
+      },
     );
   }
 }

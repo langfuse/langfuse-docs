@@ -20,7 +20,6 @@ This notebook demonstrates how to capture detailed traces from a [Google Agent D
 <Steps>
 ## Step&nbsp;1: Install dependencies
 
-
 ```python
 %pip install langfuse google-adk openinference-instrumentation-google-adk -q
 ```
@@ -29,28 +28,26 @@ This notebook demonstrates how to capture detailed traces from a [Google Agent D
 
 Fill in the **Langfuse** and your **Gemini API key**.
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Gemini API Key (Get from Google AI Studio: https://aistudio.google.com/app/apikey)
-os.environ["GOOGLE_API_KEY"] = "..." 
+os.environ["GOOGLE_API_KEY"] = "..."
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -60,11 +57,9 @@ else:
 
     Langfuse client is authenticated and ready!
 
-
 ## Step 3: OpenTelemetry Instrumentation
 
 Use the [`GoogleADKInstrumentor`](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-google-adk) library to wrap ADK calls and send OpenTelemetry spans to Langfuse.
-
 
 ```python
 from openinference.instrumentation.google_adk import GoogleADKInstrumentor
@@ -75,7 +70,6 @@ GoogleADKInstrumentor().instrument()
 ## Step 3: Build a hello world agent
 
 Every tool call and model completion is captured as an OpenTelemetry span and forwarded to Langfuse.
-
 
 ```python
 from google.adk.agents import Agent
@@ -116,6 +110,7 @@ Head over to your **Langfuse dashboard → Traces**. You should see traces inclu
 ![Google ADK example trace in Langfuse](https://langfuse.com/images/cookbook/integration-google-adk/google-adk-trace.png)
 
 [Link to trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/b82a0bdc1994fc5d1c8576ca032543f7?timestamp=2025-08-28T07:32:30.303Z&display=details)
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

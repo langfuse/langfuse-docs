@@ -16,7 +16,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["jannikmaierhoefer"]}
 />
 
-In AI development, iterating quickly is important. Whether you're refining a prompt, swapping a model, or changing your application logic, you need to understand the impact of each change on performance. Manually annotating outputs after every modification is slow and expensive, especially when you want to integrate evaluations into a CI/CD pipeline. 
+In AI development, iterating quickly is important. Whether you're refining a prompt, swapping a model, or changing your application logic, you need to understand the impact of each change on performance. Manually annotating outputs after every modification is slow and expensive, especially when you want to integrate evaluations into a CI/CD pipeline.
 
 **Automated evaluators** solve this problem by providing a scalable way to measure and monitor your application's failure modes, enabling a fast and effective development loop.
 
@@ -54,9 +54,9 @@ Before building an evaluator, it's important to differentiate between two types 
 
 Let's apply this to the [Langfuse Example App](/docs/demo). First, we fix some obvious issues by clarifying the prompt: "use a maximum of three bullet points" and "ask for more context when the user's query is ambiguous." With those fixed, we can focus on measuring the more complex model limitation failures we identified in the [previous blog post](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications):
 
-* **Out of Scope**: The agent answers a question not related to Langfuse or the LLM/AI space.
-* **Generic Responses**: The answer is technically correct but doesn't resolve the user's issue. The metric is to assess if the agent's final answer is helpful and directly addresses the user's question.
-* **Context Retrieval / RAG Issues**: The agent uses the wrong retrieval tool. The metric needs to judge if the correct tool was chosen based on the user's query.
+- **Out of Scope**: The agent answers a question not related to Langfuse or the LLM/AI space.
+- **Generic Responses**: The answer is technically correct but doesn't resolve the user's issue. The metric is to assess if the agent's final answer is helpful and directly addresses the user's question.
+- **Context Retrieval / RAG Issues**: The agent uses the wrong retrieval tool. The metric needs to judge if the correct tool was chosen based on the user's query.
 
 For this guide, we will set up an evaluator for the "Out of Scope" failure mode.
 
@@ -81,13 +81,15 @@ A good LLM-as-a-Judge prompt is narrowly focused and well-structured:
 Here is an example prompt I use in our Example App to check if the agent's answer is within its scope:
 
 <Frame className="rounded-lg overflow-hidden">
-  ![LLM-as-a-Judge Prompt](/images/blog/2025-09-05-automated-evaluations/prompt.png)
+  ![LLM-as-a-Judge
+  Prompt](/images/blog/2025-09-05-automated-evaluations/prompt.png)
 </Frame>
 
 Once you drafted your prompt, you can set up the LLM-as-a-Judge evaluator in the Langfuse UI. You can find a guide on how to set them up in the UI [here](/docs/evaluation/evaluation-methods/llm-as-a-judge).
 
 <Frame className="rounded-lg overflow-hidden">
-  ![Evaluator Setup](/images/blog/2025-09-05-automated-evaluations/setup-evaluator.png)
+  ![Evaluator
+  Setup](/images/blog/2025-09-05-automated-evaluations/setup-evaluator.png)
 </Frame>
 
 ## Validating Your Evaluator [#validate-evaluator]
@@ -97,10 +99,11 @@ To build an evaluator you can trust, you must validate its performance against h
 First, split a set of human-labeled traces into a **development set** and a **test set**. In Langfuse, you can use tags to manage these sets. The **development set** is used to iteratively refine your judge's prompt. Run the evaluator on this set, compare its scores to the human labels, analyze the disagreements, and adjust the prompt's definitions or examples until its judgments closely align with yours:
 
 <Frame className="rounded-lg overflow-hidden">
-  ![Evaluator Tuning](/images/blog/2025-09-05-automated-evaluations/evaluator-tuning.png)
+  ![Evaluator
+  Tuning](/images/blog/2025-09-05-automated-evaluations/evaluator-tuning.png)
 </Frame>
 
-Additionally, you can measure the judge's alignment with human labels. The best metrics for this are **True Positive Rate (TPR)** and **True Negative Rate (TNR)**. TPR measures what fraction of actual "Passes" your judge correctly identifies, while TNR measures what fraction of actual "Fails" it correctly identifies. 
+Additionally, you can measure the judge's alignment with human labels. The best metrics for this are **True Positive Rate (TPR)** and **True Negative Rate (TNR)**. TPR measures what fraction of actual "Passes" your judge correctly identifies, while TNR measures what fraction of actual "Fails" it correctly identifies.
 
 You can calculate these metrics by querying the data from the trace table (via [UI export](/docs/api-and-data-platform/features/export-from-ui) or [SDKs](/docs/api-and-data-platform/features/query-via-sdk)) and calculating the metrics.
 
@@ -110,12 +113,17 @@ You can now repeat this process for both your Evaluators in the Langfuse UI and 
 
 ## Next Steps [#operationalize-evaluator]
 
-With good automated evaluators in place, the next step is to operationalize your workflow. The goal is to create a CI/CD pipeline where every code change (to a prompt, model, or tool) automatically triggers an evaluation run on a **golden [Langfuse Dataset](/docs/datasets)**. 
+With good automated evaluators in place, the next step is to operationalize your workflow. The goal is to create a CI/CD pipeline where every code change (to a prompt, model, or tool) automatically triggers an evaluation run on a **golden [Langfuse Dataset](/docs/datasets)**.
 
 Your automated evaluators will score these runs, providing immediate feedback on how your changes impacted key failure modes. This continuous monitoring loop helps you develop faster while maintaining a high quality bar for your application.
 
 import { FileCode } from "lucide-react";
 
 <Cards num={1}>
-  <Card title="CI/CD for LLM Applications" href="/blog/2025-10-21-testing-llm-applications" icon={<FileCode />} arrow />
+  <Card
+    title="CI/CD for LLM Applications"
+    href="/blog/2025-10-21-testing-llm-applications"
+    icon={<FileCode />}
+    arrow
+  />
 </Cards>

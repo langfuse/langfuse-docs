@@ -27,4 +27,3 @@ function IconClaude(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default IconClaude;
-

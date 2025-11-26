@@ -158,7 +158,7 @@ const supportDiscussions =
     .find((cat) => cat.category === "Support")
     ?.discussions.sort(
       (a, b) =>
-        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
     ) || [];
 const supportDiscussionsTop50 = supportDiscussions.slice(0, 20);
 
@@ -167,7 +167,7 @@ const ideasDiscussions =
     .find((cat) => cat.category === "Ideas")
     ?.discussions.sort(
       (a, b) =>
-        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
     ) || [];
 
 const ideasDiscussionsTop50 = ideasDiscussions.slice(0, 20);
@@ -188,7 +188,7 @@ export default function OpenSource() {
         if (response.ok) {
           const data: ReleaseData[] = await response.json();
           const langfuseRelease = data.find(
-            (release) => release.repo === "langfuse/langfuse"
+            (release) => release.repo === "langfuse/langfuse",
           );
           setReleaseData(langfuseRelease || null);
         }
@@ -207,7 +207,7 @@ export default function OpenSource() {
     if (!date) return "no activity";
     const now = new Date();
     const diffHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
     );
     if (diffHours < 24) return `${diffHours} hours ago`;
     const diffDays = Math.floor(diffHours / 24);
@@ -263,7 +263,7 @@ export default function OpenSource() {
                 : formatTimeDiff(
                     releaseData?.publishedAt
                       ? new Date(releaseData.publishedAt)
-                      : null
+                      : null,
                   )
             }
             linkHref={

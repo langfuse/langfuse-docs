@@ -74,7 +74,7 @@ await startActiveObservation("context-manager", async (span) => {
     async () => {
       // All observations created here automatically have this metadata
       // ... your logic ...
-    }
+    },
   );
 });
 ```
@@ -93,10 +93,10 @@ const processData = observe(
         // All nested observations automatically inherit this metadata
         const result = await performProcessing(data);
         return result;
-      }
+      },
     );
   },
-  { name: "process-data" }
+  { name: "process-data" },
 );
 
 const result = await processData("input");
@@ -149,7 +149,7 @@ await startActiveObservation("openai-call", async () => {
         model: "gpt-3.5-turbo",
         max_tokens: 300,
       });
-    }
+    },
   );
 });
 ```
@@ -192,9 +192,9 @@ await propagateAttributes(
   async () => {
     await chain.invoke(
       { input: "<user_input>" },
-      { callbacks: [langfuseHandler] }
+      { callbacks: [langfuseHandler] },
     );
-  }
+  },
 );
 ```
 
@@ -207,7 +207,7 @@ You can set the `metadata` via the override configs, see the [Flowise Integratio
 
 </LangTabs>
 
-<PropagationRestrictionsCallout attributes={['metadata']}/>
+<PropagationRestrictionsCallout attributes={["metadata"]} />
 
 ## Non-Propagated Metadata
 
@@ -221,13 +221,13 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_observation(as_type="span", name="process-request") as root_span:
-    # Add metadata to this specific observation only
-    root_span.update(metadata={"stage": "parsing"})
+with langfuse.start_as_current_observation(as_type="span", name="process-request") as root_span: # Add metadata to this specific observation only
+root_span.update(metadata={"stage": "parsing"})
 
     # ... or access span via the current context
     langfuse.update_current_span(metadata={"stage": "parsing"})
-```
+
+````
 
 </Tab>
 
@@ -251,11 +251,10 @@ await startActiveObservation("process-request", async (span) => {
     metadata: { stage: "parsing" },
   });
 });
-```
+````
 
 </Tab>
 </LangTabs>
-
 
 ## GitHub Discussions
 

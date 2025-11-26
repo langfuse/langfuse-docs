@@ -54,7 +54,7 @@ const GhDiscussionsPreviewInternal = ({
           (!labels ||
             discussion.labels.some((label) => labels.includes(label))) &&
           (searchTerm === "" ||
-            discussion.title.toLowerCase().includes(searchTerm.toLowerCase()))
+            discussion.title.toLowerCase().includes(searchTerm.toLowerCase())),
       ),
     }));
   }, [labels, searchTerm]);
@@ -95,7 +95,7 @@ const GhDiscussionsPreviewInternal = ({
     const startIndex = (currentPage - 1) * itemsPerPage;
     const displayedDiscussions = sortedDiscussions.slice(
       startIndex,
-      startIndex + itemsPerPage
+      startIndex + itemsPerPage,
     );
 
     if (displayedDiscussions.length === 0) {
@@ -213,7 +213,7 @@ const GhDiscussionsPreviewInternal = ({
                     {pageNumber}
                   </PaginationLink>
                 </PaginationItem>
-              )
+              ),
             )}
           </div>
           <PaginationItem>
@@ -242,7 +242,7 @@ const GhDiscussionsPreviewInternal = ({
         >
           {discussion.title}
         </Link>
-      ))
+      )),
     );
   };
 

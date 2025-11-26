@@ -25,11 +25,11 @@ This guide demonstrates how to **integrate Langfuse** into your **Kong API Gatew
 
 ### Supported AI Providers
 
-| Provider | Endpoints | Status |
-|----------|-----------|--------|
-| OpenAI-Compatible | `/v1/chat/completions`, `/v1/completions`, `/v1/embeddings` | ✅ |
-| vLLM | `/generate`, `/v1/completions` | ✅ |
-| Custom Providers | Extensible detection framework | ✅ |
+| Provider          | Endpoints                                                   | Status |
+| ----------------- | ----------------------------------------------------------- | ------ |
+| OpenAI-Compatible | `/v1/chat/completions`, `/v1/completions`, `/v1/embeddings` | ✅     |
+| vLLM              | `/generate`, `/v1/completions`                              | ✅     |
+| Custom Providers  | Extensible detection framework                              | ✅     |
 
 ## 1. Install the Kong Plugin
 
@@ -58,7 +58,7 @@ luarocks make rockspec/kong-plugin-ai-tracing-1.0.0-1.rockspec
 ### Option 3: Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   kong:
     image: kong:3.4
@@ -123,20 +123,21 @@ curl -X POST http://localhost:8001/services/YOUR_AI_SERVICE/plugins \
 
 ### Configuration Parameters
 
-| Parameter | Type | Default | Required | Description |
-|-----------|------|---------|----------|-------------|
-| `langfuse_enabled` | boolean | `false` | Yes | Enable/disable Langfuse integration |
-| `langfuse_public_key` | string | - | Yes | Your Langfuse public API key |
-| `langfuse_secret_key` | string | - | Yes | Your Langfuse secret API key |
-| `langfuse_endpoint` | string | `https://cloud.langfuse.com/api/public/ingestion` | No | Langfuse API endpoint |
-| `langfuse_timeout` | number | `5000` | No | HTTP timeout in milliseconds |
-| `environment` | string | `production` | No | Environment tag for filtering traces |
-| `log_level` | string | `info` | No | Logging verbosity (`debug`, `info`, `warn`, `error`) |
+| Parameter             | Type    | Default                                           | Required | Description                                          |
+| --------------------- | ------- | ------------------------------------------------- | -------- | ---------------------------------------------------- |
+| `langfuse_enabled`    | boolean | `false`                                           | Yes      | Enable/disable Langfuse integration                  |
+| `langfuse_public_key` | string  | -                                                 | Yes      | Your Langfuse public API key                         |
+| `langfuse_secret_key` | string  | -                                                 | Yes      | Your Langfuse secret API key                         |
+| `langfuse_endpoint`   | string  | `https://cloud.langfuse.com/api/public/ingestion` | No       | Langfuse API endpoint                                |
+| `langfuse_timeout`    | number  | `5000`                                            | No       | HTTP timeout in milliseconds                         |
+| `environment`         | string  | `production`                                      | No       | Environment tag for filtering traces                 |
+| `log_level`           | string  | `info`                                            | No       | Logging verbosity (`debug`, `info`, `warn`, `error`) |
 
 import { Callout } from "nextra/components";
 
 <Callout type="info">
-For self-hosted Langfuse instances, update `langfuse_endpoint` to your instance URL followed by `/api/public/ingestion`.
+  For self-hosted Langfuse instances, update `langfuse_endpoint` to your
+  instance URL followed by `/api/public/ingestion`.
 </Callout>
 
 ## 4. Hello World Example
@@ -158,7 +159,8 @@ curl -X POST http://kong-gateway:8000/v1/chat/completions \
 ```
 
 <Frame>
-![Example trace in Langfuse](/images/cookbook/integration_kong/kong-example-trace-01.png)
+  ![Example trace in
+  Langfuse](/images/cookbook/integration_kong/kong-example-trace-01.png)
 </Frame>
 
 Clicking the link above (or your own project link) lets you view all observations, token usage, latencies, etc., for debugging or optimization.
@@ -184,17 +186,18 @@ curl -X POST http://kong-gateway:8000/v1/chat/completions \
 
 ### Supported Context Headers
 
-| Header | Description | Example |
-|--------|-------------|---------|
-| `X-User-Id` | Unique user identifier | `user-12345` |
-| `X-Session-Id` | Session identifier | `session-abc` |
-| `X-Chat-Id` | Conversation/chat ID | `chat-789` |
-| `X-Message-Id` | Individual message ID | `msg-54321` |
-| `X-Organization-Id` | Organization context | `org-acme` |
-| `X-Project-Id` | Project identifier | `project-xyz` |
+| Header              | Description            | Example       |
+| ------------------- | ---------------------- | ------------- |
+| `X-User-Id`         | Unique user identifier | `user-12345`  |
+| `X-Session-Id`      | Session identifier     | `session-abc` |
+| `X-Chat-Id`         | Conversation/chat ID   | `chat-789`    |
+| `X-Message-Id`      | Individual message ID  | `msg-54321`   |
+| `X-Organization-Id` | Organization context   | `org-acme`    |
+| `X-Project-Id`      | Project identifier     | `project-xyz` |
 
 <Frame>
-![Example trace with context](/images/cookbook/integration_kong/kong-example-trace-02.png)
+  ![Example trace with
+  context](/images/cookbook/integration_kong/kong-example-trace-02.png)
 </Frame>
 
 ## 6. Adding Metadata
@@ -409,12 +412,11 @@ The AI tracing plugin works alongside other Kong plugins:
 - **Request Transformer**: Modify requests before tracing
 
 <Callout type="warning">
-**Security Best Practices**:
-- Store Langfuse API keys securely (use Kong's vault integration or environment variables)
-- Review exported data for PII compliance
-- Restrict access to plugin configuration in production
-- Ensure Kong-Langfuse communication uses HTTPS
-- Consider data retention policies for sensitive content
+  **Security Best Practices**: - Store Langfuse API keys securely (use Kong's
+  vault integration or environment variables) - Review exported data for PII
+  compliance - Restrict access to plugin configuration in production - Ensure
+  Kong-Langfuse communication uses HTTPS - Consider data retention policies for
+  sensitive content
 </Callout>
 
 ## Resources

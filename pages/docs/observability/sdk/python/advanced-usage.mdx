@@ -94,6 +94,7 @@ When filtering instrumentation scopes, be aware that blocking certain libraries 
 For example, if you block parent spans but keep child spans from a separate library, you may see "orphaned" LLM spans whose parent spans were filtered out. This can make traces harder to interpret.
 
 Consider the impact on trace structure when choosing which scopes to filter.
+
 </Callout>
 
 ## Isolated TracerProvider
@@ -101,6 +102,7 @@ Consider the impact on trace structure when choosing which scopes to filter.
 You can configure a separate OpenTelemetry TracerProvider for use with Langfuse. This creates isolation between Langfuse tracing and your other observability systems.
 
 **Benefits of isolation:**
+
 - Langfuse spans won't be sent to your other observability backends (e.g., Datadog, Jaeger, Zipkin)
 - Third-party library spans won't be sent to Langfuse
 - Independent configuration and sampling rates
@@ -112,6 +114,7 @@ While TracerProviders are isolated, they share the same OpenTelemetry context fo
 - Trace hierarchies may be incomplete or confusing
 
 Plan your instrumentation carefully to avoid confusing trace structures.
+
 </Callout>
 
 ```python
@@ -145,11 +148,11 @@ Using the `trace_context` argument to 'force' the parent child relationship may 
 - If you are using multiprocessing, [see here for details on how to propagate the OpenTelemetry context](https://github.com/open-telemetry/opentelemetry-python/issues/2765#issuecomment-1158402076).
 - If you are using Pydantic Logfire, please set `distributed_tracing` to `True`.
 
-
 ## Multi-Project Setup (Experimental)
 
 <Callout type="warning">
-Multi-project setups are **experimental** and have important limitations regarding third-party OpenTelemetry integrations.
+  Multi-project setups are **experimental** and have important limitations
+  regarding third-party OpenTelemetry integrations.
 </Callout>
 
 The Langfuse Python SDK supports routing traces to different projects within the same application by using multiple public keys. This works because the Langfuse SDK adds a specific span attribute containing the public key to all spans it generates.
@@ -198,7 +201,7 @@ For all integrations in multi-project setups, you must specify the `public_key` 
 
 **Observe Decorator:**
 
-Pass `langfuse_public_key` as a keyword argument to the *top-most* observed function (not the decorator). From Python SDK >= 3.2.2, nested decorated functions will automatically pick up the public key from the execution context they are currently into. Also, calls to `get_client` will be also aware of the current `langfuse_public_key` in the decorated function execution context, so passing the `langfuse_public_key` here again is not necessary.
+Pass `langfuse_public_key` as a keyword argument to the _top-most_ observed function (not the decorator). From Python SDK >= 3.2.2, nested decorated functions will automatically pick up the public key from the execution context they are currently into. Also, calls to `get_client` will be also aware of the current `langfuse_public_key` in the decorated function execution context, so passing the `langfuse_public_key` here again is not necessary.
 
 ```python
 from langfuse import observe
@@ -335,8 +338,9 @@ langfuse.flush()
 
 If you are [self-hosting](/docs/deployment/self-host) Langfuse and you'd like to use self-signed SSL certificates, you will need to configure the SDK to trust the self-signed certificate:
 
-<Callout type='warning'>
-Changing SSL settings has major security implications depending on your environment. Be sure you understand these implications before you proceed.
+<Callout type="warning">
+  Changing SSL settings has major security implications depending on your
+  environment. Be sure you understand these implications before you proceed.
 </Callout>
 
 **1. Set OpenTelemetry span exporter to trust self-signed certificate**

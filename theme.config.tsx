@@ -106,19 +106,19 @@ const config: DocsThemeConfig = {
     const section = asPath.startsWith("/docs")
       ? "Docs"
       : asPath.startsWith("/changelog/")
-      ? "Changelog"
-      : asPath.startsWith("/cookbook/")
-      ? "Cookbook"
-      : asPath.startsWith("/faq/")
-      ? "FAQ"
-      : "";
+        ? "Changelog"
+        : asPath.startsWith("/cookbook/")
+          ? "Cookbook"
+          : asPath.startsWith("/faq/")
+            ? "FAQ"
+            : "";
 
     const image = frontMatter.ogImage
       ? "https://langfuse.com" + frontMatter.ogImage
       : `https://langfuse.com/api/og?title=${encodeURIComponent(
-          title
+          title,
         )}&description=${encodeURIComponent(
-          description
+          description,
         )}&section=${encodeURIComponent(section)}`;
 
     const video = frontMatter.ogVideo
@@ -126,7 +126,7 @@ const config: DocsThemeConfig = {
       : null;
 
     const cookbook = COOKBOOK_ROUTE_MAPPING.find(
-      (cookbook) => cookbook.path === asPath
+      (cookbook) => cookbook.path === asPath,
     );
     const canonical: string | undefined = cookbook?.canonicalPath
       ? "https://langfuse.com" + cookbook.canonicalPath
@@ -138,12 +138,12 @@ const config: DocsThemeConfig = {
       asPath === "/"
         ? "Langfuse"
         : asPath.startsWith("/blog/")
-        ? "%s - Langfuse Blog"
-        : asPath.startsWith("/docs/guides/")
-        ? "%s - Langfuse Guides"
-        : asPath.startsWith("/handbook/")
-        ? "%s - Langfuse Handbook"
-        : "%s - Langfuse";
+          ? "%s - Langfuse Blog"
+          : asPath.startsWith("/docs/guides/")
+            ? "%s - Langfuse Guides"
+            : asPath.startsWith("/handbook/")
+              ? "%s - Langfuse Handbook"
+              : "%s - Langfuse";
 
     const isDev =
       typeof process !== "undefined" && process.env.NODE_ENV === "development";

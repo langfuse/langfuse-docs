@@ -57,7 +57,9 @@ const MagicContainer = ({ children, className }: MagicContainerProps) => {
     init();
     containerRef.current &&
       setBoxes(
-        Array.from(containerRef.current.children).map((el) => el as HTMLElement)
+        Array.from(containerRef.current.children).map(
+          (el) => el as HTMLElement,
+        ),
       );
   }, []);
 

@@ -70,7 +70,7 @@ The observe decorator is capturing the args, kwargs and return value of decorate
 You can create spans or generations anywhere in your application. If you need more control than the `@observe` decorator, the primary way to do this is using context managers (with `with` statements), which ensure that observations are properly started and ended.
 
 - `langfuse.start_as_current_observation(as_type="span")`: Creates a new span and sets it as the currently active observation in the OTel context for its duration. Any new observations created within this block will be its children.
-- `langfuse.start_as_current_observation(as_type="generation")`: Similar to the above, but creates a specialized "generation" observation type for LLM calls. 
+- `langfuse.start_as_current_observation(as_type="generation")`: Similar to the above, but creates a specialized "generation" observation type for LLM calls.
 - You can see an overview of the different observation types [here](/docs/observability/features/observation-types).
 
 ```python
@@ -335,24 +335,25 @@ Trace-level attributes apply to the entire trace, not just a single observation.
 
 **Trace attribute parameters:**
 
-| Parameter    | Type                  | Description                                                      | Recommended Method |
-| :----------- | :-------------------- | :--------------------------------------------------------------- | :----------------- |
-| `name`       | `Optional[str]`       | Name for the trace.                                              | `update_trace()` |
+| Parameter    | Type                  | Description                                                      | Recommended Method       |
+| :----------- | :-------------------- | :--------------------------------------------------------------- | :----------------------- |
+| `name`       | `Optional[str]`       | Name for the trace.                                              | `update_trace()`         |
 | `user_id`    | `Optional[str]`       | ID of the user associated with this trace.                       | `propagate_attributes()` |
 | `session_id` | `Optional[str]`       | Session identifier for grouping related traces.                  | `propagate_attributes()` |
 | `version`    | `Optional[str]`       | Version of your application/service for this trace.              | `propagate_attributes()` |
-| `input`      | `Optional[Any]`       | Overall input for the entire trace.                              | `update_trace()` |
-| `output`     | `Optional[Any]`       | Overall output for the entire trace.                             | `update_trace()` |
+| `input`      | `Optional[Any]`       | Overall input for the entire trace.                              | `update_trace()`         |
+| `output`     | `Optional[Any]`       | Overall output for the entire trace.                             | `update_trace()`         |
 | `metadata`   | `Optional[Any]`       | Additional metadata for the trace.                               | `propagate_attributes()` |
 | `tags`       | `Optional[List[str]]` | List of tags to categorize the trace.                            | `propagate_attributes()` |
-| `public`     | `Optional[bool]`      | Whether the trace should be publicly accessible (if configured). | `update_trace()` |
+| `public`     | `Optional[bool]`      | Whether the trace should be publicly accessible (if configured). | `update_trace()`         |
 
 <Callout type="info">
   **Note:** For `user_id`, `session_id`, `metadata`, `version`, and `tags`, consider
   using `propagate_attributes()` (see below) to ensure these attributes are
   applied to **all spans**, not just the trace object.
 
-  In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagate_attributes` is the future-proof solution.
+In the near-term future filtering and aggregating observations by these attributes requires them to be present on all observations, and `propagate_attributes` is the future-proof solution.
+
 </Callout>
 
 #### Propagating Attributes [#propagate-attributes]
@@ -416,8 +417,7 @@ def call_llm():
 
 import { PropagationRestrictionsCallout } from "@/components/PropagationRestrictionsCallout";
 
-<PropagationRestrictionsCallout attributes={[]}/>
-
+<PropagationRestrictionsCallout attributes={[]} />
 
 ##### Cross-Service Propagation
 

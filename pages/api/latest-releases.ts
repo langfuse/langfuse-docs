@@ -26,7 +26,7 @@ const getLatestReleases = async (): Promise<ApiResponse[]> => {
   }
 
   const responses = await Promise.all(
-    REPOS.map((repo) => fetch(GITHUB_REPO_API_URL_RELEASE(repo), { headers }))
+    REPOS.map((repo) => fetch(GITHUB_REPO_API_URL_RELEASE(repo), { headers })),
   );
 
   if (responses.some((res) => !res.ok)) {
@@ -49,7 +49,7 @@ const getLatestReleases = async (): Promise<ApiResponse[]> => {
         publishedAt: latestRelease ? latestRelease.published_at : undefined,
         url: latestRelease ? latestRelease.html_url : undefined,
       };
-    })
+    }),
   );
 
   return langfuseReleases;
@@ -57,7 +57,7 @@ const getLatestReleases = async (): Promise<ApiResponse[]> => {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   try {
     // Only allow GET requests for this endpoint
@@ -75,7 +75,7 @@ export default async function handler(
         // cache for 7 days if there is an error with the API response
         .setHeader(
           "Cache-Control",
-          "public, s-maxage=3600, max-age=3600, stale-if-error=604800"
+          "public, s-maxage=3600, max-age=3600, stale-if-error=604800",
         )
         .json(langfuseReleases)
     );

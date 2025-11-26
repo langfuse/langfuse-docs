@@ -10,7 +10,7 @@ export const getStaticPaths = async () => {
   // this page is a catch-all for all tags and generates a page for each tag that has no dedicated page
   // We create dedicated pages as these auto-generated ones do not appear in the main menu
   const excludeTagsWithDistinctPages = getPagesUnderRoute("/faq/tag").map(
-    (page) => page.route.split("/").pop()
+    (page) => page.route.split("/").pop(),
   );
   const allTags = getFaqPages().reduce((acc, page) => {
     const tags = page.frontMatter?.tags || [];

@@ -35,15 +35,15 @@ export const CustomerIndex = ({
       (getPagesUnderRoute(path) as Array<CustomerStory>)
         .filter((page) => page.frontMatter?.showInCustomerIndex !== false)
         .slice(0, maxItems),
-    [maxItems, path]
+    [maxItems, path],
   );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {customerStories.map((story) => (
-        <Link 
-          key={story.route} 
-          href={story.route} 
+        <Link
+          key={story.route}
+          href={story.route}
           className="group block bg-card border rounded-lg p-8 break-inside-avoid hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer flex flex-col h-full"
         >
           {/* Customer Logo */}
@@ -98,7 +98,9 @@ export const CustomerIndex = ({
           <div className="flex-1" />
 
           {/* Author Information */}
-          {(story.frontMatter.quoteAuthor || story.frontMatter.quoteRole || story.frontMatter.quoteCompany) && (
+          {(story.frontMatter.quoteAuthor ||
+            story.frontMatter.quoteRole ||
+            story.frontMatter.quoteCompany) && (
             <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
               <div>
                 {story.frontMatter.quoteAuthor && (
@@ -106,39 +108,39 @@ export const CustomerIndex = ({
                     {story.frontMatter.quoteAuthor}
                   </div>
                 )}
-                {(story.frontMatter.quoteRole || story.frontMatter.quoteCompany) && (
+                {(story.frontMatter.quoteRole ||
+                  story.frontMatter.quoteCompany) && (
                   <div>
                     {story.frontMatter.quoteRole && (
                       <span>{story.frontMatter.quoteRole}</span>
                     )}
-                    {story.frontMatter.quoteRole && story.frontMatter.quoteCompany && (
-                      <span> at </span>
-                    )}
+                    {story.frontMatter.quoteRole &&
+                      story.frontMatter.quoteCompany && <span> at </span>}
                     {story.frontMatter.quoteCompany && (
                       <span>{story.frontMatter.quoteCompany}</span>
                     )}
                   </div>
                 )}
               </div>
-                          <div className="w-6 h-6 min-w-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600 transition-colors">
-              <svg 
-                className="w-3 h-3 text-gray-600 dark:text-gray-400" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M5 12h14M12 5l7 7-7 7" 
-                />
-              </svg>
-            </div>
+              <div className="w-6 h-6 min-w-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600 transition-colors">
+                <svg
+                  className="w-3 h-3 text-gray-600 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 12h14M12 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
             </div>
           )}
         </Link>
       ))}
     </div>
   );
-}; 
+};

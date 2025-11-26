@@ -18,7 +18,7 @@ const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
 const trackMcpToolUsage = async (
   toolName: string,
   status: "success" | "error",
-  properties: Record<string, any> = {}
+  properties: Record<string, any> = {},
 ) => {
   return waitUntil(
     (async () => {
@@ -39,7 +39,7 @@ const trackMcpToolUsage = async (
       } catch (error) {
         console.error("Error tracking PostHog event:", error);
       }
-    })()
+    })(),
   );
 };
 
@@ -51,7 +51,11 @@ const mcpHandler = createMcpHandler(
       "searchLangfuseDocs",
       "Semantic search (RAG) over the Langfuse documentation. Use this whenever the user asks a broader question that cannot be answered by a specific single page. Returns a concise answer synthesized from relevant docs. The raw provider response is included in _meta. Prefer this before guessing. If a specific page is needed call getLangfuseDocsPage first.",
       {
-        query: z.string().describe("The user’s question in natural language. Include helpful context like SDK/language (e.g., Python v3, JS v4), self-hosted vs cloud, and short error messages (trim long stack traces). Keep under ~600 characters."),
+        query: z
+          .string()
+          .describe(
+            "The user’s question in natural language. Include helpful context like SDK/language (e.g., Python v3, JS v4), self-hosted vs cloud, and short error messages (trim long stack traces). Keep under ~600 characters.",
+          ),
       },
       async ({ query }) => {
         try {
@@ -69,7 +73,7 @@ const mcpHandler = createMcpHandler(
                 messages: [{ role: "user", content: query }],
                 response_format: { type: "json_object" },
               }),
-            }
+            },
           );
 
           if (!inkeepRes.ok) {
@@ -119,7 +123,7 @@ const mcpHandler = createMcpHandler(
             isError: true,
           };
         }
-      }
+      },
     );
 
     // Define the getLangfuseDocsPage tool
@@ -131,7 +135,7 @@ const mcpHandler = createMcpHandler(
         pathOrUrl: z
           .string()
           .describe(
-            "Docs path starting with “/” (e.g., /docs/observability/overview) or a full URL on https://langfuse.com. Do not include anchors (#...) or queries (?foo=bar) — they will be ignored."
+            "Docs path starting with “/” (e.g., /docs/observability/overview) or a full URL on https://langfuse.com. Do not include anchors (#...) or queries (?foo=bar) — they will be ignored.",
           ),
       },
       async ({ pathOrUrl }) => {
@@ -194,7 +198,7 @@ const mcpHandler = createMcpHandler(
             isError: true,
           };
         }
-      }
+      },
     );
 
     // Define the getLangfuseOverview tool
@@ -249,7 +253,7 @@ const mcpHandler = createMcpHandler(
             isError: true,
           };
         }
-      }
+      },
     );
   },
   {
@@ -260,13 +264,13 @@ const mcpHandler = createMcpHandler(
     basePath: "/api",
     maxDuration: 60,
     verboseLogs: true,
-  }
+  },
 );
 
 // Wrapper function to adapt App Router handler to Pages Router
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   // Create a Request object from NextApiRequest
   const url = new URL(req.url || "", `http://${req.headers.host}`);

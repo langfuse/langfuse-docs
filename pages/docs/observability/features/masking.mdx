@@ -107,7 +107,7 @@ const spanProcessor = new LangfuseSpanProcessor({
     // A simple regex to mask credit card numbers
     const maskedData = data.replace(
       /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g,
-      "***MASKED_CREDIT_CARD***"
+      "***MASKED_CREDIT_CARD***",
     );
     return maskedData;
   },

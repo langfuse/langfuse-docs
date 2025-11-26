@@ -129,7 +129,7 @@ export const FeatureTabs = ({
         root: null,
         rootMargin: "50px",
         threshold: [0, 0.1, 0.25, 0.5],
-      }
+      },
     );
 
     observer.observe(element);

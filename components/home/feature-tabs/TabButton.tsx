@@ -3,7 +3,6 @@ import { forwardRef } from "react";
 import type { FeatureTabData } from "./types";
 import { Button } from "@/components/ui/button";
 
-
 export interface TabButtonProps {
   feature: FeatureTabData;
   isActive: boolean;
@@ -13,7 +12,18 @@ export interface TabButtonProps {
 }
 
 export const TabButton = forwardRef<HTMLButtonElement, TabButtonProps>(
-  ({ feature, isActive, onClick, onMouseEnter, onMouseLeave, className, ...props }, ref) => {
+  (
+    {
+      feature,
+      isActive,
+      onClick,
+      onMouseEnter,
+      onMouseLeave,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
     const Icon = feature.icon;
 
     return (
@@ -44,13 +54,13 @@ export const TabButton = forwardRef<HTMLButtonElement, TabButtonProps>(
               size={18}
               className={cn(
                 "shrink-0 transition-colors",
-                isActive ? "text-primary" : "text-muted-foreground"
+                isActive ? "text-primary" : "text-muted-foreground",
               )}
             />
             <span
               className={cn(
                 "font-semibold text-sm transition-colors",
-                isActive ? "text-primary" : "text-foreground"
+                isActive ? "text-primary" : "text-foreground",
               )}
             >
               {feature.title}
@@ -59,7 +69,7 @@ export const TabButton = forwardRef<HTMLButtonElement, TabButtonProps>(
         </Button>
       </div>
     );
-  }
+  },
 );
 
 TabButton.displayName = "TabButton";

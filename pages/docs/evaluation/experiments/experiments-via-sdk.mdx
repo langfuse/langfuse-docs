@@ -152,17 +152,17 @@ Run experiments directly on datasets stored in Langfuse for automatic tracing an
 ```python
 from langfuse import get_client
 from langfuse.openai import OpenAI
- 
+
 # Initialize client
 langfuse = get_client()
- 
+
 # Define your task function
 def my_task(*, item, **kwargs):
     question = item.input # `run_experiment` passes a `DatasetItemClient` to the task function. The input of the dataset item is available as `item.input`.
     response = OpenAI().chat.completions.create(
         model="gpt-4.1", messages=[{"role": "user", "content": question}]
     )
- 
+
     return response.choices[0].message.content
 
 # Get dataset from Langfuse
@@ -675,7 +675,7 @@ describe("Geography Experiment Tests", () => {
 
     // Access the run evaluator result directly
     const avgAccuracy = result.runEvaluations.find(
-      (eval) => eval.name === "avg_accuracy"
+      (eval) => eval.name === "avg_accuracy",
     )?.value as number;
 
     // Assert minimum accuracy threshold
@@ -698,7 +698,7 @@ describe("Geography Experiment Tests", () => {
 
     // Access the run evaluator result directly
     const avgAccuracy = result.runEvaluations.find(
-      (eval) => eval.name === "avg_accuracy"
+      (eval) => eval.name === "avg_accuracy",
     )?.value as number;
 
     // This test will fail because the task gives wrong answers
@@ -757,7 +757,7 @@ const levenshteinEvaluator = createEvaluatorFromAutoevals(Levenshtein());
 // Use with additional parameters
 const customFactualityEvaluator = createEvaluatorFromAutoevals(
   Factuality,
-  { model: "gpt-4o" } // Additional AutoEvals parameters
+  { model: "gpt-4o" }, // Additional AutoEvals parameters
 );
 
 const result = await langfuse.experiment.run({
@@ -1300,13 +1300,17 @@ You need to set up a webhook to receive the trigger request from Langfuse.
 - **Navigate to** `Your Project` > `Datasets`
 - **Click on** the dataset you want to set up a remote experiment trigger for
 
-<Frame className="max-w-lg">![New Experiment Button](/images/docs/navigate-to-dataset.png)</Frame>
+<Frame className="max-w-lg">
+  ![New Experiment Button](/images/docs/navigate-to-dataset.png)
+</Frame>
 
 ### Open the setup page
 
 **Click on** `Start Experiment` to open the setup page
 
-<Frame className="max-w-lg">![New Experiment Button](/images/docs/trigger-process.png)</Frame>
+<Frame className="max-w-lg">
+  ![New Experiment Button](/images/docs/trigger-process.png)
+</Frame>
 
 **Click on** `⚡` below `Custom Experiment`
 

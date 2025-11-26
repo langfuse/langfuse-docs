@@ -7,7 +7,9 @@ import { buttonVariants } from "./ui/button";
 
 export function HiringBadge() {
   const [isHovered, setIsHovered] = useState(false);
-  const [goats, setGoats] = useState<Array<{ id: number; x: number; y: number; delay: number; duration: number }>>([]);
+  const [goats, setGoats] = useState<
+    Array<{ id: number; x: number; y: number; delay: number; duration: number }>
+  >([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const goatIdRef = useRef(0);
   const lastSpawnTimeRef = useRef(0);
@@ -22,20 +24,23 @@ export function HiringBadge() {
     const now = Date.now();
     if (isHovered && now - lastSpawnTimeRef.current > 100) {
       lastSpawnTimeRef.current = now;
-      
+
       const newGoat = {
         id: goatIdRef.current++,
         x,
         y,
         delay: 0,
-        duration: 1.5 + (Math.random() * 0.6),
+        duration: 1.5 + Math.random() * 0.6,
       };
       setGoats((prev) => [...prev, newGoat]);
 
       // Remove goat after animation completes
-      setTimeout(() => {
-        setGoats((prev) => prev.filter((goat) => goat.id !== newGoat.id));
-      }, (newGoat.duration + 0.5) * 1000);
+      setTimeout(
+        () => {
+          setGoats((prev) => prev.filter((goat) => goat.id !== newGoat.id));
+        },
+        (newGoat.duration + 0.5) * 1000,
+      );
     }
   };
 
@@ -49,7 +54,7 @@ export function HiringBadge() {
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="relative hidden lg:block"
       onMouseMove={handleMouseMove}
@@ -60,7 +65,7 @@ export function HiringBadge() {
         href="/careers"
         className={cn(
           buttonVariants({ variant: "outline", size: "pill" }),
-          "inline-flex h-6 px-2.5 text-[11px] font-medium bg-white dark:bg-muted text-foreground hover:bg-accent/50 dark:hover:bg-muted/80 items-center gap-1.5 relative z-10"
+          "inline-flex h-6 px-2.5 text-[11px] font-medium bg-white dark:bg-muted text-foreground hover:bg-accent/50 dark:hover:bg-muted/80 items-center gap-1.5 relative z-10",
         )}
         onFocus={() => setIsHovered(true)}
         onBlur={() => setIsHovered(false)}
@@ -71,26 +76,31 @@ export function HiringBadge() {
           <span className={cn("block", isHovered && "invisible")}>
             Hiring in Berlin and SF
           </span>
-          <span className={cn("absolute left-0 top-0", !isHovered && "invisible")}>
+          <span
+            className={cn("absolute left-0 top-0", !isHovered && "invisible")}
+          >
             Looking for GOATS!
           </span>
         </span>
       </Link>
-      
+
       {/* Falling goats animation */}
       {isHovered && (
-        <div className="fixed pointer-events-none overflow-visible z-50" style={{ 
-          top: 0, 
-          left: 0, 
-          width: "100vw", 
-          height: "100vh",
-        }}>
+        <div
+          className="fixed pointer-events-none overflow-visible z-50"
+          style={{
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+          }}
+        >
           {goats.map((goat) => {
             if (!containerRef.current) return null;
             const rect = containerRef.current.getBoundingClientRect();
             const absoluteX = rect.left + goat.x;
             const absoluteY = rect.top + goat.y;
-            
+
             return (
               <span
                 key={goat.id}

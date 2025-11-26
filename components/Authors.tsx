@@ -28,14 +28,14 @@ const findAuthor = (authorName: string): Author => {
   const author =
     allAuthors[authorName as keyof typeof allAuthors] ??
     Object.values(allAuthors).find(
-      (author) => author.firstName.toLowerCase() === authorName.toLowerCase()
+      (author) => author.firstName.toLowerCase() === authorName.toLowerCase(),
     ) ??
     Object.values(allAuthors).find(
-      (author) => author.name.toLowerCase() === authorName.toLowerCase()
+      (author) => author.name.toLowerCase() === authorName.toLowerCase(),
     );
   if (!author) {
     throw new Error(
-      `Author "${authorName}" is not present in allAuthors. Please check data/authors.json.`
+      `Author "${authorName}" is not present in allAuthors. Please check data/authors.json.`,
     );
   }
   return author;
@@ -89,7 +89,7 @@ export const Author = (props: { author: string; hideLastName?: boolean }) => {
           />
           <span
             className={cn(
-              "text-primary/60 group-hover:text-primary whitespace-nowrap"
+              "text-primary/60 group-hover:text-primary whitespace-nowrap",
             )}
           >
             {props.hideLastName ? author.firstName : author.name}

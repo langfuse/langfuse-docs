@@ -20,13 +20,11 @@ This guide shows you how to integrate CometAPI with Langfuse. CometAPI's API end
 
 Make sure you have installed the necessary Python packages:
 
-
 ```python
 %pip install openai langfuse
 ```
 
 ## Step 2: Set Up Environment Variables
-
 
 ```python
 import os
@@ -34,7 +32,7 @@ import os
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-..."
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
@@ -50,7 +48,6 @@ In this step we use the native [OpenAI drop-in replacement](https://langfuse.com
 
 To start using CometAPI with OpenAI's client libraries, pass in your CometAPI API key to the `api_key` option, and change the `base_url` to `https://api.cometapi.com/v1/`:
 
-
 ```python
 # instead of import openai:
 from langfuse.openai import openai
@@ -62,13 +59,16 @@ client = openai.OpenAI(
 ```
 
 <Callout type="info" emoji="ℹ️">
-**Note:** The OpenAI drop-in replacement is fully compatible with the [Low-Level Langfuse Python SDKs](https://langfuse.com/docs/sdk/python/low-level-sdk) and [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace all parts of your application.
+  **Note:** The OpenAI drop-in replacement is fully compatible with the
+  [Low-Level Langfuse Python
+  SDKs](https://langfuse.com/docs/sdk/python/low-level-sdk) and [`@observe()`
+  decorator](https://langfuse.com/docs/sdk/python/decorators) to trace all parts
+  of your application.
 </Callout>
 
 ## Step 4: Run An Example
 
 The following cell demonstrates how to call CometAPI's chat model using the traced OpenAI client. All API calls will be automatically traced by Langfuse.
-
 
 ```python
 client = openai.OpenAI(
@@ -96,8 +96,8 @@ After running the example model call, you can see the traces in Langfuse. You wi
 - Token usage statistics
 - Latency metrics
 
-
 _Example trace link in Langfuse_
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

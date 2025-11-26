@@ -57,12 +57,21 @@ export const handler = async (req: Request) => {
     type: "chat",
   });
 
-  const reasoningSummary = prompt.config
-    .reasoningSummary as 'low' | 'medium' | 'high' | undefined;
-  const textVerbosity = prompt.config
-    .textVerbosity as 'low' | 'medium' | 'high' | undefined;
-  const reasoningEffort = prompt.config
-    .reasoningEffort as 'low' | 'medium' | 'high' | undefined;
+  const reasoningSummary = prompt.config.reasoningSummary as
+    | "low"
+    | "medium"
+    | "high"
+    | undefined;
+  const textVerbosity = prompt.config.textVerbosity as
+    | "low"
+    | "medium"
+    | "high"
+    | undefined;
+  const reasoningEffort = prompt.config.reasoningEffort as
+    | "low"
+    | "medium"
+    | "high"
+    | undefined;
 
   // Convert UI messages format of Vercel AI SDK to: [{ role: "user", content: "text..." }]
   const chatHistory = messages.map((msg) => ({
@@ -72,7 +81,7 @@ export const handler = async (req: Request) => {
       .map((part) => part.text)
       .join(""),
   }));
-  
+
   // Compile the prompt with chat history as a message placeholder
   const compiledPrompt = prompt.compile({}, { chat_history: chatHistory });
 
@@ -92,7 +101,6 @@ export const handler = async (req: Request) => {
 
   // Discover all tools exposed by the MCP server
   const tools = await mcpClient.tools();
-
 
   const result = streamText({
     model: openai(String(prompt.config.model)),

@@ -67,7 +67,7 @@ export const WebPreview = ({
       <div
         className={cn(
           "flex size-full flex-col rounded-lg border bg-card",
-          className
+          className,
         )}
         {...props}
       >
@@ -212,7 +212,7 @@ export const WebPreviewConsole = ({
           <ChevronDownIcon
             className={cn(
               "h-4 w-4 transition-transform duration-200",
-              consoleOpen && "rotate-180"
+              consoleOpen && "rotate-180",
             )}
           />
         </Button>
@@ -220,7 +220,7 @@ export const WebPreviewConsole = ({
       <CollapsibleContent
         className={cn(
           "px-4 pb-4",
-          "outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+          "outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         )}
       >
         <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -234,7 +234,7 @@ export const WebPreviewConsole = ({
                   "text-xs",
                   log.level === "error" && "text-destructive",
                   log.level === "warn" && "text-yellow-600",
-                  log.level === "log" && "text-foreground"
+                  log.level === "log" && "text-foreground",
                 )}
               >
                 <span className="text-muted-foreground">

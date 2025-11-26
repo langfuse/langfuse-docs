@@ -16,7 +16,8 @@ An "agent" is more than just a single call to an LLM. It's a system that operate
 This cycle of Call, Action, Environment, and Feedback continues until the agent decides to stop and generate a final answer. This entire sequence of events is what we call a **"trace"** or a **"trajectory."**
 
 <Frame>
-![LLM Agent](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/agent-overview.png)
+  ![LLM
+  Agent](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/agent-overview.png)
 </Frame>
 
 ### Why Evaluate Agents?
@@ -25,37 +26,39 @@ Evaluating these complex, multi-step trajectories is important because they can 
 
 ### Common problems when working with agents
 
-When working with agents, three problems show up again and again: **understanding, specification,** and **generalization**. You often lack understanding of what the agent actually does on real traffic—what tools it calls, where it gets stuck—because you’re not systematically inspecting traces or linking them to user feedback. 
+When working with agents, three problems show up again and again: **understanding, specification,** and **generalization**. You often lack understanding of what the agent actually does on real traffic—what tools it calls, where it gets stuck—because you’re not systematically inspecting traces or linking them to user feedback.
 
 The task is frequently underspecified: prompts and examples don’t clearly encode what “good” behavior is, so the agent improvises in unpredictable ways. And even once you’ve tightened the spec, the agent may still struggle to generalize—performing well on a few handpicked examples but failing on slightly different real-world queries—unless you add systematic, dataset-based evaluations to check robustness at scale.
 
 <Frame>
-![LLM Agent](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/evaluations.png)
+  ![LLM
+  Agent](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/evaluations.png)
 </Frame>
 
 ### The 3 Phases of Evaluation
 
 The process of evaluation has a clear, phased approach.
 
-**Phase 1: Early Development (Manual Tracing)** 
-When you're first building an agent, the most valuable thing you can do is simply look at the traces. Manual tracing gives you immediate insight into your agent's reasoning.  
+**Phase 1: Early Development (Manual Tracing)**
+When you're first building an agent, the most valuable thing you can do is simply look at the traces. Manual tracing gives you immediate insight into your agent's reasoning.
 
 **Phase 2: First Users (Online Evaluation)**
-As you get your first users, you can implement user feedback mechanisms, like thumbs-up or thumbs-down buttons, to flag problematic traces for review.  
+As you get your first users, you can implement user feedback mechanisms, like thumbs-up or thumbs-down buttons, to flag problematic traces for review.
 
-**Phase 3: Scaling (Offline Evaluation)** 
+**Phase 3: Scaling (Offline Evaluation)**
 The final phase, and the focus of this notebook, is creating an automated "offline evaluation dataset." As you scale, you can't manually review every trace. You need a "gold standard" dataset of inputs and their expected outputs or trajectories. This benchmark allows you to test your agent automatically, prevent regressions, and confidently make improvements.
 
 <Frame>
-![LLM Agent](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/issues.png)
+  ![LLM
+  Agent](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/issues.png)
 </Frame>
 
 ### Our Focus: Three Offline Evaluation Strategies
 
 In this notebook, we will focus on three practical, automated evaluation strategies that use a Langfuse dataset for experimentation.
 
-**1) Final Response (Black-Box):** 
-First is the "Final Response" evaluation. This method only cares about the user's input and the agent's final answer, completely ignoring the steps it took to get there. It's flexible, but it doesn't tell you *why* an agent failed.
+**1) Final Response (Black-Box):**
+First is the "Final Response" evaluation. This method only cares about the user's input and the agent's final answer, completely ignoring the steps it took to get there. It's flexible, but it doesn't tell you _why_ an agent failed.
 
 **2) Trajectory (Glass-Box):**
 Second is the "Trajectory" evaluation. This method checks if the agent took the "correct path." It compares the agent's actual sequence of tool calls against the expected sequence from our benchmark dataset. This helps pinpoint exactly where in the reasoning process a failure occurred.
@@ -69,10 +72,7 @@ Below, we will define a sample agent, create a small benchmark dataset, and add 
 
 _**Note**: In this guide, we are using Pydantic AI agents, but can be generalized to any other framework or tool._
 
-
-
 ### Step 0: Install Packages
-
 
 ```python
 %pip install -q --upgrade "pydantic-ai[mcp]" langfuse openai nest_asyncio aiohttp
@@ -81,7 +81,6 @@ _**Note**: In this guide, we are using Pydantic AI agents, but can be generalize
 ### Step 1: Set Environment Variables
 
 Get your Langfuse API keys from [project settings](https://cloud.langfuse.com).
-
 
 ```python
 import os
@@ -98,7 +97,6 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 Enable automatic tracing for Pydantic AI agents.
 
-
 ```python
 from langfuse import get_client
 from pydantic_ai.agent import Agent
@@ -113,7 +111,6 @@ print("✅ Pydantic AI instrumentation enabled")
 ### Step 3: Create Agent
 
 Build an agent that searches Langfuse docs using the [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp).
-
 
 ```python
 from typing import Any
@@ -135,7 +132,7 @@ async def run_agent(item, system_prompt="You are an expert on Langfuse. ", model
     ) -> ToolResult:
         tool_call_history.append({"tool_name": tool_name, "args": args})
         return await call_tool(tool_name, args)
-    
+
     langfuse_docs_server = MCPServerStreamableHTTP(
         url=LANGFUSE_MCP_URL,
         process_tool_call=process_tool_call,
@@ -149,7 +146,7 @@ async def run_agent(item, system_prompt="You are an expert on Langfuse. ", model
 
     async with agent:
         result = await agent.run(item.input["question"])
-        
+
         langfuse.update_current_trace(
             output=result.output,
             metadata={"tool_call_history": tool_call_history},
@@ -161,11 +158,11 @@ async def run_agent(item, system_prompt="You are an expert on Langfuse. ", model
 ### Step 4: Create Evaluation Dataset
 
 Build a benchmark dataset with test cases. Each case includes:
+
 - `input`: User question
 - `expected_output.response_facts`: Key facts the response must contain
 - `expected_output.trajectory`: Expected sequence of tool calls
 - `expected_output.search_term`: Expected search query (if applicable)
-
 
 ```python
 test_cases = [
@@ -226,14 +223,15 @@ for case in test_cases:
 
 ### Step 5: Set Up Evaluators
 
-Create three evaluators in the Langfuse UI. Each tests a different aspect of agent behavior. You can find the documentation on setting them up [here](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge). 
+Create three evaluators in the Langfuse UI. Each tests a different aspect of agent behavior. You can find the documentation on setting them up [here](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge).
 
 #### 1. Final Response Evaluation (Black Box)
 
 Tests output quality. Works regardless of internal implementation.
 
 <Frame>
-![Final Response Evaluation](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/eval-final-response.png)
+  ![Final Response
+  Evaluation](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/eval-final-response.png)
 </Frame>
 
 **Prompt template:**
@@ -244,12 +242,14 @@ You are a teacher grading a student based on the factual correctness of their st
 ### Examples
 
 #### Example 1:
+
 - Response: "The sun is shining brightly."
 - Facts to verify: ["The sun is up.", "It is a beautiful day."]
 - Reasoning: The response includes both facts.
 - Score: 1
 
 #### Example 2:
+
 - Response: "When I was in the kitchen, the dog was there"
 - Facts to verify: ["The cat is on the table.", "The dog is in the kitchen."]
 - Reasoning: The response mentions the dog but not the cat.
@@ -266,7 +266,8 @@ You are a teacher grading a student based on the factual correctness of their st
 Verifies the agent used the correct sequence of tools.
 
 <Frame>
-![Trajectory Evaluation](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/eval-trajectory.png)
+  ![Trajectory
+  Evaluation](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/eval-trajectory.png)
 </Frame>
 
 **Prompt template:**
@@ -302,7 +303,8 @@ Output: {{output}}
 Validates search query quality when agents search documentation.
 
 <Frame>
-![Trajectory Evaluation](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/eval-single-step.png)
+  ![Trajectory
+  Evaluation](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/eval-single-step.png)
 </Frame>
 
 **Prompt template:**
@@ -339,7 +341,6 @@ Create these evaluators in Langfuse UI under **Prompts** → **Create Evaluator*
 
 Run agents on your dataset. Compare different models and prompts to find the best configuration.
 
-
 ```python
 dataset = langfuse.get_dataset(DATASET_NAME)
 
@@ -355,7 +356,6 @@ print(result.format())
 ### Step 7: Compare Multiple Configurations
 
 Test different prompts and models to find the best configuration.
-
 
 ```python
 from functools import partial

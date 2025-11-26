@@ -1,4 +1,5 @@
 **Install package**
+
 ```sh
 npm install @langfuse/openai
 ```
@@ -8,7 +9,7 @@ npm install @langfuse/openai
 Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
 
 import EnvJS from "@/components-mdx/env-js.mdx";
-import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
+import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx";
 
 <EnvJS />
 
@@ -19,6 +20,7 @@ import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
 With your environment configured and OpenTelemetry initialized, call OpenAI SDK methods as usual from the wrapped client.
 
 **Wrap OpenAI client**
+
 ```ts
 import OpenAI from "openai";
 import { observeOpenAI } from "@langfuse/openai";
@@ -26,8 +28,8 @@ import { observeOpenAI } from "@langfuse/openai";
 const openai = observeOpenAI(new OpenAI());
 
 const res = await openai.chat.completions.create({
-    messages: [{ role: "system", content: "Tell me a story about a dog." }],
-    model: "gpt-4o",
-    max_tokens: 300,
+  messages: [{ role: "system", content: "Tell me a story about a dog." }],
+  model: "gpt-4o",
+  max_tokens: 300,
 });
 ```

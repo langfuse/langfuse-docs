@@ -24,7 +24,7 @@ export function TutorialCard({
       <Card
         className={cn(
           "h-full transition-all duration-200 border bg-transparent hover:bg-muted/40 hover:border-gray-300 dark:hover:border-gray-600 group",
-          className
+          className,
         )}
       >
         <CardContent className="p-4 flex flex-col h-full">

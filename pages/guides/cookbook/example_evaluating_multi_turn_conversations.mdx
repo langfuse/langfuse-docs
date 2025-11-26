@@ -24,6 +24,7 @@ When looking at your traces, sometimes you realize that at a specific part of a 
 You might wonder what the percentage of conversations have this same issue, which would involve examining sometimes prohibitively large number of conversation traces to determine if it's an actual problem your users are experiencing or not. You might also wonder how to determine if the solution you're implementing is actually solving the problem for all the different scenarios.
 
 This cookbook will show you how to evaluate your chatbot responses at any specific point in an ongoing conversation, a.k.a. **N+1 Evaluations**. You will learn:
+
 - how to find the relevant traces quickly
 - create datasets from real user conversations
 - systematically measure whether your improvements actually work.
@@ -34,7 +35,7 @@ The example below builds a simple cooking assistant chatbot. Even if your setup 
 
 The first part will setup an application and generate some traces in Langfuse, but you can follow along with your own application and existing conversation traces.
 
-----
+---
 
 Not using Langfuse yet? [Get started](https://langfuse.com/docs/get-started) by capturing LLM events.
 
@@ -46,12 +47,10 @@ In this example, we'll build a cooking assistant chatbot and then debug the prob
 
 First you need to install Langfuse via pip and then set the environment variables.
 
-
 ```python
 # Install the packages
 %pip install langfuse --upgrade
 ```
-
 
 ```python
 import os
@@ -67,7 +66,6 @@ os.environ["OPENAI_API_KEY"] = 'sk-proj-123'
 ```
 
 Now we'll create a simple cooking assistant chatbot that uses OpenAI as the LLM and trace it with Langfuse.
-
 
 ```python
 # This is a simple cooking assistant chatbot traced with Langfuse and uses OpenAI as the LLM.
@@ -140,9 +138,11 @@ chat = SimpleChat()
 We'll now add a few conversation traces to Langfuse.
 
 <Callout type="info">
-   Technically, we're creating fake/synthetic conversation examples here, not using real ones from actual users. Creating synthetic conversations is a different evaluation method that we'll explain separately in another post. For now, let's pretend these are real conversations from your chatbot.
+  Technically, we're creating fake/synthetic conversation examples here, not
+  using real ones from actual users. Creating synthetic conversations is a
+  different evaluation method that we'll explain separately in another post. For
+  now, let's pretend these are real conversations from your chatbot.
 </Callout>
-
 
 ```python
 messages = [
@@ -185,7 +185,6 @@ Now that we have some conversation traces, let's assume a typical debugging scen
 
 You will notice that the first two conversation traces have a recipe question from the user with the chatbot failing to address the user's new dietary restrictions. Let's now assume that we're seeing a pattern of this same issue in our traces (and that we have a lot more than just 3 conversations).
 
-
 You can create an [LLM-as-a-Judge](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge) to find all traces that have this same issue.Once you run it against your existing traces, you'll see that your traces have a score of 1 or 0 depending on whether they have the conversation history up to the point where the chatbot's response is incorrect.
 
 ![Check LLM-as-a-Judge output](https://langfuse.com/images/cookbook/example_evaluating_multi_turn_conversations/step2-check-llm-as-a-judge-output.png)
@@ -205,7 +204,6 @@ First step is to create a scoring mechanism that will score the responses from t
 ### Step 5 - Run your production LLM-app against the dataset
 
 Use the following code to create [Dataset Experiments](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk). This will run the chatbot against the dataset and score the responses using the LLM-as-a-Judge evaluator we created in the previous step.
-
 
 ```python
 from langfuse import get_client
@@ -234,8 +232,6 @@ Now you can see the Dataset Runs in the Langfuse UI, and the average score for t
 ### Step 6 - Improve your chatbot and evaluate again
 
 Now that you have a scoring mechanism, you can improve your chatbot and evaluate again. You can use the same dataset and evaluate the scores again to see if the improvements are working.
-
-
 
 ## Conclusion
 

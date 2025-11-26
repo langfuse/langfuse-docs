@@ -18,7 +18,7 @@ Langfuse integrates with Langchain using Langchain Callbacks. The Langfuse SDK a
 
 > **What is LangGraph?** [LangGraph](https://python.langchain.com/docs/get_started/introduction/) is a framework built on top of LangChain that makes it easier to design and run stateful, multi-step AI agents using a graph-based architecture.
 
-> **What is Langfuse?**  [Langfuse](/) is a platform for observability and tracing of LLM applications. It captures everything happening during an LLM interaction: inputs, outputs, tool usage, retries, latencies and costs and allows you to evaluate and debug your application.
+> **What is Langfuse?** [Langfuse](/) is a platform for observability and tracing of LLM applications. It captures everything happening during an LLM interaction: inputs, outputs, tool usage, retries, latencies and costs and allows you to evaluate and debug your application.
 
 ## Getting Started
 
@@ -66,7 +66,9 @@ langfuse_handler = CallbackHandler()
 ### LangChain Example
 
 <Callout type="info" emoji="💡">
-Instrumenting LangGraph follows the same pattern. Simply pass the `langfuse_handler` to the agent invocation. ([Example Notebook](/guides/cookbook/integration_langgraph)).
+  Instrumenting LangGraph follows the same pattern. Simply pass the
+  `langfuse_handler` to the agent invocation. ([Example
+  Notebook](/guides/cookbook/integration_langgraph)).
 </Callout>
 
 ```python /config={"callbacks": [langfuse_handler]}/
@@ -123,15 +125,14 @@ OPENAI_API_KEY = "sk-proj-..."
 
 With the environment variables set, we can now initialize the `langfuseSpanProcessor` which is passed to the main OpenTelemetry SDK that orchestrates tracing.
 
-
 ```typescript
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
- 
+
 const sdk = new NodeSDK({
   spanProcessors: [new LangfuseSpanProcessor()],
 });
- 
+
 sdk.start();
 ```
 
@@ -141,7 +142,7 @@ Instantiate the CallbackHandler. Optionally, you can pass additional attributes 
 
 ```typescript
 import { CallbackHandler } from "@langfuse/langchain";
- 
+
 // Initialize the Langfuse CallbackHandler
 const langfuseHandler = new CallbackHandler({
   sessionId: "user-session-123",
@@ -153,23 +154,21 @@ const langfuseHandler = new CallbackHandler({
 ### LangChain Example
 
 <Callout type="info" emoji="💡">
-Instrumenting LangGraph follows the same pattern. Simply pass the `langfuseHandler` to the agent invocation.
+  Instrumenting LangGraph follows the same pattern. Simply pass the
+  `langfuseHandler` to the agent invocation.
 </Callout>
 
 ```typescript /{ callbacks: [langfuseHandler] }/
 import { createAgent, tool } from "@langchain/core/agents";
 import * as z from "zod";
 
-const getWeather = tool(
-  (input) => `It's always sunny in ${input.city}!`,
-  {
-    name: "get_weather",
-    description: "Get the weather for a given city",
-    schema: z.object({
-      city: z.string().describe("The city to get the weather for"),
-    }),
-  }
-);
+const getWeather = tool((input) => `It's always sunny in ${input.city}!`, {
+  name: "get_weather",
+  description: "Get the weather for a given city",
+  schema: z.object({
+    city: z.string().describe("The city to get the weather for"),
+  }),
+});
 
 const agent = createAgent({
   model: "openai:gpt-5-mini",
@@ -178,9 +177,13 @@ const agent = createAgent({
 
 console.log(
   await agent.invoke(
-    { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] }, 
-    { callbacks: [langfuseHandler] }
-    )
+    {
+      messages: [
+        { role: "user", content: "What's the weather in San Francisco?" },
+      ],
+    },
+    { callbacks: [langfuseHandler] },
+  ),
 );
 ```
 
@@ -191,11 +194,10 @@ After executing the application, navigate to your [Langfuse Trace Table](https:/
 ![Langfuse Trace](https://langfuse.com/images/cookbook/example-js-sdk/js_integration_langchain_trace.png)
 
 [Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2c1581dd9cecdafb6ca091b83d7ea99a?timestamp=2025-10-30T08:45:41.319Z)
+
 </Steps>
 </Tab>
 </Tabs>
-
-
 
 ## Example Notebooks
 
@@ -349,7 +351,7 @@ const langfuseHandlerTrace = new CallbackHandler({ root: trace });
 // Add Langfuse handler as callback (classic and LCEL)
 await chain.invoke(
   { input: "<user_input>" },
-  { callbacks: [langfuseHandlerTrace] }
+  { callbacks: [langfuseHandlerTrace] },
 );
 
 // Get Langchain handler for a span
@@ -359,7 +361,7 @@ const langfuseHandlerSpan = new CallbackHandler({ root: span });
 // Add Langfuse handler as callback (classic and LCEL)
 await chain.invoke(
   { input: "<user_input>" },
-  { callbacks: [langfuseHandlerSpan] }
+  { callbacks: [langfuseHandlerSpan] },
 );
 ```
 
@@ -433,14 +435,13 @@ await chain.invoke(
     runName: traceName,
     tags,
     metadata: { langfuseUserId: userId, langfuseSessionId: sessionId },
-  }
+  },
 );
 ```
 
 </Tab>
 
 </LangTabs>
-
 
 ### Trace IDs & Distributed Tracing
 
@@ -500,7 +501,7 @@ await chain.invoke(
   {
     callbacks: [langfuseHandler],
     runId: predefinedRunId,
-  }
+  },
 );
 ```
 
@@ -699,7 +700,7 @@ Python SDK v3 introduces a completely revised Langfuse core with a new **observa
 | ------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | Package import      | `from langfuse.callback import CallbackHandler`                   | `from langfuse.langchain import CallbackHandler`                       |
 | Client handling     | Multiple instantiated clients                                     | Singleton pattern, access via `get_client()`                           |
-| Trace/Span context  | `CallbackHandler` optionally accepted `root` to group runs        | Use context managers `with langfuse.start_as_current_observation(...)`        |
+| Trace/Span context  | `CallbackHandler` optionally accepted `root` to group runs        | Use context managers `with langfuse.start_as_current_observation(...)` |
 | Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Use `metadata["langfuse_user_id"]` OR `span.update_trace(user_id=...)` |
 | Constructor args    | `CallbackHandler(sample_rate=..., user_id=...)`                   | No constructor args – use Langfuse client or spans                     |
 
@@ -850,11 +851,11 @@ const chain = new LLMChain({
 // execute the chain
 await chain.call(
   { product: "<user_input_one>" },
-  { callbacks: [langfuseHandler] }
+  { callbacks: [langfuseHandler] },
 );
 await chain.call(
   { product: "<user_input_two>" },
-  { callbacks: [langfuseHandler] }
+  { callbacks: [langfuseHandler] },
 );
 ```
 

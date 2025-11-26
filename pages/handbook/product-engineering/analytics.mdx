@@ -36,11 +36,9 @@ graph LR
 The Langfuse analytics stack consists of multiple data sources that feed into BigQuery datasets and are then transformed and visualized:
 
 1. **Data Warehouse** -> **BigQuery**
-
    - [Analytics Project](https://console.cloud.google.com/welcome?inv=1&invt=AbylRQ&project=analytics-461014)
 
 2. **Data Sources** → **langfuse_raw** (BigQuery)
-
    - [PostHog](https://eu.posthog.com/project/7132) direct export
    - [Airbyte Cloud](https://cloud.airbyte.com/workspaces/c1588c24-d8e8-460a-93ee-cb5987156a60/connections) instance importing:
      - ClickHouse data (from prod-eu, prod-us, prod-hipaa)
@@ -52,7 +50,6 @@ The Langfuse analytics stack consists of multiple data sources that feed into Bi
      - All sheets in this folder are shared (view only) with the dbt and metabase service accounts
 
 3. **langfuse_raw** → **langfuse_prod** (BigQuery)
-
    - [dbt Cloud](https://hy094.us1.dbt.com/dashboard/70471823463468/projects/70471823471745/) transforms raw data into production-ready format
    - DBT queries managed in the [Analytics Repo](https://github.com/langfuse/analytics), see Readme for more details on how to use dbt
    - Model layers (mental model):

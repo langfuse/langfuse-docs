@@ -19,7 +19,6 @@ This notebook demonstrates how to **integrate Langfuse** into your **Microsoft A
 
 Below we install the `agent-framework` library (the Microsoft Agent Framework) and `langfuse` for observability.
 
-
 ```python
 %pip install agent-framework langfuse --pre
 ```
@@ -28,14 +27,12 @@ Below we install the `agent-framework` library (the Microsoft Agent Framework) a
 
 Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
-
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -49,8 +46,6 @@ os.environ["OPENAI_CHAT_MODEL_ID"] = "gpt-5-mini"
 ## 3. Initialize Langfuse Client
 
 Initialize the Langfuse client to verify the connection. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
-
-
 
 ```python
 from langfuse import get_client
@@ -69,10 +64,9 @@ else:
 The Microsoft Agent Framework includes built-in observability support through OpenTelemetry. Enable it by calling `setup_observability()` which automatically exports traces to Langfuse.
 
 <Callout type="info" emoji="ℹ️">
-**Note:** Set `enable_sensitive_data=True` to capture full request/response data including function arguments and results.
+  **Note:** Set `enable_sensitive_data=True` to capture full request/response
+  data including function arguments and results.
 </Callout>
-
-
 
 ```python
 from agent_framework.observability import setup_observability
@@ -83,7 +77,6 @@ setup_observability(enable_sensitive_data=True)
 ## 5. Hello World Example with Tool
 
 Below we create a **weather agent** using the Microsoft Agent Framework with Azure OpenAI. The agent has access to a `get_weather` function tool that it can call to retrieve weather information.
-
 
 ```python
 import asyncio
@@ -118,13 +111,11 @@ await main()
 
 The Microsoft Agent Framework also supports using OpenAI directly (not through Azure). Simply use `OpenAIResponsesClient` instead of `AzureOpenAIChatClient`.
 
-
 ```python
 # Required for OpenAI API access
 os.environ["OPENAI_API_KEY"]="sk-proj-..."
-os.environ["OPENAI_RESPONSES_MODEL_ID"]="gpt-5-mini" 
+os.environ["OPENAI_RESPONSES_MODEL_ID"]="gpt-5-mini"
 ```
-
 
 ```python
 from agent_framework.openai import OpenAIResponsesClient

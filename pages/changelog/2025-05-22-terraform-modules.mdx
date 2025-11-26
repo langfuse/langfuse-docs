@@ -15,13 +15,13 @@ import { Playground } from "nextra/components";
 export const getStaticProps = async () => {
   const [awsRes, gcpRes, azureRes] = await Promise.all([
     fetch(
-      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-aws/refs/heads/main/README.md"
+      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-aws/refs/heads/main/README.md",
     ),
     fetch(
-      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-gcp/main/README.md"
+      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-gcp/main/README.md",
     ),
     fetch(
-      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-azure/main/README.md"
+      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-azure/main/README.md",
     ),
   ]);
   const [awsReadme, gcpReadme, azureReadme] = await Promise.all([

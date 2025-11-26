@@ -4,7 +4,7 @@ description: Learn how Langfuse's backend is structured and how to write code fo
 
 # Backend Code Structure Guide
 
-This guide explains how Langfuse's backend is organized and how to write code that follows our established patterns. 
+This guide explains how Langfuse's backend is organized and how to write code that follows our established patterns.
 
 ## Architecture at a Glance
 
@@ -44,7 +44,9 @@ Langfuse uses a **monorepo** structure with three main packages:
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
+
 We follow the layered architecture pattern:
+
 - Router Layer: HTTP Requests or BullMQ Job handlers
 - Service Layer: Contains all the business logic
 - Repository Layer: Prisma / ClickHouse
@@ -111,7 +113,6 @@ shared/src/
 └── index.ts               # Public exports
 ```
 
-
 ## TypeScript Types
 
 We use TypeScript for all our code and maintain a structured type system with clear conversion boundaries.
@@ -175,4 +176,3 @@ sequenceDiagram
 - **Public APIs are versioned** - Our SDKs convert returned JSON to TypeScript/Python types. We must always be backwards compatible. Hence, we define dedicated types for the public API and convert domain objects to these types.
 - **tRPC API is not versioned** - We deploy our backend and frontend in sync and force refresh our frontend on new deployments. Therefore we can introduce breaking changes to the tRPC API.
 - The domain types can be found in [`packages/shared/src/domain/index.ts`](https://github.com/langfuse/langfuse/blob/main/packages/shared/src/domain/index.ts)
-

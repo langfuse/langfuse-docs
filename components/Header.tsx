@@ -22,7 +22,7 @@ export const Header = ({
     <div
       className={cn(
         "mx-auto max-w-4xl text-center mb-12 text-balance",
-        className
+        className,
       )}
     >
       {title && (
@@ -40,7 +40,11 @@ export const Header = ({
           {buttons.map((button) => (
             <Button key={button.href} variant="ghost" asChild>
               {button.target ? (
-                <a href={button.href} target={button.target} rel="noopener noreferrer">
+                <a
+                  href={button.href}
+                  target={button.target}
+                  rel="noopener noreferrer"
+                >
                   {button.text} <ArrowRight size={14} className="ml-2" />
                 </a>
               ) : (

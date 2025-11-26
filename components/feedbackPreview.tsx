@@ -108,7 +108,7 @@ export default function FeedbackPreview() {
             variant={state === "positive" ? "default" : "secondary"}
             className={clsx(
               state === "positive" && "bg-green-500 text-white",
-              "hover:bg-green-600 hover:text-white"
+              "hover:bg-green-600 hover:text-white",
             )}
             disabled={state === "loading-positive"}
             onClick={() => handleFeedback("positive")}
@@ -164,7 +164,7 @@ export function DataTable<TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 );

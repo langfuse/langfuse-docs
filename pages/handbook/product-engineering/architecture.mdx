@@ -2,8 +2,6 @@
 title: Architecture
 ---
 
-
-
 # Langfuse Platform Architecture - High-Level Overview
 
 Langfuse's infrastructure continuously evolves to support increasing scale and new product features. We started on Vercel and Supabase with Next.js and Postgres, and have evolved to the distributed architecture described below. As our product and scale requirements grow, we'll continue to mature our infrastructure to meet those needs.
@@ -11,6 +9,7 @@ Langfuse's infrastructure continuously evolves to support increasing scale and n
 ## Infrastructure Components
 
 ### Application Layer
+
 ```mermaid
 graph LR
     Web["Langfuse Web<br/>(Next.js UI + API Layer)"]
@@ -18,11 +17,12 @@ graph LR
 
     Web -->|Queue| Worker
 ```
+
 - **Web container (NextJs)**: Serves the UI application and all APIs.
 - **Worker container (Express)**: Processes ingestion events in the background and executes async tasks (e.g. exports, LLM as a Judge).
 
-
 ### Storage Layer
+
 ```mermaid
 flowchart LR
     Postgres["PostgreSQL<br/>(OLTP)<br/><br/>Transactional Data"]
@@ -33,21 +33,19 @@ flowchart LR
     Postgres ~~~ ClickHouse ~~~ Redis ~~~ S3
 ```
 
-
 - **PostgreSQL**: Stores transactional data (users, organizations, projects, API keys, prompts, datasets, LLM as a Judge settings).
 - **ClickHouse**: Stores tracing data (traces, observations, scores). We use it to run dashboards, metrics, and render tables in the UI.
 - **Redis**: Stores event queue (BullMQ) and caching layer (API keys, prompts).
 - **S3**: Stores raw ingestion events and multi-modal attachments (images, audio).
 
-
 ### Why do we need an OLAP database (Clickhouse) for observability data?
+
 - We built Langfuse initially on Postgres and eventually migrated to Clickhouse. We always knew that Postgres wont be the best fit for our observability data.
 - OLAP databases have a columnar layout. With that the database only scans data required to produce results for analytical queries (e.g. LLM cost over time).
 - We needed a multi-node database to scale our data insert.
 - As we are an open source product, we required a database which runs on an open source license.
 
 ---
-
 
 ## Production environments
 
@@ -90,14 +88,14 @@ graph TB
         GHA -->|Build & Push| DockerHub["Docker Hub<br/>(OSS releases)"]
     end
     ECR -->|Deploy| VPN
-    
+
     subgraph CF["Cloudflare"]
         WAF["WAF<br/>(Web Application Firewall)"]
         Proxy["Central Proxy"]
     end
-    
+
     CF -->|Traffic| VPN
-    
+
     subgraph VPN["<span style='display:block; width:100%; text-align:left; white-space: nowrap;'><i>Langfuse Cloud (US, EU, HIPAA)</i></span>"]
         ECS["AWS ECS Fargate (Web + Worker)"]
         ECS --> ElastiCache["ElastiCache Redis (Clustered)"]

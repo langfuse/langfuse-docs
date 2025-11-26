@@ -21,7 +21,7 @@ const spanProcessor = new LangfuseSpanProcessor({
     // A simple regex to mask credit card numbers
     const maskedData = data.replace(
       /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g,
-      "***MASKED_CREDIT_CARD***"
+      "***MASKED_CREDIT_CARD***",
     );
     return maskedData;
   },
@@ -129,7 +129,7 @@ const rootSpan = startObservation(
       spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
       traceFlags: 1, // mark trace as sampled
     },
-  }
+  },
 );
 
 // Later, you can regenerate the same traceId to score or retrieve the trace
@@ -186,7 +186,7 @@ import { LangfuseSpanProcessor } from "@langfuse/otel";
 
 // Export the processor to be able to flush it
 export const langfuseSpanProcessor = new LangfuseSpanProcessor({
-  exportMode: "immediate" // optional: configure immediate span export in serverless environments
+  exportMode: "immediate", // optional: configure immediate span export in serverless environments
 });
 
 const sdk = new NodeSDK({
@@ -316,7 +316,9 @@ This configuration will send every trace to both projects. You can also configur
 ## Custom scores from browser
 
 <Callout>
-  Sending custom scores directly from the browser is not yet supported in the TypeScript SDK v4. The docs below describe the still valid approach with the SDK v3.
+  Sending custom scores directly from the browser is not yet supported in the
+  TypeScript SDK v4. The docs below describe the still valid approach with the
+  SDK v3.
 </Callout>
 
 The TypeScript SDK can be used to report custom scores client-side directly from the browser. It is commonly used to ingest scores into Langfuse which are based on implicit user interactions and feedback.
@@ -425,7 +427,7 @@ Hint for Next.js users: you need to prefix the public key with `NEXT_PUBLIC_` to
 
 <Callout type="warning">
 
-  Never set your Langfuse **secret key** in public browser code. The `LangfuseWeb` requires only the public key.
+Never set your Langfuse **secret key** in public browser code. The `LangfuseWeb` requires only the public key.
 
 </Callout>
 

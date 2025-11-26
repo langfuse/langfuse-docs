@@ -15,12 +15,10 @@ This notebook shows how to trace and observe BeeAI Framework applications with L
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
 
-
 <Steps>
 ## Step 1: Install Dependencies
 
 Before you begin, install the necessary packages in your Python environment:
-
 
 ```python
 %pip install beeai-framework langfuse openinference-instrumentation-beeai "beeai-framework[wikipedia]"
@@ -32,14 +30,12 @@ Next, set up your Langfuse API keys. You can get these keys by signing up for a 
 
 You will also need to configure your LLM provider credentials. BeeAI Framework supports multiple providers including OpenAI, Ollama, watsonx.ai, and others.
 
-
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -51,8 +47,6 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
-
-
 
 ```python
 from langfuse import get_client
@@ -67,8 +61,6 @@ assert langfuse.auth_check(), "Langfuse auth failed - check your keys ✋"
 
 Use the [`BeeAIInstrumentor`](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-beeai) library to wrap [BeeAI Framework](https://framework.beeai.dev) calls and send OpenTelemetry spans to Langfuse.
 
-
-
 ```python
 from openinference.instrumentation.beeai import BeeAIInstrumentor
 
@@ -76,7 +68,6 @@ BeeAIInstrumentor().instrument()
 ```
 
 ## Step 4: Run an Example
-
 
 ```python
 import asyncio
@@ -102,8 +93,8 @@ tools = [
 
 # Create a ReAct agent with memory
 agent = ReActAgent(
-    llm=llm, 
-    tools=tools, 
+    llm=llm,
+    tools=tools,
     memory=TokenMemory(llm)
 )
 
@@ -112,8 +103,8 @@ async def main():
     response = await agent.run(
         prompt="I'm planning a trip to Barcelona, Spain. Can you research key attractions and landmarks I should visit, and also tell me what the current weather conditions are like there?",
         execution=AgentExecutionConfig(
-            max_retries_per_step=3, 
-            total_max_retries=10, 
+            max_retries_per_step=3,
+            total_max_retries=10,
             max_iterations=5
         ),
     )
@@ -132,9 +123,9 @@ After executing the application, navigate to your Langfuse Trace Table. You will
 ![Langfuse Trace](https://langfuse.com/images/cookbook/integration_beeai/beeai-trace.png)
 
 [View trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/096fc09a30ab90d2431778f9ee2b3936?timestamp=2025-08-01T13%3A56%3A54.163Z&display=details)
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
 <LearnMore />
-

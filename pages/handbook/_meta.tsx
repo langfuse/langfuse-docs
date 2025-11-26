@@ -41,6 +41,6 @@ export default {
     title: "Resources",
   },
   ...Object.fromEntries(
-    Object.entries(TEAMS).map(([key, value]) => [key, value.name])
+    Object.entries(TEAMS).map(([key, value]) => [key, value.name]),
   ),
 };

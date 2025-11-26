@@ -130,7 +130,7 @@ const compiledPrompt = prompt.compile(
         content: "Also, the Korean movie Memories of a Murderer",
       },
     ],
-  }
+  },
 );
 
 // -> compiledPrompt = [
@@ -180,7 +180,7 @@ const langfusePrompt = await langfuse.prompt.get("movie-critic-chat", {
 
 // Using langchain, you can obtain a ChatPromptTemplate with MessagesPlaceholder objects for unresolved placeholders
 const langchainPrompt = ChatPromptTemplate.fromTemplate(
-  langfusePrompt.getLangchainPrompt()
+  langfusePrompt.getLangchainPrompt(),
 );
 
 // -> langchainPrompt = [

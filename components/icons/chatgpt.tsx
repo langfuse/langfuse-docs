@@ -16,4 +16,3 @@ function IconChatGPT(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default IconChatGPT;
-

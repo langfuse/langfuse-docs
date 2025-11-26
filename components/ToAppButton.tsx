@@ -57,8 +57,8 @@ export const ToAppButton = ({
     Record<RegionKey, boolean>
   >(
     Object.fromEntries(
-      Object.keys(regions).map((key) => [key, false])
-    ) as Record<RegionKey, boolean>
+      Object.keys(regions).map((key) => [key, false]),
+    ) as Record<RegionKey, boolean>,
   );
   const [continentCode, setContinentCode] = useState<string | null>(null);
   const isUsingDefaultText =
@@ -127,7 +127,7 @@ export const ToAppButton = ({
             size="xs"
             className={cn(
               "whitespace-nowrap",
-              isUsingDefaultText && "w-[45px] sm:w-[70px]"
+              isUsingDefaultText && "w-[45px] sm:w-[70px]",
             )}
           >
             <span className="sm:hidden">{dropdownText}</span>
@@ -141,14 +141,14 @@ export const ToAppButton = ({
                 <DropdownMenuItem asChild key={key}>
                   <Link href={region.url}>{region.label}</Link>
                 </DropdownMenuItem>
-              )
+              ),
           )}
         </DropdownMenuContent>
       </DropdownMenu>
     );
   } else if (signedInCount === 1) {
     const signedInRegion = Object.entries(regions).find(
-      ([key]) => signedInRegions[key as RegionKey]
+      ([key]) => signedInRegions[key as RegionKey],
     );
 
     return (
@@ -157,7 +157,7 @@ export const ToAppButton = ({
         asChild
         className={cn(
           "whitespace-nowrap",
-          isUsingDefaultText && "w-[45px] sm:w-[70px]"
+          isUsingDefaultText && "w-[45px] sm:w-[70px]",
         )}
       >
         <Link href={signedInRegion![1].url}>
@@ -173,7 +173,7 @@ export const ToAppButton = ({
         asChild
         className={cn(
           "whitespace-nowrap",
-          isUsingDefaultText && "w-[45px] sm:w-[70px]"
+          isUsingDefaultText && "w-[45px] sm:w-[70px]",
         )}
       >
         <Link

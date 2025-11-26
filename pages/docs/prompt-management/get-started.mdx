@@ -126,7 +126,7 @@ const compiledChatPrompt = chatPrompt.compile({
 ```ts
 // Get specific version of a prompt (here version 1)
 const prompt = await langfuse.prompt.get("movie-critic", {
-  version: 1
+  version: 1,
 });
 
 // Get specific label
@@ -231,7 +231,7 @@ const langfusePrompt = await langfuse.prompt.get("movie-critic");
 
 // Example using ChatPromptTemplate
 const promptTemplate = PromptTemplate.fromTemplate(
-  langfusePrompt.getLangchainPrompt()
+  langfusePrompt.getLangchainPrompt(),
 );
 ```
 
@@ -239,14 +239,13 @@ const promptTemplate = PromptTemplate.fromTemplate(
 
 ```ts
 // Get current `production` version of a chat prompt
-const langfusePrompt = await langfuse.prompt.get(
-  "movie-critic-chat",
-  { type: "chat" }
-);
+const langfusePrompt = await langfuse.prompt.get("movie-critic-chat", {
+  type: "chat",
+});
 
 // Example using ChatPromptTemplate
 const promptTemplate = ChatPromptTemplate.fromMessages(
-  langfusePrompt.getLangchainPrompt().map((msg) => [msg.role, msg.content])
+  langfusePrompt.getLangchainPrompt().map((msg) => [msg.role, msg.content]),
 );
 ```
 
@@ -255,7 +254,7 @@ const promptTemplate = ChatPromptTemplate.fromMessages(
 ```ts
 // Get specific version of a prompt (here version 1)
 const prompt = await langfuse.prompt.get("movie-critic", {
-  version: 1
+  version: 1,
 });
 
 // Get specific label

@@ -29,10 +29,10 @@ export const BlogIndex = ({
         .sort(
           (a, b) =>
             new Date(b.frontMatter.date).getTime() -
-            new Date(a.frontMatter.date).getTime()
+            new Date(a.frontMatter.date).getTime(),
         )
         .slice(0, maxItems),
-    [maxItems]
+    [maxItems],
   );
 
   // Function to normalize and split tags
@@ -52,13 +52,13 @@ export const BlogIndex = ({
         const selectedTags = normalizeTags(selectedTag);
         return selectedTags.some((tag) => postTags.includes(tag));
       }),
-    [posts, selectedTag]
+    [posts, selectedTag],
   );
 
   // Get unique tags
   const tags = useMemo(() => {
     const allTags = posts.flatMap((page) =>
-      normalizeTags(page.frontMatter?.tag)
+      normalizeTags(page.frontMatter?.tag),
     );
     return Array.from(new Set(allTags));
   }, [posts]);

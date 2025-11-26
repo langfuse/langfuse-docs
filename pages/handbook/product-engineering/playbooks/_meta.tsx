@@ -1,6 +1,5 @@
 export default {
-    "*": {
-      layout: "default",
-    },
-  };
-  
+  "*": {
+    layout: "default",
+  },
+};

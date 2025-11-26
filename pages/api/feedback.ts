@@ -12,7 +12,7 @@ export default async function handler(req: NextRequest) {
         {
           status: 400,
           statusText: "Bad Request - Only POST requests are allowed",
-        }
+        },
       );
     if (!process.env.WEBSITE_FEEDBACK_WEBHOOK)
       throw new Error("WEBSITE_FEEDBACK_WEBHOOK is not set");
@@ -39,7 +39,7 @@ export default async function handler(req: NextRequest) {
         {
           status: 500,
           statusText: "Internal Server Error",
-        }
+        },
       );
     }
   } catch (error) {
@@ -49,7 +49,7 @@ export default async function handler(req: NextRequest) {
       {
         status: 500,
         statusText: "Internal Server Error",
-      }
+      },
     );
   }
 }
