@@ -3,26 +3,66 @@ title: Tracing Data Model in Langfuse
 description: Langfuse (open source) helps you trace and analyze LLM applications. Learn how traces and observations are structured in Langfuse.
 ---
 
-# Observability Data Model
+# Core Concepts
 
-Tracing in Langfuse is a way to log and analyze the execution of your LLM applications. The following reference provides a detailed overview of the data model used. It is inspired by OpenTelemetry.
+todo
+## Traces, Observations and Sessions
 
-## Traces and Observations
+Langfuse organizes an application's data into three core concepts: sessions, traces and observations.
 
+```mermaid
+flowchart LR
+
+    subgraph SESSION [session]
+        direction TB
+
+        subgraph TRACE1 [trace]
+            direction LR
+            O1[observation]
+            O2[observation]
+            O3[observation]
+        end
+
+        subgraph TRACE2 [trace]
+            direction LR
+            O4[observation]
+            O5[observation]
+            O6[observation]
+        end
+
+        subgraph TRACE3 [trace]
+            direction LR
+            O7[observation]
+            O8[observation]
+            O9[observation]
+        end
+
+    end
+    classDef sessionBox fill:#ffffff,stroke:#888,stroke-width:2px;
+    classDef traceBox fill:#ffffff,stroke:#aaa,stroke-width:1.5px;
+    classDef obsBox fill:#ffffff,stroke:#ccc;
+
+    %% Assign classes
+    class SESSION sessionBox;
+    class TRACE1,TRACE2,TRACE3 traceBox;
+    class O1,O2,O3,O4,O5,O6,O7,O8,O9 obsBox;
+```
 ### Traces
 
 A `trace` typically represents a single request or operation.
+For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace. 
+
 It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
 
 import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
 
 ### Observations
 
-Each trace can contain multiple `observations` to log the individual steps of the execution. Usually, a trace corresponds to a single api call of an application.
+Each trace can contain multiple `observations` to log the individual steps of the execution.  Example observations include LLM text generations, toolcalls, RAG retrieval steps, etc.
 
 #### Nesting
 
-Observations can be nested manually or by leveraging the automatic [OpenTelemetry context propagation](https://opentelemetry.io/docs/concepts/context-propagation/).
+Observations can be nested. The example below shows a trace with a nested observation.
 
 <div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
 
@@ -66,13 +106,13 @@ Langfuse supports a number of LLM application specific [observation types](/docs
 
 <ObservationTypesList />
 
-## Sessions
+The advantage of using observation types is that you can filter on them, and certain types have special handling in the Langfuse UI.
+
+### Sessions
 
 Optionally, traces can be grouped into [sessions](/docs/tracing-features/sessions).
 Sessions are used to group traces that are part of the same user interaction.
-A common example is a thread in a chat interface.
-
-Please refer to the [Sessions](/docs/tracing-features/sessions) documentation to add sessions to your traces.
+A common example is a thread in a chat interface. 
 
 <div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
 
@@ -100,6 +140,8 @@ Example session in Langfuse UI
 </div>
 
 </div>
+
+Using sessions is recommended for applications with multi-turn conversations or workflows. Please refer to the [Sessions](/docs/tracing-features/sessions) documentation to add sessions to your traces.
 
 ## Scores
 
