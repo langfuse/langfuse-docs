@@ -5,7 +5,10 @@ description: Langfuse (open source) helps you trace and analyze LLM applications
 
 # Core Concepts
 
-todo
+This page digs into the underlying concepts of how Langfuse structures and captures your data. Understanding these will make debugging and working with traces easier.
+
+Ready to start? Check out the [Get Started guide](/docs/observability/get-started) to ingest your first trace.
+
 ## Traces, Observations and Sessions
 
 Langfuse organizes an application's data into three core concepts: sessions, traces and observations.
@@ -40,7 +43,7 @@ flowchart LR
     end
     classDef sessionBox fill:#ffffff,stroke:#888,stroke-width:2px;
     classDef traceBox fill:#ffffff,stroke:#aaa,stroke-width:1.5px;
-    classDef obsBox fill:#ffffff,stroke:#ccc;
+    classDef obsBox fill:#E0EFFF,stroke:#ccc;
 
     %% Assign classes
     class SESSION sessionBox;
@@ -73,6 +76,14 @@ Hierarchical structure of traces in Langfuse
 <div className="flex-1 flex items-center justify-center ">
 
 ```mermaid
+---
+config:
+  showSequenceNumbers: true
+  theme: base
+  themeVariables:
+    primaryColor: "#E0EFFF"
+    noteBkgColor: "#FCFCFC"
+---
 classDiagram
     Trace "1" *-- "n" Observation
     Observation o-- Observation: Nesting
@@ -123,6 +134,14 @@ Optionally, sessions aggregate traces
 <div className="flex-1 flex items-center justify-center">
 
 ```mermaid
+---
+config:
+  showSequenceNumbers: true
+  theme: base
+  themeVariables:
+    primaryColor: "#E0EFFF"
+    noteBkgColor: "#FCFCFC"
+---
 classDiagram
     Session "1" o-- "n" Trace
 ```
@@ -142,3 +161,103 @@ Example session in Langfuse UI
 </div>
 
 Using sessions is recommended for applications with multi-turn conversations or workflows. Please refer to the [Sessions](/docs/tracing-features/sessions) documentation to add sessions to your traces.
+
+
+## How Langfuse Captures Data
+
+Now that you understand the data model, let's explore how Langfuse actually captures and processes your traces.
+
+### Built on OpenTelemetry
+
+Langfuse is built on [OpenTelemetry](https://opentelemetry.io/), an open standard for collecting telemetry data from applications. 
+
+This means you're not locked into using only Langfuse-specific SDKs. If you're already using a framework that supports OpenTelemetry—like the Vercel AI SDK, LangChain, or LlamaIndex—it'll work with Langfuse out of the box. You can also send your traces to multiple destinations at once, like Langfuse for LLM observability and Datadog for infrastructure monitoring.
+
+Your instrumentation code stays portable. If you decide to self-host Langfuse or switch to a different observability platform later, you won't need to rewrite your tracing code.
+
+### Background Processing
+
+When you add Langfuse tracing to your application, it doesn't send traces immediately the moment they're created. That would introduce network calls in the middle of your request or script, slowing down your application.
+
+Instead, Langfuse batches traces locally and sends them in the background, keeping your application fast and responsive.
+
+```mermaid
+---
+config:
+  showSequenceNumbers: true
+  theme: base
+  themeVariables:
+    primaryColor: "#E0EFFF"
+    noteBkgColor: "#FCFCFC"
+---
+sequenceDiagram
+    autonumber
+    participant User as End user
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Exporter as Background exporter
+    participant Langfuse as Langfuse backend
+
+    loop Incoming requests over time
+        User->>App: send request
+        App->>SDK: createTrace() / log events
+        SDK->>Exporter: enqueue(trace/events)
+        Note over App,SDK: Tracing is non-blocking<br/>App continues handling request
+        App-->>User: response
+    end
+
+    loop In the background
+        Note over Exporter: Runs on a timer / batch size
+        Exporter->>Langfuse: send(batched traces)
+        Langfuse-->>Exporter: ack
+    end
+```
+
+#### Long-running applications
+
+The approach above is perfect for long-running applications (like web servers or APIs) because the background exporter continuously runs and has plenty of time to flush batches on its own.
+
+#### Short-lived applications
+
+For applications that start, execute something, and shut down quickly (such as scripts, CLI tools, or serverless functions), there's a risk that the application terminates while there are still unsent traces in the queue. 
+
+```mermaid
+---
+config:
+  showSequenceNumbers: true
+  theme: base
+  themeVariables:
+    primaryColor: "#E0EFFF"
+    noteBkgColor: "#FCFCFC"
+---
+sequenceDiagram
+    autonumber
+    participant User as End user
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Exporter as Background exporter
+    participant Langfuse as Langfuse backend
+
+    User->>App: start script / job
+    App->>SDK: createTrace()
+    SDK->>Exporter: enqueue(trace)
+    Note over Exporter: Trace buffered in memory
+
+    alt No flush() used
+        Note over Exporter: Exporter waits for next<br/>background send
+        App-->>User: job finished
+        App-->>App: process exits
+        Note over App,Exporter: Process terminates before<br/>buffer is sent → traces lost
+    else flush() used
+        App->>SDK: flush() before exit
+        SDK->>Exporter: flush()
+        Exporter->>Langfuse: send(all buffered traces)
+        Langfuse-->>Exporter: ack
+        Note over Exporter: Buffer is now empty
+        App-->>User: job finished
+        App-->>App: process exits
+    end
+```
+
+To avoid losing data, short-lived applications must explicitly call `flush()` before exiting. This forces the exporter to send all buffered traces immediately, ensuring nothing is lost when the process terminates.
+
