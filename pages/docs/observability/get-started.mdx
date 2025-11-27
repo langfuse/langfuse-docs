@@ -15,15 +15,13 @@ This quickstart helps you to ingest your first trace in Langfuse.
 
 ## Ingest your first trace
 
-import { CopyAgentOnboardingPrompt } from "@/components/agentic-onboarding/CopyAgentOnboardingPrompt";
-import DocsMcpServerInstallation from "@/components-mdx/docs-mcp-server-installation.mdx";
 import GetStartedPythonSdk from "@/components-mdx/get-started/python-sdk.mdx";
 import GetStartedJsSdk from "@/components-mdx/get-started/js-sdk.mdx";
 import GetStartedOpenaiSdk from "@/components-mdx/get-started/openai-sdk.mdx";
 import GetStartedLangchain from "@/components-mdx/get-started/langchain.mdx";
 import GetStartedJsOpenaiSdk from "@/components-mdx/get-started/js-openai-sdk.mdx";
 import GetStartedJsLangchain from "@/components-mdx/get-started/js-langchain.mdx";
-import EnvPython from "@/components-mdx/env-python.mdx";
+import GetStartedAutoInstall from "@/components-mdx/get-started/auto-install.mdx";
 
 import { BookOpen, Code } from "lucide-react";
 
@@ -194,22 +192,21 @@ Use the Langfuse JS/TS SDK to wrap any LLM or Agent
 
 Use the agent mode of your editor to integrate Langfuse into your existing codebase.
 
-<Callout type="warning" emoji="🤖">
-  This might or might not work very well (depending on your code base). Please
-  share any feedback or issues on [GitHub](/issues).
-</Callout>
+<GetStartedAutoInstall />
 
-**1. Install the Langfuse Docs MCP Server (optional)**
-
-The agent will use the Langfuse `searchLangfuseDocs` tool ([docs](/docs/docs-mcp)) to find the correct documentation for the integration you are looking for. This is optional, alternatively the agent can use its native websearch capabilities.
-
-<DocsMcpServerInstallation />
-
-**2. Run Agent**
-
-Copy and execute the following prompt in the agent mode of your editor:
-
-<CopyAgentOnboardingPrompt />
+<Cards num={2}>
+  <Card
+    icon={<BookOpen />}
+    title="Full MCP Server documentation"
+    href="/docs/docs-mcp"
+    arrow
+  />
+  <Card
+    title="All integrations"
+    href="/integrations"
+    arrow
+  />
+</Cards>
 
 </Tab>
 
