@@ -7,13 +7,13 @@ pip install langfuse
 Set your Langfuse credentials as environment variables so the SDK knows which project to write to.
 <Env />
 
-Swap the regular OpenAI import to Langfuse’s OpenAI drop-in. It behaves like the regular OpenAI client, but also automatically records each call for you.
+Swap the regular OpenAI import to Langfuse’s OpenAI drop-in. It behaves like the regular OpenAI client while also recording each call for you.
 
 ```python
 from langfuse.openai import openai
 ```
 
-Use the OpenAI SDK as you normally would. The wrapper captures the prompt, model and output and forwards everything to Langfuse without changing the response you get back.
+Use the OpenAI SDK as you normally would. The wrapper captures the prompt, model and output and forwards everything to Langfuse.
 
 ```python
 completion = openai.chat.completions.create(
