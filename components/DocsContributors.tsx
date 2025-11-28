@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
-import { allAuthors } from "./Authors";
+import React, { useState, useEffect, forwardRef } from "react";
+import { allAuthors, Author, AuthorHoverCardContent } from "./Authors";
 import contributorsData from "../data/generated/contributors.json";
 import Image from "next/image";
+import { HoverCard, HoverCardTrigger } from "@/components/ui/hover-card";
 
 const getContributors = (path: string): string[] => {
   // Try exact path first, then with/without /index suffix
@@ -19,22 +20,81 @@ const getContributors = (path: string): string[] => {
   return [];
 };
 
-const processContributor = (username: string) => {
+type ProcessedContributor = {
+  username: string;
+  name: string;
+  title: string;
+  image: string;
+  profileUrl: string;
+  author?: Author; // Full author object for team members (enables hovercard)
+};
+
+const ContributorCardContent = forwardRef<
+  HTMLAnchorElement,
+  {
+    contributor: ProcessedContributor;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>
+>(({ contributor, className, ...props }, ref) => (
+  <a
+    ref={ref}
+    href={contributor.profileUrl}
+    className="group flex items-center gap-2.5 p-1 rounded-md hover:bg-accent transition-colors mb-1"
+    target="_blank"
+    rel="noopener noreferrer"
+    {...props}
+  >
+    <Image
+      src={contributor.image}
+      width={32}
+      height={32}
+      className="rounded-full flex-shrink-0"
+      alt={contributor.name}
+    />
+    <div className="flex-1 min-w-0">
+      <div className="text-sm font-medium text-foreground group-hover:text-primary">
+        {contributor.name}
+      </div>
+      <div className="text-xs text-muted-foreground">{contributor.title}</div>
+    </div>
+  </a>
+));
+ContributorCardContent.displayName = "ContributorCardContent";
+
+const ContributorCard = ({
+  contributor,
+}: {
+  contributor: ProcessedContributor;
+}) => {
+  // Team members get a hovercard with social links
+  if (contributor.author) {
+    return (
+      <HoverCard openDelay={50} closeDelay={50}>
+        <HoverCardTrigger asChild>
+          <ContributorCardContent contributor={contributor} />
+        </HoverCardTrigger>
+        <AuthorHoverCardContent author={contributor.author} side="left" />
+      </HoverCard>
+    );
+  }
+
+  // External contributors just get a plain link
+  return <ContributorCardContent contributor={contributor} />;
+};
+
+const processContributor = (username: string): ProcessedContributor => {
   const author = Object.values(allAuthors).find(
     (author) => author.github === username
   );
 
   if (author) {
-    // Internal contributor
+    // Internal contributor - always link to GitHub
     return {
       username,
       name: author.name,
       title: author.title || "Team Member",
       image: author.image,
-      profileUrl:
-        "twitter" in author
-          ? `https://twitter.com/${author.twitter}`
-          : `https://github.com/${author.github}`,
+      profileUrl: `https://github.com/${author.github}`,
+      author, // Include full author for hovercard
     };
   }
 
@@ -74,29 +134,10 @@ export const DocsContributors = () => {
       </div>
       <div>
         {displayedContributors.map((contributor) => (
-          <a
+          <ContributorCard
             key={contributor.username}
-            href={contributor.profileUrl}
-            className="group flex items-center gap-2.5 p-1 rounded-md hover:bg-accent transition-colors mb-1"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src={contributor.image}
-              width={32}
-              height={32}
-              className="rounded-full flex-shrink-0"
-              alt={contributor.name}
-            />
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-foreground group-hover:text-primary">
-                {contributor.name}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {contributor.title}
-              </div>
-            </div>
-          </a>
+            contributor={contributor}
+          />
         ))}
         {remainingCount > 0 && !showAll && (
           <button

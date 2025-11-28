@@ -400,7 +400,7 @@ _Tags in Langfuse_
 
 The unsupervised intent classification pipeline demonstrates how to cluster and label Langfuse trace data without predefined categories. It uses embedding techniques, clustering algorithms, and LLM-generated labels to automatically identify and tag intents, offering flexibility for unlabeled data but potentially less consistency than supervised methods.
 
-We will use sample data from the [public demo](https://langfuse.com/demo) project (RAG on Langfuse Documentation) to understand what people are most interested in when interacting with the demo application.
+We will use sample data from the [public example](https://langfuse.com/demo) project (RAG on Langfuse Documentation) to understand what people are most interested in when interacting with the example application.
 
 
 ```python
@@ -424,7 +424,7 @@ langfuse = Langfuse()
 
 ### 1. Fetch traces from Langfuse
 
-We will fetch 15,000 messages sent to the demo application to create meaningful clusters.
+We will fetch 15,000 messages sent to the example application to create meaningful clusters.
 
 
 ```python
