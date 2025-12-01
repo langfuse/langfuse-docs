@@ -3,25 +3,17 @@ npm install @langfuse/core @langfuse/langchain
 ```
 
 import EnvJS from "@/components-mdx/env-js.mdx";
+import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
 
-Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
+Add your Langfuse credentials as environment variables so the integration knows which project to send your traces to.
 
 <EnvJS />
 
-With the environment variables set, we can now initialize the `langfuseSpanProcessor` which is passed to the main OpenTelemetry SDK that orchestrates tracing.
+**Initialize OpenTelemetry**
 
-```ts
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { LangfuseSpanProcessor } from "@langfuse/otel";
- 
-const sdk = new NodeSDK({
-  spanProcessors: [new LangfuseSpanProcessor()],
-});
- 
-sdk.start();
-```
+<SetupOtelJS />
 
-Finally, initialize the Langfuse `CallbackHandler` and add it to your chain.
+Finally, initialize the Langfuse `CallbackHandler` and add it to your chain. The `CallbackHandler` listens to the LangChain agent's actions and prepares that information to be sent to Langfuse.
 
 ```typescript
 import { CallbackHandler } from "@langfuse/langchain";
@@ -29,6 +21,8 @@ import { CallbackHandler } from "@langfuse/langchain";
 // Initialize the Langfuse CallbackHandler
 const langfuseHandler = new CallbackHandler();
 ```
+
+The line `{ callbacks: [langfuseHandler] }` is what attaches the `CallbackHandler` to the agent.
 
 ```typescript /{ callbacks: [langfuseHandler] }/
 import { createAgent, tool } from "@langchain/core/agents";
