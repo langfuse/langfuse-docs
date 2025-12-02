@@ -15,24 +15,6 @@ You can configure the environment by setting the `LANGFUSE_TRACING_ENVIRONMENT` 
 If both are specified, the initialization parameter takes precedence.
 If nothing is specified, the default environment is `default`.
 
-## Data Model
-
-The `environment` attribute is available on all events in Langfuse:
-
-- Traces
-- Observations (spans, events, generations)
-- Scores
-- Sessions
-
-See [Data Model](/docs/tracing-data-model) for more details.
-
-The environment must be a string that follows this regex pattern: `^(?!langfuse)[a-z0-9-_]+$` with at most 40 characters.
-
-This means:
-
-- Cannot start with "langfuse"
-- Can only contain lowercase letters, numbers, hyphens, and underscores
-
 ## Usage
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
@@ -217,6 +199,24 @@ For guidance on how to structure, separate, and work with multiple environments 
 1. **Consistent Environment Names**: Use consistent environment names across your application to make filtering and analysis easier.
 2. **Environment-Specific Analysis**: Use environments to analyze and compare metrics across different deployment stages.
 3. **Testing**: Use separate environments for testing to avoid polluting production data.
+
+## Data Model
+
+The `environment` attribute is available on all events in Langfuse:
+
+- Traces
+- Observations (spans, events, generations)
+- Scores
+- Sessions
+
+See [Data Model](/docs/tracing-data-model) for more details.
+
+The environment must be a string that follows this regex pattern: `^(?!langfuse)[a-z0-9-_]+$` with at most 40 characters.
+
+This means:
+
+- Cannot start with "langfuse"
+- Can only contain lowercase letters, numbers, hyphens, and underscores
 
 ## GitHub Discussions
 

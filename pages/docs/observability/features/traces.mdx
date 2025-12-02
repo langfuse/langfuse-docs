@@ -1,10 +1,18 @@
 ---
 title: Trace IDs & Distributed Tracing
 description: Bring your own trace IDs for distributed tracing and linking traces across services.
-sidebarTitle: Trace IDs & Distributed Tracing
+sidebarTitle: Traces
 ---
 
-# Trace IDs & Distributed Tracing
+# Traces
+
+A trace groups together multiple [observations](/docs/observability/features/observations) that are part of the same request or operation.
+
+For example, when a user asks a question to a chatbot, that interaction, from the user’s question to the bot’s response, is captured as one trace. It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
+
+Most integrations will automatically create a trace for you. However, you can also create a trace manually using the Langfuse SDK.
+
+## Trace IDs & Distributed Tracing
 
 Langfuse allows you to bring your own trace IDs (e.g., messageId, traceId, correlationId) for
 
@@ -45,6 +53,13 @@ The Python SDK uses W3C Trace Context IDs by default, which are:
 
 - 32-character lowercase hexadecimal string for trace IDs
 - 16-character lowercase hexadecimal string for observation (span) IDs
+
+You can inspect and reuse these IDs programmatically:
+
+- `langfuse.get_current_trace_id()` returns the trace ID of the active observation.
+- `langfuse.get_current_observation_id()` returns the observation (span) ID of the active observation.
+- `span.trace_id` and `span.id` expose the IDs on any `LangfuseSpan`/`LangfuseGeneration` returned from `start_as_current_observation`.
+- `Langfuse.create_trace_id(seed: Optional[str] = None)` is a static helper to deterministically pre-generate trace IDs before a trace exists (e.g., to correlate an external request ID).
 
 ### Using the Decorator
 
@@ -114,7 +129,7 @@ with langfuse.start_as_current_observation(
     # Your code here
 ```
 
-### Accessing Current Trace ID
+### Accessing Current Trace & Observation IDs
 
 ```python
 from langfuse import get_client
@@ -122,12 +137,37 @@ from langfuse import get_client
 langfuse = get_client()
 
 with langfuse.start_as_current_observation(as_type="span", name="outer-operation") as span:
-    # Access the trace ID of the current span
+    # Access the IDs of the current span
     current_trace_id = langfuse.get_current_trace_id()
     current_span_id = langfuse.get_current_observation_id()
 
-    print(f"Current trace ID: {current_trace_id}")
+    print(f"Trace ID from helper: {current_trace_id}")
+    print(f"Observation ID from helper: {current_span_id}")
+    print(f"Trace ID from object: {span.trace_id}")
+    print(f"Observation ID from object: {span.id}")
 
+```
+
+### Pre-generating Trace IDs
+
+Use the static helper when you need a trace ID before creating any spans (for example, to pass IDs between services or to link later scores to a trace that does not yet exist):
+
+```python
+from langfuse import get_client, Langfuse
+
+langfuse = get_client()
+
+external_request_id = "req_12345"
+deterministic_trace_id = Langfuse.create_trace_id(seed=external_request_id)
+print(f"Deterministic Trace ID for {external_request_id}: {deterministic_trace_id}")
+
+# Later, start a span that adopts that trace ID
+with langfuse.start_as_current_observation(
+    as_type="span",
+    name="process-request",
+    trace_context={"trace_id": deterministic_trace_id}
+) as span:
+    # Your code here
 ```
 
 </Tab>
