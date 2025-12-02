@@ -227,7 +227,7 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
   return (
     <HomeSection>
       <Header
-        title="Get a Demo"
+        title={isDiscoverOpen ? "Walkthroughs" : "Get a Demo"}
         h="h1"
         description="Learn more about Langfuse — talk to us or discover yourself"
       />
