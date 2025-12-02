@@ -1,5 +1,10 @@
 import { getGitHubStars } from "@/lib/github-stars";
-import { DOCKER_PULLS, SDK_INSTALLS_PER_MONTH } from "./home/Usage";
+import {
+  DOCKER_PULLS,
+  FORTUNE_50_COMPANIES,
+  FORTUNE_500_COMPANIES,
+  SDK_INSTALLS_PER_MONTH,
+} from "./home/Usage";
 
 export const CredibilitySentence = ({
   bold = true,
@@ -26,7 +31,11 @@ export const CredibilitySentence = ({
       <Metric className={metricClassName}>
         {(DOCKER_PULLS / 1_000_000).toFixed(0)}M+ Docker pulls
       </Metric>
-      .
+      . Trusted by{" "}
+      <Metric className={metricClassName}>{FORTUNE_50_COMPANIES}</Metric>{" "}
+      Fortune 50 and{" "}
+      <Metric className={metricClassName}>{FORTUNE_500_COMPANIES}</Metric>{" "}
+      Fortune 500 companies.
     </p>
   );
 };
