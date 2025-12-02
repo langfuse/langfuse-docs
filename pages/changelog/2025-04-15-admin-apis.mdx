@@ -15,18 +15,18 @@ These APIs allow you to create, update, and delete organizations, manage project
 
 | Resource              | Description                                                       | API                         |
 | --------------------- | ----------------------------------------------------------------- | --------------------------- |
-| Organizations         | Create, update, and delete organizations                          | Organization Management API |
-| Organization API Keys | Generate and manage organization-level API keys                   | Organization Management API |
+| Organizations         | Create, update, and delete organizations                          | Instance Management API |
+| Organization API Keys | Generate and manage organization-level API keys                   | Instance Management API |
 | Projects              | Create, update, and delete projects within organizations          | Admin API                   |
 | Project API Keys      | Generate and manage project-level API keys                        | Admin API                   |
 | Users                 | Invite, manage, and remove users from organizations and projects  | Admin API                   |
 | User Permissions      | Control access levels for users across organizations and projects | Admin API                   |
 
-## Organization Management API
+## Instance Management API
 
 **Availability:** Self-hosted (enterprise) instances only
 
-The Organization Management API provides endpoints for creating and managing organizations in your Langfuse instance. To use this API:
+The Instance Management API provides endpoints for creating and managing organizations in your Langfuse instance. To use this API:
 
 1. Set the `ADMIN_API_KEY` environment variable in your self-hosted instance
 2. Include this key as a Bearer token in your API requests
@@ -34,7 +34,7 @@ The Organization Management API provides endpoints for creating and managing org
 
 This API enables full programmatic control over organization creation and management.
 
-Learn more: [Organization Management API](/self-hosting/administration/organization-management-api) | [API Reference](https://organizations-api.reference.langfuse.com/)
+Learn more: [Instance Management API](/self-hosting/administration/instance-management-api) | [API Reference](https://organizations-api.reference.langfuse.com/)
 
 ## Organization-level API Routes
 
@@ -43,7 +43,7 @@ The user management endpoints follow [SCIM](https://datatracker.ietf.org/doc/htm
 
 To use this API:
 
-1. Obtain an organization API key through the Organization Management API
+1. Obtain an organization API key through the Instance Management API
 2. Use this key to authenticate with the Admin API endpoints
 3. Manage projects, users, and access controls programmatically
 
