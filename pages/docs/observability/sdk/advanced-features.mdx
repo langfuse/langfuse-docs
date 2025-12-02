@@ -1,0 +1,495 @@
+---
+title: Advanced features of the Langfuse SDKs
+description: Configure masking, logging, sampling, multi-project routing, evaluations, and environment-specific behaviors for Python and JS/TS.
+category: SDKs
+---
+
+# Advanced features
+
+Use these patterns to harden your Langfuse instrumentation, protect sensitive data, and adapt the SDKs to complex environments. Each section shows the equivalent Python and JS/TS setup side-by-side.
+
+## Mask sensitive data
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+Provide a `mask` function when instantiating the client to scrub inputs, outputs, and metadata before they leave your infrastructure.
+
+```python
+from langfuse import Langfuse
+import re
+
+def pii_masker(data: any, **kwargs) -> any:
+    if isinstance(data, str):
+        return re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "[EMAIL_REDACTED]", data)
+    elif isinstance(data, dict):
+        return {k: pii_masker(data=v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [pii_masker(data=item) for item in data]
+    return data
+
+langfuse = Langfuse(mask=pii_masker)
+```
+</Tab>
+<Tab title="TypeScript">
+Pass a `mask` callback to the `LangfuseSpanProcessor`. The callback receives stringified JSON of the attribute and should return the masked payload.
+
+```ts filename="instrumentation.ts" /mask: /
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) =>
+    data.replace(/\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g, "***MASKED_CREDIT_CARD***"),
+});
+
+const sdk = new NodeSDK({ spanProcessors: [spanProcessor] });
+
+sdk.start();
+```
+</Tab>
+</Tabs>
+
+## Logging & debugging
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+The SDK uses Python's standard logging under the `"langfuse"` logger.
+
+```python
+import logging
+
+langfuse_logger = logging.getLogger("langfuse")
+langfuse_logger.setLevel(logging.DEBUG)
+```
+
+Alternatively set `debug=True` or `LANGFUSE_DEBUG="True"` when instantiating the client.
+</Tab>
+<Tab title="TypeScript">
+Configure the global SDK logger or set `LANGFUSE_LOG_LEVEL`.
+
+```ts /configureGlobalLogger/
+import { configureGlobalLogger, LogLevel } from "@langfuse/core";
+
+configureGlobalLogger({ level: LogLevel.DEBUG });
+```
+
+```bash
+export LANGFUSE_LOG_LEVEL="DEBUG"
+```
+</Tab>
+</Tabs>
+
+## Sampling
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+Sample traces directly on the client.
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(sample_rate=0.2)
+```
+</Tab>
+<Tab title="TypeScript">
+Use OpenTelemetry samplers to control which traces reach Langfuse.
+
+```ts filename="instrumentation.ts" /TraceIdRatioBasedSampler/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
+
+const sdk = new NodeSDK({
+  sampler: new TraceIdRatioBasedSampler(0.2),
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+</Tab>
+</Tabs>
+
+## Filter exported spans {#filtering-spans}
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+Exclude spans from specific instrumentation scopes.
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(blocked_instrumentation_scopes=["sqlalchemy", "psycopg"])
+```
+
+<Callout type="warning">
+Filtering parent spans may result in orphaned children in Langfuse.
+</Callout>
+</Tab>
+<Tab title="TypeScript">
+Provide a `shouldExportSpan` predicate.
+
+```ts filename="instrumentation.ts" /shouldExportSpan/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
+
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  otelSpan.instrumentationScope.name !== "express";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor({ shouldExportSpan })],
+});
+
+sdk.start();
+```
+
+```ts
+import { ShouldExportSpan } from "@langfuse/otel";
+
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name);
+```
+</Tab>
+</Tabs>
+
+## Tracer provider isolation
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+Create a dedicated OTEL `TracerProvider` for Langfuse spans.
+
+```python
+from opentelemetry.sdk.trace import TracerProvider
+from langfuse import Langfuse
+
+langfuse_tracer_provider = TracerProvider()
+langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
+langfuse.start_span(name="isolated").end()
+```
+
+<Callout type="warning">
+TracerProviders still share the same context, so mixing providers may create orphaned spans.
+</Callout>
+</Tab>
+<Tab title="TypeScript">
+Isolate Langfuse spans with a custom provider and avoid sending them to other exporters.
+
+```ts /setLangfuseTracerProvider/
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { setLangfuseTracerProvider } from "@langfuse/tracing";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const langfuseTracerProvider = new NodeTracerProvider({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+setLangfuseTracerProvider(langfuseTracerProvider);
+```
+
+<Callout type="warning">
+As with Python, isolating tracer providers can break parent/child relationships when contexts overlap.
+</Callout>
+</Tab>
+</Tabs>
+
+## Multi-project setups {#multi-project-setup-experimental}
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+Instantiate dedicated clients per project and pass the `langfuse_public_key` context where needed.
+
+```python
+from langfuse import Langfuse, observe
+
+project_a = Langfuse(public_key="pk-lf-project-a-...", secret_key="sk-lf-project-a-...")
+project_b = Langfuse(public_key="pk-lf-project-b-...", secret_key="sk-lf-project-b-...")
+
+@observe
+def process_data_for_project_a(data, langfuse_public_key="pk-lf-project-a-..."):
+    return {"processed": data}
+
+@observe
+def process_data_for_project_b(data, langfuse_public_key="pk-lf-project-b-..."):
+    return {"processed": data}
+```
+
+You can also route OpenAI or LangChain integrations by passing `langfuse_public_key` on each call.
+</Tab>
+<Tab title="TypeScript">
+Register multiple span processors—one per Langfuse project—and optionally set filters per processor.
+
+```ts filename="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor({
+      publicKey: "pk-lf-public-key-project-1",
+      secretKey: "sk-lf-secret-key-project-1",
+    }),
+    new LangfuseSpanProcessor({
+      publicKey: "pk-lf-public-key-project-2",
+      secretKey: "sk-lf-secret-key-project-2",
+    }),
+  ],
+});
+
+sdk.start();
+```
+</Tab>
+</Tabs>
+
+## Environment-specific considerations
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+### Thread pools and multiprocessing
+
+Use the OpenTelemetry threading instrumentor so context flows across worker threads.
+
+```python
+from opentelemetry.instrumentation.threading import ThreadingInstrumentor
+
+ThreadingInstrumentor().instrument()
+```
+
+For multiprocessing, follow the [OpenTelemetry guidance](https://github.com/open-telemetry/opentelemetry-python/issues/2765#issuecomment-1158402076). If you use Pydantic Logfire, enable `distributed_tracing=True`.
+
+### Distributed tracing
+
+Prefer native OTEL propagation when linking services. The `trace_context` argument should be a last resort because it forces root-span semantics server-side.
+
+### Time to first token (TTFT)
+
+```python
+from langfuse import get_client
+import datetime, time
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(as_type="generation", name="TTFT-Generation") as generation:
+    time.sleep(3)
+    generation.update(
+        completion_start_time=datetime.datetime.now(),
+        output="some response",
+    )
+
+langfuse.flush()
+```
+
+### Self-signed TLS certificates
+
+```bash filename=".env"
+OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE="/path/to/my-selfsigned-cert.crt"
+```
+
+```python
+import os, httpx
+from langfuse import Langfuse
+
+httpx_client = httpx.Client(verify=os.environ["OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE"])
+langfuse = Langfuse(httpx_client=httpx_client)
+```
+
+<Callout type="warning">
+Understand the security implications before trusting self-signed certificates.
+</Callout>
+</Tab>
+<Tab title="TypeScript">
+### Serverless environments
+
+```ts filename="instrumentation.ts" /langfuseSpanProcessor/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+export const langfuseSpanProcessor = new LangfuseSpanProcessor({
+  exportMode: "immediate",
+});
+
+const sdk = new NodeSDK({ spanProcessors: [langfuseSpanProcessor] });
+
+sdk.start();
+```
+
+```ts filename="handler.ts" /forceFlush/
+import { langfuseSpanProcessor } from "./instrumentation";
+
+export async function handler(event, context) {
+  // ... logic ...
+  await langfuseSpanProcessor.forceFlush();
+}
+```
+
+Use `after` in Vercel Cloud Functions to schedule the flush after the response has been sent.
+
+### Custom scores from the browser {#custom-scores-from-browser}
+
+```ts
+import { LangfuseWeb } from "langfuse";
+
+export function UserFeedbackComponent(props: { traceId: string }) {
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+    baseUrl: "https://cloud.langfuse.com",
+  });
+
+  const handleUserFeedback = async (value: number) =>
+    await langfuseWeb.score({ traceId: props.traceId, name: "user_feedback", value });
+
+  return (
+    <div>
+      <button onClick={() => handleUserFeedback(1)}>👍</button>
+      <button onClick={() => handleUserFeedback(0)}>👎</button>
+    </div>
+  );
+}
+```
+
+<Callout type="warning">
+Never expose your Langfuse secret key in browser code. Use only the public key with `LangfuseWeb`.
+</Callout>
+
+### Langfuse + Sentry
+
+```ts filename="instrumentation.ts"
+import * as Sentry from "@sentry/node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import {
+  SentryPropagator,
+  SentrySampler,
+  SentrySpanProcessor,
+} from "@sentry/opentelemetry";
+
+const sentryClient = Sentry.init({
+  dsn: "<your dsn>",
+  skipOpenTelemetrySetup: true,
+  tracesSampleRate: 1,
+});
+
+const provider = new NodeTracerProvider({
+  sampler: sentryClient ? new SentrySampler(sentryClient) : undefined,
+  spanProcessors: [new LangfuseSpanProcessor(), new SentrySpanProcessor()],
+});
+
+provider.register({
+  propagator: new SentryPropagator(),
+  contextManager: new Sentry.SentryContextManager(),
+});
+```
+</Tab>
+</Tabs>
+
+## Evaluation & scoring {#create-scores}
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+Use observation methods, context-aware helpers, or low-level APIs to submit scores.
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(as_type="generation", name="summary_generation") as gen:
+    gen.update(output="summary text...")
+    gen.score(name="conciseness", value=0.8, data_type="NUMERIC")
+    gen.score_trace(name="user_feedback_rating", value="positive", data_type="CATEGORICAL")
+
+with langfuse.start_as_current_observation(as_type="span", name="complex_task"):
+    langfuse.score_current_span(name="task_component_quality", value=True, data_type="BOOLEAN")
+```
+
+```python
+langfuse.create_score(
+    name="fact_check_accuracy",
+    value=0.95,
+    trace_id="abcdef1234567890abcdef1234567890",
+    observation_id="1234567890abcdef",
+    data_type="NUMERIC",
+    comment="Source verified for 95% of claims.",
+)
+```
+
+### Dataset runs
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+dataset = langfuse.get_dataset(name="my-eval-dataset")
+for item in dataset.items:
+    print(item.input, item.expected_output)
+
+langfuse.create_dataset(name="new-summarization-tasks")
+langfuse.create_dataset_item(
+    dataset_name="new-summarization-tasks",
+    input={"text": "Long article..."},
+    expected_output={"summary": "Short summary."}
+)
+```
+</Tab>
+<Tab title="TypeScript">
+Server-side scoring uses the `LangfuseClient`.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+await langfuse.score.create({
+  traceId: "trace_id_here",
+  name: "accuracy",
+  value: 0.9,
+});
+```
+
+Browser feedback can be captured via `LangfuseWeb` (see the environment section above) and attached to traces or observations.
+
+For datasets, use the `@langfuse/client` helpers described in the [dataset runs guide](/docs/evaluation/dataset-runs/remote-run#setup--run-via-sdk).
+</Tab>
+</Tabs>
+
+## Observation types
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+Specify observation types via decorators or context managers.
+
+```python /as_type="tool"/
+from langfuse import observe
+
+@observe(as_type="tool")
+def retrieve_context(query):
+    return vector_store.get(query)
+```
+
+```python /as_type="embedding"/
+from langfuse import get_client
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(as_type="chain", name="retrieval-pipeline") as chain:
+    with langfuse.start_as_current_observation(as_type="retriever", name="vector-search") as retriever:
+        retriever.update(output={"results": perform_vector_search("user question")})
+```
+</Tab>
+<Tab title="TypeScript">
+The `asType` option is available on `startObservation`, `startActiveObservation`, and the `observe` wrapper.
+
+```ts /{ asType: "tool" }/
+import { startObservation } from "@langfuse/tracing";
+
+const span = startObservation("user-request");
+
+const toolCall = span.startObservation(
+  "fetch-weather",
+  { input: { city: "Paris" } },
+  { asType: "tool" }
+);
+
+toolCall.end();
+```
+</Tab>
+</Tabs>

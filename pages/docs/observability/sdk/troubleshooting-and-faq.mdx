@@ -1,0 +1,49 @@
+---
+title: Langfuse SDK troubleshooting & FAQ
+description: Resolve common Python and JS/TS SDK issues with side-by-side guidance.
+category: SDKs
+---
+
+# Troubleshooting & FAQ
+
+If you cannot find your issue below, try [Ask AI](/docs/ask-ai), open a [GitHub issue](/issues), or contact [support](/support).
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+## Authentication issues
+
+- Ensure `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and (if self-hosting) `LANGFUSE_BASE_URL` are set as environment variables or passed to `Langfuse()`.
+- Use `langfuse.auth_check()` during setup (not in production) to confirm connectivity.
+
+## No traces appearing
+
+- Confirm `tracing_enabled` is `True` and `sample_rate` is not `0.0`.
+- Call `langfuse.shutdown()` (or `langfuse.flush()` in short-lived jobs) so queued data is exported.
+- Enable debug logging (`debug=True` or `LANGFUSE_DEBUG="True"`) to inspect exporter output.
+
+## Incorrect nesting or missing spans
+
+- Self-hosted users need Langfuse platform **>= 3.63.0** for the v3 SDK.
+- Prefer context managers (`with langfuse.start_as_current_observation(...)`) to maintain OTEL context.
+- If using manual spans (`langfuse.start_span()`), always call `.end()`.
+- In async code, rely on Langfuse helpers to avoid losing context across `await` boundaries.
+
+## LangChain/OpenAI integration issues
+
+- Ensure Langfuse wrappers (`from langfuse.openai import openai` or `LangfuseCallbackHandler`) are instantiated before API calls.
+- Check version compatibility between Langfuse, LangChain, and the model SDKs.
+
+## Media not appearing
+
+- Use `LangfuseMedia` objects for audio/image payloads and inspect debug logs to surface upload errors (uploads run on background threads).
+</Tab>
+<Tab title="TypeScript">
+## Missing traces in serverless environments
+
+Use the serverless export pattern from the [advanced features guide](/docs/observability/sdk/advanced-features#environment-specific-considerations): export the `LangfuseSpanProcessor`, call `forceFlush()` before the runtime freezes, or schedule a flush with `after` on Vercel Functions.
+
+## Missing traces with `@vercel/otel`
+
+Use the manual OpenTelemetry setup via `NodeSDK` and register the `LangfuseSpanProcessor`. The `@vercel/otel` helper does not yet support the OpenTelemetry JS SDK v2 that Langfuse depends on. See the [TypeScript instrumentation docs](/docs/observability/sdk/instrumentation#framework-third-party-telemetry) for a full example.
+</Tab>
+</Tabs>
