@@ -9,9 +9,9 @@ This page digs into the underlying concepts of how Langfuse structures and captu
 
 Ready to start? Check out the [Get Started guide](/docs/observability/get-started) to ingest your first trace.
 
-## Traces, Observations and Sessions
+## Observations, Traces, and Sessions
 
-Langfuse organizes an application's data into three core concepts: sessions, traces and observations.
+Langfuse organizes an application's data into three core concepts: observations, traces, and sessions.
 
 ```mermaid
 flowchart LR
@@ -50,18 +50,12 @@ flowchart LR
     class TRACE1,TRACE2,TRACE3 traceBox;
     class O1,O2,O3,O4,O5,O6,O7,O8,O9 obsBox;
 ```
-### Traces
-
-A `trace` typically represents a single request or operation.
-For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace. 
-
-It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
 
 import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
 
 ### Observations
 
-Each trace can contain multiple `observations` to log the individual steps of the execution. Langfuse supports a number of LLM application specific [observation types](/docs/observability/features/observation-types), for example _generations_, _toolcalls_, _RAG retrieval steps_, etc.
+`Observations` are the individual steps within a trace. Langfuse supports a number of LLM application specific [observation types](/docs/observability/features/observation-types), for example _generations_, _toolcalls_, _RAG retrieval steps_, etc.
 
 Observations can be nested. The example below shows a trace with a nested observation.
 
@@ -69,7 +63,7 @@ Observations can be nested. The example below shows a trace with a nested observ
 
 <div className="border rounded py-4 px-4 flex flex-col items-center justify-center bg-card">
 
-Hierarchical structure of traces in Langfuse
+Hierarchical structure of observations in Langfuse
 
 <div className="flex-1 flex items-center justify-center ">
 
@@ -108,6 +102,13 @@ Example trace in Langfuse UI
 </div>
 
 </div>
+
+### Traces
+
+A `trace` typically represents a single request or operation.
+For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace. 
+
+It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
 
 ### Sessions
 
@@ -151,6 +152,20 @@ Example session in Langfuse UI
 </div>
 
 Using sessions is recommended for applications with multi-turn conversations or workflows. Please refer to the [Sessions](/docs/tracing-features/sessions) documentation to add sessions to your traces.
+
+## Adding Attributes
+
+Once you've structured your data into traces and observations, you can enrich them with additional attributes. These attributes act as labels that help you filter, segment, and analyze your traces for specific use cases.
+
+There are different types of attributes you can add:
+
+| Attribute | Description |
+|-----------|-------------|
+| [Environments](/docs/observability/features/environments) | Separate data from different deployment contexts like `production`, `staging`, or `development` |
+| [Tags](/docs/observability/features/tags) | Flexible labels to categorize traces by feature, API endpoint, or workflow |
+| [User](/docs/observability/features/users) | Track which end-user triggered each trace |
+| [Metadata](/docs/observability/features/metadata) | Flexible key-value store for custom information |
+| [Releases & Versions](/docs/observability/features/releases-and-versioning) | Track application versions and component changes |
 
 
 ## How Langfuse Captures Data
