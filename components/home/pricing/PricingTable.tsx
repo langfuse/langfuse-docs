@@ -1068,8 +1068,8 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Organization Management API",
-        href: "/self-hosting/administration/organization-management-api",
+        name: "Instance Management API",
+        href: "/self-hosting/administration/instance-management-api",
         tiers: {
           selfHosted: { "Open Source": ENTERPRISE },
         },
