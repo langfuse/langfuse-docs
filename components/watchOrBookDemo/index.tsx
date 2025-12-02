@@ -37,7 +37,7 @@ function SwitchToggle({
         href="/watch-demo"
         className="text-sm font-medium hover:text-primary transition-colors"
       >
-        Discover yourself
+        Watch videos
       </Link>
     </div>
   );
@@ -141,11 +141,11 @@ function TalkToUsContent() {
 
 function DiscoverYourselfContent() {
   const links = [
-    { href: "/pricing", label: "Pricing" },
-    { href: "/enterprise", label: "Enterprise FAQ" },
     { href: "/docs", label: "Documentation" },
     { href: "/self-hosting", label: "Self-hosting docs" },
     { href: "/demo", label: "Interactive Example Project" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/enterprise", label: "Enterprise FAQ" },
     { href: "/security", label: "Security Center" },
     { href: "/ask-ai", label: "Questions? Ask AI" },
     { href: "/support", label: "Contact Support" },
@@ -158,10 +158,10 @@ function DiscoverYourselfContent() {
   return (
     <>
       <h2 className="text-3xl font-bold tracking-tight">
-        Discover Langfuse yourself
+        Self-serve resources
       </h2>
       <div>
-        <p>Explore our resources to learn more about Langfuse:</p>
+        <p>Everything you need to get started:</p>
         <ul className="flex flex-col gap-2 mt-2">
           {links.map((link) => (
             <li key={link.href} className="flex items-start gap-3">
@@ -192,7 +192,7 @@ function DiscoverYourselfContent() {
           >
             reach out to us
           </Link>
-          ,
+          .
         </p>
         <div className="flex flex-col lg:flex-row gap-6 mt-4">
           <TeamMemberCard
@@ -227,9 +227,13 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
   return (
     <HomeSection>
       <Header
-        title={isDiscoverOpen ? "Walkthroughs" : "Get a Demo"}
+        title={isDiscoverOpen ? "See Langfuse in Action" : "Get a Demo"}
         h="h1"
-        description="Learn more about Langfuse — talk to us or discover yourself"
+        description={
+          isDiscoverOpen
+            ? "Watch short videos to see how Langfuse helps you build better LLM applications"
+            : "Learn more about Langfuse — talk to us or watch videos"
+        }
       />
 
       <div className="w-full max-w-6xl px-4">

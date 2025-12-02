@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { WALKTHROUGH_TABS } from "./constants";
 import { BookOpen, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface VideoPlayerProps {
   videoId: string;
@@ -25,7 +26,7 @@ function VideoPlayer({ videoId, title }: VideoPlayerProps) {
   );
 }
 
-export function WatchWalkthroughs() {
+export function WatchWalkthroughs({ className }: { className?: string }) {
   const router = useRouter();
 
   // Get current tab from query param or default to first tab
@@ -49,7 +50,7 @@ export function WatchWalkthroughs() {
   };
 
   return (
-    <div className="flex flex-col gap-8 items-center">
+    <div className={cn("flex flex-col gap-8 items-center", className)}>
       <Tabs
         value={activeTab}
         onValueChange={handleTabChange}
