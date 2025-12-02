@@ -5,7 +5,7 @@ import { getGitHubStars } from "@/lib/github-stars";
 import { cn } from "@/lib/utils";
 
 // Export usage stats constants
-export const SDK_INSTALLS_PER_MONTH = 14_800_000;
+export const SDK_INSTALLS_PER_MONTH = 23_100_000;
 export const DOCKER_PULLS = 6_000_000;
 export const FORTUNE_500_COMPANIES = 63;
 export const FORTUNE_50_COMPANIES = 19;
