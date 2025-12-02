@@ -41,9 +41,8 @@ flowchart LR
         end
 
     end
-    classDef sessionBox fill:#ffffff,stroke:#888,stroke-width:2px;
-    classDef traceBox fill:#ffffff,stroke:#aaa,stroke-width:1.5px;
-    classDef obsBox fill:#E0EFFF,stroke:#ccc;
+    classDef sessionBox fill:none,stroke:#888,stroke-width:2px;
+    classDef traceBox fill:none,stroke:#aaa,stroke-width:1.5px;
 
     %% Assign classes
     class SESSION sessionBox;
@@ -68,14 +67,6 @@ Hierarchical structure of observations in Langfuse
 <div className="flex-1 flex items-center justify-center ">
 
 ```mermaid
----
-config:
-  showSequenceNumbers: true
-  theme: base
-  themeVariables:
-    primaryColor: "#E0EFFF"
-    noteBkgColor: "#FCFCFC"
----
 classDiagram
     Trace "1" *-- "n" Observation
     Observation o-- Observation: Nesting
@@ -125,14 +116,6 @@ Optionally, sessions aggregate traces
 <div className="flex-1 flex items-center justify-center">
 
 ```mermaid
----
-config:
-  showSequenceNumbers: true
-  theme: base
-  themeVariables:
-    primaryColor: "#E0EFFF"
-    noteBkgColor: "#FCFCFC"
----
 classDiagram
     Session "1" o-- "n" Trace
 ```
@@ -191,14 +174,6 @@ In order to avoid slowing down your application, Langfuse doesn't send traces sy
 Instead, Langfuse batches traces locally and sends them in the background, keeping your application fast and responsive.
 
 ```mermaid
----
-config:
-  showSequenceNumbers: true
-  theme: base
-  themeVariables:
-    primaryColor: "#E0EFFF"
-    noteBkgColor: "#FCFCFC"
----
 sequenceDiagram
     autonumber
     participant User as End user
@@ -234,14 +209,6 @@ To avoid losing data, short-lived applications __must explicitly call `flush()` 
 
 
 ```mermaid
----
-config:
-  showSequenceNumbers: true
-  theme: base
-  themeVariables:
-    primaryColor: "#E0EFFF"
-    noteBkgColor: "#FCFCFC"
----
 sequenceDiagram
     autonumber
     participant User as End user
