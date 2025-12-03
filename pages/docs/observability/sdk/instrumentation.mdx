@@ -9,275 +9,30 @@ import { PropagationRestrictionsCallout } from "@/components/PropagationRestrict
 
 # Instrumentation
 
-Langfuse SDKs build on OpenTelemetry so you can mix native integrations, wrappers, and fully custom spans. Use the tabs below to see the equivalent Python and JS/TS patterns side-by-side.
+Langfuse SDKs lets you manually create observations and traces. You can also use the manual creation patters together with one of the [native integrations](/integrations).
+
 
 ## Native integrations [#native-integrations]
 
-Langfuse supports native integrations for popular LLM and agent libraries. They capture prompts, responses, usage, and errors automatically while preserving full OpenTelemetry context. Explore the full ecosystem in the [Integrations gallery](/integrations).
+Langfuse supports [native integrations](/integrations) for popular LLM and agent libraries such as OpenAI, LangChain or the Vercel AI SDK. They automatically create observations and traces and capture prompts, responses, usage, and errors. 
 
-### OpenAI
+## Custom observations [#custom]
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
-Langfuse provides a drop-in replacement for the OpenAI Python SDK to automatically trace all API calls.
+For some use cases you might want to have more control over the observations and traces. For this, you can create custom observations using the Langfuse SDK. The SDKs provide 3 ways to create custom observations:
 
-```diff
-- import openai
-+ from langfuse.openai import openai
+- **[Context manager](#context-manager)**
+- **[Observe wrapper](#observe-wrapper)** 
+- **[Manual observations](#manual-observations)**
 
-# Your existing OpenAI code continues to work as is
-# For example:
-# client = openai.OpenAI()
-# completion = client.chat.completions.create(...)
-```
+All custom patterns are interoperable. You can nest a decorator-created observation inside a context manager or mix manual spans with native integrations.
 
-**What's captured automatically:** prompts (incl. streaming), responses, timings, errors, token usage, estimated costs, and multimedia payloads. If the OpenAI call runs inside an active Langfuse span it is nested correctly.
+### Context manager [#context-manager]
 
-You can also pass Langfuse-specific metadata to enrich the trace:
-
-```python /metadata={"langfuse_session_id":/
-from langfuse.openai import openai
-
-client = openai.OpenAI()
-
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "What is OpenTelemetry?"}],
-    metadata={
-        "langfuse_session_id": "session_123",
-        "langfuse_user_id": "user_456",
-        "langfuse_tags": ["production", "chat-bot"],
-        "custom_field": "additional metadata",
-    },
-)
-```
-
-Integrations are interoperable with manual tracing. Wrap calls with Langfuse spans to propagate tags or session data:
-
-```python
-from langfuse import get_client, propagate_attributes
-from langfuse.openai import openai
-
-langfuse = get_client()
-client = openai.OpenAI()
-
-with langfuse.start_as_current_observation(as_type="span", name="qna-bot-openai"):
-    with propagate_attributes(tags=["qna-bot-openai"]):
-        response = client.chat.completions.create(
-            name="qna-bot-openai",
-            model="gpt-4o",
-            messages=[{"role": "user", "content": "What is OpenTelemetry?"}],
-        )
-```
-</Tab>
-<Tab title="TypeScript">
-Wrap any OpenAI client with `observeOpenAI`. All subsequent calls emit generations that inherit the current OpenTelemetry context.
-
-```ts /observeOpenAI/
-import { OpenAI } from "openai";
-import { observeOpenAI } from "@langfuse/openai";
-
-const openai = new OpenAI();
-
-const tracedOpenAI = observeOpenAI(openai, {
-  traceName: "my-openai-trace",
-  sessionId: "user-session-123",
-  userId: "user-abc",
-  tags: ["openai-integration"],
-});
-
-const completion = await tracedOpenAI.chat.completions.create({
-  model: "gpt-4",
-  messages: [{ role: "user", content: "What is OpenTelemetry?" }],
-});
-```
-
-Mix native integrations with custom spans (e.g., `startActiveObservation`) whenever you need additional metadata or nesting control.
-</Tab>
-</Tabs>
-
-### LangChain
+The context manager allows you to create a new span and set it as the currently active observation in the OTel context for its duration. Any new observations created within this block will be its children. 
 
 <Tabs items={["Python", "TypeScript"]}>
 <Tab title="Python">
-Use the Langfuse LangChain callback handler to automatically trace chains, tools, retrievers, and LLM calls.
-
-```python
-from langfuse import get_client, propagate_attributes
-from langfuse.langchain import CallbackHandler
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-
-langfuse = get_client()
-langfuse_handler = CallbackHandler()
-llm = ChatOpenAI(model_name="gpt-4o")
-prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
-chain = prompt | llm
-
-with langfuse.start_as_current_observation(as_type="span", name="joke-chain"):
-    with propagate_attributes(tags=["joke-chain"]):
-        response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
-```
-
-Trace attributes (`session_id`, `user_id`, `tags`) can be set via `metadata` on the LangChain call so every observation inherits them.
-</Tab>
-<Tab title="TypeScript">
-<GetStartedJsLangchain />
-</Tab>
-</Tabs>
-
-### Framework & third-party telemetry
-
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
-Any OTEL-instrumented library can forward spans to Langfuse. Example: tracing Anthropic via the community instrumentation package.
-
-```python
-from anthropic import Anthropic
-from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
-
-from langfuse import get_client
-
-AnthropicInstrumentor().instrument()
-
-langfuse = get_client()
-client = Anthropic()
-
-with langfuse.start_as_current_observation(as_type="span", name="myspan"):
-    message = client.messages.create(
-        model="claude-3-7-sonnet-20250219",
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Hello, Claude"}],
-    )
-
-langfuse.flush()
-```
-
-See the [Langfuse + LlamaIndex integration](/integrations/frameworks/llamaindex) for another OTEL-based example.
-</Tab>
-<Tab title="TypeScript">
-The JS SDK integrates with frameworks like the Vercel AI SDK. Register the `LangfuseSpanProcessor` in your OTEL setup and flush spans after streaming responses.
-
-```ts filename="instrumentation.ts"
-import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
-import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
-
-const shouldExportSpan: ShouldExportSpan = (span) =>
-  span.otelSpan.instrumentationScope.name !== "next.js";
-
-export const langfuseSpanProcessor = new LangfuseSpanProcessor({ shouldExportSpan });
-
-const tracerProvider = new NodeTracerProvider({
-  spanProcessors: [langfuseSpanProcessor],
-});
-
-tracerProvider.register();
-```
-
-```ts filename="route.ts" /observe/ /forceFlush/
-import { streamText } from "ai";
-import { after } from "next/server";
-
-import { openai } from "@ai-sdk/openai";
-import { observe, updateActiveObservation, updateActiveTrace } from "@langfuse/tracing";
-import { trace } from "@opentelemetry/api";
-
-import { langfuseSpanProcessor } from "@/src/instrumentation";
-
-const handler = async (req: Request) => {
-  const { messages, chatId, userId } = await req.json();
-
-  updateActiveObservation({ input: messages[messages.length - 1] });
-  updateActiveTrace({ name: "my-ai-sdk-trace", sessionId: chatId, userId });
-
-  const result = streamText({
-    experimental_telemetry: { isEnabled: true },
-    onFinish: async (result) => {
-      updateActiveObservation({ output: result.content });
-      updateActiveTrace({ output: result.content });
-      trace.getActiveSpan()?.end();
-    },
-  });
-
-  after(async () => await langfuseSpanProcessor.forceFlush());
-
-  return result.toUIMessageStreamResponse();
-};
-
-export const POST = observe(handler, {
-  name: "handle-chat-message",
-  endOnExit: false,
-});
-```
-
-Any OTEL-instrumented library (databases, HTTP clients, agents) automatically exports spans to Langfuse once the `LangfuseSpanProcessor` is registered.
-</Tab>
-</Tabs>
-
-## Custom instrumentation patterns [#custom-instrumentation]
-
-You can also create custom instrumentation patterns using the Langfuse SDK. 
-
-All custom patterns are interoperable—you can nest a decorator-created observation inside a context manager or mix manual spans with native integrations.
-
-### Observe decorator [#observe-wrapper]
-
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
-Use the `@observe()` decorator to automatically capture inputs, outputs, timings, and errors of a wrapped function.
-
-```python
-from langfuse import observe
-
-@observe()
-def my_data_processing_function(data, parameter):
-    return {"processed_data": data, "status": "ok"}
-
-@observe(name="llm-call", as_type="generation")
-async def my_async_llm_call(prompt_text):
-    return "LLM response"
-```
-
-**Parameters**: `name`, `as_type`, `capture_input`, `capture_output`, `transform_to_string`. Special kwargs such as `langfuse_trace_id` or `langfuse_parent_observation_id` let you stitch into existing traces.
-
-The decorator automatically propagates the OTEL trace context. Pass `langfuse_trace_id` when you need to force a specific trace ID (e.g., to align with an external system) and `langfuse_parent_observation_id` to attach to an existing parent span.
-
-<Callout type="info">
-Capturing large inputs/outputs may add overhead. Disable IO capture per decorator (`capture_input=False`, `capture_output=False`) or via the `LANGFUSE_OBSERVE_DECORATOR_IO_CAPTURE_ENABLED` env var.
-</Callout>
-</Tab>
-<Tab title="TypeScript">
-Wrap existing functions with `observe` to trace calls without modifying their internals.
-
-```ts /observe/ /updateActiveObservation/
-import { observe, updateActiveObservation } from "@langfuse/tracing";
-
-async function fetchData(source: string) {
-  updateActiveObservation({ metadata: { source: "API" } });
-  return { data: `some data from ${source}` };
-}
-
-const tracedFetchData = observe(fetchData, {});
-
-const result = await tracedFetchData("API");
-```
-
-| Option | Description | Default |
-| ------ | ----------- | ------- |
-| `name` | Observation name | Function name |
-| `asType` | Observation type (`span`, `generation`, etc.) | `"span"` |
-| `captureInput` | Capture arguments as `input` | `true` |
-| `captureOutput` | Capture return values/errors as `output` | `true` |
-</Tab>
-</Tabs>
-
-### Context managers & callbacks [#context-management-with-callbacks]
-
-Context helpers keep spans correctly parented and automatically close them for you.
-
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
-`langfuse.start_as_current_observation()` is the primary way to create spans or generations while ensuring the active OpenTelemetry context is updated. Any child spans created inside the `with` block inherit the parent automatically.
+`langfuse.start_as_current_observation()` is the primary way to create observations while ensuring the active OpenTelemetry context is updated. Any child observations created inside the `with` block inherit the parent automatically.
 
 ```python
 from langfuse import get_client, propagate_attributes
@@ -301,7 +56,7 @@ with langfuse.start_as_current_observation(
 ```
 </Tab>
 <Tab title="TypeScript">
-`startActiveObservation` accepts a callback, makes the new span active for the callback scope, and ends it automatically—even across async boundaries.
+`startActiveObservation` accepts a callback, makes the new span active for the callback scope, and ends it automatically, even across async boundaries.
 
 ```ts /startActiveObservation/
 import { startActiveObservation, startObservation } from "@langfuse/tracing";
@@ -319,6 +74,57 @@ await startActiveObservation("user-request", async (span) => {
   span.update({ output: "Answered." });
 });
 ```
+</Tab>
+</Tabs>
+
+### Observe wrapper [#observe-wrapper]
+
+Use the `observe` wrapper to automatically capture inputs, outputs, timings, and errors of a wrapped function without modifying the function's internal logic.
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+
+```python /@observe/
+from langfuse import observe
+
+@observe()
+def my_data_processing_function(data, parameter):
+    return {"processed_data": data, "status": "ok"}
+
+@observe(name="llm-call", as_type="generation")
+async def my_async_llm_call(prompt_text):
+    return "LLM response"
+```
+
+**Parameters**: `name`, `as_type`, `capture_input`, `capture_output`, `transform_to_string`. Special kwargs such as `langfuse_trace_id` or `langfuse_parent_observation_id` let you stitch into existing traces.
+
+The decorator automatically propagates the OTEL trace context. Pass `langfuse_trace_id` when you need to force a specific trace ID (e.g., to align with an external system) and `langfuse_parent_observation_id` to attach to an existing parent span.
+
+<Callout type="info">
+Capturing large inputs/outputs may add overhead. Disable IO capture per decorator (`capture_input=False`, `capture_output=False`) or via the `LANGFUSE_OBSERVE_DECORATOR_IO_CAPTURE_ENABLED` env var.
+</Callout>
+</Tab>
+<Tab title="TypeScript">
+
+```ts /observe/ /updateActiveObservation/
+import { observe, updateActiveObservation } from "@langfuse/tracing";
+
+async function fetchData(source: string) {
+  updateActiveObservation({ metadata: { source: "API" } });
+  return { data: `some data from ${source}` };
+}
+
+const tracedFetchData = observe(fetchData, {});
+
+const result = await tracedFetchData("API");
+```
+
+| Option | Description | Default |
+| ------ | ----------- | ------- |
+| `name` | Observation name | Function name |
+| `asType` | Observation type (`span`, `generation`, etc.) | `"span"` |
+| `captureInput` | Capture arguments as `input` | `true` |
+| `captureOutput` | Capture return values/errors as `output` | `true` |
 </Tab>
 </Tabs>
 
@@ -418,9 +224,9 @@ await startActiveObservation("outer-process", async () => {
 
 <Tabs items={["Python", "TypeScript"]}>
 <Tab title="Python">
-Update observation objects directly or use context-aware helpers.
+Update observation objects directly with `.update()` or use context-aware helpers with `.update_current_span()`.
 
-```python
+```python /.update/ /.update_current_span/
 from langfuse import get_client
 
 langfuse = get_client()
@@ -439,7 +245,7 @@ with langfuse.start_as_current_observation(as_type="span", name="data-processing
 <Tab title="TypeScript">
 Update the active observation or trace without holding a reference.
 
-```ts /updateActiveTrace/
+```ts /.update/ /updateActiveTrace/
 import { startActiveObservation, updateActiveTrace } from "@langfuse/tracing";
 
 await startActiveObservation("user-request", async (span) => {
@@ -744,8 +550,6 @@ span.end();
 ### Client lifecycle & flushing
 
 Both SDKs buffer spans in the background. Always flush or shut down the exporter in short-lived processes (scripts, serverless functions, workers) to avoid losing data.
-
-<Tabs items={["Python", "TypeScript"]}>
 
 <Tabs items={["Python", "TypeScript"]}>
 <Tab title="Python">
