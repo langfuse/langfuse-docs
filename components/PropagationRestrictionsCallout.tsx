@@ -8,9 +8,9 @@ export function PropagationRestrictionsCallout({
   attributes = ["userId", "sessionId", "metadata", "version", "tags"],
 }: PropagationRestrictionsCalloutProps) {
   const pythonLink =
-    "/docs/observability/sdk/python/instrumentation#propagate-attributes";
+    "/docs/observability/sdk/instrumentation#propagate-attributes";
   const tsLink =
-    "/docs/observability/sdk/typescript/instrumentation#propagate-attributes";
+    "/docs/observability/sdk/instrumentation#propagate-attributes";
 
   const formatAttributes = (attrs: string[]) => {
     if (attrs.length === 1) return `\`${attrs[0]}\``;

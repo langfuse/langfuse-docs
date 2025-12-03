@@ -1,5 +1,7 @@
 export default {
   overview: "Overview",
-  python: "Python",
-  typescript: "JS/TS",
+  instrumentation: "Instrumentation",
+  "advanced-features": "Advanced Features",
+  "troubleshooting-and-faq": "Troubleshooting & FAQ",
+  "upgrade-path": "Upgrade Path",
 };

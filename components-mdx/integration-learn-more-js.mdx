@@ -10,12 +10,12 @@ import {
 
 ## Interoperability with the JS/TS SDK
 
-You can use this integration together with the Langfuse [JS/TS SDK](/docs/observability/sdk/typescript/overview) to add additional attributes or group observations into a single trace.
+You can use this integration together with the Langfuse [SDKs](/docs/observability/sdk/overview) to add additional attributes or group observations into a single trace.
 
 <Tabs items={["Context Manager", "Observe Wrapper"]}>
 <Tabs.Tab>
 
-The [Context Manager](/docs/observability/sdk/typescript/instrumentation#context-management-with-callbacks) allows you to wrap your instrumented code using context managers (with `with` statements), which allows you to add additional attributes to the trace. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
+The [Context Manager](/docs/observability/sdk/instrumentation#context-management-with-callbacks) allows you to wrap your instrumented code using context managers (with `with` statements), which allows you to add additional attributes to the trace. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
 
 ```typescript
 import { startActiveObservation, propagateAttributes } from "npm:@langfuse/tracing";
@@ -51,12 +51,12 @@ await startActiveObservation("context-manager", async (span) => {
 });
 ```
 
-Learn more about using the Context Manager in the [JS/TS SDK](https://langfuse.com/docs/observability/sdk/typescript/instrumentation#context-management-with-callbacks) docs.
+Learn more about using the Context Manager in the [Langfuse SDK instrumentation docs](https://langfuse.com/docs/observability/sdk/instrumentation#context-management-with-callbacks).
 
 </Tabs.Tab>
 <Tabs.Tab>
 
-The [`observe` wrapper](/docs/observability/sdk/typescript/instrumentation#observe-wrapper) is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a span or generation around the function call. You can use the `propagateAttributes` function to add attributes to the observation from within the wrapped function.
+The [`observe` wrapper](/docs/observability/sdk/instrumentation#observe-wrapper) is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a span or generation around the function call. You can use the `propagateAttributes` function to add attributes to the observation from within the wrapped function.
 
 ```typescript
 import { observe, propagateAttributes } from "@langfuse/tracing";
@@ -98,7 +98,7 @@ const processUserRequest = observe(
 const result = await processUserRequest("some query");
 ```
 
-Learn more about using the Decorator in the [JS/TS SDK docs](/docs/observability/sdk/typescript/instrumentation#observe-wrapper) docs.
+Learn more about using the Decorator in the [Langfuse SDK instrumentation docs](/docs/observability/sdk/instrumentation#observe-wrapper).
 
 </Tabs.Tab>
 </Tabs>
