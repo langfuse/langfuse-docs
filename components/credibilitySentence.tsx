@@ -44,9 +44,9 @@ export const CredibilitySentence = ({
           <li>
             Trusted by{" "}
             <Metric className={metricClassName}>{FORTUNE_50_COMPANIES}</Metric>{" "}
-            Fortune 50 and{" "}
+            of the Fortune 50 and{" "}
             <Metric className={metricClassName}>{FORTUNE_500_COMPANIES}</Metric>{" "}
-            Fortune 500 companies
+            of the Fortune 500
           </li>
         </ul>
       </div>
