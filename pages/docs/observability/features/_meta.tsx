@@ -1,23 +1,30 @@
 import { MenuSubSeparator } from "@/components/MenuSubSeparator";
 
 export default {
-  "-- Core": {
+  "-- Essential": {
     type: "separator",
     title: <MenuSubSeparator>Essential</MenuSubSeparator>,
   },
+  observations: {},
+  traces: {},
   sessions: {},
+
+  "-- Attributes": {
+    type: "separator",
+    title: <MenuSubSeparator>Attributes</MenuSubSeparator>,
+  },
   users: {},
-  environments: {},
-  tags: {},
   metadata: {},
-  "trace-ids-and-distributed-tracing": {},
+  tags: {},
+  environments: {},
+  "log-levels": {},
+  "releases-and-versioning": {},
 
   "-- Advanced": {
     type: "separator",
     title: <MenuSubSeparator>Advanced</MenuSubSeparator>,
   },
   "user-feedback": {},
-  "log-levels": {},
   "*": {
     layout: "default",
   },
