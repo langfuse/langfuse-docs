@@ -19,7 +19,7 @@ export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
     },
     { name: "GitHub stars", value: getGitHubStars(), showPlus: false },
     {
-      name: "Fortune 50 companies",
+      name: "of the Fortune 50",
       value: FORTUNE_50_COMPANIES,
       showPlus: false,
     },
