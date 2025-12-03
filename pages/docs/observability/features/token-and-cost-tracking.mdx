@@ -382,15 +382,40 @@ Model definitions include prices per usage type. Usage types must match exactly 
 
 Langfuse automatically calculates cost for ingested generations at the time of ingestion if (1) usage is ingested or inferred, (2) and a matching model definition includes prices.
 
+### Pricing Tiers [#pricing-tiers]
+
+Some model providers charge different rates depending on the number of input tokens used. For example, Anthropic's Claude Sonnet 4.5 and Google's Gemini 2.5 Pro apply higher pricing when more than 200K input tokens are used.
+
+Langfuse supports **pricing tiers** for models, enabling accurate cost calculation for these context-dependent pricing structures.
+
+#### How tier matching works
+
+Each model can have multiple pricing tiers, each with:
+- **Name**: A descriptive name (e.g., "Standard", "Large Context")
+- **Priority**: Evaluation order (0 is reserved for default tier)
+- **Conditions**: Rules that determine when the tier applies
+- **Prices**: Cost per usage type for this tier
+
+When calculating cost, Langfuse evaluates tiers in priority order (excluding the default tier). The first tier whose conditions are satisfied is used. If no conditional tier matches, the default tier is applied.
+
+**Condition format:**
+- `usageDetailPattern`: A regex pattern to match usage detail keys (e.g., `input` matches `input_tokens`, `input_cached_tokens`, etc.)
+- `operator`: Comparison operator (`gt`, `gte`, `lt`, `lte`, `eq`, `neq`)
+- `value`: The threshold value to compare against
+- `caseSensitive`: Whether the pattern matching is case-sensitive (default: false)
+
+For example, the "Large Context" tier for Claude Sonnet 4.5 has a condition: `input > 200000`, meaning it applies when the sum of all usage details matching the pattern "input" exceeds 200,000 tokens.
+
+
 ### Custom model definitions [#custom-model-definitions]
 
-You can flexibly add your own model definitions to Langfuse. This is especially useful for self-hosted or fine-tuned models which are not included in the list of Langfuse maintained models.
+You can flexibly add your own model definitions (incl. [pricing tiers](#pricing-tiers)) to Langfuse. This is especially useful for self-hosted or fine-tuned models which are not included in the list of Langfuse maintained models.
 
 <LangTabs items={["Langfuse UI", "API"]}>
 
 <Tab>
 
-To add a custom model definition in the Langfuse UI, you can either click on the "+" sign next to the model name or navigate to the **Project Settings > Models** to add a new model definition. 
+To add a custom model definition in the Langfuse UI, you can either click on the "+" sign next to the model name or navigate to the **Project Settings > Models** to add a new model definition.
 
 Then you can add the prices per token type and save the model definition. Now all **new traces** with this model will have the correct token usage and cost inferred.
 

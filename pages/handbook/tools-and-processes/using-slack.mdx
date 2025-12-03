@@ -41,18 +41,14 @@ All support/sales communication in `ext-*` channels happens via Plain.
 
 ### Create new external Slack connect channel
 
-- Create them from the channel group (e.g., `Support batch n`); this allows for easy channel management
-- Shared channels should be public channels as this allows for discovery within the customer's Slack organization
-- When creating a channel:
+- Use the appropriate channel prefix (e.g., `ext-`, `partner-`, `vendor-`)
+- Shared channels should be public channels as this allows for discovery within the customer's Slack organization.
+- When creating an `ext-*` channel (customers):
   - Invite external members
-  - Do not invite any additional Langfuse members
-  - Optionally: Mute channel right away if this is ongoing support and not an active deal
+  - Invite internal members explicitly, do not make the channel a default channel for everyone. Only invite Clemens who wants to be a member of all external channels. Everyone else can help out in this channel via the Plain integration, the App automatically joins all `ext-*` channels.
+  - Optionally: once you see that the external members joined, share a welcome message in the channel and then mute the channel on Slack. From then on, you can help out in this channel via the Plain integration.
 
 ### Configure Slack for external channels
 
 - For most channels and most team members: you can mute or leave the existing `ext-*` channels. You will get assigned to threads via Plain.
-- For high-value accounts, the person managing the relationship should stay in the channel as this makes it easier to outbound engage the customer → use direct channel to our advantage
-
-### How to mute groups of channels
-
-To quickly tidy up your Slack notifications, you can mute all channels within the support groups at once. Right-click on the channel group in the Slack sidebar, select `Manage`, and then `Mute all`.
+- For high-value accounts, the person managing the relationship should stay in the channel as this makes it easier to outbound engage the customer → use direct channel to our advantage to be close to the most important customers.
