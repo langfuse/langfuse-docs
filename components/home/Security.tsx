@@ -6,6 +6,7 @@ import GdprSVG from "./security/gdpr.svg";
 import HipaaSVG from "./security/hipaa.svg";
 import Image from "next/image";
 import Link from "next/link";
+import { FORTUNE_50_COMPANIES, FORTUNE_500_COMPANIES } from "./Usage";
 
 export default function Security() {
   return (
@@ -16,7 +17,8 @@ export default function Security() {
           <span>
             Langfuse is built with security in mind. Langfuse Cloud is SOC 2
             Type II and ISO 27001 certified, GDPR compliant and aligned with
-            HIPAA.
+            HIPAA. Langfuse is trusted by {FORTUNE_50_COMPANIES} of the Fortune
+            50 and {FORTUNE_500_COMPANIES} of the Fortune 500.
           </span>
         }
         className="mb-0"
