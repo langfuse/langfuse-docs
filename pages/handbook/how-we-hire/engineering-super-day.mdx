@@ -1,23 +1,24 @@
+import { Badge } from "@/components/ui/badge";
+
 # Engineering Super Day
 
 The Super Day is a full onsite day in our office where we work together with you on real problems you might tackle in your future role at Langfuse. The goal is to simulate working together for a day—a trial run for both sides to determine whether we enjoy collaborating, coding, and problem-solving together.
 
 We expect this investment from you, and we make the same investment ourselves to ensure we hire the best people for our team.
 
-- **Start time:** 9:30 AM
+- **Start time:** 10:30 AM
 - **Location:** [Our office](/find-us)
 - **End time:** ~5:30 PM
 
-
-## Preparation
+<Steps>
+## Preparation for the Super Day
 
 We expect everyone participating in a Super Day to be genuinely interested in joining Langfuse and to have completed the following preparation:
 
 **Everyone:**
 - Read the [handbook](/handbook) from top to bottom
 - Read the [documentation](/docs) thoroughly to understand the product and how it works
-- Understand who our users are and what problems they're trying to solve
-- Review our data models in [Postgres](https://github.com/langfuse/langfuse/blob/main/packages/shared/prisma/schema.prisma) and [Clickhouse](https://github.com/langfuse/langfuse/blob/0b8ad96b18ca4763df0a62deaac39d58a0a607c4/packages/shared/clickhouse/migrations/clustered) how we persist data. We have dedicated data model docs in our product documentation:
+- Review our data models in [Postgres](https://github.com/langfuse/langfuse/blob/main/packages/shared/prisma/schema.prisma) and [Clickhouse](https://github.com/langfuse/langfuse/blob/0b8ad96b18ca4763df0a62deaac39d58a0a607c4/packages/shared/clickhouse/migrations/clustered) how we persist data. We have dedicated data model docs in our product documentation as well:
   - [Observability data model](/docs/observability/data-model)
   - [Scores data model](/docs/evaluation/evaluation-methods/data-model)
   - [Experiments data model](/docs/evaluation/experiments/data-model)
@@ -25,63 +26,100 @@ We expect everyone participating in a Super Day to be genuinely interested in jo
 
 
 **Product & Backend Engineers:**
-- Be proficient in SQL—many of our onsite challenges rely on SQL logic
-- Complete local dev setup:
+- Be proficient in SQL — many of our onsite challenges rely on SQL logic
+- Local dev setup:
     - If you want to code in TypeScript, set up our [repository](https://github.com/langfuse/langfuse) by following the [Contributing Guide](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md)
     - If you want to code in a language of your choice, set up a scaffold project beforehand and prepare to connect to the spawned and seeded Clickhouse database (see the [Contributing Guide](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md) for database setup)
-
+We have dedicated data model docs in our product documentation:
 **Frontend/Design Engineers:**
 - Set up our [repository](https://github.com/langfuse/langfuse) by following the [Contributing Guide](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md)
 
-## Pre-Onsite Sync
+## Take-home RFC preparation
+<Callout type="info">
+**1-2 days prior to Super Day**
+</Callout>
 
-Before the Super Day, you'll have a brief sync with someone from the Langfuse team to discuss what the implementation part of the day will look like. This is also the perfect opportunity to address any questions you might have about the product, the role, or the company.
+Before the Super Day, you'll receive a technical challenge in PDF format. This challenge will describe a feature we want you to think through and plan for implementation.
 
+**30 minutes after receiving the challenge**, we'll have a **20-minute call** where you can ask any questions about the challenge, the product context, or clarify requirements.
 
-## Super Day Schedule
+After the call, you should write a document outlining how you would build the feature described in the challenge. Think of this as if you were already working at Langfuse and preparing a technical proposal for the team. You can do this in a Google Doc, Figma or any other tool of your choice. Your document should cover:
+- Technical approach and architecture
+- Trade-offs and alternatives considered
+- Any assumptions you're making
 
-
-### System + Product Design Session (2.5 hours)
-
-**9:30 AM - 11:45 AM** Participants: you, Max (CTO), Marc (CEO), and sometimes one of the engineers
-
-We'll work together to think through a complex feature we want to add to Langfuse. The goal is to simulate how we arrive at a technical proposal for building that feature.
-
-**Our philosophy:**
-We're a team that thinks before we build. We want to see you thinking, making technical trade-offs, and reasoning about why you would choose one approach over another.
-
-**Goal:**
-By the end of the session, all of us should understand how we would build this feature. If someone were to start working on it immediately, there should be no surprises.
-
-**Your role:**
-- You can ask us questions at any time, especially about our users
-- You're in the driver's seat
-- You need to structure the session and ensure we cover the important topics. You manage the time, process, and discussion
-- Typically this means: understanding the product requirements, translating them into technical requirements, and identifying the difficult technical choices
-- Develop plans to overcome technical difficulties and make reasonable trade-offs
+**Please send us your RFC on the evening before the interview day.**
 
 
-### Feedback (~15 minutes)
 
-**11:45 AM - 12:00 PM** Participants: you, Max (CTO), Marc (CEO), and sometimes one of the engineers
+## Super Day: RFC Discussion Session
 
-After the morning session, Marc and Max will take a few minutes to discuss the session and provide you with feedback. We believe this is fair given the investment you're making. In the interest of time and fairness for everyone, we may decide not to continue with the afternoon session if we don't think we're a good fit for each other.
+<Callout type="info">
+**10:30 AM - 12:00 PM** Participants: you, Max (CTO), Marc (CEO)
+</Callout>
 
 
-### Lunch
 
-**12:00 PM - 1:00 PM** Participants: you and the team
+We'll discuss the document you prepared for the challenge. Imagine you're already working at Langfuse and you want to clarify your approach and trade-offs before building the feature.
+
+
+By the end of the session, all of us should have a clear, aligned understanding of how to build this feature. You should have clarified all product and engineering specifications needed to move forward with implementation.
+
+
+## Super Day: Feedback
+
+<Callout type="info">
+**1:00 PM - 1:15 PM** Participants: you, Max (CTO), Marc (CEO), and sometimes one of the engineers
+</Callout>
+
+After the RFC discussion, Marc and Max will take a few minutes to discuss the session and provide you with feedback. We believe this is fair given the investment you're making. In the interest of time and fairness for everyone, we may decide not to continue with the afternoon session if we don't think we're a good fit for each other.
+
+
+## Super Day: Lunch
+<Callout type="info">
+**1:15 PM - 2:15 PM** Participants: you and the team
+</Callout>
 
 This is your opportunity to meet the team, learn what they work on, and observe how they interact and collaborate. The team will answer any questions you may have.
 
-### Implementation Session (~3 hours)
+## Super Day: Implementation Session
 
-**1:00 PM - 4:00 PM** Participants: you, Max (CTO), and one of the engineers
+<Callout type="info">
+**2:15 PM - 5:15 PM** Participants: you, Max (CTO), and one of the engineers
+</Callout>
 
-We'll take something from the morning session and scope it down to something deliverable in about two hours.
+We'll take something from the RFC discussion and scope it down to something deliverable in about two hours.
 
 **Process:**
-1. Pre-discussion together (~30 minutes). Similar to the morning session, you will sit in the driver seat.
+1. Pre-discussion together (~30 minutes). Similar to the RFC discussion, you will sit in the driver seat and lead the scoping conversation.
 2. You work on the implementation in the team room (~2 hours)
 3. Check-in and implementation review together (~30 minutes)
 
+</Steps>
+
+## How to succeed on the Super Day
+
+The Super Day simulates how we work at Langfuse. We're looking for engineers who can take ownership, ship fast, and stay close to users.
+
+**Lead with agency and ownership**
+- Drive the discussion forward—you're in the driver's seat
+- Make decisions and propose clear paths rather than waiting for direction
+- Think end-to-end: implementation, docs, support, customer impact, and what happens when things break
+
+**Focus on shipping, not perfection**
+- Question and cut scope to ship faster without compromising quality
+- Know when "good enough" beats "perfect"—show taste in prioritization
+- Propose practical solutions over theoretical ideals
+
+**Stay customer-centric**
+- Ask questions to deeply understand user needs and the "why" behind requirements
+- Make tradeoff decisions based on customer value, not technical elegance
+
+**Demonstrate technical depth**
+- Dive deep on technical details and defend your choices with clear reasoning
+- Explain tradeoffs between quality, speed, and maintainability
+- Ask questions when you need clarity—we don't expect you to know everything
+
+**Communicate efficiently**
+- Get to outcomes quickly—no need for polished presentations
+- Be direct about what will work, what won't, and what you're uncertain about

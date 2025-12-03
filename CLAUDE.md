@@ -85,3 +85,23 @@ This is a **Nextra-based documentation site** for Langfuse built with Next.js. K
 - Auto-generates contributor data and GitHub stars before builds
 - Extensive redirect configuration for URL management
 - CSP headers configured for security in production
+- # How to succeed on the Super Day
+
+- For all interviews, you're in the driver's seat. You take ownerhip over product areas in Langfuse, therefore, you need to lead the discussion to get to an outcome with which you can proceed to make our users happy.
+- Be ready to dive deep on technical details of the RFC or the code that you will produce during the Super Day.
+- Ask questions to clarify product requirements and user needs
+- Ask questions on anything technical where you may lack knowledge. All of us do not know everything.
+- Work with us to refine the engineering specs
+- Discuss trade-offs and defend your technical choices
+
+
+
+
+@pages/handbook/ 
+@pages/handbook/how-we-hire/engineering-super-day.mdx 
+
+
+Please look at the handbook and understand how we like to work. IMO we can do a better job on describing how to succeed on the super day. Please suggest an improved version
+
+
+ultrathink
