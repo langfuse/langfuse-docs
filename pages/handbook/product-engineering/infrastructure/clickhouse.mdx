@@ -44,4 +44,4 @@ Therefore, we have multiple batch mechanisms in place to accumulate data before 
 
 The worker container stores all ClickHouse writes into the `ClickHouseWriter` in an in-memory buffer.
 From there, we regularly flush the data to ClickHouse in configurable batch sizes and intervals.
-In addition, we use `async_inserts` on CLickHouse that collect data server-side before acknowledging the insert and writing it to disk.
+In addition, we use `async_inserts` on ClickHouse that collect data server-side before acknowledging the insert and writing it to disk.
