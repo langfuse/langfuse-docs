@@ -1,0 +1,27 @@
+**Configure OpenTelemetry endpoint**
+
+Langfuse exposes an OpenTelemetry (OTLP) endpoint at `/api/public/otel` that can receive traces from any OpenTelemetry-compatible client. If you already have an OpenTelemetry setup in your application, you can configure Langfuse as an additional backend to receive your traces.
+
+Set the following environment variables to point your OpenTelemetry exporter to Langfuse:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
+# OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel" # 🇺🇸 US data region
+
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"
+```
+
+**Authenticate with your API keys**
+
+Langfuse uses Basic Auth to authenticate OpenTelemetry requests. Create a base64-encoded string from your Langfuse API keys:
+
+```bash
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
+```
+
+Use the output as `AUTH_STRING` in the headers configuration above.
+
+**Start tracing**
+
+Once configured, your OpenTelemetry-instrumented application will automatically send traces to Langfuse. This works with any OpenTelemetry-compatible library including OpenLLMetry, OpenLIT, and framework-specific instrumentations.
+
