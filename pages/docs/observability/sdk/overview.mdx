@@ -154,9 +154,46 @@ npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 
 ## Configure credentials
 
-Add your Langfuse credentials to your environment. 
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+Set credentials via environment variables (recommended) or constructor arguments.
+
+```bash filename=".env"
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_BASE_URL="https://cloud.langfuse.com" # US: https://us.cloud.langfuse.com
+```
+
+<Callout type="info">
+If you create multiple `Langfuse` instances with the same `public_key`, the singleton instance is reused and new arguments are ignored.
+</Callout>
+
+**Key configuration options**
+
+| Constructor Argument        | Environment Variable                 | Description                                                                                                                           | Default value                  |
+| --------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `public_key`                | `LANGFUSE_PUBLIC_KEY`                | Your Langfuse project's public API key. **Required.**                                                                                 |                                |
+| `secret_key`                | `LANGFUSE_SECRET_KEY`                | Your Langfuse project's secret API key. **Required.**                                                                                 |                                |
+| `base_url`                 | `LANGFUSE_BASE_URL`                 | API host for your Langfuse instance.                                                                                                   | `"https://cloud.langfuse.com"` |
+| `timeout`                   | `LANGFUSE_TIMEOUT`                   | Timeout in seconds for API requests.                                                                                                  | `5`                            |
+| `httpx_client`              | -                                    | Custom `httpx.Client` for non-tracing HTTP requests.                                                                                  |                                |
+| `debug`                     | `LANGFUSE_DEBUG`                     | Enables verbose logging.                                                                                                              | `False`                        |
+| `tracing_enabled`           | `LANGFUSE_TRACING_ENABLED`           | Toggles Langfuse instrumentation; if `False`, tracing calls become no-ops.                                                            | `True`                         |
+| `flush_at`                  | `LANGFUSE_FLUSH_AT`                  | Number of spans to batch before sending.                                                                                              | `512`                          |
+| `flush_interval`            | `LANGFUSE_FLUSH_INTERVAL`            | Seconds between batch flushes.                                                                                                        | `5`                            |
+| `environment`               | `LANGFUSE_TRACING_ENVIRONMENT`       | Environment name (lowercase alphanumeric, hyphen/underscore).                                                                         | `"default"`                    |
+| `release`                   | `LANGFUSE_RELEASE`                   | Release identifier for grouping analytics.                                                                                            |                                |
+| `media_upload_thread_count` | `LANGFUSE_MEDIA_UPLOAD_THREAD_COUNT` | Background threads for media uploads.                                                                                                 | `1`                            |
+| `sample_rate`               | `LANGFUSE_SAMPLE_RATE`               | [Sampling](/docs/observability/features/sampling) rate between `0.0` and `1.0`.                                                       | `1.0`                          |
+| `mask`                      | -                                    | [Mask](/docs/observability/sdk/advanced-features#mask-sensitive-data) sensitive data before export.                                   |                                |
+|                             | `LANGFUSE_MEDIA_UPLOAD_ENABLED`      | Whether to upload media files to Langfuse storage (useful to disable when self-hosting).                                              | `True`                         |
+</Tab>
+<Tab title="TypeScript">
+Add credentials via environment variables so both tracing packages and `@langfuse/client` pick them up.
 
 <EnvJS />
+</Tab>
+</Tabs>
 
 ## Initialize tracing
 

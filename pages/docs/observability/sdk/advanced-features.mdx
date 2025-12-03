@@ -10,6 +10,10 @@ Use these patterns to harden your Langfuse instrumentation, protect sensitive da
 
 ## Mask sensitive data
 
+Route spans to different Langfuse projects (multi-tenant, staging vs. prod, etc.) by registering separate exporters. Note the limitations below.
+
+Both SDKs expose helpers to attach scores to observations or entire traces, plus dataset utilities for repeatable experiments.
+
 <Tabs items={["Python", "TypeScript"]}>
 <Tab title="Python">
 Provide a `mask` function when instantiating the client to scrub inputs, outputs, and metadata before they leave your infrastructure.
@@ -53,7 +57,7 @@ sdk.start();
 
 <Tabs items={["Python", "TypeScript"]}>
 <Tab title="Python">
-The SDK uses Python's standard logging under the `"langfuse"` logger.
+The Langfuse SDK uses Python's standard `logging` module. The main logger is named `"langfuse"`. Enable detailed debug logging by either passing `debug=True` when instantiating `Langfuse`, setting the `LANGFUSE_DEBUG="True"` environment variable, or configuring the logger manually:
 
 ```python
 import logging
@@ -62,10 +66,10 @@ langfuse_logger = logging.getLogger("langfuse")
 langfuse_logger.setLevel(logging.DEBUG)
 ```
 
-Alternatively set `debug=True` or `LANGFUSE_DEBUG="True"` when instantiating the client.
+The default log level for `"langfuse"` is `logging.WARNING`.
 </Tab>
 <Tab title="TypeScript">
-Configure the global SDK logger or set `LANGFUSE_LOG_LEVEL`.
+Configure the global SDK logger (or set `LANGFUSE_LOG_LEVEL`) to control verbosity. Available log levels are `DEBUG`, `INFO`, `WARN`, and `ERROR`.
 
 ```ts /configureGlobalLogger/
 import { configureGlobalLogger, LogLevel } from "@langfuse/core";
@@ -83,7 +87,7 @@ export LANGFUSE_LOG_LEVEL="DEBUG"
 
 <Tabs items={["Python", "TypeScript"]}>
 <Tab title="Python">
-Sample traces directly on the client.
+Sample traces directly on the client via the `sample_rate` constructor argument or the `LANGFUSE_SAMPLE_RATE` environment variable. The value must be between `0.0` (drop everything) and `1.0` (send all traces). If a trace is not sampled, none of its observations or scores are exported.
 
 ```python
 from langfuse import Langfuse
@@ -92,7 +96,7 @@ langfuse = Langfuse(sample_rate=0.2)
 ```
 </Tab>
 <Tab title="TypeScript">
-Use OpenTelemetry samplers to control which traces reach Langfuse.
+Langfuse respects OpenTelemetry's sampling decisions. Configure a sampler on your OTEL `NodeSDK` to control which traces reach Langfuse and reduce noise/costs in high-volume workloads.
 
 ```ts filename="instrumentation.ts" /TraceIdRatioBasedSampler/
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -121,6 +125,8 @@ from langfuse import Langfuse
 langfuse = Langfuse(blocked_instrumentation_scopes=["sqlalchemy", "psycopg"])
 ```
 
+**How it works:** every OpenTelemetry span contains an instrumentation scope (visible in Langfuse under `metadata.scope.name`). Langfuse evaluates the scope against `blocked_instrumentation_scopes` when deciding whether to export. Be careful when filtering parents—child spans may become orphaned.
+
 <Callout type="warning">
 Filtering parent spans may result in orphaned children in Langfuse.
 </Callout>
@@ -142,6 +148,8 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
+Use allowlists when you only want to forward specific instrumentation scopes (e.g., Langfuse SDK + AI SDK).
+
 ```ts
 import { ShouldExportSpan } from "@langfuse/otel";
 
@@ -155,7 +163,13 @@ const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
 
 <Tabs items={["Python", "TypeScript"]}>
 <Tab title="Python">
-Create a dedicated OTEL `TracerProvider` for Langfuse spans.
+Create a dedicated OTEL `TracerProvider` for Langfuse spans when you need isolation from other observability backends (Datadog, Jaeger, Zipkin, etc.).
+
+**Benefits**
+
+- Prevent Langfuse spans from reaching other exporters.
+- Prevent third-party spans from appearing inside Langfuse.
+- Configure sampling/export policies independently.
 
 ```python
 from opentelemetry.sdk.trace import TracerProvider
@@ -213,6 +227,22 @@ def process_data_for_project_b(data, langfuse_public_key="pk-lf-project-b-..."):
 ```
 
 You can also route OpenAI or LangChain integrations by passing `langfuse_public_key` on each call.
+
+<Callout type="warning">
+Multi-project setups are experimental. Third-party OTEL spans (HTTP clients, databases, etc.) lack the Langfuse public key attribute and will therefore be exported to **all** projects.
+</Callout>
+
+**How it works**
+
+1. Langfuse spans carry a public-key attribute.
+2. You register one exporter per project.
+3. Each exporter filters spans by that attribute before sending them.
+
+**Important considerations**
+
+- Always provide the correct `langfuse_public_key` to the top-most observed function or integration call.
+- Missing the key routes traces to the default project or drops them.
+- Third-party spans without the attribute go to every project.
 </Tab>
 <Tab title="TypeScript">
 Register multiple span processors—one per Langfuse project—and optionally set filters per processor.
@@ -349,6 +379,12 @@ export function UserFeedbackComponent(props: { traceId: string }) {
 Never expose your Langfuse secret key in browser code. Use only the public key with `LangfuseWeb`.
 </Callout>
 
+<Callout type="info">
+When sending client-side scores, make sure the frontend has access to the relevant `traceId` (and optional `observationId`). Expose those IDs in your backend response or use deterministic IDs that exist in both environments.
+</Callout>
+
+Learn more in the [custom scores documentation](/docs/evaluation/evaluation-methods/custom-scores).
+
 ### Langfuse + Sentry
 
 ```ts filename="instrumentation.ts"
@@ -377,6 +413,10 @@ provider.register({
   contextManager: new Sentry.SentryContextManager(),
 });
 ```
+
+<Callout type="info">
+If you only use Sentry for error monitoring, omit `tracesSampleRate` and the `SentrySpanProcessor` so its sampling rules don't affect Langfuse traces.
+</Callout>
 </Tab>
 </Tabs>
 
