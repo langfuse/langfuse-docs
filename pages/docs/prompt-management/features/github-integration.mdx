@@ -6,7 +6,7 @@ description: Integrate Langfuse prompts with GitHub using webhooks for version c
 
 There are two methods to integrate Langfuse prompts with GitHub:
 
-- [**GitHub Actions Webhook**](#trigger-github-actions) - Trigger CI/CD workflows when prompts change. This does not require additional infrastructure.
+- [**GitHub Actions Webhook**](#trigger-github-actions) - Trigger CI/CD workflows when prompts change. Requires a webhook proxy to transform payloads.
 - [**Sync Langfuse Prompts to a repository**](#sync-langfuse-prompts-to-a-repository) - Store prompts in a specific file in your repository. This involves a webhook server that listens for prompt version changes and commits them to the repository.
 
 ---
@@ -19,15 +19,19 @@ Trigger GitHub Actions workflows when Langfuse prompts change using `repository_
 sequenceDiagram
     participant User as User/Team
     participant LF as Langfuse
+    participant Proxy as Webhook Proxy
     participant GH as GitHub API
     participant Actions as GitHub Actions
 
     User->>LF: Update prompt in Langfuse
-    LF->>GH: POST /repos/owner/repo/dispatches
+    LF->>Proxy: POST webhook payload
+    Proxy->>GH: POST /repos/owner/repo/dispatches (transformed)
     GH->>Actions: Trigger repository_dispatch event
     Actions->>Actions: Run CI workflow (tests, deploy, etc.)
     Note over User,Actions: Prompt changes trigger automated workflows
 ```
+
+> **Note:** GitHub's `repository_dispatch` API requires a specific payload format with `event_type` and `client_payload` fields. Since Langfuse webhooks send the prompt data directly, you need an intermediate webhook proxy to transform the payload into the correct format for GitHub.
 
 ### 1. Create GitHub Workflow
 
@@ -92,22 +96,151 @@ jobs:
 | Personal Access Token (classic) | `repo` scope (public repos) or `public_repo` scope (private repos) |
 | Fine-grained PAT or GitHub App | `read` and `write` to `actions` |
 
-### 3. Configure Langfuse Webhook for Actions
+### 3. Deploy Webhook Proxy
+
+Since GitHub's `repository_dispatch` API expects a payload with `event_type` and `client_payload` fields, you need an intermediate service to transform Langfuse webhook payloads. Below are examples using Cloudflare Workers (serverless) and a Python server.
+
+<Tabs items={["Cloudflare Workers", "Python Server"]}>
+<Tab>
+
+Deploy this Cloudflare Worker to transform Langfuse webhooks into GitHub `repository_dispatch` format:
+
+```javascript
+export default {
+  async fetch(request, env) {
+    if (request.method !== "POST") {
+      return new Response("Method not allowed", { status: 405 });
+    }
+
+    try {
+      const langfusePayload = await request.json();
+
+      // Transform to GitHub repository_dispatch format
+      const githubPayload = {
+        event_type: "langfuse-prompt-update",
+        client_payload: langfusePayload,
+      };
+
+      const response = await fetch(
+        `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/dispatches`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/vnd.github+json",
+            Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+            "Content-Type": "application/json",
+            "User-Agent": "Langfuse-Webhook-Proxy",
+          },
+          body: JSON.stringify(githubPayload),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        return new Response(`GitHub API error: ${error}`, {
+          status: response.status,
+        });
+      }
+
+      return new Response(JSON.stringify({ status: "dispatched" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      return new Response(`Error: ${error.message}`, { status: 500 });
+    }
+  },
+};
+```
+
+**Environment variables required:**
+- `GITHUB_OWNER`: Your GitHub username or organization
+- `GITHUB_REPO`: Your repository name
+- `GITHUB_TOKEN`: Your GitHub Personal Access Token
+
+</Tab>
+<Tab>
+
+Deploy this Python server as a webhook proxy:
+
+```python
+from fastapi import FastAPI, HTTPException, Request
+import httpx
+import os
+
+app = FastAPI(title="Langfuse GitHub Actions Proxy")
+
+GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
+GITHUB_OWNER = os.environ["GITHUB_OWNER"]
+GITHUB_REPO = os.environ["GITHUB_REPO"]
+
+@app.post("/webhook")
+async def proxy_webhook(request: Request):
+    """Transform Langfuse webhook to GitHub repository_dispatch format."""
+    langfuse_payload = await request.json()
+    
+    # Transform to GitHub repository_dispatch format
+    github_payload = {
+        "event_type": "langfuse-prompt-update",
+        "client_payload": langfuse_payload
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/dispatches",
+            headers={
+                "Accept": "application/vnd.github+json",
+                "Authorization": f"Bearer {GITHUB_TOKEN}",
+                "Content-Type": "application/json",
+                "User-Agent": "Langfuse-Webhook-Proxy"
+            },
+            json=github_payload
+        )
+        
+        if response.status_code not in (200, 204):
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"GitHub API error: {response.text}"
+            )
+    
+    return {"status": "dispatched"}
+
+@app.get("/health")
+async def health():
+    return {"healthy": True}
+```
+
+**Install dependencies:**
+
+```bash
+pip install fastapi uvicorn httpx
+```
+
+**Run the server:**
+
+```bash
+GITHUB_TOKEN=your_token GITHUB_OWNER=owner GITHUB_REPO=repo uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Deploy to Render, Fly.io, Railway, or any platform that supports Python web apps.
+
+</Tab>
+</Tabs>
+
+### 4. Configure Langfuse Webhook
 
 1. Go to **Prompts > Automations** in your Langfuse project
 2. Click **Create Webhook**
-3. Set endpoint URL: `https://api.github.com/repos/{owner}/{repo}/dispatches`
-4. Add headers:
-   - `Accept: application/vnd.github+json`
-   - `Authorization: Bearer {your_github_token}`
+3. Set endpoint URL to your webhook proxy:
+   - Cloudflare Workers: `https://your-worker.your-subdomain.workers.dev`
+   - Python Server: `https://your-server.example.com/webhook`
 
-**Important:** Store your GitHub token securely in the Authorization header. Langfuse encrypts webhook headers and stores them securely.
-
-### 4. Test GitHub Actions Integration
+### 5. Test GitHub Actions Integration
 
 1. **Update a prompt** in Langfuse with the `production` label
-2. **Check GitHub Actions** tab for triggered workflow
-3. **Verify** that both test and deploy jobs run successfully
+2. **Check your webhook proxy logs** to verify the request was received
+3. **Check GitHub Actions** tab for triggered workflow
+4. **Verify** that both test and deploy jobs run successfully
 
 ---
 
