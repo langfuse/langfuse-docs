@@ -2,7 +2,7 @@
 title: "OpenRouter Integration"
 sidebarTitle: OpenRouter
 logo: /images/integrations/openrouter_icon.svg
-description: "Learn how to integrate Langfuse with OpenRouter using the OpenAI SDK."
+description: "Learn how to integrate Langfuse with OpenRouter using Broadcast (no-code) or the OpenAI SDK."
 ---
 
 # OpenRouter Integration
@@ -15,7 +15,15 @@ In this guide, we'll show you how to integrate [Langfuse](/) with [OpenRouter](h
 
 Since OpenRouter uses the OpenAI API schema, we can utilize Langfuse's native integration with the OpenAI SDK, available in both [Python](/integrations/model-providers/openai-py) and [TypeScript](/integrations/model-providers/openai-js).
 
-## Get started
+## Integration Methods
+
+There are two ways to integrate Langfuse with OpenRouter:
+
+**Broadcast (No Code)**: OpenRouter's [Broadcast feature](https://openrouter.ai/docs/guides/features/broadcast/overview) automatically sends traces to Langfuse. Enable it in your [OpenRouter settings](https://openrouter.ai/settings) by connecting your Langfuse API keys. This works with any OpenRouter request and requires no code changes.
+
+**SDK Integration**: Use the Langfuse OpenAI SDK wrapper for advanced features like nested tracing, custom metadata, and full control over trace data. The rest of this guide covers the SDK integration method.
+
+## Get started with SDK Integration
 
 ```bash
 pip install langfuse openai
