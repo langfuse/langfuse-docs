@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { StaticImageData } from "next/image";
-import circlebackLight from "../home/img/circleback_light.png";
-import circlebackDark from "../home/img/circleback_dark.png";
+// import circlebackLight from "../home/img/circleback_light.png";
+// import circlebackDark from "../home/img/circleback_dark.png";
+import intuitLight from "../home/img/intuit_light.svg";
+import intuitDark from "../home/img/intuit_dark.svg";
 import samsaraLight from "../home/img/samsara_light.png";
 import samsaraDark from "../home/img/samsara_dark.png";
 import khanacademyLight from "../home/img/khanacademy_light.png";
@@ -21,88 +23,89 @@ import { cn } from "@/lib/utils";
 
 type CompanyLogo = {
   name: string;
-  lightImage: StaticImageData | string;
-  darkImage: StaticImageData | string;
+  darkModeImage: StaticImageData | string;
+  lightModeImage: StaticImageData | string;
   customerStoryPath?: string;
 };
 
 const companies: CompanyLogo[] = [
   {
     name: "Samsara",
-    lightImage: samsaraLight,
-    darkImage: samsaraDark,
+    darkModeImage: samsaraLight,
+    lightModeImage: samsaraDark,
   },
   {
     name: "Twilio",
-    lightImage: twilioLight,
-    darkImage: twilioDark,
+    darkModeImage: twilioLight,
+    lightModeImage: twilioDark,
   },
   {
     name: "SumUp",
-    lightImage: sumupLight,
-    darkImage: sumupDark,
-
+    darkModeImage: sumupLight,
+    lightModeImage: sumupDark,
     customerStoryPath: "/customers/sumup",
   },
   {
     name: "Khan Academy",
-    lightImage: khanacademyLight,
-    darkImage: khanacademyDark,
-
+    darkModeImage: khanacademyLight,
+    lightModeImage: khanacademyDark,
     customerStoryPath: "/customers/khan-academy",
   },
   {
     name: "Magic Patterns",
-    lightImage: magicPatternsLight,
-    darkImage: magicPatternsDark,
-
+    darkModeImage: magicPatternsLight,
+    lightModeImage: magicPatternsDark,
     customerStoryPath: "/customers/magic-patterns-ai-design-tools",
   },
   // {
   //   name: "Springer Nature",
-  //   lightImage: springernatureLight,
-  //   darkImage: springernatureDark,
+  //   darkModeImage: springernatureLight,
+  //   lightModeImage: springernatureDark,
   //   href: "https://www.springernature.com",
   // },
   {
     name: "Merck",
-    lightImage: merckLight,
-    darkImage: merckDark,
-
+    darkModeImage: merckLight,
+    lightModeImage: merckDark,
     customerStoryPath: "/customers/merckgroup",
   },
   {
     name: "Telus",
-    lightImage: telusLight,
-    darkImage: telusDark,
+    darkModeImage: telusLight,
+    lightModeImage: telusDark,
   },
   {
-    name: "Circleback",
-    lightImage: circlebackLight,
-    darkImage: circlebackDark,
+    name: "Intuit",
+    darkModeImage: intuitDark,
+    lightModeImage: intuitLight,
   },
+  // {
+  //   name: "Circleback",
+  //   darkModeImage: circlebackLight,
+  //   lightModeImage: circlebackDark,
+  // },
 ];
 
 // Reusable component for company logos with light/dark theme support
 const LogoImage = ({
-  lightImage,
-  darkImage,
+  darkModeImage,
+  lightModeImage,
   name,
 }: {
-  lightImage: StaticImageData | string;
-  darkImage: StaticImageData | string;
+  darkModeImage: StaticImageData | string;
+  lightModeImage: StaticImageData | string;
   name: string;
 }) => (
   <>
     <Image
-      src={lightImage}
+      src={darkModeImage}
       alt={`${name} logo`}
       className="object-contain max-h-8 max-w-full hidden dark:block"
       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
       priority={false}
     />
     <Image
-      src={darkImage}
+      src={lightModeImage}
       alt={`${name} logo`}
       className="object-contain max-h-8 max-w-full dark:hidden"
       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
@@ -169,8 +172,8 @@ export const EnterpriseLogoGrid = ({
         const cellContent = (
           <>
             <LogoImage
-              lightImage={company.lightImage}
-              darkImage={company.darkImage}
+              darkModeImage={company.darkModeImage}
+              lightModeImage={company.lightModeImage}
               name={company.name}
             />
             {company.customerStoryPath && <CustomerStoryBadge small={small} />}
