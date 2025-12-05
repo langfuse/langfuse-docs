@@ -84,6 +84,42 @@ The agent will use `updatePromptLabels` to update the label assignment.
 
 The agent will use `createChatPrompt` to create a new version with enhanced content after having fetched the prompt with `getPrompt`.
 
+## Move Hardcoded Prompts to Langfuse
+
+import { CopyMoveToPromptManagementPrompt } from "@/components/agentic-onboarding/CopyMoveToPromptManagementPrompt";
+
+Use your AI coding agent (Cursor, Claude Code, etc.) to automatically identify hardcoded prompts in your codebase and migrate them to Langfuse Prompt Management. This workflow:
+
+1. **Discovers** all hardcoded prompts, system instructions, and templates in your code
+2. **Creates** the prompts in Langfuse using the MCP server
+3. **Updates** your code to fetch prompts from Langfuse at runtime
+
+### Prerequisites
+
+<Steps>
+
+### Configure the Langfuse MCP Server
+
+Follow the [setup instructions](/docs/api-and-data-platform/features/mcp-server#set-up) to connect your AI editor to the Langfuse MCP server with your project API keys.
+
+### Run the Migration Agent
+
+Copy and execute the following prompt in your editor's agent mode (e.g., Cursor Agent, Claude Code):
+
+<CopyMoveToPromptManagementPrompt />
+
+</Steps>
+
+### Why Migrate Prompts?
+
+Moving prompts from code to Langfuse Prompt Management provides several benefits:
+
+- **Iterate without deployments**: Update prompts in the Langfuse UI without code changes
+- **Version control**: Track prompt history with automatic versioning and commit messages
+- **A/B testing**: Use labels to test different prompt versions (staging vs production)
+- **Collaboration**: Non-technical team members can view and suggest prompt improvements
+- **Analytics**: Link prompts to traces to measure performance across versions
+
 ## Feedback
 
 Share your experience with the Langfuse MCP server in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605). We'd love to hear your feedback and use cases.
