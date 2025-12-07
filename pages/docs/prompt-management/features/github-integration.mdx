@@ -6,7 +6,7 @@ description: Integrate Langfuse prompts with GitHub using webhooks for version c
 
 There are two methods to integrate Langfuse prompts with GitHub:
 
-- [**GitHub Actions Webhook**](#trigger-github-actions) - Trigger CI/CD workflows when prompts change. This does not require additional infrastructure.
+- [**GitHub Repository Dispatch**](#trigger-github-actions) - Trigger CI/CD workflows when prompts change. This does not require additional infrastructure.
 - [**Sync Langfuse Prompts to a repository**](#sync-langfuse-prompts-to-a-repository) - Store prompts in a specific file in your repository. This involves a webhook server that listens for prompt version changes and commits them to the repository.
 
 ---
@@ -92,16 +92,15 @@ jobs:
 | Personal Access Token (classic) | `repo` scope (public repos) or `public_repo` scope (private repos) |
 | Fine-grained PAT or GitHub App | `read` and `write` to `actions` |
 
-### 3. Configure Langfuse Webhook for Actions
+### 3. Configure GitHub Action in Langfuse
 
-1. Go to **Prompts > Automations** in your Langfuse project
-2. Click **Create Webhook**
-3. Set endpoint URL: `https://api.github.com/repos/{owner}/{repo}/dispatches`
-4. Add headers:
-   - `Accept: application/vnd.github+json`
-   - `Authorization: Bearer {your_github_token}`
-
-**Important:** Store your GitHub token securely in the Authorization header. Langfuse encrypts webhook headers and stores them securely.
+1. Go to **Prompts > Automations** in your Langfuse project.
+2. Click **Create Automation**.
+3. Select **GitHub Repository Dispatch**.
+4. Configure the automation:
+   - **Dispatch URL**: `https://api.github.com/repos/{owner}/{repo}/dispatches` (replace `{owner}` and `{repo}` with your values)
+   - **Event Type**: `langfuse-prompt-update` (must match the type in your GitHub workflow)
+   - **GitHub Token**: Enter your GitHub Personal Access Token. It will be stored securely.
 
 ### 4. Test GitHub Actions Integration
 
