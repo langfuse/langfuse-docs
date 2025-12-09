@@ -3,18 +3,31 @@ title: "Building Langfuse's MCP Server: Code Reuse and Developer Experience"
 date: "2025-12-09"
 description: How we built a production MCP server by reusing existing API logic, creating better abstractions, and learning what matters for LLM tool usage.
 author: Michael
-tags:
-  - engineering
-  - mcp
-  - developer-tools
+ogImage: /images/blog/2025-12-09-building-langfuse-mcp-server/langfuse-mcp-servercl.png
+tags: engineering
 ---
 
-The Model Context Protocol (MCP) enables AI assistants to interact directly with external tools and data sources. We built an MCP server for Langfuse to let developers manage prompts from their AI coding assistants without context switching. When adding this support, we reused our existing public API business logic rather than building new infrastructure. 
+import { BlogHeader } from "@/components/blog/BlogHeader";
 
+<BlogHeader
+  title="Building Langfuse's MCP Server: Code Reuse and Developer Experience"
+  description="How we built a production MCP server by reusing existing API logic, creating better abstractions, and learning what matters for LLM tool usage."
+  authors={["Michael"]}
+/>
+
+The Model Context Protocol (MCP) enables AI assistants to interact directly with external tools and data sources. We built an MCP server for Langfuse to let developers manage prompts from their AI coding assistants without context switching. 
+
+This post covers the technical decisions and implementation details of our MCP server.
+
+## Scoping: Starting with Prompt Management
+
+For our initial release, we scoped the MCP server to prompt management through five tools: get, list, create text/chat, and update labels. This enables AI assistants to manage prompts in your Langfuse projects directly from their coding environment.
+
+We're plan to extend this pattern to traces, observations, datasets, evaluations, and more. Each new feature follows the same approach: reuse existing business logic, register tools through the feature module system, ship.
 
 ## Architecture: Same Logic, Different Entry Point
 
-As a small team, we prioritize maintainability and consistency across all surfaces. To launch with an initial MVP, we focused on prompt management where we already had five REST endpoints handling authentication, validation, database access, caching, and rate limiting. Rather than duplicating this logic for MCP, we designed MCP tools to call the same business logic functions. This post covers the technical decisions and implementation details.
+As a small team, we prioritize maintainability and consistency across all surfaces. To launch with an initial MVP, we focused on prompt management where we already had five REST endpoints handling authentication, validation, database access, caching, and rate limiting. Rather than duplicating this logic for MCP, we designed MCP tools to call the same business logic functions.
 
 Here's what this looks like in practice. Our REST API endpoint for fetching prompts:
 
@@ -136,24 +149,20 @@ Adding new tools is straightforward: define schemas, write handler, register.
 
 Tool descriptions require balancing brevity with clarity. LLMs use them to decide when and how to use tools. We had to experiment and iterate to find the right balance.
 
-**Too brief:** "Get a prompt" → LLM lacks context about labels, versions, or defaults
-
-**Too verbose:** "This tool retrieves prompts from the Langfuse database. Prompts are templates used in LLM applications. They can have multiple versions identified by numeric version numbers or semantic labels like production and staging. The prompt management system supports..." → Wastes context window, reduces comprehension
+| Style | Example | Issue |
+| --- | --- | --- |
+| Too brief | "Get a prompt" | LLM lacks context about labels, versions, or defaults |
+| Too verbose | "This tool retrieves prompts from the Langfuse database. Prompts are templates used in LLM applications. They can have multiple versions identified by numeric version numbers or semantic labels like production and staging. The prompt management system supports..." | Wastes context window, reduces comprehension |
 
 Clear purpose, key options, important constraints, and examples work best. We test descriptions with LLMs and refine based on observed behavior. Does it select the right tool? Does it pass correct parameters? Do error messages enable recovery?
 
 For example, here's how the `getPrompt` description evolved:
 
-**First iteration:** "Fetch a prompt by name"
-- LLM didn't know versions existed, always requested prompts without specifying which version
-
-**Second iteration:** "Fetch a prompt by name. Supports version and label parameters for retrieving specific versions."
-- LLM sometimes tried using both version and label simultaneously, causing errors
-
-**Current version:** "Fetch a specific prompt by name with optional label or version parameter. Cannot specify both label and version - they are mutually exclusive."
-- LLM correctly handles the mutual exclusivity constraint
-
-Including recovery hints in error messages reduces iteration cycles when errors occur.
+| Iteration | Description | Observed behavior |
+| --- | --- | --- |
+| First | Fetch a prompt by name | LLM didn't know versions existed, always requested prompts without specifying which version |
+| Second | Fetch a prompt by name. Supports version and label parameters for retrieving specific versions. | LLM sometimes tried using both version and label simultaneously, causing errors |
+| Current | Fetch a specific prompt by name with optional label or version parameter. Cannot specify both label and version - they are mutually exclusive. | LLM correctly handles the mutual exclusivity constraint |
 
 ## Authentication: Choosing BasicAuth
 
@@ -273,12 +282,6 @@ A 2-second REST API endpoint and a 30-minute open SSE connection appear identica
 We created a dedicated monitoring group for MCP endpoints with separate dashboards and alerting thresholds. This prevents long-tail SSE connections from affecting REST API performance measurements.
 
 We also instrument key operations with OpenTelemetry spans (`mcp.prompts.get`, `mcp.prompts.create_text`) for detailed observability.
-
-## What's Next
-
-The initial release focuses on prompt management through five tools (get, list, create text/chat, update labels). This enables AI assistants to manage prompts in your Langfuse projects.
-
-We're extending this pattern to traces, observations, datasets, evaluations, and more. Each new feature follows the same approach: reuse existing business logic, register tools through the feature module system, ship. Our streaming architecture for trace data will enable richer read operations across high-volume datasets.
 
 ## Key Takeaways
 
