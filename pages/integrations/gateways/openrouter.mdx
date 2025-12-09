@@ -36,7 +36,7 @@ For more information about setting up your Langfuse API keys or available option
 ## 2. SDK Integration:
  Use the Langfuse OpenAI SDK wrapper for advanced features like nested tracing, custom metadata, and full control over trace data. The rest of this guide covers the SDK integration method.
 
-## Get started with SDK Integration
+### Get started with SDK Integration
 
 ```bash
 pip install langfuse openai
@@ -57,7 +57,7 @@ LANGFUSE_BASE_URL="https://cloud.langfuse.com"
 os.environ["OPENAI_API_KEY"] = "<YOUR_OPENROUTER_API_KEY>"
 ```
 
-## Example 1: Simple LLM Call
+### Example 1: Simple LLM Call
 
 Since OpenRouter provides an OpenAI-compatible API, we can use the [Langfuse OpenAI SDK wrapper](/integrations/model-providers/openai-py) to automatically log OpenRouter calls as generations in Langfuse.
 
@@ -94,7 +94,7 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-## Example 2: Nested LLM Calls
+### Example 2: Nested LLM Calls
 
 By using the `@observe()` decorator, we can capture execution details of any Python function, including nested LLM calls, inputs, outputs, and execution times. This provides in-depth observability with minimal code changes.
 
@@ -159,7 +159,7 @@ analyze_text(text_to_analyze)
 
 _[Public link to example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f0f78d8887011612a3c25bdcb8fe75fd?timestamp=2025-09-04T09:39:47.697Z&display=details)_
 
-## Cost Tracking
+### Cost Tracking
 
 Langfuse [token and cost tracking](/docs/observability/features/token-and-cost-tracking) can directly capture the OpenRouter cost instead of calculating it. This will increase the accuracy of the cost tracking, especially for less popular models.
 
