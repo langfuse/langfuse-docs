@@ -21,13 +21,23 @@ This post covers the technical decisions and implementation details of our MCP s
 
 ## Scoping: Starting with Prompt Management
 
-For our initial release, we scoped the MCP server to prompt management through five tools: get, list, create text/chat, and update labels. This enables AI assistants to manage prompts in your Langfuse projects directly from their coding environment.
+For our initial release, we scoped the MCP server to prompt management through five tools: 
+
+1. get
+2. list
+3. create text
+4. create chat 
+5. update labels
+
+This enables AI assistants to manage prompts in your Langfuse projects directly from their coding environment.
 
 We're plan to extend this pattern to traces, observations, datasets, evaluations, and more. Each new feature follows the same approach: reuse existing business logic, register tools through the feature module system, ship.
 
 ## Architecture: Same Logic, Different Entry Point
 
-As a small team, we prioritize maintainability and consistency across all surfaces. To launch with an initial MVP, we focused on prompt management where we already had five REST endpoints handling authentication, validation, database access, caching, and rate limiting. Rather than duplicating this logic for MCP, we designed MCP tools to call the same business logic functions.
+As a small team, we prioritize maintainability and consistency across all surfaces. 
+
+To launch with an initial MVP, we focused on prompt management where we already had five REST endpoints handling authentication, validation, database access, caching, and rate limiting. Rather than duplicating this logic for MCP, we designed MCP tools to call the same business logic functions.
 
 Here's what this looks like in practice. Our REST API endpoint for fetching prompts:
 
