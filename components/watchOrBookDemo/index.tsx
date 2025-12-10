@@ -2,7 +2,7 @@
 
 import { Background } from "@/components/Background";
 import { Header } from "@/components/Header";
-import { ScheduleDemo } from "@/components/CalComScheduleDemo";
+import { ContactSalesForm } from "@/components/ContactSalesForm";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
 import Link from "next/link";
@@ -213,10 +213,10 @@ function DiscoverYourselfContent() {
   );
 }
 
-function CalendarSection() {
+function ContactFormSection() {
   return (
-    <div className="min-h-[300px] overflow-y-auto max-w-sm mx-auto rounded-lg border overflow-hidden">
-      <ScheduleDemo />
+    <div className="max-w-md mx-auto rounded-lg border p-6 bg-card">
+      <ContactSalesForm />
     </div>
   );
 }
@@ -254,7 +254,7 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
 
           {/* Right Column: Calendar or Walkthroughs */}
           <div className={isDiscoverOpen ? "flex-1 md:flex-[0.6]" : "flex-1"}>
-            {!isDiscoverOpen ? <CalendarSection /> : <WatchWalkthroughs />}
+            {!isDiscoverOpen ? <ContactFormSection /> : <WatchWalkthroughs />}
           </div>
         </div>
       </div>
