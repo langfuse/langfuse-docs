@@ -1,5 +1,17 @@
 import * as z from "zod/v3";
 
+/**
+ * Sanitizes a string for safe use in email headers by removing
+ * newlines, carriage returns, and other control characters that
+ * could be used for header injection attacks.
+ */
+function sanitizeForEmailHeader(input: string): string {
+  return input
+    .replace(/[\r\n\t]/g, " ") // Replace newlines and tabs with spaces
+    .replace(/[^\x20-\x7E\u00A0-\uFFFF]/g, "") // Remove control characters
+    .trim();
+}
+
 export const DEPLOYMENT_OPTIONS = [
   { value: "not-decided", label: "Not decided yet" },
   { value: "self-hosted", label: "Self-Hosted" },
@@ -86,17 +98,26 @@ export const FORM_FIELDS = {
 } as const;
 
 export const contactFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  company: z.string().min(1, "Company/Project is required"),
-  message: z.string().min(1, "Please tell us what you'd like to learn"),
-  usage: z.string().min(1, "Please describe your Langfuse usage"),
-  deployment: z.string().min(1, "Please select a deployment option"),
-  userCount: z.string().min(1, "Please provide expected user count"),
+  name: z.string().min(1, "Name is required").max(200),
+  email: z.string().email("Invalid email address").max(254),
+  // Company is sanitized because it's used in the email subject header
+  company: z
+    .string()
+    .min(1, "Company/Project is required")
+    .max(200)
+    .transform(sanitizeForEmailHeader),
+  message: z
+    .string()
+    .min(1, "Please tell us what you'd like to learn")
+    .max(5000),
+  usage: z.string().min(1, "Please describe your Langfuse usage").max(2000),
+  deployment: z.string().min(1, "Please select a deployment option").max(100),
+  userCount: z.string().min(1, "Please provide expected user count").max(100),
   enterpriseRequirements: z
-    .array(z.string())
-    .min(1, "Please select at least one option"),
-  additionalNotes: z.string().optional(),
+    .array(z.string().max(100))
+    .min(1, "Please select at least one option")
+    .max(10),
+  additionalNotes: z.string().max(5000).optional(),
 });
 
 export type ContactFormData = z.infer<typeof contactFormSchema>;
