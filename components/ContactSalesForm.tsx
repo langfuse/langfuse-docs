@@ -83,7 +83,7 @@ export function ContactSalesForm() {
   if (isSuccess) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center gap-4">
-        <CheckCircle2 className="h-12 w-12 text-green-500" />
+        <CheckCircle2 className="h-12 w-12 text-muted-green" />
         <h3 className="text-xl font-semibold">Thank you for reaching out!</h3>
         <p className="text-muted-foreground">
           We&apos;ve sent a confirmation to your email. Our team will get back
