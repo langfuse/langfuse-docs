@@ -202,13 +202,6 @@ LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED=true
 - **Availability**: Your masking service should be highly available, especially with fail-closed mode enabled.
 - **Colocation**: Deploy your masking service close to your Langfuse deployment to minimize network latency.
 
-### Security Recommendations
-
-- **Network Security**: Deploy your masking callback within the same VPC or private network as Langfuse.
-- **Authentication**: Consider adding authentication to your callback endpoint (e.g., via a shared secret in a custom header).
-- **HTTPS**: Use HTTPS for the callback URL in production environments.
-- **Logging**: Implement logging in your masking service for auditability, but be careful not to log sensitive data.
-
 ### Troubleshooting
 
 - Events are being dropped unexpectedly
