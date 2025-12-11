@@ -211,22 +211,17 @@ LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED=true
 
 ### Troubleshooting
 
-#### Events are being dropped unexpectedly
-
-1. Check that your masking service is responding within the configured timeout.
-2. Verify the response schema matches the input schema exactly.
-3. Review Langfuse Web container logs for warning messages.
-4. Temporarily set `LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED=false` to diagnose issues.
-
-#### High latency on trace ingestion
-
-1. Monitor your masking service response times.
-2. Consider increasing `LANGFUSE_INGESTION_MASKING_CALLBACK_TIMEOUT_MS` if your masking logic requires more time.
-3. Optimize your masking logic or add caching where appropriate.
-4. Ensure network latency between Langfuse and your masking service is minimal.
-
-#### Masking not being applied
-
-1. Verify `LANGFUSE_INGESTION_MASKING_CALLBACK_URL` is correctly set on the Langfuse Web container.
-2. Check that your masking service is reachable from the Langfuse Web container.
-3. Ensure your masking logic is correctly modifying the data and returning it.
+- Events are being dropped unexpectedly
+  1. Check that your masking service is responding within the configured timeout.
+  2. Verify the response schema matches the input schema exactly.
+  3. Review Langfuse Web container logs for warning messages.
+  4. Temporarily set `LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED=false` to diagnose issues.
+- High latency on trace ingestion
+  1. Monitor your masking service response times.
+  2. Consider increasing `LANGFUSE_INGESTION_MASKING_CALLBACK_TIMEOUT_MS` if your masking logic requires more time.
+  3. Optimize your masking logic or add caching where appropriate.
+  4. Ensure network latency between Langfuse and your masking service is minimal.
+- Masking not being applied
+  1. Verify `LANGFUSE_INGESTION_MASKING_CALLBACK_URL` is correctly set on the Langfuse Web container.
+  2. Check that your masking service is reachable from the Langfuse Web container.
+  3. Ensure your masking logic is correctly modifying the data and returning it.
