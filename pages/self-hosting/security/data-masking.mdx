@@ -128,6 +128,15 @@ Error handling behavior is configured via `LANGFUSE_INGESTION_MASKING_CALLBACK_F
 | Invalid response schema | Event dropped, warning logged | Event processed unmasked, warning logged |
 | Network error           | Event dropped, warning logged | Event processed unmasked, warning logged |
 
+### Limitations
+
+Server-side ingestion masking only applies to events ingested via the [OpenTelemetry endpoint](/integrations/native/opentelemetry) (`/api/public/otel`). This includes:
+
+- **Python SDK v3+** and **TypeScript SDK v4+** (OTEL-native)
+- Third-party OpenTelemetry instrumentation libraries (OpenLLMetry, OpenLIT, etc.)
+
+Events ingested via the legacy `/api/public/ingestion` endpoint are not processed through the masking callback.
+
 ### Example Implementation
 
 Here's an example masking callback service in Python using FastAPI:
