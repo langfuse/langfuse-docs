@@ -82,56 +82,10 @@ Prompts support three ways to insert dynamic content at runtime:
 
 | Type | Use Case |
 |------|----------|
-| **Variables** | Insert dynamic text into messages |
-| **Prompt References** | Reuse prompts across other prompts, avoid duplicating common instructions |
-| **Message Placeholders** | Insert arrays of messages (e.g., chat history) |
+| [Variables](/docs/prompt-management/features/variables) | Insert dynamic text into messages |
+| [Prompt References](/docs/prompt-management/features/composability) | Reuse prompts across other prompts, avoid duplicating common instructions |
+| [Message Placeholders](/docs/prompt-management/features/message-placeholders) | Insert arrays of messages (e.g., chat history) |
 
-#### Variables
-
-These are placeholders for dynamic strings.
-
-All prompts support variables using the `{{variable}}` syntax. When you fetch a prompt from Langfuse and compile it, you provide values for these variables that get inserted into the prompt template.
-
-```python
-# Example: compiling a prompt with variables
-prompt = langfuse.get_prompt("movie-critic")
-compiled = prompt.compile(criticLevel="expert", movie="Dune 2")
-# -> "As an expert movie critic, do you like Dune 2?"
-```
-
-#### Prompt References
-
-You can [compose prompts](/docs/prompt-management/features/composability) by referencing other prompts within a prompt using a special tag format. This allows you to create reusable prompt components.
-
-```bash
-# Reference another prompt by name and version
-@@@langfusePrompt:name=SystemInstructions|version=1@@@
-
-# Or use a label for dynamic resolution
-@@@langfusePrompt:name=SystemInstructions|label=production@@@
-```
-
-This enables you to maintain common instructions, examples, or context in a single place and update dependent prompts automatically when base prompts change.
-
-
-#### Message Placeholders
-
-[Message placeholders](/docs/prompt-management/features/message-placeholders) are useful when you need to insert complete arrays of messages at specific positions, such as chat history or conversation context.
-
-When compiling, you provide an array of messages for the placeholder:
-
-```python
-compiled = prompt.compile(
-  chat_history=[
-    {"role": "user", "content": "I love Ron Fricke movies"},
-    {"role": "assistant", "content": "Great taste! Have you seen Baraka?"}
-  ]
-)
-```
-
-<Callout type="info">
-**Chat prompts only:** Message placeholders can only be used in chat prompts, not text prompts.
-</Callout>
 
 
 ## Versioning and Labels

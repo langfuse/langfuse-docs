@@ -13,6 +13,7 @@ export default {
     type: "separator",
     title: <MenuSubSeparator>Advanced</MenuSubSeparator>,
   },
+  variables: {},
   composability: {},
   "message-placeholders": {},
   "evaluate-prompts": {
