@@ -7,9 +7,6 @@ description: Manage and version your prompts in Langfuse (open source). When ret
 
 Prompt management is a systematic approach to storing, versioning, and retrieving prompts for your LLM application. Instead of hardcoding prompts in your application code, you manage them centrally in Langfuse.
 
-The key benefit is decoupling: you can edit prompts without redeploying your application. This means product managers and domain experts can iterate on prompts through the UI, test changes in the playground, and deploy updates instantly—without involving developers or going through a deployment cycle.
-
-**Langfuse Prompt Management adds no latency to your application**. Prompts are cached client-side by the SDK, so retrieving them is as fast as reading from memory. See [the caching docs page](/docs/prompt-management/features/caching) for more details.
 
 <Frame fullWidth>
   <img src="/images/docs/prompt-management.png" alt="Prompt Management in Langfuse showing version control, playground, and deployment labels" />
@@ -20,6 +17,34 @@ The key benefit is decoupling: you can edit prompts without redeploying your app
 [**Watch this walkthrough**](/watch-demo?tab=prompt) of Langfuse Prompt Management and how to integrate it with your application.
 
 </Callout>
+
+### Decouple Prompt Updates from Code Deployment
+
+In most LLM applications, prompt iteration and code deployment are managed by different people. Product managers and domain experts iterate on prompts, while engineers manage deployments.
+
+With your prompts in code, when a PM wants to improve a chatbot's greeting, they need to
+
+_ask engineering → wait for code review → wait for deployment → test in production_
+
+**A simple text change takes hours or days, disrupting the workflow of different people.**
+
+When your prompts are in Langfuse, the PM updates the prompt in Langfuse UI. Your application fetches the latest version automatically. 
+
+This **separation of concerns** enables **deploying updates instantly, without involving engineering or going through a deployment cycle**.
+
+### Link prompts to traces
+
+Connect your prompts to traces, experiments, and evaluations:
+- See which prompt version was used for each trace
+- Compare performance across prompt versions
+- Run experiments to A/B test different prompt variations
+- Track cost and quality metrics by prompt version
+
+### No latency, no availability risk
+
+**Langfuse Prompt Management adds no latency to your application**. Prompts are cached client-side by the SDK, so retrieving them is as fast as reading from memory. See [the caching docs page](/docs/prompt-management/features/caching) for more details.
+
+
 
 ## Getting started
 

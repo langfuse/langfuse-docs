@@ -1,60 +1,47 @@
-# Langfuse Prompts Data Model
+---
+title: Core Concepts
+sidebarTitle: Concepts
+description: Core concepts of Langfuse Prompt Management including prompt types, versioning, labels, and configuration.
+---
 
-## Prompt Object
+# Core Concepts
 
-```json filename="Example prompt in Langfuse with custom config"
-{
-  "name": "movie-critic",
-  "type": "text",
-  "prompt": "As a {{criticLevel}} movie critic, do you like {{movie}}?",
-  "config": {
-    "model": "gpt-4o",
-    "temperature": 0.5,
-    "supported_languages": ["en", "fr"]
-  },
-  "version": 1,
-  "labels": ["production", "staging", "latest"],
-  "tags": ["movies"]
-}
-```
+This page discusses prompt management concepts and best practices. If you haven't already, check out the [overview](/docs/prompt-management/overview) page on why it's valuable for observability of your application.
 
-- `name`: Unique name of the prompt within a Langfuse project.
-- `type`: The [type](#type) of the prompt content (`text` or `chat`). Default is `text`.
-- `prompt`: The text template with variables (e.g. `This is a prompt with a {{variable}}`). For chat prompts, this is a list of chat messages each with `role` and `content` but can also contain [placeholders](#message-placeholders).
-- `config`: Optional JSON object to store any parameters (e.g. model parameters or model tools).
-- `version`: Integer to indicate the version of the prompt. The version is automatically incremented when creating a new prompt version.
-- `labels`: [Labels](#versioning-and-labels) that can be used to fetch specific prompt versions in the SDKs.
-  - When using a prompt without specifying a label, Langfuse will serve the version with the `production` label.
-  - `latest` points to the most recently created version.
-  - You can create any additional labels, e.g. for different environments (`staging`, `production`) or tenants (`tenant-1`, `tenant-2`).
-- `tags`: Use tags to categorize prompts, e.g. to filter them in the UI or SDKs. All versions of a prompt share the same tags.
+Ready to start? Check out the [Get Started guide](/docs/prompt-management/get-started) to create your first prompt.
 
-## Chat vs Text prompts [#type]
 
-Langfuse supports two types of prompts: **text** and **chat**. The key difference is in how the content is structured:
 
-### Text Prompts
+## The Prompt Object
 
-Text prompts contain a single string with optional variables. They are ideal for simple completions or when using models that expect a single text input.
+Langfuse considers a prompt to be a combination of both the instructions for the LLM (this can be a single string or an array of messages) and, optionally, [additional configuration](/docs/prompt-management/features/config) that influences the behavior.
+
+The prompt object also has a couple of attributes for managing different versions, variants, and deployments. This page will guide you through the most important principles of how to use prompts productively.
+
+For detailed information about all prompt object fields and methods, see the [SDK reference documentation](https://api.reference.langfuse.com).
+
+
+
+### Chat vs Text Prompts
+
+Langfuse supports two prompt types. The `type` field determines the format and cannot be changed after creation.
+
+<div className="grid grid-cols-1 md:grid-cols-2 mt-6 gap-4">
+
+<div className="[&_pre]:break-words [&_pre]:whitespace-pre-wrap">
 
 ```json filename="Text prompt example"
 {
   "name": "movie-critic",
   "type": "text",
-  "prompt": "As a {{criticLevel}} movie critic, do you like {{movie}}?",
+  "prompt": "As a movie critic, do you like Dune 2?",
   "version": 1
 }
 ```
 
-When compiled, text prompts return a single string:
+</div>
 
-```python
-# Returns: "As an expert movie critic, do you like Dune 2?"
-```
-
-### Chat Prompts
-
-Chat prompts contain an array of messages, each with a `role` and `content`. They are designed for conversational models and multi-turn interactions.
+<div className="[&_pre]:break-words [&_pre]:whitespace-pre-wrap">
 
 ```json filename="Chat prompt example"
 {
@@ -63,31 +50,102 @@ Chat prompts contain an array of messages, each with a `role` and `content`. The
   "prompt": [
     {
       "role": "system",
-      "content": "You are a {{criticLevel}} movie critic"
+      "content": "You are a movie critic."
     },
     {
       "role": "user",
-      "content": "Do you like {{movie}}?"
+      "content": "Do you like Dune 2?"
     }
   ],
   "version": 1
 }
 ```
 
-When compiled, chat prompts return an array of message objects:
+</div>
+
+</div>
+
+**Text prompts** are single strings, ideal for simple use cases or when you only need a system message.
+
+**Chat prompts** are arrays of messages with specific roles (system, user, assistant), useful when you want to manage complete conversation structures, include example exchanges, or handle chat history.
+
+<Callout type="info">
+**When to use chat prompts:** Most applications start with a text prompt. As you build more complex logic that requires managing multiple messages, role-based structures, or chat history, it makes sense to switch to chat prompts. This allows you to manage the complete conversation structure in your prompt management system.
+</Callout>
+
+
+### Dynamic rendering of prompts
+
+You can add variables to your prompts that can be dynamically filled out at runtime. There are different types of variables you can use, explained below.
+
+Prompts support three ways to insert dynamic content at runtime:
+
+| Type | Use Case |
+|------|----------|
+| **Variables** | Insert dynamic text into messages |
+| **Prompt References** | Reuse prompts across other prompts, avoid duplicating common instructions |
+| **Message Placeholders** | Insert arrays of messages (e.g., chat history) |
+
+#### Variables
+
+These are placeholders for dynamic strings.
+
+All prompts support variables using the `{{variable}}` syntax. When you fetch a prompt from Langfuse and compile it, you provide values for these variables that get inserted into the prompt template.
 
 ```python
-# Returns: [
-#   {"role": "system", "content": "You are an expert movie critic"},
-#   {"role": "user", "content": "Do you like Dune 2?"}
-# ]
+# Example: compiling a prompt with variables
+prompt = langfuse.get_prompt("movie-critic")
+compiled = prompt.compile(criticLevel="expert", movie="Dune 2")
+# -> "As an expert movie critic, do you like Dune 2?"
 ```
 
-Both prompt types support variable substitution using `{{variable}}` syntax and can include custom configuration parameters.
+#### Prompt References
 
-## Versioning and Labels [#versioning-and-labels]
+You can [compose prompts](/docs/prompt-management/features/composability) by referencing other prompts within a prompt using a special tag format. This allows you to create reusable prompt components.
 
-Langfuse prompt [versioning](/docs/prompt-management/features/prompt-version-control) automatically creates incremental versions (1, 2, 3...) each time you update a prompt with the same name, while labels act as pointers to specific versions for deployment management. The `production` label serves as the default version returned by SDKs when no specific label is requested, `latest` automatically points to the most recently created version, and you can create custom labels (like `staging`, `tenant-1`, or `prod-a`) to manage different environments, tenants, or A/B testing scenarios - allowing you to safely deploy, test, and rollback prompts by simply reassigning labels rather than changing code.
+```bash
+# Reference another prompt by name and version
+@@@langfusePrompt:name=SystemInstructions|version=1@@@
+
+# Or use a label for dynamic resolution
+@@@langfusePrompt:name=SystemInstructions|label=production@@@
+```
+
+This enables you to maintain common instructions, examples, or context in a single place and update dependent prompts automatically when base prompts change.
+
+
+#### Message Placeholders
+
+[Message placeholders](/docs/prompt-management/features/message-placeholders) are useful when you need to insert complete arrays of messages at specific positions, such as chat history or conversation context.
+
+When compiling, you provide an array of messages for the placeholder:
+
+```python
+compiled = prompt.compile(
+  chat_history=[
+    {"role": "user", "content": "I love Ron Fricke movies"},
+    {"role": "assistant", "content": "Great taste! Have you seen Baraka?"}
+  ]
+)
+```
+
+<Callout type="info">
+**Chat prompts only:** Message placeholders can only be used in chat prompts, not text prompts.
+</Callout>
+
+
+## Versioning and Labels
+
+Understanding how versions and labels work together is essential for managing prompts in production. They serve different but complementary purposes.
+
+**Versions** provide an immutable history of every prompt change. Each update creates a new version (1, 2, 3...).
+
+**Labels** are pointers to specific versions. Your code would typically point to labels. Common labels include:
+- `production` - Default label, used by production applications
+- `latest` - Always points to the newest version
+- Custom labels - Create labels for staging, testing, tenants, or A/B tests
+
+Learn more about [versioning](/docs/prompt-management/features/prompt-version-control) and [labels](/docs/prompt-management/features/labels).
 
 ```mermaid
 graph LR
@@ -122,4 +180,26 @@ graph LR
     class SDK sdk,sdk2
 ```
 
-{/* TODO: linking to traces, composition */}
+### Deployment Workflow
+
+Here's a typical workflow for deploying prompt changes:
+
+1. **Create and test:** Create a new prompt version (automatically gets the `latest` label)
+2. **Validate:** Test the new version in your development environment or using the playground
+3. **Deploy:** Update the `production` label to point to the new version
+4. **Monitor:** Your production application automatically picks up the new version on the next fetch
+5. **Rollback if needed:** Simply reassign the `production` label back to a previous version
+
+Since your code references the labels, all this happens without changing code.
+
+
+## Prompt Caching
+
+
+Langfuse Prompt Management uses cached prompts for 2 main reasons
+1. it adds no latency to your application. 
+2. it removes availability risk.
+
+This means your first few traces after updating a prompt might still be using the old version. If immediate updates are critical for your use case, you can disable caching or configure a shorter TTL (time-to-live). 
+
+See the [caching documentation](/docs/prompt-management/features/caching) for details on how caching works and how to configure it.
