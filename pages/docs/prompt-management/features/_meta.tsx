@@ -6,14 +6,15 @@ export default {
     title: <MenuSubSeparator>Essential</MenuSubSeparator>,
   },
   "prompt-version-control": {},
-  composability: {},
-  "message-placeholders": {},
+  "link-to-traces": {},
   playground: {},
 
   "-- Advanced": {
     type: "separator",
     title: <MenuSubSeparator>Advanced</MenuSubSeparator>,
   },
+  composability: {},
+  "message-placeholders": {},
   "evaluate-prompts": {
     title: "Evaluate Prompts ↗",
     href: "/docs/evaluation/dataset-runs/run-via-ui",
