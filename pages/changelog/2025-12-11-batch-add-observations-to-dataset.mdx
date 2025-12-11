@@ -3,6 +3,7 @@ date: 2025-12-11
 title: Batch Add Observations to Datasets
 description: Select multiple observations from the observations table and add them to a new or existing dataset with flexible field mapping.
 author: Hassieb
+ogImage: /images/changelog/2025-12-11-batch-add-observations-to-datasets.jpg
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -11,27 +12,33 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 You can now **batch add observations to datasets** directly from the observations table. This feature makes it easy to build test datasets from production data by selecting multiple observations and mapping their fields to dataset items.
 
-**How it works**
+## How it works
+1. Navigate to the **Observations table**
+2. **Use filters** to find relevant observations (optional) 
+3. **Select Observations** using the checkboxes
+4. **Click Actions** → Add to dataset
+5. Choose to create a new dataset or select an existing one
+6. **Configure field mapping** to control how observation data maps to dataset item fields
+7. **Preview the mapping and confirm**
 
-1. **Select observations**: Use the checkbox selection in the observations table to select one or more observations
-2. **Choose a dataset**: Create a new dataset or select an existing one
-3. **Configure field mapping**: Map observation fields (input, output, metadata) to dataset item fields with flexible options
-4. **Preview and confirm**: Review how your observations will be mapped before adding them
 
-**Flexible field mapping**
-
+## Flexible field mapping
 The field mapping system gives you control over how observation data is transformed into dataset items. You can use the entire field as-is (e.g., map the full observation input to the dataset item input), extract specific values using JSON path expressions or build custom objects from multiple fields.
 
-**Background processing**
+<Frame fullWidth>
+  ![Field mapping](/images/changelog/2025-12-11-fieldmapping.png)
+</Frame>
+
+## Background processing
 
 Batch operations run in the background, allowing you to continue working while observations are added to your dataset. You can monitor progress and view results in the batch actions settings page.
 
 The system supports partial success - if some observations fail validation against a dataset schema, the valid ones are still added and errors are logged for review.
 
-**Learn more**
+## Learn more
 
 import { Book } from "lucide-react";
 
 <Cards num={1}>
-  <Card title="Datasets Documentation" href="/docs/datasets" icon={<Book />} />
+  <Card title="Datasets Documentation" href="/docs/evaluation/experiments/datasets#batch-add-observations-to-datasets" icon={<Book />} />
 </Cards>
