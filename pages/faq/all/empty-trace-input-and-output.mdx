@@ -23,7 +23,7 @@ with langfuse.start_as_current_observation(as_type="span", name="complex-pipelin
         output={"final_answer": "Complete response", "confidence": 0.95}
     )
 ```
-[(1)](https://langfuse.com/docs/observability/sdk/python/sdk-v3)
+[(1)](https://langfuse.com/docs/observability/sdk/overview)
 
 If you want to set trace input/output for evaluation features, you can also use:
 
@@ -45,6 +45,6 @@ def process_user_query(user_question: str):
 
     return answer
 ```
-[(1)](https://langfuse.com/docs/observability/sdk/python/sdk-v3)
+[(1)](https://langfuse.com/docs/observability/sdk/overview)
 
-If you use the decorator-based integration, input/output are captured automatically, but you can override or disable this behavior using parameters like capture_input, capture_output, or by calling update_current_trace as shown above[(2)](/docs/observability/sdk/python/instrumentation#trace-inputoutput-behavior)[(1)](https://langfuse.com/docs/observability/sdk/python/sdk-v3).
+If you use the decorator-based integration, input/output are captured automatically, but you can override or disable this behavior using parameters like capture_input, capture_output, or by calling update_current_trace as shown above[(2)](/docs/observability/sdk/instrumentation#trace-inputoutput-behavior)[(1)](https://langfuse.com/docs/observability/sdk/overview).
