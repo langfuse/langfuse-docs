@@ -244,6 +244,22 @@ In the UI, use `+ Add to dataset` on any observation (span, event, generation) o
 </Tab>
 </LangTabs>
 
+## Batch add observations to datasets
+
+You can batch add multiple observations to a dataset directly from the observations table. This is useful for quickly building test datasets from production data.
+
+The field mapping system gives you control over how observation data is transformed into dataset items. You can use the entire field as-is (e.g., map the full observation input to the dataset item input), extract specific values using JSON path expressions or build custom objects from multiple fields.
+
+1. Navigate to the **Observations** table
+2. Use filters to find relevant observations
+3. Select observations using the checkboxes
+4. Click **Actions** → **Add to dataset**
+5. Choose to create a new dataset or select an existing one
+6. Configure field mapping to control how observation data maps to dataset item fields
+7. Preview the mapping and confirm
+
+Batch operations run in the background with support for partial success. If some observations fail validation against a dataset schema, valid items are still added and errors are logged for review. You can monitor progress in **Settings** → **Batch Actions**.
+
 ## Edit/archive dataset items
 
 You can edit or archive dataset items. Archiving items will remove them from future experiment runs.

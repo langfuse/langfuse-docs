@@ -19,6 +19,16 @@ import magicPatternsLight from "../home/img/magicpatterns_light.png";
 import magicPatternsDark from "../home/img/magicpatterns_dark.png";
 import merckLight from "../home/img/merck-dark.png";
 import merckDark from "../home/img/merck-light.png";
+import juiceboxLight from "../home/img/juicebox_light.svg";
+import juiceboxDark from "../home/img/juicebox_dark.svg";
+import pigmentLight from "../home/img/pigment_light.svg";
+import pigmentDark from "../home/img/pigment_dark.svg";
+// import springernatureLight from "../home/img/springernature_light.svg";
+// import springernatureDark from "../home/img/springernature_dark.svg";
+import sevenelevenLight from "../home/img/seveneleven_light.png";
+import sevenelevenDark from "../home/img/seveneleven_dark.png";
+import circlebackLight from "../home/img/circleback_light.png";
+import circlebackDark from "../home/img/circleback_dark.png";
 import { cn } from "@/lib/utils";
 
 type CompanyLogo = {
@@ -57,12 +67,6 @@ const companies: CompanyLogo[] = [
     lightModeImage: magicPatternsDark,
     customerStoryPath: "/customers/magic-patterns-ai-design-tools",
   },
-  // {
-  //   name: "Springer Nature",
-  //   darkModeImage: springernatureLight,
-  //   lightModeImage: springernatureDark,
-  //   href: "https://www.springernature.com",
-  // },
   {
     name: "Merck",
     darkModeImage: merckLight,
@@ -79,11 +83,31 @@ const companies: CompanyLogo[] = [
     darkModeImage: intuitDark,
     lightModeImage: intuitLight,
   },
+  {
+    name: "Juicebox",
+    darkModeImage: juiceboxLight,
+    lightModeImage: juiceboxDark,
+  },
+  {
+    name: "Pigment",
+    darkModeImage: pigmentLight,
+    lightModeImage: pigmentDark,
+  },
+  {
+    name: "Seven Eleven Japan",
+    darkModeImage: sevenelevenLight,
+    lightModeImage: sevenelevenDark,
+  },
   // {
-  //   name: "Circleback",
-  //   darkModeImage: circlebackLight,
-  //   lightModeImage: circlebackDark,
+  //   name: "Springer Nature",
+  //   darkModeImage: springernatureLight,
+  //   lightModeImage: springernatureDark,
   // },
+  {
+    name: "Circleback",
+    darkModeImage: circlebackLight,
+    lightModeImage: circlebackDark,
+  },
 ];
 
 // Reusable component for company logos with light/dark theme support
