@@ -22,12 +22,13 @@ import GetStartedLangchain from "@/components-mdx/get-started/langchain.mdx";
 import GetStartedJsOpenaiSdk from "@/components-mdx/get-started/js-openai-sdk.mdx";
 import GetStartedJsLangchain from "@/components-mdx/get-started/js-langchain.mdx";
 import GetStartedAutoInstall from "@/components-mdx/get-started/auto-install.mdx";
+import GetStartedOpenTelemetry from "@/components-mdx/get-started/opentelemetry.mdx";
 
 import { BookOpen, Code } from "lucide-react";
 
 If you're using one of our supported integrations, following their specific guide will be the fastest way to get started with minimal code changes. For more control, you can instrument your application directly using the Python or JS/TS SDKs.
 
-<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "✨ Auto Install", "More integrations"]}>
+<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "OpenTelemetry", "✨ Auto Install", "More integrations"]}>
 
 <Tab>
 {/* PYTHON - OPENAI*/}
@@ -183,6 +184,24 @@ Use the Langfuse JS/TS SDK to wrap any LLM or Agent
     icon={<Code />}
     title="Notebook"
     href="/docs/sdk/typescript/example-notebook"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
+{/* OPENTELEMETRY */}
+
+If you already have OpenTelemetry instrumentation in your application, you can configure Langfuse as an OpenTelemetry backend to receive your traces.
+
+<GetStartedOpenTelemetry />
+
+<Cards num={1}>
+  <Card
+    icon={<BookOpen />}
+    title="Full OpenTelemetry documentation"
+    href="/integrations/native/opentelemetry"
     arrow
   />
 </Cards>
