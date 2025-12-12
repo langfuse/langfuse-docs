@@ -37,7 +37,7 @@ This documentation is for the latest versions of the Langfuse SDKs.
 **Key benefits**
 
 - Based on [OpenTelemetry](https://opentelemetry.io/), so you can use any OTEL-based instrumentation library for your LLM stack.
-- Fully async requests, meaning Langfuse adds almost no latency.
+- Fully [async requests](/docs/observability/data-model#background-processing), meaning Langfuse adds almost no latency.
 - Accurate latency tracking via synchronous timestamps.
 - IDs available for downstream use.
 - Great DX when nesting observations.
@@ -122,6 +122,8 @@ Public link to the [trace in Langfuse](https://cloud.langfuse.com/project/cloram
 ## Setup
 
 This section covers all detail of setting up the Langfuse SDKs. Follow the [Quickstart](#quickstart) guide to get the first trace into Langfuse. 
+
+<Steps>
 
 ### Install the SDK
 
@@ -261,6 +263,17 @@ const langfuse = new LangfuseClient({
 
 </Tab>
 </Tabs>
+
+### Use the SDK
+
+Once you have set up the SDK, you can: 
+
+- [Create custom observations and traces](/docs/observability/sdk/instrumentation#custom-observations)
+- Use prompts from [Langfuse Prompt Management](/docs/prompt-management/get-started)
+- Run [experiments](/docs/evaluation/experiments/experiments-via-sdk) and add [custom evaluation scores](/docs/evaluation/evaluation-methods/custom-scores)
+
+</Steps>
+
 
 ## OpenTelemetry foundation
 
