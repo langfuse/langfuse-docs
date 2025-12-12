@@ -9,6 +9,12 @@ import { FeatureTabsSection } from "./FeatureTabsSection";
 const Usage = dynamic(() => import("./Usage"), {
   ssr: false,
 });
+const ContinuousEvaluationLoop = dynamic(
+  () => import("./ContinuousEvaluationLoop"),
+  {
+    ssr: false,
+  }
+);
 const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
   ssr: false,
 });
@@ -34,6 +40,7 @@ const CTAGetStarted = dynamic(() => import("./CTAGetStarted"), {
 export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
+      <ContinuousEvaluationLoop />
       <Hero />
       <FeatureTabsSection />
       <Usage />
