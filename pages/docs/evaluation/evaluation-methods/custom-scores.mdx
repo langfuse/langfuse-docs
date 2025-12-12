@@ -283,6 +283,8 @@ By default, Langfuse allows for multiple scores of the same `name` on the same t
 
 In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and add this as an `id` (JS/TS) / `score_id` (Python) when creating the score, e.g. `<trace_id>-<score_name>`.
 
+Note that if you expect API calls for the same score to be 60+ days apart, you should also use the same timestamp. See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#updating-traces-observations-and-scores) for more details.
+
 ### Enforcing a Score Config
 
 Score configs are helpful when you want to standardize your scores for future analysis.
