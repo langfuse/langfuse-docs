@@ -22,12 +22,13 @@ import GetStartedLangchain from "@/components-mdx/get-started/langchain.mdx";
 import GetStartedJsOpenaiSdk from "@/components-mdx/get-started/js-openai-sdk.mdx";
 import GetStartedJsLangchain from "@/components-mdx/get-started/js-langchain.mdx";
 import GetStartedAutoInstall from "@/components-mdx/get-started/auto-install.mdx";
+import GetStartedVercelAiSdk from "@/components-mdx/get-started/vercel-ai-sdk.mdx";
 
 import { BookOpen, Code } from "lucide-react";
 
 If you're using one of our supported integrations, following their specific guide will be the fastest way to get started with minimal code changes. For more control, you can instrument your application directly using the Python or JS/TS SDKs.
 
-<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "✨ Auto Install", "More integrations"]}>
+<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Vercel AI SDK", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "✨ Auto Install", "More integrations"]}>
 
 <Tab>
 {/* PYTHON - OPENAI*/}
@@ -82,6 +83,24 @@ First install the Langfuse OpenAI wrapper. It extends the official client to sen
     icon={<Code />}
     title="Notebook"
     href="/guides/cookbook/js_integration_openai"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
+{/* VERCEL AI SDK */}
+
+Langfuse's Vercel AI SDK integration uses OpenTelemetry to automatically trace your AI calls. If you already use the Vercel AI SDK, you can start using Langfuse with minimal changes to your code.
+
+<GetStartedVercelAiSdk />
+
+<Cards num={1}>
+  <Card
+    icon={<BookOpen />}
+    title="Full Vercel AI SDK documentation"
+    href="/integrations/frameworks/vercel-ai-sdk"
     arrow
   />
 </Cards>
