@@ -127,7 +127,11 @@ The MCP server provides five tools for comprehensive prompt management.
        --header "Authorization: Basic {your-base64-token}"
 
    # Langfuse Cloud (US)
-   claude mcp add --transport http langfuse https://us.langfuse.com/api/public/mcp \
+   claude mcp add --transport http langfuse https://us.cloud.langfuse.com/api/public/mcp \
+       --header "Authorization: Basic {your-base64-token}"
+
+   # Langfuse Cloud (HIPAA)
+   claude mcp add --transport http langfuse https://hipaa.cloud.langfuse.com/api/public/mcp \
        --header "Authorization: Basic {your-base64-token}"
 
    # Self-Hosted (HTTPS required)
