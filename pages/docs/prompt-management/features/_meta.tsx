@@ -5,8 +5,8 @@ export default {
     type: "separator",
     title: <MenuSubSeparator>Essential</MenuSubSeparator>,
   },
-  "prompt-version-control": {},
   "link-to-traces": {},
+  "prompt-version-control": {},
   playground: {},
 
   "-- Advanced": {
@@ -16,11 +16,19 @@ export default {
   variables: {},
   composability: {},
   "message-placeholders": {},
+  config: {},
   "evaluate-prompts": {
     title: "Evaluate Prompts ↗",
     href: "/docs/evaluation/dataset-runs/run-via-ui",
   },
+  caching: {},
+  "mcp-server": {},
+  "webhooks-slack-integrations": {},
+  "github-integration": {},
+  "n8n-node": {},
+  "guaranteed-availability": {},
   "a-b-testing": {},
+  folders: {},
   "*": {
     layout: "default",
   },
