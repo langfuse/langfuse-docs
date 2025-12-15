@@ -48,11 +48,11 @@ This documentation is for the latest versions of the Langfuse SDKs.
 
 Follow the quickstart guide to get the first trace into Langfuse. See the [setup](#setup) section for more details.
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 <GetStartedPythonSdk />
 </Tab>
-<Tab title="TypeScript">
+<Tab title="JS/TS SDK">
 
 **1. Install packages:**
 
@@ -117,7 +117,7 @@ See the [trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz08
 
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Setup
 
@@ -127,8 +127,8 @@ This section covers all detail of setting up the Langfuse SDKs. Follow the [Quic
 
 ### Install the SDK
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 
 Pip install the [Langfuse Python SDK](https://pypi.org/project/langfuse/).
 
@@ -136,7 +136,7 @@ Pip install the [Langfuse Python SDK](https://pypi.org/project/langfuse/).
 pip install langfuse
 ```
 </Tab>
-<Tab title="TypeScript">
+<Tab title="JS/TS SDK">
 
 The Langfuse JS/TS SDK is designed to be modular. Install the relevant packages for a full tracing setup:
 
@@ -147,7 +147,7 @@ npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 <JSSDKPackages />
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ### Configure credentials
 
@@ -161,13 +161,13 @@ You can also pass the credentials [directly to the constructor](#client-setup).
 
 ### Initialize OpenTelemetry (JS/TS only)
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 
 The Python SDK automatically sets up OpenTelemetry when [initializing the client](#client-setup).
 
 </Tab>
-<Tab title="TypeScript">
+<Tab title="JS/TS SDK">
 
 The JS/TS SDK's tracing is built on top of OpenTelemetry, so you need to set up the OpenTelemetry SDK. The [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) is the key component that sends traces to Langfuse.
 
@@ -196,13 +196,13 @@ If you are using Next.js, please use the OpenTelemetry setup via the `NodeSDK` d
 </Callout>
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 
 ### Client Setup [#client-setup]
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 
 Initialize the Langfuse client with [`get_client()`](https://python.reference.langfuse.com/langfuse#get_client) to interact with Langfuse. It will automatically use the environment variables you set above.
 
@@ -245,7 +245,7 @@ All key configuration options are listed in the [Python SDK reference](https://p
 </details>
 
 </Tab>
-<Tab title="TypeScript">
+<Tab title="JS/TS SDK">
 
 Initialize the [`LangfuseClient`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_client.LangfuseClient.html) to interact with Langfuse. The client will automatically use the environment variables you set above.
 
@@ -273,13 +273,13 @@ const langfuse = new LangfuseClient({
 
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ### Use the SDK
 
 With the SDK set up, you can: 
 
-- [Instrument you application](/docs/observability/sdk/instrumentation#custom-observations)
+- [Instrument your application](/docs/observability/sdk/instrumentation#custom-observations)
 - Use [Langfuse Prompt Management](/docs/prompt-management/get-started)
 - Run [Experiments](/docs/evaluation/experiments/experiments-via-sdk) and create [Scores](/docs/evaluation/evaluation-methods/custom-scores)
 - [Query data](/docs/api-and-data-platform/features/query-via-sdk)
