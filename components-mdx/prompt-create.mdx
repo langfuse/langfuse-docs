@@ -1,4 +1,4 @@
-<LangTabs items={["Langfuse UI", "Python SDK", "JS/TS SDK", "API"]}>
+<LangTabs items={["Langfuse UI", "Python SDK", "JS/TS SDK", "API", "Migrate from existing code"]}>
 <Tab>
 
 Use the Langfuse UI to create a new prompt or update an existing one. You'll need to select the [prompt type](), you can't change this afterwards. 
@@ -118,6 +118,40 @@ curl -X POST "https://cloud.langfuse.com/api/public/v2/prompts" \
     arrow
   />
 </Cards>
+
+</Tab>
+
+<Tab>
+
+If you have prompts in your existing codebase, you can migrate them to Langfuse programmatically.
+
+**Using the API**
+
+You can write a script that reads your existing prompts and creates them in Langfuse using the [Public API](https://api.reference.langfuse.com/#tag/prompts/post/api/public/v2/prompts). This is ideal for bulk migrations or CI/CD integration.
+
+<Cards num={1}>
+  <Card
+    title="API Reference"
+    href="https://api.reference.langfuse.com/#tag/prompts/POST/api/public/v2/prompts"
+    arrow
+  />
+</Cards>
+
+**Using the MCP Server**
+
+If you use an AI-powered IDE like Cursor or Claude Code, you can connect the [Langfuse MCP Server](/docs/prompt-management/features/mcp-server) and ask your AI agent to create prompts for you. 
+
+<Cards num={1}>
+  <Card
+    title="MCP Server for Prompts"
+    href="/docs/prompt-management/features/mcp-server"
+    arrow
+  />
+</Cards>
+
+**Things to look out for**
+
+- Langfuse uses a specific syntax for [variables, prompt references, and message placeholders](/docs/prompt-management/data-model#dynamic-rendering-of-prompts). Make sure to update your prompts to use the correct format, if you want to use Langfuse's dynamic rendering capabilities.
 
 </Tab>
 
