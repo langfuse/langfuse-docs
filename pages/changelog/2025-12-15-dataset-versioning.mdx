@@ -1,0 +1,64 @@
+---
+date: 2025-12-15
+title: Dataset Item Versioning
+description: Track dataset changes over time with automatic versioning on every addition, update, or deletion of dataset items.
+author: Marlies
+ogImage: /images/changelog/2025-12-15-dataset-versioning.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Datasets now track changes over time. Every addition, update, or deletion of dataset items produces a new version, giving you complete history and reproducibility for evaluation workflows.
+
+## Why versioning matters
+
+**Complete audit trail**: View full history of changes at item level. Understand what changed and when. Identify unintended edits and revert problematic changes.
+
+**Experiment reproducibility**: Experiments are automatically tied to the exact dataset state at run time. When you modify a dataset item after running an experiment, previous experiment results remain tied to the dataset version they actually ran against. Critical for comparing experiments over time.
+
+**Dataset evolution**: Track how gold-label datasets improve. After domain experts refine expected outputs, see exactly what changed and how it affects benchmark results. 
+
+## How it works
+
+Every addition, update, or deletion of dataset items creates a new dataset version identified by timestamp. GET APIs return the latest version at query time by default.
+
+**Item-level versioning**: Full history with diffs for every dataset item. See exactly what changed in input, expected output, or metadata between versions.
+
+**Dataset-level metadata**: Track high-level changes comparing to latest version. Understand how many items were added, modified, or deleted at the dataset level.
+
+Example workflow:
+1. Create dataset with 10 items from production traces
+2. Domain expert reviews and edits expected outputs for items
+3. Run experiment against dataset version at timestamp T1
+4. Discover error in item 9, correct the expected output
+5. New dataset version created at timestamp T2
+6. Run new experiment against version T2
+7. Both experiments remain comparable, old experiment shows it used version T1
+8. View item-level diff to see exact changes to item 9's expected output
+9. View dataset-level metadata to see that 1 item was modified at T2
+
+Versioning applies to dataset items only. Dataset schema changes do not create new versions.
+
+## Coming soon
+
+- API support to fetch datasets at specific version timestamps
+- SDK support to run experiments on specific dataset versions (not just latest)
+
+## Learn more
+
+import { Book, MessageSquare } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Datasets Documentation"
+    href="/docs/evaluation/experiments/datasets#versioning"
+    icon={<Book />}
+  />
+  <Card
+    title="Share Feedback on GitHub"
+    href="https://github.com/orgs/langfuse/discussions/6596"
+    icon={<MessageSquare />}
+  />
+</Cards>
