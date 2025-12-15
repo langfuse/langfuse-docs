@@ -483,6 +483,29 @@ with langfuse.start_as_current_observation(as_type="span", name="user-workflow")
         with langfuse.start_as_current_observation(as_type="generation", name="llm-call"):
             pass
 ```
+
+When using the `@observe()` decorator:
+```python /propagate_attributes/
+from langfuse import observe, propagate_attributes
+
+@observe()
+def my_llm_pipeline(user_id: str, session_id: str):
+    # Propagate early in the trace
+    with propagate_attributes(
+        user_id=user_id,
+        session_id=session_id,
+        metadata={"pipeline": "main"}
+    ):
+        # All nested @observe functions inherit these attributes
+        result = call_llm()
+        return result
+
+@observe()
+def call_llm():
+    # This automatically has user_id, session_id, metadata from parent
+    pass
+```
+
 </Tab>
 <Tab title="TypeScript">
 
@@ -513,7 +536,7 @@ await startActiveObservation("user-workflow", async () => {
 
 ### Cross-service propagation
 
-Use [baggage propagation](https://opentelemetry.io/docs/concepts/signals/baggage/) only when you need to forward attributes across HTTP boundaries. It pushes the values into every outbound request header, so prefer non-sensitive identifiers (session IDs, experiment versions, etc.).
+For distributed tracing across multiple services, use the `as_baggage` parameter (see [OpenTelemetry documentation for more details](https://opentelemetry.io/docs/concepts/signals/baggage/)) to propagate attributes via HTTP headers.
 
 <Tabs items={["Python", "TypeScript"]}>
 <Tab title="Python">
@@ -553,7 +576,7 @@ await startActiveObservation("api-request", async () => {
 </Tabs>
 
 <Callout type="warning">
-When baggage propagation is enabled, attributes are added to **all** outbound HTTP headers. Only use it for non-sensitive values needed for distributed tracing.
+**Security Warning**: When baggage propagation is enabled, attributes are added to **all** outbound HTTP headers. Only use it for non-sensitive values needed for distributed tracing.
 </Callout>
 
 ## Update trace [#trace-inputoutput-behavior]
@@ -677,7 +700,7 @@ See [Trace IDs & Distributed Tracing](/docs/observability/features/trace-ids-and
 <Tabs items={["Python", "TypeScript"]}>
 <Tab title="Python">
 
-Use [`create_trace_id()`](https://python.reference.langfuse.com/langfuse#Langfuse.create_trace_id) to generate a deterministic trace ID from a seed.
+Use [`create_trace_id()`](https://python.reference.langfuse.com/langfuse#Langfuse.create_trace_id) to generate a trace ID. If a `seed` is provided, the ID is deterministic. Use the same seed to get the same ID. This is useful for correlating external IDs with Langfuse traces.
 
 ```python /create_trace_id/
 from langfuse import get_client, Langfuse
@@ -688,6 +711,8 @@ deterministic_trace_id = langfuse.create_trace_id(seed=external_request_id)
 ``` 
 
 Use [`get_current_trace_id()`](https://python.reference.langfuse.com/langfuse#Langfuse.get_current_trace_id) to get the current trace ID and [`get_current_observation_id`](https://python.reference.langfuse.com/langfuse#Langfuse.get_current_observation_id) to get the current observation ID.
+
+You can also use `observation.trace_id` and `observation.id` to access the trace and observation IDs directly from a LangfuseSpan or LangfuseGeneration object.
 
 ```python /create_trace_id/ /get_current_trace_id/ /get_current_observation_id/
 from langfuse import get_client, Langfuse
@@ -735,7 +760,7 @@ await startObservation("run", async (span) => {
 </Tab>
 </Tabs>
 
-### Link to existing traces
+**Link to existing traces**
 
 When integrating with upstream services that already have trace IDs, supply the W3C trace context so Langfuse spans join the existing tree rather than creating a new one.
 
@@ -787,43 +812,68 @@ span.end();
 </Tab>
 </Tabs>
 
-### Client lifecycle & flushing
+## Client lifecycle & flushing
 
 As the Langfuse SDKs are [asynchronous](/docs/observability/data-model#background-processing), they buffer spans in the background. Always flush or shut down the client in short-lived processes (scripts, serverless functions, workers) to avoid losing data.
 
 <Tabs items={["Python", "TypeScript"]}>
 <Tab title="Python">
 
-**When to use which**
+**[`flush()`](https://python.reference.langfuse.com/langfuse#Langfuse.flush)**
 
-- Use [`flush()`](https://python.reference.langfuse.com/langfuse#Langfuse.flush) when you want to ensure data is sent mid-run (e.g., before returning a response, before a short-lived job step ends).
-- Use [`shutdown()`](https://python.reference.langfuse.com/langfuse#Langfuse.shutdown) when the application/process is ending and you want to guarantee everything is sent and threads are cleaned up.
+Manually triggers the sending of all buffered observations (spans, generations, scores, media metadata) to the Langfuse API. This is useful in short-lived scripts or before exiting an application to ensure all data is persisted.
 
 ```python
 from langfuse import get_client
 
 langfuse = get_client()
-# ... create traces ...
-langfuse.flush()
+# ... create traces and observations ...
+langfuse.flush() # Ensures all pending data is sent
+```
+
+The `flush()` method blocks until the queued data is processed by the respective background threads.
+
+**[`shutdown()`](https://python.reference.langfuse.com/langfuse#Langfuse.shutdown)**
+
+Gracefully shuts down the Langfuse client. This includes:
+
+1.  Flushing all buffered data (similar to `flush()`).
+2.  Waiting for background threads (for data ingestion and media uploads) to finish their current tasks and terminate.
+
+It's crucial to call `shutdown()` before your application exits to prevent data loss and ensure clean resource release. The SDK automatically registers an `atexit` hook to call `shutdown()` on normal program termination, but manual invocation is recommended in scenarios like:
+
+- Long-running daemons or services when they receive a shutdown signal.
+- Applications where `atexit` might not reliably trigger (e.g., certain serverless environments or forceful terminations).
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+# ... application logic ...
+
+# Before exiting:
 langfuse.shutdown()
 ```
+
+
+
 </Tab>
 <Tab title="TypeScript">
 
-**When to use which**
 
-- Use [`forceFlush()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html#forceflush) for an immediate flush of all pending spans and media uploads.
 
-- Use [`shutdown()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_client.LangfuseClient.html#shutdown) to gracefully shut down the client by flushing all pending data. This method should be called before your application exits to ensure all data is sent to Langfuse.
+<Tabs items={["Generic Serverless function", "Vercel Cloud Functions"]}>
+<Tab>
+{/* Generic serverless */}
+Export the processor from your OTEL SDK setup file in order to flush it later.
 
-Export the span processor from your OTEL setup and flush before the process exits (or use `after` in Vercel Functions).
-
-```ts filename="instrumentation.ts" 
+```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/ /exportMode: "immediate"/
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
+// Export the processor to be able to flush it
 export const langfuseSpanProcessor = new LangfuseSpanProcessor({
-  exportMode: "immediate",
+  exportMode: "immediate" // optional: configure immediate span export in serverless environments
 });
 
 const sdk = new NodeSDK({
@@ -833,13 +883,62 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
+In your serverless function handler, call [`forceFlush()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html#forceflush) on the span processor before the function exits.
+
 ```ts filename="handler.ts" /forceFlush/
 import { langfuseSpanProcessor } from "./instrumentation";
 
 export async function handler(event, context) {
-  // ... logic ...
+  // ... your application logic ...
+
+  // Flush before exiting
   await langfuseSpanProcessor.forceFlush();
 }
 ```
+
+</Tab>
+
+<Tab>
+{/* Vercel Cloud Functions */}
+
+Export the processor from your `instrumentation.ts` file in order to flush it later.
+
+```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/ /exportMode: "immediate"/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Export the processor to be able to flush it
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+});
+
+sdk.start();
+```
+
+In Vercel Cloud Functions, please use the `after` utility to schedule a flush after the request has completed.
+
+```ts filename="route.ts" /after/ /forceFlush/
+import { after } from "next/server";
+
+import { langfuseSpanProcessor } from "./instrumentation.ts";
+
+export async function POST() {
+  // ... existing request logic ...
+
+  // Schedule flush after request has completed
+  after(async () => {
+    await langfuseSpanProcessor.forceFlush();
+  });
+
+  // ... send response ...
+}
+```
+
+</Tab>
+</Tabs>
+
+
 </Tab>
 </Tabs>
