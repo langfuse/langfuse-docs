@@ -113,7 +113,7 @@ npx tsx index.ts
 ![First trace in Langfuse](/images/docs/observability/first-trace.png)
 </Frame>
 
-Public link to the [trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ef10df7b3f9e4a8adc834c18934bace0?timestamp=2025-12-03T14%3A44%3A10.907Z&observation=c71b480595bbe18c).
+See the [trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ef10df7b3f9e4a8adc834c18934bace0?timestamp=2025-12-03T14%3A44%3A10.907Z&observation=c71b480595bbe18c).
 
 
 </Tab>
@@ -121,7 +121,7 @@ Public link to the [trace in Langfuse](https://cloud.langfuse.com/project/cloram
 
 ## Setup
 
-This section covers all detail of setting up the Langfuse SDKs. Follow the [Quickstart](#quickstart) guide to get the first trace into Langfuse. 
+This section covers all detail of setting up the Langfuse SDKs. Follow the [Quickstart](#quickstart) guide to create your first trace. 
 
 <Steps>
 
@@ -138,7 +138,7 @@ pip install langfuse
 </Tab>
 <Tab title="TypeScript">
 
-The Langfuse SDK is designed to be modular. Install the relevant packages for a full tracing setup:
+The Langfuse JS/TS SDK is designed to be modular. Install the relevant packages for a full tracing setup:
 
 ```bash
 npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
@@ -159,9 +159,17 @@ You can also pass the credentials [directly to the constructor](#client-setup).
 
 <EnvJS />
 
-### Initialize OpenTelemetry (JS/TS)
+### Initialize OpenTelemetry (JS/TS only)
 
-The TypeScript SDK's tracing is built on top of OpenTelemetry, so you need to set up the OpenTelemetry SDK. The [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) is the key component that sends traces to Langfuse.
+<Tabs items={["Python", "TypeScript"]}>
+<Tab title="Python">
+
+The Python SDK automatically sets up OpenTelemetry when [initializing the client](#client-setup).
+
+</Tab>
+<Tab title="TypeScript">
+
+The JS/TS SDK's tracing is built on top of OpenTelemetry, so you need to set up the OpenTelemetry SDK. The [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) is the key component that sends traces to Langfuse.
 
 ```ts filename="instrumentation.ts" /LangfuseSpanProcessor/
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -186,6 +194,9 @@ If you are using Next.js, please use the OpenTelemetry setup via the `NodeSDK` d
 [See here for a full example for the Vercel AI SDK with NextJS on Vercel](/docs/observability/sdk/typescript/instrumentation#native-instrumentation).
 
 </Callout>
+
+</Tab>
+</Tabs>
 
 
 ### Client Setup [#client-setup]
@@ -266,11 +277,12 @@ const langfuse = new LangfuseClient({
 
 ### Use the SDK
 
-Once you have set up the SDK, you can: 
+With the SDK set up, you can: 
 
-- [Create custom observations and traces](/docs/observability/sdk/instrumentation#custom-observations)
-- Use prompts from [Langfuse Prompt Management](/docs/prompt-management/get-started)
-- Run [experiments](/docs/evaluation/experiments/experiments-via-sdk) and add [custom evaluation scores](/docs/evaluation/evaluation-methods/custom-scores)
+- [Instrument you application](/docs/observability/sdk/instrumentation#custom-observations)
+- Use [Langfuse Prompt Management](/docs/prompt-management/get-started)
+- Run [Experiments](/docs/evaluation/experiments/experiments-via-sdk) and create [Scores](/docs/evaluation/evaluation-methods/custom-scores)
+- [Query data](/docs/api-and-data-platform/features/query-via-sdk)
 
 </Steps>
 
@@ -380,3 +392,5 @@ The Langfuse SDKs provides wrappers around OTel spans (`LangfuseSpan`, `Langfuse
 ## Other languages
 
 Via the [public API](/docs/api-and-data-platform/features/public-api) you can integrate Langfuse from any runtime. For tracing specifically, send OpenTelemetry spans from your preferred instrumentation (Java, Go, etc.) to the [Langfuse OTel endpoint](/integrations/native/opentelemetry).
+
+You can find a list of community maintained SDKs [here](https://github.com/langfuse/langfuse-examples?tab=readme-ov-file#community-maintained-sdks).
