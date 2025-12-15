@@ -9,22 +9,19 @@ import { PropagationRestrictionsCallout } from "@/components/PropagationRestrict
 
 # Instrumentation
 
-The Langfuse SDKs let you manually create observations and traces. You can also use the SDKs together with our [native integrations](/integrations).
+There are two main ways to instrument your application with the Langfuse SDKs:
 
+- Using our **[native integrations](/integrations)** for popular LLM and agent libraries such as OpenAI, LangChain or the Vercel AI SDK. They automatically create observations and traces and capture prompts, responses, usage, and errors.
+- Manually instrumenting your application with the Langfuse SDK. The SDKs provide 3 ways to create observations:
+  - **[Context manager](#context-manager)**
+  - **[Observe wrapper](#observe-wrapper)** 
+  - **[Manual observations](#manual-observations)**
 
-## Native integrations [#native-integrations]
+All approaches are interoperable. You can nest a decorator-created observation inside a context manager or mix manual spans with our [native integrations](/integrations).
 
-Langfuse supports [native integrations](/integrations) for popular LLM and agent libraries such as OpenAI, LangChain or the Vercel AI SDK. They automatically create observations and traces and capture prompts, responses, usage, and errors. 
+## Custom instrumentation [#custom]
 
-## Custom observations [#custom]
-
-For some use cases you might want to have more control over the observations and traces. For this, you can create custom observations using the Langfuse SDK. The SDKs provide 3 ways to create custom observations:
-
-- **[Context manager](#context-manager)**
-- **[Observe wrapper](#observe-wrapper)** 
-- **[Manual observations](#manual-observations)**
-
-All custom patterns are interoperable. You can nest a decorator-created observation inside a context manager or mix manual spans with our [native integrations](/integrations).
+The Langfuse SDK provides 3 ways to create observations:
 
 ### Context manager [#context-manager]
 

@@ -12,8 +12,8 @@ Use these patterns to harden your Langfuse instrumentation, protect sensitive da
 
 If your trace data (inputs, outputs, metadata) might contain sensitive information (PII, secrets), you can provide a mask function during client initialization. This function will be applied to all relevant data before it’s sent to Langfuse.
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 
 The `mask` function should accept data as a keyword argument and return the masked data. The returned data must be JSON-serializable.
 
@@ -34,7 +34,7 @@ def pii_masker(data: any, **kwargs) -> any:
 langfuse = Langfuse(mask=pii_masker)
 ```
 </Tab>
-<Tab title="TypeScript">
+<Tab title="JS/TS SDK">
 
 You can provide a `mask` function to the `LangfuseSpanProcessor`. This function will be applied to the input, output, and metadata of every observation.
 
@@ -54,13 +54,22 @@ const sdk = new NodeSDK({ spanProcessors: [spanProcessor] });
 sdk.start();
 ```
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Logging & debugging
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
-The Langfuse SDK uses Python's standard `logging` module. The main logger is named `"langfuse"`. Enable detailed debug logging by either passing `debug=True` when instantiating `Langfuse`, setting the `LANGFUSE_DEBUG="True"` environment variable, or configuring the logger manually:
+The Langfuse SDK can expose detailed logging and debugging information to help you troubleshoot issues with your application.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
+
+**In code:**
+
+The Langfuse SDK uses Python's standard `logging` module. The main logger is named `"langfuse"`.
+To enable detailed debug logging, you can either:
+
+1.  Set the `debug=True` parameter when initializing the `Langfuse` client.
+2.  Configure the `"langfuse"` logger manually:
 
 ```python
 import logging
@@ -69,36 +78,77 @@ langfuse_logger = logging.getLogger("langfuse")
 langfuse_logger.setLevel(logging.DEBUG)
 ```
 
-The default log level for `"langfuse"` is `logging.WARNING`.
-</Tab>
-<Tab title="TypeScript">
-Configure the global SDK logger (or set `LANGFUSE_LOG_LEVEL`) to control verbosity. Available log levels are `DEBUG`, `INFO`, `WARN`, and `ERROR`.
+The default log level for the `langfuse` logger is `logging.WARNING`.
 
-```ts /configureGlobalLogger/
+**Via environment variable:**
+
+You can also set the log level using the `LANGFUSE_DEBUG` environment variable to enable the debug mode.
+
+```bash
+export LANGFUSE_DEBUG="True"
+```
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+You can configure the global SDK logger to control the verbosity of log output. This is useful for debugging.
+
+**In code:**
+
+```typescript /configureGlobalLogger/
 import { configureGlobalLogger, LogLevel } from "@langfuse/core";
 
+// Set the log level to DEBUG to see all log messages
 configureGlobalLogger({ level: LogLevel.DEBUG });
 ```
+
+Available log levels are `DEBUG`, `INFO`, `WARN`, and `ERROR`.
+
+**Via environment variable:**
+
+You can also set the log level using the `LANGFUSE_LOG_LEVEL` environment variable to enable the debug mode.
 
 ```bash
 export LANGFUSE_LOG_LEVEL="DEBUG"
 ```
+
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Sampling
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
-Sample traces directly on the client via the `sample_rate` constructor argument or the `LANGFUSE_SAMPLE_RATE` environment variable. The value must be between `0.0` (drop everything) and `1.0` (send all traces). If a trace is not sampled, none of its observations or scores are exported.
+Sampling lets send only a subset of traces to Langfuse. This is useful to reduce costs and noise in high-volume applications.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
+
+**In code:**
+
+You can configure the SDK to sample traces by setting the `sample_rate` parameter during client initialization. This value should be a float between `0.0` (sample 0% of traces) and `1.0` (sample 100% of traces).
+
+If a trace is not sampled, none of its observations (spans, generations) or associated scores will be sent to Langfuse.
 
 ```python
 from langfuse import Langfuse
 
-langfuse = Langfuse(sample_rate=0.2)
+# Sample approximately 20% of traces
+langfuse_sampled = Langfuse(sample_rate=0.2)
 ```
+
+**Via environment variable:**
+
+You can also set the sample rate using the `LANGFUSE_SAMPLE_RATE` environment variable.
+
+```bash
+export LANGFUSE_SAMPLE_RATE="0.2"
+```
+
+
 </Tab>
-<Tab title="TypeScript">
+<Tab title="JS/TS SDK">
+
+**In code:**
+
 Langfuse respects OpenTelemetry's sampling decisions. Configure a sampler on your OTEL `NodeSDK` to control which traces reach Langfuse and reduce noise/costs in high-volume workloads.
 
 ```ts filename="instrumentation.ts" /TraceIdRatioBasedSampler/
@@ -113,17 +163,39 @@ const sdk = new NodeSDK({
 
 sdk.start();
 ```
-</Tab>
-</Tabs>
 
-## Filter exported spans [#filtering-spans]
+**Via environment variable:**
+
+You can also set the sample rate using the `LANGFUSE_SAMPLE_RATE` environment variable.
+
+```bash
+export LANGFUSE_SAMPLE_RATE="0.2"
+```
+
+</Tab>
+</LangTabs>
+
+## Filtering by Instrumentation Scope [#filtering-spans]
 
 You can configure the SDK to filter out spans from specific instrumentation libraries that expose OTel spans that the Langfuse SDK picks up but you don't want to send to Langfuse.
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
+**How it works:**
 
-You can configure the SDK to filter out spans from specific instrumentation libraries by using the `blocked_instrumentation_scopes` parameter. This is useful when you want to exclude infrastructure spans while keeping your LLM and application spans.
+When third-party libraries create OpenTelemetry spans (through their instrumentation packages), each span has an associated "instrumentation scope" that identifies which library created it. The Langfuse SDK filters spans at the export level based on these scope names.
+
+You can see the instrumentation scope name for any span in the Langfuse UI under the observation's metadata (`metadata.scope.name`). Use this to identify which scopes you want to filter.
+
+<Callout type="warning" title="Filtering Spans May Break Trace Trees">
+  **Cross-Library Span Relationships:**
+  Filtering spans may break the parent-child relationships in your traces. For
+  example, if you filter out a parent span but keep its children, you may see
+  "orphaned" observations in the Langfuse UI.
+</Callout>
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
+
+Provide the `blocked_instrumentation_scopes` parameter to the `Langfuse` client to filter out spans from specific instrumentation libraries.
 
 ```python
 from langfuse import Langfuse
@@ -134,33 +206,10 @@ langfuse = Langfuse(
 )
 ```
 
-**How it works:**
-
-When third-party libraries create OpenTelemetry spans (through their instrumentation packages), each span has an associated "instrumentation scope" that identifies which library created it. The Langfuse SDK filters spans at the export level based on these scope names.
-
-You can see the instrumentation scope name for any span in the Langfuse UI under the span's metadata (`metadata.scope.name`). Use this to identify which scopes you want to filter.
-
-<Callout type="warning">
-**Cross-Library Span Relationships**
-
-When filtering instrumentation scopes, be aware that blocking certain libraries may break trace tree relationships if spans from blocked and non-blocked libraries are nested together.
-
-For example, if you block parent spans but keep child spans from a separate library, you may see "orphaned" LLM spans whose parent spans were filtered out. This can make traces harder to interpret.
-
-Consider the impact on trace structure when choosing which scopes to filter.
-</Callout>
-
 </Tab>
-<Tab title="TypeScript">
+<Tab title="JS/TS SDK">
 
 You can provide a predicate function `shouldExportSpan` to the `LangfuseSpanProcessor` to decide on a per-span basis whether it should be exported to Langfuse.
-
-<Callout type="warning" title="Filtering Spans May Break Trace Trees">
-  Filtering spans may break the parent-child relationships in your traces. For
-  example, if you filter out a parent span but keep its children, you may see
-  "orphaned" observations in the Langfuse UI. Consider the impact on trace
-  structure when configuring `shouldExportSpan`.
-</Callout>
 
 ```ts filename="instrumentation.ts" /shouldExportSpan/
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -186,17 +235,10 @@ const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
   ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name);
 ```
 
-<Callout type="info">
-  If you would like to exclude Langfuse spans from being sent to third-party
-  observability backends configured in your OpenTelemetry setup, see [the
-  documentation on isolating the Langfuse tracer
-  provider](#isolated-tracer-provider).
-</Callout>
-
 </Tab>
-</Tabs>
+</LangTabs>
 
-## Tracer provider isolation
+## Isolated TracerProvider
 
 You can configure a separate OpenTelemetry TracerProvider for use with Langfuse. This creates isolation between Langfuse tracing and your other observability systems.
 
@@ -206,51 +248,54 @@ Benefits of isolation:
 - Third-party library spans won't be sent to Langfuse
 - Independent configuration and sampling rates
 
-While TracerProviders are isolated, they share the same OpenTelemetry context for tracking active spans. This can cause span relationship issues where: - A parent span from one TracerProvider might have children from another TracerProvider - Some spans may appear "orphaned" if their parent spans belong to a different TracerProvider - Trace hierarchies may be incomplete or confusing
+<Callout type="warning">
+While TracerProviders are isolated, they share the same OpenTelemetry context for tracking active spans. This can cause span relationship issues where: 
+
+- A parent span from one TracerProvider might have children from another TracerProvider 
+- Some spans may appear "orphaned" if their parent spans belong to a different TracerProvider 
+- Trace hierarchies may be incomplete or confusing
+
 Plan your instrumentation carefully to avoid confusing trace structures.
+</Callout>
 
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 
-```python
+```python {4, 5}
 from opentelemetry.sdk.trace import TracerProvider
 from langfuse import Langfuse
-
-langfuse_tracer_provider = TracerProvider()
+ 
+langfuse_tracer_provider = TracerProvider() # do not set to global tracer provider to keep isolation
 langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
-langfuse.start_span(name="isolated").end()
+langfuse.start_span(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
 ```
 
-<Callout type="warning">
-TracerProviders still share the same context, so mixing providers may create orphaned spans.
-</Callout>
 </Tab>
-<Tab title="TypeScript">
+<Tab title="JS/TS SDK">
 Isolate Langfuse spans with a custom provider and avoid sending them to other exporters.
 
 ```ts /setLangfuseTracerProvider/
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { setLangfuseTracerProvider } from "@langfuse/tracing";
-import { LangfuseSpanProcessor } from "@langfuse/otel";
-
-const langfuseTracerProvider = new NodeTracerProvider({
+ 
+// Create a new TracerProvider and register the LangfuseSpanProcessor
+// do not set this TracerProvider as the global TracerProvider
+const langfuseTracerProvider = new NodeTracerProvider(
   spanProcessors: [new LangfuseSpanProcessor()],
-});
-
-setLangfuseTracerProvider(langfuseTracerProvider);
+)
+ 
+// Register the isolated TracerProvider
+setLangfuseTracerProvider(langfuseTracerProvider)
 ```
 
-<Callout type="warning">
-As with Python, isolating tracer providers can break parent/child relationships when contexts overlap.
-</Callout>
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Multi-project setups [#multi-project-setup-experimental]
 
-<Tabs items={["Python", "TypeScript"]}>
-<Tab title="Python">
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 
 <Callout type="warning">
 Multi-project setups are **experimental** in the Python SDK and have important limitations regarding third-party OpenTelemetry integrations.
@@ -408,7 +453,7 @@ response_b = chain.invoke(
 </Tab>
 
 
-<Tab title="TypeScript">
+<Tab title="JS/TS SDK">
 
 You can configure the SDK to send traces to multiple Langfuse projects. This is useful for multi-tenant applications or for sending traces to different environments. Simply register multiple `LangfuseSpanProcessor` instances, each with its own credentials.
 
@@ -436,22 +481,14 @@ This configuration will send every trace to both projects. You can also configur
 
 
 </Tab>
-</Tabs>
-
-### Thread pools and multiprocessing (Python)
-
-Use the OpenTelemetry threading instrumentor so context flows across worker threads.
-
-```python
-from opentelemetry.instrumentation.threading import ThreadingInstrumentor
-
-ThreadingInstrumentor().instrument()
-```
-
-For multiprocessing, follow the [OpenTelemetry guidance](https://github.com/open-telemetry/opentelemetry-python/issues/2765#issuecomment-1158402076). If you use Pydantic Logfire, enable `distributed_tracing=True`.
-
+</LangTabs>
 
 ### Time to first token (TTFT)
+
+You can manually set the time to first token (TTFT) of your LLM calls. This is useful for measuring the latency of your LLM calls and for identifying slow LLM calls.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python">
 
 You can use the `completion_start_time` attribute to manually set the time to first token (TTFT) of your LLM calls. This is useful for measuring the latency of your LLM calls and for identifying slow LLM calls.
 
@@ -470,6 +507,24 @@ with langfuse.start_as_current_observation(as_type="generation", name="TTFT-Gene
 
 langfuse.flush()
 ```
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+You can use the `completionStartTime` attribute to manually set the time to first token (TTFT) of your LLM calls. This is useful for measuring the latency of your LLM calls and for identifying slow LLM calls.
+
+```ts
+import { startActiveObservation } from "@langfuse/tracing";
+
+startActiveObservation("llm-call", async (span) => {
+  span.update({
+    completionStartTime: new Date().toISOString(),
+  });
+});
+```
+
+</Tab>
+</LangTabs>
 
 ## Self-signed SSL certificates (self-hosted Langfuse)
 
@@ -499,41 +554,15 @@ httpx_client = httpx.Client(verify=os.environ["OTEL_EXPORTER_OTLP_TRACES_CERTIFI
 langfuse = Langfuse(httpx_client=httpx_client)
 ```
 
-## Observation Types
+## Langfuse + Sentry (TS/JS)
 
-Langfuse supports multiple observation types to provide context for different components of LLM applications.
-The full list of the observation types is documented here: [Observation types](/docs/observability/features/observation-types).
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python">
 
+No applicable for Python.
 
-### Serverless environments
-
-```ts filename="instrumentation.ts" /langfuseSpanProcessor/
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { LangfuseSpanProcessor } from "@langfuse/otel";
-
-export const langfuseSpanProcessor = new LangfuseSpanProcessor({
-  exportMode: "immediate",
-});
-
-const sdk = new NodeSDK({ spanProcessors: [langfuseSpanProcessor] });
-
-sdk.start();
-```
-
-```ts filename="handler.ts" /forceFlush/
-import { langfuseSpanProcessor } from "./instrumentation";
-
-export async function handler(event, context) {
-  // ... logic ...
-  await langfuseSpanProcessor.forceFlush();
-}
-```
-
-Use `after` in Vercel Cloud Functions to schedule the flush after the response has been sent.
-
-
-
-### Langfuse + Sentry (TS/JS)
+</Tab>
+<Tab title="TypeScript">
 
 ```ts filename="instrumentation.ts"
 import * as Sentry from "@sentry/node";
@@ -565,5 +594,31 @@ provider.register({
 <Callout type="info">
 If you only use Sentry for error monitoring, omit `tracesSampleRate` and the `SentrySpanProcessor` so its sampling rules don't affect Langfuse traces.
 </Callout>
+
+</Tab>
+</LangTabs>
+
+## Thread pools and multiprocessing (Python)
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python">
+
+Use the OpenTelemetry threading instrumentor so context flows across worker threads.
+
+```python
+from opentelemetry.instrumentation.threading import ThreadingInstrumentor
+
+ThreadingInstrumentor().instrument()
+```
+
+For multiprocessing, follow the [OpenTelemetry guidance](https://github.com/open-telemetry/opentelemetry-python/issues/2765#issuecomment-1158402076). If you use Pydantic Logfire, enable `distributed_tracing=True`.
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+This is not applicable for TypeScript.
+
+</Tab>
+</LangTabs>
 
 
