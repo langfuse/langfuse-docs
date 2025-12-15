@@ -86,6 +86,16 @@ Prompts support three ways to insert dynamic content at runtime:
 | [Prompt References](/docs/prompt-management/features/composability) | Reuse prompts across other prompts, avoid duplicating common instructions |
 | [Message Placeholders](/docs/prompt-management/features/message-placeholders) | Insert arrays of messages (e.g., chat history) |
 
+## Prompt Caching
+
+
+Langfuse Prompt Management uses cached prompts for 2 main reasons
+1. it adds no latency to your application. 
+2. it removes availability risk.
+
+This means your first few traces after updating a prompt might still be using the old version. If immediate updates are critical for your use case, you can disable caching or configure a shorter TTL (time-to-live). 
+
+See the [caching documentation](/docs/prompt-management/features/caching) for details on how caching works and how to configure it.
 
 
 ## Versioning and Labels
@@ -147,13 +157,3 @@ Here's a typical workflow for deploying prompt changes:
 Since your code references the labels, all this happens without changing code.
 
 
-## Prompt Caching
-
-
-Langfuse Prompt Management uses cached prompts for 2 main reasons
-1. it adds no latency to your application. 
-2. it removes availability risk.
-
-This means your first few traces after updating a prompt might still be using the old version. If immediate updates are critical for your use case, you can disable caching or configure a shorter TTL (time-to-live). 
-
-See the [caching documentation](/docs/prompt-management/features/caching) for details on how caching works and how to configure it.
