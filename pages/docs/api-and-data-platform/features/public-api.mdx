@@ -52,7 +52,7 @@ There are 3 different groups of APIs:
 
 - This page -> Project-level APIs: CRUD traces/evals/prompts/configuration within a project
 - [Organization-level APIs](/docs/administration/scim-and-org-api): provision projects, users (SCIM), and permissions
-- [Management API](/self-hosting/administration/instance-management-api): administer organizations on self-hosted installations
+- [Instance Management API](/self-hosting/administration/instance-management-api): administer organizations on self-hosted installations
 
 </Callout>
 
@@ -170,7 +170,11 @@ try {
 
 ## Ingest Traces via the API
 
-It is recommended to use the OpenTelemetry Endpoint to ingest traces. Please refer to the [OpenTelemetry docs](/integrations/native/opentelemetry) for more information.
+<Callout type="info">
+  The OpenTelemetry Endpoint will replace the Ingestion API in the future. Therefore, it is strongly recommended to switch to the OpenTelemetry Endpoint for trace ingestion. Please refer to the [OpenTelemetry docs](/integrations/native/opentelemetry) for more information.
+</Callout>
+
+The (legacy) [Ingestion API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) allows trace ingestion using an API.
 
 ## Alternatives
 
