@@ -75,7 +75,7 @@ print(result.format())
 </Tab>
 <Tab>
 {/* JS/TS SDK */}
-Make sure that OpenTelemetry is properly set up for traces to be delivered to Langfuse. See the [tracing setup documentation](/docs/observability/sdk/typescript/setup#tracing-setup) for configuration details. Always flush the span processor at the end of execution to ensure all traces are sent.
+Make sure that OpenTelemetry is properly set up for traces to be delivered to Langfuse. See the [tracing setup documentation](/docs/observability/sdk/overview#initialize-tracing) for configuration details. Always flush the span processor at the end of execution to ensure all traces are sent.
 
 ```typescript
 import { OpenAI } from "openai";
@@ -134,7 +134,7 @@ console.log(await result.format());
 await otelSdk.shutdown();
 ```
 
-**Note for JS/TS SDK**: OpenTelemetry must be properly set up for traces to be delivered to Langfuse. See the [tracing setup documentation](/docs/observability/sdk/typescript/setup#tracing-setup) for configuration details. Always flush the span processor at the end of execution to ensure all traces are sent.
+**Note for JS/TS SDK**: OpenTelemetry must be properly set up for traces to be delivered to Langfuse. See the [tracing setup documentation](/docs/observability/sdk/overview#initialize-tracing) for configuration details. Always flush the span processor at the end of execution to ensure all traces are sent.
 
 </Tab>
 </LangTabs>
@@ -855,7 +855,7 @@ _See [Python SDK](/docs/sdk/python/sdk-v3) docs for more details._
 <Tab>
 {/* JS/TS SDK */}
 
-Please make sure you have [the JS/TS SDK](/docs/observability/sdk/typescript/setup) set up for tracing of your application. If you use Langfuse for [observability](/docs/observability/overview), this is the same setup.
+Please make sure you have [the Langfuse SDK](/docs/observability/sdk/overview#initialize-tracing) set up for tracing of your application. If you use Langfuse for [observability](/docs/observability/overview), this is the same setup.
 
 Example:
 
