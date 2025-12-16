@@ -6,13 +6,13 @@ description: Configure, run, and monitor LLM-powered evaluators on traces and da
 
 # LLM-as-a-Judge
 
-LLM-as-a-judge is a technique to evaluate the quality of LLM applications by using an LLM as a judge. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The resulting [`scores`](/docs/evaluation/evaluation-methods/data-model) include chain-of-thought reasoning as a `comment`.
+LLM-as-a-judge is an [evaluation method](/docs/evaluation/evaluation-methods/overview) to score the output of an application by using an LLM as an evaluator. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The resulting [`scores`](/docs/evaluation/evaluation-methods/data-model) include chain-of-thought reasoning as a `comment`.
 
 ## Why use LLM-as-a-judge?
 
-- **Scalable & cost‑effective:** Judge thousands of outputs quickly and cheaply versus human panels.
-- **Human‑like judgments:** Captures nuance (helpfulness, safety, coherence) better than simple metrics, especially when rubric‑guided.
-- **Repeatable comparisons:** With a fixed rubric, you can rerun the same prompts to get consistent scores and short rationales.
+- **Scalable:** Judge thousands of outputs quickly versus human annotators.
+- **Human‑like:** Captures nuance (e.g. helpfulness, toxicity, relevance) better than simple metrics, especially when rubric‑guided.
+- **Repeatable:** With a fixed rubric, you can rerun the same prompts to get consistent scores.
 
 ## Set up step-by-step
 
@@ -131,73 +131,22 @@ To see your evaluator in action, you need to either [send traces](/docs/observab
   pipeline example](/docs/scores/external-evaluation-pipelines).
 </Callout>
 
-## Monitor & Iterate
+## Debug LLM-as-a-Judge Executions
 
-As our system evaluates your data it writes the results as [scores](/docs/evaluation/evaluation-methods/data-model). You can then:
+Every LLM-as-a-Judge evaluator execution creates a full trace, giving you complete visibility into the evaluation process. This allows you to debug prompt issues, inspect model responses, monitor token usage, and trace evaluation history.
 
-- **View Logs**: Check detailed logs for each evaluation, including status, execution trace IDs, and retry errors. Click the execution trace ID to view the complete LLM interaction for that specific evaluation run.
-- **Use Dashboards**: Aggregate scores over time, filter by version or environment, and track the performance of your LLM application.
-- **Take Actions**: Pause, resume, or delete an evaluator.
+You can show the LLM-as-a-Judge execution traces by filtering for the environment `langfuse-llm-as-a-judge` in the tracing table:
 
 <Frame fullWidth>
-  ![View evaluator data](/images/docs/evaluator-overview.png)
+  ![Tracing table filtered to langfuse-llm-as-a-judge environment](/images/docs/evaluation/llm-as-a-judge-debug-traces.png)
 </Frame>
 
-## Trace Evaluator Executions
-
-Every LLM-as-a-Judge evaluator execution now creates a full trace, giving you complete visibility into the evaluation process. This allows you to:
-
-- **Debug prompt issues**: See exactly what prompt was sent to the judge LLM
-- **Inspect model responses**: View the complete response including reasoning and structured outputs
-- **Monitor token usage**: Track costs and performance for each evaluator execution
-- **Trace evaluation history**: Navigate from any score back to its source LLM interaction
-
-### How to access execution traces
-
-There are four ways to navigate to an evaluator execution trace:
-
-1. **Score tooltip in trace view**: For LLM-as-a-Judge scores, hover over any score badge in the trace detail view and click "View execution trace"
-
-<Frame fullWidth>
-  ![Score tooltip with execution trace
-  link](/images/docs/evaluation/eval-execution-traces-score-tooltip.png)
-</Frame>
-
-2. **Tracing table**: Filter the environment to `langfuse-llm-as-a-judge` to view all evaluator execution traces
-
-<Frame fullWidth>
-  ![Tracing table filtered to langfuse-llm-as-a-judge
-  environment](/images/docs/evaluation/eval-execution-traces-tracing-table.png)
-</Frame>
-
-3. **Scores table**: Enable the "Execution Trace" column in the scores table to see execution trace IDs for all evaluator executions
-
-<Frame fullWidth>
-  ![Scores table with execution trace
-  column](/images/docs/evaluation/eval-execution-traces-scores-table.png)
-</Frame>
-
-4. **Evaluator logs table**: View execution trace IDs in the evaluator logs for detailed execution history and status
-
-<Frame fullWidth>
-  ![Evaluator logs with execution
-  traces](/images/docs/evaluation/eval-execution-traces-logs-table.png)
-</Frame>
-
-The execution trace shows the exact prompt sent to the judge, the model's response, token usage, latency, and any errors that occurred during execution.
-
-### Understanding execution statuses
+## LLM-as-a-Judge Execution Statuses
 
 - **Completed**: Evaluation finished successfully
 - **Error**: Evaluation failed (click execution trace ID for details)
 - **Delayed**: Evaluation hit rate limits by the LLM provider and is being retried with exponential backoff
 - **Pending**: Evaluation is queued and waiting to run
-
-## FAQ
-
-import { FaqPreview } from "@/components/faq/FaqPreview";
-
-<FaqPreview tags={["LLM-as-a-Judge"]} />
 
 ## GitHub Discussions
 
