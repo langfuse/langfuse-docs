@@ -1,0 +1,77 @@
+---
+date: 2025-12-16
+title: "v2 Metrics and Observations API (Beta)"
+description: New high-performance v2 APIs for metrics and observations with cursor-based pagination, selective field retrieval, and optimized data architecture.
+author: Valeriy
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We're releasing new **v2 endpoints** for our Metrics and Observations APIs, designed from the ground up for performance at scale.
+
+<Callout type="warning">
+
+The v2 APIs are currently in **beta**. They are stable for production use, but some parameters and behaviors may evolve based on user feedback before general availability.
+
+**Important:** With current SDK versions, data may take approximately 5 minutes to appear on v2 endpoints. We will be releasing updated SDK versions soon that will make data available immediately on v2 endpoints.
+
+</Callout>
+
+## Why v2?
+
+The v1 `/public/traces` and `/public/observations` endpoints have been among the most resource-intensive APIs to serve. After analyzing usage patterns, we identified several opportunities to dramatically reduce query overhead:
+
+1. **No single way to request partial data** - The v1 API always returns complete rows with I/O, usage, and metadata even when only a few fields are needed. Traces v1 endpoint supports `fields` parameter, but it is too coarse-grained.
+2. **Offset pagination doesn't scale** - Page-based pagination makes database do more work then striclty necessary.
+3. **JSON parsing is expensive** - Automatic JSON parsing of input/output adds overhead even when raw strings suffice
+
+The v2 APIs address all of these issues. Additionally, v2 is built on top of a new immutable data model that is inherently faster - it requires fewer joins and eliminates the need for deduplication at query time.
+
+## What's New
+
+### Metrics API v2
+
+```
+GET /api/public/v2/metrics
+```
+
+Built on an optimized data model, the v2 Metrics API delivers significantly faster query performance.
+
+**The `traces` view is no longer available in v2.** Instead, use the `observations` view which is both faster and more powerful. Most trace-level analytics can be achieved by grouping observations by `traceId` - for example, get total cost per trace by grouping on `traceId` and summing `totalCost`.
+
+### Observations API v2
+
+```
+GET /api/public/v2/observations
+```
+
+A redesigned endpoint for high-performance observation retrieval:
+
+- **Selective field retrieval** - Specify which field groups you need (e.g., `core`, `basic`, `io`, `usage`). Defaults to `core` and `basic` if not specified
+- **Cursor-based pagination** - Consistent performance regardless of pagination depth
+- **Optimized I/O handling** - Returns I/O as strings by default; set `parseIoAsJson: true` only when needed
+- **Stricter limits** - Default limit of 50 (max 1,000). With cursor based pagination, large result sets can be efficiently retrieved in smaller chunks, while less work is requied per chunk.
+
+## Migration Notes
+
+The v2 APIs are additive - v1 endpoints remain available and unchanged. When ready to migrate:
+
+1. Update your API calls to use `/api/public/v2/` prefix
+2. Use the `fields` parameter to specify which field groups you need
+3. Replace page-based pagination with cursor-based pagination
+4. Note that `parseIoAsJson` defaults to `false` in v2 (v1 always parsed I/O as JSON)
+
+**Using v1 `/api/public/traces`?** Consider v2 `/api/public/v2/observations` instead - it's significantly faster and covers most use cases.
+
+## Learn more
+
+import { Book } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Metrics API Documentation" href="/docs/analytics/metrics-api#v2" icon={<Book />} />
+  <Card title="Observations API Documentation" href="/docs/api-and-data-platform/features/observations-api" icon={<Book />} />
+  <Card title="Metrics v2 API Reference" href="https://api.reference.langfuse.com/#tag/metrics/GET/api/public/v2/metrics" icon={<Book />} />
+  <Card title="Observations v2 API Reference" href="https://api.reference.langfuse.com/#tag/observation/GET/api/public/v2/observations" icon={<Book />} />
+</Cards>
