@@ -20,17 +20,11 @@ Prompt management is a systematic approach to storing, versioning, and retrievin
 
 ### Decouple Prompt Updates from Code Deployment
 
-In most LLM applications, prompt iteration and code deployment are managed by different people. Product managers and domain experts iterate on prompts, while engineers manage deployments.
+In most LLM applications, **prompt iteration and code deployment** are managed by **different people**. Product managers and domain experts iterate on prompts, while engineers manage deployments.
 
-With your prompts in code, when a PM wants to improve a chatbot's greeting, they need to
+With prompts in code, a simple text change requires engineering involvement, code review, and a full deployment cycle, turning a 2-minute update into hours or days of waiting.
 
-_ask engineering → wait for code review → wait for deployment → test in production_
-
-**A simple text change takes hours or days, disrupting the workflow of different people.**
-
-When your prompts are in Langfuse, the PM updates the prompt in Langfuse UI. Your application fetches the latest version automatically. 
-
-This **separation of concerns** enables **deploying updates instantly, without involving engineering or going through a deployment cycle**.
+When prompts live in Langfuse, non-technical team members update them directly in the UI while your application automatically fetches the latest version. This **separation of concerns** means **prompt updates deploy instantly**, without needing to involve engineering or triggering a deployment.
 
 ### No latency, no availability risk
 
