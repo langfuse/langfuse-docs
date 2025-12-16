@@ -1,0 +1,54 @@
+---
+title: Can I dynamically select sub-prompts at runtime?
+description: Learn how to conditionally choose which sub-prompt to embed based on boolean logic or other conditions using Langfuse prompt variables.
+tags: [prompt-management]
+---
+
+# Can I dynamically select which sub-prompt to embed based on a condition?
+
+Let's say you have a main prompt with shared instructions, but want to inject a different sub-set of instructions based on whether the user is on a free or premium plan.
+
+[Langfuse prompt references](/docs/prompt-management/features/composability) don't support conditional logic (like `{% if %}` statements) directly. However, you can achieve dynamic prompt selection by handling the logic in your application code and passing the selected prompt as a [variable](/docs/prompt-management/features/variables) value.
+
+**Before diving into the how, let's first zoom out and look at the options you have.**
+
+| Approach | Use when | Trade-offs |
+| --- | --- | --- |
+| [**Static prompt references**](/docs/prompt-management/features/composability) | Sub-prompt is always the same | ✅ Fully declarative, resolved automatically in Playground<br/>❌ No dynamic selection based on runtime values |
+| **Dynamic selection via variables** (this page) | Sub-prompt depends on runtime conditions | ✅ All (sub)prompts managed in Langfuse UI<br/>✅ Selection logic supported (via code)<br/>✅ Variables automatically detected by Langfuse<br/>❌ Not automatically resolved in Playground, prompt experiments |
+| [**External templating**](/faq/all/using-external-templating-libraries) (Jinja, Liquid) | Complex conditionals within a single template | ✅ Full flexibility logic-wise<br/>❌ Prompts not automatically resolved in Playground, prompt experiments <br/>❌ Variables not automatically detected by Langfuse |
+
+## How it works
+
+Instead of embedding prompts statically with [prompt composability](/docs/prompt-management/features/composability) (`@@@langfusePrompt:...@@@`), you fetch multiple prompts and select which one to use in your application code:
+
+1. Create a parent prompt with a [variable](/docs/prompt-management/features/variables) placeholder (e.g., `{{selected_prompt}}`)
+2. Create the sub-prompts you want to conditionally embed
+3. Fetch all prompts using `get_prompt()`
+4. Select the appropriate sub-prompt based on your logic
+5. Pass the selected prompt text to the parent's `compile()` method
+
+Here's an example in Python:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+# Parent prompt in Langfuse:
+# "Here is your final prompt:\n\n{{selected_prompt}}"
+
+# Get production versions
+parent_prompt = langfuse.get_prompt("parent-prompt")
+prompt_a = langfuse.get_prompt("prompt-a")
+prompt_b = langfuse.get_prompt("prompt-b")
+
+# Pick based on your boolean or other condition
+use_prompt_a = True  # your logic here
+selected = prompt_a if use_prompt_a else prompt_b
+
+# Insert into parent
+final_prompt = parent_prompt.compile(selected_prompt=selected.prompt)
+```
+
+
