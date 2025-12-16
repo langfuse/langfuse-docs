@@ -8,6 +8,8 @@ tags: [prompt-management]
 
 Yes! While Langfuse has its own [variable syntax](/docs/prompt-management/features/variables) (`{{variable}}`) with the `compile()` method, you can use external templating libraries like Jinja2 or Liquid instead for advanced features like conditionals, loops, and filters.
 
+**Do you need external templating libraries?** Managing external templating languages in a prompt editor can be cumbersome. You might be able to do this in a simpler way using [Langfuse variables](/faq/all/conditional-prompt-embedding) instead.
+
 
 ## How it works
 
@@ -27,19 +29,9 @@ When using external templating libraries instead of Langfuse's native variable s
 - **Prompt experiments:** You cannot use in-UI prompt experiments since they rely on Langfuse's `compile()`. You can use [Experiments via the SDK](/docs/evaluation/experiments/experiments-via-sdk) where you compile the prompt yourself as part of the task.
 - **Variable detection:** Langfuse's UI will only detect variables using the `{{variable}}` syntax. Jinja2/Liquid variables won't appear in the variable list.
 
-## When to use external templating
-
-Consider using external templating libraries when you need the following to be managed from the prompt UI instead of in your application code:
-
-- **Conditionals:** `{% if condition %}...{% endif %}`
-- **Loops:** `{% for item in items %}...{% endfor %}`
-- **Filters:** `{{ name | upper }}`
-- **Complex logic:** Nested conditionals, macros, includes
-
-For simple variable substitution, Langfuse's built-in `compile()` method is sufficient and provides a better experience with Playground and in-UI experiment integration.
-
 ## Related resources
 
 - [Langfuse Variables](/docs/prompt-management/features/variables) 
 - [Message Placeholders](/docs/prompt-management/features/message-placeholders)
 - [Prompt Composability](/docs/prompt-management/features/composability)
+- [Dynamically selecting sub-prompts at runtime](/faq/all/conditional-prompt-embedding)
