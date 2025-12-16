@@ -275,13 +275,15 @@ await langfuse.flush();
 </Tab>
 </LangTabs>
 
-→ More details in [Python SDK docs](/docs/observability/sdk/python/evaluation#create-scores) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+→ More details in the [Langfuse SDK advanced features guide](/docs/observability/sdk/advanced-features#create-scores). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
 ### Preventing Duplicate Scores
 
 By default, Langfuse allows for multiple scores of the same `name` on the same trace. This is useful if you'd like to track the evolution of a score over time or if e.g. you've received multiple user feedback scores on the same trace.
 
 In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and add this as an `id` (JS/TS) / `score_id` (Python) when creating the score, e.g. `<trace_id>-<score_name>`.
+
+Note that if you expect API calls for the same score to be 60+ days apart, you should also use the same timestamp. See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#updating-traces-observations-and-scores) for more details.
 
 ### Enforcing a Score Config
 
@@ -478,7 +480,7 @@ await langfuse.flush();
 
 </Tab>
 
-→ More details in [Python SDK docs](/docs/observability/sdk/python/evaluation#create-scores) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+→ More details in the [Langfuse SDK advanced features guide](/docs/observability/sdk/advanced-features#create-scores). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
 </LangTabs>
 
