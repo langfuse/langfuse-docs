@@ -24,7 +24,7 @@ The v2 APIs are currently in **beta**. They are stable for production use, but s
 The v1 `/public/traces` and `/public/observations` endpoints have been among the most resource-intensive APIs to serve. After analyzing usage patterns, we identified several opportunities to dramatically reduce query overhead:
 
 1. **No single way to request partial data** - The v1 API always returns complete rows with I/O, usage, and metadata even when only a few fields are needed. Traces v1 endpoint supports `fields` parameter, but it is too coarse-grained.
-2. **Offset pagination doesn't scale** - Page-based pagination makes database do more work then striclty necessary.
+2. **Offset pagination doesn't scale** - Page-based pagination makes database do more work than strictly necessary.
 3. **JSON parsing is expensive** - Automatic JSON parsing of input/output adds overhead even when raw strings suffice
 
 The v2 APIs address all of these issues. Additionally, v2 is built on top of a new immutable data model that is inherently faster - it requires fewer joins and eliminates the need for deduplication at query time.
@@ -52,7 +52,7 @@ A redesigned endpoint for high-performance observation retrieval:
 - **Selective field retrieval** - Specify which field groups you need (e.g., `core`, `basic`, `io`, `usage`). Defaults to `core` and `basic` if not specified
 - **Cursor-based pagination** - Consistent performance regardless of pagination depth
 - **Optimized I/O handling** - Returns I/O as strings by default; set `parseIoAsJson: true` only when needed
-- **Stricter limits** - Default limit of 50 (max 1,000). With cursor based pagination, large result sets can be efficiently retrieved in smaller chunks, while less work is requied per chunk.
+- **Stricter limits** - Default limit of 50 (max 1,000). With cursor based pagination, large result sets can be efficiently retrieved in smaller chunks, while less work is required per chunk.
 
 ## Migration Notes
 
