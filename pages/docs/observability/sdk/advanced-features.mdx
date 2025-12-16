@@ -6,7 +6,7 @@ category: SDKs
 
 # Advanced features
 
-Use these patterns to harden your Langfuse instrumentation, protect sensitive data, and adapt the SDKs to complex environments. Each section shows the equivalent Python and JS/TS setup side-by-side.
+Use these methods to harden your Langfuse instrumentation, protect sensitive data, and adapt the SDKs to your specific environment.
 
 ## Mask sensitive data
 
@@ -36,7 +36,7 @@ langfuse = Langfuse(mask=pii_masker)
 </Tab>
 <Tab title="JS/TS SDK">
 
-You can provide a `mask` function to the `LangfuseSpanProcessor`. This function will be applied to the input, output, and metadata of every observation.
+You can provide a `mask` function to the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html). This function will be applied to the input, output, and metadata of every observation.
 
 The function receives an object `{ data }`, where `data` is the stringified JSON of the attribute's value. It should return the masked data.
 

@@ -21,7 +21,7 @@ All approaches are interoperable. You can nest a decorator-created observation i
 
 ## Custom instrumentation [#custom]
 
-The Langfuse SDK provides 3 ways to create observations:
+You custom instrument your application with the Langfuse SDK using the following methods:
 
 ### Context manager [#context-manager]
 
@@ -286,7 +286,7 @@ span.update({ output: "Successfully answered user request." }).end();
 ```
 
 <Callout type="warning" title="Manual Ending Required">
-  If you use [`startObservation()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#startobservation), you are responsible for calling `.end()` on
+  If you use [`startObservation()`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startObservation.html), you are responsible for calling [`.end()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#end) on
   the returned observation object. Failure to do so will result in incomplete or
   missing observations in Langfuse.
 </Callout>
@@ -811,7 +811,7 @@ span.end();
 
 ## Client lifecycle & flushing
 
-As the Langfuse SDKs are [asynchronous](/docs/observability/data-model#background-processing), they buffer spans in the background. Always flush or shut down the client in short-lived processes (scripts, serverless functions, workers) to avoid losing data.
+As the Langfuse SDKs are [asynchronous](/docs/observability/data-model#background-processing), they buffer spans in the background. Always [`flush()`](https://python.reference.langfuse.com/langfuse#Langfuse.flush) or [`shutdown()`](https://python.reference.langfuse.com/langfuse#Langfuse.shutdown) the client in short-lived processes (scripts, serverless functions, workers) to avoid losing data.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
@@ -862,7 +862,7 @@ langfuse.shutdown()
 <Tabs items={["Generic Serverless function", "Vercel Cloud Functions"]}>
 <Tab>
 {/* Generic serverless */}
-Export the processor from your OTEL SDK setup file in order to flush it later.
+Export the processor from your OTEL SDK setup file in order to call [`forceFlush()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html#forceflush) later.
 
 ```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/ /exportMode: "immediate"/
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -880,7 +880,7 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-In your serverless function handler, call [`forceFlush()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html#forceflush) on the span processor before the function exits.
+In your serverless function handler, call [`forceFlush()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html#forceflush) on the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) before the function exits.
 
 ```ts filename="handler.ts" /forceFlush/
 import { langfuseSpanProcessor } from "./instrumentation";

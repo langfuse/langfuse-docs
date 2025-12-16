@@ -309,7 +309,7 @@ with langfuse.start_as_current_observation(
 4. **Context Managers**:
 
    - Replace manual `langfuse.trace()`, `trace.span()` with context managers if you want to use them
-   - Use `with langfuse.start_as_current_observation()` instead
+   - Use [`with langfuse.start_as_current_observation()`](https://python.reference.langfuse.com/langfuse#Langfuse.start_as_current_observation) instead
 
 5. **LlamaIndex Migration**:
 
@@ -320,7 +320,7 @@ with langfuse.start_as_current_observation(
 
    - **No Custom Observation IDs**: v3 uses W3C Trace Context standard - you cannot set custom observation IDs
    - **Trace ID Format**: Must be 32-character lowercase hexadecimal (16 bytes)
-   - **External ID Correlation**: Use `Langfuse.create_trace_id(seed=external_id)` to generate deterministic trace IDs from external systems
+   - **External ID Correlation**: Use [`Langfuse.create_trace_id(seed=external_id)`](https://python.reference.langfuse.com/langfuse#Langfuse.create_trace_id) to generate deterministic trace IDs from external systems
 
    ```python
    from langfuse import Langfuse, observe
@@ -362,7 +362,7 @@ See the [datasets documentation](/docs/evaluation/dataset-runs/remote-run) for m
 
     - **v2**: Could be set directly on integration calls
     - **v3**: Must be set on enclosing spans
-    - **Migration**: Wrap integration calls with `langfuse.start_as_current_observation()`
+    - **Migration**: Wrap integration calls with [`langfuse.start_as_current_observation()`](https://python.reference.langfuse.com/langfuse#Langfuse.start_as_current_observation)
 
 4.  **Creating Observations**:
 
@@ -372,8 +372,8 @@ See the [datasets documentation](/docs/evaluation/dataset-runs/remote-run) for m
 
 5.  **IDs and Context**:
 
-    - **v3**: W3C Trace Context format, automatic [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/)
-    - **Migration**: Use `langfuse.get_current_trace_id()` instead of `get_trace_id()`
+   - **v3**: W3C Trace Context format, automatic [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/)
+   - **Migration**: Use [`langfuse.get_current_trace_id()`](https://python.reference.langfuse.com/langfuse#Langfuse.get_current_trace_id) instead of `get_trace_id()`
 
 6.  **Event Size Limitations**:
 
@@ -400,11 +400,11 @@ The Langfuse base URL environment variable is now `LANGFUSE_BASE_URL` and no lon
 
 The v4 SDK tracing is a major rewrite based on OpenTelemetry and introduces several breaking changes.
 
-1.  **OTEL-based Architecture**: The SDK is now built on top of OpenTelemetry. An OpenTelemetry Setup is required now and done by registering the `LangfuseSpanProcessor` with an OpenTelemetry `NodeSDK`.
-2.  **New Tracing Functions**: The `langfuse.trace()`, `langfuse.span()`, and `langfuse.generation()` methods have been replaced by `startObservation`, `startActiveObservation`, etc., from the `@langfuse/tracing` package.
+1.  **OTEL-based Architecture**: The SDK is now built on top of OpenTelemetry. An OpenTelemetry Setup is required now and done by registering the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) with an OpenTelemetry `NodeSDK`.
+2.  **New Tracing Functions**: The `langfuse.trace()`, `langfuse.span()`, and `langfuse.generation()` methods have been replaced by [`startObservation`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startObservation.html), [`startActiveObservation`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startActiveObservation.html), etc., from the `@langfuse/tracing` package.
 3.  **Separation of Concerns**:
     - The **`@langfuse/tracing`** and **`@langfuse/otel`** packages are for tracing.
-    - The **`@langfuse/client`** package and the `LangfuseClient` class are now only for non-tracing features like scoring, prompt management, and datasets.
+    - The **`@langfuse/client`** package and the [`LangfuseClient`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_client.LangfuseClient.html) class are now only for non-tracing features like scoring, prompt management, and datasets.
 
 See the [SDK v4 docs](/docs/observability/sdk/overview) for details on each.
 

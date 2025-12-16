@@ -11,14 +11,32 @@ import { Rocket, Plug, Settings, LifeBuoy, BookOpen } from "lucide-react";
 
 # Langfuse SDKs
 
-Langfuse offers two SDKs for **Python** and **JS/TS**. The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features. Both SDKs are OpenTelemetry-based, async by default, and interoperate with Langfuse [native integrations](/integrations).
+Langfuse offers two SDKs:
 
+- **Python** <a href="https://github.com/langfuse/langfuse-python"><img className="inline" alt="GitHub repository langfuse/langfuse-python" src="https://img.shields.io/badge/repo-langfuse--python-blue?style=flat-square&logo=GitHub" /></a> <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi+langfuse" alt="PyPi langfuse" /></a>
+- **JS/TS** <a href="https://github.com/langfuse/langfuse-js"><img className="inline" alt="GitHub repository langfuse/langfuse-js" src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=GitHub" /></a> <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm+@langfuse/tracing" alt="NPM @langfuse/tracing" /></a>
+
+The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features. 
+
+**Key benefits**
+
+- Based on [OpenTelemetry](https://opentelemetry.io/), so you can use any OTEL-based instrumentation library for your LLM stack.
+- Fully [async requests](/docs/observability/data-model#background-processing), meaning Langfuse adds almost no latency.
+- Interoperable with Langfuse [native integrations](/integrations).
+- Accurate latency tracking via synchronous timestamps.
+- IDs available for downstream use.
+- Great DX when nesting observations.
+- Cannot break your application: SDK errors are caught and logged.
+
+<Callout type="info">
+This section documents tracing related features of the Langfuse SDK. To use the Langfuse SDK for [prompt management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview), visit their respective documentation.
+</Callout>
 
 <details>
 <summary>Requirements for self-hosted Langfuse</summary>
 
 <Callout type="info">
-If you are self-hosting Langfuse, the Python SDK v3 requires [**Langfuse platform version ≥ 3.63.0**](https://github.com/langfuse/langfuse/releases/tag/v3.63.0) and the TypeScript SDK v4 requires [**Langfuse platform version ≥ 3.95.0**](https://github.com/langfuse/langfuse/releases/tag/v3.95.0) for all features to work correctly. For traces to be correctly processed.
+If you are self-hosting Langfuse, the Python SDK v3 requires [**Langfuse platform version ≥ 3.63.0**](https://github.com/langfuse/langfuse/releases/tag/v3.63.0) and the TypeScript SDK v4 requires [**Langfuse platform version ≥ 3.95.0**](https://github.com/langfuse/langfuse/releases/tag/v3.95.0) for all features to work correctly.
 </Callout>
 
 </details>
@@ -33,16 +51,6 @@ This documentation is for the latest versions of the Langfuse SDKs.
 - Documentation for the legacy TypeScript SDK v3 can be found [here](https://js-sdk-v3.docs-snapshot.langfuse.com/docs/observability/sdk/typescript/guide/).
 
 </details>
-
-**Key benefits**
-
-- Based on [OpenTelemetry](https://opentelemetry.io/), so you can use any OTEL-based instrumentation library for your LLM stack.
-- Fully [async requests](/docs/observability/data-model#background-processing), meaning Langfuse adds almost no latency.
-- Accurate latency tracking via synchronous timestamps.
-- IDs available for downstream use.
-- Great DX when nesting observations.
-- Cannot break your application: SDK errors are caught and logged.
-- Interoperable with Langfuse [native integrations](/integrations).
 
 ## Quickstart
 
@@ -344,7 +352,7 @@ graph TD
 - **Context Propagation**: OpenTelemetry automatically handles the propagation of the current trace and span context. This means when you call another function (whether it's also traced by Langfuse, an OTel-instrumented library, or a manually created span), the new span will automatically become a child of the currently active span, forming a correct trace hierarchy.
 - [**Attribute Propagation**](/docs/observability/sdk/instrumentation#add-attributes-to-observations): Certain trace attributes (`user_id`, `session_id`, `metadata`, `version`, `tags`) can be automatically propagated to all child observations using `propagate_attributes()`. This ensures consistent attribute coverage across all observations in a trace. See the [instrumentation docs](/docs/observability/sdk/python/instrumentation#propagating-trace-attributes) for details.
 
-The Langfuse SDKs provides wrappers around OTel spans (`LangfuseSpan`, `LangfuseGeneration`) that offer convenient methods for interacting with Langfuse-specific features like scoring and media handling, while still being native OTel spans under the hood. You can also use these wrapper objects to add Langfuse trace attributes via `update_trace()` or use `propagate_attributes()` for automatic propagation to all child observations.
+The Langfuse SDKs provides wrappers around OTel spans ([`LangfuseSpan`](https://python.reference.langfuse.com/langfuse#LangfuseSpan), [`LangfuseGeneration`](https://python.reference.langfuse.com/langfuse#LangfuseGeneration)) that offer convenient methods for interacting with Langfuse-specific features like scoring and media handling, while still being native OTel spans under the hood. You can also use these wrapper objects to add Langfuse trace attributes via [`update_trace()`](https://python.reference.langfuse.com/langfuse#LangfuseEvent.update) or use [`propagate_attributes()`](https://python.reference.langfuse.com/langfuse#propagate_attributes) for automatic propagation to all child observations.
 
 ## Learn more
 
