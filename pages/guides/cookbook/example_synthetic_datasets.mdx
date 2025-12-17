@@ -385,7 +385,6 @@ You can now evaluate your application using this dataset. Check our [RAG Observa
 
 ![Custom RAG Dataset](https://langfuse.com/images/cookbook/example-synthetic-datasets/custom-rag-dataset.png)
 
-
 ### Example 6: Torque - Declarative Dataset Generation
 
 [Torque](https://github.com/qforge-dev/torque) is a declarative, typesafe DSL for building synthetic datasets. It lets you compose conversations like React components, making it particularly useful for generating complex multi-turn conversations with tool calls.
@@ -397,7 +396,9 @@ This approach is ideal when you need:
 - **Reproducible datasets** with seeded generation
 - **Complex multi-turn dialogs** that follow specific patterns
 
-```javascript
+
+
+```python
 import { Langfuse } from "langfuse";
 
 import {
@@ -492,6 +493,7 @@ for (const conversation of conversations) {
 }
 
 await langfuse.flushAsync();
+
 ```
 
 **Key advantages of Torque:**
