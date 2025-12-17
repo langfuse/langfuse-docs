@@ -26,24 +26,17 @@ Navigate to the Evaluators page and click on the `+ Set up Evaluator` button.
 
 ### Set the default model
 
-Next, you'll define the default model used for conducting the evaluations. The default is used by every managed evaluator; custom templates may override it.
+Next, define the default model used for the evaluations. This step requires an LLM Connection to be set up. Please see [LLM Connections](/docs/administration/llm-connection) for more information.
 
-<Frame fullWidth>
-  ![Evaluator default model](/images/docs/evaluator-default-model.png)
-</Frame>
-
-This step requires an LLM Connection to be set up. Please see [LLM Connections](/docs/administration/llm-connection) for more information.
-
-- **Setup**: This default model needs to be set up once, though it can be changed at any point if needed.
-- **Change**: Existing evaluators keep evaluating with the new model—historic results stay preserved.
-- **Additional Provider Options**: You can pass additional parameters when invoking a model. [Read this documentation about additional provider options](/docs/administration/llm-connection#advanced-configurations) for more information.
-- **Structured Output Support**: It's crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
+<Callout type="info">
+It’s crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
+</Callout>
 
 ### Pick an Evaluator
 
 <Frame fullWidth>![Evaluator select](/images/docs/evaluator-select.png)</Frame>
 
-Now we select an evaluator. There are two main ways:
+Next, select an evaluator. There are two main ways:
 
 <Tabs items={["Managed Evaluator", "Custom Evaluator"]}>
 <Tab>
@@ -68,7 +61,7 @@ When the library doesn't fit your specific needs, add your own:
 
 ### Choose which Data to Evaluate
 
-With your evaluator and model selected, you now specify which data to run the evaluations on. You can choose between running on **production tracing data** or **Datasets during Dataset Runs**.
+With your evaluator and model selected, you now specify which data to run the evaluations on. You can choose between running on **production tracing data** or **Dataset Experiments**.
 
 <Tabs items={["Live Data", "Experiments"]}>
 <Tab>
@@ -141,12 +134,15 @@ You can show the LLM-as-a-Judge execution traces by filtering for the environmen
   ![Tracing table filtered to langfuse-llm-as-a-judge environment](/images/docs/evaluation/llm-as-a-judge-debug-traces.png)
 </Frame>
 
-## LLM-as-a-Judge Execution Statuses
+<details>
+<summary>LLM-as-a-Judge Execution Statuses</summary>
 
-- **Completed**: Evaluation finished successfully
-- **Error**: Evaluation failed (click execution trace ID for details)
-- **Delayed**: Evaluation hit rate limits by the LLM provider and is being retried with exponential backoff
-- **Pending**: Evaluation is queued and waiting to run
+- **Completed**: Evaluation finished successfully.
+- **Error**: Evaluation failed (click execution trace ID for details).
+- **Delayed**: Evaluation hit rate limits by the LLM provider and is being retried with exponential backoff.
+- **Pending**: Evaluation is queued and waiting to run.
+
+</details>
 
 ## GitHub Discussions
 
