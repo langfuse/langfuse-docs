@@ -457,8 +457,9 @@ You can add attributes to observations to help you better understand your applic
 - [`metadata`](/docs/observability/features/metadata)
 - [`version`](/docs/observability/features/releases-and-versioning)
 - [`tags`](/docs/observability/features/tags)
+- `traceName` (trace name)
 
-To update the name, input and output of the trace, see [trace-level inputs/outputs](#trace-inputoutput-behavior).
+To update the input and output of the trace, see [trace-level inputs/outputs](#trace-inputoutput-behavior).
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
@@ -476,6 +477,7 @@ with langfuse.start_as_current_observation(as_type="span", name="user-workflow")
         session_id="session_abc",
         metadata={"experiment": "variant_a"},
         version="1.0",
+        trace_name="user-workflow",
     ):
         with langfuse.start_as_current_observation(as_type="generation", name="llm-call"):
             pass
@@ -518,6 +520,7 @@ await startActiveObservation("user-workflow", async () => {
       sessionId: "session_abc",
       metadata: { experiment: "variant_a", env: "prod" },
       version: "1.0",
+      traceName: "user-workflow",
     },
     async () => {
       const generation = startObservation("llm-call", { model: "gpt-4" }, { asType: "generation" });
