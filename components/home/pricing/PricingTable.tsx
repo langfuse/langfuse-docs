@@ -228,9 +228,11 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         price: "Custom Pricing",
         mainFeatures: [
           "All Open Source features",
+          "Management APIs",
           "Project-level RBAC",
-          "Enterprise Security Features",
-          "SOC2, ISO27001, and InfoSec reviews",
+          "Data Retention Policies",
+          "Audit Logs",
+          "ISO27001 and InfoSec reviews",
           "Dedicated support engineer",
           "Support SLA",
           "Billing via AWS Marketplace",

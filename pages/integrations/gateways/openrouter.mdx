@@ -1,5 +1,5 @@
 ---
-title: "OpenRouter Integration"
+title: "Trace OpenRouter with Langfuse"
 sidebarTitle: OpenRouter
 logo: /images/integrations/openrouter_icon.svg
 description: "Learn how to integrate Langfuse with OpenRouter using Broadcast (no-code) or the OpenAI SDK."
@@ -13,28 +13,29 @@ In this guide, we'll show you how to integrate [Langfuse](/) with [OpenRouter](h
 
 > **What is Langfuse?** [Langfuse](/) is an open source LLM engineering platform that helps teams trace LLM calls, monitor performance, and debug issues in their AI applications.
 
-## Two ways to integrate Langfuse with OpenRouter:
+Two ways to integrate Langfuse with OpenRouter:
 
-1. You can use the OpenRouter Broadcast feature to automatically send traces to Langfuse without any code changes.
-2. You can use the Langfuse OpenAI SDK wrapper to manually send traces to Langfuse. Since OpenRouter uses the OpenAI API schema, we can utilize Langfuse's native integration with the OpenAI SDK, available in both [Python](/integrations/model-providers/openai-py) and [TypeScript](/integrations/model-providers/openai-js).
+1. [**You can use the OpenRouter Broadcast feature**](#broadcast) to automatically send traces to Langfuse without any code changes.
+2. [**You can use the Langfuse OpenAI SDK wrapper**](#sdk) to manually send traces to Langfuse. Since OpenRouter uses the OpenAI API schema, we can utilize Langfuse's native integration with the OpenAI SDK, available in both [Python](/integrations/model-providers/openai-py) and [TypeScript](/integrations/model-providers/openai-js).
 
 There is more information on e.g. cost tracking or interoperability with Langfuse's Python SDK as well as next steps in the guides below.
 
-## 1. OpenRouter Broadcast Tracing with Langfuse (No-Code)
+## 1. OpenRouter Broadcast Tracing with Langfuse (No-Code) [#broadcast]
 
 OpenRouter's [Broadcast feature](https://openrouter.ai/docs/guides/features/broadcast/overview) can automatically send traces to Langfuse without any code changes. To enable this integration, go to your [OpenRouter settings](https://openrouter.ai/settings) and connect your Langfuse API keys. Once set up, all requests processed through OpenRouter will be traced and made available in your Langfuse project.
 
 <Frame className="my-10" fullWidth>
-  ![OpenRouter settings showing the Langfuse Broadcast configuration](/images/integrations/openrouter-broadcast-langfuse-config.png)
+  ![OpenRouter settings showing the Langfuse Broadcast
+  configuration](/images/integrations/openrouter-broadcast-langfuse-config.png)
 </Frame>
 
 > **Note:** This method is recommended if you want to capture all OpenRouter requests in Langfuse with minimal configuration, and do not require advanced features like custom trace metadata or nested tracing.
 
 For more information about setting up your Langfuse API keys or available options, see the [Langfuse getting started guide](/docs/observability/get-started.md).
 
+## 2. SDK Integration [#sdk]
 
-## 2. SDK Integration:
- Use the Langfuse OpenAI SDK wrapper for advanced features like nested tracing, custom metadata, and full control over trace data. The rest of this guide covers the SDK integration method.
+Use the Langfuse OpenAI SDK wrapper for advanced features like nested tracing, custom metadata, and full control over trace data. The rest of this guide covers the SDK integration method.
 
 ### Get started with SDK Integration
 
