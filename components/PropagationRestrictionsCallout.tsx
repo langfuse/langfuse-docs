@@ -1,11 +1,11 @@
 import { Callout } from "nextra/components";
 
 interface PropagationRestrictionsCalloutProps {
-  attributes?: ("userId" | "sessionId" | "metadata" | "version" | "tags")[];
+  attributes?: ("userId" | "sessionId" | "metadata" | "version" | "tags" | "traceName")[];
 }
 
 export function PropagationRestrictionsCallout({
-  attributes = ["userId", "sessionId", "metadata", "version", "tags"],
+  attributes = ["userId", "sessionId", "metadata", "version", "tags", "traceName"],
 }: PropagationRestrictionsCalloutProps) {
   const pythonLink =
     "/docs/observability/sdk/instrumentation#propagate-attributes";
@@ -31,7 +31,7 @@ export function PropagationRestrictionsCallout({
       {isGeneric ? (
         <div className="my-3">
           We use Attribute Propagation to propagate specific attributes (userId,
-          sessionId, version, tags, metadata) across all observations in an
+          sessionId, version, tags, metadata, traceName) across all observations in an
           execution context. We will use all observations with these attributes
           to calculate attribute-level metrics. Please consider the following
           when using Attribute Propagation:
