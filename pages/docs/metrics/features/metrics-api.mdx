@@ -31,8 +31,7 @@ The v2 Metrics API provides significant performance improvements through an opti
 
 ### Key Changes from v1
 
-**The `traces` view is no longer available in v2.** Instead, use the `observations` view which is both faster and more powerful compared to v1. Most trace-level analytics can be achieved by grouping observations by `traceId`.
-E.g. in order to get trace-level cost: group by `traceId`, aggregate `totalCost` with `sum`
+**The `traces` view is no longer available in v2.** Instead, use the `observations` view which is both faster and more powerful compared to v1.
 
 ### Available Views in v2
 
@@ -41,6 +40,16 @@ E.g. in order to get trace-level cost: group by `traceId`, aggregate `totalCost`
 | `observations`       | Query observation-level data with optional trace-level aggregations |
 | `scores-numeric`     | Query numeric and boolean scores                                    |
 | `scores-categorical` | Query categorical (string) scores                                   |
+
+### Row Limit
+
+The v2 Metrics API enforces a default `rowLimit` of 100 rows per query to ensure consistent performance. You can specify a custom `rowLimit` in your query to override this default.
+
+### High Cardinality Dimensions
+
+Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` cannot be used for grouping in the v2 Metrics API. Grouping by these high cardinality fields is extremely expensive and rarely useful in practice. These dimensions remain available for filtering.
+
+We recognize that "top N" queries (e.g., top 10 users by cost) are a valid use case not currently supported. We're exploring ways to enable this efficiently in the future.
 
 ### Example: Most expensive models used in observations
 

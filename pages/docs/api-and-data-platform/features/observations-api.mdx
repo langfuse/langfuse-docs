@@ -46,7 +46,7 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 | `io`       | input, output                                                                           |
 | `metadata` | metadata                                                                                |
 | `model`    | providedModelName, internalModelId, modelParameters                                     |
-| `usage`    | usageDetails, costDetails, totalCost, providedUsageDetails, providedCostDetails         |
+| `usage`    | usageDetails, costDetails, totalCost                                                    |
 | `prompt`   | promptId, promptName, promptVersion                                                     |
 | `metrics`  | latency, timeToFirstToken                                                               |
 
@@ -145,6 +145,72 @@ curl \
 | `version`             | string   | Filter by version tag                                                     |
 | `parseIoAsJson`       | boolean  | Parse input/output as JSON (default: false)                               |
 | `filter`              | string   | JSON array of filter conditions (takes precedence over query params)      |
+
+### Sample Response
+
+With all fields included
+
+```json
+{
+    "data": [
+        {
+            "id": "support-chat-7-950dc53a-gen",
+            "traceId": "support-chat-7-950dc53a",
+            "startTime": "2025-12-17T16:09:00.875Z",
+            "projectId": "7a88fb47-b4e2-43b8-a06c-a5ce950dc53a",
+            "parentObservationId": null,
+            "type": "GENERATION",
+            "endTime": "2025-12-17T16:09:01.456Z",
+            "name": "llm-generation",
+            "level": "DEFAULT",
+            "statusMessage": "",
+            "version": "",
+            "environment": "default",
+            "completionStartTime": "2025-12-17T16:09:00.995Z",
+            "createdAt": "2025-12-17T16:09:00.875Z",
+            "updatedAt": "2025-12-17T16:09:01.456Z",
+            "input": "{\"messages\":[{\"role\":\"user\",\"content\":\"Perfect.\"}]}",
+            "output": "{\"role\":\"assistant\",\"content\":\"You're all set. Have a great day!\"}",
+            "metadata": {},
+            "model": "gpt-4o",
+            "internalModelId": "",
+            "modelParameters": {
+                "temperature": 0.2
+            },
+            "usageDetails": {
+                "input": 98,
+                "output": 68,
+                "total": 166
+            },
+            "inputUsage": 98,
+            "outputUsage": 68,
+            "totalUsage": 166,
+            "costDetails": {
+                "input": 0.000196,
+                "output": 0.000204,
+                "total": 0.00083
+            },
+            "inputCost": 0.000196,
+            "outputCost": 0.000204,
+            "totalCost": 0.00083,
+            "promptId": "",
+            "promptName": "",
+            "promptVersion": null,
+            "latency": 0.581,
+            "timeToFirstToken": 0.12,
+            "userId": "",
+            "sessionId": "support-chat-session",
+            "modelId": null,
+            "inputPrice": null,
+            "outputPrice": null,
+            "totalPrice": null
+        }
+    ],
+    "meta": {
+        "cursor": "eyJsYXN0U3RhcnRUaW1lVG8iOiIyMDI1LTEyLTE3VDE2OjA5OjAwLjg3NVoiLCJsYXN0VHJhY2VJZCI6InN1cHBvcnQtY2hhdC03LTk1MGRjNTNhIiwibGFzdElkIjoic3VwcG9ydC1jaGF0LTctOTUwZGM1M2EtZ2VuIn0="
+    }
+}
+```
 
 See the [API Reference](https://api.reference.langfuse.com/#tag/observation/GET/api/public/v2/observations) for full documentation.
 

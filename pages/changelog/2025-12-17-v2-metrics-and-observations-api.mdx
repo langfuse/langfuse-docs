@@ -3,7 +3,7 @@ date: 2025-12-16
 title: "v2 Metrics and Observations API (Beta)"
 description: New high-performance v2 APIs for metrics and observations with cursor-based pagination, selective field retrieval, and optimized data architecture.
 author: Valeriy
-ogImage: /images/changelog/2025-12-16-v2-metrics-and-observations-api.png
+ogImage: /images/changelog/2025-12-17-v2-Metrics-and-Observations-API-Betacl.jpg
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -40,7 +40,11 @@ GET /api/public/v2/metrics
 
 Built on an optimized data model, the v2 Metrics API delivers significantly faster query performance.
 
-**The `traces` view is no longer available in v2.** Instead, use the `observations` view which is both faster and more powerful. Most trace-level analytics can be achieved by grouping observations by `traceId` - for example, get total cost per trace by grouping on `traceId` and summing `totalCost`.
+**The `traces` view is no longer available in v2.** Instead, use the `observations` view which is both faster and more powerful.
+
+**Row limit** - Default limit of 100 rows per query ensures consistent performance. Override with a custom `rowLimit` in your query.
+
+**High cardinality dimensions** - Dimensions like `id`, `traceId`, `userId`, and `sessionId` can be used for filtering but not for grouping, as grouping by these fields is extremely expensive. We're exploring ways to efficiently support "top N" queries (e.g., top 10 users by cost) in the future.
 
 ### Observations API v2
 
@@ -67,6 +71,16 @@ The v2 APIs are additive - v1 endpoints remain available and unchanged. When rea
 **Using v1 `/api/public/traces`?** Consider v2 `/api/public/v2/observations` instead - it's significantly faster and covers most use cases.
 
 ## Learn more
+
+<iframe
+  width="100%"
+  style={{ aspectRatio: "16/9" }}
+  src="https://www.youtube-nocookie.com/embed/NXYQ5odATrM"
+  title="v2 API Data Model Overview"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+/>
 
 import { Book } from "lucide-react";
 
