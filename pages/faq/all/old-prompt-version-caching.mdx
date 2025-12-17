@@ -1,0 +1,66 @@
+---
+title: I'm not seeing the latest version of my prompt. Why?
+description: Learn why you might see outdated prompt versions in Langfuse and how to resolve caching-related issues in both the SDK client cache and the server-side Redis cache.
+tags: [prompt-management-get-started]
+---
+
+# I'm not seeing the latest version of my prompt. Why?
+
+If you've updated a prompt in Langfuse but your application still returns the old version, it's likely due to **caching behavior**. The Langfuse SDKs cache prompts locally to ensure low latency and to keep your application running even if Langfuse would be temporarily unavailable.
+
+For a detailed explanation, see the [prompt caching documentation](/docs/prompt-management/features/caching).
+
+## Solutions
+
+### 1. Wait for cache revalidation
+
+The SDK cache TTL is **60 seconds** by default. After this time, the cached prompt is marked as stale. On the next `get_prompt` call, the stale prompt is returned immediately while the SDK fetches the new version in the background. This means **you need two fetches after the TTL expires** to see the updated prompt.
+
+### 2. Disable caching for development
+
+Set `cacheTtlSeconds` to `0` to always fetch the latest prompt.
+
+> **Note:** Disabling caching adds a network request on every `get_prompt` call, which will increase latency. This is recommended for development/testing only.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+prompt = langfuse.get_prompt("my-prompt", cache_ttl_seconds=0)
+```
+
+</Tab>
+<Tab>
+
+```ts
+const prompt = await langfuse.prompt.get("my-prompt", {
+  cacheTtlSeconds: 0,
+});
+```
+
+</Tab>
+</LangTabs>
+
+### 3. Verify the correct label
+
+By default, `get_prompt` fetches the `production` label. If you haven't promoted your changes to production, use `label="latest"` to fetch the most recent version:
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+prompt = langfuse.get_prompt("my-prompt", label="latest")
+```
+
+</Tab>
+<Tab>
+
+```ts
+const prompt = await langfuse.prompt.get("my-prompt", {
+  label: "latest",
+});
+```
+
+</Tab>
+</LangTabs>
+
