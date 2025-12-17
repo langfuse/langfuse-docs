@@ -66,7 +66,7 @@ else:
 
 ## 4. Enable Observability
 
-The Microsoft Agent Framework includes built-in observability support through OpenTelemetry. Enable it by calling `setup_observability()` which automatically exports traces to Langfuse.
+The Microsoft Agent Framework includes built-in observability support through OpenTelemetry. Enable it by calling [`configure_otel_providers()`](https://learn.microsoft.com/en-us/agent-framework/user-guide/observability?pivots=programming-language-python#1-standard-opentelemetry-environment-variables-recommended) which automatically exports traces to Langfuse.
 
 <Callout type="info" emoji="ℹ️">
 **Note:** Set `enable_sensitive_data=True` to capture full request/response data including function arguments and results.
@@ -75,9 +75,9 @@ The Microsoft Agent Framework includes built-in observability support through Op
 
 
 ```python
-from agent_framework.observability import setup_observability
+from agent_framework.observability import configure_otel_providers
 
-setup_observability(enable_sensitive_data=True)
+configure_otel_providers(enable_sensitive_data=True)
 ```
 
 ## 5. Hello World Example with Tool
@@ -128,6 +128,16 @@ os.environ["OPENAI_RESPONSES_MODEL_ID"]="gpt-5-mini"
 
 ```python
 from agent_framework.openai import OpenAIResponsesClient
+from typing import Annotated
+from pydantic import Field
+from random import randint
+
+def get_weather(
+    location: Annotated[str, Field(description="The location to get the weather for.")],
+) -> str:
+    """Get the weather for a given location."""
+    conditions = ["sunny", "cloudy", "rainy", "stormy"]
+    return f"The weather in {location} is {conditions[randint(0, 3)]} with a high of {randint(10, 30)}°C."
 
 async def main():
     async with OpenAIResponsesClient().create_agent(
@@ -145,3 +155,9 @@ await main()
 ## 7. See Traces in Langfuse
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_microsoft-agent-framework/microsoft-agent-framework-example-trace.png)
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8e419d3288419b5d944270505640e183?observation=2406e8343fd49c0e&timestamp=2025-12-17T09:37:37.258Z)
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />

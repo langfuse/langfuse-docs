@@ -1,0 +1,384 @@
+import { FileCode } from "lucide-react";
+
+At runtime, you can fetch the prompt from Langfuse. We recommend using the `production` label to fetch the version intentionally chosen for production. Learn more about control (versions/labels) [here](/docs/prompt-management/features/prompt-version-control).
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS)", "Vercel AI SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+# Initialize Langfuse client
+langfuse = get_client()
+```
+
+Below are code examples for both a text type prompt and a chat type prompt. Learn more about prompt types [here](/docs/prompt-management/data-model#text-vs-chat-prompts).
+
+**Text prompt**
+
+```python
+# By default, the production version is fetched.
+prompt = langfuse.get_prompt("movie-critic")
+
+# Insert variables into prompt template
+compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
+# -> "As an expert movie critic, do you like Dune 2?"
+```
+
+**Chat prompt**
+
+```python
+# By default, the production version of a chat prompt is fetched.
+chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat") # type arg infers the prompt type (default is 'text')
+
+# Insert variables into chat prompt template
+compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
+# -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
+```
+
+</Tab>
+
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+// Initialize the Langfuse client
+const langfuse = new LangfuseClient();
+```
+
+Below are code examples for both a text type prompt and a chat type prompt. Learn more about prompt types [here](/docs/prompt-management/data-model#text-vs-chat-prompts).
+
+**Text prompt**
+
+```ts
+// By default, the production version of a text prompt is fetched.
+const prompt = await langfuse.prompt.get("movie-critic");
+
+// Insert variables into prompt template
+const compiledPrompt = prompt.compile({
+  criticlevel: "expert",
+  movie: "Dune 2",
+});
+// -> "As an expert movie critic, do you like Dune 2?"
+```
+
+**Chat prompt**
+
+```ts
+// By default, the production version of a chat prompt is fetched.
+const chatPrompt = await langfuse.prompt.get("movie-critic-chat", {
+  type: "chat",
+}); // type option infers the prompt type (default is 'text')
+
+// Insert variables into chat prompt template
+const compiledChatPrompt = chatPrompt.compile({
+  criticlevel: "expert",
+  movie: "Dune 2",
+});
+// -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
+```
+
+</Tab>
+
+<Tab>
+
+
+```bash
+pip install langfuse openai
+```
+
+```python
+import openai
+from langfuse import get_client
+
+# Initialize Langfuse client
+langfuse = get_client()
+```
+
+Below are code examples for both a text type prompt and a chat type prompt. Learn more about prompt types [here](/docs/prompt-management/data-model#text-vs-chat-prompts).
+
+**Text prompt**
+
+```python
+# By default, the production version of a text prompt is fetched.
+prompt = langfuse.get_prompt("movie-critic")
+
+# Compile the prompt with variables
+compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
+
+# Use with OpenAI - prompt is a string
+completion = openai.chat.completions.create(
+  model="gpt-4o",
+  messages=[{"role": "user", "content": compiled_prompt}]
+)
+```
+
+**Chat prompt**
+
+```python
+# By default, the production version of a chat prompt is fetched.
+chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
+
+# Compile the prompt with variables - returns a list of message dicts
+compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
+
+# Use with OpenAI - prompt is a list of messages
+completion = openai.chat.completions.create(
+  model="gpt-4o",
+  messages=compiled_chat_prompt
+)
+```
+
+**Example notebook**
+
+<Cards num={1}>
+  <Card
+    title="Example Cookbook"
+    href="/guides/cookbook/prompt_management_openai_functions"
+    icon={<FileCode />}
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
+
+```bash
+npm install @langfuse/openai openai
+```
+
+```typescript
+import { observeOpenAI } from "@langfuse/openai";
+import { LangfuseClient } from "@langfuse/client";
+import OpenAI from "openai";
+
+// Initialize Langfuse client
+const langfuse = new LangfuseClient();
+
+// Wrap OpenAI client
+const openai = observeOpenAI(new OpenAI());
+```
+
+Below are code examples for both a text type prompt and a chat type prompt. Learn more about prompt types [here](/docs/prompt-management/data-model#text-vs-chat-prompts).
+
+**Text prompt**
+
+```typescript
+// By default, the production version of a text prompt is fetched.
+const prompt = await langfuse.prompt.get("movie-critic", {
+  type: "text",
+});
+
+// Compile the prompt with variables
+const compiledPrompt = prompt.compile({
+  criticlevel: "expert",
+  movie: "Dune 2",
+});
+
+// Use with OpenAI - prompt is a string
+const completion = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: compiledPrompt }],
+});
+```
+
+**Chat prompt**
+
+```typescript
+// By default, the production version of a chat prompt is fetched.
+const chatPrompt = await langfuse.prompt.get("movie-critic-chat", {
+  type: "chat",
+});
+
+// Compile the prompt with variables - returns an array of messages
+const compiledChatPrompt = chatPrompt.compile({
+  criticlevel: "expert",
+  movie: "Dune 2",
+});
+
+// Use with OpenAI - prompt is an array of messages
+const completion = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: compiledChatPrompt,
+});
+```
+
+</Tab>
+
+<Tab>
+
+```python
+from langfuse import Langfuse
+from langchain_core.prompts import ChatPromptTemplate
+
+# Initialize Langfuse client
+langfuse = Langfuse()
+```
+
+Below are code examples for both a text type prompt and a chat type prompt. Learn more about prompt types [here](/docs/prompt-management/data-model#text-vs-chat-prompts).
+
+These examples contain [variables](/docs/prompt-management/features/variables). As Langfuse and Langchain process input variables of prompt templates differently (`{}` instead of `{{}}`), we provide the `prompt.get_langchain_prompt()` method to transform the Langfuse prompt into a string that can be used with Langchain's PromptTemplate. You can pass optional keyword arguments to `prompt.get_langchain_prompt(**kwargs)` in order to precompile some variables and handle the others with Langchain's PromptTemplate.
+
+
+**Text prompt**
+
+```python
+# By default, the production version of a text prompt is fetched.
+langfuse_prompt = langfuse.get_prompt("movie-critic")
+
+# Example using ChatPromptTemplate
+langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt())
+
+# Example using ChatPromptTemplate with pre-compiled variables.
+langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt(strictness='tough'))
+```
+
+**Chat prompt**
+
+```python
+# By default, the production version of a chat prompt is fetched.
+langfuse_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
+
+# Create a Langchain ChatPromptTemplate from the Langfuse prompt chat messages
+langchain_prompt = ChatPromptTemplate.from_messages(langfuse_prompt.get_langchain_prompt())
+```
+
+**Example notebook**
+
+<Cards num={1}>
+  <Card
+    title="Example Cookbook"
+    href="/guides/cookbook/prompt_management_langchain"
+    icon={<FileCode />}
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+
+const langfuse = new LangfuseClient();
+```
+
+Below are code examples for both a text type prompt and a chat type prompt. Learn more about prompt types [here](/docs/prompt-management/data-model#text-vs-chat-prompts).
+
+These examples contain [variables](/docs/prompt-management/features/variables). As Langfuse and Langchain process input variables of prompt templates differently (`{}` instead of `{{}}`), we provide the `prompt.get_langchain_prompt()` method to transform the Langfuse prompt into a string that can be used with Langchain's PromptTemplate. You can pass optional keyword arguments to `prompt.get_langchain_prompt(**kwargs)` in order to precompile some variables and handle the others with Langchain's PromptTemplate.
+
+
+**Text prompt**
+
+```ts
+// Get current `production` version
+const langfusePrompt = await langfuse.prompt.get("movie-critic");
+
+// Example using ChatPromptTemplate
+const promptTemplate = PromptTemplate.fromTemplate(
+  langfusePrompt.getLangchainPrompt()
+);
+```
+
+**Chat prompt**
+
+```ts
+// Get current `production` version of a chat prompt
+const langfusePrompt = await langfuse.prompt.get(
+  "movie-critic-chat",
+  { type: "chat" }
+);
+
+// Example using ChatPromptTemplate
+const promptTemplate = ChatPromptTemplate.fromMessages(
+  langfusePrompt.getLangchainPrompt().map((msg) => [msg.role, msg.content])
+);
+```
+
+**Example notebook**
+
+<Cards num={1}>
+  <Card
+    title="Example Cookbook."
+    href="/guides/cookbook/js_prompt_management_langchain"
+    icon={<FileCode />}
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
+
+Use Langfuse Prompt Management with the Vercel AI SDK. 
+
+```bash
+npm install @langfuse/client ai
+```
+
+```typescript
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { LangfuseClient } from "@langfuse/client";
+
+// Initialize Langfuse client
+const langfuse = new LangfuseClient();
+```
+
+Below are code examples for both a text type prompt and a chat type prompt. Learn more about prompt types [here](/docs/prompt-management/data-model#text-vs-chat-prompts).
+
+**Text prompt**
+
+```typescript
+// By default, the production version of a text prompt is fetched.
+const prompt = await langfuse.prompt.get("movie-critic", {
+  type: "text",
+});
+
+// Compile the prompt with variables
+const compiledPrompt = prompt.compile({
+  criticlevel: "expert",
+  movie: "Dune 2",
+});
+
+// Use with Vercel AI SDK
+const result = await generateText({
+  model: openai("gpt-4o"),
+  prompt: compiledPrompt,
+  experimental_telemetry: {
+    isEnabled: true,
+  },
+});
+```
+
+**Chat prompt**
+
+```typescript
+// By default, the production version of a chat prompt is fetched.
+const chatPrompt = await langfuse.prompt.get("movie-critic-chat", {
+  type: "chat",
+});
+
+// Compile the prompt with variables - returns an array of messages
+const compiledChatPrompt = chatPrompt.compile({
+  criticlevel: "expert",
+  movie: "Dune 2",
+});
+
+// Use with Vercel AI SDK
+const result = await generateText({
+  model: openai("gpt-4o"),
+  messages: compiledChatPrompt,
+  experimental_telemetry: {
+    isEnabled: true,
+  },
+});
+```
+
+</Tab>
+
+</LangTabs>
+
+Not seeing your latest version? This might be because of the caching behavior. See [prompt caching](/docs/prompt-management/data-model#prompt-caching) for more details.
+
