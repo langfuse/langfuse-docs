@@ -49,8 +49,6 @@ The v2 Metrics API enforces a default `rowLimit` of 100 rows per query to ensure
 
 Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` cannot be used for grouping in the v2 Metrics API. Grouping by these high cardinality fields is extremely expensive and rarely useful in practice. These dimensions remain available for filtering.
 
-We recognize that "top N" queries (e.g., top 10 users by cost) are a valid use case not currently supported. We're exploring ways to enable this efficiently in the future.
-
 ### Example: Most expensive models used in observations
 
 ```bash

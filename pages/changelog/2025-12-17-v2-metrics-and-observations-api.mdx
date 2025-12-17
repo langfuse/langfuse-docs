@@ -44,7 +44,7 @@ Built on an optimized data model, the v2 Metrics API delivers significantly fast
 
 **Row limit** - Default limit of 100 rows per query ensures consistent performance. Override with a custom `rowLimit` in your query.
 
-**High cardinality dimensions** - Dimensions like `id`, `traceId`, `userId`, and `sessionId` can be used for filtering but not for grouping, as grouping by these fields is extremely expensive. We're exploring ways to efficiently support "top N" queries (e.g., top 10 users by cost) in the future.
+**High cardinality dimensions** - Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` can no longer be used for grouping in the v2 Metrics API. Grouping by these high cardinality fields is is not performant and rarely useful in practice. These dimensions remain available for filtering.
 
 ### Observations API v2
 
