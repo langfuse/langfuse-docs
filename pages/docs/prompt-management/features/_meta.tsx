@@ -18,7 +18,7 @@ export default {
   "message-placeholders": {},
   config: {},
   "evaluate-prompts": {
-    title: "Evaluate Prompts ↗",
+    title: "Prompt Experiments ↗",
     href: "/docs/evaluation/dataset-runs/run-via-ui",
   },
   caching: {},

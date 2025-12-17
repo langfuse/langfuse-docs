@@ -26,6 +26,10 @@ For detailed information about all prompt object fields and methods, see the [SD
 
 Langfuse supports two prompt types. The `type` field determines the format and cannot be changed after creation.
 
+**Text prompts** are single strings, ideal for simple use cases or when you only need a system message.
+
+**Chat prompts** are arrays of messages with specific roles (system, user, assistant), useful when you want to manage complete conversation structures, include example exchanges, or handle chat history.
+
 <div className="grid grid-cols-1 md:grid-cols-2 mt-6 gap-4">
 
 <div className="[&_pre]:break-words [&_pre]:whitespace-pre-wrap">
@@ -64,10 +68,6 @@ Langfuse supports two prompt types. The `type` field determines the format and c
 </div>
 
 </div>
-
-**Text prompts** are single strings, ideal for simple use cases or when you only need a system message.
-
-**Chat prompts** are arrays of messages with specific roles (system, user, assistant), useful when you want to manage complete conversation structures, include example exchanges, or handle chat history.
 
 <Callout type="info">
 **When to use chat prompts:** Most applications start with a text prompt. As you build more complex logic that requires managing multiple messages, role-based structures, or chat history, it makes sense to switch to chat prompts. This allows you to manage the complete conversation structure in your prompt management system.
