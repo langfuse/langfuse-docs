@@ -8,6 +8,69 @@ category: SDKs
 
 Use these methods to harden your Langfuse instrumentation, protect sensitive data, and adapt the SDKs to your specific environment.
 
+## Filtering by Instrumentation Scope [#filtering-by-instrumentation-scope]
+
+You can configure the SDK to filter out spans from specific instrumentation libraries that expose OTel spans that the Langfuse SDK picks up but you don't want to send to Langfuse.
+
+**How it works:**
+
+When third-party libraries create OpenTelemetry spans (through their instrumentation packages), each span has an associated "instrumentation scope" that identifies which library created it. The Langfuse SDK filters spans at the export level based on these scope names.
+
+You can see the instrumentation scope name for any span in the Langfuse UI under the observation's metadata (`metadata.scope.name`). Use this to identify which scopes you want to filter.
+
+<Callout type="warning" title="Filtering Spans May Break Trace Trees">
+  **Cross-Library Span Relationships:**
+  Filtering spans may break the parent-child relationships in your traces. For
+  example, if you filter out a parent span but keep its children, you may see
+  "orphaned" observations in the Langfuse UI.
+</Callout>
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
+
+Provide the `blocked_instrumentation_scopes` parameter to the `Langfuse` client to filter out spans from specific instrumentation libraries.
+
+```python
+from langfuse import Langfuse
+
+# Filter out database spans
+langfuse = Langfuse(
+    blocked_instrumentation_scopes=["sqlalchemy", "psycopg"]
+)
+```
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+You can provide a predicate function `shouldExportSpan` to the `LangfuseSpanProcessor` to decide on a per-span basis whether it should be exported to Langfuse.
+
+```ts filename="instrumentation.ts" /shouldExportSpan/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
+
+// Example: Filter out all spans from the 'express' instrumentation
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  otelSpan.instrumentationScope.name !== "express";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor({ shouldExportSpan })],
+});
+
+sdk.start();
+```
+
+If you want to include only LLM observability related spans, you can configure an allowlist like so:
+
+```ts filename="instrumentation.ts"
+import { ShouldExportSpan } from "@langfuse/otel";
+
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name);
+```
+
+</Tab>
+</LangTabs>
+
 ## Mask sensitive data
 
 If your trace data (inputs, outputs, metadata) might contain sensitive information (PII, secrets), you can provide a mask function during client initialization. This function will be applied to all relevant data before it’s sent to Langfuse.
@@ -170,69 +233,6 @@ You can also set the sample rate using the `LANGFUSE_SAMPLE_RATE` environment va
 
 ```bash
 export LANGFUSE_SAMPLE_RATE="0.2"
-```
-
-</Tab>
-</LangTabs>
-
-## Filtering by Instrumentation Scope [#filtering-by-instrumentation-scope]
-
-You can configure the SDK to filter out spans from specific instrumentation libraries that expose OTel spans that the Langfuse SDK picks up but you don't want to send to Langfuse.
-
-**How it works:**
-
-When third-party libraries create OpenTelemetry spans (through their instrumentation packages), each span has an associated "instrumentation scope" that identifies which library created it. The Langfuse SDK filters spans at the export level based on these scope names.
-
-You can see the instrumentation scope name for any span in the Langfuse UI under the observation's metadata (`metadata.scope.name`). Use this to identify which scopes you want to filter.
-
-<Callout type="warning" title="Filtering Spans May Break Trace Trees">
-  **Cross-Library Span Relationships:**
-  Filtering spans may break the parent-child relationships in your traces. For
-  example, if you filter out a parent span but keep its children, you may see
-  "orphaned" observations in the Langfuse UI.
-</Callout>
-
-<LangTabs items={["Python SDK", "JS/TS SDK"]}>
-<Tab title="Python SDK">
-
-Provide the `blocked_instrumentation_scopes` parameter to the `Langfuse` client to filter out spans from specific instrumentation libraries.
-
-```python
-from langfuse import Langfuse
-
-# Filter out database spans
-langfuse = Langfuse(
-    blocked_instrumentation_scopes=["sqlalchemy", "psycopg"]
-)
-```
-
-</Tab>
-<Tab title="JS/TS SDK">
-
-You can provide a predicate function `shouldExportSpan` to the `LangfuseSpanProcessor` to decide on a per-span basis whether it should be exported to Langfuse.
-
-```ts filename="instrumentation.ts" /shouldExportSpan/
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
-
-// Example: Filter out all spans from the 'express' instrumentation
-const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
-  otelSpan.instrumentationScope.name !== "express";
-
-const sdk = new NodeSDK({
-  spanProcessors: [new LangfuseSpanProcessor({ shouldExportSpan })],
-});
-
-sdk.start();
-```
-
-If you want to include only LLM observability related spans, you can configure an allowlist like so:
-
-```ts filename="instrumentation.ts"
-import { ShouldExportSpan } from "@langfuse/otel";
-
-const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
-  ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name);
 ```
 
 </Tab>
@@ -554,14 +554,9 @@ httpx_client = httpx.Client(verify=os.environ["OTEL_EXPORTER_OTLP_TRACES_CERTIFI
 langfuse = Langfuse(httpx_client=httpx_client)
 ```
 
-## Langfuse + Sentry (TS/JS)
+## Langfuse + Sentry
 
-<LangTabs items={["Python SDK", "JS/TS SDK"]}>
-<Tab title="Python">
-
-Not applicable for Python.
-
-</Tab>
+<LangTabs items={["JS/TS SDK"]}>
 <Tab title="TypeScript">
 
 ```ts filename="instrumentation.ts"
@@ -598,9 +593,9 @@ If you only use Sentry for error monitoring, omit `tracesSampleRate` and the `Se
 </Tab>
 </LangTabs>
 
-## Thread pools and multiprocessing (Python)
+## Thread pools and multiprocessing
 
-<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<LangTabs items={["Python SDK"]}>
 <Tab title="Python">
 
 Use the OpenTelemetry threading instrumentor so context flows across worker threads.
@@ -612,11 +607,6 @@ ThreadingInstrumentor().instrument()
 ```
 
 For multiprocessing, follow the [OpenTelemetry guidance](https://github.com/open-telemetry/opentelemetry-python/issues/2765#issuecomment-1158402076). If you use Pydantic Logfire, enable `distributed_tracing=True`.
-
-</Tab>
-<Tab title="JS/TS SDK">
-
-This is not applicable for TypeScript.
 
 </Tab>
 </LangTabs>
