@@ -1,0 +1,146 @@
+---
+title: Human Evaluation for LLM Apps with Testable Minds
+sidebarTitle: Testable Minds
+logo: /images/integrations/testable_minds_icon.svg
+description: Collect human evaluations on your Langfuse traces at scale using Testable Minds' diverse participant pool.
+---
+
+# Testable Minds Integration
+
+[Testable Minds](https://testable.org/ai/langfuse) is a **human evaluation platform** provided by **Testable** that connects your LLM traces to a diverse pool of pre-screened participants. While Langfuse offers automated [evaluations](/docs/scores/overview) out of the box, many teams need real **human feedback** to understand how their AI performs in practice.
+
+We've built an integration to make it easy to answer questions like:
+
+- _"How do real users perceive the quality of my LLM outputs?"_
+- _"Are my AI responses helpful, accurate, and appropriate across different demographics?"_
+- _"How does human feedback correlate with my automated evaluation scores?"_
+- _"What blind spots exist in my automated evaluation pipeline?"_
+
+## How It Works
+
+The integration creates an automated loop between Langfuse and Testable Minds:
+
+1. Testable Minds polls your Langfuse project for traces matching your filters
+2. Traces are batched into evaluation sessions and presented to qualified participants
+3. Participants evaluate each trace against your Langfuse score configurations
+4. Results are automatically pushed back to Langfuse as scores on the original traces
+
+
+## Get Started
+
+<Steps>
+
+### Create a Testable account
+
+Sign up at [testable.org/ai/langfuse](https://testable.org/ai/langfuse) to access **Testable Minds** and select the **Langfuse account type** during registration.
+
+### Set up your Langfuse score configurations
+
+Ensure you have at least one [score configuration](/faq/all/manage-score-configs) defined in Langfuse. Score configurations determine what questions participants will answer about your traces. All score types (numeric, categorical, boolean) are supported.
+
+> **Tip:** Use clear, objective questions that non-expert participants can understand. Include descriptions with examples for best results.
+
+### Connect Langfuse to Testable
+
+<Callout type="info" emoji="🎓">
+If you are using Langfuse for research and education, you can get a Langfuse research grant. More information [here](/research).
+</Callout>
+
+<Tabs items={["Langfuse Cloud", "Self-hosted"]}>
+<Tab>
+
+1. Navigate to `Account → Connections` in your Testable dashboard
+2. Enter your Langfuse **Secret Key** and **Public Key**
+3. Select your server region (Cloud EU or Cloud US)
+4. Click **Check Connection** to verify, then **Save Connection**
+
+</Tab>
+<Tab>
+
+1. Navigate to `Account → Connections` in your Testable dashboard
+2. Enter your Langfuse **Secret Key** and **Public Key**
+3. Select **Self hosted** and enter your full Langfuse base URL
+4. Click **Check Connection** to verify, then **Save Connection**
+
+</Tab>
+</Tabs>
+
+### Create a study
+
+1. Go to `Dashboard → Studies` and click **Create Study**
+2. Configure your study:
+
+   **Participants**
+   - Number of respondents per trace
+   - Optional gender balance enforcement
+   - Selection criteria for targeting specific demographics, e.g., age, location, language proficiency etc.
+
+   **Langfuse Data Settings**
+   - **Traces minimum count**: Minimum unassigned traces before launching a session.
+   - **Score Configs**: Select which [Langfuse score](/faq/all/manage-score-configs) configurations to evaluate.
+   - **Tags** (optional): Filter traces by Langfuse tags (e.g., `external_eval`, `testable_minds_eval`, etc.) (AND logic across tags).
+   - **Environments** (optional): Filter by environment (e.g., `production`, `staging`, etc.) (OR logic across environments).
+
+   **Participant-facing content**
+   - Title and description shown to participants
+
+3. Top-up your Testable Minds balance to cover evaluation costs
+4. Toggle **Start traces collection** in your study header
+
+### View scores in Langfuse
+
+Once participants complete evaluations, scores are automatically pushed back to your Langfuse traces. View them in the [Traces section](/docs/tracing).
+
+</Steps>
+
+## Integration Details
+
+#### Trace Import
+
+- Traces are polled while the study is active. You can pause imports by toggling **Pause traces collection**.
+- Only traces with both input and output are considered for import
+- Only text-based input/output is currently supported
+
+#### Evaluation Session Creation
+
+A new evaluation session is created when unassigned traces meet your configured minimum count. Each session includes built-in attention checks to ensure response quality—responses failing these checks are automatically excluded.
+
+#### Score Delivery
+
+Participant answers are mapped to your selected Langfuse score configurations and pushed back as scores on the original traces.
+
+#### Data Quality
+
+Evaluations are conducted by a pre-qualified subset of Testable Minds participants who are specifically screened for AI and LLM evaluation tasks and have a proven track record of high-quality work. All participants have verified identities and are fairly compensated based on task complexity and length.
+
+Each evaluation session includes built-in attention checks, and responses that fail these checks are automatically excluded to ensure your Langfuse scores remain accurate and reliable.
+
+#### Cost
+
+Costs are dynamically calculated by **Testable Minds** based on the number of participants, total traces evaluated, and trace length (input and output).
+
+## Troubleshooting
+
+**Connection test fails?** Re-enter your secret key (it's not auto-filled after saving), verify the correct base URL, and ensure your API keys have access to score configs and traces.
+
+**Missing scores in Langfuse?** Check that your score configurations are still active (not archived).
+
+**No sessions being created?** Verify your study is active (not paused), you have sufficient Testable Minds budget, and enough traces match your filters to meet the minimum count.
+
+## FAQ
+
+**Can I use multiple score configs in one study?**
+Yes. Participants will evaluate each trace against all selected configurations, and scores are pushed back for each config.
+
+**Can I run multiple studies simultaneously?**
+Yes. Each study operates independently with its own filters, participants, and score configurations.
+
+**Can I pause a running study?**
+Yes. Toggle **Pause traces collection** to stop imports and new sessions. Existing sessions continue until completion.
+
+**Does self-hosted Langfuse work?**
+Yes. Select "Self hosted" in connections and enter your full base URL.
+
+## Feedback
+
+If you have any feedback or questions, [contact us](https://testable.org/contact).
