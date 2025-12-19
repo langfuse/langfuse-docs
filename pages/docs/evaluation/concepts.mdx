@@ -5,12 +5,10 @@ description: This page describes the data model of the Langfuse Score object use
 
 # Evaluation Concepts
 
-| Concept                        | Description                                                                                                                                        |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [**Scores** ](#scores)                    | Scores are a flexible data object that can be used to store any evaluation metric and link it to other objects in Langfuse.             |
-| [**Evaluation Methods**](#evaluation-methods)         | Evaluation methods are functions or tools to assign scores to other objects.                                                |
-| [**Datasets**](#datasets)                   | Datasets are a collection of inputs and, optionally, expected outputs that can be used during Experiments (formerly Dataset runs).    |
-| [**Experiments**](#experiments) | Experiments (formerly Dataset runs) are used to run a dataset through your LLM application and optionally apply evaluation methods to the results.|
+- [**Scores**](#scores) are a flexible data object that can be used to store any evaluation metric and link it to other objects in Langfuse.
+- [**Evaluation Methods**](#evaluation-methods) are functions or tools to assign scores to other objects.
+- [**Datasets**](#datasets) are a collection of inputs and, optionally, expected outputs that can be used during Experiments.
+- [**Experiments**](#experiments) loop over your dataset, trigger your application on each item and optionally apply evaluation methods to the results.
 
 ## Scores [#scores]
 
@@ -71,12 +69,12 @@ classDiagram
 
 </details>
 
-## Score Config
+### Score Configs [#score-configs]
 
 Score configs are used to ensure that your scores follow a specific schema.
 Using score configs allows you to standardize your scoring schema across your team and ensure that scores are consistent and comparable for future analysis.
 
-You can define a `scoreConfig` in the Langfuse UI or via our API. Configs are immutable but can be archived (and restored anytime).
+You can define a `scoreConfig` in the Langfuse UI or via our API (how to guide [here](/faq/all/manage-score-configs)) Configs are immutable but can be archived (and restored anytime).
 
 <div className="p-4 border rounded mt-4">
 
@@ -124,19 +122,9 @@ You can use the following evaluation methods to add `scores`:
 
 ## Experiments [#experiments]
 
-**Experiments** are used to loop your LLM application through **Datasets** (local or hosted on Langfuse) and **optionally apply Evaluation Methods** to the results. This lets you strategically evaluate your application and compare the performance of different inputs, prompts, models, or other parameters side-by-side against controlled conditions.
+Experiments are used to loop your LLM application through [Datasets](/docs/evaluation/experiments/datasets) (local or hosted on Langfuse) and optionally apply [Evaluation Methods](/docs/evaluation/evaluation-methods/overview) to the results. This lets you strategically evaluate your application and compare the performance of different inputs, prompts, models, or other parameters side-by-side against controlled conditions.
 
-In Langfuse we differentiate between **Experiments via SDK** vs. **Experiments via UI**. Experiments via UI rely on Dataset, Prompts and optionally LLM-as-a-Judge Evaluators all being on the Langfuse platform and can be thus triggered and executed directly on the platform. Experiments via SDK are fully flexible and can be triggered from any external system.
-
-For the best experiment run comparison experience, we recommend managing the underlying [Datasets](/docs/evaluation/experiments/datasets) on the Langfuse platform.
-
-import {
-  Table,
-  WandSparkles,
-  CodeXml,
-  Database,
-  MousePointerClick,
-} from "lucide-react";
+Langfuse supports [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) and [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui). Experiments via UI rely on Dataset, Prompts and optionally LLM-as-a-Judge Evaluators all being on the Langfuse platform and can be thus triggered and executed directly on the platform. Experiments via SDK are fully flexible and can be triggered from any external system.
 
 - [Create a Dataset](/docs/evaluation/experiments/datasets)
 - [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
