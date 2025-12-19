@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useSyncExternalStore } from "react";
+import React, { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { Tabs } from "nextra/components";
 
 const KEY = "synced-tabs:language";
@@ -67,6 +67,11 @@ export function LangTabs(props: {
     defaultIndex >= 0 && defaultIndex < items.length ? defaultIndex : 0
   );
 
+  // Ref for the container element to calculate relative scroll position
+  const containerRef = useRef<HTMLDivElement>(null);
+  // Store the offset from the top of the tabs container to the viewport top
+  const pendingOffsetRef = useRef<number | null>(null);
+
   const labels: (string | null)[] = useMemo(() => {
     return items.map((it) => {
       if (typeof it === "string") return it;
@@ -110,12 +115,41 @@ export function LangTabs(props: {
     // If no match found, keep the current index unchanged
   }, [storedLabel, initialLabel, labels, items.length]);
 
+  // Restore scroll position after tab content renders
+  useEffect(() => {
+    if (pendingOffsetRef.current !== null && containerRef.current) {
+      const savedOffset = pendingOffsetRef.current;
+      pendingOffsetRef.current = null;
+
+      const restoreScroll = () => {
+        if (containerRef.current) {
+          const currentRect = containerRef.current.getBoundingClientRect();
+          const scrollAdjustment = currentRect.top - savedOffset;
+          if (Math.abs(scrollAdjustment) > 1) {
+            window.scrollBy({ top: scrollAdjustment, behavior: "instant" });
+          }
+        }
+      };
+
+      // Try multiple times to overcome any competing scroll behaviors
+      restoreScroll();
+      requestAnimationFrame(restoreScroll);
+      setTimeout(restoreScroll, 0);
+      setTimeout(restoreScroll, 50);
+    }
+  }, [currentIndex]);
+
   const selectedIndex = useMemo(() => {
     // Ensure currentIndex is within bounds
     return currentIndex >= 0 && currentIndex < items.length ? currentIndex : 0;
   }, [currentIndex, items.length]);
 
   const handleChange = (next: number) => {
+    // Save the container's offset from viewport top before tab change
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      pendingOffsetRef.current = rect.top;
+    }
     setCurrentIndex(next);
     const label = labels[next];
     if (typeof label === "string") store.set(label);
@@ -124,13 +158,15 @@ export function LangTabs(props: {
   };
 
   return (
-    <Tabs
-      items={items}
-      selectedIndex={selectedIndex}
-      onChange={handleChange}
-      storageKey={undefined as unknown as string}
-    >
-      {children}
-    </Tabs>
+    <div ref={containerRef}>
+      <Tabs
+        items={items}
+        selectedIndex={selectedIndex}
+        onChange={handleChange}
+        storageKey={undefined as unknown as string}
+      >
+        {children}
+      </Tabs>
+    </div>
   );
 }

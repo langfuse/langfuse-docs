@@ -6,36 +6,293 @@ description: The prompt config in Langfuse is an optional JSON object attached t
 
 # Prompt Config
 
-The prompt `config` in Langfuse is an **optional arbitrary JSON object** attached to each prompt that stores structured data such as model parameters (like model name, temperature), function/tool parameters, or JSON schemas.
+The prompt `config` in Langfuse is an **optional arbitrary JSON object** attached to each prompt, that can be used by code executing the LLM call. Common use cases include:
+- [storing model parameters](#using-the-config) (`model`, `temperature`, `max_tokens`)
+- [storing structured output schemas](#structured-outputs) (`response_format`)
+- [storing function/tool definitions](#function-calling) (`tools`, `tool_choice`)
 
-This config is **versioned** together with the prompt and allows you to manage all parameters associated with a prompt in one place, making it easier to deploy, update, and track prompt behavior and performance across different versions and environments.
+Because the config is **versioned together with the prompt**, you can manage all parameters in one place. This makes it easy to switch models, update schemas, or tune behavior without touching your application code.
 
 <Frame fullWidth>
   ![Prompt config](/images/docs/prompt-management-config.png)
 </Frame>
 
-## Use cases
+## Setting the config
 
-- Change the model your application uses without touching code
-- Manage and version the function/tool JSON schemas your application uses
-- Define the JSON schema for your application's responses
-- Set and manage you model parameters such as temperature, top_p, max_tokens, etc.
+Setting the config can be done both via the Langfuse prompt UI and via the SDKs.
 
-## Cookbooks
+<Tabs items={["UI", "Python SDK", "JS/TS SDK"]}>
+<Tab>
 
-The following two example cookbooks demonstrate how to use the `config` attribute:
+To add or edit a config for your prompt:
 
-import { Terminal, FileCode } from "lucide-react";
+1. Navigate to **Prompt Management** in the Langfuse UI
+2. Select or create a prompt
+3. In the prompt editor, find the **Config** field (JSON editor)
+4. Enter your config as a valid JSON object
+5. Save the prompt — the config is now versioned with this prompt version
 
-<Cards num={2}>
-  <Card
-    title="Example OpenAI Functions"
-    href="/guides/cookbook/prompt_management_openai_functions"
-    icon={<FileCode />}
-  />
-  <Card
-    title="Example Langchain (Python)"
-    href="/guides/cookbook/prompt_management_langchain"
-    icon={<FileCode />}
-  />
-</Cards>
+<Video
+  src="https://static.langfuse.com/docs-videos/2025-12-16-prompt-config.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Tab>
+<Tab>
+
+Pass the `config` parameter when creating or updating a prompt:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# example config with a model and temperature
+config = {
+    "model": "gpt-4o",
+    "temperature": 0
+} 
+
+langfuse.create_prompt(
+  name="invoice-extractor", 
+  type="chat", 
+  prompt=[
+    {
+      "role": "system", 
+      "content": "Extract structured data from invoices."
+      }
+  ], 
+  config=config
+)
+                    
+```
+
+</Tab>
+<Tab>
+
+Pass the `config` parameter when creating or updating a prompt:
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// example config with a model and temperature
+const config = {
+  model: "gpt-4o",
+  temperature: 0
+}
+
+await langfuse.prompt.create({
+  name: "invoice-extractor",
+  type: "chat",
+  prompt: [
+    { role: "system", content: "Extract structured data from invoices." }
+  ],
+  config: config
+});
+```
+
+</Tab>
+</Tabs>
+
+You can test your prompt with its config directly in the [Playground](/docs/prompt-management/features/playground).
+
+## Using the config [#using-the-config]
+
+The example below retrieves the AI model and temperature from the prompt config. 
+
+
+After fetching a prompt, access the config via the `config` property and pass the values to your LLM call.
+
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+This example uses the [Langfuse OpenAI integration](/docs/integrations/openai/python/get-started) for tracing, but this is optional.
+You can use any method to call your LLM (e.g., OpenAI SDK directly, other providers, etc.).
+
+```python
+from langfuse import get_client
+
+# Initialize Langfuse OpenAI client for this example.
+from langfuse.openai import OpenAI
+client = OpenAI()
+
+langfuse = get_client()
+
+# Fetch prompt
+prompt = langfuse.get_prompt("invoice-extractor")
+
+# Access config values
+cfg = prompt.config
+model = cfg.get("model")
+temperature = cfg.get("temperature")
+
+# Use in your LLM call
+client.chat.completions.create(
+  model=model, 
+  temperature=temperature, 
+  messages=prompt.prompt
+)
+```
+
+</Tab>
+<Tab>
+
+This example uses the [Langfuse OpenAI integration](/docs/integrations/openai/js/get-started) for tracing, but this is optional.
+You can use any method to call your LLM (e.g., OpenAI SDK directly, other providers, etc.) and still use the config.
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+// Initialize OpenAI client for this example.
+import OpenAI from "openai";
+import { observeOpenAI } from "@langfuse/openai";
+const client = observeOpenAI(new OpenAI());
+
+const langfuse = new LangfuseClient();
+
+// Fetch prompt
+const prompt = await langfuse.prompt.get("invoice-extractor");
+
+// Access config values
+const cfg = prompt.config;
+const model = cfg.model;
+const temperature = cfg.temperature;
+
+// Use in your LLM call
+client.chat.completions.create({
+  model,
+  temperature,
+  messages: prompt.prompt
+});
+```
+
+</Tab>
+</Tabs>
+
+## Example use cases
+
+### Structured Outputs [#structured-outputs]
+
+When you need your LLM to return data in a specific JSON format, store the schema in your prompt config. This keeps the schema versioned alongside your prompt and lets you update it without code changes.
+
+<Callout type="info">
+**Best practice:** Use `response_format` with `type: "json_schema"` and `strict: true` to enforce the schema. This ensures the model's output exactly matches your expected structure. If you're using Pydantic models, convert them with `type_to_response_format_param` — see the [OpenAI Structured Outputs guide](/docs/integrations/openai/python/structured-outputs).
+</Callout>
+
+```python
+from langfuse import get_client
+from langfuse.openai import OpenAI
+
+langfuse = get_client()
+client = OpenAI()
+
+# Fetch prompt with config containing response_format
+prompt = langfuse.get_prompt("invoice-extractor")
+system_message = prompt.compile()
+
+# Extract parameters from config
+cfg = prompt.config
+
+# Example config:
+# {
+#   "response_format": {
+#     "type": "json_schema",
+#     "json_schema": {
+#       "name": "invoice_schema",
+#       "schema": {
+#         "type": "object",
+#         "properties": {
+#           "invoice_number": { "type": "string" },
+#           "total": { "type": "number" }
+#         },
+#         "required": ["invoice_number", "total"],
+#         "additionalProperties": false
+#       },
+#       "strict": true
+#     }
+#   }
+# }
+
+response_format = cfg.get("response_format")
+
+res = client.chat.completions.create(
+  model="gpt-4o",
+  messages=[
+    {"role": "system", "content": system_message},
+    {"role": "user", "content": "Extract invoice number and total from: ..."},
+  ],
+  response_format=response_format,
+  langfuse_prompt=prompt,  # Links this generation to the prompt version in Langfuse
+)
+
+# Response is guaranteed to match your schema
+content = res.choices[0].message.content
+```
+
+### Function Calling [#function-calling]
+
+For agents and tool-using applications, store your function definitions in the prompt config. This allows you to version and update your available tools alongside your prompts.
+
+<Callout type="info">
+**Best practice:** Store `tools` (function definitions with JSON Schema parameters) and `tool_choice` in your config. This keeps your function signatures versioned and lets you add, modify, or remove tools without deploying code changes.
+</Callout>
+
+```python
+from langfuse import get_client
+from langfuse.openai import OpenAI
+
+langfuse = get_client()
+client = OpenAI()
+
+# Fetch prompt with config containing tools
+prompt = langfuse.get_prompt("weather-agent")
+system_message = prompt.compile()
+
+# Extract parameters from config
+cfg = prompt.config
+
+# Example config:
+# {
+#   "tools": [
+#     {
+#       "type": "function",
+#       "function": {
+#         "name": "get_current_weather",
+#         "description": "Get the current weather in a given location",
+#         "parameters": {
+#           "type": "object",
+#           "properties": {
+#             "location": { "type": "string", "description": "City and country" },
+#             "unit": { "type": "string", "enum": ["celsius", "fahrenheit"] }
+#           },
+#           "required": ["location"],
+#           "additionalProperties": false
+#         }
+#       }
+#     }
+#   ],
+#   "tool_choice": { "type": "auto" }
+# }
+
+tools = cfg.get("tools", [])
+tool_choice = cfg.get("tool_choice")
+
+res = client.chat.completions.create(
+  model="gpt-4o",
+  messages=[
+    {"role": "system", "content": system_message},
+    {"role": "user", "content": "What's the weather in Berlin?"},
+  ],
+  tools=tools,
+  tool_choice=tool_choice,
+  langfuse_prompt=prompt,  # Links this generation to the prompt version in Langfuse
+)
+```
+
+<Callout type="info">
+For complete end-to-end examples, see the [OpenAI Functions cookbook](/guides/cookbook/prompt_management_openai_functions) and the [Structured Outputs cookbook](/guides/cookbook/integration_openai_structured_output).
+</Callout>
