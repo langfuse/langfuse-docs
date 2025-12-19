@@ -1,0 +1,229 @@
+---
+title: Observations API
+sidebarTitle: Observations API
+description: Retrieve observations from Langfuse with high-performance v2 endpoints featuring cursor-based pagination and selective field retrieval.
+---
+
+# Observations API
+
+The Observations API allows you to retrieve observation data (spans, generations, events) from Langfuse for use in custom workflows, evaluation pipelines, and analytics.
+
+For general information about API authentication, base URLs, and SDK access, see the [Public API documentation](/docs/api-and-data-platform/features/public-api).
+
+## Observations API v2 (Beta) [#v2]
+
+<Callout type="warning">
+
+The v2 Observations API is currently in **beta**. The API is stable for production use, but some parameters and behaviors may change based on user feedback before general availability.
+
+**Data availability note:** When using current SDK versions, data may take approximately 5 minutes to appear on v2 endpoints. We will be releasing updated SDK versions soon that will make data available immediately.
+
+</Callout>
+
+```
+GET /api/public/v2/observations
+```
+
+The v2 Observations API is a redesigned endpoint optimized for high-performance data retrieval. It addresses the performance bottlenecks of the v1 API by minimizing the work Langfuse has to perform per query.
+
+### Key Improvements
+
+**1. Selective Field Retrieval**
+
+The v1 API returns complete rows with all fields (input/output, usage, metadata, etc.), forcing the database to scan every column even when you only need a subset. The v2 API lets you specify which field groups you need as a comma-separated string:
+
+```
+?fields=core,basic,usage
+```
+
+#### Available Field Groups
+
+| Group      | Fields                                                                                  |
+| ---------- | --------------------------------------------------------------------------------------- |
+| `core`     | Always included: id, traceId, startTime, endTime, projectId, parentObservationId, type  |
+| `basic`    | name, level, statusMessage, version, environment, bookmarked, public, userId, sessionId |
+| `time`     | completionStartTime, createdAt, updatedAt                                               |
+| `io`       | input, output                                                                           |
+| `metadata` | metadata                                                                                |
+| `model`    | providedModelName, internalModelId, modelParameters                                     |
+| `usage`    | usageDetails, costDetails, totalCost                                                    |
+| `prompt`   | promptId, promptName, promptVersion                                                     |
+| `metrics`  | latency, timeToFirstToken                                                               |
+
+If `fields` is not specified, `core` and `basic` field groups are returned by default.
+
+**2. Cursor-Based Pagination**
+
+The v1 API uses offset-based pagination (page numbers) which becomes increasingly slow for large datasets. The v2 API uses cursor-based pagination for better and more consistent performance.
+
+**How it works:**
+
+1. Make your initial request with a `limit` parameter
+2. If more results exist, the response includes a `cursor` in the `meta` object
+3. Pass this cursor via the `cursor` parameter in your next request to continue where you left off
+4. Repeat until no cursor is returned (you've reached the end)
+
+Results are always sorted by `startTime` descending (newest first).
+
+**Example response with cursor:**
+
+```json
+{
+  "data": [
+    {"id": "obs-1", "traceId": "trace-1", "name": "llm-call", ...},
+    {"id": "obs-2", "traceId": "trace-1", "name": "embedding", ...}
+  ],
+  "meta": {
+    "cursor": "eyJsYXN0U3RhcnRUaW1lIjoiMjAyNS0xMi0xNVQxMDozMDowMFoiLCJsYXN0SWQiOiJvYnMtMTAwIn0="
+  }
+}
+```
+
+When the response has no `cursor` in `meta` (or `meta.cursor` is `null`), you've retrieved all matching observations.
+
+**3. Optimized I/O Handling**
+
+The v1 API always attempts to parse input/output as JSON which can be expensive. The v2 API returns I/O as strings by default. Set `parseIoAsJson: true` only when you need parsed JSON.
+
+**4. Stricter Limits**
+
+| Feature       | v1        | v2    |
+| ------------- | --------- | ----- |
+| Default limit | 1000      | 50    |
+| Maximum limit | Unlimited | 1,000 |
+
+### Common Use Cases
+
+**Polling for recent observations:**
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations?fromStartTime=2025-12-15T00:00:00Z&toStartTime=2025-12-16T00:00:00Z&limit=10"
+```
+
+**Getting observations for a specific trace:**
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations?fields=core,basic,usage&traceId=your-trace-id"
+```
+
+**Paginating through results:**
+
+```bash
+# First request
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations?fromStartTime=2025-12-01T00:00:00Z&limit=100"
+
+# Response includes: "meta": { "cursor": "eyJsYXN0..." }
+
+# Next request with cursor
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations?fromStartTime=2025-12-01T00:00:00Z&limit=100&cursor=eyJsYXN0..."
+```
+
+### Parameters
+
+| Parameter             | Type     | Description                                                               |
+| --------------------- | -------- | ------------------------------------------------------------------------- |
+| `fields`              | string   | Comma-separated list of field groups to include. Defaults to `core,basic` |
+| `limit`               | integer  | Number of items per page. Defaults to 50, max 1,000                       |
+| `cursor`              | string   | Base64-encoded cursor for pagination (from previous response)             |
+| `fromStartTime`       | datetime | Retrieve observations with startTime on or after this datetime            |
+| `toStartTime`         | datetime | Retrieve observations with startTime before this datetime                 |
+| `traceId`             | string   | Filter by trace ID                                                        |
+| `name`                | string   | Filter by observation name                                                |
+| `type`                | string   | Filter by observation type (GENERATION, SPAN, EVENT)                      |
+| `userId`              | string   | Filter by user ID                                                         |
+| `level`               | string   | Filter by log level (DEBUG, DEFAULT, WARNING, ERROR)                      |
+| `parentObservationId` | string   | Filter by parent observation ID                                           |
+| `environment`         | string   | Filter by environment                                                     |
+| `version`             | string   | Filter by version tag                                                     |
+| `parseIoAsJson`       | boolean  | Parse input/output as JSON (default: false)                               |
+| `filter`              | string   | JSON array of filter conditions (takes precedence over query params)      |
+
+### Sample Response
+
+With all fields included
+
+```json
+{
+    "data": [
+        {
+            "id": "support-chat-7-950dc53a-gen",
+            "traceId": "support-chat-7-950dc53a",
+            "startTime": "2025-12-17T16:09:00.875Z",
+            "projectId": "7a88fb47-b4e2-43b8-a06c-a5ce950dc53a",
+            "parentObservationId": null,
+            "type": "GENERATION",
+            "endTime": "2025-12-17T16:09:01.456Z",
+            "name": "llm-generation",
+            "level": "DEFAULT",
+            "statusMessage": "",
+            "version": "",
+            "environment": "default",
+            "completionStartTime": "2025-12-17T16:09:00.995Z",
+            "createdAt": "2025-12-17T16:09:00.875Z",
+            "updatedAt": "2025-12-17T16:09:01.456Z",
+            "input": "{\"messages\":[{\"role\":\"user\",\"content\":\"Perfect.\"}]}",
+            "output": "{\"role\":\"assistant\",\"content\":\"You're all set. Have a great day!\"}",
+            "metadata": {},
+            "model": "gpt-4o",
+            "internalModelId": "",
+            "modelParameters": {
+                "temperature": 0.2
+            },
+            "usageDetails": {
+                "input": 98,
+                "output": 68,
+                "total": 166
+            },
+            "inputUsage": 98,
+            "outputUsage": 68,
+            "totalUsage": 166,
+            "costDetails": {
+                "input": 0.000196,
+                "output": 0.000204,
+                "total": 0.00083
+            },
+            "inputCost": 0.000196,
+            "outputCost": 0.000204,
+            "totalCost": 0.00083,
+            "promptId": "",
+            "promptName": "",
+            "promptVersion": null,
+            "latency": 0.581,
+            "timeToFirstToken": 0.12,
+            "userId": "",
+            "sessionId": "support-chat-session",
+            "modelId": null,
+            "inputPrice": null,
+            "outputPrice": null,
+            "totalPrice": null
+        }
+    ],
+    "meta": {
+        "cursor": "eyJsYXN0U3RhcnRUaW1lVG8iOiIyMDI1LTEyLTE3VDE2OjA5OjAwLjg3NVoiLCJsYXN0VHJhY2VJZCI6InN1cHBvcnQtY2hhdC03LTk1MGRjNTNhIiwibGFzdElkIjoic3VwcG9ydC1jaGF0LTctOTUwZGM1M2EtZ2VuIn0="
+    }
+}
+```
+
+<Callout type="info">
+
+**API Reference:** See the full [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for all available parameters, response schemas, and interactive examples.
+
+</Callout>
+
+## Observations API v1 [#v1]
+
+```
+GET /api/public/observations
+```
+
+The v1 Observations API remains available for existing integrations. For new implementations, we recommend using the v2 API for better performance.
+
+See the [API Reference](https://api.reference.langfuse.com/#tag/observation/GET/api/public/observations) for v1 documentation.
