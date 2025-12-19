@@ -6,7 +6,13 @@ description: Configure, run, and monitor LLM-powered evaluators on traces and da
 
 # LLM-as-a-Judge
 
-LLM-as-a-judge is an [evaluation method](/docs/evaluation/evaluation-methods/overview) to score the output of an application by using an LLM as an evaluator. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The resulting `scores` include chain-of-thought reasoning as a `comment`.
+LLM-as-a-Judge (also known as Model-based Evaluations) is an [evaluation method](/docs/evaluation/evaluation-methods/overview) to score the output of an application by using an LLM as an evaluator. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The resulting [`scores`](/docs/evaluation/evaluation-methods/data-model) include chain-of-thought reasoning as a `comment`.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2025-12-19-llm-as-a-judge-overview.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
 
 ## Why use LLM-as-a-judge?
 
@@ -135,7 +141,7 @@ You can show the LLM-as-a-Judge execution traces by filtering for the environmen
 </Frame>
 
 <details>
-<summary>LLM-as-a-Judge Execution Statuses</summary>
+<summary>LLM-as-a-Judge Execution Status</summary>
 
 - **Completed**: Evaluation finished successfully.
 - **Error**: Evaluation failed (click execution trace ID for details).
