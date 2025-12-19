@@ -1,106 +1,76 @@
 ---
-title: Human Annotation for LLM apps
+title: Add scores to traces via the UI
 description: Annotate traces and observations with scores in the Langfuse UI to record human-in-the-loop evaluations.
-sidebarTitle: Human Annotation
+sidebarTitle: Scores via UI
 ---
 
-# Human Annotation
+# Manual Scores via UI
 
-Human Annotation is a manual evaluation method. It is used to collaboratively annotate traces, sessions and observations with scores.
+Adding scores via the UI is a manual [evaluation method](/docs/evaluation/evaluation-methods/overview). It is used to collaboratively annotate traces, sessions and observations with evaluation scores.
 
-In Langfuse you can use [Annotation Queues](#annotation-queues) to streamline working through reviewing larger batches of of [single interactions (trace-level)](#single-object), [multiple interactions (session-level)](#single-object) or even [single observations](#single-object), below the trace level.
+<Callout type="info">
+You can also use [Annotation Queues](docs/evaluation/evaluation-methods/annotation-queues) to streamline working through reviewing larger batches of of traces, sessions and observations.
+</Callout>
 
-<Frame fullWidth>
-  ![Annotate](https://static.langfuse.com/docs-legacy-gifs/annotation.gif)
-</Frame>
+<Video
+  src="https://static.langfuse.com/docs-videos/2025-12-19-manual-scoring.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
 
-## Why use Human Annotation?
+## Why manually adding scores via UI?
 
-- **Collaboration**: Enable team collaboration by inviting other internal members to annotate a subset of traces and observations. This manual evaluation can enhance the overall accuracy and reliability of your results by incorporating diverse perspectives and expertise.
-- **Annotation data consistency**: Create score configurations for annotation workflows to ensure that all team members are using standardized scoring criteria. Hereby configure categorical, numerical or binary score types to capture different aspects of your data.
-- **Evaluation of new product features**: This feature can be useful for new use cases where no other scores have been allocated yet.
-- **Benchmarking of other scores**: Establish a human baseline score that can be used as a benchmark to compare and evaluate other scores. This can provide a clear standard of reference and enhance the objectivity of your performance evaluations.
-- **Curate evaluation data**: Flag high-quality examples from production logs or experiment runs to include in future evaluations and test datasets.
+- Allow multiple team members to manually review data and improve accuracy through diverse expertise.
+- Standardized score configurations and criteria ensure consistent data labeling across different workflows and scoring types.
+- Human baselines provide a reference point for benchmarking other scores and curating high-quality datasets from production logs.
 
-## Annotation of Single Traces, Sessions and Observations [#single-object]
-
-Human Annotation of single traces, sessions and observations is available in the trace, session and observation detail view.
+## Set up step-by-step
 
 <Steps>
-#### Prerequisite: Create a Score Config
+### Create a Score Config
 
-To use Human Annotation, you **need to have at least one score configuration (Score Config) set up**. See [how to create and manage Score Configs](/faq/all/manage-score-configs) for details.
+To add scores in the UI, you need to have at least one Score Config set up. See [how to create and manage Score Configs](/faq/all/manage-score-configs) for details.
 
-#### Trigger Annotation on a Trace, Session or Observation
+### Add Scores
 
-On a Trace, Session or Observation detail view **click on** `Annotate` to open the annotation form.
+On a Trace, Session or Observation detail view click on `Annotate` to open the annotation form.
 
 <Frame fullWidth>![Annotate](/images/docs/trigger_annotation.png)</Frame>
 
-#### Select Score Configs to use
+### Select Score Configs to use
 
 <Frame fullWidth>![Annotate](/images/docs/select_score_configs.png)</Frame>
 
-#### Set Score values
+### Set Score values
 
 <Frame fullWidth>![Annotate](/images/docs/set_score_values.png)</Frame>
 
-#### See newly added Scores
-
+### See the Scores
 To see your newly added scores on traces or observations, **click on** the `Scores` tab on the trace or observation detail view.
 
 <Frame fullWidth>
   ![Detail scores table](/images/docs/see_created_scores.png)
 </Frame>
 
-To see your newly added scores on sessions, **click on** the `Scores` tab on the session detail view.
+</Steps>
+
+## Add scores to experiments
+
+When running [experiments via UI](/docs/evaluation/experiments/experiments-via-ui) or via [SDK](/docs/evaluation/experiments/experiments-via-sdk), you can annotate results directly from the experiment compare view. 
+
+
+<Callout type="info">
+**Prerequisites:**
+- Set up [score configurations](/faq/all/manage-score-configs) for the dimensions you want to evaluate
+- Execute an [experiment via UI](/docs/evaluation/experiments/experiments-via-ui) or [SDK](/docs/evaluation/experiments/experiments-via-sdk) to generate results to review
+
+</Callout>
 
 <Frame fullWidth>
-  ![Detail scores table](/images/docs/see_created_scores_session.png)
+  ![Annotate from compare view](/images/changelog/2025-10-23-annotate-compare-view-overview.png)
 </Frame>
 
-All scores are also available in the traces, sessions and observations table views respectively.
-
-</Steps>
-
-## Annotate from Experiment Compare View [#annotate-experiments]
-
-When running [experiments via UI](/docs/evaluation/experiments/experiments-via-ui) or via [SDK](/docs/evaluation/experiments/experiments-via-sdk), you can annotate results directly from the experiment compare view. This workflow integrates experiment evaluation with human feedback collection.
-
-**Benefits**
-
-- **Seamless workflow**: Run experiments, review results side-by-side, and add human annotations without switching views
-- **Full context**: Annotate while viewing experiment inputs, outputs, and automated scores together
-- **Efficient review**: Navigate through all experiment items systematically to ensure complete coverage
-- **Optimistic updates**: UI reflects your annotations immediately while data persists in the background
-
-**How to Annotate Experiments**
-
-<Steps>
-
-### Prerequisites
-
-1. **Create score configs**: Set up [score configurations](/faq/all/manage-score-configs) for the dimensions you want to evaluate
-2. **Run an experiment**: Execute an [experiment via UI](/docs/evaluation/experiments/experiments-via-ui) or [SDK](/docs/evaluation/experiments/experiments-via-sdk) to generate results to review
-
-### Navigate to Compare View
-
-1. **Go to** `Your Project` > `Datasets`
-2. **Select** your dataset
-3. **Click on** the experiment run(s) you want to review
-4. **Open** the compare view to see results side-by-side
-
-### Annotate Experiment Items
-
-1. **Select a row** in the compare view to open the trace detail view
-2. **Click** `Annotate` to open the annotation form
-3. **Assign scores** based on your configured score dimensions
-4. **Add comments** (optional) to provide context for your team
-5. **Navigate** to the next item by clicking `Annotate` on another row
-
-The compare view maintains full experiment context—inputs, outputs, and automated scores—while you review each item. Summary metrics update as you add annotation scores, allowing you to track progress across the experiment.
-
-</Steps>
+The compare view maintains full experiment context: Inputs, outputs, and automated scores, while you review each item. Summary metrics update as you add annotation scores, allowing you to track progress across the experiment.
 
 ## GitHub Discussions
 
