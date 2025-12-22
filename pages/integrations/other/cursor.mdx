@@ -10,13 +10,9 @@ category: Integrations
 
 This guide shows you how to trace [Cursor](https://cursor.com) AI agent interactions with Langfuse for monitoring, debugging, and analyzing your AI-assisted coding sessions.
 
-## What is Cursor?
+> **What is Cursor?** [**Cursor**](https://cursor.com) is an AI-powered code editor built on top of VS Code. It features AI agents that can help you write, edit, debug, and understand code through natural language interactions. Cursor agents can execute shell commands, read and edit files, and use MCP (Model Context Protocol) tools to assist developers.
 
-[**Cursor**](https://cursor.com) is an AI-powered code editor built on top of VS Code. It features AI agents that can help you write, edit, debug, and understand code through natural language interactions. Cursor agents can execute shell commands, read and edit files, and use MCP (Model Context Protocol) tools to assist developers.
-
-## What is Langfuse?
-
-[**Langfuse**](https://langfuse.com) is the open-source LLM engineering platform. It helps teams collaboratively debug, analyze, and iterate on their LLM applications with features like tracing, prompt management, and evaluation.
+> **What is Langfuse?** [**Langfuse**](https://langfuse.com) is the open-source LLM engineering platform. It helps teams collaboratively debug, analyze, and iterate on their LLM applications with features like tracing, prompt management, and evaluation.
 
 ## What This Integration Does
 
@@ -31,27 +27,6 @@ With this integration, you can automatically trace all Cursor agent activity to 
 - **Performance Metrics**: Capture latencies, token usage, and execution times
 
 ## How It Works
-
-This integration leverages [Cursor Hooks](https://docs.cursor.com/advanced/hooks), an event-driven system that allows you to execute custom scripts before or after specific Cursor events. The integration captures events from all 12 Cursor hooks (Agent and Tab modes) and sends them to Langfuse.
-
-### Supported Hooks
-
-| Hook | Description |
-|------|-------------|
-| `beforeSubmitPrompt` | Captures user prompts and attachments |
-| `afterAgentResponse` | Records agent responses |
-| `afterAgentThought` | Logs agent thinking/reasoning |
-| `beforeShellExecution` | Tracks shell commands before execution |
-| `afterShellExecution` | Captures shell command output |
-| `beforeMCPExecution` | Logs MCP tool calls |
-| `afterMCPExecution` | Records MCP tool results |
-| `beforeReadFile` | Tracks file read operations |
-| `afterFileEdit` | Captures file edits with line statistics |
-| `stop` | Records session completion with status scores |
-| `beforeTabFileRead` | Tab mode file reads |
-| `afterTabFileEdit` | Tab mode file edits |
-
-## Readme
 
 Source: [naoufalelh/cursor-langfuse](https://github.com/naoufalelh/cursor-langfuse)
 
@@ -90,10 +65,3 @@ export function CursorLangfuseReadme() {
 <div className="p-6 mt-6 border bg-card rounded-md">
   <CursorLangfuseReadme />
 </div>
-
-## Learn More
-
-- [Cursor Documentation](https://docs.cursor.com)
-- [Cursor Hooks Documentation](https://docs.cursor.com/advanced/hooks)
-- [Langfuse Tracing Guide](/docs/observability/overview)
-- [Langfuse Python SDK](/docs/observability/sdk/overview)
