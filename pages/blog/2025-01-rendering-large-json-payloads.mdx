@@ -1,0 +1,245 @@
+---
+title: "Rendering Large JSON Payloads: Beyond Virtualization"
+date: 2025/01/22
+description: "Building a JSON viewer that handles 100K+ line payloads with sub-10ms expand/collapse interactions through hierarchical trees and binary search navigation."
+tag: engineering, performance, front-end, react
+author: Michael
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Rendering Large JSON Payloads: Beyond Virtualization"
+  description="Building a JSON viewer that handles 100K+ line payloads with sub-10ms expand/collapse interactions through hierarchical trees and binary search navigation."
+  date="Jan 22, 2025"
+  authors={["Michael"]}
+/>
+
+When developers use LLM applications, they see requests going in and responses coming out - but not what happens in between. Langfuse makes this visible by capturing and displaying the full input/output payloads of every LLM call. This visibility is essential because developers need to debug failures, optimize token usage, and understand how their applications behave in production.
+
+For typical use cases - a chatbot message, a function call, a simple completion - these payloads are a few hundred lines of JSON. Browsing them is straightforward: render a tree view, let users expand and collapse nodes, search for specific values.
+
+With agentic workflows, we see a small but increasing number of traces with significantly larger payloads. Long-running agent loops accumulate tens of thousands of lines of JSON. Tool calls sometimes return entire database query results. Some responses contain 100,000+ lines of structured data. Our initial JSON viewer rendered all nodes to the DOM, which caused browser lags or even crashes on these large payloads.
+
+## Initial Approach: Virtualization with Eager Flattening
+
+After implementing virtualization for our [trace viewer](/blog/2025-01-rendering-long-running-traces), we wanted to apply the same approach to JSON rendering. The challenge: we couldn't find proven open-source components for virtualized JSON viewing. One notable exception is [react-obj-view](https://github.com/vothanhdat/react-obj-view) which came close, but lacked features like search and line-wrapping we needed. To have control over the user experience andfuture extensions, we built our own.
+
+Our first virtualized implementation followed a straightforward pipeline:
+
+**Step 1: Deep Parse JSON** - Convert JSON string into JavaScript objects
+**Step 2: Build Tree Structure** - Create TreeNode objects with parent-child relationships
+**Step 3: Flatten Rows** - Convert tree into flat array based on expansion state (i.e., which rows to show in the viewer)
+**Step 4: Virtualize** - Render the subset of rows visible within the viewport from flattened array
+
+```typescript
+const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+// Build tree and flatten based on expansion state
+const flatRows = useMemo(() => {
+  const tree = buildTreeFromJSON(data);
+  return flattenTree(tree, expandedIds);
+}, [data, expandedIds]);
+
+function toggleExpand(id: string) {
+  setExpandedIds(new Set([...expandedIds, id]));
+  // Triggers rebuild of flatRows: 100K new objects allocated
+  // Main thread blocked for 300ms
+}
+
+// Virtualizer renders only visible rows
+const VirtualRow = ({ index }) => {
+  const row = flatRows[index]; // O(1) array access
+  return <RowComponent row={row} />;
+};
+```
+
+This worked for typical payloads. For large datasets, we hit two bottlenecks:
+
+**Problem 1: Initial Tree Building Blocks UI**
+
+Deep parsing and tree building for 100K+ nodes took 500ms+ on the main thread, freezing the browser. Solution: conditionally offload to Web Workers for datasets over 10,000 nodes.
+
+**Problem 2: Expand/Collapse Still Sluggish**
+
+Even with Web Workers handling initial build, every expand/collapse action rebuilt the entire flat array. Creating 100,000 new row objects on every interaction took 200-300ms. Users experienced noticeable lag when expanding large nodes.
+
+This is a fundamental performance issue: on every expand or collapse we fully re-flatten the JSON tree. That means walking 100K+ nodes and rebuilding the entire flat row list each time. While individual object creation in Javascript is fast, doing this work tens of thousands of times per interaction adds up to ~200ms of CPU time, along with extra garbage collection from all the short-lived rows, arrays, and strings. In contrast, reusing existing rows and updating only the affected subtree avoids most of this work and completes much faster because it skips the full traversal and rebuild.
+
+The issue: **virtualization solves rendering performance, not interaction performance.** We only render 50 visible rows, but we're still allocating 100,000 objects on every expansion change.
+
+## Revised Approach: Hierarchical Tree with JIT Navigation
+
+How can we resolve this? Like most problems in computer science, the solution is to trade space for time. The revised approach eliminates the flatten step entirely. Instead of pre-computing a flat array, we navigate the hierarchical tree just-in-time (JIT) when the virtualizer requests a specific row. This way we only need to traverse the tree once and can reuse the same data structure for every interaction.
+
+### Key Decision: Breaking React's Immutability Principle
+
+This required to break with a core react principle: we mutate the tree directly instead of creating immutable copies. When a user expands a node, we update that node's `isExpanded` property in place and recalculate only the affected `childOffsets` along the path to the root.
+
+Why? Immutable updates for a 100K-node tree require copying thousands of nodes even with structural sharing. Direct mutation affects only O(log n) nodes - the path from the clicked node to the root, typically 10-20 nodes. We use a version counter to trigger React re-renders explicitly.
+
+### Data Structure: childOffsets for Binary Search
+
+To enable JIT lookup, we need a data structure that can answer "what's at row 50,000?" without iterating through all 49,999 preceding rows. A naive hierarchical tree would require walking from the root, counting visible descendants at each level - an O(n) operation. Our solution: augment each node with `childOffsets`, an array of cumulative visible descendant counts that enables binary search navigation in O(log n) time.
+
+Each TreeNode maintains its hierarchical structure plus navigation metadata:
+
+```typescript
+interface TreeNode {
+  id: string;
+  key: string | number;
+  value: unknown;
+  type: "object" | "array" | "string" | "number" | "boolean" | "null";
+
+  // Structure
+  depth: number;
+  parentNode: TreeNode | null;
+  children: TreeNode[];
+
+  // Expansion state (node owns its state)
+  isExpandable: boolean;
+  isExpanded: boolean;
+
+  // Navigation via binary search
+  childOffsets: number[]; // Cumulative visible descendant counts
+  visibleDescendantCount: number;
+}
+```
+
+The `childOffsets` array enables O(log n) navigation to any row without pre-computing a flat array:
+
+```typescript
+// Example: A node with 3 children
+// Child 0 has 10 visible descendants
+// Child 1 has 5 visible descendants
+// Child 2 has 8 visible descendants
+
+childOffsets = [11, 17, 26];
+
+// To find row 15:
+// Binary search: 15 > 11 && 15 < 17 → descend into Child 1
+// Continue recursively until reaching target row
+```
+
+This enables O(log n) navigation instead of O(1) array access - but we avoid the O(n) rebuild cost:
+
+```typescript
+function getNodeByIndex(root: TreeNode, index: number): TreeNode | null {
+  if (index === 0) return root;
+  if (!root.isExpanded || root.children.length === 0) return null;
+
+  let currentIndex = index - 1; // Account for root node
+
+  // Binary search through childOffsets
+  for (let i = 0; i < root.children.length; i++) {
+    const child = root.children[i];
+    const offsetEnd = root.childOffsets[i];
+
+    if (currentIndex < offsetEnd) {
+      // Target is in this subtree
+      const childIndex = currentIndex - (i > 0 ? root.childOffsets[i - 1] : 0);
+      return getNodeByIndex(child, childIndex);
+    }
+  }
+
+  return null;
+}
+```
+
+_([View full implementation](https://github.com/langfuse/langfuse/blob/main/web/src/components/ui/AdvancedJsonViewer/utils/treeNavigation.ts))_
+
+### In-Place Mutation for Expand/Collapse
+
+When a user clicks to expand or collapse a node:
+
+```typescript
+export function toggleNodeExpansion(tree: TreeState, nodeId: string): void {
+  const node = tree.nodeMap.get(nodeId);
+  if (!node || !node.isExpandable) return;
+
+  // Direct mutation (breaks React patterns)
+  node.isExpanded = !node.isExpanded;
+  node.userExpand = node.isExpanded;
+
+  // Update ancestors' offset counts (O(log n) - path to root only)
+  updateAncestorOffsets(node);
+}
+
+// In React component:
+const [expansionVersion, setExpansionVersion] = useState(0);
+
+function handleToggleExpansion(nodeId: string) {
+  toggleNodeExpansion(tree, nodeId);
+
+  // Trigger re-render via version counter
+  setExpansionVersion((v) => v + 1);
+}
+```
+
+Instead of rebuilding the entire tree or flat array, we:
+
+1. Mutate the `isExpanded` flag on one node
+2. Update `childOffsets` along the path to root (O(log n) nodes)
+3. Increment version counter to trigger React re-render
+
+No object allocation. No array rebuilds. Just update a few numbers in place.
+
+### Progressive Enhancement with Web Workers
+
+Initial tree construction still requires traversing all nodes. We decided to do a full upfront pass before rendering the JSON to enable additional features like text search, which can quickly find content even in a virtualized view by searching the pre-built tree structure. For datasets over 10,000 nodes, we offload this to a Web Worker:
+
+```typescript
+export function buildTreeFromJSON(data: unknown, config: BuildConfig) {
+  // Pass 1: Structure - Create TreeNodes with parent-child relationships
+  const { rootNode, nodeMap } = buildTreeStructureIterative(
+    data,
+    config.rootKey,
+  );
+
+  // Pass 2: Expansion - Apply initial expansion state
+  applyExpansionStateIterative(rootNode, config.initialExpansion);
+
+  // Pass 3: Offsets - Compute childOffsets for navigation
+  computeOffsetsIterative(rootNode);
+
+  // Pass 4: Dimensions - Calculate tree metrics
+  const { maxDepth, maxContentWidth } = calculateTreeDimensions(rootNode);
+
+  return { rootNode, nodeMap, maxDepth, maxContentWidth };
+}
+```
+
+All passes use iterative algorithms with explicit stacks to avoid stack overflow on deeply nested JSON. As covered in our [trace viewer post](/blog/2025-01-rendering-long-running-traces), avoiding recursion is critical when dealing with deeply nested structures - JavaScript's call stack limit of ~10,000 frames means recursive algorithms fail on structures with deep nesting.
+
+**Alternative Approach:** If search functionality isn't required, it's possible to offload tree building to JIT as well. [react-obj-view](https://github.com/vothanhdat/react-obj-view) (no Langfuse affiliation) takes this approach with pixel-based virtualization and JIT node lookups, avoiding upfront tree construction entirely. For our use case, we accepted the few hundred milliseconds of upfront build time, as it is negligible compared to the fetch times for large JSON payloads, in exchange for instant search capabilities.
+
+## Comparing Approaches
+
+| Aspect          | Initial (Eager Flattening)   | Revised (JIT Navigation)   |
+| --------------- | ---------------------------- | -------------------------- |
+| Initial build   | O(n) parse + build + flatten | O(n) build only            |
+| Expand/collapse | O(n) flatten rebuild         | O(log n) in-place mutation |
+| Row lookup      | O(1) array access            | O(log n) binary search     |
+| Memory          | 2n (tree + flat array)       | n (tree only)              |
+| React patterns  | Immutable ✓                  | Mutable (controlled) ✗     |
+| Interaction     | 200-300ms at 100K nodes      | &lt;10ms at any size          |
+
+**Trade-offs of In-Place Mutation:**
+
+Breaking React's immutability principle requires discipline:
+
+- Clear ownership: only tree module mutates nodes
+- Debug mode validation checks offset correctness
+- Version counter makes re-renders explicit and predictable
+
+The payoff: For large json payloads the expand/collapse completes in &lt;10ms regardless of dataset size, versus 200-300ms+ with immutable rebuilds.
+
+_The complete implementation is available in the Langfuse repository:_
+
+- _[AdvancedJsonViewer](https://github.com/langfuse/langfuse/tree/main/web/src/components/ui/AdvancedJsonViewer) - Full component_
+- _[treeStructure.ts](https://github.com/langfuse/langfuse/blob/main/web/src/components/ui/AdvancedJsonViewer/utils/treeStructure.ts) - Tree building_
+- _[treeNavigation.ts](https://github.com/langfuse/langfuse/blob/main/web/src/components/ui/AdvancedJsonViewer/utils/treeNavigation.ts) - Binary search navigation_
+
+---
+
+**Building Langfuse?** We're growing our engineering team. If you enjoy solving performance problems with data structures and algorithms, [check out our open positions](https://langfuse.com/careers).

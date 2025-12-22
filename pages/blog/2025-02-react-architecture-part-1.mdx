@@ -1,0 +1,394 @@
+---
+title: "Production-Grade React Components Part 1: Separating Data, State, and Presentation"
+date: 2025/02/05
+description: "Organizing React components into four distinct layers - data fetching, pure transformation, context orchestration, and presentation - for maintainability and testability."
+tag: engineering, react, architecture
+author: Michael
+---
+
+At Langfuse we have a culture governed by [high ownership and proactive engineering](https://langfuse.com/handbook/how-we-work/principles). Engineers work directly with users, plan features across the full stack, and independently ship features and improvements without the need for complicated approval processes.
+
+This autonomy works well when many developers touch the same components, especially those that are feature-packed and heavily used. However, as components evolve iteratively, responsibilities drift and mix. Data fetching, business logic, state management, and presentation become intertwined. To maintain velocity and performance, periodic refactoring becomes necessary.
+
+This is the first in a three-part series on how we structure complex React components at Langfuse to improve their performance and maintainability. This post covers layer separation - the architectural foundation that makes everything else possible.
+
+## The Technical Challenge
+
+The trace view is one of the most-used components in Langfuse. Users see it every time the open a trace. It combines multiple concerns: progressive data fetching from several endpoints, transforming it into hierarchical structures, managing user interactions, handling responsive layouts, and adapting to different display modes.
+
+Over the past years, the trace view evolved significantly as multiple engineers added features and improvements. We took the opportunity to refactor it, introducing a component architecture that enables us to maintain and extend it more effectively going forward.
+
+## Rethinking the Architecture
+
+The original implementation mixed concerns throughout the component tree. Raw data was passed deep into components and transformed multiple times at different levels. This led to unnecessary re-renders, code duplication, and drift as different parts of the tree handled similar transformations differently.
+
+We rethought the architecture from data fetching through to presentation. The approach: separate into distinct layers based on their responsibilities and how frequently they change. This aligns with React best practices - keeping data fetching separate from presentation, extracting pure transformations, and controlling re-render boundaries through memoization.
+
+For the trace view, this resulted in four layers: data fetching, pure transformation, context orchestration, and presentation.
+
+### Layer 1: Data Fetching
+
+Data fetching is separated to isolate network concerns and make it easy to swap data sources. This layer knows nothing about tree structures or UI concerns - it only handles API calls, retry logic, and error states.
+
+```typescript
+// api/useTraceData.ts
+export function useTraceData({
+  traceId,
+  projectId,
+  timestamp,
+}: UseTraceDataParams) {
+  const query = api.traces.byIdWithObservationsAndScores.useQuery(
+    { traceId, projectId, timestamp },
+    {
+      retry(failureCount, error) {
+        if (
+          error.data?.code === "UNAUTHORIZED" ||
+          error.data?.code === "NOT_FOUND"
+        ) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+    },
+  );
+
+  return {
+    trace: query.data,
+    observations: query.data?.observations ?? [],
+    scores: query.data?.scores ?? [],
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+}
+```
+
+_([View implementation](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/api/useTraceData.ts))_
+
+### Layer 2: Pure Transformation
+
+Business logic is extracted into pure functions with no React dependencies. This enables testing without mocking, reuse across different contexts (React components, Node.js, Web Workers), and ensures transformations happen only once through memoization rather than on every render.
+
+```typescript
+// lib/tree-building.ts
+export function buildTraceUiData(
+  trace: Trace,
+  observations: Observation[],
+  minLevel?: ObservationLevel,
+): {
+  tree: TreeNode;
+  nodeMap: Map<string, TreeNode>;
+  searchItems: TraceSearchListItem[];
+  hiddenObservationsCount: number;
+} {
+  // 1. Filter observations by level
+  const { sortedObservations, hiddenObservationsCount } =
+    filterAndPrepareObservations(observations, minLevel);
+
+  // 2. Build dependency graph
+  const { nodeRegistry, leafIds } = buildDependencyGraph(sortedObservations);
+
+  // 3. Process bottom-up with topological sort
+  const nodeMap = new Map<string, TreeNode>();
+  const rootIds = buildTreeNodesBottomUp(
+    nodeRegistry,
+    leafIds,
+    nodeMap,
+    trace.timestamp,
+  );
+
+  // 4. Create trace root
+  const tree = createTraceRoot(trace, rootIds, nodeMap);
+
+  // 5. Flatten for search
+  const searchItems = flattenTreeForSearch(tree);
+
+  return { tree, nodeMap, searchItems, hiddenObservationsCount };
+}
+```
+
+_([View implementation](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/lib/tree-building.ts))_
+
+Test example:
+
+```typescript
+// lib/tree-building.clienttest.ts
+import { buildTraceUiData } from "./tree-building";
+
+test("builds tree with correct parent-child relationships", () => {
+  const trace = { id: "trace-1", timestamp: new Date() };
+  const observations = [
+    { id: "obs-1", parentObservationId: null },
+    { id: "obs-2", parentObservationId: "obs-1" },
+  ];
+
+  const { tree, nodeMap } = buildTraceUiData(trace, observations);
+
+  expect(tree.children).toHaveLength(1);
+  expect(tree.children[0].id).toBe("obs-1");
+  expect(nodeMap.get("obs-1")!.children[0].id).toBe("obs-2");
+});
+```
+
+### Layer 3: Context Orchestration
+
+Context providers combine data fetching and transformations while controlling re-render boundaries through memoization. This ensures expensive operations (like tree building) run only when inputs change, not on every render, and provides both raw and derived data through a clean API. This approach reduces prop drilling - data flows through context rather than being passed through multiple component layers.
+
+The trade-off: components depending on context are coupled to it being present in the tree above them. To avoid unnecessary re-renders, contexts should isolate responsibility (avoid fat contexts where unrelated data changes trigger re-renders of all consumers).
+
+```typescript
+// contexts/TraceDataContext.tsx
+interface TraceDataContextValue {
+  trace: TraceType;
+  observations: Observation[];
+  scores: Score[];
+  tree: TreeNode;
+  nodeMap: Map<string, TreeNode>;
+  searchItems: TraceSearchListItem[];
+  hiddenObservationsCount: number;
+  comments: Map<string, number>;
+}
+
+export function TraceDataProvider({
+  trace,
+  observations,
+  scores,
+  comments,
+  children,
+}: TraceDataProviderProps) {
+  const { minObservationLevel } = useViewPreferences();
+
+  const uiData = useMemo(() => {
+    return buildTraceUiData(trace, observations, minObservationLevel);
+  }, [trace, observations, minObservationLevel]);
+
+  const value = useMemo<TraceDataContextValue>(
+    () => ({
+      trace,
+      observations,
+      scores,
+      tree: uiData.tree,
+      nodeMap: uiData.nodeMap,
+      searchItems: uiData.searchItems,
+      hiddenObservationsCount: uiData.hiddenObservationsCount,
+      comments,
+    }),
+    [trace, observations, scores, uiData, comments],
+  );
+
+  return (
+    <TraceDataContext.Provider value={value}>
+      {children}
+    </TraceDataContext.Provider>
+  );
+}
+```
+
+_([View implementation](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/contexts/TraceDataContext.tsx))_
+
+### Layer 4: Presentation
+
+The presentation layer is responsible for rendering UI and handling user interactions. It receives data via context hooks and props, contains no business logic, and can be further distinguished into three distinct types of components, each with different responsibilities and reusability characteristics: orchestration components, domain components, and pure display components.
+
+#### Orchestration Components
+
+These components compose providers and route to platform-specific layouts. They contain no business logic or styling - only composition and platform detection.
+
+```typescript
+// Trace.tsx
+export function Trace({
+  trace,
+  observations,
+  scores,
+  projectId,
+  context,
+}: TraceProps) {
+  const commentsMap = useMemo(/* ... */);
+
+  return (
+    <ViewPreferencesProvider traceContext={context}>
+      <TraceDataProvider
+        trace={trace}
+        observations={observations}
+        scores={scores}
+        comments={commentsMap}
+      >
+        <TraceGraphDataProvider
+          projectId={trace.projectId}
+          traceId={trace.id}
+          observations={observations}
+        >
+          <SelectionProvider>
+            <SearchProvider>
+              <JsonExpansionProvider>
+                <TraceContent />
+              </JsonExpansionProvider>
+            </SearchProvider>
+          </SelectionProvider>
+        </TraceGraphDataProvider>
+      </TraceDataProvider>
+    </ViewPreferencesProvider>
+  );
+}
+```
+
+#### Domain Components
+
+Domain components connect domain concepts to display components. They pull data from contexts, apply domain-specific logic, and compose generic components with domain content.
+
+```typescript
+// components/TraceTree.tsx
+export function TraceTree() {
+  const { tree, comments } = useTraceData();
+  const { selectedNodeId, setSelectedNodeId, collapsedNodes, toggleCollapsed } =
+    useSelection();
+
+  // Domain logic: calculate root totals for heatmap scaling
+  const rootTotalCost = tree.totalCost;
+  const rootTotalDuration =
+    tree.latency != null ? tree.latency * 1000 : undefined;
+
+  return (
+    <VirtualizedTree
+      tree={tree}
+      collapsedNodes={collapsedNodes}
+      selectedNodeId={selectedNodeId}
+      onToggleCollapse={toggleCollapsed}
+      onSelectNode={setSelectedNodeId}
+      renderNode={({
+        node,
+        treeMetadata,
+        isSelected,
+        isCollapsed,
+        onToggleCollapse,
+        onSelect,
+      }) => (
+        <VirtualizedTreeNodeWrapper
+          metadata={treeMetadata}
+          nodeType={node.type}
+          hasChildren={node.children.length > 0}
+          isCollapsed={isCollapsed}
+          onToggleCollapse={onToggleCollapse}
+          isSelected={isSelected}
+          onSelect={onSelect}
+        >
+          <SpanContent
+            node={node}
+            parentTotalCost={rootTotalCost}
+            parentTotalDuration={rootTotalDuration}
+            commentCount={comments.get(node.id)}
+            onSelect={onSelect}
+          />
+        </VirtualizedTreeNodeWrapper>
+      )}
+    />
+  );
+}
+```
+
+#### Pure Display Components
+
+Pure display components are generic UI components with no domain knowledge (think of shadcn/ui components). They are pure functions, work through props, are fully type-parameterized, and can be reused across any domain.
+
+```typescript
+// components/_shared/VirtualizedTree.tsx
+interface VirtualizedTreeProps<T extends { id: string; children: T[] }> {
+  tree: T;
+  collapsedNodes: Set<string>;
+  selectedNodeId: string | null;
+  renderNode: (params: {
+    node: T;
+    treeMetadata: TreeNodeMetadata;
+    isSelected: boolean;
+    isCollapsed: boolean;
+    onToggleCollapse: () => void;
+    onSelect: () => void;
+  }) => ReactNode;
+  onToggleCollapse: (nodeId: string) => void;
+  onSelectNode: (nodeId: string | null) => void;
+}
+
+export function VirtualizedTree<T extends { id: string; children: T[] }>({
+  tree,
+  collapsedNodes,
+  selectedNodeId,
+  renderNode,
+  onToggleCollapse,
+  onSelectNode,
+}: VirtualizedTreeProps<T>) {
+  // Generic virtualization logic - works with any tree structure
+  const flattenedItems = useMemo(
+    () => flattenTree(tree, collapsedNodes, 0, [], true),
+    [tree, collapsedNodes],
+  );
+  const rowVirtualizer = useVirtualizer({
+    /* ... */
+  });
+
+  return (
+    <div ref={parentRef}>
+      {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+        const item = flattenedItems[virtualRow.index];
+        return renderNode({
+          node: item.node,
+          treeMetadata: {
+            depth: item.depth,
+            treeLines: item.treeLines,
+            isLastSibling: item.isLastSibling,
+          },
+          isSelected: item.node.id === selectedNodeId,
+          isCollapsed: collapsedNodes.has(item.node.id),
+          onToggleCollapse: () => onToggleCollapse(item.node.id),
+          onSelect: () => onSelectNode(item.node.id),
+        });
+      })}
+    </div>
+  );
+}
+```
+
+This three-tier structure within the presentation layer provides clear separation of concerns: orchestration components handle composition, domain components apply business rules, and pure display components offer maximum reusability.
+
+## Sidebar: Context Design
+
+Instead of a single monolithic context, we create focused contexts with clear boundaries. This allows us to isolate responsibility and avoid unnecessary re-renders. This way each component only subscribes to the contexts it needs - clicking a node doesn't re-render the preference panel, and toggling "show duration" doesn't re-render the tree.
+
+```typescript
+<ViewPreferencesProvider>
+  {" "}
+  {/* User preferences: show duration, costs, etc. */}
+  <TraceDataProvider>
+    {" "}
+    {/* Read-only data: trace, tree, nodeMap */}
+    <SelectionProvider>
+      {" "}
+      {/* UI state: selected node, collapsed nodes */}
+      <SearchProvider>
+        {" "}
+        {/* Search query and results */}
+        <TraceContent />
+      </SearchProvider>
+    </SelectionProvider>
+  </TraceDataProvider>
+</ViewPreferencesProvider>
+```
+
+**Why separate contexts?**
+
+Contexts are separated by change frequency and responsibility. Data changes rarely (only on refetch), selection changes constantly (every click), and preferences change occasionally (user toggles). Each context has clear ownership: TraceDataProvider owns data and derived structures, ViewPreferencesProvider owns display settings, and SelectionProvider owns interaction state.
+
+## Key Takeaways
+
+At Langfuse, our culture of high ownership and proactive engineering requires components that support rapid, confident changes by multiple developers. The layer separation approach we applied to the trace view addresses this need: separating concerns by responsibility and change frequency creates clear boundaries that enable engineers to navigate the codebase confidently and make changes without ripple effects.
+
+The new architecture has costs - more files and initial setup overhead. However, this increase in files can be managed through intentional directory organization, which we'll explore in [Part 2](/blog/2025-02-react-architecture-part-2) along with other code organization principles that build on these layer separations. The foundation this provides for maintainability and performance aligns with our engineering culture's requirements.
+
+_The complete trace view implementation:_
+
+- _[trace2/](https://github.com/langfuse/langfuse/tree/main/web/src/components/trace2) - Full feature_
+- _[api/](https://github.com/langfuse/langfuse/tree/main/web/src/components/trace2/api) - Data fetching layer_
+- _[lib/](https://github.com/langfuse/langfuse/tree/main/web/src/components/trace2/lib) - Pure transformation layer_
+- _[contexts/](https://github.com/langfuse/langfuse/tree/main/web/src/components/trace2/contexts) - Orchestration layer_
+
+---
+
+**Building Langfuse?** We're growing our engineering team. If you care about software architecture and maintainable code, [check out our open positions](https://langfuse.com/careers).
