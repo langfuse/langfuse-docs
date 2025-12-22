@@ -1,6 +1,8 @@
 export default {
   overview: "Overview",
+  concepts: "Concepts",
   "evaluation-methods": "Evaluation Methods",
+
   experiments: "Experiments",
   tutorials: {
     title: "Guides ↗",

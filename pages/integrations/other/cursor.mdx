@@ -1,0 +1,67 @@
+---
+title: Trace Cursor Agents with Langfuse
+sidebarTitle: Cursor
+logo: /images/integrations/cursor_icon.png
+description: Monitor and trace your Cursor AI agent interactions with Langfuse for comprehensive observability and debugging of AI-assisted coding sessions.
+category: Integrations
+---
+
+# Trace Cursor Agents with Langfuse
+
+This guide shows you how to trace [Cursor](https://cursor.com) AI agent interactions with Langfuse for monitoring, debugging, and analyzing your AI-assisted coding sessions.
+
+> **What is Cursor?** [**Cursor**](https://cursor.com) is an AI-powered code editor built on top of VS Code. It features AI agents that can help you write, edit, debug, and understand code through natural language interactions. Cursor agents can execute shell commands, read and edit files, and use MCP (Model Context Protocol) tools to assist developers.
+
+> **What is Langfuse?** [**Langfuse**](https://langfuse.com) is the open-source LLM engineering platform. It helps teams collaboratively debug, analyze, and iterate on their LLM applications with features like tracing, prompt management, and evaluation.
+
+## What This Integration Does
+
+With this integration, you can automatically trace all Cursor agent activity to Langfuse:
+
+- **User Prompts**: Capture every prompt and instruction sent to the agent
+- **Agent Responses**: Record all agent responses and reasoning
+- **File Operations**: Track file reads and edits with detailed statistics
+- **Shell Commands**: Monitor shell command execution and outputs
+- **MCP Tool Calls**: Log all MCP tool invocations and results
+- **Session Tracking**: Group traces by conversation and workspace for easy filtering
+- **Performance Metrics**: Capture latencies, token usage, and execution times
+
+## How It Works
+
+Source: [naoufalelh/cursor-langfuse](https://github.com/naoufalelh/cursor-langfuse)
+
+import { useData } from "nextra/hooks";
+import { Playground } from "nextra/components";
+import { Callout } from "nextra/components";
+
+export const getStaticProps = async () => {
+  const res = await fetch(
+    "https://raw.githubusercontent.com/naoufalelh/cursor-langfuse/refs/heads/main/README.md"
+  );
+  const readmeContent = await res.text();
+  return {
+    props: {
+      ssg: {
+        cursorLangfuseReadme: readmeContent,
+      },
+    },
+  };
+};
+
+export function CursorLangfuseReadme() {
+  const { cursorLangfuseReadme } = useData();
+  // Basic check to prevent errors if fetching failed or content is empty
+  if (!cursorLangfuseReadme) {
+    return <p>Error loading README content.</p>;
+  }
+  // Ensure the source prop receives a string
+  const readmeString =
+    typeof cursorLangfuseReadme === "string"
+      ? cursorLangfuseReadme
+      : JSON.stringify(cursorLangfuseReadme);
+  return <Playground source={readmeString} />;
+}
+
+<div className="p-6 mt-6 border bg-card rounded-md">
+  <CursorLangfuseReadme />
+</div>
