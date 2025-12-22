@@ -1,13 +1,11 @@
 ---
 description: Ingest custom scores via the Langfuse SDKs or API.
-sidebarTitle: Custom Scores (API/SDK)
+sidebarTitle: Scores via API/SDK
 ---
 
-# Custom Scores
+# Scores via API/SDK
 
-Custom Scores are the most flexible way to implement evaluation workflows using Langfuse. As any other evaluation method the purpose of custom scores is to assign evaluations metrics to `Traces`, `Observations`, `Sessions`, or `DatasetRuns` via the `Score` object (see [Scores Data Model](/docs/evaluation/evaluation-methods/data-model)).
-
-This is achieved by ingesting scores via the Langfuse SDKs or API.
+You can use the Langfuse SDKs or API to add scores to traces, observations, sessions and dataset runs. This is an [evaluation method](/docs/evaluation/evaluation-methods/overview) that allows to set up custom evaluation workflows and extend the scoring capabilities of Langfuse.
 
 ## Common Use Cases
 
@@ -31,7 +29,7 @@ If a score is ingested manually using a `trace_id` to link the score to a trace,
 
 Here are examples by `Score` data types
 
-<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
 <Tab>
 
 <Tabs items={["Numeric", "Categorical", "Boolean"]}>
@@ -273,9 +271,71 @@ await langfuse.flush();
 </Tabs>
 
 </Tab>
+<Tab>
+
+You can also create scores directly via the [REST API](https://api.reference.langfuse.com/#tag/score/POST/api/public/scores). Authenticate using HTTP Basic Auth with your Langfuse Public Key as username and Secret Key as password.
+
+<Tabs items={["Numeric", "Categorical", "Boolean"]}>
+<Tab>
+Numeric score values must be provided as float.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "traceId": "trace_id_here",
+    "observationId": "observation_id_here",
+    "name": "correctness",
+    "value": 0.9,
+    "dataType": "NUMERIC",
+    "comment": "Factually correct"
+  }'
+```
+
+</Tab>
+<Tab>
+Categorical score values must be provided as strings.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "traceId": "trace_id_here",
+    "observationId": "observation_id_here",
+    "name": "accuracy",
+    "value": "partially correct",
+    "dataType": "CATEGORICAL",
+    "comment": "Some factual errors"
+  }'
+```
+
+</Tab>
+<Tab>
+Boolean scores must be provided as a float (`0` or `1`). The value's string equivalent will be automatically populated and is accessible on read.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "traceId": "trace_id_here",
+    "observationId": "observation_id_here",
+    "name": "helpfulness",
+    "value": 0,
+    "dataType": "BOOLEAN",
+    "comment": "Incorrect answer"
+  }'
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
 </LangTabs>
 
-→ More details in the [Langfuse SDK advanced features guide](/docs/observability/sdk/advanced-features#create-scores). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
 ### Preventing Duplicate Scores
 
@@ -299,7 +359,7 @@ Whenever you provide a `ScoreConfig`, the score data will be validated against t
 - **Score Value when Type is categorical**: Value must map to one of the categories defined in the config
 - **Score Value when Type is boolean**: Value must equal `0` or `1`
 
-<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
 
 <Tab>
 
@@ -479,8 +539,76 @@ await langfuse.flush();
 </Tabs>
 
 </Tab>
+<Tab>
 
-→ More details in the [Langfuse SDK advanced features guide](/docs/observability/sdk/advanced-features#create-scores). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+You can also enforce score configs via the [REST API](https://api.reference.langfuse.com/#tag/score/POST/api/public/scores) by providing a `configId`.
+
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
+<Tab>
+When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "unique_id",
+    "traceId": "trace_id_here",
+    "observationId": "observation_id_here",
+    "name": "accuracy",
+    "value": 0.9,
+    "dataType": "NUMERIC",
+    "configId": "78545-6565-3453654-43543",
+    "comment": "Factually correct"
+  }'
+```
+
+</Tab>
+<Tab>
+Categorical scores are used to evaluate data that falls into specific categories. If you provide a configId, the score value will be validated against the config's categories.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "unique_id",
+    "traceId": "trace_id_here",
+    "observationId": "observation_id_here",
+    "name": "correctness",
+    "value": "correct",
+    "dataType": "CATEGORICAL",
+    "configId": "12345-6565-3453654-43543",
+    "comment": "Factually correct"
+  }'
+```
+
+</Tab>
+<Tab>
+When ingesting boolean scores, you can provide the value as a float. If you provide a configId, the score's name and config's name must match as well as their data types.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "unique_id",
+    "traceId": "trace_id_here",
+    "observationId": "observation_id_here",
+    "name": "helpfulness",
+    "value": 1,
+    "dataType": "BOOLEAN",
+    "configId": "93547-6565-3453654-43543",
+    "comment": "Factually correct"
+  }'
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+
+See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
 </LangTabs>
 
