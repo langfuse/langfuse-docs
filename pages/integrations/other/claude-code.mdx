@@ -85,17 +85,8 @@ Configure in your Claude Code settings (~/.claude/settings.json):
 import json
 import os
 import sys
-from datetime import datetime
 
-# Initialize Langfuse client
-from langfuse import Langfuse
-
-# Initialize Langfuse with environment variables
-langfuse = Langfuse(
-    public_key=os.environ.get("LANGFUSE_PUBLIC_KEY"),
-    secret_key=os.environ.get("LANGFUSE_SECRET_KEY"),
-    host=os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com"),
-)
+from langfuse import get_client, propagate_attributes
 
 
 def main():
@@ -111,27 +102,27 @@ def main():
     tool_output = input_data.get("tool_output", {})
     session_id = input_data.get("session_id", "default")
 
+    # Get the Langfuse client (uses LANGFUSE_* environment variables)
+    langfuse = get_client()
+
     # Create a trace for this tool usage
-    trace = langfuse.trace(
+    with langfuse.start_as_current_observation(
         name=f"claude-code-{tool_name}",
-        session_id=session_id,
-        metadata={
-            "source": "claude-code",
-            "tool_name": tool_name,
-        },
-    )
-
-    # Log the tool usage as a span
-    span = trace.span(
-        name=tool_name,
+        as_type="span",
         input=tool_input,
-        output=tool_output,
-        metadata={
-            "hook_type": "PostToolUse",
-        },
-    )
+    ) as span:
+        # Propagate session information
+        with propagate_attributes(
+            session_id=session_id,
+            metadata={"source": "claude-code", "hook_type": "PostToolUse"},
+        ):
+            # Update the span with tool output
+            span.update(
+                output=tool_output,
+                metadata={"tool_name": tool_name},
+            )
 
-    # Flush to ensure data is sent
+    # Flush to ensure data is sent (important for short-lived scripts)
     langfuse.flush()
 
     # Exit successfully (don't block the tool)
@@ -153,11 +144,11 @@ chmod +x ~/.claude-code/hooks/langfuse_hook.py
 Add the Langfuse credentials to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
 
 ```bash
-# Langfuse Configuration
+# Langfuse Configuration (used by get_client())
 export LANGFUSE_PUBLIC_KEY="pk-lf-..."
 export LANGFUSE_SECRET_KEY="sk-lf-..."
-export LANGFUSE_HOST="https://cloud.langfuse.com"  # EU region
-# export LANGFUSE_HOST="https://us.cloud.langfuse.com"  # US region
+export LANGFUSE_HOST="https://cloud.langfuse.com"  # 🇪🇺 EU region
+# export LANGFUSE_HOST="https://us.cloud.langfuse.com"  # 🇺🇸 US region
 ```
 
 Reload your shell:
@@ -274,15 +265,10 @@ Create a stop hook script (`langfuse_stop_hook.py`):
 """Session end hook for Langfuse"""
 
 import json
-import os
 import sys
-from langfuse import Langfuse
 
-langfuse = Langfuse(
-    public_key=os.environ.get("LANGFUSE_PUBLIC_KEY"),
-    secret_key=os.environ.get("LANGFUSE_SECRET_KEY"),
-    host=os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com"),
-)
+from langfuse import get_client, propagate_attributes
+
 
 def main():
     try:
@@ -291,19 +277,24 @@ def main():
         sys.exit(0)
 
     session_id = input_data.get("session_id", "default")
-    
-    # Log session end
-    trace = langfuse.trace(
+
+    # Get the Langfuse client (uses LANGFUSE_* environment variables)
+    langfuse = get_client()
+
+    # Log session end event
+    with langfuse.start_as_current_observation(
         name="claude-code-session-end",
-        session_id=session_id,
-        metadata={
-            "source": "claude-code",
-            "event": "session_end",
-        },
-    )
-    
+        as_type="span",
+    ) as span:
+        with propagate_attributes(
+            session_id=session_id,
+            metadata={"source": "claude-code", "event": "session_end"},
+        ):
+            span.update(output={"status": "session_ended"})
+
     langfuse.flush()
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
@@ -337,5 +328,6 @@ Verify your Langfuse API keys are correct and the host URL matches your region (
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code/overview)
 - [Claude Code Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks)
 - [Claude Code GitHub Repository](https://github.com/anthropics/claude-code)
-- [Langfuse Python SDK](/docs/sdk/python/sdk-v3)
+- [Langfuse SDK Instrumentation](/docs/observability/sdk/instrumentation)
+- [Langfuse Python SDK Reference](https://python.reference.langfuse.com)
 - [Langfuse Documentation](https://langfuse.com/docs)
