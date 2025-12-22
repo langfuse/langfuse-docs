@@ -1,0 +1,175 @@
+---
+title: "Integrate Claude Code with Langfuse"
+sidebarTitle: Claude Code
+logo: /images/integrations/anthropic_icon.png
+description: "Monitor Claude Code AI coding assistant interactions with Langfuse for comprehensive observability."
+category: Integrations
+---
+
+# Claude Code Integration with Langfuse
+
+## What is Claude Code?
+
+[Claude Code](https://docs.anthropic.com/en/docs/claude-code) is Anthropic's agentic coding tool that lives in your terminal. It can understand your codebase, help you write and edit code, execute commands, create and run tests, and help you accomplish complex coding tasks with natural language. Claude Code brings the power of Claude's AI capabilities directly into your development workflow.
+
+## What is Langfuse?
+
+[Langfuse](https://langfuse.com) is the open-source LLM engineering platform. It helps teams trace LLM applications, debug issues, evaluate quality, and monitor costs in production. Langfuse provides comprehensive observability for LLM-powered applications through tracing, metrics, and evaluation tools.
+
+## What Can This Integration Trace?
+
+Claude Code emits [OpenTelemetry standard events](https://docs.anthropic.com/en/docs/claude-code/monitoring-usage) for monitoring and observability. This integration allows you to capture:
+
+- **Session traces**: Track individual coding sessions and conversations
+- **Tool usage**: Monitor which tools Claude Code invokes (file operations, command execution, etc.)
+- **API calls**: See the underlying API requests made by Claude Code
+- **Timing information**: Understand the duration of operations
+- **User prompts** (optional): Log the input prompts sent to Claude Code
+
+<Callout type="info">
+Claude Code's telemetry provides operational metrics and event data. Note that the detailed prompts and LLM responses are not included in the telemetry by default—only session metadata and tool invocations are captured.
+</Callout>
+
+## Quick Start
+
+Configure Claude Code to send OpenTelemetry events to Langfuse by setting the following environment variables before starting Claude Code.
+
+<Steps>
+
+### Set up Langfuse
+
+1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
+2. Create a new project and copy your API keys from the project settings.
+
+### Create Your Authorization Header
+
+Langfuse uses [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication) for OpenTelemetry authentication. Create the base64-encoded string by combining your public and secret keys:
+
+```bash
+# Replace with your actual API keys
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
+```
+
+For long API keys on GNU/Linux systems, you may need to add `-w 0` to prevent line wrapping:
+
+```bash
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64 -w 0
+```
+
+Save this base64 string for the next step.
+
+### Configure Environment Variables
+
+Set the following environment variables in your shell:
+
+```bash
+# Enable Claude Code telemetry
+export CLAUDE_CODE_ENABLE_TELEMETRY=1
+
+# Configure OpenTelemetry export
+export OTEL_LOGS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=http/json
+
+# Set the Langfuse OpenTelemetry endpoint
+export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v1/logs"
+# Use https://us.cloud.langfuse.com/api/public/otel/v1/logs for 🇺🇸 US region
+
+# Authenticate with Langfuse using Basic Auth (use your base64 string from Step 2)
+export OTEL_EXPORTER_OTLP_LOGS_HEADERS="Authorization=Basic <your-base64-encoded-api-keys>"
+
+# Optional: Log user prompts (set to 1 to enable)
+export OTEL_LOG_USER_PROMPTS=1
+```
+
+### Start Claude Code
+
+With the environment variables set, start Claude Code:
+
+```bash
+claude
+```
+
+Events from your Claude Code session will now be sent to Langfuse.
+
+### View Traces in Langfuse
+
+Open your Langfuse project to see the captured telemetry. You'll be able to see:
+
+- Session start and end events
+- Tool invocations and their results
+- Timing information for each operation
+- User prompts (if `OTEL_LOG_USER_PROMPTS=1` is set)
+
+</Steps>
+
+## Configuration Reference
+
+| Environment Variable | Description | Required |
+|---------------------|-------------|----------|
+| `CLAUDE_CODE_ENABLE_TELEMETRY` | Set to `1` to enable Claude Code telemetry | Yes |
+| `OTEL_LOGS_EXPORTER` | Set to `otlp` to use OpenTelemetry Protocol | Yes |
+| `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL` | Set to `http/json` for JSON format | Yes |
+| `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` | The Langfuse OpenTelemetry logs endpoint | Yes |
+| `OTEL_EXPORTER_OTLP_LOGS_HEADERS` | Authorization header with base64-encoded API keys | Yes |
+| `OTEL_LOG_USER_PROMPTS` | Set to `1` to include user prompts in telemetry | No |
+
+## Self-Hosted Langfuse
+
+If you're self-hosting Langfuse, update the endpoint to point to your instance:
+
+```bash
+export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="https://your-langfuse-instance.com/api/public/otel/v1/logs"
+```
+
+<Callout type="warning">
+The OpenTelemetry endpoint requires Langfuse v3.22.0 or later. Make sure your self-hosted deployment is up to date.
+</Callout>
+
+## Shell Configuration
+
+To make this configuration persistent, add the environment variables to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent):
+
+```bash
+# Claude Code + Langfuse Integration
+export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export OTEL_LOGS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=http/json
+export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v1/logs"
+export OTEL_EXPORTER_OTLP_LOGS_HEADERS="Authorization=Basic <your-base64-encoded-api-keys>"
+export OTEL_LOG_USER_PROMPTS=1
+```
+
+Then reload your shell configuration:
+
+```bash
+source ~/.bashrc  # or source ~/.zshrc
+```
+
+## Troubleshooting
+
+### No traces appearing in Langfuse
+
+1. Verify that `CLAUDE_CODE_ENABLE_TELEMETRY=1` is set
+2. Check that your API keys are correctly base64-encoded
+3. Ensure the endpoint URL is correct for your region
+4. Check your Langfuse project's trace list for any incoming data
+
+### Authentication errors
+
+Make sure the base64-encoded string includes both your public key and secret key separated by a colon:
+
+```bash
+# Format: <public-key>:<secret-key>
+echo -n "pk-lf-abc123:sk-lf-xyz789" | base64
+```
+
+### Self-hosted: Connection refused
+
+Ensure your Langfuse instance is running and accessible from your machine. The OpenTelemetry endpoint should be available at `/api/public/otel/v1/logs`.
+
+## Resources
+
+- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
+- [Claude Code Monitoring Usage](https://docs.anthropic.com/en/docs/claude-code/monitoring-usage)
+- [Langfuse OpenTelemetry Integration](/integrations/native/opentelemetry)
+- [Langfuse Documentation](https://langfuse.com/docs)
