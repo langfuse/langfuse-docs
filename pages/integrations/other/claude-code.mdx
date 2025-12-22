@@ -2,7 +2,7 @@
 title: "Integrate Claude Code with Langfuse"
 sidebarTitle: Claude Code
 logo: /images/integrations/anthropic_icon.png
-description: "Monitor Claude Code AI coding assistant interactions with Langfuse for comprehensive observability."
+description: "Monitor Claude Code AI coding assistant interactions with Langfuse using hooks for comprehensive observability."
 category: Integrations
 ---
 
@@ -10,7 +10,7 @@ category: Integrations
 
 ## What is Claude Code?
 
-[Claude Code](https://docs.anthropic.com/en/docs/claude-code) is Anthropic's agentic coding tool that lives in your terminal. It can understand your codebase, help you write and edit code, execute commands, create and run tests, and help you accomplish complex coding tasks with natural language. Claude Code brings the power of Claude's AI capabilities directly into your development workflow.
+[Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) is Anthropic's agentic coding tool that lives in your terminal. It can understand your codebase, help you write and edit code, execute commands, create and run tests, and help you accomplish complex coding tasks with natural language. Claude Code brings the power of Claude's AI capabilities directly into your development workflow.
 
 ## What is Langfuse?
 
@@ -18,21 +18,24 @@ category: Integrations
 
 ## What Can This Integration Trace?
 
-Claude Code emits [OpenTelemetry standard events](https://docs.anthropic.com/en/docs/claude-code/monitoring-usage) for monitoring and observability. This integration allows you to capture:
+By using Claude Code's [hooks system](https://docs.anthropic.com/en/docs/claude-code/hooks), this integration captures tool usage events and sends them to Langfuse. You can monitor:
 
-- **Session traces**: Track individual coding sessions and conversations
-- **Tool usage**: Monitor which tools Claude Code invokes (file operations, command execution, etc.)
-- **API calls**: See the underlying API requests made by Claude Code
-- **Timing information**: Understand the duration of operations
-- **User prompts** (optional): Log the input prompts sent to Claude Code
+- **Tool invocations**: Track when Claude Code uses tools like file editing, bash commands, or web searches
+- **Tool inputs and outputs**: See what data is passed to and returned from each tool
+- **Session information**: Group related tool calls into logical sessions
+- **Timing information**: Understand how long operations take
 
-<Callout type="info">
-Claude Code's telemetry provides operational metrics and event data. Note that the detailed prompts and LLM responses are not included in the telemetry by default—only session metadata and tool invocations are captured.
-</Callout>
+## How It Works
+
+Claude Code provides a [hooks system](https://docs.anthropic.com/en/docs/claude-code/hooks) that allows you to run custom scripts at different lifecycle points:
+
+- **PreToolUse**: Before a tool is executed
+- **PostToolUse**: After a tool completes
+- **Stop**: When a session ends
+
+We'll use these hooks to send telemetry data to Langfuse via the Langfuse Python SDK.
 
 ## Quick Start
-
-Configure Claude Code to send OpenTelemetry events to Langfuse by setting the following environment variables before starting Claude Code.
 
 <Steps>
 
@@ -41,135 +44,298 @@ Configure Claude Code to send OpenTelemetry events to Langfuse by setting the fo
 1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
 2. Create a new project and copy your API keys from the project settings.
 
-### Create Your Authorization Header
+### Install Dependencies
 
-Langfuse uses [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication) for OpenTelemetry authentication. Create the base64-encoded string by combining your public and secret keys:
-
-```bash
-# Replace with your actual API keys
-echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
-```
-
-For long API keys on GNU/Linux systems, you may need to add `-w 0` to prevent line wrapping:
+Install the Langfuse Python SDK:
 
 ```bash
-echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64 -w 0
+pip install langfuse
 ```
 
-Save this base64 string for the next step.
+### Create the Hook Script
 
-### Configure Environment Variables
+Create a file called `langfuse_hook.py` in a convenient location (e.g., `~/.claude-code/hooks/langfuse_hook.py`):
 
-Set the following environment variables in your shell:
+```python
+#!/usr/bin/env python3
+"""
+Claude Code Hook: Langfuse Integration
+=======================================
+This hook sends Claude Code tool usage events to Langfuse for observability.
+
+Configure in your Claude Code settings (~/.claude/settings.json):
+
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude-code/hooks/langfuse_hook.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+"""
+
+import json
+import os
+import sys
+from datetime import datetime
+
+# Initialize Langfuse client
+from langfuse import Langfuse
+
+# Initialize Langfuse with environment variables
+langfuse = Langfuse(
+    public_key=os.environ.get("LANGFUSE_PUBLIC_KEY"),
+    secret_key=os.environ.get("LANGFUSE_SECRET_KEY"),
+    host=os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com"),
+)
+
+
+def main():
+    try:
+        input_data = json.load(sys.stdin)
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # Extract tool information
+    tool_name = input_data.get("tool_name", "unknown")
+    tool_input = input_data.get("tool_input", {})
+    tool_output = input_data.get("tool_output", {})
+    session_id = input_data.get("session_id", "default")
+
+    # Create a trace for this tool usage
+    trace = langfuse.trace(
+        name=f"claude-code-{tool_name}",
+        session_id=session_id,
+        metadata={
+            "source": "claude-code",
+            "tool_name": tool_name,
+        },
+    )
+
+    # Log the tool usage as a span
+    span = trace.span(
+        name=tool_name,
+        input=tool_input,
+        output=tool_output,
+        metadata={
+            "hook_type": "PostToolUse",
+        },
+    )
+
+    # Flush to ensure data is sent
+    langfuse.flush()
+
+    # Exit successfully (don't block the tool)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Make the Script Executable
 
 ```bash
-# Enable Claude Code telemetry
-export CLAUDE_CODE_ENABLE_TELEMETRY=1
-
-# Configure OpenTelemetry export
-export OTEL_LOGS_EXPORTER=otlp
-export OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=http/json
-
-# Set the Langfuse OpenTelemetry endpoint
-export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v1/logs"
-# Use https://us.cloud.langfuse.com/api/public/otel/v1/logs for 🇺🇸 US region
-
-# Authenticate with Langfuse using Basic Auth (use your base64 string from Step 2)
-export OTEL_EXPORTER_OTLP_LOGS_HEADERS="Authorization=Basic <your-base64-encoded-api-keys>"
-
-# Optional: Log user prompts (set to 1 to enable)
-export OTEL_LOG_USER_PROMPTS=1
+chmod +x ~/.claude-code/hooks/langfuse_hook.py
 ```
 
-### Start Claude Code
+### Set Environment Variables
 
-With the environment variables set, start Claude Code:
+Add the Langfuse credentials to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
+
+```bash
+# Langfuse Configuration
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_HOST="https://cloud.langfuse.com"  # EU region
+# export LANGFUSE_HOST="https://us.cloud.langfuse.com"  # US region
+```
+
+Reload your shell:
+
+```bash
+source ~/.bashrc  # or source ~/.zshrc
+```
+
+### Configure Claude Code Hooks
+
+Add the hook configuration to your Claude Code settings file (`~/.claude/settings.json`):
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude-code/hooks/langfuse_hook.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+<Callout type="info">
+The `"matcher": "*"` configuration will capture all tool usage. You can also specify specific tools like `"Bash"`, `"Edit"`, or `"Read"` to only trace certain operations.
+</Callout>
+
+### Start Using Claude Code
+
+Now when you use Claude Code, tool usage events will be sent to Langfuse:
 
 ```bash
 claude
 ```
 
-Events from your Claude Code session will now be sent to Langfuse.
-
 ### View Traces in Langfuse
 
-Open your Langfuse project to see the captured telemetry. You'll be able to see:
+Open your Langfuse project to see the captured traces. Each tool invocation will appear as a trace with:
 
-- Session start and end events
-- Tool invocations and their results
-- Timing information for each operation
-- User prompts (if `OTEL_LOG_USER_PROMPTS=1` is set)
+- Tool name
+- Input parameters
+- Output results
+- Session grouping
+- Timestamps
 
 </Steps>
 
-## Configuration Reference
+## Advanced Configuration
 
-| Environment Variable | Description | Required |
-|---------------------|-------------|----------|
-| `CLAUDE_CODE_ENABLE_TELEMETRY` | Set to `1` to enable Claude Code telemetry | Yes |
-| `OTEL_LOGS_EXPORTER` | Set to `otlp` to use OpenTelemetry Protocol | Yes |
-| `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL` | Set to `http/json` for JSON format | Yes |
-| `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` | The Langfuse OpenTelemetry logs endpoint | Yes |
-| `OTEL_EXPORTER_OTLP_LOGS_HEADERS` | Authorization header with base64-encoded API keys | Yes |
-| `OTEL_LOG_USER_PROMPTS` | Set to `1` to include user prompts in telemetry | No |
+### Tracing Specific Tools Only
 
-## Self-Hosted Langfuse
+To only trace specific tools, modify the matcher in your settings:
 
-If you're self-hosting Langfuse, update the endpoint to point to your instance:
-
-```bash
-export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="https://your-langfuse-instance.com/api/public/otel/v1/logs"
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude-code/hooks/langfuse_hook.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude-code/hooks/langfuse_hook.py"
+          }
+        ]
+      }
+    ]
+  }
+}
 ```
 
-<Callout type="warning">
-The OpenTelemetry endpoint requires Langfuse v3.22.0 or later. Make sure your self-hosted deployment is up to date.
-</Callout>
+### Adding Session Start/Stop Hooks
 
-## Shell Configuration
+You can also capture session lifecycle events:
 
-To make this configuration persistent, add the environment variables to your shell profile (`~/.bashrc`, `~/.zshrc`, or equivalent):
-
-```bash
-# Claude Code + Langfuse Integration
-export CLAUDE_CODE_ENABLE_TELEMETRY=1
-export OTEL_LOGS_EXPORTER=otlp
-export OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=http/json
-export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v1/logs"
-export OTEL_EXPORTER_OTLP_LOGS_HEADERS="Authorization=Basic <your-base64-encoded-api-keys>"
-export OTEL_LOG_USER_PROMPTS=1
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude-code/hooks/langfuse_stop_hook.py"
+          }
+        ]
+      }
+    ]
+  }
+}
 ```
 
-Then reload your shell configuration:
+Create a stop hook script (`langfuse_stop_hook.py`):
 
-```bash
-source ~/.bashrc  # or source ~/.zshrc
+```python
+#!/usr/bin/env python3
+"""Session end hook for Langfuse"""
+
+import json
+import os
+import sys
+from langfuse import Langfuse
+
+langfuse = Langfuse(
+    public_key=os.environ.get("LANGFUSE_PUBLIC_KEY"),
+    secret_key=os.environ.get("LANGFUSE_SECRET_KEY"),
+    host=os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com"),
+)
+
+def main():
+    try:
+        input_data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        sys.exit(0)
+
+    session_id = input_data.get("session_id", "default")
+    
+    # Log session end
+    trace = langfuse.trace(
+        name="claude-code-session-end",
+        session_id=session_id,
+        metadata={
+            "source": "claude-code",
+            "event": "session_end",
+        },
+    )
+    
+    langfuse.flush()
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
 ```
 
 ## Troubleshooting
 
 ### No traces appearing in Langfuse
 
-1. Verify that `CLAUDE_CODE_ENABLE_TELEMETRY=1` is set
-2. Check that your API keys are correctly base64-encoded
-3. Ensure the endpoint URL is correct for your region
-4. Check your Langfuse project's trace list for any incoming data
+1. Verify the hook script is executable: `chmod +x ~/.claude-code/hooks/langfuse_hook.py`
+2. Check that environment variables are set: `echo $LANGFUSE_PUBLIC_KEY`
+3. Test the script manually: `echo '{"tool_name": "test"}' | python3 ~/.claude-code/hooks/langfuse_hook.py`
+4. Check the Langfuse SDK is installed: `pip show langfuse`
+
+### Hook script errors
+
+Hook scripts that exit with code 1 show errors to the user. Exit code 0 is for success, exit code 2 blocks the tool call.
+
+Test your script in isolation before configuring it as a hook:
+
+```bash
+echo '{"tool_name": "Bash", "tool_input": {"command": "ls"}}' | python3 ~/.claude-code/hooks/langfuse_hook.py
+```
 
 ### Authentication errors
 
-Make sure the base64-encoded string includes both your public key and secret key separated by a colon:
-
-```bash
-# Format: <public-key>:<secret-key>
-echo -n "pk-lf-abc123:sk-lf-xyz789" | base64
-```
-
-### Self-hosted: Connection refused
-
-Ensure your Langfuse instance is running and accessible from your machine. The OpenTelemetry endpoint should be available at `/api/public/otel/v1/logs`.
+Verify your Langfuse API keys are correct and the host URL matches your region (EU or US).
 
 ## Resources
 
-- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
-- [Claude Code Monitoring Usage](https://docs.anthropic.com/en/docs/claude-code/monitoring-usage)
-- [Langfuse OpenTelemetry Integration](/integrations/native/opentelemetry)
+- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code/overview)
+- [Claude Code Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks)
+- [Claude Code GitHub Repository](https://github.com/anthropics/claude-code)
+- [Langfuse Python SDK](/docs/sdk/python/sdk-v3)
 - [Langfuse Documentation](https://langfuse.com/docs)
