@@ -1,0 +1,34 @@
+---
+title: Evaluation Core Concepts
+description: Learn the fundamental concepts behind LLM evaluation in Langfuse - Scores, Evaluation Methods, Datasets, and Experiments.
+---
+
+## Evaluation Core Concepts
+
+
+
+
+### Live vs Asynchronous Evaluation (experiments)
+
+There are two main ways of evaluation: asynchronous (offline) and live (online) evaluation. Both have their place in the development process. 
+
+**Asynchronous (offline)** evaluations are used to test changes to the product's behavior before deploying them. This is done by running an application against a dataset and evaluating these results. Often, there are multiple iterations of fixing things based on the evaluation results, before deploying the changes to production. Asynchronous evaluations are also known as [experiments](/docs/evaluation//core-concepts#experiments).
+
+**Live (online)** evaluations are used to monitor what's happening in production. This is done by monitoring and evaluating live traces and gives you insight in how well the application is behaving in production.When you find edge cases, add them to your offline datasets.
+
+
+### Evaluation Methods
+
+
+| Method | What | Use when |
+| --- | --- | --- |
+| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Use an LLM to evaluate outputs based on custom criteria | Subjective assessments at scale (tone, accuracy, helpfulness) |
+| [Deterministic Checks](/docs/evaluation/evaluation-methods/custom-scores) | Rule-based validation of output properties | Format validation, length constraints, keyword matching |
+| [Human Annotation](/docs/evaluation/evaluation-methods/annotation) | Manual review and scoring in a UI | Building ground truth, edge cases, quality spot checks |
+
+## Experiments (asynchronous evaluation) [#experiments]
+
+
+
+
+## Live Evaluation [#live-evaluation]
