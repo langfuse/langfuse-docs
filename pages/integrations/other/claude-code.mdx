@@ -2,38 +2,37 @@
 title: "Integrate Claude Code with Langfuse"
 sidebarTitle: Claude Code
 logo: /images/integrations/anthropic_icon.png
-description: "Monitor Claude Code AI coding assistant interactions with Langfuse using hooks for comprehensive observability."
+description: "Trace Claude Code AI coding assistant conversations, user inputs, and tool usage with Langfuse for comprehensive observability."
 category: Integrations
 ---
 
 # Claude Code Integration with Langfuse
 
-## What is Claude Code?
+> **What is Claude Code?**: [Claude Code](https://claude.com/product/claude-code) is Anthropic's agentic coding tool that lives in your terminal. It can understand your codebase, help you write and edit code, execute commands, create and run tests, and help you accomplish complex coding tasks with natural language. Claude Code brings the power of Claude's AI capabilities directly into your development workflow.
 
-[Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) is Anthropic's agentic coding tool that lives in your terminal. It can understand your codebase, help you write and edit code, execute commands, create and run tests, and help you accomplish complex coding tasks with natural language. Claude Code brings the power of Claude's AI capabilities directly into your development workflow.
-
-## What is Langfuse?
-
-[Langfuse](https://langfuse.com) is the open-source LLM engineering platform. It helps teams trace LLM applications, debug issues, evaluate quality, and monitor costs in production. Langfuse provides comprehensive observability for LLM-powered applications through tracing, metrics, and evaluation tools.
+> **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source LLM engineering platform. It helps teams trace LLM applications, debug issues, evaluate quality, and monitor costs in production.
 
 ## What Can This Integration Trace?
 
-By using Claude Code's [hooks system](https://docs.anthropic.com/en/docs/claude-code/hooks), this integration captures tool usage events and sends them to Langfuse. You can monitor:
+By using Claude Code's [hooks system](https://code.claude.com/docs/en/hooks-guide), this integration captures full conversation interactions and sends them to Langfuse. You can monitor:
 
-- **Tool invocations**: Track when Claude Code uses tools like file editing, bash commands, or web searches
-- **Tool inputs and outputs**: See what data is passed to and returned from each tool
-- **Session information**: Group related tool calls into logical sessions
+- **User inputs**: Capture every prompt and message you send to Claude Code
+- **Assistant responses**: Track Claude's responses and reasoning
+- **Tool invocations**: See when Claude Code uses tools like file editing, bash commands, or web searches
+- **Tool inputs and outputs**: Inspect data passed to and returned from each tool
+- **Session information**: Group related interactions into logical sessions
 - **Timing information**: Understand how long operations take
 
 ## How It Works
 
-Claude Code provides a [hooks system](https://docs.anthropic.com/en/docs/claude-code/hooks) that allows you to run custom scripts at different lifecycle points:
+Claude Code provides a [hooks system](https://code.claude.com/docs/en/hooks-guide) that allows you to run custom scripts at different lifecycle points. This integration uses the **Stop hook**, which runs after each Claude Code response.
 
-- **PreToolUse**: Before a tool is executed
-- **PostToolUse**: After a tool completes
-- **Stop**: When a session ends
+1. A global "Stop" hook is configured to run each time Claude Code responds
+2. The hook reads Claude Code's generated conversation transcripts
+3. Messages are converted into Langfuse traces and sent to your Langfuse project
+4. All turns from the same session are grouped using a shared `session_id`
 
-We'll use these hooks to send telemetry data to Langfuse via the Langfuse Python SDK.
+Tracing is **opt-in per project** using environment variables in your project's `.claude/settings.local.json`.
 
 ## Quick Start
 
@@ -54,78 +53,449 @@ pip install langfuse
 
 ### Create the Hook Script
 
-Create a file called `langfuse_hook.py` in a convenient location (e.g., `~/.claude-code/hooks/langfuse_hook.py`):
+Create the hook script at `~/.claude/hooks/langfuse_hook.py`:
+
+```bash
+mkdir -p ~/.claude/hooks
+```
+
+<details>
+<summary>View full langfuse_hook.py script</summary>
 
 ```python
 #!/usr/bin/env python3
 """
-Claude Code Hook: Langfuse Integration
-=======================================
-This hook sends Claude Code tool usage events to Langfuse for observability.
-
-Configure in your Claude Code settings (~/.claude/settings.json):
-
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/.claude-code/hooks/langfuse_hook.py"
-          }
-        ]
-      }
-    ]
-  }
-}
+Sends Claude Code traces to Langfuse after each response.
 """
 
 import json
 import os
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
-from langfuse import get_client, propagate_attributes
+# Check if Langfuse is available
+try:
+    from langfuse import Langfuse
+except ImportError:
+    print("Error: langfuse package not installed. Run: pip install langfuse", file=sys.stderr)
+    sys.exit(0)
+
+# Configuration
+LOG_FILE = Path.home() / ".claude" / "state" / "langfuse_hook.log"
+STATE_FILE = Path.home() / ".claude" / "state" / "langfuse_state.json"
+DEBUG = os.environ.get("CC_LANGFUSE_DEBUG", "").lower() == "true"
+
+
+def log(level: str, message: str) -> None:
+    """Log a message to the log file."""
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(LOG_FILE, "a") as f:
+        f.write(f"{timestamp} [{level}] {message}\n")
+
+
+def debug(message: str) -> None:
+    """Log a debug message (only if DEBUG is enabled)."""
+    if DEBUG:
+        log("DEBUG", message)
+
+
+def load_state() -> dict:
+    """Load the state file containing session tracking info."""
+    if not STATE_FILE.exists():
+        return {}
+    try:
+        return json.loads(STATE_FILE.read_text())
+    except (json.JSONDecodeError, IOError):
+        return {}
+
+
+def save_state(state: dict) -> None:
+    """Save the state file."""
+    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    STATE_FILE.write_text(json.dumps(state, indent=2))
+
+
+def get_content(msg: dict) -> Any:
+    """Extract content from a message."""
+    if isinstance(msg, dict):
+        if "message" in msg:
+            return msg["message"].get("content")
+        return msg.get("content")
+    return None
+
+
+def is_tool_result(msg: dict) -> bool:
+    """Check if a message contains tool results."""
+    content = get_content(msg)
+    if isinstance(content, list):
+        return any(
+            isinstance(item, dict) and item.get("type") == "tool_result"
+            for item in content
+        )
+    return False
+
+
+def get_tool_calls(msg: dict) -> list:
+    """Extract tool use blocks from a message."""
+    content = get_content(msg)
+    if isinstance(content, list):
+        return [
+            item for item in content
+            if isinstance(item, dict) and item.get("type") == "tool_use"
+        ]
+    return []
+
+
+def get_text_content(msg: dict) -> str:
+    """Extract text content from a message."""
+    content = get_content(msg)
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        text_parts = []
+        for item in content:
+            if isinstance(item, dict) and item.get("type") == "text":
+                text_parts.append(item.get("text", ""))
+            elif isinstance(item, str):
+                text_parts.append(item)
+        return "\n".join(text_parts)
+    return ""
+
+
+def merge_assistant_parts(parts: list) -> dict:
+    """Merge multiple assistant message parts into one."""
+    if not parts:
+        return {}
+    
+    merged_content = []
+    for part in parts:
+        content = get_content(part)
+        if isinstance(content, list):
+            merged_content.extend(content)
+        elif content:
+            merged_content.append({"type": "text", "text": str(content)})
+    
+    # Use the structure from the first part
+    result = parts[0].copy()
+    if "message" in result:
+        result["message"] = result["message"].copy()
+        result["message"]["content"] = merged_content
+    else:
+        result["content"] = merged_content
+    
+    return result
+
+
+def find_latest_transcript() -> tuple[str, Path] | None:
+    """Find the most recently modified transcript file.
+    
+    Claude Code stores transcripts as *.jsonl files directly in the project directory.
+    Main conversation files have UUID names, agent files have agent-*.jsonl names.
+    The session ID is stored inside each JSON line.
+    """
+    projects_dir = Path.home() / ".claude" / "projects"
+    
+    if not projects_dir.exists():
+        debug(f"Projects directory not found: {projects_dir}")
+        return None
+    
+    latest_file = None
+    latest_mtime = 0
+    
+    for project_dir in projects_dir.iterdir():
+        if not project_dir.is_dir():
+            continue
+        
+        # Look for all .jsonl files directly in the project directory
+        for transcript_file in project_dir.glob("*.jsonl"):
+            mtime = transcript_file.stat().st_mtime
+            if mtime > latest_mtime:
+                latest_mtime = mtime
+                latest_file = transcript_file
+    
+    if latest_file:
+        # Extract session ID from the first line of the file
+        try:
+            first_line = latest_file.read_text().split("\n")[0]
+            first_msg = json.loads(first_line)
+            session_id = first_msg.get("sessionId", latest_file.stem)
+            debug(f"Found transcript: {latest_file}, session: {session_id}")
+            return (session_id, latest_file)
+        except (json.JSONDecodeError, IOError, IndexError) as e:
+            debug(f"Error reading transcript {latest_file}: {e}")
+            return None
+    
+    debug("No transcript files found")
+    return None
+
+
+def create_trace(
+    langfuse: Langfuse,
+    session_id: str,
+    turn_num: int,
+    user_msg: dict,
+    assistant_msgs: list,
+    tool_results: list,
+) -> None:
+    """Create a Langfuse trace for a single turn using the new SDK API."""
+    # Extract user text
+    user_text = get_text_content(user_msg)
+    
+    # Extract final assistant text
+    final_output = ""
+    if assistant_msgs:
+        final_output = get_text_content(assistant_msgs[-1])
+    
+    # Get model info from first assistant message
+    model = "claude"
+    if assistant_msgs and isinstance(assistant_msgs[0], dict) and "message" in assistant_msgs[0]:
+        model = assistant_msgs[0]["message"].get("model", "claude")
+    
+    # Collect all tool calls and results
+    all_tool_calls = []
+    for assistant_msg in assistant_msgs:
+        tool_calls = get_tool_calls(assistant_msg)
+        for tool_call in tool_calls:
+            tool_name = tool_call.get("name", "unknown")
+            tool_input = tool_call.get("input", {})
+            tool_id = tool_call.get("id", "")
+            
+            # Find matching tool result
+            tool_output = None
+            for tr in tool_results:
+                tr_content = get_content(tr)
+                if isinstance(tr_content, list):
+                    for item in tr_content:
+                        if isinstance(item, dict) and item.get("tool_use_id") == tool_id:
+                            tool_output = item.get("content")
+                            break
+            
+            all_tool_calls.append({
+                "name": tool_name,
+                "input": tool_input,
+                "output": tool_output,
+                "id": tool_id,
+            })
+    
+    # Create trace using the new API with context managers
+    with langfuse.start_as_current_span(
+        name=f"Turn {turn_num}",
+        input={"role": "user", "content": user_text},
+        metadata={
+            "source": "claude-code",
+            "turn_number": turn_num,
+            "session_id": session_id,
+        },
+    ) as trace_span:
+        # Create generation for the LLM response
+        with langfuse.start_as_current_observation(
+            name="Claude Response",
+            as_type="generation",
+            model=model,
+            input={"role": "user", "content": user_text},
+            output={"role": "assistant", "content": final_output},
+            metadata={
+                "tool_count": len(all_tool_calls),
+            },
+        ) as generation:
+            pass  # Generation is auto-completed when exiting context
+        
+        # Create spans for tool calls
+        for tool_call in all_tool_calls:
+            with langfuse.start_as_current_span(
+                name=f"Tool: {tool_call['name']}",
+                input=tool_call["input"],
+                metadata={
+                    "tool_name": tool_call["name"],
+                    "tool_id": tool_call["id"],
+                },
+            ) as tool_span:
+                tool_span.update(output=tool_call["output"])
+            debug(f"Created span for tool: {tool_call['name']}")
+        
+        # Update trace with output
+        trace_span.update(output={"role": "assistant", "content": final_output})
+    
+    debug(f"Created trace for turn {turn_num}")
+
+
+def process_transcript(langfuse: Langfuse, session_id: str, transcript_file: Path, state: dict) -> int:
+    """Process a transcript file and create traces for new turns."""
+    # Get previous state for this session
+    session_state = state.get(session_id, {})
+    last_line = session_state.get("last_line", 0)
+    turn_count = session_state.get("turn_count", 0)
+    
+    # Read transcript
+    lines = transcript_file.read_text().strip().split("\n")
+    total_lines = len(lines)
+    
+    if last_line >= total_lines:
+        debug(f"No new lines to process (last: {last_line}, total: {total_lines})")
+        return 0
+    
+    # Parse new messages
+    new_messages = []
+    for i in range(last_line, total_lines):
+        try:
+            msg = json.loads(lines[i])
+            new_messages.append(msg)
+        except json.JSONDecodeError:
+            continue
+    
+    if not new_messages:
+        return 0
+    
+    debug(f"Processing {len(new_messages)} new messages")
+    
+    # Group messages into turns (user -> assistant(s) -> tool_results)
+    turns = 0
+    current_user = None
+    current_assistants = []
+    current_assistant_parts = []
+    current_msg_id = None
+    current_tool_results = []
+    
+    for msg in new_messages:
+        role = msg.get("type") or (msg.get("message", {}).get("role"))
+        
+        if role == "user":
+            # Check if this is a tool result
+            if is_tool_result(msg):
+                current_tool_results.append(msg)
+                continue
+            
+            # New user message - finalize previous turn
+            if current_msg_id and current_assistant_parts:
+                merged = merge_assistant_parts(current_assistant_parts)
+                current_assistants.append(merged)
+                current_assistant_parts = []
+                current_msg_id = None
+            
+            if current_user and current_assistants:
+                turns += 1
+                turn_num = turn_count + turns
+                create_trace(langfuse, session_id, turn_num, current_user, current_assistants, current_tool_results)
+            
+            # Start new turn
+            current_user = msg
+            current_assistants = []
+            current_assistant_parts = []
+            current_msg_id = None
+            current_tool_results = []
+            
+        elif role == "assistant":
+            msg_id = None
+            if isinstance(msg, dict) and "message" in msg:
+                msg_id = msg["message"].get("id")
+            
+            if not msg_id:
+                # No message ID, treat as continuation
+                current_assistant_parts.append(msg)
+            elif msg_id == current_msg_id:
+                # Same message ID, add to current parts
+                current_assistant_parts.append(msg)
+            else:
+                # New message ID - finalize previous message
+                if current_msg_id and current_assistant_parts:
+                    merged = merge_assistant_parts(current_assistant_parts)
+                    current_assistants.append(merged)
+                
+                # Start new assistant message
+                current_msg_id = msg_id
+                current_assistant_parts = [msg]
+    
+    # Process final turn
+    if current_msg_id and current_assistant_parts:
+        merged = merge_assistant_parts(current_assistant_parts)
+        current_assistants.append(merged)
+    
+    if current_user and current_assistants:
+        turns += 1
+        turn_num = turn_count + turns
+        create_trace(langfuse, session_id, turn_num, current_user, current_assistants, current_tool_results)
+    
+    # Update state
+    state[session_id] = {
+        "last_line": total_lines,
+        "turn_count": turn_count + turns,
+        "updated": datetime.now(timezone.utc).isoformat(),
+    }
+    save_state(state)
+    
+    return turns
 
 
 def main():
+    script_start = datetime.now()
+    debug("Hook started")
+    
+    # Check if tracing is enabled
+    if os.environ.get("TRACE_TO_LANGFUSE", "").lower() != "true":
+        debug("Tracing disabled (TRACE_TO_LANGFUSE != true)")
+        sys.exit(0)
+    
+    # Check for required environment variables
+    public_key = os.environ.get("CC_LANGFUSE_PUBLIC_KEY") or os.environ.get("LANGFUSE_PUBLIC_KEY")
+    secret_key = os.environ.get("CC_LANGFUSE_SECRET_KEY") or os.environ.get("LANGFUSE_SECRET_KEY")
+    host = os.environ.get("CC_LANGFUSE_HOST") or os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com")
+    
+    if not public_key or not secret_key:
+        log("ERROR", "Langfuse API keys not set (CC_LANGFUSE_PUBLIC_KEY / CC_LANGFUSE_SECRET_KEY)")
+        sys.exit(0)
+    
+    # Initialize Langfuse client
     try:
-        input_data = json.load(sys.stdin)
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    # Extract tool information
-    tool_name = input_data.get("tool_name", "unknown")
-    tool_input = input_data.get("tool_input", {})
-    tool_output = input_data.get("tool_output", {})
-    session_id = input_data.get("session_id", "default")
-
-    # Get the Langfuse client (uses LANGFUSE_* environment variables)
-    langfuse = get_client()
-
-    # Create a trace for this tool usage
-    with langfuse.start_as_current_observation(
-        name=f"claude-code-{tool_name}",
-        as_type="span",
-        input=tool_input,
-    ) as span:
-        # Propagate session information
-        with propagate_attributes(
-            session_id=session_id,
-            metadata={"source": "claude-code", "hook_type": "PostToolUse"},
-        ):
-            # Update the span with tool output
-            span.update(
-                output=tool_output,
-                metadata={"tool_name": tool_name},
-            )
-
-    # Flush to ensure data is sent (important for short-lived scripts)
-    langfuse.flush()
-
-    # Exit successfully (don't block the tool)
+        langfuse = Langfuse(
+            public_key=public_key,
+            secret_key=secret_key,
+            host=host,
+        )
+    except Exception as e:
+        log("ERROR", f"Failed to initialize Langfuse client: {e}")
+        sys.exit(0)
+    
+    # Load state
+    state = load_state()
+    
+    # Find the most recently modified transcript
+    result = find_latest_transcript()
+    if not result:
+        debug("No transcript file found")
+        sys.exit(0)
+    
+    session_id, transcript_file = result
+    
+    if not transcript_file:
+        debug("No transcript file found")
+        sys.exit(0)
+    
+    debug(f"Processing session: {session_id}")
+    
+    # Process the transcript
+    try:
+        turns = process_transcript(langfuse, session_id, transcript_file, state)
+        
+        # Flush to ensure all data is sent
+        langfuse.flush()
+        
+        # Log execution time
+        duration = (datetime.now() - script_start).total_seconds()
+        log("INFO", f"Processed {turns} turns in {duration:.1f}s")
+        
+        if duration > 180:
+            log("WARN", f"Hook took {duration:.1f}s (>3min), consider optimizing")
+            
+    except Exception as e:
+        log("ERROR", f"Failed to process transcript: {e}")
+        import traceback
+        debug(traceback.format_exc())
+    finally:
+        langfuse.shutdown()
+    
     sys.exit(0)
 
 
@@ -133,123 +503,27 @@ if __name__ == "__main__":
     main()
 ```
 
+</details>
+
 ### Make the Script Executable
 
 ```bash
-chmod +x ~/.claude-code/hooks/langfuse_hook.py
+chmod +x ~/.claude/hooks/langfuse_hook.py
 ```
 
-### Set Environment Variables
+### Configure the Global Hook
 
-Add the Langfuse credentials to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
-
-```bash
-# Langfuse Configuration (used by get_client())
-export LANGFUSE_PUBLIC_KEY="pk-lf-..."
-export LANGFUSE_SECRET_KEY="sk-lf-..."
-export LANGFUSE_HOST="https://cloud.langfuse.com"  # 🇪🇺 EU region
-# export LANGFUSE_HOST="https://us.cloud.langfuse.com"  # 🇺🇸 US region
-```
-
-Reload your shell:
-
-```bash
-source ~/.bashrc  # or source ~/.zshrc
-```
-
-### Configure Claude Code Hooks
-
-Add the hook configuration to your Claude Code settings file (`~/.claude/settings.json`):
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/.claude-code/hooks/langfuse_hook.py"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-<Callout type="info">
-The `"matcher": "*"` configuration will capture all tool usage. You can also specify specific tools like `"Bash"`, `"Edit"`, or `"Read"` to only trace certain operations.
-</Callout>
-
-### Start Using Claude Code
-
-Now when you use Claude Code, tool usage events will be sent to Langfuse:
-
-```bash
-claude
-```
-
-### View Traces in Langfuse
-
-Open your Langfuse project to see the captured traces. Each tool invocation will appear as a trace with:
-
-- Tool name
-- Input parameters
-- Output results
-- Session grouping
-- Timestamps
-
-</Steps>
-
-## Advanced Configuration
-
-### Tracing Specific Tools Only
-
-To only trace specific tools, modify the matcher in your settings:
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/.claude-code/hooks/langfuse_hook.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/.claude-code/hooks/langfuse_hook.py"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-### Adding Session Start/Stop Hooks
-
-You can also capture session lifecycle events:
+Add the Stop hook to your global Claude Code settings (`~/.claude/settings.json`):
 
 ```json
 {
   "hooks": {
     "Stop": [
       {
-        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude-code/hooks/langfuse_stop_hook.py"
+            "command": "python3 ~/.claude/hooks/langfuse_hook.py"
           }
         ]
       }
@@ -258,76 +532,120 @@ You can also capture session lifecycle events:
 }
 ```
 
-Create a stop hook script (`langfuse_stop_hook.py`):
+This registers the hook globally so it runs for all Claude Code sessions.
 
-```python
-#!/usr/bin/env python3
-"""Session end hook for Langfuse"""
+### Enable Tracing Per-Project
 
-import json
-import sys
+For each project where you want tracing enabled, create a `.claude/settings.local.json` file in the project root:
 
-from langfuse import get_client, propagate_attributes
-
-
-def main():
-    try:
-        input_data = json.load(sys.stdin)
-    except json.JSONDecodeError:
-        sys.exit(0)
-
-    session_id = input_data.get("session_id", "default")
-
-    # Get the Langfuse client (uses LANGFUSE_* environment variables)
-    langfuse = get_client()
-
-    # Log session end event
-    with langfuse.start_as_current_observation(
-        name="claude-code-session-end",
-        as_type="span",
-    ) as span:
-        with propagate_attributes(
-            session_id=session_id,
-            metadata={"source": "claude-code", "event": "session_end"},
-        ):
-            span.update(output={"status": "session_ended"})
-
-    langfuse.flush()
-    sys.exit(0)
-
-
-if __name__ == "__main__":
-    main()
+```json
+{
+  "env": {
+    "TRACE_TO_LANGFUSE": "true",
+    "LANGFUSE_PUBLIC_KEY": "pk-lf-...",
+    "LANGFUSE_SECRET_KEY": "sk-lf-...",
+    "LANGFUSE_HOST": "https://cloud.langfuse.com"
+  }
+}
 ```
+
+<Callout type="info">
+Tracing is opt-in per project. The hook runs globally but immediately exits if `TRACE_TO_LANGFUSE` is not set to `"true"` for that project.
+</Callout>
+
+**Environment Variables:**
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `TRACE_TO_LANGFUSE` | Set to `"true"` to enable tracing | Yes |
+| `LANGFUSE_PUBLIC_KEY` | Your Langfuse public key | Yes |
+| `LANGFUSE_SECRET_KEY` | Your Langfuse secret key | Yes |
+| `LANGFUSE_HOST` | Langfuse host URL (`https://cloud.langfuse.com` for EU, `https://us.cloud.langfuse.com` for US) | No (defaults to EU) |
+| `CC_LANGFUSE_DEBUG` | Set to `"true"` for verbose debug logging | No |
+
+### Start Using Claude Code
+
+Now when you use Claude Code in a project with tracing enabled, conversations will be sent to Langfuse:
+
+```bash
+cd your-project
+claude
+```
+
+### View Traces in Langfuse
+
+Open your Langfuse project to see the captured traces. You'll see:
+
+- **Turn traces**: Each conversation turn (user prompt → assistant response) as a trace
+- **Generation spans**: Claude's LLM responses with model info
+- **Tool spans**: Nested spans for each tool call (Read, Write, Bash, etc.)
+- **Session grouping**: All turns from the same session share a `session_id`
+
+</Steps>
 
 ## Troubleshooting
 
 ### No traces appearing in Langfuse
 
-1. Verify the hook script is executable: `chmod +x ~/.claude-code/hooks/langfuse_hook.py`
-2. Check that environment variables are set: `echo $LANGFUSE_PUBLIC_KEY`
-3. Test the script manually: `echo '{"tool_name": "test"}' | python3 ~/.claude-code/hooks/langfuse_hook.py`
-4. Check the Langfuse SDK is installed: `pip show langfuse`
+1. **Check if the hook is running:**
+   ```bash
+   tail -f ~/.claude/state/langfuse_hook.log
+   ```
+   You should see log entries after each Claude response.
+
+2. **Verify environment variables** are set in your project's `.claude/settings.local.json`:
+   - Check that `TRACE_TO_LANGFUSE` is set to `"true"`
+   - Verify your API keys are correct (public key starts with `pk-lf-`)
+
+3. **Enable debug mode** for detailed logging:
+```json
+{
+     "env": {
+       "CC_LANGFUSE_DEBUG": "true"
+  }
+}
+```
+
+4. **Check the Langfuse SDK is installed:**
+   ```bash
+   pip show langfuse
+   ```
+
+### Permission errors
+
+Make sure the hook script is executable:
+
+```bash
+chmod +x ~/.claude/hooks/langfuse_hook.py
+```
 
 ### Hook script errors
 
-Hook scripts that exit with code 1 show errors to the user. Exit code 0 is for success, exit code 2 blocks the tool call.
-
-Test your script in isolation before configuring it as a hook:
+Test the script manually to check for errors:
 
 ```bash
-echo '{"tool_name": "Bash", "tool_input": {"command": "ls"}}' | python3 ~/.claude-code/hooks/langfuse_hook.py
+TRACE_TO_LANGFUSE=true \
+LANGFUSE_PUBLIC_KEY="pk-lf-..." \
+LANGFUSE_SECRET_KEY="sk-lf-..." \
+python3 ~/.claude/hooks/langfuse_hook.py
+```
+
+Check the log file for errors:
+
+```bash
+cat ~/.claude/state/langfuse_hook.log
 ```
 
 ### Authentication errors
 
-Verify your Langfuse API keys are correct and the host URL matches your region (EU or US).
+Verify your Langfuse API keys are correct and the host URL matches your region:
+- **EU region**: `https://cloud.langfuse.com`
+- **US region**: `https://us.cloud.langfuse.com`
 
 ## Resources
 
-- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code/overview)
-- [Claude Code Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks)
+- [Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [Claude Code Hooks](https://code.claude.com/docs/en/hooks-guide)
 - [Claude Code GitHub Repository](https://github.com/anthropics/claude-code)
 - [Langfuse SDK Instrumentation](/docs/observability/sdk/instrumentation)
 - [Langfuse Python SDK Reference](https://python.reference.langfuse.com)
-- [Langfuse Documentation](https://langfuse.com/docs)
