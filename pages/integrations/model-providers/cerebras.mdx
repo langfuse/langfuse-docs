@@ -1,0 +1,98 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Monitor Cerebras with Langfuse
+sidebarTitle: Cerebras
+logo: /images/integrations/cerebras_icon.png
+description: Learn how to integrate Cerebras with Langfuse using the OpenAI drop-in replacement.
+category: Integrations
+---
+
+# Observability for Cerebras with Langfuse
+
+This guide shows you how to integrate [Cerebras](https://cerebras.ai/) with Langfuse. Cerebras's API is fully compatible with OpenAI's client libraries, allowing us to use the Langfuse OpenAI drop-in replacement to trace all parts of your application.
+
+> **What is Cerebras?** [Cerebras](https://inference-docs.cerebras.ai/) is a high-throughput, low-latency inference platform built on Cerebras’ wafer-scale processors (WSE) and CS systems, optimized specifically for token generation at scale.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
+
+<Steps>
+## Step 1: Install Dependencies
+
+Make sure you have installed the necessary Python packages:
+
+
+```python
+%pip install openai langfuse -q
+```
+
+## Step 2: Set Up Environment Variables
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Get your Cerebras API key from https://cloud.cerebras.ai/
+os.environ["CEREBRAS_API_KEY"] = "csk-..."
+```
+
+## Step 3: Langfuse OpenAI drop-in Replacement
+
+In this step we use the native [OpenAI drop-in replacement](https://langfuse.com/docs/integrations/openai-sdk/python) by importing `from langfuse.openai import openai`.
+
+To start using Cerebras with OpenAI's client libraries, pass in your Cerebras API key to the `api_key` option, and change the `base_url` to `https://api.cerebras.ai/v1`:
+
+
+
+```python
+# instead of import openai:
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+  api_key=os.environ.get("CEREBRAS_API_KEY"),
+  base_url="https://api.cerebras.ai/v1",
+)
+```
+
+## Step 4: Run An Example
+
+The following cell demonstrates how to call Cerebras's chat model using the traced OpenAI client. All API calls will be automatically traced by Langfuse.
+
+
+
+```python
+response = client.chat.completions.create(
+  model="zai-glm-4.6",
+  messages=[
+    {"role": "system", "content": "You are a travel agent. Be descriptive and helpful."},
+    {"role": "user", "content": "Tell me the top 3 things to do in San Francisco"},
+  ],
+  name="cerebras-travel-agent"
+)
+
+print(response.choices[0].message.content)
+```
+
+## Step 5: See Traces in Langfuse
+
+After running the example model call, you can see the traces in Langfuse. You will see detailed information about your Cerebras API calls, including:
+
+- Request parameters (model, messages, temperature, etc.)
+- Response content
+- Token usage statistics
+- Latency metrics
+
+![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration_cerebras/cerebras-example-trace.png)
+
+_[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9fcfb69f4662fb0687c17aa3a5ab2926?timestamp=2025-12-23T14:11:48.905Z)_
+</Steps>
+
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
