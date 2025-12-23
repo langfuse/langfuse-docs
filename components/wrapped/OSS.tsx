@@ -1,29 +1,8 @@
+import Link from "next/link";
+import contributors from "./data/oss-contributors-2025.json";
 import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
-
-interface OSSMetricProps {
-  value: string;
-  label: string;
-}
-
-function OSSMetric({ value, label }: OSSMetricProps) {
-  return (
-    <div className="p-6 lg:p-8">
-      <div className="text-4xl sm:text-5xl lg:text-6xl font-bold font-mono">
-        {value}
-      </div>
-      <div className="mt-2 text-lg font-semibold">{label}</div>
-    </div>
-  );
-}
-
-const ossMetrics = [
-  { value: "15K+", label: "GitHub Stars" },
-  { value: "500+", label: "Contributors" },
-  { value: "1000+", label: "Pull Requests merged" },
-  { value: "50+", label: "Community integrations" },
-];
 
 export function OSS() {
   return (
@@ -32,14 +11,28 @@ export function OSS() {
         title="Open Source"
         subtitle="Built in the open, with the community"
       />
-      <WrappedGrid>
-        {ossMetrics.map((metric, index) => (
-          <WrappedGridItem key={index}>
-            <OSSMetric {...metric} />
-          </WrappedGridItem>
+      <div className="flex flex-wrap items-center gap-3">
+        {contributors.map((contributor) => (
+          <Link
+            key={contributor.login}
+            href={contributor.url}
+            className="inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-sm hover:bg-muted transition-colors"
+          >
+            {contributor.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={contributor.avatarUrl}
+                alt={contributor.login}
+                className="h-6 w-6 rounded-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <span className="h-6 w-6 rounded-full bg-muted" />
+            )}
+            <span className="font-medium">@{contributor.login}</span>
+          </Link>
         ))}
-      </WrappedGrid>
+      </div>
     </WrappedSection>
   );
 }
-
