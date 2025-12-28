@@ -7,8 +7,8 @@ import { WrappedSection } from "./components/WrappedSection";
 const messages = [
   "2025 was a big year at 🪢",
   "We 🚢 more than ever.",
-  "The Community is growing faster than ever... 📈",
-  "...And so are your applications 🚀",
+  "The community is growing faster than ever... 📈",
+  "...and so are your applications 🚀",
   "Let's take a l👀k back.",
 ];
 

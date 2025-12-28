@@ -3,7 +3,7 @@
 import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import { type Page } from "nextra";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
@@ -124,9 +124,10 @@ interface MonthBoxProps {
     title: string;
     route: string;
   }>;
+  animationProps?: any;
 }
 
-function MonthBox({ month, year, launches }: MonthBoxProps) {
+function MonthBox({ month, year, launches, animationProps }: MonthBoxProps) {
   const monthDate = new Date(year, parseInt(month) - 1, 1);
   const monthName = monthDate.toLocaleDateString("en-US", { month: "long" });
 
@@ -139,9 +140,8 @@ function MonthBox({ month, year, launches }: MonthBoxProps) {
 
   const launchWeekUrl = getLaunchWeekUrl(month);
 
-  return (
-    <WrappedGridItem colSpan={1} hideStars>
-      <div className="h-full flex flex-col p-6 lg:p-8">
+  const content = (
+    <div className="h-full flex flex-col p-6 lg:p-8">
         <div className="flex items-center gap-2 flex-wrap mb-4">
           <h3 className="text-2xl font-bold font-mono">{monthName}</h3>
           <span className="text-sm text-muted-foreground">
@@ -162,6 +162,17 @@ function MonthBox({ month, year, launches }: MonthBoxProps) {
           ))}
         </div>
       </div>
+  );
+
+  return (
+    <WrappedGridItem colSpan={1} hideStars>
+      {animationProps ? (
+        <motion.div {...animationProps}>
+          {content}
+        </motion.div>
+      ) : (
+        content
+      )}
     </WrappedGridItem>
   );
 }
@@ -214,29 +225,48 @@ export function Launches() {
     return a.localeCompare(b);
   });
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { once: true, margin: "-100px" });
+
   return (
     <WrappedSection>
       <SectionHeading
         title="A Year of Launches..."
         subtitle="We have shipped a ton of new features this year."
       >
-        <p className="text-sm text-muted-foreground">
+        <p className="hidden lg:block text-sm text-muted-foreground">
           hold hover to ⭐ your favorite launches of the year
         </p>
       </SectionHeading>
-      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-1 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
-        {months.map((monthKey) => {
-          const [year, month] = monthKey.split("-");
-          return (
-            <MonthBox
-              key={monthKey}
-              month={month}
-              year={parseInt(year)}
-              launches={launchesByMonth[monthKey]}
-            />
-          );
-        })}
-      </WrappedGrid>
+      <div ref={containerRef}>
+        <WrappedGrid className="!grid-cols-1 sm:!grid-cols-1 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
+          {months.map((monthKey, index) => {
+            const [year, month] = monthKey.split("-");
+            
+            const animationProps = {
+              initial: { opacity: 0, y: 20, scale: 0.95 },
+              animate: isInView
+                ? { opacity: 1, y: 0, scale: 1 }
+                : { opacity: 0, y: 20, scale: 0.95 },
+              transition: {
+                duration: 0.5,
+                delay: index * 0.1,
+                ease: [0.22, 1, 0.36, 1],
+              },
+            };
+
+            return (
+              <MonthBox
+                key={monthKey}
+                month={month}
+                year={parseInt(year)}
+                launches={launchesByMonth[monthKey]}
+                animationProps={animationProps}
+              />
+            );
+          })}
+        </WrappedGrid>
+      </div>
     </WrappedSection>
   );
 }

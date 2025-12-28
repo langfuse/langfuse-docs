@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useInView, useMotionValue, useSpring } from "framer-motion";
+import { useInView, useMotionValue, useSpring, motion } from "framer-motion";
 import {
   ListTree,
   FileCode,
@@ -278,32 +278,64 @@ const formatGrowth = (value: number) => {
 };
 
 export function Metrics() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { once: true, margin: "-100px" });
+
   return (
     <WrappedSection>
       <SectionHeading
         title="You all have been busy..."
         subtitle="Key metrics from our platform in 2025"
       />
-      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
-        {metrics.map((metric, index) => {
-          const items = [
-            <WrappedGridItem
-              key={index}
-              colSpan={metric.isFullWidth ? 3 : 1}
-            >
-              <MetricCard {...metric} />
-            </WrappedGridItem>
-          ];
+      <div ref={containerRef}>
+        <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
+          {metrics.map((metric, index) => {
+            const delay = index * 0.1; // Stagger delay
+            
+            const animationProps = {
+              initial: { opacity: 0, y: 20, scale: 0.95 },
+              animate: isInView
+                ? { opacity: 1, y: 0, scale: 1 }
+                : { opacity: 0, y: 20, scale: 0.95 },
+              transition: {
+                duration: 0.5,
+                delay: delay,
+                ease: [0.22, 1, 0.36, 1],
+              },
+            };
+
+            const items = [
+              <WrappedGridItem
+                key={index}
+                colSpan={metric.isFullWidth ? 3 : 1}
+              >
+                <motion.div {...animationProps}>
+                  <MetricCard {...metric} />
+                </motion.div>
+              </WrappedGridItem>
+            ];
 
           // Insert Consumption graph after Prompts created (index 2)
           if (index === 2) {
+            const graphAnimationProps = {
+              initial: { opacity: 0, y: 20, scale: 0.95 },
+              animate: isInView
+                ? { opacity: 1, y: 0, scale: 1 }
+                : { opacity: 0, y: 20, scale: 0.95 },
+              transition: {
+                duration: 0.5,
+                delay: (index + 1) * 0.1,
+                ease: [0.22, 1, 0.36, 1],
+              },
+            };
             items.push(
-              <WrappedGridItem key="consumption" colSpan={3}>
-                <div className="p-6">
+              <WrappedGridItem key="consumption" colSpan={3} className="hidden lg:block">
+                <motion.div {...graphAnimationProps}>
+                  <div className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
                     <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
                       <h3 className="text-2xl sm:text-3xl font-bold font-mono">Consumption</h3>
-                      <p className="mt-2 text-sm text-muted-foreground"> Consumption comparision between January and December 2025. This shows usage growth of total traces, observations and evals ingested.</p>
+                      <p className="mt-2 text-sm text-muted-foreground"> Consumption between January and December 2025. Usage growth of total traces, observations and evals ingested.</p>
                     </div>
                     <div className="w-full lg:w-3/4 aspect-[21/9] lg:aspect-auto lg:h-[400px]">
                       <ResponsiveContainer width="100%" height="100%">
@@ -345,15 +377,28 @@ export function Metrics() {
                     </div>
                   </div>
                 </div>
+                </motion.div>
               </WrappedGridItem>
             );
           }
 
           // Insert Monthly Package Downloads graph after the last 3 metrics (index 5 - Peak Tracing)
           if (index === 5) {
+            const graphAnimationProps = {
+              initial: { opacity: 0, y: 20, scale: 0.95 },
+              animate: isInView
+                ? { opacity: 1, y: 0, scale: 1 }
+                : { opacity: 0, y: 20, scale: 0.95 },
+              transition: {
+                duration: 0.5,
+                delay: (index + 1) * 0.1,
+                ease: [0.22, 1, 0.36, 1],
+              },
+            };
             items.push(
-              <WrappedGridItem key="downloads" colSpan={3}>
-                <div className="p-6">
+              <WrappedGridItem key="downloads" colSpan={3} className="hidden lg:block">
+                <motion.div {...graphAnimationProps}>
+                  <div className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
                     <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
                       <h3 className="text-2xl sm:text-3xl font-bold font-mono">Monthly Package Downloads</h3>
@@ -398,6 +443,7 @@ export function Metrics() {
                     </div>
                   </div>
                 </div>
+                </motion.div>
               </WrappedGridItem>
             );
           }
@@ -405,6 +451,7 @@ export function Metrics() {
           return items;
         }).flat()}
       </WrappedGrid>
+      </div>
     </WrappedSection>
   );
 }

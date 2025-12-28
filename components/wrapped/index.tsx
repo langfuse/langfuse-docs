@@ -5,7 +5,6 @@ import { Metrics } from "./Metrics";
 import { OSS } from "./OSS";
 import { Launches } from "./Launches";
 import { Customers } from "./Customers";
-import { Team } from "./Team";
 import { Outro } from "./Outro";
 import { CTA } from "./CTA";
 
@@ -19,7 +18,6 @@ export function Wrapped() {
         <OSS />
         <Launches />
         <Customers />
-        <Team />
         <Outro />
         <CTA />
       </main>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import { WrappedSection } from "./components/WrappedSection";
 
 const title = "Langfuse Wrapped";
@@ -14,6 +14,7 @@ export function Hero() {
   const [translateY, setTranslateY] = useState(0);
   const [titleWidth, setTitleWidth] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const scrollY = useMotionValue(0);
 
   useEffect(() => {
     // Check if mobile
@@ -57,7 +58,9 @@ export function Hero() {
       
       // Move Hero up and out based on scroll progress
       // Negative y moves it up (out of view)
-      setTranslateY(-scrollProgress * windowHeight * 1.2);
+      const newTranslateY = -scrollProgress * windowHeight * 1.2;
+      setTranslateY(newTranslateY);
+      scrollY.set(newTranslateY);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -73,14 +76,67 @@ export function Hero() {
         <div style={{ height: "100vh" }} />
         
         {/* Fixed position hero */}
-        <div className="fixed inset-0 flex items-center justify-center pointer-events-none">
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+          {/* Decorative emojis */}
+          <motion.div 
+            className="absolute top-[25%] left-[25%] w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-white rounded-2xl flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl shadow-lg"
+            initial={{ opacity: 0, scale: 0, rotate: -180 }}
+            animate={{ opacity: 1, scale: 1, rotate: -12 }}
+            style={{ y: scrollY }}
+            transition={{ 
+              delay: 0.5,
+              duration: 0.6,
+              type: "spring",
+              stiffness: 200,
+              damping: 15
+            }}
+          >
+            ⭐
+          </motion.div>
+          <motion.div 
+            className="absolute top-[60%] right-[8%] w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-white rounded-2xl flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl shadow-lg"
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1, rotate: 15 }}
+            style={{ y: scrollY }}
+            transition={{ 
+              delay: 0.7,
+              duration: 0.5,
+              type: "spring",
+              stiffness: 150,
+              damping: 12
+            }}
+          >
+            🎁
+          </motion.div>
+          <motion.div 
+            className="absolute bottom-[20%] left-[15%] w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-white rounded-2xl flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl shadow-lg"
+            initial={{ opacity: 0, scale: 0, rotate: 180, x: -100 }}
+            animate={{ opacity: 1, scale: 1, rotate: -8, x: 0 }}
+            style={{ y: scrollY }}
+            transition={{ 
+              delay: 0.9,
+              duration: 0.7,
+              type: "spring",
+              stiffness: 180,
+              damping: 14
+            }}
+          >
+            🎄
+          </motion.div>
           <div
             ref={heroRef}
             style={{ transform: `translateY(${translateY}px)` }}
             className="text-center w-full px-4"
           >
             <div className="flex flex-col items-center justify-center gap-5 text-center w-full">
-              <span className="text-primary/70 text-lg font-semibold">2025</span>
+              <motion.span 
+                className="text-primary/70 text-2xl sm:text-3xl lg:text-4xl font-bold font-mono"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              >
+                2025
+              </motion.span>
               <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold font-mono text-balance w-full px-4 text-center">
                 {/* Mobile: Simple static text */}
                 <span className="sm:hidden">{title}</span>
@@ -130,9 +186,14 @@ export function Hero() {
                   ))}
                 </motion.span>
               </h1>
-              <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl">
+              <motion.p 
+                className="text-xl sm:text-2xl text-muted-foreground max-w-2xl"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.4, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              >
                 A year in review
-              </p>
+              </motion.p>
             </div>
           </div>
         </div>
