@@ -28,11 +28,34 @@ const downloadData = [
   { month: "Dec", downloads: 24.20 }, // 114.38 - 90.18
 ];
 
+// GitHub stars data from CSV (interpolated for missing months)
+const starData = [
+  { month: "Jan", stars: 7700 },
+  { month: "Feb", stars: 8350 }, // Interpolated between Jan and Mar
+  { month: "Mar", stars: 9000 },
+  { month: "Apr", stars: 10300 },
+  { month: "May", stars: 11600 },
+  { month: "Jun", stars: 12900 },
+  { month: "Jul", stars: 14200 },
+  { month: "Aug", stars: 14900 }, // Interpolated between Jul and Sep
+  { month: "Sep", stars: 15600 },
+  { month: "Oct", stars: 16900 },
+  { month: "Nov", stars: 18200 },
+  { month: "Dec", stars: 19826 }, // Using Dec 28 value (most recent)
+];
+
 const formatDownloads = (value: number) => {
   if (value >= 1000) {
     return `${(value / 1000).toFixed(1)}M`;
   }
   return `${value.toFixed(1)}M`;
+};
+
+const formatStars = (value: number) => {
+  if (value >= 1000) {
+    return `${(value / 1000).toFixed(1)}K`;
+  }
+  return value.toString();
 };
 
 export function Growth() {
@@ -42,43 +65,95 @@ export function Growth() {
         title="Growth"
         subtitle="Monthly package downloads in 2025"
       />
-      <div className="w-full aspect-[21/9] border-b border-l border-r border-border -mt-[1px] bg-card p-6">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={downloadData}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis
-              dataKey="month"
-              className="text-xs"
-              tick={{ fill: "currentColor" }}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "0.5rem",
-                padding: "0.5rem",
-              }}
-              formatter={(value: number) => [`${formatDownloads(value)}`, "Downloads"]}
-              labelStyle={{ color: "hsl(var(--foreground))" }}
-            />
-            <Bar
-              dataKey="downloads"
-              fill="hsl(var(--primary))"
-              radius={[4, 4, 0, 0]}
-            >
-              <LabelList
-                dataKey="downloads"
-                position="inside"
-                formatter={formatDownloads}
-                fill="hsl(var(--card))"
-                style={{ fontWeight: 600, fontSize: "0.75rem" }}
-              />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="border-b border-l border-r border-border -mt-[1px] p-6">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
+          <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
+            <h3 className="text-2xl sm:text-3xl font-bold font-mono">Monthly Package Downloads</h3>
+          </div>
+          <div className="w-full lg:w-3/4 aspect-[21/9] lg:aspect-auto lg:h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={downloadData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="month"
+                  className="text-xs"
+                  tick={{ fill: "currentColor" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                    padding: "0.5rem",
+                  }}
+                  formatter={(value: number) => [`${formatDownloads(value)}`, "Downloads"]}
+                  labelStyle={{ color: "hsl(var(--foreground))" }}
+                />
+                <Bar
+                  dataKey="downloads"
+                  fill="hsl(var(--primary))"
+                  radius={[4, 4, 0, 0]}
+                >
+                  <LabelList
+                    dataKey="downloads"
+                    position="inside"
+                    formatter={formatDownloads}
+                    fill="hsl(var(--card))"
+                    style={{ fontWeight: 600, fontSize: "0.75rem" }}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+      <div className="border-b border-l border-r border-border -mt-[1px] p-6">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
+          <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
+            <h3 className="text-2xl sm:text-3xl font-bold font-mono">GitHub Stars</h3>
+          </div>
+          <div className="w-full lg:w-3/4 aspect-[21/9] lg:aspect-auto lg:h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={starData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="month"
+                  className="text-xs"
+                  tick={{ fill: "currentColor" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                    padding: "0.5rem",
+                  }}
+                  formatter={(value: number) => [`${formatStars(value)}`, "Stars"]}
+                  labelStyle={{ color: "hsl(var(--foreground))" }}
+                />
+                <Bar
+                  dataKey="stars"
+                  fill="hsl(var(--primary))"
+                  radius={[4, 4, 0, 0]}
+                >
+                  <LabelList
+                    dataKey="stars"
+                    position="inside"
+                    formatter={formatStars}
+                    fill="hsl(var(--card))"
+                    style={{ fontWeight: 600, fontSize: "0.75rem" }}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
     </WrappedSection>
   );

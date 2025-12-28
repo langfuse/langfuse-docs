@@ -2,6 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import { useInView, useMotionValue, useSpring } from "framer-motion";
+import {
+  ListTree,
+  FileCode,
+  SquareDivide,
+  Users,
+  FolderOpen,
+  Database,
+  type LucideIcon,
+} from "lucide-react";
 import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
@@ -14,6 +23,7 @@ interface MetricCardProps {
   isFullWidth?: boolean;
   decimals?: number;
   ratePerSecond?: number;
+  icon?: LucideIcon;
 }
 
 function MetricCard({
@@ -24,6 +34,7 @@ function MetricCard({
   isFullWidth,
   decimals,
   ratePerSecond,
+  icon: Icon,
 }: MetricCardProps) {
   const isNumeric = typeof value === "number";
   const hasDecimals = decimals !== undefined && decimals > 0;
@@ -63,7 +74,14 @@ function MetricCard({
           value
         )}
       </div>
-      <div className="mt-2 text-base font-normal">{fullLabel}</div>
+      <div className="mt-2 flex items-center gap-2 text-base font-normal">
+        {Icon && (
+          <div className="shrink-0 rounded-lg border bg-muted/50 flex items-center justify-center w-6 h-6">
+            <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+          </div>
+        )}
+        <span>{fullLabel}</span>
+      </div>
     </div>
   );
 }
@@ -167,37 +185,43 @@ const SECONDS_IN_2025_UNTIL_NOW =
 const metrics = [
   {
     value: 34034881045,
-    label: "Traces & Observations",
+    label: "Traces & Observations ingested",
     isFullWidth: true,
     ratePerSecond: (34000000000 / SECONDS_IN_2025_UNTIL_NOW) * 10,
+    icon: ListTree,
   },
   {
     value: 99334923,
     label: "Evals executed",
     isFullWidth: true,
     ratePerSecond: (99000000 / SECONDS_IN_2025_UNTIL_NOW) * 10,
+    icon: SquareDivide,
   },
   {
     value: 1436154,
     label: "Prompts created",
     isFullWidth: true,
     ratePerSecond: (1400000 / SECONDS_IN_2025_UNTIL_NOW) * 10,
+    icon: FileCode,
   },
   {
     value: 132695,
     suffix: "+",
     label: "Unique Users",
+    icon: Users,
   },
   {
     value: 86034,
     suffix: "+",
     label: "Projects created",
+    icon: FolderOpen,
   },
   {
     value: 29.32,
     suffix: "TB",
     label: "Peak Tracing data traffic in one day",
     decimals: 2,
+    icon: Database,
   },
 ];
 

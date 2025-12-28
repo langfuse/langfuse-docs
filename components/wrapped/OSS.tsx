@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useInView, useMotionValue, useSpring } from "framer-motion";
+import { Users, GitPullRequest, MessageSquare, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import contributors from "./data/oss-contributors-2025.json";
 import { WrappedSection } from "./components/WrappedSection";
@@ -12,6 +13,7 @@ interface MetricCardProps {
   value: number;
   label: string;
   suffix?: string;
+  icon?: LucideIcon;
 }
 
 function AnimatedMetric({ targetValue }: { targetValue: number }) {
@@ -44,14 +46,21 @@ function AnimatedMetric({ targetValue }: { targetValue: number }) {
   );
 }
 
-function MetricCard({ value, label, suffix }: MetricCardProps) {
+function MetricCard({ value, label, suffix, icon: Icon }: MetricCardProps) {
   return (
     <div className="p-6 lg:p-8">
       <div className="font-bold font-mono text-2xl sm:text-3xl lg:text-4xl">
         <AnimatedMetric targetValue={value} />
         {suffix}
       </div>
-      <div className="mt-2 text-base font-normal">{label}</div>
+      <div className="mt-2 flex items-center gap-2 text-base font-normal">
+        {Icon && (
+          <div className="shrink-0 rounded-lg border bg-muted/50 flex items-center justify-center w-6 h-6">
+            <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+          </div>
+        )}
+        <span>{label}</span>
+      </div>
     </div>
   );
 }
@@ -60,14 +69,17 @@ const ossMetrics = [
   {
     value: contributors.length,
     label: "Contributors",
+    icon: Users,
   },
   {
     value: 2572,
     label: "Merged PRs",
+    icon: GitPullRequest,
   },
   {
     value: 1936,
     label: "GH Discussions",
+    icon: MessageSquare,
   },
 ];
 
