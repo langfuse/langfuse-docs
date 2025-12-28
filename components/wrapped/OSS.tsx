@@ -2,12 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import { useInView, useMotionValue, useSpring } from "framer-motion";
-import { Users, GitPullRequest, MessageSquare, type LucideIcon } from "lucide-react";
+import { Users, GitPullRequest, MessageSquare, Star, type LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { getGitHubStars } from "@/lib/github-stars";
 import contributors from "./data/oss-contributors-2025.json";
 import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
+import { HoverStars } from "./components/HoverStars";
 
 interface MetricCardProps {
   value: number;
@@ -81,6 +83,11 @@ const ossMetrics = [
     label: "GH Discussions",
     icon: MessageSquare,
   },
+  {
+    value: getGitHubStars(),
+    label: "GitHub Stars",
+    icon: Star,
+  },
 ];
 
 export function OSS() {
@@ -90,7 +97,8 @@ export function OSS() {
         title="Contributors of 2025 🙏"
         subtitle="Big thanks to all contributors!"
       />
-      <div className="border-l border-r border-b border-border -mt-[1px] p-6 lg:p-8">
+      <div className="relative group border-l border-r border-b border-border -mt-[1px] p-6 lg:p-8">
+        <HoverStars />
         <div className="flex flex-wrap items-center gap-3">
           {contributors.map((contributor) => (
             <Link
@@ -114,7 +122,7 @@ export function OSS() {
           ))}
         </div>
       </div>
-      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
+      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-4 !border-t-0 -mt-[1px]">
         {ossMetrics.map((metric, index) => (
           <WrappedGridItem key={index}>
             <MetricCard {...metric} />

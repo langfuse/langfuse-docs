@@ -6,8 +6,8 @@ import { WrappedSection } from "./components/WrappedSection";
 
 const messages = [
   "2025 was a big year for 🪢 Langfuse.",
-  "We 🚢 more features than ever.",
-  "Our community grew 📈 exponentially.",
+  "We 🚢 more than ever.",
+  "The community grew 📈 exponentially.",
   "Let's take a l👀k back.",
 ];
 

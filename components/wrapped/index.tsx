@@ -2,7 +2,6 @@ import { Background } from "../Background";
 import { Hero } from "./Hero";
 import { Intro } from "./Intro";
 import { Metrics } from "./Metrics";
-import { Growth } from "./Growth";
 import { OSS } from "./OSS";
 import { Launches } from "./Launches";
 import { Customers } from "./Customers";
@@ -17,7 +16,6 @@ export function Wrapped() {
         <Hero />
         <Intro />
         <Metrics />
-        <Growth />
         <OSS />
         <Launches />
         <Customers />
