@@ -12,7 +12,7 @@ export function SectionHeading({
   className,
 }: SectionHeadingProps) {
   return (
-    <div className={cn("mb-12 lg:mb-16", className)}>
+    <div className={cn("border-t border-l border-r border-b border-border p-6 lg:p-8", className)}>
       <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-mono text-balance">
         {title}
       </h2>

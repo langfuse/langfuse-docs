@@ -32,7 +32,7 @@ export function Team() {
         title="Team"
         subtitle="The people behind Langfuse"
       />
-      <WrappedGrid>
+      <WrappedGrid className="!border-t-0 -mt-[1px]">
         {teamMembers.map((member, index) => (
           <WrappedGridItem key={index}>
             <TeamMember {...member} />

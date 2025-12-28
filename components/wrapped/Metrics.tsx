@@ -208,7 +208,7 @@ export function Metrics() {
         title="By the numbers"
         subtitle="Key metrics from our platform in 2025"
       />
-      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-3">
+      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
         {metrics.map((metric, index) => (
           <WrappedGridItem
             key={index}

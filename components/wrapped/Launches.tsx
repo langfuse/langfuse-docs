@@ -125,7 +125,7 @@ export function Launches() {
         title="Launches"
         subtitle="Everything we shipped in 2025"
       />
-      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-1 lg:!grid-cols-3">
+      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-1 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
         {months.map((monthKey) => {
           const [year, month] = monthKey.split("-");
           return (
