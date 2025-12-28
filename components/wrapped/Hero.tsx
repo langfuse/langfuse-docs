@@ -79,7 +79,7 @@ export function Hero() {
         <div className="fixed inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
           {/* Decorative emojis */}
           <motion.div 
-            className="absolute top-[25%] left-[25%] w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-white rounded-2xl flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl shadow-lg"
+            className="absolute top-[25%] left-[25%] w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl shadow-lg"
             initial={{ opacity: 0, scale: 0, rotate: -180 }}
             animate={{ opacity: 1, scale: 1, rotate: -12 }}
             style={{ y: scrollY }}
@@ -94,7 +94,7 @@ export function Hero() {
             ⭐
           </motion.div>
           <motion.div 
-            className="absolute top-[60%] right-[8%] w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-white rounded-2xl flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl shadow-lg"
+            className="absolute top-[60%] right-[8%] w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl shadow-lg"
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1, rotate: 15 }}
             style={{ y: scrollY }}
@@ -109,7 +109,7 @@ export function Hero() {
             🎁
           </motion.div>
           <motion.div 
-            className="absolute bottom-[20%] left-[15%] w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-white rounded-2xl flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl shadow-lg"
+            className="absolute bottom-[20%] left-[15%] w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl shadow-lg"
             initial={{ opacity: 0, scale: 0, rotate: 180, x: -100 }}
             animate={{ opacity: 1, scale: 1, rotate: -8, x: 0 }}
             style={{ y: scrollY }}

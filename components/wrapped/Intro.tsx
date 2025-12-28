@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { WrappedSection } from "./components/WrappedSection";
 
 const messages = [
-  "2025 was a big year at 🪢",
+  "2025 was a big year at 🪢 Langfuse.",
   "We 🚢 more than ever.",
   "The community is growing faster than ever... 📈",
   "...and so are your applications 🚀",

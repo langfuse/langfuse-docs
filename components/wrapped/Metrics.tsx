@@ -335,7 +335,7 @@ export function Metrics() {
                   <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
                     <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
                       <h3 className="text-2xl sm:text-3xl font-bold font-mono">Consumption</h3>
-                      <p className="mt-2 text-sm text-muted-foreground"> Consumption between January and December 2025. Usage growth of total traces, observations and evals ingested.</p>
+                      <p className="mt-2 text-sm text-muted-foreground"> Consumption between January and December 2025. Ingestions of  traces, observations and evals.</p>
                     </div>
                     <div className="w-full lg:w-3/4 aspect-[21/9] lg:aspect-auto lg:h-[400px]">
                       <ResponsiveContainer width="100%" height="100%">
