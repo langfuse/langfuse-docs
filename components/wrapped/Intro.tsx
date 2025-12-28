@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { WrappedSection } from "./components/WrappedSection";
 
 const messages = [
-  "2025 was a big year for 🪢 Langfuse.",
+  "2025 was a big year at 🪢",
   "We 🚢 more than ever.",
-  "The community grew 📈 exponentially.",
+  "The Community is growing faster than ever... 📈",
+  "...And so are your applications 🚀",
   "Let's take a l👀k back.",
 ];
 
@@ -162,7 +163,7 @@ export function Intro() {
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                 className="absolute inset-0 flex items-center justify-center w-full"
               >
-                <p className="text-2xl sm:text-4xl lg:text-5xl font-semibold text-center text-balance max-w-4xl px-4 mx-auto">
+                <p className="text-2xl sm:text-4xl lg:text-5xl font-semibold text-center text-balance max-w-4xl px-4 mx-auto" style={{ lineHeight: '1.5' }}>
                   {messages[activeIndex]}
                 </p>
               </motion.div>

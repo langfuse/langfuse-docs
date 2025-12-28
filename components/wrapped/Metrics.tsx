@@ -281,7 +281,7 @@ export function Metrics() {
   return (
     <WrappedSection>
       <SectionHeading
-        title="By the numbers"
+        title="You all have been busy..."
         subtitle="Key metrics from our platform in 2025"
       />
       <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
@@ -324,7 +324,7 @@ export function Metrics() {
                               borderRadius: "0.5rem",
                               padding: "0.5rem",
                             }}
-                            formatter={(value: number) => [`${formatGrowth(value)}`, "Growth"]}
+                            formatter={(value: number) => [`${formatGrowth(value)}`, "Traffic relative to Dec 25"]}
                             labelStyle={{ color: "hsl(var(--foreground))" }}
                           />
                           <Bar

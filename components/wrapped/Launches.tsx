@@ -217,8 +217,8 @@ export function Launches() {
   return (
     <WrappedSection>
       <SectionHeading
-        title="Launches"
-        subtitle="Everything we shipped in 2025"
+        title="A Year of Launches..."
+        subtitle="We have shipped a ton of new features this year."
       >
         <p className="text-sm text-muted-foreground">
           hold hover to ⭐ your favorite launches of the year

@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
+import { HoverStars } from "./components/HoverStars";
 import intuitLight from "../home/img/intuit_light.svg";
 import intuitDark from "../home/img/intuit_dark.svg";
 import samsaraLight from "../home/img/samsara_light.png";
@@ -114,16 +115,16 @@ function CustomerStoryCard({ story }: { story: CustomerStory }) {
                     src={story.frontMatter.customerLogo}
                     alt={`${story.frontMatter.title} logo`}
                     width={200}
-                    height={60}
-                    className="h-6 w-auto object-contain dark:hidden"
+                    height={80}
+                    className="h-8 w-auto object-contain dark:hidden"
                     quality={100}
                   />
                   <Image
                     src={story.frontMatter.customerLogoDark}
                     alt={`${story.frontMatter.title} logo`}
                     width={200}
-                    height={60}
-                    className="h-6 w-auto object-contain hidden dark:block"
+                    height={80}
+                    className="h-8 w-auto object-contain hidden dark:block"
                     quality={100}
                   />
                 </>
@@ -132,8 +133,8 @@ function CustomerStoryCard({ story }: { story: CustomerStory }) {
                   src={story.frontMatter.customerLogo}
                   alt={`${story.frontMatter.title} logo`}
                   width={200}
-                  height={60}
-                  className="h-6 w-auto object-contain dark:invert dark:brightness-0 dark:contrast-200"
+                  height={80}
+                  className="h-8 w-auto object-contain dark:invert dark:brightness-0 dark:contrast-200"
                   quality={100}
                 />
               )}
@@ -268,7 +269,8 @@ function CompanyLogo({
 
 type CustomerItem =
   | { type: "story"; story: CustomerStory & { company: any } }
-  | { type: "logo"; company: typeof companiesWithoutStories[0] };
+  | { type: "logo"; company: typeof companiesWithoutStories[0] }
+  | { type: "text"; text: string };
 
 export function Customers() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -301,7 +303,7 @@ export function Customers() {
     );
 
     // Define the exact order
-    const order: Array<{ type: "story" | "logo"; name: string }> = [
+    const order: Array<{ type: "story" | "logo" | "text"; name: string }> = [
       // First column
       { type: "logo", name: "Intuit" },
       { type: "story", name: "SumUp" },
@@ -313,6 +315,7 @@ export function Customers() {
       { type: "logo", name: "Seven Eleven Japan" },
       { type: "story", name: "Khan Academy" },
       { type: "logo", name: "Circleback" },
+      { type: "text", name: "And thousands more..." },
       { type: "story", name: "Merck" },
       { type: "logo", name: "Pigment" },
       { type: "story", name: "Magic Patterns" },
@@ -326,11 +329,13 @@ export function Customers() {
         if (story) {
           result.push({ type: "story", story });
         }
-      } else {
+      } else if (type === "logo") {
         const company = logoMap.get(name);
         if (company) {
           result.push({ type: "logo", company });
         }
+      } else if (type === "text") {
+        result.push({ type: "text", text: name });
       }
     }
 
@@ -340,12 +345,12 @@ export function Customers() {
   return (
     <WrappedSection>
       <SectionHeading
-        title="Customers"
-        subtitle="Teams building with Langfuse"
+        title="Powering the Greatest..."
+        subtitle="We couldn't be prouder to work with these companies."
       />
 
       <div ref={containerRef}>
-        <div className="columns-1 sm:columns-2 lg:columns-3 gap-px">
+        <div className="columns-1 sm:columns-2 lg:columns-3 gap-0 -mt-[1px]">
           {orderedItems.map((item, index) => {
             // Calculate delay based on position (top-left to bottom-right)
             // For 3 columns: row = Math.floor(index / 3), col = index % 3
@@ -367,24 +372,46 @@ export function Customers() {
               },
             };
 
+            // Use negative margins to overlap borders on all sides except first item
+            // For columns layout, we overlap top and left borders
+            const marginClass = index === 0 
+              ? "" 
+              : "-mt-[1px] -ml-[1px]";
+
             if (item.type === "story") {
               return (
                 <motion.div
                   key={`story-${item.story.route || index}`}
-                  className="border border-border bg-background break-inside-avoid mb-px"
+                  className={`relative group border border-border bg-background break-inside-avoid ${marginClass}`}
                   {...animationProps}
                 >
+                  <HoverStars />
                   <CustomerStoryCard story={item.story} />
+                </motion.div>
+              );
+            } else if (item.type === "logo") {
+              return (
+                <motion.div
+                  key={`logo-${item.company.name || index}`}
+                  className={`relative group border border-border bg-background break-inside-avoid ${marginClass}`}
+                  {...animationProps}
+                >
+                  <HoverStars />
+                  <CompanyLogo {...item.company} />
                 </motion.div>
               );
             } else {
               return (
                 <motion.div
-                  key={`logo-${item.company.name || index}`}
-                  className="border border-border bg-background break-inside-avoid mb-px"
+                  key={`text-${index}`}
+                  className={`border border-border bg-background break-inside-avoid ${marginClass}`}
                   {...animationProps}
                 >
-                  <CompanyLogo {...item.company} />
+                  <div className="p-3 lg:p-4 flex items-center justify-center min-h-[100px]">
+                    <p className="text-sm text-muted-foreground text-center">
+                      {item.text}
+                    </p>
+                  </div>
                 </motion.div>
               );
             }

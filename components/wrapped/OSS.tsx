@@ -94,8 +94,8 @@ export function OSS() {
   return (
     <WrappedSection>
       <SectionHeading
-        title="Contributors of 2025 🙏"
-        subtitle="Big thanks to all contributors!"
+        title="To the Builders..."
+        subtitle="Big thanks to all contributors of 2025!"
       />
       <div className="relative group border-l border-r border-b border-border -mt-[1px] p-6 lg:p-8">
         <HoverStars />

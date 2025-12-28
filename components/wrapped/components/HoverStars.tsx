@@ -69,7 +69,7 @@ export function HoverStars({ className }: HoverStarsProps) {
     >
       {/* Top-left star */}
       <motion.span
-        className="absolute top-1.5 left-1.5 text-lg leading-none"
+        className="absolute top-1 left-1 text-lg leading-none"
         variants={getStarAnimation("tl")}
         initial="hidden"
         animate={isHovered ? "visible" : "hidden"}
@@ -79,7 +79,7 @@ export function HoverStars({ className }: HoverStarsProps) {
 
       {/* Top-right star */}
       <motion.span
-        className="absolute top-1.5 right-1.5 text-lg leading-none"
+        className="absolute top-1 right-1 text-lg leading-none"
         variants={getStarAnimation("tr")}
         initial="hidden"
         animate={isHovered ? "visible" : "hidden"}
@@ -89,7 +89,7 @@ export function HoverStars({ className }: HoverStarsProps) {
 
       {/* Bottom-left star */}
       <motion.span
-        className="absolute bottom-1.5 left-1.5 text-lg leading-none"
+        className="absolute bottom-1 left-1 text-lg leading-none"
         variants={getStarAnimation("bl")}
         initial="hidden"
         animate={isHovered ? "visible" : "hidden"}
@@ -99,7 +99,7 @@ export function HoverStars({ className }: HoverStarsProps) {
 
       {/* Bottom-right star */}
       <motion.span
-        className="absolute bottom-1.5 right-1.5 text-lg leading-none"
+        className="absolute bottom-1 right-1 text-lg leading-none"
         variants={getStarAnimation("br")}
         initial="hidden"
         animate={isHovered ? "visible" : "hidden"}
