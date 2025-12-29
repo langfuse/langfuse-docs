@@ -5,8 +5,9 @@ description: Learn the fundamental concepts behind LLM evaluation in Langfuse - 
 
 ## Evaluation Core Concepts
 
+### What is an evaluation?
 
-
+An evaluation, or "eval" in short, is a function that scores the behavior of an LLM on a specific aspect. The input of an evaluation function is the input and output of an LLM call, the output of the evaluation function is a score. 
 
 ### Live vs Asynchronous Evaluation (experiments)
 
@@ -14,8 +15,29 @@ There are two main ways of evaluation: asynchronous (offline) and live (online) 
 
 **Asynchronous (offline)** evaluations are used to test changes to the product's behavior before deploying them. This is done by running an application against a dataset and evaluating these results. Often, there are multiple iterations of fixing things based on the evaluation results, before deploying the changes to production. Asynchronous evaluations are also known as [experiments](/docs/evaluation//core-concepts#experiments).
 
-**Live (online)** evaluations are used to monitor what's happening in production. This is done by monitoring and evaluating live traces and gives you insight in how well the application is behaving in production.When you find edge cases, add them to your offline datasets.
+**Live (online)** evaluations are used to monitor what's happening in production. This is done by monitoring and evaluating live traces and gives you insight in how well the application is behaving in production. When you find edge cases, add them to your offline datasets so that next time you run your application against these datasets, you can catch them early.
 
+**In practice, successful evaluation blends online and offline evaluations.** Many teams adopt a loop-like approach. This way, evaluation is continuous and ever-improving.
+
+
+<Frame fullWidth>
+  ![Experiments and live evaluation loop](/images/docs/evaluation/experiments-and-live-eval-loop.png)
+</Frame>
+
+
+**Here's an example workflow** for building a customer support chatbot
+
+1. You update your prompt to make responses less formal.
+2. Before deciding to publish the new prompt, you test it against a dataset of customer questions.
+3. You review the results and see that the tone of the responses improved, but the responses are longer and some miss important links.
+4. You refine the prompt and run the experiment again.
+5. The results look good now. You deploy the new prompt to production.
+6. You monitor the new prompt with live evaluation to catch any new edge cases.
+7. All of a sudden, you notice that a customer asked a question in French, but the bot responded in English.
+8. You add the French query to your dataset so that you'll catch this edge case in the future.
+8. You update your prompt to support French and run the experiment again.
+
+Over time, your dataset grows from a couple of examples to a diverse, representative set of failure cases.
 
 ### Evaluation Methods
 
