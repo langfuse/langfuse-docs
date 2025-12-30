@@ -9,11 +9,6 @@ description: Learn the fundamental concepts behind LLM evaluation in Langfuse - 
 
 An evaluation (or "eval") is a function that scores the behavior of an LLM on a specific aspect. The input of an evaluation function is the input and output of an LLM call, the output of the evaluation function is a score that quantifies the behavior of the LLM on the specific aspect. 
 
-Example evaluations:
-- checking whether a response is factually accurate
-- evaluating the tone of voice ("Is this response using a professional tone?")
-- checking whether the LLM successfully avoids generating harmful content
-
 ### Live vs Asynchronous Evaluation (experiments)
 
 There are two complementary ways to evaluate your application: asynchronous (offline) and live (online) evaluation. Both have their place in the development process. 
@@ -50,7 +45,7 @@ In practice, successful evaluation blends online and offline evaluations. A comm
 > 7. You notice that a customer asked a question in French, but the bot responded in English.
 > 8. You add this French query to your dataset so future experiments will catch this issue.
 > 9. You update your prompt to support French responses and run another experiment.
-
+> 
 > Over time, your dataset grows from a couple of examples to a diverse, representative set of real-world test cases.
 
 ### Evaluation Methods
@@ -113,8 +108,6 @@ You can run experiments programmatically using the Langfuse SDK. This gives you 
 #### Via UI
 Run experiments directly from the Langfuse interface by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/run-via-ui).
 
-
-Todo: link to a page on what's available in the UI for experiments.
 
 ## Live Evaluation [#live-evaluation]
 
