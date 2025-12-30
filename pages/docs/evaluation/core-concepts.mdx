@@ -5,41 +5,57 @@ description: Learn the fundamental concepts behind LLM evaluation in Langfuse - 
 
 ## Evaluation Core Concepts
 
-### What is an evaluation?
+### What is evaluation?
 
-An evaluation, or "eval" in short, is a function that scores the behavior of an LLM on a specific aspect. The input of an evaluation function is the input and output of an LLM call, the output of the evaluation function is a score. 
+An evaluation (or "eval") is a function that scores the behavior of an LLM on a specific aspect. The input of an evaluation function is the input and output of an LLM call, the output of the evaluation function is a score that quantifies the behavior of the LLM on the specific aspect. 
+
+Example evaluations:
+- checking whether a response is factually accurate
+- evaluating the tone of voice ("Is this response using a professional tone?")
+- checking whether the LLM successfully avoids generating harmful content
 
 ### Live vs Asynchronous Evaluation (experiments)
 
-There are two main ways of evaluation: asynchronous (offline) and live (online) evaluation. Both have their place in the development process. 
+There are two complementary ways to evaluate your application: asynchronous (offline) and live (online) evaluation. Both have their place in the development process. 
 
-**Asynchronous (offline)** evaluations are used to test changes to the product's behavior before deploying them. This is done by running an application against a dataset and evaluating these results. Often, there are multiple iterations of fixing things based on the evaluation results, before deploying the changes to production. Asynchronous evaluations are also known as [experiments](/docs/evaluation//core-concepts#experiments).
+#### Asynchronous Evaluation (Experiments) [#asynchronous-evaluation]
 
-**Live (online)** evaluations are used to monitor what's happening in production. This is done by monitoring and evaluating live traces and gives you insight in how well the application is behaving in production. When you find edge cases, add them to your offline datasets so that next time you run your application against these datasets, you can catch them early.
+This means testing our application against a fixed dataset before deploying changes to production. Often, there are multiple iterations of fixing things based on the evaluation results, before deploying the changes to production. 
 
-**In practice, successful evaluation blends online and offline evaluations.** Many teams adopt a loop-like approach. This way, evaluation is continuous and ever-improving.
+Asynchronous evaluations are also known as [experiments](/docs/evaluation//core-concepts#experiments).
 
+
+#### Live evaluations [#live-evaluation]
+
+Live evaluations are used to monitor what's happening live in production. This is done by evaluating live traces. 
+
+Real users will always find edge cases you didn't anticipate. When you find edge cases through live evaluation, you can add them to your experiment datasets so that you can catch unexpected behavior during 
+
+#### The evaluation loop
+
+In practice, successful evaluation blends online and offline evaluations. A common workflow looks like this:
 
 <Frame fullWidth>
   ![Experiments and live evaluation loop](/images/docs/evaluation/experiments-and-live-eval-loop.png)
 </Frame>
 
 
-**Here's an example workflow** for building a customer support chatbot
+> **Here's an example workflow** for building a customer support chatbot
+> 1. You update your prompt to make responses less formal.
+> 2. Before deploying, you run an **experiment**: test the new prompt against your dataset of customer questions.
+> 3. You review the scores and outputs. The tone improved, but responses are longer and some miss important links.
+> 4. You refine the prompt and run the experiment again.
+> 5. The results look good now. You deploy the new prompt to production.
+> 6. You monitor with **live evaluation** to catch any new edge cases.
+> 7. You notice that a customer asked a question in French, but the bot responded in English.
+> 8. You add this French query to your dataset so future experiments will catch this issue.
+> 9. You update your prompt to support French responses and run another experiment.
 
-1. You update your prompt to make responses less formal.
-2. Before deciding to publish the new prompt, you test it against a dataset of customer questions.
-3. You review the results and see that the tone of the responses improved, but the responses are longer and some miss important links.
-4. You refine the prompt and run the experiment again.
-5. The results look good now. You deploy the new prompt to production.
-6. You monitor the new prompt with live evaluation to catch any new edge cases.
-7. All of a sudden, you notice that a customer asked a question in French, but the bot responded in English.
-8. You add the French query to your dataset so that you'll catch this edge case in the future.
-8. You update your prompt to support French and run the experiment again.
-
-Over time, your dataset grows from a couple of examples to a diverse, representative set of failure cases.
+> Over time, your dataset grows from a couple of examples to a diverse, representative set of real-world test cases.
 
 ### Evaluation Methods
+
+For both asynchronous and live evaluation, you can use a variety of evaluation methods.
 
 
 | Method | What | Use when |
@@ -48,9 +64,66 @@ Over time, your dataset grows from a couple of examples to a diverse, representa
 | [Deterministic Checks](/docs/evaluation/evaluation-methods/custom-scores) | Rule-based validation of output properties | Format validation, length constraints, keyword matching |
 | [Human Annotation](/docs/evaluation/evaluation-methods/annotation) | Manual review and scoring in a UI | Building ground truth, edge cases, quality spot checks |
 
+
+
 ## Experiments (asynchronous evaluation) [#experiments]
 
+An experiment runs your application against a dataset and evaluates the outputs. This is how you test changes before deploying to production.
+
+### Definitions
+
+Before diving into experiments, it's helpful to understand the building blocks in Langfuse: datasets, dataset items, scores, tasks, evaluators, and experiments.
+
+| Object | Definition |
+| --- | --- |
+| **Dataset** | A collection of test cases (dataset items). You can run experiments on a dataset. |
+| **Dataset item** | One item in a dataset.Each dataset item contains an input (the scenario to test) and optionally an expected output. |
+| **Task** | The application code that you want to test in an experiment. This will be performed on each dataset item, and you will score the output.
+| **Evaluator** | A function that scores experiment results. In the context of a Langfuse experiment, this can be a [deterministic check](/docs/evaluation/evaluation-methods/custom-scores), or [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). |
+| **Score** | The result of an evaluator. This can be numeric, categorical, or boolean. See [Scores](/docs/evaluation/evaluation-methods/data-model) for more details.|
+| **Experiment Run** | A single execution of your task against all items in a dataset, producing outputs (and scores). |
+
+You can find the data model for these objects [here](/docs/evaluation/experiments/data-model).
 
 
+### How these work together
+
+This is what happens conceptually:
+
+When you run an experiment on a given **dataset**, each of the **dataset items** will be passed to the **task function** you defined. The task function is generally an LLM call that happens in your application, that you want to test. The task function produces an output for each dataset item. This process is called an **experiment run**. The resulting collection of outputs linked to the dataset items are the **experiment results**. 
+
+Often, you want to score these experiment results using different **evaluators**. These evaluators take in the dataset item and the output produced by the task function, and produce a score based on a specific criteria you define. Based on these scores, you can then get a complete picture of how your application performs across all test cases.
+
+<Frame fullWidth>
+  ![Experiments and live evaluation loop](/images/docs/evaluation/experiments-flow.png)
+</Frame>
+
+You can compare experiment runs to see if a new prompt version improves scores, or identify specific inputs where your application struggles. Based on these experiment results, you can decide whether the change is ready to be deployed to production. 
+
+You can find more details on how these objects link together under the hood on the [data model page](/docs/evaluation/experiments/data-model). 
+
+
+### How to run an experiment
+
+Langfuse supports two ways to run experiments, and you can use both in parallel for different workflows.
+
+#### Via SDK
+You can run experiments programmatically using the Langfuse SDK. This gives you full control over what the task, evaluator, etc. look like. [Learn more about running experiments via SDK](/docs/evaluation/run-via-sdk).
+
+#### Via UI
+Run experiments directly from the Langfuse interface by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/run-via-ui).
+
+
+Todo: link to a page on what's available in the UI for experiments.
 
 ## Live Evaluation [#live-evaluation]
+
+For live evaluation, evaluators are triggered to produce a score live on production traces. This helps you catch issues immediately.
+
+Langfuse currently supports LLM-as-a-Judge and human annotation checks for live evaluation. [Deterministic checks are on the roadmap](https://github.com/orgs/langfuse/discussions/6087).
+
+
+### Monitoring with dashboards
+
+Langfuse offers dashboards to monitor your application performance in real-time. You can also monitor scores in dashboards. You can find more details on how to use dashboards [here](/docs/metrics/features/custom-dashboards).
+
