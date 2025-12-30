@@ -3,5 +3,4 @@ export default {
   annotation: "Human Annotations",
   "custom-scores": "Custom Scores",
   "score-analytics": "Score Analytics",
-  "data-model": "Data Model",
 };

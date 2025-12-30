@@ -80,10 +80,10 @@ Before diving into experiments, it's helpful to understand the building blocks i
 | **Dataset item** | One item in a dataset.Each dataset item contains an input (the scenario to test) and optionally an expected output. |
 | **Task** | The application code that you want to test in an experiment. This will be performed on each dataset item, and you will score the output.
 | **Evaluator** | A function that scores experiment results. In the context of a Langfuse experiment, this can be a [deterministic check](/docs/evaluation/evaluation-methods/custom-scores), or [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). |
-| **Score** | The result of an evaluator. This can be numeric, categorical, or boolean. See [Scores](/docs/evaluation/evaluation-methods/data-model) for more details.|
+| **Score** | The result of an evaluator. This can be numeric, categorical, or boolean. See [Scores](/docs/evaluation/data-model#scores) for more details.|
 | **Experiment Run** | A single execution of your task against all items in a dataset, producing outputs (and scores). |
 
-You can find the data model for these objects [here](/docs/evaluation/experiments/data-model).
+You can find the data model for these objects [here](/docs/evaluation/data-model).
 
 
 ### How these work together
@@ -100,7 +100,7 @@ Often, you want to score these experiment results using different **evaluators**
 
 You can compare experiment runs to see if a new prompt version improves scores, or identify specific inputs where your application struggles. Based on these experiment results, you can decide whether the change is ready to be deployed to production. 
 
-You can find more details on how these objects link together under the hood on the [data model page](/docs/evaluation/experiments/data-model). 
+You can find more details on how these objects link together under the hood on the [data model page](/docs/evaluation/data-model). 
 
 
 ### How to run an experiment
