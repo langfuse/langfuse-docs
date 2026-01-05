@@ -554,41 +554,55 @@ httpx_client = httpx.Client(verify=os.environ["OTEL_EXPORTER_OTLP_TRACES_CERTIFI
 langfuse = Langfuse(httpx_client=httpx_client)
 ```
 
-## Langfuse + Sentry
+## Setup with Sentry
+
+If you’re using both Sentry and Langfuse in your application, you’ll need to configure a custom OpenTelemetry setup since both tools use OpenTelemetry for tracing. This guide shows how to send error monitoring data to Sentry while simultaneously capturing LLM observability traces in Langfuse.
+
+To use Langfuse alongside Sentry, configure `skipOpenTelemetrySetup: true` in your Sentry initialization and manually set up the OpenTelemetry components:
+
+<Callout type="info">
+Important: If you’re using Sentry’s tracing feature, be aware that Sentry’s `tracesSampleRate` will also apply to your Langfuse traces, since both services share the same underlying OpenTelemetry setup.
+
+If you only want to use Sentry for error monitoring (without tracing), omit the `tracesSampleRate` in `Sentry.init()` and remove the `SentrySpanProcessor` from the span processors array.
+
+</Callout>
 
 <LangTabs items={["JS/TS SDK"]}>
 <Tab title="TypeScript">
 
 ```ts filename="instrumentation.ts"
 import * as Sentry from "@sentry/node";
+ 
 import { LangfuseSpanProcessor } from "@langfuse/otel";
-import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import {
   SentryPropagator,
   SentrySampler,
   SentrySpanProcessor,
 } from "@sentry/opentelemetry";
-
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+ 
 const sentryClient = Sentry.init({
   dsn: "<your dsn>",
   skipOpenTelemetrySetup: true,
-  tracesSampleRate: 1,
+  tracesSampleRate: 1, // <-- must be dropped if Sentry tracing is not used
+  // ...
 });
-
+ 
 const provider = new NodeTracerProvider({
   sampler: sentryClient ? new SentrySampler(sentryClient) : undefined,
-  spanProcessors: [new LangfuseSpanProcessor(), new SentrySpanProcessor()],
+  spanProcessors: [
+    new LangfuseSpanProcessor(),
+    new SentrySpanProcessor(), // <-- must be dropped if Sentry tracing is not used
+  ],
 });
-
+ 
 provider.register({
   propagator: new SentryPropagator(),
   contextManager: new Sentry.SentryContextManager(),
 });
 ```
 
-<Callout type="info">
-If you only use Sentry for error monitoring, omit `tracesSampleRate` and the `SentrySpanProcessor` so its sampling rules don't affect Langfuse traces.
-</Callout>
+For more details on custom OpenTelemetry setup with Sentry, see the [Sentry documentation](https://docs.sentry.io/platforms/javascript/guides/express/opentelemetry/custom-setup/).
 
 </Tab>
 </LangTabs>
