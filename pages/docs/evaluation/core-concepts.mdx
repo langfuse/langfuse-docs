@@ -9,15 +9,15 @@ description: Learn the fundamental concepts behind LLM evaluation in Langfuse - 
 
 An evaluation (or "eval") is a function that scores the behavior of an LLM on a specific aspect. The input of an evaluation function is the input and output of an LLM call, the output of the evaluation function is a score that quantifies the behavior of the LLM on the specific aspect. 
 
-### Live vs Asynchronous Evaluation (experiments)
+### Live vs Offline Evaluation (experiments)
 
 There are two complementary ways to evaluate your application: asynchronous (offline) and live (online) evaluation. Both have their place in the development process. 
 
-#### Asynchronous Evaluation (Experiments) [#asynchronous-evaluation]
+#### Offline Evaluation (Experiments) [#offline-evaluation]
 
 This means testing our application against a fixed dataset before deploying changes to production. Often, there are multiple iterations of fixing things based on the evaluation results, before deploying the changes to production. 
 
-Asynchronous evaluations are also known as [experiments](/docs/evaluation//core-concepts#experiments).
+Offline evaluations are also known as [experiments](/docs/evaluation/core-concepts#experiments).
 
 
 #### Live evaluations [#live-evaluation]
@@ -31,7 +31,7 @@ Real users will always find edge cases you didn't anticipate. When you find edge
 In practice, successful evaluation blends online and offline evaluations. A common workflow looks like this:
 
 <Frame fullWidth>
-  ![Experiments and live evaluation loop](/images/docs/evaluation/experiments-and-live-eval-loop.png)
+  ![Experiments and live evaluation loop](/images/docs/evaluation/online-offline-eval-loop.png)
 </Frame>
 
 
@@ -61,7 +61,7 @@ For both asynchronous and live evaluation, you can use a variety of evaluation m
 
 
 
-## Experiments (asynchronous evaluation) [#experiments]
+## Experiments (offline evaluation) [#experiments]
 
 An experiment runs your application against a dataset and evaluates the outputs. This is how you test changes before deploying to production.
 
