@@ -9,9 +9,9 @@ description: Learn the fundamental concepts behind LLM evaluation in Langfuse - 
 
 An evaluation (or "eval") is a function that scores the behavior of an LLM on a specific aspect. The input of an evaluation function is the input and output of an LLM call, the output of the evaluation function is a score that quantifies the behavior of the LLM on the specific aspect. 
 
-### Live vs Offline Evaluation (experiments)
+### Online vs Offline Evaluation (experiments)
 
-There are two complementary ways to evaluate your application: asynchronous (offline) and live (online) evaluation. Both have their place in the development process. 
+There are two complementary ways to evaluate your application: offline and online evaluation. Both have their place in the development process. 
 
 #### Offline Evaluation (Experiments) [#offline-evaluation]
 
@@ -20,18 +20,18 @@ This means testing our application against a fixed dataset before deploying chan
 Offline evaluations are also known as [experiments](/docs/evaluation/core-concepts#experiments).
 
 
-#### Live evaluations [#live-evaluation]
+#### Online Evaluations [#online-evaluation]
 
-Live evaluations are used to monitor what's happening live in production. This is done by evaluating live traces. 
+Online evaluations are used to monitor what's happening in production. This is done by evaluating production traces. 
 
-Real users will always find edge cases you didn't anticipate. When you find edge cases through live evaluation, you can add them to your experiment datasets so that you can catch unexpected behavior during 
+Real users will always find edge cases you didn't anticipate. When you find edge cases through online evaluation, you can add them to your experiment datasets so that you can catch unexpected behavior during future offline evaluation runs.
 
 #### The evaluation loop
 
 In practice, successful evaluation blends online and offline evaluations. A common workflow looks like this:
 
 <Frame fullWidth>
-  ![Experiments and live evaluation loop](/images/docs/evaluation/online-offline-eval-loop.png)
+  ![Online and offline evaluation loop](/images/docs/evaluation/online-offline-eval-loop.png)
 </Frame>
 
 
@@ -41,7 +41,7 @@ In practice, successful evaluation blends online and offline evaluations. A comm
 > 3. You review the scores and outputs. The tone improved, but responses are longer and some miss important links.
 > 4. You refine the prompt and run the experiment again.
 > 5. The results look good now. You deploy the new prompt to production.
-> 6. You monitor with **live evaluation** to catch any new edge cases.
+> 6. You monitor with **online evaluation** to catch any new edge cases.
 > 7. You notice that a customer asked a question in French, but the bot responded in English.
 > 8. You add this French query to your dataset so future experiments will catch this issue.
 > 9. You update your prompt to support French responses and run another experiment.
@@ -50,7 +50,7 @@ In practice, successful evaluation blends online and offline evaluations. A comm
 
 ### Evaluation Methods
 
-For both asynchronous and live evaluation, you can use a variety of evaluation methods.
+For both offline and online evaluation, you can use a variety of evaluation methods.
 
 
 | Method | What | Use when |
@@ -90,7 +90,7 @@ When you run an experiment on a given **dataset**, each of the **dataset items**
 Often, you want to score these experiment results using different **evaluators**. These evaluators take in the dataset item and the output produced by the task function, and produce a score based on a specific criteria you define. Based on these scores, you can then get a complete picture of how your application performs across all test cases.
 
 <Frame fullWidth>
-  ![Experiments and live evaluation loop](/images/docs/evaluation/experiments-flow.png)
+  ![Experiments flow](/images/docs/evaluation/experiments-flow.png)
 </Frame>
 
 You can compare experiment runs to see if a new prompt version improves scores, or identify specific inputs where your application struggles. Based on these experiment results, you can decide whether the change is ready to be deployed to production. 
@@ -109,11 +109,11 @@ You can run experiments programmatically using the Langfuse SDK. This gives you 
 Run experiments directly from the Langfuse interface by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/run-via-ui).
 
 
-## Live Evaluation [#live-evaluation]
+## Online Evaluation [#online-evaluation]
 
-For live evaluation, evaluators are triggered to produce a score live on production traces. This helps you catch issues immediately.
+For online evaluation, evaluators are triggered to produce a score on production traces. This helps you catch issues immediately.
 
-Langfuse currently supports LLM-as-a-Judge and human annotation checks for live evaluation. [Deterministic checks are on the roadmap](https://github.com/orgs/langfuse/discussions/6087).
+Langfuse currently supports LLM-as-a-Judge and human annotation checks for online evaluation. [Deterministic checks are on the roadmap](https://github.com/orgs/langfuse/discussions/6087).
 
 
 ### Monitoring with dashboards
