@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
 import { useConfig } from "nextra-theme-docs";
-import { usePostHog } from "posthog-js/react";
+import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { Button } from "./ui/button";
 import {
   Copy as CopyIcon,
@@ -53,7 +53,7 @@ const isCustomerStory = (pathname: string) =>
 
 const CopyMarkdownButton = () => {
   const router = useRouter();
-  const posthog = usePostHog();
+  const capture = usePostHogClientCapture();
   const [copyState, setCopyState] = useState<
     "idle" | "loading" | "copied" | "error"
   >("idle");
@@ -93,9 +93,7 @@ const CopyMarkdownButton = () => {
     setCopyState("loading");
     setErrorMessage("");
 
-    posthog?.capture("copy_page", {
-      type: "copy",
-    });
+    capture("copy_page", { type: "copy" });
 
     const mdUrl = getMarkdownUrl();
 
@@ -155,15 +153,11 @@ const CopyMarkdownButton = () => {
   };
 
   const handleChatGPTClick = () => {
-    posthog?.capture("copy_page", {
-      type: "chatgpt",
-    });
+    capture("copy_page", { type: "chatgpt" });
   };
 
   const handleClaudeClick = () => {
-    posthog?.capture("copy_page", {
-      type: "claude",
-    });
+    capture("copy_page", { type: "claude" });
   };
 
   const isDisabled = copyState === "loading" || copyState === "copied";
@@ -284,9 +278,7 @@ const CopyMarkdownButton = () => {
             <Link
               href="/docs/docs-mcp"
               onClick={() => {
-                posthog?.capture("copy_page", {
-                  type: "mcp",
-                });
+                capture("copy_page", { type: "mcp" });
               }}
               target="_blank"
               className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
