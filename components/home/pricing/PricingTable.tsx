@@ -1147,7 +1147,7 @@ const sections: Section[] = [
         name: "Contracts",
         tiers: {
           cloud: {
-            Hobby: "Standard T&Cs",
+            Hobby: "Standard T&Cs & DPA",
             Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
             Enterprise: "Custom with " + YEARLY_COMMITMENT,
@@ -1161,7 +1161,7 @@ const sections: Section[] = [
         name: "Data processing agreement (GDPR)",
         href: "/security/dpa",
         tiers: {
-          cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": ENTERPRISE },
         },
       },
