@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
 import { useConfig } from "nextra-theme-docs";
-import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import { Button } from "./ui/button";
 import {
   Copy as CopyIcon,
