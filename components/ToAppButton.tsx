@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
 const DEFAULT_BUTTON_TEXT = {
   signedIn: "To App",
@@ -53,6 +54,7 @@ export const ToAppButton = ({
   signUpText = DEFAULT_BUTTON_TEXT.signUp,
   dropdownText = DEFAULT_BUTTON_TEXT.dropdown,
 }: ToAppButtonProps = {}) => {
+  const capture = usePostHogClientCapture();
   const [signedInRegions, setSignedInRegions] = useState<
     Record<RegionKey, boolean>
   >(
@@ -167,6 +169,21 @@ export const ToAppButton = ({
       </Button>
     );
   } else {
+    // Determine which region the sign up button will navigate to
+    const targetUrl = continentCode
+      ? continentHostMapping[continentCode]
+      : regions.eu.url;
+    const targetRegion = Object.entries(regions).find(
+      ([, region]) => region.url === targetUrl
+    )?.[0] as RegionKey;
+
+    const handleSignUpClick = () => {
+      capture("click_sign_up_button", {
+        region: targetRegion || "eu",
+        ...(continentCode && { continent_code: continentCode }),
+      });
+    };
+
     return (
       <Button
         size="xs"
@@ -176,11 +193,7 @@ export const ToAppButton = ({
           isUsingDefaultText && "w-[45px] sm:w-[70px]"
         )}
       >
-        <Link
-          href={
-            continentCode ? continentHostMapping[continentCode] : regions.eu.url
-          }
-        >
+        <Link href={targetUrl} onClick={handleSignUpClick}>
           <span className="sm:hidden">{dropdownText}</span>
           <span className="hidden sm:inline">{signUpText}</span>
         </Link>

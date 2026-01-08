@@ -5,6 +5,7 @@ import { usePostHog } from "posthog-js/react";
 // This preserves existing PostHog event structure while adding type safety
 interface EventDefinitions {
   copy_page: { type: "copy" | "chatgpt" | "claude" | "mcp" };
+  click_sign_up_button: { region: "eu" | "us" | "hipaa"; continent_code?: string };
 }
 
 type EventName = keyof EventDefinitions;
@@ -18,7 +19,7 @@ export const usePostHogClientCapture = () => {
     properties: EventDefinitions[E],
     options?: CaptureOptions
   ): CaptureResult | void {
-    return posthog.capture(eventName, properties, options);
+    return posthog?.capture(eventName, properties, options);
   }
 
   return capture;
