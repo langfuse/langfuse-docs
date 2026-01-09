@@ -2,30 +2,30 @@
 title: Concepts
 description: Learn the fundamental concepts behind LLM evaluation in Langfuse - Scores, Evaluation Methods, Datasets, and Experiments.
 ---
-## Core Concepts
+# Core Concepts
 
-### What is evaluation?
+## What is evaluation?
 
 An evaluation (or "eval") is a function that scores the behavior of an LLM on a specific aspect. The input of an evaluation function is the input and output of an LLM call, the output of the evaluation function is a score that quantifies the behavior of the LLM on the specific aspect. 
 
-### Online vs Offline Evaluation (experiments)
+## Online vs Offline Evaluation (experiments)
 
 There are two complementary ways to evaluate your application: offline and online evaluation. Both have their place in the development process. 
 
-#### Offline Evaluation (Experiments) [#offline-evaluation]
+### Offline Evaluation (Experiments) [#offline-evaluation]
 
 This means testing our application against a fixed dataset before deploying changes to production. Often, there are multiple iterations of fixing things based on the evaluation results, before deploying the changes to production. 
 
 Offline evaluations are also known as [experiments](/docs/evaluation/core-concepts#experiments).
 
 
-#### Online Evaluations [#online-evaluation]
+### Online Evaluations [#online-evaluation]
 
 Online evaluations are used to monitor what's happening in production. This is done by evaluating production traces. 
 
 Real users will always find edge cases you didn't anticipate. When you find edge cases through online evaluation, you can add them to your experiment datasets so that you can catch unexpected behavior during future offline evaluation runs.
 
-#### The evaluation loop
+### The evaluation loop
 
 In practice, successful evaluation blends online and offline evaluations. A common workflow looks like this:
 
@@ -47,7 +47,7 @@ In practice, successful evaluation blends online and offline evaluations. A comm
 > 
 > Over time, your dataset grows from a couple of examples to a diverse, representative set of real-world test cases.
 
-### Evaluation Methods
+## Evaluation Methods
 
 For both offline and online evaluation, you can use a variety of evaluation methods.
 

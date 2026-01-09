@@ -15,6 +15,7 @@ Langfuse offers two SDKs:
 
 - **Python** <a href="https://github.com/langfuse/langfuse-python"><img className="inline" alt="GitHub repository langfuse/langfuse-python" src="https://img.shields.io/badge/repo-langfuse--python-blue?style=flat-square&logo=GitHub" /></a> <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi+langfuse" alt="PyPi langfuse" /></a>
 - **JS/TS** <a href="https://github.com/langfuse/langfuse-js"><img className="inline" alt="GitHub repository langfuse/langfuse-js" src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=GitHub" /></a> <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm+@langfuse/tracing" alt="NPM @langfuse/tracing" /></a>
+- [**Other Languages**](#other-languages) via OpenTelemetry
 
 The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features. 
 
@@ -80,7 +81,7 @@ Create an `instrumentation.ts` to register the Langfuse span processor so traces
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
-const sdk = new NodeSDK({
+export const sdk = new NodeSDK({
   spanProcessors: [new LangfuseSpanProcessor()],
 });
 
@@ -96,7 +97,7 @@ Instrumentation means adding code that records what’s happening in your applic
 In this example we will use the [context manager](/docs/observability/sdk/instrumentation#context-manager). You can also use the [decorator](/docs/observability/sdk/instrumentation#observe-wrapper) or create [manual observations](/docs/observability/sdk/instrumentation#manual-observations).
 
 ```ts filename="index.ts" /startActiveObservation/
-import "./instrumentation";
+import { sdk } from "./instrumentation";
 import { startActiveObservation } from "@langfuse/tracing";
 
 async function main() {
@@ -108,8 +109,10 @@ async function main() {
   });
 }
 
-main();
+// Shutdown flushes events and is required for short-lived applications
+main().finally(() => sdk.shutdown());
 ```
+_[When do I need to use `shutdown()`?](/docs/observability/data-model#background-processing)_
 
 **5. Run your application and see the trace in Langfuse:**
 
@@ -399,6 +402,22 @@ The Langfuse SDKs provides wrappers around OTel spans ([`LangfuseSpan`](https://
 
 ## Other languages
 
-Via the [public API](/docs/api-and-data-platform/features/public-api) you can integrate Langfuse from any runtime. For tracing specifically, send OpenTelemetry spans from your preferred instrumentation (Java, Go, etc.) to the [Langfuse OTel endpoint](/integrations/native/opentelemetry).
+Langfuse mantains SDKs for Python and JavaScript/TypeScript. For other languages, you can use our [OpenTelemetry endpoint](/integrations/native/opentelemetry) to instrument your application and use the [public API](/docs/api-and-data-platform/features/public-api) to use Langfuse prompt management, evaluation and querying.
 
-You can find a list of community maintained SDKs [here](https://github.com/langfuse/langfuse-examples?tab=readme-ov-file#community-maintained-sdks).
+### Instrumentation
+
+To instrument your application, you can send OpenTelemetry spans to the [Langfuse OTel endpoint](/integrations/native/opentelemetry). For this you can use the following OpenTelemetry SDKs:
+
+- [OpenTelemetry Java](https://opentelemetry.io/docs/languages/java/)
+- [OpenTelemetry .NET](https://opentelemetry.io/docs/languages/net/)
+- [OpenTelemetry Go](https://opentelemetry.io/docs/languages/go/)
+- [OpenTelemetry C++](https://opentelemetry.io/docs/languages/cpp/)
+- [OpenTelemetry Erlang/Elixir](https://opentelemetry.io/docs/languages/erlang/)
+- [OpenTelemetry Ruby](https://opentelemetry.io/docs/languages/ruby/)
+- [OpenTelemetry PHP](https://opentelemetry.io/docs/languages/php/)
+- [OpenTelemetry Rust](https://opentelemetry.io/docs/languages/rust/)
+- [OpenTelemetry Swift](https://opentelemetry.io/docs/languages/swift/)
+
+### Prompt management, evaluation and querying:
+
+To use other Langfuse features, you can use the [public API](/docs/api-and-data-platform/features/public-api) integrate Langfuse from any runtime. We also provide a list of community maintained SDKs [here](https://github.com/langfuse/langfuse-examples?tab=readme-ov-file#community-maintained-sdks).

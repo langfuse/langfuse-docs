@@ -49,7 +49,7 @@ export default {
   },
   roadmap: "Roadmap",
   "docs-mcp": "Docs MCP Server",
-  references: "References",
+  references: "SDK & API References",
 
   "security-compliance": {
     title: "Security & Compliance ↗",

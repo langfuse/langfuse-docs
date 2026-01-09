@@ -1,5 +1,5 @@
 ---
-date: 2025-12-16
+date: 2025-12-17
 title: "v2 Metrics and Observations API (Beta)"
 description: New high-performance v2 APIs for metrics and observations with cursor-based pagination, selective field retrieval, and optimized data architecture.
 author: Valeriy
@@ -15,6 +15,8 @@ We're releasing new **v2 endpoints** for our Metrics and Observations APIs, desi
 <Callout type="warning">
 
 The v2 APIs are currently in **beta**. They are stable for production use, but some parameters and behaviors may evolve based on user feedback before general availability.
+
+**Cloud-only (Beta):** The v2 APIs are only available on Langfuse Cloud and currently in beta. We are working on a robust migration path for self-hosted deployments.
 
 **Important:** With current SDK versions, data may take approximately 5 minutes to appear on v2 endpoints. We will be releasing updated SDK versions soon that will make data available immediately on v2 endpoints.
 
@@ -72,6 +74,10 @@ The v2 APIs are additive - v1 endpoints remain available and unchanged. When rea
 
 ## Learn more
 
+For full documentation, see the [Metrics API docs](/docs/analytics/metrics-api#v2) and [Observations API docs](/docs/api-and-data-platform/features/observations-api#v2).
+
+---
+
 <iframe
   width="100%"
   style={{ aspectRatio: "16/9" }}
@@ -82,9 +88,11 @@ The v2 APIs are additive - v1 endpoints remain available and unchanged. When rea
   allowFullScreen
 />
 
-import { Book } from "lucide-react";
+import { Book, FileCode } from "lucide-react";
 
 <Cards num={2}>
   <Card title="Metrics API Documentation" href="/docs/analytics/metrics-api#v2" icon={<Book />} />
   <Card title="Observations API Documentation" href="/docs/api-and-data-platform/features/observations-api" icon={<Book />} />
+  <Card title="v2 Metrics API Reference" href="https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics" icon={<FileCode />} />
+  <Card title="v2 Observations API Reference" href="https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations" icon={<FileCode />} />
 </Cards>

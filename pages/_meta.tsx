@@ -7,6 +7,14 @@ export default {
       layout: "raw",
     },
   },
+  wrapped: {
+    type: "page",
+    title: "Langfuse Wrapped 2025",
+    display: "hidden",
+    theme: {
+      layout: "raw",
+    },
+  },
   imprint: {
     title: "Imprint",
     type: "page",
