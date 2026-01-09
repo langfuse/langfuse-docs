@@ -44,7 +44,7 @@ export default function App({ Component, pageProps }) {
       {process.env.NODE_ENV === "production" && (
         <>
           <Hubspot />
-          {/*   Cookieyes consent manager */}
+          {/* Cookieyes consent manager */}
           <Script
             id="cookieyes"
             type="text/javascript"
