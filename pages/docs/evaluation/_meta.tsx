@@ -1,7 +1,6 @@
 export default {
   overview: "Overview",
-  "core-concepts": "Core Concepts",
-  "data-model": "Data Model",
+  "core-concepts": "Concepts",
   "evaluation-methods": "Evaluation Methods",
   experiments: "Experiments",
   tutorials: {
