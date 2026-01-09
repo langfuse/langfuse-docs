@@ -4,30 +4,22 @@ description: Learn the fundamental concepts behind LLM evaluation in Langfuse - 
 ---
 # Core Concepts
 
-## What is evaluation?
+This page digs into the different concepts of evaluations, and what's available in Langfuse. 
 
-An evaluation (or "eval") is a function that scores the behavior of an LLM on a specific aspect. The input of an evaluation function is the input and output of an LLM call, the output of the evaluation function is a score that quantifies the behavior of the LLM on the specific aspect. 
+Ready to start? 
 
-## Online vs Offline Evaluation (experiments)
-
-There are two complementary ways to evaluate your application: offline and online evaluation. Both have their place in the development process. 
-
-### Offline Evaluation (Experiments) [#offline-evaluation]
-
-This means testing our application against a fixed dataset before deploying changes to production. Often, there are multiple iterations of fixing things based on the evaluation results, before deploying the changes to production. 
-
-Offline evaluations are also known as [experiments](/docs/evaluation/core-concepts#experiments).
+- [Create a dataset](/docs/evaluation/experiments/datasets) to measure your LLM application's performance consistently
+- [Run an experiment](/docs/evaluation/experiments/overview) get an overview of how your application is doing
+- [Set up a live evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) to monitor your live traces
 
 
-### Online Evaluations [#online-evaluation]
+## The Evaluation Loop
 
-Online evaluations are used to monitor what's happening in production. This is done by evaluating production traces. 
+LLM applications often have a constant loop of testing and monitoring. 
 
-Real users will always find edge cases you didn't anticipate. When you find edge cases through online evaluation, you can add them to your experiment datasets so that you can catch unexpected behavior during future offline evaluation runs.
+**Experiments** let you test your application against a fixed dataset before you deploy. You run your new prompt or model against test cases, review the scores, iterate until the results look good, then deploy your changes.
 
-### The evaluation loop
-
-In practice, successful evaluation blends online and offline evaluations. A common workflow looks like this:
+**Online evaluation** scores live traces to catch issues in real traffic. When you find edge cases your dataset didn't cover, you add them back to your dataset so future experiments will catch them.
 
 <Frame fullWidth>
   ![Online and offline evaluation loop](/images/docs/evaluation/online-offline-eval-loop.png)
@@ -47,20 +39,7 @@ In practice, successful evaluation blends online and offline evaluations. A comm
 > 
 > Over time, your dataset grows from a couple of examples to a diverse, representative set of real-world test cases.
 
-## Evaluation Methods
-
-For both offline and online evaluation, you can use a variety of evaluation methods.
-
-
-| Method | What | Use when |
-| --- | --- | --- |
-| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Use an LLM to evaluate outputs based on custom criteria | Subjective assessments at scale (tone, accuracy, helpfulness) |
-| [Deterministic Checks](/docs/evaluation/evaluation-methods/custom-scores) | Rule-based validation of output properties | Format validation, length constraints, keyword matching |
-| [Human Annotation](/docs/evaluation/evaluation-methods/annotation) | Manual review and scoring in a UI | Building ground truth, edge cases, quality spot checks |
-
-
-
-## Experiments (offline evaluation) [#experiments]
+## Experiments [#experiments]
 
 An experiment runs your application against a dataset and evaluates the outputs. This is how you test changes before deploying to production.
 
@@ -97,15 +76,11 @@ You can compare experiment runs to see if a new prompt version improves scores, 
 You can find more details on how these objects link together under the hood on the [data model page](/docs/evaluation/experiments/data-model). 
 
 
-### How to run an experiment
+### Two ways to run experiments
 
-Langfuse supports two ways to run experiments, and you can use both in parallel for different workflows.
+You can **run experiments programmatically using the Langfuse SDK**. This gives you full control over what the task, evaluator, etc. look like. [Learn more about running experiments via SDK](/docs/evaluation/run-via-sdk).
 
-#### Via SDK
-You can run experiments programmatically using the Langfuse SDK. This gives you full control over what the task, evaluator, etc. look like. [Learn more about running experiments via SDK](/docs/evaluation/run-via-sdk).
-
-#### Via UI
-Run experiments directly from the Langfuse interface by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/run-via-ui).
+Another way is to **run experiments directly from the Langfuse interface** by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/run-via-ui).
 
 
 ## Online Evaluation [#online-evaluation]
@@ -118,4 +93,16 @@ Langfuse currently supports LLM-as-a-Judge and human annotation checks for onlin
 ### Monitoring with dashboards
 
 Langfuse offers dashboards to monitor your application performance in real-time. You can also monitor scores in dashboards. You can find more details on how to use dashboards [here](/docs/metrics/features/custom-dashboards).
+
+
+## Evaluation Methods
+
+For both offline and online evaluation, you can use a variety of evaluation methods.
+
+
+| Method | What | Use when |
+| --- | --- | --- |
+| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Use an LLM to evaluate outputs based on custom criteria | Subjective assessments at scale (tone, accuracy, helpfulness) |
+| [Deterministic Checks](/docs/evaluation/evaluation-methods/custom-scores) | Rule-based validation of output properties | Format validation, length constraints, keyword matching |
+| [Human Annotation](/docs/evaluation/evaluation-methods/annotation) | Manual review and scoring in a UI | Building ground truth, edge cases, quality spot checks |
 
