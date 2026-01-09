@@ -305,7 +305,7 @@ langfuse = get_client()
 external_request_id = "req_12345"
 predefined_trace_id = Langfuse.create_trace_id(seed=external_request_id)
 
-langfuse_handler = CallbackHandler(trace_context={"trace_id": predefined_trace_id)
+langfuse_handler = CallbackHandler(trace_context={"trace_id": predefined_trace_id})
 
 # LangChain execution will be part of this trace
 response = chain.invoke(
