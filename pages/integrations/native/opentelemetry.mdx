@@ -32,7 +32,9 @@ flowchart LR
   class App,Langfuse subgraphBox;
 ```
 
-## OpenTelemetry native Langfuse SDK v3
+## Ingestion Options
+
+### OpenTelemetry native Langfuse SDK v3
 
 The quickest path to start tracing with Langfuse is the new **OTEL-native Langfuse SDK v3**. The SDK is a thin layer on top of the official OpenTelemetry client that automatically converts all emitted spans into rich Langfuse observations (spans, generations, events, and [other observation types](/docs/observability/features/observation-types)) and adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring.
 
@@ -40,7 +42,7 @@ Because it lives in the shared OpenTelemetry context, any other library that is 
 
 Get started by following the dedicated guide for the Python implementation here: [/docs/observability/sdk/overview](/docs/observability/sdk/overview).
 
-## OpenTelemetry endpoint
+### OpenTelemetry endpoint
 
 Langfuse can receive traces on the `/api/public/otel` (OTLP) endpoint.
 
@@ -76,13 +78,13 @@ OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v
 
 Please note that Langfuse does not support `gRPC` for the OpenTelemetry endpoint. Please use `HTTP/protobuf` instead.
 
-## Custom via OpenTelemetry SDKs
+### Custom via OpenTelemetry SDKs
 
 You can use the OpenTelemetry SDKs to directly export traces to Langfuse with the configuration mentioned above. Thereby, Language support of Langfuse is extended to other languages than the ones supported by the [Langfuse SDKs](/docs/sdk/overview) (Python and JS/TS).
 
 As a reference, see [this example notebook](/docs/opentelemetry/example-python-sdk) on how to use the OpenTelemetry Python SDK to export traces to Langfuse.
 
-## Use OpenTelemetry GenAI Instrumentation Libraries
+### Use OpenTelemetry GenAI Instrumentation Libraries
 
 Any OpenTelemetry compatible instrumentation can be used to export traces to Langfuse. Check out the following end-to-end examples of popular instrumentation SDKs to get started:
 
@@ -179,7 +181,7 @@ Any OpenTelemetry compatible instrumentation can be used to export traces to Lan
 - [LlamaIndex](/integrations/frameworks/llamaindex)
 - [LlamaIndex Workflows](/integrations/frameworks/llamaindex-workflows)
 
-## Export from OpenTelemetry Collector
+### Export from OpenTelemetry Collector
 
 ```mermaid
 graph LR
@@ -222,7 +224,7 @@ service:
       exporters: [otlphttp/langfuse]
 ```
 
-### Filtering Spans sent to Langfuse
+#### Filtering Spans sent to Langfuse
 
 In case you want to selectively send OTel Spans to Langfuse, you can use the OTel Collector [filterprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md).
 It enables you to filter spans based on attributes, span names, and more.
@@ -262,7 +264,7 @@ service:
       exporters: [otlphttp/langfuse]
 ```
 
-## Property Mapping [#property-mapping]
+## Attribute Mapping [#property-mapping]
 
 Langfuse aims to be compliant with the [OpenTelemetry GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-agent-spans/) and support major LLM instrumentation frameworks.
 
