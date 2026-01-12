@@ -275,6 +275,10 @@ Furthermore, Langfuse uses attributes within the `langfuse.*` namespace to map O
   not work as expected or does not parse the correct attributes.
 </Callout>
 
+Langfuse distinguishes between trace-level attributes and observation-level attributes. 
+- [Trace-level attributes](/docs/observability/data-model#trace-level-attributes) represent shared context for an entire interaction. If langfuse detects these attributes on a specific span, it will treat them as properties of the whole trace.
+- [Observation-level attributes](/docs/observability/data-model#observation-level-attributes) describe individual steps within a trace. Langfuse keeps them on the observation level. 
+
 ### Propagating Trace Attributes to All Spans [#propagating-attributes]
 
 When using OpenTelemetry instrumentation to send traces to Langfuse, certain trace-level attributes should be propagated to **all spans** within a trace to enable accurate aggregations and filtering in Langfuse. These attributes include:
