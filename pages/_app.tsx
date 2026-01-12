@@ -19,6 +19,7 @@ export default function App({ Component, pageProps }) {
         api_host:
           process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
         ui_host: "https://eu.posthog.com",
+        persistence: "cookie",
         // Enable debug mode in development
         loaded: (posthog) => {
           if (process.env.NODE_ENV === "development") posthog.debug();
