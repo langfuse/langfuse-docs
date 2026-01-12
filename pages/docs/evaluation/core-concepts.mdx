@@ -17,7 +17,7 @@ Ready to start?
 
 LLM applications often have a constant loop of testing and monitoring. 
 
-**Experiments** let you test your application against a fixed dataset before you deploy. You run your new prompt or model against test cases, review the scores, iterate until the results look good, then deploy your changes.
+**Offline evaluation** lets you test your application against a fixed dataset before you deploy. You run your new prompt or model against test cases, review the scores, iterate until the results look good, then deploy your changes. In Langfuse, you can do that by running [Experiments](/docs/evaluation/core-concepts#experiments).
 
 **Online evaluation** scores live traces to catch issues in real traffic. When you find edge cases your dataset didn't cover, you add them back to your dataset so future experiments will catch them.
 
@@ -28,7 +28,7 @@ LLM applications often have a constant loop of testing and monitoring.
 
 > **Here's an example workflow** for building a customer support chatbot
 > 1. You update your prompt to make responses less formal.
-> 2. Before deploying, you run an **experiment**: test the new prompt against your dataset of customer questions.
+> 2. Before deploying, you run an **experiment**: test the new prompt against your dataset of customer questions **(offline evaluation)**.
 > 3. You review the scores and outputs. The tone improved, but responses are longer and some miss important links.
 > 4. You refine the prompt and run the experiment again.
 > 5. The results look good now. You deploy the new prompt to production.
@@ -38,6 +38,18 @@ LLM applications often have a constant loop of testing and monitoring.
 > 9. You update your prompt to support French responses and run another experiment.
 > 
 > Over time, your dataset grows from a couple of examples to a diverse, representative set of real-world test cases.
+
+## Evaluation Methods
+
+Evaluation methods are the functions that score traces, observations, sessions, or dataset runs. You can use a variety of evaluation methods to add [scores](/docs/evaluation/experiments/data-model#scores).
+
+
+| Method | What | Use when |
+| --- | --- | --- |
+| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Use an LLM to evaluate outputs based on custom criteria | Subjective assessments at scale (tone, accuracy, helpfulness) |
+| [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui) | Manually add scores to traces directly in the Langfuse UI | Quick quality spot checks, reviewing individual traces |
+| [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues) | Structured human review workflows with customizable queues | Building ground truth, systematic labeling, team collaboration |
+| [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) | Programmatically add scores using the Langfuse API or SDK | Custom evaluation pipelines, deterministic checks, automated workflows |
 
 ## Experiments [#experiments]
 
@@ -52,9 +64,7 @@ Before diving into experiments, it's helpful to understand the building blocks i
 | **Dataset** | A collection of test cases (dataset items). You can run experiments on a dataset. |
 | **Dataset item** | One item in a dataset.Each dataset item contains an input (the scenario to test) and optionally an expected output. |
 | **Task** | The application code that you want to test in an experiment. This will be performed on each dataset item, and you will score the output.
-| **Evaluation Method** | A function that scores experiment results. In the context of a Langfuse experiment, this can be a [deterministic check](/docs/evaluation/evaluation-methods/custom-scores), or 
-[LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). |
-
+| **Evaluation Method** | A function that scores experiment results. In the context of a Langfuse experiment, this can be a [deterministic check](/docs/evaluation/evaluation-methods/custom-scores), or [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). |
 | **Score** | The output of an evaluation. This can be numeric, categorical, or boolean. See [Scores](/docs/evaluation/experiments/data-model#scores) for more details.|
 | **Experiment Run** | A single execution of your task against all items in a dataset, producing outputs (and scores). |
 
@@ -97,15 +107,5 @@ Langfuse currently supports LLM-as-a-Judge and human annotation checks for onlin
 Langfuse offers dashboards to monitor your application performance in real-time. You can also monitor scores in dashboards. You can find more details on how to use dashboards [here](/docs/metrics/features/custom-dashboards).
 
 
-## Evaluation Methods
 
-For both experiments and online evaluation, you can use a variety of evaluation methods to add [scores](/docs/evaluation/experiments/data-model#scores) to traces, observations, sessions, or dataset runs.
-
-
-| Method | What | Use when |
-| --- | --- | --- |
-| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Use an LLM to evaluate outputs based on custom criteria | Subjective assessments at scale (tone, accuracy, helpfulness) |
-| [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui) | Manually add scores to traces directly in the Langfuse UI | Quick quality spot checks, reviewing individual traces |
-| [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues) | Structured human review workflows with customizable queues | Building ground truth, systematic labeling, team collaboration |
-| [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) | Programmatically add scores using the Langfuse API or SDK | Custom evaluation pipelines, deterministic checks, automated workflows |
 
