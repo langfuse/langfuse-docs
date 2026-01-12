@@ -13,13 +13,32 @@ Langfuse can operate as an OpenTelemetry Backend to receive traces on the `/api/
 
 As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces are still evolving, Langfuse maps the received OTel traces to the [Langfuse data model](/docs/tracing-data-model) and supports additional attributes that are popular in the OTel GenAI ecosystem ([property mapping](#property-mapping)). Please contribute to the discussion on [GitHub](https://github.com/orgs/langfuse/discussions/2509) if an integration does not work as expected or does not parse the correct attributes.
 
+```mermaid
+flowchart LR
+  subgraph App["Application"]
+    Logic["Operations, LLM calls, events"]
+    OTel["OpenTelemetry instrumentation (SDKs, libraries)"]
+    Logic --> OTel
+  end
+
+  OTel -->|"OTLP traces"| Endpoint["Langfuse OTLP endpoint /api/public/otel"]
+
+  subgraph Langfuse["Langfuse"]
+    Endpoint --> Map["OTel to Langfuse attribute mapping"]
+    Map --> UI["Langfuse data model"]
+  end
+
+  classDef subgraphBox fill:none,stroke:#888,stroke-width:2px;
+  class App,Langfuse subgraphBox;
+```
+
 ## OpenTelemetry native Langfuse SDK v3
 
 The quickest path to start tracing with Langfuse is the new **OTEL-native Langfuse SDK v3**. The SDK is a thin layer on top of the official OpenTelemetry client that automatically converts all emitted spans into rich Langfuse observations (spans, generations, events, and [other observation types](/docs/observability/features/observation-types)) and adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring.
 
 Because it lives in the shared OpenTelemetry context, any other library that is already instrumented with OTEL (HTTP frameworks, databases, GenAI instrumentation like OpenLLMetry/OpenLIT, etc.) will seamlessly show up in the same Langfuse traces without additional configuration.
 
-Get started by following the dedicated guide for the Python implementation here: [/docs/sdk/python/sdk-v3](/docs/sdk/python/sdk-v3).
+Get started by following the dedicated guide for the Python implementation here: [/docs/observability/sdk/overview](/docs/observability/sdk/overview).
 
 ## OpenTelemetry endpoint
 
