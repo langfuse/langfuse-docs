@@ -1,5 +1,4 @@
 export default {
-  overview: "Overview",
   "llm-as-a-judge": "LLM-as-a-Judge",
   "annotation-queues": "Annotation Queues",
   "scores-via-ui": "Scores via UI",

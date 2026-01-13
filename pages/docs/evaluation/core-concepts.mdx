@@ -1,0 +1,149 @@
+---
+title: Concepts
+description: Learn the fundamental concepts behind LLM evaluation in Langfuse - Scores, Evaluation Methods, Datasets, and Experiments.
+---
+# Core Concepts
+
+This page digs into the different concepts of evaluations, and what's available in Langfuse. 
+
+Ready to start? 
+
+- [Create a dataset](/docs/evaluation/experiments/datasets) to measure your LLM application's performance consistently
+- [Run an experiment](/docs/evaluation/core-concepts#experiments) to get an overview of how your application is doing
+- [Set up LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) to evaluate your live traces
+
+
+## The Evaluation Loop
+
+LLM applications often have a constant loop of testing and monitoring. 
+
+**Offline evaluation** lets you test your application against a fixed dataset before you deploy. You run your new prompt or model against test cases, review the scores, iterate until the results look good, then deploy your changes. In Langfuse, you can do that by running [Experiments](/docs/evaluation/core-concepts#experiments).
+
+**Online evaluation** scores live traces to catch issues in real traffic. When you find edge cases your dataset didn't cover, you add them back to your dataset so future experiments will catch them.
+
+<Frame fullWidth>
+  ![Online and offline evaluation loop](/images/docs/evaluation/online-offline-eval-loop.png)
+</Frame>
+
+
+> **Here's an example workflow** for building a customer support chatbot
+> 1. You update your prompt to make responses less formal.
+> 2. Before deploying, you run an **experiment**: test the new prompt against your dataset of customer questions **(offline evaluation)**.
+> 3. You review the scores and outputs. The tone improved, but responses are longer and some miss important links.
+> 4. You refine the prompt and run the experiment again.
+> 5. The results look good now. You deploy the new prompt to production.
+> 6. You monitor with **online evaluation** to catch any new edge cases.
+> 7. You notice that a customer asked a question in French, but the bot responded in English.
+> 8. You add this French query to your dataset so future experiments will catch this issue.
+> 9. You update your prompt to support French responses and run another experiment.
+> 
+> Over time, your dataset grows from a couple of examples to a diverse, representative set of real-world test cases.
+
+## Evaluation Methods [#evaluation-methods]
+
+Evaluation methods are the functions that score traces, observations, sessions, or dataset runs. You can use a variety of evaluation methods to add [scores](/docs/evaluation/experiments/data-model#scores).
+
+
+| Method | What | Use when |
+| --- | --- | --- |
+| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Use an LLM to evaluate outputs based on custom criteria | Subjective assessments at scale (tone, accuracy, helpfulness) |
+| [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui) | Manually add scores to traces directly in the Langfuse UI | Quick quality spot checks, reviewing individual traces |
+| [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues) | Structured human review workflows with customizable queues | Building ground truth, systematic labeling, team collaboration |
+| [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) | Programmatically add scores using the Langfuse API or SDK | Custom evaluation pipelines, deterministic checks, automated workflows |
+
+When setting up new evaluation methods, you can use [Score Analytics](/docs/evaluation/evaluation-methods/score-analytics) to analyze or sense-check the scores you produce. 
+## Experiments [#experiments]
+
+An experiment runs your application against a dataset and evaluates the outputs. This is how you test changes before deploying to production.
+
+### Definitions
+
+Before diving into experiments, it's helpful to understand the building blocks in Langfuse: datasets, dataset items, tasks, scores, and experiments.
+
+| Object | Definition |
+| --- | --- |
+| **Dataset** | A collection of test cases (dataset items). You can run experiments on a dataset. |
+| **Dataset item** | One item in a dataset. Each dataset item contains an input (the scenario to test) and optionally an expected output. |
+| **Task** | The application code that you want to test in an experiment. This will be performed on each dataset item, and you will score the output.
+| **Evaluation Method** | A function that scores experiment results. In the context of a Langfuse experiment, this can be a [deterministic check](/docs/evaluation/evaluation-methods/custom-scores), or [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). |
+| **Score** | The output of an evaluation. This can be numeric, categorical, or boolean. See [Scores](/docs/evaluation/experiments/data-model#scores) for more details.|
+| **Experiment Run** | A single execution of your task against all items in a dataset, producing outputs (and scores). |
+
+You can find the data model for these objects [here](/docs/evaluation/experiments/data-model).
+
+
+### How these work together
+
+This is what happens conceptually:
+
+When you run an experiment on a given **dataset**, each of the **dataset items** will be passed to the **task function** you defined. The task function is generally an LLM call that happens in your application, that you want to test. The task function produces an output for each dataset item. This process is called an **experiment run**. The resulting collection of outputs linked to the dataset items are the **experiment results**. 
+
+Often, you want to score these experiment results. You can use various [evaluation methods](#evaluation-methods) that take in the dataset item and the output produced by the task function, and produce a score based on criteria you define. Based on these scores, you can then get a complete picture of how your application performs across all test cases.
+
+<Frame fullWidth>
+  ![Experiments flow](/images/docs/evaluation/experiments-flow.jpg)
+</Frame>
+
+You can compare experiment runs to see if a new prompt version improves scores, or identify specific inputs where your application struggles. Based on these experiment results, you can decide whether the change is ready to be deployed to production. 
+
+You can find more details on how these objects link together under the hood on the [data model page](/docs/evaluation/experiments/data-model). 
+
+
+### Two ways to run experiments
+
+You can **run experiments programmatically using the Langfuse SDK**. This gives you full control over the task, evaluation logic, and more. [Learn more about running experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
+
+Another way is to **run experiments directly from the Langfuse interface** by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
+
+<div className="my-6">
+  <div className="grid grid-cols-3 gap-2">
+    {/* Header row */}
+    <div></div>
+    <div className="text-center font-medium p-3 bg-gray-50 dark:bg-gray-800 rounded border dark:border-gray-700">
+      **Langfuse Execution**
+    </div>
+    <div className="text-center font-medium p-3 bg-gray-50 dark:bg-gray-800 rounded border dark:border-gray-700">
+      **Local/CI Execution**
+    </div>
+
+    {/* Langfuse Data row */}
+    <div className="font-medium p-3 bg-gray-50 dark:bg-gray-800 rounded border dark:border-gray-700 text-center">
+      **Langfuse Dataset**
+    </div>
+    <div className="p-3 border dark:border-gray-700 rounded text-center bg-green-50 dark:bg-green-900/30">
+      [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)
+    </div>
+    <div className="p-3 border dark:border-gray-700 rounded text-center bg-blue-50 dark:bg-blue-900/30">
+      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
+    </div>
+
+    {/* Local Data row */}
+    <div className="font-medium p-3 bg-gray-50 dark:bg-gray-800 rounded border dark:border-gray-700 text-center">
+      **Local Dataset**
+    </div>
+    <div className="p-3 border dark:border-gray-700 rounded text-center bg-red-50 dark:bg-red-900/30">
+      Not supported
+    </div>
+    <div className="p-3 border dark:border-gray-700 rounded text-center bg-blue-50 dark:bg-blue-900/30">
+      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
+    </div>
+
+  </div>
+</div>
+
+*While it's optional, we recommend managing the underlying [Datasets](/docs/evaluation/experiments/datasets) in Langfuse as it allows for [1] In-UI comparison tables of different experiments on the same data and [2] Iteratively improve dataset based on production/staging traces.*
+
+## Online Evaluation [#online-evaluation]
+
+For online evaluation, you can configure evaluation methods to automatically score production traces. This helps you catch issues immediately.
+
+Langfuse currently supports LLM-as-a-Judge and human annotation checks for online evaluation. [Deterministic checks are on the roadmap](https://github.com/orgs/langfuse/discussions/6087).
+
+
+### Monitoring with dashboards
+
+Langfuse offers dashboards to monitor your application performance in real-time. You can also monitor scores in dashboards. You can find more details on how to use dashboards [here](/docs/metrics/features/custom-dashboards).
+
+
+
+
