@@ -276,8 +276,25 @@ Furthermore, Langfuse uses attributes within the `langfuse.*` namespace to map O
 </Callout>
 
 Langfuse distinguishes between trace-level attributes and observation-level attributes. 
-- [Trace-level attributes](/docs/observability/data-model#trace-level-attributes) represent shared context for an entire interaction. If langfuse detects these attributes on a specific span, it will treat them as properties of the whole trace.
-- [Observation-level attributes](/docs/observability/data-model#observation-level-attributes) describe individual steps within a trace. Langfuse keeps them on the observation level. 
+- [Trace-level attributes](#trace-level-attributes) represent shared context for an entire interaction. If Langfuse detects these attributes on a specific span, it will treat them as properties of the whole trace.
+- [Observation-level attributes](#observation-level-attributes) describe individual steps within a trace. Langfuse keeps them on the observation level. 
+
+### How Metadata Mapping Works [#metadata-mapping]
+
+OpenTelemetry spans can carry arbitrary attributes. Langfuse handles these attributes differently depending on how they are named:
+
+| Attribute Type | Where it Appears in Langfuse | Example |
+|----------------|------------------------------|---------|
+| **Explicit metadata mapping** | First-level key in `metadata` (filterable) | `langfuse.trace.metadata.customer_tier` → `metadata.customer_tier` |
+| **Unmapped OTel attributes** | Nested under `metadata.attributes` (catch-all) | `http.method` → `metadata.attributes.http.method` |
+| **Resource attributes** | Nested under `metadata.resourceAttributes` | `service.name` → `metadata.resourceAttributes.service.name` |
+
+<Callout type="info">
+**Langfuse SDKs vs. standard OpenTelemetry SDKs**
+
+- **Langfuse SDKs** provide utility functions (like `update()` with a `metadata` parameter) that automatically set the `langfuse.*.metadata.*` prefixed attributes. This means custom metadata appears at the first level and is filterable.
+- **Standard OpenTelemetry SDKs** set attributes directly on spans. Unless you explicitly use the `langfuse.trace.metadata.*` or `langfuse.observation.metadata.*` prefix, these attributes end up in the `metadata.attributes` catch-all and are not directly filterable in Langfuse.
+</Callout>
 
 ### Propagating Trace Attributes to All Spans [#propagating-attributes]
 
