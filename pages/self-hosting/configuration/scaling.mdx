@@ -43,6 +43,29 @@ You can set `LANGFUSE_SKIP_INGESTION_CLICKHOUSE_READ_MIN_PROJECT_CREATE_DATE` to
 Please note that any S3/blob storage deletion lifecycle rules in combination with late updates to events may cause duplicates in the event history.
 If you use the default integration methods with the Langfuse SDKs or OpenTelemetry this should not affect you.
 
+### Server-side sampling per project
+
+Server-side sampling allows you to reduce ingestion processing load by configuring Langfuse to process only a percentage of traces for specific projects. This is useful for high-volume projects where full trace capture may not be necessary, or for cost control in scenarios where trace volume exceeds your infrastructure capacity.
+
+Configure sampling rates per project using the `LANGFUSE_INGESTION_PROCESSING_SAMPLED_PROJECTS` environment variable:
+
+```bash
+LANGFUSE_INGESTION_PROCESSING_SAMPLED_PROJECTS="project-id-1:0.5,project-id-2:0.2"
+```
+
+The format is a comma-separated list of `projectId:sampleRate` pairs, where:
+- `projectId` is the Langfuse project identifier
+- `sampleRate` is a decimal between 0 and 1 (e.g., 0.5 = keep 50% of traces, 0.2 = keep 20% of traces)
+
+**Key behaviors:**
+- Sampling is **deterministic and hash-based**: the same trace ID will always result in the same sampling decision, ensuring consistency across related events
+- Sampling operates at the **trace level**: when a trace is sampled out, all associated observations, spans, generations, and scores are also dropped
+- Sampling happens after S3 upload but before Redis queue processing, reducing load on ClickHouse and Redis
+
+This is **server-side sampling** that occurs during ingestion processing. For sampling at the client before data is sent to Langfuse, see [client-side sampling](/docs/observability/features/sampling). Client-side sampling is generally preferred as it reduces network bandwidth and S3 storage costs, while server-side sampling is useful for emergency load reduction or when client configuration is not feasible.
+
+Note that server-side sampling means accepting partial observability data for the configured projects. Consider this tradeoff when deciding on appropriate sample rates.
+
 ### Separating ingestion and user interface
 
 When the ingestion load is high, the Langfuse web interface and API calls may become slow or unresponsive.
