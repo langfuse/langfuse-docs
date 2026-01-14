@@ -1,0 +1,51 @@
+---
+date: 2026-01-14
+title: Corrected Outputs for Traces and Observations
+description: Capture improved versions of LLM outputs directly in trace views. Build fine-tuning datasets and drive continuous improvement with domain expert feedback.
+author: Marlies
+# ogVideo: 
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now add corrected outputs to traces and observations, making it easy for domain experts to capture what the model should have generated. View diffs between original and corrected outputs, and export corrections to build better datasets.
+
+## Why corrections matter
+
+**Human-in-the-loop improvement**: Domain experts review production outputs and provide corrections based on their expertise. Capture institutional knowledge directly in your traces.
+
+**Fine-tuning data at scale**: Export corrected outputs alongside original inputs to create high-quality training datasets from real production data.
+
+**Quality benchmarking**: Compare actual vs expected outputs across your production traces. Identify systematic issues and track improvement over time.
+
+## How it works
+
+Navigate to any trace or observation and add a corrected output in the dedicated field. Langfuse shows a diff view comparing the original and corrected outputs. Toggle between JSON validation mode and plain text to match your data format.
+
+Corrections are accessible via the API as scores with `dataType: "CORRECTION"`, making it easy to export and analyze them programmatically.
+
+## Use cases
+
+- **Customer support**: Capture expert agent responses for training
+- **Content generation**: Document preferred outputs for style and tone
+- **Code generation**: Record working code when the model output needed fixes
+- **Structured extraction**: Provide correctly formatted outputs as examples
+
+## Learn more
+
+import { Book, MessageSquare } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Corrections Documentation"
+    href="/docs/observability/features/corrections"
+    icon={<Book />}
+  />
+  <Card
+    title="Share Feedback on GitHub"
+    href="https://github.com/orgs/langfuse/discussions"
+    icon={<MessageSquare />}
+  />
+</Cards>
