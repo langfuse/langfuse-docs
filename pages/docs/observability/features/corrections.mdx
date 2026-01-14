@@ -62,7 +62,7 @@ from langfuse import Langfuse
 langfuse = Langfuse()
 
 # Add correction to a trace
-langfuse.score(
+langfuse.create_score(
     trace_id="trace-123",
     name="output",
     value="The corrected output text here",
@@ -70,7 +70,7 @@ langfuse.score(
 )
 
 # Add correction to an observation
-langfuse.score(
+langfuse.create_score(
     trace_id="trace-123",
     observation_id="obs-456",
     name="output",
@@ -88,7 +88,7 @@ import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 
 // Add correction to a trace
-langfuse.score({
+langfuse.score.create({
   traceId: "trace-123",
   name: "output",
   value: "The corrected output text here",
@@ -96,7 +96,7 @@ langfuse.score({
 });
 
 // Add correction to an observation
-langfuse.score({
+langfuse.score.create({
   traceId: "trace-123",
   observationId: "obs-456",
   name: "output",
@@ -135,40 +135,12 @@ Corrections are stored as scores and can be fetched programmatically to build da
 <Tabs items={["Python", "TypeScript", "HTTP"]}>
 <Tab>
 
-```python
-from langfuse import Langfuse
-
-langfuse = Langfuse()
-
-# Fetch all corrections for a project
-corrections = langfuse.fetch_scores(
-    data_type="CORRECTION"
-)
-
-for correction in corrections.data:
-    print(f"Trace: {correction.trace_id}")
-    print(f"Original: {correction.trace.output}")
-    print(f"Corrected: {correction.string_value}")
-```
+Coming soon: Fetch corrections via the SDK.
 
 </Tab>
 <Tab>
 
-```typescript
-import { Langfuse } from "langfuse";
-
-const langfuse = new Langfuse();
-
-// Fetch all corrections for a project
-const corrections = await langfuse.fetchScores({
-  dataType: "CORRECTION"
-});
-
-corrections.data.forEach(correction => {
-  console.log(`Trace: ${correction.traceId}`);
-  console.log(`Corrected: ${correction.stringValue}`);
-});
-```
+Coming soon: Fetch corrections via the SDK.
 
 </Tab>
 <Tab>
