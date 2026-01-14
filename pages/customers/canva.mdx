@@ -1,0 +1,149 @@
+---
+title: "How Canva built an Agentic Support Experience using Langfuse"
+date: January 12, 2026
+description: Learn how Canva's 4-person ML team built an AI support system that outperformed enterprise vendors, powered by Langfuse observability across Java and Python stacks.
+ogImage: 
+tag: customer-story
+author: Felix
+customerLogo: "/images/customers/canva/canva-color.png"
+customerLogoDark: "/images/customers/canva/canva-white.png"
+customerQuote: "Langfuse hits the sweet spot between engineering requirements and empowerment of non-technical users to contribute their domain expertise."
+quoteAuthor: "Andreas Schuster"
+quoteRole: "Head of Product, AI Help Experience"
+quoteCompany: "Canva"
+quoteAuthorImage: "/images/customers/canva/andreas.jpg"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { ImpactChart } from "@/components/customers/ImpactChart";
+
+<BlogHeader
+  title="How Canva built an Agentic Support Experience using Langfuse"
+  description="Learn how Canva's 4-person ML team built an AI support system that outperformed enterprise vendors, powered by Langfuse observability across Java and Python stacks."
+  customerLogo="/images/customers/canva/canva-color.png"
+  authors={["felixkrauth"]}
+/>
+
+## About Canva
+
+[Canva](https://www.canva.com) is the visual communication platform used by over 250 million monthly active users worldwide. From presentations to social media graphics to full brand kits, Canva has democratized design for individuals and enterprises alike.
+
+## Building a Multi-Agent Support Experience
+
+Canva is building on Langfuse to develop and operate their customer support agent experience. Their setup has evolved from a simple chat experience to a multi-layered and multi-agent system with access to many tools, sub-agents, and internal systems of record for context retrieval. 
+
+The core evolves around the in-app chat (Help Assistant) and an asynchronous ticket resolution agent (Omni Agent). 
+
+<Frame fullWidth>
+  ![Screenshot of Canva's Support Agent](/images/customers/canva/multi-agent-support-system.png)
+</Frame>
+
+**Help Assistant:** The Help Assistant is the user-facing chat panel that handles the majority of support volume. When a user opens the help interface, their query gets routed to specialized sub-agents:
+- Design assistance – "How do I remove a background?"
+- Account actions – Refunds, subscription changes
+- Feature requests – Routed to ticket creation
+
+**OmniAgent:** OmniAgent is a more sophisticated system that works asynchronously on submitted tickets. It interfaces with users through the Help Assistant or e-mail. If OmniAgent can't resolve the ticket, it escalates to human support.
+
+"We call it OmniAgent because it has access to an incredible amount of tools, functionalities, and user data," says Andreas. "It can dig into account history, execute complex multi-step resolutions, and handle edge cases the fast path can't."
+
+## Two Stacks, one Platform
+
+Canva's multi-language architecture made handling different tech stacks a core requirement for their LLM operations platform. **Help Assistant runs on Java**, the backbone of much of Canva's infrastructure. The team integrated via [OpenTelemetry](/docs/integrations/opentelemetry), giving them a universal protocol that doesn't lock them into any single vendor. **OmniAgent runs as a Python ML worker**, taking full advantage of [Langfuse's native Python SDK](/docs/observability/sdk/overview) and the faster iteration cycles that come with it.
+
+## How Canva uses Langfuse
+
+Canva takes full advantage of the entire Langfuse suite across Observability, Prompt Management and Evaluation. What started as a tight engineering core has expanded across roles:
+- **ML Engineers** – Deep debugging, trace analysis, system optimization 
+- **Product Managers** – Prompt iteration, replay testing, quality monitoring 
+- **QA Team** – Annotation queues, systematic quality scoring 
+- **Content Designers** – Maintaining and improving response content 
+- **Domain Experts**  – Topic-, market- or language-specific QA
+
+One example: Canva's Japanese market requires precise formal business tones. A marketing manager in Japan set up a dedicated LLM-as-a-judge evaluator to monitor tone of voice, without engineering help. This is a massive enabler: the person who knows the subject matter best can build and run evaluators independently.
+
+<CustomerQuote
+  quote="We have realized that to build good AI systems, you need to inject domain expertise which is not within an engineer's scope. Langfuse makes that possible. It hits the sweet spot between engineering requirements and empowerment of non-technical users to contribute their domain expertise."
+  name="Andreas Schuster"
+  role="Head of Product, AI Help Experience"
+  company="Canva"
+  image="/images/customers/canva/andreas.jpg"
+/>
+
+### Tracing for Debugging
+
+The [Tracing](/docs/observability/overview) captures error information, warnings, and metadata across every step. Engineers use [Metadata](/docs/observability/features/metadata) and [Tags](/docs/observability/features/tags) to search and filter efficiently, while the [Playground](/docs/prompt-management/features/playground) replay functionality lets anyone re-run a generation with the exact system prompt from that moment, critical for reproducing issues.
+
+### Prompt Management
+
+Langfuse's [Prompt Management](/docs/prompt-management/overview) has become a key enabler. Prompts are versioned, changes can be tested before deployment, and—critically—non-technical team members can make updates independently.
+
+"The prompt management system is stellar," says Sergey. "Versioning, the ability to promote changes—it's a big enabler. When a product manager can change a prompt without asking me anything, that saves enormous amounts of engineering time."
+
+### Evals and Experiments
+
+Canva's multi-agent setup is a great example of how different LLM systems require different approaches to evals. "For the OmniAgent with lower volume, we can deploy after manual checks on a good sample," explains Sergey. "For Help Assistant with its higher volume, we set up automated evals with LLM-as-judge before anything goes live."
+
+|  | Help Assistant | OmniAgent |
+| :---- | :---- | :---- |
+| **Request volume** | High—handles most user queries | Lower—only escalated tickets |
+| **System complexity** | Relatively stateless. User asks questions, system answers. Each query is self-contained. | Stateful. Needs full context: ticket history, user account state, available tools, prior interactions. |
+| **Replayability** | Relatively high. Can test offline with just a query string. | Low. Can't replay without reconstructing the full system state behind each ticket. |
+| **Eval approach** | **Pre-deployment:** Dataset-driven Experiments with LLM-as-Judge. Maintain thousands of query/expected-answer pairs, run automated evals. For model upgrades (e.g., GPT-5.2), run the full suite before switching. **In Production:** LLM-as-Judge is used to monitor ongoing performance in real usage situations across about 20 different eval metrics. | Shadow mode with human review. New features run in parallel without affecting users. QA annotates 20-100 traces weekly, PMs use Playground to replay and tune individual prompts. |
+| **Eval features** | [Datasets](/docs/evaluation/experiments/datasets), [Experiments](/docs/evaluation/experiments/overview), [LLM-as-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues), [Playground](/docs/prompt-management/features/playground) |
+
+## From Self-Hosting to Cloud
+
+Canva started on self-hosting during early evaluation but then migrated to Langfuse Cloud to reduce internal workload and focus on building the best possible AI support system.
+
+"I could just run Langfuse locally," says Sergey. "This wasn't the case with other solutions. Being open source is a huge differentiator. It lets the team validate the tooling before kicking off all required approvals in legal and procurement."
+
+Once the value was proven, they migrated to Langfuse Cloud. "Running such a large system at scale means we need to maintain a lot with our own team," Sergey explains. "We don't have capacity for all the maintenance. It's a platform effort."
+
+## Why Canva chose Langfuse
+
+The team evaluated several LLM observability platforms. Langfuse won for several reasons:
+
+- **Open source** – Allowed Sergey to build confidence into Langfuse's capabilities before engaging in commercial discussions
+- **Framework agnostic** – Canva uses raw LLM clients, no frameworks
+- **OpenTelemetry support** – Critical for the Java stack, no vendor lock-in 
+- **End-to-end LLM operations platform** – Full suite across observability, prompt management, and evaluation
+- **Shipping velocity** – "Other vendors came back with Figma prototypes. Meanwhile, Langfuse shipped two features. That's when we knew."
+
+<CustomerQuote
+  quote="Langfuse makes our engineers' life so much easier. Without Langfuse, our AI systems would be a black box. Only engineers would know what's happening, and only after deep investigation into logs."
+  name="Sergey Iakovlev"
+  role="Machine Learning Lead"
+  company="Canva"
+  image="/images/customers/canva/sergey.jpg"
+/>
+
+## Business Impact
+
+<ImpactChart
+  items={[
+    {
+      area: "90% lower cost per-resolution",
+      impact: "In-house development beat enterprise vendors in cost and quality. Building on Langfuse a 4-person team achieved 90% lower cost per-resolution compared to enterprise vendors.",
+    },
+      {
+      area: "Multi-Agent System at Scale",
+      impact: "AI support handles 80% of user interactions across 250M monthly active users through a sophisticated multi-agent architecture.",
+    },
+     {
+      area: "Faster Iteration Speed",
+      impact: "Engineers ship faster and domain experts are empowered to directly improve the system without requiring engineering.",
+    },
+    {
+      area: "Improved AI System Quality",
+      impact: "Including non-technical team members has improved the overall system quality significantly.",
+    },
+    {
+      area: "Single Platform across Tech Stacks",
+      impact: "Langfuse runs for both Canva's Java and Python stacks, enabling a single observability platform for their entire multi-agent support system.",
+    },
+   
+  ]}
+/>
