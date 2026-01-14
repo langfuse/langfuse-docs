@@ -14,21 +14,21 @@ If you're using Langfuse alongside other observability tools like Sentry, Datado
 - [Langfuse spans in other backends](#langfuse-spans-in-other-backends)
 - [Unwanted spans in Langfuse](#unwanted-spans-in-langfuse)
 - [Orphaned traces](#orphaned-traces)
-- [Missing usage/cost data](#missing-usage-cost-data) 
+- [Missing usage/cost data](#missing-usage-cost-data)
 
 ## Core Concepts [#core-concepts]
 
-Understanding these concepts will help you understand why certain issues happen and how to debug an OTEL-related issue, even if your setup doesn't match our examples exactly.
+Understanding these concepts will help you understand why certain issues happen and how to debug an [OpenTelemetry](https://opentelemetry.io/)-related issue, even if your setup doesn't match our examples exactly.
 
 ### How Langfuse Uses OpenTelemetry [#how-langfuse-uses-otel]
 
-The Langfuse SDK (v3+) is built on OpenTelemetry (OTEL). When you initialize Langfuse, it registers a **span processor** that captures trace data and sends it to Langfuse.
+The Langfuse SDK (v3+) is built on [OpenTelemetry (OTEL)](https://opentelemetry.io/). When you initialize Langfuse, it registers a [**span processor**](#span-processors) that captures trace data and sends it to Langfuse.
 
-By default, Langfuse attaches to the **global TracerProvider**—the same one that other OTEL-based tools use. This is where conflicts arise.
+By default, Langfuse attaches to the [**global TracerProvider**](#global-tracer-provider)—the same one that other OTEL-based tools use. This is where conflicts arise.
 
 ### The Global TracerProvider [#global-tracer-provider]
 
-OpenTelemetry uses a **single, global TracerProvider** per application. Think of it as a central hub that all tracing flows through.
+[OpenTelemetry](https://opentelemetry.io/) uses a **single, global TracerProvider** per application. Think of it as a central hub that all tracing flows through.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -59,7 +59,7 @@ Your Code → TracerProvider → Span Processors → Exporters → Backend
                                    └── OTLPExporter → Honeycomb/Datadog
 ```
 
-Every span processor attached to the TracerProvider sees **every span**. There's no automatic filtering, so a processor can't tell if a span "belongs" to it or not.
+Every span processor attached to the [TracerProvider](#global-tracer-provider) sees **every span**. There's no automatic filtering, so a processor can't tell if a span "belongs" to it or not.
 
 This is why you might see database queries in Langfuse or LLM calls in your APM tool.
 
@@ -82,7 +82,7 @@ You can use instrumentation scopes to **filter which spans reach Langfuse**. Thi
 
 ### Context and Parent-Child Relationships [#context-parent-child]
 
-OpenTelemetry maintains a **context** that tracks which span is currently "active." When you create a new span, it automatically becomes a child of the active span.
+[OpenTelemetry](https://opentelemetry.io/) maintains a **context** that tracks which span is currently "active." When you create a new span, it automatically becomes a child of the active span.
 
 ```
 HTTP Request (parent)
@@ -90,8 +90,8 @@ HTTP Request (parent)
     └── Token Streaming (grandchild)
 ```
 
-**Important:** Even when using isolated TracerProviders (covered below), they still share this context. This means:
-- A parent span from one TracerProvider can have children from another
+**Important:** Even when using [isolated TracerProviders](/docs/observability/sdk/advanced-features#isolated-tracer-provider) (covered below), they still share this context. This means:
+- A parent span from one [TracerProvider](#global-tracer-provider) can have children from another
 - If you filter out a parent span, its children become "orphaned" and appear disconnected in the UI
 
 Keep it in mind when filtering spans.
@@ -105,59 +105,142 @@ You've set up Langfuse, but your dashboard is empty or missing expected traces.
 
 **Why this happens**
 
-Another tool (like Sentry for example) initialized OTEL before Langfuse and configured the global TracerProvider in a way that prevents Langfuse's span processor from receiving spans.
+Another tool (like Sentry for example) initialized OTEL before Langfuse and configured the [global TracerProvider](#global-tracer-provider) in a way that prevents Langfuse's span processor from receiving spans.
 
 **How to debug**
 
+<LangTabs items={["Python", "JS/TS"]}>
+
+<Tab>
+
+{/* PYTHON */}
+
 1. Enable debug logging to see what's happening:
-   ```python
-   # Python
-   import os
-   os.environ["LANGFUSE_LOG_LEVEL"] = "debug"
-   ```
-   ```typescript
-   // JavaScript/TypeScript
-   process.env.LANGFUSE_LOG_LEVEL = "debug";
-   ```
+
+```python
+import os
+os.environ["LANGFUSE_LOG_LEVEL"] = "debug"
+```
 
 2. Check your initialization order: add logging to see which tool initializes first:
-   ```python
-   print("Initializing Sentry...")
-   sentry_sdk.init(...)
-   print("Initializing Langfuse...")
-   langfuse = Langfuse()
-   ```
+
+```python
+print("Initializing Sentry...")
+sentry_sdk.init(...)
+print("Initializing Langfuse...")
+langfuse = Langfuse()
+```
 
 3. Verify which TracerProvider is active:
-   ```python
-   from opentelemetry import trace
-   provider = trace.get_tracer_provider()
-   print(f"Global provider: {type(provider)}")
-   ```
+
+```python
+from opentelemetry import trace
+provider = trace.get_tracer_provider()
+print(f"Global provider: {type(provider)}")
+```
 
 4. Test if spans are being created at all:
-   ```python
-   from opentelemetry import trace
-   tracer = trace.get_tracer(__name__)
-   with tracer.start_as_current_span("test-span"):
-       print("Created test span")
-   ```
 
-**How to fix it**
+```python
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
+with tracer.start_as_current_span("test-span"):
+    print("Created test span")
+```
 
-If using Sentry, see the [Sentry integration guide](./sentry-integration-iteration-4.md).
+</Tab>
+
+<Tab>
+
+{/* JS/TS */}
+
+1. Enable debug logging to see what's happening:
+
+```typescript
+process.env.LANGFUSE_LOG_LEVEL = "debug";
+```
+
+2. Check your initialization order: add logging to see which tool initializes first:
+
+```typescript
+console.log("Initializing Sentry...");
+Sentry.init({ dsn: "..." });
+console.log("Initializing Langfuse...");
+// Langfuse initialization
+```
+
+3. Verify which TracerProvider is active:
+
+```typescript
+import { trace } from "@opentelemetry/api";
+const provider = trace.getTracerProvider();
+console.log("Global provider:", provider);
+```
+
+4. Test if spans are being created at all:
+
+```typescript
+import { trace } from "@opentelemetry/api";
+const tracer = trace.getTracer("test");
+const span = tracer.startSpan("test-span");
+console.log("Created test span");
+span.end();
+```
+
+</Tab>
+
+</LangTabs>
+
+**How to fix this**
+
+If using Sentry, see the [Sentry integration guide](/faq/all/existing-sentry-setup).
 
 For other tools, you have two options:
 
 **Option A: Add Langfuse to the existing OTEL setup**
 
-If your other tool allows adding span processors, add `LangfuseSpanProcessor` to their configuration. This way you can keep using one TracerProvider where both tools see all spans, but you can filter what reaches Langfuse.
+If your other tool allows adding [span processors](#span-processors), add `LangfuseSpanProcessor` to their configuration. This way you can keep using one [TracerProvider](#global-tracer-provider) where both tools see all spans, but you can filter what reaches Langfuse.
 
+<LangTabs items={["Python", "JS/TS"]}>
+
+<Tab>
+
+{/* PYTHON */}
+```python
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from langfuse.opentelemetry import LangfuseSpanProcessor
+
+# Create a shared provider
+provider = TracerProvider()
+
+# Add Langfuse processor with filtering
+provider.add_span_processor(
+    LangfuseSpanProcessor(
+        blocked_instrumentation_scopes=["fastapi", "sqlalchemy"]
+    )
+)
+
+# Add your APM exporter
+provider.add_span_processor(
+    BatchSpanProcessor(OTLPSpanExporter(endpoint="https://your-apm-endpoint.com/v1/traces"))
+)
+
+# Register as global
+trace.set_tracer_provider(provider)
+```
+
+</Tab>
+
+<Tab>
+
+{/* JS/TS */}
 ```typescript
-// TypeScript - shared provider with filtering
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
 
 const sdk = new NodeSDK({
   spanProcessors: [
@@ -178,6 +261,10 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
+</Tab>
+
+</LangTabs>
+
 When to use this:
 - You want distributed tracing across your entire application
 - You want your APM to see everything, but Langfuse to only see LLM traces
@@ -185,10 +272,14 @@ When to use this:
 
 **Option B: Use an isolated TracerProvider for Langfuse**
 
-Create a separate TracerProvider that only Langfuse uses. This keeps Langfuse completely separate from your other observability tools.
+Create a separate [TracerProvider](#global-tracer-provider) that only Langfuse uses. This keeps Langfuse completely separate from your other observability tools.
 
+<LangTabs items={["Python", "JS/TS"]}>
+
+<Tab>
+
+{/* PYTHON */}
 ```python
-# Python
 from opentelemetry.sdk.trace import TracerProvider
 from langfuse import Langfuse
 
@@ -196,8 +287,12 @@ from langfuse import Langfuse
 langfuse = Langfuse(tracer_provider=TracerProvider())
 ```
 
+</Tab>
+
+<Tab>
+
+{/* JS/TS */}
 ```typescript
-// TypeScript
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { LangfuseSpanProcessor, setLangfuseTracerProvider } from "@langfuse/tracing";
 
@@ -208,6 +303,10 @@ const langfuseProvider = new NodeTracerProvider({
 // Register for Langfuse only, not as global
 setLangfuseTracerProvider(langfuseProvider);
 ```
+
+</Tab>
+
+</LangTabs>
 
 When to use this:
 - You want LLM traces only in Langfuse
@@ -222,16 +321,20 @@ Trade-offs:
 
 Your Datadog, Honeycomb, or other APM dashboard shows LLM-related spans that you only want in Langfuse.
 
-**Why this happens** 
+**Why this happens**
 
-Langfuse is using the global TracerProvider, which has other exporters attached. All spans go to all destinations.
+Langfuse is using the [global TracerProvider](#global-tracer-provider), which has other exporters attached. All spans go to all destinations.
 
-**How to fix it** 
+**How to fix it**
 
-Use an isolated TracerProvider for Langfuse so its spans don't flow through the global provider.
+Use an [isolated TracerProvider](/docs/observability/sdk/advanced-features#isolated-tracer-provider) for Langfuse so its spans don't flow through the global provider.
 
+<LangTabs items={["Python", "JS/TS"]}>
+
+<Tab>
+
+{/* PYTHON */}
 ```python
-# Python
 from opentelemetry.sdk.trace import TracerProvider
 from langfuse import Langfuse
 
@@ -241,8 +344,12 @@ langfuse_provider = TracerProvider()
 langfuse = Langfuse(tracer_provider=langfuse_provider)
 ```
 
+</Tab>
+
+<Tab>
+
+{/* JS/TS */}
 ```typescript
-// TypeScript
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { LangfuseSpanProcessor, setLangfuseTracerProvider } from "@langfuse/tracing";
 
@@ -254,27 +361,37 @@ const langfuseProvider = new NodeTracerProvider({
 setLangfuseTracerProvider(langfuseProvider);
 ```
 
-**Caveat:** Isolated TracerProviders still share OTEL context. Some spans may appear orphaned if their parent was created by a different provider.
+</Tab>
+
+</LangTabs>
+
+**Caveat:** [Isolated TracerProviders](/docs/observability/sdk/advanced-features#isolated-tracer-provider) still share OTEL context. Some spans may appear orphaned if their parent was created by a different provider.
 
 ### Unwanted Spans Appearing in Langfuse [#unwanted-spans-in-langfuse]
 
 Your Langfuse dashboard shows HTTP requests, database queries, or other infrastructure spans instead of just LLM traces.
 
-**Why this happens** 
+**Why this happens**
 
-Langfuse is attached to the global TracerProvider, which receives spans from all instrumented libraries (FastAPI, SQLAlchemy, HTTP clients, etc.).
+Langfuse is attached to the [global TracerProvider](#global-tracer-provider), which receives spans from all instrumented libraries (FastAPI, SQLAlchemy, HTTP clients, etc.).
 
-This is especially common when using **OTEL auto-instrumentation** (`opentelemetry-instrument python app.py`), which automatically instruments your web framework, database, HTTP clients, and more.
+This is especially common when using [OTEL auto-instrumentation](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/), which automatically instruments your web framework, database, HTTP clients, and more.
 
 **How to debug**
 
 Look at the unwanted spans in Langfuse and check their `metadata.scope.name` field to identify which libraries are creating them.
 
-**How to fix it** 
+**How to fix it**
 
-Filter spans by instrumentation scope to only allow LLM-related spans through to Langfuse.
+Filter spans by [instrumentation scope](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) to only allow LLM-related spans through to Langfuse.
 
-**Python: Use `blocked_instrumentation_scopes`**
+<LangTabs items={["Python", "JS/TS"]}>
+
+<Tab>
+
+{/* PYTHON */}
+
+Use `blocked_instrumentation_scopes` to exclude specific libraries:
 
 ```python
 from langfuse import Langfuse
@@ -302,9 +419,14 @@ langfuse = Langfuse(
 )
 ```
 
-**TypeScript: Use `shouldExportSpan`**
+</Tab>
 
-Blocklist approach (exclude specific scopes):
+<Tab>
+
+{/* JS/TS */}
+
+Use `shouldExportSpan` with a blocklist approach (exclude specific scopes):
+
 ```typescript
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
@@ -322,7 +444,8 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-Allowlist approach (only include specific scopes):
+Or use an allowlist approach (only include specific scopes):
+
 ```typescript
 const allowedScopes = ["langfuse-sdk", "ai", "openai", "@ai-sdk/openai"];
 
@@ -337,18 +460,22 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
+</Tab>
+
+</LangTabs>
+
 **Warning about filtering:** If you filter out a span that's a parent of other spans, the children will appear as orphaned top-level traces. This is especially common when filtering out web framework spans (like `fastapi`) that wrap your LLM calls. See [Orphaned Traces](#orphaned-traces) below.
 
 ### Orphaned or Disconnected Traces [#orphaned-traces]
 
-Traces in Langfuse appear as standalone items when they should be nested under a parent, or you see broken hierarchies.
+Traces in Langfuse appear as standalone items when they should be nested under a parent, or you see broken [hierarchies](#context-parent-child).
 
-**Why this happens** 
+**Why this happens**
 
 This typically occurs when:
 1. You're filtering spans, and a parent span got filtered out
-2. You're using multiple TracerProviders, and they're creating interleaved span hierarchies
-3. The root span is from a blocked instrumentation scope
+2. You're using multiple [TracerProviders](#global-tracer-provider), and they're creating interleaved span hierarchies
+3. The root span is from a [blocked instrumentation scope](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope)
 
 For example:
 
@@ -365,23 +492,48 @@ LLM Call (langfuse-sdk)       ← Now a root span, missing context
 
 **How to fix this**
 
-This is largely a tradeoff. You can't filter parent spans without affecting the hierarchy. Your options:
+This is largely a tradeoff. You can't filter parent spans without affecting the [hierarchy](#context-parent-child). Your options:
 
 1. **Accept orphaned spans:** If the trace data itself is correct, the visual hierarchy issue may be acceptable.
 
-2. **Filter more selectively:** Instead of blocking entire scopes, consider whether you can allow the root span through while blocking deeper infrastructure spans.
+2. **Filter more selectively:** Instead of [blocking entire scopes](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope), consider whether you can allow the root span through while blocking deeper infrastructure spans.
 
 3. **Set trace-level data explicitly:** If you're losing important metadata that was on the root span, set it explicitly on your Langfuse trace:
-   ```python
-   with langfuse.trace(name="my-operation", user_id="user-123", session_id="session-456") as trace:
-       # Your code here
-   ```
+
+<LangTabs items={["Python", "JS/TS"]}>
+
+<Tab>
+
+{/* PYTHON */}
+```python
+with langfuse.trace(name="my-operation", user_id="user-123", session_id="session-456") as trace:
+    # Your code here
+```
+
+</Tab>
+
+<Tab>
+
+{/* JS/TS */}
+```typescript
+import { startTrace } from "@langfuse/tracing";
+
+startTrace({ name: "my-operation", userId: "user-123", sessionId: "session-456" }, (trace) => {
+  // Your code here
+});
+```
+
+</Tab>
+
+</LangTabs>
+
+For details on which trace fields are supported by Langfuse, see the full [OpenTelemetry Integration Guide](/integrations/native/opentelemetry#property-mapping).
 
 ### Missing Usage or Cost Data [#missing-usage-cost-data]
 
-Traces appear in Langfuse, but token counts and cost information are missing.
+Traces appear in Langfuse, but [token counts and cost information](/docs/observability/features/token-and-cost-tracking) are missing.
 
-**Why this happens** 
+**Why this happens**
 
 Langfuse expects usage attributes (like `gen_ai.usage.prompt_tokens`) to be present on spans. When using certain OTEL configurations, these attributes may:
 - Only exist on child spans, not the root span
@@ -391,10 +543,29 @@ Langfuse expects usage attributes (like `gen_ai.usage.prompt_tokens`) to be pres
 **How to debug**
 
 Enable debug logging and check if usage attributes are present in the span data being exported:
+
+<LangTabs items={["Python", "JS/TS"]}>
+
+<Tab>
+
+{/* PYTHON */}
 ```python
 import os
 os.environ["LANGFUSE_LOG_LEVEL"] = "debug"
 ```
+
+</Tab>
+
+<Tab>
+
+{/* JS/TS */}
+```typescript
+process.env.LANGFUSE_LOG_LEVEL = "debug";
+```
+
+</Tab>
+
+</LangTabs>
 
 **How to fix this**
 
@@ -408,40 +579,14 @@ os.environ["LANGFUSE_LOG_LEVEL"] = "debug"
 
 Sentry requires special configuration because it automatically initializes OpenTelemetry. You need to disable this and set up a shared provider manually.
 
-**See the full guide:** [Using Langfuse with Sentry](./sentry-integration-iteration-4.md)
+**See the full guide:** [Using Langfuse with Sentry](/faq/all/existing-sentry-setup)
 
 ### Pydantic Logfire
 
 Logfire has specific behaviors around PII scrubbing that can affect Langfuse session IDs. It also instruments HTTP and other libraries by default.
 
-**See the full guide:** [Using Langfuse with Pydantic Logfire](./logfire-integration-iteration-4.md)
+**See the full guide:** [Using Langfuse with Pydantic Logfire](/docs/integrations/logfire)
 
-### Honeycomb
+### Datadog / Honeycomb / Jaeger / Zipkin / Grafana Tempo
 
-Honeycomb uses standard OTEL configuration. Use an isolated TracerProvider to keep Langfuse spans out of Honeycomb:
-
-```python
-from opentelemetry.sdk.trace import TracerProvider
-from langfuse import Langfuse
-
-langfuse = Langfuse(tracer_provider=TracerProvider())
-```
-
-### Datadog
-
-Datadog's OTEL integration typically uses the Datadog Agent as a collector. Use an isolated TracerProvider to keep Langfuse separate:
-
-```python
-from opentelemetry.sdk.trace import TracerProvider
-from langfuse import Langfuse
-
-langfuse = Langfuse(tracer_provider=TracerProvider())
-```
-
-### Jaeger / Zipkin / Grafana Tempo
-
-These are standard OTEL backends. Use either an isolated TracerProvider or span filtering depending on your needs.
-
-### Azure Monitor
-
-There may be dependency version conflicts between `azure-monitor-opentelemetry` and Langfuse due to different OpenTelemetry SDK version requirements. Check release notes for compatible versions, or use an isolated TracerProvider to minimize interaction.
+These use standard OTEL configurations. Use either an [isolated TracerProvider](/docs/observability/sdk/advanced-features#isolated-tracer-provider) or [span filtering](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) depending on your needs.
