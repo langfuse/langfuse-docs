@@ -51,7 +51,7 @@ The core evolves around the in-app chat (Help Assistant) and an asynchronous tic
 
 ## Two Stacks, one Platform
 
-Canva's multi-language architecture made handling different tech stacks a core requirement for their LLM operations platform. **Help Assistant runs on Java**, the backbone of much of Canva's infrastructure. The team integrated via [OpenTelemetry](/docs/integrations/opentelemetry), giving them a universal protocol that doesn't lock them into any single vendor. **OmniAgent runs as a Python ML worker**, taking full advantage of [Langfuse's native Python SDK](/docs/observability/sdk/overview) and the faster iteration cycles that come with it.
+Canva's multi-language architecture made handling different tech stacks a core requirement for their LLM operations platform. **Help Assistant runs on Java**, the backbone of much of Canva's infrastructure. The team integrated via [OpenTelemetry](/integrations/native/opentelemetry), giving them a universal protocol that doesn't lock them into any single vendor. **OmniAgent runs as a Python ML worker**, taking full advantage of [Langfuse's native Python SDK](/docs/observability/sdk/overview) and the faster iteration cycles that come with it.
 
 ## How Canva uses Langfuse
 
@@ -92,7 +92,7 @@ Canva's multi-agent setup is a great example of how different LLM systems requir
 | **System complexity** | Relatively stateless. User asks questions, system answers. Each query is self-contained. | Stateful. Needs full context: ticket history, user account state, available tools, prior interactions. |
 | **Replayability** | Relatively high. Can test offline with just a query string. | Low. Can't replay without reconstructing the full system state behind each ticket. |
 | **Eval approach** | **Pre-deployment:** Dataset-driven Experiments with LLM-as-Judge. Maintain thousands of query/expected-answer pairs, run automated evals. For model upgrades (e.g., GPT-5.2), run the full suite before switching. **In Production:** LLM-as-Judge is used to monitor ongoing performance in real usage situations across about 20 different eval metrics. | Shadow mode with human review. New features run in parallel without affecting users. QA annotates 20-100 traces weekly, PMs use Playground to replay and tune individual prompts. |
-| **Eval features** | [Datasets](/docs/evaluation/experiments/datasets), [Experiments](/docs/evaluation/experiments/overview), [LLM-as-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues), [Playground](/docs/prompt-management/features/playground) |
+| **Eval features** | [Datasets](/docs/evaluation/experiments/datasets), [Experiments](/docs/evaluation/core-concepts#experiments), [LLM-as-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues), [Playground](/docs/prompt-management/features/playground) |
 
 ## From Self-Hosting to Cloud
 
