@@ -16,7 +16,7 @@ If you're using Langfuse alongside other observability tools like Sentry, Datado
 - [Orphaned traces](#orphaned-traces)
 - [Missing usage/cost data](#missing-usage-cost-data)
 
-## Core Concepts [#core-concepts]
+## Concepts [#core-concepts]
 
 Understanding these concepts will help you understand why certain issues happen and how to debug an [OpenTelemetry](https://opentelemetry.io/)-related issue, even if your setup doesn't match our examples exactly.
 
@@ -35,9 +35,9 @@ By default, Langfuse attaches to the [**global TracerProvider**](#global-tracer-
 │              Global TracerProvider                      │
 │                                                         │
 │  Span Processors:                                       │
-│  ├── LangfuseSpanProcessor  → sends to Langfuse        │
-│  ├── SentrySpanProcessor    → sends to Sentry          │
-│  └── OTLPExporter           → sends to Datadog/etc     │
+│  ├── LangfuseSpanProcessor  → sends to Langfuse         │
+│  ├── SentrySpanProcessor    → sends to Sentry           │
+│  └── OTLPExporter           → sends to Datadog/etc.     │
 │                                                         │
 │  ALL spans go through ALL processors                    │
 └─────────────────────────────────────────────────────────┘
@@ -583,9 +583,31 @@ Sentry requires special configuration because it automatically initializes OpenT
 
 ### Pydantic Logfire
 
-Logfire has specific behaviors around PII scrubbing that can affect Langfuse session IDs. It also instruments HTTP and other libraries by default.
+Logfire automatically scrubs values that look like personally identifiable information (PII). This includes strings containing words like "session", "password", "token", etc. If you're setting session IDs in Langfuse, you may see them appear as:
+```
+[Scrubbed due to 'session']
+```
 
-**See the full guide:** [Using Langfuse with Pydantic Logfire](/docs/integrations/logfire)
+You can solve this by configuring a custom scrubbing callback that preserves Langfuse-related IDs:
+
+```python
+import logfire
+
+def preserve_langfuse_ids(match, path):
+    """Don't scrub Langfuse session/trace IDs."""
+    # Check if this is a Langfuse-related attribute
+    langfuse_attributes = ["session_id", "trace_id", "user_id", "langfuse"]
+
+    if any(attr in path for attr in langfuse_attributes):
+        return match.group()  # Return the original value unchanged
+
+    return None  # Use default scrubbing for everything else
+
+logfire.configure(
+    send_to_logfire=False,  # If sending to Langfuse instead
+    scrubbing_callback=preserve_langfuse_ids,
+)
+```
 
 ### Datadog / Honeycomb / Jaeger / Zipkin / Grafana Tempo
 
