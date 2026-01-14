@@ -1,6 +1,6 @@
 export default {
   overview: "Overview",
-  concepts: "Concepts",
+  "core-concepts": "Concepts",
   "evaluation-methods": "Evaluation Methods",
 
   experiments: "Experiments",

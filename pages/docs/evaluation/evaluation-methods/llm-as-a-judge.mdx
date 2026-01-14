@@ -6,7 +6,7 @@ description: Configure, run, and monitor LLM-powered evaluators on traces and da
 
 # LLM-as-a-Judge
 
-LLM-as-a-Judge (also known as Model-based Evaluations) is an [evaluation method](/docs/evaluation/evaluation-methods/overview) to score the output of an application by using an LLM as an evaluator. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The resulting [`scores`](/docs/evaluation/evaluation-methods/data-model) include chain-of-thought reasoning as a `comment`.
+LLM-as-a-Judge (also known as Model-based Evaluations) is an evaluation method to score the output of an application by using an LLM as an evaluator. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The resulting [`scores`](/docs/evaluation/core-concepts#scores) include chain-of-thought reasoning as a `comment`.
 
 <Video
   src="https://static.langfuse.com/docs-videos/2025-12-19-llm-as-a-judge-overview.mp4"
@@ -35,7 +35,7 @@ Navigate to the Evaluators page and click on the `+ Set up Evaluator` button.
 Next, define the default model used for the evaluations. This step requires an LLM Connection to be set up. Please see [LLM Connections](/docs/administration/llm-connection) for more information.
 
 <Callout type="info">
-It’s crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
+It's crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
 </Callout>
 
 ### Pick an Evaluator
