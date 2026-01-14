@@ -8,9 +8,11 @@ tags: [tracing, integration-opentelemetry]
 
 This guide covers how to configure Langfuse alongside Sentry. If you haven't already, read [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup) to understand the general concepts.
 
+> **Note:** This guide focuses on the **Sentry JavaScript/Node SDK**, which automatically initializes OpenTelemetry and claims the global TracerProvider. The Python `sentry_sdk` does not have this behavior, so Python users can typically use a standard [isolated TracerProvider](#isolated-tracer-provider) without special Sentry configuration.
+
 ## Why Sentry Requires Special Configuration
 
-Sentry automatically initializes OpenTelemetry when you call `Sentry.init()`. This includes:
+Sentry's JavaScript SDK automatically initializes OpenTelemetry when you call `Sentry.init()`. This includes:
 - Creating a `SentrySpanProcessor`
 - Setting up `SentryPropagator` for distributed tracing
 - Installing `SentryContextManager`
@@ -112,6 +114,9 @@ If you omit any of these, Sentry's tracing may not work correctly.
 
 If you don't need distributed tracing across Sentry and Langfuse spans, you can use a completely [isolated TracerProvider](/docs/observability/sdk/advanced-features#isolated-tracer-provider) for Langfuse. This is simpler to configure and avoids sampling conflicts.
 
+<LangTabs items={["JS/TS", "Python"]}>
+<Tab>
+
 ```typescript
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { LangfuseSpanProcessor, setLangfuseTracerProvider } from "@langfuse/tracing";
@@ -130,6 +135,27 @@ const langfuseProvider = new NodeTracerProvider({
 });
 setLangfuseTracerProvider(langfuseProvider);
 ```
+
+</Tab>
+<Tab>
+
+```python
+import sentry_sdk
+from opentelemetry.sdk.trace import TracerProvider
+from langfuse import Langfuse
+
+# Initialize Sentry normally
+sentry_sdk.init(
+    dsn=os.environ["SENTRY_DSN"],
+    traces_sample_rate=1.0,
+)
+
+# Langfuse uses a completely separate provider
+langfuse = Langfuse(tracer_provider=TracerProvider())
+```
+
+</Tab>
+</LangTabs>
 
 #### Trade-offs
 
