@@ -13,6 +13,8 @@ Langfuse can operate as an OpenTelemetry Backend to receive traces on the `/api/
 
 As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces are still evolving, Langfuse maps the received OTel traces to the [Langfuse data model](/docs/tracing-data-model) and supports additional attributes that are popular in the OTel GenAI ecosystem ([property mapping](#property-mapping)). Please contribute to the discussion on [GitHub](https://github.com/orgs/langfuse/discussions/2509) if an integration does not work as expected or does not parse the correct attributes.
 
+> **Using other OTEL-based tools?** If you're using Langfuse alongside other OpenTelemetry-based tools, you may run into conflicts. See [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup) for configuration guidance.
+
 ```mermaid
 flowchart LR
   subgraph App["Application"]
