@@ -6,7 +6,7 @@ tags: [observability, integration-opentelemetry]
 
 # Using Langfuse with an Existing OpenTelemetry Setup
 
-If you're using Langfuse alongside other observability tools like Sentry, Datadog, Honeycomb, or Pydantic Logfire, you may run into conflicts. This guide explains why these conflicts happen and how to resolve them.
+If you're using Langfuse alongside other observability tools like Sentry, Datadog, Honeycomb, or Pydantic Logfire, you may run into conflicts as they all rely on OpenTelemetry. This guide explains why exactly these conflicts happen and how to resolve them.
 
 **This page covers the following common issues:**
 
@@ -22,9 +22,9 @@ Understanding these concepts will help you understand why certain issues happen 
 
 ### How Langfuse Uses OpenTelemetry [#how-langfuse-uses-otel]
 
-The Langfuse SDK (v3+) is built on [OpenTelemetry (OTEL)](https://opentelemetry.io/). When you initialize Langfuse, it registers a [**span processor**](#span-processors) that captures trace data and sends it to Langfuse.
+The latest Langfuse SDKs (Python SDK v3+ and JS SDK v4+) are built on [OpenTelemetry (OTEL)](https://opentelemetry.io/). When you initialize Langfuse, it registers by default a [**span processor**](#span-processors) that captures trace data and sends it to Langfuse.
 
-By default, Langfuse attaches to the [**global TracerProvider**](#global-tracer-provider)—the same one that other OTEL-based tools use. This is where conflicts arise.
+By default, Langfuse attaches its span processor on the [**global TracerProvider**](#global-tracer-provider)—the same one that other OTEL-based tools use. This is where conflicts arise.
 
 ### The Global TracerProvider [#global-tracer-provider]
 
@@ -43,9 +43,10 @@ By default, Langfuse attaches to the [**global TracerProvider**](#global-tracer-
 └─────────────────────────────────────────────────────────┘
 ```
 
-Two problems arise from this:
+Multiple problems arise from this:
 - When multiple tools register their processors on the global provider, **every span from every library goes to every destination**. Your HTTP requests end up in Langfuse; your LLM calls end up in Datadog.
 - If one tool initializes the global provider before another, **the second tool's configuration may not take effect at all**.
+- If a third party SDK is tinkering with the global TracerProvider in an incompatible way, this may lead to unexpected behavior and hard to debug issues
 
 ### Span Processors and the Flow of Data [#span-processors]
 
@@ -61,7 +62,7 @@ Your Code → TracerProvider → Span Processors → Exporters → Backend
 
 Every span processor attached to the [TracerProvider](#global-tracer-provider) sees **every span**. There's no automatic filtering, so a processor can't tell if a span "belongs" to it or not.
 
-This is why you might see database queries in Langfuse or LLM calls in your APM tool.
+This is why you might see infrastructure spans such as database queries in Langfuse or LLM calls in your APM tool.
 
 ### Instrumentation Scopes [#instrumentation-scopes]
 
@@ -76,7 +77,7 @@ Every span has an **instrumentation scope**: a label identifying which library c
 | `sqlalchemy` | SQLAlchemy instrumentation |
 | `@opentelemetry/instrumentation-http` | HTTP client instrumentation |
 
-You can use instrumentation scopes to **filter which spans reach Langfuse**. This is key to solving most conflicts.
+You can use instrumentation scopes to [**filter which spans reach Langfuse**](#unwanted-spans-in-langfuse). This is key to solving most conflicts.
 
 **Finding scope names:** In the Langfuse UI, click on any span and look for `metadata.scope.name` to see which library created it.
 
@@ -92,12 +93,12 @@ HTTP Request (parent)
 
 **Important:** Even when using [isolated TracerProviders](/docs/observability/sdk/advanced-features#isolated-tracer-provider) (covered below), they still share this context. This means:
 - A parent span from one [TracerProvider](#global-tracer-provider) can have children from another
-- If you filter out a parent span, its children become "orphaned" and appear disconnected in the UI
+- If you filter out a parent span either by a rule in the span processor or if it originiated from a different TraceProvider, its children become "orphaned" and appear disconnected in the UI
 
 Keep it in mind when filtering spans.
 
 ## Troubleshooting
-Because of these dynamics, shared between providers, you may encounter some unexpected behavior. Below are some common issues and how to fix them.
+Below are some common issues and how to fix them.
 
 ### No Traces Appearing in Langfuse [#no-traces-in-langfuse]
 
@@ -119,7 +120,7 @@ Another tool (like Sentry for example) initialized OTEL before Langfuse and conf
 
 ```python
 import os
-os.environ["LANGFUSE_LOG_LEVEL"] = "debug"
+os.environ["LANGFUSE_DEBUG"] = "True"
 ```
 
 2. Check your initialization order: add logging to see which tool initializes first:
@@ -551,7 +552,7 @@ Enable debug logging and check if usage attributes are present in the span data 
 {/* PYTHON */}
 ```python
 import os
-os.environ["LANGFUSE_LOG_LEVEL"] = "debug"
+os.environ["LANGFUSE_DEBUG"] = "True"
 ```
 
 </Tab>
