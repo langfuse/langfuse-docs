@@ -1,17 +1,23 @@
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { HomeSection } from "./components/HomeSection";
-import { YCLogo } from "./img/ycLogo";
+import { ArrowRight } from "lucide-react";
 
 export function Hero() {
   return (
     <HomeSection className="py-0 pt-0 lg:py-0 lg:pt-0 pb-0 lg:pb-0 first:pt-4">
       {/* HERO */}
       <div className="flex flex-col items-center justify-center gap-5 md:min-h-[calc(min(calc(60vh-100px),60vw))] pb-10 pt-5 lg:pt-10 2xl:pt-20">
-        <div className="flex flex-row items-center gap-x-2 gap-y-1 bg-card rounded-full px-3 py-1.5 border">
-          <div className="text-primary/70 text-sm">Backed by</div>
-          <YCLogo />
-        </div>
+        <Link
+          href="/blog/announcing-acquisition"
+          className="flex flex-row items-center gap-x-2 gap-y-1 rounded-full px-4 py-2 border transition-opacity hover:opacity-80"
+          style={{ backgroundColor: "rgb(250, 255, 105)", borderColor: "rgb(250, 255, 105)" }}
+        >
+          <div className="text-black text-sm font-semibold">
+          ClickHouse acquires Langfuse! 🎉
+          </div>
+          <ArrowRight className="h-4 w-4 text-black" />
+        </Link>
 
         <h1 className="mt-2 text-4xl sm:text-7xl lg:text-8xl font-bold font-mono text-center text-balance lg:text-wrap">
           Open Source LLM&nbsp;Engineering Platform
