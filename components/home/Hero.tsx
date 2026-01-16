@@ -9,12 +9,15 @@ export function Hero() {
       {/* HERO */}
       <div className="flex flex-col items-center justify-center gap-5 md:min-h-[calc(min(calc(60vh-100px),60vw))] pb-10 pt-5 lg:pt-10 2xl:pt-20">
         <Link
-          href="/blog/announcing-acquisition"
+          href="/blog/joining-clickhouse"
           className="flex flex-row items-center gap-x-2 gap-y-1 rounded-full px-4 py-2 border transition-opacity hover:opacity-80"
-          style={{ backgroundColor: "rgb(250, 255, 105)", borderColor: "rgb(250, 255, 105)" }}
+          style={{
+            backgroundColor: "rgb(250, 255, 105)",
+            borderColor: "rgb(250, 255, 105)",
+          }}
         >
           <div className="text-black text-sm font-semibold">
-          ClickHouse acquires Langfuse! 🎉
+            ClickHouse acquires Langfuse! 🎉
           </div>
           <ArrowRight className="h-4 w-4 text-black" />
         </Link>
