@@ -1,22 +1,53 @@
 ```bash
-npm i @langfuse/langchain
+npm install @langfuse/core @langfuse/langchain
 ```
 
 import EnvJS from "@/components-mdx/env-js.mdx";
+import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
 
-Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
+Add your Langfuse credentials as environment variables so the integration knows which project to send your traces to.
 
 <EnvJS />
 
-Initialize the Langfuse callback handler and add it to your chain.
+**Initialize OpenTelemetry**
 
-```ts {9}
+<SetupOtelJS />
+
+Finally, initialize the Langfuse `CallbackHandler` and add it to your chain. The `CallbackHandler` listens to the LangChain agent's actions and prepares that information to be sent to Langfuse.
+
+```typescript
 import { CallbackHandler } from "@langfuse/langchain";
-
+ 
+// Initialize the Langfuse CallbackHandler
 const langfuseHandler = new CallbackHandler();
+```
 
-// Your Langchain code
+The line `{ callbacks: [langfuseHandler] }` is what attaches the `CallbackHandler` to the agent.
 
-// Add Langfuse handler as callback to `run` or `invoke`
-await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+```typescript /{ callbacks: [langfuseHandler] }/
+import { createAgent, tool } from "@langchain/core/agents";
+import * as z from "zod";
+
+const getWeather = tool(
+  (input) => `It's always sunny in ${input.city}!`,
+  {
+    name: "get_weather",
+    description: "Get the weather for a given city",
+    schema: z.object({
+      city: z.string().describe("The city to get the weather for"),
+    }),
+  }
+);
+
+const agent = createAgent({
+  model: "openai:gpt-5-mini",
+  tools: [getWeather],
+});
+
+console.log(
+    await agent.invoke(
+        { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] }, 
+        { callbacks: [langfuseHandler] }
+    )
+);
 ```

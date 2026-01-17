@@ -1,13 +1,16 @@
 ---
-description: Try Langfuse in action with a live demo project for free. Interact with the chatbot to see new traces and user feedback (👍/👎) in Langfuse. No credit card required.
+description: Try Langfuse in action with a live example project for free. Interact with the chatbot to see new traces and user feedback (👍/👎) in Langfuse. No credit card required.
 ---
 
-# Interactive Langfuse Demo
+# Example Project
 
 import { Button } from "@/components/ui/button";
 import { ToAppButton } from "@/components/ToAppButton";
 
-Try Langfuse yourself with a view-only project.
+The Langfuse example project is a **live, shared project** that lets you explore Langfuse's features with real data before setting up your own account. Think of it as a hands-on walkthrough where you can see how teams use Langfuse for LLM observability, prompt management, and evaluation.
+
+The example project provides **view-only access**.
+
 
 <Callout type="info" emoji="🎥">
 
@@ -15,24 +18,52 @@ Prefer videos? [**Watch end-to-end walkthroughs**](/watch-demo) of all Langfuse 
 
 </Callout>
 
-## Step 1: Open demo project in Langfuse
+## Getting Started with the Example Project
 
-Access the demo project by creating a free account (no credit card required).
+### Step 1: Access the Example Project
+
+Create a free account (no credit card required) to access the example project.
 
 <div className="mt-3">
   <ToAppButton
-    signedInText="View Demo project"
-    signUpText="Create Demo account"
-    dropdownText="View Demo project"
+    signedInText="View Example project"
+    signUpText="Create Example account"
+    dropdownText="View Example project"
   />
 </div>
 
-## Step 2: Produce new traces & scores
+### Step 2: Understand What You're Seeing
 
-Interact with chatbot below to see new traces and user feedback (👍/👎) in Langfuse.
+When you first open the example project, you'll land on the **Traces** page. Here's what you're looking at:
+
+- Each row represents one interaction with the example chatbot
+- You'll see traces from all users (not just yours). This is intentional so you can explore diverse examples
+- The traces show: timing, costs, input/output, and any scores assigned by evaluations
+
+**Try this:**
+1. Click on any trace to see detailed execution steps
+2. Notice the graph view showing how the chatbot's components work together
+3. Look for traces with scores to see how evaluation works
+
+**Explore all features:** Browse the left navigation to explore [Tracing](/docs/tracing), [Sessions](/docs/tracing/sessions), [Prompts](/docs/prompts), [Scores](/docs/scores), and [Datasets](/docs/datasets). Each area shows how Langfuse works in a complete LLM application.
+
+## Interact with the Example Chatbot
+
+The chatbot below generates all the traces you see in the example project. Every question creates a new trace that you can inspect in Langfuse.
 
 import { Chat } from "@/components/qaChatbot";
 
 <Chat className="mt-6" />
 
-_Interested in implementation details of this RAG chat? Check out the [blog post](/blog/qa-chatbot-for-langfuse-docs) (code is fully open source)._
+_Interested in implementation details of this RAG chat? Check out the [blog post about how the chatbot was built](/blog/qa-chatbot-for-langfuse-docs) (code is fully open source)._
+
+
+
+## Next Steps
+
+Ready to set up your own project?
+
+1. **[Get Started with Tracing](/docs/observability/get-started)**: Add observability to your LLM application
+2. **[Set Up Prompt Management](/docs/prompt-management/get-started)**: Move prompts out of your code
+3. **[Create Your First Evaluation](/docs/evaluation/overview)**: Start measuring quality systematically
+

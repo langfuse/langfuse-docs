@@ -46,6 +46,12 @@ Conversation (conversation-uuid)
 
 This organization helps you track conversation-to-conversation and turn-to-turn.
 
+**Important notes on this trace structure:**
+
+1. **One trace = one full conversation**: Due to the way Pipecat structures its OpenTelemetry spans, a single trace represents one complete conversation. This differs from the typical Langfuse pattern where one trace equals one interaction, and full conversations are grouped under a [session](/docs/observability/features/sessions). With Pipecat, there's no need to group traces under a session—your entire conversation is already contained within a single trace.
+
+2. **Default trace name**: By default, all traces are named `conversation` or the conversation uuid. See [Renaming Traces](#renaming-traces) below for an example of how to patch the spans to customize your trace name.
+
 Learn more about Pipecat span attributes in the [Pipecat documentation](https://docs.pipecat.ai/server/utilities/opentelemetry).
 
 ## End-to-end Examples
@@ -127,6 +133,64 @@ task = PipelineTask(
 ```
 
 For more details, please refer to the [OpenTelemetry Python Documentation](https://opentelemetry-python.readthedocs.io/).
+
+### Add Trace Input and Output
+
+By default, Pipecat traces don't include the conversation input and output at the trace level. You can patch Pipecat's service decorators to set the `langfuse.trace.input` and `langfuse.trace.output` attributes, capturing the first LLM call's messages as the trace input and the last LLM response as the trace output:
+
+```python filename="main.py"
+def patch_trace_input_output():
+    from pipecat.utils.tracing import service_decorators
+    original = service_decorators.add_llm_span_attributes
+    first_call = [True]
+
+    def patched(span, *args, **kwargs):
+        original(span, *args, **kwargs)
+
+        # Set the input of the first LLM call as the trace input
+        if first_call[0] and kwargs.get("messages"):
+            span.set_attribute("langfuse.trace.input", kwargs["messages"])
+            first_call[0] = False
+
+        # Set the output of each LLM call as the trace output (last one wins)
+        orig_set = span.set_attribute
+        def new_set(key, value):
+            orig_set(key, value)
+            if key == "output":
+                orig_set("langfuse.trace.output", value)
+        span.set_attribute = new_set
+
+    service_decorators.add_llm_span_attributes = patched
+
+# Apply patch before tracing setup
+patch_trace_input_output()
+```
+
+### Renaming Traces (Optional) [#renaming-traces]
+
+By default, all Pipecat traces are named `conversation` or use the conversation UUID. To customize the trace name, extend the patch to set the `langfuse.trace.name` attribute:
+
+```python filename="main.py"
+def patch_trace_name():
+    from pipecat.utils.tracing import service_decorators
+    original = service_decorators.add_llm_span_attributes
+    first_call = [True]
+
+    def patched(span, *args, **kwargs):
+        original(span, *args, **kwargs)
+
+        # Set a custom trace name on the first LLM call
+        if first_call[0]:
+            span.set_attribute("langfuse.trace.name", "pipecat-chatbot")
+            first_call[0] = False
+
+    service_decorators.add_llm_span_attributes = patched
+
+# Apply patch before tracing setup
+patch_trace_name()
+```
+
+You can combine both patches into a single function if you want to set the trace name, input, and output together.
 
 </Steps>
 

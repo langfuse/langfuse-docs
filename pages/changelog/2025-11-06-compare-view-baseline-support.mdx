@@ -1,0 +1,55 @@
+---
+date: 2025-11-06
+title: Baseline Support in Experiment Compare View
+description: Compare experiment runs side-by-side with baseline designation to systematically identify regressions and improvements
+badge: Launch Week 4 🚀
+author: Marlies
+ogVideo: https://static.langfuse.com/docs-videos/2025-11-06-experiment-compare-baseline.mp4
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Every prompt tweak, model swap, or config change is an experiment. Teams need to know if the candidate actually improves upon production. Without structured comparison, you're either building spreadsheets or missing regressions.
+
+**What's New**
+
+The experiment compare view now supports baseline designation. Select two experiment runs from the experiments table, click **Compare**, and set one as baseline. This enables side-by-side analysis of baseline versus candidate performance across all test cases.
+
+## Side-by-Side Comparison
+
+<Frame fullWidth>
+  ![Baseline comparison view](/images/changelog/2025-11-06-experiment-compare-baseline.png)
+</Frame>
+
+1. **Matched rows**: Each row shows baseline and candidate outputs for the same dataset item, using stable identifiers for apples-to-apples comparison
+2. **Visual indicators**: Green/red deltas for scores, cost, and latency make it easy to spot item-level changes
+3. **Column headers**: Summary stats show aggregate performance differences between baseline and candidate
+4. **Trace access**: Click any row to open execution traces and debug behavioral changes
+
+## Hunt for Regressions
+
+Use column filters to build your regression worklist. Filter by score thresholds (e.g., `Candidate Hallucination > 0.0`) or performance deltas (e.g., `Cost Delta > 10%`). The filtered table becomes your work queue.
+
+For each item:
+- **Compare outputs**: Review baseline vs. candidate behavior to see what changed
+- **Validate evaluators**: Check if the evaluator score matches actual output quality. Broken evaluators create false signals—fix them before trusting results
+- **Add annotations**: Use [annotation mode](/changelog/2025-10-23-annotate-from-compare-view) to classify failures with structured scores
+
+## Aggregate Metrics
+
+The "Charts" tab shows high-level metric summaries. Compare baseline and candidate across quality scores, cost, and latency distributions. Get first signal whether quality improvements come at acceptable cost in latency or price.
+
+## Getting Started
+
+1. Run two experiment versions using the same dataset
+2. Select both runs in the experiments table and click **Compare**
+3. Designate the production version as baseline
+4. Review aggregate metrics in Charts tab, then drill into item-level differences in Outputs tab
+
+## Learn More
+
+- [Experiments Overview](/docs/evaluation/core-concepts#experiments)
+- [Running Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
+- [Human Annotation in Compare View](/changelog/2025-10-23-annotate-from-compare-view)

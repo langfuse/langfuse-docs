@@ -67,8 +67,8 @@ import os
 # Langfuse Configuration
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com"  # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com"  # 🇺🇸 US region
 
 # TrueFoundry Configuration
 os.environ["TRUEFOUNDRY_API_KEY"] = "your-truefoundry-token"
@@ -152,38 +152,38 @@ The `@observe()` decorator automatically wraps your functions and adds custom at
 
 
 ```python
-from langfuse import observe, get_client
+from langfuse import observe, get_client, propagate_attributes
 
 langfuse = get_client()
 
 @observe()
 def analyze_customer_query(query, customer_id):
     """Analyze customer query using TrueFoundry Gateway with full observability"""
-    
-    response = client.chat.completions.create(
-        model="openai-main/gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a customer service AI assistant."},
-            {"role": "user", "content": query},
-        ],
-        temperature=0.3
-    )
-    
-    result = response.choices[0].message.content
-    
-    # Add custom metadata to the trace
-    langfuse.update_current_trace(
-        input={"query": query, "customer_id": customer_id},
-        output={"response": result},
+
+    # Propagate attributes to all child observations
+    with propagate_attributes(
         user_id=customer_id,
         session_id=f"session_{customer_id}",
         tags=["customer-service", "truefoundry-gateway"],
-        metadata={
-            "model_used": "openai-main/gpt-4o",
-            "gateway": "truefoundry",
-            "query_type": "customer_support"
-        },
+        metadata={"gateway": "truefoundry"},
         version="1.0.0"
+    ):
+    
+        response = client.chat.completions.create(
+            model="openai-main/gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a customer service AI assistant."},
+                {"role": "user", "content": query},
+            ],
+            temperature=0.3
+        )
+        
+        result = response.choices[0].message.content
+
+    # update trace level input and output
+    langfuse.update_current_trace(
+        input={"query": query, "customer_id": customer_id},
+        output={"response": result},
     )
     
     return result

@@ -19,6 +19,7 @@ export default function App({ Component, pageProps }) {
         api_host:
           process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
         ui_host: "https://eu.posthog.com",
+        persistence: "cookie",
         // Enable debug mode in development
         loaded: (posthog) => {
           if (process.env.NODE_ENV === "development") posthog.debug();
@@ -40,13 +41,18 @@ export default function App({ Component, pageProps }) {
       <PostHogProvider client={posthog}>
         <Component {...pageProps} />
       </PostHogProvider>
-      <Hubspot />
-      <Script
-        id="cookieyes"
-        type="text/javascript"
-        src="https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js"
-        strategy="beforeInteractive"
-      />
+      {process.env.NODE_ENV === "production" && (
+        <>
+          <Hubspot />
+          {/* Cookieyes consent manager */}
+          <Script
+            id="cookieyes"
+            type="text/javascript"
+            src="https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js"
+            strategy="beforeInteractive"
+          />
+        </>
+      )}
     </div>
   );
 }

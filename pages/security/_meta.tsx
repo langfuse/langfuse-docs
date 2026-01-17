@@ -21,6 +21,7 @@ export default {
   "penetration-testing": "Penetration Testing",
   "vulnerability-management": "Vulnerability Management",
   "security-faq": "Security FAQ",
+  toms: {},
   "-- Compliance": {
     type: "separator",
     title: "Compliance",

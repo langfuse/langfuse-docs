@@ -4,110 +4,126 @@ description: FAQ and deployment options for Langfuse in an enterprise environmen
 
 # Langfuse for Enterprise
 
-Langfuse addresses key challenges when deploying LLM-based applications within an enterprise. As an [open source](/open-source) project, Langfuse is the ideal platform **to address data security and privacy concerns by self-hosting.** This document outlines common queries related to using Langfuse in an enterprise setting.
+Langfuse is the leading LLM Engineering platform built for enterprise-grade security, scalability, and compliance. Trusted by **19 of the Fortune 50** and **63 of the Fortune 500**, Langfuse addresses key challenges when deploying LLM-based applications within an enterprise environment.
 
-Langfuse is licensed as an open-core project. It's core product (tracing, observability, evals, prompt management and API/SDK endpoints) is MIT-licensed and freely available (also without limitation for commercial use).
+import { CredibilitySentence } from "@/components/credibilitySentence";
 
----
-
-## Your platform for enterprise-ready LLM applications
-
-Upgrade to Langfuse Enterprise Edition to address high security requirements and needs of platform teams to support billions of traces per month. With an Enterprise Agreement, you get access to additional support, features to address your specific needs and compliance requirements.
-
-Please refer to our [feature overview](/pricing-self-host) and the Enterprise Edition FAQ [here](/open-source#enterprise-edition-ee-faq).
-
-Langfuse is trusted by the best teams building LLM applications and AI agents and supported by the largest open source community:
+<CredibilitySentence style="list" />
 
 import { EnterpriseLogos } from "../components/EnterpriseLogos";
-import { Button } from "../components/ui/button";
-import Link from "next/link";
 
 <EnterpriseLogos />
 
----
+## A complete toolbox to build enterprise LLM applications
 
-## Select Resources
+Langfuse is a complete platform combining [[1] observability](/docs/observability/overview), [[2] prompt management](/docs/prompt-management/overview), [[3] evaluation](/docs/evaluation/overview), and much more to help teams collaboratively debug, analyze, and iterate on their LLM applications. 
 
-- [Why Langfuse?](/why)
-- [Langfuse has twice been included in the Thoughtworks Tech Radar](https://www.thoughtworks.com/en-us/radar/platforms/langfuse)
-- [Feature Comparison](/pricing-self-host) - Open Source and Enterprise Edition (Self-hosted)
-- [Security and Compliance](/security) - includes information on GDPR, HIPAA, SOC2 and ISO27001 compliance
-- [Enterprise Security FAQ](/security/security-faq)
+All platform features are natively integrated to accelerate the development workflow. **Langfuse is open, self-hostable, and extensible.**
+
+Please refer to our [feature overview](/docs) to learn about all the features and how to get started.
+
+import { FeatureOverview } from "@/components/FeatureOverview";
+
+<FeatureOverview />
+
+import { Button } from "../components/ui/button";
+
+import EnterpriseCloudScale from "@/components-mdx/enterprise-cloud-scale.mdx";
+
+## Enterprise grade scalability and security
+
+**Langfuse Cloud** is enterprise-ready with SOC 2 Type II and ISO 27001 certifications, GDPR compliance, and HIPAA alignment. For organizations with specific data residency requirements, Langfuse can also be [self-hosted](/self-hosting) as an [open source](/open-source) MIT-licensed project.
+
+<EnterpriseCloudScale />
+
+Langfuse **scales to the largest enterprise use cases** and platform deployment scenarios. Langfuse OSS and Langfuse Enterprise use the same codebase as Langfuse Cloud. Langfuse Cloud currently operates at:
+
+- **\>80M** traces per day
+- **\>5B** tracing events per month
+- **Thousands of customers** on the same multi-tenant deployment
+
+## Packages & Services
+
+We offer a range of packages and services to help you get started with Langfuse.
+
+- **Langfuse Cloud** [(see plans and what's included)](/pricing)
+- **Self-host Langfuse** for free or with an Enterprise Agreement [(see self-host licensing)](/pricing-self-host)
+
+More details:
 - Langfuse can be procured through the [AWS Marketplace](https://aws.amazon.com/marketplace/seller-profile?id=seller-nmyz7ju7oafxu) or per invoice.
+- With an Enterprise Agreement, you get access to additional support, features to address your specific needs and compliance requirements.
 
----
+## Don't take our word for it
 
-## Talk to us
+import { CustomerCarousel } from "@/components/customers/CustomerCarousel";
+
+<div className="flex flex-col gap-4">
+  <CustomerCarousel path="/customers" showDots={true} loop={true} className="mt-6" />
+</div>
+
+## Let's Talk!
 
 Ready to get started with Langfuse Enterprise? We're here to help you find the right solution for your team.
 
-<div className="flex flex-col sm:flex-row gap-4 mt-6">
-  <Button size="lg" variant="outline" asChild>
-    <Link href="/talk-to-us">Talk to Enterprise team</Link>
-  </Button>
-  <Button size="lg" variant="secondary" asChild>
-    <Link href="mailto:enterprise@langfuse.com">Email us</Link>
-  </Button>
-</div>
----
+import Link from "next/link";
 
-## Introduction to Langfuse
+export function TalkToUsButton() {
+  return (
+    <div className="flex flex-col sm:flex-row gap-4 mt-6">
+      <Button size="lg" asChild>
+        <Link href="/talk-to-us">Talk to Enterprise team</Link>
+      </Button>
+      <Button size="lg" variant="outline" asChild>
+        <Link href="mailto:enterprise@langfuse.com">
+          Email us: enterprise@langfuse.com
+        </Link>
+      </Button>
+    </div>
+  );
+}
 
-If you are new to Langfuse, watch these walkthroughs to get a thorough introduction to the Langfuse platform.
+<TalkToUsButton />
 
-import { WatchWalkthroughsCards } from "@/components/walkthroughs/WatchWalkthroughsCards";
+## Additional Resources
 
-<WatchWalkthroughsCards />
+### Ways to experience the Product
+- [10 minute video overview](/watch-demo) of all Langfuse features
+- [Test it yourself with our demo-application](/docs/demo) of the Langfuse platform
+- [Create an account on Langfuse Cloud](https://cloud.langfuse.com/) for free (no credit card required)
+- [Talk to Sales](/talk-to-us) to get a personalized demo
 
----
+### Product
+- [Why customers choose Langfuse](/why)
+- [Security and Compliance](/security) - about GDPR, HIPAA, SOC2 and ISO27001 compliance and [related FAQs](/security/security-faq)
+- [Technical documentation](/docs) 
+- [Changelog](/changelog)
+- [Roadmap](/docs/roadmap)
 
-## Resources
+### Langfuse Cloud
+- [Cloud Pricing](/pricing)
+- [Security and Compliance](/security) - includes information on GDPR, HIPAA, SOC2 and ISO27001 compliance
 
-- Product
-  - [Scope](/blog/2024-04-introducing-langfuse-2.0) of LLM Engineering Platform
-  - [Positioning](/why) of Langfuse
-  - [Technical documentation](/docs) with detailed information on all features and integrations
-  - [10 minute demo](/watch-demo) of all Langfuse features
-  - [Interactive demo](/docs/demo) of the Langfuse platform
-  - [Changelog](/changelog)
-  - [Roadmap](/docs/roadmap)
-  - [Traces as the core of the LLMOps workflow (webinar + slides)](/guides/videos/webinar-observability-llm-systems)
-  - [Langfuse has been included in the Thoughtsworks Tech Radar](https://www.thoughtworks.com/en-us/radar/platforms/langfuse)
-- Langfuse Cloud
-  - [Cloud Pricing](/pricing)
-  - [Security and Compliance](/security) - includes information on GDPR, HIPAA, SOC2 and ISO27001 compliance
-- Self-hosting
-  - [Deployment Guide](/self-hosting)
-  - Open Source [Licensing](/open-source)
-  - [Comparison](/pricing-self-host) of Open Source and Enterprise version
-  - Langfuse Self-Hosting: EE [Terms and Conditions](/terms)
+### Self-hosting
 
----
+- [Deployment Guide](/self-hosting)
+- [Open Source Licensing](/open-source) 
+- [Comparison](/pricing-self-host) of Open Source and Enterprise version
+- [Langfuse Self-Hosting: EE](/self-hosting) [Terms and Conditions](/terms)
 
-## Resellers and managed Langfuse deployments
+### Webinars
+- [Traces as the core of the LLMOps workflow (webinar + slides)](/guides/videos/webinar-observability-llm-systems)
+- [Continuous Agent Evals with Langfuse and AWS Bedrock AgentCore](https://www.youtube.com/watch?v=api-Z4TfDvM)
 
-We [partner](https://www.shakudo.io/partners) with [Shakudo](https://www.shakudo.io/) who operates Langfuse Enterprise self-hosted on behalf of customers on their VPC.
-
-In Japan & APAC, [GAO](https://www.gao-ai.com/) is a partner company based in Tokyo that provides professional services, technical support, and payment in local currency in Japan.
-
-We are happy to introduce prospects to our contact at Shakudo and GAO for more information on self-hosted / managed self-hosting.
-
----
+### Resellers and managed Langfuse deployments
+If you want an introduction to our partners, just let us know!
+- [Shakudo](https://www.shakudo.io/partners) - managed Langfuse Enterprise self-hosted on behalf of customers on their VPC.
+- [GAO](https://www.gao-ai.com/) - our Partner in Japan & APAC that provides professional services, technical support, and payment in local currency in Japan.
 
 ## Any questions?
 
 We're here to help you find the right solution for your use case.
 
-<div className="flex flex-col sm:flex-row gap-4 mt-6">
-  <Button size="lg" variant="outline" asChild>
-    <Link href="/talk-to-us">Talk to Enterprise Team</Link>
-  </Button>
-  <Button size="lg" variant="secondary" asChild>
-    <Link href="mailto:enterprise@langfuse.com">Email us</Link>
-  </Button>
-</div>
-
----
+<TalkToUsButton />
 
 ## FAQ
 
@@ -170,7 +186,7 @@ If Langfuse fails to maintain an uptime percentage of greater than 99% for any 3
 <details>
 <summary>What is the difference between Langfuse Cloud and the open-source version?</summary>
 
-The Langfuse team provides Langfuse Cloud as a managed solution to simplify the initial setup of Langfuse and to minimize the operational overhead of maintaining high availability in production. You can chose to self-host Langfuse on your own infrastructure.
+The Langfuse team provides Langfuse Cloud as a managed solution to simplify the initial setup of Langfuse and to minimize the operational overhead of maintaining high availability in production. You can choose to self-host Langfuse on your own infrastructure.
 
 Some features are not available in the open-source version. Please refer to the overview [here](/pricing-self-host).
 
@@ -183,7 +199,7 @@ Langfuse offers a list of prebuilt roles which apply on an organizational and pr
 
 If needed, environments (production, staging, development) can be separated into different projects in Langfuse to restrict access to production/sensitive data while making it easier to share development environments with the team and other stakeholders.
 
-SSO with Langfuse is simple. Currently Google, GitHub, Azure AD, Okta, Auth0, and AWS Cognito are supported. We can easily add additional providers based on your requirements. As an enterprise customer, you can also enforce SSO for your organization.
+SSO with Langfuse is simple. Currently Google, GitHub, Azure AD, Okta, Auth0, AWS Cognito, Keycloak, and JumpCloud are supported. We can easily add additional providers based on your requirements. As an enterprise customer, you can also enforce SSO for your organization.
 
 </details>
 

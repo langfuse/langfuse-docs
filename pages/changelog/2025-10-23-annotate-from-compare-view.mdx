@@ -1,0 +1,55 @@
+---
+date: 2025-11-06
+title: Annotation Support in Experiment Compare View
+description: Add human annotations while reviewing experiment results side-by-side. Review experiment outputs, assign scores, and leave comments while viewing full experiment context.
+author: Marlies
+ogImage: /images/changelog/2025-10-23-annotate-compare-view-overview.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now annotate traces directly from the experiment compare view, streamlining the workflow of running experiments and adding human feedback.
+
+**What's New**
+
+Human annotation is now available directly in the experiment compare view. Select any cell to open the annotation side panel, where you can assign scores and leave comments while maintaining full experiment context. Use resulting annotation score data to compare experiment results across different prompt versions, model configurations or iterations of your application. 
+
+**How It Works**
+
+<Frame fullWidth>
+  ![Annotate from compare view](/images/changelog/2025-10-23-annotate-compare-view-overview.png)
+</Frame>
+
+1. **Run an experiment**: Execute an [experiment via UI](/docs/evaluation/experiments/experiments-via-ui) or [SDK](/docs/evaluation/experiments/experiments-via-sdk) to test prompt versions or models
+2. **Open compare view**: Navigate to the experiment comparison to review results side-by-side
+3. **Select a cell**: Click any experiment item to open the annotation panel
+4. **Add scores**: Assign values for the [score configs](/faq/all/manage-score-configs) you've set up
+5. **Leave comments**: Add context for your team about specific outputs
+6. **Move to next item**: Click "Annotate" on the next cell you'd like to review
+
+The UI updates optimistically as you add scores, providing immediate feedback while data persists in the background. Summary metrics in the compare view reflect your annotations as you work.
+
+**Score Configurations**
+
+Before annotating, [create score configs](/faq/all/manage-score-configs) to standardize scoring criteria across your team. Score configs support:
+
+- **Numerical scores**: Define min/max ranges for quantitative evaluation
+- **Categorical scores**: Set custom categories for classification tasks
+- **Binary scores**: Use boolean values for pass/fail judgments
+
+Standardized score configs ensure consistency and make results comparable across experiments and team members. You can update score configs at any time.
+
+**Getting Started**
+
+1. Set up [score configs](/faq/all/manage-score-configs) for your evaluation criteria
+2. Run an [experiment via UI](/docs/evaluation/experiments/experiments-via-ui)
+3. Open the compare view and start annotating
+
+## Learn More
+
+- [Human Annotation Documentation](/docs/evaluation/evaluation-methods/annotation)
+- [Score Config Management](/faq/all/manage-score-configs)
+- [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)
+- [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)

@@ -35,6 +35,57 @@ const categoryConfig = {
   frameworks: {
     title: "Frameworks",
     description: "Integrate with popular AI frameworks",
+    // Featured links shown first, separated by a divider from the rest
+    featuredLinks: [
+      {
+        route: "/integrations/frameworks/langchain",
+        frontMatter: {
+          title: "LangChain & LangGraph",
+          logo: "/images/integrations/langchain_icon.png",
+        },
+        title: "LangChain & LangGraph",
+      },
+      {
+        route: "/integrations/model-providers/openai-py",
+        frontMatter: {
+          title: "OpenAI (Python)",
+          logo: "/images/integrations/openai_icon.svg",
+        },
+        title: "OpenAI (Python)",
+      },
+      {
+        route: "/integrations/frameworks/vercel-ai-sdk",
+        frontMatter: {
+          title: "Vercel AI SDK",
+          logo: "/images/integrations/vercel_ai_sdk_icon.png",
+        },
+        title: "Vercel AI SDK",
+      },
+      {
+        route: "/integrations/frameworks/google-adk",
+        frontMatter: {
+          title: "Google ADK",
+          logo: "/images/integrations/google_adk_icon.png",
+        },
+        title: "Google ADK",
+      },
+      {
+        route: "/integrations/frameworks/pydantic-ai",
+        frontMatter: {
+          title: "Pydantic AI",
+          logo: "/images/integrations/pydantic_ai_icon.svg",
+        },
+        title: "Pydantic AI",
+      },
+      {
+        route: "/integrations/frameworks/openai-agents",
+        frontMatter: {
+          title: "OpenAI Agents",
+          logo: "/images/integrations/openai_icon.svg",
+        },
+        title: "OpenAI Agents",
+      },
+    ],
   },
   "model-providers": {
     title: "Model Providers",
@@ -136,6 +187,9 @@ export const IntegrationIndex = () => {
         .map((category) => {
           const config = categoryConfig[category];
           const pages = categorizedPages[category];
+          const featured = (categoryConfig as any)[category]?.featuredLinks as
+            | ProcessedIntegrationPage[]
+            | undefined;
 
           return (
             <div key={category} className="my-10">
@@ -150,8 +204,43 @@ export const IntegrationIndex = () => {
                   </p>
                 </div>
               </div>
-              <Cards num={3}>
-                {pages.map((page) => (
+              {/* Featured (non-duplicated) */}
+              {featured && featured.length > 0 && (
+                <Cards num={3}>
+                  {featured
+                    .slice(0, 6)
+                    .map((page) => (
+                      <Cards.Card
+                        href={page.route}
+                        key={page.route}
+                        title={page.title}
+                        icon={
+                          (page as any).frontMatter?.logo ? (
+                            <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
+                              <img
+                                src={(page as any).frontMatter.logo}
+                                alt=""
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          ) : (
+                            config.icon
+                          )
+                        }
+                        arrow
+                      >
+                        {""}
+                      </Cards.Card>
+                    ))}
+                </Cards>
+              )}
+              <div className={featured && featured.length > 0 ? "mt-8" : ""}>
+                <Cards num={3}>
+                  {pages
+                    .filter(
+                      (p) => !(featured || []).some((f) => f.route === p.route)
+                    )
+                    .map((page) => (
                   <Cards.Card
                     href={page.route}
                     key={page.route}
@@ -174,7 +263,8 @@ export const IntegrationIndex = () => {
                     {""}
                   </Cards.Card>
                 ))}
-              </Cards>
+                </Cards>
+              </div>
             </div>
           );
         })}

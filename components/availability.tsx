@@ -22,7 +22,7 @@ const availabilities: {
   },
   {
     id: "team-add-on",
-    label: "Team Add-On",
+    label: "Teams Add-on required",
     shortLabel: "Team",
     Icon: Check,
   },

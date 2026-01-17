@@ -5,10 +5,11 @@ description: Manage and version your prompts in Langfuse (open source). When ret
 
 # Prompt Management
 
-Prompt management is a systematic approach to storing, versioning and retrieving prompts in LLM applications.
+Prompt management is a systematic approach to storing, versioning, and retrieving prompts for your LLM application. Instead of hardcoding prompts in your application code, you manage them centrally in Langfuse.
+
 
 <Frame fullWidth>
-  <img src="/images/docs/prompt-management.png" alt="Prompt Management" />
+  <img src="/images/docs/prompt-management.png" alt="Prompt Management in Langfuse showing version control, playground, and deployment labels" />
 </Frame>
 
 <Callout type="info" emoji="🎥">
@@ -17,143 +18,28 @@ Prompt management is a systematic approach to storing, versioning and retrieving
 
 </Callout>
 
-## Why Prompt Management?
+### Decouple Prompt Updates from Code Deployment
 
-- Involve non-technical users through UI
-- Decoupling: edit prompts without redeploying
-- Quickly rollback to a previous version of a prompt
-- Compare different prompt versions side-by-side
-- No latency/availability impact due to [client-side caching](/docs/prompt-management/features/caching)
+In most LLM applications, **prompt iteration and code deployment** are managed by **different people**. Product managers and domain experts iterate on prompts, while engineers manage deployments.
 
-## Where to start
+With prompts in code, a simple text change requires engineering involvement, code review, and a full deployment cycle, turning a 2-minute update into hours or days of waiting.
 
-Follow the quickstart to create your first prompt and use it in your application.
+When prompts live in Langfuse, non-technical team members update them directly in the UI while your application automatically fetches the latest version. This **separation of concerns** means **prompt updates deploy instantly**, without needing to involve engineering or triggering a deployment.
 
-import {
-  Rocket,
-  BookOpen,
-  Joystick,
-  Layers,
-  MessageSquare,
-  Tag,
-  GitPullRequestArrow,
-  FileDiff,
-  PlaySquare,
-  Link,
-  Folder,
-  Settings,
-  TestTube,
-  Zap,
-  Gauge,
-  BarChart3,
-  Webhook,
-  Server,
-  Workflow,
-} from "lucide-react";
+### No latency, no availability risk
 
-<Cards num={1}>
-  <Card
-    icon={<Rocket size="24" />}
-    title="Quickstart"
-    href="/docs/prompt-management/get-started"
-    arrow
-  />
-  <Card
-    icon={<BookOpen size="24" />}
-    title="Data Model"
-    href="/docs/prompt-management/data-model"
-    arrow
-  />
-</Cards>
+**Langfuse Prompt Management adds no latency to your application**. Prompts are cached client-side by the SDK, so retrieving them is as fast as reading from memory. See [the caching docs page](/docs/prompt-management/features/caching) for more details.
 
-## Core Features
 
-Essential prompt management features that form the foundation of prompt operations in Langfuse:
 
-<Cards num={2}>
-  <Card
-    title="Prompt Version Control"
-    href="/docs/prompt-management/features/prompt-version-control"
-    icon={<GitPullRequestArrow />}
-    arrow
-  />
-  <Card
-    title="Prompt Composability"
-    href="/docs/prompt-management/features/composability"
-    icon={<Layers />}
-    arrow
-  />
-  <Card
-    title="Message Placeholders"
-    href="/docs/prompt-management/features/message-placeholders"
-    icon={<MessageSquare />}
-    arrow
-  />
-  <Card
-    title="Playground"
-    href="/docs/prompt-management/features/playground"
-    icon={<PlaySquare />}
-    arrow
-  />
-</Cards>
+## Getting started
 
-## Advanced Features
+Start by [adding your first prompt](/docs/prompt-management/get-started) to Langfuse, and connecting it to your application. You can either create a prompt from scratch in the UI or import existing prompts from your application.
 
-Extended capabilities for sophisticated prompt management and analysis:
+Take a moment to understand the core concepts: [prompt types, versioning, labels, and configuration](/docs/prompt-management/data-model).
 
-<Cards num={2}>
-  <Card
-    title="Link to Traces"
-    href="/docs/prompt-management/features/link-to-traces"
-    icon={<Link />}
-    arrow
-  />
-  <Card
-    title="Folders"
-    href="/docs/prompt-management/features/folders"
-    icon={<Folder />}
-    arrow
-  />
-  <Card
-    title="Config"
-    href="/docs/prompt-management/features/config"
-    icon={<Settings />}
-    arrow
-  />
-  <Card
-    title="A/B Testing"
-    href="/docs/prompt-management/features/a-b-testing"
-    icon={<TestTube />}
-    arrow
-  />
-  <Card
-    title="Caching"
-    href="/docs/prompt-management/features/caching"
-    icon={<Zap />}
-    arrow
-  />
-  <Card
-    title="Availability"
-    href="/docs/prompt-management/features/guaranteed-availability"
-    icon={<Gauge />}
-    arrow
-  />
-  <Card
-    title="Webhooks"
-    href="/docs/prompt-management/features/webhooks"
-    icon={<Webhook />}
-    arrow
-  />
-  <Card
-    title="MCP Server"
-    href="/docs/prompt-management/features/mcp-server"
-    icon={<Server />}
-    arrow
-  />
-  <Card
-    title="n8n Node"
-    href="/docs/prompt-management/features/n8n-node"
-    icon={<Workflow />}
-    arrow
-  />
-</Cards>
+Once you have prompts in Langfuse and are using them in your application, there are a few things you can do to get the most out of Langfuse Prompt Management:
+- [Link prompts to traces](/docs/prompt-management/features/link-to-traces) to analyze performance by prompt version
+- [Use version control and labels](/docs/prompt-management/features/prompt-version-control) to manage deployments across environments
+
+Looking for something specific? Take a look under _Features_ for guides on specific topics.

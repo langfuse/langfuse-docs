@@ -6,7 +6,7 @@ sidebarTitle: Datasets
 
 # Datasets
 
-A dataset is a collection of inputs and expected outputs and is used to test your application. Both, [UI-based](/docs/evaluation/experiments/experiments-via-ui) and [SDK-based](/docs/evaluation/experiments/experiments-via-sdk) experiments support Langfuse Datasets.
+A dataset is a collection of inputs and expected outputs and is used to test your application. Both [UI-based](/docs/evaluation/experiments/experiments-via-ui) and [SDK-based](/docs/evaluation/experiments/experiments-via-sdk) experiments support Langfuse Datasets.
 
 _Langfuse Dataset View_
 
@@ -38,6 +38,154 @@ import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx
 
 <CreateDatasetItem />
 </Steps>
+
+## Dataset Folders
+
+Datasets can be organized into virtual folders to group datasets serving similar use cases.
+To create a folder, add slashes (`/`) to a dataset name. The UI shows every segment ending with a `/` as a folder automatically.
+
+### Create and fetch a dataset in a folder
+
+Use the Langfuse UI or SDK to create and fetch a dataset in a folder by adding a slash (`/`) to a dataset name.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<Tab>
+
+```python
+dataset_name = "evaluation/qa-dataset"
+
+# When creating a dataset, use the full dataset name
+langfuse.create_dataset(
+    name=dataset_name,
+)
+
+# When fetching a dataset in a folder, use the full dataset name
+langfuse.get_dataset(
+    name=dataset_name
+)
+
+```
+
+This creates and fetches a dataset named `qa-dataset` in a folder named `evaluation`. The full dataset name remains `evaluation/qa-dataset`.
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+const datasetName = "evaluation/qa-dataset";
+const encodedName = encodeURIComponent(datasetName); // "evaluation%2Fqa-dataset"
+
+// When creating a dataset, use the full dataset name
+await langfuse.dataset.create(datasetName);
+
+// When fetching a dataset in a folder, use the encoded name
+await langfuse.dataset.get(encodedName);
+```
+
+This creates and fetches a dataset named `qa-dataset` in a folder named `evaluation`. The full dataset name remains `evaluation/qa-dataset`.
+
+</Tab>
+<Tab>
+
+In the UI, create a dataset and use a slash (`/`) in the name field to organize it into a folder. Fetch it by navigating to the folder, clicking on the folder name and clicking on the dataset name in the list.
+
+</Tab>
+</LangTabs>
+
+<Callout type="info">
+  **URL Encoding**: When using dataset names with slashes as path parameters in
+  the API or JS/TS SDK, use URL encoding. For example, in TypeScript: `encodeURIComponent(name)`.
+</Callout>
+
+## Versioning
+
+To access Dataset Versions via the Langfuse UI, navigate to: **Datasets** > **Navigate to a specific dataset** > **Select Items Tab**. On this page you can toggle the version view.
+
+Every `add`, `update`, `delete`, or `archive` of dataset items produces a new dataset version. Versions track changes over time using timestamps.
+
+`GET` APIs return the latest version at query time by default. Support for fetching datasets at specific version timestamps via API will be added shortly.
+
+Versioning applies to dataset items only, not dataset schemas. Dataset schema changes do not create new versions.
+
+## Schema Enforcement
+
+Optionally add JSON Schema validation to your datasets to ensure all dataset items conform to a defined structure. This helps maintain data quality, catch errors early, and ensure consistency across your team.
+
+You can define JSON schemas for `input` and/or `expectedOutput` fields when creating or updating a dataset. Once set, all dataset items are automatically validated against these schemas. Valid items are accepted, invalid items are rejected with detailed error messages showing the validation issue.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<Tab>
+
+```python
+langfuse.create_dataset(
+    name="qa-conversations",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "messages": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "role": {"type": "string", "enum": ["user", "assistant", "system"]},
+                        "content": {"type": "string"}
+                    },
+                    "required": ["role", "content"]
+                }
+            }
+        },
+        "required": ["messages"]
+    },
+    expected_output_schema={
+        "type": "object",
+        "properties": {"response": {"type": "string"}},
+        "required": ["response"]
+    }
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+await langfuse.createDataset({
+  name: "qa-conversations",
+  inputSchema: {
+    type: "object",
+    properties: {
+      messages: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            role: { type: "string", enum: ["user", "assistant", "system"] },
+            content: { type: "string" }
+          },
+          required: ["role", "content"]
+        }
+      }
+    },
+    required: ["messages"]
+  },
+  expectedOutputSchema: {
+    type: "object",
+    properties: { response: { type: "string" } },
+    required: ["response"]
+  }
+});
+```
+
+</Tab>
+<Tab>
+
+Navigate to **Datasets** → **New Dataset** or edit an existing dataset → Expand **Schema Validation** section → Add your JSON schemas → Click **Save**.
+
+</Tab>
+</LangTabs>
 
 ## Create synthetic datasets
 
@@ -105,6 +253,22 @@ In the UI, use `+ Add to dataset` on any observation (span, event, generation) o
 
 </Tab>
 </LangTabs>
+
+## Batch add observations to datasets
+
+You can batch add multiple observations to a dataset directly from the observations table. This is useful for quickly building test datasets from production data.
+
+The field mapping system gives you control over how observation data is transformed into dataset items. You can use the entire field as-is (e.g., map the full observation input to the dataset item input), extract specific values using JSON path expressions or build custom objects from multiple fields.
+
+1. Navigate to the **Observations** table
+2. Use filters to find relevant observations
+3. Select observations using the checkboxes
+4. Click **Actions** → **Add to dataset**
+5. Choose to create a new dataset or select an existing one
+6. Configure field mapping to control how observation data maps to dataset item fields
+7. Preview the mapping and confirm
+
+Batch operations run in the background with support for partial success. If some observations fail validation against a dataset schema, valid items are still added and errors are logged for review. You can monitor progress in **Settings** → **Batch Actions**.
 
 ## Edit/archive dataset items
 

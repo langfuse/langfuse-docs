@@ -1,0 +1,95 @@
+import { Badge } from "@/components/ui/badge";
+
+# Engineering Super Day
+
+The Super Day is a full onsite day in our office where we work together with you on real problems you might tackle in your future role at Langfuse. The goal is to simulate working together for a day—a trial run for both sides to determine whether we enjoy collaborating, coding, and problem-solving together. Here is an overview on [how we work](/handbook/how-we-work/principles) as a team.
+
+
+- **Start time:** 10:30 AM
+- **Location:** [Our office](/find-us)
+- **End time:** ~5:30 PM
+
+<Steps>
+## Preparation for the Super Day
+
+We expect everyone participating in a Super Day to be genuinely interested in joining Langfuse and to have prepared for the day:
+
+**Everyone:**
+- Read the [handbook](/handbook) from top to bottom
+- Read the [documentation](/docs) to understand the product and how it works
+- Review our data models in [Postgres](https://github.com/langfuse/langfuse/blob/main/packages/shared/prisma/schema.prisma) and [Clickhouse](https://github.com/langfuse/langfuse/blob/0b8ad96b18ca4763df0a62deaac39d58a0a607c4/packages/shared/clickhouse/migrations/clustered) how we persist data. We have dedicated data model docs in our product documentation as well:
+  - [Observability data model](/docs/observability/data-model)
+  - [Evaluation data model](/docs/evaluation/experiments/data-model)
+  - [Prompt management data model](/docs/prompt-management/data-model)
+
+
+**Product & Backend Engineers:**
+- Be proficient in SQL — many of our onsite challenges rely on SQL logic
+- Local dev setup:
+    - Typescript: set up our [repository](https://github.com/langfuse/langfuse) by following the [Contributing Guide](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md)
+    - Other languages: set up a scaffold project beforehand and prepare to connect to the spawned and seeded Clickhouse database (see the [Contributing Guide](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md) for database setup)
+
+**Frontend/Design Engineers:**
+- Set up our [repository](https://github.com/langfuse/langfuse) by following the [Contributing Guide](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md)
+
+## Take-home Design Discussion Preparation
+<Callout type="info">
+**1-2 days prior to Super Day**<br/>
+Expected time investment: ~2 hours
+</Callout>
+
+You'll receive a technical challenge in PDF format describing a feature to plan for implementation.
+
+**30 minutes after receiving the challenge**, we'll have a **15-minute call** where you can ask any questions about the challenge, the product context, or clarify requirements.
+
+After the call, you should take some time to prepare for the discussion during the Super Day. More on that below. No formal document is required to be submitted.
+
+## Super Day: Design Discussion Session
+
+<Callout type="info">
+**10:30 AM - 11:45 AM** Participants: you, Max (CTO), Marc (CEO)
+</Callout>
+
+We'll discuss the feature that we sent you in advance. Imagine you're already working at Langfuse and you want to clarify your approach and trade-offs before building the feature. This means: you are in the driver's seat, you are responsible for understanding product requirements and deriving technical specifications. You are also required to make educated technical trade-offs. We are there to help you and answer any questions you have.
+
+We start the session with a 15 minutes presentation by you on the preparation and your thoughts on how to build it. From there, we will dive into the technical details and discuss trade-offs. By the end of the session, all of us should have a clear understanding of how to build this feature. You should have clarified all product and engineering specifications needed to move forward with implementation.
+
+## Super Day: Feedback
+
+<Callout type="info">
+**11:45 AM - 12:00 PM** Participants: you, Max (CTO), Marc (CEO)
+</Callout>
+
+After the morning session, Marc and Max will take a few minutes to discuss the session and provide you with feedback. We believe this is fair given the investment you're making. In the interest of time and fairness for everyone, we may decide not to continue with the afternoon session if we don't think we're a good fit for each other.
+
+
+## Super Day: Lunch
+<Callout type="info">
+**12:00 PM - 1:00 PM** Participants: you and the team
+</Callout>
+
+Meet the team for lunch, learn what they work on, and observe how they collaborate. Ask any questions you have.
+
+## Super Day: Implementation Session
+
+<Callout type="info">
+**1:00 PM - 5:15 PM** Participants: you, Max (CTO), and an engineer
+</Callout>
+
+We'll scope down something from the morning discussion to code during the afternoon session.
+
+**Process:**
+1. Pre-discussion (~30 minutes). You sit in the driver's seat and lead the scoping conversation.
+2. Implementation by yourself (~2 hours)
+3. Check-in and review (~30 minutes)
+
+</Steps>
+
+## How to succeed on the Super Day
+
+- Preparation: Prepare for the discussion by reading the documentation, understanding the product, and reviewing the data models. Prepare a plan for the implementation and come with a list of questions to ask during the discussion.
+- Show ownership and agency: Lead the discussion, drive decisions, and think end-to-end about impact and failure modes.
+- Prioritize shipping: Cut scope intelligently, avoid perfection traps, and choose practical, “good enough” solutions.
+- Stay customer-focused: Ask clarifying questions, understand the “why,” and make tradeoffs based on user value.
+- Demonstrate technical depth: Explain your reasoning, dive into details, and compare tradeoffs clearly.
+- Communicate with clarity: Be direct, efficient, and explicit about what works, what doesn’t, and where you’re unsure.

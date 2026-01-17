@@ -4,11 +4,26 @@ import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { getGitHubStars } from "@/lib/github-stars";
 import { cn } from "@/lib/utils";
 
+// Export usage stats constants
+export const SDK_INSTALLS_PER_MONTH = 23_100_000;
+export const DOCKER_PULLS = 6_000_000;
+export const FORTUNE_500_COMPANIES = 63;
+export const FORTUNE_50_COMPANIES = 19;
+
 export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
   const stats = [
-    { name: "SDK installs / month", value: 14_800_000, showPlus: true },
+    {
+      name: "SDK installs / month",
+      value: SDK_INSTALLS_PER_MONTH,
+      showPlus: true,
+    },
     { name: "GitHub stars", value: getGitHubStars(), showPlus: false },
-    { name: "Docker pulls", value: 6_000_000, showPlus: true },
+    {
+      name: "of the Fortune 50",
+      value: FORTUNE_50_COMPANIES,
+      showPlus: false,
+    },
+    { name: "Docker pulls", value: DOCKER_PULLS, showPlus: true },
   ];
 
   return (
@@ -20,9 +35,12 @@ export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
         <div className="relative">
           <EnterpriseLogoGrid />
         </div>
-        <div className="flex flex-row justify-around sm:justify-center sm:gap-10">
+        <div className="flex flex-row flex-wrap justify-around gap-6 sm:justify-center sm:gap-10">
           {stats.map((item) => (
-            <div key={item.name} className="text-center">
+            <div
+              key={item.name}
+              className="text-center flex-[1_1_45%] sm:flex-none"
+            >
               <p className="text-xl sm:text-2xl font-bold text-primary/80 font-mono">
                 <NumberTicker value={item.value} />
                 {item.showPlus && (

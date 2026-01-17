@@ -42,9 +42,9 @@ This guide describes a four-step process to **identify, categorize, and quantify
 
 ---
 
-I'll demonstrate this process using a [demo chatbot in the Langfuse documentation](/docs/demo) that uses the Vercel AI SDK and has access to a RAG tool to retrieve documents from the Langfuse documentation. The demo chat app logs traces into the Langfuse demo project and has already answered 19k user queries in the past year.
+I'll demonstrate this process using an [example chatbot in the Langfuse documentation](/docs/demo) that uses the Vercel AI SDK and has access to a RAG tool to retrieve documents from the Langfuse documentation. The example chat app logs traces into the Langfuse example project and has already answered 19k user queries in the past year.
 
-Here's the chat interface (you can find the demo chat app [here](/docs/demo)):
+Here's the chat interface (you can find the example chat app [here](/docs/demo)):
 
 <Frame className="rounded-lg overflow-hidden">
   ![Chat
@@ -53,7 +53,7 @@ Here's the chat interface (you can find the demo chat app [here](/docs/demo)):
 
 ## 1. Gather a Diverse Dataset [#gather-dataset]
 
-To start our error analysis, we assemble a representative dataset of 50-100 traces produced by the demo chat app. The quality of your analysis depends on the diversity of this initial data.
+To start our error analysis, we assemble a representative dataset of 50-100 traces produced by the example chat app. The quality of your analysis depends on the diversity of this initial data.
 
 **Existing Production Traces:** If you already have real user traces, as in our example, create your dataset based on them. I recommend first manually clicking through your traces, focusing only on the user input, and adding a diverse set of traces to an annotation queue.
 
@@ -68,7 +68,7 @@ In Langfuse, you can add traces to an annotation queue by clicking the "Add to A
 
 **Synthetic Dataset:** If you lack production data, generate a synthetic dataset covering anticipated user behaviors and potential failure points. We have a Python cookbook that shows how to do this [here](/guides/cookbook/example_synthetic_datasets). Once created, add these traces to a Langfuse Annotation Queue. Note that the quality of your dataset matters a lot for the success of your error analysis; it needs to be diverse and representative of the real world.
 
-The [Annotation Queue](/docs/evaluation/evaluation-methods/annotation#annotation-queues) we created will serve as your workspace for the analysis. For our demo chatbot, we selected 40 traces reflecting different user questions, from simple definitions to complex comparisons:
+The [Annotation Queue](/docs/evaluation/evaluation-methods/annotation#annotation-queues) we created will serve as your workspace for the analysis. For our example chatbot, we selected 40 traces reflecting different user questions, from simple definitions to complex comparisons:
 
 <Frame className="rounded-lg overflow-hidden">
   ![Annotation
@@ -87,7 +87,7 @@ For each trace, assign two annotations:
 
 If you have traces with multiple errors, focusing on the first failure is efficient. A single upstream error, like incorrect document retrieval, often causes multiple downstream issues. Fixing the root cause resolves them all. Your comment should be a raw observation, not a premature diagnosis.
 
-Here are some examples from our demo chat app:
+Here are some examples from our example chat app:
 
 import {
   Carousel,
@@ -154,7 +154,7 @@ With our error labels in place, we can now annotate our dataset with these failu
 
 First, create a new Score configuration in Langfuse containing each failure mode as a boolean or categorical option. Then, re-annotate your dataset using this new, structured schema.
 
-This labeled dataset allows you to use Langfuse analytics to pivot and aggregate the data. You can now answer critical questions like, "What is our most frequent failure mode?" For our demo chatbot, the analysis revealed that Context Retrieval Issues were the most common problem.
+This labeled dataset allows you to use Langfuse analytics to pivot and aggregate the data. You can now answer critical questions like, "What is our most frequent failure mode?" For our example chatbot, the analysis revealed that Context Retrieval Issues were the most common problem.
 
 Here are the results after labeling our dataset:
 
@@ -175,7 +175,7 @@ This error analysis produces a quantified, application-specific understanding of
 
 The structured failure modes you defined serve as the foundation for building automated evaluators, which can scale this analysis across your application. However, before setting up automated evaluators, ensure you first address the obvious issues encountered during the error analysis. You can typically go through multiple rounds of this process before reaching a plateau.
 
-In the next blog post, we will set up automated evaluators and use them to continuously improve our demo chatbot:
+In the next blog post, we will set up automated evaluators and use them to continuously improve our example chatbot:
 
 import { FileCode } from "lucide-react";
 

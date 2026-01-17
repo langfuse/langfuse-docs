@@ -1,6 +1,7 @@
 export default {
   "llm-as-a-judge": "LLM-as-a-Judge",
-  annotation: "Human Annotations",
-  "custom-scores": "Custom Scores",
-  "data-model": "Data Model",
+  "annotation-queues": "Annotation Queues",
+  "scores-via-ui": "Scores via UI",
+  "scores-via-sdk": "Scores via API/SDK",
+  "score-analytics": "Score Analytics",
 };

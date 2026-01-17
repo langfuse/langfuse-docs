@@ -1,10 +1,10 @@
 ---
-title: Comments on Objects
+title: Comments
 description: Add contextual comments to traces, observations, sessions, and prompts in Langfuse for team collaboration.
 sidebarTitle: Comments
 ---
 
-# Comments on Objects
+# Comments
 
 Comments enable teams to add contextual notes and discussions directly to traces, observations, sessions, and prompts within Langfuse. This feature facilitates collaboration by allowing team members to:
 
@@ -14,11 +14,9 @@ Comments enable teams to add contextual notes and discussions directly to traces
 - Coordinate on prompt improvements
 - Leave feedback during development and review cycles
 
-<Video
-  src="https://static.langfuse.com/docs-videos/comments.mp4"
-  aspectRatio={16 / 9}
-  gifStyle
-/>
+<Frame>
+  ![Comments with @mentions and reactions](/images/changelog/2025-10-29-comment-mentions.png)
+</Frame>
 
 ## Supported Object Types
 
@@ -45,7 +43,9 @@ Clicking the comment button opens a side drawer containing:
 
 1. **Comment Thread** - All existing comments displayed chronologically
 2. **Composer** - Text area for writing new comments (if you have write permissions)
-3. **Markdown Preview** - Real-time preview of your formatted comment
+3. **Markdown** -  Support basic markdown formatting
+4. **@Mentions** - Tag team members in comments using @mentions
+5. **Reactions** - Add emoji reactions to comments
 
 <Callout type="info">
   Comment authors can only delete their own comments. Project admins cannot
@@ -59,6 +59,8 @@ Clicking the comment button opens a side drawer containing:
 The Comments API allows programmatic access to create and retrieve comments. All endpoints follow the standard Langfuse API patterns.
 
 ```http
+GET /api/public/comments
+GET /api/public/comments/{commentId}
 POST /api/public/comments
 ```
 
@@ -67,3 +69,62 @@ POST /api/public/comments
 </Tab>
 
 </LangTabs>
+
+## @Mentions
+
+You can tag team members in comments using @mentions to notify them about important findings or discussions. This is especially useful when you need someone's attention on a specific trace, observation, or issue.
+
+### How to Use @Mentions
+
+1. Start typing `@` in the comment composer
+2. An autocomplete menu appears showing all project members
+3. Select a team member from the list or continue typing to filter
+4. The mention is inserted into your comment as a clickable badge
+
+### Email Notifications
+
+When you mention someone in a comment:
+
+- They receive an email notification with the comment content and context
+- The email includes a direct link to the object (trace, observation, session, or prompt)
+- Users can manage their notification preferences per project
+
+### Managing Notification Preferences
+
+Team members can control when they receive email notifications for mentions:
+
+- Navigate to project settings to configure notification preferences
+- Choose to enable or disable mention notifications per project
+- Preferences apply to all future mentions in that project
+
+<Callout type="info">
+  Only project members can be mentioned in comments. The autocomplete menu
+  automatically filters to show only users who have access to the current
+  project.
+</Callout>
+
+## Reactions
+
+Add emoji reactions to comments for quick acknowledgments without writing a full response. Reactions are a lightweight way to show agreement, appreciation, or simply acknowledge that you've seen a comment.
+
+### How to Add Reactions
+
+- Hover over any comment to reveal the reaction button
+- Click to select an emoji from the reaction picker
+- Your reaction appears next to the comment with your name
+- Click your existing reaction again to remove it
+
+Reactions help keep comment threads focused while still allowing team members to provide quick feedback and show engagement with the discussion.
+
+## Commenting on Specific Text
+
+You can also add comments anchored to specific text within trace and observation input, output, or metadata fields - similar to Google Docs.
+
+1. Use the "JSON Beta" view of a trace or observation
+2. Select the text you want to comment on
+3. Click the comment button that appears
+4. Your comment will be anchored to that exact selection and shown on hover
+
+This makes it easier to discuss specific parts of LLM responses or flag exact issues with teammates.
+
+Note: if the trace or observation data is updated after a comment was created, the comment becomes "detached" with a visual indicator showing the reference may have changed.

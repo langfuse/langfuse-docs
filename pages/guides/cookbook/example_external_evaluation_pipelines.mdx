@@ -84,8 +84,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -95,7 +95,7 @@ Let's go ahead and generate a list of topic suggestions that we can later query 
 
 
 ```python
-import openai
+from langfuse.openai import openai
 
 topic_suggestion = """ You're a world-class journalist, specialized
 in figuring out which are the topics that excite people the most.
@@ -126,7 +126,7 @@ Great job! You now have a list of interesting topics users might ask about. Next
 
 
 ```python
-from langfuse import observe, get_client
+from langfuse import observe, get_client, propagate_attributes
 langfuse = get_client()
 
 prompt_template = """
@@ -141,24 +141,28 @@ Question: {question}
 
 @observe()
 def explain_concept(topic):
-    langfuse.update_current_trace(
-        name=f"Explanation '{topic}'",
+
+    with propagate_attributes(
         tags=["ext_eval_pipelines"]
-    )
-    prompt = prompt_template.format(question=topic)
+    ):
 
+        prompt = prompt_template.format(question=topic)
 
-    return openai.chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content": prompt,
-            }
-        ],
-        model="gpt-4o-mini",
+        langfuse.update_current_trace(
+            name=f"Explanation '{topic}'"
+            )
 
-        temperature=0.6
-    ).choices[0].message.content
+        return openai.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            model="gpt-4o-mini",
+
+            temperature=0.6
+        ).choices[0].message.content
 
 
 for topic in topics:

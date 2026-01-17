@@ -104,8 +104,11 @@ export function PricingPage({
         {isPricingPage ? (
           <>
             <div className="relative">
-              <div className="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8 mt-16">
-                <PricingCalculator />
+              <div className={cn(
+                "mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8",
+                variant === "cloud" ? "mt-16" : "mt-0"
+              )}>
+                {variant === "cloud" && <PricingCalculator />}
                 <PricingDiscounts />
                 <PricingFAQ />
               </div>

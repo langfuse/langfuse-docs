@@ -8,7 +8,12 @@ description: Langfuse is an open source LLM engineering platform. It includes ob
 Langfuse is an **open-source LLM engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow. Langfuse is open, self-hostable, and extensible ([_why langfuse?_](/why)).
 
 import { FeatureOverview } from "@/components/FeatureOverview";
-import { TextQuote, GitPullRequestArrow, ThumbsUp, FlaskConical } from "lucide-react";
+import {
+  TextQuote,
+  GitPullRequestArrow,
+  ThumbsUp,
+  FlaskConical,
+} from "lucide-react";
 
 <FeatureOverview />
 
@@ -20,6 +25,7 @@ import { TextQuote, GitPullRequestArrow, ThumbsUp, FlaskConical } from "lucide-r
 - Support for tracking multi-turn conversations as sessions and user tracking
 - Agents can be represented as graphs
 - Capture traces via our native SDKs for Python/JS, 50+ library/framework integrations, OpenTelemetry, or via an LLM Gateway such as LiteLLM
+- Based on OpenTelemetry to increase compatibility and reduce vendor lock-in
 
 Want to see an example? Play with the [interactive demo](/docs/demo).
 
@@ -61,7 +67,7 @@ import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
 - Get started with different [evaluation methods](/docs/evaluation/overview): LLM-as-a-judge, user feedback, manual labeling, or custom
 - Identify issues early by running evaluations on production traces
 - Create and manage [Datasets](/docs/evaluation/features/datasets) for systematic testing in development that ensure your application performs reliably across different scenarios
-- Run [Experiments](/docs/evaluation/experiments/overview) to systematically test your LLM application
+- Run [Experiments](/docs/evaluation/core-concepts#experiments) to systematically test your LLM application
 
 <Callout type="info" emoji="🎥">
 

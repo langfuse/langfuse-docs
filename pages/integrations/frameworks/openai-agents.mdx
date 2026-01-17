@@ -35,8 +35,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -233,12 +233,10 @@ class LangfuseProcessor(SpanProcessor):
                 span.set_attribute("langfuse.prompt.version", prompt_info.get("version"))
 
 
-# 1) Register your processor BEFORE instantiating Langfuse
-trace.get_tracer_provider().add_span_processor(LangfuseProcessor())
-
-# 2) Now bring up Langfuse (it will attach its own span processor/exporter to the same provider)
-from langfuse import Langfuse, get_client
+from langfuse import get_client
 langfuse = get_client()
+
+trace.get_tracer_provider().add_span_processor(LangfuseProcessor())
 ```
 
 

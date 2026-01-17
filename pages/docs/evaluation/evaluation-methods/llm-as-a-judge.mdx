@@ -6,13 +6,19 @@ description: Configure, run, and monitor LLM-powered evaluators on traces and da
 
 # LLM-as-a-Judge
 
-LLM-as-a-judge is a technique to evaluate the quality of LLM applications by using an LLM as a judge. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The resulting [`scores`](/docs/evaluation/evaluation-methods/data-model) include chain-of-thought reasoning as a `comment`.
+LLM-as-a-Judge (also known as Model-based Evaluations) is an evaluation method to score the output of an application by using an LLM as an evaluator. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The resulting [`scores`](/docs/evaluation/core-concepts#scores) include chain-of-thought reasoning as a `comment`.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2025-12-19-llm-as-a-judge-overview.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
 
 ## Why use LLM-as-a-judge?
 
-- **Scalable & cost‑effective:** Judge thousands of outputs quickly and cheaply versus human panels.
-- **Human‑like judgments:** Captures nuance (helpfulness, safety, coherence) better than simple metrics, especially when rubric‑guided.
-- **Repeatable comparisons:** With a fixed rubric, you can rerun the same prompts to get consistent scores and short rationales.
+- **Scalable:** Judge thousands of outputs quickly versus human annotators.
+- **Human‑like:** Captures nuance (e.g. helpfulness, toxicity, relevance) better than simple metrics, especially when rubric‑guided.
+- **Repeatable:** With a fixed rubric, you can rerun the same prompts to get consistent scores.
 
 ## Set up step-by-step
 
@@ -26,24 +32,17 @@ Navigate to the Evaluators page and click on the `+ Set up Evaluator` button.
 
 ### Set the default model
 
-Next, you'll define the default model used for conducting the evaluations. The default is used by every managed evaluator; custom templates may override it.
+Next, define the default model used for the evaluations. This step requires an LLM Connection to be set up. Please see [LLM Connections](/docs/administration/llm-connection) for more information.
 
-<Frame fullWidth>
-  ![Evaluator default model](/images/docs/evaluator-default-model.png)
-</Frame>
-
-This step requires an LLM Connection to be set up. Please see [LLM Connections](/docs/administration/llm-connection) for more information.
-
-- **Setup**: This default model needs to be set up once, though it can be changed at any point if needed.
-- **Change**: Existing evaluators keep evaluating with the new model—historic results stay preserved.
-- **Additional Provider Options**: You can pass additional parameters when invoking a model. [Read this documentation about additional provider options](/docs/administration/llm-connection#advanced-configurations) for more information.
-- **Structured Output Support**: It's crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
+<Callout type="info">
+It's crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
+</Callout>
 
 ### Pick an Evaluator
 
 <Frame fullWidth>![Evaluator select](/images/docs/evaluator-select.png)</Frame>
 
-Now we select an evaluator. There are two main ways:
+Next, select an evaluator. There are two main ways:
 
 <Tabs items={["Managed Evaluator", "Custom Evaluator"]}>
 <Tab>
@@ -68,7 +67,7 @@ When the library doesn't fit your specific needs, add your own:
 
 ### Choose which Data to Evaluate
 
-With your evaluator and model selected, you now specify which data to run the evaluations on. You can chose between running on **production tracing data** or **Datasets during Dataset Runs**.
+With your evaluator and model selected, you now specify which data to run the evaluations on. You can choose between running on **production tracing data** or **Dataset Experiments**.
 
 <Tabs items={["Live Data", "Experiments"]}>
 <Tab>
@@ -131,23 +130,25 @@ To see your evaluator in action, you need to either [send traces](/docs/observab
   pipeline example](/docs/scores/external-evaluation-pipelines).
 </Callout>
 
-## Monitor & Iterate
+## Debug LLM-as-a-Judge Executions
 
-As our system evaluates your data it writes the results as [scores](/docs/evaluation/evaluation-methods/data-model). You can then:
+Every LLM-as-a-Judge evaluator execution creates a full trace, giving you complete visibility into the evaluation process. This allows you to debug prompt issues, inspect model responses, monitor token usage, and trace evaluation history.
 
-- **View Logs**: Check detailed logs for each evaluation, including status, any retry errors. (Tracing the request/response bodies sent to the evaluation model is on our roadmap: https://github.com/orgs/langfuse/discussions/7166).
-- **Use Dashboards**: Aggregate scores over time, filter by version or environment, and track the performance of your LLM application.
-- **Take Actions**: Pause, resume, or delete an evaluator.
+You can show the LLM-as-a-Judge execution traces by filtering for the environment `langfuse-llm-as-a-judge` in the tracing table:
 
 <Frame fullWidth>
-  ![View evaluator data](/images/docs/evaluator-overview.png)
+  ![Tracing table filtered to langfuse-llm-as-a-judge environment](/images/docs/evaluation/llm-as-a-judge-debug-traces.png)
 </Frame>
 
-## FAQ
+<details>
+<summary>LLM-as-a-Judge Execution Status</summary>
 
-import { FaqPreview } from "@/components/faq/FaqPreview";
+- **Completed**: Evaluation finished successfully.
+- **Error**: Evaluation failed (click execution trace ID for details).
+- **Delayed**: Evaluation hit rate limits by the LLM provider and is being retried with exponential backoff.
+- **Pending**: Evaluation is queued and waiting to run.
 
-<FaqPreview tags={["LLM-as-a-Judge"]} />
+</details>
 
 ## GitHub Discussions
 

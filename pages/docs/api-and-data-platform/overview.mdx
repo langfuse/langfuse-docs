@@ -30,10 +30,16 @@ import {
   Activity,
   Download,
   Cloud,
-  Sliders,
+  Blocks,
 } from "lucide-react";
 
 <Cards num={3}>
+  <Card
+    title="MCP Server"
+    href="/docs/api-and-data-platform/features/mcp-server"
+    icon={<Blocks />}
+    arrow
+  />
   <Card
     title="Public API"
     href="/docs/api-and-data-platform/features/public-api"
@@ -59,9 +65,31 @@ import {
     arrow
   />
   <Card
-    title="Export for Fine-Tuning"
-    href="/docs/api-and-data-platform/features/fine-tuning"
-    icon={<Sliders />}
+    title="Export to PostHog"
+    href="/integrations/analytics/posthog"
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-1 flex items-center justify-center">
+        <img
+          src="/images/integrations/posthog_icon.svg"
+          alt="PostHog icon"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    arrow
+  />
+  <Card
+    title="Export to Mixpanel"
+    href="/integrations/analytics/mixpanel"
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-1 flex items-center justify-center">
+        <img
+          src="/images/integrations/mixpanel_icon.svg"
+          alt="Mixpanel icon"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
     arrow
   />
 </Cards>

@@ -5,7 +5,9 @@ description: With Langfuse you can capture all your LLM evaluations in one place
 
 # Evaluation Overview
 
-Evaluation is a critical aspect of developing and deploying LLM applications. Usually, teams use a multitude of different evaluation methods to score the performance of their AI application depending on the use case and the stage of the development process.
+Evals give you a repeatable check of your LLM application's behavior. You **replace guesswork with data**.
+
+They also help you **catch regressions before you ship a change**. You tweak a prompt to handle an edge case, run your eval, and immediately see if it affected the behavior of your application in unintended ways.
 
 <Callout type="info" emoji="🎥">
 
@@ -13,118 +15,19 @@ Evaluation is a critical aspect of developing and deploying LLM applications. Us
 
 </Callout>
 
-## Why use LLM Evaluation?
 
-LLM evaluation is crucial for improving the accuracy and robustness of language models, ultimately enhancing the user experience and trust in your AI application. Here are the key benefits:
 
-- **Quality Assurance**: Detect hallucinations, factual inaccuracies, and inconsistent outputs to ensure your AI app delivers reliable results
-- **Performance Monitoring**: Measure response quality, relevance, and user satisfaction across different scenarios and edge cases
-- **Continuous Improvement**: Identify areas for enhancement and track improvements over time through structured evaluation metrics
-- **User Trust**: Build confidence in your AI application by demonstrating consistent, high-quality outputs through systematic evaluation
-- **Risk Mitigation**: Catch potential issues before they reach production users, reducing the likelihood of poor user experiences or reputational damage
+## Getting Started
 
-## Online & Offline Evaluation
+If you're new to LLM evaluation, start by exploring the [Concepts](/docs/evaluation/core-concepts) page. There's a lot to uncover, and going through the concepts before diving in will speed up your learning curve.
 
-**Offline Evaluation involves**
+Once you know what you want to do, you can:
 
-- Evaluating the application in a controlled setting
-- Typically using curated test Datasets instead of live user queries
-- Heavily used during development (can be part of CI/CD pipelines) to measure improvements / regressions
-- Repeatable and you can get clear accuracy metrics since you have ground truth.
+- [Create a dataset](/docs/evaluation/experiments/datasets) to measure your LLM application's performance consistently
+- [Run an experiment](/docs/evaluation/core-concepts#experiments) get an overview of how your application is doing
+- [Set up a live evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) to monitor your live traces
 
-**Online Evaluation involves**
-
-- Evaluating the application in a live, real-world environment, i.e. during actual usage in production.
-- Use Evaluation Methods that track success rates, user satisfaction scores, or other metrics on live traffic
-- Advantage of online evaluation is that it captures things you might not anticipate in a lab setting
-- Can include collecting implicit and explicit user feedback, and possibly running shadow tests or A/B tests
-
-**In practice, successful evaluation blends online and offline evaluations.** Many teams adopt a loop-like approach. This way, evaluation is continuous and ever-improving.
-
-<Frame fullWidth>
-  ![Continuous evaluation loop](/images/docs/evaluation/online-offline-loop.png)
-</Frame>
-
-_Adapted from: “How to continuously improve LLM products?”, Evidently_
-
-## Core Concepts
-
-| Concept                        | Description                                                                                                                                        |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Scores**                     | Scores are a flexible data object that can be used to store any evaluation metric and link it to other objects in Langfuse.                        |
-| **Evaluation Methods**         | Evaluation methods are functions or tools to assign scores to other objects.                                                                       |
-| **Datasets**                   | Datasets are a collection of inputs and, optionally, expected outputs that can be used during Experiments (formerly Dataset runs).                 |
-| **Experiments / Dataset Runs** | Experiments (formerly Dataset runs) are used to run a dataset through your LLM application and optionally apply evaluation methods to the results. |
-
-## Evaluation Methods [#evaluation-methods]
-
-Evaluation methods are functions or tools to assign evaluation `Score`s to other objects. Langfuse uses the Scores to store evaluation metrics, it is meant to be flexible to represent any evaluation metric.
-
-Langfuse currently supports: automatic scoring through **LLM-as-a-Judge**, manual **Human Annotations** or fully **Custom Scoring via API/SDKs**. We keep adding more evaluation methods fast, so stay tuned!
-
-import { Lightbulb, SquarePercent, ClipboardPen } from "lucide-react";
-
-<Cards num={1}>
-  <Card
-    icon={<Lightbulb size="24" />}
-    title="LLM-as-a-Judge"
-    href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
-    arrow
-  />
-  <Card
-    icon={<ClipboardPen size="24" />}
-    title="Human Annotations"
-    href="/docs/evaluation/evaluation-methods/annotation"
-    arrow
-  />
-  <Card
-    icon={<SquarePercent size="24" />}
-    title="Custom Scores"
-    href="/docs/evaluation/evaluation-methods/custom-scores"
-    arrow
-  />
-</Cards>
-
-Learn more about the [Scores Data Model](/docs/evaluation/evaluation-methods/data-model).
-
-## Experiments [#experiments]
-
-**Experiments** are used to loop your LLM application through **Datasets** (local or hosted on Langfuse) and **optionally apply Evaluation Methods** to the results. This lets you strategically evaluate your application and compare the performance of different inputs, prompts, models, or other parameters side-by-side against controlled conditions.
-
-In Langfuse we differentiate between **Experiments via SDK** vs. **Experiments via UI**. Experiments via UI rely on Dataset, Prompts and optionally LLM-as-a-Judge Evaluators all being on the Langfuse platform and can be thus triggered and executed directly on the platform. Experiments via SDK are fully flexible and can be triggered from any external system.
-
-For the best experiment run comparison experience, we recommend managing the underlying [Datasets](/docs/evaluation/experiments/datasets) on the Langfuse platform.
-
-import {
-  Table,
-  WandSparkles,
-  CodeXml,
-  Database,
-  MousePointerClick,
-} from "lucide-react";
-
-<Cards num={1}>
-  <Card
-    icon={<Table size="24" />}
-    title="Create a Dataset"
-    href="/docs/evaluation/experiments/datasets"
-    arrow
-  />
-  <Card
-    icon={<CodeXml size="24" />}
-    title="Experiments via SDK"
-    href="/docs/evaluation/experiments/experiments-via-sdk"
-    arrow
-  />
-  <Card
-    icon={<WandSparkles size="24" />}
-    title="Experiments via UI"
-    href="/docs/evaluation/experiments/experiments-via-ui"
-    arrow
-  />
-</Cards>
-
-Learn more about the [Experiments Data Model](/docs/evaluation/experiments/data-model).
+Looking for something specific? Take a look under _Evaluation Methods_ and _Experiments_ for guides on specific topics.
 
 ## GitHub Discussions
 

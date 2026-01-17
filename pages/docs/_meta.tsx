@@ -6,7 +6,7 @@ export default {
     title: <MenuSwitcher />,
   },
   index: "Overview",
-  demo: "Interactive Demo",
+  demo: "Example Project",
   "ask-ai": "Ask AI",
 
   "-- Get Started": {
@@ -49,7 +49,7 @@ export default {
   },
   roadmap: "Roadmap",
   "docs-mcp": "Docs MCP Server",
-  references: "References",
+  references: "SDK & API References",
 
   "security-compliance": {
     title: "Security & Compliance ↗",

@@ -18,6 +18,23 @@ Please include the following details in your report:
 
 We will acknowledge receipt of your report, typically within 2 business days, and will work with you to understand and resolve the issue.
 
+## Focus Areas
+
+- Improper or missing authorization checks
+- Insecure role assignments or privilege escalation
+- Ability to access resources or perform actions outside assigned permissions, especially across organizations
+
+## Out of Scope
+
+The following issues are considered out of scope and will not be accepted:
+
+- **Denial of Service (DoS)** attacks, including volumetric attacks or repetitive API calls based on captured frontend calls
+- **Missing rate limiting** without demonstrating a concrete security impact
+- **Automated scanner output** without manual verification or a working proof of concept
+- **Missing security headers** (e.g., CSP, X-Frame-Options) without a demonstrated exploit or missing Secure/HttpOnly flag on non-sensitive cookies
+- **Unsolicited messages** Testing that would result in sending spam or other unsolicited messages to Langfuse users
+- **Social engineering** or phishing attacks against Langfuse employees or users
+
 ## Our Commitment
 
 - We will investigate reported vulnerabilities promptly.
@@ -33,12 +50,19 @@ Please note that we **currently do not operate a formal bug bounty program** wit
 
 We appreciate the efforts of security researchers who help keep Langfuse secure. The following individuals have responsibly disclosed vulnerabilities that led to improvements:
 
-| Reported by                                             | PR with fix                                             | Description                                    |
-| ------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------- |
-| [Ather Iqbal](https://linkedin.com/in/atheriqbalhacker) | [#4434](https://github.com/langfuse/langfuse/pull/4434) | Password complexity + block links in user name |
-| [Milan Jain](https://linkedin.com/in/milan-jain-scriptkiddie-50a738213) | [#6703](https://github.com/langfuse/langfuse/pull/6703) | Hyperlink injection in organization invite email |
-| [pyozzi](https://www.linkedin.com/in/sang-yeong-pyo-0411a6207) | [#8821](https://github.com/langfuse/langfuse/pull/8821) | SSRF vulnerability in webhooks |
-| [depthfirst](https://www.depthfirst.com) | [#9027](https://github.com/langfuse/langfuse/pull/9027), [#9028](https://github.com/langfuse/langfuse/pull/9028) | Protect background migration endpoints |
+| Reported by                                                                                                                 | PR with fix                                                                                                                                                    | Description                                                                             |
+|-----------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [Ather Iqbal](https://linkedin.com/in/atheriqbalhacker)                                                                     | [#4434](https://github.com/langfuse/langfuse/pull/4434)                                                                                                        | Password complexity + block links in user name                                          |
+| [Milan Jain](https://linkedin.com/in/milan-jain-scriptkiddie-50a738213)                                                     | [#6703](https://github.com/langfuse/langfuse/pull/6703)                                                                                                        | Hyperlink injection in organization invite email                                        |
+| [pyozzi](https://www.linkedin.com/in/sang-yeong-pyo-0411a6207)                                                              | [#8821](https://github.com/langfuse/langfuse/pull/8821)                                                                                                        | SSRF vulnerability in webhooks                                                          |
+| [depthfirst](https://www.depthfirst.com)                                                                                    | [#9027](https://github.com/langfuse/langfuse/pull/9027), [#9028](https://github.com/langfuse/langfuse/pull/9028)                                               | Protect background migration endpoints                                                  |
+| [Carsten Csiky](https://github.com/csicar/)                                                                                 | [#10223](https://github.com/langfuse/langfuse/pull/10223)                                                                                                      | Do not expose resolved but blocked IPs in user facing error messages.                   |
+| [Team-DisclosureX Cybrgen](https://linkedin.com/company/cybrgen-limited/), [J Sonali](https://www.linkedin.com/in/j-sonali) | [#10136](https://github.com/langfuse/langfuse/pull/10136), [CVE-2025-64504](https://github.com/langfuse/langfuse/security/advisories/GHSA-94hf-6gqq-pj69)      | Cross‑organization enumeration of member & invitation lists via project membership APIs |
+| [David Bors at Snyk Security Labs](https://www.linkedin.com/in/davidxbors/)                                                 | [#10426](https://github.com/langfuse/langfuse/pull/10426), [GHSA-w9pw-c549-5m6w](https://github.com/langfuse/langfuse/security/advisories/GHSA-w9pw-c549-5m6w) | SSO Account Takeover via CSRF or phishing attack                                        |
+| [Sankalp Tripathi](https://linkedin.com/in/sankalp-tripathi-9bbb982b9)                                                      | [#10603](https://github.com/langfuse/langfuse/pull/10603)                                                                                                      | Hyperlink injection in welcome email                                                    |
+| [Ophir Silverman (BleuCPU)](https://bleucpu.com/)                                                                           | [#10866](https://github.com/langfuse/langfuse/pull/10866)                                                                                                      | Denial of Service using expensive loop rendering in LLM as a Judge                      |
+| [Faizan Raza / Kolega.dev](https://kolega.dev)                                                                              | [#11311](https://github.com/langfuse/langfuse/pull/11311)                                                                                                      | SSRF vulnerability in Posthog Integration                                               |
+| [Faizan Raza / Kolega.dev](https://kolega.dev)                                                                              | [#11395](https://github.com/langfuse/langfuse/pull/11395)                                                                                                      | Unencrypted Blob Storage Integration Secret in Postgres when created via API            |
 
 ## Contact
 

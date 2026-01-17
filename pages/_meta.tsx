@@ -7,6 +7,14 @@ export default {
       layout: "raw",
     },
   },
+  wrapped: {
+    type: "page",
+    title: "Langfuse Wrapped 2025",
+    display: "hidden",
+    theme: {
+      layout: "raw",
+    },
+  },
   imprint: {
     title: "Imprint",
     type: "page",
@@ -102,6 +110,13 @@ export default {
     title: "Handbook",
     // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
   },
+  changelog: {
+    type: "page",
+    title: "Changelog",
+    theme: {
+      layout: "full",
+    },
+  },
   pricing: {
     title: "Pricing",
     type: "page",
@@ -112,14 +127,6 @@ export default {
   "pricing-self-host": {
     title: "Pricing (self-hosted)",
     type: "page",
-    theme: {
-      layout: "full",
-    },
-    display: "hidden",
-  },
-  changelog: {
-    type: "page",
-    title: "Changelog",
     theme: {
       layout: "full",
     },
@@ -143,12 +150,11 @@ export default {
   },
   "watch-demo": {
     type: "page",
-    title: "Demo",
-    theme: {
-      layout: "full",
-      timestamp: false,
-    },
+    title: "Watch Demo",
     display: "hidden",
+    theme: {
+      layout: "raw",
+    },
   },
   "talk-to-us": {
     type: "page",
@@ -245,6 +251,15 @@ export default {
   },
   "oss-friends": {
     title: "OSS Friends",
+    type: "page",
+    display: "hidden",
+    theme: {
+      typesetting: "article",
+      timestamp: false,
+    },
+  },
+  "press": {
+    title: "Press",
     type: "page",
     display: "hidden",
     theme: {

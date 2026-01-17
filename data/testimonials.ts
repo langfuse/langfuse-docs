@@ -3,7 +3,7 @@ export interface Testimonial {
   name: string;
   handle: string;
   avatar: string;
-  platform: "xcom" | "producthunt";
+  platform: "xcom" | "producthunt" | "linkedin";
   content: string;
   postURL?: string;
 }
@@ -38,6 +38,15 @@ export const testimonials: Testimonial[] = [
   },
   {
     id: "4",
+    name: "Jorge Torres",
+    handle: "CEO @ MindsDB",
+    avatar: "/images/walloflove/jorgetorres.jpeg",
+    platform: "linkedin",
+    content: "One of my fav products! Long Live Langfuse, we use it everywhere in MindsDB",
+    postURL: "https://www.linkedin.com/posts/torresjorge_day-4-of-launch-week-brings-major-upgrades-activity-7392403428108521472-6eIQ?utm_source=share&utm_medium=member_desktop&rcm=ACoAACSW1FMBTZYGJkOLhe4YZmjH3MXAurzFFsk",
+  },
+  {
+    id: "5",
     name: "Viktor Sarstrom",
     handle: "@viktorsarstrom",
     avatar: "/images/walloflove/vicstor.jpg",
@@ -46,7 +55,7 @@ export const testimonials: Testimonial[] = [
     postURL: "https://x.com/viktorsarstrom/status/1941093292319670527",
   },
   {
-    id: "5",
+    id: "6",
     name: "Othmane Zoheir",
     handle: "@othmanezoheir",
     avatar: "/images/walloflove/othmane.jpg",
@@ -55,7 +64,7 @@ export const testimonials: Testimonial[] = [
     postURL: "https://www.producthunt.com/products/langfuse/reviews?review=964209",
   },
   {
-    id: "6",
+    id: "7",
     name: "Nadeesha Cabral",
     handle: "SVP of Engineering",
     avatar: "/images/walloflove/nadeesha.png",
@@ -64,7 +73,7 @@ export const testimonials: Testimonial[] = [
     postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=209822",
   },
   {
-    id: "7",
+    id: "8",
     name: "Roman Geugelin",
     handle: "@RGeugelin",
     avatar: "/images/walloflove/RomanGeugelin.avif",
@@ -73,7 +82,7 @@ export const testimonials: Testimonial[] = [
     postURL: "https://www.producthunt.com/products/langfuse/reviews?review=1274265",
   },
   {
-    id: "8",
+    id: "9",
     name: "Jackson Golden",
     handle: "AI Engineer",
     avatar: "/images/walloflove/jackson.avif",
@@ -82,7 +91,7 @@ export const testimonials: Testimonial[] = [
     postURL: "https://www.producthunt.com/products/langfuse/reviews?review=1105948",
   },
   {
-    id: "9",
+    id: "10",
     name: "Feliks Ghazaryan",
     handle: "Founder at Symvol",
     avatar: "/images/walloflove/FeliksGhazaryan.avif",
@@ -91,7 +100,7 @@ export const testimonials: Testimonial[] = [
     postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=290737",
   },
   {
-    id: "10",
+    id: "11",
     name: "Grant Sloane",
     handle: "@rolling__sloane",
     avatar: "/images/walloflove/grantsloane.jpeg",

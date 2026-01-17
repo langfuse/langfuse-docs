@@ -4,17 +4,16 @@ import Env from "@/components-mdx/env-python.mdx";
 pip install langfuse
 ```
 
-Add you Langfuse credentials as environment variables.
-
+Set your Langfuse credentials as environment variables so the SDK knows which project to write to.
 <Env />
 
-Change the import to use the OpenAI drop-in replacement.
+Swap the regular OpenAI import to Langfuse’s OpenAI drop-in. It behaves like the regular OpenAI client while also recording each call for you.
 
 ```python
 from langfuse.openai import openai
 ```
 
-Use the OpenAI SDK as usual.
+Use the OpenAI SDK as you normally would. The wrapper captures the prompt, model and output and forwards everything to Langfuse.
 
 ```python
 completion = openai.chat.completions.create(

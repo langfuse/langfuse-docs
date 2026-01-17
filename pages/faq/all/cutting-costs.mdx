@@ -7,7 +7,7 @@ tags: [platform, cloud]
 
 Langfuse Cloud [pricing](/pricing) is based on the number of ingested units per billing period.
 
-`Units = Traces + Observations + Scores` ([data model](/docs/tracing-data-model))
+`Units = Traces + Observations + Scores` ([data model](/docs/administration/billable-units))
 
 Most cost spikes result from ingesting **too many traces or overly verbose observations**.
 You can **cut costs quickly by sampling fewer traces or logging only essential data**—all while preserving your core insights.
@@ -29,7 +29,7 @@ Every observation within a trace counts toward your unit total. Some observation
 2. Update your integration/instrumentation to exclude these observations.
    - For most integrations, you define which observations are created. Thus, you can remove them by updating your instrumentation.
    - If you use the Python SDK (v3, OpenTelemetry-based), all OpenTelemetry spans are exported to Langfuse by default. If some observations are not relevant, you can [filter out observations by instrumentation scope](/docs/sdk/python/sdk-v3#filtering-by-instrumentation-scope).
-   - If you use the JS SDK (v4, OpenTelemetry-based), you can [filter out irrelevant spans and observations](/docs/observability/sdk/typescript/advanced-usage#filtering-spans). 
+   - If you use the JS SDK (v4, OpenTelemetry-based), you can [filter out irrelevant spans and observations](/docs/observability/sdk/advanced-features#filter-exported-spans). 
 
 ## Option 2: Sample fewer traces
 
