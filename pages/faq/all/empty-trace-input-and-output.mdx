@@ -41,7 +41,7 @@ By default, trace input/output is copied from the observation at the top level (
 
 This means:
 - If your root observation has input/output → the trace will too
-- If your root observation has no input/output → your trace will be empty
+- If your root observation has no input/output → your trace will be empty (unless you set it explicitly, see [below](#solution-b))
 
 This is why your trace might show empty fields even though you can see data in the individual observations inside it.
 
@@ -156,6 +156,8 @@ span.end();
 ```
 </Tab>
 </Tabs>
+
+<span id="solution-b"></span>
 
 **Solution B**: Set input/output directly on the trace
 
