@@ -1,0 +1,236 @@
+---
+title: Glossary
+description: A comprehensive glossary of key terms and concepts used in Langfuse documentation.
+---
+
+# Glossary
+
+This glossary provides definitions for key terms and concepts used throughout the Langfuse documentation.
+
+## Agent
+
+An [observation type](/docs/observability/features/observation-types) that represents an AI agent which decides on the application flow and can use tools with the guidance of an LLM. Agents are used to model complex decision-making workflows.
+
+## Agent Graphs
+
+A [visual representation](/docs/observability/features/agent-graphs) of complex AI agent workflows in Langfuse. Agent graphs help you understand and debug multi-step reasoning processes and agent interactions by displaying the flow of observations within a trace.
+
+## Annotation Queues
+
+A manual [evaluation method](/docs/evaluation/evaluation-methods/annotation-queues) that allows domain experts to review and add scores and comments to traces, observations, or sessions. Useful for building ground truth, systematic labeling, and team collaboration.
+
+## API Keys
+
+Credentials used to authenticate with the Langfuse API. API keys consist of a public key and secret key and are associated with a specific [project](/docs/administration/rbac). They are managed in project settings.
+
+## Chain
+
+An [observation type](/docs/observability/features/observation-types) that represents a link between different application steps, such as passing context from a retriever to an LLM call.
+
+## Chat Prompt
+
+A [prompt type](/docs/prompt-management/data-model#text-vs-chat-prompts) that consists of an array of messages with specific roles (system, user, assistant). Useful for managing complete conversation structures and chat history.
+
+## Cost Tracking
+
+The ability to [track and analyze costs](/docs/observability/features/token-and-cost-tracking) associated with LLM usage. Langfuse can ingest or infer costs based on token usage and model definitions, providing breakdowns by usage type.
+
+## Custom Dashboards
+
+[Flexible, self-service analytics dashboards](/docs/metrics/features/custom-dashboards) that allow you to visualize and monitor metrics from your LLM application. Dashboards support multiple chart types, filtering, and multi-level aggregations.
+
+## Dataset
+
+A [collection of test cases](/docs/evaluation/experiments/datasets) (dataset items) used to test and benchmark LLM applications. Datasets contain inputs and optionally expected outputs for systematic testing.
+
+## Dataset Item
+
+An [individual test case](/docs/evaluation/experiments/data-model#datasetitem-object) within a dataset. Each item contains an input (the scenario to test) and optionally an expected output.
+
+## Dataset Run
+
+Also known as an [Experiment Run](/docs/evaluation/experiments/data-model#datasetrun-experiment-run). The execution of a dataset through your LLM application, producing outputs that can be evaluated. Links dataset items to their corresponding traces.
+
+## Embedding
+
+An [observation type](/docs/observability/features/observation-types) that represents a call to an LLM to generate embeddings. Can include model information, token usage, and costs.
+
+## Environment
+
+A way to [organize traces, observations, and scores](/docs/observability/features/environments) from different deployment contexts (e.g., production, staging, development). Helps keep data separate while using the same project.
+
+## Evaluator
+
+An [observation type](/docs/observability/features/observation-types) that represents functions assessing the relevance, correctness, or helpfulness of LLM outputs. Also refers to the function that scores experiment results.
+
+## Evaluation
+
+The process of [measuring quality and reliability](/docs/evaluation/overview) of LLM applications. Langfuse supports multiple evaluation methods including LLM-as-a-Judge, human annotation, and custom scores.
+
+## Event
+
+A basic [observation type](/docs/observability/features/observation-types) used to track discrete events in a trace. Events are the building blocks of tracing.
+
+## Experiment
+
+The process of [running your application against a dataset](/docs/evaluation/core-concepts#experiments) and evaluating the outputs. Used to test changes before deploying to production.
+
+## Flush
+
+The process of [sending buffered trace data](/docs/observability/sdk/instrumentation#client-lifecycle--flushing) to the Langfuse server. Important for short-lived applications to ensure no data is lost when the process terminates.
+
+## Generation
+
+An [observation type](/docs/observability/features/observation-types) that logs outputs from AI models including prompts, completions, token usage, and costs. The most common observation type for LLM calls.
+
+## Guardrail
+
+An [observation type](/docs/observability/features/observation-types) that represents a component protecting against malicious content, jailbreaks, or other [security risks](/docs/security-and-guardrails).
+
+## Instrumentation
+
+The process of [adding code to record application behavior](/docs/observability/sdk/instrumentation). Langfuse provides context managers, observe wrappers, and manual observation methods for instrumenting your application.
+
+## LLM Connection
+
+An [API key configuration](/docs/administration/llm-connection) that allows Langfuse to call LLM models in the Playground or for LLM-as-a-Judge evaluations. Supports providers like OpenAI, Anthropic, and Google.
+
+## LLM-as-a-Judge
+
+An [evaluation method](/docs/evaluation/evaluation-methods/llm-as-a-judge) that uses an LLM to score the output of your application based on custom criteria. Provides scalable, repeatable evaluations with chain-of-thought reasoning.
+
+## Masking
+
+A feature that allows [redacting sensitive information](/docs/observability/features/masking) from inputs and outputs before sending data to the Langfuse server. Important for compliance and protecting user privacy.
+
+## Metadata
+
+[Custom key-value pairs](/docs/observability/features/metadata) that can be added to observations for better filtering, segmentation, and analysis. Can be propagated to child observations within a context.
+
+## Metrics
+
+[Actionable insights](/docs/metrics/overview) derived from observability and evaluation traces. Include quality scores, cost and latency measurements, and volume statistics.
+
+## MCP Server
+
+A [Model Context Protocol server](/docs/api-and-data-platform/features/mcp-server) that enables AI-powered tools to interact with Langfuse data. Used for advanced integrations and AI-assisted workflows.
+
+## Observation
+
+An [individual step within a trace](/docs/observability/data-model). Observations can be of different types (span, generation, event, tool, etc.) and can be nested to represent hierarchical workflows.
+
+## Offline Evaluation
+
+[Testing your application against a fixed dataset](/docs/evaluation/core-concepts#the-evaluation-loop) before deployment. Used to validate changes and catch regressions during development.
+
+## Online Evaluation
+
+[Scoring live production traces](/docs/evaluation/core-concepts#online-evaluation) to catch issues in real traffic. Helps identify edge cases and monitor application quality in production.
+
+## OpenTelemetry
+
+An [open standard](/docs/observability/data-model#built-on-opentelemetry) for collecting telemetry data from applications. Langfuse is built on OpenTelemetry, enabling interoperability and reducing vendor lock-in.
+
+## Organization
+
+A [top-level entity](/docs/administration/rbac) in Langfuse that contains projects. Organizations manage users, billing, and access controls.
+
+## Playground
+
+The [LLM Playground](/docs/prompt-management/features/playground) where you can test, iterate, and compare different prompts and models directly in Langfuse without writing code.
+
+## Project
+
+A container that [groups all Langfuse data](/docs/administration/rbac) within an organization. Projects enable fine-grained role-based access control and separate data for different applications.
+
+## Prompt
+
+The instructions sent to an LLM. In [Langfuse Prompt Management](/docs/prompt-management/overview), prompts are versioned, labeled, and can include variables for dynamic content.
+
+## Prompt Management
+
+A [systematic approach](/docs/prompt-management/overview) to storing, versioning, and retrieving prompts for LLM applications. Decouples prompt updates from code deployment.
+
+## Public API
+
+The [REST API](/docs/api-and-data-platform/features/public-api) that provides access to all Langfuse data and features. Used for custom integrations, workflows, and programmatic access.
+
+## RBAC
+
+[Role-Based Access Control](/docs/administration/rbac) that manages permissions within Langfuse. Roles include Owner, Admin, Member, Viewer, and None, each with specific scopes.
+
+## Release
+
+A tag that [tracks the overall version](/docs/observability/features/releases-and-versioning) of your application (e.g., semantic version or git commit hash). Used to correlate traces with application deployments.
+
+## Retriever
+
+An [observation type](/docs/observability/features/observation-types) that represents data retrieval steps, such as calls to vector stores or databases in RAG applications.
+
+## Sampling
+
+[Controlling the volume of traces](/docs/observability/features/sampling) collected by Langfuse. Configured via sample rate to reduce data volume and costs while maintaining representative coverage.
+
+## Score
+
+The [output of an evaluation](/docs/evaluation/experiments/data-model#scores). Scores can be numeric, categorical, or boolean and are assigned to traces, observations, sessions, or dataset runs.
+
+## Score Config
+
+A [configuration defining how a score](/docs/evaluation/experiments/data-model#score-config) is calculated and interpreted. Includes data type, value constraints, and categories for standardized scoring.
+
+## SDK
+
+Software Development Kit. Langfuse provides [native SDKs](/docs/observability/sdk/overview) for Python and JavaScript/TypeScript that handle tracing, prompt management, and API access.
+
+## Session
+
+A way to [group related traces](/docs/observability/features/sessions) that are part of the same user interaction. Commonly used for multi-turn conversations or chat threads.
+
+## Span
+
+An [observation type](/docs/observability/features/observation-types) that represents the duration of a unit of work in a trace. The default observation type for most operations.
+
+## Tags
+
+[Flexible labels](/docs/observability/features/tags) that categorize and filter traces and observations. Useful for organizing by feature, API endpoint, workflow, or other criteria.
+
+## Task
+
+A [function definition](/docs/evaluation/experiments/data-model#task) that processes dataset items during an experiment. The task represents the application code you want to test.
+
+## Text Prompt
+
+A [prompt type](/docs/prompt-management/data-model#text-vs-chat-prompts) that consists of a single string. Ideal for simple use cases or when you only need a system message.
+
+## Token Tracking
+
+The ability to [track token usage](/docs/observability/features/token-and-cost-tracking) across LLM generations. Langfuse captures input and output tokens and can infer usage using built-in tokenizers.
+
+## Tool
+
+An [observation type](/docs/observability/features/observation-types) that represents a tool call in your application, such as calling a weather API or executing a database query.
+
+## Trace
+
+A [single request or operation](/docs/observability/data-model) in your LLM application. Traces contain the overall input, output, and metadata, along with nested observations that capture each step.
+
+## Tracing
+
+The process of [capturing structured logs](/docs/observability/overview) of every request in your LLM application. Includes prompts, responses, token usage, latency, and any intermediate steps.
+
+## User Feedback
+
+[Collecting feedback from users](/docs/observability/features/user-feedback) on LLM outputs. Can be explicit (ratings, comments) or implicit (behavior signals). Captured as scores linked to traces.
+
+## User Tracking
+
+The ability to [associate traces with users](/docs/observability/features/users) via a userId. Enables per-user analytics, cost tracking, and filtering.
+
+## Variables
+
+[Placeholders in prompts](/docs/prompt-management/features/variables) that are dynamically filled at runtime. Allow creating reusable prompt templates with customizable content.
+
+## Version
+
+A parameter that [tracks changes to observations](/docs/observability/features/releases-and-versioning) with a specific name. Used to measure the impact of changes to individual components within your application.
