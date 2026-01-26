@@ -517,10 +517,10 @@ with langfuse.trace(name="my-operation", user_id="user-123", session_id="session
 
 {/* JS/TS */}
 ```typescript
-import { startTrace } from "@langfuse/tracing";
-
-startTrace({ name: "my-operation", userId: "user-123", sessionId: "session-456" }, (trace) => {
-  // Your code here
+propagateAttributes({ userId: "user_123" }, async () => {
+  const result = await startActiveObservation("parent", async (parentSpan) => {
+    // your code here
+  });
 });
 ```
 
