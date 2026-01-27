@@ -194,7 +194,8 @@ span.end();
 
 **How to fix this**
 
-If using Sentry, see the [Sentry integration guide](/faq/all/existing-sentry-setup).
+- If using Sentry, see the [Sentry integration guide](/faq/all/existing-sentry-setup).
+- If you're deploying to AWS Bedrock AgentCore, the runtime's ADOT auto-instrumentation may be intercepting your SDK calls. See [AWS Bedrock AgentCore (ADOT)](#aws-bedrock-agentcore-adot).
 
 For other tools, you have two options:
 
@@ -467,6 +468,10 @@ sdk.start();
 
 **Warning about filtering:** If you filter out a span that's a parent of other spans, the children will appear as orphaned top-level traces. This is especially common when filtering out web framework spans (like `fastapi`) that wrap your LLM calls. See [Orphaned Traces](#orphaned-traces) below.
 
+<Callout type="info">
+If you're deploying to **AWS Bedrock AgentCore** and seeing health check spans (`/ping`, `/health`), see [AWS Bedrock AgentCore (ADOT)](#aws-bedrock-agentcore-adot) for how to filter them out.
+</Callout>
+
 ### Orphaned or Disconnected Traces [#orphaned-traces]
 
 Traces in Langfuse appear as standalone items when they should be nested under a parent, or you see broken [hierarchies](#context-parent-child).
@@ -517,10 +522,10 @@ with langfuse.trace(name="my-operation", user_id="user-123", session_id="session
 
 {/* JS/TS */}
 ```typescript
-import { startTrace } from "@langfuse/tracing";
-
-startTrace({ name: "my-operation", userId: "user-123", sessionId: "session-456" }, (trace) => {
-  // Your code here
+propagateAttributes({ userId: "user_123" }, async () => {
+  const result = await startActiveObservation("parent", async (parentSpan) => {
+    // your code here
+  });
 });
 ```
 
@@ -613,3 +618,34 @@ logfire.configure(
 ### Datadog / Honeycomb / Jaeger / Zipkin / Grafana Tempo
 
 These use standard OTEL configurations. Use either an [isolated TracerProvider](/docs/observability/sdk/advanced-features#isolated-tracer-provider) or [span filtering](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) depending on your needs.
+
+### AWS Bedrock AgentCore (ADOT) [#aws-bedrock-agentcore-adot]
+
+When deploying to [AWS Bedrock AgentCore](/integrations/frameworks/amazon-agentcore), the runtime automatically injects ADOT (AWS Distro for OpenTelemetry). This creates a situation where **OTEL is imposed by the deployment environment** rather than something you configure yourself.
+
+**Common symptoms:**
+
+- Standard Langfuse SDK callbacks (like LangChain's `CallbackHandler`) work locally but produce no traces when deployed to AgentCore
+- ADOT manages telemetry at the runtime level, potentially intercepting or bypassing SDK HTTP calls
+- All HTTP traffic gets instrumented, including health checks (`/ping`) which appear as unwanted spans
+
+**Solution:**
+
+Instead of relying on Langfuse SDK callbacks, configure the ADOT collector to send traces directly to Langfuse. Pass these environment variables when launching your AgentCore agent:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic $(echo -n 'pk-xxx:sk-xxx' | base64)"
+```
+
+To filter out health check spans and other unwanted instrumentation:
+
+```bash
+OTEL_PYTHON_EXCLUDED_URLS="/ping,/health"
+```
+
+This applies regardless of which framework (LangChain, LlamaIndex, Strands, etc.) you use on AgentCore.
+
+<Callout type="info">
+For a complete integration guide with code examples, see the dedicated [Amazon Bedrock AgentCore integration page](/integrations/frameworks/amazon-agentcore).
+</Callout>
