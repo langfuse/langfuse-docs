@@ -638,6 +638,10 @@ Since Langchain version > 0.3.0, the callbacks on which Langfuse relies have bee
 
 Read more about awaiting callbacks here in the [Langchain docs](https://js.langchain.com/docs/how_to/callbacks_serverless).
 
+### AWS Bedrock AgentCore
+
+When deploying LangChain applications to AWS Bedrock AgentCore, the runtime's ADOT (AWS Distro for OpenTelemetry) auto-instrumentation requires OTEL configuration instead of relying solely on the Langfuse callback handler. See [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup#aws-bedrock-agentcore-adot) for configuration details, or the full [Amazon Bedrock AgentCore integration guide](/integrations/frameworks/amazon-agentcore).
+
 ### Azure OpenAI model names
 
 Please add the `model` keyword argument to the `AzureOpenAI` or `AzureChatOpenAI` class to have the model name parsed correctly in Langfuse.
