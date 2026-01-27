@@ -258,6 +258,15 @@ export default {
       timestamp: false,
     },
   },
+  "press": {
+    title: "Press",
+    type: "page",
+    display: "hidden",
+    theme: {
+      typesetting: "article",
+      timestamp: false,
+    },
+  },
   about: {
     title: "About us",
     type: "page",
