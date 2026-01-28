@@ -631,18 +631,18 @@ When deploying to [AWS Bedrock AgentCore](/integrations/frameworks/amazon-agentc
 
 **Solution:**
 
-Instead of relying on Langfuse SDK callbacks, configure the ADOT collector to send traces directly to Langfuse. Pass these environment variables when launching your AgentCore agent:
+Instead of relying on Langfuse SDK callbacks, disable ADOT and configure your own OTEL exporter to send traces to Langfuse. Pass these environment variables when launching your AgentCore agent:
 
 ```bash
+# 1. Disable AgentCore's built-in ADOT tracing
+DISABLE_ADOT_OBSERVABILITY=true
+
+# 2. Configure your own OTEL exporter to Langfuse
 OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
 OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic $(echo -n 'pk-xxx:sk-xxx' | base64)"
 ```
 
-To filter out health check spans and other unwanted instrumentation:
-
-```bash
-OTEL_PYTHON_EXCLUDED_URLS="/ping,/health"
-```
+For US region, use `https://us.cloud.langfuse.com/api/public/otel` as the endpoint.
 
 This applies regardless of which framework (LangChain, LlamaIndex, Strands, etc.) you use on AgentCore.
 
