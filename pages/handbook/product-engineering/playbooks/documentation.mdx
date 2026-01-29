@@ -31,6 +31,25 @@ Good reads:
 - [Posthog _How we write docs?_](https://posthog.com/handbook/content/docs)
 - [Mintlify Docs Guide](https://www.mintlify.com/guides/introduction)
 
+## Redirects when moving or renaming pages
+
+When you move or rename a documentation page, always add a redirect from the old URL to the new one. This preserves user experience (bookmarks, shared links) and SEO (search engines transfer ranking to the new URL).
+
+**Where:** All redirects live in [lib/redirects.js](https://github.com/langfuse/langfuse-docs/blob/master/lib/redirects.js). Next.js and Cloudflare Pages both use this file.
+
+**How:**
+
+1. For page moves/renames, use **permanent redirects** (they are applied as 301 so search engines update their index).
+2. At the bottom of `lib/redirects.js`, add a new dated constant (e.g. `myPageMoveRedirects202601`) with a short comment describing the change.
+3. Add one or more `[oldPath, newPath]` tuples. Paths are relative to the site root (e.g. `/docs/evaluation/data-model` → `/docs/evaluation/experiments/data-model`). You can include hash fragments for specific sections (e.g. `"/docs/foo#section"`).
+4. Spread your new constant into the `permanentRedirects` array.
+
+**Important:** Permanent redirects can only be added, not removed (browsers and search engines may cache them). Use a descriptive constant name and comment so future readers understand why the redirect exists.
+
+**Example prompt for Cursor / Claude Code:** You can ask the AI to add redirects for all page changes on your current branch. Copy-paste something like:
+
+> Look at the git diff on my current branch for the `pages/` directory. For every file that was moved or renamed (or whose path changed), add a permanent redirect in `lib/redirects.js`: old URL → new URL. Use the same pattern as existing redirects: create a new dated constant (e.g. `myChangeRedirects202601`) with a short comment, add `[oldPath, newPath]` tuples (paths relative to site root, e.g. `/docs/foo` not `pages/docs/foo.mdx`), and spread it into the `permanentRedirects` array. Only add redirects for pages that actually changed path; do not add redirects for edits to existing files.
+
 ## Changelog
 
 For new capabilities and updates, we write [changelog](/changelog) posts.
