@@ -1,55 +1,94 @@
 ---
-title: LangSmith Alternative? Langfuse vs. LangSmith
+title: LangSmith Alternative? Langfuse vs. LangSmith for LLM Observability
 description: Langfuse is an open-source alternative to LangSmith. This article compares Langfuse and LangSmith for LLM observability, analytics, evaluations, testing, and annotation.
 tags: [comparison, integration-langchain]
 ---
 
-# LangSmith Alternative? Langfuse vs. LangSmith
+# Langfuse vs. LangSmith
 
-## Is Langfuse a LangSmith Alternative?
+This guide outlines the key differences between **[Langfuse](/)** and **[LangSmith](https://www.langchain.com/langsmith)** to help engineering teams choose the right LLM observability platform.
 
-The answer is yes, Langfuse is an open-source alternative to LangSmith.
+**TL;DR:**
 
-## How do LangSmith and Langfuse compare?
+* **Choose Langfuse** if you prioritize **Open Source** (MIT), data sovereignty (full self-hosting), a framework-agnostic approach (works with any stack), and transparent unit-based pricing.
+* **Choose LangSmith** if you are an **"All-in-LangChain"** shop requiring a managed SaaS solution that offers deep, native integration for deploying LangGraph agents ("DevOps-in-a-box").
 
-LangSmith and Langfuse are broadly similar products. They provide LLM observability, analytics, evaluations, testing and annotation.
+## Open Source & Distribution
 
-## What are the main differences between Langfuse and LangSmith
+Langfuse operates on an "Open Core" model where the platform is open source (MIT) and self-hosting is a first-class citizen. LangSmith is a proprietary, closed-source SaaS tool; while it offers a self-hosted option, it is gated strictly behind an Enterprise license.
 
-- Langfuse is open source while **LangSmith is a closed source project**.
-- LangSmith is developed by the LangChain team and integrates very well with the LangChain framework. While Langfuse also maintains [Langchain integrations](/integrations/frameworks/langchain), you may be better of choosing LangSmith if you plan to exclusively develop using the Langchain and Langgraph frameworks. Based on a recent [report](https://blog.langchain.dev/langchain-state-of-ai-2024/) by the LangChain team, **out of all LangSmith users, 84.3% use `langchain` frameworks and 84.7% use Python.**
-- Langfuse maintains a [large number of integrations](/integrations) into many frameworks and libraries.
-- Langfuse can be [freely self hosted](/self-hosting) at no cost while LangSmith needs to be purchased to be self hosted.
+| Feature | Langfuse | LangSmith |
+| --- | --- | --- |
+| **Model** | **[Open Source](https://github.com/langfuse/langfuse)** (MIT License) | **Proprietary SaaS** (Closed Source Backend) |
+| **GitHub Stars** | [](https://github.com/langfuse/langfuse) | Nhttps://www.google.com/search?q=/A (Server source code is not public) |
+| **Self-Hosting** | **First-Class Citizen**: Full feature parity with Cloud. Free to deploy via [Docker/Helm](https://www.google.com/search?q=/self-hosting). | **Enterprise Only**: Requires a sales contract and license key. |
+| **Data Sovereignty** | **High**: Can run fully air-gapped on own VPC without vendor contact. | **Medium**: "Hybrid" deployment available for Enterprise; SaaS defaults to Cloud. |
 
-## Langfuse Overview
+## Scalability & Performance
 
-Langfuse is an open source LLM engineering platform that provides a comprehensive tracing solution for AI agents and LLM applications. Langfuse helps teams to understand and debug complex LLM applications and evaluate and iterate them in production.
+Both platforms utilize ClickHouse for high-scale analytics. However, Langfuse's architecture is natively built on ClickHouse (and recently acquired by ClickHouse Inc.), whereas LangSmith abstracts this infrastructure behind a managed SaaS layer.
 
-[Here is a LangGraph example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/23338c52-350d-4efb-89ca-82d759828b1d?observation=b9374ddc-6485-4b01-b3b5-64a46607f05b)
+| Feature | Langfuse | LangSmith |
+| --- | --- | --- |
+| **Backend** | **[ClickHouse](https://clickhouse.com/)**: Native OLAP architecture for high-throughput observability. | **ClickHouse + Postgres**: Enterprise-scale architecture managed by LangChain. |
+| **Ingestion** | **Async Queue**: Decoupled Redis queue + generic workers for reliability. | **Queue-Based**: Stateless backend designed for horizontal scaling. |
 
-## Is Langfuse related to LangSmith and Langchain?
+## Integrations
 
-No, Langfuse is independent from LangSmith and Langchain. LangSmith is a commercial offering by the same company that develops the open source Langchain LLM application framework.
+LangSmith's primary strength is its vertical integration with the LangChain framework. Langfuse positions itself as "Switzerland"—a neutral, framework-agnostic platform built on OpenTelemetry standards.
 
-While Langfuse [integrates](/integrations/frameworks/langchain) with the open source Langchain framework, the two organizations are separate and bear not relation. Langfuse and LangSmith operate in the same space and both try to help developers improve and iterate on their LLM applications.
+| Feature | Langfuse | LangSmith |
+| --- | --- | --- |
+| **Standard** | **[OpenTelemetry Native](https://www.google.com/search?q=/docs/observability/overview)**: Architecture built on OTel standards. | **Supported**: Supports OTel ingestion, but features optimize for native SDK. |
+| **LangChain** | **High Support**: Native `CallbackHandler` drop-in integration. | **Native**: Default observability backend for LangChainhttps://www.google.com/search?q=/LangGraph. |
+| **Frameworks** | **Broad Support**: Native integrations for LlamaIndex, Haystack, LiteLLM, Dify, Flowise, etc. | **Ecosystem Focused**: Deepest support for LangChainhttps://www.google.com/search?q=/LangGraph; others via OTel. |
 
-## Is LangSmith open source?
+## Pricing
 
-LangSmith is a closed source product. It is developed by the Langchain team which is developing the Langchain application framework in open source.
+The economic models differ significantly. Langfuse charges based on the *depth* of data (Units), while LangSmith charges based on the *volume of root executions* (Traces), largely ignoring internal steps.
 
-## Can you self-host LangSmith?
+| Feature | Langfuse | LangSmith |
+| --- | --- | --- |
+| **Model** | **[Unit-Based](https://www.google.com/search?q=/docs/administration/billable-units)**: 1 Unit = 1 Trace, Observation, or Score. | **Trace-Based**: Charges per root run (internal steps included). |
+| **Best For** | **Cost-Efficiency**: Cheaper for high-volume, shallow chains (e.g., RAG chatbots). | **Deep Agents**: Cheaper for highly recursive, complex agents (e.g., 50+ step autonomous loops). |
+| **Free Tier** | **50,000 unitshttps://www.google.com/search?q=/mo** (highly generous for developers). | **5,000 traceshttps://www.google.com/search?q=/mo**. |
+| **Plans** | [Free, Core ($29/mo), Pro ($199/mo), Enterprise](https://www.google.com/search?q=/pricing). | [Developer (Free), Plus ($39/seat/mo), Enterprise](https://www.langchain.com/pricing). |
 
-LangSmith can be self-hosted but it requires [a paid Enterprise License](https://www.langchain.com/pricing-langsmith) to do so. It is a closed source project.
+## Open Platform & Extensibility
 
-Langfuse can be freely [self-hosted](/self-hosting) and is open source. Users can self-host the FOSS (Free and Open Source) version of Langfuse, while a paid Enterprise Edition with some additional features is also available.
+Langfuse is API-first, allowing teams to treat observability data as their own. LangSmith focuses on extending the LangChain ecosystem via the Hub.
 
-## Langfuse and LangSmith Comparisons
+| Feature | Langfuse | LangSmith |
+| --- | --- | --- |
+| **API Access** | **Full CRUD**: Public API for Traces, Spans, Scores, and Prompts. | **Readhttps://www.google.com/search?q=/Write**: API available for runs and datasets. |
+| **Data Export** | **[Blob Storage Export](https://www.google.com/search?q=/docs/api-and-data-platform/features/export-to-blob-storage)**: Automated dumps to S3https://www.google.com/search?q=/GCP (JSONLhttps://www.google.com/search?q=/Parquet). | **Bulk Export**: Available on paid plans. |
+| **Ecosystem** | **Neutral**: Integrates with any LLM stack or gateway. | **LangChain Hub**: Native integration for prompt sharing. |
 
-- Independent Consultancy Astral Insights has written up a report comparing LangSmith and Langfuse. You can find it [here](https://astralinsights.ai/comparison-of-observability-platforms-LangSmith-langfuse/)
-- Atla-AI has written up a review of LLM Evaluation Tooling, comparing [LangSmith and Langfuse](https://www.atla-ai.com/post/llm-evaluation-tooling-review)
-- There is a Reddit thread in which users discuss [Alternatives to LangSmith](https://www.reddit.com/r/LangChain/comments/1b2y18p/LangSmith_started_charging_time_to_compare/).
-- Another Reddit thread discusses [free Alternatives to LangSmith](https://www.reddit.com/r/LocalLLaMA/comments/1aujfiz/real_free_alternative_to_LangSmith/)
+## Enterprise Security
+
+Both platforms are enterprise-ready with major certifications. Langfuse offers ISO 27001 in addition to SOC 2, and allows for easier air-gapped compliance via open-source self-hosting.
+
+| Feature | Langfuse | LangSmith |
+| --- | --- | --- |
+| **Certifications** | **[SOC 2 Type II, ISO 27001](https://www.google.com/search?q=/security)**, GDPR, HIPAA aligned. | [SOC 2 Type II, GDPR, HIPAA](https://docs.langchain.com/langsmith/pricing-faq). |
+| **Adoption** | Trusted by **19 of Fortune 50** & 63 of Fortune 500. | Wide adoption among LangChain enterprise users. |
+| **Governance** | [SSO](https://www.google.com/search?q=/docs/administration/authentication-and-sso), [RBAC](https://www.google.com/search?q=/docs/administration/rbac) available in Teamshttps://www.google.com/search?q=/Enterprise. | SSO, RBAC available in Enterprise plans. |
+
+## Feature Highlights
+
+**Langfuse:**
+
+* **[Model Agnosticism](https://www.google.com/search?q=/docs/integrations/overview):** Works equally well with OpenAI SDK, LiteLLM, LlamaIndex, or raw HTTP calls.
+* **[Prompt Management](https://www.google.com/search?q=/docs/prompt-management/overview):** Agnostic playground that doesn't lock you into a specific framework's syntax.
+* **[Evaluations](https://www.google.com/search?q=/docs/evaluation/overview):** "LLM-as-a-judge" evaluators that run on your own infrastructure or via the managed service.
+* **[ClickHouse Native](https://www.google.com/search?q=/blog/2024-12-langfuse-v3-infrastructure-evolution):** Unrestricted access to raw data via SQL (in self-hosted) for custom analytics.
+
+**LangSmith:**
+
+* **[LangGraph Deployment](https://www.langchain.com/langsmith/deployment):** A specialized runtime to deploy LangGraph agents as APIs (DevOps capabilities).
+* **Zero-Setup Tracing:** Automatic instrumentation for LangChain applications via environment variables.
+* **[The Hub](https://www.google.com/search?q=https://smith.langchain.com/hub):** Access to a community repository of prompts.
 
 ## This comparison is out of date?
 
-Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/pages/faq/all) with up to date information.
+Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/pages/faq/all) with up-to-date information.
