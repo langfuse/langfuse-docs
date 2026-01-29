@@ -1,0 +1,285 @@
+---
+title: "Evaluator Migration Guide"
+date: 2026/01/29
+description: Upgrade your trace-level evaluators to observation-level for improved performance and reliability
+tag: guide
+author: Marlies
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Evaluator Migration Guide"
+  description="Upgrade your trace-level evaluators to observation-level for improved performance and reliability"
+  date="January 29, 2026"
+  authors={["marliesmayerhofer"]}
+/>
+
+## Overview
+
+Langfuse has introduced running evaluators on observations as the recommended approach for live data LLM-as-a-Judge evaluations. This guide helps you migrate existing live data evaluators to the new system.
+
+## Why Migrate?
+
+### Benefits of Observation-Level Evaluators
+
+**1. Better Performance**
+- Reduced database load enables faster evaluation processing
+- Scales better under high-volume workloads
+
+**2. Improved Reliability**
+- More predictable behavior with evaluation targeting specific operations
+- Better error handling and retry logic
+
+**3. Greater Control**
+- Evaluate specific observations (LLM calls, tool invocations, etc.) rather than entire traces
+- More precise filtering
+- Easier debugging when evaluations fail
+
+**4. Future-Proof**
+- Built on Langfuse's next-generation evaluation architecture
+
+### Understanding the Trade-offs
+
+We recognize this migration may require work on your end. Here's our perspective:
+
+- **You can keep running evaluators on traces**: They will continue to work for the foreseeable future
+- **Some users benefit more than others**: High-volume users or those with complex traces will see the biggest improvements
+- **This enables long-term improvements**: The architectural change allows us to build better, simpler features for everyone
+- **We're here to help**: Use the built-in migration wizard and this guide
+
+## When to Migrate
+
+### ✅ Migrate Now If:
+- You are running on or planning to upgrade to SDK >= 4.4.0 (JavaScript) or >= 3.9.0 (Python)
+- You are experiencing performance issues with current evaluators
+- You are setting up new evaluators and want the best experience
+
+### ⏸️ Wait If:
+- You are blocked from upgrading to SDK >= 4.4.0 (JavaScript) or >= 3.9.0 (Python)
+- Your current evaluators perfectly for your use case
+
+## Migration Process
+
+### Step 1: Check Your SDK Version
+
+Ensure you're running a compatible SDK version:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tab>
+```bash
+pip show langfuse
+# Required: >= 3.9.0
+```
+
+To upgrade:
+```bash
+pip install --upgrade langfuse
+```
+</Tab>
+
+<Tab>
+```bash
+npm list langfuse
+# Required: >= 4.4.0
+```
+
+To upgrade:
+```bash
+npm install langfuse@latest
+```
+</Tab>
+</Tabs>
+
+### Step 2: Use the Upgrade Wizard
+
+Langfuse provides a built-in wizard to migrate your evaluators.
+
+1. **Navigate to your evaluators page**
+   - Go to your project → Evaluation → LLM-as-a-Judge
+   - You'll see a callout for evaluators marked "Legacy"
+
+2. **Click "Upgrade" on any legacy evaluator**
+   - This opens the migration wizard
+   - The wizard shows your current configuration on the left
+
+3. **Review the migrated configuration**
+   - **Left side**: Your current (legacy) configuration (read-only)
+   - **Right side**: Proposed configuration (editable)
+
+4. **Adjust the new configuration**
+   - **Filters**: Add filters to narrow down the evaluation to a specific subset of data you're interested in (`observation type`, `trace name`, `trace tags`, `userId`, `sessionId`, `metadata` etc.)
+   - **Variable Mapping**: Map variables from observation fields (input, output, metadata) to your evaluation prompt
+
+5. **Choose what happens to the old evaluator**
+   - **Keep both active**: Test the new evaluator alongside the old one
+   - **Mark old as inactive (recommended initially)**: Old evaluator stops running, new one takes over
+   - **Delete old evaluator**: Permanently remove the legacy evaluator
+
+### Step 3: Verify Evaluator Execution
+
+Verify the new evaluator works correctly:
+
+1. **Check execution metrics**
+   - Go to Evaluator Table → find new evaluator row → click "Logs"
+   - View execution logs
+
+2. **Compare results** (if running both)
+   - Review scores from both legacy and new evaluators. You might find our [score analytics](/docs/evaluation/evaluation-methods/score-analytics) helpful to compare the results.
+   - Ensure consistency in evaluation logic
+
+## Migration Examples
+
+### Example 1: Simple Trace Evaluator
+
+**Before (Trace-level)**:
+```
+Target: Traces
+Filter: trace.name = "chat-completion"
+Variables:
+  - user_query: trace.input
+  - assistant_response: trace.output
+```
+
+**After (Observation-level)**:
+```
+Target: Observations
+Filter: observation.type = "generation" AND observation.name = "chat-completion" AND metadata.env = "production"
+Variables:
+  - user_query: observation.input
+  - assistant_response: observation.output
+```
+
+**Key Changes**:
+- Now targets specific observation type ("generation")
+- Filters at observation level instead of trace level
+- Variables come from observation instead of trace
+
+### Example 2: Complex Multi-Step Trace
+
+**Before (Trace-level)**:
+```
+Target: Traces
+Filter: trace.name = "research-agent"
+Variables:
+  - user_query: trace.input
+  - final_result: generation[name="summarize"].output
+  - tool_calls: tool[name="web_search"].output
+```
+
+**After (Observation-level)**:
+```
+Target: Observations
+Filter: observation.type = "generation" AND observation.name = "summarize"
+Variables:
+  - user_query: observation.input  # Now from the observation itself
+  - final_result: observation.output
+  - context: observation.metadata.context  # Reference to related data
+```
+
+**Key Changes**:
+- Now evaluates each summarization operation independently
+- Variables simplified to single observation's data
+- More granular evaluation of each step in the agent workflow
+
+### Example 3: Experiment Evaluator (Old SDK → New SDK)
+
+**Before (Old SDK - "dataset")**:
+```
+Target: Offline Experiments (old SDK version)
+SDK Version: < 4.4.0
+Variables:
+  - prompt: experiment_item.input
+  - response: experiment_item.output
+  - expected: experiment_item.expected_output
+```
+
+**After (New SDK - "experiment")**:
+```
+Target: Offline Experiments (new SDK version)
+SDK Version: >= 4.4.0
+Variables:
+  - prompt: experiment_item.input
+  - response: experiment_item.output
+  - expected: experiment_item.expected_output
+```
+
+**Key Changes**:
+- Upgraded to new SDK version for better performance
+- Same variable mapping, but runs on improved architecture
+
+## Troubleshooting
+
+### "No trace data found" Error
+
+**Problem**: Migration wizard can't find sample trace data
+
+**Solution**:
+- Adjust your filters to match existing data
+- Ensure you have recent traces that match your filter criteria
+- Try widening your filter temporarily to see sample data
+
+### Variables Don't Map Correctly
+
+**Problem**: Variables from trace can't be directly mapped to observations
+
+**Solution**:
+- Use JSON path selectors to extract nested data (e.g., `$.context.user_id`)
+- Break complex traces into multiple observation-level evaluators
+- Store necessary context in observation metadata during instrumentation
+
+### Performance Differences
+
+**Problem**: New evaluator runs slower/faster than expected
+
+**Solution**:
+- Check if you're evaluating more observations than expected (use filters)
+- Review sampling settings (may need adjustment for observation level)
+- Monitor for a few days as the new system optimizes
+
+## SDK Version-Specific Guidance
+
+### For Users on Old SDK Versions (< 4.4.0)
+
+You have two options:
+
+**Option 1: Upgrade Your SDK** (Recommended)
+1. Update to latest SDK version
+2. Migrate evaluators using the wizard
+
+**Option 2: Continue with Evaluators Running on Traces**
+- No changes needed
+- Evaluators will continue to work
+- Note: You won't get performance improvements
+
+### For Users on New SDK Versions (>= 4.4.0)
+
+If you have existing trace-level evaluators:
+
+**Option 1: Migrate to Observations** (Recommended)
+- Follow the migration wizard
+- Get full benefits of new architecture
+
+**Option 2: Keep Trace Evaluators with Manual Updates**
+- Call `update_trace_io()` in your SDK code to set trace input/output
+- This maintains backward compatibility
+- Note: Extra SDK call required
+
+## Getting Help
+
+- **Documentation**: Refer to [LLM-as-a-Judge guide](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+- **Discord**: Join our [Discord community](https://discord.gg/langfuse) for migration support
+- **GitHub**: Report issues at [github.com/langfuse/langfuse](https://github.com/langfuse/langfuse)
+- **Support**: Contact support@langfuse.com for enterprise customers
+
+## Rollback Plan
+
+If you need to revert after migration:
+
+1. **If you kept both evaluators**: Simply mark the new one as inactive
+2. **If you deleted the old evaluator**: Create a new trace-level evaluator with the old configuration
+3. **Data is preserved**: All historical evaluation results remain accessible
+
+---
+
+*Last updated: January 29, 2026*
