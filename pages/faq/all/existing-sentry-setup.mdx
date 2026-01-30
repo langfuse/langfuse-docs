@@ -119,7 +119,8 @@ If you don't need distributed tracing across Sentry and Langfuse spans, you can 
 
 ```typescript
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
-import { LangfuseSpanProcessor, setLangfuseTracerProvider } from "@langfuse/tracing";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { setLangfuseTracerProvider } from "@langfuse/tracing";
 import * as Sentry from "@sentry/node";
 
 // Sentry uses its own automatic OTEL setup
