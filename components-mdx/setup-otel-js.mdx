@@ -4,6 +4,27 @@ Install the OpenTelemetry SDK, which the Langfuse integration uses under the hoo
 npm install @opentelemetry/sdk-node
 ```
 
+**Configure OpenTelemetry environment variables**
+
+Before initializing the SDK, you need to set up the OpenTelemetry exporter environment variables. These tell OpenTelemetry where to send the traces and how to authenticate with Langfuse.
+
+Add the following environment variables to your `.env` file or environment:
+
+```bash filename=".env"
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU region
+# OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel" # 🇺🇸 US region
+
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <base64_encoded_auth>"
+```
+
+To generate the base64 encoded authentication string, use the following command in your terminal:
+
+```bash
+echo -n "pk-lf-...:sk-lf-..." | base64
+```
+
+Replace `pk-lf-...` and `sk-lf-...` with your actual `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` values. Then replace `<base64_encoded_auth>` in the `OTEL_EXPORTER_OTLP_HEADERS` with the output from the command above.
+
 Next is initializing the Node SDK. You can do that either in a dedicated instrumentation file or directly at the top of your main file.
 
 
