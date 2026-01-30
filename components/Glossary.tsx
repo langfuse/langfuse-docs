@@ -746,7 +746,7 @@ export const Glossary = () => {
           </button>
         </div>
       ) : (
-        Object.entries(groupedTerms)
+        (Object.entries(groupedTerms) as [string, GlossaryTerm[]][])
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([letter, terms]) => (
             <div key={letter} id={`letter-${letter}`} className="mb-6">
