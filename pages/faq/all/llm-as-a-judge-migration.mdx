@@ -1,6 +1,5 @@
 ---
-title: Evaluator Migration Guide
-description: Upgrade your trace-level evaluators to observation-level for improved performance and reliability
+title: How do I migrate my trace-level evaluators to observation-level evaluators?
 tags: [evaluation, llm-as-a-judge]
 ---
 
@@ -146,7 +145,7 @@ Variables:
 - Additional filters at observation level to identify the specific observation you want to evaluate in the trace tree
 - Variables come from observation instead of trace (e.g. `observation.input` and `observation.output`)
 
-### Example 2: Complex Multi-Step Trace
+{/* ### Example 2: Complex Multi-Step Trace
 
 **Before (Trace-level)**:
 ```
@@ -197,7 +196,7 @@ Variables:
 
 **Key Changes**:
 - Upgraded to new SDK version for better performance
-- Same variable mapping, but runs on improved architecture
+- Same variable mapping, but runs on improved architecture */}
 
 ## Troubleshooting
 
@@ -212,7 +211,7 @@ Variables:
 
 ## SDK Version-Specific Guidance
 
-### For Users on Old SDK Versions (< 4.4.0)
+### For Users on Old SDK Versions (Python < 3.9.0, JavaScript < 4.4.0)
 
 You have two options:
 
@@ -223,20 +222,15 @@ You have two options:
 **Option 2: Continue with Evaluators Running on Traces**
 - No changes needed
 - Evaluators will continue to work
-- Note: You won't get performance improvements
+- Note: You may continue using trace evaluators on the new SDK version, but you will not get performance improvements.
 
-### For Users on New SDK Versions (>= 4.4.0)
+### For Users on New SDK Versions (Python >= 3.9.0, JavaScript >= 4.4.0)
 
 If you have existing evaluators running on traces:
 
 **Option 1: Migrate to Observations** (Recommended)
 - Follow the migration wizard
 - Get full benefits of new architecture
-
-**Option 2: Keep Trace Evaluators with Manual Updates**
-- Call `update_trace_io()` in your SDK code to set trace input/output
-- This maintains backward compatibility
-- Note: Extra SDK call required
 
 ## Getting Help
 
