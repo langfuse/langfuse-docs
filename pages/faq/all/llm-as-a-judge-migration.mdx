@@ -7,6 +7,26 @@ tags: [evaluation, llm-as-a-judge]
 
 Langfuse has introduced running evaluators on observations as the recommended approach for live data LLM-as-a-Judge evaluations. This guide helps you migrate existing live data evaluators to the new system.
 
+## Prerequisites
+
+### SDK Requirements for Observation-Level Evaluators (Live Data)
+
+| Requirement | Python | JS/TS |
+|-------------|--------|-------|
+| **Minimum SDK version** | v3+ (OTel-based) | v4+ (OTel-based) |
+| **Migration guide** | [Python v2 → v3](/docs/observability/sdk/upgrade-path#python-sdk-v2--v3) | [JS/TS v3 → v4](/docs/observability/sdk/upgrade-path#jsts-sdk-v3--v4) |
+
+**Filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `trace_name`), you must use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code.
+
+### SDK Requirements for Experiments via SDK
+
+| Requirement | Python | JS/TS |
+|-------------|--------|-------|
+| **Minimum SDK version** | >= 3.9.0 | >= 4.4.0 |
+| **Required function** | [`run_experiment()`](/docs/evaluation/experiments/experiments-via-sdk) | [`experiment.run()`](/docs/evaluation/experiments/experiments-via-sdk) |
+
+You must use the experiment runner SDK functions listed above. Simply having the correct SDK version is not sufficient.
+
 ## Why Migrate?
 
 ### Benefits of Observation-Level Evaluators
@@ -39,42 +59,32 @@ We recognize this migration may require work on your end. Here's our perspective
 ## When to Migrate
 
 ### ✅ Migrate Now If:
-- You are running on or planning to upgrade to SDK >= 4.4.0 (JavaScript) or >= 3.9.0 (Python)
+- You are using the OTel-based SDKs (Python v3+ or JS/TS v4+)
 - You are experiencing performance issues with current evaluators
 - You are setting up new evaluators and want the best experience
 
 ### ⏸️ Wait If:
-- You are blocked from upgrading to SDK >= 4.4.0 (JavaScript) or >= 3.9.0 (Python)
-- Your current evaluators perfectly for your use case
+- You are still using the legacy SDKs (Python v2 or JS/TS v3)
+- Your current evaluators work perfectly for your use case
 
 ## Migration Process
 
-### Step 1: Check Your SDK Version
+### Step 1: Verify SDK Version
 
-Ensure you're running a compatible SDK version:
+Confirm you are using the OTel-based SDKs (see [Prerequisites](#prerequisites) above):
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tab>
 ```bash
 pip show langfuse
-# Required: >= 3.9.0
-```
-
-To upgrade:
-```bash
-pip install --upgrade langfuse
+# Required: v3+
 ```
 </Tab>
 
 <Tab>
 ```bash
 npm list langfuse
-# Required: >= 4.4.0
-```
-
-To upgrade:
-```bash
-npm install langfuse@latest
+# Required: v4+
 ```
 </Tab>
 </Tabs>
@@ -202,35 +212,30 @@ Variables:
 
 ### Variables Don't Map Correctly
 
-**Problem**: You were mapping variables from two different observations 
+**Problem**: You were mapping variables from two different observations
 
 **Solution**:
 - If possible, store necessary context in a single observation metadata during instrumentation
 - Consider breaking your single trace evaluator into multiple observation evaluators
-- Do not migrate your evaluator now. We do not yet have a translation for the new system, but are actively working on it. 
+- Do not migrate your evaluator now. We do not yet have a translation for the new system, but are actively working on it.
 
 ## SDK Version-Specific Guidance
 
-### For Users on Old SDK Versions (Python < 3.9.0, JavaScript < 4.4.0)
+### For Users on Legacy SDKs (Python v2, JS/TS v3)
 
 You have two options:
 
-**Option 1: Upgrade Your SDK** (Recommended)
-1. Update to latest SDK version
-2. Migrate evaluators using the wizard
+**Option 1: Upgrade to OTel-based SDK** (Recommended)
+1. Upgrade to Python SDK v3+ or JS/TS SDK v4+ (see [Prerequisites](#prerequisites))
+2. Update your instrumentation code using the migration guides
+3. Migrate evaluators using the wizard
 
 **Option 2: Continue with Evaluators Running on Traces**
-- No changes needed
-- Evaluators will continue to work
-- Note: You may continue using trace evaluators on the new SDK version, but you will not get performance improvements.
+- No changes needed—trace-level evaluators will continue to work
 
-### For Users on New SDK Versions (Python >= 3.9.0, JavaScript >= 4.4.0)
+### For Users on OTel-based SDKs (Python v3+, JS/TS v4+)
 
-If you have existing evaluators running on traces:
-
-**Option 1: Migrate to Observations** (Recommended)
-- Follow the migration wizard
-- Get full benefits of new architecture
+If you have existing evaluators running on traces, we recommend migrating to observation-level evaluators using the wizard above to get the full benefits of the new architecture.
 
 ## Getting Help
 
@@ -248,4 +253,4 @@ If you need to revert after migration:
 
 ---
 
-*Last updated: January 29, 2026*
+*Last updated: January 30, 2026*
