@@ -10,46 +10,46 @@ This guide outlines the key differences between **[Langfuse](/)** and **[LangSmi
 
 **TL;DR:**
 
-* **Choose Langfuse** if you prioritize **Open Source** (MIT), data sovereignty (full self-hosting), a framework-agnostic approach (works with any stack), and transparent unit-based pricing.
-* **Choose LangSmith** if you are an **"All-in-LangChain"** shop requiring a managed SaaS solution that offers deep, native integration for deploying LangGraph agents ("DevOps-in-a-box").
+* **Choose Langfuse** if you prioritize Open Source (MIT), data sovereignty (full self-hosting), a framework-agnostic approach (works with any stack), and transparent unit-based pricing.
+* **Choose LangSmith** if you are an "All-in-LangChain" shop requiring a managed SaaS solution that offers deep, native integration for deploying LangChain and LangGraph agents.
 
 ## Open Source & Distribution
 
-Langfuse operates on an "Open Core" model where the platform is open source (MIT) and self-hosting is a first-class citizen. LangSmith is a proprietary, closed-source SaaS tool; while it offers a self-hosted option, it is gated strictly behind an Enterprise license.
+Langfuse is open source (MIT) and self-hosting is a first-class citizen. LangSmith is a proprietary, closed-source SaaS tool; while it offers a self-hosted option, it requires an Enterprise license.
 
 | Feature | Langfuse | LangSmith |
 | --- | --- | --- |
-| **Model** | **[Open Source](https://github.com/langfuse/langfuse)** (MIT License) | **Proprietary SaaS** (Closed Source Backend) |
+| **Model** | **[Open Source](https://github.com/langfuse/langfuse)** (MIT License) | **Proprietary SaaS** (Closed Source) |
 | **GitHub Stars** | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | N/A |
 | **Self-Hosting** | **First-Class Citizen**: Full feature parity with Cloud. | **Enterprise Only**: Requires a sales contract and license key. |
 | **Data Sovereignty** | **High**: Can run fully air-gapped on own VPC without vendor contact. | **Medium**: "Hybrid" deployment available for Enterprise; SaaS defaults to Cloud. |
 
 ## Scalability & Performance
 
-Both platforms utilize ClickHouse for high-scale analytics. However, Langfuse's architecture is natively built on ClickHouse (and recently acquired by ClickHouse Inc.), whereas LangSmith abstracts this infrastructure behind a managed SaaS layer.
+Both platforms utilize ClickHouse for high-scale analytics. Langfuse is [part of ClickHouse](https://langfuse.com/blog/joining-clickhouse) and works closely with the core database team to ensure highest performance and reliability.
 
 | Feature | Langfuse | LangSmith |
 | --- | --- | --- |
-| **Backend** | **[ClickHouse](https://clickhouse.com/)** (Langfuse is part of ClickHouse) | **ClickHouse** |
+| **Backend** | **[ClickHouse](https://clickhouse.com/)** ([acquired Langfuse](https://langfuse.com/blog/joining-clickhouse)) | **ClickHouse** |
 | **Ingestion** | **Async Queue**: Decoupled Redis queue + generic workers for reliability. | **Queue-Based**: Stateless backend designed for horizontal scaling. |
 
 ## Integrations
 
-LangSmith's primary strength is its vertical integration with the LangChain framework. Langfuse positions itself as "Switzerland"—a neutral, framework-agnostic platform built on OpenTelemetry standards.
+LangSmith's primary strength is its vertical integration with the LangChain framework. Langfuse positions itself as an open and framework-agnostic platform built on [OpenTelemetry](https://opentelemetry.io/docs/) standards.
 
 | Feature | Langfuse | LangSmith |
 | --- | --- | --- |
-| **Standard** | **[OpenTelemetry Native](/docs/observability/overview)**: Architecture built on OTel standards. | **Supported**: Supports OTel ingestion, but features optimize for native SDK. |
-| **Frameworks** | Integrations with 80+ frameworks and model providers (OpenAI, Vercel AI SDK, LangChain, etc.) | **Ecosystem Focused**: Deepest support for LangChain/LangGraph; others via OTel. |
+| **Standard** | **[OpenTelemetry Native](/docs/observability/overview)**: SDKs built on OpenTelemetry. | **Supported**: Supports OTel ingestion; features optimized for native SDK. |
+| **Frameworks** | Integrations with **80+ frameworks** and model providers (OpenAI, Vercel AI SDK, LangChain, etc.) | **Ecosystem Focused**: Deepest support for LangChain/LangGraph; others via wrappers and OTel. |
 
 ## Pricing
 
-The economic models differ significantly. Langfuse charges based on the *depth* of data (Units), while LangSmith charges based on the *volume of root executions* (Traces), largely ignoring internal steps.
+The economic models differ significantly. Langfuse charges based on the depth of data (Units), while LangSmith charges based on the volume of root executions (Traces).
 
 | Feature | Langfuse | LangSmith |
 | --- | --- | --- |
 | **Model** | **[Unit-Based](/docs/administration/billable-units)**: 1 Unit = 1 Trace, Observation, or Score. | **Trace-Based**: Charges per root run (internal steps included). |
-| **Free Tier** | **50,000 units/mo** (highly generous for developers). | **5,000 traces/mo**. |
+| **Free Tier** | 50,000 units/mo | 5,000 traces/mo. |
 | **Plans** | [Free, Core ($29/mo), Pro ($199/mo), Enterprise](/pricing). | [Developer (Free), Plus ($39/seat/mo), Enterprise](https://www.langchain.com/pricing). |
 
 ## Open Platform & Extensibility
@@ -58,9 +58,8 @@ Langfuse is API-first, allowing teams to treat observability data as their own. 
 
 | Feature | Langfuse | LangSmith |
 | --- | --- | --- |
-| **API Access** | **Full CRUD**: Public API for Traces, Spans, Scores, and Prompts. | **Read/Write**: API available for runs and datasets. |
+| **API Access** | **API first**: Full CRUD for Traces, Spans, Scores, and platform features. | **Read/Write**: API available to query traces and datasets. |
 | **Data Export** | **[Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage)**: Automated dumps to S3/GCP (JSONL/Parquet). | **Bulk Export**: Available on paid plans. |
-| **Ecosystem** | **Neutral**: Integrates with any LLM stack or gateway. | **LangChain Hub**: Native integration for prompt sharing. |
 
 ## Enterprise Security
 
@@ -68,7 +67,7 @@ Both platforms are enterprise-ready with major certifications. Langfuse offers I
 
 | Feature | Langfuse | LangSmith |
 | --- | --- | --- |
-| **Certifications** | **[SOC 2 Type II, ISO 27001](/security)**, GDPR, HIPAA aligned. | [SOC 2 Type II, GDPR, HIPAA](https://docs.langchain.com/langsmith/pricing-faq). |
+| **Certifications** | [SOC 2 Type II, ISO 27001](/security), GDPR, HIPAA aligned. | [SOC 2 Type II, GDPR, HIPAA](https://docs.langchain.com/langsmith/pricing-faq). |
 | **Adoption** | Trusted by **19 of Fortune 50** & 63 of Fortune 500. | Wide adoption among LangChain enterprise users. |
 | **Governance** | [SSO](/docs/administration/authentication-and-sso), [RBAC](/docs/administration/rbac) available in Teams/Enterprise plans. | SSO, RBAC available in Enterprise plans. |
 
@@ -87,6 +86,6 @@ Both platforms are enterprise-ready with major certifications. Langfuse offers I
 * **Zero-Setup Tracing:** Automatic instrumentation for LangChain applications via environment variables.
 * **[The Hub](https://smith.langchain.com/hub):** Access to a community repository of prompts.
 
-## This comparison is out of date?
-
-Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/pages/faq/all) with up-to-date information.
+<Callout type="info">
+  This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/pages/faq/all) with up-to-date information.
+</Callout>
