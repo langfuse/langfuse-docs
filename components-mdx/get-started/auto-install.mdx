@@ -5,15 +5,23 @@ import DocsMcpServerInstallation from "@/components-mdx/docs-mcp-server-installa
   This feature is experimental. Please share feedback or issues on [GitHub](/issues).
 </Callout>
 
-**Install the Langfuse Docs MCP Server (optional)**
+**Option 1: Use the Langfuse Observability Skill**
 
-The agent will use the Langfuse `searchLangfuseDocs` tool ([docs](/docs/docs-mcp)) to find the correct documentation for the integration. This is optional—the agent can also use its native web search capabilities.
+Install the [Langfuse Observability Skill](https://skills.sh/langfuse/skills/langfuse-observability) to automatically instrument your LLM application with best practices:
+
+```bash
+npx skills add langfuse/skills --skill "langfuse-observability"
+```
+
+**Option 2: Use the Langfuse Docs MCP Server**
+
+Install the Langfuse Docs MCP Server. The agent will use the Langfuse `searchLangfuseDocs` tool ([docs](/docs/docs-mcp)) to find the correct documentation for the integration.
 
 <DocsMcpServerInstallation />
 
-**Run the agent**
+**Option 3: Run the agent with this prompt**
 
-Copy and execute the following prompt in your editor's agent mode:
+Copy and execute the following prompt in your editor's agent mode. The agent can use its native web search capabilities to find documentation.
 
 <CopyAgentOnboardingPrompt />
 
