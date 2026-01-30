@@ -47,6 +47,7 @@ export default {
     type: "separator",
     title: "More",
   },
+  glossary: "Glossary",
   roadmap: "Roadmap",
   "docs-mcp": "Docs MCP Server",
   references: "SDK & API References",

@@ -295,7 +295,13 @@ export const POST = observe(handler, {
 
 ## Usage together with other observability tools
 
-The Vercel AI SDK uses OpenTelemetry for tracing (instrumentation scope: `ai`). If you're also using Sentry, Datadog, or other OTEL-based tools, you may need additional configuration to avoid conflicts. See [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup).
+The Vercel AI SDK uses OpenTelemetry for tracing (instrumentation scope: `ai`). If you're also using Sentry, Datadog, or other OTEL-based tools, you may need additional configuration to avoid conflicts.
+
+<Callout type="info">
+**Using an isolated TracerProvider?** If you're using an isolated TracerProvider for Langfuse (to keep LLM traces separate from other observability tools), you need to explicitly pass the tracer to the AI SDK's `experimental_telemetry` option. See [Vercel AI SDK with Isolated TracerProvider](/faq/all/existing-otel-setup#vercel-ai-sdk-isolated-provider).
+</Callout>
+
+For more details on resolving OpenTelemetry conflicts, see [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup).
 
 import LearnMore from "@/components-mdx/integration-learn-more-js.mdx";
 
