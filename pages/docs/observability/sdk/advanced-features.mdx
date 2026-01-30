@@ -283,9 +283,9 @@ import { setLangfuseTracerProvider } from "@langfuse/tracing";
  
 // Create a new TracerProvider and register the LangfuseSpanProcessor
 // do not set this TracerProvider as the global TracerProvider
-const langfuseTracerProvider = new NodeTracerProvider(
+const langfuseTracerProvider = new NodeTracerProvider({
   spanProcessors: [new LangfuseSpanProcessor()],
-)
+})
  
 // Register the isolated TracerProvider
 setLangfuseTracerProvider(langfuseTracerProvider)
