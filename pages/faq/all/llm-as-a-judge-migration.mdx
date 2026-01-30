@@ -1,21 +1,10 @@
 ---
-title: "Evaluator Migration Guide"
-date: 2026/01/29
+title: Evaluator Migration Guide
 description: Upgrade your trace-level evaluators to observation-level for improved performance and reliability
-tag: guide
-author: Marlies
+tags: [evaluation, llm-as-a-judge]
 ---
 
-import { BlogHeader } from "@/components/blog/BlogHeader";
-
-<BlogHeader
-  title="Evaluator Migration Guide"
-  description="Upgrade your trace-level evaluators to observation-level for improved performance and reliability"
-  date="January 29, 2026"
-  authors={["marliesmayerhofer"]}
-/>
-
-## Overview
+# Evaluator Migration Guide
 
 Langfuse has introduced running evaluators on observations as the recommended approach for live data LLM-as-a-Judge evaluations. This guide helps you migrate existing live data evaluators to the new system.
 
@@ -86,7 +75,7 @@ npm list langfuse
 
 To upgrade:
 ```bash
-npm install langfuse@latest
+npm install langfuse
 ```
 </Tab>
 </Tabs>
@@ -132,6 +121,8 @@ Verify the new evaluator works correctly:
 
 ### Example 1: Simple Trace Evaluator
 
+Likely, your trace input/output is equivalent to a observation's input/output within that same trace. Your evaluator should now target this observation directly. In this example, let's assume you have a generation observation named "chat-completion" that holds the same input/output as your trace.
+
 **Before (Trace-level)**:
 ```
 Target: Traces
@@ -144,16 +135,16 @@ Variables:
 **After (Observation-level)**:
 ```
 Target: Observations
-Filter: observation.type = "generation" AND observation.name = "chat-completion" AND metadata.env = "production"
+Filter:  trace.name = "chat-completion" AND observation.type = "generation" AND observation.name = "chat-completion"
 Variables:
   - user_query: observation.input
   - assistant_response: observation.output
 ```
 
 **Key Changes**:
-- Now targets specific observation type ("generation")
-- Filters at observation level instead of trace level
-- Variables come from observation instead of trace
+
+- Additional filters at observation level to identify the specific observation you want to evaluate in the trace tree
+- Variables come from observation instead of trace (e.g. `observation.input` and `observation.output`)
 
 ### Example 2: Complex Multi-Step Trace
 
@@ -210,32 +201,14 @@ Variables:
 
 ## Troubleshooting
 
-### "No trace data found" Error
-
-**Problem**: Migration wizard can't find sample trace data
-
-**Solution**:
-- Adjust your filters to match existing data
-- Ensure you have recent traces that match your filter criteria
-- Try widening your filter temporarily to see sample data
-
 ### Variables Don't Map Correctly
 
-**Problem**: Variables from trace can't be directly mapped to observations
+**Problem**: You were mapping variables from two different observations 
 
 **Solution**:
-- Use JSON path selectors to extract nested data (e.g., `$.context.user_id`)
-- Break complex traces into multiple observation-level evaluators
-- Store necessary context in observation metadata during instrumentation
-
-### Performance Differences
-
-**Problem**: New evaluator runs slower/faster than expected
-
-**Solution**:
-- Check if you're evaluating more observations than expected (use filters)
-- Review sampling settings (may need adjustment for observation level)
-- Monitor for a few days as the new system optimizes
+- If possible, store necessary context in a single observation metadata during instrumentation
+- Consider breaking your single trace evaluator into multiple observation evaluators
+- Do not migrate your evaluator now. We do not yet have a translation for the new system, but are actively working on it. 
 
 ## SDK Version-Specific Guidance
 
@@ -254,7 +227,7 @@ You have two options:
 
 ### For Users on New SDK Versions (>= 4.4.0)
 
-If you have existing trace-level evaluators:
+If you have existing evaluators running on traces:
 
 **Option 1: Migrate to Observations** (Recommended)
 - Follow the migration wizard
@@ -268,7 +241,6 @@ If you have existing trace-level evaluators:
 ## Getting Help
 
 - **Documentation**: Refer to [LLM-as-a-Judge guide](/docs/evaluation/evaluation-methods/llm-as-a-judge)
-- **Discord**: Join our [Discord community](https://discord.gg/langfuse) for migration support
 - **GitHub**: Report issues at [github.com/langfuse/langfuse](https://github.com/langfuse/langfuse)
 - **Support**: Contact support@langfuse.com for enterprise customers
 
@@ -277,7 +249,7 @@ If you have existing trace-level evaluators:
 If you need to revert after migration:
 
 1. **If you kept both evaluators**: Simply mark the new one as inactive
-2. **If you deleted the old evaluator**: Create a new trace-level evaluator with the old configuration
+2. **If you deleted the old evaluator**: Create a new evaluator with the old configuration
 3. **Data is preserved**: All historical evaluation results remain accessible
 
 ---
