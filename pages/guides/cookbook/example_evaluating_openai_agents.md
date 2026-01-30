@@ -29,12 +29,15 @@ This guide covers online and offline evaluation metrics used by teams to bring a
 
 ## Step 0: Install the Required Libraries
 
-Below we install the `openai-agents` library (the OpenAI Agents SDK [link text](https://github.com/openai/openai-agents-python)), the `pydantic-ai[logfire]` OpenTelemetry instrumentation, `langfuse` and the Hugging Face `datasets` library
+Below we install the `openai-agents` library (the OpenAI Agents SDK [link text](https://github.com/openai/openai-agents-python)), the `openinference` OpenTelemetry instrumentation, `langfuse` and the Hugging Face `datasets` library
 
 
 ```python
-%pip install openai-agents nest_asyncio "pydantic-ai[logfire]" langfuse datasets
+%pip install openai-agents nest_asyncio openinference-instrumentation-openai-agents langfuse datasets -q
 ```
+
+    Note: you may need to restart the kernel to use updated packages.
+
 
 ## Step 1: Instrument Your Agent
 
@@ -45,25 +48,15 @@ In this notebook, we will use [Langfuse](https://langfuse.com/) to trace, debug 
 
 ```python
 import os
-import base64
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***" 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***" 
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# Build Basic Auth header.
-LANGFUSE_AUTH = base64.b64encode(
-    f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
-).decode()
- 
-# Configure OpenTelemetry endpoint & headers
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_BASE_URL") + "/api/public/otel"
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
-
 # Your openai key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ["OPENAI_API_KEY"] = "sk-proj-***"
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
@@ -81,10 +74,9 @@ else:
     print("Authentication failed. Please check your credentials and host.")
 ```
 
-    Langfuse client is authenticated and ready!
+Now, we initialize the [OpenInference OpenAI Agents instrumentation](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-openai-agents). This third-party instrumentation automatically captures OpenAI Agents operations and exports OpenTelemetry (OTel) spans to Langfuse.
 
-
-Pydantic Logfire offers an instrumentation for the OpenAi Agent SDK. We use this to send traces to the [Langfuse OpenTelemetry Backend](https://langfuse.com/docs/opentelemetry/get-started).
+**Note:** `nest_asyncio.apply()` is not compatible with `uvloop`, which is commonly used with FastAPI to manage the event loop. If your application uses `uvloop` and you require nest_asyncio (e.g., for certain instrumentation or tracing libraries), you'll need to disable `uvloop` in the affected parts of your codebase and fall back to Python’s standard asyncio event loop.
 
 
 ```python
@@ -92,24 +84,12 @@ import nest_asyncio
 nest_asyncio.apply()
 ```
 
-**Note:** `nest_asyncio.apply()` is not compatible with `uvloop`, which is commonly used with FastAPI to manage the event loop. If your application uses `uvloop` and you require nest_asyncio (e.g., for certain instrumentation or tracing libraries), you'll need to disable `uvloop` in the affected parts of your codebase and fall back to Python’s standard asyncio event loop.
-
 
 ```python
-import logfire
-
-# Configure logfire instrumentation.
-logfire.configure(
-    service_name='my_agent_service',
-
-    send_to_logfire=False,
-)
-# This method automatically patches the OpenAI Agents SDK to send logs via OTLP to Langfuse.
-logfire.instrument_openai_agents()
+from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+ 
+OpenAIAgentsInstrumentor().instrument()
 ```
-
-    Overriding of current TracerProvider is not allowed
-
 
 ## Step 2: Test Your Instrumentation
 
@@ -135,37 +115,13 @@ await loop.create_task(main())
 langfuse.flush()
 ```
 
-    09:51:42.350 OpenAI Agents trace: Agent workflow
-    09:51:42.352   Agent run: 'Assistant'
-    09:51:42.359     Responses API with 'gpt-4o'
-    Evaluating AI agents is crucial for several reasons:
-    
-    1. **Performance Assessment**: Evaluating AI helps determine how well an agent performs on specific tasks and whether it meets the desired objectives or benchmarks.
-    
-    2. **Reliability and Safety**: Ensures the AI behaves consistently and safely, particularly in critical applications like healthcare, finance, or autonomous vehicles.
-    
-    3. **Bias Detection**: Helps identify and mitigate biases that could lead to unfair or discriminatory outcomes, promoting ethical AI use.
-    
-    4. **Improvement and Iteration**: Evaluation provides insights into areas where the AI can be improved, guiding further development and optimization.
-    
-    5. **Trust and Transparency**: Building trust with users and stakeholders by demonstrating the AI’s capabilities, reliability, and limitations through clear evaluation metrics.
-    
-    6. **Regulatory Compliance**: Ensures adherence to industry standards and legal requirements, which can vary by region and application.
-    
-    7. **Resource Allocation**: Helps in making informed decisions about resource allocation, ensuring effort and investment are directed towards promising AI solutions.
-    
-    8. **User Satisfaction**: Evaluation ensures that the AI meets user needs and expectations, leading to better user experience and engagement.
-    
-    Each of these factors contributes to developing AI systems that are effective, ethical, and aligned with human values and needs.
-
-
 Check your Langfuse Traces Dashboard to confirm that the spans and logs have been recorded.
 
 Example trace in Langfuse:
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/first-example-trace.png)
 
-_[Link to the trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/0195948781a9f0d78fd5e067154aa508?timestamp=2025-03-14T12%3A01%3A03.401Z&observation=64bcac3cb82d04e9)_
+_[Link to the trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ad567cbfc5f66feea681e257879b1abb?timestamp=2026-01-21T12%3A24%3A09.654Z&observation=5a852bf5fd81785b)_
 
 ## Step 3: Observe and Evaluate a More Complex Agent
 
@@ -195,14 +151,6 @@ loop = asyncio.get_running_loop()
 await loop.create_task(main())
 ```
 
-    09:53:26.847 OpenAI Agents trace: Agent workflow
-    09:53:26.856   Agent run: 'Hello world'
-    09:53:26.859     Responses API with 'gpt-4o'
-    09:53:27.783     Function: get_weather
-    09:53:27.784     Responses API with 'gpt-4o'
-    The weather in Berlin is currently sunny.
-
-
 ### Trace Structure
 
 Langfuse records a **trace** that contains **spans**, which represent each step of your agent’s logic. Here, the trace contains the overall agent run and sub-spans for:
@@ -213,7 +161,7 @@ You can inspect these to see precisely where time is spent, how many tokens are 
 
 ![Trace tree in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/trace-tree.png)
 
-_[Link to the trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019594b5b9a27c5d497b13be71e7f255?timestamp=2025-03-14T12%3A51%3A32.386Z&display=preview&observation=6374a3c96baf831d)_
+_[Link to the trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2b3549558ea5376f343e76826d8c8a8d?timestamp=2026-01-21T12:25:42.549Z)_
 
 ## Online Evaluation
 
@@ -305,10 +253,11 @@ If your agent is embedded into a user interface, you can record direct user feed
 
 In the code snippet below, when a user sends a chat message, we capture the OpenTelemetry trace ID. If the user likes/dislikes the last answer, we attach a score to the trace.
 
+**Note:** The following cell is build to work in Google Colab notebooks and can be skipped or adjusted for other environments.
+
 
 ```python
 from agents import Agent, Runner, WebSearchTool
-from opentelemetry.trace import format_trace_id
 import ipywidgets as widgets
 from IPython.display import display
 from langfuse import get_client
@@ -374,24 +323,6 @@ display(widgets.HBox([thumbs_up, thumbs_down]))
 langfuse.flush()
 ```
 
-    10:06:34.993 OpenAI Agents trace: Agent workflow
-    10:06:34.995   Agent run: 'WebSearchAgent'
-    10:06:34.996     Responses API with 'gpt-4o'
-    1 times 1 equals 1.
-    10:06:36.456 OpenAI Agents trace: Agent workflow
-    10:06:36.456   Agent run: 'Assistant'
-    10:06:36.457     Responses API with 'gpt-4o'
-    \(1 \times 1 = 1\)
-    How did you like the agent response?
-
-
-
-    HBox(children=(Button(description='👍', icon='thumbs-up', style=ButtonStyle()), Button(description='👎', icon='t…
-
-
-    Scored the trace in Langfuse
-
-
 User feedback is then captured in Langfuse:
 
 ![User feedback is being captured in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/open-ai-agent-user-feedback.png)
@@ -436,11 +367,6 @@ with langfuse.start_as_current_observation(as_type="span", name="OpenAI-Agent-Tr
         output=result.final_output,
     )
 ```
-
-    10:08:58.475 OpenAI Agents trace: Agent workflow
-    10:08:58.476   Agent run: 'WebSearchAgent'
-    10:08:58.478     Responses API with 'gpt-4o'
-
 
 You can see that the answer of this example is judged as "not toxic".
 
@@ -491,18 +417,11 @@ langfuse.create_dataset(
     name=langfuse_dataset_name,
     description="search-dataset uploaded from Huggingface",
     metadata={
-        "date": "2025-03-14",
+        "date": "2026-01-21",
         "type": "benchmark"
     }
 )
 ```
-
-
-
-
-    Dataset(id='cm88w66t102qpad07xhgeyaej', name='search-dataset_huggingface_openai-agent', description='search-dataset uploaded from Huggingface', metadata={'date': '2025-03-14', 'type': 'benchmark'}, project_id='cloramnkj0002jz088vzn1ja4', created_at=datetime.datetime(2025, 3, 14, 14, 47, 14, 676000, tzinfo=datetime.timezone.utc), updated_at=datetime.datetime(2025, 3, 14, 14, 47, 14, 676000, tzinfo=datetime.timezone.utc))
-
-
 
 
 ```python
@@ -520,63 +439,63 @@ for idx, row in df.iterrows():
 
 #### Running the Agent on the Dataset
 
-We define a helper function `run_openai_agent()` that:
-1. Starts a Langfuse span
-2. Runs our agent on the prompt
-3. Records the trace ID in Langfuse
+We use the [experiment runner SDK](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk#experiment-runner-sdk) to run our agent against each dataset item. The experiment runner handles concurrent execution, automatic tracing, and evaluation.
 
-Then, we loop over each dataset item, run the agent, and link the trace to the dataset item. We can also attach a quick evaluation score if desired.
+We define a task function that:
+1. Starts a Langfuse span for tracing
+2. Runs our agent on the prompt
+3. Returns the generated answer
 
 
 ```python
+import asyncio
 from agents import Agent, Runner, WebSearchTool
 from langfuse import get_client
  
 langfuse = get_client()
 dataset_name = "search-dataset_huggingface_openai-agent"
-current_run_name = "qna_model_v3_run_05_20" # Identifies this specific evaluation run
 
+# Define the OpenAI agent
 agent = Agent(
     name="WebSearchAgent",
     instructions="You are an agent that can search the web.",
-    tools=[WebSearchTool(search_context_size= "high")]
+    tools=[WebSearchTool(search_context_size="high")]
 )
- 
-# Assume 'run_openai_agent' is your instrumented application function
-def run_openai_agent(question):
-    with langfuse.start_as_current_observation(as_type="generation", name="qna-llm-call") as generation:
-        # Simulate LLM call
-        result = Runner.run_sync(agent, question)
- 
-        # Update the trace with the input and output
-        generation.update_trace(
-            input= question,
-            output=result.final_output,
-        )
 
+# Task function that runs the OpenAI agent for each dataset item
+def run_task(*, item, **kwargs):
+    """Task function that runs the OpenAI agent for each dataset item"""
+    question = item.input["text"]
+    
+    async def _run():
+        result = await Runner.run(agent, question)
+
+        print(f"Processed: {item.input}")
         return result.final_output
- 
-dataset = langfuse.get_dataset(name=dataset_name) # Fetch your pre-populated dataset
- 
-for item in dataset.items:
- 
-    # Use the item.run() context manager
-    with item.run(
-        run_name=current_run_name,
-        run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7},
-        run_description="Evaluation run for Q&A model v3 on May 20th"
-    ) as root_span: # root_span is the root span of the new trace for this item and run.
-        # All subsequent langfuse operations within this block are part of this trace.
- 
-        # Call your application logic
-        generated_answer = run_openai_agent(question=item.input["text"])
+    
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(_run())
+```
 
-        print(item.input)
+
+```python
+# Fetch dataset
+dataset = langfuse.get_dataset(name=dataset_name)
+
+# Run experiment using the experiment runner SDK
+result = dataset.run_experiment(
+    name="qna_model_v3_run_05_20",  # Identifies this specific evaluation run
+    description="Evaluation run for Q&A model v3 on May 20th",
+    task=run_task,
+    metadata={"model_provider": "OpenAI", "temperature_setting": 0.7}
+)
+
+print(result.format())
 ```
 
 You can repeat this process with different:
 - Search tools (e.g. different context sized for OpenAI's `WebSearchTool`)
-- Models (gpt-4o-mini, o1, etc.)
+- Models (gpt-5.2, gpt-5.2-mini, etc.)
 - Tools (search vs. no search)
 
 Then compare them side-by-side in Langfuse. In this example, I did run the agent 3 times on the 50 dataset questions. For each run, I used a different setting for the context size of OpenAI's `WebSearchTool`. You can see that an increased context size also slightly increased the answer correctness from `0.89` to `0.92`. The `correct_answer` score is created by an [LLM-as-a-Judge Evaluator](https://langfuse.com/docs/scores/model-based-evals) that is set up to judge the correctness of the question based on the sample answer given in the dataset.
