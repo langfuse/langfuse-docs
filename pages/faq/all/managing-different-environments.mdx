@@ -5,18 +5,28 @@ tags: [platform, self-hosting, cloud, observability, administration]
 
 # How to manage different environments in Langfuse?
 
-Langfuse allows you to effectively manage various environments, such as production, staging, and development, either through projects or tags.
+Langfuse offers two approaches to manage environments like production, staging, and development: built-in environments or separate projects.
+
+## Which Approach Should I Use?
+
+Use the **built-in Environments feature** if your team can share access across all environments. This is the recommended approach because prompts, datasets, evaluators, and other configurations are automatically shared within the project, eliminating the need to sync anything between environments.
+
+Use **separate projects** if you need different access controls per environment, such as restricting production data to a smaller group of team members. This requires additional setup to sync prompts and configurations between projects, but provides full isolation.
 
 ## Environments (Recommended)
 
 The recommended approach for managing different environments in Langfuse is to use the built-in [Environments](/docs/tracing-features/environments) feature. This allows you to organize your traces, observations, and scores from different contexts such as production, staging, or development within the same project.
 
-You can configure the environment by setting the `LANGFUSE_TRACING_ENVIRONMENT` environment variable or by using the `environment` parameter in the client initialization:
+You can configure the environment by setting the `LANGFUSE_TRACING_ENVIRONMENT` environment variable or by using the `environment` parameter in the client initialization.
 
-## Alternative Option 1: Projects
+## Separate Projects
 
 If you need to specify different [role-based access controls](/docs/rbac) for each environment, consider using separate projects for each environment. You can still group all environments within the same organization to simplify access management. Each project will have its own set of members, prompts, and API keys.
 
-## Alternative Option 2: Tags
+### Syncing Prompts Between Projects
 
-[Tags](/docs/tracing-features/tags) are the preferred option if you don't have role-based access control requirements and want a consolidated view across all environments. Tags are fully supported across Langfuse features and make it easier to switch between different environments within the user interface and integrations as they share api keys, prompts, and members.
+When using separate projects for each environment, prompts and other configurations are not automatically shared. You have two options to keep them in sync.
+
+The [GitHub Integration](/docs/prompt-management/features/github-integration) allows you to store prompts in a repository and automatically deploy them to different Langfuse projects. This enables a CI/CD workflow where prompts are version-controlled and promoted from development to staging to production through your existing Git workflow.
+
+For custom workflows, you can use the [Prompt Management API](/docs/prompt-management) to programmatically read prompts from one project and write them to another. This is useful if you want to build your own promotion scripts or integrate with internal tooling.
