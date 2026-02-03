@@ -206,7 +206,26 @@ trace.update({
 
 ---
 
-### 3. You're using the `@observe()` decorator but input/output capture is disabled
+### 3. Your root span is being filtered out
+
+**Symptoms**: Trace input/output is empty when using `shouldExportSpan` to filter spans.
+
+If you're using `shouldExportSpan` in your `LangfuseSpanProcessor` to filter spans, and your root span matches the filter criteria, the trace input/output will be empty. This happens because trace input/output is [derived from the root observation by default](#the-root-observation-rule).
+
+**Solution**: If you want the root span to stay filtered out, use `updateTrace()` to manually set trace input/output from within a child span that is not filtered out:
+
+```typescript
+span.updateTrace({
+  input: yourInputData,
+  output: yourOutputData,
+});
+```
+
+See the [advanced features docs](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) for more details on `shouldExportSpan`.
+
+---
+
+### 4. You're using the `@observe()` decorator but input/output capture is disabled
 
 **Symptoms**: Decorated functions don't show input/output, even though they return values.
 
@@ -240,7 +259,7 @@ def my_function(data):
 
 ---
 
-### 4. You're using an OpenTelemetry-based integration
+### 5. You're using an OpenTelemetry-based integration
 
 **Symptoms**: Traces from OTEL integrations (OpenLLMetry, Logfire, etc.) show empty input/output.
 
