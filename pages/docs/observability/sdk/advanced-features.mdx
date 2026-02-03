@@ -19,10 +19,9 @@ When third-party libraries create OpenTelemetry spans (through their instrumenta
 You can see the instrumentation scope name for any span in the Langfuse UI under the observation's metadata (`metadata.scope.name`). Use this to identify which scopes you want to filter.
 
 <Callout type="warning" title="Filtering Spans May Break Trace Trees">
-  **Cross-Library Span Relationships:**
   Filtering spans may break the parent-child relationships in your traces. For
   example, if you filter out a parent span but keep its children, you may see
-  "orphaned" observations in the Langfuse UI.
+  "orphaned" observations in the Langfuse UI or [traces without any input or output](/faq/all/empty-trace-input-and-output#3-your-root-span-is-being-filtered-out).
 </Callout>
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
