@@ -206,7 +206,7 @@ The approach above works well for long-running applications (like web servers or
 
 For applications that start, execute something, and shut down quickly (short-lived applications), there's a risk that the application terminates while there are still unsent traces in the queue. 
 
-To avoid losing data, short-lived applications __must explicitly call `flush()` before exiting__. This forces the exporter to send all buffered traces immediately, so nothing is lost when the process terminates.
+To avoid losing data, short-lived applications __must explicitly call [`flush()`](/docs/observability/features/queuing-batching#manual-flushing) before exiting__. This forces the exporter to send all buffered traces immediately, so nothing is lost when the process terminates.
 
 
 ```mermaid
