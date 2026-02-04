@@ -1,107 +1,95 @@
 ---
 title: Braintrust Data Alternatives? The best LLMOps platform?
-description: This article compares Langfuse and Braintrust for LLM observability, analytics, evaluations, testing, and annotation.
+description: his article compares Langfuse and Braintrust for LLM observability, analytics, evaluations, and engineering workflows.
 tags: [comparison]
 ---
 
-# Braintrust Alternative? Langfuse vs. Braintrust
+# Langfuse vs. Braintrust
 
-This article compares **Langfuse** and **Braintrust**, two platforms designed to empower developers to build and improve AI applications.
+This guide outlines the key differences between **[Langfuse](/)** and **[Braintrust](https://www.braintrust.dev/docs)** to help engineering teams choose the right LLM observability platform.
 
-## What is Braintrust?
+**TL;DR:**
 
-[Braintrust](https://www.braintrust.dev/) is an LLM logging and experimentation platform. It provides tools for model evaluation, performance insights, real-time monitoring, and human review. They offer an LLM proxy to log application data and an in-UI playground for rapid prototyping.
+* **Choose Langfuse** if you prioritize an open-source, vendor-neutral platform that allows for full self-hosting, predictable unit-based pricing, and deep integration with OpenTelemetry standards.
+* **Choose Braintrust** if you prefer a proprietary, "batteries-included" SaaS platform that focuses heavily on the evaluation loop, offering an integrated proxy and specialized tools for rapid prompt iteration.
+
+## Open Source & Distribution
+
+The most fundamental divergence lies in the distribution model. Langfuse is open-source (MIT), ensuring transparency and no vendor lock-in. Braintrust is a proprietary, closed-source platform where the core engine and database are managed property.
+
+| Feature | Langfuse | Braintrust |
+| --- | --- | --- |
+| **Model** | **[Open Source](https://github.com/langfuse/langfuse)** (MIT License) | **Proprietary SaaS** (Closed Source Core) |
+| **GitHub Stars** | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | N/A |
+| **PyPI Downloads** | [![Langfuse pypi downloads](https://img.shields.io/pypi/dm/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://pypi.org/project/langfuse/) | [![Braintrust pypi downloads](https://img.shields.io/pypi/dm/braintrust?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://pypi.org/project/braintrust) |
+| **npm Downloads** | [![Langfuse npm downloads](https://img.shields.io/npm/dm/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://www.npmjs.com/package/langfuse) | [![Braintrust npm downloads](https://img.shields.io/npm/dm/braintrust?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://www.npmjs.com/package/braintrust) |
+| **Docker Pulls** | [![Langfuse Docker Pulls](https://img.shields.io/docker/pulls/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://hub.docker.com/r/langfuse/langfuse) | N/A |
+| **Self-Hosting** | **First-Class Citizen**: Full feature parity with Cloud. capable of running offline or in air-gapped environments. | **Restricted**: Hybrid model only available on [Enterprise tiers](https://www.braintrust.dev/docs/admin) (Data plane in VPC, Control plane managed). |
+
+## Scalability & Performance
+
+Both platforms utilize high-performance analytical databases, but their architectural philosophies differ. Langfuse relies on the open-source power of ClickHouse, while Braintrust relies on a custom-built proprietary engine.
+
+| Feature | Langfuse | Braintrust |
+| --- | --- | --- |
+| **Backend** | **[ClickHouse](https://clickhouse.com/)**: Transitions to ClickHouse in v3 for sub-second query performance on billions of events. | **Brainstore**: Proprietary engine using streaming Rust and object storage. |
+
+## Integrations
+
+Langfuse adopts a "standards-first" strategy via OpenTelemetry and async ingestion, whereas Braintrust focuses on their own proprietary proxy layer.
+
+| Feature | Langfuse | Braintrust |
+| --- | --- | --- |
+| **Standard** | **[OpenTelemetry Native SDKs](/integrations/native/opentelemetry)**: Interoperable with existing enterprise stacks (Java, Go, Rust via OTLP). | Focuses on `wrapOpenAI` SDKs and a proprietary [AI proxy gateway](https://www.braintrust.dev/docs/deploy/ai-proxy). |
+| **Frameworks** | **100+ Integrations**: Native support for LangChain, LlamaIndex, CrewAI, AutoGen, and more. | Support for many of the [popular frameworks and model providers](https://www.braintrust.dev/docs/integrations). |
+
+## Pricing
+
+Langfuse offers a predictable unit-based model. Braintrust uses a multi-dimensional model charging for data volume, scores, and retention.
+
+| Feature | Langfuse | Braintrust |
+| --- | --- | --- |
+| **Free Tier** | **Cloud**: 50k units/mo. **Self-Hosted**: Unlimited free usage. | **Free**: 1M trace spans, 1 GB processed data, 10k scores, 14-day retention. |
+| **Paid Entry** | **Core**: Starts at **$29/mo** (includes 100k units). | **Pro**: Starts at **$249/mo** (includes 5GB data, 50k scores). |
+| **Billing Model** | **Unit-Based**: Prices based on simple "billable units" (traces, observations, scores). | **Multi-Dimensional**: Charges for Processed Data (GB) + Scores + Data Retention. |
+| **Overage Costs** | ~$8.00 per 100k units (decreasing with volume). | $3 per GB processed data; $1.50 per 1k scores. |
+
+## Open Platform & Extensibility
+
+Langfuse is built API-first, allowing engineers to easily export data or build custom tools. Braintrust focuses on powerful in-platform querying via SQL.
+
+| Feature | Langfuse | Braintrust |
+| --- | --- | --- |
+| **API Access** | **Full CRUD**: API-first architecture for all traces, prompts, and platform features. | [API available](https://www.braintrust.dev/docs/guides/api), emphasis is on UI workflows. |
+| **Querying** | API's to query traces, observations, and scores; [Public Metrics API](/docs/metrics/features/metrics-api) for aggregated analytics. | **BTQL & SQL**: Proprietary query languages for [in-platform analysis](https://www.braintrust.dev/docs/guides/api). |
+| **Data Portability** | CSV/JSON exports; [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) to S3 storage. | JSON/CSV export via [UI or SDK](https://www.braintrust.dev/docs/guides/api). |
+
+## Enterprise Security
+
+Both platforms are SOC 2 Type II and HIPAA compliant. Langfuse offers stricter data residency options through full self-hosting.
+
+| Feature | Langfuse | Braintrust |
+| --- | --- | --- |
+| **Certifications** | **SOC 2 Type II, ISO 27001**, GDPR, HIPAA. | **SOC 2 Type II**, HIPAA. |
+| **Deployment** | Cloud or Self-Hosted: Air-gapped capable | **Restricted**: Hybrid model only available on Enterprise tiers (Data plane in VPC, Control plane managed). |
+| **Governance** | SSO, RBAC, and Audit Logs available. | SSO, RBAC, and Audit Logs available. |
+
+## Feature Highlights
+
+**Langfuse:**
+
+* **Core Observability:** Deep tracing with "Queued Trace Ingestion" for high throughput.
+* **Agent Debugging:** Hierarchical traces specifically designed for complex, multi-step agent reasoning.
+* **Prompt Management:** Agnostic prompt management with a Model Context Protocol (MCP) server.
+* **Custom Evaluators:** Flexible "LLM-as-a-Judge" and remote custom evaluators via API.
+
+**Braintrust:**
+
+* **Experimentation:** "Evaluation-first" philosophy with side-by-side prompt comparison views.
+* **The Proxy:** Unified gateway with caching and failover for 100+ models.
+* **Playground:** Integrated environment for rapid iteration on "golden datasets" derived from logs.
+* **Dataset Management:** Specialized tools for curating and versioning testing datasets.
 
 <Callout type="info">
-  Read our view on using LLM proxies for LLM application development
-  [here](/blog/2024-09-langfuse-proxy).
+  This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/pages/faq/all) with up-to-date information.
 </Callout>
-
-## What is Langfuse?
-
-[Langfuse](https://github.com/langfuse/langfuse) is an **open-source** LLM observability platform that offers comprehensive tracing, prompt management, evaluations, and human annotation queues. It empowers teams to understand and debug complex LLM applications, evaluate and iterate them in production, and maintain full control over their data.
-
-## How Do Langfuse and Braintrust Compare?
-
-Both platforms offer functionalities to support developers working with LLMs, but they differ in their features and underlying philosophy.
-
-### High level overview
-
-One of the biggest differences between [Langfuse](https://www.langfuse.com/) and [Braintrust](https://www.braintrust.dev/) is that Langfuse is **open-source**, making it free and easy to self-host and customize according to your needs. Being open-source provides transparency, flexibility, and full control over the codebase, allowing developers to inspect, modify, and contribute to the platform.
-Langfuse is built for production use cases, with a focus on reliability, security, and control over infrastructure.
-
-Braintrust offers innovative in-UI experiences such as a playground, prompt iteration, and functions which makes it a great solution for experimentation. Langfuse focuses on its best-in-class core features: tracing, evaluations, prompt management, and open, stable APIs.
-
-### Feature Comparison
-
-| Feature                        | **Langfuse**                                                          | **Braintrust**                                                |
-| ------------------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------- |
-| **Open Source**                | ✅ Yes ([GitHub Repository](https://github.com/langfuse/langfuse))    | ❌ No                                                         |
-| **Customizability**            | ✅ High (modify and extend as needed)                                 | ⚠️ Limited (proprietary platform)                             |
-| **LLM Proxy**                  | [with 🚅 LiteLLM](https://oss-llmops-stack.com/)                      | ✅ Yes (provides AI proxy layer)                              |
-| **Production Risks via Proxy** | ❌ None introduced by Langfuse                                        | ⚠️ Potential risks (latency, downtime, data privacy concerns) |
-| **Prompt Management**          | ✅ Comprehensive ([Learn more](/docs/prompts/get-started))            | ✅ Yes                                                        |
-| **Evaluation Framework**       | ✅ Yes ([Learn more](/docs/scores/overview))                          | ✅ Yes                                                        |
-| **Human Annotation Queues**    | ✅ Built-in ([Learn more](/docs/scores/annotation#annotation-queues)) | ❌ No                                                         |
-| **LLM Playground**             | ✅ Yes ([Learn more](/docs/playground))                               | ✅ Yes                                                        |
-| **Self-Hosting**               | ✅ Open Source ([Deployment options](/self-hosting))                  | ⚠️ Enterprise Plans                                           |
-| **Integrations**               | ✅ Yes ([Integrations](/integrations))                                | ✅ Yes                                                        |
-
-import { Callout } from "nextra/components";
-
-### Langfuse Strengths
-
-- **Open-Source**: Langfuse's open-source nature allows developers to inspect, modify, and contribute to the codebase, providing transparency and flexibility.
-- **No LLM Proxy**: Langfuse integrates [directly](/blog/2024-09-langfuse-proxy) with LLMs without introducing an intermediary proxy, reducing potential risks related to latency, downtime, and data privacy.
-- **Comprehensive Observability**: Offers deep insights into model interactions by tracing not only LLM calls, but also related application processes.
-- **Self-Hosting Flexibility**: Provides self-hosting options, ensuring organizations can maintain full control over data residency, compliance, and security ([Learn more](/self-hosting)).
-
-### Braintrust Considerations
-
-- **Proprietary Platform**: Braintrust is a closed source platform. This inherently limits transparency, customization and agency.
-- **LLM Proxy**: Braintrust is focussed on an LLM proxy to access models from providers like OpenAI and Anthropic, introducing potential production risks:
-  - **Latency and Uptime Risks**: The proxy layer can introduce additional points of failure or performance bottlenecks.
-  - **Data Privacy Concerns**: Routing data through an external proxy may raise compliance issues, particularly for sensitive data.
-  - **Dependency on Third-Party Services**: Changes in proxy service terms or availability can impact application reliability.
-- **Self-Hosting Limitations**: Braintrust's self-hosting options are limited to their enterprise plan.
-
-## Why Choose Langfuse Over Braintrust?
-
-- **Production Ready**: Langfuse is designed for [production](https://www.thoughtworks.com/radar/platforms/langfuse) use cases, with a focus on reliability, security, and control over infrastructure.
-- **Transparency and Control**: With Langfuse being open-source, you have full transparency into the platform's operations and can rely on it for the long-term.
-- **Flexible Integration**: Langfuse integrates directly with popular LLM frameworks and SDKs, fitting seamlessly into your existing workflows.
-- **Reduced Production Risks**: By [deciding not to use an LLM proxy](/blog/2024-09-langfuse-proxy), Langfuse eliminates potential points of failure and security risks associated with proxy layers.
-
-## Download Metrics
-
-|             | pypi downloads                                                                                                                                                           | npm downloads                                                                                                                                                               | docker pulls                                                                                                                                                                              |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🪢 Langfuse | [![Langfuse pypi downloads](https://img.shields.io/pypi/dm/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://pypi.org/project/langfuse/)    | [![Langfuse npm downloads](https://img.shields.io/npm/dm/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://www.npmjs.com/package/langfuse)     | [![Langfuse Docker Pulls](https://img.shields.io/docker/pulls/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://hub.docker.com/r/langfuse/langfuse) |
-| Braintrust  | [![Braintrust pypi downloads](https://img.shields.io/pypi/dm/braintrust?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://pypi.org/project/braintrust) | [![Braintrust npm downloads](https://img.shields.io/npm/dm/braintrust?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://www.npmjs.com/package/braintrust) | N/A                                                                                                                                                                                       |
-
-## Conclusion
-
-Both **Langfuse** and **Braintrust** offer valuable solutions for developers building AI applications with large language models.
-
-Langfuse's open-source nature provides transparency and flexibility, allowing organizations to customize the platform and maintain full control over their data—an essential factor for **production environments** where security and compliance are critical. Its direct integration with LLMs, without using LLM proxies, minimizes potential risks related to latency, uptime, and data privacy.
-
-Braintrust offers a tightly integrated suite of tools with a focus on evaluation, including a playground for rapid prototyping and A/B testing features. It provides a rich in-UI experience.
-
----
-
-## Other Comparisons
-
-- Atla-AI has written up a review of LLM Evaluation Tooling, comparing [Braintrust and Langfuse](https://www.atla-ai.com/post/llm-evaluation-tooling-review).
-- TheyDo posted about [building the AI quality flywheel](https://www.theydo.com/blog/articles/building-the-ai-quality-flywheel-how-theydo-turns-user-feedback-into-better-ai) comparing Braintrust, Langfuse Chainforge and MLflow.
-
-## Learn More About Langfuse
-
-- **Get Started with Langfuse**: [Documentation Overview](/docs)
-- **Deployment Options**: [Self-Hosting Guide](/self-hosting)
-- **Integrations**: [Supported SDKs and Frameworks](/integrations)
-- **Prompt Management**: [Managing Prompts in Production](/docs/prompts/get-started)
-- **Evaluation Tools**: [Evaluating Model Outputs](/docs/scores/overview)
-
----
-
-_This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/pages/faq/all) with up-to-date information._

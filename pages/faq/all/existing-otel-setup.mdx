@@ -194,7 +194,8 @@ span.end();
 
 **How to fix this**
 
-If using Sentry, see the [Sentry integration guide](/faq/all/existing-sentry-setup).
+- If using Sentry, see the [Sentry integration guide](/faq/all/existing-sentry-setup).
+- If you're deploying to AWS Bedrock AgentCore, the runtime's ADOT auto-instrumentation may be intercepting your SDK calls. See [AWS Bedrock AgentCore (ADOT)](#aws-bedrock-agentcore-adot).
 
 For other tools, you have two options:
 
@@ -295,7 +296,8 @@ langfuse = Langfuse(tracer_provider=TracerProvider())
 {/* JS/TS */}
 ```typescript
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
-import { LangfuseSpanProcessor, setLangfuseTracerProvider } from "@langfuse/tracing";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { setLangfuseTracerProvider } from "@langfuse/tracing";
 
 const langfuseProvider = new NodeTracerProvider({
   spanProcessors: [new LangfuseSpanProcessor()],
@@ -352,7 +354,8 @@ langfuse = Langfuse(tracer_provider=langfuse_provider)
 {/* JS/TS */}
 ```typescript
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
-import { LangfuseSpanProcessor, setLangfuseTracerProvider } from "@langfuse/tracing";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { setLangfuseTracerProvider } from "@langfuse/tracing";
 
 const langfuseProvider = new NodeTracerProvider({
   spanProcessors: [new LangfuseSpanProcessor()],
@@ -467,6 +470,10 @@ sdk.start();
 
 **Warning about filtering:** If you filter out a span that's a parent of other spans, the children will appear as orphaned top-level traces. This is especially common when filtering out web framework spans (like `fastapi`) that wrap your LLM calls. See [Orphaned Traces](#orphaned-traces) below.
 
+<Callout type="info">
+If you're deploying to **AWS Bedrock AgentCore** and seeing health check spans (`/ping`, `/health`), see [AWS Bedrock AgentCore (ADOT)](#aws-bedrock-agentcore-adot) for how to filter them out.
+</Callout>
+
 ### Orphaned or Disconnected Traces [#orphaned-traces]
 
 Traces in Langfuse appear as standalone items when they should be nested under a parent, or you see broken [hierarchies](#context-parent-child).
@@ -517,10 +524,10 @@ with langfuse.trace(name="my-operation", user_id="user-123", session_id="session
 
 {/* JS/TS */}
 ```typescript
-import { startTrace } from "@langfuse/tracing";
-
-startTrace({ name: "my-operation", userId: "user-123", sessionId: "session-456" }, (trace) => {
-  // Your code here
+propagateAttributes({ userId: "user_123" }, async () => {
+  const result = await startActiveObservation("parent", async (parentSpan) => {
+    // your code here
+  });
 });
 ```
 
@@ -613,3 +620,68 @@ logfire.configure(
 ### Datadog / Honeycomb / Jaeger / Zipkin / Grafana Tempo
 
 These use standard OTEL configurations. Use either an [isolated TracerProvider](/docs/observability/sdk/advanced-features#isolated-tracer-provider) or [span filtering](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) depending on your needs.
+
+### AWS Bedrock AgentCore (ADOT) [#aws-bedrock-agentcore-adot]
+
+When deploying to [AWS Bedrock AgentCore](/integrations/frameworks/amazon-agentcore), the runtime automatically injects ADOT (AWS Distro for OpenTelemetry). This creates a situation where **OTEL is imposed by the deployment environment** rather than something you configure yourself.
+
+**Common symptoms:**
+
+- Standard Langfuse SDK callbacks (like LangChain's `CallbackHandler`) work locally but produce no traces when deployed to AgentCore
+- ADOT manages telemetry at the runtime level, potentially intercepting or bypassing SDK HTTP calls
+- All HTTP traffic gets instrumented, including health checks (`/ping`) which appear as unwanted spans
+
+**Solution:**
+
+Instead of relying on Langfuse SDK callbacks, disable ADOT and configure your own OTEL exporter to send traces to Langfuse. Pass these environment variables when launching your AgentCore agent:
+
+```bash
+# 1. Disable AgentCore's built-in ADOT tracing
+DISABLE_ADOT_OBSERVABILITY=true
+
+# 2. Configure your own OTEL exporter to Langfuse
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic $(echo -n 'pk-xxx:sk-xxx' | base64)"
+```
+
+For US region, use `https://us.cloud.langfuse.com/api/public/otel` as the endpoint.
+
+This applies regardless of which framework (LangChain, LlamaIndex, Strands, etc.) you use on AgentCore.
+
+<Callout type="info">
+For a complete integration guide with code examples, see the dedicated [Amazon Bedrock AgentCore integration page](/integrations/frameworks/amazon-agentcore).
+</Callout>
+
+### Vercel AI SDK with Isolated TracerProvider [#vercel-ai-sdk-isolated-provider]
+
+When using an [isolated TracerProvider](/docs/observability/sdk/advanced-features#isolated-tracer-provider) with the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk), the SDK may not automatically pick up your isolated provider set via `setLangfuseTracerProvider()`. This is because the Vercel AI SDK looks for a globally registered provider by default.
+
+You need to explicitly pass the tracer to the Vercel AI SDK's `experimental_telemetry` option:
+
+```typescript
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { setLangfuseTracerProvider } from "@langfuse/tracing";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+
+// Create an isolated TracerProvider for Langfuse
+const langfuseTracerProvider = new NodeTracerProvider({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+// Register the isolated TracerProvider
+setLangfuseTracerProvider(langfuseTracerProvider);
+
+// Explicitly pass the tracer to the Vercel AI SDK
+const { text } = await generateText({
+  model: openai("gpt-5.1"),
+  prompt: "Hello, world!",
+  experimental_telemetry: {
+    isEnabled: true,
+    tracer: langfuseTracerProvider.getTracer("ai"), // Use the isolated provider's tracer
+  },
+});
+```
+
+This ensures the Vercel AI SDK uses your isolated Langfuse TracerProvider instead of any globally registered provider, allowing Langfuse tracing to coexist with other observability tools.
