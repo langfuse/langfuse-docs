@@ -49,7 +49,8 @@ For comprehensive documentation including code examples, advanced patterns, and 
   key](/self-hosting/license-key) to activate it.
 </Callout>
 
-Server-side ingestion masking allows self-hosted Langfuse administrators to define custom callback logic for masking or redacting sensitive data from tracing events as they are ingested. This feature operates at the Langfuse Web container level, providing centralized data masking across all clients.
+Server-side ingestion masking allows self-hosted Langfuse administrators to define custom callback logic for masking or redacting sensitive data from tracing events as they are ingested.
+This feature operates at the Langfuse Worker container level, providing centralized data masking across all clients.
 
 **Key benefits:**
 
@@ -59,7 +60,7 @@ Server-side ingestion masking allows self-hosted Langfuse administrators to defi
 
 ### How It Works
 
-1. When a tracing event hits the Langfuse Web container, it checks if a masking callback URL is configured.
+1. When a tracing event is processed on the Langfuse Worker container, it checks if a masking callback URL is configured.
 2. If configured, Langfuse sends the OpenTelemetry trace object to your callback endpoint via HTTP POST.
 3. Your callback service processes the data and returns the masked object.
 4. Langfuse continues processing with the masked data.
@@ -68,24 +69,32 @@ Server-side ingestion masking allows self-hosted Langfuse administrators to defi
 sequenceDiagram
     participant SDK as Langfuse SDK
     participant Web as Langfuse Web
+    participant S3 as S3 Event Bucket
+    participant Worker as Langfuse Worker
     participant Callback as Masking Callback
 
     SDK->>Web: Send trace event
-    Web->>Callback: POST (OpenTelemetry object)
+    Web->>S3: Store unmasked event in S3
+    Note over S3: Data is stored unmasked in S3.
+    Web->>Worker: Forward S3 reference to worker via Redis
+    Worker->>S3: Fetch data from S3
+    Worker->>Callback: POST (OpenTelemetry object)
     Note over Callback: Apply masking logic
-    Callback->>Web: Return masked object
-    Note over Web: Process masked event
+    Callback->>Worker: Return masked object
+    Note over Worker: Process masked event
 ```
 
 ### Configuration
 
-Configure the masking callback using the following environment variables on the Langfuse Web container:
+Configure the masking callback using the following environment variables on the Langfuse Worker container:
 
 | Variable                                          | Required / Default | Description                                                                                                                                                                                  |
 | ------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `LANGFUSE_INGESTION_MASKING_CALLBACK_URL`         | Required to enable | The HTTP(S) URL of your masking callback endpoint. When set, all ingestion events will be sent to this endpoint for masking before processing.                                               |
 | `LANGFUSE_INGESTION_MASKING_CALLBACK_TIMEOUT_MS`  | `500`              | Timeout in milliseconds for the callback request. If the callback does not respond within this time, the behavior is determined by the fail mode setting.                                    |
-| `LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED` | `true`             | When `true` (default), events are dropped if the callback fails or times out, and a warning is logged. When `false` (fail open), events are processed without masking if the callback fails. |
+| `LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED` | `false`             | When set to `true`, events are dropped if the callback fails or times out, and a warning is logged. When `false` (default, fail open), events are processed without masking if the callback fails. |
+| `LANGFUSE_INGESTION_MASKING_MAX_RETRIES`          | `1`                | Maximum number of retries for failed callback requests. If the callback fails after this many attempts, the behavior is determined by the fail mode setting.                                 |
+| `LANGFUSE_INGESTION_MASKING_PROPAGATED_HEADERS`   | `''`               | Comma-separated list of headers to propagate from the original request to the masking callback. These headers will be forwarded from the Web container and added to the header in the callback request. |
 
 ### Callback Interface
 
@@ -104,6 +113,7 @@ Langfuse sends a `POST` request to your callback URL with:
 **Body:**
 
 The request body contains the OpenTelemetry trace object in JSON format. This is the raw tracing data that would be stored in Langfuse.
+The event body follows the [OpenTelemetry Trace Request Proto](https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/trace/v1/trace.proto).
 
 #### Response
 
@@ -113,8 +123,8 @@ Your callback must return:
 - **Body**: The masked OpenTelemetry object in the **exact same schema** as the input
 
 <Callout type="warning">
-  The response object must maintain the same structure as the input. Only modify
-  the values you want to mask—do not add, remove, or rename fields.
+  The response object must maintain the same structure as the input.
+  Only modify the values you want to mask—do not add, remove, or rename fields.
 </Callout>
 
 #### Error Handling
@@ -136,6 +146,11 @@ Server-side ingestion masking only applies to events ingested via the [OpenTelem
 - Third-party OpenTelemetry instrumentation libraries (OpenLLMetry, OpenLIT, etc.)
 
 Events ingested via the legacy `/api/public/ingestion` endpoint are not processed through the masking callback.
+
+<Callout type="info">
+  For project or organization-specific masking requirements, we recommend to use the `X-Langfuse-Org-Id` and `X-Langfuse-Project-Id` headers
+  or `LANGFUSE_INGESTION_MASKING_PROPAGATED_HEADERS` to customize your masking decisions.
+</Callout>
 
 ### Example Implementation
 
@@ -200,7 +215,7 @@ LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED=true
 - **Latency**: The masking callback adds latency to the ingestion path. Keep your callback service fast (ideally < 100ms).
 - **Timeout**: The default 500ms timeout is designed to balance reliability with performance. Adjust based on your masking complexity.
 - **Availability**: Your masking service should be highly available, especially with fail-closed mode enabled.
-- **Colocation**: Deploy your masking service close to your Langfuse deployment to minimize network latency.
+- **Colocation**: Deploy your masking service close to your Langfuse deployment to minimize network latency. Sidecar containers are recommended.
 
 ### Troubleshooting
 
