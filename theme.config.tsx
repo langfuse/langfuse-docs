@@ -217,24 +217,20 @@ const config: DocsThemeConfig = {
     Callout,
     Video,
   },
-  // banner: {
-  //   key: "cloudflare-incident",
-  //   dismissible: false,
-  //   content: (
-  //     <Link href="https://status.langfuse.com/">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">
-  //         Incident: Langfuse Cloud is affected by the global Cloudflare outage.
-  //         Currently, services are recovering, see status page for more details.
-  //       </span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         Incident: Langfuse Cloud is affected by the global Cloudflare outage.
-  //         Currently, services are recovering, see status page for more details.
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "joining-clickhouse",
+    dismissible: true,
+    content: (
+      <Link href="/blog/joining-clickhouse">
+        {/* mobile */}
+        <span className="sm:hidden">Langfuse joins ClickHouse! →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+          Langfuse joins ClickHouse! Learn more →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;

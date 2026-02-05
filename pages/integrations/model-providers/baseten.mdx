@@ -1,0 +1,107 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Monitor Baseten with Langfuse
+sidebarTitle: Baseten
+logo: /images/integrations/baseten_icon.png
+description: Learn how to integrate Baseten with Langfuse using the OpenAI drop-in replacement.
+category: Integrations
+---
+
+# Observability for Baseten with Langfuse
+
+
+This guide shows you how to integrate [Baseten](https://www.baseten.co/) with Langfuse. Baseten's inference API is fully compatible with OpenAI's client libraries, allowing us to use the Langfuse OpenAI drop-in replacement to trace all parts of your application.
+
+
+> **What is Baseten?** [Baseten](https://docs.baseten.co/overview) is an inference platform that enables developers to deploy and scale machine learning models in production. It provides fast, reliable model inference with support for popular open-source models through an OpenAI-compatible API.
+
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
+
+
+<Steps>
+## Step 1: Install Dependencies
+
+Make sure you have installed the necessary Python packages:
+
+
+
+```python
+%pip install openai langfuse -q
+
+```
+
+## Step 2: Set Up Environment Variables
+
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Get your Baseten API key from https://app.baseten.co/settings/api_keys
+os.environ["BASETEN_API_KEY"] = "..."
+
+```
+
+## Step 3: Langfuse OpenAI drop-in Replacement
+
+In this step we use the native [OpenAI drop-in replacement](https://langfuse.com/docs/observability/sdk/instrumentation) by importing `from langfuse.openai import openai`.
+
+To start using Baseten with OpenAI's client libraries, pass in your Baseten API key to the `api_key` option, and change the `base_url` to `https://inference.baseten.co/v1`:
+
+
+
+```python
+# instead of import openai:
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+  api_key=os.environ.get("BASETEN_API_KEY"),
+  base_url="https://inference.baseten.co/v1",
+)
+```
+
+## Step 4: Run An Example
+
+The following cell demonstrates how to call Baseten's chat model using the traced OpenAI client. All API calls will be automatically traced by Langfuse.
+
+
+```python
+response = client.chat.completions.create(
+  model="zai-org/GLM-4.6",
+  messages=[
+    {"role": "system", "content": "You are a travel agent. Be descriptive and helpful."},
+    {"role": "user", "content": "Tell me the top 3 things to do in San Francisco"},
+  ],
+  name="baseten-example-trace"
+)
+
+print(response.choices[0].message.content)
+```
+
+## Step 5: See Traces in Langfuse
+
+After running the example model call, you can see the traces in Langfuse. You will see detailed information about your Baseten API calls, including:
+
+- Request parameters (model, messages, temperature, etc.)
+- Response content
+- Token usage statistics
+- Latency metrics
+
+<Frame>
+![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration_baseten/baseten-example-trace.png)
+</Frame>
+
+_[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2c070a60-3cb9-43c6-9731-ba2ae3076453?timestamp=2025-12-23T14:38:10.441Z)_
+</Steps>
+
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />

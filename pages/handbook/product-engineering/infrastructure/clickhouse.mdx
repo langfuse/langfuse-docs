@@ -82,7 +82,7 @@ If you observe runtime issues on large projects, it usually makes sense to inves
 
 ## Operations
 
-ClickHouse support a cluster mode and a single instance mode. Those have an effect on DDL queries, as a ON CLUSTER keyword is required to achieve replication in a multi-node setup, but throws errors on single-instances without a cluster config.
+ClickHouse supports a cluster mode and a single instance mode. Those have an effect on DDL queries, as an ON CLUSTER keyword is required to achieve replication in a multi-node setup, but throws errors on single-instances without a cluster config.
 
 For simplicity in the application, we replicate our migration scripts to support both. The migration being executed depends on the CLICKHOUSE_MIGRATION_CLUSTER_ENABLED environment variable. It defaults to true and must be set explicitly to false to disable cluster mode.
 
@@ -95,9 +95,17 @@ packages/shared/clickhouse/migrations/unclustered/<name>.up.sql
 packages/shared/clickhouse/migrations/unclustered/<name>.down.sql
 ```
 
-The unclustered mode is tested in our CI and the clustered mode on staging, i.e. we should observe if any of the migrations you've added are invalid.
+The unclustered mode is tested in our CI and the clustered mode on staging, i.e., we should observe if any of the migrations you've added are invalid.
 
-Also review our guidelines on [ClickHouse database migrations](https://github.com/langfuse/langfuse/blob/main/REVIEW.md#clickhouse) in the repo.
+Also, review our guidelines on [ClickHouse database migrations](https://github.com/langfuse/langfuse/blob/main/REVIEW.md#clickhouse) in the repo.
+
+## Limitations
+
+Within the Langfuse v3 major release cycle, we promise backwards compatibility with ClickHouse 24.3.
+Therefore, some of our CI runs against this version and may error if you use features or setting flags that were introduced in later versions.
+Notable differences include:
+
+- No `JSON` column support. I.e., an introduction of a new column with type JSON would demand a major release of Langfuse.
 
 ## Doc References
 

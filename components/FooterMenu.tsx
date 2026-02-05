@@ -163,6 +163,10 @@ const menuItems: {
         href: "/about",
       },
       {
+        name: "Press",
+        href: "/press",
+      },
+      {
         name: "Customers",
         href: "/customers",
       },

@@ -50,7 +50,7 @@ LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
 OPENAI_API_KEY = "sk-proj-..."
 ```
 
-With the environment variables set, we can now initialize the Langfuse Client and the CallbackHandler. You can also use [constructor arguments](/docs/observability/sdk/python/setup#initialize-client) to initialize the Langfuse client.
+With the environment variables set, we can now initialize the Langfuse Client and the CallbackHandler. You can also use [constructor arguments](/docs/observability/sdk/overview#initialize-tracing) to initialize the Langfuse client.
 
 ```python
 from langfuse import get_client
@@ -637,6 +637,10 @@ Since Langchain version > 0.3.0, the callbacks on which Langfuse relies have bee
 - importing the global `awaitAllCallbacks` method to ensure all callbacks finish if necessary
 
 Read more about awaiting callbacks here in the [Langchain docs](https://js.langchain.com/docs/how_to/callbacks_serverless).
+
+### AWS Bedrock AgentCore
+
+When deploying LangChain applications to AWS Bedrock AgentCore, the runtime's ADOT (AWS Distro for OpenTelemetry) auto-instrumentation requires OTEL configuration instead of relying solely on the Langfuse callback handler. See [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup#aws-bedrock-agentcore-adot) for configuration details, or the full [Amazon Bedrock AgentCore integration guide](/integrations/frameworks/amazon-agentcore).
 
 ### Azure OpenAI model names
 

@@ -1,0 +1,74 @@
+# AWS ECS Fargate
+
+We are using [AWS ECS Fargate](https://docs.aws.amazon.com/ecs/) as the runtime for our web and worker application containers.
+
+To separate traffic and load patterns we run multiple deployments of each service with different configurations with
+specific routing or queue worker configurations.
+In addition, all of the containers are autoscaled dynamically based on application load and metrics.
+
+## Terminology
+
+- **Cluster**: A logical group of services and tasks.
+- **Service**: A collection of tasks that share the same configuration. Services are long-lived and are a collection of tasks.
+- **Task**: A specific, ephemeral group of containers. Comparable with a `Pod` in Kubernetes. Tasks are short-lived and can be scaled horizontally.
+- **Task Definition**: A specific configuration for a task. It contains environment variables, the docker image, and other configuration.
+- **Sidecar**: Additional containers that run alongside the main container in a task.
+
+## Common Concepts
+
+### Components Split
+
+We run the `web` and `worker` services in multiple different configurations:
+
+- **web**: The standard web application that serves most of the user-facing traffic.
+- **web-iso**: An additional web container that specific routes are sent to. Currently, this affects all trace-related public API routes, e.g. `/api/public/traces` and `/api/public/observations` (among others).
+  As those workloads are CPU heavy they would have a noisy-neighbor impact on more latency sensitive routes if they would be kept in the main container group.
+  Traffic separation happens on the LoadBalancer level using path-based rules.
+- **web-ingestion**: A container group that handles media APIs, `/api/public/ingestion`, and `/api/public/otel/v1/traces` requests. This allows for more fine-grained autoscaling and protects
+  the stability of ingestion routes from the remaining implementation.
+- **worker**: The standard worker container that performs most of the queue processing. ingestion-queue and otel-ingestion-queue processing is disabled.
+- **worker-cpu**: A worker deployment that handles CPU-heavy processing, mainly the ingestion-queue and the otel-ingestion-queue. This increases throughput and reduces error rates due to CPU stalls
+  on other worker jobs.
+
+### Sidecars
+
+Each of our tasks consists of three containers. The core application container that we ship for Langfuse-OSS, and two sidecar containers for monitoring.
+One sidecar container handles logging using Fluent Bit and forwards all application logs directly to DataDog.
+The second sidecar container is the Datadog Agent who tracks metrics and also acts as an OpenTelemetry Collector for traces.
+
+## Deployment
+
+### Configuration Changes
+
+The container configuration, e.g. environment variables, can be changed via Terraform.
+This updates the underlying Task Definition and triggers a new deployment for the service.
+
+Manual scaling overwrites will be reverted on the next Terraform apply.
+
+### Version Changes
+
+The `Deploy to ECS` action on GitHub will build new versions of the application containers and deploy them into the cluster.
+This will create a new Task Definition version and also trigger a new deployment for the service.
+
+### Common Issues
+
+- Sometimes the container deployment gets stuck and remains in a "Deploying" state for a long time.
+  This can surface as a deployment timeout within GitHub when running deploys. Often this is the case when multiple deployments happen concurrently and AWS ECS cannot decide which containers
+  to stop and has no capacity to start additional containers. Our scaling settings force it to never exceed 100% scaling capacity and not drop below the desired capacity.
+  This can be resolved by increasing the desired capacity temporarily.
+- Overwriting deployed versions with stale plans. Terraform takes the current container version at the `plan` time as the baseline for subsequent writes.
+  If a deployment happened between the plan and the apply steps, it might be the case that the apply reverts the deploy.
+  Therefore, we recommend to keep the time between plans and applys as short as possible.
+
+## Performance Notes
+
+### Logging large bodies
+
+Performing large computations within logging calls has a strong impact on the application performance, even if the corresponding logs are disabled.
+E.g. `logger.debug(JSON.stringify(bigObject))` will first stringify the object and then make a logging decision.
+You can use the Datadog profiling view and flamegraph to identify those.
+
+## Scaling
+
+- For the `web` containers we use request-based autoscaling. We have a target number of requests and add or remove capacity if we deviate from the target.
+- For the `worker` containers we use queue-length-based autoscaling. We define a target backlog per instance and add capacity if the backlog exceeds the target.

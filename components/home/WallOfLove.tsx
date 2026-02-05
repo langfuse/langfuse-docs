@@ -7,7 +7,7 @@ export const WallOfLove = () => {
     <HomeSection>
       <Header
         title="Join the Community"
-        description="80.000+ people have built on Langfuse."
+        description="100.000+ people have built on Langfuse."
         buttons={[
           { href: "https://x.com/langfuse", text: "Follow @langfuse", target: "_blank" },
           { href: "https://x.com/compose/post", text: "Share some love", target: "_blank" }

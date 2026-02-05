@@ -151,6 +151,7 @@ runtime.configure(
 
 launch_result = runtime.launch(
     env_vars={
+        "DISABLE_ADOT_OBSERVABILITY": "true",  # Required: disable ADOT to use Langfuse
         "BEDROCK_MODEL_ID": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
         "OTEL_EXPORTER_OTLP_ENDPOINT": os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"],
         "OTEL_EXPORTER_OTLP_HEADERS": os.environ["OTEL_EXPORTER_OTLP_HEADERS"],
@@ -192,6 +193,45 @@ After running your agent, log in to [Langfuse](https://cloud.langfuse.com) to ex
 The traces provide comprehensive visibility into your agent's behavior in production.
 
 </Steps>
+
+## Using AgentCore with Other Frameworks
+
+If you're using LangChain, LlamaIndex, or another framework on AgentCore: Langfuse SDK callbacks alone won't work on AgentCore. The AgentCore runtime manages telemetry at a level that can bypass SDK HTTP calls.
+
+Pass these environment variables when launching your AgentCore runtime:
+
+```bash
+# Disable AWS's built-in tracing
+DISABLE_ADOT_OBSERVABILITY=true
+
+# Configure OTEL to export to Langfuse
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic $(echo -n 'pk-xxx:sk-xxx' | base64)"
+```
+
+For US region, use `https://us.cloud.langfuse.com/api/public/otel` as the endpoint.
+
+Here's an example of how to launch an AgentCore runtime with the required environment variables:
+
+```python
+import base64
+
+# Prepare auth header
+langfuse_auth = base64.b64encode(
+    f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()
+).decode()
+
+# Launch with required env vars
+launch_result = agentcore_runtime.launch(
+    env_vars={
+        "DISABLE_ADOT_OBSERVABILITY": "true",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": f"{LANGFUSE_BASE_URL}/api/public/otel",
+        "OTEL_EXPORTER_OTLP_HEADERS": f"Authorization=Basic {langfuse_auth}",
+    }
+)
+```
+
+For more troubleshooting, see [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup#aws-bedrock-agentcore-adot).
 
 ## Example repository: Continuous Evaluation with AgentCore and Langfuse
 

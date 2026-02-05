@@ -1,0 +1,58 @@
+---
+source: Jupyter Notebook
+title: LibreChat Observability with Langfuse Tracing
+sidebarTitle: LibreChat
+logo: /images/integrations/librechat_icon.png
+description: Add LLM observability to LibreChat with Langfuse tracing to monitor conversations, debug issues, and analyze model performance
+category: Integrations
+---
+
+# Trace LibreChat with Langfuse
+
+This guide shows you how to integrate [Langfuse](https://langfuse.com) tracing with [LibreChat](https://www.librechat.ai/) to get full observability into your AI conversations.
+
+> **What is LibreChat?** [LibreChat](https://github.com/danny-avila/LibreChat) is an open-source AI chat platform that brings together multiple AI providers (OpenAI, Anthropic, Google, Azure, and more) into a unified interface. 
+
+> **What is Langfuse?** [Langfuse](https://github.com/langfuse/langfuse) is an open-source LLM observability platform that helps you trace, monitor, and debug your LLM applications.
+
+
+<Steps>
+## Prerequisites
+
+Before you begin, ensure you have:
+
+1. A running LibreChat instance (see [LibreChat Installation Guide](https://www.librechat.ai/docs/quick_start/local_setup))
+2. A Langfuse account ([sign up for free](https://cloud.langfuse.com))
+3. Langfuse API keys from your project settings
+
+## Configure LibreChat Environment Variables
+
+LibreChat uses environment variables for configuration. Add the following Langfuse-related variables to your `.env` file in your LibreChat installation directory:
+
+```bash
+# Langfuse Configuration
+LANGFUSE_PUBLIC_KEY=pk-lf-***
+LANGFUSE_SECRET_KEY=sk-lf-***
+
+# 🇪🇺 EU Data Region
+LANGFUSE_BASE_URL=https://cloud.langfuse.com
+
+# 🇺🇸 US Data Region
+# LANGFUSE_BASE_URL=https://us.cloud.langfuse.com
+```
+
+> **Note**: For self-hosted Langfuse instances, set `LANGFUSE_BASE_URL` to your custom URL (e.g., `http://localhost:3000` for local development).
+
+## Restart LibreChat
+
+After adding the environment variables, restart your LibreChat instance to apply the changes.
+
+## See traces in Langfuse
+
+Once LibreChat is restarted with Langfuse configured, you can see a new trace for every chat message response in the Langfuse UI:
+
+![LibreChat example trace](https://langfuse.com/images/cookbook/integration_librechat/librechat-example-trace.png)
+
+[Link to trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/57b4aa20a258a2e9e2d1ce2e4eacb21c?observation=06f5341a68d723b1&timestamp=2026-02-04T13%3A02%3A54.248Z&traceId=57b4aa20a258a2e9e2d1ce2e4eacb21c)
+</Steps>
+
