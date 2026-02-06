@@ -125,6 +125,14 @@ curl -X POST "https://cloud.langfuse.com/api/public/v2/prompts" \
 
 If you have prompts in your existing codebase, you can migrate them to Langfuse programmatically.
 
+**Using the Prompt Migration Skill**
+
+Use the [Langfuse Prompt Migration Skill](https://skills.sh/langfuse/skills/langfuse-prompt-migration) to automatically migrate hardcoded prompts to Langfuse for version control, A/B testing, and deployment-free iteration:
+
+```bash
+npx skills add langfuse/skills --skill "langfuse-prompt-migration"
+```
+
 **Using the API**
 
 You can write a script that reads your existing prompts and creates them in Langfuse using the [Public API](https://api.reference.langfuse.com/#tag/prompts/post/api/public/v2/prompts). This is ideal for bulk migrations or CI/CD integration.

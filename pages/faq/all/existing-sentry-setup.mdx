@@ -1,0 +1,207 @@
+---
+title: How to integrate Langfuse with an existing Sentry setup
+description: Learn how to add Langfuse as a backend to your existing Sentry instrumentation.
+tags: [observability, integration-opentelemetry]
+---
+
+# Using Langfuse with Sentry
+
+This guide covers how to configure Langfuse alongside Sentry. If you haven't already, read [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup) to understand the general concepts.
+
+> **Note:** This guide focuses on the **Sentry JavaScript/Node SDK**, which automatically initializes OpenTelemetry and claims the global TracerProvider. The Python `sentry_sdk` does not have this behavior, so Python users can typically use a standard [isolated TracerProvider](#isolated-tracer-provider) without special Sentry configuration.
+
+## Why Sentry Requires Special Configuration
+
+Sentry's JavaScript SDK automatically initializes OpenTelemetry when you call `Sentry.init()`. This includes:
+- Creating a `SentrySpanProcessor`
+- Setting up `SentryPropagator` for distributed tracing
+- Installing `SentryContextManager`
+- Registering itself as the global TracerProvider
+
+Because Sentry "claims" the global TracerProvider, simply initializing Langfuse afterward won't work: Langfuse's span processor never gets attached to the provider Sentry controls.
+
+## Setup options
+
+### Option A: Shared TracerProvider (Recommended) [#shared-tracer-provider]
+
+Disable Sentry's automatic OTEL setup and configure a shared TracerProvider that includes both Sentry and Langfuse processors. This gives you distributed tracing across both tools.
+
+```bash
+npm install @sentry/opentelemetry
+```
+
+```typescript
+import * as Sentry from "@sentry/node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import {
+  SentryPropagator,
+  SentrySampler,
+  SentrySpanProcessor,
+} from "@sentry/opentelemetry";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+
+// Step 1: Initialize Sentry WITHOUT automatic OTEL setup
+const sentryClient = Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  skipOpenTelemetrySetup: true,  // Critical: prevents Sentry from claiming global provider
+  tracesSampleRate: 1.0,
+});
+
+// Step 2: Create a shared TracerProvider with both processors
+const provider = new NodeTracerProvider({
+  sampler: sentryClient ? new SentrySampler(sentryClient) : undefined,
+  spanProcessors: [
+    // Langfuse processor - optionally with filtering
+    new LangfuseSpanProcessor({
+      shouldExportSpan: ({ otelSpan }) =>
+        ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name),
+    }),
+    // Sentry processor - receives all spans
+    new SentrySpanProcessor(),
+  ],
+});
+
+// Step 3: Register with Sentry's propagator and context manager
+provider.register({
+  propagator: new SentryPropagator(),
+  contextManager: new Sentry.SentryContextManager(),
+});
+```
+
+#### Sentry's Sample Rate Affects Langfuse
+
+When using a shared TracerProvider, Sentry's `tracesSampleRate` applies to **all** traces, including those going to Langfuse.
+
+```typescript
+Sentry.init({
+  tracesSampleRate: 0.1,  // Only 10% of traces are created
+  // ...
+});
+```
+
+If you set this to `0.1`, only 10% of your LLM calls will appear in Langfuse. To send all traces to Langfuse while sampling for Sentry, use the [isolated TracerProvider](#isolated-tracer-provider) approach instead (Option B).
+
+#### Filtering Langfuse Spans
+
+In the setup above, we use `shouldExportSpan` to [only send LLM-related spans](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) to Langfuse:
+
+```typescript
+new LangfuseSpanProcessor({
+  shouldExportSpan: ({ otelSpan }) =>
+    ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name),
+}),
+```
+
+This prevents HTTP requests, database queries, and other infrastructure spans from appearing in Langfuse, while Sentry still receives everything.
+
+Adjust the allowed [scopes](/faq/all/existing-otel-setup#instrumentation-scopes) based on what you want in Langfuse. You can find the scope name of a span in the Langfuse UI by clicking on any span and looking for `metadata.scope.name`. 
+
+#### Required Sentry Components
+
+When using `skipOpenTelemetrySetup: true`, you must manually configure all of Sentry's OTEL components:
+
+| Component | Purpose |
+|-----------|---------|
+| `SentrySampler` | Applies Sentry's sampling decisions |
+| `SentrySpanProcessor` | Sends spans to Sentry |
+| `SentryPropagator` | Handles distributed tracing headers |
+| `SentryContextManager` | Manages async context for Sentry |
+
+If you omit any of these, Sentry's tracing may not work correctly.
+
+
+### Option B: Isolated TracerProvider [#isolated-tracer-provider]
+
+If you don't need distributed tracing across Sentry and Langfuse spans, you can use a completely [isolated TracerProvider](/docs/observability/sdk/advanced-features#isolated-tracer-provider) for Langfuse. This is simpler to configure and avoids sampling conflicts.
+
+<LangTabs items={["JS/TS", "Python"]}>
+<Tab>
+
+```typescript
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { setLangfuseTracerProvider } from "@langfuse/tracing";
+import * as Sentry from "@sentry/node";
+
+// Sentry uses its own automatic OTEL setup
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  tracesSampleRate: 1.0,
+  // No skipOpenTelemetrySetup - let Sentry manage global provider
+});
+
+// Langfuse uses a completely separate provider
+const langfuseProvider = new NodeTracerProvider({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+setLangfuseTracerProvider(langfuseProvider);
+```
+
+</Tab>
+<Tab>
+
+```python
+import sentry_sdk
+from opentelemetry.sdk.trace import TracerProvider
+from langfuse import Langfuse
+
+# Initialize Sentry normally
+sentry_sdk.init(
+    dsn=os.environ["SENTRY_DSN"],
+    traces_sample_rate=1.0,
+)
+
+# Langfuse uses a completely separate provider
+langfuse = Langfuse(tracer_provider=TracerProvider())
+```
+
+</Tab>
+</LangTabs>
+
+#### Trade-offs
+
+- Simpler configuration
+- Sentry's sampling doesn't affect Langfuse traces
+- Langfuse and Sentry traces won't share context
+- Some spans may appear orphaned in Langfuse if their parent is in Sentry's provider
+
+
+## Common Issues
+
+#### No traces in Langfuse after adding Sentry
+
+**Cause:** Sentry initialized OTEL before Langfuse could attach its processor.
+
+**Solution:** Use Option A (shared setup) with `skipOpenTelemetrySetup: true`, or Option B (isolated provider).
+
+#### Setting skipOpenTelemetrySetup breaks Sentry tracing
+
+**Cause:** You're not manually configuring all required Sentry OTEL components.
+
+**Solution:** Ensure you're registering the provider with `SentryPropagator` and `SentryContextManager` as shown in Option A.
+
+#### Infrastructure spans appearing in Langfuse
+
+**Cause:** You're not filtering spans in the LangfuseSpanProcessor.
+
+**Solution:** Add a `shouldExportSpan` filter to only allow LLM-related scopes.
+
+#### Only some traces appear in Langfuse
+
+**Cause:** Sentry's `tracesSampleRate` is less than 1.0 and you're using Option A (shared provider).
+
+**Solution:** Set `tracesSampleRate: 1.0` if you want all traces, or use Option B (isolated provider) to avoid the sampling issue.
+
+## AWS Lambda Considerations
+
+In serverless environments like AWS Lambda, you may need additional configuration:
+
+```typescript
+new LangfuseSpanProcessor({
+  exportMode: "immediate",  // Don't batch - export before Lambda freezes
+  shouldExportSpan: ({ otelSpan }) =>
+    ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name),
+}),
+```
+
+The `exportMode: "immediate"` setting ensures spans are exported right away rather than batched, which is important because Lambda may freeze the execution context before batched spans are flushed. Read more on [how Langfuse captures and sends spans](/docs/observability/data-model#background-processing) here.
