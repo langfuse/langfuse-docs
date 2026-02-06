@@ -76,16 +76,46 @@ With your evaluator and model selected, you now specify which data to run the ev
 
 Evaluating live production traffic allows you to monitor the performance of your LLM application in real-time.
 
-<Tabs items={["Observations (Recommended)", "Traces (Deprecated)"]}>
+<Tabs items={["Traces", "Observations (Closed Beta)"]}>
 <Tab>
 
-**Live Observations (Recommended)**
+**Live Traces**
 
-Run evaluators on individual observations such as LLM calls, tool invocations, or agent steps. This provides:
+<Callout type="info">
 
-- **Granular control**: Target specific observations in your trace
-- **Performant system**: Optimized architecture for high-volume evaluation
-- **Flexible filtering**: Apply a combination of trace and observation filters
+**When to use**
+
+- You're on a legacy SDK version (Python v2 or JS/TS v3) and cannot upgrade
+- You have existing trace-level evals that work for your use case
+- You need to evaluate aggregate trace-level data
+
+**Important** If you're using the OTel-based SDKs (Python v3+ or JS/TS v4+), you must call `update_trace()` to populate trace input/output, or migrate to observation-level evaluators.
+
+**Migration Path** Use our [migration guide](/faq/all/llm-as-a-judge-migration) to upgrade your evaluators to run on observations.
+
+</Callout>
+
+Run evaluators on complete traces. This approach:
+
+- Evaluates entire trace execution
+- Limited to trace-level filtering
+
+**How it works**
+
+1. Select "Live Traces" as your evaluation target
+2. Narrow down the evaluation to a specific subset of data you're interested in. You can filter by trace name, tags, `userId` and more. Combine filters freely.
+3. Choose whether to run on _new_ traces only and/or _existing_ traces once (for backfilling). When in doubt, we recommend running on _new_ traces.
+4. To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of the matched traces.
+5. Langfuse shows a sample of traces from the last 24 hours that match your current filters, allowing you to sanity-check your selection.
+
+<Frame fullWidth>
+  ![Production tracing data](/images/docs/evaluator-trace-filter.png)
+</Frame>
+</Tab>
+
+<Tab>
+
+**Live Observations (Closed Beta)**
 
 <Callout type="info">
 **SDK Requirements**
@@ -98,49 +128,18 @@ Run evaluators on individual observations such as LLM calls, tool invocations, o
 **Filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `trace_name`), you must use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations.
 </Callout>
 
+Run evaluators on individual observations such as LLM calls, tool invocations, or agent steps. This provides:
+
+- **Granular control**: Target specific observations in your trace
+- **Performant system**: Optimized architecture for high-volume evaluation
+- **Flexible filtering**: Apply a combination of trace and observation filters
+
 **How it works**:
 
 1. Select "Live Observations" as your evaluation target
 2. Narrow down the evaluation to a specific subset of data you're interested in (`observation type`, `trace name`, `trace tags`, `userId`, `sessionId`, `metadata` etc.)
 3. To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of the matched observations.
 
-</Tab>
-
-<Tab>
-
-**Live Traces (Deprecated)**
-
-<Callout type="warning">
-**Deprecated**: We recommend using evaluators on observations for better performance and reliability. Evaluators running on traces will continue to work but won't receive new features.
-
-**When to use**:
-
-- You're on a legacy SDK version (Python v2 or JS/TS v3) and cannot upgrade
-- You have existing trace-level evals that work for your use case
-- You need to evaluate aggregate trace-level data
-
-**Important**: If you're using the OTel-based SDKs (Python v3+ or JS/TS v4+), you must call `update_trace()` to populate trace input/output, or migrate to observation-level evaluators.
-
-**Migration Path**: Use our [migration guide](/faq/all/llm-as-a-judge-migration) to upgrade your evaluators to run on observations.
-
-</Callout>
-
-Run evaluators on complete traces. This legacy approach:
-
-- Evaluates entire trace execution
-- Limited to trace-level filtering
-
-**How it works**:
-
-1. Select "Live Traces" as your evaluation target
-2. Narrow down the evaluation to a specific subset of data you're interested in. You can filter by trace name, tags, `userId` and more. Combine filters freely.
-3. Choose whether to run on _new_ traces only and/or _existing_ traces once (for backfilling). When in doubt, we recommend running on _new_ traces.
-4. To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of the matched traces.
-5. Langfuse shows a sample of traces from the last 24 hours that match your current filters, allowing you to sanity-check your selection.
-
-<Frame fullWidth>
-  ![Production tracing data](/images/docs/evaluator-trace-filter.png)
-</Frame>
 
 </Tab>
 </Tabs>
