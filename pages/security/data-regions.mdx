@@ -47,13 +47,13 @@ Less critical factor:
 
 ## Business Continuity & Availability
 
-| Control               | Details                                                                                          |
-| --------------------- | ------------------------------------------------------------------------------------------------ |
-| **High availability** | Multi‑AZ databases & load‑balanced stateless application layer on AWS.                           |
-| **Disaster recovery** | Encrypted backups stored cross‑region; tested at least annually                                  |
-| **Status page**       | [https://status.langfuse.com](https://status.langfuse.com) with historical uptime and incidents. |
-
-For our cloud service, we have a RTO of 12h and RPO of 10min. 
+| Control                   | Details                                                                                                                                                         |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **High Availability**     | Multi‑AZ databases & load‑balanced stateless application layer on AWS.                                                                                          |
+| **Recovery Precision**    | RPO: 10 minutes (PITR for Postgres). RTO: 12 hours.                                                                                                            |
+| **Backup Layers**         | Postgres: 7d retention. Clickhouse: 6-hourly backups (4d retention). S3: 7d versioning retention.                                                              |
+| **Durability**            | Encrypted backups stored cross‑region on AWS/Clickhouse Cloud; tested at least annually for restoration integrity.                                             |
+| **Status Page**           | [https://status.langfuse.com](https://status.langfuse.com) with historical uptime and incidents.                                                               | 
 
 
 ## Self-hosted Instances
