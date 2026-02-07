@@ -95,7 +95,15 @@ Evaluating live production traffic allows you to monitor the performance of your
 
 </Callout>
 
-Run evaluators on complete traces. This approach:
+Run evaluators on complete traces. This approach evaluates at the trace level, but can **target any data within the trace** when mapping variables:
+
+- **Trace input/output**: The top-level input and output of the entire trace
+- **Specific observation outputs**: Target the output of a particular LLM call, tool invocation, or agent step within the trace using JSONPath expressions
+- **Nested data**: Access deeply nested fields within any observation's input, output, or metadata
+
+This flexibility means you can evaluate specific parts of your trace (e.g., the output of a particular tool call) while still using trace-level filtering to select which traces to evaluate. However, for more granular filtering and better performance, consider using observation-level evaluators.
+
+**Limitations**
 
 - Evaluates entire trace execution
 - Limited to trace-level filtering
