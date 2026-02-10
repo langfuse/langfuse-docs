@@ -1,7 +1,7 @@
 ---
 date: 2026-02-10
 title: Simplify for Scale
-description: A faster, more intuitive Langfuse. Rebuilt from the ground up for instant performance at any scale.
+description: Infrastructure rebuild for improved performance at scale. Immutable observations, no joins, and faster APIs across all features.
 author: Max,Steffen,Valeriy,Hassieb,Nimar,Marlies
 ogImage: /images/changelog/2026-02-10-simplify-for-scale.jpg
 ---
@@ -12,108 +12,85 @@ import {  Callout } from "nextra/components";
 
 <ChangelogHeader />
 
-We're rebuilding Langfuse's infrastructure to deliver the best performance especially for large projects. After processing billions of events per month, we've identified exactly where bottlenecks occur at scale—and we're eliminating them.
+We've rebuilt Langfuse's infrastructure to address performance bottlenecks at scale. After processing billions of events per month, we analzyed our query patterns and we introduce changes now to be able to scale with our customers.
 
-The result? **Instant charts. Lightning-fast APIs. A simpler, more intuitive data model.** Everything you love about Langfuse, now built to scale.
+The new architecture delivers faster charts and APIs through a simplified data model that eliminates expensive joins and reduces query complexity.
 
-## What you'll get
+## Changes
 
-### A simpler, more intuitive data model
+### Observation-centric data model
 
-No more confusion between traces and observations. Everything is now an **observation**—a single, unified concept that's easier to understand and work with.
+The data model now centers on **observations** as the primary concept.
 
-Set context like `user_id`, `session_id`, and `metadata` once, and it automatically flows through all your spans. No more repeatedly updating trace metadata or patching outputs. Your instrumentation gets simpler and your mental model gets clearer.
+Context attributes (`user_id`, `session_id`, `metadata`) set at the trace level now propagate automatically to all child spans. This eliminates the need to repeatedly update trace metadata or patch outputs across observations.
 
-### Snappier UI across the board
+Single inputs and outputs for a trace are not sufficient anymore. Users with complex agentic workflows benefit from the new data model combined with new filter capabilities as there may be multiple observations for a single trace that are relevant for the user to look at in the UI.
 
-Charts that used to take seconds now load **instantly**. Filtering through millions of observations is smooth and fast.
+### UI performance improvements
 
-We've eliminated the expensive database operations that caused slowdowns. Whether you're exploring complex agentic traces or analyzing production patterns, the UI keeps up with your thinking.
+Chart rendering time has been significantly reduced. Queries that previously took seconds or minutes now complete in few seconds or milliseconds. Database operations have been optimized to reduce query complexity. 
 
-### Blazing fast APIs with our new v2 endpoints
+This applies to trace exploration, filtering, and analytics across large projects.
 
-Retrieve your data faster than ever with our redesigned APIs:
+### New v2 API endpoints
 
-- **New Observations API v2**: Optimized for performance with flexible filtering and streamlined responses
-- **New Metrics API v2**: Lightning-fast aggregations across millions of events
+We redesigned the observations and metrics APIs to test the new data model under the hood.The redesigned APIs offer significant performance improvements:
 
-These aren't just incremental improvements—we're talking **10-100x faster** for common queries. Export data, build dashboards, integrate with your tools—everything gets faster.
+- **Observations API v2**: Optimized query execution with flexible filtering
+- **Metrics API v2**: Faster aggregations across large projects
 
 
-### Nearly instant LLM-as-a-judge evaluations
+### Faster LLM-as-a-judge evaluations
 
-Previously, database query overhead added significant latency to every evaluation execution. Each eval required querying ClickHouse, creating bottlenecks that limited throughput and slowed down evaluation workflows.
+Previously, each evaluation required a separate ClickHouse query, adding latency and limiting throughput.
 
-With the new architecture, we've eliminated these database bottlenecks. Evaluations now run on observations directly, enabling us to:
+Evaluations now run directly on observations, eliminating database query overhead:
 
-- **Evaluate at scale**: Run evals on each and every observation without performance degradation
-- **Near-instant execution**: LLM-as-a-judge evaluations are now only bottlenecked by LLM API rate limits, not our infrastructure
-- **Higher throughput**: Process evaluations in parallel at much higher concurrency
+- Evaluations can be executed on every observation without performance degradation
+- Execution time is now limited by LLM API rate limits rather than database queries
+- We support higher evaluation concurrency
 
 <PerformanceComparison />
 
-## How we did it
+## Technical changes
 
-We rebuilt Langfuse around three core principles:
+The rebuild is based on three core principles:
 
-**Immutable by default**: Observations are written once and never modified. This eliminates expensive deduplication operations that slowed down queries.
+**Immutable observations**: Observations are written once and never modified, eliminating deduplication operations.
 
-**No joins required**: Trace-level attributes are propagated directly onto observations in the SDK, so queries run on a single table with no costly joins.
+**No joins**: Trace-level attributes propagate to observations in the SDK. Queries run on a single table without joins.
 
-**Observations first**: Observations become the single source of truth, simplifying everything from APIs to UI.
+**Observation-centric model**: Observations are the primary data source for APIs and UI.
 
 
-## Upgrade to unlock the performance
+## How to unlock new performance
 
-To experience these improvements, upgrade to the latest SDK:
+The new architecture is being rolled out gradually. Here's how to access the performance improvements:
+
+### Enable beta UI experience
+
+In the UI, a beta toggle will be available to opt into the new experience. Note that not all UI screens have been migrated to the new data model yet. Data from older SDK versions will be delayed by 5-10 minutes.
+
+
+### Upgrade SDKs
+
+Upgrade to the latest major SDK versions to explore your data in real time:
 
 - **Python SDK**: Version 3.0.0 or higher
 - **JS/TS SDK**: Version 4.0.0 or higher
 
 <Callout type="info">
-Set trace-level attributes (`user_id`, `session_id`, `metadata`) as early as possible in your instrumentation so they propagate to all downstream spans automatically.
+Set trace-level attributes (`user_id`, `session_id`, `trace metadata`) as early as possible in your instrumentation so they propagate to all downstream spans automatically.
 </Callout>
 
-### What's changing in the SDKs
+### Migrate LLM-as-a-judge evaluations
 
-The new SDKs streamline the data model by focusing on observations:
+Upgrade your LLM-as-a-judge evaluations to run at the observation level instead of the trace level for significantly faster execution.
 
-| Attribute | Status | Migration Path |
-|-----------|--------|----------------|
-| `name` | Deprecated | Use root span name (generated automatically) |
-| `release` | Deprecated | Use `version` instead |
-| `input`/`output` | Deprecated | Set on the relevant observation/span |
-| `tags` | Deprecated | Use `metadata` or scores |
-| `version` | ✅ **Supported** | Continues as span-level attribute |
-| `metadata` | ✅ **Supported** | Propagates across all spans |
-| `user_id` | ✅ **Supported** | Propagates across all spans |
-| `session_id` | ✅ **Supported** | Propagates across all spans |
-| `public` | ✅ **Supported** | Set at observation level |
+### Adopt new v2 API endpoints
 
-Don't worry—we're maintaining backwards compatibility. Old SDK versions continue to work, though you'll get the best performance with the latest versions.
+Use the new Observations API v2 and Metrics API v2 endpoints to retrieve data with improved performance.
 
-## Rollout timeline
-
-We're rolling out the new infrastructure gradually:
-
-1. ✅ **Available now**: New SDKs with attribute propagation
-2. 🚀 **Coming soon**: Core tracing UI migrated to observation-first views
-3. 📊 **Next**: Dashboards and LLM-as-a-judge updates
-4. 🔌 **Future**: Public APIs v2 with observation-only endpoints
-
-Users on older SDK versions will continue to work with backwards compatibility, though you may experience a ~3 minute ingestion delay during the transition period. Upgrading to the latest SDK removes this delay and unlocks the full performance benefits.
-
-## Feature updates
-
-**Core Tracing UI**: Redesigned around observations. Better filtering and navigation, especially for complex agentic traces.
-
-**Dashboards**: Enhanced performance with the new data model. Charts using deprecated trace attributes will get migration guides.
-
-**LLM-as-a-judge**: Moving to observation-level evaluations for much faster execution. Trace-level evals remain backwards compatible.
-
-**Public APIs**: New v2 endpoints deliver 10-100x faster responses. Existing APIs remain available during migration.
-
-**Exports**: Performance improvements across UI exports, blob storage, and Posthog integrations.
 
 ## Get started
 
@@ -138,7 +115,5 @@ import { Book, Github, Zap } from "lucide-react";
 </Cards>
 
 <Callout type="info">
-Stay updated on the rollout by subscribing to our [GitHub discussions](https://github.com/orgs/langfuse/discussions). We'll share migration guides and best practices as each phase goes live.
+Track rollout progress and migration updates on [GitHub discussions](https://github.com/orgs/langfuse/discussions).
 </Callout>
-
-**Ready to experience the performance boost?** Upgrade your SDK today and feel the difference.
