@@ -225,12 +225,6 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 
 ![Bedrock Converse API Trace](https://langfuse.com/images/cookbook/integration-amazon-bedrock/bedrock-converse-trace.png)
 
-## Using Amazon Bedrock AgentCore
-
-When deploying AI agents to [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agents/), the runtime automatically injects ADOT (AWS Distro for OpenTelemetry). This requires OTEL configuration to export traces to Langfuse.
-
-See the dedicated [Amazon Bedrock AgentCore integration guide](/integrations/frameworks/amazon-agentcore) for complete setup instructions, or [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup#aws-bedrock-agentcore-adot) for troubleshooting OTEL-related issues.
-
 ## Can I monitor Amazon Bedrock cost and token usage in Langfuse?
 
 Yes, you can monitor cost and token usage of your Bedrock calls in Langfuse. The native integrations with LLM application frameworks and the LiteLLM proxy will automatically report token usage to Langfuse.
