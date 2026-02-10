@@ -6,7 +6,7 @@ description: Configure, run, and monitor LLM-powered evaluators on observations,
 
 # LLM-as-a-Judge
 
-Use an LLM to automatically score your application outputs. For this evaluation method, the LLM is presented with an observation, trace or experiment item and asked to score and reason about the output. It will then produce a [`score`](/docs/evaluation/core-concepts#scores) including a comment with chain-of-thought reasoning.
+Use an LLM to automatically score your application outputs. For this evaluation method, the LLM is presented with your application's input and output and asked to score and reason about the output. It will then produce a [`score`](/docs/evaluation/core-concepts#scores) including a comment with chain-of-thought reasoning.
 
 <Video
   src="https://static.langfuse.com/docs-videos/2025-12-19-llm-as-a-judge-overview.mp4"
@@ -14,11 +14,171 @@ Use an LLM to automatically score your application outputs. For this evaluation 
   gifStyle
 />
 
-## Why use LLM-as-a-judge?
+## Why use LLM-as-a-Judge?
 
 - **Scalable:** Judge thousands of outputs quickly versus human annotators.
 - **Human‑like:** Captures nuance (e.g. helpfulness, toxicity, relevance) better than simple metrics, especially when rubric‑guided.
 - **Repeatable:** With a fixed rubric, you can rerun the same prompts to get consistent scores.
+
+## How to use LLM-as-a-Judge?
+
+LLM-as-a-Judge evaluators can run on three types of data: **Observations** (individual operations), **Traces** (complete workflows), or **Experiments** (controlled test datasets). Your choice depends on whether you're testing in development or monitoring production, and what level of granularity you need.
+
+### Decision Tree
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+<div className="flex flex-col items-center gap-6 py-8 my-6">
+
+<Card className="border-2 border-primary">
+  <CardContent className="p-4 text-center font-semibold">
+    Which data needs to be evaluated?
+  </CardContent>
+</Card>
+
+<div className="text-2xl text-primary">↓</div>
+
+<div className="flex flex-col md:flex-row gap-12 w-full justify-center">
+
+{/* Live Production Branch */}
+<div className="flex flex-col items-center gap-4 flex-1 min-w-[280px]">
+  <Card className="border-2 border-primary w-full">
+    <CardHeader className="p-4">
+      <CardTitle className="text-base text-center">Live Production Data</CardTitle>
+      <CardDescription className="text-center text-xs">Monitor real-time traffic</CardDescription>
+    </CardHeader>
+  </Card>
+
+  <div className="text-xl text-primary">↓</div>
+
+  <div className="flex flex-col gap-3 w-full">
+    <Card className="border-2 border-primary">
+      <CardContent className="p-3">
+        <div className="font-semibold text-sm">Observations <span className="text-xs font-normal opacity-70">(Recommended, Beta)</span></div>
+        <div className="text-xs text-muted-foreground mt-1">Individual operations: LLM calls, retrievals, tool calls</div>
+      </CardContent>
+    </Card>
+
+    <Card className="border">
+      <CardContent className="p-3">
+        <div className="font-semibold text-sm">Traces</div>
+        <div className="text-xs text-muted-foreground mt-1">Complete workflow executions</div>
+      </CardContent>
+    </Card>
+  </div>
+</div>
+
+{/* Offline Experiments Branch */}
+<div className="flex flex-col items-center gap-4 flex-1 min-w-[280px]">
+  <Card className="border-2 border-primary w-full">
+    <CardHeader className="p-4">
+      <CardTitle className="text-base text-center">Offline Experiment Data</CardTitle>
+      <CardDescription className="text-center text-xs">Test in controlled environment</CardDescription>
+    </CardHeader>
+  </Card>
+
+  <div className="text-xl text-primary">↓</div>
+
+  <Card className="border-2 border-primary w-full">
+    <CardContent className="p-3">
+      <div className="font-semibold text-sm">Experiments</div>
+      <div className="text-xs text-muted-foreground mt-1">Controlled test cases with datasets</div>
+    </CardContent>
+  </Card>
+</div>
+
+</div>
+
+</div>
+
+<Callout type="info">
+**Production Pattern**: Teams typically use **Experiments** during development to validate changes, then deploy **Observation-level** evaluators in production for scalable, precise monitoring.
+</Callout>
+
+### Understanding Each Evaluation Target
+
+<Tabs items={["Live Production Data", "Offline Experiment Data"]} storageKey="eval-data-type">
+<Tab>
+
+Evaluate live production traffic to monitor your LLM application performance in real-time.
+
+<Tabs items={["Observations (Recommended, Beta)", "Traces"]} storageKey="eval-live-target">
+<Tab>
+
+Run evaluators on individual observations within your traces—such as LLM calls, retrieval operations, embedding generations, or tool calls.
+
+**Why target Observations**
+
+- **Operation-level precision**: Filter by observation type to evaluate only final LLM responses or retrieval steps, not entire workflows. Reduces evaluation volume and cost by targeting specific operations.
+- **Compositional evaluation**: Run different evaluators on different operations within one trace. Toxicity on LLM outputs, relevance on retrievals, accuracy on generations—simultaneously.
+- **Production-scale architecture**: Asynchronous execution handles high-volume traffic. Optimized for thousands of evaluations per minute.
+- **Combined filtering**: Stack observation filters (type, name, metadata) with trace filters (userId, sessionId, tags, version). Example: "all LLM generations in conversations tagged 'customer-support' for premium users".
+
+**Data Flow**
+
+At ingest time, each observation is evaluated against your filter criteria. Matching observations are added to an evaluation queue. Evaluation jobs are then processed asynchronously.
+
+**Example Use Cases**
+- Evaluate helpfulness of only the final chatbot response to users
+- Monitor toxicity scores on all customer-facing LLM generations
+- Track retrieval relevance for RAG systems by targeting document retrieval observations
+
+</Tab>
+
+<Tab>
+
+Run evaluators on complete traces, evaluating entire workflow executions from start to finish.
+
+**Why target Traces**
+
+- You need to evaluate aggregate data across a full workflow
+- Your evaluation requires full context spanning multiple operations
+- You're on legacy SDK versions (Python v2 or JS/TS v3) and cannot upgrade
+
+**Data Flow**
+
+At ingest time, each trace is evaluated against your filter criteria. Matching traces are added to an evaluation queue. Evaluation jobs are then processed asynchronously.
+
+**Example Use Cases**
+- Score the accuracy of a multi-step agent workflow (e.g., retrieval → reranking → generation → citation)
+- Track the effectiveness of a full agent execution (planning → tool use → synthesis)
+
+<Callout type="info">
+**Consider targeting Observations instead**: For most production monitoring use cases, observation-level evaluators offer better performance, precision, and cost efficiency. See [migration guide](/faq/all/llm-as-a-judge-migration) to upgrade.
+</Callout>
+
+</Tab>
+</Tabs>
+
+</Tab>
+
+<Tab>
+
+Run evaluators on controlled test datasets to compare model versions, prompt variations, or system configurations in a reproducible environment.
+
+**Why target Experiments**
+
+- You need reproducible benchmarks for decision-making
+- Comparing multiple prompt versions or model configurations
+- You have datasets with expected outputs (ground truth)
+
+**Data Flow**
+
+Each experiment run generates traces that are automatically scored by your selected evaluators. Think of each experiment item as a test case: input → execution → output → evaluation.
+
+1. Create a dataset with test inputs and (optionally) expected outputs. You may also define your test data locally.
+2. Run experiment via UI or SDK—this executes your application code for each dataset item. See [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) or [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for more information.
+3. Selected evaluators to automatically score the generated outputs
+4. Compare results across experiment runs to make data-driven decisions
+
+**Example Use Case**
+
+- Compare GPT-4 vs Claude Opus on 50 customer support questions, evaluate both for accuracy and helpfulness, then deploy the better-performing model
+
+</Tab>
+</Tabs>
+
+
 
 ## Set up step-by-step
 
@@ -69,76 +229,51 @@ When the library doesn't fit your specific needs, add your own:
 
 ### Choose which Data to Evaluate
 
-With your evaluator and model selected, you now specify which data to run the evaluations on. You can choose between scoring **live tracing data** or **offline experiments**.
+With your evaluator and model selected, configure which data to run the evaluations on. See the [How it works](#how-it-works) section above to understand which option fits your use case.
 
-<Tabs items={["Live Data", "Experiments"]}>
+<Tabs items={["Live Production Data", "Offline Experiment Data"]} storageKey="eval-data-type">
 <Tab>
 
-Evaluating live production traffic allows you to monitor the performance of your LLM application in real-time.
-
-<Tabs items={["Traces", "Observations (Closed Beta)"]}>
+<Tabs items={["Observations (Recommended, Beta)", "Traces"]} storageKey="eval-live-target">
 <Tab>
 
-**Live Traces**
+**Configuration Steps**
 
-<Callout type="info">
+1. Select "Live Observations" as your evaluation target
+2. Filter to specific observations using observation type, trace name, trace tags, userId, sessionId, metadata, and other attributes
+3. Configure sampling percentage (e.g., 5%) to manage evaluation costs and throughput
 
-**When to use**
+**Requirements**
 
-- You're on a legacy SDK version (Python v2 or JS/TS v3) and cannot upgrade
-- You have existing trace-level evals that work for your use case
-- You need to evaluate aggregate trace-level data
+- **SDK version**: Python v3+ (OTel-based) or JS/TS v4+ (OTel-based)
+  - [Python v2 → v3 migration guide](/docs/observability/sdk/upgrade-path#python-sdk-v2--v3)
+  - [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path#jsts-sdk-v3--v4)
+- **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations.
 
-**Important** If you're using the OTel-based SDKs (Python v3+ or JS/TS v4+), you must call `update_trace()` to populate trace input/output, or migrate to observation-level evaluators.
-
-**Migration Path** Use our [migration guide](/faq/all/llm-as-a-judge-migration) to upgrade your evaluators to run on observations.
-
-</Callout>
-
-Run evaluators on complete traces. This approach:
-
-- Evaluates entire trace execution
-- Limited to trace-level filtering
-
-**How it works**
-
-1. Select "Live Traces" as your evaluation target
-2. Narrow down the evaluation to a specific subset of data you're interested in. You can filter by trace name, tags, `userId` and more. Combine filters freely.
-3. Choose whether to run on _new_ traces only and/or _existing_ traces once (for backfilling). When in doubt, we recommend running on _new_ traces.
-4. To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of the matched traces.
-5. Langfuse shows a sample of traces from the last 24 hours that match your current filters, allowing you to sanity-check your selection.
-
-<Frame fullWidth>
-  ![Production tracing data](/images/docs/evaluator-trace-filter.png)
-</Frame>
 </Tab>
 
 <Tab>
 
-**Live Observations (Closed Beta)**
+**Configuration Steps**
+
+1. Select "Live Traces" as your evaluation target
+2. Filter traces by name, tags, userId, and other trace-level attributes
+3. Choose whether to run on new traces only or include existing traces (backfilling)
+4. Configure sampling percentage (e.g., 5%) to manage evaluation costs and throughput
+5. Preview matched traces from the last 24 hours to validate your filter configuration
+
+<Frame fullWidth>
+  ![Production tracing data](/images/docs/evaluator-trace-filter.png)
+</Frame>
+
+**Requirements**
+
+- **OTel-based SDKs**: If you're using Python v3+ or JS/TS v4+, you must call `update_trace()` to populate trace input/output, or use observation-level evaluators instead.
 
 <Callout type="info">
-**SDK Requirements**
-
-| Requirement | Python | JS/TS |
-|-------------|--------|-------|
-| **Minimum SDK version** | v3+ (OTel-based) | v4+ (OTel-based) |
-| **Migration guide** | [Python v2 → v3](/docs/observability/sdk/upgrade-path#python-sdk-v2--v3) | [JS/TS v3 → v4](/docs/observability/sdk/upgrade-path#jsts-sdk-v3--v4) |
-
-**Filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `trace_name`), you must use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations.
+**Performance consideration**: For most production monitoring use cases, observation-level evaluators offer better performance, precision, and cost efficiency. See [migration guide](/faq/all/llm-as-a-judge-migration) to upgrade.
 </Callout>
 
-Run evaluators on individual observations such as LLM calls, tool invocations, or agent steps. This provides:
-
-- **Granular control**: Target specific observations in your trace
-- **Performant system**: Optimized architecture for high-volume evaluation
-- **Flexible filtering**: Apply a combination of trace and observation filters
-
-**How it works**:
-
-1. Select "Live Observations" as your evaluation target
-2. Narrow down the evaluation to a specific subset of data you're interested in (`observation type`, `trace name`, `trace tags`, `userId`, `sessionId`, `metadata` etc.)
-3. To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of the matched observations.
 
 
 </Tab>
@@ -147,22 +282,18 @@ Run evaluators on individual observations such as LLM calls, tool invocations, o
 </Tab>
 <Tab>
 
-LLM-as-a-Judge evaluators can score the results of your Experiments.
+**Configuration Steps**
 
-**[Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)**: When running Experiments via UI, you can simply select which evaluators you want to run. These selected evaluators will then automatically execute on the data generated by your next run.
+- **[Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)**: When running experiments through the UI, select which evaluators to run. These evaluators will automatically execute on the data generated by your next run.
 
-**[Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)**: You can configure evaluators directly in the code by using the [Experiment Runner SDK](/docs/evaluation/experiments/experiments-via-sdk#advanced-features).
+- **[Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)**: Configure evaluators directly in code using the experiment runner SDK.
 
-<Callout type="info">
-**SDK Requirements for Experiments via SDK**
+**Requirements (for Experiments via SDK)**
 
-| Requirement | Python | JS/TS |
-|-------------|--------|-------|
-| **Minimum SDK version** | >= 3.9.0 | >= 4.4.0 |
-| **Required function** | [`run_experiment()`](/docs/evaluation/experiments/experiments-via-sdk) | [`experiment.run()`](/docs/evaluation/experiments/experiments-via-sdk) |
+- **Recommended**: Python >= 3.9.0 or JS/TS >= 4.4.0 with experiment runner functions ([`run_experiment()`](/docs/evaluation/experiments/experiments-via-sdk) / [`experiment.run()`](/docs/evaluation/experiments/experiments-via-sdk)). More performant architecture with built-in evaluator orchestration.
+- **Legacy support**: Older SDK versions supported. Upgrade recommended for better performance.
 
-You must use the experiment runner SDK functions listed above. Simply having the correct SDK version is not sufficient.
-</Callout>
+
 
 </Tab>
 </Tabs>
@@ -171,7 +302,7 @@ You must use the experiment runner SDK functions listed above. Simply having the
 
 You now need to teach Langfuse _which properties_ of your observation, trace, or experiment item represent the actual data to populate these variables for a sensible evaluation. For instance, you might map your system's logged observation input to the prompt's `{{input}}` variable, and the LLM response (observation output) to the prompt's `{{output}}` variable. This mapping is crucial for ensuring the evaluation is sensible and relevant.
 
-<Tabs items={["Live Data", "Experiments"]}>
+<Tabs items={["Live Production Data", "Offline Experiment Data"]} storageKey="eval-data-type">
 <Tab>
 
 - **Prompt Preview**: As you configure the mapping, Langfuse shows a **live preview of the evaluation prompt populated with actual data**. This preview uses historical data from the last 24 hours that matched your filters. You can navigate through several examples to see how their respective data fills the prompt, helping you build confidence that the mapping is correct.
