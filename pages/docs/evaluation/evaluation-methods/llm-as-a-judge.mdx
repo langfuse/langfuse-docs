@@ -109,14 +109,14 @@ Run evaluators on individual observations within your traces—such as LLM calls
 
 **Why target Observations**
 
+- **Dramatically faster execution**: Evaluations complete in seconds, not minutes. Eliminates evaluation delays and backlogs. Asynchronous architecture processes thousands of evaluations per minute.
 - **Operation-level precision**: Filter by observation type to evaluate only final LLM responses or retrieval steps, not entire workflows. Reduces evaluation volume and cost by targeting specific operations.
 - **Compositional evaluation**: Run different evaluators on different operations within one trace. Toxicity on LLM outputs, relevance on retrievals, accuracy on generations—simultaneously.
-- **Production-scale architecture**: Asynchronous execution handles high-volume traffic. Optimized for thousands of evaluations per minute.
 - **Combined filtering**: Stack observation filters (type, name, metadata) with trace filters (userId, sessionId, tags, version). Example: "all LLM generations in conversations tagged 'customer-support' for premium users".
 
 **Data Flow**
 
-At ingest time, each observation is evaluated against your filter criteria. Matching observations are added to an evaluation queue. Evaluation jobs are then processed asynchronously.
+At ingest time, each observation is evaluated against your filter criteria. Matching observations are added to an evaluation queue. Evaluation jobs are then processed asynchronously. Scores are attached to the specific observation, resulting in one score per observation per evaluator. Depending on your filter criteria, multiple observations may match the criteria and result in multiple scores per trace.
 
 **Example Use Cases**
 - Evaluate helpfulness of only the final chatbot response to users
@@ -137,14 +137,14 @@ Run evaluators on complete traces, evaluating entire workflow executions from st
 
 **Data Flow**
 
-At ingest time, each trace is evaluated against your filter criteria. Matching traces are added to an evaluation queue. Evaluation jobs are then processed asynchronously.
+At ingest time, each trace is evaluated against your filter criteria. Matching traces are added to an evaluation queue. Evaluation jobs are then processed asynchronously. Scores are attached to the trace itself, resulting in one score per trace per evaluator.
 
 **Example Use Cases**
 - Score the accuracy of a multi-step agent workflow (e.g., retrieval → reranking → generation → citation)
 - Track the effectiveness of a full agent execution (planning → tool use → synthesis)
 
 <Callout type="info">
-**Consider targeting Observations instead**: For most production monitoring use cases, observation-level evaluators offer better performance, precision, and cost efficiency. See [migration guide](/faq/all/llm-as-a-judge-migration) to upgrade.
+**Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision and cost efficiency for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
 
 </Tab>
@@ -271,7 +271,7 @@ With your evaluator and model selected, configure which data to run the evaluati
 - **OTel-based SDKs**: If you're using Python v3+ or JS/TS v4+, you must call `update_trace()` to populate trace input/output, or use observation-level evaluators instead.
 
 <Callout type="info">
-**Performance consideration**: For most production monitoring use cases, observation-level evaluators offer better performance, precision, and cost efficiency. See [migration guide](/faq/all/llm-as-a-judge-migration) to upgrade.
+**Performance consideration**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays and backlogs. They also offer better precision and cost efficiency. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
 
 
