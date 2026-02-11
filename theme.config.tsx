@@ -128,9 +128,13 @@ const config: DocsThemeConfig = {
     const cookbook = COOKBOOK_ROUTE_MAPPING.find(
       (cookbook) => cookbook.path === asPath
     );
-    const canonical: string | undefined = cookbook?.canonicalPath
-      ? "https://langfuse.com" + cookbook.canonicalPath
-      : undefined;
+    const canonical: string | undefined = frontMatter.canonical
+      ? frontMatter.canonical.startsWith("http")
+        ? frontMatter.canonical
+        : "https://langfuse.com" + frontMatter.canonical
+      : cookbook?.canonicalPath
+        ? "https://langfuse.com" + cookbook.canonicalPath
+        : undefined;
 
     const noindex = frontMatter.noindex === true;
 

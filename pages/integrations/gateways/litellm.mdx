@@ -47,6 +47,10 @@ export LANGFUSE_OTEL_HOST="https://us.cloud.langfuse.com"  # Default US region
 **2. Setup litellm_config.yaml**
 
 ```yaml litellm_config.yaml
+model_list:
+  - model_name: gpt-5.1
+    litellm_params:
+      model: gpt-5.1
 litellm_settings:
   callbacks: ["langfuse_otel"]
 ```
