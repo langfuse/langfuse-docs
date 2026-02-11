@@ -622,7 +622,7 @@ with langfuse.start_as_current_observation(
 Use [`observation.set_trace_io()`](https://python.reference.langfuse.com/langfuse#LangfuseEvent.set_trace_io) or [`langfuse.set_current_trace_io()`](https://python.reference.langfuse.com/langfuse#Langfuse.set_current_trace_io) if you need different trace inputs/outputs than the root observation:
 
 <Callout type="warning">
-`set_trace_io()` and `set_current_trace_io()` are deprecated and exist only for backward compatibility with trace-level LLM-as-a-judge evaluators that rely on trace input/output. For new code, set input/output on the root observation directly. See the [Python v3 → v4 migration guide](/docs/observability/sdk/python-v3-to-v4-upgrade).
+`set_trace_io()` and `set_current_trace_io()` are deprecated and exist only for backward compatibility with trace-level LLM-as-a-judge evaluators that rely on trace input/output. For new code, set input/output on the root observation directly. See the [Python v3 → v4 migration guide](/docs/observability/sdk/upgrade-path#python-v3--v4).
 </Callout>
 
 ```python /set_current_trace_io/ /set_trace_io/
@@ -662,7 +662,7 @@ def process_user_query(user_question: str):
 Use [`propagateAttributes`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.propagateAttributes.html) to set correlating trace attributes, and [`setTraceIO`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#settraceio) for trace-level input/output.
 
 <Callout type="warning">
-`.setTraceIO()` is deprecated and exists only for backward compatibility with trace-level LLM-as-a-judge evaluators. See the [JS/TS v4 → v5 migration guide](/docs/observability/sdk/js-v4-to-v5-upgrade).
+`.setTraceIO()` is deprecated and exists only for backward compatibility with trace-level LLM-as-a-judge evaluators. See the [JS/TS v4 → v5 migration guide](/docs/observability/sdk/upgrade-path#jsts-v4--v5).
 </Callout>
 
 ```ts /propagateAttributes/ /setTraceIO/
