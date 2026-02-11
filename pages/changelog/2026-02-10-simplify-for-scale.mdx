@@ -17,7 +17,7 @@ The new architecture delivers faster charts and APIs through a simplified data m
 
 ## Changes
 
-### Observation-centric data model
+### 1. Observation-centric data model
 
 The data model now centers on **observations** as the primary concept.
 
@@ -25,21 +25,21 @@ Context attributes (`user_id`, `session_id`, `metadata`) set at the trace level 
 
 Complex agentic workflows often involve multiple important steps within a single trace. The new observation-centric model lets you filter and analyze individual observations, moving beyond the limitation of viewing only trace-level inputs and outputs. Saved table filters let you persist filter presets across users in a project, making it easier for teams to share common views.
 
-### UI performance improvements
+### 2. UI performance improvements
 
 Chart rendering time has been significantly reduced. Queries that previously took seconds or minutes now complete in few seconds or milliseconds. Database operations have been optimized to reduce query complexity. 
 
 This applies to trace exploration, filtering, and analytics across large projects.
 
-### New v2 API endpoints
+### 3. New v2 API endpoints
 
 We redesigned the observations and metrics APIs to test the new data model under the hood.The redesigned APIs offer significant performance improvements:
 
-- **Observations API v2**: Optimized query execution with flexible filtering
-- **Metrics API v2**: Faster aggregations across large projects
+- **[Observations API v2](/docs/api-and-data-platform/features/observations-api#v2)**: Optimized query execution with flexible filtering
+- **[Metrics API v2](/docs/metrics/features/metrics-api#v2)**: Faster aggregations across large projects
 
 
-### Faster LLM-as-a-judge evaluations
+### 4. Faster LLM-as-a-judge evaluations
 
 Previously, each evaluation required a separate ClickHouse query, adding latency and limiting throughput.
 
@@ -48,8 +48,6 @@ Evaluations now run directly on observations, eliminating database query overhea
 - Evaluations can be executed on every observation without performance degradation
 - Execution time is now limited by LLM API rate limits rather than database queries
 - We support higher evaluation concurrency
-
-
 
 ## Technical changes
 <Frame fullWidth>
@@ -61,8 +59,6 @@ The rebuild is based on three core principles:
 - **Immutable observations**: Observations are written once and never modified, eliminating deduplication operations.
 - **No joins**: Trace-level attributes propagate to observations in the SDK. Queries run on a single table without joins.
 - **Observation-centric model**: Observations are the primary data source for APIs and UI.
-
-
 
 
 Max shared technical details on how we use ClickHouse to keep product performance ahead of demand at ClickHouse Open House ([recording](https://www.youtube.com/watch?v=NXYQ5odATrM)) in Amsterdam.
@@ -78,12 +74,15 @@ Track rollout progress and migration updates on [GitHub discussions](https://git
 
 The new architecture is being rolled out gradually. Here's how to access the performance improvements:
 
-### Enable beta UI experience
+### 1. Enable beta UI experience
 
 In the UI, a beta toggle will be available to opt into the new experience. Note that not all UI screens have been migrated to the new data model yet. Data from older SDK versions will be delayed by 5-10 minutes.
 
+<Frame className="max-w-xs mx-auto">
+  ![Beta toggle in Langfuse UI](/images/changelog/2026-02-11-v4-preview/v4-beta-togle.png)
+</Frame>
 
-### Upgrade SDKs
+### 2. Upgrade SDKs
 
 Upgrade to the latest major SDK versions to explore your data in real time:
 
@@ -91,14 +90,14 @@ Upgrade to the latest major SDK versions to explore your data in real time:
 - **JS/TS SDK**: Version x.x.x or higher
 
 <Callout type="info">
-Set trace-level attributes (`user_id`, `session_id`, `trace metadata`) as early as possible in your instrumentation so they propagate to all downstream spans automatically.
+Set trace-level attributes (`user_id`, `session_id`, `trace metadata`) as early as possible in your instrumentation so they propagate to all downstream spans automatically. Learn more about [trace-level attributes](/docs/observability/sdk/python/context#trace-level-attributes).
 </Callout>
 
-### Migrate LLM-as-a-judge evaluations
+### 3. Migrate LLM-as-a-judge evaluations
 
-Upgrade your LLM-as-a-judge evaluations to run at the observation level instead of the trace level for significantly faster execution.
+Upgrade your LLM-as-a-judge evaluations to run at the observation level instead of the trace level for significantly faster execution. Learn more in the [LLM-as-a-judge migration guide](/faq/all/llm-as-a-judge-migration).
 
-### Adopt new v2 API endpoints
+### 4. Adopt new v2 API endpoints
 
 The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) deliver significant performance improvements through the new observation-centric data model:
 
