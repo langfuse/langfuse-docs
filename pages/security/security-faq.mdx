@@ -45,6 +45,10 @@ OIDC SSO, email/password, and SCIM provisioning; MFA or passkeys can be enforced
 
 The REST API uses Basic Auth with a pair of API keys: the public key (username) and secret key (password). These keys are created in the project settings, are hashed before storage and can be rotated. JWTs are not used.
 
+> **How long is a session token valid before it expires?**
+
+Session tokens are valid for 86,400 seconds (24 hours). We use JWT tokens which validate the expiry server-side, ensuring tokens expire on both the server and client.
+
 > **How is least‑privilege enforced?**
 
 RBAC lets you scope roles to organisation or project. See [RBAC documentation](/docs/rbac) for more details.
@@ -55,9 +59,25 @@ RBAC lets you scope roles to organisation or project. See [RBAC documentation](/
 
 Langfuse runs on AWS in isolated VPCs with WAF and AWS Shield for DDoS mitigation.
 
+> **What security headers are implemented on Langfuse endpoints?**
+
+We enforce CSP (Content Security Policy), HSTS (HTTP Strict Transport Security), and X-Frame-Options on all endpoints including [langfuse.com](https://domsignal.com/test/ea3amc5z08sh6fnovjek392ihxrb66q6) and [cloud.langfuse.com](https://domsignal.com/test/spdnv4cx0949ah3nvz5b5eapab8o2390).
+
 > **How does Langfuse Cloud monitor its environment?**
 
 Langfuse uses DataDog and Sentry to monitor its application and environments. All cloud audit logs are automatically written into a seperate, locked-down account. In addition, we have automated systems in place to alert us about anomalous usage.
+
+> **What anomaly detection and security alerting capabilities are in place?**
+
+Automatic anomaly detection is enabled using AWS GuardDuty with alerts for impossible travel and unusual API usage of service accounts and users.
+
+> **How does Langfuse log activities in the cloud platform?**
+
+We log failed authentication attempts in application logs and track activities in our infrastructure (AWS, ClickHouse, etc.). Application and system logs are retained in a hot store for 15 days and permanently within cold storage.
+
+> **Does Langfuse use time synchronization for audits?**
+
+Yes. All services run in AWS cloud, which provides both NTP (Network Time Protocol) and PTP (Precision Time Protocol) clock devices. NTP is used by default.
 
 > **How often does Langfuse rotate its API keys?**
 
@@ -68,6 +88,10 @@ Langfuse uses short-lived api keys where possible. For long-lived API keys we ro
 > **What secure‑coding and testing practices are in place?**
 
 Every commit passes our CI pipeline of end-to-end, unit, and security tests.
+
+> **Does Langfuse perform SAST or DAST?**
+
+We perform SAST (Static Application Security Testing) by scanning our container images with Snyk on commits to main ([example](https://github.com/langfuse/langfuse/actions/runs/19838910104/job/56842732608)). We also run static code scans using CodeQL ([example](https://github.com/langfuse/langfuse/actions/runs/19838910102/job/56842732711)).
 
 > **How does the Software Development Lifecycle Policy look like?**
 
