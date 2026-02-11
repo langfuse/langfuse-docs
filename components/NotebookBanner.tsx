@@ -8,11 +8,15 @@ export const NotebookBanner: React.FC<{ src: string; className?: string }> = ({
   // Check if this is a Deno notebook by looking at the filename
   const isDenoNotebook = src.includes("/js_") && src.endsWith(".ipynb");
 
+  // Extract the notebook filename from the src path for Binder URL
+  const notebookFilename = src.split("/").pop();
+  const binderUrl = `https://mybinder.org/v2/gh/langfuse/langfuse-docs/main?urlpath=lab/tree/cookbook/${notebookFilename}`;
+
   return (
     <div className={className}>
       <Callout type="info">
         <div className="flex flex-wrap gap-1 md:justify-between md:items-center">
-          <span>This is a Jupyter notebook</span>
+          <span>This is a {isDenoNotebook ? "Deno" : "Jupyter"} notebook</span>
           <div className="flex gap-2 flex-wrap">
             <a
               href={`https://github.com/langfuse/langfuse-docs/blob/main${src}`}
@@ -23,6 +27,28 @@ export const NotebookBanner: React.FC<{ src: string; className?: string }> = ({
                 Open on GitHub
               </Button>
             </a>
+            {isDenoNotebook && (
+              <a
+                href={binderUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button size="xs" variant="outline" className="inline-flex items-center gap-1.5">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="4 9 39 48"
+                    className="h-4 w-4 shrink-0"
+                  >
+                    <circle fill="none" stroke="#F5A252" strokeWidth="4.8342" strokeMiterlimit="10" cx="27.879" cy="23.939" r="9.542"/>
+                    <circle fill="none" stroke="#579ACA" strokeWidth="4.8342" strokeMiterlimit="10" cx="27.879" cy="42.499" r="9.543"/>
+                    <circle fill="none" stroke="#E66581" strokeWidth="4.8342" strokeMiterlimit="10" cx="18.551" cy="33.289" r="9.543"/>
+                    <path fill="none" stroke="#579ACA" strokeWidth="4.8342" strokeMiterlimit="10" d="M20.196,36.836c0.759-1.031,1.74-1.927,2.921-2.607c4.566-2.63,10.401-1.06,13.031,3.507"/>
+                    <path fill="none" stroke="#F5A252" strokeWidth="4.8342" strokeMiterlimit="10" d="M19.61,28.701c-2.63-4.566-1.061-10.401,3.507-13.032c4.567-2.63,10.401-1.059,13.031,3.508"/>
+                  </svg>
+                  Open in Binder
+                </Button>
+              </a>
+            )}
             {!isDenoNotebook && (
               <a
                 href={`https://colab.research.google.com/github/langfuse/langfuse-docs/blob/main${src}`}
