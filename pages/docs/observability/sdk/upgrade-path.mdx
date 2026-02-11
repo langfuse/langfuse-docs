@@ -12,7 +12,7 @@ This page shows the migration guides to the latest versions of the Langfuse SDKs
 
 ### Python v3 → v4
 
-The Python SDK v4 introduces the **observation-centric data model**. In this model, correlating attributes (`user_id`, `session_id`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
+The Python SDK v4 introduces the **[observation-centric data model](/docs/observability/data-model)**. In this model, correlating attributes (`user_id`, `session_id`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
 
 This changes how you set trace attributes: instead of imperatively updating the trace object with `update_current_trace()`, you use `propagate_attributes()` — a context manager that automatically applies attributes to all child observations created within its scope.
 
@@ -41,26 +41,28 @@ langfuse.update_current_trace(
 **v4 (decomposed):**
 
 ```python
-from langfuse import propagate_attributes, get_client
+from langfuse import observe, propagate_attributes, get_client
 
 langfuse = get_client()
 
-# (a) Correlating attributes → propagate_attributes() context manager
-with propagate_attributes(
-    trace_name="trace-name",  # note: 'name' is now 'trace_name'
-    user_id="user-123",
-    session_id="session-abc",
-    version="1.0",
-    metadata={"key": "value"},
-    tags=["tag1"],
-):
-    ...
+@observe()
+def my_function():
+    # (a) Correlating attributes → propagate_attributes() context manager
+    with propagate_attributes(
+        trace_name="trace-name",  # note: 'name' is now 'trace_name'
+        user_id="user-123",
+        session_id="session-abc",
+        version="1.0",
+        metadata={"key": "value"},
+        tags=["tag1"],
+    ):
+        result = call_llm("Hello")
 
-# (b) Trace I/O → set_current_trace_io() (deprecated, only for legacy trace-level LLM-as-a-judge configurations)
-langfuse.set_current_trace_io(input={"query": "hello"}, output={"result": "world"})
+    # (b) Trace I/O (deprecated, only for legacy trace-level LLM-as-a-judge configurations)
+    langfuse.set_current_trace_io(input={"query": "Hello"}, output={"result": result})
 
-# (c) Public flag → set_current_trace_as_public()
-langfuse.set_current_trace_as_public()
+    # (c) Public flag
+    langfuse.set_current_trace_as_public()
 ```
 
 **Key differences:**
@@ -77,7 +79,7 @@ langfuse.set_current_trace_as_public()
 
 <Callout type="warning">
   `set_current_trace_io()` is deprecated and exists only for backward
-  compatibility with trace-level LLM-as-a-judge evaluators that rely on trace
+  compatibility with trace-level [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators that rely on trace
   input/output. For new code, set input/output on the root observation directly.
 </Callout>
 
@@ -94,17 +96,20 @@ span.update_trace(name=..., user_id=..., input=..., output=..., public=True)
 **v4:**
 
 ```python
-from langfuse import propagate_attributes
+from langfuse import get_client, propagate_attributes
 
-with propagate_attributes(trace_name=..., user_id=...):
-    ...
+langfuse = get_client()
 
-span.set_trace_io(input=..., output=...)  # deprecated
-span.set_trace_as_public()
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    with propagate_attributes(trace_name="my-trace", user_id="user-123"):
+        result = call_llm("Hello")
+
+    span.set_trace_io(input={"query": "Hello"}, output={"result": result})  # deprecated
+    span.set_trace_as_public()
 ```
 
 <Callout type="info">
-  For integrations (LangChain, OpenAI), passed-in trace attributes now propagate
+  For integrations ([LangChain](/integrations/frameworks/langchain), [OpenAI](/integrations/model-providers/openai-py)), passed-in trace attributes now propagate
   to children only — they do not bubble up to the trace.
 </Callout>
 
@@ -123,9 +128,9 @@ Observations are the primary concept in the new model. The unified `start_observ
 | `span.start_generation(name="x")`                               | `span.start_observation(name="x", as_type="generation")`                               |
 | `span.start_as_current_generation(name="x")`                    | `span.start_as_current_observation(name="x", as_type="generation")`                    |
 
-##### 4. `DatasetItemClient.run()` removed → use Experiment SDK
+##### 4. `DatasetItemClient.run()` removed → use [Experiment SDK](/docs/evaluation/experiments/experiments-via-sdk)
 
-The Experiment SDK (`dataset.run_experiment()`) handles propagation of experiment attributes (run metadata, dataset item linking) under the hood. The manual `item.run()` context manager cannot properly propagate attributes in the new observation-centric model.
+The [Experiment SDK](/docs/evaluation/experiments/experiments-via-sdk) (`dataset.run_experiment()`) handles propagation of experiment attributes (run metadata, dataset item linking) under the hood. The manual `item.run()` context manager cannot properly propagate attributes in the new [observation-centric model](/docs/observability/data-model).
 
 **v3:**
 
@@ -139,6 +144,10 @@ for item in dataset.items:
 **v4:**
 
 ```python
+from langfuse import get_client
+
+dataset = get_client().get_dataset("my-dataset")
+
 def my_task(*, item, **kwargs):
     return my_llm(item.input)
 
@@ -147,13 +156,15 @@ dataset.run_experiment(name="my-run", task=my_task)
 
 The `DatasetItem` objects still have the same data attributes (`id`, `input`, `expected_output`, `metadata`, etc.) but the `run()` method is removed.
 
-##### 5. LangChain `CallbackHandler`: `update_trace` parameter removed
+##### 5. [LangChain](/integrations/frameworks/langchain) `CallbackHandler`: `update_trace` parameter removed
 
 The handler now uses `propagate_attributes()` internally. The `update_trace` parameter no longer exists — passing it raises a `TypeError`.
 
 **v3:**
 
 ```python
+from langfuse.langchain import CallbackHandler
+
 handler = CallbackHandler(update_trace=True, trace_context={...})
 ```
 
@@ -238,7 +249,7 @@ def my_function():
     return "result"
 ```
 
-##### OpenAI Integration
+##### [OpenAI Integration](/integrations/model-providers/openai-py)
 
 **v2 Pattern:**
 
@@ -312,7 +323,7 @@ with langfuse.start_as_current_observation(as_type="span", name="chat-request") 
 `update_trace()` is deprecated in Python SDK v4. See the [v3 → v4 migration guide](#python-v3--v4).
 </Callout>
 
-##### LangChain Integration
+##### [LangChain Integration](/integrations/frameworks/langchain)
 
 **v2 Pattern:**
 
@@ -382,7 +393,7 @@ with langfuse.start_as_current_observation(as_type="span", name="langchain-reque
 `update_trace()` is deprecated in Python SDK v4. See the [v3 → v4 migration guide](#python-v3--v4).
 </Callout>
 
-##### LlamaIndex Integration Users
+##### [LlamaIndex Integration](/integrations/frameworks/llamaindex) Users
 
 **v2 Pattern:**
 
@@ -411,8 +422,7 @@ with langfuse.start_as_current_observation(as_type="span", name="llamaindex-quer
     with propagate_attributes(
         user_id="user_123",
     ):
-
-    response = index.as_query_engine().query("Hello")
+        response = index.as_query_engine().query("Hello")
 
     span.update_trace(
         input={"query": "Hello"},
@@ -503,7 +513,7 @@ with langfuse.start_as_current_observation(
 
 3. **Trace Input/Output**:
 
-   - **Critical for LLM-as-a-judge**: Explicitly set trace input/output
+   - **Critical for [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)**: Explicitly set trace input/output
    - Don't rely on automatic derivation from root observation if you need specific values
 
 4. **Context Managers**:
@@ -588,7 +598,7 @@ We will continue to support the v2 SDK for the foreseeable future with critical 
 
 ### JS/TS v4 → v5
 
-The JS/TS SDK v5 introduces the **observation-centric data model**. In this model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
+The JS/TS SDK v5 introduces the **[observation-centric data model](/docs/observability/data-model)**. In this model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
 
 This changes how you set trace attributes: instead of imperatively updating the trace with `updateActiveTrace()`, you use `propagateAttributes()` — a function that wraps a callback, automatically applying attributes to all child observations created within its scope.
 
@@ -661,7 +671,7 @@ await propagateAttributes(
 
 <Callout type="warning">
   `setActiveTraceIO()` is deprecated and exists only for backward compatibility
-  with trace-level LLM-as-a-judge evaluators that rely on trace input/output.
+  with trace-level [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators that rely on trace input/output.
   For new code, set input/output on the root observation directly.
 </Callout>
 
@@ -672,6 +682,8 @@ The same decomposition applies on all observation wrapper classes (`LangfuseSpan
 **v4:**
 
 ```typescript
+import { startObservation } from "@langfuse/tracing";
+
 const span = startObservation("my-op");
 span.updateTrace({
   name: "my-trace",
@@ -710,10 +722,10 @@ propagateAttributes(
 
 <Callout type="warning">
   `.setTraceIO()` is deprecated and exists only for backward compatibility with
-  trace-level LLM-as-a-judge evaluators that rely on trace input/output.
+  trace-level [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators that rely on trace input/output.
 </Callout>
 
-##### 3. `@langfuse/langchain` internal changes
+##### 3. [`@langfuse/langchain`](/integrations/frameworks/langchain) internal changes
 
 The `CallbackHandler` now uses `propagateAttributes()` for trace-level attributes. This affects users who:
 
@@ -721,7 +733,7 @@ The `CallbackHandler` now uses `propagateAttributes()` for trace-level attribute
 - Depend on the internal span-creation behavior
 - Rely on `traceMetadata` accepting non-string values — non-string values are now serialized via `JSON.stringify` before being passed to `propagateAttributes`, which requires `Record<string, string>`
 
-##### 4. `@langfuse/openai` internal changes
+##### 4. [`@langfuse/openai`](/integrations/model-providers/openai-py) internal changes
 
 The `traceMethod` wrapper now wraps the traced call in `propagateAttributes()` to set `userId`, `sessionId`, `tags`, and `traceName`, instead of calling `.updateTrace()` on the observation. (If you rely on attributes being set on parent observations as well, wrap the entire execution in with `propagateAttributes`). This affects users who rely on the internal span creation behavior of the traced OpenAI wrapper.
 
@@ -762,7 +774,7 @@ The v4 SDK tracing is a major rewrite based on OpenTelemetry and introduces seve
 
 See the [SDK v4 docs](/docs/observability/sdk/overview) for details on each.
 
-#### Prompt Management
+#### [Prompt Management](/docs/prompt-management/overview)
 
 - **Import**: The import of the Langfuse client is now:
 
@@ -813,7 +825,7 @@ Please note that provided tool definitions to the LLM are now mapped to `metadat
 
 </Callout>
 
-#### Langchain integration
+#### [Langchain integration](/integrations/frameworks/langchain)
 
 - **Import**: The import of the Langchain integration is now:
 
