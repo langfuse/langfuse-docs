@@ -158,7 +158,7 @@ langfuse = get_client()
  
 # Define your task function
 def my_task(*, item, **kwargs):
-    question = item.input # `run_experiment` passes a `DatasetItemClient` to the task function. The input of the dataset item is available as `item.input`.
+    question = item.input # `run_experiment` passes a `DatasetItem` to the task function. The input of the dataset item is available as `item.input`.
     response = OpenAI().chat.completions.create(
         model="gpt-4.1", messages=[{"role": "user", "content": question}]
     )
@@ -842,8 +842,8 @@ def my_llm_function(question: str):
     )
     output = response.choices[0].message.content
 
-    # Update trace input / output
-    get_client().update_current_trace(input=question, output=output)
+    # Update trace input / output (deprecated — only needed for backward compat with legacy trace-level LLM-as-a-judge evaluators)
+    get_client().set_current_trace_io(input=question, output=output)
 
     return output
 ```
@@ -1071,6 +1071,10 @@ Each experiment is identified by a unique `run_name`. If you reuse the same `run
 
 You may then execute that LLM-app for each dataset item to create a dataset run:
 
+<Callout type="warning">
+In Python SDK v4, `item.run()` has been removed. Use `dataset.run_experiment()` instead, which handles attribute propagation automatically. See [Python v3 → v4 migration](/docs/observability/sdk/python-v3-to-v4-upgrade).
+</Callout>
+
 ```python filename="execute_dataset.py" /for item in dataset.items:/
 from datetime import datetime
 from langfuse import get_client
@@ -1145,6 +1149,10 @@ await langfuse.flush();
 </Tab>
 <Tab>
 
+<Callout type="warning">
+In Python SDK v4, `item.run()` has been removed. Use `dataset.run_experiment()` instead, which handles attribute propagation automatically. See [Python v3 → v4 migration](/docs/observability/sdk/python-v3-to-v4-upgrade).
+</Callout>
+
 ```python /for item in dataset.items:/
 from datetime import datetime
 from langfuse import get_client
@@ -1171,8 +1179,8 @@ for item in dataset.items:
         # Execute your LLM-app against the dataset item input
         output = my_langchain_chain(item.input, langfuse_handler)
 
-        # Update top-level trace input and output
-        root_span.update_trace(input=item.input, output=output.content)
+        # Update top-level trace input and output (deprecated — only for backward compat with legacy trace-level LLM-as-a-judge evaluators)
+        root_span.set_trace_io(input=item.input, output=output.content)
 
         # Optionally: Add scores computed in your experiment runner, e.g. json equality check
         root_span.score_trace(

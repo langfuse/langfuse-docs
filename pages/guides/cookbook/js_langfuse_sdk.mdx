@@ -92,7 +92,7 @@ This is the recommended approach for most use cases as it prevents context leaka
 
 ```typescript
 // Import necessary functions from the tracing package
-import { startActiveObservation, startObservation, updateActiveTrace, updateActiveObservation } from "npm:@langfuse/tracing";
+import { startActiveObservation, startObservation, propagateAttributes, updateActiveObservation } from "npm:@langfuse/tracing";
  
 // Start a new span with automatic context management
 await startActiveObservation("context-manager", async (span) => {
@@ -137,15 +137,15 @@ await startActiveObservation("context-manager", async (span) => {
     { level: "WARNING", statusMessage: "This is a warning" },
   );
  
-  // Update the trace with user context
-  updateActiveTrace({
+  // Propagate trace attributes with user context via callback
+  await propagateAttributes({
     userId: user.id,
     sessionId: user.sessionId,
     metadata: { userName: user.name },
+  }, async () => {
+    // Mark the span as complete with final output
+    span.update({ output: "Successfully answered." });
   });
- 
-  // Mark the span as complete with final output
-  span.update({ output: "Successfully answered." });
 });
 
 // Ensure all spans are sent to Langfuse

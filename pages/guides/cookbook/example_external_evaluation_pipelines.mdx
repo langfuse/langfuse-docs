@@ -143,14 +143,11 @@ Question: {question}
 def explain_concept(topic):
 
     with propagate_attributes(
-        tags=["ext_eval_pipelines"]
+        tags=["ext_eval_pipelines"],
+        trace_name=f"Explanation '{topic}'"
     ):
 
         prompt = prompt_template.format(question=topic)
-
-        langfuse.update_current_trace(
-            name=f"Explanation '{topic}'"
-            )
 
         return openai.chat.completions.create(
             messages=[

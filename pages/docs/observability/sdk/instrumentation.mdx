@@ -335,7 +335,7 @@ with langfuse.start_as_current_observation(as_type="span", name="outer-process")
         # gen1 is active, child of outer_span
         gen1.update(output="LLM 1 output")
 
-    with outer_span.start_as_current_span(name="intermediate-step") as mid_span:
+    with outer_span.start_as_current_observation(name="intermediate-step") as mid_span:
         # mid_span is active, also a child of outer_span
         # This demonstrates using the yielded span object to create children
 
@@ -619,9 +619,13 @@ with langfuse.start_as_current_observation(
 
 **Override Default Behavior**
 
-Use [`observation.update_trace()`](https://python.reference.langfuse.com/langfuse#LangfuseEvent.update_trace) or [`langfuse.update_current_trace()`](https://python.reference.langfuse.com/langfuse#Langfuse.update_current_trace) if you need different trace inputs/outputs than the root observation:
+Use [`observation.set_trace_io()`](https://python.reference.langfuse.com/langfuse#LangfuseEvent.set_trace_io) or [`langfuse.set_current_trace_io()`](https://python.reference.langfuse.com/langfuse#Langfuse.set_current_trace_io) if you need different trace inputs/outputs than the root observation:
 
-```python /update_current_trace/ /update_trace/
+<Callout type="warning">
+`set_trace_io()` and `set_current_trace_io()` are deprecated and exist only for backward compatibility with trace-level LLM-as-a-judge evaluators that rely on trace input/output. For new code, set input/output on the root observation directly. See the [Python v3 → v4 migration guide](/docs/observability/sdk/python-v3-to-v4-upgrade).
+</Callout>
+
+```python /set_current_trace_io/ /set_trace_io/
 from langfuse import get_client
 
 langfuse = get_client()
@@ -631,7 +635,7 @@ with langfuse.start_as_current_observation(as_type="span", name="complex-pipelin
     root_span.update(input="Step 1 data", output="Step 1 result")
 
     # But trace should have different input/output (e.g., for LLM-as-a-judge)
-    root_span.update_trace(
+    root_span.set_trace_io(
         input={"original_query": "User's actual question"},
         output={"final_answer": "Complete response", "confidence": 0.95}
     )
@@ -643,45 +647,51 @@ with langfuse.start_as_current_observation(as_type="span", name="complex-pipelin
 def process_user_query(user_question: str):
     # LLM processing...
     answer = call_llm(user_question)
- 
+
     # Explicitly set trace input/output for evaluation features
-    langfuse.update_current_trace(
+    langfuse.set_current_trace_io(
         input={"question": user_question},
         output={"answer": answer}
     )
- 
+
     return answer
 ```
 
 </Tab>
 <Tab title="JS/TS SDK">
-Use [`updateTrace`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#updatetrace) to update the trace-level fields.
+Use [`propagateAttributes`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.propagateAttributes.html) to set correlating trace attributes, and [`setTraceIO`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#settraceio) for trace-level input/output.
 
-```ts /updateTrace/
-import { startObservation } from "@langfuse/tracing";
+<Callout type="warning">
+`.setTraceIO()` is deprecated and exists only for backward compatibility with trace-level LLM-as-a-judge evaluators. See the [JS/TS v4 → v5 migration guide](/docs/observability/sdk/js-v4-to-v5-upgrade).
+</Callout>
 
-const rootSpan = startObservation("data-processing");
-
-// ... some initial steps ...
+```ts /propagateAttributes/ /setTraceIO/
+import { propagateAttributes, startObservation } from "@langfuse/tracing";
 
 const userId = "user-123";
 const sessionId = "session-abc";
-rootSpan.updateTrace({
-  userId: userId,
-  sessionId: sessionId,
-  tags: ["authenticated-user"],
-  metadata: { plan: "premium" },
-});
 
-const generation = rootSpan.startObservation(
-  "llm-call",
-  {},
-  { asType: "generation" }
+propagateAttributes(
+  {
+    userId: userId,
+    sessionId: sessionId,
+    tags: ["authenticated-user"],
+    metadata: { plan: "premium" },
+  },
+  () => {
+    const rootSpan = startObservation("data-processing");
+
+    const generation = rootSpan.startObservation(
+      "llm-call",
+      {},
+      { asType: "generation" }
+    );
+
+    generation.end();
+
+    rootSpan.end();
+  }
 );
-
-generation.end();
-
-rootSpan.end();
 ```
 </Tab>
 </LangTabs>

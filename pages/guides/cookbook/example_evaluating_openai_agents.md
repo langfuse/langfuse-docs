@@ -236,7 +236,7 @@ with langfuse.start_as_current_observation(
         result = await main(input_query)
     
         # Pass additional attributes to the span
-        span.update_trace(
+        span.set_trace_io(
             input=input_query,
             output=result,
             )
@@ -303,7 +303,7 @@ with langfuse.start_as_current_observation(
     result = await main(user_input)
     trace_id = langfuse.get_current_trace_id()
 
-    span.update_trace(
+    span.set_trace_io(
         input=user_input,
         output=result.final_output,
     )
@@ -344,7 +344,7 @@ Example from Langfuse:
 
 
 ```python
-# Example: Checking if the agent’s output is toxic or not.
+# Example: Checking if the agent's output is toxic or not.
 from agents import Agent, Runner, WebSearchTool
 
 # Define your agent with the web search tool
@@ -362,7 +362,7 @@ with langfuse.start_as_current_observation(as_type="span", name="OpenAI-Agent-Tr
     result = Runner.run_sync(agent, input_query)
 
     # Add input and output values to parent trace
-    span.update_trace(
+    span.set_trace_io(
         input=input_query,
         output=result.final_output,
     )

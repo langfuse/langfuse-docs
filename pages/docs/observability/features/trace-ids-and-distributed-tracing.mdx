@@ -314,8 +314,8 @@ with langfuse.start_as_current_observation(
     trace_context={"trace_id": predefined_trace_id}
 ) as span:
 
-    with propagate_attributes(
-    span.update_trace(
+    # Set trace I/O (deprecated — only for backward compat with legacy trace-level LLM-as-a-judge evaluators)
+    span.set_trace_io(
         input={"person": "Ada Lovelace"}
     )
 
@@ -325,7 +325,7 @@ with langfuse.start_as_current_observation(
         config={"callbacks": [langfuse_handler]}
     )
 
-    span.update_trace(output={"response": response})
+    span.set_trace_io(output={"response": response})
 
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused

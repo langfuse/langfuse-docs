@@ -121,6 +121,7 @@ from langfuse.decorators import observe
 # Optional: automated instrumentation via OpenAI SDK integration
 # See note above regarding alternative implementations
 from langfuse.openai import openai
+from langfuse import propagate_attributes
 
 # Global reference for the current trace_id which is used to later add user feedback
 current_trace_id = None
@@ -137,33 +138,37 @@ async def create_response(
 
     # Add session_id to Langfuse Trace to enable session tracking
     global session_id
-    langfuse.update_current_trace(
-        name="gradio_demo_chat",
+    with propagate_attributes(
+        trace_name="gradio_demo_chat",
         session_id=session_id,
-        input=prompt,
-    )
+    ):
 
-    # Add prompt to history
-    if not history:
-        history = [{"role": "system", "content": "You are a friendly chatbot"}]
-    history.append({"role": "user", "content": prompt})
-    yield history
+        # Set trace input
+        langfuse.set_current_trace_io(
+            input=prompt,
+        )
 
-    # Get completion via OpenAI SDK
-    # Auto-instrumented by Langfuse via the import, see alternative in note above
-    response = {"role": "assistant", "content": ""}
-    oai_response = openai.chat.completions.create(
-        messages=history,
-        model="gpt-4o-mini",
-    )
-    response["content"] = oai_response.choices[0].message.content or ""
+        # Add prompt to history
+        if not history:
+            history = [{"role": "system", "content": "You are a friendly chatbot"}]
+        history.append({"role": "user", "content": prompt})
+        yield history
 
-    # Customize trace ouput for better readability in Langfuse Sessions
-    langfuse.update_current_trace(
-        output=response["content"],
-    )
+        # Get completion via OpenAI SDK
+        # Auto-instrumented by Langfuse via the import, see alternative in note above
+        response = {"role": "assistant", "content": ""}
+        oai_response = openai.chat.completions.create(
+            messages=history,
+            model="gpt-4o-mini",
+        )
+        response["content"] = oai_response.choices[0].message.content or ""
 
-    yield history + [response]
+        # Customize trace ouput for better readability in Langfuse Sessions
+        langfuse.set_current_trace_io(
+            output=response["content"],
+        )
+
+        yield history + [response]
 
 async def respond(prompt: str, history):
     async for message in create_response(prompt, history):

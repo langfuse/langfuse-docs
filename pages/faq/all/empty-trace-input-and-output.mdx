@@ -177,8 +177,8 @@ with langfuse.start_as_current_observation(
     user_input = "What's the weather like?"
     result = process_request(user_input)
 
-    # Set trace input/output explicitly (separate from span)
-    root_span.update_trace(
+    # Set trace input/output explicitly (deprecated — only for backward compat with legacy trace-level LLM-as-a-judge evaluators)
+    root_span.set_trace_io(
         input={"user_question": user_input},
         output={"answer": result}
     )
@@ -212,10 +212,14 @@ trace.update({
 
 If you're using `shouldExportSpan` in your `LangfuseSpanProcessor` to filter spans, and your root span matches the filter criteria, the trace input/output will be empty. This happens because trace input/output is [derived from the root observation by default](#the-root-observation-rule).
 
-**Solution**: If you want the root span to stay filtered out, use `updateTrace()` to manually set trace input/output from within a child span that is not filtered out:
+**Solution**: If you want the root span to stay filtered out, use `setTraceIO()` to manually set trace input/output from within a child span that is not filtered out:
+
+<Callout type="warning">
+`setTraceIO()` and `set_trace_io()` are deprecated and exist only for backward compatibility with trace-level LLM-as-a-judge evaluators. See the [JS/TS v4 → v5 migration guide](/docs/observability/sdk/js-v4-to-v5-upgrade) and [Python v3 → v4 migration guide](/docs/observability/sdk/python-v3-to-v4-upgrade).
+</Callout>
 
 ```typescript
-span.updateTrace({
+span.setTraceIO({
   input: yourInputData,
   output: yourOutputData,
 });

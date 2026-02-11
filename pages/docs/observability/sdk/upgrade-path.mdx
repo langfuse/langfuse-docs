@@ -8,6 +8,14 @@ category: SDKs
 
 This page shows the migration guides to the latest versions of the Langfuse SDKs. Pick your SDK to follow the relevant migration steps.
 
+## Python SDK v3 → v4
+
+The Python SDK v4 introduces the observation-centric data model. See the [full migration guide](/docs/observability/sdk/python-v3-to-v4-upgrade).
+
+## JS/TS SDK v4 → v5
+
+The JS/TS SDK v5 introduces the observation-centric data model. See the [full migration guide](/docs/observability/sdk/js-v4-to-v5-upgrade).
+
 ## Python SDK v2 → v3
 
 The Python SDK v3 introduces significant improvements and changes compared to the legacy v2 SDK. It is **not fully backward compatible**. This comprehensive guide will help you migrate based on your current integration.
@@ -124,6 +132,10 @@ with langfuse.start_as_current_observation(as_type="span", name="chat-request") 
             )
 ```
 
+<Callout type="warning">
+`update_trace()` is deprecated in Python SDK v4. See the [v3 → v4 migration guide](/docs/observability/sdk/python-v3-to-v4-upgrade).
+</Callout>
+
 #### LangChain Integration
 
 **v2 Pattern:**
@@ -190,6 +202,10 @@ with langfuse.start_as_current_observation(as_type="span", name="langchain-reque
             )
 ```
 
+<Callout type="warning">
+`update_trace()` is deprecated in Python SDK v4. See the [v3 → v4 migration guide](/docs/observability/sdk/python-v3-to-v4-upgrade).
+</Callout>
+
 #### LlamaIndex Integration Users
 
 **v2 Pattern:**
@@ -227,6 +243,10 @@ with langfuse.start_as_current_observation(as_type="span", name="llamaindex-quer
         output={"response": str(response)}
         )
 ```
+
+<Callout type="warning">
+`update_trace()` is deprecated in Python SDK v4. See the [v3 → v4 migration guide](/docs/observability/sdk/python-v3-to-v4-upgrade).
+</Callout>
 
 #### Low-Level SDK Users
 
@@ -286,6 +306,10 @@ with langfuse.start_as_current_observation(
             output={"response": "Response"}
             )
 ```
+
+<Callout type="warning">
+`update_trace()` is deprecated in Python SDK v4. See the [v3 → v4 migration guide](/docs/observability/sdk/python-v3-to-v4-upgrade).
+</Callout>
 
 ### Key Migration Checklist
 

@@ -181,7 +181,7 @@ def analyze_customer_query(query, customer_id):
         result = response.choices[0].message.content
 
     # update trace level input and output
-    langfuse.update_current_trace(
+    langfuse.set_current_trace_io(
         input={"query": query, "customer_id": customer_id},
         output={"response": result},
     )

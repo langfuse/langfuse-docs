@@ -111,7 +111,7 @@ class SimpleChat:
             # Extract and add assistant response
             assistant_message = response.choices[0].message.content
             self.conversation_history.append({"role": "assistant", "content": assistant_message})
-            get_client().update_current_trace(input=messages, output=assistant_message)
+            get_client().set_current_trace_io(input=messages, output=assistant_message)
 
             return assistant_message
 

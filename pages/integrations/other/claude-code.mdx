@@ -281,7 +281,7 @@ def create_trace(
             })
     
     # Create trace using the new API with context managers
-    with langfuse.start_as_current_span(
+    with langfuse.start_as_current_observation(
         name=f"Turn {turn_num}",
         input={"role": "user", "content": user_text},
         metadata={
@@ -305,7 +305,7 @@ def create_trace(
         
         # Create spans for tool calls
         for tool_call in all_tool_calls:
-            with langfuse.start_as_current_span(
+            with langfuse.start_as_current_observation(
                 name=f"Tool: {tool_call['name']}",
                 input=tool_call["input"],
                 metadata={

@@ -24,7 +24,7 @@ If you cannot find your issue below, try [Ask AI](/docs/ask-ai), open a [GitHub 
 
 - Self-hosted users need Langfuse platform **>= 3.63.0** for the OTel based SDKs.
 - Prefer context managers (`with langfuse.start_as_current_observation(...)`) to maintain OTEL context.
-- If using manual spans (`langfuse.start_span()`), always call `.end()`.
+- If using manual spans (`langfuse.start_observation()`), always call `.end()`.
 - In async code, rely on Langfuse helpers to avoid losing context across `await` boundaries.
 
 ## LangChain/OpenAI integration issues
