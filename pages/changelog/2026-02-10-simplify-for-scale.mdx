@@ -1,18 +1,17 @@
 ---
 date: 2026-02-10
-title: Simplify for Scale
-description: Infrastructure rebuild for improved performance at scale. Immutable observations, no joins, and faster APIs across all features.
+title: "[Draft] Simplify for Scale"
+description: We've rebuilt Langfuse's infrastructure to address performance bottlenecks at scale.
 author: Max,Steffen,Valeriy,Hassieb,Nimar,Marlies
-ogImage: /images/changelog/2026-02-10-simplify-for-scale.jpg
+ogImage: /images/changelog/2026-02-11-v4-preview/v4-banner.png
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
-import { PerformanceComparison } from "@/components/changelog/PerformanceComparison";
 import {  Callout } from "nextra/components";
 
 <ChangelogHeader />
 
-We've rebuilt Langfuse's infrastructure to address performance bottlenecks at scale. After processing billions of events per month, we analzyed our query patterns and we introduce changes now to be able to scale with our customers.
+After processing billions of events per month, we analzyed our query patterns and we introduce changes now to be able to scale with our customers.
 
 The new architecture delivers faster charts and APIs through a simplified data model that eliminates expensive joins and reduces query complexity.
 
@@ -50,7 +49,7 @@ Evaluations now run directly on observations, eliminating database query overhea
 - Execution time is now limited by LLM API rate limits rather than database queries
 - We support higher evaluation concurrency
 
-<PerformanceComparison />
+
 
 ## Technical changes
 
@@ -59,6 +58,9 @@ The rebuild is based on three core principles:
 - **Immutable observations**: Observations are written once and never modified, eliminating deduplication operations.
 - **No joins**: Trace-level attributes propagate to observations in the SDK. Queries run on a single table without joins.
 - **Observation-centric model**: Observations are the primary data source for APIs and UI.
+
+_Max shared on how we use ClickHouse to keep product performance ahead of demand at ClickHouse Open House ([recording](https://www.youtube.com/watch?v=NXYQ5odATrM)) in Amsterdam._
+
 
 
 ## How to unlock new performance
@@ -79,8 +81,8 @@ In the UI, a beta toggle will be available to opt into the new experience. Note 
 
 Upgrade to the latest major SDK versions to explore your data in real time:
 
-- **Python SDK**: Version 3.0.0 or higher
-- **JS/TS SDK**: Version 4.0.0 or higher
+- **Python SDK**: Version x.x.x or higher
+- **JS/TS SDK**: Version x.x.x or higher
 
 <Callout type="info">
 Set trace-level attributes (`user_id`, `session_id`, `trace metadata`) as early as possible in your instrumentation so they propagate to all downstream spans automatically.
