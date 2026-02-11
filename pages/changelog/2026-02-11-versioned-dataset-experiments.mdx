@@ -1,0 +1,166 @@
+---
+date: 2026-02-11
+title: Fetch and Run Experiments on Versioned Datasets
+description: Fetch datasets at specific version timestamps and run experiments on historical dataset versions via UI, API, and SDKs for full reproducibility.
+author: Marlies
+# ogImage: /images/changelog/2026-02-11-versioned-dataset-experiments.jpg
+canonical: /docs/evaluation/experiments/datasets#versioning
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now fetch datasets at specific version timestamps and run experiments directly on versioned datasets across UI, API, and SDKs. This completes the dataset versioning feature [released in December](/changelog/2025-12-15-dataset-versioning).
+
+## Why versioned experiments matter
+
+- **Full reproducibility**: Re-run experiments on the exact dataset state from any point in time, even after items are updated or deleted. Reproduce results from weeks or months ago with complete confidence.
+- **A/B testing with confidence**: Compare model performance before and after dataset refinements. Test new prompts against the same baseline dataset version that your production model was evaluated on.
+- **Regression testing**: Run experiments on a specific dataset version while your team continues improving the dataset. Ensure new model versions don't regress on established benchmarks.
+
+## Fetch datasets at specific versions
+
+Retrieve datasets as they existed at any timestamp. By default, APIs return the latest version.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+from datetime import datetime, timezone
+
+langfuse = get_client()
+
+# Fetch dataset from December 15th
+version_timestamp = datetime(2025, 12, 15, 6, 30, 0, tzinfo=timezone.utc)
+
+dataset_v1 = langfuse.get_dataset(
+    name="qa-dataset",
+    version=version_timestamp
+)
+
+# Fetch latest version
+dataset_latest = langfuse.get_dataset(name="qa-dataset")
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// Fetch dataset from December 15th
+const versionTimestamp = new Date("2025-12-15T06:30:00").toISOString();
+
+const datasetV1 = await langfuse.dataset.get("qa-dataset", {
+  version: versionTimestamp
+});
+
+// Fetch latest version
+const datasetLatest = await langfuse.dataset.get("qa-dataset");
+```
+
+</Tab>
+<Tab>
+
+Navigate to **Datasets** → Select dataset → **Items Tab** → Toggle **Version view** to browse all historical versions.
+
+</Tab>
+</LangTabs>
+
+## Run experiments on versioned datasets
+
+Execute experiments against specific dataset versions using the experiment runner or via UI.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+from langfuse.openai import OpenAI
+
+langfuse = get_client()
+
+# Fetch versioned dataset
+versioned_dataset = langfuse.get_dataset(
+    name="qa-dataset",
+    version=datetime(2025, 12, 15, 6, 30, 0, tzinfo=timezone.utc)
+)
+
+# Run experiment on that exact version
+def my_task(*, item, **kwargs):
+    response = OpenAI().chat.completions.create(
+        model="gpt-4.1",
+        messages=[{"role": "user", "content": item["input"]}]
+    )
+    return response.choices[0].message.content
+
+result = versioned_dataset.run_experiment(
+    name="Baseline Experiment v1",
+    description="Testing against dataset from Dec 15",
+    task=my_task
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+import { OpenAI } from "openai";
+import { observeOpenAI } from "@langfuse/openai";
+
+const langfuse = new LangfuseClient();
+
+// Fetch versioned dataset
+const versionedDataset = await langfuse.dataset.get("qa-dataset", {
+  version: new Date("2025-12-15T06:30:00").toISOString()
+});
+
+// Run experiment on that exact version
+const result = await versionedDataset.runExperiment({
+  name: "Baseline Experiment v1",
+  description: "Testing against dataset from Dec 15",
+  task: async ({ item }) => {
+    const response = await observeOpenAI(new OpenAI()).chat.completions.create({
+      model: "gpt-4.1",
+      messages: [{ role: "user", content: item.input }]
+    });
+    return response.choices[0].message.content;
+  }
+});
+```
+
+</Tab>
+<Tab>
+
+When running experiments in the UI:
+
+1. Navigate to **Run Prompt Experiment**
+2. Select your dataset
+3. Choose a version from the **Dataset Version** dropdown
+4. The experiment runs against that specific dataset state
+5. If no version is selected, runs against latest version
+
+</Tab>
+</LangTabs>
+
+## Learn more
+
+import { Book, MessageSquare } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Dataset Versioning Documentation"
+    href="/docs/evaluation/experiments/datasets#versioning"
+    icon={<Book />}
+  />
+  <Card
+    title="Experiment Runner SDK"
+    href="/docs/evaluation/experiments/experiments-via-sdk"
+    icon={<Book />}
+  />
+</Cards>
