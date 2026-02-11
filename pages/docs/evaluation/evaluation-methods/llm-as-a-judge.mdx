@@ -54,7 +54,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
   <div className="flex flex-col gap-3 w-full">
     <Card className="border-2 border-primary">
       <CardContent className="p-3">
-        <div className="font-semibold text-sm">Observations <span className="text-xs font-normal opacity-70">(Recommended, Beta)</span></div>
+        <div className="font-semibold text-sm">Observations <span className="text-xs font-normal opacity-70">(Beta)</span></div>
         <div className="text-xs text-muted-foreground mt-1">Individual operations: LLM calls, retrievals, tool calls</div>
       </CardContent>
     </Card>
@@ -102,7 +102,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 Evaluate live production traffic to monitor your LLM application performance in real-time.
 
-<Tabs items={["Observations (Recommended, Beta)", "Traces"]} storageKey="eval-live-target">
+<Tabs items={["Observations (Beta)", "Traces"]} storageKey="eval-live-target">
 <Tab>
 
 Run evaluators on individual observations within your traces—such as LLM calls, retrieval operations, embedding generations, or tool calls.
@@ -129,6 +129,10 @@ At ingest time, each observation is evaluated against your filter criteria. Matc
 
 Run evaluators on complete traces, evaluating entire workflow executions from start to finish.
 
+<Callout type="info">
+**Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision and cost efficiency for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
+</Callout>
+
 **Why target Traces**
 
 - You need to evaluate aggregate data across a full workflow
@@ -142,10 +146,6 @@ At ingest time, each trace is evaluated against your filter criteria. Matching t
 **Example Use Cases**
 - Score the accuracy of a multi-step agent workflow (e.g., retrieval → reranking → generation → citation)
 - Track the effectiveness of a full agent execution (planning → tool use → synthesis)
-
-<Callout type="info">
-**Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision and cost efficiency for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
-</Callout>
 
 </Tab>
 </Tabs>
@@ -234,7 +234,7 @@ With your evaluator and model selected, configure which data to run the evaluati
 <Tabs items={["Live Production Data", "Offline Experiment Data"]} storageKey="eval-data-type">
 <Tab>
 
-<Tabs items={["Observations (Recommended, Beta)", "Traces"]} storageKey="eval-live-target">
+<Tabs items={["Observations (Beta)", "Traces"]} storageKey="eval-live-target">
 <Tab>
 
 **Configuration Steps**
@@ -254,6 +254,10 @@ With your evaluator and model selected, configure which data to run the evaluati
 
 <Tab>
 
+<Callout type="info">
+**Performance consideration**: We recommend using Observation-level evaluators for production monitoring. They complete in seconds (vs minutes for trace-level), eliminating evaluation delays and backlogs. They also offer better precision and cost efficiency. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
+</Callout>
+
 **Configuration Steps**
 
 1. Select "Live Traces" as your evaluation target
@@ -269,11 +273,6 @@ With your evaluator and model selected, configure which data to run the evaluati
 **Requirements**
 
 - **OTel-based SDKs**: If you're using Python v3+ or JS/TS v4+, you must call `update_trace()` to populate trace input/output, or use observation-level evaluators instead.
-
-<Callout type="info">
-**Performance consideration**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays and backlogs. They also offer better precision and cost efficiency. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
-</Callout>
-
 
 
 </Tab>
