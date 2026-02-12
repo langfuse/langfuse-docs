@@ -299,14 +299,17 @@ import { FileCode, BookOpen, Video, Users, Joystick } from "lucide-react";
 
 ## FAQ
 
-<Accordion title="How do you test LLM applications?">
+<details>
+<summary>How do you test LLM applications?</summary>
 Testing LLM applications requires a different approach than traditional software testing. Instead of checking exact output matches, you use **evaluation functions** that score outputs on continuous scales. The typical approach combines three components: (1) **Datasets** — collections of input/output pairs representing test cases, (2) **Experiment runners** — tools that execute your LLM application against the dataset, and (3) **Evaluators** — scoring functions that assess output quality using LLM-as-a-Judge, semantic similarity, or custom logic. A test passes when evaluation scores meet your defined thresholds.
-</Accordion>
+</details>
 
-<Accordion title="What is the difference between LLM testing and LLM evaluation?">
+<details>
+<summary>What is the difference between LLM testing and LLM evaluation?</summary>
 **Testing** produces binary pass/fail results — your test suite tells you whether something broke. **Evaluation** measures quality on continuous scales — how accurate, helpful, or relevant are the responses. In practice, LLM testing and evaluation blend together: you "test" your application by "evaluating" its outputs with scoring functions, and a test passes if the evaluation score meets your threshold. Both are essential for building reliable LLM applications.
-</Accordion>
+</details>
 
-<Accordion title="How do I automate LLM testing in CI/CD?">
+<details>
+<summary>How do I automate LLM testing in CI/CD?</summary>
 You can integrate LLM testing into your CI/CD pipeline using Langfuse's experiment runner SDK. Create a test script that: (1) loads your dataset (locally or from Langfuse), (2) runs your application against each test case, (3) scores the outputs with evaluator functions, and (4) asserts that scores meet minimum thresholds. Run this script as part of your CI pipeline using `pytest` or your preferred test runner. See the [experiments via SDK guide](/docs/evaluation/experiments/experiments-via-sdk) for implementation details.
-</Accordion>
+</details>

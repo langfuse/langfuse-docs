@@ -185,21 +185,25 @@ import { FileCode, BookOpen } from "lucide-react";
 
 ## FAQ
 
-<Accordion title="What is LLM Guard?">
+<details>
+<summary>What is LLM Guard?</summary>
 [LLM Guard](https://llm-guard.com) is an open-source library by Protect AI that provides security guardrails for LLM applications. It includes input scanners (prompt injection detection, PII anonymization, toxicity detection, topic banning) and output scanners (content moderation, bias detection, malicious URL detection, deanonymization). LLM Guard can be integrated with Langfuse to trace and monitor the effectiveness of each security check.
-</Accordion>
+</details>
 
-<Accordion title="What are security guardrails for LLMs?">
+<details>
+<summary>What are security guardrails for LLMs?</summary>
 Security guardrails are protective measures that intercept and filter inputs and outputs of LLM applications to prevent misuse and harm. They include input guardrails (blocking prompt injection and malicious inputs), output guardrails (filtering toxic or harmful responses), PII detection and redaction, content filtering, and topic restriction. Guardrails run at the application layer and are complementary to model-level safety training.
-</Accordion>
+</details>
 
-<Accordion title="How do I prevent prompt injection in my LLM application?">
+<details>
+<summary>How do I prevent prompt injection in my LLM application?</summary>
 Prompt injection can be mitigated through multiple layers: (1) Use a guardrail library like LLM Guard or Lakera to detect and block injection attempts before they reach the model. (2) Implement clear separation between system instructions and user input. (3) Use Langfuse tracing to monitor for injection attempts in production. (4) Set up automated evaluations to flag suspicious patterns. No single approach is 100% effective, so a defense-in-depth strategy with monitoring is recommended.
-</Accordion>
+</details>
 
-<Accordion title="How do I monitor LLM security in production?">
+<details>
+<summary>How do I monitor LLM security in production?</summary>
 Use Langfuse to monitor your LLM security posture: (1) Trace every request through your guardrail pipeline to see which checks triggered. (2) Use LLM-as-a-Judge evaluators to automatically score traces for toxicity, PII leakage, and prompt injection. (3) Set up custom dashboards to track security scores over time. (4) Use annotation queues for human review of flagged conversations. (5) Track the latency impact of security checks to balance protection with user experience.
-</Accordion>
+</details>
 
 ## GitHub Discussions
 

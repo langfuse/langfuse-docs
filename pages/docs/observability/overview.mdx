@@ -39,19 +39,23 @@ Already know what you want? Take a look under _Features_ for guides on specific 
 
 ## FAQ
 
-<Accordion title="What is the difference between observability and tracing?">
+<details>
+<summary>What is the difference between observability and tracing?</summary>
 **Observability** is the broader capability of understanding the internal state of your system from its outputs. It encompasses tracing, metrics, and logging. **Tracing** is a specific observability technique that records the flow of a request through your system, preserving causal relationships between operations. In the context of LLM applications, tracing is the most important observability tool because it captures the full context of each request — prompts, responses, tool calls, and their relationships.
-</Accordion>
+</details>
 
-<Accordion title="What is application tracing?">
+<details>
+<summary>What is application tracing?</summary>
 Application tracing records the complete lifecycle of a request as it flows through your system. Each trace captures every operation — LLM calls, retrieval steps, tool executions, and custom logic — along with timing, inputs, outputs, and metadata. This gives you full visibility into what happened during each request, enabling debugging, performance optimization, and quality monitoring.
-</Accordion>
+</details>
 
-<Accordion title="How does Langfuse compare to other tracing solutions?">
+<details>
+<summary>How does Langfuse compare to other tracing solutions?</summary>
 Langfuse is purpose-built for LLM applications, which means it natively understands LLM-specific concepts like token usage, model parameters, prompt/completion pairs, and evaluation scores. Unlike general-purpose APM tools, Langfuse provides features specific to AI engineering: [LLM-as-a-Judge evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge), [prompt management](/docs/prompt-management/overview), [experiments and datasets](/docs/evaluation/experiments/datasets), and [custom dashboards](/docs/metrics/features/custom-dashboards). It's also [open source](/self-hosting) and can be self-hosted.
-</Accordion>
+</details>
 
-<Accordion title="Does Langfuse add latency to my application?">
+<details>
+<summary>Does Langfuse add latency to my application?</summary>
 No. Langfuse SDKs send tracing data asynchronously in the background. Trace events are queued locally and flushed in batches, so your application's response time is not affected. See [queuing and batching](/docs/observability/features/queuing-batching) for details.
-</Accordion>
+</details>
 
