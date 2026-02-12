@@ -1,46 +1,16 @@
 ---
-title: "Ragas Metrics: Evaluate RAG Pipelines with Langfuse"
-description: "Use Ragas evaluation metrics (faithfulness, answer relevancy, context precision) to measure and improve your RAG pipeline quality. Trace evaluations with Langfuse."
+description: Use RAGAS to evaluate your RAG pipelines traced with Langfuse to measure the quality of your retrieval and sythesis.
 category: Evaluation
 ---
 
-# Ragas Metrics: Evaluate RAG Pipelines with Langfuse
-
-[Ragas](https://docs.ragas.io/) is an open-source evaluation framework that provides purpose-built metrics for measuring the quality of Retrieval-Augmented Generation (RAG) pipelines. By combining Ragas metrics with Langfuse tracing, you can systematically evaluate and improve your RAG application's retrieval and generation quality.
-
-## What are Ragas Metrics?
-
-Ragas provides a suite of evaluation metrics specifically designed for RAG pipelines. These metrics assess different aspects of your system's performance:
-
-| Ragas Metric | What It Measures | Inputs Required | Use When |
-|-------------|-----------------|-----------------|----------|
-| **Faithfulness** | Whether the generated answer is factually consistent with the retrieved context | Question, Answer, Contexts | You need to detect hallucinations in generated responses |
-| **Answer Relevancy** | How pertinent the generated answer is to the original question | Question, Answer | You need to ensure responses directly address user queries |
-| **Context Precision** | Whether relevant context items are ranked higher than irrelevant ones | Question, Contexts, Ground Truth | You need to optimize retrieval ranking quality |
-| **Context Recall** | Whether all relevant information from ground truth is captured in the retrieved context | Question, Contexts, Ground Truth | You need to ensure retrieval coverage is complete |
-| **Answer Correctness** | How well the generated answer matches an expected answer | Question, Answer, Ground Truth | You have reference answers to compare against |
-| **Harmfulness** | Whether the generated answer contains harmful or dangerous content | Question, Answer, Contexts | You need to monitor safety in generated content |
-
-Many Ragas metrics are **reference-free**, meaning you don't need ground-truth data to run them. This makes them ideal for evaluating production traces collected with Langfuse.
-
-## How Ragas Scores Work
-
-Each Ragas metric produces a score between 0 and 1:
-- **0.0 - 0.3**: Poor quality — immediate attention needed
-- **0.3 - 0.6**: Moderate quality — room for improvement
-- **0.6 - 0.8**: Good quality — acceptable for most use cases
-- **0.8 - 1.0**: Excellent quality — high-performing system
-
-These scores can be tracked over time in [Langfuse dashboards](/docs/metrics/features/custom-dashboards) to monitor quality trends and catch regressions.
-
-## Using Ragas with Langfuse
+# Evaluation of RAG pipelines with Ragas
 
 Langfuse offers the feature to score your traces and spans. They can be used in multiple ways across Langfuse:
 1. Displayed on trace to provide a quick overview
 2. Segment all execution traces by scores to e.g. find all traces with a low-quality score
 3. Analytics: Detailed score reporting with drill downs into use cases and user segments
 
-Ragas can help you run [Model-Based Evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge) on your traces/spans, especially for RAG pipelines. Because many Ragas metrics are reference-free, you don't need ground-truths when running the evaluations and can run them on production traces that you've collected with Langfuse.
+Ragas is an open-source tool that can help you run [Model-Based Evaluation](https://langfuse.com/docs/scores/model-based-evals) on your traces/spans, especially for RAG pipelines. Ragas can perform reference-free evaluations of various aspects of your RAG pipeline. Because it is reference-free you don't need ground-truths when running the evaluations and can run it on production traces that you've collected with Langfuse.
 
 ## The Environment
 

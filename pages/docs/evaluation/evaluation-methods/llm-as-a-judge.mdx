@@ -6,7 +6,7 @@ description: "Learn how LLM-as-a-Judge evaluation works — use large language m
 
 # LLM-as-a-Judge
 
-LLM-as-a-Judge is an evaluation methodology where a large language model is used to assess the quality of outputs produced by another LLM application. Instead of relying solely on human reviewers or simple heuristic metrics, you prompt a capable model (the "judge") to score and reason about application outputs against defined criteria.
+LLM-as-a-Judge is an evaluation methodology where an LLM is used to assess the quality of outputs produced by another LLM application. Instead of relying solely on human reviewers or simple heuristic metrics, you prompt a capable model (the "judge") to score and reason about application outputs against defined criteria.
 
 This approach has become one of the most popular methods for evaluating LLM applications because it combines the nuance of human judgment with the scalability of automated evaluation.
 
@@ -28,35 +28,11 @@ A typical LLM-as-a-Judge prompt includes:
 
 The judge model then returns a structured score and reasoning that can be tracked, aggregated, and analyzed over time.
 
-## Why Use LLM-as-a-Judge?
+## Why use LLM-as-a-Judge?
 
-- **Scalable:** Evaluate thousands of outputs quickly versus human annotators who can review only a handful per hour.
-- **Human-like nuance:** Captures subjective quality dimensions (helpfulness, toxicity, relevance, tone) better than simple string-matching or heuristic metrics, especially when guided by detailed rubrics.
-- **Repeatable:** With a fixed rubric and deterministic model settings, you get consistent scores that enable reliable comparison across experiments.
-- **Cost-effective:** Significantly cheaper than human annotation at scale — typically pennies per evaluation versus dollars per human review.
-- **Fast iteration:** Get evaluation results in seconds, enabling rapid prompt engineering and model selection cycles.
-
-### LLM-as-a-Judge vs. Human Evaluation vs. Deterministic Metrics
-
-| Dimension | LLM-as-a-Judge | Human Evaluation | Deterministic Metrics |
-|-----------|----------------|------------------|----------------------|
-| **Scale** | Thousands per minute | Tens per hour | Unlimited |
-| **Nuance** | High (rubric-dependent) | Highest | Low |
-| **Cost** | Low ($0.01-0.10/eval) | High ($1-10/eval) | Near-zero |
-| **Consistency** | High with fixed rubrics | Variable across annotators | Perfect |
-| **Setup effort** | Medium (prompt + rubric) | High (guidelines + training) | Low (code rules) |
-| **Best for** | Subjective quality at scale | Ground truth, edge cases | Format checks, exact matching |
-
-### Known Limitations and Biases
-
-Like any evaluation method, LLM-as-a-Judge has known limitations to be aware of:
-
-- **Positional bias:** Judge models may favor the first or last option in comparative evaluations. Mitigation: randomize ordering or run evaluations in both orders.
-- **Verbosity bias:** Longer, more detailed responses may receive higher scores regardless of accuracy. Mitigation: include explicit rubric instructions about conciseness.
-- **Self-enhancement bias:** Models may rate outputs from their own model family more favorably. Mitigation: use a different model family as the judge.
-- **Limited domain expertise:** Judge models may lack specialized knowledge for technical or domain-specific evaluations. Mitigation: include domain context in the evaluation prompt.
-
-For these reasons, most teams use LLM-as-a-Judge alongside [human annotation](/docs/evaluation/evaluation-methods/annotation-queues) for calibration and ground truth establishment.
+- **Scalable:** Judge thousands of outputs quickly versus human annotators.
+- **Human‑like:** Captures nuance (e.g. helpfulness, toxicity, relevance) better than simple metrics, especially when rubric‑guided.
+- **Repeatable:** With a fixed rubric, you can rerun the same prompts to get consistent scores.
 
 ## How to use LLM-as-a-Judge?
 
@@ -402,7 +378,7 @@ LLM-as-a-Judge is an evaluation methodology where a large language model (the "j
 </Accordion>
 
 <Accordion title="How accurate is LLM-as-a-Judge compared to human evaluation?">
-Research shows that strong LLM judges (such as GPT-4 class models) achieve 80-90% agreement with human evaluators on many quality dimensions, which is comparable to inter-annotator agreement between humans. Accuracy improves significantly with well-designed rubrics and clear evaluation criteria. For best results, calibrate your LLM-as-a-Judge setup against a small set of human-annotated examples.
+Research shows that strong LLM judges (such as GPT-5 class models) achieve 80-90% agreement with human evaluators on many quality dimensions, which is comparable to inter-annotator agreement between humans. Accuracy improves significantly with well-designed rubrics and clear evaluation criteria. For best results, calibrate your LLM-as-a-Judge setup against a small set of human-annotated examples.
 </Accordion>
 
 <Accordion title="What models work best as LLM judges?">
