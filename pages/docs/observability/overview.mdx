@@ -1,14 +1,14 @@
 ---
-title: LLM Observability & Application Tracing (open source)
-description: Open Source LLM Observability and Tracing with Langfuse. Integrates with OpenAI, LlamaIndex, LangChain, Python Decorators and more.
+title: "LLM Observability & Application Tracing (Open Source)"
+description: "Open source application tracing and observability for LLM apps. Capture traces, monitor latency, track costs, and debug issues across OpenAI, LangChain, LlamaIndex, and more."
 ---
 
-# Observability & Tracing
+# Observability & Application Tracing
 
 Because AI is inherently non-deterministic, debugging your application without any observability tool is more like guesswork.
-Well implemented observability gives you the tools to understand what's happening inside your application and why.
+Well-implemented observability gives you the tools to understand what's happening inside your application and why.
 
-The core of this is tracing. It gives you structured logs of every request: the exact prompt sent, the model's response, token usage, latency, and any tools or retrieval steps in between.
+The core of this is **application tracing** — structured logs of every request that capture the exact prompt sent, the model's response, token usage, latency, and any tools or retrieval steps in between.
 
 Langfuse captures all of this for you as you build. Here's an example of a trace in the Langfuse UI:
 
@@ -22,8 +22,57 @@ Langfuse captures all of this for you as you build. Here's an example of a trace
 
 </Callout>
 
+## What is Application Tracing?
 
-## Getting started
+Application tracing is the practice of recording the flow of a request through your system. In the context of LLM applications, a **trace** captures the complete lifecycle of a single request — from the initial user input through every LLM call, tool execution, retrieval step, and final response.
+
+Unlike traditional logging, which captures isolated events, tracing preserves the **causal relationships** between operations. You can see that an LLM call happened _because_ of a retrieval step, which happened _because_ of a user query — all connected in a single trace.
+
+### Why Tracing Matters for LLM Applications
+
+LLM applications are fundamentally different from traditional software:
+
+- **Non-deterministic outputs** — The same input can produce different responses, making it impossible to verify correctness through simple assertions.
+- **Complex multi-step workflows** — Modern LLM apps involve chains of operations: retrieval, reranking, generation, tool use, and post-processing. Bugs can hide anywhere.
+- **Cost accumulation** — Each LLM call incurs token-based costs. Without tracing, it's difficult to understand where costs are concentrated.
+- **Latency sensitivity** — Users expect fast responses. Tracing helps identify which steps add latency and where optimization is needed.
+- **Agent autonomy** — AI agents make autonomous decisions about tool use and execution flow. Tracing gives you visibility into these decision paths.
+
+### Key Concepts
+
+Understanding a few core concepts will help you get the most out of Langfuse tracing:
+
+| Concept | Description |
+|---------|-------------|
+| **Trace** | A complete record of a single request through your application. Contains one or more observations. [Learn more](/docs/observability/data-model) |
+| **Observation** | An individual operation within a trace — an LLM call, tool execution, retrieval step, or custom span. [Learn more](/docs/observability/features/observation-types) |
+| **Session** | A group of related traces, such as a multi-turn conversation. [Learn more](/docs/observability/features/sessions) |
+| **Span** | A timed operation representing a unit of work within a trace. |
+| **Generation** | A specific type of observation representing an LLM call, with inputs, outputs, model parameters, and token counts. |
+
+## What Langfuse Captures
+
+Langfuse automatically captures rich data for every traced request:
+
+- **Inputs and outputs** — Full prompts and model responses for every LLM call
+- **Model parameters** — Temperature, max tokens, model version, and other configuration
+- **Token usage and costs** — Input/output tokens with automatic [cost calculation](/docs/observability/features/token-and-cost-tracking)
+- **Latency** — Timing for each operation with breakdown by step
+- **Tool and retrieval calls** — What tools were invoked, what data was retrieved
+- **Nested call hierarchy** — Parent-child relationships between operations
+- **Metadata** — Custom attributes like user IDs, session IDs, tags, and [environment](/docs/observability/features/environments)
+- **Errors and exceptions** — Error messages and stack traces with [log levels](/docs/observability/features/log-levels)
+
+## Integrations and SDK Support
+
+Langfuse integrates with the most popular LLM frameworks and providers. Tracing is typically set up with just a few lines of code:
+
+- **Frameworks:** [LangChain & LangGraph](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex), [Haystack](/integrations/frameworks/haystack), [CrewAI](/integrations/frameworks/crewai), and [more](/integrations)
+- **Model providers:** [OpenAI](/integrations/model-providers/openai-py), [Anthropic](/integrations/model-providers/anthropic), [Google](/integrations/model-providers/google), [Amazon Bedrock](/integrations/model-providers/amazon-bedrock), and [more](/integrations)
+- **SDKs:** [Python SDK](/docs/observability/sdk/overview), [JS/TS SDK](/docs/observability/sdk/overview), [OpenTelemetry](/integrations/native/opentelemetry)
+- **No-code platforms:** [Flowise](/integrations/no-code/flowise), [Langflow](/integrations/no-code/langflow), [Dify](/integrations/no-code/dify), [LobeChat](/integrations/no-code/lobechat)
+
+## Getting Started
 
 Start by [setting up your first trace](/docs/observability/get-started).
 
@@ -33,6 +82,26 @@ Once you're up and running, you can start adding on more functionality to your t
 - [Group traces into sessions for multi-turn applications](/docs/observability/features/sessions)
 - [Split traces into environments for different stages of your application](/docs/observability/features/environments)
 - [Add attributes to your traces so you can filter them in the future](/docs/observability/features/tags)
+- [Use custom trace IDs for distributed tracing](/docs/observability/features/trace-ids-and-distributed-tracing)
+- [Track costs and token usage](/docs/observability/features/token-and-cost-tracking)
 
-Already know what you want? Take a look under _Features_ for guides on specific topics. 
+Already know what you want? Take a look under _Features_ for guides on specific topics.
+
+## FAQ
+
+<Accordion title="What is the difference between observability and tracing?">
+**Observability** is the broader capability of understanding the internal state of your system from its outputs. It encompasses tracing, metrics, and logging. **Tracing** is a specific observability technique that records the flow of a request through your system, preserving causal relationships between operations. In the context of LLM applications, tracing is the most important observability tool because it captures the full context of each request — prompts, responses, tool calls, and their relationships.
+</Accordion>
+
+<Accordion title="What is application tracing?">
+Application tracing records the complete lifecycle of a request as it flows through your system. Each trace captures every operation — LLM calls, retrieval steps, tool executions, and custom logic — along with timing, inputs, outputs, and metadata. This gives you full visibility into what happened during each request, enabling debugging, performance optimization, and quality monitoring.
+</Accordion>
+
+<Accordion title="How does Langfuse compare to other tracing solutions?">
+Langfuse is purpose-built for LLM applications, which means it natively understands LLM-specific concepts like token usage, model parameters, prompt/completion pairs, and evaluation scores. Unlike general-purpose APM tools, Langfuse provides features specific to AI engineering: [LLM-as-a-Judge evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge), [prompt management](/docs/prompt-management/overview), [experiments and datasets](/docs/evaluation/experiments/datasets), and [custom dashboards](/docs/metrics/features/custom-dashboards). It's also [open source](/self-hosting) and can be self-hosted.
+</Accordion>
+
+<Accordion title="Does Langfuse add latency to my application?">
+No. Langfuse SDKs send tracing data asynchronously in the background. Trace events are queued locally and flushed in batches, so your application's response time is not affected. See [queuing and batching](/docs/observability/features/queuing-batching) for details.
+</Accordion>
 
