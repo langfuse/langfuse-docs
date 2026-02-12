@@ -1,6 +1,6 @@
 ---
-title: Chatbot Monitoring with Advanced Observability
-description: Learn how to improve your AI chatbot with Langfuse's observability tools. Monitor chatbot performance, user interactions, and system health to ensure effective, compliant, and positive user experiences.
+title: "Chatbot Analytics: Monitor, Evaluate & Improve Your AI Chatbot"
+description: "Learn how to use chatbot analytics tools to monitor performance, track user interactions, and improve your AI chatbot. Covers key metrics, evaluation strategies, and analytics platforms."
 tags: [article]
 ---
 
@@ -43,7 +43,7 @@ Capture detailed logs of user conversations and system processes. This data is e
 - **Conversation Logs**: Record user inputs and chatbot responses.
 - **System Traces**: Monitor the internal processes, including API calls and database queries.
 
-Learn how to set up [logging and tracing](/docs/tracing) with Langfuse.
+Learn how to set up [logging and tracing](/docs/observability/overview) with Langfuse.
 
 ### 2. Feedback Integration
 
@@ -52,7 +52,7 @@ Incorporate mechanisms for users to provide feedback directly within the chatbot
 - **User Feedback Capture**: Allow users to rate responses or report issues.
 - **Analysis of Feedback**: Use the collected data to improve the chatbot's performance.
 
-Langfuse can help you capture and analyze user feedback. [Learn more](/docs/scores/user-feedback).
+Langfuse can help you capture and analyze user feedback. [Learn more](/docs/observability/features/user-feedback).
 
 ### 3. Analytics Dashboards
 
@@ -62,7 +62,7 @@ Visualize key metrics and monitor the chatbot's performance over time.
 - **Engagement Metrics**: Track the number of interactions, session durations, and user retention rates.
 - **Performance Metrics**: Monitor response times and error rates.
 
-Explore how to [analyze](/docs/analytics/overview) your chatbot metrics in Langfuse.
+Explore how to [analyze](/docs/metrics/overview) your chatbot metrics in Langfuse.
 
 ### 4. Model Based Evaluations
 
@@ -72,7 +72,7 @@ Use automated evaluations (LLM-as-a-judge) to assess the quality of your chatbot
 - **Continuous Monitoring**: Regularly assess the chatbot's performance to ensure it meets quality standards.
 - **Benchmarking**: Compare your chatbot's performance against predefined benchmarks.
 
-Langfuse can set up and manage model-based evaluations—[learn more here](/docs/scores/model-based-evals).
+Langfuse can set up and manage model-based evaluations—[learn more here](/docs/evaluation/evaluation-methods/llm-as-a-judge).
 
 ### 5. External Evaluation Pipelines
 
@@ -82,7 +82,7 @@ Set up pipelines to evaluate the chatbot's responses with external evaluation fr
 - **Compliance Checking**: Automatically verify that responses meet regulatory standards.
 - **Prompt Injection**: Detect and mitigate attempts to manipulate the chatbot's responses through crafted inputs.
 
-Langfuse bundles your evaluation metrics—[get started here](/docs/scores/external-evaluation-pipelines).
+Langfuse bundles your evaluation metrics—[get started here](/docs/evaluation/evaluation-methods/scores-via-sdk).
 
 ## Observability Tools
 
@@ -102,7 +102,7 @@ Effectively manage the prompts used by your AI models to ensure consistent and r
 - **Prompt Versioning**: Keep track of changes to prompts over time.
 - **Optimization**: Analyze which prompts yield the best responses.
 
-Check out [Langfuse's Prompt Management](/docs/prompts/get-started).
+Check out [Langfuse's Prompt Management](/docs/prompt-management/get-started).
 
 ### 3. User Behavior Analytics
 
@@ -111,7 +111,7 @@ Understand how users interact with your chatbot.
 - **Interaction Patterns**: Identify common user intents and needs.
 - **Drop-off Analysis**: Find out where users disengage.
 
-Learn more about [user behavior tracking](/docs/analytics/overview).
+Learn more about [user behavior tracking](/docs/metrics/overview).
 
 ### 4. Integrations
 
@@ -135,7 +135,7 @@ Langfuse is designed to scale with your needs.
 
 The [`@observe()` decorator](/docs/sdk/python/decorators) makes it easy to trace any Python LLM application. In this quickstart we also use the Langfuse [OpenAI integration](/integrations/model-providers/openai-py) to automatically capture all model parameters.
 
-Not using OpenAI? Check out how you can [trace any LLM with Langfuse](/docs/get-started).
+Not using OpenAI? Check out how you can [trace any LLM with Langfuse](/docs/observability/get-started).
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host](/self-hosting)
 2.  Create a new project
@@ -161,7 +161,7 @@ from langfuse.openai import openai # OpenAI integration
 @observe()
 def story():
     return openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         max_tokens=100,
         messages=[
           {"role": "system", "content": "You are a great storyteller."},
@@ -176,7 +176,65 @@ def main():
 main()
 ```
 
+## Key Chatbot Analytics Metrics
+
+To effectively measure and improve your chatbot, track these key metrics:
+
+| Metric | What It Measures | Why It Matters |
+|--------|-----------------|----------------|
+| **Messages per session** | Average number of messages in a conversation | Indicates engagement depth and conversation complexity |
+| **Session duration** | How long users spend interacting with the chatbot | Helps understand user engagement and satisfaction |
+| **Resolution rate** | Percentage of conversations that achieve the user's goal | Direct measure of chatbot effectiveness |
+| **Escalation rate** | How often conversations are handed off to a human agent | Identifies gaps in chatbot capabilities |
+| **Response latency** | Time between user message and chatbot response | Critical for user experience and retention |
+| **Cost per conversation** | Token usage and associated costs per session | Essential for budgeting and optimization |
+| **User satisfaction score** | Direct feedback from users (thumbs up/down, ratings) | Ground truth measure of chatbot quality |
+| **Hallucination rate** | How often the chatbot generates inaccurate information | Critical for trust and compliance |
+
+Use [custom dashboards](/docs/metrics/features/custom-dashboards) in Langfuse to visualize these metrics over time and across user segments.
+
+## Chatbot Analytics Tools
+
+Choosing the right chatbot analytics tools depends on what you need to measure and how your chatbot is built. Here are the main categories:
+
+- **LLM Observability Platforms** — Tools like [Langfuse](/), [LangSmith](https://smith.langchain.com/), and [Arize Phoenix](https://phoenix.arize.com/) provide deep tracing and monitoring of LLM-powered chatbots, capturing every model call, retrieval step, and tool interaction.
+- **Product Analytics** — Tools like [PostHog](https://posthog.com/) and Mixpanel help track user behavior patterns, funnel analysis, and engagement metrics. Langfuse integrates with [PostHog](/integrations/analytics/posthog) for combined LLM + product analytics.
+- **Evaluation Frameworks** — Tools like [Ragas](https://docs.ragas.io/) and [Promptfoo](https://www.promptfoo.dev/) help assess response quality through automated evaluation pipelines.
+- **Feedback Collection** — Built-in feedback widgets and [user feedback capture](/docs/observability/features/user-feedback) to gather direct user ratings and comments.
+
+For most teams, an LLM observability platform like Langfuse serves as the foundation, with additional tools added as specific analytics needs arise.
+
+## Choosing a Chatbot Analytics Platform
+
+When evaluating a chatbot analytics platform, consider these key capabilities:
+
+- **Conversation tracing** — Can you see the full flow of each conversation, including all LLM calls, retrieval steps, and tool invocations?
+- **Session grouping** — Can you group related messages into [sessions](/docs/observability/features/sessions) to analyze multi-turn conversations?
+- **Evaluation support** — Does the platform support [automated evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge) of response quality, including LLM-as-a-Judge?
+- **Cost tracking** — Can you track [token usage and costs](/docs/observability/features/token-and-cost-tracking) per conversation and per user?
+- **Custom dashboards** — Can you build [custom dashboards](/docs/metrics/features/custom-dashboards) to visualize the metrics that matter to your team?
+- **Integration support** — Does the platform work with your tech stack? Langfuse supports [LangChain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex), [OpenAI](/integrations/model-providers/openai-py), and [many more](/integrations).
+- **Open source & self-hosting** — Can you [self-host](/self-hosting) the platform for data privacy and compliance requirements?
+
 ## Resources
 
 - To see chatbot tracing in action, have a look at our interactive demo [here](/docs/demo).
 - Have a look at [this guide](/blog/qa-chatbot-for-langfuse-docs) to see how we built and instrumented a chatbot for the Langfuse docs.
+
+## FAQ
+
+<Accordion title="What is chatbot analytics?">
+Chatbot analytics is the practice of collecting, measuring, and analyzing data from your AI chatbot to understand its performance and improve user experience. This includes tracking metrics like response quality, conversation length, user satisfaction, cost per conversation, and error rates. With proper analytics, you can identify where your chatbot struggles, optimize prompts, and make data-driven improvements.
+</Accordion>
+
+<Accordion title="What chatbot analytics tools should I use?">
+The best toolset depends on your needs. For LLM-powered chatbots, start with an LLM observability platform like Langfuse for conversation tracing, cost tracking, and quality evaluation. Add product analytics tools like PostHog for user behavior analysis, and evaluation frameworks like Ragas for automated quality assessment. Most teams find that a combination of 2-3 tools covers their analytics needs.
+</Accordion>
+
+<Accordion title="How do I measure chatbot performance?">
+Measure chatbot performance across multiple dimensions: (1) **Quality** — use LLM-as-a-Judge evaluation and user feedback scores, (2) **Efficiency** — track response latency, cost per conversation, and token usage, (3) **Effectiveness** — measure resolution rate, escalation rate, and user satisfaction, (4) **Safety** — monitor hallucination rate, compliance violations, and prompt injection attempts. Use custom dashboards to visualize trends over time.
+</Accordion>
+
+<Accordion title="How do I improve my chatbot's responses?">
+Start by analyzing your chatbot analytics to identify problem areas. Use conversation tracing to inspect low-quality responses and understand why they failed. Set up automated evaluations to score responses on key dimensions (helpfulness, accuracy, tone). Build a dataset of problematic conversations and run experiments to test prompt improvements before deploying them to production. Continuously monitor production performance and feed edge cases back into your test dataset.
+</Accordion>
