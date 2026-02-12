@@ -1,5 +1,5 @@
 ---
-description: Survey of common security problems facing LLM-based applications and how to use Langfuse to trace, prevent, and evaluate LLM safety risks.
+description: "Comprehensive guide to LLM security guardrails — protect against prompt injection, PII leakage, and harmful content. Learn how to use LLM Guard, NeMo Guardrails, and Langfuse to monitor and evaluate LLM safety."
 sidebarTitle: LLM Security & Guardrails
 ---
 
@@ -19,6 +19,19 @@ There are a host of potential safety risks involved with LLM-based applications.
 
 LLM Security involves implementing protective measures to safeguard LLMs and their infrastructure from unauthorized access, misuse, and adversarial attacks, ensuring the integrity and confidentiality of both the model and data. This is crucial in AI/ML systems to maintain ethical usage, prevent security risks like prompt injections, and ensure reliable operation under safe conditions.
 
+## Types of Security Guardrails
+
+Security guardrails for LLM applications fall into several categories, each addressing different risk vectors:
+
+| Guardrail Type | What It Protects Against | When It Runs |
+|---------------|-------------------------|-------------|
+| **Input guardrails** | Prompt injection, jailbreak attempts, malicious instructions | Before the LLM call |
+| **Output guardrails** | Toxic content, harmful responses, off-topic answers | After the LLM response |
+| **PII detection & redaction** | Leakage of personal information (names, emails, SSNs, credit cards) | Before input and/or after output |
+| **Content filtering** | Inappropriate, offensive, or NSFW content | After the LLM response |
+| **Topic restriction** | Responses outside allowed domains or banned topics | Before and after LLM calls |
+| **Rate limiting & abuse prevention** | Excessive usage, automated attacks, cost exploitation | At the API/application layer |
+
 ## How does LLM Security work?
 
 <Callout type="info">
@@ -32,21 +45,41 @@ LLM Security can be addressed with a combination of
 
 ### 1. Run-time security measures
 
-There are several popular security libraries that can be used to mitigate security risks in LLM-based applications. These include: [LLM Guard](https://llm-guard.com), [Prompt Armor](https://promptarmor.com), [NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails), [Microsoft Azure AI Content Safety](https://azure.microsoft.com/en-us/products/ai-services/ai-content-safety), [Lakera](https://www.lakera.ai). These libraries help with security measures in the following ways:
+There are several popular security guardrail libraries that can be used to mitigate security risks in LLM-based applications:
+
+| Library | Key Features | Open Source |
+|---------|-------------|-------------|
+| [LLM Guard](https://llm-guard.com) | Comprehensive input/output scanning, PII detection, toxicity, prompt injection detection, ban topics, regex matching | Yes |
+| [NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails) | Programmable guardrails with Colang, topical rails, fact-checking, moderation | Yes |
+| [Lakera](https://www.lakera.ai) | Prompt injection detection, content moderation, PII detection via API | No (SaaS) |
+| [Microsoft Azure AI Content Safety](https://azure.microsoft.com/en-us/products/ai-services/ai-content-safety) | Content moderation, prompt shields, groundedness detection | No (Cloud) |
+| [Prompt Armor](https://promptarmor.com) | Prompt injection protection, data leakage prevention | No (SaaS) |
+
+These libraries help with security measures in the following ways:
 
 1. Catching and blocking a potentially harmful or inappropriate prompt before sending to the model
-2. Redacting sensitive PII before being sending into the model and then un-redacting in the response
+2. Redacting sensitive PII before sending into the model and then un-redacting in the response
 3. Evaluating prompts and completions on toxicity, relevance, or sensitive material at run-time and blocking the response if necessary
+
+### LLM Guard
+
+[LLM Guard](https://llm-guard.com) by Protect AI is one of the most popular open-source security guardrail libraries. It provides a comprehensive set of scanners for both input and output:
+
+**Input scanners:** Anonymize (PII redaction), BanSubstrings, BanTopics, Code, Language, PromptInjection, Regex, Secrets, Sentiment, TokenLimit, Toxicity
+
+**Output scanners:** BanSubstrings, BanTopics, Bias, Code, Deanonymize, Language, MaliciousURLs, NoRefusal, Regex, Relevance, Sensitive, Sentiment, Toxicity
+
+LLM Guard integrates well with Langfuse — you can trace each scanner's execution, monitor risk scores, and evaluate the effectiveness of your security setup over time. See the [Getting Started example below](#getting-started) for a complete walkthrough.
 
 ### 2. Monitoring and evaluation of security measures with Langfuse
 
-Use Langfuse [tracing](/docs/tracing) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
+Use Langfuse [tracing](/docs/observability/overview) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
 
 1. Manually inspect traces to investigate security issues.
 2. Monitor security scores over time in the Langfuse Dashboard.
-3. Validate security checks. You can use Langfuse [scores](/docs/scores) to evaluate the effectiveness of security tools. Integrating Langfuse into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:
-   - [Annotations (in UI)](/docs/scores/annotation). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.
-   - [Automated evaluations](/docs/scores/model-based-evals). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup. Check out the docs to learn more about how to set up these evaluations.
+3. Validate security checks. You can use Langfuse [scores](/docs/evaluation/core-concepts) to evaluate the effectiveness of security tools. Integrating Langfuse into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:
+   - [Annotations (in UI)](/docs/evaluation/evaluation-methods/annotation-queues). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.
+   - [Automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup. Check out the docs to learn more about how to set up these evaluations.
 4. Track Latency. Some LLM security checks need to be awaited before the model can be called, others block the response to the user. Thus they quickly are an essential driver of overall latency of an LLM application. Langfuse can help dissect the latencies of these checks within a trace to understand whether the checks are worth the wait.
 
 ## Getting Started
@@ -125,7 +158,7 @@ def summarize_transcript(prompt: str):
   sanitized_prompt = anonymize(prompt)
 
   answer = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         max_tokens=100,
         messages=[
           {"role": "system", "content": "Summarize the given court transcript."},
@@ -181,6 +214,24 @@ import { FileCode, BookOpen } from "lucide-react";
     icon={<FileCode />}
   />
 </Cards>
+
+## FAQ
+
+<Accordion title="What is LLM Guard?">
+[LLM Guard](https://llm-guard.com) is an open-source library by Protect AI that provides security guardrails for LLM applications. It includes input scanners (prompt injection detection, PII anonymization, toxicity detection, topic banning) and output scanners (content moderation, bias detection, malicious URL detection, deanonymization). LLM Guard can be integrated with Langfuse to trace and monitor the effectiveness of each security check.
+</Accordion>
+
+<Accordion title="What are security guardrails for LLMs?">
+Security guardrails are protective measures that intercept and filter inputs and outputs of LLM applications to prevent misuse and harm. They include input guardrails (blocking prompt injection and malicious inputs), output guardrails (filtering toxic or harmful responses), PII detection and redaction, content filtering, and topic restriction. Guardrails run at the application layer and are complementary to model-level safety training.
+</Accordion>
+
+<Accordion title="How do I prevent prompt injection in my LLM application?">
+Prompt injection can be mitigated through multiple layers: (1) Use a guardrail library like LLM Guard or Lakera to detect and block injection attempts before they reach the model. (2) Implement clear separation between system instructions and user input. (3) Use Langfuse tracing to monitor for injection attempts in production. (4) Set up automated evaluations to flag suspicious patterns. No single approach is 100% effective, so a defense-in-depth strategy with monitoring is recommended.
+</Accordion>
+
+<Accordion title="How do I monitor LLM security in production?">
+Use Langfuse to monitor your LLM security posture: (1) Trace every request through your guardrail pipeline to see which checks triggered. (2) Use LLM-as-a-Judge evaluators to automatically score traces for toxicity, PII leakage, and prompt injection. (3) Set up custom dashboards to track security scores over time. (4) Use annotation queues for human review of flagged conversations. (5) Track the latency impact of security checks to balance protection with user experience.
+</Accordion>
 
 ## GitHub Discussions
 
