@@ -222,17 +222,20 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "joining-clickhouse",
-    dismissible: true,
+    key: "snapshot-notice-python-sdk-v3-js-sdk-v4",
+    dismissible: false,
     content: (
-      <Link href="/blog/joining-clickhouse">
-        {/* mobile */}
-        <span className="sm:hidden">Langfuse joins ClickHouse! →</span>
-        {/* desktop */}
-        <span className="hidden sm:inline">
-          Langfuse joins ClickHouse! Learn more →
-        </span>
-      </Link>
+      <span>
+        ⚠️ Snapshot (as of Python SDK v3 / JS SDK v4) ⚠️ {"  "}
+        <Link
+          href="https://langfuse.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline cursor-pointer"
+        >
+          view latest ↗
+        </Link>
+      </span>
     ),
   },
 };
