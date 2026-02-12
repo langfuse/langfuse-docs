@@ -4,6 +4,7 @@ import * as z from "zod/v3";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
+import { searchLangfuseDocsWithInkeep } from "./inkeep-search";
 
 // Initialize PostHog client for server-side tracking
 const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
@@ -55,37 +56,12 @@ const mcpHandler = createMcpHandler(
       },
       async ({ query }) => {
         try {
-          // Call Inkeep RAG API
-          const inkeepRes = await fetch(
-            "https://api.inkeep.com/v1/chat/completions",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.INKEEP_BACKEND_API_KEY}`,
-              },
-              body: JSON.stringify({
-                model: "inkeep-rag",
-                messages: [{ role: "user", content: query }],
-                response_format: { type: "json_object" },
-              }),
-            }
-          );
-
-          if (!inkeepRes.ok) {
-            throw new Error(`Inkeep API returned ${inkeepRes.status}`);
-          }
-
-          const result = await inkeepRes.json();
-
-          // Extract the actual content from the Inkeep response
-          const responseContent =
-            result.choices?.[0]?.message?.content || "No results found";
+          const inkeepResult = await searchLangfuseDocsWithInkeep(query);
 
           // Track successful MCP tool event
           trackMcpToolUsage("searchLangfuseDocs", "success", {
             query: query,
-            response_length: responseContent.length,
+            response_length: inkeepResult.answer.length,
           });
 
           // Return the actual documentation content in MCP format
@@ -93,11 +69,11 @@ const mcpHandler = createMcpHandler(
             content: [
               {
                 type: "text",
-                text: responseContent,
+                text: inkeepResult.answer,
               },
             ],
             // Include the full Inkeep response as structured data for debugging
-            _meta: result,
+            _meta: inkeepResult.metadata,
           };
         } catch (error) {
           // Track error MCP tool event
