@@ -41,13 +41,16 @@ We redesigned the observations and metrics APIs to test the new data model under
 
 ### 4. Faster LLM-as-a-judge evaluations
 
-Previously, each evaluation required a separate ClickHouse query, adding latency and limiting throughput.
+[LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) on traces require a separate ClickHouse query, causing delays and backlogs at scale.
 
-Evaluations now run directly on observations, eliminating database query overhead:
+[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge#understanding-each-evaluation-target) execute in seconds instead of minutes: 
 
-- Evaluations can be executed on every observation without performance degradation
-- Execution time is now limited by LLM API rate limits rather than database queries
-- We support higher evaluation concurrency
+- **Eliminate evaluation delays**: No database query overhead. Execution time is limited only by LLM API rate limits, not database performance
+- **Scale without performance impact**: Run evaluations on every observation without degradation
+- **Faster iteration**: See evaluation results immediately after ingestion, not minutes later
+- **Higher concurrency**: Process more evaluations per minute
+
+[Upgrade existing trace-level evaluators](/faq/all/llm-as-a-judge-migration) to observation-level for immediate performance gains.
 
 ## Technical changes
 <Frame fullWidth>
