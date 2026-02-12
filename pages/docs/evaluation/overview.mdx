@@ -1,9 +1,9 @@
 ---
-title: Evaluation of LLM Applications
-description: With Langfuse you can capture all your LLM evaluations in one place. You can combine a variety of different evaluation metrics like model-based evaluations (LLM-as-a-Judge), human annotations or fully custom evaluation workflows via API/SDKs. This allows you to measure quality, tonality, factual accuracy, completeness, and other dimensions of your LLM application.
+title: "LLM Evaluation Metrics & Methods"
+description: "Comprehensive guide to LLM evaluation metrics — faithfulness, relevance, toxicity, hallucination, and more. Learn how to measure quality with LLM-as-a-Judge, human annotations, and custom evaluation workflows."
 ---
 
-# Evaluation Overview
+# LLM Evaluation Metrics & Methods
 
 Evals give you a repeatable check of your LLM application's behavior. You **replace guesswork with data**.
 
@@ -15,19 +15,118 @@ They also help you **catch regressions before you ship a change**. You tweak a p
 
 </Callout>
 
+## Why LLM Evaluation Metrics Matter
 
+LLMs are non-deterministic — the same prompt can produce different outputs. Traditional software testing (assert `output == expected`) doesn't work. Instead, you need **evaluation metrics** that score outputs on continuous scales across multiple quality dimensions.
+
+Without evaluation metrics, you're guessing:
+- Did the new prompt version actually improve helpfulness?
+- Is your RAG pipeline returning relevant context?
+- Are responses free from hallucinations and toxic content?
+
+Evaluation metrics give you quantifiable answers to these questions, enabling data-driven decisions about prompt changes, model selection, and system architecture.
+
+## Common LLM Evaluation Metrics
+
+The right metric depends on what you're building. Here are the most widely used LLM evaluation metrics, organized by category:
+
+### Quality & Accuracy Metrics
+
+| Metric | What It Measures | Best For |
+|--------|-----------------|----------|
+| **Faithfulness** | Whether the output is factually consistent with the provided context | RAG pipelines, summarization |
+| **Answer Correctness** | How well the output matches an expected answer | Q&A systems, factual queries |
+| **Hallucination Rate** | Whether the model fabricates information not present in the context | RAG pipelines, knowledge bases |
+| **Coherence** | Logical flow and readability of the output | Long-form generation, chatbots |
+| **Completeness** | Whether the output addresses all aspects of the input | Customer support, complex queries |
+
+### Relevance Metrics
+
+| Metric | What It Measures | Best For |
+|--------|-----------------|----------|
+| **Answer Relevancy** | How pertinent the response is to the original question | Chatbots, search, Q&A |
+| **Context Precision** | Whether retrieved context items are ranked by relevance | RAG retrieval optimization |
+| **Context Recall** | Whether all relevant context was retrieved | RAG retrieval coverage |
+| **Topic Adherence** | Whether the response stays on topic | Constrained assistants |
+
+### Safety & Compliance Metrics
+
+| Metric | What It Measures | Best For |
+|--------|-----------------|----------|
+| **Toxicity** | Presence of harmful, offensive, or inappropriate content | User-facing applications |
+| **PII Detection** | Whether the output leaks personally identifiable information | Healthcare, finance, legal |
+| **Bias** | Whether responses show systematic favoritism or discrimination | Hiring tools, recommendations |
+| **Prompt Injection Resistance** | Robustness against adversarial input manipulation | Public-facing chatbots |
+
+### User Experience Metrics
+
+| Metric | What It Measures | Best For |
+|--------|-----------------|----------|
+| **Helpfulness** | How useful the response is to the user | General assistants, support bots |
+| **Tone & Style** | Whether the response matches desired communication style | Brand-specific applications |
+| **Conciseness** | Whether the response is appropriately brief | Chat interfaces, mobile apps |
+| **User Satisfaction** | Direct feedback from end users (thumbs up/down, ratings) | Production monitoring |
+
+## Choosing the Right Evaluation Metric
+
+Different stages of development and different application types call for different metrics:
+
+- **During development**: Use [experiments](/docs/evaluation/experiments/experiments-via-sdk) with metrics like faithfulness, answer correctness, and relevancy to compare prompt versions or model configurations before deploying.
+- **In production**: Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) with metrics like toxicity, helpfulness, and hallucination rate to continuously monitor live traffic.
+- **For RAG pipelines**: Focus on faithfulness, context precision, context recall, and answer relevancy. See our [RAGAS integration guide](/guides/cookbook/evaluation_of_rag_with_ragas) for automated RAG evaluation.
+- **For chatbots**: Prioritize helpfulness, tone, coherence, and user satisfaction. See our guide on [chatbot analytics](/faq/all/chatbot-analytics).
+- **For safety-critical apps**: Focus on toxicity, PII detection, bias, and prompt injection resistance. See [LLM Security & Guardrails](/docs/security-and-guardrails).
+
+## How to Evaluate: Methods in Langfuse
+
+Langfuse supports multiple evaluation methods. You can combine them to get a complete picture of your application's quality:
+
+| Method | What | Use When |
+|--------|------|----------|
+| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Use an LLM to evaluate outputs based on custom criteria | Subjective assessments at scale (tone, accuracy, helpfulness) |
+| [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues) | Structured human review workflows | Building ground truth, systematic labeling, team collaboration |
+| [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui) | Manually add scores to traces in the Langfuse UI | Quick quality spot checks, reviewing individual traces |
+| [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) | Programmatically add scores using the API or SDK | Custom evaluation pipelines, deterministic checks, automated workflows |
+
+For a deeper dive into these concepts, see the [Core Concepts](/docs/evaluation/core-concepts) page.
+
+## The Evaluation Loop
+
+Effective LLM evaluation is not a one-time task — it's a continuous loop:
+
+1. **Offline evaluation** — Test your application against a fixed [dataset](/docs/evaluation/experiments/datasets) before deploying. Run [experiments](/docs/evaluation/core-concepts#experiments) to compare prompt versions or model configurations.
+2. **Online evaluation** — Score live production traces with [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) to catch issues in real traffic.
+3. **Feedback integration** — When you find edge cases in production, add them back to your dataset so future experiments catch them.
+4. **Dashboard monitoring** — Use [custom dashboards](/docs/metrics/features/custom-dashboards) to visualize evaluation scores over time and spot trends.
 
 ## Getting Started
 
-If you're new to LLM evaluation, start by exploring the [Concepts](/docs/evaluation/core-concepts) page. There's a lot to uncover, and going through the concepts before diving in will speed up your learning curve.
-
-Once you know what you want to do, you can:
+Once you know what you want to measure, you can:
 
 - [Create a dataset](/docs/evaluation/experiments/datasets) to measure your LLM application's performance consistently
-- [Run an experiment](/docs/evaluation/core-concepts#experiments) get an overview of how your application is doing
+- [Run an experiment](/docs/evaluation/core-concepts#experiments) to get an overview of how your application is doing
 - [Set up a live evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) to monitor your live traces
+- [Analyze scores](/docs/evaluation/evaluation-methods/score-analytics) to understand trends and identify areas for improvement
 
 Looking for something specific? Take a look under _Evaluation Methods_ and _Experiments_ for guides on specific topics.
+
+## FAQ
+
+<Accordion title="What are the most important LLM evaluation metrics?">
+The most important metrics depend on your use case. For RAG pipelines, focus on **faithfulness**, **context precision**, and **answer relevancy**. For chatbots, prioritize **helpfulness**, **coherence**, and **user satisfaction**. For safety-critical applications, **toxicity**, **PII detection**, and **bias** are essential. Most teams start with 2-3 core metrics and add more as they identify specific quality dimensions that matter for their users.
+</Accordion>
+
+<Accordion title="How do I choose between automated and human evaluation?">
+Use **automated evaluation** (LLM-as-a-Judge, deterministic checks) for scalable, repeatable assessments across large volumes of data. Use **human evaluation** (annotation queues, manual scoring) for building ground truth datasets, calibrating automated evaluators, and assessing subjective qualities that are difficult to automate. Most teams use both: human evaluation to establish baselines and validate automated metrics, then automated evaluation for continuous monitoring at scale.
+</Accordion>
+
+<Accordion title="What is the difference between online and offline evaluation?">
+**Offline evaluation** runs your application against a fixed dataset in a controlled environment — this is what you do during development to test changes before deploying (experiments). **Online evaluation** scores live production traces in real-time to catch issues in actual user traffic. Teams typically use offline evaluation to validate changes and online evaluation to monitor production quality, creating a continuous improvement loop.
+</Accordion>
+
+<Accordion title="How often should I run evaluations?">
+Run **offline evaluations** (experiments) whenever you make changes to prompts, models, or system architecture. Run **online evaluations** continuously on a sample of production traffic — typically 5-20% depending on volume and cost constraints. Review evaluation dashboards at least weekly to spot trends, and set up alerts for significant score drops.
+</Accordion>
 
 ## GitHub Discussions
 
