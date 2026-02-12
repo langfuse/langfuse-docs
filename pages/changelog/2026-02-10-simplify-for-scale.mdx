@@ -31,9 +31,9 @@ Chart rendering time has been significantly reduced. Queries that previously too
 
 This applies to trace exploration, filtering, and analytics across large projects.
 
-### 3. New v2 API endpoints
+### 3. New observations and metrics API endpoints
 
-We redesigned the observations and metrics APIs to test the new data model under the hood.The redesigned APIs offer significant performance improvements:
+We redesigned the observations and metrics APIs to test the new data model under the hood. The redesigned APIs offer significant performance improvements:
 
 - **[Observations API v2](/docs/api-and-data-platform/features/observations-api#v2)**: Optimized query execution with flexible filtering
 - **[Metrics API v2](/docs/metrics/features/metrics-api#v2)**: Faster aggregations across large projects
@@ -79,11 +79,17 @@ The new architecture is being rolled out gradually. Here's how to access the per
 
 ### 1. Enable beta UI experience
 
-In the UI, a beta toggle will be available to opt into the new experience. Note that not all UI screens have been migrated to the new data model yet. Data from older SDK versions will be delayed by 5-10 minutes.
-
 <Frame className="max-w-xs mx-auto">
   ![Beta toggle in Langfuse UI](/images/changelog/2026-02-11-v4-preview/v4-beta-togle.png)
 </Frame>
+
+In the UI, a beta toggle will be available to opt into the new experience. Note that not all UI screens have been migrated to the new data model yet.
+
+<Callout type="info">
+**Upgrade SDKs to avoid delays**: Data from older SDK versions will be delayed by up to 10 minutes in the new UI. We strongly recommend upgrading to the latest SDK versions as soon as possible to see your data in real time.
+</Callout>
+
+
 
 ### 2. Upgrade SDKs
 
@@ -100,7 +106,7 @@ Set trace-level attributes (`user_id`, `session_id`, `trace metadata`) as early 
 
 Upgrade your LLM-as-a-judge evaluations to run at the observation level instead of the trace level for significantly faster execution. Learn more in the [LLM-as-a-judge migration guide](/faq/all/llm-as-a-judge-migration).
 
-### 4. Adopt new v2 API endpoints
+### 4. Adopt new observations and metrics API endpoints
 
 The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) deliver significant performance improvements through the new observation-centric data model:
 
