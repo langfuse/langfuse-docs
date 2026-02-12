@@ -1,10 +1,12 @@
 ---
-title: Guide - Building an intent classification pipeline
-description: Build an intent classification pipeline to understand how users are using your LLM application and how performance differs by intent.
+title: "Intent Classification for LLM Applications with Python"
+description: "Build an intent classification pipeline using supervised and unsupervised approaches. Classify user intents in your LLM application to improve evaluation, debugging, and performance monitoring."
 category: Classification
 ---
 
-# LLM Application Intent Classification
+# Intent Classification for LLM Applications
+
+Intent classification is the process of categorizing user inputs into predefined categories (intents) to understand what users are trying to accomplish. For LLM applications, intent classification helps you break down how your application is being used, identify which categories of requests perform well or poorly, and build more representative test datasets.
 
 This guide demonstrates how to build an intent classification pipeline using Langfuse trace data. With both supervised and unsupervised approaches, you can automate the labeling and analysis of traces from your Langfuse projects.
 
@@ -25,7 +27,7 @@ By the end of this notebook, you'll have two basic pipelines that will:
 1. Extract trace data from one of your Langfuse projects.
 2. Train an intent classification model.
 3. Predict the intent of traces using both supervised and unsupervised approaches.
-4. Upload predicted intent results back to Langfuse as [tags](https://langfuse.com/docs/tracing-features/tags).
+4. Upload predicted intent results back to Langfuse as [tags](https://langfuse.com/docs/observability/features/tags).
 
 ---
 
