@@ -130,22 +130,20 @@ At ingest time, each observation is evaluated against your filter criteria. Matc
 Run evaluators on complete traces, evaluating entire workflow executions from start to finish.
 
 <Callout type="info">
-**Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision and cost efficiency for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
+**Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
 
 **Why target Traces**
 
-- You need to evaluate aggregate data across a full workflow
 - Your evaluation requires full context spanning multiple operations
 - You're on legacy SDK versions (Python v2 or JS/TS v3) and cannot upgrade
 
 **Data Flow**
 
-At ingest time, each trace is evaluated against your filter criteria. Matching traces are added to an evaluation queue. Evaluation jobs are then processed asynchronously. Scores are attached to the trace itself, resulting in one score per trace per evaluator.
+At ingest time, each trace is evaluated against your filter criteria. Matching traces are added to an evaluation queue and processed asynchronously. Scores are attached to the trace itself, resulting in one score per trace per evaluator.
 
 **Example Use Cases**
-- Score the accuracy of a multi-step agent workflow (e.g., retrieval → reranking → generation → citation)
-- Track the effectiveness of a full agent execution (planning → tool use → synthesis)
+- Score the accuracy of a multi-step agent workflow, if and only if evaluator needs full context spanning multiple operations (e.g., retrieval → reranking → generation → citation)
 
 </Tab>
 </Tabs>
@@ -248,7 +246,7 @@ With your evaluator and model selected, configure which data to run the evaluati
 - **SDK version**: Python v3+ (OTel-based) or JS/TS v4+ (OTel-based)
   - [Python v2 → v3 migration guide](/docs/observability/sdk/upgrade-path#python-sdk-v2--v3)
   - [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path#jsts-sdk-v3--v4)
-- **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations.
+- **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations. If you do set up trace-level attribute filtering and are not propagating attributes to observations, your observations will not be matched by the evaluator.
 
 </Tab>
 
