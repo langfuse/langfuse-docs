@@ -137,7 +137,7 @@ langfuse = get_client()
 langfuse.flush()
 ```
 
-Learn more about queuing and batching of events [here](/docs/tracing).
+Learn more about queuing and batching of events [here](/docs/observability/features/queuing-batching).
 
 ### Assistants API
 
@@ -163,7 +163,7 @@ export LANGFUSE_DEBUG=true
 
 ### Sampling
 
-[Sampling](/docs/tracing-features/sampling) can be used to control the volume of traces collected by the Langfuse server.
+[Sampling](/docs/observability/features/sampling) can be used to control the volume of traces collected by the Langfuse server.
 
 ```python
 from langfuse import Langfuse
@@ -263,7 +263,7 @@ with langfuse.start_as_current_observation(as_type="span", name="calculator-requ
 
 ### Use Traces
 
-[Langfuse Tracing](/docs/tracing) groups multiple observations (can be any LLM or non-LLM call) into a single trace. This integration by default creates a single trace for each openai call.
+[Langfuse Tracing](/docs/observability/overview) groups multiple observations (can be any LLM or non-LLM call) into a single trace. This integration by default creates a single trace for each openai call.
 
 - Add non-OpenAI related observations to the trace.
 - Group multiple OpenAI calls into a single trace while customizing the trace.
@@ -271,7 +271,7 @@ with langfuse.start_as_current_observation(as_type="span", name="calculator-requ
 - Use all Langfuse Tracing features.
 
 <Callout type="info">
-  New to Langfuse Tracing? Checkout this [introduction](/docs/tracing) to the
+  New to Langfuse Tracing? Checkout this [introduction](/docs/observability/overview) to the
   basic concepts.
 </Callout>
 
@@ -421,7 +421,7 @@ Tracing of the assistants api is not supported by this integration as OpenAI Ass
 
 ## Tracking of OpenAI API Errors [#error-tracking]
 
-Langfuse automatically tracks and monitors OpenAI API errors if you use the native integration. They are captured via the `level` and `statusMessage` fields (see [docs](/docs/tracing-features/log-levels)).
+Langfuse automatically tracks and monitors OpenAI API errors if you use the native integration. They are captured via the `level` and `statusMessage` fields (see [docs](/docs/observability/features/log-levels)).
 
 Learn more about how to get started [here](/integrations/model-providers/openai-py).
 

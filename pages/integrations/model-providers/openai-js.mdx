@@ -133,9 +133,9 @@ You can add the following properties to the `langfuseConfig` of the `observeOpen
 | `generationName`     | Set `generationName` to identify a specific type of generation.                        |
 | `langfusePrompt`     | Pass a created or fetched Langfuse prompt to link it with the generations              |
 | `generationMetadata` | Set `generationMetadata` with additional information that you want to see in Langfuse. |
-| `sessionId`          | The current [session](/docs/tracing-features/sessions).                                |
-| `userId`             | The current [user_id](/docs/tracing-features/users).                                   |
-| `tags`               | Set [tags](/docs/tracing-features/tags) to categorize and filter traces.               |
+| `sessionId`          | The current [session](/docs/observability/features/sessions).                                |
+| `userId`             | The current [user_id](/docs/observability/features/users).                                   |
+| `tags`               | Set [tags](/docs/observability/features/tags) to categorize and filter traces.               |
 
 Example:
 
@@ -163,7 +163,7 @@ const res = await observeOpenAI(new OpenAI(), {
 
 ### Link to Langfuse prompts
 
-With [Langfuse Prompt management](/docs/prompts/get-started) you can effectively manage and version your prompts. You can link your OpenAI generations to a prompt by passing the `langfusePrompt` property to the `observeOpenAI` function.
+With [Langfuse Prompt management](/docs/prompt-management/get-started) you can effectively manage and version your prompts. You can link your OpenAI generations to a prompt by passing the `langfusePrompt` property to the `observeOpenAI` function.
 
 ```ts
 import { observeOpenAI } from "@langfuse/openai";
