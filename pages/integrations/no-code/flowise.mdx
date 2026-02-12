@@ -2,16 +2,27 @@
 title: Observability and Tracing for Flowise
 sidebarTitle: Flowise
 logo: /images/integrations/flowise_icon.svg
-description: Open source observability for Flowise applications. Automatically capture detailed traces and metrics for every request.
+description: "Monitor and trace your Flowise LLM applications with Langfuse. Automatically capture detailed traces, costs, and metrics for every request in your no-code AI workflows."
 ---
 
 # Flowise Observability & Tracing
 
-**Flowise** ([GitHub](https://github.com/FlowiseAI/Flowise)) is a no-code builder. It lets you build customized LLM flows with a drag & drop editor.
+## What is Flowise?
 
-With the native integration, you can use Flowise to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
+**Flowise** ([GitHub](https://github.com/FlowiseAI/Flowise)) is an open-source, no-code platform for building LLM applications using a visual drag-and-drop editor. It lets you create complex AI workflows — including chatbots, RAG pipelines, and multi-step agent chains — without writing code.
 
-The integration supports all use cases of Flowise, including: interactively in the UI, API, and embeds.
+Key features of Flowise include:
+- **Visual workflow builder** — Drag and drop components to build LLM chains, agents, and RAG pipelines
+- **Pre-built integrations** — Connect to OpenAI, Anthropic, HuggingFace, Pinecone, and dozens of other providers
+- **API-first design** — Every flow can be exposed as an API endpoint for integration with your applications
+- **Embeddable chat widget** — Embed your chatbots directly into web pages
+- **Extensible** — Add custom nodes and components to extend functionality
+
+## Langfuse Integration
+
+With the native Langfuse integration, you can use Flowise to quickly create complex LLM applications in no-code and then use Langfuse to monitor, trace, and improve them.
+
+The integration supports all use cases of Flowise, including: interactively in the UI, API, and embeds. Once connected, Langfuse automatically captures detailed traces for every request, including model parameters, token usage, costs, and latency.
 
 ## Integration
 
@@ -65,7 +76,7 @@ The integration automatically maps the following fields from Flowise to Langfuse
 
 | Flowise                                                         | Langfuse                                     | Required version                                                                     |
 | --------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [chatId](https://docs.flowiseai.com/api-reference/chat-message) | [sessionId](/docs/tracing-features/sessions) | [Flowise 1.4.10](https://github.com/FlowiseAI/Flowise/releases/tag/flowise%401.4.10) |
+| [chatId](https://docs.flowiseai.com/api-reference/chat-message) | [sessionId](/docs/observability/features/sessions) | [Flowise 1.4.10](https://github.com/FlowiseAI/Flowise/releases/tag/flowise%401.4.10) |
 
 ## Override Config
 
