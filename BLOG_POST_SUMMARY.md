@@ -7,14 +7,14 @@ Created a Valentine's Day themed blog post titled **"Will you be my CLI? Making 
 ## File Created
 
 - **Location**: `/pages/blog/2026-02-13-will-you-be-my-cli.mdx`
-- **Length**: 511 lines
+- **Length**: ~675 lines (updated with CLI section)
 - **Date**: February 13, 2026 (Valentine's Day)
 - **Author**: Marc
 - **Tags**: engineering, agents
 
 ## Content Structure
 
-The blog post covers 5 main features that make Langfuse agent-friendly:
+The blog post covers 6 main features that make Langfuse agent-friendly:
 
 ### 1. llms.txt: The Discovery Layer
 - Explains the llms.txt standard from llmstxt.org
@@ -40,7 +40,16 @@ The blog post covers 5 main features that make Langfuse agent-friendly:
 - Explains the Inkeep RAG integration
 - Provides TypeScript implementation snippet
 
-### 5. Docs MCP Server: The Integration Layer
+### 5. Langfuse CLI: Direct API Access from the Terminal
+- Introduces langfuse-cli package on npm (v0.0.1-beta.0)
+- Shows installation and configuration
+- Provides extensive usage examples for traces, prompts, datasets, scores
+- Explains the skill file for agent training
+- Details auto-generation from OpenAPI spec using specli
+- Demonstrates JSON output and curl preview features
+- Links to: [npm package](https://www.npmjs.com/package/langfuse-cli)
+
+### 6. Docs MCP Server: The IDE Integration Layer
 - Explains MCP (Model Context Protocol)
 - Documents the three main tools: searchLangfuseDocs, getLangfuseDocsPage, getLangfuseOverview
 - Shows installation configuration for Cursor/VS Code
@@ -112,11 +121,11 @@ Required image specifications documented in `/public/images/blog/2026-02-13-will
 
 All requirements from Linear issue GTM-1841 have been addressed:
 
-✅ **skill** - Covered through llms.txt explanation  
-✅ **CLI that wraps API with inline comments based on OpenAPI spec** - Covered in OpenAPI section with curl examples  
-✅ **llms.txt** - Dedicated section with implementation details  
-✅ **Return markdown on .md ending or accept text/markdown header** - Comprehensive Markdown Endpoints section  
-✅ **Search endpoint exposed publicly and mentioned in skill** - Full Public Search Endpoint section  
-✅ **docs mcp** - Extensive Docs MCP Server section with code examples  
+✅ **skill** - Covered in CLI section with skill file explanation + llms.txt for discovery  
+✅ **CLI that wraps API with inline comments based on OpenAPI spec** - COMPLETE dedicated section (Feature #5) with installation, usage, and technical details  
+✅ **llms.txt** - Dedicated section with implementation details (Feature #1)  
+✅ **Return markdown on .md ending or accept text/markdown header** - Comprehensive Markdown Endpoints section (Feature #2)  
+✅ **Search endpoint exposed publicly and mentioned in skill** - Full Public Search Endpoint section (Feature #4)  
+✅ **docs mcp** - Extensive Docs MCP Server section with code examples (Feature #6)  
 
-The blog post successfully captures the "broader theme" of making agents love Langfuse while staying "factual / interesting to devs" with code examples and prompt examples throughout.
+The blog post successfully captures the "broader theme" of making agents love Langfuse while staying "factual / interesting to devs" with code examples and prompt examples throughout. The CLI section directly addresses the "Will you be my CLI?" title theme.

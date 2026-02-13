@@ -7,11 +7,12 @@ Created a Valentine's Day themed blog post about how Langfuse has been optimized
 ## What's in this PR
 
 ### Main Content
-- **Blog Post**: `/pages/blog/2026-02-13-will-you-be-my-cli.mdx` (511 lines)
+- **Blog Post**: `/pages/blog/2026-02-13-will-you-be-my-cli.mdx` (~675 lines)
   - Valentine's themed but stays factual in technical sections
-  - Covers 5 major agent optimization features
-  - Includes working code examples, curl commands, and API usage
+  - Covers 6 major agent optimization features
+  - Includes working code examples, curl commands, CLI usage, and API examples
   - Cross-references to related changelogs and documentation
+  - **NEW**: Comprehensive CLI section with real npm package examples
 
 ### Supporting Files
 - **Image Directory**: `/public/images/blog/2026-02-13-will-you-be-my-cli/`
@@ -24,14 +25,16 @@ Created a Valentine's Day themed blog post about how Langfuse has been optimized
 2. **Markdown Endpoints** - Docs available as .md or via Accept header
 3. **OpenAPI-First API** - Comprehensive API documentation and spec
 4. **Public Search Endpoint** - Semantic search available to all agents
-5. **Docs MCP Server** - Model Context Protocol integration for IDEs
+5. **Langfuse CLI** - Terminal-based API access (NEW! 🎉)
+6. **Docs MCP Server** - Model Context Protocol integration for IDEs
 
 ## Why This Post Works
 
 - ❤️ **Timely**: Valentine's Day theme makes it engaging and shareable
 - 🤖 **Relevant**: Agents are a hot topic in developer tools
 - 🔧 **Technical**: Real code examples and implementation details
-- 🔗 **Connected**: Links to existing changelogs and documentation
+- 💻 **Complete**: Now includes the CLI tool, completing the agent toolchain
+- 🔗 **Connected**: Links to existing changelogs, npm package, and documentation
 - 📚 **Educational**: Provides takeaways for other developer tool builders
 
 ## Next Steps
@@ -69,6 +72,7 @@ The post includes practical examples for:
 - Using the Search API
 - Calling the REST API with curl
 - Using Python/TypeScript SDKs
+- **Using the langfuse-cli from terminal** (NEW!)
 - Installing and using the MCP server
 - Agent workflow from discovery to implementation
 
