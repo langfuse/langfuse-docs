@@ -27,7 +27,7 @@ Complex agentic workflows often involve multiple important steps within a single
 
 ### 2. UI performance improvements
 
-Chart rendering time has been significantly reduced. Queries that previously took seconds or minutes now complete in few seconds or milliseconds. Database operations have been optimized to reduce query complexity. 
+Chart rendering time has been significantly reduced. Queries that previously took seconds or minutes now complete in few seconds or milliseconds. Database operations have been optimized to reduce query complexity.
 
 This applies to trace exploration, filtering, and analytics across large projects.
 
@@ -93,13 +93,15 @@ In the UI, a beta toggle will be available to opt into the new experience. Note 
 
 ### 2. Upgrade SDKs
 
-Upgrade to the latest major SDK versions to explore your data in real time:
+Upgrade to the latest major SDK versions to take advantage of the observation-centric data model and explore your data in real time:
 
-- **Python SDK**: Version x.x.x or higher
-- **JS/TS SDK**: Version x.x.x or higher
+- **Python SDK**: v4 ([migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
+- **JS/TS SDK**: v5 ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
+
+The key change: `update_current_trace()` / `updateActiveTrace()` is replaced by `propagate_attributes()`, which automatically flows attributes like `user_id`, `session_id`, `metadata`, and `tags` to all child observations.
 
 <Callout type="info">
-Set trace-level attributes (`user_id`, `session_id`, `trace metadata`) as early as possible in your instrumentation so they propagate to all downstream spans automatically. Learn more about [trace-level attributes](/docs/observability/sdk/overview).
+Set trace-level attributes (`user_id`, `session_id`, propagated `metadata`) as early as possible in your instrumentation so they propagate to all downstream spans automatically. Learn more about [trace-level attributes](/docs/observability/sdk/instrumentation#add-attributes).
 </Callout>
 
 ### 3. Migrate LLM-as-a-judge evaluations
@@ -124,7 +126,7 @@ import { Book, Github, Zap } from "lucide-react";
 <Cards num={3}>
   <Card
     title="SDK Migration Guides"
-    href="/docs/sdk/overview"
+    href="/docs/observability/sdk/upgrade-path"
     icon={<Book />}
   />
   <Card

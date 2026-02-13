@@ -202,7 +202,7 @@ tracerProvider.register();
 
 The example below shows a chat endpoint that uses the Langfuse `observe()` wrapper to create a trace, adds session and user metadata, and properly handles streaming responses. Concretely: 
 - `observe()` creates a Langfuse trace around your handler
-- `updateActiveTrace()` adds session and user metadata for better trace organization
+- `propagateAttributes()` adds session and user metadata for better trace organization
 - `forceFlush()` ensures traces are sent before the serverless function terminates
 - `endOnExit: false` keeps the observation open until the streaming response completes
 
@@ -216,8 +216,8 @@ import { after } from "next/server";
 import { openai } from "@ai-sdk/openai";
 import {
   observe,
-  updateActiveObservation,
-  updateActiveTrace,
+  propagateAttributes,
+  setActiveTraceIO,
 } from "@langfuse/tracing";
 import { trace } from "@opentelemetry/api";
 
@@ -236,54 +236,50 @@ const handler = async (req: Request) => {
     (part) => part.type === "text"
   )?.text;
 
+  // Set input on the active trace
+  setActiveTraceIO({
+    input: inputText,
+  });
+
   // Add session and user context to the trace
-  updateActiveObservation({
-    input: inputText,
-  });
-
-  updateActiveTrace({
-    name: "chat-message",
-    sessionId: chatId,  // Groups related messages together
-    userId,             // Track which user made the request
-    input: inputText,
-  });
-
-  const result = streamText({
-    model: openai("gpt-5.1"),
-    messages,
-    experimental_telemetry: {
-      isEnabled: true,
+  await propagateAttributes(
+    {
+      traceName: "chat-message",
+      sessionId: chatId,  // Groups related messages together
+      userId,             // Track which user made the request
     },
-    onFinish: async (result) => {
-      // Update trace with final output after stream completes
-      updateActiveObservation({
-        output: result.content,
-      });
-      updateActiveTrace({
-        output: result.content,
+    async () => {
+      const result = streamText({
+        model: openai("gpt-5.1"),
+        messages,
+        experimental_telemetry: {
+          isEnabled: true,
+        },
+        onFinish: async (result) => {
+          // Update trace with final output after stream completes
+          setActiveTraceIO({
+            output: result.content,
+          });
+
+          // End span manually after stream has finished
+          trace.getActiveSpan().end();
+        },
+        onError: async (error) => {
+          setActiveTraceIO({
+            output: error,
+          });
+
+          // Manually end the span since we're streaming
+          trace.getActiveSpan()?.end();
+        },
       });
 
-      // End span manually after stream has finished
-      trace.getActiveSpan().end();
-    },
-    onError: async (error) => {
-      updateActiveObservation({
-        output: error,
-        level: "ERROR"
-      });
-      updateActiveTrace({
-        output: error,
-      });
+      // Critical for serverless: flush traces before function terminates
+      after(async () => await langfuseSpanProcessor.forceFlush());
 
-      // Manually end the span since we're streaming
-      trace.getActiveSpan()?.end();
-    },
-  });
-
-  // Critical for serverless: flush traces before function terminates
-  after(async () => await langfuseSpanProcessor.forceFlush());
-
-  return result.toUIMessageStreamResponse();
+      return result.toUIMessageStreamResponse();
+    }
+  );
 };
 
 // Wrap handler with observe() to create a Langfuse trace

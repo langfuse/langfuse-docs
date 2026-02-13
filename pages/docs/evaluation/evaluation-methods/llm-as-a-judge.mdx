@@ -246,8 +246,8 @@ With your evaluator and model selected, configure which data to run the evaluati
 **Requirements**
 
 - **SDK version**: Python v3+ (OTel-based) or JS/TS v4+ (OTel-based)
-  - [Python v2 → v3 migration guide](/docs/observability/sdk/upgrade-path#python-sdk-v2--v3)
-  - [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path#jsts-sdk-v3--v4)
+  - [Python v2 → v3 migration guide](/docs/observability/sdk/upgrade-path/python-v2-to-v3)
+  - [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path/js-v3-to-v4)
 - **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations.
 
 </Tab>
@@ -272,8 +272,11 @@ With your evaluator and model selected, configure which data to run the evaluati
 
 **Requirements**
 
-- **OTel-based SDKs**: If you're using Python v3+ or JS/TS v4+, you must call `update_trace()` to populate trace input/output, or use observation-level evaluators instead.
+- **OTel-based SDKs**: If you're using Python v3+ or JS/TS v4+, trace input/output is derived from the root observation by default. To explicitly set trace input/output for these evaluators, use `set_trace_io()` (Python) or `setTraceIO()` (JS/TS). See the [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) migration guides.
 
+<Callout type="info">
+We recommend migrating to [observation-level evaluators](/faq/all/llm-as-a-judge-migration) instead of using `set_trace_io()` / `setTraceIO()`. Once migrated, you can remove these calls from your codebase entirely.
+</Callout>
 
 </Tab>
 </Tabs>

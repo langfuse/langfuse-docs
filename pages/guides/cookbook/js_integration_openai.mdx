@@ -224,7 +224,7 @@ Use the context manager of the Langfuse TypeScript SDK to group two OpenAI gener
 
 
 ```typescript
-import { startObservation, startActiveObservation } from "npm:@langfuse/tracing";
+import { startObservation, startActiveObservation, propagateAttributes } from "npm:@langfuse/tracing";
 import OpenAI from "npm:openai";
 import { observeOpenAI } from "npm:@langfuse/openai";
 
@@ -261,12 +261,16 @@ await startActiveObservation("user-request", async (span) => {
     })
   ).choices[0].message.content;
 
-  // Update trace
-  span.updateTrace({
-    name:"City poem generator",
+  // Propagate trace attributes
+  await propagateAttributes({
+    traceName: "City poem generator",
     tags: ["updated"],
     metadata: {"env": "development"},
     release: "v0.0.2",
+  }, async () => {});
+
+  // Set input and output on the root observation
+  span.update({
     input: country,
     output: poem,
   });

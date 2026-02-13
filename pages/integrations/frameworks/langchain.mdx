@@ -246,7 +246,7 @@ The Langchain integration works seamlessly with the Langfuse SDK to create compr
 
 **Using the `@observe()` decorator:**
 
-```python /@observe()/ /langfuse.update_current_trace/
+```python /@observe()/ /langfuse.set_current_trace_io/
 from langfuse import observe, get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI
@@ -258,6 +258,7 @@ def process_user_query(user_input: str):
 
     # Propagate trace attributes to all child observations
     with propagate_attributes(
+        trace_name="user-query-processing",
         session_id="session-1234",
         user_id="user-5678",
     ):
@@ -272,9 +273,8 @@ def process_user_query(user_input: str):
 
       result = chain.invoke({"input": user_input}, config={"callbacks": [langfuse_handler]})
 
-      # Update trace with input and final output
-      langfuse.update_current_trace(
-        name="user-query-processing",
+      # Set trace I/O (deprecated — only for backward compat with legacy trace-level LLM-as-a-judge evaluators)
+      langfuse.set_current_trace_io(
         input={"query": user_input},
         output={"response": result.content},
         )
@@ -289,7 +289,7 @@ See the [Langchain + decorator observability cookbook](/guides/cookbook/example_
 
 **Using context managers:**
 
-```python /with langfuse.start_as_current_observation(as_type="span", name="multi-step-process") as root_span:/ /prep_span.update/ /root_span.update_trace/ /post_span.update/ /root_span.update_trace/
+```python /with langfuse.start_as_current_observation(as_type="span", name="multi-step-process") as root_span:/ /prep_span.update/ /root_span.set_trace_io/ /post_span.update/
 from langfuse import get_client, propagate_attributes
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI
@@ -328,8 +328,8 @@ with langfuse.start_as_current_observation(as_type="span", name="multi-step-proc
           final_result = f"Response: {result.content}"
           post_span.update(output={"final_response": final_result})
 
-      # Update trace output
-      root_span.update_trace(
+      # Set trace I/O (deprecated — only for backward compat with legacy trace-level LLM-as-a-judge evaluators)
+      root_span.set_trace_io(
         input={"user_query": "Explain quantum computing"},
         output={"final_answer": final_result}
         )
@@ -467,18 +467,21 @@ with langfuse.start_as_current_observation(
     name="langchain-request",
     trace_context={"trace_id": predefined_trace_id}
 ) as span:
-    span.update_trace(
-        user_id="user_123",
+    # Set trace I/O (deprecated — only for backward compat with legacy trace-level LLM-as-a-judge evaluators)
+    span.set_trace_io(
         input={"person": "Ada Lovelace"}
     )
 
-    # LangChain execution will be part of this trace
-    response = chain.invoke(
-        {"person": "Ada Lovelace"},
-        config={"callbacks": [langfuse_handler]}
-    )
+    with propagate_attributes(
+        user_id="user_123",
+    ):
+        # LangChain execution will be part of this trace
+        response = chain.invoke(
+            {"person": "Ada Lovelace"},
+            config={"callbacks": [langfuse_handler]}
+        )
 
-    span.update_trace(output={"response": response})
+    span.set_trace_io(output={"response": response})
 
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
@@ -704,7 +707,7 @@ Python SDK v3 introduces a completely revised Langfuse core with a new **observa
 | Package import      | `from langfuse.callback import CallbackHandler`                   | `from langfuse.langchain import CallbackHandler`                       |
 | Client handling     | Multiple instantiated clients                                     | Singleton pattern, access via `get_client()`                           |
 | Trace/Span context  | `CallbackHandler` optionally accepted `root` to group runs        | Use context managers `with langfuse.start_as_current_observation(...)`        |
-| Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Use `metadata["langfuse_user_id"]` OR `span.update_trace(user_id=...)` |
+| Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Use `metadata["langfuse_user_id"]` OR `propagate_attributes(user_id=...)` |
 | Constructor args    | `CallbackHandler(sample_rate=..., user_id=...)`                   | No constructor args – use Langfuse client or spans                     |
 
 Minimal migration example:

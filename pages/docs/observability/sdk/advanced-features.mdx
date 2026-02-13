@@ -269,7 +269,7 @@ from langfuse import Langfuse
  
 langfuse_tracer_provider = TracerProvider() # do not set to global tracer provider to keep isolation
 langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
-langfuse.start_span(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
+langfuse.start_observation(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
 ```
 
 </Tab>

@@ -1,0 +1,165 @@
+---
+title: "JS/TS SDK: v4 → v5 migration guide"
+description: Migration guide for upgrading the Langfuse JS/TS SDK from v4 to v5.
+category: SDKs
+---
+
+# JS/TS v4 → v5
+
+The JS/TS SDK v5 introduces the **[observation-centric data model](/docs/observability/data-model)**. In this model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
+
+This changes how you set trace attributes: instead of imperatively updating the trace with `updateActiveTrace()`, you use `propagateAttributes()` — a function that wraps a callback, automatically applying attributes to all child observations created within its scope.
+
+## Breaking Changes
+
+**1. `updateActiveTrace()` decomposed into 3 functions**
+
+In the new model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) must live on every observation, not just the trace. `propagateAttributes()` wraps a callback — the current and all child spans created inside the callback automatically inherit the attributes. Spans created _before_ the callback are **not** retroactively updated.
+
+**v4:**
+
+```typescript
+import { updateActiveTrace, startActiveObservation } from "@langfuse/tracing";
+
+await startActiveObservation("my-operation", async (span) => {
+  updateActiveTrace({
+    name: "user-workflow",
+    userId: "user-123",
+    sessionId: "session-456",
+    tags: ["production"],
+    public: true,
+    metadata: { testRun: "server-export" },
+    input: { query: "hello" },
+    output: { response: "world" },
+  });
+});
+```
+
+**v5:**
+
+```typescript
+import {
+  propagateAttributes,
+  startActiveObservation,
+  setActiveTraceIO,
+  setActiveTraceAsPublic,
+} from "@langfuse/tracing";
+
+await propagateAttributes(
+  {
+    traceName: "user-workflow", // was "name"
+    userId: "user-123",
+    sessionId: "session-456",
+    tags: ["production"],
+    metadata: { testRun: "server-export" },
+  },
+  async () => {
+    await startActiveObservation("my-operation", async (span) => {
+      setActiveTraceIO({
+        input: { query: "hello" },
+        output: { response: "world" },
+      });
+      setActiveTraceAsPublic();
+    });
+  },
+);
+```
+
+**Key differences:**
+
+| Attribute                                | v4                                      | v5                                                           |
+| ---------------------------------------- | --------------------------------------- | ------------------------------------------------------------ |
+| `name`                                   | `updateActiveTrace({name: ...})`        | `propagateAttributes({traceName: ...}, cb)`                  |
+| `userId`, `sessionId`, `tags`, `version` | `updateActiveTrace({...})`              | `propagateAttributes({...}, cb)`                             |
+| `metadata`                               | `updateActiveTrace({metadata: any})`    | `propagateAttributes({metadata: Record<string,string>}, cb)` |
+| `input`, `output`                        | `updateActiveTrace({...})`              | `setActiveTraceIO({...})` (deprecated)                       |
+| `public`                                 | `updateActiveTrace({public: true})`     | `setActiveTraceAsPublic()`                                   |
+| `release`                                | `updateActiveTrace({release: ...})`     | Removed — use `LANGFUSE_RELEASE` env var                     |
+| `environment`                            | `updateActiveTrace({environment: ...})` | Removed — use `LANGFUSE_TRACING_ENVIRONMENT` env var         |
+
+<Callout type="warning">
+  `setActiveTraceIO()` is deprecated and exists only for backward compatibility
+  with trace-level
+  [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+  evaluators that rely on trace input/output. For new code, set input/output on
+  the root observation directly.
+</Callout>
+
+**2. `.updateTrace()` → `.setTraceIO()` + `.setTraceAsPublic()`**
+
+The same decomposition applies on all observation wrapper classes (`LangfuseSpan`, `LangfuseGeneration`, etc.).
+
+**v4:**
+
+```typescript
+import { startObservation } from "@langfuse/tracing";
+
+const span = startObservation("my-op");
+span.updateTrace({
+  name: "my-trace",
+  userId: "user-123",
+  sessionId: "session-456",
+  tags: ["prod"],
+  public: true,
+  input: { query: "hello" },
+  output: { response: "world" },
+});
+```
+
+**v5:**
+
+```typescript
+import { propagateAttributes, startObservation } from "@langfuse/tracing";
+
+propagateAttributes(
+  {
+    traceName: "my-trace",
+    userId: "user-123",
+    sessionId: "session-456",
+    tags: ["prod"],
+  },
+  () => {
+    const span = startObservation("my-op");
+    span.setTraceIO({
+      input: { query: "hello" },
+      output: { response: "world" },
+    });
+    span.setTraceAsPublic();
+    span.end();
+  },
+);
+```
+
+<Callout type="warning">
+  `.setTraceIO()` is deprecated and exists only for backward compatibility with
+  trace-level
+  [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+  evaluators that rely on trace input/output.
+</Callout>
+
+**3. [`@langfuse/langchain`](/integrations/frameworks/langchain) internal changes**
+
+The `CallbackHandler` now uses `propagateAttributes()` for trace-level attributes. This affects users who:
+
+- Subclass `CallbackHandler`
+- Depend on the internal span-creation behavior
+- Rely on `traceMetadata` accepting non-string values — non-string values are now serialized via `JSON.stringify` before being passed to `propagateAttributes`, which requires `Record<string, string>`
+
+**4. [`@langfuse/openai`](/integrations/model-providers/openai-py) internal changes**
+
+The `traceMethod` wrapper now wraps the traced call in `propagateAttributes()` to set `userId`, `sessionId`, `tags`, and `traceName`, instead of calling `.updateTrace()` on the observation. (If you rely on attributes being set on parent observations as well, wrap the entire execution in with `propagateAttributes`).
+
+**5. Removed attributes**
+
+| Removed       | Replacement                                                    |
+| ------------- | -------------------------------------------------------------- |
+| `release`     | Set via `LANGFUSE_RELEASE` env var                             |
+| `environment` | Set via `LANGFUSE_TRACING_ENVIRONMENT` env var                 |
+| `public`      | Replaced by `setActiveTraceAsPublic()` / `.setTraceAsPublic()` |
+
+## Migration Checklist
+
+1. Search for `updateActiveTrace` → split into `propagateAttributes()` + `setActiveTraceIO()` (when relying on legacy trace-level LLM-as-a-judge configurations) + `setActiveTraceAsPublic()`
+2. Search for `.updateTrace(` → split into `propagateAttributes()` + `.setTraceIO()` + `.setTraceAsPublic()`
+3. Verify propagated metadata values are `Record<string, string>` with values ≤200 characters
+4. Replace `release`/`environment` attribute usage with env vars (`LANGFUSE_RELEASE`, `LANGFUSE_TRACING_ENVIRONMENT`)
