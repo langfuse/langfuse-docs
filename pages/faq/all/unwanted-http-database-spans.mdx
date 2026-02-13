@@ -1,0 +1,125 @@
+---
+title: Why do I see HTTP requests or database queries in my Langfuse traces?
+description: If your Langfuse dashboard shows spans like HTTP GET, SQL queries, or health checks alongside your LLM calls, here's why it happens and how to fix it.
+tags: [observability, integration]
+---
+
+# Why do I see HTTP requests or database queries in my Langfuse traces?
+
+When your application uses other OpenTelemetry-instrumented libraries, you might see [observations](/docs/observability/data-model#observations-traces-and-sessions) showing up in Langfuse that aren't relevant for monitoring or improving the AI side of your app. They still count toward your [billable units](/docs/administration/billable-units), so you'll want to remove these from your Langfuse setup.
+
+You can often recognize these spans by their names: `GET /api/...`, `sql`, `put_with_retries`, `/ping`, or similar.
+
+<Frame>
+  ![Langfuse traces list showing unwanted GET spans](/images/docs/faq-unwanted-http-database-spans.png)
+</Frame>
+
+## Why this happens
+
+The Langfuse SDKs (Python v3+, JS/TS v4+) are built on [OpenTelemetry (OTEL)](https://opentelemetry.io/). By default, the SDK attaches to the [**global TracerProvider**](/faq/all/existing-otel-setup#global-tracer-provider), which is a single hub that all OTEL-instrumented libraries in your app share. Every span from every library flows through every processor attached to that provider. There's no automatic filtering, so Langfuse can't tell the difference between an LLM call and a database query.
+
+```
+┌────────────────────────────────────────────────┐
+│            Global TracerProvider                │
+│                                                 │
+│  All spans from all libraries:                  │
+│  ├── LLM calls (OpenAI, Anthropic, ...)    ✅  │
+│  ├── HTTP requests (axios, fetch, ...)     ❌  │
+│  ├── Database queries (SQL, Redis, ...)    ❌  │
+│  └── Framework spans (FastAPI, Express)    ❌  │
+│                                                 │
+│  → ALL of these get sent to Langfuse            │
+└────────────────────────────────────────────────┘
+```
+
+This typically happens when:
+
+- You're using OTEL auto-instrumentation (e.g. `getNodeAutoInstrumentations()` in JS or Python auto-instrumentation), which automatically instruments every library it can find, including HTTP clients, databases, and web frameworks. See [unwanted spans in Langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse).
+- Another observability tool (Sentry, Datadog, Logfire) already set up the global TracerProvider, and Langfuse is attached to it too. See [using Langfuse with an existing OTEL setup](/faq/all/existing-otel-setup) or [with Sentry](/faq/all/existing-sentry-setup).
+- Your deployment environment injects OTEL automatically (e.g. AWS Bedrock AgentCore with ADOT). See [AWS Bedrock AgentCore](/faq/all/existing-otel-setup#aws-bedrock-agentcore-adot).
+
+For a deeper explanation of how the global TracerProvider works and how multiple tools interact, see [Using Langfuse with an existing OpenTelemetry setup](/faq/all/existing-otel-setup).
+
+## How to fix it
+
+You need to tell Langfuse which spans to keep and which to ignore. Each span carries an **instrumentation scope**, a label identifying which library created it. You can [filter on these](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
+
+To find the scope name of a span, click on any observation in the Langfuse UI and look for `metadata.scope.name`.
+
+<LangTabs items={["Python", "JS/TS"]}>
+
+<Tab>
+
+**Block specific scopes** you don't want:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(
+    blocked_instrumentation_scopes=[
+        # HTTP clients
+        "opentelemetry.instrumentation.requests",
+        "opentelemetry.instrumentation.httpx",
+
+        # Web frameworks
+        "opentelemetry.instrumentation.fastapi",
+        "opentelemetry.instrumentation.starlette",
+        "flask",
+        "django",
+
+        # Databases
+        "sqlalchemy",
+        "psycopg",
+        "psycopg2",
+    ]
+)
+```
+
+</Tab>
+
+<Tab>
+
+**Allow only LLM-related scopes** (recommended for JS/TS):
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const allowedScopes = ["langfuse-sdk", "ai", "openai", "@ai-sdk/openai"];
+
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor({
+      shouldExportSpan: ({ otelSpan }) =>
+        allowedScopes.includes(otelSpan.instrumentationScope.name),
+    }),
+  ],
+});
+
+sdk.start();
+```
+
+Or **block specific scopes**:
+
+```typescript
+const blockedScopes = ["express", "http", "pg", "redis", "fastify"];
+
+new LangfuseSpanProcessor({
+  shouldExportSpan: ({ otelSpan }) =>
+    !blockedScopes.includes(otelSpan.instrumentationScope.name),
+});
+```
+
+</Tab>
+
+</LangTabs>
+
+For the full list of filtering options, see the [SDK advanced features docs](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope). The exact scope names depend on the libraries you use, so always check `metadata.scope.name` in the Langfuse UI to confirm which scopes to filter.
+
+<Callout type="warning" title="Filtering can cause orphaned traces">
+  If you filter out a parent span (e.g. a FastAPI request that wraps your LLM call), its children will appear as disconnected top-level traces. See [orphaned traces](/faq/all/existing-otel-setup#orphaned-traces) for workarounds.
+</Callout>
+
+---
+
+Still seeing unexpected spans? Reach out to [support](/support).
