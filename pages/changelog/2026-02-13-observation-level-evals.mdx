@@ -3,7 +3,7 @@ date: 2026-02-13
 title: "Evaluate Individual Operations: Faster, More Precise LLM-as-a-Judge"
 description: Observation-level evaluations enable precise operation-specific scoring for production monitoring.
 author: Marlies,Hassieb
-# ogImage: /images/changelog/2026-02-13-observation-evals/og-image.png
+ogImage: /images/changelog/2026-02-13-observation-evals.png
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -11,7 +11,7 @@ import { Callout } from "nextra/components";
 
 <ChangelogHeader />
 
-[LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) can now be run on individual observations—LLM calls, retrievals, tool executions, or any operation within your traces. This architectural shift delivers dramatically faster execution and operation-level precision for production monitoring.
+[LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) can now be run on individual observations—LLM calls, retrievals, tool executions, or any operation within your traces. Previously, evaluations could only be run on [entire traces](/docs/evaluation/evaluation-methods/llm-as-a-judge#understanding-each-evaluation-target). This architectural shift delivers dramatically faster execution and operation-level precision for production monitoring.
 
 **Example**: In a RAG pipeline with 10 operations (retrieval → reranking → generation → citation), evaluate only the final generation for helpfulness and the retrieval step for relevance—not the entire workflow. Each operation gets its own score.
 
