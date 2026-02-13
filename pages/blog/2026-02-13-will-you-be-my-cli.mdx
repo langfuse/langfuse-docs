@@ -37,12 +37,13 @@ We realized that if we wanted agents to successfully integrate Langfuse into cod
 ### The Features We Shipped
 
 1. **llms.txt** - A machine-readable documentation index
-2. **Markdown Endpoints** - Docs as raw markdown, not just HTML
-3. **OpenAPI-First API** - Comprehensive, machine-readable API documentation
-4. **Public Search** - Semantic search available to everyone
-5. **Langfuse CLI** - Terminal-based API access auto-generated from OpenAPI
-6. **Authenticated MCP Server** - Full access to your Langfuse project data
-7. **Docs MCP Server** - Public documentation access for agents
+2. **Agent Skills** - Structured workflows for common integration tasks
+3. **Markdown Endpoints** - Docs as raw markdown, not just HTML
+4. **OpenAPI-First API** - Comprehensive, machine-readable API documentation
+5. **Public Search** - Semantic search available to everyone
+6. **Langfuse CLI** - Terminal-based API access auto-generated from OpenAPI
+7. **Authenticated MCP Server** - Full access to your Langfuse project data
+8. **Docs MCP Server** - Public documentation access for agents
 
 Let's dive into each one.
 
@@ -100,6 +101,90 @@ async function generateLLMsList() {
 ```
 
 **Why it matters:** When an agent first encounters Langfuse, it can immediately fetch `langfuse.com/llms.txt` and understand the entire documentation structure without crawling hundreds of pages.
+
+---
+
+## Agent Skills: Structured Workflows for Common Tasks
+
+**Problem:** How can agents learn not just what Langfuse is, but how to actually use it in common scenarios?
+
+**Solution:** We created a [skills repository](https://github.com/langfuse/skills) with structured workflows for the most common Langfuse integration tasks.
+
+### What are Skills?
+
+Skills are structured markdown files that teach agents how to complete specific tasks. They follow the [Agent Skills](https://github.com/anthropics/skills) format and work with Claude Code, Cursor, and other AI coding agents.
+
+We've published three core skills:
+
+#### 1. **langfuse-observability** - Setting up tracing
+
+Guides agents through instrumenting LLM applications with Langfuse observability:
+
+- Assessing current state (what frameworks are used?)
+- Verifying baseline requirements (model name, tokens, trace names)
+- Choosing framework integrations vs manual instrumentation
+- Adding contextual data (session_id, user_id, tags)
+- Avoiding common mistakes (import order, missing flush())
+
+#### 2. **langfuse-prompt-migration** - Moving prompts to Langfuse
+
+Helps agents migrate hardcoded prompts to Langfuse prompt management:
+
+- Scanning codebases for prompt patterns
+- Checking templating compatibility (Langfuse uses `{{variable}}` syntax)
+- Proposing naming conventions and structure
+- Creating prompts via API
+- Refactoring code to use `get_prompt()`
+- Linking prompts to traces
+
+#### 3. **langfuse-api** - Interacting with the API
+
+Teaches agents how to query and manage Langfuse resources:
+
+- Checking for credentials
+- Fetching fresh API reference before each call
+- Making authenticated requests
+- Handling pagination
+- Common use cases (export traces, manage prompts, create datasets)
+
+### Installation
+
+Agents can add these skills using the skills CLI:
+
+```bash
+npx skills add langfuse/skills --skill "langfuse-observability"
+npx skills add langfuse/skills --skill "langfuse-prompt-migration"
+npx skills add langfuse/skills --skill "langfuse-api"
+```
+
+### How Skills Work
+
+Each skill provides:
+
+1. **When to Use** - Triggers that tell the agent when this skill is relevant
+2. **Workflow** - Step-by-step instructions with decision trees
+3. **Common Patterns** - Tables showing what to look for in code
+4. **Best Practices** - Inference rules to minimize back-and-forth with users
+5. **Links to Docs** - Dynamic references to fetch current information
+
+For example, the observability skill tells agents to:
+- Infer context needs from code rather than asking unnecessary questions
+- Prefer framework integrations over manual instrumentation
+- Always explain *why* when suggesting additions
+
+### Why This Matters
+
+Skills are different from documentation. Documentation tells you *what* is possible. Skills tell you *how* to accomplish a specific goal, with conditional logic and decision points.
+
+An agent with the `langfuse-observability` skill knows:
+- To check for existing integrations before adding manual instrumentation
+- That import order matters for OpenAI integration
+- To call `flush()` in scripts before exit
+- When to infer vs when to ask the user questions
+
+**Why it matters:** Agents can now complete complex multi-step tasks like migrating all prompts in a codebase or setting up comprehensive tracing, with minimal user guidance.
+
+[Browse all skills →](https://github.com/langfuse/skills)
 
 ---
 
@@ -493,6 +578,7 @@ Try it out and let us know what you think. And if you build something cool with 
 
 ## Resources
 
+- [Agent Skills Repository](https://github.com/langfuse/skills)
 - [Langfuse CLI on npm](https://www.npmjs.com/package/langfuse-cli)
 - [Langfuse Docs MCP Server](/docs/docs-mcp)
 - [Authenticated MCP Server](/docs/api-and-data-platform/features/mcp-server)
