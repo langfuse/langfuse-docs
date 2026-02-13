@@ -11,7 +11,7 @@ import {  Callout } from "nextra/components";
 
 <ChangelogHeader />
 
-After processing billions of events per month, we analzyed our query patterns and we introduce changes now to be able to scale with our customers.
+After processing billions of events per month, we analyzed our query patterns and we introduce changes now to be able to scale with our customers.
 
 The new architecture delivers faster charts and APIs through a simplified data model that eliminates expensive joins and reduces query complexity.
 
@@ -19,7 +19,7 @@ The new architecture delivers faster charts and APIs through a simplified data m
 
 ### 1. Observation-centric data model
 
-The data model now centers on **observations** as the primary concept.
+The data model now centers on [observations](/docs/observability/data-model#observations) as the primary concept.
 
 Context attributes (`user_id`, `session_id`, `metadata`) set at the trace level now propagate automatically to all child spans. This eliminates the need to repeatedly update trace metadata or patch outputs across observations.
 
@@ -31,9 +31,9 @@ Chart rendering time has been significantly reduced. Queries that previously too
 
 This applies to trace exploration, filtering, and analytics across large projects.
 
-### 3. New v2 API endpoints
+### 3. New observations and metrics API endpoints
 
-We redesigned the observations and metrics APIs to test the new data model under the hood.The redesigned APIs offer significant performance improvements:
+We redesigned the observations and metrics APIs to test the new data model under the hood. The redesigned APIs offer significant performance improvements:
 
 - **[Observations API v2](/docs/api-and-data-platform/features/observations-api#v2)**: Optimized query execution with flexible filtering
 - **[Metrics API v2](/docs/metrics/features/metrics-api#v2)**: Faster aggregations across large projects
@@ -41,13 +41,16 @@ We redesigned the observations and metrics APIs to test the new data model under
 
 ### 4. Faster LLM-as-a-judge evaluations
 
-Previously, each evaluation required a separate ClickHouse query, adding latency and limiting throughput.
+[LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) on traces require a separate ClickHouse query, causing delays and backlogs at scale.
 
-Evaluations now run directly on observations, eliminating database query overhead:
+[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge#understanding-each-evaluation-target) execute in seconds instead of minutes: 
 
-- Evaluations can be executed on every observation without performance degradation
-- Execution time is now limited by LLM API rate limits rather than database queries
-- We support higher evaluation concurrency
+- **Eliminate evaluation delays**: No database query overhead. Execution time is limited only by LLM API rate limits, not database performance
+- **Scale without performance impact**: Run evaluations on every observation without degradation
+- **Faster iteration**: See evaluation results immediately after ingestion, not minutes later
+- **Higher concurrency**: Process more evaluations per minute
+
+[Upgrade existing trace-level evaluators](/faq/all/llm-as-a-judge-migration) to observation-level for immediate performance gains.
 
 ## Technical changes
 <Frame fullWidth>
@@ -61,7 +64,7 @@ The rebuild is based on three core principles:
 - **Observation-centric model**: Observations are the primary data source for APIs and UI.
 
 
-Max shared technical details on how we use ClickHouse to keep product performance ahead of demand at ClickHouse Open House ([recording](https://www.youtube.com/watch?v=NXYQ5odATrM)) in Amsterdam.
+Max shared technical details on how we arrived at this architecture to keep product performance ahead of demand at ClickHouse Open House ([recording](https://www.youtube.com/watch?v=NXYQ5odATrM)) in Amsterdam.
 
 
 
@@ -76,11 +79,17 @@ The new architecture is being rolled out gradually. Here's how to access the per
 
 ### 1. Enable beta UI experience
 
-In the UI, a beta toggle will be available to opt into the new experience. Note that not all UI screens have been migrated to the new data model yet. Data from older SDK versions will be delayed by 5-10 minutes.
-
 <Frame className="max-w-xs mx-auto">
   ![Beta toggle in Langfuse UI](/images/changelog/2026-02-11-v4-preview/v4-beta-togle.png)
 </Frame>
+
+In the UI, a beta toggle will be available to opt into the new experience. Note that not all UI screens have been migrated to the new data model yet.
+
+<Callout type="info">
+**Upgrade SDKs to avoid delays**: Data from older SDK versions will be delayed by up to 10 minutes in the new UI. We strongly recommend upgrading to the latest SDK versions as soon as possible to see your data in real time.
+</Callout>
+
+
 
 ### 2. Upgrade SDKs
 
@@ -99,7 +108,7 @@ Set trace-level attributes (`user_id`, `session_id`, propagated `metadata`) as e
 
 Upgrade your LLM-as-a-judge evaluations to run at the observation level instead of the trace level for significantly faster execution. Learn more in the [LLM-as-a-judge migration guide](/faq/all/llm-as-a-judge-migration).
 
-### 4. Adopt new v2 API endpoints
+### 4. Adopt new observations and metrics API endpoints
 
 The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) deliver significant performance improvements through the new observation-centric data model:
 
