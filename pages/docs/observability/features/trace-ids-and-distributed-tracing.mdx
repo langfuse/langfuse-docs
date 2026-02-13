@@ -295,7 +295,7 @@ const completion = await openai.chat.completions.create({
 </Tab>
 <Tab>
 
-To pass a custom trace ID to a Langchain execution, you can wrap the execution in a span that sets a predefined trace ID. You can also retrieve the last trace ID a callback handler has created via `langfuse_handler.last_trace_id`.
+To pass a custom trace ID to a Langchain execution, you can add a trace ID to the callback handler using the `trace_context` argument. You can also retrieve the last trace ID a callback handler has created via `langfuse_handler.last_trace_id`.
 
 ```python
 from langfuse import get_client, Langfuse
@@ -307,27 +307,13 @@ langfuse = get_client()
 external_request_id = "req_12345"
 predefined_trace_id = Langfuse.create_trace_id(seed=external_request_id)
 
-langfuse_handler = CallbackHandler()
+langfuse_handler = CallbackHandler(trace_context={"trace_id": predefined_trace_id})
 
-# Use the predefined trace ID with trace_context
-with langfuse.start_as_current_observation(
-    as_type="span",
-    name="langchain-request",
-    trace_context={"trace_id": predefined_trace_id}
-) as span:
-
-    with propagate_attributes(
-    span.update_trace(
-        input={"person": "Ada Lovelace"}
-    )
-
-    # LangChain execution will be part of this trace
-    response = chain.invoke(
-        {"person": "Ada Lovelace"},
-        config={"callbacks": [langfuse_handler]}
-    )
-
-    span.update_trace(output={"response": response})
+# LangChain execution will be part of this trace
+response = chain.invoke(
+    {"person": "Ada Lovelace"},
+    config={"callbacks": [langfuse_handler]}
+)
 
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
