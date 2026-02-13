@@ -17,7 +17,7 @@ import { Callout } from "nextra/components";
 
 ```
 Target: Individual observations
-Filter: type = "generation" AND name = "final-response"
+Filter: type = "GENERATION" AND name = "final-response"
 Result: One score per matching observation
 Speed: Seconds per evaluation
 ```
@@ -36,7 +36,7 @@ Evaluate only what matters. Target final LLM responses, retrieval steps, or spec
 **Compositional evaluation**
 Run different evaluators on different operations simultaneously. Toxicity on LLM outputs, relevance on retrievals, accuracy on generations—all within one trace. Stack observation filters (type, name, metadata) with trace attributes filters (userId, sessionId, tags).
 
-**Production-ready architecture**
+**Scalable architecture**
 Built for high-volume workloads. At ingest time, observations are evaluated against filter criteria, added to an evaluation queue, and processed asynchronously. No joins, no complex queries—just fast, reliable evaluation at scale.
 
 ## Getting Started
