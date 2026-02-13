@@ -47,8 +47,11 @@ const menuItems: {
         href: "/docs/prompt-management/overview",
       },
       { name: "Evaluation", href: "/docs/evaluation/overview" },
-      { name: "Metrics", href: "/docs/metrics" },
-      { name: "Playground", href: "/docs/playground" },
+      { name: "Metrics", href: "/docs/metrics/overview" },
+      {
+        name: "Playground",
+        href: "/docs/prompt-management/features/playground",
+      },
       { name: "Pricing", href: "/pricing" },
       { name: "Enterprise", href: "/enterprise" },
     ],
@@ -57,15 +60,15 @@ const menuItems: {
     heading: "Developers",
     items: [
       { name: "Documentation", href: "/docs" },
-      { name: "Python SDK", href: "/docs/sdk/python/sdk-v3" },
-      { name: "JS/TS SDK", href: "/docs/sdk/typescript/guide" },
+      { name: "Self-Hosting", href: "/self-hosting" },
+      { name: "SDKs", href: "/docs/observability/sdk/overview" },
       { name: "Integrations", href: "/integrations" },
       {
         name: "API Reference",
         href: "/docs/api-and-data-platform/overview",
       },
-      { name: "Self-Hosting", href: "/self-hosting" },
-      { name: "Guides & Cookbooks", href: "/guides" },
+      { name: "Status", href: "https://status.langfuse.com" },
+      { name: "Talk to Us", href: "/talk-to-us" },
     ],
   },
   {
@@ -74,10 +77,10 @@ const menuItems: {
       { name: "Blog", href: "/blog" },
       { name: "Changelog", href: "/changelog" },
       { name: "Roadmap", href: "/docs/roadmap" },
-      { name: "Interactive Demo", href: "/demo" },
+      { name: "Interactive Demo", href: "/docs/demo" },
       { name: "Customers", href: "/customers" },
       { name: "AI Engineering Library", href: "/library" },
-      { name: "Status", href: "https://status.langfuse.com" },
+      { name: "Guides & Cookbooks", href: "/guides" },
     ],
   },
   {
@@ -88,8 +91,7 @@ const menuItems: {
       { name: "Press", href: "/press" },
       { name: "Security", href: "/security" },
       { name: "Support", href: "/support" },
-      { name: "Talk to Us", href: "/talk-to-us" },
-      { name: "Open Source", href: "/open-source" },
+      { name: "Open Source", href: "/handbook/chapters/open-source" },
     ],
   },
 ];
@@ -99,40 +101,11 @@ const bottomLinks: { name: string; href: string }[] = [
   { name: "Privacy", href: "/privacy" },
   { name: "Imprint", href: "/imprint" },
   { name: "Cookie Policy", href: "/cookie-policy" },
-  { name: "SOC 2 Type II", href: "/security/soc2" },
-  { name: "ISO 27001", href: "/security/iso27001" },
-  { name: "GDPR", href: "/security/gdpr" },
-  { name: "HIPAA", href: "/security/hipaa" },
-  { name: "\u{1F1EF}\u{1F1F5} Japanese", href: "/jp" },
-  { name: "\u{1F1F0}\u{1F1F7} Korean", href: "/kr" },
-  { name: "\u{1F1E8}\u{1F1F3} Chinese", href: "/cn" },
 ];
 
 const FooterMenu = () => {
   return (
     <div className="w-full">
-      {/* Social icons */}
-      <div className="flex justify-end gap-4 pb-6 mb-6 border-b border-border/50">
-        {socialLinks.map((link) => {
-          const Icon = link.icon;
-          const isExternal = link.href.startsWith("http");
-          return (
-            <a
-              key={link.name}
-              href={link.href}
-              aria-label={link.name}
-              className="text-muted-foreground hover:text-primary transition-colors"
-              {...(isExternal && {
-                target: "_blank",
-                rel: "nofollow noreferrer",
-              })}
-            >
-              <Icon className="h-5 w-5" />
-            </a>
-          );
-        })}
-      </div>
-
       {/* Link columns */}
       <div className="grid grid-cols-2 md:grid-cols-4 text-base gap-y-8 gap-x-2">
         {menuItems.map((menu) => (
@@ -158,8 +131,12 @@ const FooterMenu = () => {
       </div>
 
       {/* Legal bar + copyright */}
-      <div className="border-t border-border/50 mt-8 pt-4">
-        <div className="flex flex-wrap gap-x-4 gap-y-2">
+      <div className="border-t border-border/50 mt-8 pt-4 flex flex-col sm:flex-row sm:items-center gap-4">
+        <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+          &copy; 2022-{new Date().getFullYear()} Langfuse GmbH / Finto
+          Technologies Inc.
+        </span>
+        <div className="flex flex-wrap gap-x-4 gap-y-2 sm:justify-center flex-1">
           {bottomLinks.map((link) => (
             <Link
               key={link.name}
@@ -171,9 +148,25 @@ const FooterMenu = () => {
             </Link>
           ))}
         </div>
-        <div className="mt-4 font-mono text-sm">
-          &copy; 2022-{new Date().getFullYear()} Langfuse GmbH / Finto
-          Technologies Inc.
+        <div className="flex gap-3 shrink-0">
+          {socialLinks.map((link) => {
+            const Icon = link.icon;
+            const isExternal = link.href.startsWith("http");
+            return (
+              <a
+                key={link.name}
+                href={link.href}
+                aria-label={link.name}
+                className="text-muted-foreground hover:text-primary transition-colors"
+                {...(isExternal && {
+                  target: "_blank",
+                  rel: "nofollow noreferrer",
+                })}
+              >
+                <Icon className="h-4 w-4" />
+              </a>
+            );
+          })}
         </div>
       </div>
 
