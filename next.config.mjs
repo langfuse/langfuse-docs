@@ -146,12 +146,34 @@ const nextraConfig = withNextra({
   async rewrites() {
     // Serve any ".md" path by mapping to the static copy in public/md-src
     // Example: /docs.md -> /md-src/docs.md, /docs/observability/overview.md -> /md-src/docs/observability/overview.md
-    return [
-      {
-        source: "/:path*.md",
-        destination: "/md-src/:path*.md",
-      },
-    ];
+    return {
+      // Run BEFORE Next serves pages/public files so it can override HTML routes
+      // when the client explicitly asks for markdown.
+      beforeFiles: [
+        // Optional: make "/" negotiable too (remove if you don't have md-src/index.md)
+        {
+          source: "/",
+          has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
+          destination: "/md-src/index.md",
+        },
+
+        // Content negotiation: /docs or /docs/observability/overview -> /md-src/... .md
+        // Excludes /api, /_next, and /md-src, and avoids double-appending .md.
+        {
+          source: "/:path((?!api|_next|md-src)(?!.*\\.md$).*)",
+          has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
+          destination: "/md-src/:path.md",
+        },
+      ],
+
+      // Keep your existing "manual .md" access:
+      afterFiles: [
+        {
+          source: "/:path*.md",
+          destination: "/md-src/:path*.md",
+        },
+      ],
+    };
   },
 });
 

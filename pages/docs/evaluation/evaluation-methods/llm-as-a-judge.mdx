@@ -1,18 +1,32 @@
 ---
-title: LLM-as-a-Judge Evaluation
+title: "LLM-as-a-Judge Evaluation: Complete Guide"
 sidebarTitle: LLM-as-a-Judge
-description: Configure, run, and monitor LLM-powered evaluators on observations, traces, and experiments.
+description: "Learn how LLM-as-a-Judge evaluation works — use large language models to automatically score, evaluate, and monitor your LLM application outputs at scale with rubric-guided assessments."
 ---
 
 # LLM-as-a-Judge
 
-Use an LLM to automatically score your application outputs. For this evaluation method, the LLM is presented with your application's input and output and asked to score and reason about the output. It will then produce a [`score`](/docs/evaluation/core-concepts#scores) including a comment with chain-of-thought reasoning.
+LLM-as-a-Judge is an evaluation methodology where an LLM is used to assess the quality of outputs produced by another LLM application. Instead of relying solely on human reviewers or simple heuristic metrics, you prompt a capable model (the "judge") to score and reason about application outputs against defined criteria.
+
+This approach has become one of the most popular methods for evaluating LLM applications because it combines the nuance of human judgment with the scalability of automated evaluation.
 
 <Video
   src="https://static.langfuse.com/docs-videos/2025-12-19-llm-as-a-judge-overview.mp4"
   aspectRatio={16 / 9}
   gifStyle
 />
+
+## How LLM-as-a-Judge Works
+
+The core idea is straightforward: present an LLM with the input, the application's output, and a scoring rubric, then ask it to evaluate the output. The judge model produces a [`score`](/docs/evaluation/core-concepts#scores) along with chain-of-thought reasoning explaining its assessment.
+
+A typical LLM-as-a-Judge prompt includes:
+1. **Evaluation criteria** — a rubric defining what "good" looks like (e.g., "Score 1 if the answer is factually incorrect, 5 if fully accurate and well-sourced")
+2. **Input context** — the original user query or prompt
+3. **Output to evaluate** — the application's response
+4. **Optional reference** — ground truth or expected output for comparison
+
+The judge model then returns a structured score and reasoning that can be tracked, aggregated, and analyzed over time.
 
 ## Why use LLM-as-a-Judge?
 
@@ -130,22 +144,20 @@ At ingest time, each observation is evaluated against your filter criteria. Matc
 Run evaluators on complete traces, evaluating entire workflow executions from start to finish.
 
 <Callout type="info">
-**Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision and cost efficiency for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
+**Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
 
 **Why target Traces**
 
-- You need to evaluate aggregate data across a full workflow
 - Your evaluation requires full context spanning multiple operations
 - You're on legacy SDK versions (Python v2 or JS/TS v3) and cannot upgrade
 
 **Data Flow**
 
-At ingest time, each trace is evaluated against your filter criteria. Matching traces are added to an evaluation queue. Evaluation jobs are then processed asynchronously. Scores are attached to the trace itself, resulting in one score per trace per evaluator.
+At ingest time, each trace is evaluated against your filter criteria. Matching traces are added to an evaluation queue and processed asynchronously. Scores are attached to the trace itself, resulting in one score per trace per evaluator.
 
 **Example Use Cases**
-- Score the accuracy of a multi-step agent workflow (e.g., retrieval → reranking → generation → citation)
-- Track the effectiveness of a full agent execution (planning → tool use → synthesis)
+- Score the accuracy of a multi-step agent workflow, if and only if evaluator needs full context spanning multiple operations (e.g., retrieval → reranking → generation → citation)
 
 </Tab>
 </Tabs>
@@ -248,7 +260,7 @@ With your evaluator and model selected, configure which data to run the evaluati
 - **SDK version**: Python v3+ (OTel-based) or JS/TS v4+ (OTel-based)
   - [Python v2 → v3 migration guide](/docs/observability/sdk/upgrade-path#python-sdk-v2--v3)
   - [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path#jsts-sdk-v3--v4)
-- **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations.
+- **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations. If you do set up trace-level attribute filtering and are not propagating attributes to observations, your observations will not be matched by the evaluator.
 
 </Tab>
 
@@ -329,7 +341,7 @@ To see your evaluator in action, you need to either [send traces](/docs/observab
 <Callout type="info">
   Need custom logic? Use the SDK instead—see [Custom
   Scores](/docs/evaluation/evaluation-methods/custom-scores) or an [external
-  pipeline example](/docs/scores/external-evaluation-pipelines).
+  pipeline example](/docs/evaluation/evaluation-methods/scores-via-sdk).
 </Callout>
 
 ## Debug LLM-as-a-Judge Executions
@@ -358,6 +370,33 @@ You can show the LLM-as-a-Judge execution traces by filtering for the environmen
 ### Migrating from Trace-Level to Observation-Level Evaluators
 
 If you have existing evaluators running on traces and want to upgrade to running on observations for better performance and reliability, check out our comprehensive [Evaluator Migration Guide](/faq/all/llm-as-a-judge-migration).
+
+## FAQ
+
+<details>
+<summary>What is LLM-as-a-Judge evaluation?</summary>
+LLM-as-a-Judge is an evaluation methodology where a large language model (the "judge") assesses the quality of outputs from another LLM application. The judge model is given the input, the application's output, and a scoring rubric, then produces a score with reasoning. It's one of the most popular approaches for evaluating LLM applications because it combines human-like nuance with automated scalability.
+</details>
+
+<details>
+<summary>How accurate is LLM-as-a-Judge compared to human evaluation?</summary>
+Research shows that strong LLM judges (such as GPT-5 class models) achieve 80-90% agreement with human evaluators on many quality dimensions, which is comparable to inter-annotator agreement between humans. Accuracy improves significantly with well-designed rubrics and clear evaluation criteria. For best results, calibrate your LLM-as-a-Judge setup against a small set of human-annotated examples.
+</details>
+
+<details>
+<summary>What models work best as LLM judges?</summary>
+The most capable models generally produce the best evaluations. Models with strong instruction-following and reasoning capabilities (such as GPT-4o, Claude Sonnet, or Gemini Pro) are commonly used. The judge model should support structured output so scores can be reliably parsed. In Langfuse, you configure the judge model via [LLM Connections](/docs/administration/llm-connection).
+</details>
+
+<details>
+<summary>How much does LLM-as-a-Judge cost?</summary>
+Cost depends on the judge model and the size of the inputs being evaluated. A typical evaluation costs $0.01-0.10 per assessment. You can manage costs by: (1) using sampling to evaluate a percentage of traces, (2) targeting specific observations instead of full traces, and (3) choosing cost-effective judge models for simpler evaluations.
+</details>
+
+<details>
+<summary>Can I use LLM-as-a-Judge for RAG evaluation?</summary>
+Yes. LLM-as-a-Judge is particularly effective for RAG pipelines. You can evaluate faithfulness (is the answer grounded in the retrieved context?), relevance (does the answer address the question?), and completeness (does the answer cover all relevant information?). Langfuse also integrates with [RAGAS](/guides/cookbook/evaluation_of_rag_with_ragas) for specialized RAG evaluation metrics.
+</details>
 
 ## GitHub Discussions
 
