@@ -17,7 +17,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 Valentine's Day is here, and while most people are thinking about flowers and chocolates, we've been thinking about something more romantic: **making AI agents fall in love with Langfuse**. 
 
-Over the past months, we've shipped a series of features designed specifically to make Langfuse the perfect companion for AI agents—whether they're coding in your IDE, running in production, or helping you debug your LLM applications. This post walks through our "agent love language": the technical decisions and implementations that make Langfuse easy for agents to discover, understand, and integrate with.
+Over the past months, we've shipped a series of features designed specifically to make Langfuse the perfect companion for AI agents—whether they're coding in your IDE, running in the terminal, or helping you debug your LLM applications. This post walks through our "agent love language": the technical decisions and implementations that make Langfuse easy for agents to discover, understand, and integrate with.
 
 ## Why Agents Need Love Too
 
@@ -30,8 +30,20 @@ When an agent encounters your product, it needs to quickly:
 3. **Access** documentation in machine-readable formats
 4. **Search** efficiently for specific information
 5. **Execute** operations through well-defined interfaces
+6. **Interact** from their native environment (terminal or IDE)
 
 We realized that if we wanted agents to successfully integrate Langfuse into codebases, we needed to optimize for these needs. So we did. Here's what we built.
+
+### The Six Features We Shipped
+
+1. **llms.txt** - A machine-readable documentation index
+2. **Markdown Endpoints** - Docs as raw markdown, not just HTML
+3. **OpenAPI-First API** - Comprehensive, machine-readable API documentation
+4. **Public Search** - Semantic search available to everyone
+5. **Langfuse CLI** - Terminal-based API access auto-generated from OpenAPI
+6. **Docs MCP Server** - IDE integration via Model Context Protocol
+
+Let's dive into each one.
 
 ---
 
@@ -264,9 +276,128 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 ---
 
-## 5. Docs MCP Server: The Integration Layer
+## 5. Langfuse CLI: Direct API Access from the Terminal
 
-**Problem:** How do we make all these capabilities easily accessible to AI coding assistants?
+**Problem:** Agents often work in terminal environments. How can they interact with Langfuse without writing HTTP requests manually?
+
+**Solution:** We built `langfuse-cli` — a command-line interface that wraps the entire Langfuse API, auto-generated from our OpenAPI spec.
+
+### What is langfuse-cli?
+
+It's a CLI tool built on [specli](https://github.com/vercel-labs/specli) that generates commands directly from the OpenAPI specification. Every API endpoint becomes a CLI command with proper flags, validation, and help text.
+
+### Installation & Usage
+
+```bash
+# Run directly with npx
+npx langfuse-cli traces list --limit 10
+
+# Or install globally
+npm install -g langfuse-cli
+langfuse prompts get --name my-prompt
+
+# Configure with environment variables
+export LANGFUSE_PUBLIC_KEY=pk-lf-...
+export LANGFUSE_SECRET_KEY=sk-lf-...
+export LANGFUSE_HOST=https://cloud.langfuse.com
+
+# List all available resources
+langfuse __schema
+
+# Get help for any resource
+langfuse traces --help
+
+# JSON output for scripting
+langfuse traces list --limit 5 --json
+
+# Preview the curl command
+langfuse scores list --curl
+```
+
+### Examples
+
+```bash
+# Fetch recent traces
+langfuse traces list --limit 10
+
+# Get a specific trace by ID
+langfuse traces get <trace-id>
+
+# List all prompts
+langfuse prompts list
+
+# Get a prompt by name
+langfuse prompts get --name "customer-support-v1"
+
+# List dataset items
+langfuse dataset-items list --dataset-name "qa-examples"
+
+# Create a score
+langfuse scores create \
+  --trace-id abc123 \
+  --name quality \
+  --value 0.95
+```
+
+### For Agents: The Skill File
+
+Here's what makes this especially agent-friendly — we include a **skill file** at `skill/langfuse-cli.md` that teaches AI agents how to use the CLI:
+
+```markdown
+# Langfuse CLI Skill
+
+The Langfuse CLI provides command-line access to the Langfuse API.
+
+## Installation
+npx langfuse-cli <resource> <action>
+
+## Common Operations
+
+### Traces
+- List traces: langfuse traces list --limit 10
+- Get trace: langfuse traces get <id>
+- Search: langfuse traces list --user-id <user> --json
+
+### Prompts  
+- List: langfuse prompts list
+- Get: langfuse prompts get --name <name>
+
+... [full skill documentation]
+```
+
+Agents can read this file to understand all available commands, flags, and usage patterns.
+
+### Why Auto-Generate from OpenAPI?
+
+By generating the CLI from the OpenAPI spec, we get:
+
+1. **Always in sync** - CLI updates automatically when the API changes
+2. **Complete coverage** - Every endpoint becomes a command
+3. **Proper validation** - Request schemas enforce correct input
+4. **Built-in help** - Auto-generated help text for every command
+5. **Type safety** - Flags match the API parameter types exactly
+
+### Technical Implementation
+
+The CLI is built using a patched OpenAPI spec. We flatten discriminated unions (`oneOf` with `allOf`) into plain objects so specli can generate proper command flags:
+
+```typescript
+// scripts/patch-openapi.ts
+// Flattens complex union types for CLI generation
+export function patchOpenAPI(spec: OpenAPISpec) {
+  // Convert oneOf/allOf patterns to flat object schemas
+  // This makes endpoints like `prompts create` generate proper flags
+  return flattenedSpec;
+}
+```
+
+**Why it matters:** Agents working in terminal environments can now interact with Langfuse using natural command-line syntax. They can list traces, fetch prompts, create scores, and manage datasets—all without writing API client code. The skill file provides the knowledge, and the CLI provides the interface.
+
+---
+
+## 6. Docs MCP Server: The IDE Integration Layer
+
+**Problem:** How do we make all these capabilities easily accessible to AI coding assistants in their native environment?
 
 **Solution:** We built an [MCP (Model Context Protocol) server](https://langfuse.com/docs/docs-mcp) that exposes Langfuse docs through standardized tools.
 
@@ -350,7 +481,7 @@ Want to learn how we built it? Check out our [deep dive on building the MCP serv
 
 ## The Love Story Continues
 
-Here's what an agent's journey looks like when integrating Langfuse:
+Here's what an agent's journey looks like when integrating Langfuse—from discovery to implementation:
 
 <Steps>
 
@@ -383,10 +514,10 @@ curl https://langfuse.com/docs/integrations/langchain.md
 
 ### Implementation
 
-Agent writes the integration code using the API.
+Agent writes the integration code using the SDK or CLI.
 
 ```python
-# Agent writes properly configured code
+# Option 1: Using the Python SDK
 from langfuse import get_client
 from langchain.callbacks import LangfuseCallbackHandler
 
@@ -396,9 +527,14 @@ callback = LangfuseCallbackHandler()
 # ... rest of implementation
 ```
 
+```bash
+# Option 2: Using the CLI for quick testing
+langfuse traces list --limit 5 --json | jq '.data[] | {id, name}'
+```
+
 ### Verification
 
-Agent can now debug and monitor the integration through the Langfuse UI.
+Agent can now debug and monitor the integration through the Langfuse UI or CLI.
 
 </Steps>
 
@@ -424,7 +560,11 @@ Let agents ask questions about your docs. Semantic search is powerful and the in
 
 Keep your OpenAPI spec updated and comprehensive. It's the contract that agents rely on.
 
-### 5. Support MCP (or similar protocols)
+### 5. Build a CLI
+
+Provide command-line access to your API. Agents often work in terminal environments and benefit from command-line interfaces.
+
+### 6. Support Standardized Protocols
 
 Give agents a standardized way to access your capabilities. MCP is gaining adoption and integrating with popular IDEs.
 
@@ -433,6 +573,26 @@ Give agents a standardized way to access your capabilities. MCP is gaining adopt
 ## Try It Yourself
 
 Want to see how agents interact with Langfuse? Here are some ways to get started:
+
+### Try the CLI
+
+```bash
+# Run directly
+npx langfuse-cli traces list --limit 5
+
+# Or install globally
+npm install -g langfuse-cli
+
+# Configure with your API keys
+export LANGFUSE_PUBLIC_KEY=pk-lf-...
+export LANGFUSE_SECRET_KEY=sk-lf-...
+
+# Explore available commands
+langfuse __schema
+langfuse traces --help
+```
+
+[CLI on npm →](https://www.npmjs.com/package/langfuse-cli)
 
 ### Install the Docs MCP Server
 
@@ -479,6 +639,7 @@ curl https://langfuse.com/docs/observability/overview.md
 
 We're continuing to improve the agent experience:
 
+- **CLI Enhancements** - More advanced filtering, output formatting, and batch operations
 - **Authenticated MCP Server** - Full access to your Langfuse data through MCP tools ([already available](/docs/api-and-data-platform/features/mcp-server))
 - **Enhanced Search** - Better semantic understanding and multi-modal search
 - **More API Endpoints** - Expanding coverage of Langfuse features via REST API
@@ -498,6 +659,7 @@ Try it out and let us know what you think. And if you build something cool with 
 
 ## Resources
 
+- [Langfuse CLI on npm](https://www.npmjs.com/package/langfuse-cli)
 - [Langfuse Docs MCP Server](/docs/docs-mcp)
 - [Authenticated MCP Server](/docs/api-and-data-platform/features/mcp-server)
 - [llms.txt](https://langfuse.com/llms.txt)
