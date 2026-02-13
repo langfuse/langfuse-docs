@@ -110,7 +110,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       href: "https://cloud.langfuse.com",
       featured: true,
       description:
-        "For production projects. Longer data retention and unlimited users.",
+        "For production projects. Longer data access and unlimited users.",
       price: "$29",
       priceDiscountCta: {
         name: "Discounts available",
