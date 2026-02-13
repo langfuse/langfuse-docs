@@ -7,7 +7,7 @@ category: Integrations
 
 # Cookbook: Langchain Integration (Python)
 
-<a href="/guides/cookbook/integration_langchain"><img className="inline" alt="Python" src="https://img.shields.io/badge/Python-d4d4d8?style=flat&logo=python&logoColor=white" /></a> <a href="/guides/cookbook/js_integration_langchain"><img className="inline" alt="JS/TS" src="https://img.shields.io/badge/JS/TS-F7DF1E?style=flat&logo=javascript&logoColor=black" /></a>
+<a href="https://langfuse.com/guides/cookbook/integration_langchain"><img className="inline" alt="Python" src="https://img.shields.io/badge/Python-d4d4d8?style=flat&logo=python&logoColor=white" /></a> <a href="https://langfuse.com/guides/cookbook/js_integration_langchain"><img className="inline" alt="JS/TS" src="https://img.shields.io/badge/JS/TS-F7DF1E?style=flat&logo=javascript&logoColor=black" /></a>
 
 This is a cookbook with examples of the Langfuse Integration for Langchain (Python).
 
