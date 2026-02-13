@@ -86,7 +86,11 @@ const config: DocsThemeConfig = {
   },
   toc: {
     backToTop: true,
-    extraContent: <DocsContributors />,
+    extraContent: () => {
+      const { asPath } = useRouter();
+      // Only show contributors on docs pages, not blog
+      return asPath.startsWith("/blog/") ? null : <DocsContributors />;
+    },
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {

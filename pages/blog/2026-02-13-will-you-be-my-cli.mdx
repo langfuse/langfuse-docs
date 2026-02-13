@@ -17,11 +17,11 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 Valentine's Day is here, and while most people are thinking about flowers and chocolates, we've been thinking about something more romantic: **making AI agents fall in love with Langfuse**. 
 
-Over the past months, we've shipped a series of features designed specifically to make Langfuse the perfect companion for AI agents—whether they're coding in your IDE, running in the terminal, or helping you debug your LLM applications. This post walks through our "agent love language": the technical decisions and implementations that make Langfuse easy for agents to discover, understand, and integrate with.
+Over the past months, we've shipped a series of features designed specifically to make Langfuse the perfect companion for AI agents, whether they're coding in your IDE, running in the terminal, or helping you debug your LLM applications. This post walks through our "agent love language": the technical decisions and implementations that make Langfuse easy for agents to discover, understand, and integrate with.
 
 ## Why Agents Need Love Too
 
-AI agents are increasingly doing real work: writing code, debugging applications, searching documentation, and even building entire features. But here's the thing—**agents are only as good as the tools they can use**.
+AI agents are increasingly doing real work: writing code, debugging applications, searching documentation, and even building entire features. But here's the thing: **agents are only as good as the tools they can use**.
 
 When an agent encounters your product, it needs to quickly:
 
@@ -34,20 +34,21 @@ When an agent encounters your product, it needs to quickly:
 
 We realized that if we wanted agents to successfully integrate Langfuse into codebases, we needed to optimize for these needs. So we did. Here's what we built.
 
-### The Six Features We Shipped
+### The Features We Shipped
 
 1. **llms.txt** - A machine-readable documentation index
 2. **Markdown Endpoints** - Docs as raw markdown, not just HTML
 3. **OpenAPI-First API** - Comprehensive, machine-readable API documentation
 4. **Public Search** - Semantic search available to everyone
 5. **Langfuse CLI** - Terminal-based API access auto-generated from OpenAPI
-6. **Docs MCP Server** - IDE integration via Model Context Protocol
+6. **Authenticated MCP Server** - Full access to your Langfuse project data
+7. **Docs MCP Server** - Public documentation access for agents
 
 Let's dive into each one.
 
 ---
 
-## 1. llms.txt: The Discovery Layer
+## llms.txt: The Discovery Layer
 
 **Problem:** How does an agent quickly understand what Langfuse is and what documentation is available?
 
@@ -100,19 +101,19 @@ async function generateLLMsList() {
 
 **Why it matters:** When an agent first encounters Langfuse, it can immediately fetch `langfuse.com/llms.txt` and understand the entire documentation structure without crawling hundreds of pages.
 
-Read more: [llms.txt announcement](/changelog/2024-11-17-llms-txt)
-
 ---
 
-## 2. Markdown Endpoints: Native Content for Agents
+## Markdown Endpoints: Native Content for Agents
 
 **Problem:** Agents work better with raw markdown than rendered HTML. How do we serve documentation in agent-friendly formats?
 
-**Solution:** Every documentation page can now be accessed as markdown—either by appending `.md` to the URL or by sending an `Accept: text/markdown` header.
+**Solution:** Every documentation page can now be accessed as markdown, either by appending `.md` to the URL or by sending an `Accept: text/markdown` header.
 
 ### How It Works
 
 We use Next.js rewrites and static file serving to provide markdown versions of all docs. This was a fun technical challenge that required converting our MDX pages to plain markdown at build time and serving them efficiently.
+
+The implementation uses Next.js rewrites in [`next.config.mjs`](https://github.com/langfuse/langfuse-docs/blob/main/next.config.mjs#L146-L177):
 
 ```javascript
 // next.config.mjs
@@ -152,11 +153,9 @@ curl -H "Accept: text/markdown" https://langfuse.com/docs/observability/overview
 - The `getLangfuseDocsPage` tool in our MCP server
 - Agent-driven integrations in IDEs like Cursor
 
-Read more: [Markdown endpoints announcement](/changelog/2025-08-07-markdown-endpoints-and-copy-button)
-
 ---
 
-## 3. OpenAPI-First API Design
+## OpenAPI-First API Design
 
 **Problem:** How do agents understand what API endpoints are available and how to use them?
 
@@ -218,7 +217,7 @@ prompts = langfuse.api.prompts.list()
 
 ---
 
-## 4. Public Search Endpoint
+## Public Search Endpoint
 
 **Problem:** How can agents quickly find relevant information across all documentation?
 
@@ -276,11 +275,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 ---
 
-## 5. Langfuse CLI: Direct API Access from the Terminal
+## Langfuse CLI: Direct API Access from the Terminal
 
 **Problem:** Agents often work in terminal environments. How can they interact with Langfuse without writing HTTP requests manually?
 
-**Solution:** We built `langfuse-cli` — a command-line interface that wraps the entire Langfuse API, auto-generated from our OpenAPI spec.
+**Solution:** We built `langfuse-cli`, a command-line interface that wraps the entire Langfuse API, auto-generated from our OpenAPI spec.
 
 ### What is langfuse-cli?
 
@@ -341,7 +340,7 @@ langfuse scores create \
 
 ### For Agents: The Skill File
 
-Here's what makes this especially agent-friendly — we include a **skill file** at `skill/langfuse-cli.md` that teaches AI agents how to use the CLI:
+Here's what makes this especially agent-friendly: we include a **skill file** at `skill/langfuse-cli.md` that teaches AI agents how to use the CLI:
 
 ```markdown
 # Langfuse CLI Skill
@@ -391,27 +390,69 @@ export function patchOpenAPI(spec: OpenAPISpec) {
 }
 ```
 
-**Why it matters:** Agents working in terminal environments can now interact with Langfuse using natural command-line syntax. They can list traces, fetch prompts, create scores, and manage datasets—all without writing API client code. The skill file provides the knowledge, and the CLI provides the interface.
+**Why it matters:** Agents working in terminal environments can now interact with Langfuse using natural command-line syntax. They can list traces, fetch prompts, create scores, and manage datasets, all without writing API client code. The skill file provides the knowledge, and the CLI provides the interface.
 
 ---
 
-## 6. Docs MCP Server: The IDE Integration Layer
+## Authenticated MCP Server
 
-**Problem:** How do we make all these capabilities easily accessible to AI coding assistants in their native environment?
+**Problem:** How can agents interact with your Langfuse project data directly from their IDE?
 
-**Solution:** We built an [MCP (Model Context Protocol) server](https://langfuse.com/docs/docs-mcp) that exposes Langfuse docs through standardized tools.
+**Solution:** We built an authenticated MCP server that provides full access to your Langfuse data through the [Model Context Protocol](https://modelcontextprotocol.io/).
 
-### What is MCP?
+### What It Does
 
-MCP is a protocol that enables AI assistants to interact with external tools and data sources. Our MCP server provides three tools:
+The authenticated MCP server lets agents:
+- Fetch and analyze traces from your projects
+- Read and manage prompts
+- Access datasets and experiments
+- Create and query scores
+- Interact with all Langfuse resources
 
-1. **`searchLangfuseDocs`** - Semantic search (uses the public search endpoint)
+This is powered by the same infrastructure as our REST API, ensuring consistency and reliability.
+
+### Authentication
+
+The MCP server uses your Langfuse API keys (public and secret key) to authenticate and access your project data. This gives agents the same level of access you have through the web UI or API.
+
+```json
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://cloud.langfuse.com/api/mcp",
+      "transport": "streamableHttp",
+      "auth": {
+        "username": "pk-lf-...",
+        "password": "sk-lf-..."
+      }
+    }
+  }
+}
+```
+
+**Why it matters:** Agents can now query your production data, analyze traces, fetch prompts for testing, and interact with your Langfuse projects without leaving their coding environment.
+
+[Read the full guide](/docs/api-and-data-platform/features/mcp-server) · [How we built it](/blog/2025-12-09-building-langfuse-mcp-server)
+
+---
+
+## Docs MCP Server
+
+**Problem:** How can agents quickly access Langfuse documentation while coding?
+
+**Solution:** We built a public, unauthenticated MCP server specifically for documentation access.
+
+### What It Provides
+
+The docs MCP server exposes three tools:
+
+1. **`searchLangfuseDocs`** - Semantic search over all documentation
 2. **`getLangfuseDocsPage`** - Fetch specific pages as markdown
-3. **`getLangfuseOverview`** - Get the high-level index (fetches llms.txt)
+3. **`getLangfuseOverview`** - Get the documentation index (llms.txt)
 
 ### Installation
 
-The MCP server works in Cursor, VS Code, Claude Desktop, and any MCP-compatible client:
+No authentication required. Works in Cursor, VS Code, Claude Desktop, and any MCP-compatible client:
 
 ```json
 {
@@ -424,232 +465,25 @@ The MCP server works in Cursor, VS Code, Claude Desktop, and any MCP-compatible 
 }
 ```
 
-### Example Usage in Cursor
-
-Once installed, agents in Cursor can automatically:
+### Example Usage
 
 ```
 User: "Add Langfuse tracing to my LangGraph application"
 
-Agent: Let me search the Langfuse docs...
-[Calls searchLangfuseDocs with query: "LangGraph integration"]
-
-Agent: I found the integration guide. Let me get the full details...
-[Calls getLangfuseDocsPage with path: "/docs/integrations/langgraph"]
-
-Agent: Based on the documentation, here's how to add tracing:
-
-[Agent writes the integration code with proper imports and configuration]
+Agent: [Calls searchLangfuseDocs with query: "LangGraph integration"]
+Agent: [Calls getLangfuseDocsPage with path: "/docs/integrations/langgraph"]
+Agent: Based on the documentation, here's how to add tracing...
 ```
 
-### Implementation
+**Why it matters:** Agents can search and read documentation without requiring API keys, making it easy to learn about and integrate Langfuse.
 
-The MCP server is implemented as a Next.js API route:
-
-```typescript
-// pages/api/mcp.ts
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const mcpServer = new Server({
-    name: "langfuse-docs",
-    version: "1.0.0",
-  });
-
-  mcpServer.tool("searchLangfuseDocs", async ({ query }) => {
-    const result = await searchLangfuseDocsWithInkeep(query);
-    return result.answer;
-  });
-
-  mcpServer.tool("getLangfuseDocsPage", async ({ path }) => {
-    const markdown = await fetchMarkdownPage(path);
-    return markdown;
-  });
-
-  mcpServer.tool("getLangfuseOverview", async () => {
-    return await fetch("https://langfuse.com/llms.txt").then(r => r.text());
-  });
-
-  // Handle MCP protocol
-  await handleMcpRequest(req, res, mcpServer);
-}
-```
-
-**Why it matters:** This is the capstone that ties everything together. Agents can now discover Langfuse (via llms.txt), search for relevant information (via search API), fetch detailed documentation (via markdown endpoints), and execute operations (via the REST API)—all through a standardized interface.
-
-Want to learn how we built it? Check out our [deep dive on building the MCP server](/blog/2025-12-09-building-langfuse-mcp-server).
-
----
-
-## The Love Story Continues
-
-Here's what an agent's journey looks like when integrating Langfuse—from discovery to implementation:
-
-<Steps>
-
-### Discovery
-
-Agent encounters a mention of Langfuse and wants to learn more.
-
-```bash
-# Fetches the overview
-curl https://langfuse.com/llms.txt
-```
-
-### Search
-
-Agent needs to find specific integration documentation.
-
-```bash
-# Searches for relevant content
-curl "https://langfuse.com/api/search-docs?query=LangChain%20integration"
-```
-
-### Deep Dive
-
-Agent wants to read the full integration guide.
-
-```bash
-# Gets the raw markdown documentation
-curl https://langfuse.com/docs/integrations/langchain.md
-```
-
-### Implementation
-
-Agent writes the integration code using the SDK or CLI.
-
-```python
-# Option 1: Using the Python SDK
-from langfuse import get_client
-from langchain.callbacks import LangfuseCallbackHandler
-
-langfuse = get_client()
-callback = LangfuseCallbackHandler()
-
-# ... rest of implementation
-```
-
-```bash
-# Option 2: Using the CLI for quick testing
-langfuse traces list --limit 5 --json | jq '.data[] | {id, name}'
-```
-
-### Verification
-
-Agent can now debug and monitor the integration through the Langfuse UI or CLI.
-
-</Steps>
-
----
-
-## Key Takeaways
-
-If you're building developer tools that you want agents to adopt:
-
-### 1. Provide a Discovery Mechanism
-
-Implement `llms.txt` or similar. It's simple to generate and hugely valuable for agents trying to understand your product.
-
-### 2. Make Content Machine-Readable
-
-Serve documentation in formats agents can parse—markdown, JSON, etc. Don't force them to extract content from HTML.
-
-### 3. Expose Public Search
-
-Let agents ask questions about your docs. Semantic search is powerful and the infrastructure is increasingly commoditized.
-
-### 4. Maintain Strong API Documentation
-
-Keep your OpenAPI spec updated and comprehensive. It's the contract that agents rely on.
-
-### 5. Build a CLI
-
-Provide command-line access to your API. Agents often work in terminal environments and benefit from command-line interfaces.
-
-### 6. Support Standardized Protocols
-
-Give agents a standardized way to access your capabilities. MCP is gaining adoption and integrating with popular IDEs.
-
----
-
-## Try It Yourself
-
-Want to see how agents interact with Langfuse? Here are some ways to get started:
-
-### Try the CLI
-
-```bash
-# Run directly
-npx langfuse-cli traces list --limit 5
-
-# Or install globally
-npm install -g langfuse-cli
-
-# Configure with your API keys
-export LANGFUSE_PUBLIC_KEY=pk-lf-...
-export LANGFUSE_SECRET_KEY=sk-lf-...
-
-# Explore available commands
-langfuse __schema
-langfuse traces --help
-```
-
-[CLI on npm →](https://www.npmjs.com/package/langfuse-cli)
-
-### Install the Docs MCP Server
-
-Add to your Cursor or VS Code MCP configuration:
-
-```json
-{
-  "mcpServers": {
-    "langfuse-docs": {
-      "url": "https://langfuse.com/api/mcp",
-      "transport": "streamableHttp"
-    }
-  }
-}
-```
-
-[Full installation guide →](/docs/docs-mcp)
-
-### Try the Search API
-
-```bash
-curl "https://langfuse.com/api/search-docs?query=your+question+here"
-```
-
-### Explore the API
-
-```bash
-# Get the OpenAPI spec
-curl https://cloud.langfuse.com/generated/api/openapi.yml
-
-# Browse the interactive docs
-open https://api.reference.langfuse.com
-```
-
-### Read a Doc Page as Markdown
-
-```bash
-curl https://langfuse.com/docs/observability/overview.md
-```
-
----
-
-## What's Next
-
-We're continuing to improve the agent experience:
-
-- **CLI Enhancements** - More advanced filtering, output formatting, and batch operations
-- **Authenticated MCP Server** - Full access to your Langfuse data through MCP tools ([already available](/docs/api-and-data-platform/features/mcp-server))
-- **Enhanced Search** - Better semantic understanding and multi-modal search
-- **More API Endpoints** - Expanding coverage of Langfuse features via REST API
-- **Agent-Specific Examples** - Documentation optimized for agent comprehension
+[Read the installation guide](/docs/docs-mcp)
 
 ---
 
 ## So, Will You Be My CLI? 💘
 
-We've put a lot of love into making Langfuse agent-friendly. Whether you're an AI coding assistant, an autonomous agent, or a developer using these tools—we want you to have the best possible experience integrating and using Langfuse.
+We've put a lot of love into making Langfuse agent-friendly. Whether you're an AI coding assistant, an autonomous agent, or a developer using these tools, we want you to have the best possible experience integrating and using Langfuse.
 
 Try it out and let us know what you think. And if you build something cool with these capabilities, we'd love to hear about it!
 
