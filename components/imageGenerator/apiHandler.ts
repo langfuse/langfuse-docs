@@ -50,9 +50,14 @@ const handler = async (req: Request) => {
 
     const image = result.image;
 
+    // Include the image as a base64 data URI in the trace output.
+    // The Langfuse SDK automatically detects data URIs, uploads them
+    // to object storage, and displays them in the trace UI.
+    const dataUri = `data:${image.mediaType};base64,${image.base64}`;
+
     updateActiveTrace({
       output: {
-        mediaType: image.mediaType,
+        image: dataUri,
         size: "1024x1024",
         model: "gpt-image-1",
       },
