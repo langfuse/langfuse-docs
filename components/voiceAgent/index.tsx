@@ -61,23 +61,9 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
 
       const { token, url } = await res.json();
 
-      // Dynamically import LiveKit — this will fail if livekit-client is not installed,
-      // which is expected. The try/catch handles the case gracefully.
-      let livekitModule: any;
-      try {
-        livekitModule = await import(
-          // @ts-ignore -- livekit-client is an optional dependency
-          /* webpackIgnore: true */ "livekit-client"
-        );
-      } catch {
-        setAgentState("not-configured");
-        setError(
-          "LiveKit client library is not available. The voice agent demo requires additional setup."
-        );
-        return;
-      }
-
-      const { Room, RoomEvent, ConnectionState } = livekitModule;
+      const { Room, RoomEvent, ConnectionState } = await import(
+        "livekit-client"
+      );
 
       const room = new Room();
       roomRef.current = room;
@@ -103,7 +89,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
 
       room.on(
         RoomEvent.ConnectionStateChanged,
-        (state: typeof ConnectionState) => {
+        (state) => {
           if (state === ConnectionState.Disconnected) {
             setAgentState("idle");
             roomRef.current = null;

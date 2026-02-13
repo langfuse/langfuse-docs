@@ -1,3 +1,4 @@
+import { AccessToken } from "livekit-server-sdk";
 import { observe, updateActiveTrace, getActiveTraceId } from "@langfuse/tracing";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
@@ -12,7 +13,7 @@ const handler = async (req: Request) => {
     );
   }
 
-  const livekitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+  const livekitUrl = process.env.LIVEKIT_URL;
   const apiKey = process.env.LIVEKIT_API_KEY;
   const apiSecret = process.env.LIVEKIT_API_SECRET;
 
@@ -34,21 +35,6 @@ const handler = async (req: Request) => {
     userId,
     input: { action: "create-session" },
   });
-
-  // Dynamically import livekit-server-sdk to avoid build errors when not installed
-  let AccessToken: any;
-  try {
-    // @ts-expect-error -- livekit-server-sdk is an optional dependency
-    const livekitServerSdk = await import(/* webpackIgnore: true */ "livekit-server-sdk");
-    AccessToken = livekitServerSdk.AccessToken;
-  } catch {
-    return new Response(
-      JSON.stringify({
-        error: "LiveKit server SDK is not installed.",
-      }),
-      { status: 503, headers: { "Content-Type": "application/json" } }
-    );
-  }
 
   const roomName = `voice-demo-${crypto.randomUUID()}`;
   const participantName = userId;
