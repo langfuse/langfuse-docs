@@ -116,75 +116,53 @@ Skills are structured markdown files that teach agents how to complete specific 
 
 We've published three core skills:
 
-#### 1. **langfuse-observability** - Setting up tracing
+- **langfuse-observability** - Setting up tracing in LLM applications
+- **langfuse-prompt-migration** - Migrating hardcoded prompts to Langfuse
+- **langfuse-api** - Querying and managing Langfuse resources via API
 
-Guides agents through instrumenting LLM applications with Langfuse observability:
+### How They Work
 
-- Assessing current state (what frameworks are used?)
-- Verifying baseline requirements (model name, tokens, trace names)
-- Choosing framework integrations vs manual instrumentation
-- Adding contextual data (session_id, user_id, tags)
-- Avoiding common mistakes (import order, missing flush())
+Each skill provides step-by-step workflows with decision trees, inference rules, and best practices. Unlike documentation that tells you *what* is possible, skills tell you *how* to accomplish a specific goal.
 
-#### 2. **langfuse-prompt-migration** - Moving prompts to Langfuse
+Here's an excerpt from the observability skill showing how it guides agents through framework detection:
 
-Helps agents migrate hardcoded prompts to Langfuse prompt management:
+```markdown
+### 1. Assess Current State
 
-- Scanning codebases for prompt patterns
-- Checking templating compatibility (Langfuse uses `{{variable}}` syntax)
-- Proposing naming conventions and structure
-- Creating prompts via API
-- Refactoring code to use `get_prompt()`
-- Linking prompts to traces
+Check the project:
+- Is Langfuse SDK installed?
+- What LLM frameworks are used? (OpenAI SDK, LangChain, LlamaIndex, Vercel AI SDK, etc.)
+- Is there existing instrumentation?
 
-#### 3. **langfuse-api** - Interacting with the API
+**No integration yet:** Set up Langfuse using a framework integration if available. 
+Integrations capture more context automatically and require less code than manual instrumentation.
 
-Teaches agents how to query and manage Langfuse resources:
+**Integration exists:** Audit against baseline requirements below.
 
-- Checking for credentials
-- Fetching fresh API reference before each call
-- Making authenticated requests
-- Handling pagination
-- Common use cases (export traces, manage prompts, create datasets)
+### 2. Verify Baseline Requirements
 
-### Installation
+Every trace should have these fundamentals:
 
-Agents can add these skills using the skills CLI:
+| Requirement | Check | Why |
+|-------------|-------|-----|
+| Model name | Is the LLM model captured? | Enables model comparison and filtering |
+| Token usage | Are input/output tokens tracked? | Enables automatic cost calculation |
+| Good trace names | Are names descriptive? | Makes traces findable |
+| Span hierarchy | Are multi-step operations nested? | Shows which step is slow |
+...
+```
+
+[View complete skill →](https://github.com/langfuse/skills/blob/main/skills/langfuse-observability/SKILL.md)
+
+### Discovery
+
+We've published these skills on [skills.sh/langfuse/skills](https://skills.sh/langfuse/skills) to make them easier for agents to discover and install:
 
 ```bash
 npx skills add langfuse/skills --skill "langfuse-observability"
-npx skills add langfuse/skills --skill "langfuse-prompt-migration"
-npx skills add langfuse/skills --skill "langfuse-api"
 ```
 
-### How Skills Work
-
-Each skill provides:
-
-1. **When to Use** - Triggers that tell the agent when this skill is relevant
-2. **Workflow** - Step-by-step instructions with decision trees
-3. **Common Patterns** - Tables showing what to look for in code
-4. **Best Practices** - Inference rules to minimize back-and-forth with users
-5. **Links to Docs** - Dynamic references to fetch current information
-
-For example, the observability skill tells agents to:
-- Infer context needs from code rather than asking unnecessary questions
-- Prefer framework integrations over manual instrumentation
-- Always explain *why* when suggesting additions
-
-### Why This Matters
-
-Skills are different from documentation. Documentation tells you *what* is possible. Skills tell you *how* to accomplish a specific goal, with conditional logic and decision points.
-
-An agent with the `langfuse-observability` skill knows:
-- To check for existing integrations before adding manual instrumentation
-- That import order matters for OpenAI integration
-- To call `flush()` in scripts before exit
-- When to infer vs when to ask the user questions
-
-**Why it matters:** Agents can now complete complex multi-step tasks like migrating all prompts in a codebase or setting up comprehensive tracing, with minimal user guidance.
-
-[Browse all skills →](https://github.com/langfuse/skills)
+**Why it matters:** Agents can now complete complex multi-step tasks like migrating all prompts in a codebase or setting up comprehensive tracing, with minimal user guidance. The structured workflows include conditional logic, inference rules, and decision points that documentation alone can't provide.
 
 ---
 
