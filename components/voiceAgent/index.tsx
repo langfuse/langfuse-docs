@@ -26,6 +26,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
     { role: "user" | "assistant"; text: string }[]
   >([]);
   const roomRef = useRef<any>(null);
+  const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
   const userId = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -61,21 +62,45 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
 
       const { token, url } = await res.json();
 
-      const { Room, RoomEvent, ConnectionState } = await import(
+      const { Room, RoomEvent, ConnectionState, Track } = await import(
         "livekit-client"
       );
 
       const room = new Room();
       roomRef.current = room;
 
+      // Play audio from agent when their audio track is subscribed
+      room.on(
+        RoomEvent.TrackSubscribed,
+        (track, _publication, _participant) => {
+          if (track.kind === Track.Kind.Audio) {
+            const el = track.attach();
+            audioElementRef.current = el;
+            el.play().catch(() => {});
+            setAgentState("speaking");
+          }
+        }
+      );
+
+      room.on(
+        RoomEvent.TrackUnsubscribed,
+        (track) => {
+          if (track.kind === Track.Kind.Audio) {
+            track.detach();
+            if (audioElementRef.current) {
+              audioElementRef.current.remove();
+              audioElementRef.current = null;
+            }
+            setAgentState("listening");
+          }
+        }
+      );
+
       // Listen for agent state changes via data messages
       room.on(RoomEvent.DataReceived, (payload: Uint8Array) => {
         try {
           const text = new TextDecoder().decode(payload);
           const data = JSON.parse(text);
-          if (data.type === "agent_state") {
-            setAgentState(data.state as AgentState);
-          }
           if (data.type === "transcript") {
             setTranscripts((prev) => [
               ...prev,
@@ -102,6 +127,18 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
         roomRef.current = null;
       });
 
+      // Track when the agent starts/stops speaking via active speaker changes
+      room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
+        const agentSpeaking = speakers.some(
+          (s) => !s.isLocal
+        );
+        if (agentSpeaking) {
+          setAgentState("speaking");
+        } else if (roomRef.current) {
+          setAgentState("listening");
+        }
+      });
+
       await room.connect(url, token);
       setAgentState("connected");
 
@@ -115,6 +152,10 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
   }, [userId]);
 
   const disconnect = useCallback(() => {
+    if (audioElementRef.current) {
+      audioElementRef.current.remove();
+      audioElementRef.current = null;
+    }
     if (roomRef.current) {
       roomRef.current.disconnect();
       roomRef.current = null;

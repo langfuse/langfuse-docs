@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { experimental_generateImage as generateImage } from "ai";
 import {
   observe,
+  updateActiveObservation,
   updateActiveTrace,
   getActiveTraceId,
 } from "@langfuse/tracing";
@@ -38,6 +39,11 @@ const handler = async (req: Request) => {
     input: prompt,
   });
 
+  updateActiveObservation(
+    { input: prompt },
+    { asType: "generation" }
+  );
+
   try {
     const result = await generateImage({
       model: openai.image("gpt-image-1"),
@@ -54,6 +60,22 @@ const handler = async (req: Request) => {
     // The Langfuse SDK automatically detects data URIs, uploads them
     // to object storage, and displays them in the trace UI.
     const dataUri = `data:${image.mediaType};base64,${image.base64}`;
+
+    updateActiveObservation(
+      {
+        input: prompt,
+        output: {
+          image: dataUri,
+          size: "1024x1024",
+        },
+        model: "gpt-image-1",
+        modelParameters: {
+          size: "1024x1024",
+          quality: "low",
+        },
+      },
+      { asType: "generation" }
+    );
 
     updateActiveTrace({
       output: {
@@ -86,6 +108,7 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "image-generator",
+  asType: "generation",
 });
 
 export const maxDuration = 60;

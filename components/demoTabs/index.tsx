@@ -61,11 +61,6 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
             <span className="hidden sm:inline">Q&A Chatbot</span>
             <span className="sm:hidden">Chat</span>
           </TabsTrigger>
-          <TabsTrigger value="sentiment" className="gap-1.5">
-            <BarChart3Icon className="size-4" />
-            <span className="hidden sm:inline">Sentiment Classifier</span>
-            <span className="sm:hidden">Sentiment</span>
-          </TabsTrigger>
           <TabsTrigger value="image" className="gap-1.5">
             <ImageIcon className="size-4" />
             <span className="hidden sm:inline">Image Generator</span>
@@ -76,14 +71,15 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
             <span className="hidden sm:inline">Voice Agent</span>
             <span className="sm:hidden">Voice</span>
           </TabsTrigger>
+          <TabsTrigger value="sentiment" className="gap-1.5">
+            <BarChart3Icon className="size-4" />
+            <span className="hidden sm:inline">Sentiment Classifier</span>
+            <span className="sm:hidden">Sentiment</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="chatbot">
           <Chat />
-        </TabsContent>
-
-        <TabsContent value="sentiment">
-          <SentimentClassifier />
         </TabsContent>
 
         <TabsContent value="image">
@@ -92,6 +88,10 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
 
         <TabsContent value="voice">
           <VoiceAgent />
+        </TabsContent>
+
+        <TabsContent value="sentiment">
+          <SentimentClassifier />
         </TabsContent>
       </Tabs>
     </div>
