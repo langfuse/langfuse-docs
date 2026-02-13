@@ -64,9 +64,9 @@ fiqa_eval
 ## The Metrics
 For going to measure the following aspects of a RAG system. These metric are from the Ragas library:
 
-1. [faithfulness](https://docs.ragas.io/en/latest/concepts/metrics/faithfulness.html): This measures the factual consistency of the generated answer against the given context.
-2. [answer_relevancy](https://docs.ragas.io/en/latest/concepts/metrics/answer_relevance.html): Answer Relevancy, focuses on assessing how pertinent the generated answer is to the given prompt.
-3. [context precision](https://docs.ragas.io/en/latest/concepts/metrics/context_precision.html): Context Precision is a metric that evaluates whether all of the ground-truth relevant items present in the contexts are ranked high. Ideally all the relevant chunks must appear at the top ranks. This metric is computed using the question and the contexts, with values ranging between 0 and 1, where higher scores indicate better precision.
+1. [faithfulness](https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/faithfulness/): This measures the factual consistency of the generated answer against the given context.
+2. [answer_relevancy](https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/answer_relevance/): Answer Relevancy, focuses on assessing how pertinent the generated answer is to the given prompt.
+3. [context precision](https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/context_precision/): Context Precision is a metric that evaluates whether all of the ground-truth relevant items present in the contexts are ranked high. Ideally all the relevant chunks must appear at the top ranks. This metric is computed using the question and the contexts, with values ranging between 0 and 1, where higher scores indicate better precision.
 
 Checkout the [RAGAS documentation](https://docs.ragas.io/en/latest/concepts/metrics/index.html) to know more about these metrics and how they work.
 
