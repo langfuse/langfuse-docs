@@ -148,7 +148,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         <>
           100k units / month included, additional: <GraduatedPricingText />
         </>,
-        "Unlimited data access",
+        "3 years data access",
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
@@ -441,8 +441,8 @@ const sections: Section[] = [
           cloud: {
             Hobby: "30 days",
             Core: "90 days",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
+            Pro: "3 years",
+            Enterprise: "3 years",
           },
         },
       },
