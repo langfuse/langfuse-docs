@@ -38,34 +38,45 @@ const handler = async (req: Request) => {
     input: prompt,
   });
 
-  const result = await generateImage({
-    model: openai.image("gpt-image-1"),
-    prompt,
-    size: "1024x1024",
-    providerOptions: {
-      openai: { quality: "low" },
-    },
-  });
-
-  const image = result.image;
-
-  updateActiveTrace({
-    output: {
-      mediaType: image.mediaType,
+  try {
+    const result = await generateImage({
+      model: openai.image("gpt-image-1"),
+      prompt,
       size: "1024x1024",
-      model: "gpt-image-1",
-    },
-  });
+      providerOptions: {
+        openai: { quality: "low" },
+      },
+    });
 
-  after(async () => await flush());
+    const image = result.image;
 
-  return new Response(
-    JSON.stringify({
-      image: { base64: image.base64, mediaType: image.mediaType },
-      traceId,
-    }),
-    { status: 200, headers: { "Content-Type": "application/json" } }
-  );
+    updateActiveTrace({
+      output: {
+        mediaType: image.mediaType,
+        size: "1024x1024",
+        model: "gpt-image-1",
+      },
+    });
+
+    after(async () => await flush());
+
+    return new Response(
+      JSON.stringify({
+        image: { base64: image.base64, mediaType: image.mediaType },
+        traceId,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (err) {
+    after(async () => await flush());
+
+    return new Response(
+      JSON.stringify({
+        error: err instanceof Error ? err.message : "Failed to generate image",
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
 };
 
 export const POST = observe(handler, {

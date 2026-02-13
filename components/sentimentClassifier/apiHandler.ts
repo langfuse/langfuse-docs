@@ -45,25 +45,36 @@ const handler = async (req: Request) => {
     input: text,
   });
 
-  const result = await generateObject({
-    model: openai("gpt-4o-mini"),
-    schema: SentimentSchema,
-    prompt: `Analyze the sentiment of the following text. Classify it as positive, negative, or neutral. Provide a confidence score between 0 and 1, a brief explanation of your reasoning, and extract the key phrases that influenced your classification.\n\nText: ${text}`,
-    experimental_telemetry: {
-      isEnabled: true,
-    },
-  });
+  try {
+    const result = await generateObject({
+      model: openai("gpt-4o-mini"),
+      schema: SentimentSchema,
+      prompt: `Analyze the sentiment of the following text. Classify it as positive, negative, or neutral. Provide a confidence score between 0 and 1, a brief explanation of your reasoning, and extract the key phrases that influenced your classification.\n\nText: ${text}`,
+      experimental_telemetry: {
+        isEnabled: true,
+      },
+    });
 
-  updateActiveTrace({
-    output: result.object,
-  });
+    updateActiveTrace({
+      output: result.object,
+    });
 
-  after(async () => await flush());
+    after(async () => await flush());
 
-  return new Response(
-    JSON.stringify({ result: result.object, traceId }),
-    { status: 200, headers: { "Content-Type": "application/json" } }
-  );
+    return new Response(
+      JSON.stringify({ result: result.object, traceId }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (err) {
+    after(async () => await flush());
+
+    return new Response(
+      JSON.stringify({
+        error: err instanceof Error ? err.message : "Failed to classify text",
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
 };
 
 export const POST = observe(handler, {

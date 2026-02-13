@@ -93,12 +93,18 @@ export const SentimentClassifier = ({
         body: JSON.stringify({ text: textToAnalyze, userId }),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Failed to classify text");
+      const text = await res.text();
+      let data: any;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error("Invalid response from server");
       }
 
-      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? `Request failed (${res.status})`);
+      }
+
       setResult({ ...data, inputText: textToAnalyze });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

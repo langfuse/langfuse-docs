@@ -76,12 +76,18 @@ export const ImageGenerator = ({
         body: JSON.stringify({ prompt: textPrompt, userId }),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Failed to generate image");
+      const responseText = await res.text();
+      let data: any;
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error("Invalid response from server");
       }
 
-      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? `Request failed (${res.status})`);
+      }
+
       setCurrentImage({
         base64: data.image.base64,
         mediaType: data.image.mediaType,
