@@ -22,7 +22,6 @@ import DocsMcpServerInstallation from "@/components-mdx/docs-mcp-server-installa
 - Transport: `streamableHttp`
 - Authentication: None
 - Tools:
-
   - `searchLangfuseDocs`: Semantic search (RAG) over the Langfuse documentation. Returns a concise answer synthesized from relevant docs. Use for broader questions; prefer getLangfuseDocsPage for specific pages. Powered by [Inkeep RAG API](https://docs.inkeep.com/ai-api/rag-mode/http-request).
   - `getLangfuseDocsPage`: Fetch the raw Markdown for a specific Langfuse docs page. Accepts a docs path (e.g., `/docs/observability/overview`) or a full `https://langfuse.com` URL. Use for specific pages, integrations, or code samples.
   - `getLangfuseOverview`: Get a high-level index by fetching [llms.txt](https://langfuse.com/llms.txt). Use at the start of a session to discover key docs endpoints. Avoid repeated calls.
@@ -36,7 +35,7 @@ import DocsMcpServerInstallation from "@/components-mdx/docs-mcp-server-installa
 
 ## REST Endpoint
 
-The underlying docs search is also available independently as a REST API at `https://langfuse.com/api/search-docs`.
+The underlying docs search (`searchLangfuseDocs` tool) is also available independently as a REST API at `https://langfuse.com/api/search-docs`.
 
 ```bash
 curl "https://langfuse.com/api/search-docs?query=Langfuse+Docs+MCP+Server"
