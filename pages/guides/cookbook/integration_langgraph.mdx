@@ -510,12 +510,12 @@ def langgraph_research(question):
       name="🤖-sub-research-agent",
       trace_context={"trace_id": predefined_trace_id}
   ) as span:
-      span.set_trace_io(input=question)
+      span.update(input=question)
 
       response = sub_agent.invoke({"messages": [HumanMessage(content = question)]},
                         config={"callbacks": [langfuse_handler]})
     
-      span.set_trace_io(output= response["messages"][1].content)
+      span.update(output= response["messages"][1].content)
 
   return response["messages"][1].content
 ```
@@ -544,13 +544,13 @@ with langfuse.start_as_current_observation(
     name="🤖-main-agent",
     trace_context={"trace_id": predefined_trace_id}
 ) as span:
-    span.set_trace_io(input=user_question)
+    span.update(input=user_question)
  
     # LangChain execution will be part of this trace
     response = main_agent.invoke({"messages": [{"role": "user", "content": user_question}]},
                             config={"callbacks": [langfuse_handler]})
 
-    span.set_trace_io(output=response["messages"][1].content)
+    span.update(output=response["messages"][1].content)
  
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 ```

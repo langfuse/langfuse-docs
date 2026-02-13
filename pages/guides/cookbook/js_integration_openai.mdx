@@ -267,12 +267,12 @@ await startActiveObservation("user-request", async (span) => {
     tags: ["updated"],
     metadata: {"env": "development"},
     release: "v0.0.2",
-  }, async () => {
-    // Set trace-level input/output
-    span.setTraceIO({
-      input: country,
-      output: poem,
-    });
+  }, async () => {});
+
+  // Set input and output on the root observation
+  span.update({
+    input: country,
+    output: poem,
   });
 
 });

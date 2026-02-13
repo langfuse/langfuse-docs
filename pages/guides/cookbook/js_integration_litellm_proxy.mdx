@@ -153,11 +153,11 @@ await startActiveObservation("user-request", async (span) => {
     tags: ["updated"],
     metadata: {"env": "development"},
     release: "v0.0.2",
-  }, async () => {
-    // Set trace-level input
-    span.setTraceIO({
-      input: systemPrompt,
-    });
+  }, async () => {});
+
+  // Set input on the root observation
+  span.update({
+    input: systemPrompt,
   });
 
 });

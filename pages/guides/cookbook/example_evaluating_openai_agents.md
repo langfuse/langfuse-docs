@@ -235,8 +235,8 @@ with langfuse.start_as_current_observation(
 
         result = await main(input_query)
     
-        # Pass additional attributes to the span
-        span.set_trace_io(
+        # Set input and output on the root observation
+        span.update(
             input=input_query,
             output=result,
             )
@@ -303,7 +303,7 @@ with langfuse.start_as_current_observation(
     result = await main(user_input)
     trace_id = langfuse.get_current_trace_id()
 
-    span.set_trace_io(
+    span.update(
         input=user_input,
         output=result.final_output,
     )
@@ -361,8 +361,8 @@ with langfuse.start_as_current_observation(as_type="span", name="OpenAI-Agent-Tr
     # Run your agent with a query
     result = Runner.run_sync(agent, input_query)
 
-    # Add input and output values to parent trace
-    span.set_trace_io(
+    # Set input and output on the root observation
+    span.update(
         input=input_query,
         output=result.final_output,
     )

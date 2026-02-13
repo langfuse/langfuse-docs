@@ -123,7 +123,7 @@ from pydantic_ai.mcp import MCPServerStreamableHTTP, CallToolFunc, ToolResult
 LANGFUSE_MCP_URL = "https://langfuse.com/api/mcp"
 
 async def run_agent(item, system_prompt="You are an expert on Langfuse. ", model="openai:gpt-4o-mini"):
-    langfuse.set_current_trace_io(input=item.input)
+    langfuse.update_current_observation(input=item.input)
 
     tool_call_history = []
 
@@ -150,7 +150,7 @@ async def run_agent(item, system_prompt="You are an expert on Langfuse. ", model
     async with agent:
         result = await agent.run(item.input["question"])
         
-        langfuse.set_current_trace_io(
+        langfuse.update_current_observation(
             output=result.output,
             metadata={"tool_call_history": tool_call_history},
         )
