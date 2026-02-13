@@ -96,7 +96,7 @@ Example trace in Langfuse UI
 ### Traces
 
 A `trace` typically represents a single request or operation.
-For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace. 
+For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace.
 
 It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
 
@@ -104,7 +104,7 @@ It contains the overall input and output of the function, as well as metadata ab
 
 Optionally, traces can be grouped into [sessions](/docs/tracing-features/sessions).
 Sessions are used to group traces that are part of the same user interaction.
-A common example is a thread in a chat interface. 
+A common example is a thread in a chat interface.
 
 <div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
 
@@ -150,28 +150,58 @@ There are different types of attributes you can add:
 | [Releases & Versions](/docs/observability/features/releases-and-versioning) | Track application versions and component changes |
 
 
+## Observation-Centric Data Model
+
+<Callout type="info">
+The observation-centric data model is available with Python SDK v4+ and JS/TS SDK v5+. Both data models currently coexist, but Langfuse is gradually transitioning to the observation-centric model. See the [changelog post](/changelog/2026-02-10-simplify-for-scale) for more details.
+</Callout>
+
+To improve query performance at scale, Langfuse introduces an **observation-centric data model** as part of Langfuse v4 alongside the existing model. In this model, context attributes (`user_id`, `session_id`, `metadata`, `tags`) that previously lived only on the trace are propagated to every observation. This eliminates expensive joins between trace and observation tables, enabling single-table queries.
+
+<Frame fullWidth>
+  ![Observation-centric data model](/images/changelog/2026-02-11-v4-preview/data-model.png)
+</Frame>
+
+### What changes
+
+| | Classic model | Observation-centric model |
+|---|---|---|
+| **Storage** | Separate mutable Traces and Observations tables | Single immutable Observations table |
+| **Context attributes** | Stored on the trace, joined at query time | Propagated to every observation at ingestion time |
+| **Trace input/output** | Set directly on the trace | Removed, use observation IO instead. (For legacy LLM-as-a-judge evaluators that depend on trace input and output, users can use the deprecated `set_trace_io` methods in the SDKs.) |
+| **Mutability** | Traces and observations are mutable | Observations are immutable (written once) |
+
+### How to adopt
+
+Upgrade to the latest SDK versions to start ingesting data in the new format:
+
+- **Python SDK v4**: See [migration guide](/docs/observability/sdk/upgrade-path#python-v3--v4)
+- **JS/TS SDK v5**: See [migration guide](/docs/observability/sdk/upgrade-path#jsts-v4--v5)
+
+The key change is that `update_current_trace()` / `updateActiveTrace()` is replaced by `propagate_attributes()`, which automatically flows attributes to all child observations created within its scope.
+
 ## How Langfuse Captures Data
 
 Now that you understand the data model, let's explore how Langfuse actually captures and processes your traces.
 
 ### Built on OpenTelemetry
 
-Langfuse is built on [OpenTelemetry](https://opentelemetry.io/), an open standard for collecting telemetry data from applications. 
+Langfuse is built on [OpenTelemetry](https://opentelemetry.io/), an open standard for collecting telemetry data from applications.
 
-This means you're not locked into using only Langfuse-specific SDKs. You can also send your traces to multiple destinations at once, like Langfuse for LLM observability and Datadog for infrastructure monitoring. 
+This means you're not locked into using only Langfuse-specific SDKs. You can also send your traces to multiple destinations at once, like Langfuse for LLM observability and Datadog for infrastructure monitoring.
 
 See the [OpenTelemetry integration guide](/integrations/native/opentelemetry) for detailed documentation on integrating OpenTelemetry with Langfuse.
 
 #### Instrumentation
 
-Instrumentation is the process of adding code to record its behavior. Once this recording is turned on, Langfuse (through OpenTelemetry) can automatically capture these events and structure them into traces and observations. 
+Instrumentation is the process of adding code to record its behavior. Once this recording is turned on, Langfuse (through OpenTelemetry) can automatically capture these events and structure them into traces and observations.
 
 The [Get Started guide](/docs/observability/get-started) walks you through the process of instrumenting a function in your application.
 
 
 ### Background Processing
 
-In order to avoid slowing down your application, Langfuse doesn't send traces synchronously the moment they're created. 
+In order to avoid slowing down your application, Langfuse doesn't send traces synchronously the moment they're created.
 Instead, Langfuse batches traces locally and sends them in the background, keeping your application fast and responsive.
 
 ```mermaid
@@ -204,7 +234,7 @@ The approach above works well for long-running applications (like web servers or
 
 #### Short-lived applications
 
-For applications that start, execute something, and shut down quickly (short-lived applications), there's a risk that the application terminates while there are still unsent traces in the queue. 
+For applications that start, execute something, and shut down quickly (short-lived applications), there's a risk that the application terminates while there are still unsent traces in the queue.
 
 To avoid losing data, short-lived applications __must explicitly call [`flush()`](/docs/observability/features/queuing-batching#manual-flushing) before exiting__. This forces the exporter to send all buffered traces immediately, so nothing is lost when the process terminates.
 

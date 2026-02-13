@@ -272,8 +272,11 @@ With your evaluator and model selected, configure which data to run the evaluati
 
 **Requirements**
 
-- **OTel-based SDKs**: If you're using Python v3+ or JS/TS v4+, you must call `update_trace()` to populate trace input/output, or use observation-level evaluators instead.
+- **OTel-based SDKs**: If you're using Python v3+ or JS/TS v4+, trace input/output is derived from the root observation by default. To explicitly set trace input/output for these evaluators, use `set_trace_io()` (Python) or `setTraceIO()` (JS/TS). See the [Python v3 → v4](/docs/observability/sdk/upgrade-path#python-v3--v4) and [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path#jsts-v4--v5) migration guides.
 
+<Callout type="info">
+We recommend migrating to [observation-level evaluators](/faq/all/llm-as-a-judge-migration) instead of using `set_trace_io()` / `setTraceIO()`. Once migrated, you can remove these calls from your codebase entirely.
+</Callout>
 
 </Tab>
 </Tabs>

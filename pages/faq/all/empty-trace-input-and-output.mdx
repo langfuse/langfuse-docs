@@ -215,7 +215,7 @@ If you're using `shouldExportSpan` in your `LangfuseSpanProcessor` to filter spa
 **Solution**: If you want the root span to stay filtered out, use `setTraceIO()` to manually set trace input/output from within a child span that is not filtered out:
 
 <Callout type="warning">
-`setTraceIO()` and `set_trace_io()` are deprecated and exist only for backward compatibility with trace-level LLM-as-a-judge evaluators. See the [JS/TS v4 → v5 migration guide](/docs/observability/sdk/upgrade-path#jsts-v4--v5) and [Python v3 → v4 migration guide](/docs/observability/sdk/upgrade-path#python-v3--v4).
+`setTraceIO()` and `set_trace_io()` are deprecated. They are only needed if you still rely on trace-level [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators that read trace input/output. Once you have [migrated to observation-level evaluators](/faq/all/llm-as-a-judge-migration), these calls have no effect and can be removed from your codebase.
 </Callout>
 
 ```typescript

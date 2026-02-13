@@ -842,8 +842,8 @@ def my_llm_function(question: str):
     )
     output = response.choices[0].message.content
 
-    # Update trace input / output (deprecated — only needed for backward compat with legacy trace-level LLM-as-a-judge evaluators)
-    get_client().set_current_trace_io(input=question, output=output)
+    # Update observation input / output
+    get_client().update_current_observation(input=question, output=output)
 
     return output
 ```

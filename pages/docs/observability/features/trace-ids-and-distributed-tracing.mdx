@@ -314,18 +314,13 @@ with langfuse.start_as_current_observation(
     trace_context={"trace_id": predefined_trace_id}
 ) as span:
 
-    # Set trace I/O (deprecated — only for backward compat with legacy trace-level LLM-as-a-judge evaluators)
-    span.set_trace_io(
-        input={"person": "Ada Lovelace"}
-    )
-
     # LangChain execution will be part of this trace
     response = chain.invoke(
         {"person": "Ada Lovelace"},
         config={"callbacks": [langfuse_handler]}
     )
 
-    span.set_trace_io(output={"response": response})
+    span.update(input={"person": "Ada Lovelace"}, output={"response": response})
 
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
