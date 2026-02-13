@@ -86,7 +86,14 @@ The same decomposition applies to the observation-level `update_trace()` method.
 **v3:**
 
 ```python
-span.update_trace(name=..., user_id=..., input=..., output=..., public=True)
+span.update_trace(
+    name="trace-name",
+    user_id="user-123",
+    session_id="session-abc",
+    input={"query": "hello"},
+    output={"result": "world"},
+    public=True,
+)
 ```
 
 **v4:**
@@ -97,10 +104,10 @@ from langfuse import get_client, propagate_attributes
 langfuse = get_client()
 
 with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
-    with propagate_attributes(trace_name="my-trace", user_id="user-123"):
-        result = call_llm("Hello")
+    with propagate_attributes(trace_name="trace-name", user_id="user-123", session_id="session-abc"):
+        result = call_llm("hello")
 
-    span.set_trace_io(input={"query": "Hello"}, output={"result": result})  # deprecated
+    span.set_trace_io(input={"query": "hello"}, output={"result": result})  # deprecated
     span.set_trace_as_public()
 ```
 
