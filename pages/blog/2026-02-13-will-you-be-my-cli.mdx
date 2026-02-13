@@ -88,6 +88,8 @@ async function generateLLMsList() {
 
 **Why it matters:** When an agent first encounters Langfuse, it can immediately fetch `langfuse.com/llms.txt` and understand the entire documentation structure without crawling hundreds of pages.
 
+Read more: [llms.txt announcement](/changelog/2024-11-17-llms-txt)
+
 ---
 
 ## 2. Markdown Endpoints: Native Content for Agents
@@ -98,7 +100,7 @@ async function generateLLMsList() {
 
 ### How It Works
 
-We use Next.js rewrites and static file serving to provide markdown versions of all docs:
+We use Next.js rewrites and static file serving to provide markdown versions of all docs. This was a fun technical challenge that required converting our MDX pages to plain markdown at build time and serving them efficiently.
 
 ```javascript
 // next.config.mjs
@@ -137,6 +139,8 @@ curl -H "Accept: text/markdown" https://langfuse.com/docs/observability/overview
 - The "Copy as Markdown" feature in our docs
 - The `getLangfuseDocsPage` tool in our MCP server
 - Agent-driven integrations in IDEs like Cursor
+
+Read more: [Markdown endpoints announcement](/changelog/2025-08-07-markdown-endpoints-and-copy-button)
 
 ---
 
@@ -339,6 +343,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 ```
 
 **Why it matters:** This is the capstone that ties everything together. Agents can now discover Langfuse (via llms.txt), search for relevant information (via search API), fetch detailed documentation (via markdown endpoints), and execute operations (via the REST API)—all through a standardized interface.
+
+Want to learn how we built it? Check out our [deep dive on building the MCP server](/blog/2025-12-09-building-langfuse-mcp-server).
 
 ---
 
