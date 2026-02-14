@@ -250,21 +250,48 @@ const downloadData = [
   { month: "Dec", downloads: 24.20 }, // 114.38 - 90.18
 ];
 
-// Relative growth data
-const growthData = [
-  { month: "Jan", growth: 6.15 },
-  { month: "Feb", growth: 6.24 },
-  { month: "Mar", growth: 9.40 },
-  { month: "Apr", growth: 13.25 },
-  { month: "May", growth: 15.66 },
-  { month: "Jun", growth: 19.28 },
-  { month: "Jul", growth: 30.12 },
-  { month: "Aug", growth: 39.76 },
-  { month: "Sep", growth: 57.83 },
-  { month: "Oct", growth: 63.86 },
-  { month: "Nov", growth: 86.75 },
-  { month: "Dec", growth: 100.00 },
+// Monthly tracing events consumption data (raw values)
+const consumptionDataRaw = [
+  { month: "May '23", events: 114 },
+  { month: "Jun '23", events: 42010 },
+  { month: "Jul '23", events: 83032 },
+  { month: "Aug '23", events: 103914 },
+  { month: "Sep '23", events: 1849376 },
+  { month: "Oct '23", events: 4568114 },
+  { month: "Nov '23", events: 2413301 },
+  { month: "Dec '23", events: 2662004 },
+  { month: "Jan '24", events: 6015026 },
+  { month: "Feb '24", events: 9457665 },
+  { month: "Mar '24", events: 17803910 },
+  { month: "Apr '24", events: 29888275 },
+  { month: "May '24", events: 76717284 },
+  { month: "Jun '24", events: 183682810 },
+  { month: "Jul '24", events: 225955386 },
+  { month: "Aug '24", events: 237017592 },
+  { month: "Sep '24", events: 221872039 },
+  { month: "Oct '24", events: 193620641 },
+  { month: "Nov '24", events: 269441127 },
+  { month: "Dec '24", events: 344903918 },
+  { month: "Jan '25", events: 508968375 },
+  { month: "Feb '25", events: 518046358 },
+  { month: "Mar '25", events: 779206065 },
+  { month: "Apr '25", events: 1054129792 },
+  { month: "May '25", events: 1318584168 },
+  { month: "Jun '25", events: 1625847070 },
+  { month: "Jul '25", events: 2515629333 },
+  { month: "Aug '25", events: 3253334987 },
+  { month: "Sep '25", events: 4749003156 },
+  { month: "Oct '25", events: 5324809957 },
+  { month: "Nov '25", events: 7219911848 },
+  { month: "Dec '25", events: 9390233927 },
 ];
+
+// Calculate total sum and convert to percentages
+const totalEvents = consumptionDataRaw.reduce((sum, item) => sum + item.events, 0);
+const consumptionData = consumptionDataRaw.map((item) => ({
+  month: item.month,
+  percentage: (item.events / totalEvents) * 100,
+}));
 
 const formatDownloads = (value: number) => {
   if (value >= 1000) {
@@ -273,8 +300,22 @@ const formatDownloads = (value: number) => {
   return `${value.toFixed(1)}M`;
 };
 
-const formatGrowth = (value: number) => {
-  return `${Math.round(value)}%`;
+const formatPercentage = (value: number) => {
+  if (value < 0.1) {
+    return `${value.toFixed(2)}%`;
+  } else if (value < 1) {
+    return `${value.toFixed(1)}%`;
+  }
+  return `${value.toFixed(1)}%`;
+};
+
+// Only show label if percentage is large enough to be fully displayed
+const formatPercentageLabel = (value: number) => {
+  // Only show label if percentage is >= 2.5% (bars smaller than this won't display labels well)
+  if (value < 2.5) {
+    return "";
+  }
+  return formatPercentage(value);
 };
 
 export function Metrics() {
@@ -332,15 +373,15 @@ export function Metrics() {
               <WrappedGridItem key="consumption" colSpan={3} className="hidden lg:block">
                 <motion.div {...graphAnimationProps}>
                   <div className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
-                    <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
+                  <div className="flex flex-col">
+                    <div className="w-full mb-4">
                       <h3 className="text-2xl sm:text-3xl font-bold font-mono">Consumption</h3>
-                      <p className="mt-2 text-sm text-muted-foreground"> Consumption between January and December 2025. Ingestions of traces, observations and evals.</p>
+                      <p className="mt-2 text-sm text-muted-foreground">Tracing events ingested from May 2023 to December 2025. Shows the growth of traces, observations and evals over time.</p>
                     </div>
-                    <div className="w-full lg:w-3/4 aspect-[21/9] lg:aspect-auto lg:h-[400px]">
+                    <div className="w-full aspect-[21/9] lg:aspect-auto lg:h-[400px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
-                          data={growthData}
+                          data={consumptionData}
                           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -348,6 +389,9 @@ export function Metrics() {
                             dataKey="month"
                             className="text-xs"
                             tick={{ fill: "currentColor" }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
                           />
                           <Tooltip
                             contentStyle={{
@@ -356,20 +400,21 @@ export function Metrics() {
                               borderRadius: "0.5rem",
                               padding: "0.5rem",
                             }}
-                            formatter={(value: number) => [`${formatGrowth(value)}`, "Traffic relative to Dec 25"]}
+                            formatter={(value: number) => [`${formatPercentage(value)}`, "of total"]}
                             labelStyle={{ color: "hsl(var(--foreground))" }}
                           />
                           <Bar
-                            dataKey="growth"
+                            dataKey="percentage"
                             fill="hsl(var(--primary))"
                             radius={[4, 4, 0, 0]}
                           >
                             <LabelList
-                              dataKey="growth"
+                              dataKey="percentage"
                               position="inside"
-                              formatter={formatGrowth}
+                              formatter={formatPercentageLabel}
                               fill="hsl(var(--card))"
                               style={{ fontWeight: 600, fontSize: "0.75rem" }}
+                              angle={-90}
                             />
                           </Bar>
                         </BarChart>
