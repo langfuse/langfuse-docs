@@ -21,8 +21,8 @@ import merckLight from "../home/img/merck-dark.png";
 import merckDark from "../home/img/merck-light.png";
 import juiceboxLight from "../home/img/juicebox_light.svg";
 import juiceboxDark from "../home/img/juicebox_dark.svg";
-import pigmentLight from "../home/img/pigment_light.svg";
-import pigmentDark from "../home/img/pigment_dark.svg";
+// import pigmentLight from "../home/img/pigment_light.svg";
+// import pigmentDark from "../home/img/pigment_dark.svg";
 // import springernatureLight from "../home/img/springernature_light.svg";
 // import springernatureDark from "../home/img/springernature_dark.svg";
 import sevenelevenLight from "../home/img/seveneleven_light.png";
@@ -40,9 +40,10 @@ type CompanyLogo = {
 
 const companies: CompanyLogo[] = [
   {
-    name: "Samsara",
-    darkModeImage: samsaraLight,
-    lightModeImage: samsaraDark,
+    name: "Canva",
+    darkModeImage: "/images/customers/canva/Canva-white.png",
+    lightModeImage: "/images/customers/canva/Canva-color.png",
+    customerStoryPath: "/customers/canva",
   },
   {
     name: "Twilio",
@@ -88,10 +89,15 @@ const companies: CompanyLogo[] = [
     darkModeImage: juiceboxLight,
     lightModeImage: juiceboxDark,
   },
+  // {
+  //   name: "Pigment",
+  //   darkModeImage: pigmentLight,
+  //   lightModeImage: pigmentDark,
+  // },
   {
-    name: "Pigment",
-    darkModeImage: pigmentLight,
-    lightModeImage: pigmentDark,
+    name: "Samsara",
+    darkModeImage: samsaraLight,
+    lightModeImage: samsaraDark,
   },
   {
     name: "Seven Eleven Japan",
@@ -119,24 +125,31 @@ const LogoImage = ({
   darkModeImage: StaticImageData | string;
   lightModeImage: StaticImageData | string;
   name: string;
-}) => (
-  <>
-    <Image
-      src={darkModeImage}
-      alt={`${name} logo`}
-      className="object-contain max-h-8 max-w-full hidden dark:block"
-      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-      priority={false}
-    />
-    <Image
-      src={lightModeImage}
-      alt={`${name} logo`}
-      className="object-contain max-h-8 max-w-full dark:hidden"
-      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-      priority={false}
-    />
-  </>
-);
+}) => {
+  // For string paths (public images), we need width and height
+  const isStringPath = typeof darkModeImage === "string";
+
+  return (
+    <>
+      <Image
+        src={darkModeImage}
+        alt={`${name} logo`}
+        className="object-contain max-h-8 max-w-full hidden dark:block"
+        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+        priority={false}
+        {...(isStringPath && { width: 120, height: 32 })}
+      />
+      <Image
+        src={lightModeImage}
+        alt={`${name} logo`}
+        className="object-contain max-h-8 max-w-full dark:hidden"
+        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+        priority={false}
+        {...(isStringPath && { width: 120, height: 32 })}
+      />
+    </>
+  );
+};
 
 // Customer story badge component
 const CustomerStoryBadge = ({ small }: { small?: boolean }) => (
