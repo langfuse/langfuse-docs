@@ -1,8 +1,9 @@
 ---
 title: "Will you be my CLI? Making Agents fall in love with Langfuse."
 date: 2026/02/14
-description: How we optimized Langfuse for AI agents with CLI, Skills, markdown endpoints, OpenAPI-based API documentation, public search, llms.txt, and MCP servers. A love letter to agents that need great developer tools.
-author: Marc
+description: How we optimized Langfuse for AI agents with CLI, Skills, markdown endpoints, OpenAPI-based API documentation, public RAG endpoint, llms.txt, and MCP servers. A love letter to agents that need great developer tools.
+author: Felix, Lotte, Nimar, Marc
+tag: engineering
 ogImage: /images/blog/2026-02-13-will-you-be-my-cli/valentine.jpg
 ---
 
@@ -11,17 +12,17 @@ import { Frame } from "@/components/Frame";
 
 <BlogHeader
   title="Will you be my CLI? Making Agents fall in love with Langfuse."
-  description="How we optimized Langfuse for AI agents with CLI, Skills, markdown endpoints, OpenAPI-based API documentation, public search, llms.txt, and MCP servers. A love letter to agents that need great developer tools."
-  authors={["Marc"]}
+  description="How we optimized Langfuse for AI agents with CLI, Skills, markdown endpoints, OpenAPI-based API documentation, public RAG endpoint, llms.txt, and MCP servers. A love letter to agents that need great developer tools."
+  authors={["felixkrauth", "lotteverheyden", "nimarblume", "marcklingen"]}
 />
 
 <Frame fullWidth>
-![Valentine's Day](/images/blog/2026-02-13-will-you-be-my-cli/valentine.jpg)
+  ![Valentine's Day](/images/blog/2026-02-13-will-you-be-my-cli/valentine.jpg)
 </Frame>
 
 Valentine's Day is here, and while most people are thinking about flowers and chocolates, we've been thinking about something more romantic: making AI agents fall in love with Langfuse.
 
-Over the past months, we've shipped a series of features designed specifically to make Langfuse the perfect companion for AI agents, whether they're coding in your IDE, running in the terminal, or helping you debug your LLM applications. 
+Over the past months, we've shipped a series of features designed specifically to make Langfuse the perfect companion for AI agents, whether they're coding in your IDE, running in the terminal, or helping you debug your LLM applications.
 
 This post walks through our "agent love language": the technical decisions and implementations that make Langfuse easy for agents to discover, understand, and integrate with.
 
@@ -29,96 +30,230 @@ This post walks through our "agent love language": the technical decisions and i
 
 AI agents are increasingly doing real work: writing code, debugging applications, searching documentation, and even building entire features. But here's the thing: agents are only as good as the tools they can use.
 
-When an agent encounters your product, it needs to quickly discover, understand and interact with our website, docs, and APIs.
+When an agent encounters our product, it needs to quickly discover, understand, and interact with our website, docs, and APIs.
 
 We realized that if we wanted agents to successfully integrate Langfuse into codebases, we needed to optimize for these needs.
 
 This is how we try to be a good catch for agents:
 
-1. **Skills** \- Skills that offer structured workflows for agents  
-2. **Langfuse CLI** \- Together with Skills the CLI opens up all of Langfuse to be used by agents  
-3. **Markdown Endpoints** \- Docs as raw markdown, not just HTML  
-4. **Public Search** \- Semantic search available to everyone via public endpoint  
-5. **llms.txt** \- A machine-readable documentation index  
-6. **OpenAPI-First API** \- Comprehensive, machine-readable API documentation  
-7. **Docs MCP Server** \- Docs search and access for agents that prefer MCP  
-8. **Authenticated MCP Server** \- Full access to your Langfuse project data
+1. **Skills** \- Agent Skills that offer context and structured workflows for agents
+2. **Langfuse CLI** \- Together with Skills, the CLI opens up all of Langfuse to be used by agents
+3. **Markdown Endpoints** \- Docs as raw markdown, not just HTML, giving agents faster and better structured access to our documentation
+4. **Public RAG Endpoint** \- RAG endpoint available to everyone via public API, letting agents search through all indexed docs and GitHub issues/discussions
+5. **llms.txt** \- A machine-readable documentation index, giving agents a high-level overview and links to detailed documentation
+6. **OpenAPI-First API** \- Comprehensive, machine-readable API documentation, giving agents a complete understanding of our API
+7. **Docs MCP Server** \- Docs search and access for agents that prefer MCP over Skills/CLI
+8. **Authenticated MCP Server** \- For agents that want to use Prompts from Langfuse Prompt Management, we built an authenticated MCP server
 
 Let's dive into each one.
 
 ## Skills
 
-How can agents learn not just what Langfuse is, but how to actually use it in common scenarios? 
+How can agents learn not just what Langfuse is, but how to actually use it in common scenarios?
 
-Skills, especially in combination with a CLI (see more below), are the most effective pattern for this. We created [a skills repository](https://github.com/langfuse/skills) with structured workflows for the most common Langfuse integration tasks.
+[Agent Skills](https://github.com/anthropics/skills), especially in combination with a CLI (see more below), are the most effective pattern for this. We created [a skills repo](https://github.com/langfuse/skills) with structured workflows for the most common Langfuse integration tasks.
 
 We've published three Langfuse-specific skills to start with, more will follow:
 
 <Frame fullWidth>
-![Skills](/images/blog/2026-02-13-will-you-be-my-cli/skills-2.png)
+  ![Skills](/images/blog/2026-02-13-will-you-be-my-cli/skills-2.png)
 </Frame>
 
 **What are Skills?**  
-Skills are structured markdown files that teach agents how to complete specific tasks. They follow the Agent Skills format and work with Claude Code, Cursor, and other AI coding agents. (I can recommend this complete [guide to build skills](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf?hsLang=en))
+Skills follow the open [Agent Skills](https://github.com/anthropics/skills) standard. Each skill is a self-contained folder with a `SKILL.md` entrypoint that combines YAML frontmatter (metadata and trigger conditions) with markdown instructions. Skills can optionally bundle supporting files like reference docs, templates, and executable scripts. They work across Claude Code, Cursor, and other compatible AI coding agents. (For a deep dive, see this [guide to building skills](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf?hsLang=en).)
 
 **How They Work**  
-Each skill provides step-by-step instructions with decision trees, inference rules, and best practices for agents to follow when interacting with Langfuse. Unlike documentation that tells you what is possible, skills tell you how to accomplish a specific goal.
+Skills use a progressive disclosure model: the YAML frontmatter (name, description, trigger phrases) is always loaded into the agent's context so it knows when a skill is relevant, but the full instructions are only loaded on demand. This keeps context usage low while giving agents access to specialized knowledge. Unlike documentation that tells you what is possible, skills provide step-by-step workflows with decision trees, error handling, and best practices — they tell agents _how_ to accomplish a specific goal. Multiple skills can be loaded simultaneously, and they compose well with CLI tools and MCP servers.
 
-Here's an excerpt from the observability skill showing how it guides agents through framework detection:
+<Tabs items={["Main Langfuse Skill", "Observability Skill"]}>
+<Tab>
 
-<Frame fullWidth>
-![Observability skill excerpt](/images/blog/2026-02-13-will-you-be-my-cli/skill.png)
-</Frame>
+Here's an excerpt from the [main Langfuse skill](https://github.com/langfuse/skills/blob/main/skills/langfuse/SKILL.md) showing how the skill is structured and how it guides agents through the different capabilities:
+
+````markdown filename="skills/langfuse/SKILL.md"
+---
+name: langfuse
+description: Interact with Langfuse and access its documentation. Use when needing to (1) query or modify Langfuse data programmatically via the CLI — traces, prompts, datasets, scores, sessions, and any other API resource, (2) look up Langfuse documentation, concepts, integration guides, or SDK usage, or (3) understand how any Langfuse feature works. This skill covers CLI-based API access (via npx) and multiple documentation retrieval methods.
+---
+
+# Langfuse
+
+Two core capabilities: **programmatic API access** via the Langfuse CLI, and **documentation retrieval** via llms.txt, page fetching, and search.
+
+## 1. Langfuse API via CLI
+
+Use the `langfuse-cli` to interact with the full Langfuse REST API from the command line. Run via npx (no install required):
+
+```bash
+npx langfuse-cli api <resource> <action>
+```
+
+### Quickstart
+
+...[redacted for brevity]
+
+### Detailed CLI Reference
+
+For common workflows, tips, and full usage patterns, see [references/cli.md](references/cli.md).
+
+## 2. Langfuse Documentation
+
+Three methods to access Langfuse docs, in order of preference:
+
+### 2a. Documentation Index (llms.txt)
+
+Fetch the full index of all documentation pages:
+
+```bash
+curl -s https://langfuse.com/llms.txt
+```
+
+Returns a structured list of every doc page with titles and URLs. Use this to discover the right page for a topic, then fetch that page directly.
+
+Alternatively, you can start on `https://langfuse.com/docs` and explore the site to find the page you need.
+
+### 2b. Fetch Individual Pages as Markdown
+
+Any page listed in llms.txt can be fetched as markdown by appending `.md` to its path or by using Accept: text/markdown in the request headers. Use this when you know which page contains the information needed. Returns clean markdown with code examples and configuration details.
+
+```bash
+curl -s "https://langfuse.com/docs/observability/overview.md"
+curl -s "https://langfuse.com/docs/observability/overview" -H "Accept: text/markdown"
+```
+
+### 2c. Search Documentation
+
+When you need to find information across all docs and github issues/discussions without knowing the specific page:
+
+```bash
+curl -s "https://langfuse.com/api/search-docs?query=<url-encoded-query>"
+```
+
+Example:
+
+```bash
+curl -s "https://langfuse.com/api/search-docs?query=How+do+I+trace+LangGraph+agents"
+```
+
+Returns a JSON response with:
+
+- `query`: the original query
+- `answer`: a JSON string containing an array of matching documents, each with:
+  - `url`: link to the doc page
+  - `title`: page title
+  - `source.content`: array of relevant text excerpts from the page
+
+Search is a great fallback if you cannot find the relevant pages or need more context. Especially useful when debugging issues as all GitHub Issues and Discussions are also indexed. Responses can be large — extract only the relevant portions.
+
+### Documentation Workflow
+
+1. Start with **llms.txt** to orient — scan for relevant page titles
+2. **Fetch specific pages** when you identify the right one
+3. Fall back to **search** when the topic is unclear and you want more context
+````
+
+</Tab>
+<Tab>
+
+Here's an excerpt from the [observability skill](https://github.com/langfuse/skills/blob/main/skills/langfuse-observability/SKILL.md) showing how frontmatter is used for progressive disclosure and how it guides agents through framework detection to help set up Langfuse:
+
+```markdown filename="skills/langfuse-observability/SKILL.md"
+---
+name: langfuse-observability
+description: Instrument LLM applications with Langfuse tracing. Use when setting up Langfuse, adding observability to LLM calls, or auditing existing instrumentation.
+---
+
+# Langfuse Observability
+
+Instrument LLM applications with Langfuse tracing, following best practices and tailored to your use case.
+
+## When to Use
+
+- Setting up Langfuse in a new project
+- Auditing existing Langfuse instrumentation
+- Adding observability to LLM calls
+
+## Workflow
+
+### 1. Assess Current State
+
+Check the project:
+
+- Is Langfuse SDK installed?
+- What LLM frameworks are used? (OpenAI SDK, LangChain, LlamaIndex, Vercel AI SDK, etc.)
+- Is there existing instrumentation?
+
+**No integration yet:** Set up Langfuse using a framework integration if available. Integrations capture more context automatically and require less code than manual instrumentation.
+
+**Integration exists:** Audit against baseline requirements below.
+
+...
+```
+
+</Tab>
+</Tabs>
 
 ## Langfuse CLI
 
-Agents often work in terminal environments. How can they interact with Langfuse without writing HTTP requests manually? 
+Agents often work in terminal environments and Langfuse has APIs for all core features. How can we help Agents interact with Langfuse without writing HTTP requests manually?
 
 We built [`langfuse-cli`](https://github.com/langfuse/langfuse-cli), a command-line interface that wraps the entire Langfuse API, auto-generated from our OpenAPI spec with some modifications.
 
-It's a CLI tool built on [specli](https://github.com/vercel-labs/specli) that generates commands directly from the OpenAPI specification. Every API endpoint becomes a CLI command with proper flags, validation, and help text.
+It's a CLI tool built on [specli](https://github.com/vercel-labs/specli) that generates commands directly from the OpenAPI specification. Every API endpoint becomes a CLI command with proper flags, validation, and help text (that again helps with progressive disclosure).
 
 <Frame fullWidth>
-![Langfuse CLI](/images/blog/2026-02-13-will-you-be-my-cli/cli.png)
+  ![Langfuse CLI](/images/blog/2026-02-13-will-you-be-my-cli/cli.png)
 </Frame>
 
-**For Agents: The Skill File**  
-This makes the CLI especially agent-friendly: we include a **skill file** at `skill/langfuse-cli.md` that teaches AI agents how to use the CLI:
+**For Agents: Reference in the Langfuse Skill**  
+In the main Langfuse Skill (see above) we include a reference that teaches AI agents how to use the CLI:
 
-```markdown
-# Langfuse CLI Skill
+````markdown filename="skills/langfuse/references/cli.md"
+# Langfuse CLI Reference
 
-The Langfuse CLI provides command-line access to the Langfuse API.
+## Install
 
-## Installation
-npx langfuse-cli <resource> <action>
+```bash
+# Run directly (recommended)
+npx langfuse-cli api <resource> <action>
+bunx langfuse-cli api <resource> <action>
 
-## Common Operations
-
-### Traces
-- List traces: langfuse traces list --limit 10
-- Get trace: langfuse traces get <id>
-- Search: langfuse traces list --user-id <user> --json
-
-### Prompts  
-- List: langfuse prompts list
-- Get: langfuse prompts get --name <name>
-
-... [full skill documentation]
+# Or install globally
+npm i -g langfuse-cli
+langfuse api <resource> <action>
 ```
+
+## Discovery
+
+```bash
+# List all resources and auth info
+langfuse api __schema
+
+# List actions for a resource
+langfuse api <resource> --help
+
+# Show args/options for a specific action
+langfuse api <resource> <action> --help
+
+# Preview the curl command without executing
+langfuse api <resource> <action> --curl
+```
+
+...[redacted for brevity]
+````
 
 Agents can read this file to understand all available commands, flags, and usage patterns.
 
-**Why Auto-Generate from OpenAPI?**  
+**Why Auto-Generate from OpenAPI?**
 By generating the CLI from the OpenAPI spec, we get:
 
-1. **Always in sync** \- CLI updates automatically when the API changes  
-2. **Complete coverage** \- Every endpoint becomes a command  
-3. **Proper validation** \- Request schemas enforce correct input  
-4. **Built-in help** \- Auto-generated help text for every command  
+1. **Always in sync** \- CLI updates automatically when the API changes
+2. **Complete coverage** \- Every endpoint becomes a command
+3. **Proper validation** \- Request schemas enforce correct input
+4. **Built-in help** \- Auto-generated help text for every command
 5. **Type safety** \- Flags match the API parameter types exactly
 
-**Technical Implementation**  
+**Technical Implementation**
 The CLI is built using a patched OpenAPI spec. We flatten discriminated unions (`oneOf` with `allOf`) into plain objects so specli can generate proper command flags:
 
 ```ts
@@ -132,52 +267,54 @@ export function patchOpenAPI(spec: OpenAPISpec) {
 }
 ```
 
-## .md Endpoints
+## Every Page as Markdown
 
-Agents work better with raw markdown than rendered HTML. How do we serve documentation in agent-friendly formats?
+Markdown has quickly become the lingua franca for AI agents. When an agent fetches a typical documentation page as HTML, most of the response is noise: navigation chrome, script tags, style attributes, SVG icons, data attributes, and deeply nested `div` structures that carry no semantic value. The actual content the agent needs — the text, code examples, and document structure — is buried inside all of that. Feeding raw HTML to an LLM is essentially spending tokens on packaging instead of the content inside.
 
-Every Langfuse documentation or website page can be accessed as markdown, either by appending `.md` to the URL or by sending an `Accept: text/markdown` header. 
+Markdown solves this by preserving the semantic structure that matters (headings, lists, code blocks, links) while stripping away everything else. This has two practical effects: it dramatically reduces token consumption, and it produces cleaner context that leads to better agent outputs. A typical documentation page served as markdown is 3–5x smaller in token count than its HTML equivalent.
 
-This significantly reduces file sizes and the chance that documentation content is understood incorrectly due to incorrect parsing of HTML content.
+**Two Ways to Access**
 
-<Frame fullWidth>
-![Markdown endpoints](/images/blog/2026-02-13-will-you-be-my-cli/markdown.png)
-</Frame>
+We support two methods for fetching any Langfuse documentation or website page as markdown, covering different agent patterns:
 
-**How It Works**  
-We use Next.js rewrites and static file serving to provide markdown versions of all docs. This was a fun technical challenge that required converting our MDX pages to plain markdown at build time and serving them efficiently.
+1. **URL extension** — Append `.md` to any page path. This is the simplest approach and works well for agents that construct URLs directly (e.g., from an `llms.txt` index or a skill reference).
 
-The implementation uses Next.js rewrites in [`next.config.mjs`](https://github.com/langfuse/langfuse-docs/blob/main/next.config.mjs#L146-L177):
-
-Usage Examples
+2. **Content negotiation** — Send an `Accept: text/markdown` request header. This follows the [HTTP content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Content_negotiation) standard and is the approach used by agents like Claude Code and OpenCode that automatically request markdown from any server that supports it. No URL rewriting needed — the same canonical URL returns markdown or HTML depending on the client's preference.
 
 ```shell
-# Fetch markdown by URL extension
+# Option 1: URL extension
 curl https://langfuse.com/docs/observability/overview.md
-```
-```shell
-# Or use content negotiation
+
+# Option 2: Content negotiation
 curl -H "Accept: text/markdown" https://langfuse.com/docs/observability/overview
 ```
 
-Agents can now directly consume documentation content without parsing HTML. This powers:
+<Frame fullWidth>
+  ![Markdown endpoints](/images/blog/2026-02-13-will-you-be-my-cli/markdown.png)
+</Frame>
 
-- Agents like Claude Code that include `Accept: text/markdown` in their requests  
-- Agents that use the Skill  
-- The "Copy as Markdown" feature in our docs  
-- The `getLangfuseDocsPage` tool in our MCP server  
-- Agent-driven integrations in IDEs like Cursor
+**How It Works**
 
-## Public Search Endpoint
+At build time, we convert all of our MDX pages to plain markdown and write them to static files. Next.js [rewrites](https://github.com/langfuse/langfuse-docs/blob/main/next.config.mjs#L146-L177) then handle routing: requests with an `.md` extension or `Accept: text/markdown` header are rewritten to serve the pre-built markdown file. Because the conversion happens at build time rather than on each request, responses are fast and cacheable.
+
+This powers a number of workflows across the ecosystem:
+
+- **Coding agents** like Claude Code and OpenCode that automatically include `Accept: text/markdown` in their requests
+- **Skills and CLI workflows** that `curl` specific `.md` URLs referenced in the skill file
+- **Our MCP server's** `getLangfuseDocsPage` tool, which fetches pages as markdown under the hood
+- **IDE integrations** in Cursor, Windsurf, and others that pull documentation into agent context
+- A **"Copy as Markdown"** button in our docs UI for humans who want clean content too
+
+## Public RAG Endpoint
 
 How can agents quickly find relevant information across all documentation?
 
-We exposed our semantic search as a public REST API and included it in our Skill. Thereby agents can not only browse the docs manually but can also search through all indexed docs and GitHub issues/discussions.
+We exposed a public RAG endpoint as a REST API and included it in our Skill. This way, agents can not only browse the docs manually but also query all indexed docs and GitHub issues/discussions.
 
 Instead of reading through dozens of documentation pages, agents can ask natural language questions and get synthesized answers with source citations.
 
-**The Search API**  
-Any agent (or human) can now search Langfuse docs without authentication:
+**The RAG API**  
+Any agent (or human) can now query Langfuse docs without authentication:
 
 ```shell
 curl "https://langfuse.com/api/search-docs?query=How%20do%20I%20trace%20LangGraph%20agents"
@@ -201,13 +338,16 @@ Response:
 ```
 
 **Implementation**  
-We are using [Inkeep](https://inkeep.com/) to power our search across docs and websites. It allows us to provide an endpoint to use [Inkeep's RAG API](https://docs.inkeep.com/ai-api/rag-mode/http-request) under the hood:
+We are using [Inkeep](https://inkeep.com/) to power [Ask AI](/docs/ask-ai) on our website and it also exposes a [RAG API](https://docs.inkeep.com/ai-api/rag-mode/http-request) with raw access to the data:
 
 ```ts
 // pages/api/search-docs.ts
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const query = req.query.query as string;
-  
+
   if (!query) {
     return res.status(400).json({ error: "Missing query parameter" });
   }
@@ -226,19 +366,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 How does an agent quickly understand what Langfuse is and what documentation is available?
 
-We implemented [llms.txt](https://langfuse.com/llms.txt), a standard proposed by [llmstxt.org](https://llmstxt.org/) that provides a machine-readable index of your documentation. When an agent first encounters Langfuse, it can immediately understand the entire documentation structure without crawling hundreds of pages. Of course, we also mention it in our Skills file.
+We implemented [llms.txt](https://langfuse.com/llms.txt), a standard proposed by [llmstxt.org](https://llmstxt.org/) that provides a machine-readable index of your documentation. When an agent first encounters Langfuse, it can immediately understand the entire documentation structure without crawling hundreds of pages. Of course, we also mention it in our Skills file as the main entrypoint to the documentation.
 
 <Frame fullWidth>
-![llms.txt overview](/images/blog/2026-02-13-will-you-be-my-cli/llms.txt.png)
+  ![llms.txt overview](/images/blog/2026-02-13-will-you-be-my-cli/llms.txt.png)
 </Frame>
 
 **What is llms.txt?**  
 It's a simple markdown file that gives LLMs a high-level overview and links to detailed documentation—all in one place. Here's what ours looks like:
 
-```markdown
+```markdown filename="https://langfuse.com/llms.txt"
 # Langfuse
 
-> Langfuse is an **open-source LLM engineering platform** that helps teams 
+> Langfuse is an **open-source LLM engineering platform** that helps teams
 > collaboratively debug, analyze, and iterate on their LLM applications.
 
 ## Langfuse Docs MCP Server
@@ -250,7 +390,7 @@ Connect to the Langfuse Docs MCP server to access documentation...
 - [Observability Overview](/docs/observability/overview.md)
 - [Prompt Management](/docs/prompt-management/overview.md)
 - [Evaluation](/docs/evaluation/overview.md)
-...
+  ...
 ```
 
 **Implementation**  
@@ -259,39 +399,20 @@ We auto-generate this file from our sitemap using a [simple Node.js script](http
 ```javascript
 // scripts/generate_llms_txt.js
 async function generateLLMsList() {
-  const sitemapContent = fs.readFileSync('public/sitemap-0.xml', 'utf-8');
+  const sitemapContent = fs.readFileSync("public/sitemap-0.xml", "utf-8");
   const result = await parser.parseStringPromise(sitemapContent);
-  
+
   let markdownContent = `# Langfuse\n\n`;
   markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
-  
+
   // Group URLs by section (docs, self-hosting, etc.)
-  urls.forEach(url => {
-    const section = new URL(url).pathname.split('/')[1];
+  urls.forEach((url) => {
+    const section = new URL(url).pathname.split("/")[1];
     // ... categorize and format
   });
-  
-  fs.writeFileSync('public/llms.txt', markdownContent);
+
+  fs.writeFileSync("public/llms.txt", markdownContent);
 }
-```
-
-## OpenAPI-First API
-
-How do agents understand what API endpoints are available and how to use them? 
-
-We maintain a comprehensive OpenAPI specification that serves as both documentation and a contract for our API.
-
-Our API is fully documented at [api.reference.langfuse.com](https://api.reference.langfuse.com) with:
-
-- Complete endpoint descriptions  
-- Request/response schemas  
-- Authentication examples  
-- Error handling documentation
-
-Our spec is available at:
-
-```shell
-curl https://cloud.langfuse.com/generated/api/openapi.yml
 ```
 
 ## Docs MCP Server
@@ -299,14 +420,14 @@ curl https://cloud.langfuse.com/generated/api/openapi.yml
 We also built a public, unauthenticated MCP server specifically for documentation access.
 
 <Frame fullWidth>
-![Docs MCP Server](/images/blog/2026-02-13-will-you-be-my-cli/mcp.png)
+  ![Docs MCP Server](/images/blog/2026-02-13-will-you-be-my-cli/mcp.png)
 </Frame>
 
 **What It Provides**  
 The docs MCP server exposes three tools:
 
-1. **`searchLangfuseDocs`** \- Semantic search over all documentation  
-2. **`getLangfuseDocsPage`** \- Fetch specific pages as markdown  
+1. **`searchLangfuseDocs`** \- Semantic search over all documentation
+2. **`getLangfuseDocsPage`** \- Fetch specific pages as markdown
 3. **`getLangfuseOverview`** \- Get the documentation index (llms.txt)
 
 **Installation**  
@@ -339,11 +460,9 @@ The MCP server is also used in our [public example project](/docs/demo) that ans
 
 ## Authenticated MCP Server
 
-How can non-coding agents (ChatGPT, Claude, …) interact with your Langfuse project data?
+How can non-coding agents (ChatGPT, Claude, …) interact with your Langfuse project data and especially use prompts from Langfuse Prompt Management?
 
-For this we built an authenticated MCP server that provides access to your Langfuse data through the Model Context Protocol (MCP).
-
-Right now, this MCP server is primarily focused on Langfuse prompt management, but we plan to extend this pattern to traces, observations, datasets, evaluations, and more.
+For this, we built an authenticated MCP server that provides access to your Langfuse data through the Model Context Protocol (MCP).
 
 We have written in more detail about how it works and how we built it here: [Blog: Building Langfuse’s MCP Server](https://langfuse.com/blog/2025-12-09-building-langfuse-mcp-server)
 
@@ -377,8 +496,7 @@ Try it out and let us know what you think. And if you build something cool with 
 
 ## Resources
 
-- [Agent Skills Repository](https://github.com/langfuse/skills)  
-- [Langfuse CLI on npm](https://www.npmjs.com/package/langfuse-cli)  
-- [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)  
+- [Agent Skills Repository](https://github.com/langfuse/skills)
+- [Langfuse CLI on npm](https://www.npmjs.com/package/langfuse-cli)
+- [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)
 - [Langfuse Authenticated MCP Server](/docs/api-and-data-platform/features/mcp-server)
-
