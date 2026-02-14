@@ -1,7 +1,7 @@
 ---
 title: Using Agent Skills to Automatically Improve your Prompts
 date: 2026/02/13
-description: Use the Langfuse API skill for Claude Code to analyze trace feedback and iteratively improve your prompts.
+description: Use the Langfuse CLI skill for Claude Code to analyze trace feedback and iteratively improve your prompts.
 tag: guide
 author: Lotte
 ---
@@ -10,7 +10,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="Using Agent Skills to Automatically Improve your Prompts"
-  description="Use the Langfuse API skill to analyze trace feedback and iteratively improve your prompts."
+  description="Use the Langfuse CLI skill to analyze trace feedback and iteratively improve your prompts."
   date="February 13, 2026"
   authors={["lotteverheyden"]}
 />
@@ -18,15 +18,15 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Callout } from "nextra/components";
 import { Frame } from "@/components/Frame";
 
-This guide demonstrates how you can use an AI agent and the [Langfuse API skill](https://github.com/langfuse/skills) to iteratively improve your prompts. You annotate a handful of traces in Langfuse, then let the agent fetch your feedback, analyze the patterns, and propose prompt changes. It's a fast way to get from a rough first prompt to something more robust. It will get you from 10% to 70% before you invest in more structured evaluation like datasets and automated scoring.
+This guide demonstrates how you can use an AI agent and the [Langfuse CLI skill](https://github.com/langfuse/skills) to iteratively improve your prompts. You annotate a handful of traces in Langfuse, then let the agent fetch your feedback, analyze the patterns, and propose prompt changes. It's a fast way to get from a rough first prompt to something more robust. It will get you from 10% to 70% before you invest in more structured evaluation like datasets and automated scoring.
 
-We'll walk through the full loop using an example: a chatbot that searches past GitHub discussions in the Langfuse repository. We'll use Claude with the Langfuse API skill as the AI agent.
+We'll walk through the full loop using an example: a chatbot that searches past GitHub discussions in the Langfuse repository. We'll use Claude with the Langfuse CLI skill as the AI agent.
 
 ## Prerequisites
 
 **An LLM application with Langfuse tracing set up**. If your application is not instrumented yet, you can take a look at the [tracing get started page](/docs/observability/get-started) to set it up. 
 
-**An AI agent with the Langfuse API skill installed**. You can use any AI agent, we'll use Claude with the Langfuse API skill in this guide. You can follow the installation instructions on the [Langfuse API skill page](https://github.com/langfuse/skills/tree/main/skills/langfuse-api).
+**An AI agent with the Langfuse CLI skill installed**. You can use any AI agent, we'll use Claude with the [Langfuse CLI](https://github.com/langfuse/langfuse-cli) skill in this guide. You can follow the installation instructions on the [Langfuse CLI skill page](https://github.com/langfuse/skills/tree/main/skills/langfuse-cli).
 
 **Your prompt managed in Langfuse Prompt Management (optional)**. This guide manages the prompt in Langfuse, but you can also manage the prompt elsewhere. If you'd like to have your prompt in Langfuse, you can follow the instructions on the [Langfuse Prompt Management page](/docs/prompt-management/get-started).
 
@@ -146,7 +146,7 @@ Retrieve all scores that were created today. For each score, include the score
 name, any comments left on the score, and the full content of the linked trace.
 ```
 
-Claude pulls in everything via the Langfuse API and comes back with a structured summary:
+Claude pulls in everything via the Langfuse CLI and comes back with a structured summary:
 
 > **Claude:** Here's a summary of all **8 annotation scores** from today. They fall into 3 score categories:
 >
@@ -247,7 +247,7 @@ You can keep doing iterations of this loop until you don't see any obvious issue
 
 In this guide we manually annotated traces, but the same approach works with different sources of feedback:
 
-- **User feedback from production**: If your app collects [user feedback (thumbs up/down, ratings, comments)](/docs/observability/features/user-feedback), you can fetch those via the API and use them in the same way. Be selective though: not all user feedback is actionable, so you may want to filter for feedback you actually agree with before handing it to the agent.
+- **User feedback from production**: If your app collects [user feedback (thumbs up/down, ratings, comments)](/docs/observability/features/user-feedback), you can fetch those via the CLI and use them in the same way. Be selective though: not all user feedback is actionable, so you may want to filter for feedback you actually agree with before handing it to the agent.
 - **Annotation queues**: If your team reviews traces through [Langfuse annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), you can fetch scores from a specific queue to work with a curated set of annotations.
 - **Experiment results**: After running an [experiment](/docs/evaluation/experiments), you can fetch the scores and comments from that run. 
 
