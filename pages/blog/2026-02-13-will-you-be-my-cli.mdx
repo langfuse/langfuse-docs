@@ -50,9 +50,9 @@ Let's dive into each one.
 
 How can agents learn not just what Langfuse is, but how to actually use it in common scenarios? 
 
-Skills, especially in combination with a CLI (see more below) are the most effective pattern for this. We created [a skills repository](https://github.com/langfuse/skills) with structured workflows for the most common Langfuse integration tasks.
+Skills, especially in combination with a CLI (see more below), are the most effective pattern for this. We created [a skills repository](https://github.com/langfuse/skills) with structured workflows for the most common Langfuse integration tasks.
 
-We've published three Langfuse specific skills to start with, more will follow:
+We've published three Langfuse-specific skills to start with, more will follow:
 
 <Frame fullWidth>
 ![Skills](/images/blog/2026-02-13-will-you-be-my-cli/skills-2.png)
@@ -138,7 +138,7 @@ Agents work better with raw markdown than rendered HTML. How do we serve documen
 
 Every Langfuse documentation or website page can be accessed as markdown, either by appending `.md` to the URL or by sending an `Accept: text/markdown` header. 
 
-This significantly reduces filesizes and the chance that documentation content is understood incorrectly due to incorrect parsing of HTML content.
+This significantly reduces file sizes and the chance that documentation content is understood incorrectly due to incorrect parsing of HTML content.
 
 <Frame fullWidth>
 ![Markdown endpoints](/images/blog/2026-02-13-will-you-be-my-cli/markdown.png)
@@ -172,7 +172,7 @@ Agents can now directly consume documentation content without parsing HTML. This
 
 How can agents quickly find relevant information across all documentation?
 
- We exposed our semantic search as a public REST API and included it in our SKILL. Thereby agents can not only browse the docs manually but can also search through all indexed docs and github issues/discussions.
+We exposed our semantic search as a public REST API and included it in our Skill. Thereby agents can not only browse the docs manually but can also search through all indexed docs and GitHub issues/discussions.
 
 Instead of reading through dozens of documentation pages, agents can ask natural language questions and get synthesized answers with source citations.
 
@@ -341,9 +341,9 @@ The MCP server is also used in our [public example project](/docs/demo) that ans
 
 How can non-coding agents (ChatGPT, Claude, …) interact with your Langfuse project data?
 
-For this we built an authenticated MCP server that provides access to your Langfuse data through the Model Context Protocol (MCP)
+For this we built an authenticated MCP server that provides access to your Langfuse data through the Model Context Protocol (MCP).
 
-Right now, this MCP server is primarily focused on langfuse prompt management, but we plan to extend this pattern to traces, observations, datasets, evaluations, and more.
+Right now, this MCP server is primarily focused on Langfuse prompt management, but we plan to extend this pattern to traces, observations, datasets, evaluations, and more.
 
 We have written in more detail about how it works and how we built it here: [Blog: Building Langfuse’s MCP Server](https://langfuse.com/blog/2025-12-09-building-langfuse-mcp-server)
 
