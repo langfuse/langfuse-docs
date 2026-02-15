@@ -216,12 +216,9 @@ export default function CloudRegionSelectorPage() {
                         )}
                       </span>
                       <div className="min-w-0">
-                        <div className="mb-1 flex items-center justify-between gap-2">
-                          <p className="text-base font-semibold">
-                            {card.title}
-                          </p>
-                          {isSignedIn && <SignedInHint />}
-                        </div>
+                        <p className="mb-1 text-base font-semibold">
+                          {card.title}
+                        </p>
                         <p className="mt-1.5 text-xs font-medium tracking-wide text-muted-foreground/80">
                           AWS {card.awsRegion} • {card.awsLocation}
                         </p>
@@ -233,7 +230,7 @@ export default function CloudRegionSelectorPage() {
                         </code>
                       </div>
                     </div>
-                    <div>
+                    <div className="flex flex-col items-center gap-1.5">
                       <Button
                         asChild
                         size="sm"
@@ -247,6 +244,7 @@ export default function CloudRegionSelectorPage() {
                           <ArrowRight className="h-4 w-4" />
                         </a>
                       </Button>
+                      {isSignedIn && <SignedInHint />}
                     </div>
                   </div>
                 );
