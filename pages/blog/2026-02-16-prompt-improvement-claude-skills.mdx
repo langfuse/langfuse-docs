@@ -54,6 +54,9 @@ We're using a chatbot that searches GitHub discussions in the [Langfuse reposito
 
 It fetches its system prompt from Langfuse, searches Github multiple times with different queries, evaluates the results and responds with the issues that are relevant. Every interaction produces a trace in Langfuse. You can find the full example repository [here](https://github.com/langfuse/langfuse-examples/tree/main/applications/github-issue-search).
 
+<details>
+<summary>Example application code snippet</summary>
+
 ```python
 from langfuse import Langfuse, get_client, observe
 from langfuse.openai import OpenAI
@@ -83,25 +86,23 @@ def handle_turn(client: OpenAI, console: Console, messages: list):
 
 def main():
     langfuse = Langfuse()
-    # Fetch the prompt from Langfuse 
+    # Fetch the prompt from Langfuse
     prompt = langfuse.get_prompt("github-issue-search", label="production")
     system_prompt = prompt.compile()
     messages = [{"role": "system", "content": system_prompt}]
     # ... conversation loop
 ```
 
+</details>
+
 {/* TODO: link to the full example repository */}
 
 
 ## Let's Dive In
 
-Before you start, you need to have some traces to work with. If your application isn't live yet, you can manually enter a few inputs to start with. In my case, I ran the chatbot with about 10 different inputs to cover a range of cases: feature requests, bug reports, off-topic questions, and some that were intentionally vague. 
+Before you start, you need to have some traces to work with. If your application isn't live yet, you can manually enter a few inputs to start with. In my case, I ran the chatbot with about 10 different inputs to cover a range of cases: feature requests, bug reports, off-topic questions, and some that were intentionally vague.
 
-<Frame>
-  <img src="/images/docs/guides/prompt-improvement-traces-overview.png" alt="Traces from the GitHub issue search chatbot in Langfuse" />
-</Frame>
-
-### Go Through your Traces and Annotate
+### 1. Go Through your Traces and Annotate
 
 Looking at the traces, there are likely a few things you notice right away. Some are clear mistakes, in other cases you only realize you want a different behavior while reading the trace. You'll have many scattered feedback points, which you want to write down somewhere so you have a log of things to tackle.
 
@@ -113,28 +114,20 @@ You can do this in Langfuse with **scores and comments**. I like to create a few
 
 > You need to create score configs in order to manually annotate your traces with these scores. See [manual scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui) and [how to create and manage score configs](/faq/all/manage-score-configs) for details.
 
-Every time you notice something, annotate the trace with the relevant score and add your specific feedback as a comment. The score gives Claude the category, the comment gives it the reason why, which is what you want Claude to address later on.
-
 <Frame>
   <img src="/images/docs/guides/prompt-improvement-score-annotation.png" alt="Annotating a trace with a score and comment in Langfuse" />
 </Frame>
 
-Here are a few examples:
-
-| User input | Score | Comment |
-|---|---|---|
-| "Can I export my traces as CSV?" | `response-not-relevant` | "The tickets found clearly confirm CSV export exists, but the bot gave a vague answer instead of just saying yes." |
-| "What's the weather today?" | `outside-response-scope` | "Off-topic question. Should have said this is outside its scope instead of trying to answer." |
-| "I want to set up automated alerts when my LLM's latency exceeds a threshold" | `bad-search-results` | "Only searched for 'latency', missed 'alerts' entirely. There are relevant issues about automated alerts that it didn't find." |
+Every time you notice something, annotate the trace with the relevant score and add your specific feedback as a comment. The score gives Claude the category, the comment gives it the reason why, which is what you want Claude to address later on.
 
 You don't need to score every trace. Just the ones where something is clearly off. I scored 8 out of roughly 10.
 
 
-### Analyze with Claude
+### 2. Analyze with Claude
 
 After some time, you'll have a good collection of feedback to work with. Where in the past you might have manually started working through these points, you can now ask Claude to do a lot of the heavy lifting.
 
-I asked it to fetch my scores:
+**I asked it to fetch my scores:**
 
 ```text filename="Prompt"
 Retrieve all scores that were created today. For each score, include the score
@@ -143,68 +136,26 @@ name, any comments left on the score, and the full content of the linked trace.
 
 Claude pulls in everything via the Langfuse CLI and comes back with a structured summary:
 
-> **Claude:** Here's a summary of all **8 annotation scores** from today. They fall into 3 score categories:
->
-> **`response-not-relevant` (4 scores)**
->
-> | # | User Input | Your Comment |
-> |---|---|---|
-> | 1 | "Tracing doesn't work" | Chatbot assumes open issue status = unresolved bug. It can't assume issues are ongoing based on ticket status alone. Sometimes an issue stays open because the user didn't explicitly confirm that it's resolved. |
-> | 2 | "Can I export my traces as CSV?" | The tickets found clearly confirm CSV export exists, but the bot gave a vague answer instead of just saying yes. |
-> | 3 | "I want to compare prompt versions side by side" | First result was relevant, second was an unrelated bug report. Don't surface vaguely related bug tickets for feature requests. |
-> | 4 | "I want to track cost per user per day and set budget alerts" | Listed loosely related cost bugs instead of recognizing there's no matching ticket. Should have said so and suggested opening one. |
->
-> **`outside-response-scope` (3 scores)**
->
-> | # | User Input | Your Comment |
-> |---|---|---|
-> | 5 | "It would be great to have a dark mode" | Found no results but claimed "there have been discussions about dark mode in the past." That's made up. |
-> | 6 | "I want to track cost per user per day and set budget alerts" | Tool calls failed but the bot gave generic advice instead of telling the user it can't reach GitHub right now. |
-> | 7 | "What's the weather today?" | Off-topic question. Should have said this is outside its scope instead of trying to answer. |
->
-> **`bad-search-results` (1 score)**
->
-> | # | User Input | Your Comment |
-> |---|---|---|
-> | 8 | "I want to set up automated alerts when my LLM's latency exceeds a threshold" | Only searched for "latency", missed "alerts" entirely. There are relevant issues about automated alerts that it didn't find. |
+<Frame>
+  <img src="/images/docs/guides/prompt-improvement-scores-summary.png" alt="Claude's summary of all 8 annotation scores grouped by category: response-not-relevant, outside-response-scope, and bad-search-results" />
+</Frame>
 
-Now ask Claude to look at the prompt itself:
+**Now ask Claude to look at the prompt itself:**
 
 ```text filename="Prompt"
 Fetch the prompt linked to these traces. What gaps in this prompt could be
 causing these issues?
 ```
 
-Because our prompt is linked to the traces, Claude can fetch the correct version and analyze it. Here's the prompt it fetched (version 1):
+Because our prompt is linked to the traces, Claude can fetch the correct version and analyze it. In this case it mapped each annotated issue back to six specific gaps. See the three first ones below:
 
-> You are a helpful assistant that searches past GitHub issues in the Langfuse repository (langfuse/langfuse) to help users find whether their question, bug, or feature request has already been reported.
->
-> When a user describes a problem or idea:
-> 1. Think about what keywords and phrases would match relevant issues.
-> 2. Use the search_issues tool to search. Call it multiple times with different queries to get better coverage (e.g. try synonyms, related terms, error messages).
-> 3. Summarize what you found. Always include the issue number, title, state (open/closed), and URL so users can check directly.
-> 4. If nothing relevant was found, let the user know it appears to be a new topic and encourage them to open an issue.
->
-> Be concise but thorough.
+<Frame>
+  <img src="/images/docs/guides/prompt-improvement-gap-analysis.png" alt="Claude's analysis of prompt gaps: no scope guardrail, no guidance on tool failure, no instruction to interpret results critically" />
+</Frame>
 
-Claude maps each annotated issue back to a specific gap:
+This kind of analysis across multiple traces would take a while to do by hand.
 
-> **Claude:** Here's what I see that could cause the annotated issues:
->
-> **1. No scope guardrail** _(scores 5, 6, 7: `outside-response-scope`)_
-> The prompt says "you are a helpful assistant" with no instruction to stay within scope. When asked "what's the weather?", it tried to help. It needs an explicit instruction to only handle Langfuse-related queries.
->
-> **2. No guidance on tool failure** _(score 6)_
-> There's no instruction for what to do when `search_issues` fails or returns errors. The bot fell back to generic advice instead of transparently telling the user the tool is unavailable.
->
-> **3. No instruction to interpret results critically** _(scores 1, 2, 3, 4)_
-> The prompt says "summarize what you found" but doesn't tell the bot to evaluate relevance. It lists everything it gets back, even tangentially related bug tickets for a feature request.
->
-> [ 3 more issues... ]
-
-Six concrete issues, each traced back to your annotations. This kind of analysis across multiple traces would take a while to do by hand.
-
-### Improve the prompt
+### 3. Improve the prompt
 
 You can iterate on the issues Claude identified if you don't completely agree with them. Once you're happy with it, you can go into improving the prompt.
 
@@ -219,7 +170,9 @@ Claude will propose a revised prompt. Once you agree with all changes, you can u
 Update the prompt in Langfuse.
 ```
 
-> **Claude:** Done. The updated prompt is live as **version 2** of `github-issue-search`, with the `production` and `latest` labels applied.
+<Frame>
+  <img src="/images/docs/guides/prompt-improvement-claude-response.png" alt="Claude confirms the updated prompt is live as version 2 of github-issue-search with production and latest labels applied" />
+</Frame>
 
 Here's what the diff looks like in Langfuse:
 
@@ -227,7 +180,7 @@ Here's what the diff looks like in Langfuse:
   <img src="/images/docs/guides/prompt-improvement-prompt-diff.png" alt="Prompt diff in Langfuse showing changes from version 1 to version 2" />
 </Frame>
 
-### Keep iterating
+### 4. Keep iterating
 
 You can keep doing iterations of this loop until you don't see any obvious issues. In my case, I did about 3 iterations, after which I was consistently getting good results on my small set of traces. 
 
