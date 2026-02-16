@@ -1,7 +1,7 @@
 ---
 title: Using Agent Skills to Automatically Improve your Prompts
-date: 2026/02/13
-description: Use the Langfuse CLI skill for Claude Code to analyze trace feedback and iteratively improve your prompts.
+date: 2026/02/16
+description: Use the Langfuse skill for Claude Code to analyze trace feedback and iteratively improve your prompts.
 tag: guide
 author: Lotte
 ---
@@ -10,28 +10,26 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="Using Agent Skills to Automatically Improve your Prompts"
-  description="Use the Langfuse CLI skill to analyze trace feedback and iteratively improve your prompts."
-  date="February 13, 2026"
+  description="Use the Langfuse skill to analyze trace feedback and iteratively improve your prompts."
+  date="February 16, 2026"
   authors={["lotteverheyden"]}
 />
 
 import { Callout } from "nextra/components";
 import { Frame } from "@/components/Frame";
 
-This guide demonstrates how you can use an AI agent and the [Langfuse CLI skill](https://github.com/langfuse/skills) to iteratively improve your prompts. You annotate a handful of traces in Langfuse, then let the agent fetch your feedback, analyze the patterns, and propose prompt changes. It's a fast way to get from a rough first prompt to something more robust. It will get you from 10% to 70% before you invest in more structured evaluation like datasets and automated scoring.
 
-We'll walk through the full loop using an example: a chatbot that searches past GitHub discussions in the Langfuse repository. We'll use Claude with the Langfuse CLI skill as the AI agent.
+Did you know you can use an AI agent and the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) to iteratively improve your prompts? You annotate a handful of traces in Langfuse, then let the agent fetch your feedback, analyze the patterns, and propose prompt changes. It's a fast way to get from a rough first prompt to something more robust. It will get you from 10% to 70% before you invest in more structured evaluation like datasets and automated scoring.
+
+We'll walk through the full loop using an example: a chatbot that searches past GitHub discussions in the Langfuse repository. We'll use Claude with the Langfuse skill as the AI agent.
 
 ## Prerequisites
 
 **An LLM application with Langfuse tracing set up**. If your application is not instrumented yet, you can take a look at the [tracing get started page](/docs/observability/get-started) to set it up. 
 
-**An AI agent with the Langfuse CLI skill installed**. You can use any AI agent, we'll use Claude with the [Langfuse CLI](https://github.com/langfuse/langfuse-cli) skill in this guide. You can follow the installation instructions on the [Langfuse CLI skill page](https://github.com/langfuse/skills/tree/main/skills/langfuse-cli).
+**An AI agent with the Langfuse skill installed**. You can use any AI agent, we'll use Claude with the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) in this guide (which uses the [Langfuse CLI](https://github.com/langfuse/langfuse-cli) under the hood).
 
-**Your prompt managed in Langfuse Prompt Management (optional)**. This guide manages the prompt in Langfuse, but you can also manage the prompt elsewhere. If you'd like to have your prompt in Langfuse, you can follow the instructions on the [Langfuse Prompt Management page](/docs/prompt-management/get-started).
-
-
-
+**Your prompt managed in Langfuse Prompt Management (optional)**. This lets the agent fetch and update your prompt directly, and links prompts to traces automatically. See the [Prompt Management setup guide](/docs/prompt-management/get-started) and [linking prompts to traces](/docs/prompt-management/features/link-to-traces).
 
 
 ## Context on the Workflow
@@ -42,12 +40,9 @@ Before diving into the walkthrough, here's a quick overview of the workflow and 
 
 The workflow is a loop with three steps: you look at traces, annotate the ones that are off, and then hand your annotations to an AI agent that analyzes them and updates the prompt. Then you run the app again and repeat until the obvious issues are gone.
 
-```mermaid
-graph LR
-    B["Review traces and annotate failures"] --> C["Agent fetches scores and analyzes prompt gaps"]
-    C --> D["Agent updates prompt in Langfuse"]
-    D --> B
-```
+<Frame fullWidth>
+  <img src="/images/docs/guides/prompt-improvement-workflow-diagram.png" alt="Workflow diagram: You review traces and annotate failures, the agent fetches scores and analyzes gaps in the prompt, then updates prompts in Langfuse" />
+</Frame>
 
 ### The Example Application
 
@@ -141,7 +136,7 @@ After some time, you'll have a good collection of feedback to work with. Where i
 
 I asked it to fetch my scores:
 
-```
+```text filename="Prompt"
 Retrieve all scores that were created today. For each score, include the score
 name, any comments left on the score, and the full content of the linked trace.
 ```
@@ -175,7 +170,7 @@ Claude pulls in everything via the Langfuse CLI and comes back with a structured
 
 Now ask Claude to look at the prompt itself:
 
-```
+```text filename="Prompt"
 Fetch the prompt linked to these traces. What gaps in this prompt could be
 causing these issues?
 ```
@@ -205,14 +200,7 @@ Claude maps each annotated issue back to a specific gap:
 > **3. No instruction to interpret results critically** _(scores 1, 2, 3, 4)_
 > The prompt says "summarize what you found" but doesn't tell the bot to evaluate relevance. It lists everything it gets back, even tangentially related bug tickets for a feature request.
 >
-> **4. No instruction to synthesize an answer** _(score 2)_
-> For the CSV export question, the tickets clearly showed CSV export exists, but the bot didn't draw that conclusion. It needs to answer the user's question first, then cite supporting issues.
->
-> **5. No guidance on unverified claims** _(score 5)_
-> When no results were found for dark mode, the bot invented "there have been discussions in the past." It needs to only state what it can verify from search results.
->
-> **6. Search strategy is underspecified** _(score 8)_
-> For the alerts query, the bot only searched "latency" and missed "alerts." It needs to decompose the user's request into its distinct concepts and search for each independently.
+> [ 3 more issues... ]
 
 Six concrete issues, each traced back to your annotations. This kind of analysis across multiple traces would take a while to do by hand.
 
@@ -220,14 +208,14 @@ Six concrete issues, each traced back to your annotations. This kind of analysis
 
 You can iterate on the issues Claude identified if you don't completely agree with them. Once you're happy with it, you can go into improving the prompt.
 
-```
+```text filename="Prompt"
 Propose updates to this prompt that addresses the issues above. Keep it concise;
 group related issues into single instructions where possible.
 ```
 
 Claude will propose a revised prompt. Once you agree with all changes, you can update the prompt. You can ask Claude to update the prompt in Langfuse for you.
 
-```
+```text filename="Prompt"
 Update the prompt in Langfuse.
 ```
 
