@@ -4,5 +4,5 @@ export default {
   "headless-initialization": {},
   "organization-creators": {},
   "ui-customization": {},
-  "organization-management-api": {},
+  "instance-management-api": {},
 };

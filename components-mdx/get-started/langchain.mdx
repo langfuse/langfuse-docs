@@ -4,11 +4,11 @@ import Env from "@/components-mdx/env-python.mdx";
 pip install langfuse langchain-openai
 ```
 
-Add your Langfuse credentials as environment variables.
+Add your Langfuse credentials as environment variables so the callback handler knows which project to write to.
 
 <Env />
 
-Initialize the Langfuse callback handler.
+Initialize the Langfuse callback handler. LangChain has its own callback system, and Langfuse listens to those callbacks to record what your chains and LLMs are doing.
 
 ```python
 from langfuse.langchain import CallbackHandler
@@ -16,7 +16,7 @@ from langfuse.langchain import CallbackHandler
 langfuse_handler = CallbackHandler()
 ```
 
-Add the Langfuse callback handler to your chain.
+Add the Langfuse callback handler to your chain. The Langfuse callback handler plugs into LangChain’s event system. Every time the chain runs or the LLM is called, LangChain emits events, and the handler turns those into traces and observations in Langfuse.
 
 ```python {10}
 from langchain_openai import ChatOpenAI

@@ -1,14 +1,17 @@
-**Install package**
+**Install packages**
+
+Install the Langfuse tracing SDK, the Langfuse OpenTelemetry integration, and the OpenTelemetry Node SDK.
+
 ```sh
-npm install @langfuse/tracing
+npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 ```
 
 **Add credentials**
 
-Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
-
 import EnvJS from "@/components-mdx/env-js.mdx";
 import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
+
+Add your Langfuse credentials to your environment variables so the tracing SDK knows which Langfuse project it should send your recorded data to.
 
 <EnvJS />
 
@@ -18,15 +21,19 @@ import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
 
 **Instrument application**
 
+Instrumentation means adding code that records what’s happening in your application so it can be sent to Langfuse. Here, OpenTelemetry acts as the system that collects those recordings.
+
 ```ts filename="server.ts"
 import { startActiveObservation, startObservation } from "@langfuse/tracing";
 
+// startActiveObservation creates a trace for this block of work.
+// Everything inside automatically becomes part of that trace.
 await startActiveObservation("user-request", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" },
   });
 
-  // This generation will automatically be a child of "user-request"
+  // This generation will automatically be a child of "user-request" because of the startObservation function.
   const generation = startObservation(
     "llm-call",
     {
@@ -36,14 +43,15 @@ await startActiveObservation("user-request", async (span) => {
     { asType: "generation" },
   );
 
-  // ... LLM call logic ...
+  // ... your real LLM call would happen here ...
 
   generation
     .update({
-      output: { content: "The capital of France is Paris." },
+      output: { content: "The capital of France is Paris." }, // update the output of the generation
     })
-    .end();
+    .end(); // mark this nested observation as complete
 
+  // Add final information about the overall request
   span.update({ output: "Successfully answered." });
 });
 ```

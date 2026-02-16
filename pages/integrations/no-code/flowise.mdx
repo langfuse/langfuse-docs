@@ -2,7 +2,7 @@
 title: Observability and Tracing for Flowise
 sidebarTitle: Flowise
 logo: /images/integrations/flowise_icon.svg
-description: Open source observability for Flowise applications. Automatically capture detailed traces and metrics for every request.
+description: "Monitor and trace your Flowise LLM applications with Langfuse. Automatically capture detailed traces, costs, and metrics for every request in your no-code AI workflows."
 ---
 
 # Flowise Observability & Tracing
@@ -65,13 +65,13 @@ The integration automatically maps the following fields from Flowise to Langfuse
 
 | Flowise                                                         | Langfuse                                     | Required version                                                                     |
 | --------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [chatId](https://docs.flowiseai.com/api-reference/chat-message) | [sessionId](/docs/tracing-features/sessions) | [Flowise 1.4.10](https://github.com/FlowiseAI/Flowise/releases/tag/flowise%401.4.10) |
+| [chatId](https://docs.flowiseai.com/api-reference/chat-message) | [sessionId](/docs/observability/features/sessions) | [Flowise 1.4.10](https://github.com/FlowiseAI/Flowise/releases/tag/flowise%401.4.10) |
 
 ## Override Config
 
 The Flowise allows you to pass additional parameters as `overrideConfig` to the Langfuse API. This can be used to pass additional information to Langfuse, such as `userId` for user-level tracking.
 
-Learn more about `overrideConfig` in the [Flowise Prediction API documentation](https://docs.flowiseai.com/using-flowise/api#prediction-api).
+Learn more about `overrideConfig` in the [Flowise Prediction API documentation](https://docs.flowiseai.com/api-reference/prediction).
 
 ```json
 {

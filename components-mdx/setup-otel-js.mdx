@@ -1,10 +1,40 @@
-Install the OpenTelemetry Node SDK package:
+Install the OpenTelemetry SDK, which the Langfuse integration uses under the hood to capture the data from each OpenAI call.
 
 ```bash
 npm install @opentelemetry/sdk-node
 ```
 
-Create a `instrumentation.ts` file that initializes the OpenTelemetry `NodeSDK` and registers the `LangfuseSpanProcessor`.
+Next is initializing the Node SDK. You can do that either in a dedicated instrumentation file or directly at the top of your main file.
+
+
+<LangTabs items={["Inline setup", "Instrumentation file"]}>
+
+<Tab>
+
+The inline setup is the simplest way to get started. It works well for projects where your main file is executed first and import order is straightforward.
+
+We can now initialize the `LangfuseSpanProcessor` and start the SDK. The `LangfuseSpanProcessor` is the part that takes that collected data and sends it to your Langfuse project. 
+
+Important: start the SDK before initializing the logic that needs to be traced to avoid losing data.
+
+```ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+ 
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+ 
+sdk.start();
+```
+
+</Tab>
+
+<Tab>
+
+The instrumentation file often preferred when you're using frameworks that have complex startup order (Next.js, serverless, bundlers) or if you want a clean, predictable place where tracing is always initialized first.
+
+Create an `instrumentation.ts` file, which sets up the _collector_ that gathers data about each OpenAI call. The `LangfuseSpanProcessor` is the part that takes that collected data and sends it to your Langfuse project.
 
 ```ts filename="instrumentation.ts" /LangfuseSpanProcessor/
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -17,8 +47,14 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-Import the `instrumentation.ts` file at the top of your application.
+Import the `instrumentation.ts` file first so all later imports run with tracing enabled.
 
 ```ts filename="index.ts"
 import "./instrumentation"; // Must be the first import
 ```
+
+</Tab>
+
+</LangTabs>
+
+

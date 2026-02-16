@@ -1,6 +1,6 @@
 ---
 title: Are there any limits to the Langfuse API?
-tags: [platform, api]
+tags: [platform]
 ---
 
 # What are the limits to the Langfuse API?
@@ -18,6 +18,10 @@ While the [Langfuse API](/docs/api) is extremely open and flexible, there are so
 
 5MB per request and 5MB per response
 
+### Request Constraints
+
+- **Trace Deletion**: We advise strongly against trying to send more than 30-50 trace ids in a single DELETE request. Consider using [data retention](/docs/administration/data-retention) to automatically delete old traces instead of manual deletion.
+
 ### Rate Limits
 
 Rate limits are applied per-organization.
@@ -26,6 +30,7 @@ Rate limits are applied per-organization.
 | ------------------------------------------------------------------------------------------------------- | ------------------ | ------------------ | ------------------- |
 | **Tracing**. Batched `/ingestion` and `/otel` endpoints used by SDKs and integrations to ingest traces. | 1,000&nbsp;req/min | 4,000&nbsp;req/min | 20,000&nbsp;req/min |
 | **Legacy Tracing**. Legacy ingestion endpoints.                                                         | 100&nbsp;req/min   | 400&nbsp;req/min   | 400&nbsp;req/min    |
+| **Trace Deletion**. DELETE APIs used to delete traces.                                                  | 50&nbsp;req/day    | 200&nbsp;req/day   | 1,000&nbsp;req/day  |
 | **Prompts**. GET APIs used to fetch prompts for use in applications.                                    | No limit           | No limit           | No limit            |
 | **Metrics**. GET APIs used to fetch analytics data, e.g. [metrics api](/docs/analytics/metrics-api).    | 100&nbsp;req/day   | 200&nbsp;req/day   | 2000&nbsp;req/day   |
 | **Datasets**. APIs used to work with [datasets and experiments](/docs/datasets).                        | 100&nbsp;req/min   | 200&nbsp;req/min   | 1,000&nbsp;req/min  |

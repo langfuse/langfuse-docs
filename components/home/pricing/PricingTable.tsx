@@ -110,7 +110,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       href: "https://cloud.langfuse.com",
       featured: true,
       description:
-        "For production projects. Longer data retention and unlimited users.",
+        "For production projects. Longer data access and unlimited users.",
       price: "$29",
       priceDiscountCta: {
         name: "Discounts available",
@@ -148,7 +148,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         <>
           100k units / month included, additional: <GraduatedPricingText />
         </>,
-        "Unlimited data access",
+        "3 years data access",
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
@@ -228,9 +228,11 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         price: "Custom Pricing",
         mainFeatures: [
           "All Open Source features",
+          "Management APIs",
           "Project-level RBAC",
-          "Enterprise Security Features",
-          "SOC2, ISO27001, and InfoSec reviews",
+          "Data Retention Policies",
+          "Audit Logs",
+          "ISO27001 and InfoSec reviews",
           "Dedicated support engineer",
           "Support SLA",
           "Billing via AWS Marketplace",
@@ -379,7 +381,7 @@ const sections: Section[] = [
         name: "Included usage",
         description:
           "Billable units are the collection of created traces, observations, and scores in Langfuse.",
-        href: "/docs/observability/data-model",
+        href: "/docs/administration/billable-units",
         tiers: {
           cloud: {
             Hobby: "50k units",
@@ -396,7 +398,7 @@ const sections: Section[] = [
         name: "Additional usage",
         description:
           "Billable units are the collection of created traces, observations, and scores in Langfuse. Pricing follows graduated tiers with lower rates at higher volumes.",
-        href: "/docs/observability/data-model",
+        href: "/docs/administration/billable-units",
         tiers: {
           cloud: {
             Hobby: false,
@@ -439,8 +441,8 @@ const sections: Section[] = [
           cloud: {
             Hobby: "30 days",
             Core: "90 days",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
+            Pro: "3 years",
+            Enterprise: "3 years",
           },
         },
       },
@@ -940,7 +942,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "SSO via Google, AzureAD, GitHub",
+        name: "Sign in with Google, AzureAD, GitHub",
         tiers: {
           cloud: {
             Hobby: true,
@@ -1068,8 +1070,8 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Organization Management API",
-        href: "/self-hosting/administration/organization-management-api",
+        name: "Instance Management API",
+        href: "/self-hosting/administration/instance-management-api",
         tiers: {
           selfHosted: { "Open Source": ENTERPRISE },
         },
@@ -1145,7 +1147,7 @@ const sections: Section[] = [
         name: "Contracts",
         tiers: {
           cloud: {
-            Hobby: "Standard T&Cs",
+            Hobby: "Standard T&Cs & DPA",
             Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
             Enterprise: "Custom with " + YEARLY_COMMITMENT,
@@ -1159,7 +1161,7 @@ const sections: Section[] = [
         name: "Data processing agreement (GDPR)",
         href: "/security/dpa",
         tiers: {
-          cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": ENTERPRISE },
         },
       },
@@ -1321,7 +1323,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
           : "grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
         selectedTiers.length === 4 && "md:grid-cols-4",
         selectedTiers.length === 3 && "md:grid-cols-3",
-        selectedTiers.length === 2 && "md:grid-cols-2"
+        selectedTiers.length === 2 && "md:grid-cols-2",
       )}
     >
       {selectedTiers.map((tier) => (
@@ -1330,7 +1332,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
           className={cn(
             tier.featured && "border-primary",
             "relative h-full flex flex-col",
-            selectedTiers.length === 1 && "w-full max-w-lg"
+            selectedTiers.length === 1 && "w-full max-w-lg",
           )}
         >
           {/* Unlimited Users callout for Core and Pro */}
@@ -1515,7 +1517,7 @@ export function PricingTable({
         // Get the widths of each column
         const headerCells = headerRef.current.querySelectorAll("th");
         const widths = Array.from(headerCells).map(
-          (cell) => (cell as HTMLElement).getBoundingClientRect().width
+          (cell) => (cell as HTMLElement).getBoundingClientRect().width,
         );
         setColumnWidths(widths);
       }
@@ -1567,7 +1569,7 @@ export function PricingTable({
         <div
           className={cn(
             "mx-auto space-y-16",
-            selectedTiers.length === 1 ? "max-w-xl" : "max-w-2xl"
+            selectedTiers.length === 1 ? "max-w-xl" : "max-w-2xl",
           )}
         >
           {selectedTiers.map((tier) => (
@@ -1632,7 +1634,7 @@ export function PricingTable({
         aria-labelledby="comparison-heading"
         className={cn(
           "hidden lg:block bg-card rounded-lg overflow-hidden border mt-20",
-          selectedTiers.length === 1 && "max-w-4xl mx-auto"
+          selectedTiers.length === 1 && "max-w-4xl mx-auto",
         )}
         ref={tableRef}
       >
@@ -1693,7 +1695,7 @@ export function PricingTable({
                 <th
                   className={cn(
                     "text-left font-medium",
-                    selectedTiers.length === 1 ? "w-7/12" : "w-3/12"
+                    selectedTiers.length === 1 ? "w-7/12" : "w-3/12",
                   )}
                   scope="col"
                 ></th>
@@ -1702,7 +1704,7 @@ export function PricingTable({
                     key={tier.id}
                     className={cn(
                       "p-2 text-center text-lg text-foreground font-semibold",
-                      selectedTiers.length === 1 ? "w-5/12" : "w-2/12"
+                      selectedTiers.length === 1 ? "w-5/12" : "w-2/12",
                     )}
                     scope="col"
                   >

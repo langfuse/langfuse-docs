@@ -101,6 +101,154 @@ In the UI, create a dataset and use a slash (`/`) in the name field to organize 
   the API or JS/TS SDK, use URL encoding. For example, in TypeScript: `encodeURIComponent(name)`.
 </Callout>
 
+## Versioning
+
+To access Dataset Versions via the Langfuse UI, navigate to: **Datasets** > **Navigate to a specific dataset** > **Select Items Tab**. On this page you can toggle the version view.
+
+Every `add`, `update`, `delete`, or `archive` of dataset items produces a new dataset version. Versions track changes over time using timestamps.
+
+`GET` APIs return the latest version at query time by default. You can fetch datasets at specific version timestamps using the `version` parameter.
+
+Versioning applies to dataset items only, not dataset schemas. Dataset schema changes do not create new versions.
+
+### Fetch dataset at a specific version
+
+You can retrieve a dataset as it existed at a specific point in time by providing a version timestamp. This returns only the items that existed at that timestamp.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+from datetime import datetime, timedelta
+
+langfuse = get_client()
+
+# Capture dataset state as of 2025-12-15 at 06:30:00 UTC
+version_timestamp = datetime(2025, 12, 15, 6, 30, 0, tzinfo=timezone.utc)
+
+# Fetch dataset at version timestamp
+dataset_at_version = langfuse.get_dataset(
+    name="my-dataset",
+    version=version_timestamp
+)
+
+# Fetch latest version
+dataset_latest = langfuse.get_dataset(name="my-dataset")
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// Capture the timestamp (use item's createdAt)
+const versionTimestamp = new Date("2025-12-15T06:30:00").toISOString();
+
+// Fetch dataset at version timestamp
+const datasetAtVersion = await langfuse.dataset.get("my-dataset", {
+  version: versionTimestamp
+});
+
+// Fetch latest version
+const datasetLatest = await langfuse.dataset.get("my-dataset");
+```
+
+</Tab>
+<Tab>
+
+You can view all dataset versions by navigating to **Datasets** → **Select a dataset** → **Items Tab** → Toggle the **Version view**.
+
+<Frame fullWidth>![Dataset Version View](/images/docs/dataset-versioned-items.png)</Frame>
+
+</Tab>
+</LangTabs>
+
+### Run experiments on versioned datasets
+
+You can run experiments directly on versioned datasets. This is useful for comparing how your model performs against different dataset versions or reproducing experiment results with the exact dataset state from a specific point in time.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<Tab>
+
+```python
+from datetime import timedelta
+import time
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+version_timestamp = datetime(2025, 12, 15, 6, 30, 0, tzinfo=timezone.utc)
+
+# Fetch versioned dataset 
+versioned_dataset = langfuse.get_dataset("qa-dataset", version=version_timestamp)
+
+# Run experiment on the versioned dataset
+def my_llm_application(*, item, **kwargs):
+    # Your LLM application logic here
+    # For this example, we'll just return the expected output
+    return item.expected_output
+
+result = versioned_dataset.run_experiment(
+    name="Baseline Experiment v1",
+    description="Running on dataset v1",
+    task=my_llm_application
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// Capture the version timestamp
+const versionTimestamp = new Date("2025-12-15T06:30:00").toISOString();
+
+// Fetch versioned dataset
+const versionedDataset = await langfuse.dataset.get("qa-dataset", {
+  version: versionTimestamp
+});
+// Run experiment on the versioned dataset
+const result = await versionedDataset.runExperiment({
+  name: "Baseline Experiment v1",
+  description: "Running on dataset v1",
+  task: async ({ item }) => {
+    // Your LLM application logic here
+    // For this example, we'll just return the expected output
+    return item.expectedOutput;
+  }
+});
+```
+
+</Tab>
+<Tab>
+
+In the UI, you can select a specific dataset version when running experiments:
+
+1. Navigate to **Experiments** → **Run Experiment**
+2. Select your dataset in the **Dataset Selection** step
+3. Choose a version from the **Dataset Version** dropdown
+4. The dropdown shows available version timestamps
+5. The experiment will run against the dataset state at that specific point in time
+6. If no version is selected, the experiment runs against the latest version
+
+<Frame fullWidth>![Dataset Version Selection](/images/docs/dataset-versioned-items.png)</Frame>
+
+</Tab>
+</LangTabs>
+
+This approach ensures reproducibility by allowing you to:
+- Re-run experiments on historical dataset versions even after items are updated or deleted
+- Compare model performance before and after dataset changes
+- Maintain experiment consistency and reproduce exact results from previous runs
+- Test improvements against the same baseline dataset version
+
 ## Schema Enforcement
 
 Optionally add JSON Schema validation to your datasets to ensure all dataset items conform to a defined structure. This helps maintain data quality, catch errors early, and ensure consistency across your team.
@@ -243,6 +391,22 @@ In the UI, use `+ Add to dataset` on any observation (span, event, generation) o
 
 </Tab>
 </LangTabs>
+
+## Batch add observations to datasets
+
+You can batch add multiple observations to a dataset directly from the observations table. This is useful for quickly building test datasets from production data.
+
+The field mapping system gives you control over how observation data is transformed into dataset items. You can use the entire field as-is (e.g., map the full observation input to the dataset item input), extract specific values using JSON path expressions or build custom objects from multiple fields.
+
+1. Navigate to the **Observations** table
+2. Use filters to find relevant observations
+3. Select observations using the checkboxes
+4. Click **Actions** → **Add to dataset**
+5. Choose to create a new dataset or select an existing one
+6. Configure field mapping to control how observation data maps to dataset item fields
+7. Preview the mapping and confirm
+
+Batch operations run in the background with support for partial success. If some observations fail validation against a dataset schema, valid items are still added and errors are logged for review. You can monitor progress in **Settings** → **Batch Actions**.
 
 ## Edit/archive dataset items
 

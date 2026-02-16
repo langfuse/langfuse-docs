@@ -10,7 +10,7 @@ Langfuse is [open-source](/open-source) and data tracked with Langfuse is open. 
 
 Common use cases:
 
-- Train or [fine-tune](/docs/fine-tuning) models on the production traces in Langfuse. E.g. to create a small model after having used a large model in production for a specific use case.
+- Train or fine-tune models on the production traces in Langfuse. E.g. to create a small model after having used a large model in production for a specific use case.
 - Collect few-shot examples to improve quality of output.
 - Programmatically create [datasets](/docs/evaluation/features/datasets).
 
@@ -56,6 +56,15 @@ trace = langfuse.api.trace.get("traceId")
 ### Observations
 
 ```python
+# v2 API (recommended) - cursor-based pagination, selective field retrieval
+observations = langfuse.api.observations_v_2.get_many(
+    trace_id="abcdef1234",
+    type="GENERATION",
+    limit=100,
+    fields="core,basic,usage"
+)
+
+# v1 API
 observations = langfuse.api.observations.get_many(trace_id="abcdef1234", type="GENERATION", limit=100)
 observation = langfuse.api.observations.get("observationId")
 ```
@@ -88,7 +97,22 @@ Please refer to the [prompt management documentation](/docs/prompt-management/ge
 ### Metrics
 
 ```python
-query = """
+# v2 API (recommended) - optimized performance, observations view only
+query_v2 = """
+{
+  "view": "observations",
+  "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+  "dimensions": [{"field": "providedModelName"}],
+  "filters": [],
+  "fromTimestamp": "2025-05-01T00:00:00Z",
+  "toTimestamp": "2025-05-13T00:00:00Z"
+}
+"""
+
+langfuse.api.metrics_v_2.get(query = query_v2)
+
+# v1 API
+query_v1 = """
 {
   "view": "traces",
   "metrics": [{"measure": "count", "aggregation": "count"}],
@@ -99,7 +123,7 @@ query = """
 }
 """
 
-langfuse.api.metrics.metrics(query = query)
+langfuse.api.metrics.metrics(query = query_v1)
 ```
 
 #### Async equivalents
@@ -142,7 +166,15 @@ const traces = await langfuse.api.trace.list();
 // Fetch a single trace by ID
 const trace = await langfuse.api.trace.get("traceId");
 
-// Fetch list of observations, supports filters and pagination
+// Fetch list of observations (v2 API recommended)
+const observationsV2 = await langfuse.api.observationsV2.getMany({
+  traceId: "abcdef1234",
+  type: "GENERATION",
+  limit: 100,
+  fields: "core,basic,usage"
+});
+
+// Fetch list of observations (v1 API)
 const observations = await langfuse.api.observations.getMany();
 
 // Fetch a single observation by ID
@@ -159,6 +191,18 @@ const scores = await langfuse.api.scoreV2.get();
 
 // Fetch a single score by ID
 const score = await langfuse.api.scoreV2.getById("scoreId");
+
+// Fetch metrics (v2 API recommended)
+const metricsV2 = await langfuse.api.metricsV2.get({
+  query: JSON.stringify({
+    view: "observations",
+    metrics: [{ measure: "totalCost", aggregation: "sum" }],
+    dimensions: [{ field: "providedModelName" }],
+    filters: [],
+    fromTimestamp: "2025-05-01T00:00:00Z",
+    toTimestamp: "2025-05-13T00:00:00Z"
+  })
+});
 
 // Explore more entities via Intellisense
 ```

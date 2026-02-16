@@ -1,0 +1,27 @@
+import { CopyAgentOnboardingPrompt } from "@/components/agentic-onboarding/CopyAgentOnboardingPrompt";
+import DocsMcpServerInstallation from "@/components-mdx/docs-mcp-server-installation.mdx";
+
+<Callout type="warning" emoji="🤖">
+  This feature is experimental. Please share feedback or issues on [GitHub](/issues).
+</Callout>
+
+**Using the Observability Skill**
+
+Install the [Langfuse Observability Skill](https://skills.sh/langfuse/skills/langfuse-observability) to automatically instrument your LLM application with best practices:
+
+```bash
+npx skills add langfuse/skills --skill "langfuse-observability"
+```
+
+**Using the Langfuse Docs MCP Server**
+
+Install the Langfuse Docs MCP Server. The agent will use the Langfuse `searchLangfuseDocs` tool ([docs](/docs/docs-mcp)) to find the correct documentation for the integration.
+
+<DocsMcpServerInstallation />
+
+**Using the agent prompt**
+
+Copy and execute the following prompt in your editor's agent mode. The agent can use its native web search capabilities to find documentation.
+
+<CopyAgentOnboardingPrompt />
+

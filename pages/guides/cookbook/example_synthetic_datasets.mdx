@@ -385,6 +385,128 @@ You can now evaluate your application using this dataset. Check our [RAG Observa
 
 ![Custom RAG Dataset](https://langfuse.com/images/cookbook/example-synthetic-datasets/custom-rag-dataset.png)
 
+### Example 6: Torque - Declarative Dataset Generation
+
+[Torque](https://github.com/qforge-dev/torque) is a declarative, typesafe DSL for building synthetic datasets. It lets you compose conversations like React components, making it particularly useful for generating complex multi-turn conversations with tool calls.
+
+This approach is ideal when you need:
+
+- **Structured conversations** with tool usage patterns
+- **Type-safe dataset generation** with full TypeScript support
+- **Reproducible datasets** with seeded generation
+- **Complex multi-turn dialogs** that follow specific patterns
+
+
+
+```python
+import { Langfuse } from "langfuse";
+
+import {
+  oneOf,
+  generatedUser,
+  generatedAssistant,
+  generatedToolCall,
+  generatedToolCallResult,
+  times,
+  between,
+  generateDataset,
+} from "@qforge/torque";
+import { weatherTool, searchEmailTool } from "@qforge/torque/examples";
+import { openai } from "@ai-sdk/openai";
+
+const langfuse = new Langfuse({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+  secretKey: process.env.LANGFUSE_SECRET_KEY,
+  baseUrl: process.env.LANGFUSE_URL,
+});
+
+// Generate dataset with Torque's declarative DSL
+const conversationSchema = () => {
+  // Randomly select which tool to use in this conversation
+  const selectedTool = oneOf([searchEmailTool, weatherTool]);
+
+  return [
+    // Register the tool function
+    selectedTool.toolFunction(),
+
+    // User initiates request
+    generatedUser({
+      prompt: `User asking a question that will require calling ${selectedTool.name} tool.`,
+    }),
+
+    // Assistant acknowledges and calls tool
+    generatedAssistant({
+      prompt: "Assistant acknowledging the tool call",
+      toolCalls: [generatedToolCall(selectedTool, "tool-1")],
+    }),
+
+    generatedToolCallResult(selectedTool, "tool-1"),
+
+    // Assistant presents results
+    generatedAssistant({
+      prompt:
+        "Assistant responding to the user's question using the result of the tool call.",
+    }),
+
+    // Optional follow-up conversation (1-2 exchanges)
+    times(between(1, 2), [
+      generatedUser({
+        prompt: "Follow-up question",
+      }),
+      generatedAssistant({
+        prompt:
+          "Assistant responding to the user's follow-up question",
+      }),
+    ]),
+  ];
+};
+
+// Generate the dataset to a JSONL file
+await generateDataset(conversationSchema, {
+  count: 50,
+  model: openai("gpt-5-mini"),
+  output: "data/torque_tool.jsonl",
+  seed: 42, // Reproducible generation
+});
+
+// Read generated JSONL and upload to Langfuse
+await langfuse.createDataset({
+  name: "torque_tool",
+  description: "Tool calling conversations generated with Torque DSL",
+});
+
+const jsonlContent = await Bun.file("data/torque_tool.jsonl").text();
+const conversations = jsonlContent
+  .trim()
+  .split("\n")
+  .map((line) => JSON.parse(line));
+
+for (const conversation of conversations) {
+  await langfuse.createDatasetItem({
+    datasetName: "torque_tool",
+    input: conversation.messages,
+    metadata: {
+      tool_used: conversation.messages.find((m) => m.role === "tool")?.name,
+      turns: conversation.messages.length,
+    },
+  });
+}
+
+await langfuse.flushAsync();
+
+```
+
+**Key advantages of Torque:**
+
+1. **Type-safe conversations**: Full TypeScript support with Zod schemas ensures your synthetic data matches your production types
+2. **Declarative patterns**: Compose complex conversation flows with `times()`, `oneOf()`, and other combinators
+3. **Tool simulation**: Built-in support for tool calls and results, perfect for evaluating agentic applications
+4. **Reproducible**: Seeded generation ensures identical datasets across runs
+5. **Realistic variations**: AI generates natural variations while following your structural constraints
+
+This approach is particularly powerful for **evaluating AI agents** with tool usage, as it generates structurally consistent but semantically diverse conversations.
+
+
 ## Next Steps
 
 1. **Explore your dataset in Langfuse**. You can see each dataset in the UI.

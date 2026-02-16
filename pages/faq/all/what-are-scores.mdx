@@ -1,0 +1,60 @@
+---
+title: What are scores in Langfuse and when should I use them?
+description: Understand what scores are, how they differ from tags, and when to use them to evaluate your LLM application.
+tags: [evaluation]
+---
+
+# What Are Scores and When Should I Use Them?
+
+Scores are Langfuse's universal data object for storing **evaluation results**. Any time you want to assign a quality judgment to an LLM output, whether by a human, an LLM judge, a programmatic check, or end-user feedback, the result is stored as a score.
+
+Every score has a **name** (like `"correctness"` or `"helpfulness"`) and a **value**. The value can be one of three data types: numeric, categorical, or boolean.
+
+Scores can be attached to [traces](/docs/observability/data-model#traces), [observations](/docs/observability/data-model#observations), [sessions](/docs/observability/data-model#sessions), or [dataset runs](/docs/evaluation/experiments/data-model). Most commonly, scores are attached to traces to evaluate a single end-to-end interaction.
+
+## When to Use Scores
+
+Scores become useful when you want to go beyond observing what your application does and start measuring how well it does it. Common use cases:
+
+- **Collecting user feedback**: Capture thumbs up/down or star ratings from your users and attach them to traces. See the [user feedback guide](/docs/observability/features/user-feedback).
+
+- **Monitoring production quality**: Set up automated evaluators (like [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)) to continuously score live traces for things like hallucination, relevance, or tone.
+
+- **Running guardrails**: Score whether outputs pass safety checks, like PII detection, format validation, or content policy compliance. These programmatic checks run in your application and write results back as scores.
+
+- **Comparing changes with experiments**: When you change a prompt, model, or pipeline, run an [experiment](/docs/evaluation/experiments) to score the new version against a dataset. See [running experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
+
+Once you have scores, they show up in [score analytics](/docs/evaluation/evaluation-methods/score-analytics), can be visualized in [custom dashboards](/docs/metrics/features/custom-dashboards), and can be queried via the [API](/docs/api).
+
+## How to Create Scores
+
+There are four ways to add scores:
+
+- **LLM-as-a-Judge**: Set up [automated evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) that score traces based on custom criteria (e.g. hallucination, tone, relevance). These can run on live production traces or on experiment results.
+
+- **Annotation in the UI**: Team members [manually score](/docs/evaluation/evaluation-methods/annotation) traces, observations, or sessions directly in the Langfuse dashboard. Requires a [score config](/faq/all/manage-score-configs) to be set up first.
+
+- **Annotation queues**: Set up [structured review workflows](/docs/evaluation/evaluation-methods/annotation-queues) where reviewers work through batches of traces.
+
+- **SDK / API**: [Programmatically add scores](/docs/evaluation/evaluation-methods/custom-scores) from your application code. This is the way to go for user feedback (thumbs up/down, star ratings), guardrail results, or custom evaluation pipelines.
+
+## Should I Use Scores or Tags?
+
+A common question is whether to use scores or [tags](/docs/observability/features/tags) for a given use case. They serve different purposes:
+
+| | Scores | Tags |
+|---|---|---|
+| **Purpose** | Measure _how good_ something is | Describe _what_ something is |
+| **Data** | Numeric, categorical, or boolean value | Simple string label |
+| **When added** | Can be added to a trace at any time, including long after the trace was created | Set during tracing and cannot be changed afterwards |
+| **Used for** | Quality measurement, analytics, experiments | Filtering, segmentation, organizing |
+
+As a rule of thumb: if you already know the category at tracing time (e.g. which feature or API endpoint triggered the trace), use a tag. If you need to classify or evaluate traces later, whether that's judging quality or categorizing with LLM-as-a-Judge, use a score.
+
+## Related
+
+- An overview of [evaluation concepts](/docs/evaluation/core-concepts)
+- Configure your score setup with [score configs](/faq/all/manage-score-configs)
+- Comparing and analyzing scores with the [score analytics](/docs/evaluation/evaluation-methods/score-analytics) view
+- Visualize your scores with [dashboards](/docs/metrics/features/custom-dashboards)
+- Compare prompt changes using scores on [datasets](/docs/evaluation/experiments)

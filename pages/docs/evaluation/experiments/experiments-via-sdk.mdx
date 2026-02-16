@@ -75,7 +75,7 @@ print(result.format())
 </Tab>
 <Tab>
 {/* JS/TS SDK */}
-Make sure that OpenTelemetry is properly set up for traces to be delivered to Langfuse. See the [tracing setup documentation](/docs/observability/sdk/typescript/setup#tracing-setup) for configuration details. Always flush the span processor at the end of execution to ensure all traces are sent.
+Make sure that OpenTelemetry is properly set up for traces to be delivered to Langfuse. See the [tracing setup documentation](/docs/observability/sdk/overview#initialize-tracing) for configuration details. Always flush the span processor at the end of execution to ensure all traces are sent.
 
 ```typescript
 import { OpenAI } from "openai";
@@ -134,7 +134,7 @@ console.log(await result.format());
 await otelSdk.shutdown();
 ```
 
-**Note for JS/TS SDK**: OpenTelemetry must be properly set up for traces to be delivered to Langfuse. See the [tracing setup documentation](/docs/observability/sdk/typescript/setup#tracing-setup) for configuration details. Always flush the span processor at the end of execution to ensure all traces are sent.
+**Note for JS/TS SDK**: OpenTelemetry must be properly set up for traces to be delivered to Langfuse. See the [tracing setup documentation](/docs/observability/sdk/overview#initialize-tracing) for configuration details. Always flush the span processor at the end of execution to ensure all traces are sent.
 
 </Tab>
 </LangTabs>
@@ -206,6 +206,8 @@ await otelSdk.shutdown();
 </LangTabs>
 
 When using Langfuse datasets, dataset runs are automatically created in Langfuse and are available for comparison in the UI. This enables tracking experiment performance over time and comparing different approaches on the same dataset.
+
+Experiments always run on the latest dataset version at experiment time. Support for running experiments on specific dataset versions will be added to the SDK shortly.
 
 ### Advanced Features
 
@@ -853,7 +855,7 @@ _See [Python SDK](/docs/sdk/python/sdk-v3) docs for more details._
 <Tab>
 {/* JS/TS SDK */}
 
-Please make sure you have [the JS/TS SDK](/docs/observability/sdk/typescript/setup) set up for tracing of your application. If you use Langfuse for [observability](/docs/observability/overview), this is the same setup.
+Please make sure you have [the Langfuse SDK](/docs/observability/sdk/overview#initialize-tracing) set up for tracing of your application. If you use Langfuse for [observability](/docs/observability/overview), this is the same setup.
 
 Example:
 
@@ -1060,7 +1062,9 @@ Please refer to the [integrations](/docs/integrations/overview) page for details
 
 ### Run experiment on dataset
 
-When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows you to compare different runs of the same application on the same dataset. Each experiment is identified by a `run_name`.
+When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows you to compare different runs of the same application on the same dataset.
+
+Each experiment is identified by a unique `run_name`. If you reuse the same `run_name`, the new run will not appear separately in the Langfuse dataset run UI. As a good practice, include a timestamp in your `run_name` to ensure uniqueness (the [Experiment Runner SDK](#experiment-runner-sdk) does this automatically).
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK", "Other frameworks"]}>
 <Tab>
@@ -1068,17 +1072,21 @@ When running an experiment on a dataset, the application that shall be tested is
 You may then execute that LLM-app for each dataset item to create a dataset run:
 
 ```python filename="execute_dataset.py" /for item in dataset.items:/
+from datetime import datetime
 from langfuse import get_client
 from .app import my_llm_application
 
 # Load the dataset
 dataset = get_client().get_dataset("<dataset_name>")
 
+# Include a timestamp to ensure the run_name is unique
+run_name = f"my-experiment-{datetime.now().isoformat()}"
+
 # Loop over the dataset items
 for item in dataset.items:
     # Use the item.run() context manager for automatic trace linking
     with item.run(
-        run_name="<run_name>",
+        run_name=run_name,
         run_description="My first run",
         run_metadata={"model": "llama3"},
     ) as root_span:
@@ -1107,6 +1115,9 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
+// Include a timestamp to ensure the run_name is unique
+const runName = `my-experiment-${new Date().toISOString()}`;
+
 for (const item of dataset.items) {
   // execute application function and get langfuseObject (trace/span/generation/event, and other observation types: see /docs/observability/features/observation-types)
   // output also returned as it is used to evaluate the run
@@ -1114,7 +1125,7 @@ for (const item of dataset.items) {
   const [span, output] = await myLlmApplication.run(item.input);
 
   // link the execution trace to the dataset item and give it a run_name
-  await item.link(span, "<run_name>", {
+  await item.link(span, runName, {
     description: "My first run", // optional run description
     metadata: { model: "llama3" }, // optional run metadata
   });
@@ -1135,12 +1146,16 @@ await langfuse.flush();
 <Tab>
 
 ```python /for item in dataset.items:/
+from datetime import datetime
 from langfuse import get_client
 from langfuse.langchain import CallbackHandler
 #from .app import my_llm_application
 
 # Load the dataset
 dataset = get_client().get_dataset("<dataset_name>")
+
+# Include a timestamp to ensure the run_name is unique
+run_name = f"my-experiment-{datetime.now().isoformat()}"
 
 # Initialize the Langfuse handler
 langfuse_handler = CallbackHandler()
@@ -1149,7 +1164,7 @@ langfuse_handler = CallbackHandler()
 for item in dataset.items:
     # Use the item.run() context manager for automatic trace linking
     with item.run(
-        run_name="<run_name>",
+        run_name=run_name,
         run_description="My first run",
         run_metadata={"model": "llama3"},
     ) as root_span:
@@ -1180,7 +1195,8 @@ import { CallbackHandler } from "@langfuse/langchain";
 ...
 
 const langfuse = new LangfuseClient()
-const runName = "my-dataset-run";
+// Include a timestamp to ensure the run_name is unique
+const runName = `my-dataset-run-${new Date().toISOString()}`;
 for (const item of dataset.items) {
   const [span, output] = await startActiveObservation('my_llm_application', async (span) => {
     // ... your Langchain code ...
@@ -1212,13 +1228,16 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
+// Include a timestamp to ensure the run_name is unique
+const runName = `my-experiment-${new Date().toISOString()}`;
+
 // iterate over the dataset items
 for (const item of dataset.items) {
   // run application on the dataset item input
   const [span, output] = await runMyLLMApplication(item.input, trace.id);
 
   // link the execution trace to the dataset item and give it a run_name
-  await item.link(span, "<run_name>", {
+  await item.link(span, runName, {
     description: "My first run", // optional run description
     metadata: { model: "gpt-4o" }, // optional run metadata
   });

@@ -30,6 +30,7 @@ export default {
     type: "separator",
     title: <MenuSubSeparator>Misc</MenuSubSeparator>,
   },
+  "billable-units": "Billable Units",
   "troubleshooting-and-faq": {
     title: "Troubleshooting & FAQ",
   },

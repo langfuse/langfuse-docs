@@ -1,0 +1,54 @@
+---
+date: 2025-12-02
+title: Pricing Tiers for Accurate Model Cost Tracking
+description: Langfuse now supports pricing tiers for models with context-dependent pricing, enabling accurate cost calculation for models with context-dependent pricing.
+author: Hassieb
+ogImage: /images/changelog/2025-12-02-model-pricing-tiers/tiered-model-cost.jpg
+canonical: /docs/observability/features/token-and-cost-tracking
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Some model providers charge different rates depending on the number of input tokens used. For example, Anthropic's Claude Sonnet 4.5 with 1M context window, Google's Gemini 2.5 Pro and Gemini 3 Pro Preview all apply higher pricing when more than 200K input tokens are used.
+
+## How it works
+
+Pricing tiers allow multiple price points for a single model, each with conditions that determine when that tier applies. Tiers are evaluated in priority order, and the first matching tier is used for cost calculation.
+
+For example, Claude Sonnet 4.5 has two tiers:
+- **Standard** (default): Applied when input tokens ≤ 200K
+- **Large Context**: Applied when input tokens > 200K (2x input price, 1.5x output price)
+
+## Pre-configured models
+
+The following models now have pricing tiers pre-configured in Langfuse and now support accurate cost tracking with zero changes necessary:
+
+| Model | Tiers | Threshold |
+|-------|-------|-----------|
+| `claude-sonnet-4-5-20250929` | Standard / Large Context | > 200K input tokens |
+| `gemini-2.5-pro` | Standard / Large Context | > 200K input tokens |
+| `gemini-3-pro-preview` | Standard / Large Context | > 200K input tokens |
+
+## Custom pricing tiers
+
+You can also define pricing tiers for your own custom models via the Langfuse UI or API. This is useful for:
+- Self-hosted models with tiered pricing
+- Fine-tuned models with custom pricing structures
+- Other providers with context-dependent pricing
+
+Each tier includes:
+- **Name**: A descriptive name (e.g., "Standard", "Large Context")
+- **Priority**: Evaluation order (0 is reserved for the default pricing tier)
+- **Conditions**: Rules that determine when the tier applies (e.g., input tokens > 200K)
+- **Prices**: Cost per usage type for this tier
+
+## Learn more
+
+import { Book } from "lucide-react";
+
+<Cards num={1}>
+  <Card title="Cost Tracking Documentation" href="/docs/model-usage-and-cost" icon={<Book />} />
+  <Card title="Models API Reference" href="https://api.reference.langfuse.com/#tag/models/post/apipublicmodels" target="_blank" icon={<Book />} />
+</Cards>

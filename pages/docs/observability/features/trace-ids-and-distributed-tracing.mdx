@@ -1,10 +1,12 @@
 ---
-title: Trace IDs & Distributed Tracing
-description: Bring your own trace IDs for distributed tracing and linking traces across services.
+title: "Trace IDs & Distributed Tracing"
+description: "Use custom trace IDs and tracer IDs for distributed tracing in Langfuse. Link traces across services, use deterministic IDs, and integrate with your existing tracing infrastructure."
 sidebarTitle: Trace IDs & Distributed Tracing
 ---
 
 # Trace IDs & Distributed Tracing
+
+A **trace ID** is a unique identifier that follows a request as it flows through your system. In distributed systems, trace IDs enable you to correlate operations across multiple services and reconstruct the full request lifecycle.
 
 Langfuse allows you to bring your own trace IDs (e.g., messageId, traceId, correlationId) for
 
@@ -21,7 +23,7 @@ By default, Langfuse assigns random IDs (uuid, cuid) to all logged events. For t
 
 It is recommended to use your own domain specific IDs (e.g., messageId, traceId, correlationId) as it helps with downstream use cases like:
 
-- [deeplinking](/docs/tracing-features/url) to the trace from your own ui or logs
+- [deeplinking](/docs/observability/features/url) to the trace from your own ui or logs
 - [evaluating](/docs/scores) and adding custom metrics to the trace
 - [fetching](/docs/api) the trace from the API
 
@@ -185,7 +187,7 @@ const scoringTraceId = await createTraceId(externalId);
 Setting a parentSpanContext will detach the created span from the active span context as it no longer inherits from the current active span in the context.
 
 
-Learn more in the [JS/TS SDK](/docs/observability/sdk/typescript/advanced-usage#managing-trace-and-observation-ids) docs.
+Learn more in the [Langfuse SDK instrumentation docs](/docs/observability/sdk/instrumentation#managing-trace-and-observation-ids).
 
 </Tab>
 <Tab title="OpenTelemetry">

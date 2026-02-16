@@ -3,6 +3,7 @@ date: 2025-08-28
 title: TypeScript SDK v4 (GA)
 description: The new OpenTelemetry-based TypeScript SDK v4 is now generally available with improved DX, modular packages, and seamless integrations.
 author: Hassieb
+canonical: /docs/observability/sdk/overview
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -47,7 +48,7 @@ await startActiveObservation("user-request", async (span) => {
 });
 ```
 
-[Learn more →](/docs/observability/sdk/typescript/instrumentation#custom-instrumentation)
+[Learn more →](/docs/observability/sdk/instrumentation#custom-instrumentation)
 
 </Tab>
 
@@ -66,7 +67,7 @@ const tracedFunction = observe(async (source: string) => {
 const result = await tracedFunction("API");
 ```
 
-[Learn more →](/docs/observability/sdk/typescript/instrumentation#observe-wrapper)
+[Learn more →](/docs/observability/sdk/instrumentation#observe-wrapper)
 
 </Tab>
 
@@ -86,7 +87,7 @@ span.update({ output: "Successfully answered." });
 span.end(); // Required: manually end the observation
 ```
 
-[Learn more →](/docs/observability/sdk/typescript/instrumentation#manual-observations)
+[Learn more →](/docs/observability/sdk/instrumentation#manual-observations)
 
 </Tab>
 
@@ -98,17 +99,17 @@ span.end(); // Required: manually end the observation
   <Card
     icon={<BookOpen size="24" />}
     title="Overview"
-    href="/docs/observability/sdk/typescript/overview"
+    href="/docs/observability/sdk/overview"
     arrow
   />
   <Card
     icon={<Plug size="24" />}
     title="Instrumentation"
-    href="/docs/observability/sdk/typescript/instrumentation"
+    href="/docs/observability/sdk/instrumentation"
     arrow
   />
 </Cards>
 
-**Upgrading from v3?** Follow the [upgrade guide](/docs/observability/sdk/typescript/upgrade-path) for step-by-step migration instructions.
+**Upgrading from v3?** Follow the [upgrade guide](/docs/observability/sdk/upgrade-path#typescript-sdk---upgrade-path-v3-to-v4) for step-by-step migration instructions.
 
 Have thoughts or issues? **Share feedback in the discussion:** [GitHub Discussions #8403](https://github.com/orgs/langfuse/discussions/8403).

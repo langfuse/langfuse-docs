@@ -4,7 +4,7 @@ description: Get started with LLM observability with Langfuse in minutes before 
 
 # Get Started with Tracing
 
-This quickstart helps you to ingest your first trace in Langfuse.
+This guide walks you through ingesting your first trace into Langfuse. If you're looking to understand what tracing is and why it matters, check out the [Observability Overview](/docs/observability/overview) first. For details on how traces are structured in Langfuse and how it works in the background, see [Core Concepts](/docs/observability/data-model).
 
 <Steps>
 
@@ -15,31 +15,34 @@ This quickstart helps you to ingest your first trace in Langfuse.
 
 ## Ingest your first trace
 
-import { CopyAgentOnboardingPrompt } from "@/components/agentic-onboarding/CopyAgentOnboardingPrompt";
-import DocsMcpServerInstallation from "@/components-mdx/docs-mcp-server-installation.mdx";
 import GetStartedPythonSdk from "@/components-mdx/get-started/python-sdk.mdx";
 import GetStartedJsSdk from "@/components-mdx/get-started/js-sdk.mdx";
 import GetStartedOpenaiSdk from "@/components-mdx/get-started/openai-sdk.mdx";
 import GetStartedLangchain from "@/components-mdx/get-started/langchain.mdx";
 import GetStartedJsOpenaiSdk from "@/components-mdx/get-started/js-openai-sdk.mdx";
 import GetStartedJsLangchain from "@/components-mdx/get-started/js-langchain.mdx";
-import EnvPython from "@/components-mdx/env-python.mdx";
+import GetStartedAutoInstall from "@/components-mdx/get-started/auto-install.mdx";
+import GetStartedVercelAiSdk from "@/components-mdx/get-started/vercel-ai-sdk.mdx";
 
 import { BookOpen, Code } from "lucide-react";
 
-<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "✨ Auto Install", "More integrations"]}>
+If you're using one of our supported integrations, following their specific guide will be the fastest way to get started with minimal code changes. For more control, you can instrument your application directly using the Python or JS/TS SDKs.
+
+<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Vercel AI SDK", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "✨ Auto Install", "More integrations"]}>
 
 <Tab>
 {/* PYTHON - OPENAI*/}
 
-Use the drop-in replacement for the OpenAI Python SDK to get full observability.
+Langfuse’s OpenAI SDK is a drop-in replacement for the OpenAI client that automatically records your model calls without changing how you write code. If you already use the OpenAI python SDK, you can start using Langfuse with minimal changes to your code.
+
+Start by installing the Langfuse OpenAI SDK. It includes the wrapped OpenAI client and sends traces in the background.
 
 <GetStartedOpenaiSdk />
 
 <Cards num={2}>
   <Card
     icon={<BookOpen />}
-    title="Documentation"
+    title="Full OpenAI SDK documentation"
     href="/integrations/model-providers/openai-py"
     arrow
   />
@@ -52,7 +55,7 @@ Use the drop-in replacement for the OpenAI Python SDK to get full observability.
         />
       </div>
     }
-    title="Notebook"
+    title="Notebook example"
     href="https://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/integration_openai_sdk.ipynb"
     arrow
   />
@@ -63,14 +66,16 @@ Use the drop-in replacement for the OpenAI Python SDK to get full observability.
 <Tab>
 {/* JS/TS - OpenAI */}
 
-Use the Langfuse wrapper function around the OpenAI JS/TS SDK for full observability.
+Langfuse’s JS/TS OpenAI SDK wraps the official client so your model calls are automatically traced and sent to Langfuse. If you already use the OpenAI JavaScript SDK, you can start using Langfuse with minimal changes to your code.
+
+First install the Langfuse OpenAI wrapper. It extends the official client to send traces in the background.
 
 <GetStartedJsOpenaiSdk />
 
 <Cards num={2}>
   <Card
     icon={<BookOpen />}
-    title="Documentation"
+    title="Full OpenAI SDK documentation"
     href="/integrations/model-providers/openai-js"
     arrow
   />
@@ -85,16 +90,36 @@ Use the Langfuse wrapper function around the OpenAI JS/TS SDK for full observabi
 </Tab>
 
 <Tab>
-{/* LANGCHAIN */}
+{/* VERCEL AI SDK */}
 
-Use the Langfuse CallbackHandler to get full observability of the LangChain Python SDK.
+Langfuse's Vercel AI SDK integration uses OpenTelemetry to automatically trace your AI calls. If you already use the Vercel AI SDK, you can start using Langfuse with minimal changes to your code.
+
+<GetStartedVercelAiSdk />
+
+<Cards num={1}>
+  <Card
+    icon={<BookOpen />}
+    title="Full Vercel AI SDK documentation"
+    href="/integrations/frameworks/vercel-ai-sdk"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
+{/* LANGCHAIN (PYTHON) */}
+
+Langfuse's LangChain integration uses a callback handler to record and send traces to Langfuse. If you already use LangChain, you can start using Langfuse with minimal changes to your code.
+
+First install the Langfuse SDK and your LangChain SDK. 
 
 <GetStartedLangchain />
 
 <Cards num={2}>
   <Card
     icon={<BookOpen />}
-    title="Documentation"
+    title="Full LangChain SDK documentation"
     href="/integrations/frameworks/langchain"
     arrow
   />
@@ -118,14 +143,16 @@ Use the Langfuse CallbackHandler to get full observability of the LangChain Pyth
 <Tab>
 {/* LANGCHAIN (JS/TS) */}
 
-Use the Langfuse CallbackHandler to get full observability of the LangChain JS/TS SDK.
+Langfuse's LangChain integration uses a callback handler to record and send traces to Langfuse. If you already use LangChain, you can start using Langfuse with minimal changes to your code.
+
+First install the Langfuse core SDK and the LangChain integration.
 
 <GetStartedJsLangchain />
 
 <Cards num={2}>
   <Card
     icon={<BookOpen />}
-    title="Documentation"
+    title="Full Langchain SDK documentation"
     href="/integrations/frameworks/langchain"
     arrow
   />
@@ -142,22 +169,14 @@ Use the Langfuse CallbackHandler to get full observability of the LangChain JS/T
 <Tab>
 {/* PYTHON SDK */}
 
-Use the Langfuse Python SDK to wrap any LLM or Agent
-
-```bash
-pip install langfuse
-```
-
-<EnvPython />
-
-There are three main ways of creating traces with the Python SDK:
+The Langfuse Python SDK gives you full control over how you instrument your application and can be used with any other framework.
 
 <GetStartedPythonSdk />
 
 <Cards num={1}>
   <Card
     icon={<BookOpen />}
-    title="Documentation"
+    title="Full Python SDK documentation"
     href="/docs/sdk/python/sdk-v3"
     arrow
   />
@@ -175,7 +194,7 @@ Use the Langfuse JS/TS SDK to wrap any LLM or Agent
 <Cards num={2}>
   <Card
     icon={<BookOpen />}
-    title="Documentation"
+    title="Full JS/TS SDK documentation"
     href="/docs/sdk/typescript/guide"
     arrow
   />
@@ -194,22 +213,21 @@ Use the Langfuse JS/TS SDK to wrap any LLM or Agent
 
 Use the agent mode of your editor to integrate Langfuse into your existing codebase.
 
-<Callout type="warning" emoji="🤖">
-  This might or might not work very well (depending on your code base). Please
-  share any feedback or issues on [GitHub](/issues).
-</Callout>
+<GetStartedAutoInstall />
 
-**1. Install the Langfuse Docs MCP Server (optional)**
-
-The agent will use the Langfuse `searchLangfuseDocs` tool ([docs](/docs/docs-mcp)) to find the correct documentation for the integration you are looking for. This is optional, alternatively the agent can use its native websearch capabilities.
-
-<DocsMcpServerInstallation />
-
-**2. Run Agent**
-
-Copy and execute the following prompt in the agent mode of your editor:
-
-<CopyAgentOnboardingPrompt />
+<Cards num={2}>
+  <Card
+    icon={<BookOpen />}
+    title="Full MCP Server documentation"
+    href="/docs/docs-mcp"
+    arrow
+  />
+  <Card
+    title="All integrations"
+    href="/integrations"
+    arrow
+  />
+</Cards>
 
 </Tab>
 
@@ -327,10 +345,20 @@ After running your application, visit the Langfuse interface to view the trace y
   gifStyle
 />
 
+
 </Steps>
 
-## Core Features
+#### Not seeing what you expected?
+import { FaqPreview } from "@/components/faq/FaqPreview";
 
-import ObservabilityCoreFeatures from "@/components-mdx/observability-core-features.mdx";
+<FaqPreview tags={["observability-get-started"]} />
 
-<ObservabilityCoreFeatures />
+## Next steps
+
+Now that you've ingested your first trace, you can start adding on more functionality to your traces. We recommend starting with the following:
+- [Group traces into sessions for multi-turn applications](/docs/observability/features/sessions)
+- [Split traces into environments for different stages of your application](/docs/observability/features/environments)
+- [Add attributes to your traces so you can filter them in the future](/docs/observability/features/tags)
+
+Already know what you want? Take a look under _Features_ for guides on specific topics. 
+

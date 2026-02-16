@@ -1,113 +1,96 @@
 ---
-title: Arize Phoenix Alternative? Langfuse vs. Arize AI for LLM Observability
-description: This article compares Langfuse and Arize AI for LLM observability, analytics, evaluations, testing, and annotation.
+title: Arize AX Alternative? Langfuse vs. Arize AI and Arize Phoenix for LLM Observability
+description: This article compares Langfuse and Arize AI and Arize Phoenix for LLM observability, analytics, evaluations, testing, and annotation.
 tags: [comparison]
 ---
 
-# Arize Phoenix Alternative? Langfuse vs. Arize AI for LLM Observability
+# Langfuse vs. Arize AX / Arize Phoenix
 
-This article compares [Arize Phoenix](https://docs.arize.com/phoenix) and [Langfuse](/), two **open source** LLM observability platforms.
+This guide outlines the key differences between **[Langfuse](/)** and **[Arize AX](https://arize.com/llm-observability/)** to help engineering teams choose the right LLM observability platform.
 
-## High Level Comparison
+**TL;DR:**
 
-Arize Phoenix and Langfuse are both open-source tools for LLM observability, analytics, evaluation, testing, and annotation. However, they differ in focus, adoption, and suitability for different stages of LLM application development.
+* **Choose Langfuse** if you prioritize open-source flexibility, transparent pricing based on usage, and a developer-first experience with extensive integrations and full self-hosting capabilities.
+* **Choose Arize AX** if you need a managed SaaS solution with specialized support for financial compliance (PCI DSS) and deep integration into existing ML data fabrics.
 
-**Langfuse** focuses on being **best in class** for core LLM engineering features (tracing, evaluations, prompt management, APIs), prompt management, and usage analytics. **Arize Phoenix** focuses on the **experimental and development** stages of LLM apps and is particularly strong for RAG use cases.
+## Open Source & Distribution
 
-- **Self-Hosting**: Langfuse is very easy to self-host and offers extensive [self-hosting documentation](/self-hosting) for data security or compliance requirements.
+Langfuse stands out for its open-source model, ensuring feature parity between self-hosted and cloud versions. Arize AX is a proprietary enterprise SaaS, while its open-source counterpart ([Arize Phoenix](https://docs.arize.com/phoenix)) is primarily for local testing and debugging (uses PostgreSQL instead of ClickHouse).
 
-- **Integration with Arize**: Arize Phoenix is a good solution if your company already uses [Arize AI's](https://arize.com) platform. Phoenix enables a smooth data transfer between the two tools. However, it lacks **prompt management** and **LLM usage monitoring** features, which may limit its effectiveness in production environments.
+| Feature | Langfuse | Arize AX |
+| --- | --- | --- |
+| **Model** | **[Open Source](https://github.com/langfuse/langfuse)** (MIT License) | **Proprietary SaaS** (Open-source "[Phoenix](https://github.com/arize-ai/phoenix)" is for local dev only) |
+| **GitHub Stars** | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | [![Phoenix GitHub stars (Phoenix)](https://img.shields.io/github/stars/arize-ai/phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://github.com/arize-ai/phoenix)|
+| **PyPI Downloads** | [![Langfuse pypi downloads](https://img.shields.io/pypi/dm/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://pypi.org/project/langfuse/) | [![Phoenix pypi downloads (Phoenix)](https://img.shields.io/pypi/dm/arize-phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://pypi.org/project/arize-phoenix) |
+| **npm Downloads** | [![Langfuse npm downloads](https://img.shields.io/npm/dm/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://www.npmjs.com/package/langfuse) | N/A |
+| **Docker Pulls** | [![Langfuse Docker Pulls](https://img.shields.io/docker/pulls/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://hub.docker.com/r/langfuse/langfuse) | [![Phoenix Docker Pulls (Phoenix)](https://img.shields.io/docker/pulls/arizephoenix/phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://hub.docker.com/r/arizephoenix/phoenix) |
+| **Self-Hosting** | **First-Class Citizen**: Full feature parity with Cloud (including ClickHouse). Easy to [deploy via Docker](/self-hosting). | Limited, [Phoenix only](https://docs.arize.com/phoenix/deployment). No feature parity with Arize AX Cloud. |
 
-- **Adoption and Production Readiness**: Langfuse has a larger open source adoption compared to Arize Phoenix and is considered [battle-tested](https://www.thoughtworks.com/en-de/radar/platforms/langfuse) for production use cases. This makes Langfuse a good choice for companies seeking a reliable tool for live production environments.
+## Scalability & Performance
 
-## Download and Usage Statistics
+Both tools are built for scale, but they use different architectural approaches. Langfuse is part of ClickHouse and leverages the speed of ClickHouse architecture, while Arize AX uses a proprietary database.
 
-Langfuse is the most popular open source LLM observability platform. You can find a comparison of GitHub stars and PyPI downloads vs. Arize Phoenix below. We are transparent about our [usage statistics](/about).
+| Feature | Langfuse | Arize AX |
+| --- | --- | --- |
+| **Backend** | **[ClickHouse](https://clickhouse.com/)** ([acquired Langfuse](https://langfuse.com/blog/joining-clickhouse)): Optimized for high-throughput OLAP. | **[adb (Arize Database)](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database)**: Proprietary engine for agentic telemetry. |
 
-### Community Engagement
+## Integrations
 
-<Tabs items={["Overview", "GitHub Star History"]}>
-  <Tabs.Tab>
+Langfuse focuses on broad, community-driven compatibility via OpenTelemetry, whereas Arize AX emphasizes auto-instrumentation and deep data warehouse links.
 
-|                 | ⭐️ GitHub stars                                                                                                                                                                    | Last commit                                                                                                                                                                              | GitHub Discussions                                                                                                                                                                                      | GitHub Issues                                                                                                                                                                                                                       |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🪢 Langfuse     | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | [![Langfuse last commit](https://img.shields.io/github/last-commit/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | [![Langfuse GitHub Discussions](https://img.shields.io/github/discussions/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/orgs/langfuse/discussions) | [![Langfuse GitHub Issues](https://img.shields.io/github/issues-pr-closed-raw/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse/issues?q=is%3Aissue+is%3Aclosed) |
-| Phoenix / Arize | [![Phoenix GitHub stars](https://img.shields.io/github/stars/arize-ai/phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://github.com/arize-ai/phoenix)      | [![Phoenix last commit](https://img.shields.io/github/last-commit/arize-ai/phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://github.com/arize-ai/phoenix)      | [![Phoenix GitHub Discussions](https://img.shields.io/github/discussions/arize-ai/phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://github.com/Arize-ai/phoenix/discussions)  | [![Phoenix GitHub Issues](https://img.shields.io/github/issues-pr-closed-raw/arize-ai/phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://github.com/arize-ai/phoenix/issues?q=is%3Aissue+is%3Aclosed)      |
+| Feature | Langfuse | Arize AX |
+| --- | --- | --- |
+| **Standard** | **[OpenTelemetry Native](/docs/observability/overview)**: Built on OTel standards. | **[OpenTelemetry Native](https://arize.com/docs/ax/integrations/opentelemetry/overview)**: Built on OTel standards. |
+| **Frameworks** | **[80+ Frameworks](/integrations)**: with popular frameworks like LangChain, LlamaIndex, OpenAI, Anthropic, etc. | Maintains integrations via [OpenInference library](https://github.com/Arize-ai/openinference). |
 
-_Numbers refresh automatically via [shields.io](https://shields.io)_
+## Pricing
 
-  </Tabs.Tab>
-  <Tabs.Tab>
-    <Frame fullWidth>
-      ![GitHub Star History of Langfuse and Phoenix](/images/blog/faq/phoenix-arize/github-star-history-langfuse-phoenix-arize.png)
-    </Frame>
-    _source: [star-history.com](https://star-history.com/#langfuse/langfuse&arize-ai/phoenix&Date)_
-  </Tabs.Tab>
-</Tabs>
+Langfuse offers a transparent, volume-based pricing model that scales predictably. Arize AX charges based on span counts and data volume, which can become costly for data-heavy LLM apps.
 
-### Downloads
+| Feature | Langfuse | Arize AX |
+| --- | --- | --- |
+| **Model** | **Usage-Based**: [Billable unit](/docs/administration/billable-units) = trace, observation, or score. | **Hybrid**: Spans + Data Ingestion Volume (GB). |
+| **Free Tier** | 50k traces/mo free to test the full platform. | 25k spans/mo and 1 GB data. |
+| **Scalability** | Graduated pricing (e.g., $6/100k units at scale). Transparent overages. | N/A |
+| **Plans** | [Free, Core ($29/mo), Pro ($199/mo), Teams, Enterprise](/pricing). | [Free, Pro ($50/mo), Enterprise](https://arize.com/pricing/). |
 
-|                 | pypi downloads                                                                                                                                                        | npm downloads                                                                                                                                                           | docker pulls                                                                                                                                                                                 |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🪢 Langfuse     | [![Langfuse pypi downloads](https://img.shields.io/pypi/dm/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://pypi.org/project/langfuse/) | [![Langfuse npm downloads](https://img.shields.io/npm/dm/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://www.npmjs.com/package/langfuse) | [![Langfuse Docker Pulls](https://img.shields.io/docker/pulls/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://hub.docker.com/r/langfuse/langfuse)    |
-| Phoenix / Arize | [![Phoenix pypi downloads](https://img.shields.io/pypi/dm/arize-phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://pypi.org/project/phoenix) | N/A                                                                                                                                                                     | [![Phoenix Docker Pulls](https://img.shields.io/docker/pulls/arizephoenix/phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://hub.docker.com/r/arizephoenix/phoenix) |
+## Open Platform & Extensibility
 
-_Numbers refresh automatically via [shields.io](https://shields.io)_
+Langfuse is designed as a core infrastructure component, allowing teams to build custom internal tools on top of its API.
 
-## Arize Phoenix
+| Feature | Langfuse | Arize AX |
+| --- | --- | --- |
+| **API Access** | [API first](/docs/api-and-data-platform/features/public-api) for all data (traces, evals, prompts) and platform features. | API available, to export to data warehouses. |
+| **Customizability** | Build custom workflows, evaluations, and [dashboards](/docs/metrics/features/custom-dashboards) using the SDK/API. | Custom evaluations and pipelines via SDK. |
+| **Data Access** | Query via API and [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage). | Query via API and blob storage exports. |
 
-![Arize Phoenix UI](/images/blog/faq/phoenix-arize/phoenix-arize-screen.png)
 
-### What is Arize Phoenix?
+## Enterprise Security
 
-Arize Phoenix is an open-source observability tool designed for experimentation, evaluation, and troubleshooting of LLM apps. Built by [Arize AI](https://arize.com), Phoenix enables AI engineers and data scientists to visualize data, evaluate performance, track down issues, and export data for improvements.
+Both platforms serve large enterprises, but Arize AX has a slight edge in specific financial certifications (PCI DSS). Langfuse supports [masking](https://langfuse.com/docs/observability/features/masking) to filter out PCI DSS sensitive data.
 
-### What is Arize Phoenix used for?
+| Feature | Langfuse | Arize AX |
+| --- | --- | --- |
+| **Certifications** | **[SOC 2 Type II, ISO 27001](/security)**, GDPR, HIPAA aligned. | [SOC 2 Type II, HIPAA, **PCI DSS 4.0**, CSA Star Level 1](https://arize.com/docs/ax/security-and-settings/compliance). |
+| **Adoption** | Trusted by **19 of Fortune 50** & 63 of Fortune 500. | Strong enterprise adoption, particularly in fintech. |
+| **Governance** | [SSO](/docs/administration/authentication-and-sso), [RBAC](/docs/administration/rbac), [Audit Logs](/docs/administration/audit-logs) available in Teams/Enterprise plans. | SSO, RBAC available in Enterprise plans. |
 
-- **Integration with Arize AI**: Share data when discovering insights to the Arize platform so the data science team can perform further investigation or kickoff retraining workflows.
-- **Development and Experimentation**: Arize Phoenix is focused on the experimental and development stages of LLM applications, providing tools for model evaluation and troubleshooting.
 
-## Langfuse
+## Feature Highlights
 
-<Video
-  src="https://static.langfuse.com/docs-videos/trace-page-dark.mp4"
-  gifStyle
-/>
-_Example trace in our [public demo](/docs/demo)_
+**Langfuse:**
+* **[Core Observability](/docs/observability/overview):** Best-in-class tracing with accurate [token and cost tracking](/docs/observability/features/token-and-cost-tracking) for 100+ models.
+* **[Prompt Management](/docs/prompt-management/overview):** Collaborative [playground](/docs/prompt-management/features/playground) with versioning, caching, fallbacks, and protected labels.
+* **Collaboration:** [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [comments](/docs/observability/features/comments) with @mentions, and [audit logs](/docs/administration/audit-logs).
+* **[Evaluations](/docs/evaluation/overview):** Flexible "[LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)" evaluators that can be run in-UI or via SDK pipelines.
 
-### What is Langfuse?
 
-Langfuse is an LLM observability platform that provides a comprehensive tracing and logging solution for LLM applications. Langfuse helps teams to understand and debug complex LLM applications and evaluate and iterate on them in production.
+**Arize AX:**
+* **[Agentic Visualization](https://arize.com/docs/ax/observe/tracing/sessions-and-users):** Specialized views for multi-agent conversation flows.
+* **[Data Fabric](https://arize.com/docs/ax/security-and-settings/data-fabric):** Seamless integration with enterprise data lakes (Snowflake/BigQuery).
+* **Evaluation:** Strong focus on session-level evaluation and retrieval diagnosis (RAG).
 
-### What is Langfuse used for?
+<Callout type="info">
+  This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/pages/faq/all) with up-to-date information.
+</Callout>
 
-- **Holistic Tracing and Debugging**: Effective tracking of both LLM and non-LLM actions, delivering complete context for applications.
-- **Production Environments**: Best in class for core LLM engineering features, emphasizing production-grade monitoring, debugging, and performance analytics.
-- **Prompt Management**: Provides robust [prompt management](/docs/prompts/get-started) solutions through client SDKs, ensuring minimal impact on application latency and uptime during prompt retrieval.
-- **Integration Options**: Supports asynchronous logging and tracing SDKs with integrations for frameworks like [LangChain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex), [OpenAI SDK](/integrations/model-providers/openai-py), and [others](/integrations).
-- **Deep Evaluation**: Facilitates user feedback collection, manual reviews, annotation queues, [LLM-as-a-Judge](/docs/scores/model-based-evals) automated annotations, and [custom evaluation](/docs/scores/overview) functions.
-- **Self-Hosting**: Extensive [self-hosting documentation](/self-hosting) for data security or compliance requirements.
-
-## Core Feature Comparison
-
-This table compares the core features of LLM observability tools: Logging model calls, managing and testing prompts in production, and evaluating model outputs.
-
-| **Feature**           | **Arize Phoenix** | **🪢 Langfuse**                                |
-| --------------------- | ----------------- | ---------------------------------------------- |
-| **Open Source**       | ✅ Yes            | ✅ [Yes](https://github.com/langfuse/langfuse) |
-| **Tracing**           | ✅ Yes            | ✅ [Yes](/docs/tracing)                        |
-| **Prompt Management** | ❌ No             | ✅ [Yes](/docs/prompts/get-started)            |
-| **User Feedback**     | ✅ Yes            | ✅ [Yes](/docs/scores/user-feedback)           |
-| **Usage Monitoring**  | ❌ No             | ✅ [Yes](/docs/analytics/overview)             |
-| **Evaluations**       | ✅ Yes            | ✅ [Yes](/docs/scores/overview)                |
-| **Playground**        | ❌ No             | ✅ [Yes](/docs/playground)                     |
-
-## Conclusion
-
-**Langfuse** is a great choice for most **production use cases**, particularly when comprehensive **tracing**, **prompt management**, deep **evaluation** capabilities, and robust **usage monitoring** are critical. Its ability to provide detailed insights into both **LLM and non-LLM activities**, along with support for asynchronous logging and various framework integrations, makes it ideal for complex applications requiring thorough observability.
-
-**Arize Phoenix** is a strong option if your company already uses **Arize AI's enterprise platform** and is focused on the **experimental and development stages** of LLM applications. It offers tools for evaluation and troubleshooting . However, its **lack of prompt management** and **comprehensive LLM usage monitoring** features may limit its effectiveness in production environments, making it less suitable for teams requiring these capabilities.
-
-## This comparison is out of date?
-
-Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/pages/faq/all) with up-to-date information.

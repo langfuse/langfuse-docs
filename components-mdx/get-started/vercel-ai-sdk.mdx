@@ -1,0 +1,45 @@
+**Install packages**
+
+Install the Vercel AI SDK, OpenTelemetry, and the Langfuse integration packages.
+
+```bash
+npm install ai @ai-sdk/openai @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
+```
+
+**Add credentials**
+
+Set your Langfuse credentials as environment variables so the SDK knows which project to write to.
+
+import EnvJS from "@/components-mdx/env-js.mdx";
+
+<EnvJS />
+
+**Initialize OpenTelemetry with Langfuse**
+
+Set up the OpenTelemetry SDK with the Langfuse span processor. This captures telemetry data from the Vercel AI SDK and sends it to Langfuse.
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+
+**Enable telemetry in your AI SDK calls**
+
+Pass `experimental_telemetry: { isEnabled: true }` to your AI SDK functions. The AI SDK automatically creates telemetry spans, which the `LangfuseSpanProcessor` captures and sends to Langfuse.
+
+```typescript
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+
+const { text } = await generateText({
+  model: openai("gpt-4o"),
+  prompt: "What is the weather like today?",
+  experimental_telemetry: { isEnabled: true },
+});
+```

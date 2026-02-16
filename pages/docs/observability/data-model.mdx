@@ -3,32 +3,65 @@ title: Tracing Data Model in Langfuse
 description: Langfuse (open source) helps you trace and analyze LLM applications. Learn how traces and observations are structured in Langfuse.
 ---
 
-# Observability Data Model
+# Core Concepts
 
-Tracing in Langfuse is a way to log and analyze the execution of your LLM applications. The following reference provides a detailed overview of the data model used. It is inspired by OpenTelemetry.
+This page digs into the underlying concepts of how Langfuse structures and captures your data. Understanding these will make debugging and working with traces easier.
 
-## Traces and Observations
+Ready to start? Check out the [Get Started guide](/docs/observability/get-started) to ingest your first trace.
 
-### Traces
+## Observations, Traces, and Sessions
 
-A `trace` typically represents a single request or operation.
-It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
+Langfuse organizes an application's data into three core concepts: observations, traces, and sessions.
+
+```mermaid
+flowchart LR
+
+    subgraph SESSION [session]
+        direction TB
+
+        subgraph TRACE1 [trace]
+            direction LR
+            O1[observation]
+            O2[observation]
+            O3[observation]
+        end
+
+        subgraph TRACE2 [trace]
+            direction LR
+            O4[observation]
+            O5[observation]
+            O6[observation]
+        end
+
+        subgraph TRACE3 [trace]
+            direction LR
+            O7[observation]
+            O8[observation]
+            O9[observation]
+        end
+
+    end
+    classDef sessionBox fill:none,stroke:#888,stroke-width:2px;
+    classDef traceBox fill:none,stroke:#aaa,stroke-width:1.5px;
+
+    %% Assign classes
+    class SESSION sessionBox;
+    class TRACE1,TRACE2,TRACE3 traceBox;
+```
 
 import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
 
 ### Observations
 
-Each trace can contain multiple `observations` to log the individual steps of the execution. Usually, a trace corresponds to a single api call of an application.
+`Observations` are the individual steps within a trace. Langfuse supports a number of LLM application specific [observation types](/docs/observability/features/observation-types), for example _generations_, _toolcalls_, _RAG retrieval steps_, etc.
 
-#### Nesting
-
-Observations can be nested manually or by leveraging the automatic [OpenTelemetry context propagation](https://opentelemetry.io/docs/concepts/context-propagation/).
+Observations can be nested. The example below shows a trace with a nested observation.
 
 <div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
 
 <div className="border rounded py-4 px-4 flex flex-col items-center justify-center bg-card">
 
-Hierarchical structure of traces in Langfuse
+Hierarchical structure of observations in Langfuse
 
 <div className="flex-1 flex items-center justify-center ">
 
@@ -60,19 +93,18 @@ Example trace in Langfuse UI
 
 </div>
 
-#### Types
+### Traces
 
-Langfuse supports a number of LLM application specific [observation types](/docs/observability/features/observation-types):
+A `trace` typically represents a single request or operation.
+For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace. 
 
-<ObservationTypesList />
+It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
 
-## Sessions
+### Sessions
 
-Optionally, traces can be grouped into [sessions](/docs/tracing-features/sessions).
+Optionally, traces can be grouped into [sessions](/docs/observability/features/sessions).
 Sessions are used to group traces that are part of the same user interaction.
-A common example is a thread in a chat interface.
-
-Please refer to the [Sessions](/docs/tracing-features/sessions) documentation to add sessions to your traces.
+A common example is a thread in a chat interface. 
 
 <div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
 
@@ -101,32 +133,110 @@ Example session in Langfuse UI
 
 </div>
 
-## Scores
+Using sessions is recommended for applications with multi-turn conversations or workflows. Please refer to the [Sessions](/docs/observability/features/sessions) documentation to add sessions to your traces.
 
-[Scores](/docs/scores) are flexible objects used to evaluate traces, observations, sessions and dataset runs.
+## Adding Attributes
 
-They can be:
+Once you've structured your data into traces and observations, you can enrich them with additional attributes. These attributes act as labels that help you filter, segment, and analyze your traces for specific use cases.
 
-- Numeric, categorical, or boolean values
-- Associated with a trace, a session, or a dataset run (one and only one is required)
-- For trace level scores only: Linked to a specific observation within a trace (optional)
-- Annotated with comments for additional context
-- Validated against a score configuration schema (optional)
+There are different types of attributes you can add:
 
-Typically, session-level scores are used for comprehensive evaluation of conversational experiences across multiple interactions, while trace-level scores are used for evaluation of a single interaction. Dataset run level scores are used for overall evaluation of a dataset run, e.g. precision, recall, F1-score.
+| Attribute | Description |
+|-----------|-------------|
+| [Environments](/docs/observability/features/environments) | Separate data from different deployment contexts like `production`, `staging`, or `development` |
+| [Tags](/docs/observability/features/tags) | Flexible labels to categorize traces by feature, API endpoint, or workflow |
+| [User](/docs/observability/features/users) | Track which end-user triggered each trace |
+| [Metadata](/docs/observability/features/metadata) | Flexible key-value store for custom information |
+| [Releases & Versions](/docs/observability/features/releases-and-versioning) | Track application versions and component changes |
 
-Please refer to the [scores documentation](/docs/scores) to get started. For more details on score types and attributes, refer to the [score data model](/docs/scores/data-model) documentation.
 
-## Billable Units
+## How Langfuse Captures Data
 
-Langfuse Cloud [pricing](/pricing) is based on the number of ingested units per billing period.
+Now that you understand the data model, let's explore how Langfuse actually captures and processes your traces.
 
-`Units` = `Count of Traces` + `Count of Observations` + `Count of Scores`
+### Built on OpenTelemetry
 
-Use our [pricing calculator](/pricing?calculatorOpen=true) to estimate your monthly costs based on your expected usage.
+Langfuse is built on [OpenTelemetry](https://opentelemetry.io/), an open standard for collecting telemetry data from applications. 
 
-### FAQ
+This means you're not locked into using only Langfuse-specific SDKs. You can also send your traces to multiple destinations at once, like Langfuse for LLM observability and Datadog for infrastructure monitoring. 
 
-**How can I track my Langfuse Cloud usage?** Use the Usage Monitoring Report in the Dashboards tab in Langfuse to analyze your Langfuse Cloud usage.
+See the [OpenTelemetry integration guide](/integrations/native/opentelemetry) for detailed documentation on integrating OpenTelemetry with Langfuse.
 
-**How can I optimize my Langfuse Cloud usage to reduce cost?** If your application scales and you want to optimize Langfuse Cloud cost, please check out [this guide](/faq/all/cutting-costs).
+#### Instrumentation
+
+Instrumentation is the process of adding code to record its behavior. Once this recording is turned on, Langfuse (through OpenTelemetry) can automatically capture these events and structure them into traces and observations. 
+
+The [Get Started guide](/docs/observability/get-started) walks you through the process of instrumenting a function in your application.
+
+
+### Background Processing
+
+In order to avoid slowing down your application, Langfuse doesn't send traces synchronously the moment they're created. 
+Instead, Langfuse batches traces locally and sends them in the background, keeping your application fast and responsive.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant User as End user
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Exporter as Background exporter
+    participant Langfuse as Langfuse backend
+
+    loop Incoming requests over time
+        User->>App: send request
+        App->>SDK: createTrace() / log events
+        SDK->>Exporter: enqueue(trace/events)
+        Note over App,SDK: Tracing is non-blocking<br/>App continues handling request
+        App-->>User: response
+    end
+
+    loop In the background
+        Note over Exporter: Runs on a timer / batch size
+        Exporter->>Langfuse: send(batched traces)
+        Langfuse-->>Exporter: ack
+    end
+```
+
+#### Long-running applications
+
+The approach above works well for long-running applications (like web servers or APIs) because the background exporter continuously runs and has plenty of time to flush batches on its own.
+
+#### Short-lived applications
+
+For applications that start, execute something, and shut down quickly (short-lived applications), there's a risk that the application terminates while there are still unsent traces in the queue. 
+
+To avoid losing data, short-lived applications __must explicitly call [`flush()`](/docs/observability/features/queuing-batching#manual-flushing) before exiting__. This forces the exporter to send all buffered traces immediately, so nothing is lost when the process terminates.
+
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant User as End user
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Exporter as Background exporter
+    participant Langfuse as Langfuse backend
+
+    User->>App: start script / job
+    App->>SDK: createTrace()
+    SDK->>Exporter: enqueue(trace)
+    Note over Exporter: Trace buffered in memory
+
+    alt No flush() used
+        Note over Exporter: Exporter waits for next<br/>background send
+        App-->>User: job finished
+        App-->>App: process exits
+        Note over App,Exporter: Process terminates before<br/>buffer is sent → traces lost
+    else flush() used
+        App->>SDK: flush() before exit
+        SDK->>Exporter: flush()
+        Exporter->>Langfuse: send(all buffered traces)
+        Langfuse-->>Exporter: ack
+        Note over Exporter: Buffer is now empty
+        App-->>User: job finished
+        App-->>App: process exits
+    end
+```
+
+

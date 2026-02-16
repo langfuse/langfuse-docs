@@ -7,6 +7,14 @@ export default {
       layout: "raw",
     },
   },
+  wrapped: {
+    type: "page",
+    title: "Langfuse Wrapped 2025",
+    display: "hidden",
+    theme: {
+      layout: "raw",
+    },
+  },
   imprint: {
     title: "Imprint",
     type: "page",
@@ -243,6 +251,15 @@ export default {
   },
   "oss-friends": {
     title: "OSS Friends",
+    type: "page",
+    display: "hidden",
+    theme: {
+      typesetting: "article",
+      timestamp: false,
+    },
+  },
+  "press": {
+    title: "Press",
     type: "page",
     display: "hidden",
     theme: {
