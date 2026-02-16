@@ -1,0 +1,43 @@
+# Langfuse Incident Response Plan
+
+---
+
+### On-Call
+
+On-call schedules are managed in **PagerDuty**. Declaring an incident in incident.io triggers a PagerDuty alert — the on-call engineer's phone will ring within 1–2 minutes.
+
+**When to page:** platform outages, security issues, elevated errors, a customer seeing another customer's data. When in doubt, page.
+
+---
+
+### Declaration
+
+**Any team member** can declare an incident at any time. Don't wait for certainty.
+
+1. Log in to **incident.io** (Google SSO) → **"Declare Incident"**.
+2. Fill in a summary, affected service(s), and **always select the highest severity** — this is not published externally. For now we only have high severity incidents.
+
+incident.io will automatically create a **Slack channel**, page the **on-call engineer** via PagerDuty, and post to **#incidents**.
+
+---
+
+### Incident Lead
+
+The **first engineer to join** the incident channel is the Incident Lead. Assign yourself the role in incident.io. Pull respective [DRIs](https://langfuse.com/handbook/how-we-work/ownership) of affected components or Max in if needed. If required, pull someone from the business side in to monitor Slack channels and support tickets.
+
+The Incident Lead owns mitigation, coordinates all system changes, keeps the channel and status page updated, and decides when to adjust severity or dissolve the call.
+
+---
+
+### Response
+
+1. **Triage** — Join the Slack channel, collect evidence (screenshots, metrics, logs), update [status.langfuse.com](https://status.langfuse.com) via incident.io. For critical incidents, enable the product announcement banner.
+2. **Mitigate** — Restore the system first: rollback, scale up, feature-flag, hotfix. Root cause comes later.
+3. **Stabilize** — Mark as mitigated in incident.io, update status page, monitor for 15–30 min, then dissolve the call.
+
+---
+
+### Resolution & Post-Mortem
+
+After mitigation, find and fix the root cause. Complete the post-mortem in [Linear](https://linear.app/langfuse/view/incidents-952de24cfbb8) using the auto-generated timeline, covering: summary, impact, root cause, contributing factors, and action items with owners. Track follow-ups in the Linear ticket. Share in **#team-engineering**.
+
