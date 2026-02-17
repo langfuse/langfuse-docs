@@ -1,0 +1,55 @@
+---
+date: 2026-02-17
+title: "Langfuse CLI Released"
+description: Fully use Langfuse from the CLI — built for AI agents and power users.
+author: Nimar
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+AI agents do real work in terminals, writing code, debugging, querying APIs. As part of our effort to [make agents fall in love with Langfuse](/blog/2026-02-13-will-you-be-my-cli), we built a CLI that wraps the entire Langfuse API so agents (and humans) can interact with Langfuse directly.
+
+```bash
+npx langfuse-cli api <resource> <action>
+```
+
+The CLI covers all functionality exposed via our APIs, you can get traces, observations, update prompts or create datasets and more.
+
+## Discovery & Usage
+
+Progressive disclosure built in — start broad, drill down:
+
+```bash
+langfuse api help                     # List all resources
+langfuse api prompts --help           # List actions for prompts
+langfuse api prompts create --help    # Show flags for create
+
+langfuse api traces list --limit 10
+langfuse api prompts get --name my-prompt
+langfuse api traces list --limit 5 --curl  # Preview curl without executing
+```
+
+26 resources supported: traces, prompts, datasets, scores, metrics, annotation queues, and more.
+
+## Authentication
+
+Pass an `--env .env` file to load your API key from a file. Alternatively, export the relvant variables:
+
+```bash
+export LANGFUSE_PUBLIC_KEY=pk-lf-...
+export LANGFUSE_SECRET_KEY=sk-lf-...
+export LANGFUSE_HOST=https://cloud.langfuse.com  # default, supports self-hosted
+```
+
+## Pairs with Agent Skills
+
+The CLI is designed to work together with our [Agent Skills](https://github.com/langfuse/skills). The main Langfuse skill teaches agents how to discover endpoints, follow common workflows, and access documentation — all through the CLI. Read more about Skills and the full agent story in [the blog post](/blog/2026-02-13-will-you-be-my-cli).
+
+## Learn More
+
+- [npm package](https://www.npmjs.com/package/langfuse-cli)
+- [GitHub Repo](https://github.com/langfuse/langfuse-cli)
+- [Blog: Making Agents Fall in Love with Langfuse](/blog/2026-02-13-will-you-be-my-cli)
+- [API Reference](/docs/api)
