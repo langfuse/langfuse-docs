@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { experimental_generateImage as generateImage } from "ai";
 import {
   observe,
+  propagateAttributes,
   updateActiveObservation,
   updateActiveTrace,
   getActiveTraceId,
@@ -11,104 +12,96 @@ import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 
 const handler = async (req: Request) => {
-  const { success } = rateLimit(req, { limit: 3, windowMs: 60_000 });
-  if (!success) {
-    return new Response(
-      JSON.stringify({
-        error: "Rate limit exceeded. Image generation is limited to 3 per minute. Please try again later.",
-      }),
-      { status: 429, headers: { "Content-Type": "application/json" } }
-    );
-  }
+  return propagateAttributes({ tags: ["image-generator"] }, async () => {
+    const { success } = rateLimit(req, { limit: 3, windowMs: 60_000 });
+    if (!success) {
+      return new Response(
+        JSON.stringify({
+          error: "Rate limit exceeded. Image generation is limited to 3 per minute. Please try again later.",
+        }),
+        { status: 429, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
-  const { prompt, userId }: { prompt: string; userId: string } =
-    await req.json();
+    const { prompt, userId }: { prompt: string; userId: string } =
+      await req.json();
 
-  if (!prompt || prompt.trim().length === 0) {
-    return new Response(
-      JSON.stringify({ error: "Prompt is required." }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
+    if (!prompt || prompt.trim().length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Prompt is required." }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
-  const traceId = getActiveTraceId();
+    const traceId = getActiveTraceId();
 
-  updateActiveTrace({
-    name: "Image-Generator",
-    userId,
-    input: prompt,
-  });
-
-  updateActiveObservation(
-    { input: prompt },
-    { asType: "generation" }
-  );
-
-  try {
-    const result = await generateImage({
-      model: openai.image("gpt-image-1"),
-      prompt,
-      size: "1024x1024",
-      providerOptions: {
-        openai: { quality: "low" },
-      },
+    updateActiveTrace({
+      name: "Image-Generator",
+      userId,
+      input: prompt,
     });
 
-    const image = result.image;
-
-    // Include the image as a base64 data URI in the trace output.
-    // The Langfuse SDK automatically detects data URIs, uploads them
-    // to object storage, and displays them in the trace UI.
-    const dataUri = `data:${image.mediaType};base64,${image.base64}`;
-
     updateActiveObservation(
-      {
-        input: prompt,
-        output: {
-          image: dataUri,
-          size: "1024x1024",
-        },
-        model: "gpt-image-1",
-        modelParameters: {
-          size: "1024x1024",
-          quality: "low",
-        },
-      },
+      { input: prompt },
       { asType: "generation" }
     );
 
-    updateActiveTrace({
-      output: {
-        image: dataUri,
+    try {
+      const result = await generateImage({
+        model: openai.image("gpt-image-1"),
+        prompt,
         size: "1024x1024",
-        model: "gpt-image-1",
-      },
-    });
+        providerOptions: {
+          openai: { quality: "low" },
+        },
+      });
 
-    after(async () => await flush());
+      const image = result.image;
 
-    return new Response(
-      JSON.stringify({
-        image: { base64: image.base64, mediaType: image.mediaType },
-        traceId,
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-  } catch (err) {
-    after(async () => await flush());
+      // Include the image as a base64 data URI in the trace output.
+      // The Langfuse SDK automatically detects data URIs, uploads them
+      // to object storage, and displays them in the trace UI.
+      const dataUri = `data:${image.mediaType};base64,${image.base64}`;
 
-    return new Response(
-      JSON.stringify({
-        error: err instanceof Error ? err.message : "Failed to generate image",
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
-  }
+      updateActiveObservation(
+        {
+          input: prompt,
+          output: dataUri,
+          model: "gpt-image-1",
+          modelParameters: {
+            size: "1024x1024",
+            quality: "low",
+          },
+        },
+        { asType: "generation" }
+      );
+
+      after(async () => await flush());
+
+      return new Response(
+        JSON.stringify({
+          image: { base64: image.base64, mediaType: image.mediaType },
+          traceId,
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    } catch (err) {
+      after(async () => await flush());
+
+      return new Response(
+        JSON.stringify({
+          error: err instanceof Error ? err.message : "Failed to generate image",
+        }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  });
 };
 
 export const POST = observe(handler, {
   name: "image-generator",
   asType: "generation",
+  captureOutput: false,
 });
 
 export const maxDuration = 60;
