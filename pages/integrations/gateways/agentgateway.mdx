@@ -1,0 +1,428 @@
+---
+title: AgentGateway Integration
+sidebarTitle: AgentGateway
+logo: /images/integrations/solo_icon.png
+description: Route LLM traffic through AgentGateway and get full observability in Langfuse via OpenTelemetry tracing
+category: Integrations
+---
+
+# Trace AI traffic through AgentGateway with Langfuse
+
+This guide shows how to integrate **Langfuse** with **AgentGateway** to automatically capture and observe all LLM API calls routed through the gateway — without modifying your application code.
+
+> **What is AgentGateway?** [AgentGateway](https://agentgateway.dev) is a Kubernetes-native AI gateway built on Envoy Proxy and the Gateway API. It routes traffic to LLM providers (OpenAI, Anthropic, Azure OpenAI, Bedrock, Gemini, and more), MCP tool servers, and AI agents. Open source ([CNCF](https://www.cncf.io/)) with an [Enterprise edition](https://docs.solo.io/agentgateway) from Solo.io.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM observability platform that helps you trace, monitor, evaluate, and debug your LLM applications.
+
+## Features
+
+- **Zero-code instrumentation**: Automatic tracing for all LLM calls proxied through AgentGateway
+- **Multi-provider support**: OpenAI, Anthropic, Azure OpenAI, AWS Bedrock, Google Gemini, Vertex AI, Ollama, and any OpenAI-compatible provider
+- **Rich GenAI telemetry**: Model, token usage (input/output/total), streaming status, temperature, and other LLM parameters
+- **MCP tool tracing**: Trace MCP tool discovery and execution through the gateway
+- **Security policy visibility**: See which requests were blocked by prompt guards, PII protection, or rate limits
+- **Native OTLP export**: AgentGateway emits OpenTelemetry traces natively — no sidecar or SDK needed
+
+## Architecture
+
+```
+┌──────────┐     ┌─────────────────────┐     ┌──────────────────┐     ┌─────────┐
+│ AI Agent │────▶│   AgentGateway      │────▶│ OTEL Collector   │────▶│ Langfuse│
+│          │     │   (Envoy + Gateway  │     │ (otlphttp export)│     │         │
+│          │     │    API)             │     │                  │     │         │
+└──────────┘     └─────────────────────┘     └──────────────────┘     └─────────┘
+                         │
+                         ▼
+                 ┌───────────────┐
+                 │  LLM Provider │
+                 │  (OpenAI,     │
+                 │   Anthropic,  │
+                 │   etc.)       │
+                 └───────────────┘
+```
+
+AgentGateway emits OpenTelemetry traces for every request. An OTEL Collector receives the traces and forwards them to Langfuse's OTEL endpoint.
+
+## Prerequisites
+
+- Kubernetes cluster with [AgentGateway installed](https://agentgateway.dev/docs/kubernetes/latest/setup/) (OSS or Enterprise)
+- Langfuse account ([self-hosted](https://langfuse.com/docs/deployment/self-host) or [cloud](https://cloud.langfuse.com))
+- `kubectl` and `helm` CLI tools
+
+## Step 1: Get your Langfuse credentials
+
+From your Langfuse project settings, grab:
+- **Public Key** (`pk-lf-...`)
+- **Secret Key** (`sk-lf-...`)
+- **OTEL Endpoint** (e.g., `https://us.cloud.langfuse.com/api/public/otel` or your self-hosted URL)
+
+Create the Base64-encoded Basic auth header:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_AUTH=$(echo -n "${LANGFUSE_PUBLIC_KEY}:${LANGFUSE_SECRET_KEY}" | base64)
+echo $LANGFUSE_AUTH
+```
+
+## Step 2: Deploy an OpenTelemetry Collector
+
+Deploy an OTEL Collector that receives traces from AgentGateway and forwards them to Langfuse:
+
+```yaml
+# otel-collector.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: langfuse-otel-collector-config
+  namespace: agentgateway-system
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    exporters:
+      otlphttp/langfuse:
+        endpoint: https://us.cloud.langfuse.com/api/public/otel  # Replace with your Langfuse OTEL endpoint
+        headers:
+          Authorization: "Basic <YOUR_LANGFUSE_AUTH>"  # Replace with your Base64-encoded credentials
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_interval: 30s
+          max_elapsed_time: 300s
+    processors:
+      batch:
+        send_batch_size: 1000
+        timeout: 5s
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlphttp/langfuse]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langfuse-otel-collector
+  namespace: agentgateway-system
+  labels:
+    app: langfuse-otel-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langfuse-otel-collector
+  template:
+    metadata:
+      labels:
+        app: langfuse-otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: docker.io/otel/opentelemetry-collector-contrib:0.132.1
+          args: ["--config=/conf/config.yaml"]
+          ports:
+            - containerPort: 4317
+              name: otlp-grpc
+            - containerPort: 4318
+              name: otlp-http
+          volumeMounts:
+            - name: config
+              mountPath: /conf
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: langfuse-otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langfuse-otel-collector
+  namespace: agentgateway-system
+  labels:
+    app: langfuse-otel-collector
+spec:
+  selector:
+    app: langfuse-otel-collector
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+```
+
+Apply it:
+
+```bash
+kubectl apply -f otel-collector.yaml
+```
+
+## Step 3: Configure AgentGateway tracing
+
+<Tabs items={["Enterprise", "Open Source"]}>
+<Tab>
+
+Create an `EnterpriseAgentgatewayParameters` resource to configure tracing with rich GenAI semantic conventions:
+
+```yaml
+# tracing-params.yaml
+apiVersion: enterpriseagentgateway.solo.io/v1alpha1
+kind: EnterpriseAgentgatewayParameters
+metadata:
+  name: tracing
+  namespace: agentgateway-system
+spec:
+  rawConfig:
+    config:
+      tracing:
+        otlpEndpoint: grpc://langfuse-otel-collector.agentgateway-system.svc.cluster.local:4317
+        otlpProtocol: grpc
+        randomSampling: true
+        fields:
+          add:
+            # GenAI semantic conventions (maps to Langfuse fields)
+            gen_ai.operation.name: '"chat"'
+            gen_ai.system: "llm.provider"
+            gen_ai.request.model: "llm.requestModel"
+            gen_ai.response.model: "llm.responseModel"
+            gen_ai.streaming: "llm.streaming"
+            # Token usage
+            gen_ai.usage.prompt_tokens: "llm.inputTokens"
+            gen_ai.usage.completion_tokens: "llm.outputTokens"
+            gen_ai.usage.total_tokens: "llm.totalTokens"
+            # LLM parameters
+            gen_ai.request.temperature: "llm.params.temperature"
+            gen_ai.request.top_p: "llm.params.top_p"
+            gen_ai.request.max_tokens: "llm.params.max_tokens"
+            # Prompt & completion content
+            gen_ai.prompt: "llm.prompt"
+            gen_ai.completion: "llm.completion"
+            # HTTP context
+            http.method: "request.method"
+            http.path: "request.path"
+            http.status_code: "response.code"
+```
+
+Apply and reference it from your Gateway:
+
+```yaml
+# gateway.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: ai-gateway
+  namespace: agentgateway-system
+spec:
+  gatewayClassName: enterprise-agentgateway
+  infrastructure:
+    parametersRef:
+      name: tracing
+      group: enterpriseagentgateway.solo.io
+      kind: EnterpriseAgentgatewayParameters
+  listeners:
+    - name: http
+      port: 8080
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
+```
+
+```bash
+kubectl apply -f tracing-params.yaml
+kubectl apply -f gateway.yaml
+```
+
+</Tab>
+<Tab>
+
+For the open source edition, configure tracing via Helm values when installing AgentGateway:
+
+```bash
+helm upgrade -i agentgateway oci://ghcr.io/kgateway-dev/charts/agentgateway \
+  --namespace agentgateway-system \
+  --version v2.2.0 \
+  --set "gateway.telemetry.tracing.otlp.endpoint=langfuse-otel-collector.agentgateway-system.svc.cluster.local:4317"
+```
+
+Then create a Gateway resource:
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: ai-gateway
+  namespace: agentgateway-system
+spec:
+  gatewayClassName: agentgateway
+  listeners:
+    - name: http
+      port: 8080
+      protocol: HTTP
+```
+
+<Callout type="info">
+  The open source edition provides basic OTLP tracing. The Enterprise edition adds rich GenAI semantic conventions with customizable field mappings.
+</Callout>
+
+</Tab>
+</Tabs>
+
+## Step 4: Set up an LLM route
+
+Create an `AgentgatewayBackend` and `HTTPRoute` to route traffic to an LLM provider:
+
+```yaml
+# openai-backend.yaml
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: openai
+  namespace: agentgateway-system
+spec:
+  ai:
+    provider:
+      openai: {}
+  policies:
+    auth:
+      secretRef:
+        name: openai-api-key
+        namespace: agentgateway-system
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: openai-route
+  namespace: agentgateway-system
+spec:
+  parentRefs:
+    - name: ai-gateway
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /openai
+      backendRefs:
+        - name: openai
+          group: agentgateway.dev
+          kind: AgentgatewayBackend
+```
+
+Create the API key secret:
+
+```bash
+kubectl create secret generic openai-api-key \
+  -n agentgateway-system \
+  --from-literal="Authorization=Bearer $OPENAI_API_KEY"
+```
+
+Apply the route:
+
+```bash
+kubectl apply -f openai-backend.yaml
+```
+
+## Step 5: Send a test request
+
+```bash
+# Get the gateway address
+export GATEWAY_IP=$(kubectl get gateway ai-gateway -n agentgateway-system \
+  -o jsonpath='{.status.addresses[0].value}')
+
+# Or port-forward for local testing
+kubectl port-forward -n agentgateway-system svc/ai-gateway 8080:8080 &
+
+# Send a request
+curl http://${GATEWAY_IP:-localhost}:8080/openai/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "What is Kubernetes?"}
+    ]
+  }' | jq .
+```
+
+## Step 6: View traces in Langfuse
+
+Open your Langfuse dashboard. You should see traces with:
+
+- **Model**: The LLM model used (e.g., `gpt-4o`)
+- **Token usage**: Input, output, and total tokens
+- **Latency**: End-to-end request duration
+- **Prompt & completion**: Full request/response content (Enterprise)
+- **Cost**: Automatically calculated from model and token usage
+
+Each trace includes the full GenAI semantic convention attributes, giving you deep visibility into every LLM call flowing through your gateway.
+
+## Advanced: Multiple exporters
+
+You can fan out traces to multiple backends (e.g., Langfuse + Jaeger + your own collector) by adding additional exporters to the OTEL Collector config:
+
+```yaml
+exporters:
+  otlphttp/langfuse:
+    endpoint: https://us.cloud.langfuse.com/api/public/otel
+    headers:
+      Authorization: "Basic <YOUR_LANGFUSE_AUTH>"
+  otlp/jaeger:
+    endpoint: jaeger-collector.observability:4317
+    tls:
+      insecure: true
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/langfuse, otlp/jaeger]
+```
+
+## Advanced: Adding metadata
+
+Pass custom metadata through HTTP headers that AgentGateway forwards as trace attributes. This enables Langfuse features like user tracking and session grouping:
+
+```bash
+curl http://localhost:8080/openai/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "x-user-id: user-123" \
+  -H "x-session-id: session-abc" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+With the Enterprise tracing config, these headers are captured as trace attributes that Langfuse can use for filtering and grouping.
+
+## Troubleshooting
+
+| Issue | Check |
+|-------|-------|
+| No traces in Langfuse | Verify OTEL Collector is running: `kubectl get pods -n agentgateway-system -l app=langfuse-otel-collector` |
+| Auth errors | Verify Base64 credentials: `echo -n "pk-lf-...:sk-lf-..." \| base64` |
+| Missing token counts | Ensure Enterprise edition with `fields.add` config for `gen_ai.usage.*` |
+| Traces but no cost | Langfuse calculates cost from `gen_ai.usage.*` and `gen_ai.response.model` — ensure both are present |
+| Gateway not emitting traces | Check Gateway references the tracing `parametersRef` and the OTEL endpoint is reachable |
+
+## Learn more
+
+- [AgentGateway Documentation](https://agentgateway.dev)
+- [Enterprise AgentGateway](https://docs.solo.io/agentgateway)
+- [Langfuse OTEL Integration](https://langfuse.com/docs/integrations/otel)
+- [OpenTelemetry GenAI Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/)
