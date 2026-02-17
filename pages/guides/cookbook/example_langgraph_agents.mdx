@@ -23,7 +23,7 @@ Below we install the `langgraph` library, `langfuse` and the Hugging Face `datas
 
 
 ```python
-%pip install langfuse langchain langgraph langchain_openai langchain_community langchain_huggingface
+%pip install langfuse langchain langgraph langchain_openai langchain_community langchain_huggingface -q
 ```
 
 ## Step 1: Set Environment Variables
@@ -35,13 +35,13 @@ Get your Langfuse API keys by signing up for Langfuse cloud or self-hosting Lang
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***" 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***" 
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ["OPENAI_API_KEY"] = "sk-proj-***"
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. get_client() initializes the Langfuse client using the credentials provided in the environment variables.
@@ -58,6 +58,9 @@ if langfuse.auth_check():
 else:
     print("Authentication failed. Please check your credentials and host.")
 ```
+
+    Langfuse client is authenticated and ready!
+
 
 ## Step 2: Test Your Instrumentation
 
@@ -537,132 +540,74 @@ for idx, row in df_30.iterrows():
 
 #### Running the Agent on the Dataset
 
-First, we assemble a simple LangGraph agent that answers questions using OpenAI models. 
-
-
-```python
-from typing import Annotated
- 
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
-from typing_extensions import TypedDict
- 
-from langgraph.graph import StateGraph
-from langgraph.graph.message import add_messages
- 
-class State(TypedDict):
-    messages: Annotated[list, add_messages]
- 
-graph_builder = StateGraph(State)
- 
-llm = ChatOpenAI(model = "gpt-4.5-preview")
-
-def chatbot(state: State):
-    return {"messages": [llm.invoke(state["messages"])]}
- 
-graph_builder.add_node("chatbot", chatbot)
-graph_builder.set_entry_point("chatbot")
-graph_builder.set_finish_point("chatbot")
-
-graph = graph_builder.compile()
-```
-
-Then, we define a helper function `my_agent()` that:
-1. Creates a Langfuse trace 
-2. Fetches the `langfuse_handler_trace` to instrument the LangGraph execution. 
-3. Runs our agent and passing `langfuse_handler_trace` to the invocation. 
+First, we define a task function `my_task()` that wraps our LangGraph agent. 
 
 
 ```python
 from langfuse import get_client
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
+from langgraph.graph.message import add_messages
+from langgraph.graph import StateGraph
+from langchain_core.messages import HumanMessage
+from typing import Annotated
+from typing_extensions import TypedDict
 
-class State(TypedDict):
-    messages: Annotated[list, add_messages]
- 
-graph_builder = StateGraph(State)
-llm = ChatOpenAI(model = "gpt-4o")
+# Initialize Langfuse CallbackHandler for Langchain
 langfuse = get_client()
+langfuse_handler = CallbackHandler()
 
-def chatbot(state: State):
-    return {"messages": [llm.invoke(state["messages"])]}
+# Define the task function we pass to the experiment runner method
+def my_task(*, item, **kwargs):
+    
+    question = item.input["text"]
+    
+    class State(TypedDict):
+        messages: Annotated[list, add_messages]
  
-graph_builder.add_node("chatbot", chatbot)
-graph_builder.set_entry_point("chatbot")
-graph_builder.set_finish_point("chatbot")
-graph = graph_builder.compile()
+    graph_builder = StateGraph(State)
+    llm = ChatOpenAI(model = "gpt-4o")
 
-def my_agent(question, langfuse_handler):
+    def chatbot(state: State):
+        return {"messages": [llm.invoke(state["messages"])]}
     
-    # Create a trace via Langfuse spans and use Langchain within it
-    with langfuse.start_as_current_observation(as_type="span", name="my-langgraph-agent") as root_span:
-    
-        # Step 2: LangChain processing
-        response = graph.invoke(
-        input={"messages": [HumanMessage(content = question)]},
+    graph_builder.add_node("chatbot", chatbot)
+    graph_builder.set_entry_point("chatbot")
+    graph_builder.set_finish_point("chatbot")
+    graph = graph_builder.compile()
+
+    response = graph.invoke(
+        input={"messages": [HumanMessage(content=question)]},
         config={"callbacks": [langfuse_handler]}
         )
-    
-        # Update trace output
-        root_span.update_trace(
-            input=question,
-            output=response["messages"][1].content)
         
-        print(question)
-        print(response["messages"][1].content)
+    print(question)
+    print(response["messages"][1].content)
 
     return response["messages"][1].content
 ```
 
-Finally, we loop over each dataset item, run the agent, and link the trace to the dataset item. We can also attach a quick evaluation score if desired.
+Finally, we use the experiment runner SDK to run our task function against each dataset item. The experiment runner handles concurrent execution, automatic tracing, and evaluation.
 
 
 ```python
-from langfuse import get_client
-from langfuse.langchain import CallbackHandler
- 
-# Initialize Langfuse CallbackHandler for Langchain (tracing)
-langfuse_handler = CallbackHandler()
-langfuse = get_client()
-
+# Fetch dataset and run experiment
 dataset = langfuse.get_dataset('qa-dataset_langgraph-agent')
 
-for item in dataset.items:
-    # Use the item.run() context manager for automatic trace linking
-    with item.run(
-        run_name="run_gpt-4o",
-        run_description="My first run",
-        run_metadata={"model": "gpt-4o"},
-    ) as root_span:
-        # All operations within this block are part of the trace for this dataset item
-        
-        # Call your application logic - this can use any combination of decorators, 
-        # context managers, or manual observations
-        with langfuse.start_as_current_observation(
-            as_type="generation",
-            name="llm-call",
-            model="gpt-4o",
-            input=item.input
-        ) as generation:
-            # Your LLM application logic here
-            output = my_agent(str(item.input), langfuse_handler)
-            generation.update(output=output)
- 
-        # Optionally, score the result against the expected output
-        root_span.score_trace(
-            name="user-feedback",
-            value=1,
-            comment="This is a comment",  # optional, useful to add reasoning
-        )
+result = dataset.run_experiment(
+    name="run_gpt-4o",
+    description="My first run",
+    task=my_task,
+    metadata={"model": "gpt-4o"}
+)
  
 # Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
 langfuse.flush()
+print(result.format())
 ```
 
 You can repeat this process with different agent configurations such as:
-- Models (gpt-4o-mini, o1, etc.)
+- Models (gpt-5.1, gpt-5-mini, etc.)
 - Prompts
 - Tools (search vs. no search)
 - Complexity of agent (multi agent vs single agent)
