@@ -1,7 +1,7 @@
 ---
 title: "How Canva built an Agentic Support Experience using Langfuse"
 date: January 12, 2026
-description: Learn how Canva's 4-person ML team built an AI support system that outperformed enterprise vendors, powered by Langfuse observability across Java and Python stacks.
+description: Learn how Canva's 4-person ML team built an AI support experience surpassing all baseline evaluation targets, powered by Langfuse observability across Java and Python stacks.
 ogImage: 
 tag: customer-story
 author: Felix
@@ -30,11 +30,11 @@ import { ImpactChart } from "@/components/customers/ImpactChart";
 
 [Canva](https://www.canva.com) is the visual communication platform used by over 250 million monthly active users worldwide. From presentations to social media graphics to full brand kits, Canva has democratized design for individuals and enterprises alike.
 
-## Building a Multi-Agent Support Experience
+## Building a multi-agent Support Experience
 
-Canva is building on Langfuse to develop and operate their agentic customer support experience. Their setup has evolved from a simple chat experience to a multi-layered and multi-agent system with access to many tools, sub-agents, and internal systems of record for context retrieval.
+Canva is building on Langfuse to develop and operate their customer support agent experience. Their setup has evolved from a simple chat experience to a multi-layered and multi-agent system with access to many tools, sub-agents, and internal systems of record for context retrieval.
 
-The core revolves around the in-app chat (Help Assistant) and an asynchronous ticket resolution agent (Omni Agent).
+The core evolves around the in-app chat (Help Assistant) and an asynchronous ticket resolution agent (Omni Agent).
 
 <Frame fullWidth>
   ![Screenshot of Canva's Support Agent](/images/customers/canva/multi-agent-support-system.png)
@@ -46,9 +46,9 @@ The core revolves around the in-app chat (Help Assistant) and an asynchronous ti
 * Account actions - Refunds, subscription changes
 * Feature requests - Routed to bug lists and roadmaps
 
-**Omni Agent:** Omni Agent is a more sophisticated system that works asynchronously on submitted tickets. It interfaces with users through the Help Assistant or e-mail. If Omni Agent can’t resolve the ticket, it escalates to human support.
+**OmniAgent:** OmniAgent is a more sophisticated system that works asynchronously on submitted tickets. It interfaces with users through the Help Assistant or e-mail. If OmniAgent can’t resolve the ticket, it escalates to human support.
 
-“We call it Omni Agent because it has access to a large amount of tools, functionalities, and user data,” says Andreas. “It can dig into account history, execute complex multi-step resolutions, and handle edge cases the fast path can’t.”
+“We call it OmniAgent because it has access to a large amount of tools and functionalities” says Andreas. “It can dig into the issue, execute complex multi-step resolutions, and handle edge cases the fast path can’t.”
 
 ## Two Stacks, one Platform
 
@@ -80,7 +80,7 @@ One example: Canva's Japanese market requires precise formal business tones. A m
 
 ### Tracing for Debugging
 
-The [Tracing](/docs/observability/overview) captures error information, warnings, and metadata across every step. Engineers use [Metadata](/docs/observability/features/metadata) and [Tags](/docs/observability/features/tags) to search and filter efficiently, while the [Playground](/docs/prompt-management/features/playground) replay functionality lets anyone re-run a generation with the exact system prompt of that moment, critical for reproducing issues.
+The [Tracing](/docs/observability/overview) captures error information, warnings, and metadata across every step. Engineers use [Metadata](/docs/observability/features/metadata) and [Tags](/docs/observability/features/tags) to search and filter efficiently, while the [Playground](/docs/prompt-management/features/playground) replay functionality lets anyone re-run a generation with the exact system prompt from that moment, critical for reproducing issues.
 
 <Frame fullWidth>
   ![Screenshot of Canva's Tracing](/images/customers/canva/canva-tracing.png)
@@ -88,7 +88,7 @@ The [Tracing](/docs/observability/overview) captures error information, warnings
 
 ### Prompt Management
 
-Langfuse's [Prompt Management](/docs/prompt-management/overview) has become a key enabler. Prompts are versioned, changes can be tested before deployment, and critically, non-technical team members can make updates independently.
+Langfuse's [Prompt Management](/docs/prompt-management/overview) has become a key enabler. Prompts are versioned, changes can be tested before deployment, and, critically, non-technical team members can make updates independently.
 
 <Frame fullWidth>
   ![Screenshot of Canva's Prompt Management](/images/customers/canva/canva-prompt-management.jpg)
@@ -102,7 +102,7 @@ While both systems, Help Assistant and Omni Agent, differ in request volume and 
 
 Here are Canva’s approaches to offline and online Evals:
 
-- **[Experiments](/docs/evaluation/core-concepts#experiments) & [Datasets](/docs/evaluation/experiments/datasets):** In development, both systems can be tested by running offline Experiments based on data stored in Datasets. Canva has stored input data for default paths and edge cases together with their expected outputs. To make agents with access to tools testable the team is mocking tool call responses during experiments.
+- **[Experiments](/docs/evaluation/core-concepts#experiments) & [Datasets](/docs/evaluation/experiments/datasets):** In development, both systems can be tested by running offline Experiments based on data stored in Datasets: Canva has stored input data for default paths and edge cases together with their expected outputs. To make agents with access to tools testable the team is mocking tool call responses during experiments.
 
 - **[LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge):** Both systems are running slightly different sets of evaluators scoring them across 15-20 metrics both offline (in development) and online (in production). 
 
@@ -116,7 +116,7 @@ Here are Canva’s approaches to offline and online Evals:
 
 Canva started on [self-hosting](/self-hosting) during early product development but then migrated to [Langfuse Cloud](https://cloud.langfuse.com/) to reduce internal workload and focus on building the best possible AI support system.
 
-"I could just run Langfuse locally. Being open source is a huge differentiator. It lets the team validate the tooling before kicking off all required approvals in legal and procurement," says Sergey.
+"I could just run Langfuse locally. Being open source is a huge differentiator. It lets the team validate the tooling before kicking off all required approvals in legal and procurement." says Sergey.
 
 Once the value was proven, they migrated to Langfuse Cloud. "Running such a large system at scale means we need to maintain a lot with our own team," Sergey explains. "We don't have capacity for all the maintenance. It's a platform effort."
 
