@@ -1,19 +1,20 @@
 ---
-title: Langfuse SDK upgrade paths
-description: Migrate from Python SDK v2 → v3 and TypeScript SDK v3 → v4 with side-by-side guides.
+title: "Python SDK: v2 → v3 migration guide"
+description: Migration guide for upgrading the Langfuse Python SDK from v2 to v3.
 category: SDKs
 ---
 
-# Upgrade paths
+# Python v2 → v3
 
-This page shows the migration guides to the latest versions of the Langfuse SDKs. Pick your SDK to follow the relevant migration steps.
-
-## Python SDK v2 → v3
+<Callout type="info">
+If you are on Python SDK v2, we recommend upgrading directly to v4 (the latest major). See the [Python v3 → v4 migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4). The v2 → v3 changes below still apply — complete them first, then follow the v3 → v4 guide.
+</Callout>
 
 The Python SDK v3 introduces significant improvements and changes compared to the legacy v2 SDK. It is **not fully backward compatible**. This comprehensive guide will help you migrate based on your current integration.
 
 <Callout type="info">
-  You can find a snapshot of the v2 SDK documentation [here](https://python-sdk-v2.docs-snapshot.langfuse.com/docs/observability/sdk/python/decorators).
+  You can find a snapshot of the v2 SDK documentation
+  [here](https://python-sdk-v2.docs-snapshot.langfuse.com/docs/observability/sdk/python/decorators).
 </Callout>
 
 **Core Changes to SDK v2:**
@@ -23,9 +24,9 @@ The Python SDK v3 introduces significant improvements and changes compared to th
 - **Trace Attributes** (`user_id`, `session_id`, etc.) Can be set via enclosing spans OR directly on integrations using metadata fields (OpenAI call, Langchain invocation)
 - **Context Management**: Automatic OTEL [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/)
 
-### Migration Path by Integration Type
+## Migration Path by Integration Type
 
-#### `@observe` Decorator Users
+**`@observe` Decorator Users**
 
 **v2 Pattern:**
 
@@ -54,7 +55,7 @@ def my_function():
     return "result"
 ```
 
-#### OpenAI Integration
+**[OpenAI Integration](/integrations/model-providers/openai-py)**
 
 **v2 Pattern:**
 
@@ -124,7 +125,12 @@ with langfuse.start_as_current_observation(as_type="span", name="chat-request") 
             )
 ```
 
-#### LangChain Integration
+<Callout type="warning">
+  `update_trace()` is deprecated in Python SDK v4. See the [v3 → v4 migration
+  guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4).
+</Callout>
+
+**[LangChain Integration](/integrations/frameworks/langchain)** [#langchain-integration]
 
 **v2 Pattern:**
 
@@ -190,7 +196,12 @@ with langfuse.start_as_current_observation(as_type="span", name="langchain-reque
             )
 ```
 
-#### LlamaIndex Integration Users
+<Callout type="warning">
+  `update_trace()` is deprecated in Python SDK v4. See the [v3 → v4 migration
+  guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4).
+</Callout>
+
+**[LlamaIndex Integration](/integrations/frameworks/llamaindex) Users**
 
 **v2 Pattern:**
 
@@ -219,8 +230,7 @@ with langfuse.start_as_current_observation(as_type="span", name="llamaindex-quer
     with propagate_attributes(
         user_id="user_123",
     ):
-
-    response = index.as_query_engine().query("Hello")
+        response = index.as_query_engine().query("Hello")
 
     span.update_trace(
         input={"query": "Hello"},
@@ -228,7 +238,12 @@ with langfuse.start_as_current_observation(as_type="span", name="llamaindex-quer
         )
 ```
 
-#### Low-Level SDK Users
+<Callout type="warning">
+  `update_trace()` is deprecated in Python SDK v4. See the [v3 → v4 migration
+  guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4).
+</Callout>
+
+**Low-Level SDK Users**
 
 **v2 Pattern:**
 
@@ -253,7 +268,8 @@ generation.end(output="Response")
 **v3 Migration:**
 
 <Callout type="info">
-  In v3, all spans / generations must be ended by calling `.end()` on the returned object.
+  In v3, all spans / generations must be ended by calling `.end()` on the
+  returned object.
 </Callout>
 
 ```python
@@ -287,37 +303,36 @@ with langfuse.start_as_current_observation(
             )
 ```
 
-### Key Migration Checklist
+<Callout type="warning">
+  `update_trace()` is deprecated in Python SDK v4. See the [v3 → v4 migration
+  guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4).
+</Callout>
+
+## Key Migration Checklist
 
 1. **Update Imports**:
-
    - Use `from langfuse import get_client` to access global client instance configured via environment variables
    - Use `from langfuse import Langfuse` to create a new client instance configured via constructor parameters
    - Use `from langfuse import observe` to import the observe decorator
    - Update integration imports: `from langfuse.langchain import CallbackHandler`
 
 2. **Trace Attributes Pattern**:
-
    - **Option 1**: Use metadata fields (`langfuse_user_id`, `langfuse_session_id`, `langfuse_tags`) directly in integration calls
    - **Option 2**: Move `user_id`, `session_id`, `tags` to `propagate_attributes()`
 
 3. **Trace Input/Output**:
-
-   - **Critical for LLM-as-a-judge**: Explicitly set trace input/output
+   - **Critical for [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)**: Explicitly set trace input/output
    - Don't rely on automatic derivation from root observation if you need specific values
 
 4. **Context Managers**:
-
    - Replace manual `langfuse.trace()`, `trace.span()` with context managers if you want to use them
    - Use [`with langfuse.start_as_current_observation()`](https://python.reference.langfuse.com/langfuse#Langfuse.start_as_current_observation) instead
 
 5. **LlamaIndex Migration**:
-
    - Replace Langfuse callback with third-party OTEL instrumentation
    - Install: `pip install openinference-instrumentation-llama-index`
 
 6. **ID Management**:
-
    - **No Custom Observation IDs**: v3 uses W3C Trace Context standard - you cannot set custom observation IDs
    - **Trace ID Format**: Must be 32-character lowercase hexadecimal (16 bytes)
    - **External ID Correlation**: Use [`Langfuse.create_trace_id(seed=external_id)`](https://python.reference.langfuse.com/langfuse#Langfuse.create_trace_id) to generate deterministic trace IDs from external systems
@@ -346,159 +361,35 @@ The `link` method on the dataset item objects has been replaced by a context man
 
 See the [datasets documentation](/docs/evaluation/dataset-runs/remote-run) for more details.
 
-### Detailed Change Summary
+## Detailed Change Summary
 
 1.  **Core Change: OpenTelemetry Foundation**
-
     - Built on OpenTelemetry standards for better ecosystem compatibility
 
 2.  **Trace Input/Output Behavior**
-
     - **v2**: Integrations could set trace input/output directly
     - **v3**: Trace input/output derived from root observation by default
     - **Migration**: Explicitly set via `span.update_trace(input=..., output=...)`
 
 3.  **Trace Attributes Location**
-
     - **v2**: Could be set directly on integration calls
     - **v3**: Must be set on enclosing spans
     - **Migration**: Wrap integration calls with [`langfuse.start_as_current_observation()`](https://python.reference.langfuse.com/langfuse#Langfuse.start_as_current_observation)
 
 4.  **Creating Observations**:
-
     - **v2**: `langfuse.trace()`, `langfuse.span()`, `langfuse.generation()`
     - **v3**: `langfuse.start_as_current_observation()`
     - **Migration**: Use context managers, ensure `.end()` is called or use `with` statements
 
 5.  **IDs and Context**:
 
-   - **v3**: W3C Trace Context format, automatic [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/)
-   - **Migration**: Use [`langfuse.get_current_trace_id()`](https://python.reference.langfuse.com/langfuse#Langfuse.get_current_trace_id) instead of `get_trace_id()`
+- **v3**: W3C Trace Context format, automatic [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/)
+- **Migration**: Use [`langfuse.get_current_trace_id()`](https://python.reference.langfuse.com/langfuse#Langfuse.get_current_trace_id) instead of `get_trace_id()`
 
 6.  **Event Size Limitations**:
-
     - **v2**: Events were limited to 1MB in size
     - **v3**: No size limits enforced on the SDK-side for events
 
-### Future support for v2
+## Future support for v2
 
 We will continue to support the v2 SDK for the foreseeable future with critical bug fixes and security patches. We will not be adding any new features to the v2 SDK. You can find a snapshot of the v2 SDK documentation [here](https://python-sdk-v2.docs-snapshot.langfuse.com/docs/observability/sdk/python/decorators).
-
-
-
-## JS/TS SDK v3 → v4
-
-Please follow each section below to upgrade your application from v3 to v4.
-
-If you encounter any questions or issues while upgrading, please raise an [issue](/issues) on GitHub.
-
-### Initialization
-
-The Langfuse base URL environment variable is now `LANGFUSE_BASE_URL` and no longer `LANGFUSE_BASEURL`. For backward compatibility however, the latter will still work in v4 but not in future versions.
-
-### Tracing
-
-The v4 SDK tracing is a major rewrite based on OpenTelemetry and introduces several breaking changes.
-
-1.  **OTEL-based Architecture**: The SDK is now built on top of OpenTelemetry. An OpenTelemetry Setup is required now and done by registering the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) with an OpenTelemetry `NodeSDK`.
-2.  **New Tracing Functions**: The `langfuse.trace()`, `langfuse.span()`, and `langfuse.generation()` methods have been replaced by [`startObservation`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startObservation.html), [`startActiveObservation`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startActiveObservation.html), etc., from the `@langfuse/tracing` package.
-3.  **Separation of Concerns**:
-    - The **`@langfuse/tracing`** and **`@langfuse/otel`** packages are for tracing.
-    - The **`@langfuse/client`** package and the [`LangfuseClient`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_client.LangfuseClient.html) class are now only for non-tracing features like scoring, prompt management, and datasets.
-
-See the [SDK v4 docs](/docs/observability/sdk/overview) for details on each.
-
-### Prompt Management
-
-- **Import**: The import of the Langfuse client is now:
-
-  ```typescript
-  import { LangfuseClient } from "@langfuse/client";
-  ```
-
-- **Usage**: The usage of the Langfuse client is now:
-
-  ```typescript
-  const langfuse = new LangfuseClient();
-
-  const prompt = await langfuse.prompt.get("my-prompt");
-
-  const compiledPrompt = prompt.compile({ topic: "developers" });
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: compiledPrompt }],
-  });
-  ```
-
-- `version` is now an optional property of the options object of `langfuse.prompt.get()` instead of a positional argument.
-
-  ```typescript
-  const prompt = await langfuse.prompt.get("my-prompt", { version: "1.0" });
-  ```
-
-### OpenAI integration
-
-- **Import**: The import of the OpenAI integration is now:
-
-  ```typescript
-  import { observeOpenAI } from "@langfuse/openai";
-  ```
-
-- You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
-
-### Vercel AI SDK
-
-Works very similarly to v3, but replaces `LangfuseExporter` from `langfuse-vercel` with the regular `LangfuseSpanProcessor` from `@langfuse/otel`.
-
-Please see [full example on usage with the AI SDK](/docs/observability/sdk/instrumentation#framework-third-party-telemetry) for more details.
-
-<Callout>
-
-Please note that provided tool definitions to the LLM are now mapped to `metadata.tools` and no longer in `input.tools`. This is relevant in case you are running evaluations on your generations.
-
-</Callout>
-
-### Langchain integration
-
-- **Import**: The import of the Langchain integration is now:
-
-  ```typescript
-  import { CallbackHandler } from "@langfuse/langchain";
-  ```
-
-- You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
-
-### `langfuseClient.getTraceUrl`
-
-- method is now asynchronous and returns a promise
-
-  ```typescript
-  const traceUrl = await langfuseClient.getTraceUrl(traceId);
-  ```
-
-### Scoring
-
-- **Import**: The import of the Langfuse client is now:
-
-  ```typescript
-  import { LangfuseClient } from "@langfuse/client";
-  ```
-
-- **Usage**: The usage of the Langfuse client is now:
-
-  ```typescript
-  const langfuse = new LangfuseClient();
-
-  await langfuse.score.create({
-    traceId: "trace_id_here",
-    name: "accuracy",
-    value: 0.9,
-  });
-  ```
-
-See [custom scores documentation](/docs/evaluation/evaluation-methods/custom-scores) for new scoring methods.
-
-### Datasets
-
-See [datasets documentation](/docs/evaluation/dataset-runs/remote-run#setup--run-via-sdk) for new dataset methods.
