@@ -194,11 +194,23 @@ import Image from "next/image";
   />
 </Frame>
 
-### Connecting via proxies
+### Connecting via a gateway
 
-You can use an LLM proxy to power LLM-as-a-judge or the Playground in Langfuse. Please create an LLM API Key in the project settings and set the base URL to resolve to your proxy's host. The proxy must accept the API format of one of our adapters and support tool calling.
+If you route LLM calls through an OpenAI-compatible gateway such as [LiteLLM](/integrations/gateways/litellm), [OpenRouter](/integrations/gateways/openrouter), or [Portkey](/integrations/gateways/portkey), you can use it as your LLM connection for the Playground and LLM-as-a-Judge evaluations.
 
-For OpenAI compatible proxies, here is an example tool calling request that must be handled by the proxy in OpenAI format to support LLM-as-a-judge in Langfuse:
+To set this up:
+
+1. Navigate to **Project Settings** > **LLM Connections** and click **Add new LLM API key**.
+2. Select **OpenAI** as the provider.
+3. Enter the API key for your gateway.
+4. Under **Advanced Settings**, set the **Base URL** to your gateway's endpoint, e.g. `https://your-litellm-instance.com/v1`.
+5. Add any **custom model names** that your gateway exposes.
+
+<Callout type="info">
+  The gateway must support [tool calling](https://platform.openai.com/docs/guides/function-calling) in the OpenAI format for LLM-as-a-Judge evaluations to work.
+</Callout>
+
+For OpenAI-compatible gateways, here is an example tool calling request that must be handled by the gateway to support LLM-as-a-Judge in Langfuse:
 
 ```bash /<host set in project settings>/ /<api key entered in project settings>/ /<custom header set in project settings>/ /<model set in project settings>/
 curl -X POST 'https://<host set in project settings>/chat/completions' \
