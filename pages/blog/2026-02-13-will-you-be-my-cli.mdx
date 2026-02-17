@@ -4,7 +4,7 @@ date: 2026/02/14
 description: How we optimized Langfuse for AI agents with CLI, Skills, markdown endpoints, public RAG endpoint, llms.txt, and MCP servers. A love letter to agents that need great developer tools.
 author: Felix, Lotte, Nimar, Marc
 tag: engineering
-ogImage: /images/blog/2026-02-13-will-you-be-my-cli/valentine.jpg
+ogImage: /images/blog/2026-02-13-will-you-be-my-cli/valentines-cover.jpg
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
@@ -12,7 +12,7 @@ import { Frame } from "@/components/Frame";
 
 <BlogHeader
   title="Will you be my CLI? Making Agents fall in love with Langfuse."
-  description="How we optimized Langfuse for AI agents with CLI, Skills, markdown endpoints,public RAG endpoint, llms.txt, and MCP servers. A love letter to agents that need great developer tools."
+  description="How we optimized Langfuse for AI agents with CLI, Skills, markdown endpoints, public RAG endpoint, llms.txt, and MCP servers. A love letter to agents that need great developer tools."
   authors={["felixkrauth", "lotteverheyden", "nimarblume", "marcklingen"]}
 />
 
@@ -213,29 +213,20 @@ In the main Langfuse Skill (see above) we include a reference that teaches AI ag
 ## Install
 
 ```bash
-# Run directly (recommended)
-npx langfuse-cli api <resource> <action>
+npx langfuse-cli api <resource> <action>   ## Run directly (recommended)
 bunx langfuse-cli api <resource> <action>
 
-# Or install globally
-npm i -g langfuse-cli
+npm i -g langfuse-cli                      ## Or install globally
 langfuse api <resource> <action>
 ```
 
 ## Discovery
 
 ```bash
-# List all resources and auth info
-langfuse api __schema
-
-# List actions for a resource
-langfuse api <resource> --help
-
-# Show args/options for a specific action
-langfuse api <resource> <action> --help
-
-# Preview the curl command without executing
-langfuse api <resource> <action> --curl
+langfuse api __schema                      ## List all resources and auth info
+langfuse api <resource> --help             ## List actions for a resource
+langfuse api <resource> <action> --help    ## Show args/options for a specific action
+langfuse api <resource> <action> --curl    ## Preview the curl command without executing
 ```
 
 ...[redacted for brevity]
