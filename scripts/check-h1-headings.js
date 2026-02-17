@@ -27,20 +27,29 @@ async function findMarkdownFiles(dir) {
 
 async function checkH1Count(filepath) {
     let h1Count = 0;
-    let inCodeBlock = false;
+    let codeBlockFence = null; // tracks the fence string (e.g. "```" or "````") when inside a code block
     try {
         const content = await fs.readFile(filepath, 'utf-8');
         const lines = content.split('\n');
         for (const line of lines) {
             const trimmedLine = line.trim();
-            // Toggle inCodeBlock state if a code fence is found
-            if (trimmedLine.startsWith('```') || trimmedLine.startsWith('~~~')) {
-                inCodeBlock = !inCodeBlock;
-                continue; // Don't check the fence line itself
+            // Match code fence lines (``` or ~~~ with 3+ chars)
+            const fenceMatch = trimmedLine.match(/^(`{3,}|~{3,})/);
+            if (fenceMatch) {
+                const fence = fenceMatch[1];
+                if (codeBlockFence === null) {
+                    // Opening a new code block
+                    codeBlockFence = fence;
+                } else if (fence[0] === codeBlockFence[0] && fence.length >= codeBlockFence.length) {
+                    // Closing the code block (same char, same or greater length)
+                    codeBlockFence = null;
+                }
+                // Inner fences with fewer chars are just content, skip them
+                continue;
             }
 
             // Only check for H1 if not inside a code block
-            if (!inCodeBlock && line.startsWith('# ')) {
+            if (codeBlockFence === null && line.startsWith('# ')) {
                 h1Count++;
             }
         }
@@ -49,7 +58,7 @@ async function checkH1Count(filepath) {
         return -1; // Indicate error
     }
     // Ensure we didn't end mid-block (e.g., unclosed fence)
-    if (inCodeBlock) {
+    if (codeBlockFence !== null) {
         console.warn(`Warning: File ${filepath} might have an unclosed code block.`);
     }
     return h1Count;
