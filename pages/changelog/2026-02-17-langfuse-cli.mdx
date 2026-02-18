@@ -1,7 +1,9 @@
 ---
 date: 2026-02-17
-title: "Langfuse CLI Released"
-description: Fully use Langfuse from the CLI — built for AI agents and power users.
+title: "Langfuse CLI"
+description: Fully use Langfuse from the CLI. Built for AI agents and power users.
+ogImage: /images/changelog/2026-02-17-langfuse-cli.jpg
+canonical: /docs/api-and-data-platform/features/cli
 author: Nimar
 ---
 
@@ -11,15 +13,38 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 AI agents do real work in terminals, writing code, debugging, querying APIs. As part of our effort to [make agents fall in love with Langfuse](/blog/2026-02-13-will-you-be-my-cli), we built a CLI that wraps the entire Langfuse API so agents (and humans) can interact with Langfuse directly.
 
+Read the full documentation in the dedicated [CLI GitHub Repo](https://github.com/langfuse/langfuse-cli).
+
+
+## Get started
+Get started by running:
+
 ```bash
 npx langfuse-cli api <resource> <action>
 ```
 
+Or just ask your coding agent to do it for you:
+
+```markdown
+please install langfuse-cli
+```
+
+## What it can do
+
 The CLI covers all functionality exposed via our APIs, you can get traces, observations, update prompts or create datasets and more.
+
+It dynamically wraps our full OpenAPI spec, so every endpoint (traces, prompts, datasets, scores, sessions, metrics, and more) is available as a CLI command. See the full [API Reference](/docs/api-and-data-platform/features/public-api) for details.
+
+## Why use it
+
+- **Let your coding agent manage Langfuse for you.** Cursor, Claude Code, Windsurf, etc. can use the CLI to create datasets, pull traces, update prompts, and more without you leaving the editor.
+- **Script your workflows.** Automate repetitive tasks like exporting traces, batch-scoring, or syncing prompts across environments in CI/CD or bash scripts.
+- **Faster than the UI for quick lookups.** Grab the last 5 traces, check a prompt version, or list scores in seconds.
+
 
 ## Discovery & Usage
 
-Progressive disclosure built in — start broad, drill down:
+Progressive disclosure built in. Start broad, drill down:
 
 ```bash
 langfuse api help                     # List all resources
@@ -45,11 +70,11 @@ export LANGFUSE_HOST=https://cloud.langfuse.com  # default, supports self-hosted
 
 ## Pairs with Agent Skills
 
-The CLI is designed to work together with our [Agent Skills](https://github.com/langfuse/skills). The main Langfuse skill teaches agents how to discover endpoints, follow common workflows, and access documentation — all through the CLI. Read more about Skills and the full agent story in [the blog post](/blog/2026-02-13-will-you-be-my-cli).
+The CLI is designed to work together with our [Agent Skills](https://github.com/langfuse/skills). The main Langfuse skill teaches agents how to discover endpoints, follow common workflows, and access documentation, all through the CLI. Read more about Skills and the full agent story in [the blog post](/blog/2026-02-13-will-you-be-my-cli).
 
 ## Learn More
 
 - [npm package](https://www.npmjs.com/package/langfuse-cli)
-- [GitHub Repo](https://github.com/langfuse/langfuse-cli)
+- [CLI GitHub Repo](https://github.com/langfuse/langfuse-cli)
 - [Blog: Making Agents Fall in Love with Langfuse](/blog/2026-02-13-will-you-be-my-cli)
 - [API Reference](/docs/api)
