@@ -9,19 +9,15 @@ const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
   ssr: false,
 });
 
-export function Logo() {
+export function Logo({
+  wrapInLink = true,
+}: {
+  /** When false, render only the image block (use when already inside a link, e.g. NavbarLogo). */
+  wrapInLink?: boolean;
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
-  return (
-    <>
-      <div className="flex items-center">
-        <Link
-          href="/"
-          onContextMenu={(e) => {
-            e.preventDefault();
-            setMenuOpen(true);
-          }}
-        >
-          <div className="flex gap-2 items-center cursor-pointer -mr-4 md:-mr-0">
+  const imageBlock = (
+    <div className="flex gap-2 items-center cursor-pointer -mr-4 md:-mr-0">
             <Image
               src="/langfuse_logo_white.svg"
               alt="Langfuse Logo"
@@ -53,7 +49,24 @@ export function Logo() {
               }
             `}</style>
           </div>
-        </Link>
+  );
+
+  return (
+    <>
+      <div className="flex items-center">
+        {wrapInLink ? (
+          <Link
+            href="/"
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setMenuOpen(true);
+            }}
+          >
+            {imageBlock}
+          </Link>
+        ) : (
+          imageBlock
+        )}
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
     </>

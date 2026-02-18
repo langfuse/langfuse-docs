@@ -1,0 +1,95 @@
+---
+title: MCP Server for Prompts
+sidebarTitle: MCP Server
+description: Access and manage Langfuse prompts through the Model Context Protocol (MCP), enabling AI agents to work with your prompt library programmatically.
+---
+
+# MCP Server for Langfuse Prompts
+
+The Langfuse [Model Context Protocol](https://modelcontextprotocol.io) (MCP) Server enables AI assistants and agents to interact with your [Prompt Management](/docs/prompt-management/overview) system. The server is built directly into Langfuse at `/api/public/mcp` (streamableHttp), no external setup or build steps required.
+
+## Available Tools
+
+The Langfuse MCP Server provides five tools for comprehensive prompt management in Claude Code and other MCP clients:
+
+<Frame className="max-w-4xl">
+  <img
+    src="/images/changelog/2025-11-20-native-mcp-server.png"
+    alt="Langfuse MCP Server tools in Claude Code showing 5 tools: getPrompt, listPrompts, createTextPrompt, createChatPrompt, and updatePromptLabels"
+  />
+</Frame>
+
+## Features
+
+### Read Operations
+
+- **`getPrompt`** - Fetch a specific prompt by name
+
+  - Optional `label` parameter (e.g., "production", "staging") - defaults to "production"
+  - Optional `version` parameter to get a specific version number
+  - Returns compiled prompt with metadata and configuration
+
+- **`listPrompts`** - Browse all prompts in your project
+  - Optional filtering by `name`, `tag`, or `label`
+  - Cursor-based pagination for large prompt libraries
+  - Returns prompt metadata including available versions and labels
+
+### Write Operations
+
+- **`createTextPrompt`** - Create a new text prompt version
+
+  - Simple string content with `{{variable}}` template syntax
+  - Optional labels (e.g., `["production", "staging"]`)
+  - Optional config object for model settings
+  - Optional tags for organization
+  - Optional commit message to document changes
+  - Automatically increments version number
+
+- **`createChatPrompt`** - Create a new chat prompt version
+
+  - OpenAI-style message format with role and content
+  - Supports system, user, and assistant message roles
+  - Template variables work in message content
+  - Same label, config, tag, and commit message options as text prompts
+
+- **`updatePromptLabels`** - Manage labels across prompt versions
+  - Move labels between versions (e.g., promote staging to production)
+  - Labels are unique—setting a label on one version removes it from others
+  - Cannot modify the auto-managed `latest` label
+  - Useful for deployment workflows and version control
+
+## Setup
+
+See the [MCP Server setup guide](/docs/api-and-data-platform/features/mcp-server#authentication) for complete instructions on authentication and client configuration.
+
+## Example Workflows
+
+### Create a New Prompt
+
+Ask your AI agent:
+
+> "Create a new text prompt called 'customer-email' with a friendly greeting template that includes name and product variables. Tag it as 'draft' and add a production label."
+
+The agent will use `createTextPrompt` to create the prompt version.
+
+### Promote a Prompt to Production
+
+> "Move the production label from version 2 to version 3 of the customer-email prompt"
+
+The agent will use `updatePromptLabels` to update the label assignment.
+
+### Iterate on a Chat Prompt
+
+> "Create a new version of the code-review prompt with improved system instructions and add an example assistant message showing the review format"
+
+The agent will use `createChatPrompt` to create a new version with enhanced content after having fetched the prompt with `getPrompt`.
+
+## Feedback
+
+Share your experience with the Langfuse MCP server in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605). We'd love to hear your feedback and use cases.
+
+## Learn More
+
+- [MCP Server Overview](/docs/api-and-data-platform/features/mcp-server) - Complete MCP server documentation
+- [Prompt Management](/docs/prompt-management/overview) - Learn about Langfuse prompt features
+- [Model Context Protocol](https://modelcontextprotocol.io) - Official MCP documentation

@@ -8,7 +8,7 @@ import type {
 } from "@inkeep/cxkit-react";
 import { useTheme } from "nextra-theme-docs";
 import { type PostHog, usePostHog } from "posthog-js/react";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
 const customAnalyticsCallback = (
@@ -46,14 +46,14 @@ type InkeepSharedSettings = {
 const useInkeepSettings = (): InkeepSharedSettings => {
   const { resolvedTheme } = useTheme();
   const posthog = usePostHog();
-  const router = useRouter();
+  const pathname = usePathname() ?? "";
 
   const tabOfCurrentDocsSection = useMemo(() => {
     return inkeepCustomTabsToSlugs.find((t) => {
       const slugs = Array.isArray(t.slug) ? t.slug : [t.slug];
-      return slugs.some((slug) => router.pathname.startsWith(slug));
+      return slugs.some((slug) => pathname.startsWith(slug));
     })?.tab;
-  }, [router.pathname]);
+  }, [pathname]);
 
   const baseSettings: InkeepBaseSettings = {
     apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY! || "",

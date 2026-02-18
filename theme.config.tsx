@@ -1,14 +1,12 @@
 import React from "react";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
-import { Logo } from "@/components/logo";
 import { Cards, Steps, Tabs, Callout } from "nextra/components";
 import { useRouter } from "next/router";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 import { Frame } from "./components/Frame";
-import { GithubMenuBadge } from "./components/GitHubBadge";
-import { ToAppButton } from "./components/ToAppButton";
+import { NavbarLogo } from "./components/NavbarLogo";
+import { NavbarExtraContent } from "./components/NavbarExtraContent";
 import { DocsContributors } from "./components/DocsContributors";
-import { Button } from "./components/ui/button";
 import { COOKBOOK_ROUTE_MAPPING } from "./lib/cookbook_route_mapping";
 import { GeistSans } from "geist/font/sans";
 import FooterMenu from "./components/FooterMenu";
@@ -17,65 +15,17 @@ import { AvailabilityBanner } from "./components/availability";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import { LangTabs } from "./components/LangTabs";
 import { Video } from "./components/Video";
-import { HiringBadge } from "@/components/HiringBadge";
 // import IconYoutube from "./components/icons/youtube";
 
 const config: DocsThemeConfig = {
-  logo: (
-    <div className="flex items-center gap-4">
-      <Logo />
-      <HiringBadge />
-    </div>
-  ),
+  logo: <NavbarLogo linkToHome={false} />,
   logoLink: false,
   main: MainContentWrapper,
   search: {
-    // placeholder: "Search...",
     component: <InkeepSearchBar />,
   },
   navbar: {
-    extraContent: (
-      <>
-        {/* <a
-          className="p-1 hidden lg:inline-block hover:opacity-80"
-          target="_blank"
-          href="https://www.youtube.com/@langfuse"
-          aria-label="Langfuse YouTube"
-        >
-          <IconYoutube className="h-7 w-7" />
-        </a> */}
-        <a
-          className="p-1 hidden lg:inline-block hover:opacity-80"
-          target="_blank"
-          href="https://x.com/langfuse"
-          aria-label="Langfuse X formerly known as Twitter"
-          rel="nofollow noreferrer"
-        >
-          <svg
-            aria-label="X formerly known as Twitter"
-            fill="currentColor"
-            width="24"
-            height="24"
-            viewBox="0 0 24 22"
-          >
-            <path d="M16.99 0H20.298L13.071 8.26L21.573 19.5H14.916L9.702 12.683L3.736 19.5H0.426L8.156 10.665L0 0H6.826L11.539 6.231L16.99 0ZM15.829 17.52H17.662L5.83 1.876H3.863L15.829 17.52Z"></path>
-          </svg>
-        </a>
-
-        <GithubMenuBadge />
-
-        <Button
-          size="xs"
-          asChild
-          className="whitespace-nowrap"
-          variant="outline"
-        >
-          <Link href="/talk-to-us">Get Demo</Link>
-        </Button>
-
-        <ToAppButton />
-      </>
-    ),
+    extraContent: <NavbarExtraContent />,
   },
   sidebar: {
     defaultMenuCollapseLevel: 1,

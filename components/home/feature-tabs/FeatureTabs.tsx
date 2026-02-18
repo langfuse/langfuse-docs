@@ -8,7 +8,7 @@ import {
   useCallback,
   useReducer,
 } from "react";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { TabButton } from "./TabButton";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
@@ -89,16 +89,18 @@ export const FeatureTabs = ({
   };
 
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [state, dispatch] = useReducer(tabStateReducer, initialTabState);
 
   // Memoize activeTab computation to prevent unnecessary re-renders
   const activeTab = useMemo(() => {
-    const tab = router.query.tab as string;
+    const tab = searchParams.get("tab");
     if (tab && features.some((f) => f.id === tab)) {
       return tab;
     }
     return defaultTab;
-  }, [router.query.tab, features, defaultTab]);
+  }, [searchParams, features, defaultTab]);
 
   const tabListRef = useRef<HTMLDivElement>(null);
   const tabListScrollRef = useRef<HTMLDivElement>(null);
@@ -147,13 +149,10 @@ export const FeatureTabs = ({
     dispatch({ type: "PAUSE_AUTO_ADVANCE" });
     clearAutoAdvanceTimer();
 
-    // Update URL query param
-    const query = { ...router.query };
-    query.tab = tabId;
-
-    router.replace({ pathname: router.pathname, query }, undefined, {
-      shallow: true,
-    });
+    // Update URL query param (App Router)
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tabId);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   // Keyboard navigation
@@ -257,13 +256,10 @@ export const FeatureTabs = ({
     setTimeout(() => {
       dispatch({ type: "RESET_PROGRESS" });
 
-      // Update URL query param
-      const query = { ...router.query };
-      query.tab = nextTab.id;
-
-      router.replace({ pathname: router.pathname, query }, undefined, {
-        shallow: true,
-      });
+      // Update URL query param (App Router)
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", nextTab.id);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
 
       // Allow fade in
       setTimeout(() => {
@@ -276,6 +272,8 @@ export const FeatureTabs = ({
     defaultAutoAdvance?.enabled,
     state.isAutoAdvancePaused,
     router,
+    pathname,
+    searchParams,
   ]);
 
   // Simplified auto-advance with single timer and optimized progress updates

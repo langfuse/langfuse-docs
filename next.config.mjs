@@ -1,12 +1,17 @@
-import remarkGfm from "remark-gfm";
-import nextra from "nextra";
+import path from "path";
+import { fileURLToPath } from "url";
+import { createMDX } from "fumadocs-mdx/next";
 import NextBundleAnalyzer from "@next/bundle-analyzer";
 
 import * as redirects from "./lib/redirects.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
+
+const withMDX = createMDX();
 
 /**
  * CSP headers
@@ -32,18 +37,8 @@ const cspHeader =
 `
     : "";
 
-// nextra config
-const withNextra = nextra({
-  theme: "nextra-theme-docs",
-  themeConfig: "./theme.config.tsx",
-  mdxOptions: {
-    remarkPlugins: [remarkGfm],
-  },
-  defaultShowCopyCode: true,
-});
-
-// next config
-const nextraConfig = withNextra({
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   // Enable static export when STATIC_EXPORT env var is set
   ...(process.env.STATIC_EXPORT === "true" && {
     output: "export",
@@ -55,6 +50,19 @@ const nextraConfig = withNextra({
     scrollRestoration: true,
   },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
+
+  webpack(config) {
+    config.resolve = config.resolve ?? {};
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "nextra/context": path.resolve(__dirname, "lib/nextra-shim/context.tsx"),
+      "nextra/hooks": path.resolve(__dirname, "lib/nextra-shim/hooks.ts"),
+      nextra: path.resolve(__dirname, "lib/nextra-shim/nextra-types.ts"),
+      "nextra-theme-docs": path.resolve(__dirname, "lib/nextra-shim/theme-docs.tsx"),
+      "nextra/components": path.resolve(__dirname, "lib/nextra-shim/components.tsx"),
+    };
+    return config;
+  },
 
   images: {
     // Disable image optimization for static export
@@ -175,6 +183,6 @@ const nextraConfig = withNextra({
       ],
     };
   },
-});
+};
 
-export default withBundleAnalyzer(nextraConfig);
+export default withBundleAnalyzer(withMDX(nextConfig));

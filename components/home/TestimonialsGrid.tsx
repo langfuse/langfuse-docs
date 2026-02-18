@@ -26,33 +26,26 @@ const CARDS_CONFIG = {
   ALL: 15
 } as const;
 
-// Helper function to render content with @langfuse links for X.com posts
-const renderContent = (content: string, platform: string, postURL?: string) => {
+// Helper to render content; card is already a link so we use span for @langfuse to avoid nested <a>
+const renderContent = (content: string, platform: string) => {
   if (platform === "xcom" && content.includes("@langfuse")) {
     const parts = content.split("@langfuse");
     const elements = [];
-    
     for (let i = 0; i < parts.length; i++) {
       elements.push(parts[i]);
       if (i < parts.length - 1) {
         elements.push(
-          <a
+          <span
             key={i}
-            href={postURL || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
             className="text-blue-500 hover:text-blue-600 hover:underline"
-            onClick={(e) => e.stopPropagation()}
           >
             @langfuse
-          </a>
+          </span>
         );
       }
     }
-    
     return elements;
   }
-  
   return content;
 };
 
@@ -149,7 +142,7 @@ export const TestimonialsGrid = () => {
 
               {/* Content */}
               <div className="text-sm text-foreground leading-relaxed">
-                {renderContent(testimonial.content, testimonial.platform, testimonial.postURL)}
+                {renderContent(testimonial.content, testimonial.platform)}
               </div>
             </a>
             ))}
