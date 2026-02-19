@@ -23,3 +23,17 @@ Follow these best practices:
 
 - **Add timestamp filters**: E.g. run `GET /api/public/traces?page=1&limit=10&fromTimestamp=2025-10-16T00:00:00.000Z&toTimestamp=2025-10-17T00:00:00.000Z`.
 - **Use the `fields` parameter**: Request only the data you need to avoid expensive joins (e.g. `GET /api/public/traces?fields=core,io`).
+
+### Additional Self-Host Options
+
+Self-hosters can configure server-side defaults and restrictions for the `GET /api/public/traces` endpoint via environment variables.
+Enforcement order: rejection → default date range → default fields.
+
+| Variable                                      | Type                                      | Description                                                                                                                                                                                                                                                   |
+|-----------------------------------------------|-------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `LANGFUSE_API_TRACES_REJECT_NO_DATE_RANGE`    | `"true"` / `"false"` (default: `"false"`) | Reject requests that do not include a `fromTimestamp` parameter with HTTP 400.                                                                                                                                                                                |
+| `LANGFUSE_API_TRACES_DEFAULT_DATE_RANGE_DAYS` | Positive integer (optional)               | When no `fromTimestamp` is provided, automatically apply a lookback window of N days from `toTimestamp` (or now). Ignored when rejection is enabled.                                                                                                          |
+| `LANGFUSE_API_TRACES_DEFAULT_FIELDS`          | Comma-separated string (optional)         | Default field groups returned when the caller does not specify a `fields` query parameter. Valid groups: `core`, `io`, `scores`, `observations`, `metrics`. E.g. `"core"` or `"core,io"`. An explicit `fields` query parameter always overrides this default. |
+
+**Recommended starting point for large projects:** set `LANGFUSE_API_TRACES_DEFAULT_FIELDS=core` and `LANGFUSE_API_TRACES_DEFAULT_DATE_RANGE_DAYS=3`.
+This keeps `input`/`output` out of the default response (users can still request them explicitly via `fields=core,io`) and caps the scan window.
