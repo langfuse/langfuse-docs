@@ -4,7 +4,7 @@ import { Frame } from "@/components/Frame";
 import { Video } from "@/components/Video";
 import { LangTabs } from "@/components/LangTabs";
 import { FetchReadme } from "@/components/FetchReadme";
-import { Callout, Tabs, Tab, Cards } from "@/lib/nextra-shim/components";
+import { Callout, Tabs, Tab, Cards, Steps, FileTree } from "@/lib/nextra-shim/components";
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -17,6 +17,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Tab,
     Cards,
     Card: Cards.Card,
+    Steps,
+    FileTree,
     FetchReadme,
     ...components,
   };
