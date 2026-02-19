@@ -1,7 +1,7 @@
 import { getPagesUnderRoute } from "nextra/context";
 import { type Page } from "nextra";
 import { Cards } from "nextra/components";
-import { CHAPTER_ORDER } from "@/pages/handbook/chapters/_meta";
+import { CHAPTER_ORDER } from "@/lib/handbook-meta";
 
 export const ChapterIndex = () => {
   const pages = getPagesUnderRoute("/handbook/chapters") as Array<

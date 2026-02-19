@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { Authors, allAuthors } from "../Authors";
-import { useConfig } from "nextra-theme-docs";
 
 export const BlogHeader = ({
   authors,
@@ -17,8 +16,6 @@ export const BlogHeader = ({
   image?: string;
   customerLogo?: string;
 }) => {
-  const { frontMatter } = useConfig();
-
   return (
     <div className="flex flex-col gap-1 items-center my-10 text-center">
       {image && (
@@ -30,7 +27,7 @@ export const BlogHeader = ({
           className="rounded mb-14"
         />
       )}
-      <span className="text-primary/60">{date ?? frontMatter.date}</span>
+      <span className="text-primary/60">{date}</span>
       {customerLogo && (
         <div className="bg-white rounded-lg p-4 shadow-sm border my-4">
           <Image

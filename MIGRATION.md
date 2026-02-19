@@ -37,20 +37,19 @@ This document describes the migration from Nextra (Pages Router) to Fumadocs (Ap
 
 ## Remaining steps
 
-### 1. Content migration
+### 1. Content migration (docs)
 
-- **Copy `docs-nextra-backup/*` → `content/docs/`** (this folder is the former `pages/docs/`, moved to fix the /docs route conflict)  
-  - Move all MDX/MD from `pages/docs/` into `content/docs/` preserving structure (e.g. `pages/docs/observability/overview.mdx` → `content/docs/observability/overview.mdx`).
-- **Replace Nextra `_meta.tsx` with Fumadocs `meta.json`** in each folder.  
-  - Nextra: `export default { index: "Overview", "observability": "Observability", ... }`.  
-  - Fumadocs: `{ "title": "Section title", "pages": ["index", "observability", ...] }`.  
-  - Write a small script to convert `_meta.tsx` → `meta.json` (strip separators/custom entries or map them to titles).
+- **Done.** Docs live in `content/docs/` with Fumadocs `meta.json`. The former `pages/docs/` content was migrated; `docs-nextra-backup` was removed after verification.
 
-### 2. Other sections (blog, changelog, guides, etc.)
+### 2. Other sections (blog, changelog, guides, etc.) — done
 
-- Either:
-  - **Option A:** Add more Fumadocs collections in `source.config.ts` (e.g. `blog`, `changelog`) and corresponding `app/blog/`, `app/changelog/` routes that use the same pattern as `app/docs/`, or  
-  - **Option B:** Implement them as normal App Router routes under `app/blog/`, `app/changelog/`, etc., with data from your own source or from Fumadocs `multiple()` if you add more collections.
+- **Done.** All main sections are on App Router:
+  - **Fumadocs collections** in `source.config.ts`: `selfHosting`, `blog`, `changelog`, `guides`, `faq`, `integrations`, `security`, `library`, `customers`, `handbook`.
+  - **Content** in `content/<section>/`.
+  - **App routes**: `app/docs/` (docs), `app/blog/`, `app/changelog/` (index + layout), and `app/[section]/[[...slug]]` for self-hosting, guides, faq, integrations, security, library, customers, handbook.
+  - **Client loaders** for section MDX: `lib/section-loaders.generated.ts` (generated in prebuild via `scripts/generate-section-loaders.js`).
+  - **Index components** (`BlogIndex`, `ChangelogIndex`) use `getPagesUnderRoute` from nextra-shim, which now reads from Fumadocs sources via `getPagesForRoute` in `lib/source.ts`.
+- **Static marketing pages** are in `content/marketing/` and served via `app/[section]` (section = about, careers, pricing, etc.).
 
 ### 3. Replace Nextra usage in components
 
@@ -70,18 +69,15 @@ Notable components to refactor:
 - `components/MainContentWrapper.tsx`, `components/LangTabs.tsx`, etc. – remove `useConfig` / Nextra theme; use Fumadocs layout or local state.
 - `components/not-found-animation.tsx`, `components/MetabaseDashboard.tsx`, `components/inkeep/useInkeepSettings.ts` – replace `useTheme` with `next-themes` or Fumadocs theme.
 
-### 4. Home and global providers
+### 4. Home and global providers — done
 
-- **`app/page.tsx`** – Replace the placeholder with the real landing page (e.g. render `<Home />` from `@/components/home`). Fix any remaining Nextra imports inside `Home` and its children (see table above).
-- **Analytics and scripts** – `pages/_app.tsx` currently wraps the app with PostHog, Hubspot, Cookieyes, and fonts. These are not in the new root layout yet. Add them to `app/layout.tsx`:
-  - PostHog: use a client component that calls `posthog.init()` and wraps children in `PostHogProvider` (same as current `_app.tsx`).
-  - Hubspot and Cookieyes scripts: add the same `<Script>`/components in the root layout (client or server as appropriate).
+- **`app/page.tsx`** – Uses real `<Home />` from `@/components/home`.
+- **Analytics and scripts** – In `app/layout.tsx`: PostHog (via `@/components/analytics/PostHogProvider`), Hubspot, and Cookieyes scripts (production only).
 
-### 5. Remove Pages Router docs and Nextra
+### 5. Remove Pages Router — done
 
-- After all routes are moved to App Router and content lives under `content/docs/` (and any other Fumadocs dirs), you can remove:
-  - `pages/_app.tsx`, `pages/index.mdx`, and the whole `pages/docs/` tree (and other Nextra-backed pages).
-- Do not remove `pages/` until every URL is served from `app/` (or you explicitly keep some Pages routes).
+- **Done.** The `pages/` directory has been removed. The site uses **App Router only**.
+- All routes are under `app/`; content lives under `content/`. API routes are under `app/api/`.
 
 ### 6. Optional: Fumadocs search
 

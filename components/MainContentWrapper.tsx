@@ -1,4 +1,6 @@
-import { useRouter } from "next/router";
+"use client";
+
+import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useConfig } from "nextra-theme-docs";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
@@ -52,7 +54,7 @@ const isCustomerStory = (pathname: string) =>
   pathname.startsWith("/customers/");
 
 const CopyMarkdownButton = () => {
-  const router = useRouter();
+  const pathname = usePathname();
   const capture = usePostHogClientCapture();
   const [copyState, setCopyState] = useState<
     "idle" | "loading" | "copied" | "error"
@@ -70,7 +72,7 @@ const CopyMarkdownButton = () => {
   }, []);
 
   const getMarkdownUrl = () => {
-    let basePath = router.pathname;
+    let basePath = pathname ?? "";
     if (basePath.startsWith("/")) basePath = basePath.substring(1);
     if (basePath.endsWith("/")) basePath = basePath.slice(0, -1);
     if (!basePath) basePath = "index"; // Handle root index page
@@ -305,16 +307,16 @@ const CopyMarkdownButton = () => {
 };
 
 export const MainContentWrapper = (props) => {
-  const router = useRouter();
+  const pathname = usePathname();
   const { frontMatter } = useConfig();
   const cookbook = COOKBOOK_ROUTE_MAPPING.find(
-    (cookbook) => cookbook.path === router.pathname
+    (cookbook) => cookbook.path === pathname
   );
 
   const versionLabel = frontMatter.label;
 
   const shouldShowCopyButton = pathsWithCopyAsMarkdownButton.some((prefix) =>
-    router.pathname.startsWith(prefix)
+    (pathname ?? "").startsWith(prefix)
   );
 
   return (
@@ -326,7 +328,7 @@ export const MainContentWrapper = (props) => {
               {versionLabel}
             </span>
           )}
-          {shouldShowCopyButton && <CopyMarkdownButton key={router.pathname} />}
+          {shouldShowCopyButton && <CopyMarkdownButton key={pathname} />}
         </div>
       )}
 
@@ -335,16 +337,16 @@ export const MainContentWrapper = (props) => {
       ) : null}
 
       {props.children}
-      {isCustomerStory(router.pathname) && <CustomerStoryCTA />}
+      {isCustomerStory(pathname ?? "") && <CustomerStoryCTA />}
       {!pathsWithoutFooterWidgets.some(
         (path) =>
-          router.pathname === path || router.pathname.startsWith(path + "/")
+          pathname === path || (pathname ?? "").startsWith(path + "/")
       ) ? (
         <div
           className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t dark:border-neutral-800"
           id="docs-feedback"
         >
-          <DocsFeedback key={router.pathname} />
+          <DocsFeedback key={pathname} />
           <DocsSupport />
         </div>
       ) : null}
@@ -367,7 +369,7 @@ export const DocsSupport = () => {
 };
 
 export const DocsFeedback = () => {
-  const router = useRouter();
+  const pathname = usePathname();
   const [selected, setSelected] = useState<
     "positive" | "negative" | "submitted" | null
   >(null);
@@ -388,7 +390,7 @@ export const DocsFeedback = () => {
     fetch("/api/feedback", {
       method: "POST",
       body: JSON.stringify({
-        page: router.pathname,
+        page: pathname ?? "",
         feedback: newSelection,
       }),
     })
@@ -408,7 +410,7 @@ export const DocsFeedback = () => {
     fetch("/api/feedback", {
       method: "POST",
       body: JSON.stringify({
-        page: router.pathname,
+        page: pathname ?? "",
         feedback: selected,
         comment: feedbackComment,
       }),

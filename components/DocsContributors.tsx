@@ -1,4 +1,6 @@
-import { useRouter } from "next/router";
+"use client";
+
+import { usePathname } from "next/navigation";
 import React, { useState, useEffect, forwardRef } from "react";
 import { allAuthors, Author, AuthorHoverCardContent } from "./Authors";
 import contributorsData from "../data/generated/contributors.json";
@@ -109,8 +111,8 @@ const processContributor = (username: string): ProcessedContributor => {
 };
 
 export const DocsContributors = () => {
-  const router = useRouter();
-  const currentPath = router.asPath.split("#")[0].split("?")[0];
+  const pathname = usePathname() ?? "";
+  const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
 
   // Reset showAll when the page changes

@@ -1,15 +1,22 @@
 /**
- * Shim for nextra/context so home and other components don't crash.
- * getPagesUnderRoute returns [] until those routes are migrated to App Router.
+ * Shim for nextra/context. Uses Fumadocs sources so index components get real data
+ * when routes are served from App Router (content/*).
  */
 import type React from "react";
+import { getPagesForRoute } from "@/lib/source";
 
-export function getPagesUnderRoute(_route: string): Array<{
+export function getPagesUnderRoute(route: string): Array<{
   name?: string;
   route?: string;
   title?: string;
   frontMatter?: Record<string, unknown>;
   children?: React.ReactNode;
 }> {
-  return [];
+  const pages = getPagesForRoute(route);
+  return pages.map((p) => ({
+    name: p.name,
+    route: p.route,
+    title: p.title,
+    frontMatter: p.frontMatter,
+  }));
 }

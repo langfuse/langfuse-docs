@@ -5,7 +5,12 @@
 "use client";
 
 import * as React from "react";
-import { Primitive, Tab as FumadocsTab } from "fumadocs-ui/components/tabs";
+import {
+  Tab as FumadocsTab,
+  Tabs as FumadocsTabs,
+  TabsList as FumadocsTabsList,
+  TabsTrigger as FumadocsTabsTrigger,
+} from "fumadocs-ui/components/tabs";
 
 function toValue(s: string): string {
   return s.toLowerCase().replace(/\s/g, "-");
@@ -114,16 +119,16 @@ export function Tabs({
   });
 
   return (
-    <Primitive.Tabs value={value} onValueChange={onValueChange} {...rest}>
-      <Primitive.TabsList>
+    <FumadocsTabs value={value} onValueChange={onValueChange} {...rest}>
+      <FumadocsTabsList>
         {items.map((item, i) => (
-          <Primitive.TabsTrigger key={i} value={values[i]}>
+          <FumadocsTabsTrigger key={i} value={values[i]}>
             {item}
-          </Primitive.TabsTrigger>
+          </FumadocsTabsTrigger>
         ))}
-      </Primitive.TabsList>
+      </FumadocsTabsList>
       {tabChildren}
-    </Primitive.Tabs>
+    </FumadocsTabs>
   );
 }
 
@@ -148,3 +153,75 @@ export const Playground = ({ source }: { source: string }) => (
     <code>{source}</code>
   </pre>
 );
+
+/** Numbered step list — wraps children in a styled ordered-list container. */
+export function Steps({ children, ...props }: { children?: React.ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className="steps ml-4 border-l pl-8 [counter-reset:step]" {...props}>
+      {children}
+    </div>
+  );
+}
+
+const FileTreeFile = ({
+  name,
+  active,
+}: {
+  name: string;
+  active?: boolean;
+}) => (
+  <li className="flex items-center gap-1.5 py-0.5 text-sm">
+    <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0 text-muted-foreground" fill="currentColor">
+      <path d="M2 2.5A2.5 2.5 0 014.5 0h7A2.5 2.5 0 0114 2.5v11a2.5 2.5 0 01-2.5 2.5h-7A2.5 2.5 0 012 13.5V2.5z" />
+    </svg>
+    <span className={active ? "font-semibold" : ""}>{name}</span>
+  </li>
+);
+
+const FileTreeFolder = ({
+  name,
+  children,
+  defaultOpen = false,
+}: {
+  name: string;
+  children?: React.ReactNode;
+  defaultOpen?: boolean;
+}) => {
+  const [open, setOpen] = React.useState(defaultOpen);
+  return (
+    <li className="py-0.5">
+      <button
+        className="flex items-center gap-1.5 text-sm hover:text-foreground"
+        onClick={() => setOpen((v) => !v)}
+        type="button"
+      >
+        <svg
+          viewBox="0 0 16 16"
+          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-90" : ""}`}
+          fill="currentColor"
+        >
+          <path d="M6 3l5 5-5 5V3z" />
+        </svg>
+        <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0 text-muted-foreground" fill="currentColor">
+          <path d="M1.75 1A1.75 1.75 0 000 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0016 13.25v-8.5A1.75 1.75 0 0014.25 3H7.5L6.25 1h-4.5z" />
+        </svg>
+        <span>{name}</span>
+      </button>
+      {open && children && (
+        <ul className="ml-5 border-l pl-2 mt-0.5">{children}</ul>
+      )}
+    </li>
+  );
+};
+
+/** File-tree component matching Nextra's FileTree API. */
+export function FileTree({ children }: { children?: React.ReactNode }) {
+  return (
+    <ul className="not-prose rounded-lg border p-4 font-mono text-sm my-4 [&_ul]:mt-0.5">
+      {children}
+    </ul>
+  );
+}
+
+FileTree.File = FileTreeFile;
+FileTree.Folder = FileTreeFolder;

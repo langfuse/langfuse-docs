@@ -1,4 +1,4 @@
-import { DocsLayout } from "fumadocs-ui/layout";
+import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { source } from "@/lib/source";
 import { DocsNavbar } from "@/components/docs/DocsNavbar";
 import FooterMenu from "@/components/FooterMenu";

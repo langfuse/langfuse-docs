@@ -11,8 +11,10 @@ import {
   Code,
   Database,
 } from "lucide-react";
-import nativeIntegrationsMeta from "../../pages/integrations/native/_meta";
-import dataPlatformIntegrationsMeta from "../../pages/integrations/data-platform/_meta";
+import {
+  nativeIntegrationsMeta,
+  dataPlatformIntegrationsMeta,
+} from "@/lib/integrations-meta";
 
 /**
  * Transforms meta config entries into integration page objects

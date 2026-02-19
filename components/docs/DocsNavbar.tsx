@@ -1,6 +1,6 @@
 "use client";
 
-import { SidebarTrigger } from "fumadocs-core/sidebar";
+import { SidebarTrigger } from "fumadocs-ui/components/sidebar/base";
 import { NavbarLogo } from "@/components/NavbarLogo";
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";

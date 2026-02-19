@@ -1,7 +1,10 @@
+"use client";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { WALKTHROUGH_TABS } from "./constants";
 import { BookOpen, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,25 +31,18 @@ function VideoPlayer({ videoId, title }: VideoPlayerProps) {
 
 export function WatchWalkthroughs({ className }: { className?: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Get current tab from query param or default to first tab
-  const activeTab = (() => {
-    const tab = router.query.tab as string;
-    if (tab && WALKTHROUGH_TABS.some((t) => t.id === tab)) {
-      return tab;
-    }
-    return WALKTHROUGH_TABS[0].id;
-  })();
+  const tab = searchParams.get("tab");
+  const activeTab =
+    tab && WALKTHROUGH_TABS.some((t) => t.id === tab)
+      ? tab
+      : WALKTHROUGH_TABS[0].id;
 
-  // Handle tab change and update URL query param
   const handleTabChange = (value: string) => {
-    const query = { ...router.query };
-
-    query.tab = value;
-
-    router.replace({ pathname: router.pathname, query }, undefined, {
-      shallow: true,
-    });
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", value);
+    router.replace(`?${params.toString()}`);
   };
 
   return (
@@ -56,12 +52,12 @@ export function WatchWalkthroughs({ className }: { className?: string }) {
         onValueChange={handleTabChange}
         className="w-full"
       >
-        <TabsList className="h-auto p-2 gap-2 flex-wrap justify-center mx-auto flex-row">
+        <TabsList className="flex-row flex-wrap gap-2 justify-center p-2 mx-auto h-auto">
           {WALKTHROUGH_TABS.map((tab) => (
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="flex-none h-auto items-center justify-center md:gap-2 text-center whitespace-nowrap flex-row"
+              className="flex-row flex-none justify-center items-center h-auto text-center whitespace-nowrap md:gap-2"
             >
               <tab.icon className="size-4" />
               <span>{tab.label}</span>
@@ -74,10 +70,10 @@ export function WatchWalkthroughs({ className }: { className?: string }) {
             <TabsContent
               key={tab.id}
               value={tab.id}
-              className="mt-2 p-4 border rounded bg-card max-w-2xl mx-auto"
+              className="p-4 mx-auto mt-2 max-w-2xl rounded border bg-card"
             >
               <div className="mb-6">
-                <h3 className="text-xl font-semibold mb-2">{tab.title}</h3>
+                <h3 className="mb-2 text-xl font-semibold">{tab.title}</h3>
                 <p>{tab.description}</p>
               </div>
               <VideoPlayer
@@ -88,7 +84,7 @@ export function WatchWalkthroughs({ className }: { className?: string }) {
                 <Button
                   asChild
                   variant="outline"
-                  className="w-full justify-start"
+                  className="justify-start w-full"
                 >
                   <Link href={tab.docs.href}>
                     <BookOpen size={16} />

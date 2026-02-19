@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { type Page } from "nextra";
 import { Video } from "../Video";
-import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Head from "next/head";
 import {
@@ -21,13 +21,13 @@ export const ChangelogIndex = ({
 }: {
   itemsPerPage?: number;
 }) => {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const page = Number(router.query.page) || 1;
+    const page = Number(searchParams.get("page")) || 1;
     setCurrentPage(page);
-  }, [router.query.page]);
+  }, [searchParams]);
 
   const allPages = (
     getPagesUnderRoute("/changelog") as Array<Page & { frontMatter: any }>

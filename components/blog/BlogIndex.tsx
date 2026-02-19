@@ -1,9 +1,11 @@
+"use client";
+
 import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import Image from "next/image";
 import { type Page } from "nextra";
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export const BlogIndex = ({
@@ -13,14 +15,14 @@ export const BlogIndex = ({
   maxItems?: number;
   path?: string;
 }) => {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   // Initialize selected tag from URL parameter
   useEffect(() => {
-    const tag = router.query.tag as string | undefined;
+    const tag = searchParams.get("tag") ?? undefined;
     setSelectedTag(tag || null);
-  }, [router.query.tag]);
+  }, [searchParams]);
 
   const posts = useMemo(
     () =>
@@ -32,7 +34,7 @@ export const BlogIndex = ({
             new Date(a.frontMatter.date).getTime()
         )
         .slice(0, maxItems),
-    [maxItems]
+    [maxItems, path]
   );
 
   // Function to normalize and split tags
@@ -81,7 +83,7 @@ export const BlogIndex = ({
 
   return (
     <div>
-      <div className="flex gap-2 flex-wrap mb-10 justify-center">
+      <div className="flex flex-wrap gap-2 justify-center mb-10">
         {tags.map((tag) => (
           <Button
             key={tag}
@@ -102,27 +104,27 @@ export const BlogIndex = ({
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7">
+      <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 xl:grid-cols-3">
         {filteredPosts.map((page) => (
           <Link key={page.route} href={page.route} className="block mb-8 group">
             {page.frontMatter?.ogImage ? (
-              <div className="mt-4 rounded relative aspect-video overflow-hidden">
+              <div className="overflow-hidden relative mt-4 rounded aspect-video">
                 <Image
                   src={page.frontMatter.ogImage}
-                  className="object-cover transform group-hover:scale-105 transition-transform"
+                  className="object-cover transition-transform transform group-hover:scale-105"
                   alt={page.frontMatter?.title ?? "Blog post image"}
                   fill={true}
                   sizes="(min-width: 1024px) 33vw, 100vw"
                 />
               </div>
             ) : null}
-            <h2 className="block font-mono mt-8 text-2xl opacity-90 group-hover:opacity-100">
+            <h2 className="block mt-8 font-mono text-2xl opacity-90 group-hover:opacity-100">
               {page.meta?.title || page.frontMatter?.title || page.name}
             </h2>
-            <div className="opacity-80 mt-2 group-hover:opacity-100">
+            <div className="mt-2 opacity-80 group-hover:opacity-100">
               {page.frontMatter?.description} <span>Read more →</span>
             </div>
-            <div className="flex gap-2 flex-wrap mt-3 items-baseline">
+            <div className="flex flex-wrap gap-2 items-baseline mt-3">
               {normalizeTags(page.frontMatter?.tag).map((tag, index) => (
                 <Button
                   key={index}
@@ -146,12 +148,12 @@ export const BlogIndex = ({
                 </Button>
               ))}
               {page.frontMatter?.date ? (
-                <span className="opacity-60 text-sm group-hover:opacity-100">
+                <span className="text-sm opacity-60 group-hover:opacity-100">
                   {page.frontMatter.date}
                 </span>
               ) : null}
               {page.frontMatter?.author ? (
-                <span className="opacity-60 text-sm group-hover:opacity-100">
+                <span className="text-sm opacity-60 group-hover:opacity-100">
                   by {page.frontMatter.author}
                 </span>
               ) : null}

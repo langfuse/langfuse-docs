@@ -51,7 +51,7 @@ const nextConfig = {
   },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
 
-  webpack(config) {
+  webpack(config, { isServer }) {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -61,6 +61,15 @@ const nextConfig = {
       "nextra-theme-docs": path.resolve(__dirname, "lib/nextra-shim/theme-docs.tsx"),
       "nextra/components": path.resolve(__dirname, "lib/nextra-shim/components.tsx"),
     };
+    // Prevent client bundle from failing on Node built-ins (e.g. fumadocs-mdx using fs/promises)
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        "fs/promises": false,
+        path: false,
+      };
+    }
     return config;
   },
 

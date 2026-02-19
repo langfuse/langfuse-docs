@@ -1,0 +1,31 @@
+import { BlogIndex } from "@/components/blog/BlogIndex";
+import { Header } from "@/components/Header";
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+import Link from "next/link";
+
+export default function BlogIndexPage() {
+  return (
+    <div className="md:container">
+      <div className="flex flex-col items-center content-center text-center my-10">
+        <Header
+          title="Blog"
+          description={
+            <>
+              The latest updates from Langfuse. See{" "}
+              <Link href="/changelog" className="underline">
+                Changelog
+              </Link>{" "}
+              for more product updates.
+            </>
+          }
+          className="mb-8"
+          h="h1"
+        />
+        <div className="mb-8">
+          <ProductUpdateSignup source="blog" />
+        </div>
+      </div>
+      <BlogIndex path="/blog" />
+    </div>
+  );
+}

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { RootProvider } from "fumadocs-ui/provider";
+import Script from "next/script";
+import { RootProvider } from "fumadocs-ui/provider/next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { PostHogProvider } from "@/components/analytics/PostHogProvider";
+import { Hubspot } from "@/components/analytics/hubspot";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
@@ -23,7 +26,20 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <body className="font-sans antialiased">
-        <RootProvider>{children}</RootProvider>
+        <PostHogProvider>
+          <RootProvider>{children}</RootProvider>
+        </PostHogProvider>
+        {process.env.NODE_ENV === "production" && (
+          <>
+            <Hubspot />
+            <Script
+              id="cookieyes"
+              type="text/javascript"
+              src="https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js"
+              strategy="beforeInteractive"
+            />
+          </>
+        )}
       </body>
     </html>
   );
