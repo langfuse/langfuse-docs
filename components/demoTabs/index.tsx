@@ -11,19 +11,16 @@ import {
 import { cn } from "@/lib/utils";
 import {
   MessageSquareIcon,
-  MicIcon,
   ImageIcon,
   BarChart3Icon,
 } from "lucide-react";
 import { Chat } from "@/components/qaChatbot";
 import { SentimentClassifier } from "@/components/sentimentClassifier";
 import { ImageGenerator } from "@/components/imageGenerator";
-import { VoiceAgent } from "@/components/voiceAgent";
 import { Loader } from "@/components/ai-elements/loader";
 
 const TAB_MAP: Record<string, string> = {
   chatbot: "chatbot",
-  voice: "voice",
   image: "image",
   sentiment: "sentiment",
 };
@@ -66,11 +63,6 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
             <span className="hidden sm:inline">Image Generator</span>
             <span className="sm:hidden">Image</span>
           </TabsTrigger>
-          <TabsTrigger value="voice" className="gap-1.5">
-            <MicIcon className="size-4" />
-            <span className="hidden sm:inline">Voice Agent</span>
-            <span className="sm:hidden">Voice</span>
-          </TabsTrigger>
           <TabsTrigger value="sentiment" className="gap-1.5">
             <BarChart3Icon className="size-4" />
             <span className="hidden sm:inline">Sentiment Classifier</span>
@@ -84,10 +76,6 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
 
         <TabsContent value="image">
           <ImageGenerator />
-        </TabsContent>
-
-        <TabsContent value="voice">
-          <VoiceAgent />
         </TabsContent>
 
         <TabsContent value="sentiment">

@@ -35,6 +35,9 @@ importers:
       '@langfuse/core':
         specifier: 4.6.1
         version: 4.6.1(@opentelemetry/api@1.9.0)
+      '@langfuse/openai':
+        specifier: ^4.6.1
+        version: 4.6.1(@opentelemetry/api@1.9.0)
       '@langfuse/otel':
         specifier: 4.6.1
         version: 4.6.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.0.1(@opentelemetry/api@1.9.0))(@opentelemetry/exporter-trace-otlp-http@0.203.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.0.1(@opentelemetry/api@1.9.0))
@@ -194,6 +197,9 @@ importers:
       nodemailer:
         specifier: ^7.0.11
         version: 7.0.11
+      openai:
+        specifier: ^6.22.0
+        version: 6.22.0(ws@8.18.3)(zod@4.0.15)
       openai-edge:
         specifier: ^1.2.2
         version: 1.2.2
@@ -738,6 +744,9 @@ packages:
     resolution: {integrity: sha512-DtQoKWHQh0I0MsJxcKrBQVKAJ3fea6+raXlISVY3NDMFG/zSKkdkNouQvUXQtSCHBbOFupHMBw8imM30lbhq3g==}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
+
+  '@langfuse/openai@4.6.1':
+    resolution: {integrity: sha512-U07zUPkivaKi8S8a3oXDzheUhROI/A6RQLYWqGyvvbOodjPQDFLCeiHneCfaZjBss6n8CCrL8E6NSzqR1UlinQ==}
 
   '@langfuse/otel@4.6.1':
     resolution: {integrity: sha512-ZUa+nV5und6IYK2b5w1vXoNzU/Hfpl1MJ2uu9Woyb74ZBQi36nBwo7SeX+NLvy+n/UzKcJMetOYrA5ywlXvnuA==}
@@ -4769,6 +4778,18 @@ packages:
       zod:
         optional: true
 
+  openai@6.22.0:
+    resolution: {integrity: sha512-7Yvy17F33Bi9RutWbsaYt5hJEEJ/krRPOrwan+f9aCPuMat1WVsb2VNSII5W1EksKT6fF69TG/xj4XzodK3JZw==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
   opener@1.5.2:
     resolution: {integrity: sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==}
     hasBin: true
@@ -6931,6 +6952,13 @@ snapshots:
   '@langfuse/core@4.6.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
+
+  '@langfuse/openai@4.6.1(@opentelemetry/api@1.9.0)':
+    dependencies:
+      '@langfuse/core': 4.6.1(@opentelemetry/api@1.9.0)
+      '@langfuse/tracing': 4.6.1(@opentelemetry/api@1.9.0)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
 
   '@langfuse/otel@4.6.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.0.1(@opentelemetry/api@1.9.0))(@opentelemetry/exporter-trace-otlp-http@0.203.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.0.1(@opentelemetry/api@1.9.0))':
     dependencies:
@@ -11603,6 +11631,11 @@ snapshots:
       zod: 4.0.15
     transitivePeerDependencies:
       - encoding
+
+  openai@6.22.0(ws@8.18.3)(zod@4.0.15):
+    optionalDependencies:
+      ws: 8.18.3
+      zod: 4.0.15
 
   opener@1.5.2: {}
 

@@ -1,5 +1,5 @@
-import { openai } from "@ai-sdk/openai";
-import { experimental_generateImage as generateImage } from "ai";
+import OpenAI from "openai";
+import { observeOpenAI } from "@langfuse/openai";
 import {
   observe,
   propagateAttributes,
@@ -41,46 +41,41 @@ const handler = async (req: Request) => {
       input: prompt,
     });
 
-    updateActiveObservation(
-      { input: prompt },
-      { asType: "generation" }
-    );
-
     try {
-      const result = await generateImage({
-        model: openai.image("gpt-image-1"),
-        prompt,
-        size: "1024x1024",
-        providerOptions: {
-          openai: { quality: "low" },
-        },
+      // observeOpenAI automatically creates a child generation span that
+      // captures: model, input (prompt), and usage tokens with granular
+      // breakdown (input_text_tokens, input_image_tokens, output_tokens).
+      const openai = observeOpenAI(new OpenAI(), {
+        generationName: "gpt-image-1",
       });
 
-      const image = result.image;
+      const result = await openai.images.generate({
+        model: "gpt-image-1",
+        prompt,
+        size: "1024x1024",
+        quality: "low",
+      });
 
-      // Include the image as a base64 data URI in the trace output.
+      const imageData = result.data?.[0]?.b64_json;
+      if (!imageData) {
+        throw new Error("No image data returned");
+      }
+
+      const mediaType = "image/png";
+
+      // The observeOpenAI generation span has ended at this point, so
+      // updateActiveObservation targets the parent span from observe().
       // The Langfuse SDK automatically detects data URIs, uploads them
       // to object storage, and displays them in the trace UI.
-      const dataUri = `data:${image.mediaType};base64,${image.base64}`;
-
-      updateActiveObservation(
-        {
-          input: prompt,
-          output: dataUri,
-          model: "gpt-image-1",
-          modelParameters: {
-            size: "1024x1024",
-            quality: "low",
-          },
-        },
-        { asType: "generation" }
-      );
+      updateActiveObservation({
+        output: `data:${mediaType};base64,${imageData}`,
+      });
 
       after(async () => await flush());
 
       return new Response(
         JSON.stringify({
-          image: { base64: image.base64, mediaType: image.mediaType },
+          image: { base64: imageData, mediaType },
           traceId,
         }),
         { status: 200, headers: { "Content-Type": "application/json" } }
@@ -100,7 +95,6 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "image-generator",
-  asType: "generation",
   captureOutput: false,
 });
 
