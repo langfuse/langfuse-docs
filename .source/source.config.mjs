@@ -55,6 +55,9 @@ var source_config_default = defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkGfm],
     providerImportSource: "@/mdx-components",
+    // Disable remark-image: many content files reference remote images via https://
+    // and the plugin tries to fetch dimensions at compile time, causing build failures
+    remarkImageOptions: false,
     // Teach remark-structure's mdast-util-to-markdown serializer how to handle
     // MDX JSX nodes (mdxJsxFlowElement / mdxJsxTextElement). Without this, it
     // throws "Cannot handle unknown node `mdxJsxFlowElement`" when pages contain
