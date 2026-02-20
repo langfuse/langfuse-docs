@@ -1,11 +1,30 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
+import React from "react";
 import NextImage from "next/image";
 import { Frame } from "@/components/Frame";
 import { Video } from "@/components/Video";
 import { LangTabs } from "@/components/LangTabs";
 import { FetchReadme } from "@/components/FetchReadme";
 import { Callout, Tabs, Tab, Cards, Steps, FileTree } from "@/lib/nextra-shim/components";
+
+const BLOCK_TAGS = new Set([
+  "div", "details", "summary", "figure", "pre", "table",
+  "ul", "ol", "blockquote", "section", "article",
+]);
+
+function MdxParagraph({ children, ...props }: React.HTMLAttributes<HTMLElement>) {
+  const hasBlock = React.Children.toArray(children).some(
+    (child) =>
+      React.isValidElement(child) &&
+      typeof child.type === "string" &&
+      BLOCK_TAGS.has(child.type)
+  );
+  if (hasBlock) {
+    return <div {...props}>{children}</div>;
+  }
+  return <p {...props}>{children}</p>;
+}
 
 function MdxImage(props: React.ImgHTMLAttributes<HTMLImageElement>) {
   const { src, alt, width, height, ...rest } = props;
@@ -29,6 +48,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
     img: MdxImage,
+    p: MdxParagraph,
     Frame,
     Video,
     LangTabs,
