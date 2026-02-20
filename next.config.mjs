@@ -49,9 +49,14 @@ const nextConfig = {
   experimental: {
     scrollRestoration: true,
   },
+  turbopack: {
+    // Fix Turbopack panic when running from a git worktree with multiple lockfiles.
+    // Tell Turbopack to use this worktree's directory as the root.
+    root: __dirname,
+  },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
 
-  webpack(config, { isServer }) {
+  webpack(config, { isServer, webpack }) {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -68,7 +73,20 @@ const nextConfig = {
         fs: false,
         "fs/promises": false,
         path: false,
+        os: false,
+        url: false,
+        module: false,
+        stream: false,
+        buffer: false,
       };
+      // Strip the node: URI scheme prefix so webpack can apply the fallback above.
+      // fumadocs-mdx server code uses `import 'node:fs/promises'` which webpack
+      // doesn't handle natively in browser bundles.
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+          resource.request = resource.request.replace(/^node:/, "");
+        })
+      );
     }
     return config;
   },
