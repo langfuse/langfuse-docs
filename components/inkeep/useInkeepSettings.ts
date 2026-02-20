@@ -6,7 +6,7 @@ import type {
   AIChatDisclaimerSettings,
   InkeepCallbackEvent,
 } from "@inkeep/cxkit-react";
-import { useTheme } from "nextra-theme-docs";
+import { useTheme } from "next-themes";
 import { type PostHog, usePostHog } from "posthog-js/react";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";

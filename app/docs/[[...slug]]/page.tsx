@@ -3,6 +3,7 @@ import { source } from "@/lib/source";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 import { DocBodyClient } from "./DocBodyClient";
+import { DocsContributors } from "@/components/DocsContributors";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
@@ -22,7 +23,7 @@ export default async function DocPage(props: PageProps) {
   const { toc } = loaded;
 
   return (
-    <DocsPage toc={toc}>
+    <DocsPage toc={toc} tableOfContent={{ footer: <DocsContributors /> }}>
       <h1 className="mb-2 text-4xl font-bold tracking-tight">
         {page.data.title}
       </h1>
