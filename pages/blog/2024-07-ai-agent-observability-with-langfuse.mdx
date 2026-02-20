@@ -1,25 +1,19 @@
 ---
-title: "AI Agent Monitoring & Observability with Langfuse"
+title: "AI Agent Observability, Tracing & Evaluation with Langfuse"
 date: 2025/03/16
-description: "Monitor, trace, and debug AI agents in production. Learn about agent monitoring strategies, key metrics to track, and how to use Langfuse with LangGraph, OpenAI Agents, Dify, Flowise, and Langflow."
+description: "Trace, monitor, evaluate, and test AI agents in production. Learn about agent observability strategies, evaluation techniques, and how to use Langfuse with LangGraph, OpenAI Agents, Pydantic AI, CrewAI, and more."
 ogImage: /images/blog/ai-agent-observability/ai-agent-observability.png
-tag: agents, guide
+tag: agents, guide, evaluation
 author: Jannik
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="AI Agent Monitoring & Observability with Langfuse"
-  description="Monitor, trace, and debug AI agents in production. Learn about agent monitoring strategies, key metrics to track, and how to use Langfuse with LangGraph, OpenAI Agents, Dify, Flowise, and Langflow."
-  date="March 16, 2025"
+  title="AI Agent Observability, Tracing & Evaluation with Langfuse"
+  description="Trace, monitor, evaluate, and test AI agents in production. Learn about agent observability strategies, evaluation techniques, and how to use Langfuse with LangGraph, OpenAI Agents, Pydantic AI, CrewAI, n8n, and more."
+  date="February 20, 2026"
   authors={["jannikmaierhoefer"]}
-/>
-
-<Video
-  src="https://static.langfuse.com/docs-videos/langgraph-overview.mp4"
-  gifStyle
-  className="max-w-4xl"
 />
 
 ## What are AI Agents?
@@ -61,6 +55,14 @@ Observing agents means tracking and analyzing the performance, behavior, and int
 
 [Langfuse](/) is an open-source LLM engineering platform that provides deep insights into metrics such as latency, cost, and error rates, enabling developers to debug, optimize, and enhance their AI systems. Using Langfuse observability, teams can identify and resolve issues, streamline workflows, and maintain high-quality outputs by evaluating agent responses in complex, multi-step AI agents.
 
+### Industry Trends in Agent Observability
+
+As AI agents become more prevalent in production, the observability landscape is evolving rapidly. The industry is converging on **OpenTelemetry (OTEL)** as a standard for collecting agent telemetry data, preventing vendor lock-in and enabling interoperability across frameworks. Many agent frameworks — including Pydantic AI, smolagents, and Strands Agents — now emit traces via OpenTelemetry, which [Langfuse natively supports](/docs/observability/sdk/instrumentation).
+
+There is also a shift from reactive log-based monitoring to **proactive, structured tracing** with typed observation data. Rather than parsing unstructured logs after failures, teams now instrument agents with rich semantic types (tool calls, retriever steps, guardrail checks) for real-time insight into agent behavior.
+
+Additionally, **cost optimization** is becoming critical as agent workloads scale. Agents that autonomously chain multiple LLM and API calls can incur unpredictable costs, making real-time cost tracking and per-trace cost attribution essential for production deployments.
+
 ### Why AI Agent Observability is Important
 
 #### Debugging and Edge Cases
@@ -97,6 +99,7 @@ LangGraph agents can be [monitored with Langfuse](/guides/cookbook/integration_l
 
 <Video
   src="https://static.langfuse.com/docs-videos/langgraph-overview.mp4"
+  aspectRatio={1546 / 1080}
   gifStyle
 />
 
@@ -120,6 +123,7 @@ For a comprehensive guide on setting up this integration, please refer to our [T
 
 <Video
   src="https://static.langfuse.com/docs-videos/openai-agents-sdk-trace.mp4"
+  aspectRatio={1588 / 1080}
   gifStyle
 />
 
@@ -134,6 +138,66 @@ For a comprehensive, step-by-step guide, see our integration notebook: [Observab
 ![Smolagents Example trace in Langfuse](/images/cookbook/integration-smolagents/smolagent_example_trace.png)
 
 _[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ce5160f9bfd5a6cd63b07d2bfcec6f54?timestamp=2025-02-11T09%3A25%3A45.163Z&display=details)_
+
+#### Pydantic AI
+
+[Pydantic AI](https://ai.pydantic.dev/) brings Pydantic's type safety and ergonomic developer experience to agent development. You define your agent's inputs, tool signatures, and outputs as Python types, and the framework handles validation plus OpenTelemetry instrumentation under the hood. The result is a FastAPI-style developer experience for building production-ready agents.
+
+For a step-by-step guide, see our integration notebook: [Trace Pydantic AI agents with Langfuse](/integrations/frameworks/pydantic-ai).
+
+<Frame fullWidth>
+  ![Pydantic AI trace visualization in Langfuse](https://langfuse.com/images/cookbook/otel-integration-pydantic-ai/pydanticai-openai-trace-tree.png)
+</Frame>
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/25f4bdeebaab60e6e1bee7e8469554bc?timestamp=2025-06-06T14%3A39%3A55.786Z&display=details)_
+
+#### CrewAI
+
+[CrewAI](https://github.com/crewAIInc/crewAI) is all about role-based collaboration among multiple agents. You assign each agent a distinct skillset or role, then let them cooperate to solve a problem. The framework offers a higher-level abstraction called a "Crew" that coordinates workflows, allowing agents to share context and build upon one another's contributions. It is well-suited for tasks requiring multiple specialists working in parallel.
+
+For setup instructions, see our integration guide: [Trace CrewAI agents with Langfuse](/integrations/frameworks/crewai).
+
+<Frame fullWidth>
+  ![CrewAI trace visualization in Langfuse](/images/blog/2025-03-19-ai-agent-comparison/crewai-trace.png)
+</Frame>
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/3b485ea0d723bab3e5e53e72c6b10a71?timestamp=2025-02-24T10%3A34%3A30.423Z&observation=0c53ff94ec9c3da9)_
+
+#### AutoGen
+
+[AutoGen](https://github.com/microsoft/autogen), from Microsoft Research, frames agent interactions as asynchronous conversations among specialized agents. Each agent can be a ChatGPT-style assistant or a tool executor, and you orchestrate how they pass messages back and forth. This event-driven approach reduces blocking and is well-suited for longer tasks or scenarios requiring real-time concurrency.
+
+For tracing setup, see: [Trace AutoGen agents with Langfuse](/integrations/frameworks/autogen).
+
+<Frame fullWidth>
+  ![AutoGen trace visualization in Langfuse](/images/blog/2025-03-19-ai-agent-comparison/autogen-trace.png)
+</Frame>
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/df850ab499107d4348584cf5933baabd?timestamp=2025-02-04T16%3A55%3A51.660Z&observation=286c648acb0105c2)_
+
+#### Strands Agents
+
+[Strands Agents SDK](https://strandsagents.com) is a model-agnostic agent framework that runs anywhere and supports multiple model providers including Amazon Bedrock, Anthropic, OpenAI, and Ollama via LiteLLM. It emphasizes production readiness with first-class OpenTelemetry tracing, giving you end-to-end observability with a clean, declarative API for defining agent behavior.
+
+For setup instructions, see: [Trace Strands Agents with Langfuse](/integrations/frameworks/strands-agents).
+
+<Frame fullWidth>
+  ![Strands Agents trace visualization in Langfuse](https://langfuse.com/images/cookbook/integration_aws_strands_agents/strands-agents-trace.png)
+</Frame>
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c9d6f01342ca664464b2e56f649d9da4?timestamp=2025-05-17T13%3A22%3A14.561Z&display=details)_
+
+#### Semantic Kernel
+
+[Semantic Kernel](https://github.com/microsoft/semantic-kernel) is Microsoft's approach to orchestrating AI "skills" and combining them into workflows. It supports multiple programming languages (C#, Python, Java) and focuses on enterprise readiness, including security, compliance, and Azure integration. You can create a range of skills — some powered by AI, others by pure code — and compose them into multi-step plans.
+
+For tracing setup, see: [Trace Semantic Kernel with Langfuse](/integrations/frameworks/semantic-kernel).
+
+<Frame fullWidth>
+  ![Semantic Kernel trace visualization in Langfuse](/images/blog/2025-03-19-ai-agent-comparison/semantic-kernel-trace.png)
+</Frame>
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/14c7a9f1cc0d7ff16ac1a057a3d45be9?timestamp=2025-02-04T18%3A00%3A53.475Z&observation=cb3f0fb8a2369414)_
 
 ### No-code Agent Builders
 
@@ -177,8 +241,47 @@ With the native Langfuse [integration](/integrations/no-code/dify), you can use 
 
 <span>_Example of a Dify Agent that summarizes meetings._</span>
 
+## Agent Evaluation and Testing
+
+Building an agent is only the first step. Agents can fail in nuanced ways — selecting the wrong tool, entering reasoning loops, or hallucinating in intermediate steps that produce a plausible-looking but incorrect final answer. To ship agents with confidence, you need a systematic approach to evaluation and testing.
+
+### Why Evaluate Agents?
+
+When working with agents, three problems show up again and again: **understanding**, **specification**, and **generalization**. You often lack understanding of what the agent actually does on real traffic because you are not systematically inspecting traces. The task is frequently underspecified — prompts and examples don't clearly encode what "good" behavior is, so the agent improvises in unpredictable ways. And even once you have tightened the spec, the agent may still struggle to generalize, performing well on handpicked examples but failing on slightly different real-world queries.
+
+### Three Evaluation Strategies
+
+Langfuse supports three complementary strategies for evaluating agents:
+
+1. **Final Response (Black-Box):** This method only looks at the user's input and the agent's final answer, ignoring the intermediate steps. It is flexible and easy to set up, but does not tell you *why* an agent failed.
+
+2. **Trajectory (Glass-Box):** This strategy evaluates the full sequence of tool calls, reasoning steps, and decisions an agent made. You compare the actual trajectory against an expected one, catching issues like unnecessary tool calls, skipped steps, or inefficient reasoning paths.
+
+3. **Single Step (White-Box):** This zooms in on individual steps within the agent's execution, evaluating whether each tool call returned the right result or each reasoning step was sound. It provides the most granular feedback for debugging specific failures.
+
+### Three Phases of Evaluation
+
+The evaluation process follows a natural progression as your application matures:
+
+- **Phase 1 — Manual Tracing:** During early development, the most valuable activity is simply inspecting traces in Langfuse to understand your agent's reasoning.
+- **Phase 2 — Online Evaluation:** As you get your first users, implement [user feedback](/docs/observability/features/user-feedback) mechanisms and automated [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators to flag problematic traces in real-time.
+- **Phase 3 — Offline Evaluation:** At scale, create benchmark [datasets](/docs/evaluation/experiments/datasets) of inputs and expected outputs, then run automated [experiments](/docs/evaluation/experiments/experiments-via-sdk) to test your agent before each release, preventing regressions and enabling confident iteration.
+
+### Agent Evaluation Guides
+
+To dive deeper, explore these hands-on guides:
+
+- [Agent Evaluation Guide](/guides/cookbook/example_pydantic_ai_mcp_agent_evaluation) — End-to-end walkthrough of all three evaluation strategies using Pydantic AI agents
+- [Evaluating OpenAI Agents](/guides/cookbook/example_evaluating_openai_agents) — Online and offline evaluation for OpenAI Agents SDK
+- [LangGraph Agent Evaluation](/guides/cookbook/example_langgraph_agents) — Monitoring and evaluating LangGraph agents
+- [Synthetic Dataset Generation](/guides/cookbook/example_synthetic_datasets) — Scale test coverage with LLM-generated data for agent evaluation
+- [Testing LLM Applications](/blog/2025-10-21-testing-llm-applications) — Build a testing foundation with deterministic checks and LLM judges
+
 ## Get Started
 
-If you want to get started with building your AI Agents and monitoring them with Langfuse, check out our [end-to-end example](/guides/cookbook/integration_langgraph) of building a simple agent with LangGraph and tracking it with Langfuse.
+If you want to get started with building AI agents and monitoring them with Langfuse, here are the best places to begin:
 
-To get an in-depth guide on when to use which agent framework, check out our [AI Agent Comparison](/blog/2025-03-19-ai-agent-comparison) blog post.
+- **Build and trace an agent:** Follow our [end-to-end example](/guides/cookbook/integration_langgraph) of building a simple agent with LangGraph and tracking it with Langfuse.
+- **Compare agent frameworks:** Read our [AI Agent Comparison](/blog/2025-03-19-ai-agent-comparison) blog post for an in-depth guide on when to use which framework.
+- **Evaluate your agents:** Start with the [Agent Evaluation Guide](/guides/cookbook/example_pydantic_ai_mcp_agent_evaluation) to set up black-box, trajectory, and step-level evaluations.
+- **Explore all integrations:** Browse the full list of [supported integrations](/integrations) to find the right setup for your stack.
