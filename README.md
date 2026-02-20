@@ -68,7 +68,7 @@ The docs site includes four interconnected features designed to make documentati
    - `getLangfuseDocsPage`: Fetches specific page markdown from `.md` URLs
    - `getLangfuseOverview`: Returns `llms.txt` overview
 
-All three user-facing features (Copy, PDF, MCP) depend on the same foundation of pre-built static markdown files, making them fast, cacheable, and reliable. See [RESEARCH-LLM-FEATURES.md](./RESEARCH-LLM-FEATURES.md) for detailed implementation details.
+All three user-facing features (Copy, PDF, MCP) depend on the same foundation of pre-built static markdown files, making them fast, cacheable, and reliable.
 
 ## Bundle analysis
 
