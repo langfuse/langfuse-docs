@@ -1308,20 +1308,20 @@ After each experiment run on a dataset, you can check the aggregated score in th
 
 ## Optional: Trigger SDK Experiment from UI
 
-When setting up Experiments via SDK, it can be useful to allow triggering the experiment runs from the Langfuse UI.
+When setting up Experiments via SDK, it can be useful to allow triggering the experiment runs from the Langfuse UI. This requires two parts: configuring the trigger in the Langfuse UI and setting up a webhook endpoint on your server to receive the request.
 
-You need to set up a webhook to receive the trigger request from Langfuse.
+### Set up the trigger in Langfuse UI
 
 <Steps>
 
-### Navigate to the dataset
+#### Navigate to the dataset
 
 - **Navigate to** `Your Project` > `Datasets`
 - **Click on** the dataset you want to set up a remote experiment trigger for
 
 <Frame className="max-w-lg">![New Experiment Button](/images/docs/navigate-to-dataset.png)</Frame>
 
-### Open the setup page
+#### Open the setup page
 
 **Click on** `Start Experiment` to open the setup page
 
@@ -1333,18 +1333,19 @@ You need to set up a webhook to receive the trigger request from Langfuse.
   ![New Experiment Button](/images/docs/trigger-remote-experiment-1.png)
 </Frame>
 
-### Configure the webhook
+#### Configure the webhook
 
-**Enter** the URL of your external evaluation service that will receive the webhook when experiments are triggered.
-**Specify** a default config that will be sent to your webhook. Users can modify this when triggering experiments.
+**Enter** the URL of your external evaluation service that will receive the webhook when experiments are triggered (e.g. `https://your-server.com/api/experiments/webhook`).
+
+**Specify** a default config JSON that will be sent to your webhook as a stringified `payload` field. Users can modify this config each time they trigger an experiment.
 
 <Frame className="max-w-lg">
   ![New Experiment Button](/images/docs/trigger-remote-experiment-2.png)
 </Frame>
 
-### Trigger experiments
+#### Trigger experiments
 
-Once configured, team members can trigger remote experiments via the `Run` button under the **Custom Experiment** option. Langfuse will send the dataset metadata (ID and name) along with any custom configuration to your webhook.
+Once configured, team members can trigger remote experiments via the `Run` button under the **Custom Experiment** option. Langfuse will send the dataset metadata (ID and name) along with the custom configuration to your webhook.
 
 <Frame className="max-w-lg">
   ![New Experiment Button](/images/docs/trigger-remote-experiment-3.png)
@@ -1352,4 +1353,206 @@ Once configured, team members can trigger remote experiments via the `Run` butto
 
 </Steps>
 
-**Typical workflow**: Your webhook receives the request, fetches the dataset from Langfuse, runs your application against the dataset items, evaluates the results, and ingests the scores back into Langfuse as a new Experiment run.
+### Webhook payload
+
+When an experiment is triggered from the UI, Langfuse sends a `POST` request to your webhook URL with the following JSON body:
+
+```json
+{
+  "projectId": "clx...",
+  "datasetId": "cm...",
+  "datasetName": "my-evaluation-dataset",
+  "payload": "{\"experimentName\":\"My Experiment\",\"maxConcurrency\":5}"
+}
+```
+
+<Callout type="info" emoji="ℹ️">
+  The `payload` field is a **stringified JSON string**, not a nested object. Your webhook must parse this string with `JSON.parse()` (or equivalent) to access the custom configuration values.
+</Callout>
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `projectId` | `string` | The Langfuse project ID (optional) |
+| `datasetId` | `string` | The unique ID of the dataset |
+| `datasetName` | `string` | The name of the dataset |
+| `payload` | `string` | Stringified JSON containing the custom configuration entered in the UI |
+
+The contents of `payload` are entirely up to you — there is no required schema. It is simply whatever JSON you entered as the default config when setting up the trigger. Your webhook decides how to interpret it. For example, you might include fields like:
+
+```json
+{
+  "experimentName": "My Experiment",
+  "experimentDescription": "Testing new prompt template",
+  "maxConcurrency": 5
+}
+```
+
+These fields are **not** required by Langfuse — they are only meaningful to your own webhook receiver.
+
+### Build the webhook receiver
+
+Your webhook endpoint needs to:
+
+1. Parse and validate the incoming request body
+2. Parse the stringified `payload` field into a usable object
+3. Return a `200 OK` response immediately (Langfuse expects a quick acknowledgment)
+4. Run the experiment asynchronously in the background
+
+<Callout type="warning" emoji="⚠️">
+  Your webhook **must** return a `200` status code promptly. If the response takes too long or returns an error, Langfuse will consider the trigger as failed. Run the actual experiment execution asynchronously after responding.
+</Callout>
+
+The following examples show a minimal webhook receiver using Flask (Python) and Express (JS/TS). You can adapt this to any web framework or language — the only requirement is that your endpoint handles the [webhook payload](#webhook-payload) described above and returns a `200` response.
+
+<LangTabs items={["Python", "JS/TS"]}>
+<Tab>
+{/* PYTHON */}
+
+```python
+from flask import Flask, request, jsonify
+import threading
+from langfuse import get_client
+
+app = Flask(__name__)
+
+@app.route("/api/experiments/webhook", methods=["POST"])
+def handle_webhook():
+    body = request.get_json()
+
+    # Extract fields from the webhook payload
+    dataset_id = body["datasetId"]
+    dataset_name = body["datasetName"]
+
+    # Parse the stringified payload JSON
+    import json
+    config = json.loads(body["payload"])
+
+    experiment_name = config.get("experimentName", "SDK Experiment")
+    max_concurrency = config.get("maxConcurrency", 5)
+
+    # Respond immediately with 200 OK
+    # Run the experiment in the background
+    thread = threading.Thread(
+        target=run_experiment_async,
+        args=(dataset_name, experiment_name, max_concurrency, config)
+    )
+    thread.start()
+
+    return jsonify({
+        "success": True,
+        "message": "Experiment triggered successfully."
+    }), 200
+
+
+def run_experiment_async(dataset_name, experiment_name, max_concurrency, config):
+    """Run the experiment in the background"""
+    langfuse = get_client()
+
+    # Fetch dataset from Langfuse
+    dataset = langfuse.get_dataset(dataset_name)
+
+    # Define your task function
+    def my_task(*, item, **kwargs):
+        # Replace with your actual application logic
+        question = item.input if isinstance(item.input, str) else item.input.get("question", str(item.input))
+        # ... call your LLM application here ...
+        return result
+
+    # Run the experiment
+    result = dataset.run_experiment(
+        name=experiment_name,
+        task=my_task,
+        max_concurrency=max_concurrency,
+    )
+
+    print(result.format())
+```
+
+</Tab>
+<Tab>
+{/* JS/TS */}
+
+```typescript
+import express from "express";
+import { LangfuseClient, ExperimentTask } from "@langfuse/client";
+
+const app = express();
+app.use(express.json());
+
+const langfuse = new LangfuseClient();
+
+app.post("/api/experiments/webhook", async (req, res) => {
+  const { datasetId, datasetName, payload: payloadString } = req.body;
+
+  // Parse the stringified payload JSON
+  let config: Record<string, unknown>;
+  try {
+    config = JSON.parse(payloadString);
+  } catch {
+    res.status(400).json({ success: false, error: "Invalid JSON in payload" });
+    return;
+  }
+
+  const experimentName = (config.experimentName as string) ?? "SDK Experiment";
+  const maxConcurrency = (config.maxConcurrency as number) ?? 5;
+
+  // Respond immediately with 200 OK
+  res.status(200).json({
+    success: true,
+    message: "Experiment triggered successfully.",
+  });
+
+  // Run the experiment asynchronously after responding
+  runExperimentAsync(datasetName, experimentName, maxConcurrency, config);
+});
+
+async function runExperimentAsync(
+  datasetName: string,
+  experimentName: string,
+  maxConcurrency: number,
+  config: Record<string, unknown>
+) {
+  try {
+    // Fetch dataset from Langfuse
+    const dataset = await langfuse.dataset.get(datasetName);
+
+    // Define your task function
+    const task: ExperimentTask = async (item) => {
+      const input = item.input as { question?: string; text?: string };
+      const question =
+        typeof item.input === "string"
+          ? item.input
+          : input?.question || input?.text || String(item.input);
+
+      // Replace with your actual application logic
+      // const output = await myLLMApplication(question);
+      return output;
+    };
+
+    // Run the experiment
+    const result = await dataset.runExperiment({
+      name: experimentName,
+      task,
+      maxConcurrency,
+    });
+
+    console.log(await result.format());
+  } catch (error) {
+    console.error("Experiment failed:", error);
+  }
+}
+```
+
+</Tab>
+</LangTabs>
+
+### End-to-end workflow
+
+The typical flow when a team member triggers an experiment from the Langfuse UI:
+
+1. **Langfuse sends a `POST` request** to your webhook URL with `datasetId`, `datasetName`, and the custom `payload` (stringified JSON).
+2. **Your webhook responds with `200 OK`** immediately to acknowledge receipt.
+3. **Your server fetches the dataset** from Langfuse using the SDK (`get_dataset` / `dataset.get`).
+4. **Your server runs each dataset item** through your application logic (the task function).
+5. **Results are automatically tracked** in Langfuse as a new experiment run, visible in the dataset's run comparison view.
+6. Optionally, your server can **compute and ingest evaluation scores** back into Langfuse as part of the experiment.
