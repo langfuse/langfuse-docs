@@ -27,11 +27,11 @@ export default function HomeLayout({
       </div>
       <header className="sticky top-0 z-50 h-16 border-b backdrop-blur-md border-foreground/10 bg-background/50">
         <nav className="container flex flex-row items-center h-full">
-          <NavbarLogo />
-          <div className="hidden flex-1 justify-center md:flex">
-            <NavLinks />
+          <div className="flex flex-1">
+            <NavbarLogo />
           </div>
-          <div className="flex flex-1 gap-2 justify-end items-center md:gap-4 md:flex-none">
+          <NavLinks />
+          <div className="flex flex-1 gap-2 justify-end items-center md:gap-4">
             <div className="hidden min-w-0 max-w-[240px] flex-1 md:block lg:max-w-[280px]">
               <InkeepSearchBar />
             </div>
