@@ -171,17 +171,11 @@ Create a new file [`instrumentation.ts`](https://nextjs.org/docs/app/api-referen
 ```typescript
 // instrumentation.ts
 
-import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 
-// Optional: filter our NextJS infra spans
-const shouldExportSpan: ShouldExportSpan = (span) => {
-  return span.otelSpan.instrumentationScope.name !== "next.js";
-};
-
-export const langfuseSpanProcessor = new LangfuseSpanProcessor({
-  shouldExportSpan,
-});
+// Default smart filter exports Langfuse + GenAI/LLM spans
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
 
 const tracerProvider = new NodeTracerProvider({
   spanProcessors: [langfuseSpanProcessor],

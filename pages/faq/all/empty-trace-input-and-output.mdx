@@ -210,7 +210,7 @@ trace.update({
 
 **Symptoms**: Trace input/output is empty when using `shouldExportSpan` to filter spans.
 
-If you're using `shouldExportSpan` in your `LangfuseSpanProcessor` to filter spans, and your root span matches the filter criteria, the trace input/output will be empty. This happens because trace input/output is [derived from the root observation by default](#the-root-observation-rule).
+If you're using `shouldExportSpan` in your `LangfuseSpanProcessor` to filter spans, and your root span gets filtered out, the trace input/output will be empty. This happens because trace input/output is [derived from the root observation by default](#the-root-observation-rule).
 
 **Solution**: If you want the root span to stay filtered out, use `setTraceIO()` to manually set trace input/output from within a child span that is not filtered out:
 

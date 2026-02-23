@@ -51,11 +51,8 @@ const sentryClient = Sentry.init({
 const provider = new NodeTracerProvider({
   sampler: sentryClient ? new SentrySampler(sentryClient) : undefined,
   spanProcessors: [
-    // Langfuse processor - optionally with filtering
-    new LangfuseSpanProcessor({
-      shouldExportSpan: ({ otelSpan }) =>
-        ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name),
-    }),
+    // Langfuse processor - default smart filter (Langfuse + GenAI/LLM spans)
+    new LangfuseSpanProcessor(),
     // Sentry processor - receives all spans
     new SentrySpanProcessor(),
   ],
@@ -83,18 +80,22 @@ If you set this to `0.1`, only 10% of your LLM calls will appear in Langfuse. To
 
 #### Filtering Langfuse Spans
 
-In the setup above, we use `shouldExportSpan` to [only send LLM-related spans](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) to Langfuse:
+Langfuse already applies a default LLM-focused filter. In most Sentry setups, this means no extra filtering code is required.
+
+If you need stricter routing, you can provide `shouldExportSpan`:
 
 ```typescript
 new LangfuseSpanProcessor({
   shouldExportSpan: ({ otelSpan }) =>
-    ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name),
+    otelSpan.instrumentationScope.name === "langfuse-sdk",
 }),
 ```
 
-This prevents HTTP requests, database queries, and other infrastructure spans from appearing in Langfuse, while Sentry still receives everything.
+This keeps only Langfuse SDK spans in Langfuse, while Sentry still receives everything.
 
-Adjust the allowed [scopes](/faq/all/existing-otel-setup#instrumentation-scopes) based on what you want in Langfuse. You can find the scope name of a span in the Langfuse UI by clicking on any span and looking for `metadata.scope.name`. 
+To export everything during debugging, temporarily set `shouldExportSpan: () => true`.
+
+Adjust your allowed [scopes](/faq/all/existing-otel-setup#instrumentation-scopes) based on what you want in Langfuse. You can find the scope name of a span in the Langfuse UI by clicking on any span and looking for `metadata.scope.name`.
 
 #### Required Sentry Components
 
@@ -182,9 +183,9 @@ langfuse = Langfuse(tracer_provider=TracerProvider())
 
 #### Infrastructure spans appearing in Langfuse
 
-**Cause:** You're not filtering spans in the LangfuseSpanProcessor.
+**Cause:** Your custom `shouldExportSpan` is too permissive.
 
-**Solution:** Add a `shouldExportSpan` filter to only allow LLM-related scopes.
+**Solution:** Tighten your `shouldExportSpan` rules.
 
 #### Only some traces appear in Langfuse
 
@@ -199,8 +200,6 @@ In serverless environments like AWS Lambda, you may need additional configuratio
 ```typescript
 new LangfuseSpanProcessor({
   exportMode: "immediate",  // Don't batch - export before Lambda freezes
-  shouldExportSpan: ({ otelSpan }) =>
-    ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name),
 }),
 ```
 

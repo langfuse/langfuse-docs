@@ -50,10 +50,18 @@ With the environment variables set, we can now initialize the Langfuse client. `
 
 ```python
 from langfuse import Langfuse
- 
-# Filter out Autogen OpenTelemetryspans
+from langfuse.span_filter import is_default_export_span
+
+# Filter out AutoGen runtime spans
+blocked_scopes = {"autogen SingleThreadedAgentRuntime"}
 langfuse = Langfuse(
-    blocked_instrumentation_scopes=["autogen SingleThreadedAgentRuntime"]
+    should_export_span=lambda span: (
+        is_default_export_span(span)
+        and not (
+            span.instrumentation_scope is not None
+            and span.instrumentation_scope.name in blocked_scopes
+        )
+    )
 )
  
 # Verify connection

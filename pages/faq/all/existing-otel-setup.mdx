@@ -24,7 +24,15 @@ Understanding these concepts will help you understand why certain issues happen 
 
 The latest Langfuse SDKs (Python SDK v3+ and JS SDK v4+) are built on [OpenTelemetry (OTEL)](https://opentelemetry.io/). When you initialize Langfuse, it registers by default a [**span processor**](#span-processors) that captures trace data and sends it to Langfuse.
 
-By default, Langfuse attaches its span processor on the [**global TracerProvider**](#global-tracer-provider)—the same one that other OTEL-based tools use. This is where conflicts arise.
+By default, Langfuse attaches its span processor on the [**global TracerProvider**](#global-tracer-provider), the same one that other OTEL-based tools use. This is where conflicts arise.
+
+Langfuse applies a default export filter to keep traces LLM-focused. By default, it exports:
+
+- Spans created by the Langfuse SDK (`langfuse-sdk`)
+- Spans with `gen_ai.*` attributes
+- Spans from known LLM instrumentation scopes
+
+To bypass the default filter and export everything, use an always-true custom callback.
 
 ### The Global TracerProvider [#global-tracer-provider]
 
@@ -44,7 +52,7 @@ By default, Langfuse attaches its span processor on the [**global TracerProvider
 ```
 
 Multiple problems arise from this:
-- When multiple tools register their processors on the global provider, **every span from every library goes to every destination**. Your HTTP requests end up in Langfuse; your LLM calls end up in Datadog.
+- When multiple tools register their processors on the global provider, **every span from every library is seen by every processor**. Each processor then decides what to export.
 - If one tool initializes the global provider before another, **the second tool's configuration may not take effect at all**.
 - If a third party SDK is tinkering with the global TracerProvider in an incompatible way, this may lead to unexpected behavior and hard to debug issues
 
@@ -60,9 +68,9 @@ Your Code → TracerProvider → Span Processors → Exporters → Backend
                                    └── OTLPExporter → Honeycomb/Datadog
 ```
 
-Every span processor attached to the [TracerProvider](#global-tracer-provider) sees **every span**. There's no automatic filtering, so a processor can't tell if a span "belongs" to it or not.
+Every span processor attached to the [TracerProvider](#global-tracer-provider) sees **every span**. What gets exported depends on each processor's filtering rules.
 
-This is why you might see infrastructure spans such as database queries in Langfuse or LLM calls in your APM tool.
+This is why you might still see infrastructure spans in Langfuse (if export-all or permissive custom filters are enabled) or LLM calls in your APM tool.
 
 ### Instrumentation Scopes [#instrumentation-scopes]
 
@@ -209,6 +217,7 @@ If your other tool allows adding [span processors](#span-processors), add `Langf
 
 {/* PYTHON */}
 ```python
+from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -217,12 +226,8 @@ from langfuse.opentelemetry import LangfuseSpanProcessor
 # Create a shared provider
 provider = TracerProvider()
 
-# Add Langfuse processor with filtering
-provider.add_span_processor(
-    LangfuseSpanProcessor(
-        blocked_instrumentation_scopes=["fastapi", "sqlalchemy"]
-    )
-)
+# Add Langfuse processor (default exports Langfuse + GenAI/LLM spans)
+provider.add_span_processor(LangfuseSpanProcessor())
 
 # Add your APM exporter
 provider.add_span_processor(
@@ -246,13 +251,8 @@ import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
 
 const sdk = new NodeSDK({
   spanProcessors: [
-    // Langfuse with filtering - only LLM spans
-    new LangfuseSpanProcessor({
-      shouldExportSpan: ({ otelSpan }) => {
-        const allowedScopes = ["langfuse-sdk", "ai", "openai"];
-        return allowedScopes.includes(otelSpan.instrumentationScope.name);
-      },
-    }),
+    // Langfuse processor (default exports Langfuse + GenAI/LLM spans)
+    new LangfuseSpanProcessor(),
     // Your APM exporter - receives everything
     new SimpleSpanProcessor(new OTLPTraceExporter({
       url: "https://your-apm-endpoint.com/v1/traces",
@@ -377,9 +377,12 @@ Your Langfuse dashboard shows HTTP requests, database queries, or other infrastr
 
 **Why this happens**
 
-Langfuse is attached to the [global TracerProvider](#global-tracer-provider), which receives spans from all instrumented libraries (FastAPI, SQLAlchemy, HTTP clients, etc.).
+This usually happens when one of these is true:
 
-This is especially common when using [OTEL auto-instrumentation](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/), which automatically instruments your web framework, database, HTTP clients, and more.
+- You configured a custom `should_export_span` / `shouldExportSpan` callback that is too permissive
+- A third-party span matches Langfuse's default LLM-focused criteria (`gen_ai.*` attributes or known LLM scope)
+
+This is especially common with [OTEL auto-instrumentation](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/), which instruments web frameworks, databases, HTTP clients, and more.
 
 **How to debug**
 
@@ -387,7 +390,8 @@ Look at the unwanted spans in Langfuse and check their `metadata.scope.name` fie
 
 **How to fix it**
 
-Filter spans by [instrumentation scope](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) to only allow LLM-related spans through to Langfuse.
+1. Tighten your filter rules (or fall back to the default filter).
+2. Add explicit scope blocks for noisy libraries if needed.
 
 <LangTabs items={["Python", "JS/TS"]}>
 
@@ -395,33 +399,44 @@ Filter spans by [instrumentation scope](/docs/observability/sdk/advanced-feature
 
 {/* PYTHON */}
 
-Use `blocked_instrumentation_scopes` to exclude specific libraries:
+Use `should_export_span` with a blocklist approach (exclude specific scopes):
 
 ```python
 from langfuse import Langfuse
+from langfuse.span_filter import is_default_export_span
+
+blocked_scopes = {
+    # Web frameworks
+    "fastapi",
+    "opentelemetry.instrumentation.fastapi",
+    "flask",
+    "django",
+
+    # Databases
+    "sqlalchemy",
+    "psycopg",
+    "psycopg2",
+
+    # HTTP clients
+    "opentelemetry.instrumentation.requests",
+    "opentelemetry.instrumentation.httpx",
+
+    # Other tools
+    "logfire",
+}
 
 langfuse = Langfuse(
-    blocked_instrumentation_scopes=[
-        # Web frameworks
-        "fastapi",
-        "opentelemetry.instrumentation.fastapi",
-        "flask",
-        "django",
-
-        # Databases
-        "sqlalchemy",
-        "psycopg",
-        "psycopg2",
-
-        # HTTP clients
-        "opentelemetry.instrumentation.requests",
-        "opentelemetry.instrumentation.httpx",
-
-        # Other tools
-        "logfire",
-    ]
+    should_export_span=lambda span: (
+        is_default_export_span(span)
+        and not (
+            span.instrumentation_scope is not None
+            and span.instrumentation_scope.name in blocked_scopes
+        )
+    )
 )
 ```
+
+`blocked_instrumentation_scopes` still works for backward compatibility, but is deprecated and planned for removal in a future version.
 
 </Tab>
 
