@@ -1,9 +1,6 @@
 "use client";
 
-import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
-import Image from "next/image";
-import { type Page } from "nextra";
 import { Video } from "../Video";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -17,10 +14,29 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import Image from "next/image";
+
+export type ChangelogPageItem = {
+  route: string;
+  name?: string;
+  title?: string;
+  frontMatter?: {
+    date?: string;
+    title?: string;
+    description?: string;
+    badge?: React.ReactNode;
+    ogVideo?: string;
+    ogImage?: string;
+    gif?: string;
+    [key: string]: unknown;
+  };
+};
 
 export const ChangelogIndex = ({
+  pages: initialPages,
   itemsPerPage = 50,
 }: {
+  pages: ChangelogPageItem[];
   itemsPerPage?: number;
 }) => {
   const searchParams = useSearchParams();
@@ -31,14 +47,7 @@ export const ChangelogIndex = ({
     setCurrentPage(page);
   }, [searchParams]);
 
-  const allPages = (
-    getPagesUnderRoute("/changelog") as Array<Page & { frontMatter: any }>
-  ).sort(
-    (a, b) =>
-      new Date(b.frontMatter.date).getTime() -
-      new Date(a.frontMatter.date).getTime()
-  );
-
+  const allPages = initialPages;
   const totalPages = Math.ceil(allPages.length / itemsPerPage);
   const paginatedPages = allPages.slice(
     (currentPage - 1) * itemsPerPage,
@@ -154,15 +163,16 @@ export const ChangelogIndex = ({
                 ) : page.frontMatter?.ogImage ? (
                   <div className="overflow-hidden relative mb-14 rounded border shadow-md aspect-video group-hover:shadow-lg">
                     <Image
-                      src={page.frontMatter.gif ?? page.frontMatter.ogImage}
+                      src={(page.frontMatter.gif ?? page.frontMatter.ogImage) as string}
                       className="object-cover"
-                      alt={page.frontMatter?.title ?? "Blog post image"}
+                      alt={(page.frontMatter?.title ?? "Blog post image") as string}
                       fill={true}
                       sizes="(min-width: 1024px) 1000px, 100vw"
                       priority={i < 3}
                       unoptimized={
                         page.frontMatter.gif !== undefined ||
-                        page.frontMatter.ogImage?.endsWith(".gif")
+                        (typeof page.frontMatter.ogImage === "string" &&
+                          page.frontMatter.ogImage.endsWith(".gif"))
                       }
                     />
                   </div>
@@ -186,7 +196,7 @@ export const ChangelogIndex = ({
                   )}
                 </div>
                 <h2 className="block font-mono text-2xl opacity-90 md:text-3xl group-hover:opacity-100">
-                  {page.meta?.title || page.frontMatter?.title || page.name}
+                  {page.frontMatter?.title || page.name}
                 </h2>
                 <div className="mt-4 text-lg opacity-80 group-hover:opacity-100">
                   {page.frontMatter?.description}

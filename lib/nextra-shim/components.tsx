@@ -6,11 +6,11 @@
 
 import * as React from "react";
 import {
-  Tab as FumadocsTab,
   Tabs as FumadocsTabs,
   TabsList as FumadocsTabsList,
+  TabsContent as FumadocsTabsContent,
   TabsTrigger as FumadocsTabsTrigger,
-} from "fumadocs-ui/components/tabs";
+} from "fumadocs-ui/components/ui/tabs";
 
 function toValue(s: string): string {
   return s.toLowerCase().replace(/\s/g, "-");
@@ -68,12 +68,12 @@ export const Tab = ({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof FumadocsTab> & { title?: string }) => {
+}: React.ComponentProps<typeof FumadocsTabsContent> & { title?: string }) => {
   const value = valueProp ?? (title != null ? toValue(title) : undefined);
   return (
-    <FumadocsTab value={value!} className={className} {...props}>
+    <FumadocsTabsContent value={value!} className={className} {...props}>
       {children}
-    </FumadocsTab>
+    </FumadocsTabsContent>
   );
 };
 
@@ -84,7 +84,6 @@ export function Tabs({
   persist,
   defaultIndex = 0,
   children,
-  ...rest
 }: {
   items?: string[];
   id?: string;
@@ -119,7 +118,7 @@ export function Tabs({
   });
 
   return (
-    <FumadocsTabs value={value} onValueChange={onValueChange} {...rest}>
+    <FumadocsTabs value={value} onValueChange={onValueChange}>
       <FumadocsTabsList>
         {items.map((item, i) => (
           <FumadocsTabsTrigger key={i} value={values[i]}>

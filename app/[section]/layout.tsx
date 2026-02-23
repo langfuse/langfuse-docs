@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import { DocsNavbar } from "@/components/docs/DocsNavbar";
-import FooterMenu from "@/components/FooterMenu";
-import { DocsLayoutWrapper } from "@/app/docs/DocsLayoutWrapper";
+import { DocsLayout } from "fumadocs-ui/layouts/flux";
+import { Layout } from "@/components/layout";
 import { SECTION_CONFIG, SECTION_SLUGS } from "@/lib/sections";
 
 type LayoutProps = {
@@ -19,24 +17,16 @@ export default async function SectionLayout({ children, params }: LayoutProps) {
   const tree = config.source.getPageTree();
 
   return (
-    <DocsLayoutWrapper>
+    <Layout>
       <DocsLayout
         tree={tree}
-        nav={{
-          component: <DocsNavbar />,
-          enabled: true,
-          title: "Langfuse",
-          url: "/",
-          githubUrl: "https://github.com/langfuse/langfuse-docs",
-        }}
+        nav={{ enabled: false }}
+        sidebar={{ enabled: false }}
       >
-        {children}
-        <footer className="mt-12 border-t border-border/50 bg-muted/30">
-          <div className="container py-10">
-            <FooterMenu />
-          </div>
-        </footer>
+        <div className="mx-auto max-w-360">
+          {children}
+        </div>
       </DocsLayout>
-    </DocsLayoutWrapper>
+    </Layout>
   );
 }

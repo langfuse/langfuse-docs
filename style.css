@@ -53,8 +53,15 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  /* Container */
-  --container-2xl: 1400px;
+  /* Container: use Tailwind default so max-w-2xl stays 42rem (672px). Use max-w-[1400px] or a custom var for wide layout. */
+  --container-2xl: 42rem;
+
+  /* Large display headings: line-height 1 (restore pre-upgrade behavior) */
+  --text-5xl--line-height: 1;
+  --text-6xl--line-height: 1;
+  --text-7xl--line-height: 1;
+  --text-8xl--line-height: 1;
+  --text-9xl--line-height: 1;
 
   /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
@@ -247,7 +254,7 @@
   }
 
   h1 {
-    @apply tracking-tight font-mono leading-tight;
+    @apply tracking-tight font-mono;
   }
 
   h2 {

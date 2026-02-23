@@ -22,7 +22,7 @@ export function HiringBadge() {
     const now = Date.now();
     if (isHovered && now - lastSpawnTimeRef.current > 100) {
       lastSpawnTimeRef.current = now;
-      
+
       const newGoat = {
         id: goatIdRef.current++,
         x,
@@ -49,9 +49,9 @@ export function HiringBadge() {
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className="relative hidden lg:block"
+      className="hidden relative lg:block"
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -66,7 +66,7 @@ export function HiringBadge() {
         onBlur={() => setIsHovered(false)}
         style={{ width: "max-content" }}
       >
-        <span className="w-1.5 h-1.5 rounded-full bg-[theme(colors.orange.400)] shrink-0" />
+        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0" />
         <span className="relative">
           <span className={cn("block", isHovered && "invisible")}>
             Hiring in Berlin and SF
@@ -76,13 +76,13 @@ export function HiringBadge() {
           </span>
         </span>
       </Link>
-      
+
       {/* Falling goats animation */}
       {isHovered && (
-        <div className="fixed pointer-events-none overflow-visible z-50" style={{ 
-          top: 0, 
-          left: 0, 
-          width: "100vw", 
+        <div className="overflow-visible fixed z-50 pointer-events-none" style={{
+          top: 0,
+          left: 0,
+          width: "100vw",
           height: "100vh",
         }}>
           {goats.map((goat) => {
@@ -90,7 +90,7 @@ export function HiringBadge() {
             const rect = containerRef.current.getBoundingClientRect();
             const absoluteX = rect.left + goat.x;
             const absoluteY = rect.top + goat.y;
-            
+
             return (
               <span
                 key={goat.id}

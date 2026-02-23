@@ -1,8 +1,6 @@
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
+import { DocsLayout } from "fumadocs-ui/layouts/flux";
 import { changelogSource } from "@/lib/source";
-import { DocsNavbar } from "@/components/docs/DocsNavbar";
-import FooterMenu from "@/components/FooterMenu";
-import { DocsLayoutWrapper } from "@/app/docs/DocsLayoutWrapper";
+import { Layout } from "@/components/layout";
 
 export default function ChangelogLayout({
   children,
@@ -10,24 +8,14 @@ export default function ChangelogLayout({
   children: React.ReactNode;
 }) {
   return (
-    <DocsLayoutWrapper>
+    <Layout>
       <DocsLayout
         tree={changelogSource.getPageTree()}
-        nav={{
-          component: <DocsNavbar />,
-          enabled: true,
-          title: "Langfuse",
-          url: "/",
-          githubUrl: "https://github.com/langfuse/langfuse-docs",
-        }}
+        nav={{ enabled: false }}
+        sidebar={{ enabled: false }}
       >
         {children}
-        <footer className="mt-12 border-t border-border/50 bg-muted/30">
-          <div className="container py-10">
-            <FooterMenu />
-          </div>
-        </footer>
       </DocsLayout>
-    </DocsLayoutWrapper>
+    </Layout>
   );
 }
