@@ -12,7 +12,7 @@ export default function HomeLayout({
 }) {
   return (
     <>
-      <div className="nextra-banner-container max-md:_sticky top-0 z-20 flex items-center h-[2.5rem] [body.nextra-banner-hidden_&amp;]:hidden text-slate-50 dark:text-white bg-neutral-900 dark:bg-[linear-gradient(1deg,#383838,#212121)] px-2 ps-10 print:hidden">
+      <div className="max-md:_sticky top-0 z-20 flex items-center h-[2.5rem] [body.nextra-banner-hidden_&amp;]:hidden text-slate-50 dark:text-white bg-neutral-900 dark:bg-[linear-gradient(1deg,#383838,#212121)] px-2 ps-10 print:hidden">
         <div className="w-full text-sm font-medium text-center truncate">
           <Link href="/blog/joining-clickhouse">
             <span className="sm:hidden">Langfuse joins ClickHouse! →</span>
@@ -28,8 +28,10 @@ export default function HomeLayout({
       <header className="sticky top-0 z-50 h-16 border-b backdrop-blur-md border-foreground/10 bg-background/50">
         <nav className="container flex flex-row items-center h-full">
           <NavbarLogo />
-          <NavLinks />
-          <div className="flex flex-1 gap-2 justify-end items-center md:gap-4">
+          <div className="hidden flex-1 justify-center md:flex">
+            <NavLinks />
+          </div>
+          <div className="flex flex-1 gap-2 justify-end items-center md:gap-4 md:flex-none">
             <div className="hidden min-w-0 max-w-[240px] flex-1 md:block lg:max-w-[280px]">
               <InkeepSearchBar />
             </div>
