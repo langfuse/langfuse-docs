@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/ai-elements/code-block";
@@ -7,6 +7,7 @@ import { ExternalLink, BookOpen, Play, Code2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { FeatureTabData } from "./types";
+import type { SyntheticEvent } from "react";
 
 export interface TabContentProps {
   feature: FeatureTabData;
@@ -35,6 +36,22 @@ export const TabContent = ({
 
   const displayMode = feature.displayMode || "default";
 
+  const handleImageError = useCallback(
+    (e: SyntheticEvent<HTMLImageElement>) => {
+      const img = e.currentTarget;
+      const retryCount = Number(img.dataset.retryCount || "0");
+      if (retryCount < 3) {
+        img.dataset.retryCount = String(retryCount + 1);
+        setTimeout(() => {
+          const currentSrc = img.src;
+          img.src = "";
+          img.src = currentSrc;
+        }, 1000 * (retryCount + 1));
+      }
+    },
+    []
+  );
+
   if (!isActive) {
     return null;
   }
@@ -53,6 +70,7 @@ export const TabContent = ({
             className="object-cover object-left-top dark:hidden"
             sizes="100vw"
             priority={isActive}
+            onError={handleImageError}
           />
           <Image
             src={feature.image.dark}
@@ -61,6 +79,7 @@ export const TabContent = ({
             className="object-cover object-left-top hidden dark:block"
             sizes="100vw"
             priority={isActive}
+            onError={handleImageError}
           />
         </div>
       )}
@@ -238,6 +257,7 @@ export const TabContent = ({
                 className="object-cover object-left-top dark:hidden"
                 sizes="(min-width: 1024px) 33vw, 100vw"
                 priority={isActive}
+                onError={handleImageError}
               />
 
               {/* Dark theme image */}
@@ -248,6 +268,7 @@ export const TabContent = ({
                 className="object-cover object-left-top hidden dark:block"
                 sizes="(min-width: 1024px) 33vw, 100vw"
                 priority={isActive}
+                onError={handleImageError}
               />
             </div>
           </div>
