@@ -5,10 +5,20 @@ import { z } from "zod";
 
 const docsOptions = { remarkPlugins: [remarkGfm] as const };
 
+// YAML parses unquoted dates (e.g. `date: 2023-07-19`) as JS Date objects.
+// Use this helper so both string dates and Date objects are accepted and
+// normalised to an ISO date string (YYYY-MM-DD).
+const yamlDateField = z
+  .union([
+    z.string(),
+    z.date().transform((d) => d.toISOString().split("T")[0]),
+  ])
+  .nullish();
+
 // Extended schema for changelog pages — adds date, author, ogImage fields
 // that the Changelog widget reads from frontMatter.
 const changelogFrontmatterSchema = frontmatterSchema.extend({
-  date: z.string().nullish(),
+  date: yamlDateField,
   author: z.string().nullish(),
   ogImage: z.string().nullish(),
 });
@@ -17,7 +27,7 @@ const changelogFrontmatterSchema = frontmatterSchema.extend({
 // adds the custom frontmatter fields used by CustomerCarousel / CustomerIndex.
 const customerFrontmatterSchema = frontmatterSchema.extend({
   // Use .nullish() so empty YAML values (parsed as null) are accepted too
-  date: z.string().nullish(),
+  date: yamlDateField,
   ogImage: z.string().nullish(),
   tag: z.string().nullish(),
   author: z.string().nullish(),
