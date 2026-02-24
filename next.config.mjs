@@ -48,7 +48,12 @@ const nextConfig = {
   }),
   experimental: {
     scrollRestoration: true,
+    // Reduce peak memory during production build (helps avoid OOM on Vercel)
+    webpackMemoryOptimizations: true,
+    serverSourceMaps: false,
   },
+  // Reduce memory usage during build
+  productionBrowserSourceMaps: false,
   turbopack: {
     // Fix Turbopack panic when running from a git worktree with multiple lockfiles.
     // Tell Turbopack to use this worktree's directory as the root.
