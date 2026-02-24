@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { DocsLayout } from "fumadocs-ui/layouts/flux";
 import { Layout } from "@/components/layout";
 import { SECTION_CONFIG, SECTION_SLUGS } from "@/lib/sections";
+import { MainContentWrapper } from "@/components/MainContentWrapper";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -24,7 +25,9 @@ export default async function SectionLayout({ children, params }: LayoutProps) {
         sidebar={{ enabled: false }}
       >
         <div className="mx-auto max-w-360">
-          {children}
+          <MainContentWrapper>
+            {children}
+          </MainContentWrapper>
         </div>
       </DocsLayout>
     </Layout>

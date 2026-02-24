@@ -178,7 +178,7 @@ const CopyMarkdownButton = () => {
   }
 
   return (
-    <div className="inline-flex items-center rounded-md bg-secondary overflow-hidden">
+    <div className="inline-flex overflow-hidden items-center rounded-md bg-secondary">
       <button
         type="button"
         disabled={isDisabled || isError}
@@ -213,7 +213,7 @@ const CopyMarkdownButton = () => {
                 : ""
             )}
           >
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="w-3 h-3" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[200px]">
@@ -222,7 +222,7 @@ const CopyMarkdownButton = () => {
             disabled={isDisabled}
             className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
           >
-            <CopyIcon className="h-4 w-4 shrink-0" />
+            <CopyIcon className="w-4 h-4 shrink-0" />
             <div className="flex flex-col">
               <span className="font-medium">Copy page</span>
               <span className="text-xs text-muted-foreground">
@@ -238,9 +238,9 @@ const CopyMarkdownButton = () => {
               onClick={handleChatGPTClick}
               className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
             >
-              <IconChatGPT className="h-4 w-4 shrink-0" />
+              <IconChatGPT className="w-4 h-4 shrink-0" />
               <div className="flex flex-col flex-1 min-w-0">
-                <span className="font-medium flex items-center gap-1">
+                <span className="flex gap-1 items-center font-medium">
                   Open in ChatGPT
                   <ExternalLink
                     className="h-[1em] w-[1em] shrink-0"
@@ -261,9 +261,9 @@ const CopyMarkdownButton = () => {
               onClick={handleClaudeClick}
               className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
             >
-              <IconClaude className="h-4 w-4 shrink-0" />
+              <IconClaude className="w-4 h-4 shrink-0" />
               <div className="flex flex-col flex-1 min-w-0">
-                <span className="font-medium flex items-center gap-1">
+                <span className="flex gap-1 items-center font-medium">
                   Open in Claude
                   <ExternalLink
                     className="h-[1em] w-[1em] shrink-0"
@@ -285,9 +285,9 @@ const CopyMarkdownButton = () => {
               target="_blank"
               className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
             >
-              <IconMCP className="h-4 w-4 shrink-0" />
+              <IconMCP className="w-4 h-4 shrink-0" />
               <div className="flex flex-col flex-1 min-w-0">
-                <span className="font-medium flex items-center gap-1">
+                <span className="flex gap-1 items-center font-medium">
                   Install Docs MCP server
                   <ExternalLink
                     className="h-[1em] w-[1em] shrink-0"
@@ -322,9 +322,9 @@ export const MainContentWrapper = (props) => {
   return (
     <>
       {(versionLabel || shouldShowCopyButton) && (
-        <div className="flex items-center gap-2 flex-wrap mt-5">
+        <div className="flex flex-wrap gap-2 items-center mt-5">
           {versionLabel && (
-            <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
               {versionLabel}
             </span>
           )}
@@ -333,8 +333,10 @@ export const MainContentWrapper = (props) => {
       )}
 
       {cookbook ? (
-        <NotebookBanner src={cookbook.ipynbPath} className="mb-4 mt-4" />
+        <NotebookBanner src={cookbook.ipynbPath} className="mt-4 mb-4" />
       ) : null}
+
+      <hr className="my-4 border-t dark:border-neutral-800" />
 
       {props.children}
       {isCustomerStory(pathname ?? "") && <CustomerStoryCTA />}
@@ -343,7 +345,7 @@ export const MainContentWrapper = (props) => {
           pathname === path || (pathname ?? "").startsWith(path + "/")
       ) ? (
         <div
-          className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t dark:border-neutral-800"
+          className="flex flex-wrap gap-6 justify-between items-center px-4 py-6 pt-8 md:px-6 md:pt-8 xl:px-8 xl:pt-14"
           id="docs-feedback"
         >
           <DocsFeedback key={pathname} />
@@ -357,11 +359,11 @@ export const MainContentWrapper = (props) => {
 
 export const DocsSupport = () => {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex gap-3 items-center">
       <Button variant="outline" size="sm" asChild>
         <a href="/support">
           <span>Support</span>
-          <LifeBuoy className="h-4 w-4 ml-2" />
+          <LifeBuoy className="ml-2 w-4 h-4" />
         </a>
       </Button>
     </div>
@@ -428,7 +430,7 @@ export const DocsFeedback = () => {
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex gap-3 items-center">
       <span className="text-sm font-medium">Was this page helpful?</span>
       <div className="flex gap-2">
         <Button
@@ -437,7 +439,7 @@ export const DocsFeedback = () => {
           onClick={() => handleFeedbackSelection("positive")}
           disabled={submitting}
         >
-          <ThumbsUp className="h-4 w-4 text-green-600" />
+          <ThumbsUp className="w-4 h-4 text-green-600" />
           <span className="sr-only">Yes</span>
         </Button>
         <Button
@@ -446,7 +448,7 @@ export const DocsFeedback = () => {
           onClick={() => handleFeedbackSelection("negative")}
           disabled={submitting}
         >
-          <ThumbsDown className="h-4 w-4 text-red-600" />
+          <ThumbsDown className="w-4 h-4 text-red-600" />
           <span className="sr-only">No</span>
         </Button>
       </div>
@@ -465,8 +467,8 @@ export const DocsFeedback = () => {
         <DialogContent className="max-w-lg">
           {selected === "submitted" ? (
             // Thank you view
-            <div className="flex flex-col gap-4 text-center items-center py-4">
-              <ThumbsUp className="h-12 w-12 text-green-500" />
+            <div className="flex flex-col gap-4 items-center py-4 text-center">
+              <ThumbsUp className="w-12 h-12 text-green-500" />
               <h4 className="text-lg font-semibold">
                 Thank you for your feedback!
               </h4>
@@ -489,9 +491,9 @@ export const DocsFeedback = () => {
             // Positive feedback follow-up
             <div className="flex flex-col gap-6">
               <div className="flex gap-4 items-start">
-                <ThumbsUp className="h-8 w-8 text-green-500 mt-1" />
+                <ThumbsUp className="mt-1 w-8 h-8 text-green-500" />
                 <div>
-                  <h4 className="text-lg font-semibold mb-2">
+                  <h4 className="mb-2 text-lg font-semibold">
                     What was most helpful?
                   </h4>
                   <p className="text-sm text-muted-foreground">

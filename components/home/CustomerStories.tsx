@@ -1,8 +1,11 @@
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import { CustomerCarousel } from "../customers/CustomerCarousel";
+import { getPagesForRoute } from "@/lib/source";
 
 export default function CustomerStories() {
+  const stories = getPagesForRoute("/customers");
+
   return (
     <HomeSection>
       <Header
@@ -17,7 +20,11 @@ export default function CustomerStories() {
           },
         ]}
       />
-      <CustomerCarousel path="/customers" showDots={true} loop={true} />
+      <CustomerCarousel
+        stories={stories as any}
+        showDots={true}
+        loop={true}
+      />
     </HomeSection>
   );
 }

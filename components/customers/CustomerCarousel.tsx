@@ -1,9 +1,7 @@
 "use client";
 
-import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import Image from "next/image";
-import { type Page } from "nextra";
 import { useMemo, useState, useEffect } from "react";
 import {
   Carousel,
@@ -14,11 +12,11 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 
-interface CustomerStory {
+export interface CustomerStory {
   route: string;
   frontMatter: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
     customerLogo?: string;
     customerLogoDark?: string;
     customerQuote?: string;
@@ -27,15 +25,16 @@ interface CustomerStory {
     quoteCompany?: string;
     quoteAuthorImage?: string;
     showInCustomerIndex?: boolean;
+    [key: string]: unknown;
   };
   meta?: {
     title: string;
   };
-  name: string;
+  name?: string;
 }
 
 interface CustomerCarouselProps {
-  path?: string;
+  stories: CustomerStory[];
   title?: string;
   description?: string;
   showDots?: boolean;
@@ -44,19 +43,19 @@ interface CustomerCarouselProps {
 }
 
 export const CustomerCarousel = ({
-  path = "/customers",
+  stories: allStories,
   title,
   description,
   showDots = true,
   loop = false,
   className = "",
 }: CustomerCarouselProps) => {
-  // Memoize the original filtered stories to avoid repeated getPagesUnderRoute calls
+  // Filter stories where showInCustomerIndex is not explicitly false
   const originalStories = useMemo(() => {
-    return (getPagesUnderRoute(path) as Array<CustomerStory>).filter(
+    return allStories.filter(
       (page) => page.frontMatter?.showInCustomerIndex !== false
     );
-  }, [path]);
+  }, [allStories]);
 
   const customerStories = useMemo(() => {
     // For infinite loop, duplicate items to ensure smooth looping
