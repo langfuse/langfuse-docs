@@ -16,7 +16,7 @@ By default, a span is exported if **any** of these are true:
 
 - It was created by the Langfuse SDK (`instrumentation_scope.name == "langfuse-sdk"`)
 - It has at least one `gen_ai.*` attribute
-- It comes from a known LLM instrumentation scope (for example OpenAI, Anthropic, Google GenAI, Bedrock botocore scopes, OpenLLMetry, LiteLLM)
+- It comes from a known LLM instrumentation scope (for example `openinference.*`, `langsmith`, `haystack`, `litellm`, `agent_framework`, `strands-agents`, `vllm`, `opentelemetry.instrumentation.anthropic`)
 
 You can inspect a span's instrumentation scope in Langfuse under `metadata.scope.name`.
 
@@ -79,7 +79,7 @@ from langfuse.span_filter import is_langfuse_span
 langfuse = Langfuse(should_export_span=is_langfuse_span)
 ```
 
-Available Python helpers: `is_default_export_span`, `is_langfuse_span`, `is_genai_span`, `is_known_llm_instrumentor`, `KNOWN_LLM_INSTRUMENTATION_SCOPES`.
+Available Python helpers: `is_default_export_span`, `is_langfuse_span`, `is_genai_span`, `is_known_llm_instrumentor`, `KNOWN_LLM_INSTRUMENTATION_SCOPE_PREFIXES`.
 
 `blocked_instrumentation_scopes` still works for backward compatibility, but is deprecated and planned for removal in a future version. Prefer expressing deny rules in `should_export_span`.
 
@@ -126,6 +126,18 @@ sdk.start();
 ```
 
 Passing `shouldExportSpan` replaces the default filter, so include default conditions in your callback if you want to extend rather than replace the default behavior.
+
+Compose with the default filter:
+
+```ts filename="instrumentation.ts"
+import { isDefaultExportSpan, type ShouldExportSpan } from "@langfuse/otel";
+
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  isDefaultExportSpan(otelSpan) ||
+  otelSpan.instrumentationScope.name.startsWith("my-framework");
+```
+
+Available JS/TS helpers from `@langfuse/otel`: `isDefaultExportSpan`, `isLangfuseSpan`, `isGenAISpan`, `isKnownLLMInstrumentor`, `KNOWN_LLM_INSTRUMENTATION_SCOPE_PREFIXES`.
 
 Export everything:
 
