@@ -10,6 +10,50 @@ The JS/TS SDK v5 introduces the **[observation-centric data model](/docs/observa
 
 This changes how you set trace attributes: instead of imperatively updating the trace with `updateActiveTrace()`, you use `propagateAttributes()` — a function that wraps a callback, automatically applying attributes to all child observations created within its scope.
 
+<Callout type="warning">
+  v5 changes default OpenTelemetry export behavior: Langfuse now applies a smart
+  default span filter. If you previously expected all spans to be exported
+  (including non-LLM spans), review the migration section below.
+</Callout>
+
+## OpenTelemetry span filter migration
+
+Starting in v5, `LangfuseSpanProcessor` uses a smart default filter. A span is exported when at least one of these is true:
+
+- The span was created by Langfuse (`langfuse-sdk`)
+- The span has `gen_ai.*` attributes
+- The span instrumentation scope matches known LLM scope prefixes (for example `openinference`, `langsmith`, `haystack`, `litellm`)
+
+Before v5, all spans were exported unless you implemented a custom `shouldExportSpan` function.
+
+### Keep pre-v5 "export everything" behavior
+
+```typescript
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const spanProcessor = new LangfuseSpanProcessor({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+  secretKey: process.env.LANGFUSE_SECRET_KEY!,
+  shouldExportSpan: () => true,
+});
+```
+
+### Compose custom rules with default behavior
+
+`shouldExportSpan` is a full override in v5. If you want to extend (not replace) default filtering, compose with `isDefaultExportSpan`.
+
+```typescript
+import { LangfuseSpanProcessor, isDefaultExportSpan } from "@langfuse/otel";
+
+const spanProcessor = new LangfuseSpanProcessor({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+  secretKey: process.env.LANGFUSE_SECRET_KEY!,
+  shouldExportSpan: ({ otelSpan }) =>
+    isDefaultExportSpan(otelSpan) ||
+    otelSpan.instrumentationScope.name.startsWith("my_framework"),
+});
+```
+
 ## Breaking Changes
 
 **1. `updateActiveTrace()` decomposed into 3 functions**
@@ -163,3 +207,6 @@ The `traceMethod` wrapper now wraps the traced call in `propagateAttributes()` t
 2. Search for `.updateTrace(` → split into `propagateAttributes()` + `.setTraceIO()` + `.setTraceAsPublic()`
 3. Verify propagated metadata values are `Record<string, string>` with values ≤200 characters
 4. Replace `release`/`environment` attribute usage with env vars (`LANGFUSE_RELEASE`, `LANGFUSE_TRACING_ENVIRONMENT`)
+5. Audit traces/dashboards that depended on non-LLM OpenTelemetry spans: these may stop appearing with the v5 default filter
+6. If needed, set `shouldExportSpan: () => true` on `LangfuseSpanProcessor` to preserve pre-v5 "export all spans" behavior
+7. If you use custom filtering, compose with `isDefaultExportSpan` to keep the default LLM-focused behavior

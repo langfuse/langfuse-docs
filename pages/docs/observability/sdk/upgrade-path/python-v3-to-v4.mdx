@@ -10,6 +10,74 @@ The Python SDK v4 introduces the **[observation-centric data model](/docs/observ
 
 This changes how you set trace attributes: instead of imperatively updating the trace object with `update_current_trace()`, you use `propagate_attributes()` — a context manager that automatically applies attributes to the current and all child observations created within its scope.
 
+<Callout type="warning">
+  v4 changes default OpenTelemetry export behavior: Langfuse no longer exports all
+  spans by default. If you previously relied on non-LLM spans (HTTP, DB, queue,
+  framework internals) being forwarded, review the span-filter migration section
+  below before upgrading.
+</Callout>
+
+## OpenTelemetry span filter migration
+
+Starting in v4, the Python SDK applies a smart default filter. A span is exported when at least one of these is true:
+
+- The span was created by Langfuse (`langfuse-sdk`)
+- The span has `gen_ai.*` attributes
+- The span instrumentation scope matches known LLM scope prefixes (for example `openinference`, `langsmith`, `haystack`, `litellm`)
+
+Before v4, non-blocked instrumentation scopes were exported by default.
+
+### Keep pre-v4 "export everything" behavior
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(should_export_span=lambda span: True)
+```
+
+### Compose custom filters from default behavior
+
+```python
+from langfuse import Langfuse
+from langfuse.span_filter import is_default_export_span
+
+langfuse = Langfuse(
+    should_export_span=lambda span: (
+        is_default_export_span(span)
+        or (
+            span.instrumentation_scope is not None
+            and span.instrumentation_scope.name.startswith("my_framework")
+        )
+    )
+)
+```
+
+<Callout type="warning">
+  `blocked_instrumentation_scopes` is deprecated in v4 and will be removed in a
+  future version. It still works for now, but migrate to `should_export_span`.
+</Callout>
+
+Equivalent denylist behavior with `should_export_span`:
+
+```python
+from langfuse import Langfuse
+from langfuse.span_filter import is_default_export_span
+
+blocked = {"sqlite", "requests"}
+
+langfuse = Langfuse(
+    should_export_span=lambda span: (
+        is_default_export_span(span)
+        and (
+            span.instrumentation_scope is None
+            or span.instrumentation_scope.name not in blocked
+        )
+    )
+)
+```
+
+If both `blocked_instrumentation_scopes` and `should_export_span` are set, blocked scopes still win (hard veto).
+
 ## Breaking Changes
 
 **1. `update_current_trace()` decomposed into 3 methods**
@@ -216,3 +284,6 @@ The SDK now requires Pydantic v2. If your application still uses Pydantic v1, yo
 5. Search for `CallbackHandler(update_trace=` → remove parameter
 6. Verify metadata values are `dict[str, str]` with values ≤200 chars
 7. Upgrade Pydantic to v2 if still on v1
+8. Audit traces/dashboards that depended on non-LLM OpenTelemetry spans: these may stop appearing with the v4 default filter
+9. If needed, set `should_export_span=lambda span: True` to preserve pre-v4 "export all spans" behavior
+10. If you still use `blocked_instrumentation_scopes`, migrate to `should_export_span` composition before the deprecation is removed
