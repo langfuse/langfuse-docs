@@ -266,3 +266,28 @@
     @apply bg-muted text-left p-4 font-mono;
   }
 }
+
+/* Override the Tailwind v4 auto-generated animation utilities that use
+   animation: var(--animate-*).  The nested var() chain (--animate-foo
+   contains var(--speed) / var(--duration)) can be silently invalid in
+   some browsers.  Explicit shorthand values are unambiguous and reliable. */
+@layer utilities {
+  .animate-slide {
+    animation: slide var(--speed) ease-in-out infinite alternate;
+  }
+  .animate-spin-custom {
+    animation: spin-custom calc(var(--speed) * 2) infinite linear;
+  }
+  .animate-marquee {
+    animation: marquee var(--duration) linear infinite;
+  }
+  .animate-marquee-vertical {
+    animation: marquee-vertical var(--duration) linear infinite;
+  }
+  .animate-border-beam {
+    animation: border-beam calc(var(--duration) * 1s) infinite linear;
+  }
+  .animate-grid {
+    animation: grid 20s linear infinite;
+  }
+}

@@ -63,12 +63,11 @@ function ScrollingDiscussions({
   return (
     <div className="absolute inset-0 overflow-hidden opacity-50 pointer-events-none">
       <div
-        className="animate-marquee-vertical space-y-0"
+        className="space-y-0"
         style={
           {
-            "--duration": speed,
             "--gap": "0px",
-            animationDirection: "reverse",
+            animation: `marquee-vertical ${speed} linear infinite reverse`,
           } as React.CSSProperties
         }
       >
