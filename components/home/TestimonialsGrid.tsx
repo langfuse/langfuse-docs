@@ -100,7 +100,7 @@ export const TestimonialsGrid = () => {
                 href={testimonial.postURL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block p-6 rounded-lg border transition-all duration-200 cursor-pointer bg-card break-inside-avoid hover:border-gray-300 dark:hover:border-gray-600"
+                className="no-underline block p-6 rounded-lg border transition-all duration-200 cursor-pointer bg-card break-inside-avoid hover:border-gray-300 dark:hover:border-gray-600"
               >
                 {/* Profile Header */}
                 <div className="flex gap-3 items-start mb-4">
