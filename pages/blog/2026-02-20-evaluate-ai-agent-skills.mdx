@@ -31,15 +31,58 @@ You can evaluate a skill systematically by storing a list of user prompts as a [
 
 ### The dataset
 
-TODO: describe dataset, add screenshot from Langfuse UI
+We created 2 datasets: 
+| Dataset | Description |
+|---|---|
+| **cli-tests** | A set with user prompts where the agent should use the CLI to access Langfuse. |
+| **instrumentation-tests** | A set with the same user prompt `"instrument my application with Langfuse"` every time, and a folder name that points to a folder with a small existing application. |
+
+The expected output is a list of things the LLM as a judge should verify. 
 
 ### Experiment setup
 
-We used Claude Agent SDK to run the agents. You can easily integrate Langfuse with Claude Agent SDK by following [this integration guide](/integrations/frameworks/claude-agent-sdk).
+We used Claude Agent SDK to run the agents. You can easily integrate Langfuse with Claude Agent SDK by following [this integration guide](/integrations/frameworks/claude-agent-sdk). For a full example of the setup, you can look at [this example repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/evaluating-ai-agent-skills).
 
-todo: explain that you need to spin them up in a test repo, clean up repo after each run, inject the langfuse credentials, ...
+#### Repository structure
 
-**Rest of the loop: see below**
+The [repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/evaluating-ai-agent-skills) consists of the script to run the experiment, and repositories to spin up the agents. The skill is intalled globally on the Claude account.
+
+```bash
+run-experiment-auto.py # script to run the experiment
+.env # environment variables, including Anthropic API key and Langfuse credentials for tracing the agents
+agent-sandbox-repos # repositories to spin up the agents
+  |--default-hello-world
+  |--langchain-chain
+  |--...
+```
+
+#### Spinning up an agent
+
+Each experiment run spins up an agent inside a test repository. A couple of things to note: 
+
+##### Injecting context
+The **Langfuse credentials** are injected as environment variables so the agent can interact with the API and the CLI out of the box.
+
+The **Langfuse skill** is installed globally on the Claude account, so we need to set `setting_sources=["user", "project"]` in ClaudeAgentOptions to give the agent access to the global skill.
+
+**Permissions** are set to `bypassPermissions` to avoid the agent getting stuck waiting for user input.
+
+```python
+options = ClaudeAgentOptions(
+        max_turns=args.max_turns,
+        cwd=item_cwd,
+        permission_mode="bypassPermissions", # we don't want the agent to be stuck asking for permissions
+        setting_sources=["user", "project"],
+        stderr=lambda line: stderr_lines.append(line),
+        env=_load_agent_env(item_cwd),
+    )
+```
+
+##### Resetting the repository
+After each run, the repository is reset to its original state so the next run starts from a clean slate. This is especially important for the instrumentation dataset, where the agent modifies application code: you want every run to start from the same baseline.
+
+##### Tracing the agent
+The agent's behavior is [traced to Langfuse](/integrations/frameworks/claude-agent-sdk), which gives us a full record of every tool call, CLI command, and file edit.
 
 ## The Langfuse Skill
 
@@ -47,26 +90,21 @@ The [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfus
 
 At the time of writing, we also have separate skills for more specific use cases like prompt migration and instrumenting existing code. The goal is to eventually merge these into the main Langfuse skill so users only need to install one.
 
-## What We're Evaluating
-
-With the pipeline in place, the question becomes: what are we actually evaluating, and how do we want to improve it?
-
-We started simple. The first thing to check is whether the skill gets invoked at all, and if it does, whether the agent uses the CLI effectively. After looking at a couple of traces, we identified the following metrics: 
-- the number of CLI commands that resulted in an error
-- the number of retries the agent performed before succeeding
-- whether the agent switched to using Curl commands instead of the CLI
-
-Once the CLI usage is solid, we can focus on more advanced topics: is the agent actually following best practices when it instruments an application? Is it setting up tracing the way we'd advise people to do it? This is where folding the separate instrumentation skill into the main Langfuse skill comes in.
-
 ## Improving the Skill
 
-Before knowing what to improve, we need look at the traces of the dataset run. This is what a trace from a Claude Agent SDK run looks like:
+Before knowing what to improve, we need to look at the traces of the first dataset run. This is what a trace from a Claude Agent SDK run looks like:
 
 <Frame fullWidth>
   ![Trace example](/images/blog/2026-02-20-evaluate-ai-agent-skills/trace-example.png)
 </Frame>
 
-You can immediately see that the skill was invoked relatively early in the trace, which is a good sign. Going deeper into each step reveals more about the agent's behavior.
+You can immediately see that the skill was invoked relatively early in the trace, which is a good sign. Going deeper into each step reveals more about the agent's behavior. A couple of things immediately stand out:
+- A high number of CLI commands resulted in an error.
+- Sometimes the agent would switch to using Curl commands instead of the CLI.
+- The agent would sometimes invent CLI resources and actions that didn't exist.
+- The agent would sometimes not use the skill at all.
+
+From these observations we derived **initial metrics to track each iteration**: the number of CLI errors per run, the number of retries before succeeding, and whether the agent fell back to Curl or skipped the skill entirely. Once the CLI usage is solid, we can move on to more advanced questions, like whether the [agent is actually following best practices when it instruments an application](#evaluating-auto-instrumentation).
 
 ### Iteration 1: Not enforcing Langfuse URL
 
@@ -110,7 +148,7 @@ The result was that the skill stopped being invoked entirely. User prompts like 
 
 After some iterations we settled onto a very similar description as before, but with the new reference doc added. [This commit](https://github.com/langfuse/skills/pull/6/changes/a3bebd7fda7931864706bf23cef1861890f697bd) shows the before and after.
 
-### Iteration 4: Evaluating auto-instrumentation
+### Iteration 4: Evaluating auto-instrumentation [#evaluating-auto-instrumentation]
 
 How do you evaluate whether the outcome of a complex task is correct? We did the following to verify whether the agent could correctly instrument an existing application with Langfuse observability:
 
