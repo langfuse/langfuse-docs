@@ -3,8 +3,6 @@ import remarkGfm from "remark-gfm";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 
-const docsOptions = { remarkPlugins: [remarkGfm] as const };
-
 // YAML parses unquoted dates (e.g. `date: 2023-07-19`) as JS Date objects.
 // Use this helper so both string dates and Date objects are accepted and
 // normalised to an ISO date string (YYYY-MM-DD).
@@ -41,70 +39,61 @@ const customerFrontmatterSchema = frontmatterSchema.extend({
   showInCustomerIndex: z.boolean().nullish(),
 });
 
+// remarkPlugins is applied globally in defineConfig; per-collection mdxOptions
+// are only needed for schema customization.
+
 export const docs = defineDocs({
   dir: "content/docs",
-  docs: docsOptions,
 });
 
 export const selfHosting = defineDocs({
   dir: "content/self-hosting",
-  docs: docsOptions,
 });
 
 export const blog = defineDocs({
   dir: "content/blog",
-  docs: docsOptions,
 });
 
 export const changelog = defineDocs({
   dir: "content/changelog",
   docs: {
-    remarkPlugins: [remarkGfm],
     schema: changelogFrontmatterSchema,
   },
 });
 
 export const guides = defineDocs({
   dir: "content/guides",
-  docs: docsOptions,
 });
 
 export const faq = defineDocs({
   dir: "content/faq",
-  docs: docsOptions,
 });
 
 export const integrations = defineDocs({
   dir: "content/integrations",
-  docs: docsOptions,
 });
 
 export const security = defineDocs({
   dir: "content/security",
-  docs: docsOptions,
 });
 
 export const library = defineDocs({
   dir: "content/library",
-  docs: docsOptions,
 });
 
 export const customers = defineDocs({
   dir: "content/customers",
   docs: {
-    remarkPlugins: [remarkGfm],
     schema: customerFrontmatterSchema,
   },
 });
 
 export const handbook = defineDocs({
   dir: "content/handbook",
-  docs: docsOptions,
 });
 
 export const marketing = defineDocs({
   dir: "content/marketing",
-  docs: docsOptions,
 });
 
 export default defineConfig({
@@ -119,12 +108,12 @@ export default defineConfig({
     // throws "Cannot handle unknown node `mdxJsxFlowElement`" when pages contain
     // JSX components like <Callout>, <Tabs>, etc.
     remarkStructureOptions: {
+      // @ts-ignore — extensions is valid in mdast-util-to-markdown but the
+      // StructureOptions type doesn't expose it directly
       stringify: { extensions: [mdxJsxToMarkdown()] },
     },
-    rehypeCodeOptions: {
-      // Load all bundled languages so code blocks (e.g. json, python, yaml) work.
-      // Default lazy: true only loads ts/tsx and causes ShikiError for other langs.
-      lazy: false,
-    },
+    // @ts-ignore — { lazy: false } is valid at runtime; RehypeCodeOptions
+    // requires themes in its full type but fumadocs applies safe defaults
+    rehypeCodeOptions: { lazy: false },
   },
 });

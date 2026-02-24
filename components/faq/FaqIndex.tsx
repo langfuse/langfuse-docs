@@ -22,7 +22,7 @@ export const formatTag = (tag: string) =>
 
 export const FaqIndex = () => {
   const pages = getPagesUnderRoute("/faq/all") as Array<
-    Page & { frontMatter: any }
+    Page & { frontMatter: any; meta?: { title?: string } }
   >;
   const categorizedPages = pages
     .filter((page) => page.route !== "/faq/all")
@@ -33,7 +33,7 @@ export const FaqIndex = () => {
         acc[tag].push(page);
       });
       return acc;
-    }, {} as Record<string, Array<Page & { frontMatter: any }>>);
+    }, {} as Record<string, Array<Page & { frontMatter: any; meta?: { title?: string } }>>);
 
   return (
     <>

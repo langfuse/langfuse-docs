@@ -16,11 +16,7 @@ export default async function DocPage(props: PageProps) {
 
   if (!page) notFound();
 
-  const loaded =
-    typeof page.data.load === "function"
-      ? await page.data.load()
-      : { body: page.data.body, toc: page.data.toc };
-  const { toc } = loaded;
+  const { toc } = page.data;
 
   return (
     <DocsPage toc={toc} tableOfContent={{ footer: <DocsContributors /> }}>

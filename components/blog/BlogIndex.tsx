@@ -55,7 +55,7 @@ export const BlogIndex = ({
       .slice(0, maxItems);
   }, [initialPages, path, maxItems]);
 
-  const normalizeTags = (tagString?: string) => {
+  const normalizeTags = (tagString?: string): string[] => {
     if (tagString == null || typeof tagString !== "string") return [];
     return tagString
       .split(",")
@@ -76,7 +76,7 @@ export const BlogIndex = ({
 
   // Get unique tags, sorted alphabetically for consistent category row
   const tags = useMemo(() => {
-    const allTags = posts.flatMap((page) =>
+    const allTags: string[] = posts.flatMap((page) =>
       normalizeTags(page.frontMatter?.tag as string)
     );
     return Array.from(new Set(allTags)).sort((a, b) => a.localeCompare(b));

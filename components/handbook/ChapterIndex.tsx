@@ -5,7 +5,7 @@ import { CHAPTER_ORDER } from "@/lib/handbook-meta";
 
 export const ChapterIndex = () => {
   const pages = getPagesUnderRoute("/handbook/chapters") as Array<
-    Page & { frontMatter: any }
+    Page & { frontMatter: any; meta?: { title?: string } }
   >;
 
   // Filter out the _meta.tsx file and sort pages

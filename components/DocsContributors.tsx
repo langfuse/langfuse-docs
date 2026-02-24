@@ -136,10 +136,9 @@ export const DocsContributors = () => {
       </div>
       <div>
         {displayedContributors.map((contributor) => (
-          <ContributorCard
-            key={contributor.username}
-            contributor={contributor}
-          />
+          <React.Fragment key={contributor.username}>
+            <ContributorCard contributor={contributor} />
+          </React.Fragment>
         ))}
         {remainingCount > 0 && !showAll && (
           <button

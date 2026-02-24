@@ -83,27 +83,49 @@ export function Tabs({
   id,
   persist,
   defaultIndex = 0,
+  selectedIndex,
+  onChange,
+  storageKey: _storageKey,
   children,
 }: {
   items?: string[];
   id?: string;
   persist?: boolean;
   defaultIndex?: number;
+  /** Controlled mode: externally managed tab index (for LangTabs) */
+  selectedIndex?: number;
+  /** Controlled mode: called when user selects a tab (receives numeric index) */
+  onChange?: (index: number) => void;
+  /** Ignored — provided for API compatibility with older Nextra Tabs */
+  storageKey?: string;
   children?: React.ReactNode;
 }) {
   const values = React.useMemo(() => items.map(toValue), [items]);
-  const [value, setValue] = React.useState(values[defaultIndex] ?? values[0]);
+  const [internalValue, setInternalValue] = React.useState(
+    values[defaultIndex] ?? values[0]
+  );
   React.useEffect(() => {
     if (!id || !persist) return;
     const stored = localStorage.getItem(id);
-    if (stored && values.includes(stored)) setValue(stored);
+    if (stored && values.includes(stored)) setInternalValue(stored);
   }, [id, persist, values]);
+
+  // Controlled mode: if selectedIndex provided, use it; otherwise fall back to
+  // internal state driven by user clicks.
+  const controlledValue =
+    selectedIndex !== undefined ? values[selectedIndex] ?? values[0] : undefined;
+  const value = controlledValue ?? internalValue;
+
   const onValueChange = React.useCallback(
     (v: string) => {
       if (id && persist) localStorage.setItem(id, v);
-      setValue(v);
+      setInternalValue(v);
+      if (onChange) {
+        const idx = values.indexOf(v);
+        if (idx !== -1) onChange(idx);
+      }
     },
-    [id, persist]
+    [id, persist, onChange, values]
   );
 
   const tabChildren = React.Children.map(children, (child, i) => {
