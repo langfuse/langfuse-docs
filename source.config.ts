@@ -1,8 +1,26 @@
-import { defineDocs, defineConfig } from "fumadocs-mdx/config";
+import { defineDocs, defineConfig, frontmatterSchema } from "fumadocs-mdx/config";
 import remarkGfm from "remark-gfm";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
+import { z } from "zod";
 
 const docsOptions = { remarkPlugins: [remarkGfm] as const };
+
+// Extended schema for customer story pages — preserves all default fields and
+// adds the custom frontmatter fields used by CustomerCarousel / CustomerIndex.
+const customerFrontmatterSchema = frontmatterSchema.extend({
+  date: z.string().optional(),
+  ogImage: z.string().optional(),
+  tag: z.string().optional(),
+  author: z.string().optional(),
+  customerLogo: z.string().optional(),
+  customerLogoDark: z.string().optional(),
+  customerQuote: z.string().optional(),
+  quoteAuthor: z.string().optional(),
+  quoteRole: z.string().optional(),
+  quoteCompany: z.string().optional(),
+  quoteAuthorImage: z.string().optional(),
+  showInCustomerIndex: z.boolean().optional(),
+});
 
 export const docs = defineDocs({
   dir: "content/docs",
@@ -51,7 +69,10 @@ export const library = defineDocs({
 
 export const customers = defineDocs({
   dir: "content/customers",
-  docs: docsOptions,
+  docs: {
+    remarkPlugins: [remarkGfm],
+    schema: customerFrontmatterSchema,
+  },
 });
 
 export const handbook = defineDocs({
