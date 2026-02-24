@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { getPagesForRoute } from "@/lib/source";
 
 export type BlogPageItem = {
   route: string;
@@ -44,7 +43,7 @@ export const BlogIndex = ({
   }, [searchParams]);
 
   const posts = useMemo(() => {
-    const list = initialPages ?? (getPagesForRoute(path) as BlogPageItem[]);
+    const list = initialPages ?? [];
     return list
       .filter((page) => page.frontMatter?.showInBlogIndex !== false)
       .sort(
