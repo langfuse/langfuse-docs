@@ -8,6 +8,7 @@ import { LangTabs } from "@/components/LangTabs";
 import { FetchReadme } from "@/components/FetchReadme";
 import { Callout, Tabs, Tab, Cards, Steps, FileTree } from "@/lib/nextra-shim/components";
 import { MdxDetails, MdxSummary } from "@/components/MdxDetails";
+import { AvailabilityBanner } from "@/components/availability";
 
 const BLOCK_TAGS = new Set([
   "div", "details", "summary", "figure", "pre", "table",
@@ -76,6 +77,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     FetchReadme,
     details: MdxDetails,
     summary: MdxSummary,
+    AvailabilityBanner,
     ...components,
   };
 }

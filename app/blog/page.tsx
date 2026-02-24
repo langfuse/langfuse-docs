@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { BlogIndex } from "@/components/blog/BlogIndex";
 import { Header } from "@/components/Header";
 import { ProductUpdateSignup } from "@/components/productUpdateSignup";
@@ -59,7 +60,9 @@ export default function BlogIndexPage() {
           <ProductUpdateSignup source="blog" />
         </div>
       </div>
-      <BlogIndex path="/blog" pages={pages} />
+      <Suspense fallback={<div className="min-h-[400px] animate-pulse rounded-md bg-muted/50" />}>
+        <BlogIndex path="/blog" pages={pages} />
+      </Suspense>
     </div>
   );
 }
