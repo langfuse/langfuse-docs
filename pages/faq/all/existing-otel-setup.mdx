@@ -166,7 +166,8 @@ with tracer.start_as_current_span("test-span"):
 1. Enable debug logging to see what's happening:
 
 ```typescript
-process.env.LANGFUSE_LOG_LEVEL = "debug";
+process.env.LANGFUSE_DEBUG = "true";
+// or: process.env.LANGFUSE_LOG_LEVEL = "debug";
 ```
 
 2. Check your initialization order: add logging to see which tool initializes first:
@@ -586,7 +587,8 @@ os.environ["LANGFUSE_DEBUG"] = "True"
 
 {/* JS/TS */}
 ```typescript
-process.env.LANGFUSE_LOG_LEVEL = "debug";
+process.env.LANGFUSE_DEBUG = "true";
+// or: process.env.LANGFUSE_LOG_LEVEL = "debug";
 ```
 
 </Tab>

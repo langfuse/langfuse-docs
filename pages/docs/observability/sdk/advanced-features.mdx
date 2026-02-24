@@ -18,7 +18,16 @@ By default, a span is exported if **any** of these are true:
 - It has at least one `gen_ai.*` attribute
 - It comes from a known LLM instrumentation scope (for example `openinference.*`, `langsmith`, `haystack`, `litellm`, `agent_framework`, `strands-agents`, `vllm`, `opentelemetry.instrumentation.anthropic`)
 
-You can inspect a span's instrumentation scope in Langfuse under `metadata.scope.name`.
+If you want another integration added to the default instrumentation scope allowlist, open an issue in [langfuse/langfuse](https://github.com/langfuse/langfuse/issues) with the scope name and a sample span.
+
+You can inspect a span's instrumentation scope in Langfuse under `metadata.scope.name`. Filtered-out spans do not appear in the UI.
+
+To identify filtered scopes:
+
+1. Enable debug logging (`Langfuse(debug=True)` or `LANGFUSE_DEBUG="True"` on Python, `LANGFUSE_DEBUG="true"` or `LANGFUSE_LOG_LEVEL="DEBUG"` on JS/TS).
+2. Run your application and check logs for dropped-span messages and instrumentation scope names.
+3. Add those scopes to your allowlist logic by composing with `is_default_export_span` / `isDefaultExportSpan`.
+4. Optional: temporarily use `should_export_span=lambda span: True` or `shouldExportSpan: () => true` to inspect all spans, then restore filtering.
 
 <Callout type="info" title="Behavior Change">
   Earlier SDK versions exported all non-blocked spans by default. To restore
@@ -82,6 +91,8 @@ langfuse = Langfuse(should_export_span=is_langfuse_span)
 Available Python helpers: `is_default_export_span`, `is_langfuse_span`, `is_genai_span`, `is_known_llm_instrumentor`, `KNOWN_LLM_INSTRUMENTATION_SCOPE_PREFIXES`.
 
 `blocked_instrumentation_scopes` still works for backward compatibility, but is deprecated and planned for removal in a future version. Prefer expressing deny rules in `should_export_span`.
+
+Deprecated compatibility example:
 
 ```python
 from langfuse import Langfuse
@@ -248,9 +259,10 @@ Available log levels are `DEBUG`, `INFO`, `WARN`, and `ERROR`.
 
 **Via environment variable:**
 
-You can also set the log level using the `LANGFUSE_LOG_LEVEL` environment variable to enable the debug mode.
+You can enable debug mode via `LANGFUSE_DEBUG=true` (recommended quick toggle) or set `LANGFUSE_LOG_LEVEL=DEBUG` for explicit log-level control.
 
 ```bash
+export LANGFUSE_DEBUG="true"
 export LANGFUSE_LOG_LEVEL="DEBUG"
 ```
 

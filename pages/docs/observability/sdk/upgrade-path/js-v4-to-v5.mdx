@@ -62,7 +62,7 @@ const spanProcessor = new LangfuseSpanProcessor({
 
 Filtering can break trace trees when intermediate or parent spans are dropped while child spans are still exported. If traces appear disconnected, enable SDK debug logging to inspect dropped spans, then allowlist the required scopes in your callback.
 
-- JS/TS debug mode: set `LANGFUSE_LOG_LEVEL="DEBUG"`.
+- JS/TS debug mode: set `LANGFUSE_DEBUG="true"` (or `LANGFUSE_LOG_LEVEL="DEBUG"`).
 - See [SDK advanced features](/docs/observability/sdk/advanced-features) and [OpenTelemetry troubleshooting for unwanted spans](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse).
 
 ### `updateActiveTrace()` decomposed into 3 functions
