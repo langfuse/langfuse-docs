@@ -24,7 +24,7 @@ export default async function SectionLayout({ children, params }: LayoutProps) {
         nav={{ enabled: false }}
         sidebar={{ enabled: false }}
       >
-        <div className="mx-auto max-w-360">
+        <div className="mx-auto max-w-4xl">
           <MainContentWrapper>
             {children}
           </MainContentWrapper>

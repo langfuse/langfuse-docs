@@ -337,10 +337,10 @@ export const MainContentWrapper = (props) => {
         <NotebookBanner src={cookbook.ipynbPath} className="mt-4 mb-4" />
       ) : null}
 
-      <hr className="my-4 border-t dark:border-neutral-800" />
 
       {props.children}
       {isCustomerStory(pathname ?? "") && <CustomerStoryCTA />}
+      <hr className="mx-4 my-4 border-t dark:border-neutral-800 md:mx-6 xl:mx-8" />
       {!pathsWithoutFooterWidgets.some(
         (path) =>
           pathname === path || (pathname ?? "").startsWith(path + "/")
