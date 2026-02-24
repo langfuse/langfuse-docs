@@ -113,18 +113,18 @@ export const TestimonialsGrid = () => {
                         height={40}
                         className="rounded-full"
                       />
-                      <div className="absolute -right-1 -bottom-1 bg-white rounded-full border shadow-sm">
+                      <div className="absolute -right-1 -bottom-1 w-5 h-5 bg-white dark:bg-card rounded-full border border-border shadow-sm flex items-center justify-center overflow-hidden">
                         {PLATFORMS[testimonial.platform].logo.startsWith('/') ? (
                           <Image
                             src={PLATFORMS[testimonial.platform].logo}
                             alt={testimonial.platform}
-                            width={12}
-                            height={12}
+                            width={14}
+                            height={14}
                             className="object-contain"
                           />
                         ) : (
-                          <span className={`text-xs ${PLATFORMS[testimonial.platform].color}`}>
-                            {PLATFORMS[testimonial.platform].name}
+                          <span className={`text-[9px] leading-none ${PLATFORMS[testimonial.platform].color}`}>
+                            {PLATFORMS[testimonial.platform].name[0]}
                           </span>
                         )}
                       </div>
