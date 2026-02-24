@@ -37,7 +37,7 @@ To identify filtered scopes:
 <Callout type="warning" title="Filtering Spans May Break Trace Trees">
   Filtering spans may break the parent-child relationships in your traces. For
   example, if you filter out a parent span but keep its children, you may see
-  "orphaned" observations in the Langfuse UI or [traces without any input or output](/faq/all/empty-trace-input-and-output#3-your-root-span-is-being-filtered-out).
+  "orphaned" observations in the Langfuse UI. Please use the debugging flow above to re-add filtered out spans.
 </Callout>
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
@@ -340,10 +340,10 @@ Benefits of isolation:
 - Independent configuration and sampling rates
 
 <Callout type="warning">
-While TracerProviders are isolated, they share the same OpenTelemetry context for tracking active spans. This can cause span relationship issues where: 
+While TracerProviders are isolated, they share the same OpenTelemetry context for tracking active spans. This can cause span relationship issues where:
 
-- A parent span from one TracerProvider might have children from another TracerProvider 
-- Some spans may appear "orphaned" if their parent spans belong to a different TracerProvider 
+- A parent span from one TracerProvider might have children from another TracerProvider
+- Some spans may appear "orphaned" if their parent spans belong to a different TracerProvider
 - Trace hierarchies may be incomplete or confusing
 
 Plan your instrumentation carefully to avoid confusing trace structures.
@@ -356,7 +356,7 @@ Plan your instrumentation carefully to avoid confusing trace structures.
 ```python {4, 5}
 from opentelemetry.sdk.trace import TracerProvider
 from langfuse import Langfuse
- 
+
 langfuse_tracer_provider = TracerProvider() # do not set to global tracer provider to keep isolation
 langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
 langfuse.start_observation(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
@@ -369,13 +369,13 @@ Isolate Langfuse spans with a custom provider and avoid sending them to other ex
 ```ts /setLangfuseTracerProvider/
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { setLangfuseTracerProvider } from "@langfuse/tracing";
- 
+
 // Create a new TracerProvider and register the LangfuseSpanProcessor
 // do not set this TracerProvider as the global TracerProvider
 const langfuseTracerProvider = new NodeTracerProvider({
   spanProcessors: [new LangfuseSpanProcessor()],
 })
- 
+
 // Register the isolated TracerProvider
 setLangfuseTracerProvider(langfuseTracerProvider)
 ```
