@@ -13,13 +13,17 @@ This changes how you set trace attributes: instead of imperatively updating the 
 <Callout type="warning">
   v4 changes default OpenTelemetry export behavior: Langfuse no longer exports all
   spans by default. If you previously relied on non-LLM spans (HTTP, DB, queue,
-  framework internals) being forwarded, review the span-filter migration section
-  below before upgrading.
+  framework internals) being forwarded, review the first breaking change below
+  before upgrading.
 </Callout>
 
-## OpenTelemetry span filter migration
+## Breaking Changes
 
-Starting in v4, the Python SDK applies a smart default filter. A span is exported when at least one of these is true:
+### Smart default span filtering replaces export-all behavior
+
+In previous versions, exporting all OpenTelemetry spans by default increased trace noise from infrastructure and non-LLM instrumentation (HTTP, DB, queues, framework internals). To keep traces focused and useful, v4 introduces a smart default span filter.
+
+By default, v4 exports a span if any of these are true:
 
 - The span was created by Langfuse (`langfuse-sdk`)
 - The span has `gen_ai.*` attributes
@@ -27,7 +31,7 @@ Starting in v4, the Python SDK applies a smart default filter. A span is exporte
 
 Before v4, non-blocked instrumentation scopes were exported by default.
 
-### Keep pre-v4 "export everything" behavior
+#### Keep pre-v4 "export everything" behavior
 
 ```python
 from langfuse import Langfuse
@@ -35,7 +39,7 @@ from langfuse import Langfuse
 langfuse = Langfuse(should_export_span=lambda span: True)
 ```
 
-### Compose custom filters from default behavior
+#### Compose custom filters with default behavior
 
 ```python
 from langfuse import Langfuse
@@ -52,10 +56,9 @@ langfuse = Langfuse(
 )
 ```
 
-<Callout type="warning">
-  `blocked_instrumentation_scopes` is deprecated in v4 and will be removed in a
-  future version. It still works for now, but migrate to `should_export_span`.
-</Callout>
+#### Python compatibility note: `blocked_instrumentation_scopes` is deprecated
+
+`blocked_instrumentation_scopes` still works in v4, but is deprecated and will be removed in a future version. Migrate to `should_export_span`.
 
 Equivalent denylist behavior with `should_export_span`:
 
@@ -78,9 +81,14 @@ langfuse = Langfuse(
 
 If both `blocked_instrumentation_scopes` and `should_export_span` are set, blocked scopes still win (hard veto).
 
-## Breaking Changes
+#### Possible trace-tree side effects and how to debug
 
-**1. `update_current_trace()` decomposed into 3 methods**
+Filtering can break trace trees when intermediate or parent spans are dropped while child spans are still exported. If traces appear disconnected, enable SDK debug logging to inspect dropped spans, then allowlist the required scopes in your callback.
+
+- Python debug mode: use `Langfuse(debug=True)` or set `LANGFUSE_DEBUG="True"`.
+- See [SDK advanced features](/docs/observability/sdk/advanced-features) and [OpenTelemetry troubleshooting for unwanted spans](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse).
+
+### `update_current_trace()` decomposed into 3 methods
 
 In the new model, correlating attributes (`user_id`, `session_id`, `metadata`, `tags`) must live on every observation, not just the trace. This is why they move to `propagate_attributes()` — a context manager that automatically applies these attributes to the current and all child observations created within its scope.
 
@@ -147,7 +155,7 @@ def my_function():
   the root observation directly.
 </Callout>
 
-**2. `span.update_trace()` decomposed into 3 methods**
+### `span.update_trace()` decomposed into 3 methods
 
 The same decomposition applies to the observation-level `update_trace()` method.
 
@@ -185,7 +193,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation") 
   now propagate to children only — they do not bubble up to the trace.
 </Callout>
 
-**3. `start_span()` / `start_generation()` → `start_observation()`**
+### `start_span()` / `start_generation()` → `start_observation()`
 
 Observations are the primary concept in the new model. The unified `start_observation()` API with `as_type` parameter replaces the separate methods.
 
@@ -200,7 +208,7 @@ Observations are the primary concept in the new model. The unified `start_observ
 | `span.start_generation(name="x")`                               | `span.start_observation(name="x", as_type="generation")`                               |
 | `span.start_as_current_generation(name="x")`                    | `span.start_as_current_observation(name="x", as_type="generation")`                    |
 
-**4. `DatasetItemClient.run()` removed → use [Experiment SDK](/docs/evaluation/experiments/experiments-via-sdk)**
+### `DatasetItemClient.run()` removed → use [Experiment SDK](/docs/evaluation/experiments/experiments-via-sdk)
 
 The [Experiment SDK](/docs/evaluation/experiments/experiments-via-sdk) (`dataset.run_experiment()`) handles propagation of experiment attributes (run metadata, dataset item linking) under the hood.
 
@@ -228,7 +236,7 @@ dataset.run_experiment(name="my-run", task=my_task)
 
 The `DatasetItem` objects still have the same data attributes (`id`, `input`, `expected_output`, `metadata`, etc.) but the `run()` method is removed.
 
-**5. [LangChain](/integrations/frameworks/langchain) `CallbackHandler`: `update_trace` parameter removed**
+### [LangChain](/integrations/frameworks/langchain) `CallbackHandler`: `update_trace` parameter removed
 
 The handler now uses `propagate_attributes()` internally. The `update_trace` parameter no longer exists — passing it raises a `TypeError`.
 
@@ -256,7 +264,7 @@ handler = CallbackHandler(trace_context={...})
   documentation.
 </Callout>
 
-**6. Removed types**
+### Removed types
 
 The following types have been removed from `langfuse.types`:
 
@@ -266,24 +274,24 @@ The following types have been removed from `langfuse.types`:
 | `ObservationParams`                      | TypedDict extending `TraceMetadata` with observation fields                                        |
 | `MapValue`, `ModelUsage`, `PromptClient` | No longer re-exported from `langfuse.types`, import from `langfuse.model` instead                  |
 
-**7. Pydantic v1 support dropped**
+### Pydantic v1 support dropped
 
 The SDK now requires Pydantic v2. If your application still uses Pydantic v1, you must use the `pydantic.v1` [compatibility shim](https://docs.pydantic.dev/latest/migration/#continue-using-pydantic-v1-features).
 
-**8. Validation changes**
+### Validation changes
 
 - propagated `metadata`: now `dict[str, str]` with values limited to 200 characters (was `Any`). Non-string values are coerced to strings. Values exceeding the limit are dropped with a warning.
 - `user_id`, `session_id`: validated as strings with a maximum length of 200 characters. Values exceeding the limit are dropped with a warning.
 
 ## Migration Checklist
 
-1. Search for `update_current_trace` → split into `propagate_attributes()` + `set_current_trace_io()` (only when relying on legacy trace-level LLM-as-a-judge configurations) + `set_current_trace_as_public()`
-2. Search for `.update_trace(` → same split on observation objects
-3. Search for `start_span` / `start_generation` → replace with `start_observation`
-4. Search for `item.run(` → replace with `dataset.run_experiment()`
-5. Search for `CallbackHandler(update_trace=` → remove parameter
-6. Verify metadata values are `dict[str, str]` with values ≤200 chars
-7. Upgrade Pydantic to v2 if still on v1
-8. Audit traces/dashboards that depended on non-LLM OpenTelemetry spans: these may stop appearing with the v4 default filter
-9. If needed, set `should_export_span=lambda span: True` to preserve pre-v4 "export all spans" behavior
-10. If you still use `blocked_instrumentation_scopes`, migrate to `should_export_span` composition before the deprecation is removed
+1. Audit traces/dashboards that depended on non-LLM OpenTelemetry spans: these may stop appearing with the v4 default filter
+2. If needed, set `should_export_span=lambda span: True` to preserve pre-v4 "export all spans" behavior
+3. If you still use `blocked_instrumentation_scopes`, migrate to `should_export_span` composition before the deprecation is removed
+4. Search for `update_current_trace` → split into `propagate_attributes()` + `set_current_trace_io()` (only when relying on legacy trace-level LLM-as-a-judge configurations) + `set_current_trace_as_public()`
+5. Search for `.update_trace(` → same split on observation objects
+6. Search for `start_span` / `start_generation` → replace with `start_observation`
+7. Search for `item.run(` → replace with `dataset.run_experiment()`
+8. Search for `CallbackHandler(update_trace=` → remove parameter
+9. Verify metadata values are `dict[str, str]` with values ≤200 chars
+10. Upgrade Pydantic to v2 if still on v1

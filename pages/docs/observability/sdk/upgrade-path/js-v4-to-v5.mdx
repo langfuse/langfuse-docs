@@ -13,12 +13,16 @@ This changes how you set trace attributes: instead of imperatively updating the 
 <Callout type="warning">
   v5 changes default OpenTelemetry export behavior: Langfuse now applies a smart
   default span filter. If you previously expected all spans to be exported
-  (including non-LLM spans), review the migration section below.
+  (including non-LLM spans), review the first breaking change below.
 </Callout>
 
-## OpenTelemetry span filter migration
+## Breaking Changes
 
-Starting in v5, `LangfuseSpanProcessor` uses a smart default filter. A span is exported when at least one of these is true:
+### Smart default span filtering replaces export-all behavior
+
+In previous versions, exporting all OpenTelemetry spans by default increased trace noise from infrastructure and non-LLM instrumentation (HTTP, DB, queues, framework internals). To keep traces focused and useful, v5 introduces a smart default span filter.
+
+By default, v5 exports a span if any of these are true:
 
 - The span was created by Langfuse (`langfuse-sdk`)
 - The span has `gen_ai.*` attributes
@@ -26,7 +30,7 @@ Starting in v5, `LangfuseSpanProcessor` uses a smart default filter. A span is e
 
 Before v5, all spans were exported unless you implemented a custom `shouldExportSpan` function.
 
-### Keep pre-v5 "export everything" behavior
+#### Keep pre-v5 "export everything" behavior
 
 ```typescript
 import { LangfuseSpanProcessor } from "@langfuse/otel";
@@ -38,7 +42,7 @@ const spanProcessor = new LangfuseSpanProcessor({
 });
 ```
 
-### Compose custom rules with default behavior
+#### Compose custom rules with default behavior
 
 `shouldExportSpan` is a full override in v5. If you want to extend (not replace) default filtering, compose with `isDefaultExportSpan`.
 
@@ -54,9 +58,14 @@ const spanProcessor = new LangfuseSpanProcessor({
 });
 ```
 
-## Breaking Changes
+#### Possible trace-tree side effects and how to debug
 
-**1. `updateActiveTrace()` decomposed into 3 functions**
+Filtering can break trace trees when intermediate or parent spans are dropped while child spans are still exported. If traces appear disconnected, enable SDK debug logging to inspect dropped spans, then allowlist the required scopes in your callback.
+
+- JS/TS debug mode: set `LANGFUSE_LOG_LEVEL="DEBUG"`.
+- See [SDK advanced features](/docs/observability/sdk/advanced-features) and [OpenTelemetry troubleshooting for unwanted spans](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse).
+
+### `updateActiveTrace()` decomposed into 3 functions
 
 In the new model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) must live on every observation, not just the trace. `propagateAttributes()` wraps a callback — the current and all child spans created inside the callback automatically inherit the attributes. Spans created _before_ the callback are **not** retroactively updated.
 
@@ -129,7 +138,7 @@ await propagateAttributes(
   the root observation directly.
 </Callout>
 
-**2. `.updateTrace()` → `.setTraceIO()` + `.setTraceAsPublic()`**
+### `.updateTrace()` → `.setTraceIO()` + `.setTraceAsPublic()`
 
 The same decomposition applies on all observation wrapper classes (`LangfuseSpan`, `LangfuseGeneration`, etc.).
 
@@ -181,7 +190,7 @@ propagateAttributes(
   evaluators that rely on trace input/output.
 </Callout>
 
-**3. [`@langfuse/langchain`](/integrations/frameworks/langchain) internal changes**
+### [`@langfuse/langchain`](/integrations/frameworks/langchain) internal changes
 
 The `CallbackHandler` now uses `propagateAttributes()` for trace-level attributes. This affects users who:
 
@@ -189,11 +198,11 @@ The `CallbackHandler` now uses `propagateAttributes()` for trace-level attribute
 - Depend on the internal span-creation behavior
 - Rely on `traceMetadata` accepting non-string values — non-string values are now serialized via `JSON.stringify` before being passed to `propagateAttributes`, which requires `Record<string, string>`
 
-**4. [`@langfuse/openai`](/integrations/model-providers/openai-py) internal changes**
+### [`@langfuse/openai`](/integrations/model-providers/openai-py) internal changes
 
 The `traceMethod` wrapper now wraps the traced call in `propagateAttributes()` to set `userId`, `sessionId`, `tags`, and `traceName`, instead of calling `.updateTrace()` on the observation. (If you rely on attributes being set on parent observations as well, wrap the entire execution in with `propagateAttributes`).
 
-**5. Removed attributes**
+### Removed attributes
 
 | Removed       | Replacement                                                    |
 | ------------- | -------------------------------------------------------------- |
@@ -203,10 +212,10 @@ The `traceMethod` wrapper now wraps the traced call in `propagateAttributes()` t
 
 ## Migration Checklist
 
-1. Search for `updateActiveTrace` → split into `propagateAttributes()` + `setActiveTraceIO()` (when relying on legacy trace-level LLM-as-a-judge configurations) + `setActiveTraceAsPublic()`
-2. Search for `.updateTrace(` → split into `propagateAttributes()` + `.setTraceIO()` + `.setTraceAsPublic()`
-3. Verify propagated metadata values are `Record<string, string>` with values ≤200 characters
-4. Replace `release`/`environment` attribute usage with env vars (`LANGFUSE_RELEASE`, `LANGFUSE_TRACING_ENVIRONMENT`)
-5. Audit traces/dashboards that depended on non-LLM OpenTelemetry spans: these may stop appearing with the v5 default filter
-6. If needed, set `shouldExportSpan: () => true` on `LangfuseSpanProcessor` to preserve pre-v5 "export all spans" behavior
-7. If you use custom filtering, compose with `isDefaultExportSpan` to keep the default LLM-focused behavior
+1. Audit traces/dashboards that depended on non-LLM OpenTelemetry spans: these may stop appearing with the v5 default filter
+2. If needed, set `shouldExportSpan: () => true` on `LangfuseSpanProcessor` to preserve pre-v5 "export all spans" behavior
+3. If you use custom filtering, compose with `isDefaultExportSpan` to keep the default LLM-focused behavior
+4. Search for `updateActiveTrace` → split into `propagateAttributes()` + `setActiveTraceIO()` (when relying on legacy trace-level LLM-as-a-judge configurations) + `setActiveTraceAsPublic()`
+5. Search for `.updateTrace(` → split into `propagateAttributes()` + `.setTraceIO()` + `.setTraceAsPublic()`
+6. Verify propagated metadata values are `Record<string, string>` with values ≤200 characters
+7. Replace `release`/`environment` attribute usage with env vars (`LANGFUSE_RELEASE`, `LANGFUSE_TRACING_ENVIRONMENT`)
