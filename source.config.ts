@@ -8,18 +8,19 @@ const docsOptions = { remarkPlugins: [remarkGfm] as const };
 // Extended schema for customer story pages — preserves all default fields and
 // adds the custom frontmatter fields used by CustomerCarousel / CustomerIndex.
 const customerFrontmatterSchema = frontmatterSchema.extend({
-  date: z.string().optional(),
-  ogImage: z.string().optional(),
-  tag: z.string().optional(),
-  author: z.string().optional(),
-  customerLogo: z.string().optional(),
-  customerLogoDark: z.string().optional(),
-  customerQuote: z.string().optional(),
-  quoteAuthor: z.string().optional(),
-  quoteRole: z.string().optional(),
-  quoteCompany: z.string().optional(),
-  quoteAuthorImage: z.string().optional(),
-  showInCustomerIndex: z.boolean().optional(),
+  // Use .nullish() so empty YAML values (parsed as null) are accepted too
+  date: z.string().nullish(),
+  ogImage: z.string().nullish(),
+  tag: z.string().nullish(),
+  author: z.string().nullish(),
+  customerLogo: z.string().nullish(),
+  customerLogoDark: z.string().nullish(),
+  customerQuote: z.string().nullish(),
+  quoteAuthor: z.string().nullish(),
+  quoteRole: z.string().nullish(),
+  quoteCompany: z.string().nullish(),
+  quoteAuthorImage: z.string().nullish(),
+  showInCustomerIndex: z.boolean().nullish(),
 });
 
 export const docs = defineDocs({
