@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useConfig } from "nextra-theme-docs";
@@ -323,9 +324,9 @@ export const MainContentWrapper = (props) => {
     <>
       {(versionLabel || shouldShowCopyButton) && (
         <div className="flex flex-wrap gap-2 items-center mt-5">
-          {versionLabel && (
+          {versionLabel != null && (
             <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
-              {versionLabel}
+              {versionLabel as ReactNode}
             </span>
           )}
           {shouldShowCopyButton && <CopyMarkdownButton key={pathname} />}

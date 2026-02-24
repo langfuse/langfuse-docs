@@ -1,8 +1,23 @@
 // source.config.ts
-import { defineDocs, defineConfig } from "fumadocs-mdx/config";
+import { defineDocs, defineConfig, frontmatterSchema } from "fumadocs-mdx/config";
 import remarkGfm from "remark-gfm";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
+import { z } from "zod";
 var docsOptions = { remarkPlugins: [remarkGfm] };
+var customerFrontmatterSchema = frontmatterSchema.extend({
+  date: z.string().optional(),
+  ogImage: z.string().optional(),
+  tag: z.string().optional(),
+  author: z.string().optional(),
+  customerLogo: z.string().optional(),
+  customerLogoDark: z.string().optional(),
+  customerQuote: z.string().optional(),
+  quoteAuthor: z.string().optional(),
+  quoteRole: z.string().optional(),
+  quoteCompany: z.string().optional(),
+  quoteAuthorImage: z.string().optional(),
+  showInCustomerIndex: z.boolean().optional()
+});
 var docs = defineDocs({
   dir: "content/docs",
   docs: docsOptions
@@ -41,7 +56,10 @@ var library = defineDocs({
 });
 var customers = defineDocs({
   dir: "content/customers",
-  docs: docsOptions
+  docs: {
+    remarkPlugins: [remarkGfm],
+    schema: customerFrontmatterSchema
+  }
 });
 var handbook = defineDocs({
   dir: "content/handbook",
