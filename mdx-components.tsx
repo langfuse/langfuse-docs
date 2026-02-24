@@ -7,6 +7,7 @@ import { Video } from "@/components/Video";
 import { LangTabs } from "@/components/LangTabs";
 import { FetchReadme } from "@/components/FetchReadme";
 import { Callout, Tabs, Tab, Cards, Steps, FileTree } from "@/lib/nextra-shim/components";
+import { MdxDetails, MdxSummary } from "@/components/MdxDetails";
 
 const BLOCK_TAGS = new Set([
   "div", "details", "summary", "figure", "pre", "table",
@@ -60,6 +61,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Steps,
     FileTree,
     FetchReadme,
+    details: MdxDetails,
+    summary: MdxSummary,
     ...components,
   };
 }

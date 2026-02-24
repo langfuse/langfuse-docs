@@ -267,6 +267,18 @@
   }
 }
 
+/* Body content area inside <details> — adds horizontal padding so text
+   doesn't run flush against the border. */
+@layer base {
+  details > *:not(summary) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  details > *:last-child:not(summary) {
+    padding-bottom: 0.75rem;
+  }
+}
+
 /* Override the Tailwind v4 auto-generated animation utilities that use
    animation: var(--animate-*).  The nested var() chain (--animate-foo
    contains var(--speed) / var(--duration)) can be silently invalid in
