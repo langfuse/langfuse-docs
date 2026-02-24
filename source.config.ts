@@ -5,6 +5,14 @@ import { z } from "zod";
 
 const docsOptions = { remarkPlugins: [remarkGfm] as const };
 
+// Extended schema for changelog pages — adds date, author, ogImage fields
+// that the Changelog widget reads from frontMatter.
+const changelogFrontmatterSchema = frontmatterSchema.extend({
+  date: z.string().nullish(),
+  author: z.string().nullish(),
+  ogImage: z.string().nullish(),
+});
+
 // Extended schema for customer story pages — preserves all default fields and
 // adds the custom frontmatter fields used by CustomerCarousel / CustomerIndex.
 const customerFrontmatterSchema = frontmatterSchema.extend({
@@ -40,7 +48,10 @@ export const blog = defineDocs({
 
 export const changelog = defineDocs({
   dir: "content/changelog",
-  docs: docsOptions,
+  docs: {
+    remarkPlugins: [remarkGfm],
+    schema: changelogFrontmatterSchema,
+  },
 });
 
 export const guides = defineDocs({

@@ -4,19 +4,25 @@ import remarkGfm from "remark-gfm";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 var docsOptions = { remarkPlugins: [remarkGfm] };
+var changelogFrontmatterSchema = frontmatterSchema.extend({
+  date: z.string().nullish(),
+  author: z.string().nullish(),
+  ogImage: z.string().nullish()
+});
 var customerFrontmatterSchema = frontmatterSchema.extend({
-  date: z.string().optional(),
-  ogImage: z.string().optional(),
-  tag: z.string().optional(),
-  author: z.string().optional(),
-  customerLogo: z.string().optional(),
-  customerLogoDark: z.string().optional(),
-  customerQuote: z.string().optional(),
-  quoteAuthor: z.string().optional(),
-  quoteRole: z.string().optional(),
-  quoteCompany: z.string().optional(),
-  quoteAuthorImage: z.string().optional(),
-  showInCustomerIndex: z.boolean().optional()
+  // Use .nullish() so empty YAML values (parsed as null) are accepted too
+  date: z.string().nullish(),
+  ogImage: z.string().nullish(),
+  tag: z.string().nullish(),
+  author: z.string().nullish(),
+  customerLogo: z.string().nullish(),
+  customerLogoDark: z.string().nullish(),
+  customerQuote: z.string().nullish(),
+  quoteAuthor: z.string().nullish(),
+  quoteRole: z.string().nullish(),
+  quoteCompany: z.string().nullish(),
+  quoteAuthorImage: z.string().nullish(),
+  showInCustomerIndex: z.boolean().nullish()
 });
 var docs = defineDocs({
   dir: "content/docs",

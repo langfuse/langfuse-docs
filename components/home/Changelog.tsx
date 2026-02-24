@@ -1,13 +1,12 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Page } from "nextra";
-import { getPagesUnderRoute } from "nextra/context";
-
-const changelogItems = getPagesUnderRoute("/changelog") as Array<
-  Page & { frontMatter: any }
->;
+import { getPagesForRoute } from "@/lib/source";
 
 export default function Changelog({ className }: { className?: string }) {
+  const changelogItems = getPagesForRoute("/changelog") as Array<{
+    route: string;
+    frontMatter: { title?: string; date?: string; author?: string };
+  }>;
   const changelog = changelogItems
     .filter(
       (page) => page.route && page.frontMatter.title && page.frontMatter.date

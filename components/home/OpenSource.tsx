@@ -73,7 +73,7 @@ function ScrollingDiscussions({
         }
       >
         {/* Duplicate discussions to create seamless loop */}
-        {[...discussions].map((discussion, index) => (
+        {[...discussions, ...discussions].map((discussion, index) => (
           <DiscussionItem
             key={`${discussion.number}-${index}`}
             discussion={discussion}
