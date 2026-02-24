@@ -177,6 +177,8 @@ You can also pass the credentials [directly to the constructor](#client-setup).
 
 The Python SDK automatically sets up OpenTelemetry when [initializing the client](#client-setup).
 
+By default, the SDK exports Langfuse + GenAI/LLM spans. To customize this, use `should_export_span` (recommended). `blocked_instrumentation_scopes` still works but is deprecated and planned for removal in a future version.
+
 </Tab>
 <Tab title="JS/TS SDK">
 
@@ -193,7 +195,9 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-For more options to configure the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) such as masking, filtering, and more, see [the advanced usage](/docs/observability/sdk/typescript/advanced-usage).
+By default, the processor exports Langfuse + GenAI/LLM spans. To customize this, use `shouldExportSpan`.
+
+For more options to configure the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) such as masking, filtering, and more, see [advanced features](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
 
 You can learn more about setting up OpenTelemetry in your JS environment [here](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/).
 

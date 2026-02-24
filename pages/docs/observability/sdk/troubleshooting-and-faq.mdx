@@ -18,7 +18,7 @@ If you cannot find your issue below, try [Ask AI](/docs/ask-ai), open a [GitHub 
 - See [Missing traces](/faq/all/missing-traces) for common reasons and solutions.
 - Confirm `tracing_enabled` is `True` and `sample_rate` is not `0.0`.
 - Call `langfuse.shutdown()` (or `langfuse.flush()` in short-lived jobs) so queued data is exported.
-- Enable debug logging (`debug=True` or `LANGFUSE_DEBUG="True"`) to inspect exporter output.
+- Enable debug logging (`debug=True` or `LANGFUSE_DEBUG="True"` on Python, `LANGFUSE_DEBUG="true"` or `LANGFUSE_LOG_LEVEL="DEBUG"` on JS/TS) to inspect exporter output.
 
 ## Incorrect nesting or missing spans
 
@@ -39,7 +39,6 @@ If you cannot find your issue below, try [Ask AI](/docs/ask-ai), open a [GitHub 
 ## Missing traces with `@vercel/otel`
 
 - Use the manual OpenTelemetry setup via `NodeSDK` and register the `LangfuseSpanProcessor`. The `@vercel/otel` helper does not yet support the OpenTelemetry JS SDK v2 that Langfuse depends on. See the [TypeScript instrumentation docs](/docs/observability/sdk/instrumentation#framework-third-party-telemetry) for a full example.
-
 
 
 
