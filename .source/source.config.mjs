@@ -4,14 +4,18 @@ import remarkGfm from "remark-gfm";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 var docsOptions = { remarkPlugins: [remarkGfm] };
+var yamlDateField = z.union([
+  z.string(),
+  z.date().transform((d) => d.toISOString().split("T")[0])
+]).nullish();
 var changelogFrontmatterSchema = frontmatterSchema.extend({
-  date: z.string().nullish(),
+  date: yamlDateField,
   author: z.string().nullish(),
   ogImage: z.string().nullish()
 });
 var customerFrontmatterSchema = frontmatterSchema.extend({
   // Use .nullish() so empty YAML values (parsed as null) are accepted too
-  date: z.string().nullish(),
+  date: yamlDateField,
   ogImage: z.string().nullish(),
   tag: z.string().nullish(),
   author: z.string().nullish(),
@@ -38,7 +42,10 @@ var blog = defineDocs({
 });
 var changelog = defineDocs({
   dir: "content/changelog",
-  docs: docsOptions
+  docs: {
+    remarkPlugins: [remarkGfm],
+    schema: changelogFrontmatterSchema
+  }
 });
 var guides = defineDocs({
   dir: "content/guides",

@@ -15,7 +15,20 @@ const BLOCK_TAGS = new Set([
 ]);
 
 function MdxParagraph({ children, ...props }: React.HTMLAttributes<HTMLElement>) {
-  const hasBlock = React.Children.toArray(children).some(
+  const childrenArray = React.Children.toArray(children);
+
+  // If children contain MdxSummary, render without any wrapping element.
+  // <summary> MUST be a direct child of <details> for the browser to recognize it
+  // as the disclosure widget. React does not auto-correct invalid DOM nesting
+  // the way the HTML parser does, so a <p> or <div> wrapping <summary> keeps it trapped.
+  const hasSummary = childrenArray.some(
+    (child) => React.isValidElement(child) && child.type === MdxSummary
+  );
+  if (hasSummary) {
+    return <>{children}</>;
+  }
+
+  const hasBlock = childrenArray.some(
     (child) =>
       React.isValidElement(child) &&
       typeof child.type === "string" &&
