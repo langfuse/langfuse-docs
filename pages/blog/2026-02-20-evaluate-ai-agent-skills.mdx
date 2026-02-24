@@ -27,7 +27,7 @@ We built an [AI agent skill for Langfuse](https://github.com/langfuse/skills/tre
 
 ## The Evaluation Setup
 
-You can evaluate a skill systematically by storing a list of user prompts as a [Dataset](/docs/evaluation/experiments/datasets)  in Langfuse, [run an experiment](/docs/evaluation/experiments/experiments-via-sdk) by spinning up coding agents with these prompts, and [tracing](/docs/observability/core-concepts#traces) the agent's behavior. Based on what you see in these traces, you can improve the skill and measure the quality by running the pipeline again. 
+You can evaluate a skill systematically by storing a list of user prompts as a [Dataset](/docs/evaluation/experiments/datasets)  in Langfuse, [run an experiment](/docs/evaluation/experiments/experiments-via-sdk) by spinning up coding agents with these prompts, and [tracing](/docs/observability/core-concepts#traces) the agent's behavior. Based the results, you can improve the skill and measure the quality by running the pipeline again. 
 
 <Frame fullWidth>
   ![Evaluation pipeline](/images/blog/2026-02-20-evaluate-ai-agent-skills/evaluation-pipeline.png)
@@ -45,20 +45,29 @@ The expected output is a list of things the LLM as a judge should verify.
 
 ### Experiment setup
 
-We used Claude Agent SDK to run the agents. You can easily integrate Langfuse with Claude Agent SDK by following [this integration guide](/integrations/frameworks/claude-agent-sdk). For a full example of the setup, you can look at [this example repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/evaluating-ai-agent-skills).
+We used Claude Agent SDK to run the agents. You can easily integrate Langfuse with Claude Agent SDK by following [this integration guide](/integrations/frameworks/claude-agent-sdk).
+
+<Callout type="info">
+  Want to follow along? The full code for this evaluation setup is available in [this example repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/evaluating-ai-agent-skills).
+</Callout>
 
 #### Repository structure
 
 The [repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/evaluating-ai-agent-skills) consists of the script to run the experiment, and repositories to spin up the agents. The skill is intalled globally on the Claude account.
 
-```bash
-run-experiment-auto.py # script to run the experiment
-.env # environment variables, including Anthropic API key and Langfuse credentials for tracing the agents
-agent-sandbox-repos # repositories to spin up the agents
-  |--default-hello-world
-  |--langchain-chain
-  |--...
-```
+import { FileTree } from "nextra/components";
+
+<div className="[&_.nextra-filetree>ul]:block [&_.nextra-filetree>ul]:w-full">
+  <FileTree>
+    <FileTree.File name="run-experiment-auto.py" />
+    <FileTree.File name=".env" />
+    <FileTree.Folder name="agent-sandbox-repos" defaultOpen>
+      <FileTree.Folder name="default-hello-world" />
+      <FileTree.Folder name="langchain-chain" />
+      <FileTree.Folder name="..." />
+    </FileTree.Folder>
+  </FileTree>
+</div>
 
 #### Spinning up an agent
 
