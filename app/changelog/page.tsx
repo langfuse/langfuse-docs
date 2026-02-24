@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ChangelogIndex } from "@/components/changelog/ChangelogIndex";
 import type { ChangelogPageItem } from "@/components/changelog/ChangelogIndex";
 import { Header } from "@/components/Header";
@@ -58,7 +59,9 @@ export default function ChangelogIndexPage() {
           <ProductUpdateSignup source="changelog" />
         </div>
       </div>
-      <ChangelogIndex pages={pages} />
+      <Suspense fallback={<div className="min-h-[400px] animate-pulse rounded-md bg-muted/50" />}>
+        <ChangelogIndex pages={pages} />
+      </Suspense>
     </div>
   );
 }
