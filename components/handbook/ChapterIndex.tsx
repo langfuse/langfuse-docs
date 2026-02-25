@@ -1,6 +1,5 @@
 import { getPagesUnderRoute } from "nextra/context";
 import { type Page } from "nextra";
-import { Cards } from "nextra/components";
 import { CHAPTER_ORDER } from "@/lib/handbook-meta";
 
 export const ChapterIndex = () => {
@@ -38,22 +37,21 @@ export const ChapterIndex = () => {
     });
 
   return (
-    <div className="my-6">
-      <Cards num={3}>
-        {chapterPages.map((page, index) => (
-          <Cards.Card
-            href={page.route}
-            key={page.route}
-            title={page.meta?.title || page.frontMatter?.title || page.name}
-            icon={
-              <span className="text-base font-medium font-mono">
-                {index + 1}
-              </span>
-            }
-            arrow
-          />
-        ))}
-      </Cards>
+    <div className="my-6 flex flex-col gap-2 not-prose">
+      {chapterPages.map((page, index) => (
+        <a
+          key={page.route}
+          href={page.route}
+          className="flex items-center gap-3 rounded-lg border p-4 hover:border-primary"
+        >
+          <span className="text-base font-medium font-mono shrink-0 text-muted-foreground">
+            {index + 1}
+          </span>
+          <span className="font-semibold">
+            {page.meta?.title || page.frontMatter?.title || page.name}
+          </span>
+        </a>
+      ))}
     </div>
   );
 };
