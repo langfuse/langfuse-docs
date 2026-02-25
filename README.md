@@ -1,6 +1,7 @@
 ![GitHub Banner](https://github.com/langfuse/langfuse-docs/assets/2834609/e403ad73-73fa-43f0-9925-292b05ce58de)
 
 # Langfuse Docs
+<!-- test comment for tracing integration -->
 
 Repo for [langfuse.com](https://langfuse.com). Based on [Nextra](https://nextra.site/).
 
@@ -73,3 +74,5 @@ All three user-facing features (Copy, PDF, MCP) depend on the same foundation of
 ## Bundle analysis
 
 Run `pnpm run analyze` to analyze the bundle size of the production build using `@next/bundle-analyzer`.
+
+<!-- test: langfuse tracing integration -->
