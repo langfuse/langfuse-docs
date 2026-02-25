@@ -51,7 +51,7 @@ We used Claude Agent SDK to run the agents. You can easily integrate Langfuse wi
   Want to follow along? The full code for this evaluation setup is available in [this example repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/evaluating-ai-agent-skills).
 </Callout>
 
-#### Repository structure
+**Repository structure**
 
 The [repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/evaluating-ai-agent-skills) consists of the script to run the experiment, and repositories to spin up the agents. The skill is intalled globally on the Claude account.
 
@@ -69,11 +69,12 @@ import { FileTree } from "nextra/components";
   </FileTree>
 </div>
 
-#### Spinning up an agent
+**Spinning up an agent**
 
 Each experiment run spins up an agent inside a test repository. A couple of things to note: 
 
-##### Injecting context
+**Injecting context**
+
 The **Langfuse credentials** are injected as environment variables so the agent can interact with the API and the CLI out of the box.
 
 The **Langfuse skill** is installed globally on the Claude account, so we need to set `setting_sources=["user", "project"]` in ClaudeAgentOptions to give the agent access to the global skill.
@@ -91,10 +92,12 @@ options = ClaudeAgentOptions(
     )
 ```
 
-##### Resetting the repository
+**Resetting the repository**
+
 After each run, the repository is reset to its original state so the next run starts from a clean slate. This is especially important for the instrumentation dataset, where the agent modifies application code: you want every run to start from the same baseline.
 
-##### Tracing the agent
+**Tracing the agent**
+
 The agent's behavior is [traced to Langfuse](/integrations/frameworks/claude-agent-sdk), which gives us a full record of every tool call, CLI command, and file edit.
 
 ## The Langfuse Skill
