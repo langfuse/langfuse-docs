@@ -39,7 +39,7 @@ export const ChapterIndex = () => {
 
   return (
     <div className="my-6">
-      <Cards num={1}>
+      <Cards num={3}>
         {chapterPages.map((page, index) => (
           <Cards.Card
             href={page.route}
