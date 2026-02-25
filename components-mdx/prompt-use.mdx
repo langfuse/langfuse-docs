@@ -2,7 +2,7 @@ import { FileCode } from "lucide-react";
 
 At runtime, you can fetch the prompt from Langfuse. We recommend using the `production` label to fetch the version intentionally chosen for production. Learn more about control (versions/labels) [here](/docs/prompt-management/features/prompt-version-control).
 
-<LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS)", "Vercel AI SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "API", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS)", "Vercel AI SDK"]}>
 <Tab>
 
 ```python
@@ -78,6 +78,32 @@ const compiledChatPrompt = chatPrompt.compile({
 });
 // -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
 ```
+
+</Tab>
+
+<Tab>
+
+Use the [Public API](https://api.reference.langfuse.com/#tag/prompts/get/api/public/v2/prompts/{promptName}) to fetch a prompt at runtime. By default, the prompt labeled `production` is returned.
+
+```bash
+curl "https://cloud.langfuse.com/api/public/v2/prompts/movie-critic?label=production" \
+  -u "your-public-key:your-secret-key"
+```
+
+For fetching a specific version instead of a label:
+
+```bash
+curl "https://cloud.langfuse.com/api/public/v2/prompts/movie-critic?version=1" \
+  -u "your-public-key:your-secret-key"
+```
+
+<Cards num={1}>
+  <Card
+    title="API Reference"
+    href="https://api.reference.langfuse.com/#tag/prompts/get/api/public/v2/prompts/{promptName}"
+    arrow
+  />
+</Cards>
 
 </Tab>
 
