@@ -1649,12 +1649,13 @@ export function PricingTable({
             className="fixed right-0 left-0 z-50 border-b shadow-md bg-muted"
             style={{ top: "64px" }}
           >
-            <div className="px-6 mx-auto max-w-7xl">
-              <div className="overflow-hidden pl-[16px]">
+            <div className="flex justify-center items-center px-6 mx-auto max-w-7xl">
+              <div className="overflow-hidden">
                 <table
-                  className="w-full"
+                  className="w-full bg-transparent border-none"
                   style={{
                     width: headerWidth,
+                    margin: 0,
                   }}
                 >
                   <thead>
@@ -1663,7 +1664,7 @@ export function PricingTable({
                         <>
                           <th
                             style={{ width: columnWidths[0] }}
-                            className="font-medium text-left"
+                            className="font-medium text-left bg-transparent border-none"
                             scope="col"
                           ></th>
                           {selectedTiers.map((tier, index) => (
@@ -1672,7 +1673,7 @@ export function PricingTable({
                               style={{
                                 width: columnWidths[index + 1],
                               }}
-                              className="py-2 text-lg font-semibold text-center text-foreground"
+                              className="py-2 text-lg font-semibold text-center bg-transparent border-none text-foreground"
                               scope="col"
                             >
                               {tier.name}
@@ -1685,8 +1686,9 @@ export function PricingTable({
                 </table>
               </div>
             </div>
-          </div>
-        )}
+          </div >
+        )
+        }
 
         <div className="relative">
           <Table
@@ -1752,7 +1754,7 @@ export function PricingTable({
             </TableBody>
           </Table>
         </div>
-      </section>
+      </section >
     </>
   );
 }
