@@ -135,7 +135,7 @@ export function ModelList() {
           names` section in the LLM API Key creation form.
         </li>
         <li>
-          <strong>Google AI Studio:</strong> {vertexAIModels.join(", ")}
+          <strong>Google AI Studio:</strong> {googleAIStudioModels.join(", ")}
         </li>
         <li>
           <strong>Amazon Bedrock:</strong> All Amazon Bedrock models are
@@ -173,14 +173,18 @@ Please see your providers API reference for what additional fields are supported
 
 - [Anthropic Messages API Reference](https://docs.anthropic.com/en/api/messages)
 - [OpenAI Chat Completions API Reference](https://platform.openai.com/docs/api-reference/chat/create)
+- [Google Gemini API Reference](https://ai.google.dev/api)
+- [Google Vertex AI Gemini API Reference](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference)
 
 This feature is currently available for the adapters for:
 
 - Anthropic
 - OpenAI
+- Google AI Studio
+- Google Vertex AI
 - AWS (Amazon Bedrock)
 
-Example for forcing reasoning effort `minimal` on a OpenAI gpt-5 invocation:
+Example for forcing reasoning effort `minimal` on an OpenAI gpt-5 invocation:
 
 import { Frame } from "@/components/Frame";
 import Image from "next/image";
@@ -193,6 +197,17 @@ import Image from "next/image";
     height="480"
   />
 </Frame>
+
+Example provider options for Google models (Google AI Studio and Google Vertex AI) to control thinking:
+
+```json
+{
+  "thinkingLevel": "MEDIUM",
+  "thinkingBudget": 2048
+}
+```
+
+`thinkingLevel` controls the reasoning depth, and `thinkingBudget` sets the token budget for thinking. These options are only valid for Google models that support thinking.
 
 ### Connecting via a gateway
 
