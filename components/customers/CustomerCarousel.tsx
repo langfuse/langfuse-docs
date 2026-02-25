@@ -162,7 +162,7 @@ export const CustomerCarousel = ({
               >
                 <Link
                   href={story.route}
-                  className={`group block bg-card border rounded-lg p-4 md:p-8 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-500 cursor-pointer flex flex-col h-full min-h-[250px] md:min-h-[300px] ${index === current - 1
+                  className={`no-underline group block bg-card border rounded-lg p-4 md:p-8 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-500 cursor-pointer flex flex-col h-full min-h-[250px] md:min-h-[300px] ${index === current - 1
                       ? "opacity-100"
                       : isInView[index]
                         ? "opacity-20 md:opacity-50"
@@ -228,16 +228,15 @@ export const CustomerCarousel = ({
                         <div className="flex gap-3 items-center">
                           {/* Profile Picture */}
                           {story.frontMatter.quoteAuthorImage && (
-                            <div className="overflow-hidden flex-shrink-0 w-10 h-10 rounded-full">
+                            <div className="overflow-hidden flex-shrink-0 w-12 h-12 rounded-full border border-border">
                               <Image
                                 src={story.frontMatter.quoteAuthorImage}
                                 alt={`${story.frontMatter.quoteAuthor} profile picture`}
-                                width={40}
-                                height={40}
+                                width={48}
+                                height={48}
                                 className="object-cover w-full h-full"
-                                quality={100}
-                                priority={false}
-                                unoptimized={false}
+                                quality={90}
+                                unoptimized
                               />
                             </div>
                           )}
