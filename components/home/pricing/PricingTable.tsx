@@ -1650,7 +1650,7 @@ export function PricingTable({
             style={{ top: "64px" }}
           >
             <div className="flex justify-center items-center px-6 mx-auto max-w-7xl">
-              <div className="overflow-hidden">
+              <div className="overflow-hidden pl-[16px]">
                 <table
                   className="w-full bg-transparent border-none"
                   style={{
