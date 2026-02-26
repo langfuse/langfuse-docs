@@ -1,18 +1,18 @@
 ---
-title: Using Langfuse to Evaluate AI Agent Skills
-date: 2026/02/25
+title: Evaluating AI Agent Skills
+date: 2026/02/26
 description: How we used Langfuse datasets, tracing, and the cloud agent SDK to iteratively evaluate and improve our AI agent skill.
 tag: engineering
 author: Lotte
-ogImage: /images/blog/2026-02-25-evaluate-ai-agent-skills/og.jpg
+ogImage: /images/blog/2026-02-26-evaluate-ai-agent-skills/og.jpg
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="Using Langfuse to Evaluate AI Agent Skills"
+  title="Evaluating AI Agent Skills"
   description="How we used Langfuse datasets, tracing, and the cloud agent SDK to iteratively evaluate and improve our AI agent skill."
-  date="February 25, 2026"
+  date="February 26, 2026"
   authors={["lotteverheyden"]}
 />
 
@@ -20,18 +20,20 @@ import { Callout } from "nextra/components";
 import { Frame } from "@/components/Frame";
 
 <Frame fullWidth>
-  ![Using Langfuse to Evaluate AI Agent Skills](/images/blog/2026-02-25-evaluate-ai-agent-skills/og.jpg)
+  ![Using Langfuse to Evaluate AI Agent Skills](/images/blog/2026-02-26-evaluate-ai-agent-skills/og.jpg)
 </Frame>
 
-We built an [AI agent skill for Langfuse](https://github.com/langfuse/skills/tree/main/skills/langfuse) so agents can use Langfuse: access the API via the CLI, look up documentation, follow observability best practices. But **how do you know the agent actually uses the skill correctly?** And when you change the skill, how do you know it got better and not worse? We used Langfuse to find out. 
+We built an [AI agent skill for Langfuse](https://github.com/langfuse/skills/tree/main/skills/langfuse) so agents can use Langfuse: access the API via the CLI, look up documentation, follow observability best practices. But **how do you know the agent actually uses the skill correctly?** And when you change the skill, how do you know it got better and not worse? We used Langfuse to find out.
 
 ## The Evaluation Setup
 
 You can evaluate a skill systematically by storing a list of user prompts as a [Dataset](/docs/evaluation/experiments/datasets)  in Langfuse, [run an experiment](/docs/evaluation/experiments/experiments-via-sdk) by spinning up coding agents with these prompts, and [tracing](/docs/observability/overview) the agent's behavior. Based the results, you can improve the skill and measure the quality by running the pipeline again. 
 
 <Frame fullWidth>
-  ![Evaluation pipeline](/images/blog/2026-02-25-evaluate-ai-agent-skills/evaluation-pipeline.png)
+  ![Evaluation pipeline](/images/blog/2026-02-26-evaluate-ai-agent-skills/evaluation-pipeline.png)
 </Frame>
+
+This approach treats skill evaluation like prompt evaluation: define inputs, capture behavior, score the output, and iterate. OpenAI describes a [similar loop for Codex skills](https://developers.openai.com/blog/eval-skills/), using JSONL traces and deterministic graders. The core idea is the same: make skill quality measurable so you can improve it systematically.
 
 ### The dataset
 
@@ -111,7 +113,7 @@ At the time of writing, we also have separate skills for more specific use cases
 Before knowing what to improve, we need to look at the traces of the first dataset run. This is what a trace from a Claude Agent SDK run looks like:
 
 <Frame fullWidth>
-  ![Trace example](/images/blog/2026-02-25-evaluate-ai-agent-skills/trace-example.png)
+  ![Trace example](/images/blog/2026-02-26-evaluate-ai-agent-skills/trace-example.png)
 </Frame>
 
 You can immediately see that the skill was invoked relatively early in the trace, which is a good sign. Going deeper into each step reveals more about the agent's behavior. A couple of things immediately stand out:
@@ -171,7 +173,7 @@ How do you evaluate whether the outcome of a complex task is correct? We did the
 This requires a slightly different evaluation setup. Each Claude Agent SDK run starts with the same prompt, but in a different subfolder, containing a small existing application. One folder might have a basic OpenAI chat app, another a LangChain RAG pipeline. The dataset input and expected output are adjusted accordingly.  
 
 <Frame fullWidth>
-  ![Observability dataset](/images/blog/2026-02-25-evaluate-ai-agent-skills/observability-dataset.png)
+  ![Observability dataset](/images/blog/2026-02-26-evaluate-ai-agent-skills/observability-dataset.png)
 </Frame>
 
 This is where [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) becomes useful. Checking whether instrumentation is correct can't be done by string match. An LLM judge can compare the agent's changes against the expected output and score whether the instrumentation is correct.
