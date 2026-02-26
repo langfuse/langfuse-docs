@@ -78,19 +78,19 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="chatbot">
+        <TabsContent value="chatbot" forceMount className={activeTab !== "chatbot" ? "hidden" : undefined}>
           <Chat />
         </TabsContent>
 
-        <TabsContent value="image">
+        <TabsContent value="image" forceMount className={activeTab !== "image" ? "hidden" : undefined}>
           <ImageGenerator />
         </TabsContent>
 
-        <TabsContent value="sentiment">
+        <TabsContent value="sentiment" forceMount className={activeTab !== "sentiment" ? "hidden" : undefined}>
           <SentimentClassifier />
         </TabsContent>
 
-        <TabsContent value="voice">
+        <TabsContent value="voice" forceMount className={activeTab !== "voice" ? "hidden" : undefined}>
           <VoiceAgent />
         </TabsContent>
       </Tabs>
