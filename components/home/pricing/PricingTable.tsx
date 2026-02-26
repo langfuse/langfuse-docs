@@ -1649,7 +1649,7 @@ export function PricingTable({
             className="fixed right-0 left-0 z-50 border-b shadow-md bg-muted"
             style={{ top: "64px" }}
           >
-            <div className="px-6 mx-auto max-w-7xl">
+            <div className="flex justify-center items-center px-6 mx-auto max-w-7xl">
               <div className="overflow-hidden pl-[16px]">
                 <table
                   className="w-full"
