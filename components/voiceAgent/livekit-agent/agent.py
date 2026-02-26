@@ -11,12 +11,12 @@ from livekit.agents import (
     AgentServer,
     AgentSession,
     JobContext,
-    RunContext,
     cli,
     inference,
+    mcp,
     metrics,
 )
-from livekit.agents.llm import FallbackAdapter as FallbackLLMAdapter, function_tool
+from livekit.agents.llm import FallbackAdapter as FallbackLLMAdapter
 from livekit.agents.stt import FallbackAdapter as FallbackSTTAdapter
 from livekit.agents.telemetry import set_tracer_provider
 from livekit.agents.tts import FallbackAdapter as FallbackTTSAdapter
@@ -33,52 +33,70 @@ load_dotenv()
 # inside the entrypoint before the `AgentSession.start()`.
 
 
+def _make_langfuse_exporter(host: str, public_key: str, secret_key: str):
+    """Create an OTLPSpanExporter configured for a single Langfuse instance."""
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+    auth = base64.b64encode(f"{public_key}:{secret_key}".encode()).decode()
+    return OTLPSpanExporter(
+        endpoint=f"{host.rstrip('/')}/api/public/otel",
+        headers={"Authorization": f"Basic {auth}"},
+    )
+
+
 def setup_langfuse(
     metadata: dict[str, AttributeValue] | None = None,
-    *,
-    host: str | None = None,
-    public_key: str | None = None,
-    secret_key: str | None = None,
 ) -> TracerProvider:
-    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.sdk.trace import SpanProcessor
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-    public_key = public_key or os.getenv("LANGFUSE_PUBLIC_KEY")
-    secret_key = secret_key or os.getenv("LANGFUSE_SECRET_KEY")
-    host = host or os.getenv("LANGFUSE_HOST") or os.getenv("LANGFUSE_BASE_URL")
+    eu_host = os.getenv("NEXT_PUBLIC_EU_LANGFUSE_BASE_URL")
+    eu_public_key = os.getenv("NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY")
+    eu_secret_key = os.getenv("EU_LANGFUSE_SECRET_KEY")
 
-    if not public_key or not secret_key or not host:
-        raise ValueError(
-            "LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, and LANGFUSE_HOST (or LANGFUSE_BASE_URL) must be set"
-        )
+    us_host = os.getenv("NEXT_PUBLIC_US_LANGFUSE_BASE_URL")
+    us_public_key = os.getenv("NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY")
+    us_secret_key = os.getenv("US_LANGFUSE_SECRET_KEY")
 
-    langfuse_auth = base64.b64encode(f"{public_key}:{secret_key}".encode()).decode()
-    os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = f"{host.rstrip('/')}/api/public/otel"
-    os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {langfuse_auth}"
+    if not all([eu_host, eu_public_key, eu_secret_key]):
+        raise ValueError("EU Langfuse env vars must be set: NEXT_PUBLIC_EU_LANGFUSE_BASE_URL, NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY, EU_LANGFUSE_SECRET_KEY")
+    if not all([us_host, us_public_key, us_secret_key]):
+        raise ValueError("US Langfuse env vars must be set: NEXT_PUBLIC_US_LANGFUSE_BASE_URL, NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY, US_LANGFUSE_SECRET_KEY")
+
+    class LangfuseAttributeSpanProcessor(SpanProcessor):
+        """Adds Langfuse trace attributes to every span."""
+
+        def on_start(self, span, parent_context=None):
+            span.set_attribute("langfuse.trace.name", "livekit-voice-agent")
+            span.set_attribute("langfuse.trace.tags", ["voice-agent"])
+
+        def on_end(self, span):
+            pass
 
     trace_provider = TracerProvider()
-    trace_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+    trace_provider.add_span_processor(LangfuseAttributeSpanProcessor())
+    trace_provider.add_span_processor(
+        BatchSpanProcessor(_make_langfuse_exporter(eu_host, eu_public_key, eu_secret_key))
+    )
+    trace_provider.add_span_processor(
+        BatchSpanProcessor(_make_langfuse_exporter(us_host, us_public_key, us_secret_key))
+    )
     set_tracer_provider(trace_provider, metadata=metadata)
     return trace_provider
 
 
-@function_tool
-async def lookup_weather(context: RunContext, location: str) -> str:
-    """Called when the user asks for weather related information.
-
-    Args:
-        location: The location they are asking for
-    """
-
-    logger.info(f"Looking up weather for {location}")
-
-    return "sunny with a temperature of 70 degrees."
+LANGFUSE_DOCS_MCP = mcp.MCPServerHTTP(url="https://langfuse.com/api/mcp")
 
 
 class Kelly(Agent):
     def __init__(self) -> None:
         super().__init__(
-            instructions="Your name is Kelly.",
+            instructions=(
+                "Your name is Kelly. You are a friendly voice assistant for Langfuse, "
+                "an open-source LLM observability platform. Keep responses brief and conversational. "
+                "When the user asks about Langfuse features, integrations, SDKs, pricing, or usage, "
+                "use the Langfuse docs tools to find accurate information before answering."
+            ),
             llm=FallbackLLMAdapter(
                 llm=[
                     inference.LLM("openai/gpt-4.1-mini"),
@@ -98,38 +116,32 @@ class Kelly(Agent):
                 ]
             ),
             turn_detection=MultilingualModel(),
-            tools=[lookup_weather],
         )
 
     async def on_enter(self):
         logger.info("Kelly is entering the session")
-        self.session.generate_reply()
-
-    @function_tool
-    async def transfer_to_alloy(self) -> Agent:
-        """Transfer the call to Alloy."""
-        logger.info("Transferring the call to Alloy")
-        return Alloy()
+        self.session.generate_reply(
+            instructions="Greet the user and let them know you can answer questions about Langfuse using the documentation. Keep it short and friendly."
+        )
 
 
 class Alloy(Agent):
     def __init__(self) -> None:
         super().__init__(
-            instructions="Your name is Alloy.",
+            instructions=(
+                "Your name is Alloy. You are a friendly voice assistant for Langfuse, "
+                "an open-source LLM observability platform. Keep responses brief and conversational. "
+                "When the user asks about Langfuse features, integrations, SDKs, pricing, or usage, "
+                "use the Langfuse docs tools to find accurate information before answering."
+            ),
             llm=openai.realtime.RealtimeModel(voice="alloy"),
-            tools=[lookup_weather],
         )
 
     async def on_enter(self):
         logger.info("Alloy is entering the session")
-        self.session.generate_reply()
-
-    @function_tool
-    async def transfer_to_kelly(self) -> Agent:
-        """Transfer the call to Kelly."""
-
-        logger.info("Transferring the call to Kelly")
-        return Kelly()
+        self.session.generate_reply(
+            instructions="Greet the user and let them know you can answer questions about Langfuse using the documentation. Keep it short and friendly."
+        )
 
 
 server = AgentServer()
@@ -151,7 +163,10 @@ async def entrypoint(ctx: JobContext):
 
     ctx.add_shutdown_callback(flush_trace)
 
-    session = AgentSession(vad=silero.VAD.load())
+    session = AgentSession(
+        vad=silero.VAD.load(),
+        mcp_servers=[LANGFUSE_DOCS_MCP],
+    )
 
     @session.on("metrics_collected")
     def _on_metrics_collected(ev: MetricsCollectedEvent):
