@@ -1,10 +1,14 @@
+import asyncio
 import base64
+import json
 import os
+import urllib.parse
+import urllib.request
 
 from livekit import agents
-from livekit.agents import AgentServer, AgentSession, Agent
+from livekit.agents import AgentServer, AgentSession, Agent, RunContext, function_tool
 from livekit.agents.telemetry import set_tracer_provider
-from livekit.plugins import openai, silero
+from livekit.plugins import openai
 
 
 def setup_langfuse():
@@ -43,8 +47,54 @@ def setup_langfuse():
 class Assistant(Agent):
     def __init__(self) -> None:
         super().__init__(
-            instructions="You are a friendly voice assistant for Langfuse, an open-source LLM observability platform. Keep responses brief and conversational.",
+            instructions=(
+                "You are a friendly voice assistant for Langfuse, an open-source LLM observability platform. "
+                "Keep responses brief and conversational. "
+                "When the user asks about Langfuse features, integrations, SDKs, pricing, or usage, "
+                "use the search_langfuse_docs tool to find accurate information before answering."
+            ),
         )
+
+    @function_tool()
+    async def search_langfuse_docs(
+        self,
+        context: RunContext,
+        query: str,
+    ) -> str:
+        """Search the Langfuse documentation to answer questions about Langfuse features, integrations, SDKs, and usage.
+
+        Args:
+            query: The search query about Langfuse
+        """
+        encoded_query = urllib.parse.quote(query)
+        url = f"https://langfuse.com/api/search-docs?query={encoded_query}"
+
+        def _fetch():
+            req = urllib.request.Request(url, headers={"Accept": "application/json"})
+            with urllib.request.urlopen(req, timeout=10) as response:
+                return response.read().decode()
+
+        try:
+            raw = await asyncio.to_thread(_fetch)
+            data = json.loads(raw)
+            answer = data.get("answer", "")
+            if isinstance(answer, str):
+                try:
+                    parsed = json.loads(answer)
+                    chunks = []
+                    for item in parsed.get("content", []):
+                        source = item.get("source", {})
+                        for block in source.get("content", []):
+                            if block.get("type") == "text":
+                                chunks.append(block["text"][:500])
+                        if len(chunks) >= 3:
+                            break
+                    return "\n\n".join(chunks) if chunks else answer[:2000]
+                except (json.JSONDecodeError, TypeError):
+                    return answer[:2000]
+            return str(answer)[:2000]
+        except Exception as e:
+            return f"Could not search documentation: {e}"
 
 
 server = AgentServer()
@@ -55,10 +105,7 @@ async def entrypoint(ctx: agents.JobContext):
     setup_langfuse()
 
     session = AgentSession(
-        vad=silero.VAD.load(),
-        stt=openai.STT(model="gpt-4o-mini-transcribe"),
-        llm=openai.LLM(model="gpt-4o-mini"),
-        tts=openai.TTS(model="gpt-4o-mini-tts"),
+        llm=openai.realtime.RealtimeModel(voice="alloy"),
     )
 
     await session.start(
@@ -67,7 +114,7 @@ async def entrypoint(ctx: agents.JobContext):
     )
 
     await session.generate_reply(
-        instructions="Greet the user and offer your assistance."
+        instructions="Greet the user and offer your assistance. Always respond in English."
     )
 
 
