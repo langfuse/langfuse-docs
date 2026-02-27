@@ -34,7 +34,6 @@ export function SectionDocsLayoutClient({ tree, section, children }: Props) {
           ? { enabled: false }
           : { banner: <MenuSwitcher /> }
       }
-      renderNavigationPanel={isMarketing ? () => null : undefined}
     >
       <div
         className={`mx-auto ${WIDE_SECTIONS.has(section) ? "max-w-7xl" : "max-w-4xl"}`}
