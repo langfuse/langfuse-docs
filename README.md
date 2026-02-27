@@ -2,7 +2,7 @@
 
 # Langfuse Docs
 
-<!-- test comment for langfuse tracing integration -->
+<!-- test comment for langfuse tracing integration - 2026-02-27 -->
 
 Repo for [langfuse.com](https://langfuse.com). Based on [Nextra](https://nextra.site/).
 
