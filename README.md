@@ -2,6 +2,8 @@
 
 # Langfuse Docs
 
+<!-- test comment for langfuse tracing integration -->
+
 Repo for [langfuse.com](https://langfuse.com). Based on [Nextra](https://nextra.site/).
 
 ## GitHub Codespaces
