@@ -143,7 +143,7 @@ export const Frame = ({
       >
         <div
           className={cn(
-            "inline bg-primary/5 max-w-2xl [&>*]:mt-0 [&>*]:mb-0 [&>img]:block [&>img]:w-full [&>img]:h-auto [&>img]:leading-none [&>img]:align-top",
+            "block bg-primary/5 max-w-2xl [&>*]:mt-0 [&>*]:mb-0 [&>img]:block [&>img]:w-full [&>img]:h-auto [&>img]:leading-none [&>img]:align-top",
             fullWidth && "max-w-full",
             transparent && "bg-transparent"
           )}

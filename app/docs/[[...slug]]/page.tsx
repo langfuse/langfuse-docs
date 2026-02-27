@@ -18,8 +18,20 @@ export default async function DocPage(props: PageProps) {
 
   const { toc } = page.data;
 
+  const filePath = `content/docs/${slug.length === 0 ? "index" : slug.join("/")}.mdx`;
+
   return (
-    <DocsPage toc={toc} tableOfContent={{ footer: <DocsContributors /> }}>
+    <DocsPage
+      toc={toc}
+      breadcrumb={{ includePage: true }}
+      tableOfContent={{ footer: <DocsContributors /> }}
+      editOnGithub={{
+        owner: "langfuse",
+        repo: "langfuse-docs",
+        sha: "main",
+        path: filePath,
+      }}
+    >
       <h1 className="mb-2 text-4xl font-bold tracking-tight">
         {page.data.title}
       </h1>
