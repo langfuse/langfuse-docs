@@ -5,12 +5,43 @@
 "use client";
 
 import * as React from "react";
+import { cn } from "@/lib/utils";
 import {
   Tabs as FumadocsTabs,
-  TabsList as FumadocsTabsList,
+  TabsList as FumadocsTabsListPrimitive,
   TabsContent as FumadocsTabsContent,
-  TabsTrigger as FumadocsTabsTrigger,
+  TabsTrigger as FumadocsTabsTriggerPrimitive,
 } from "fumadocs-ui/components/ui/tabs";
+
+const FumadocsTabsList = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<typeof FumadocsTabsListPrimitive>
+>(({ className, ...props }, ref) => (
+  <FumadocsTabsListPrimitive
+    ref={ref}
+    className={cn(
+      "flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose",
+      className
+    )}
+    {...props}
+  />
+));
+FumadocsTabsList.displayName = "FumadocsTabsList";
+
+const FumadocsTabsTrigger = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentProps<typeof FumadocsTabsTriggerPrimitive>
+>(({ className, ...props }, ref) => (
+  <FumadocsTabsTriggerPrimitive
+    ref={ref}
+    className={cn(
+      "inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary",
+      className
+    )}
+    {...props}
+  />
+));
+FumadocsTabsTrigger.displayName = "FumadocsTabsTrigger";
 
 function toValue(s: string): string {
   return s.toLowerCase().replace(/\s/g, "-");
@@ -71,7 +102,11 @@ export const Tab = ({
 }: React.ComponentProps<typeof FumadocsTabsContent> & { title?: string }) => {
   const value = valueProp ?? (title != null ? toValue(title) : undefined);
   return (
-    <FumadocsTabsContent value={value!} className={className} {...props}>
+    <FumadocsTabsContent
+      value={value!}
+      className={cn("p-4 prose-no-margin", className)}
+      {...props}
+    >
       {children}
     </FumadocsTabsContent>
   );
@@ -131,16 +166,20 @@ export function Tabs({
   const tabChildren = React.Children.map(children, (child, i) => {
     if (!React.isValidElement(child) || child.type !== Tab) return child;
     const injectedValue = values[i];
-    const resolved =
-      child.props.value ??
-      (child.props.title != null ? toValue(child.props.title) : undefined) ??
-      injectedValue;
+    // Always use injectedValue (position-based) unless explicit value prop is set.
+    // Title-based derivation is NOT used here because the tab label in `items` may
+    // differ from the Tab's `title` prop (e.g. items="Python SDK" but title="Python SDK (v3)").
+    const resolved = child.props.value ?? injectedValue;
     if (resolved == null) return child;
     return React.cloneElement(child as React.ReactElement<{ value: string }>, { value: resolved });
   });
 
   return (
-    <FumadocsTabs value={value} onValueChange={onValueChange}>
+    <FumadocsTabs
+      value={value}
+      onValueChange={onValueChange}
+      className="flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4"
+    >
       <FumadocsTabsList>
         {items.map((item, i) => (
           <FumadocsTabsTrigger key={i} value={values[i]}>
@@ -160,7 +199,7 @@ export const Callout = ({
 }: { children?: React.ReactNode; type?: string; emoji?: string } & React.ComponentProps<"div">) => (
   <div
     className={`rounded-lg border p-4 my-4 ${
-      type === "info" ? "border-blue-200 bg-blue-50" : type === "warning" ? "border-amber-200 bg-amber-50" : "border-gray-200 bg-gray-50"
+      type === "info" ? "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50" : type === "warning" ? "border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50" : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/50"
     }`}
     {...props}
   >

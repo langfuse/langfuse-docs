@@ -19,7 +19,7 @@ export const CustomerIndex = ({
         <Link
           key={story.route}
           href={story.route}
-          className="flex flex-col p-8 h-full rounded-lg border transition-all duration-200 cursor-pointer group bg-card break-inside-avoid hover:border-gray-300 dark:hover:border-gray-600"
+          className="no-underline flex flex-col p-8 h-full rounded-lg border transition-all duration-200 cursor-pointer group bg-card break-inside-avoid hover:border-gray-300 dark:hover:border-gray-600"
         >
           {/* Customer Logo */}
           {story.frontMatter.customerLogo && (

@@ -50,3 +50,24 @@ li:has(> .subseparator) {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+/* Steps component: increment counter and render numbered circles on h3 headings */
+.steps > h3 {
+  counter-increment: step;
+}
+.steps > h3::before {
+  content: counter(step);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-right: 0.75rem;
+  vertical-align: middle;
+  flex-shrink: 0;
+}

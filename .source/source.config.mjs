@@ -7,6 +7,13 @@ var yamlDateField = z.union([
   z.string(),
   z.date().transform((d) => d.toISOString().split("T")[0])
 ]).nullish();
+var blogFrontmatterSchema = frontmatterSchema.extend({
+  date: yamlDateField,
+  tag: z.string().nullish(),
+  author: z.string().nullish(),
+  ogImage: z.string().nullish(),
+  showInBlogIndex: z.boolean().nullish()
+});
 var changelogFrontmatterSchema = frontmatterSchema.extend({
   date: yamlDateField,
   author: z.string().nullish(),
@@ -34,7 +41,10 @@ var selfHosting = defineDocs({
   dir: "content/self-hosting"
 });
 var blog = defineDocs({
-  dir: "content/blog"
+  dir: "content/blog",
+  docs: {
+    schema: blogFrontmatterSchema
+  }
 });
 var changelog = defineDocs({
   dir: "content/changelog",

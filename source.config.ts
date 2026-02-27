@@ -13,6 +13,16 @@ const yamlDateField = z
   ])
   .nullish();
 
+// Extended schema for blog pages — adds date, tag, author, ogImage fields
+// used by BlogIndex for thumbnails and filtering.
+const blogFrontmatterSchema = frontmatterSchema.extend({
+  date: yamlDateField,
+  tag: z.string().nullish(),
+  author: z.string().nullish(),
+  ogImage: z.string().nullish(),
+  showInBlogIndex: z.boolean().nullish(),
+});
+
 // Extended schema for changelog pages — adds date, author, ogImage fields
 // that the Changelog widget reads from frontMatter.
 const changelogFrontmatterSchema = frontmatterSchema.extend({
@@ -52,6 +62,9 @@ export const selfHosting = defineDocs({
 
 export const blog = defineDocs({
   dir: "content/blog",
+  docs: {
+    schema: blogFrontmatterSchema,
+  },
 });
 
 export const changelog = defineDocs({

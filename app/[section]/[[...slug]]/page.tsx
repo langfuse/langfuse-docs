@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DocsPage } from "fumadocs-ui/layouts/flux/page";
+import { DocsPage } from "fumadocs-ui/page";
 import type { TOCItemType } from "fumadocs-core/toc";
 import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS } from "@/lib/sections";
 import type { SectionSlug } from "@/lib/sections";
@@ -37,7 +37,7 @@ export default async function SectionDocPage(props: PageProps) {
   const toc: TOCItemType[] = loaded.toc ?? [];
 
   return (
-    <DocsPage toc={toc} className="max-w-full">
+    <DocsPage toc={toc} className="max-w-full" breadcrumb={{ includePage: !isMarketing }} footer={isMarketing ? { enabled: false } : undefined}>
       <SectionDocBodyClient
         collection={config.collection}
         slugPromise={Promise.resolve({ slug: effectiveSlug })}
