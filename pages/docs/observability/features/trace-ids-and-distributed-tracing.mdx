@@ -317,17 +317,19 @@ with langfuse.start_as_current_observation(
 ) as span:
 
     with propagate_attributes(
-    span.update_trace(
-        input={"person": "Ada Lovelace"}
-    )
+        user_id="user_123",
+    ):
+        span.update_trace(
+            input={"person": "Ada Lovelace"}
+        )
 
-    # LangChain execution will be part of this trace
-    response = chain.invoke(
-        {"person": "Ada Lovelace"},
-        config={"callbacks": [langfuse_handler]}
-    )
+        # LangChain execution will be part of this trace
+        response = chain.invoke(
+            {"person": "Ada Lovelace"},
+            config={"callbacks": [langfuse_handler]}
+        )
 
-    span.update_trace(output={"response": response})
+        span.update_trace(output={"response": response})
 
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
