@@ -69,8 +69,8 @@ export default {
         href: "/docs/roadmap",
       },
       customers: {
-        title: "Customers",
-        href: "/customers",
+        title: "Users",
+        href: "/users",
       },
       exampleproject: {
         title: "Example Project",
@@ -147,6 +147,14 @@ export default {
   },
   customers: {
     title: "Customers",
+    type: "page",
+    display: "hidden",
+    theme: {
+      layout: "full",
+    },
+  },
+  users: {
+    title: "Users",
     type: "page",
     display: "hidden",
     theme: {

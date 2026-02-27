@@ -35,6 +35,8 @@ import sevenelevenLight from "../home/img/seveneleven_light.png";
 import sevenelevenDark from "../home/img/seveneleven_dark.png";
 import circlebackLight from "../home/img/circleback_light.png";
 import circlebackDark from "../home/img/circleback_dark.png";
+import canvaLight from "../home/img/canva_light.png";
+import canvaDark from "../home/img/canva_dark.png";
 
 interface CustomerStory {
   route: string;
@@ -53,10 +55,11 @@ interface CustomerStory {
 
 // Companies with customer stories
 const companiesWithStories = [
-  { name: "SumUp", path: "/customers/sumup", light: sumupLight, dark: sumupDark },
-  { name: "Khan Academy", path: "/customers/khan-academy", light: khanacademyLight, dark: khanacademyDark },
-  { name: "Magic Patterns", path: "/customers/magic-patterns-ai-design-tools", light: magicPatternsLight, dark: magicPatternsDark },
-  { name: "Merck", path: "/customers/merckgroup", light: merckLight, dark: merckDark },
+  { name: "Canva", path: "/users/canva", light: canvaLight, dark: canvaDark, isIntuitive: false },
+  { name: "SumUp", path: "/users/sumup", light: sumupLight, dark: sumupDark, isIntuitive: false },
+  { name: "Khan Academy", path: "/users/khan-academy", light: khanacademyLight, dark: khanacademyDark, isIntuitive: false },
+  { name: "Magic Patterns", path: "/users/magic-patterns-ai-design-tools", light: magicPatternsLight, dark: magicPatternsDark, isIntuitive: false },
+  { name: "Merck", path: "/users/merckgroup", light: merckLight, dark: merckDark, isIntuitive: false },
 ];
 
 // Companies without customer stories (logos only)
@@ -276,7 +279,7 @@ export function Customers() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
-  const allStories = (getPagesUnderRoute("/customers") as Array<
+  const allStories = (getPagesUnderRoute("/users") as Array<
     Page & { frontMatter: any }
   >).filter(
     (page) => page.frontMatter?.showInCustomerIndex !== false
@@ -306,6 +309,7 @@ export function Customers() {
     const order: Array<{ type: "story" | "logo" | "text"; name: string }> = [
       // First column
       { type: "logo", name: "Intuit" },
+      { type: "story", name: "Canva" },
       { type: "story", name: "SumUp" },
       // Continue with rest in desired order...
       { type: "logo", name: "Samsara" },
