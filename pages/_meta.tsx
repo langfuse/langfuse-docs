@@ -145,14 +145,6 @@ export default {
     },
     display: "hidden",
   },
-  customers: {
-    title: "Customers",
-    type: "page",
-    display: "hidden",
-    theme: {
-      layout: "full",
-    },
-  },
   users: {
     title: "Users",
     type: "page",
