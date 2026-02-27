@@ -1,5 +1,4 @@
 import OpenAI from "openai";
-import { observeOpenAI } from "@langfuse/openai";
 import {
   observe,
   propagateAttributes,
@@ -7,9 +6,12 @@ import {
   updateActiveTrace,
   getActiveTraceId,
 } from "@langfuse/tracing";
+import { LangfuseMedia } from "@langfuse/core";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
+
+const openai = new OpenAI();
 
 const handler = async (req: Request) => {
   return propagateAttributes({ tags: ["image-generator"] }, async () => {
@@ -42,13 +44,6 @@ const handler = async (req: Request) => {
     });
 
     try {
-      // observeOpenAI automatically creates a child generation span that
-      // captures: model, input (prompt), and usage tokens with granular
-      // breakdown (input_text_tokens, input_image_tokens, output_tokens).
-      const openai = observeOpenAI(new OpenAI(), {
-        generationName: "gpt-image-1",
-      });
-
       const result = await openai.images.generate({
         model: "gpt-image-1",
         prompt,
@@ -61,21 +56,41 @@ const handler = async (req: Request) => {
         throw new Error("No image data returned");
       }
 
-      const mediaType = "image/png";
-
-      // The observeOpenAI generation span has ended at this point, so
-      // updateActiveObservation targets the parent span from observe().
-      // The Langfuse SDK automatically detects data URIs, uploads them
-      // to object storage, and displays them in the trace UI.
-      updateActiveObservation({
-        output: `data:${mediaType};base64,${imageData}`,
+      const imageMedia = new LangfuseMedia({
+        contentBytes: Buffer.from(imageData, "base64"),
+        contentType: "image/png",
+        source: "bytes",
       });
+
+      const usage = (result as any).usage as
+        | { input_tokens?: number; output_tokens?: number; total_tokens?: number }
+        | undefined;
+
+      updateActiveObservation(
+        {
+          input: prompt,
+          output: imageMedia,
+          model: "gpt-image-1",
+          modelParameters: {
+            size: "1024x1024",
+            quality: "low",
+          },
+          ...(usage && {
+            usageDetails: {
+              input_tokens: usage.input_tokens ?? 0,
+              output_tokens: usage.output_tokens ?? 0,
+              total: usage.total_tokens ?? 0,
+            },
+          }),
+        },
+        { asType: "generation" }
+      );
 
       after(async () => await flush());
 
       return new Response(
         JSON.stringify({
-          image: { base64: imageData, mediaType },
+          image: { base64: imageData, mediaType: "image/png" },
           traceId,
         }),
         { status: 200, headers: { "Content-Type": "application/json" } }
@@ -95,6 +110,7 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "image-generator",
+  asType: "generation",
   captureOutput: false,
 });
 

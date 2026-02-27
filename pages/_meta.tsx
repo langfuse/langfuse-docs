@@ -25,6 +25,11 @@ export default {
     type: "page",
     display: "hidden",
   },
+  cloud: {
+    type: "page",
+    title: "Cloud",
+    display: "hidden",
+  },
   product: {
     title: "Product",
     type: "menu",
