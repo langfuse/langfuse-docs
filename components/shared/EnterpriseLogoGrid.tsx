@@ -43,7 +43,7 @@ const companies: CompanyLogo[] = [
     name: "Canva",
     darkModeImage: "/images/customers/canva/Canva-white.png",
     lightModeImage: "/images/customers/canva/Canva-color.png",
-    customerStoryPath: "/customers/canva",
+    customerStoryPath: "/users/canva",
   },
   {
     name: "Twilio",
@@ -54,25 +54,25 @@ const companies: CompanyLogo[] = [
     name: "SumUp",
     darkModeImage: sumupLight,
     lightModeImage: sumupDark,
-    customerStoryPath: "/customers/sumup",
+    customerStoryPath: "/users/sumup",
   },
   {
     name: "Khan Academy",
     darkModeImage: khanacademyLight,
     lightModeImage: khanacademyDark,
-    customerStoryPath: "/customers/khan-academy",
+    customerStoryPath: "/users/khan-academy",
   },
   {
     name: "Magic Patterns",
     darkModeImage: magicPatternsLight,
     lightModeImage: magicPatternsDark,
-    customerStoryPath: "/customers/magic-patterns-ai-design-tools",
+    customerStoryPath: "/users/magic-patterns-ai-design-tools",
   },
   {
     name: "Merck",
     darkModeImage: merckLight,
     lightModeImage: merckDark,
-    customerStoryPath: "/customers/merckgroup",
+    customerStoryPath: "/users/merckgroup",
   },
   {
     name: "Telus",
@@ -171,7 +171,7 @@ const CustomerStoryBadge = ({ small }: { small?: boolean }) => (
         <>
           <span className="md:hidden whitespace-nowrap">Read Story</span>
           <span className="hidden md:group-hover:inline">
-            Read Customer Story
+            Read User Story
           </span>
           <span className="hidden md:block group-hover:hidden w-2 h-2 bg-white rounded-full"></span>
         </>
@@ -226,7 +226,7 @@ export const EnterpriseLogoGrid = ({
               clickableCellClasses,
               small && smallCellClasses
             )}
-            aria-label={`Read ${company.name} customer story`}
+            aria-label={`Read ${company.name} user story`}
             role="gridcell"
           >
             {cellContent}
