@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { StaticImageData } from "next/image";
-// import circlebackLight from "../home/img/circleback_light.png";
-// import circlebackDark from "../home/img/circleback_dark.png";
+import canvaLight from "../home/img/canva_light.png";
+import canvaDark from "../home/img/canva_dark.png";
 import intuitLight from "../home/img/intuit_light.svg";
 import intuitDark from "../home/img/intuit_dark.svg";
 import samsaraLight from "../home/img/samsara_light.png";
@@ -21,28 +21,32 @@ import merckLight from "../home/img/merck-dark.png";
 import merckDark from "../home/img/merck-light.png";
 import juiceboxLight from "../home/img/juicebox_light.svg";
 import juiceboxDark from "../home/img/juicebox_dark.svg";
-// import pigmentLight from "../home/img/pigment_light.svg";
-// import pigmentDark from "../home/img/pigment_dark.svg";
-// import springernatureLight from "../home/img/springernature_light.svg";
-// import springernatureDark from "../home/img/springernature_dark.svg";
+import pigmentLight from "../home/img/pigment_light.svg";
+import pigmentDark from "../home/img/pigment_dark.svg";
 import sevenelevenLight from "../home/img/seveneleven_light.png";
 import sevenelevenDark from "../home/img/seveneleven_dark.png";
 import circlebackLight from "../home/img/circleback_light.png";
 import circlebackDark from "../home/img/circleback_dark.png";
+import appleLight from "../home/img/apple_light.svg";
+import appleDark from "../home/img/apple_dark.svg";
+import ciscoLight from "../home/img/cisco_light.svg";
+import ciscoDark from "../home/img/cisco_dark.svg";
+import expediaGroupLight from "../home/img/expedia_group_light.svg";
+import expediaGroupDark from "../home/img/expedia_group_dark.svg";
 import { cn } from "@/lib/utils";
 
 type CompanyLogo = {
   name: string;
-  darkModeImage: StaticImageData | string;
-  lightModeImage: StaticImageData | string;
+  darkModeImage: StaticImageData;
+  lightModeImage: StaticImageData;
   customerStoryPath?: string;
 };
 
 const companies: CompanyLogo[] = [
   {
     name: "Canva",
-    darkModeImage: "/images/customers/canva/Canva-white.png",
-    lightModeImage: "/images/customers/canva/Canva-color.png",
+    darkModeImage: canvaLight,
+    lightModeImage: canvaDark,
     customerStoryPath: "/users/canva",
   },
   {
@@ -51,28 +55,15 @@ const companies: CompanyLogo[] = [
     lightModeImage: twilioDark,
   },
   {
-    name: "SumUp",
-    darkModeImage: sumupLight,
-    lightModeImage: sumupDark,
-    customerStoryPath: "/users/sumup",
+    name: "Juicebox",
+    darkModeImage: juiceboxLight,
+    lightModeImage: juiceboxDark,
   },
   {
     name: "Khan Academy",
     darkModeImage: khanacademyLight,
     lightModeImage: khanacademyDark,
     customerStoryPath: "/users/khan-academy",
-  },
-  {
-    name: "Magic Patterns",
-    darkModeImage: magicPatternsLight,
-    lightModeImage: magicPatternsDark,
-    customerStoryPath: "/users/magic-patterns-ai-design-tools",
-  },
-  {
-    name: "Merck",
-    darkModeImage: merckLight,
-    lightModeImage: merckDark,
-    customerStoryPath: "/users/merckgroup",
   },
   {
     name: "Telus",
@@ -85,15 +76,21 @@ const companies: CompanyLogo[] = [
     lightModeImage: intuitLight,
   },
   {
-    name: "Juicebox",
-    darkModeImage: juiceboxLight,
-    lightModeImage: juiceboxDark,
+    name: "SumUp",
+    darkModeImage: sumupLight,
+    lightModeImage: sumupDark,
+    customerStoryPath: "/users/sumup",
   },
-  // {
-  //   name: "Pigment",
-  //   darkModeImage: pigmentLight,
-  //   lightModeImage: pigmentDark,
-  // },
+  {
+    name: "Circleback",
+    darkModeImage: circlebackLight,
+    lightModeImage: circlebackDark,
+  },
+  {
+    name: "Apple",
+    darkModeImage: appleDark,
+    lightModeImage: appleLight,
+  },
   {
     name: "Samsara",
     darkModeImage: samsaraLight,
@@ -104,15 +101,32 @@ const companies: CompanyLogo[] = [
     darkModeImage: sevenelevenLight,
     lightModeImage: sevenelevenDark,
   },
-  // {
-  //   name: "Springer Nature",
-  //   darkModeImage: springernatureLight,
-  //   lightModeImage: springernatureDark,
-  // },
   {
-    name: "Circleback",
-    darkModeImage: circlebackLight,
-    lightModeImage: circlebackDark,
+    name: "Magic Patterns",
+    darkModeImage: magicPatternsLight,
+    lightModeImage: magicPatternsDark,
+    customerStoryPath: "/users/magic-patterns-ai-design-tools",
+  },
+  {
+    name: "Cisco",
+    darkModeImage: ciscoDark,
+    lightModeImage: ciscoLight,
+  },
+  {
+    name: "Expedia Group",
+    darkModeImage: expediaGroupDark,
+    lightModeImage: expediaGroupLight,
+  },
+  {
+    name: "Merck",
+    darkModeImage: merckLight,
+    lightModeImage: merckDark,
+    customerStoryPath: "/users/merckgroup",
+  },
+  {
+    name: "Pigment",
+    darkModeImage: pigmentLight,
+    lightModeImage: pigmentDark,
   },
 ];
 
@@ -122,13 +136,10 @@ const LogoImage = ({
   lightModeImage,
   name,
 }: {
-  darkModeImage: StaticImageData | string;
-  lightModeImage: StaticImageData | string;
+  darkModeImage: StaticImageData;
+  lightModeImage: StaticImageData;
   name: string;
 }) => {
-  // For string paths (public images), we need width and height
-  const isStringPath = typeof darkModeImage === "string";
-
   return (
     <>
       <Image
@@ -137,7 +148,6 @@ const LogoImage = ({
         className="object-contain max-h-8 max-w-full hidden dark:block"
         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
         priority={false}
-        {...(isStringPath && { width: 120, height: 32 })}
       />
       <Image
         src={lightModeImage}
@@ -145,7 +155,6 @@ const LogoImage = ({
         className="object-contain max-h-8 max-w-full dark:hidden"
         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
         priority={false}
-        {...(isStringPath && { width: 120, height: 32 })}
       />
     </>
   );
