@@ -103,6 +103,40 @@ Learn more about using the Decorator in the [Langfuse SDK instrumentation docs](
 </Tabs.Tab>
 </Tabs>
 
+## Troubleshooting
+
+<details>
+<summary>No traces appearing</summary>
+
+First, enable [debug mode](/docs/observability/sdk/advanced-features#logging--debugging) in the JS/TS SDK:
+
+```bash
+export LANGFUSE_LOG_LEVEL="DEBUG"
+```
+
+Then run your application and check the debug logs:
+
+- **OTel spans appear in the logs:** Your application is instrumented correctly but traces are not reaching Langfuse. To resolve this:
+  1. Call [`forceFlush()`](/docs/observability/sdk/instrumentation#client-lifecycle--flushing) at the end of your application to ensure all traces are exported. This is especially important in short-lived environments like serverless functions.
+  2. Verify that you are using the correct API keys and base URL.
+- **No OTel spans in the logs:** Your application is not instrumented correctly. Make sure the instrumentation runs before your application code.
+
+</details>
+
+<details>
+<summary>Unwanted observations in Langfuse</summary>
+
+The Langfuse SDK is based on OpenTelemetry. Other libraries in your application may emit OTel spans that are not relevant to you. These still count toward your [billable units](/docs/administration/billable-units), so you should filter them out. See [Unwanted spans in Langfuse](/faq/all/unwanted-http-database-spans) for details.
+
+</details>
+
+<details>
+<summary>Missing attributes</summary>
+
+Some attributes may be stored in the metadata object of the observation rather than being mapped to the Langfuse data model. If a mapping or integration does not work as expected, please [raise an issue on GitHub](/issues).
+
+</details>
+
 ## Next Steps
 
 Once you have instrumented your code, you can manage, evaluate and debug your application:

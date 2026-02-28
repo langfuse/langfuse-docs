@@ -68,14 +68,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
   <div className="flex flex-col gap-3 w-full">
     <Card className="border-2 border-primary">
       <CardContent className="p-3">
-        <div className="font-semibold text-sm">Observations <span className="text-xs font-normal opacity-70">(Beta)</span></div>
+        <div className="font-semibold text-sm">Observations <span className="text-xs font-normal opacity-70">(Recommended)</span></div>
         <div className="text-xs text-muted-foreground mt-1">Individual operations: LLM calls, retrievals, tool calls</div>
       </CardContent>
     </Card>
 
     <Card className="border">
       <CardContent className="p-3">
-        <div className="font-semibold text-sm">Traces</div>
+        <div className="font-semibold text-sm">Traces <span className="text-xs font-normal opacity-70">(Legacy)</span></div>
         <div className="text-xs text-muted-foreground mt-1">Complete workflow executions</div>
       </CardContent>
     </Card>
@@ -116,7 +116,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 Evaluate live production traffic to monitor your LLM application performance in real-time.
 
-<Tabs items={["Observations (Beta)", "Traces"]} storageKey="eval-live-target">
+<Tabs items={["Observations (Recommended)", "Traces (Legacy)"]} storageKey="eval-live-target">
 <Tab>
 
 Run evaluators on individual observations within your traces—such as LLM calls, retrieval operations, embedding generations, or tool calls.
@@ -246,7 +246,7 @@ With your evaluator and model selected, configure which data to run the evaluati
 <Tabs items={["Live Production Data", "Offline Experiment Data"]} storageKey="eval-data-type">
 <Tab>
 
-<Tabs items={["Observations (Beta)", "Traces"]} storageKey="eval-live-target">
+<Tabs items={["Observations (Recommended)", "Traces (Legacy)"]} storageKey="eval-live-target">
 <Tab>
 
 **Configuration Steps**
