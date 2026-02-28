@@ -71,14 +71,15 @@ Provider: `AUTH0`
 | Configuration      | Value                                                                                     |
 | ------------------ | ----------------------------------------------------------------------------------------- |
 | Required Variables | `AUTH_AUTHENTIK_CLIENT_ID`<br/>`AUTH_AUTHENTIK_CLIENT_SECRET`<br/>`AUTH_AUTHENTIK_ISSUER` |
-| Optional Variables | See [additional configuration](#additional-configuration) section below.                  |
+| Optional Variables | `AUTH_AUTHENTIK_AUTHORIZATION_URL`<br/><br/>See [additional configuration](#additional-configuration) section below. |
 | OAuth Redirect URL | `/api/auth/callback/authentik`                                                            |
 
 Provider: `AUTHENTIK`
 
 Notes:
 
-- The `AUTH_AUTHENTIK_ISSUER` must be in the format `https://<domain>/application/o/<slug>` without a trailing slash.
+- The `AUTH_AUTHENTIK_ISSUER` must be in the format `https://<domain>/application/o/<slug>` with an optional trailing slash.
+- **Authorization URL override:** Set `AUTH_AUTHENTIK_AUTHORIZATION_URL` to a browser-reachable Authentik URL when your Authentik instance uses a different internal vs. external URL (e.g., split-DNS or reverse proxy setups). The issuer URL will still be used for server-side token, userinfo, and JWKS validation, while the authorization URL override is used for browser redirects only.
 
 ### AWS Cognito
 
