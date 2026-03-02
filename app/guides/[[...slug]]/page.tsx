@@ -1,24 +1,26 @@
 import type { Metadata } from "next";
-import { source } from "@/lib/source";
+import { guidesSource } from "@/lib/source";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { DocBodyClient } from "./DocBodyClient";
+import { SectionDocBodyClientWithDocsBody } from "@/components/SectionDocBodyClientWithDocsBody";
 import { DocsContributors } from "@/components/DocsContributors";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
 
-export default async function DocPage(props: PageProps) {
+const COLLECTION = "guides";
+const CONTENT_DIR = "content/guides";
+
+export default async function GuidesPage(props: PageProps) {
   const params = await props.params;
   const slug = params.slug ?? [];
-  const page = source.getPage(slug);
+  const page = guidesSource.getPage(slug);
 
   if (!page) notFound();
 
   const { toc } = page.data;
-
-  const filePath = `content/docs/${slug.length === 0 ? "index" : slug.join("/")}.mdx`;
+  const filePath = `${CONTENT_DIR}/${slug.length === 0 ? "index" : slug.join("/")}.mdx`;
 
   return (
     <DocsPage
@@ -32,7 +34,10 @@ export default async function DocPage(props: PageProps) {
         path: filePath,
       }}
     >
-      <DocBodyClient slugPromise={props.params} />
+      <SectionDocBodyClientWithDocsBody
+        collection={COLLECTION}
+        slugPromise={props.params}
+      />
     </DocsPage>
   );
 }
@@ -40,7 +45,7 @@ export default async function DocPage(props: PageProps) {
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
   const slug = params.slug ?? [];
-  const page = source.getPage(slug);
+  const page = guidesSource.getPage(slug);
   if (!page)
     return {
       title: "Not Found",
@@ -52,5 +57,5 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 }
 
 export function generateStaticParams() {
-  return source.generateParams();
+  return guidesSource.generateParams();
 }

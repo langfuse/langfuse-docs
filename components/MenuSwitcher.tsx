@@ -15,7 +15,7 @@ const SECTIONS = [
 export const MenuSwitcher = () => {
   const pathname = usePathname();
   return (
-    <div className="hidden mb-2 md:block">
+    <div className="hidden my-2 md:block">
       {SECTIONS.map((item) =>
         pathname?.startsWith(item.path) ? (
           <div

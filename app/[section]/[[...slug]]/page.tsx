@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocsPage } from "fumadocs-ui/page";
 import type { TOCItemType } from "fumadocs-core/toc";
-import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS } from "@/lib/sections";
+import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, DOCS_STYLE_APP_SECTIONS } from "@/lib/sections";
 import type { SectionSlug } from "@/lib/sections";
 import { MARKETING_SLUGS } from "@/lib/source";
 import { SectionDocBodyClient } from "../SectionDocBodyClient";
@@ -36,8 +36,15 @@ export default async function SectionDocPage(props: PageProps) {
       : { body: data.body, toc: data.toc ?? [] };
   const toc: TOCItemType[] = loaded.toc ?? [];
 
+  const isWide = WIDE_SECTIONS.has(section);
   return (
-    <DocsPage toc={toc} className="max-w-full" breadcrumb={{ includePage: !isMarketing }} footer={isMarketing ? { enabled: false } : undefined}>
+    <DocsPage
+      toc={isMarketing ? undefined : toc}
+      full={isWide}
+      className={isWide ? "max-w-full! p-0!" : "max-w-full"}
+      breadcrumb={{ includePage: !isMarketing }}
+      footer={isMarketing ? { enabled: false } : undefined}
+    >
       <SectionDocBodyClient
         collection={config.collection}
         slugPromise={Promise.resolve({ slug: effectiveSlug })}
@@ -68,6 +75,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 export function generateStaticParams() {
   const params: { section: string; slug?: string[] }[] = [];
   for (const section of SECTION_SLUGS) {
+    if (DOCS_STYLE_APP_SECTIONS.has(section)) continue;
     const config = SECTION_CONFIG[section];
     const isMarketing = MARKETING_SECTION_SLUGS.has(section as (typeof MARKETING_SLUGS)[number]);
     if (isMarketing) {

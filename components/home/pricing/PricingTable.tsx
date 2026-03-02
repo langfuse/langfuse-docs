@@ -1412,7 +1412,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                 <div className="text-xs text-center text-muted-foreground">
                   <Link
                     href={tier.calloutLink.href}
-                    className="underline hover:text-primary"
+                    className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
                   >
                     {tier.calloutLink.text}
                   </Link>
@@ -1433,14 +1433,14 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
             <ul className="space-y-2.5 text-sm">
               {tier.mainFeatures.map((feature, index) => (
                 <li key={index} className="flex space-x-2">
-                  <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                  <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
                   <span className="text-muted-foreground">{feature}</span>
                 </li>
               ))}
             </ul>
             {tier.addOn && (
               <div className="relative p-3 pt-4 mt-3 w-full rounded border">
-                <div className="absolute -top-0 left-1/2 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-card text-muted-foreground">
+                <div className="absolute top-0 left-1/2 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-card text-muted-foreground">
                   + optional
                 </div>
                 <div className="flex justify-between items-center mb-2">

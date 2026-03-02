@@ -1,24 +1,26 @@
 import type { Metadata } from "next";
-import { source } from "@/lib/source";
+import { selfHostingSource } from "@/lib/source";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { DocBodyClient } from "./DocBodyClient";
+import { SectionDocBodyClientWithDocsBody } from "@/components/SectionDocBodyClientWithDocsBody";
 import { DocsContributors } from "@/components/DocsContributors";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
 
-export default async function DocPage(props: PageProps) {
+const COLLECTION = "selfHosting";
+const CONTENT_DIR = "content/self-hosting";
+
+export default async function SelfHostingPage(props: PageProps) {
   const params = await props.params;
   const slug = params.slug ?? [];
-  const page = source.getPage(slug);
+  const page = selfHostingSource.getPage(slug);
 
   if (!page) notFound();
 
   const { toc } = page.data;
-
-  const filePath = `content/docs/${slug.length === 0 ? "index" : slug.join("/")}.mdx`;
+  const filePath = `${CONTENT_DIR}/${slug.length === 0 ? "index" : slug.join("/")}.mdx`;
 
   return (
     <DocsPage
@@ -32,7 +34,10 @@ export default async function DocPage(props: PageProps) {
         path: filePath,
       }}
     >
-      <DocBodyClient slugPromise={props.params} />
+      <SectionDocBodyClientWithDocsBody
+        collection={COLLECTION}
+        slugPromise={props.params}
+      />
     </DocsPage>
   );
 }
@@ -40,7 +45,7 @@ export default async function DocPage(props: PageProps) {
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
   const slug = params.slug ?? [];
-  const page = source.getPage(slug);
+  const page = selfHostingSource.getPage(slug);
   if (!page)
     return {
       title: "Not Found",
@@ -52,5 +57,5 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 }
 
 export function generateStaticParams() {
-  return source.generateParams();
+  return selfHostingSource.generateParams();
 }

@@ -1,11 +1,12 @@
 "use client";
 
 import { use } from "react";
+import { DocsBody } from "fumadocs-ui/page";
 import { getMDXComponents } from "@/mdx-components";
 import { getSectionDocLoader } from "@/lib/section-loaders.generated";
 import { notFound } from "next/navigation";
 
-type SectionDocBodyClientProps = {
+type Props = {
   collection: string;
   slugPromise: Promise<{ slug?: string[] }>;
 };
@@ -29,10 +30,14 @@ function getCachedLoaderPromise(
   return p;
 }
 
-export function SectionDocBodyClient({
+/**
+ * Renders section doc body in DocsBody (same as docs DocBodyClient).
+ * Use in app/integrations, app/self-hosting, app/guides, app/library.
+ */
+export function SectionDocBodyClientWithDocsBody({
   collection,
   slugPromise,
-}: SectionDocBodyClientProps) {
+}: Props) {
   const params = use(slugPromise);
   const slug = params.slug ?? [];
   const loader = getSectionDocLoader(collection, slug);
@@ -42,8 +47,8 @@ export function SectionDocBodyClient({
   const MDX = mod.default;
 
   return (
-    <div className="flex-1">
+    <DocsBody>
       <MDX components={getMDXComponents()} />
-    </div>
+    </DocsBody>
   );
 }
