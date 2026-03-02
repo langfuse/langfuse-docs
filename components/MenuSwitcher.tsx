@@ -15,23 +15,23 @@ const SECTIONS = [
 export const MenuSwitcher = () => {
   const pathname = usePathname();
   return (
-    <div className="-mx-2 mb-2 hidden md:block">
+    <div className="hidden mb-2 md:block">
       {SECTIONS.map((item) =>
         pathname?.startsWith(item.path) ? (
           <div
             key={item.path}
-            className="group mb-3 flex flex-row items-center gap-3 text-primary"
+            className="flex flex-row gap-3 items-center mb-3 group text-primary"
           >
-            <item.Icon className="w-7 h-7 p-1 border rounded bg-primary/10" />
+            <item.Icon className="p-1 w-7 h-7 rounded border bg-primary/10" />
             {item.title}
           </div>
         ) : (
           <Link
             href={item.path}
             key={item.path}
-            className="group mb-3 flex flex-row items-center gap-3 text-muted-foreground hover:text-foreground"
+            className="flex flex-row gap-3 items-center mb-3 group text-muted-foreground hover:text-foreground"
           >
-            <item.Icon className="w-7 h-7 p-1 border rounded group-hover:bg-muted" />
+            <item.Icon className="p-1 w-7 h-7 rounded border group-hover:bg-muted" />
             {item.title}
           </Link>
         )
