@@ -23,7 +23,7 @@ export default async function DocPage(props: PageProps) {
   return (
     <DocsPage
       toc={toc}
-      breadcrumb={{ includePage: true }}
+      breadcrumb={{ includePage: true, includeRoot: true }}
       tableOfContent={{ footer: <DocsContributors /> }}
       editOnGithub={{
         owner: "langfuse",
@@ -32,14 +32,6 @@ export default async function DocPage(props: PageProps) {
         path: filePath,
       }}
     >
-      <h1 className="mb-2 text-4xl font-bold tracking-tight">
-        {page.data.title}
-      </h1>
-      {page.data.description && (
-        <p className="mb-6 text-lg text-fd-muted-foreground">
-          {page.data.description}
-        </p>
-      )}
       <DocBodyClient slugPromise={props.params} />
     </DocsPage>
   );

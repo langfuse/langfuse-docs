@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { useConfig } from "nextra-theme-docs";
+import { useConfig } from "@/lib/nextra-shim/theme-docs";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import { Button } from "./ui/button";
 import {
@@ -29,7 +29,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import IconChatGPT from "./icons/chatgpt";
@@ -41,6 +40,7 @@ const pathsWithoutFooterWidgets = [
   "/blog",
   "/customers",
   "/careers",
+  "/watch-demo",
 ];
 const pathsWithCopyAsMarkdownButton = [
   "/docs",

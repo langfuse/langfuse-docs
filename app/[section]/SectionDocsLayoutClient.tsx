@@ -1,19 +1,11 @@
 "use client";
 
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
+import { DocsLayout } from "fumadocs-ui/layouts/flux";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
 import { MenuSwitcher } from "@/components/MenuSwitcher";
-import { MARKETING_SECTION_SLUGS } from "@/lib/sections";
+import { MARKETING_SECTION_SLUGS, WIDE_SECTIONS } from "@/lib/sections";
 import type { ReactNode } from "react";
 import type * as PageTree from "fumadocs-core/page-tree";
-
-const WIDE_SECTIONS = new Set([
-  "pricing",
-  "pricing-self-host",
-  "talk-to-us",
-  "enterprise",
-  "startups",
-]);
 
 type Props = {
   tree: PageTree.Root;
@@ -36,7 +28,7 @@ export function SectionDocsLayoutClient({ tree, section, children }: Props) {
       }
     >
       <div
-        className={`mx-auto ${WIDE_SECTIONS.has(section) ? "max-w-7xl" : "max-w-4xl"}`}
+        className={`mx-auto w-full ${WIDE_SECTIONS.has(section) ? "max-w-7xl" : "max-w-4xl"}`}
       >
         <MainContentWrapper>{children}</MainContentWrapper>
       </div>

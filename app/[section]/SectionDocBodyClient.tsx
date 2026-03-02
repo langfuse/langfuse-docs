@@ -1,7 +1,6 @@
 "use client";
 
 import { use } from "react";
-import { DocsBody } from "fumadocs-ui/page";
 import { getMDXComponents } from "@/mdx-components";
 import { getSectionDocLoader } from "@/lib/section-loaders.generated";
 import { notFound } from "next/navigation";
@@ -43,8 +42,8 @@ export function SectionDocBodyClient({
   const MDX = mod.default;
 
   return (
-    <DocsBody>
+    <div className="flex-1">
       <MDX components={getMDXComponents()} />
-    </DocsBody>
+    </div>
   );
 }

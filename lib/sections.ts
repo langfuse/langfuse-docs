@@ -77,3 +77,13 @@ export const SECTION_CONFIG = { ...DOC_SECTIONS, ...marketingEntries } as const;
 export const SECTION_SLUGS = Object.keys(SECTION_CONFIG) as (keyof typeof SECTION_CONFIG)[];
 export type SectionSlug = (typeof SECTION_SLUGS)[number];
 export const MARKETING_SECTION_SLUGS = new Set(MARKETING_SLUGS);
+
+/** Sections that use a wider content area (e.g. pricing); article should not be constrained to 900px */
+export const WIDE_SECTIONS = new Set([
+  "pricing",
+  "pricing-self-host",
+  "talk-to-us",
+  "watch-demo",
+  "enterprise",
+  "startups",
+]);
