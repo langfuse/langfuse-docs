@@ -78,6 +78,14 @@ export const SECTION_SLUGS = Object.keys(SECTION_CONFIG) as (keyof typeof SECTIO
 export type SectionSlug = (typeof SECTION_SLUGS)[number];
 export const MARKETING_SECTION_SLUGS = new Set(MARKETING_SLUGS);
 
+/** Sections that have their own app route (app/integrations, app/self-hosting, etc.) like app/docs. Exclude from [section]. */
+export const DOCS_STYLE_APP_SECTIONS = new Set([
+  "integrations",
+  "self-hosting",
+  "guides",
+  "library",
+]);
+
 /** Sections that use a wider content area (e.g. pricing); article should not be constrained to 900px */
 export const WIDE_SECTIONS = new Set([
   "pricing",
