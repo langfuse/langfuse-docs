@@ -44,6 +44,7 @@ export default async function SectionDocPage(props: PageProps) {
       className={isWide ? "max-w-full! p-0!" : "max-w-full"}
       breadcrumb={{ includePage: !isMarketing }}
       footer={isMarketing ? { enabled: false } : undefined}
+      tableOfContentPopover={{ enabled: false }}
     >
       <SectionDocBodyClient
         collection={config.collection}
