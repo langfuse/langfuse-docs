@@ -1,10 +1,12 @@
 "use client";
 
 import { use } from "react";
+import { usePathname } from "next/navigation";
 import { DocsBody } from "fumadocs-ui/page";
 import { getMDXComponents } from "../../../mdx-components";
 import { getDocLoader } from "./doc-loaders.client";
 import { notFound } from "next/navigation";
+import { CopyMarkdownButton } from "@/components/MainContentWrapper";
 
 type DocBodyClientProps = {
   slugPromise: Promise<{ slug?: string[] }>;
@@ -35,9 +37,13 @@ export function DocBodyClient({ slugPromise }: DocBodyClientProps) {
 
   const mod = use(getCachedLoaderPromise(slug, loader));
   const MDX = mod.default;
+  const pathname = usePathname();
 
   return (
     <DocsBody>
+      <div className="mb-4">
+        <CopyMarkdownButton key={pathname} />
+      </div>
       <MDX components={getMDXComponents()} />
     </DocsBody>
   );

@@ -1,10 +1,12 @@
 "use client";
 
 import { use } from "react";
+import { usePathname } from "next/navigation";
 import { DocsBody } from "fumadocs-ui/page";
 import { getMDXComponents } from "@/mdx-components";
 import { getSectionDocLoader } from "@/lib/section-loaders.generated";
 import { notFound } from "next/navigation";
+import { CopyMarkdownButton } from "@/components/MainContentWrapper";
 
 type SectionDocBodyClientProps = {
   collection: string;
@@ -44,10 +46,18 @@ export function SectionDocBodyClient({
 
   const mod = use(getCachedLoaderPromise(collection, slug, loader));
   const MDX = mod.default;
+  const pathname = usePathname();
 
   const content = <MDX components={getMDXComponents()} />;
   if (withProse) {
-    return <DocsBody className="flex-1">{content}</DocsBody>;
+    return (
+      <DocsBody className="flex-1">
+        <div className="mb-4">
+          <CopyMarkdownButton key={pathname} />
+        </div>
+        {content}
+      </DocsBody>
+    );
   }
   return <div className="flex-1">{content}</div>;
 }
