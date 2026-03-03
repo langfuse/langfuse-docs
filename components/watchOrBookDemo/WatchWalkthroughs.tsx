@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -29,7 +30,7 @@ function VideoPlayer({ videoId, title }: VideoPlayerProps) {
   );
 }
 
-export function WatchWalkthroughs({ className }: { className?: string }) {
+function WatchWalkthroughsInner({ className }: { className?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -98,5 +99,15 @@ export function WatchWalkthroughs({ className }: { className?: string }) {
         })}
       </Tabs>
     </div>
+  );
+}
+
+// Suspense boundary required because useSearchParams() inside WatchWalkthroughsInner
+// would otherwise bail out of static prerendering and crash the production build.
+export function WatchWalkthroughs({ className }: { className?: string }) {
+  return (
+    <Suspense>
+      <WatchWalkthroughsInner className={className} />
+    </Suspense>
   );
 }
