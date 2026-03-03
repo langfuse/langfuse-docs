@@ -3,6 +3,14 @@
   --fd-nav-height: 4rem;
 }
 
+/* Mobile sidebar drawer: push below the sticky top navbar (64px / 4rem) so it
+   doesn't slide under it when opened or closed. The overlay can still cover the
+   full viewport — only the content panel needs the offset. */
+#nd-sidebar-mobile {
+  top: 4rem !important;
+  height: calc(100dvh - 4rem) !important;
+}
+
 /* Docs left sidebar: max width 360px (Fumadocs default is 268px) */
 #nd-docs-layout [grid-area="sidebar"] {
   --fd-sidebar-width: 360px;

@@ -54,7 +54,7 @@ const pathsWithCopyAsMarkdownButton = [
 const isCustomerStory = (pathname: string) =>
   pathname.startsWith("/customers/");
 
-const CopyMarkdownButton = () => {
+export const CopyMarkdownButton = () => {
   const pathname = usePathname();
   const capture = usePostHogClientCapture();
   const [copyState, setCopyState] = useState<
@@ -165,6 +165,13 @@ const CopyMarkdownButton = () => {
 
   const isDisabled = copyState === "loading" || copyState === "copied";
   const isError = copyState === "error";
+
+  // Self-guard: only render on pages that should have the copy button.
+  // All hooks are above so this conditional return is safe.
+  const shouldShow = pathsWithCopyAsMarkdownButton.some((prefix) =>
+    (pathname ?? "").startsWith(prefix)
+  );
+  if (!shouldShow) return null;
 
   let buttonText = "Copy page";
   let ButtonIcon = CopyIcon;
