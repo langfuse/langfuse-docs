@@ -6,6 +6,7 @@ import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, 
 import type { SectionSlug } from "@/lib/sections";
 import { MARKETING_SLUGS } from "@/lib/source";
 import { SectionDocBodyClient } from "../SectionDocBodyClient";
+import { DocsContributors } from "@/components/DocsContributors";
 
 type PageProps = {
   params: Promise<{ section: string; slug?: string[] }>;
@@ -46,6 +47,7 @@ export default async function SectionDocPage(props: PageProps) {
       className="max-w-full"
       breadcrumb={{ includePage: !isMarketing }}
       footer={isMarketing ? { enabled: false } : undefined}
+      tableOfContent={isMarketing ? undefined : { footer: <DocsContributors /> }}
       tableOfContentPopover={{ enabled: false }}
     >
       <SectionDocBodyClient
