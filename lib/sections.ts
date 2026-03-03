@@ -86,12 +86,14 @@ export const DOCS_STYLE_APP_SECTIONS = new Set([
   "library",
 ]);
 
-/** Sections that use a wider content area (e.g. pricing); article should not be constrained to 900px */
-export const WIDE_SECTIONS = new Set([
+/** Sections that have their own route folder under app/(wide)/ and use wide layout without prose */
+export const WIDE_SECTION_SLUGS = [
   "pricing",
   "pricing-self-host",
   "talk-to-us",
   "watch-demo",
   "enterprise",
   "startups",
-]);
+] as const;
+export type WideSectionSlug = (typeof WIDE_SECTION_SLUGS)[number];
+export const WIDE_SECTIONS = new Set<string>(WIDE_SECTION_SLUGS);

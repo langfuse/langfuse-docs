@@ -18,8 +18,7 @@ type LayoutProps = {
   params: Promise<{ section: string }>;
 };
 
-const contentWrapperClass = (section: string) =>
-  `mx-auto w-full ${WIDE_SECTIONS.has(section) ? "max-w-7xl" : "max-w-4xl"}`;
+const contentWrapperClass = "mx-auto w-full max-w-4xl";
 
 // Synchronous server component — keeps the same RSC context-propagation behaviour
 // as app/docs/layout.tsx (which is also sync). Using React.use() to unwrap the
@@ -33,6 +32,9 @@ export default function SectionLayout({ children, params }: LayoutProps) {
   if (DOCS_STYLE_APP_SECTIONS.has(section)) {
     notFound();
   }
+  if (WIDE_SECTIONS.has(section)) {
+    notFound(); /* wide sections are served by app/(wide)/<section>/page.tsx */
+  }
 
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
   const tree = config.source.getPageTree();
@@ -40,7 +42,6 @@ export default function SectionLayout({ children, params }: LayoutProps) {
   const isMarketing = MARKETING_SECTION_SLUGS.has(
     section as Parameters<typeof MARKETING_SECTION_SLUGS.has>[0]
   );
-  const isWide = WIDE_SECTIONS.has(section);
 
   // Render DocsLayout from the server component so its LayoutContextProvider
   // correctly propagates context to DocsPage in the page component.
@@ -53,9 +54,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
           githubUrl="https://github.com/langfuse/langfuse-docs"
           nav={{ enabled: false }}
           sidebar={
-            isMarketing || isWide
-              ? { enabled: false }
-              : { banner: <MenuSwitcher /> }
+            isMarketing ? { enabled: false } : { banner: <MenuSwitcher /> }
           }
           containerProps={
             isMarketing
@@ -69,7 +68,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
         >
           {isMarketing ? (
             <div className="w-full min-w-0 flex justify-center [grid-area:main]">
-              <div className={contentWrapperClass(section)}>
+              <div className={contentWrapperClass}>
                 <MainContentWrapper>{children}</MainContentWrapper>
               </div>
             </div>

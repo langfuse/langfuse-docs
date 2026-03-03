@@ -1,6 +1,7 @@
 "use client";
 
 import { use } from "react";
+import { DocsBody } from "fumadocs-ui/page";
 import { getMDXComponents } from "@/mdx-components";
 import { getSectionDocLoader } from "@/lib/section-loaders.generated";
 import { notFound } from "next/navigation";
@@ -8,6 +9,8 @@ import { notFound } from "next/navigation";
 type SectionDocBodyClientProps = {
   collection: string;
   slugPromise: Promise<{ slug?: string[] }>;
+  /** When true, wrap in DocsBody (prose) for typography. Use for marketing/docs; false for wide sections (pricing, etc.). */
+  withProse?: boolean;
 };
 
 const loaderPromiseCache = new Map<
@@ -32,6 +35,7 @@ function getCachedLoaderPromise(
 export function SectionDocBodyClient({
   collection,
   slugPromise,
+  withProse = false,
 }: SectionDocBodyClientProps) {
   const params = use(slugPromise);
   const slug = params.slug ?? [];
@@ -41,9 +45,9 @@ export function SectionDocBodyClient({
   const mod = use(getCachedLoaderPromise(collection, slug, loader));
   const MDX = mod.default;
 
-  return (
-    <div className="flex-1">
-      <MDX components={getMDXComponents()} />
-    </div>
-  );
+  const content = <MDX components={getMDXComponents()} />;
+  if (withProse) {
+    return <DocsBody className="flex-1">{content}</DocsBody>;
+  }
+  return <div className="flex-1">{content}</div>;
 }

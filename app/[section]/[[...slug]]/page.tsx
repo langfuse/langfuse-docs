@@ -21,6 +21,9 @@ export default async function SectionDocPage(props: PageProps) {
   if (!SECTION_SLUGS.includes(section as SectionSlug)) {
     notFound();
   }
+  if (WIDE_SECTIONS.has(section)) {
+    notFound(); /* wide sections are served by app/(wide)/<section>/page.tsx */
+  }
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
   const page = config.source.getPage(effectiveSlug);
 
@@ -36,12 +39,11 @@ export default async function SectionDocPage(props: PageProps) {
       : { body: data.body, toc: data.toc ?? [] };
   const toc: TOCItemType[] = loaded.toc ?? [];
 
-  const isWide = WIDE_SECTIONS.has(section);
   return (
     <DocsPage
       toc={isMarketing ? undefined : toc}
-      full={isWide}
-      className={isWide ? "max-w-full! p-0!" : "max-w-full"}
+      full={false}
+      className="max-w-full"
       breadcrumb={{ includePage: !isMarketing }}
       footer={isMarketing ? { enabled: false } : undefined}
       tableOfContentPopover={{ enabled: false }}
@@ -49,6 +51,7 @@ export default async function SectionDocPage(props: PageProps) {
       <SectionDocBodyClient
         collection={config.collection}
         slugPromise={Promise.resolve({ slug: effectiveSlug })}
+        withProse
       />
     </DocsPage>
   );
@@ -61,7 +64,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const isMarketing = MARKETING_SECTION_SLUGS.has(section as (typeof MARKETING_SLUGS)[number]);
   const effectiveSlug = isMarketing ? [section] : slug;
 
-  if (!SECTION_SLUGS.includes(section as SectionSlug)) {
+  if (!SECTION_SLUGS.includes(section as SectionSlug) || WIDE_SECTIONS.has(section)) {
     return { title: "Not Found" };
   }
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
@@ -77,6 +80,7 @@ export function generateStaticParams() {
   const params: { section: string; slug?: string[] }[] = [];
   for (const section of SECTION_SLUGS) {
     if (DOCS_STYLE_APP_SECTIONS.has(section)) continue;
+    if (WIDE_SECTIONS.has(section)) continue; /* handled by app/(wide)/<section>/page.tsx */
     const config = SECTION_CONFIG[section];
     const isMarketing = MARKETING_SECTION_SLUGS.has(section as (typeof MARKETING_SLUGS)[number]);
     if (isMarketing) {
