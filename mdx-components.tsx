@@ -70,6 +70,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Callout,
     Tabs,
     Tab,
+    "Tabs.Tab": Tab,
     Cards,
     Card: Cards.Card,
     Steps,

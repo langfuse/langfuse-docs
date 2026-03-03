@@ -193,6 +193,9 @@ export function Tabs({
   );
 }
 
+// Compound component: MDX uses <Tabs.Tab> (e.g. integration-learn-more.mdx), so Tabs.Tab must be defined.
+(Tabs as React.FunctionComponent & { Tab: typeof Tab }).Tab = Tab;
+
 export const Callout = ({
   children,
   type = "info",
