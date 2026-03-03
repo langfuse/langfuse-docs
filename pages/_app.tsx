@@ -9,6 +9,7 @@ import { PostHogProvider } from "posthog-js/react";
 import { Hubspot, hsPageView } from "@/components/analytics/hubspot";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { GoogleTagManager } from '@next/third-parties/google';
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function App({ Component, pageProps }) {
       </PostHogProvider>
       {process.env.NODE_ENV === "production" && (
         <>
+          <GoogleTagManager gtmId="GTM-NGLK4TZX" />
           <Hubspot />
           {/* Cookieyes consent manager */}
           <Script
