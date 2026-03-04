@@ -8,10 +8,6 @@ tags: [migration, integration]
 
 Helicone has [moved into maintenance mode](https://www.helicone.ai/blog/joining-mintlify) following its acquisition by Mintlify. This guide covers how to migrate your **prompt management** and **observability/tracing** setup from Helicone to Langfuse.
 
-<Callout type="info" emoji="✨">
-  We are offering 50% off the Langfuse subscription for Helicone users. Please contact us at [support@langfuse.com](mailto:support@langfuse.com) to get your discount.
-</Callout>
-
 ## Migrating Prompt Management
 
 Helicone offers two approaches to [prompt management](https://docs.helicone.ai/gateway/prompt-integration): a **gateway approach** where you pass a `prompt_id` and the gateway compiles the template server-side in a single API call, and an **SDK approach** where you fetch and compile prompts client-side via the `@helicone/helpers` package. Langfuse uses an SDK-based model similar to Helicone's SDK approach: prompts are [fetched and compiled in your application code](/docs/prompt-management/get-started), with built-in [caching](/docs/prompt-management/features/caching) to keep latency low and ensure [guaranteed availability](/docs/prompt-management/features/guaranteed-availability).
