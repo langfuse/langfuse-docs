@@ -8,6 +8,8 @@ import {
   DOCS_STYLE_APP_SECTIONS,
   MARKETING_SECTION_SLUGS,
   WIDE_SECTIONS,
+  POST_SECTIONS,
+  CHANGELOG_SECTIONS,
 } from "@/lib/sections";
 import { MenuSwitcher } from "@/components/MenuSwitcher";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
@@ -42,6 +44,8 @@ export default function SectionLayout({ children, params }: LayoutProps) {
   const isMarketing = MARKETING_SECTION_SLUGS.has(
     section as Parameters<typeof MARKETING_SECTION_SLUGS.has>[0]
   );
+  const isPost = POST_SECTIONS.has(section);
+  const isChangelog = CHANGELOG_SECTIONS.has(section);
 
   // Render DocsLayout from the server component so its LayoutContextProvider
   // correctly propagates context to DocsPage in the page component.
@@ -54,10 +58,12 @@ export default function SectionLayout({ children, params }: LayoutProps) {
           githubUrl="https://github.com/langfuse/langfuse-docs"
           nav={{ enabled: false }}
           sidebar={
-            isMarketing ? { enabled: false } : { banner: <MenuSwitcher /> }
+            isMarketing || isPost ? { enabled: false } : { banner: <MenuSwitcher /> }
           }
+          themeSwitch={isMarketing || isPost ? { enabled: false } : undefined}
+          searchToggle={isMarketing || isPost ? { enabled: false } : undefined}
           containerProps={
-            isMarketing
+            isMarketing || isChangelog
               ? // Force --fd-toc-width:0 so the docs grid doesn't reserve a phantom
                 // 268px TOC column (written to the grid by DocsPage's article via CSS :has()).
                 ({ style: { "--fd-toc-width": "0px" } } as React.ComponentProps<
@@ -66,7 +72,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
               : undefined
           }
         >
-          {isMarketing ? (
+          {isMarketing || isChangelog ? (
             <div className="w-full min-w-0 flex justify-center [grid-area:main]">
               <div className={contentWrapperClass}>
                 <MainContentWrapper>{children}</MainContentWrapper>

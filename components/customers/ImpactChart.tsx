@@ -15,15 +15,15 @@ export const ImpactChart = ({ items }: ImpactChartProps) => {
       <div className="space-y-4">
         {items.map((item, index) => (
           <div key={index}>
-            <div className="flex">
-              <div className="flex-shrink-0 mr-4">
+            <div className="flex items-baseline">
+              <div className="flex-shrink-0 w-10">
                 <span className="font-mono text-sm text-muted-foreground">
                   {String(index + 1).padStart(2, "0")}
                 </span>
               </div>
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-1">
-                  <h3 className="font-semibold text-foreground">{item.area}</h3>
+                  <h3 className="font-semibold text-foreground my-0">{item.area}</h3>
                 </div>
                 <div className="md:col-span-1">
                   <p className="leading-relaxed">{item.impact}</p>

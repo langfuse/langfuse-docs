@@ -12,7 +12,7 @@ interface CustomerCarouselWrapperProps {
 }
 
 export function CustomerCarouselWrapper({
-  path = "/customers",
+  path = "/users",
   showDots,
   loop,
   className,

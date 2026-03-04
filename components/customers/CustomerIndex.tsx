@@ -23,7 +23,7 @@ export const CustomerIndex = ({
         >
           {/* Customer Logo */}
           {story.frontMatter.customerLogo && (
-            <div className="flex items-center mb-8">
+            <div className="flex items-center mb-4">
               {story.frontMatter.customerLogoDark ? (
                 <>
                   <Image
@@ -31,7 +31,7 @@ export const CustomerIndex = ({
                     alt={`${story.frontMatter.title} logo`}
                     width={250}
                     height={80}
-                    className="object-contain w-auto h-8 dark:hidden"
+                    className="object-contain w-auto h-8 dark:hidden !m-0"
                     quality={100}
                     priority={false}
                     unoptimized={false}
@@ -41,7 +41,7 @@ export const CustomerIndex = ({
                     alt={`${story.frontMatter.title} logo`}
                     width={250}
                     height={80}
-                    className="hidden object-contain w-auto h-8 dark:block"
+                    className="hidden object-contain w-auto h-8 dark:block !m-0"
                     quality={100}
                     priority={false}
                     unoptimized={false}
@@ -53,7 +53,7 @@ export const CustomerIndex = ({
                   alt={`${story.frontMatter.title} logo`}
                   width={250}
                   height={80}
-                  className="object-contain w-auto h-8 dark:invert dark:brightness-0 dark:contrast-200"
+                  className="object-contain w-auto h-8 dark:invert dark:brightness-0 dark:contrast-200 !m-0"
                   quality={100}
                   priority={false}
                   unoptimized={false}
@@ -64,7 +64,7 @@ export const CustomerIndex = ({
 
           {/* Quote */}
           {story.frontMatter.customerQuote && (
-            <blockquote className="mb-4 text-xl leading-relaxed text-gray-500 dark:text-gray-200">
+            <blockquote className="text-xl leading-relaxed text-gray-500 dark:text-gray-200 !m-0 !mb-4 !border-0 !pl-0 not-italic">
               "{story.frontMatter.customerQuote as string}"
             </blockquote>
           )}

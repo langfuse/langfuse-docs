@@ -625,6 +625,7 @@ export const sectionLoaders: Record<
     "": () => import("@/content/library/index.mdx?collection=library"),
   },
   "customers": {
+    "": () => import("@/content/customers/index.mdx?collection=customers"),
     "khan-academy": () => import("@/content/customers/khan-academy.mdx?collection=customers"),
     "magic-patterns-ai-design-tools": () => import("@/content/customers/magic-patterns-ai-design-tools.mdx?collection=customers"),
     "merckgroup": () => import("@/content/customers/merckgroup.mdx?collection=customers"),
@@ -683,7 +684,6 @@ export const sectionLoaders: Record<
     "cn": () => import("@/content/marketing/cn.mdx?collection=marketing"),
     "community": () => import("@/content/marketing/community.mdx?collection=marketing"),
     "cookie-policy": () => import("@/content/marketing/cookie-policy.mdx?collection=marketing"),
-    "customers": () => import("@/content/marketing/customers.mdx?collection=marketing"),
     "enterprise": () => import("@/content/marketing/enterprise.mdx?collection=marketing"),
     "find-us": () => import("@/content/marketing/find-us.mdx?collection=marketing"),
     "imprint": () => import("@/content/marketing/imprint.mdx?collection=marketing"),

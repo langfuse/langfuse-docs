@@ -7,7 +7,7 @@ import {
   integrationsSource,
   securitySource,
   librarySource,
-  customersSource,
+  usersSource,
   handbookSource,
   marketingSource,
   MARKETING_SLUGS,
@@ -54,10 +54,10 @@ const DOC_SECTIONS = {
     collection: "library",
     title: "Library",
   },
-  customers: {
-    source: customersSource,
+  users: {
+    source: usersSource,
     collection: "customers",
-    title: "Customers",
+    title: "Users",
   },
   handbook: {
     source: handbookSource,
@@ -86,13 +86,18 @@ export const DOCS_STYLE_APP_SECTIONS = new Set([
   "library",
 ]);
 
+/** Sections that are blog/changelog posts — no left sidebar */
+export const POST_SECTIONS = new Set(["blog", "changelog", "users"]);
+
+/** Changelog posts — no sidebars at all, centered narrow content (like marketing) */
+export const CHANGELOG_SECTIONS = new Set(["changelog"]);
+
 /** Sections that have their own route folder under app/(wide)/ and use wide layout without prose */
 export const WIDE_SECTION_SLUGS = [
   "pricing",
   "pricing-self-host",
   "talk-to-us",
   "watch-demo",
-  "enterprise",
   "startups",
 ] as const;
 export type WideSectionSlug = (typeof WIDE_SECTION_SLUGS)[number];

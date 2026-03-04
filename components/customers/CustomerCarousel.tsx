@@ -144,7 +144,7 @@ export const CustomerCarousel = ({
       )}
 
       {/* Carousel */}
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="mx-auto w-full max-w-6xl px-12">
         <Carousel
           setApi={setApi}
           opts={{
@@ -171,7 +171,7 @@ export const CustomerCarousel = ({
                 >
                   {/* Customer Logo */}
                   {story.frontMatter.customerLogo && (
-                    <div className="flex items-center mb-8">
+                    <div className="flex items-center mb-4">
                       {story.frontMatter.customerLogoDark ? (
                         <>
                           <Image
@@ -212,7 +212,7 @@ export const CustomerCarousel = ({
 
                   {/* Quote */}
                   {story.frontMatter.customerQuote && (
-                    <blockquote className="mb-4 text-xl leading-relaxed text-gray-500 dark:text-gray-200">
+                    <blockquote className="text-xl leading-relaxed text-gray-500 dark:text-gray-200 not-italic !m-0 !mb-4 !border-0 !pl-0">
                       "{story.frontMatter.customerQuote}"
                     </blockquote>
                   )}
@@ -234,7 +234,7 @@ export const CustomerCarousel = ({
                                 alt={`${story.frontMatter.quoteAuthor} profile picture`}
                                 width={48}
                                 height={48}
-                                className="object-cover w-full h-full"
+                                className="object-cover w-full h-full !m-0"
                                 quality={90}
                                 unoptimized
                               />

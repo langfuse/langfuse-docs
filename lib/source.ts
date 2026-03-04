@@ -59,8 +59,8 @@ export const librarySource = loader({
   source: library.toFumadocsSource(),
 });
 
-export const customersSource = loader({
-  baseUrl: "/customers",
+export const usersSource = loader({
+  baseUrl: "/users",
   source: customers.toFumadocsSource(),
 });
 
@@ -81,7 +81,6 @@ export const MARKETING_SLUGS = [
   "cn",
   "community",
   "cookie-policy",
-  "customers",
   "enterprise",
   "find-us",
   "imprint",
@@ -115,7 +114,7 @@ const routeToSource: Record<
   "/integrations":       { ...integrationsSource,   baseUrl: "/integrations" },
   "/security":           { ...securitySource,       baseUrl: "/security" },
   "/library":            { ...librarySource,        baseUrl: "/library" },
-  "/customers":          { ...customersSource,      baseUrl: "/customers" },
+  "/users":              { ...usersSource,           baseUrl: "/users" },
   "/handbook":           { ...handbookSource,       baseUrl: "/handbook" },
   "/handbook/chapters":  { ...handbookSource,       baseUrl: "/handbook" },
   "/self-hosting":       { ...selfHostingSource,    baseUrl: "/self-hosting" },

@@ -23,7 +23,7 @@ const resourcesLinks = [
   { name: "Blog", href: "/blog" },
   { name: "Changelog", href: "/changelog" },
   { name: "Roadmap", href: "/docs/roadmap" },
-  { name: "Customers", href: "/customers" },
+  { name: "Users", href: "/users" },
   { name: "Example Project", href: "/docs/demo" },
   { name: "Walkthroughs", href: "/guides" },
   { name: "Support", href: "/support" },

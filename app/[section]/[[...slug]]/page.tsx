@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocsPage } from "fumadocs-ui/page";
 import type { TOCItemType } from "fumadocs-core/toc";
-import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, DOCS_STYLE_APP_SECTIONS } from "@/lib/sections";
+import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, DOCS_STYLE_APP_SECTIONS, POST_SECTIONS, CHANGELOG_SECTIONS } from "@/lib/sections";
 import type { SectionSlug } from "@/lib/sections";
 import { MARKETING_SLUGS } from "@/lib/source";
 import { SectionDocBodyClient } from "../SectionDocBodyClient";
@@ -17,6 +17,9 @@ export default async function SectionDocPage(props: PageProps) {
   const { section, slug: slugParam } = params;
   const slug = slugParam ?? [];
   const isMarketing = MARKETING_SECTION_SLUGS.has(section as (typeof MARKETING_SLUGS)[number]);
+  const isPost = POST_SECTIONS.has(section);
+  const isChangelog = CHANGELOG_SECTIONS.has(section);
+  const isCollectionIndex = section === "users" && slug.length === 0;
   const effectiveSlug = isMarketing ? [section] : slug;
 
   if (!SECTION_SLUGS.includes(section as SectionSlug)) {
@@ -42,12 +45,12 @@ export default async function SectionDocPage(props: PageProps) {
 
   return (
     <DocsPage
-      toc={isMarketing ? undefined : toc}
-      full={false}
-      className="max-w-full"
-      breadcrumb={{ includePage: !isMarketing }}
-      footer={isMarketing ? { enabled: false } : undefined}
-      tableOfContent={isMarketing ? undefined : { footer: <DocsContributors /> }}
+      toc={isMarketing || isChangelog || isCollectionIndex ? undefined : toc}
+      full={isCollectionIndex}
+      className={isPost && !isChangelog && !isCollectionIndex ? "max-w-3xl" : "max-w-full"}
+      breadcrumb={{ includePage: !isMarketing && !isPost }}
+      footer={isMarketing || isPost ? { enabled: false } : undefined}
+      tableOfContent={isMarketing || isChangelog || isCollectionIndex ? { enabled: false } : { footer: <DocsContributors /> }}
       tableOfContentPopover={{ enabled: false }}
     >
       <SectionDocBodyClient

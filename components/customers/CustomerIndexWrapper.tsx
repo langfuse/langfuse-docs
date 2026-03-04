@@ -11,7 +11,7 @@ interface CustomerIndexWrapperProps {
 }
 
 export function CustomerIndexWrapper({
-  path = "/customers",
+  path = "/users",
   maxItems,
 }: CustomerIndexWrapperProps) {
   const stories = getPagesForRoute(path) as CustomerStory[];

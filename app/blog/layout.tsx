@@ -13,6 +13,8 @@ export default function BlogLayout({
         tree={blogSource.getPageTree()}
         nav={{ enabled: false }}
         sidebar={{ enabled: false }}
+        themeSwitch={{ enabled: false }}
+        searchToggle={{ enabled: false }}
       >
         {children}
       </DocsLayout>
