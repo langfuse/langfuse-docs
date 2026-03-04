@@ -234,7 +234,7 @@ export const CustomerCarousel = ({
                                 alt={`${story.frontMatter.quoteAuthor} profile picture`}
                                 width={48}
                                 height={48}
-                                className="object-cover w-full h-full"
+                                className="object-cover w-full h-full !m-0"
                                 quality={90}
                                 unoptimized
                               />
