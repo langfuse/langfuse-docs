@@ -17,7 +17,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
-import { Background } from "./Background";
 import { NotebookBanner } from "./NotebookBanner";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import { cn } from "@/lib/utils";
@@ -360,7 +359,6 @@ export const MainContentWrapper = (props) => {
           <DocsSupport />
         </div>
       ) : null}
-      <Background />
     </>
   );
 };
