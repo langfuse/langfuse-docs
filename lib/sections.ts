@@ -7,7 +7,7 @@ import {
   integrationsSource,
   securitySource,
   librarySource,
-  customersSource,
+  usersSource,
   handbookSource,
   marketingSource,
   MARKETING_SLUGS,
@@ -54,10 +54,10 @@ const DOC_SECTIONS = {
     collection: "library",
     title: "Library",
   },
-  customers: {
-    source: customersSource,
+  users: {
+    source: usersSource,
     collection: "customers",
-    title: "Customers",
+    title: "Users",
   },
   handbook: {
     source: handbookSource,

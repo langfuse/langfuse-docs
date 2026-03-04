@@ -78,7 +78,7 @@ const menuItems: {
       { name: "Changelog", href: "/changelog" },
       { name: "Roadmap", href: "/docs/roadmap" },
       { name: "Interactive Demo", href: "/docs/demo" },
-      { name: "Customers", href: "/customers" },
+      { name: "Users", href: "/users" },
       { name: "AI Engineering Library", href: "/library" },
       { name: "Guides & Cookbooks", href: "/guides" },
     ],

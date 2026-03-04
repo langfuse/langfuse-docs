@@ -53,10 +53,10 @@ interface CustomerStory {
 
 // Companies with customer stories
 const companiesWithStories = [
-  { name: "SumUp", path: "/customers/sumup", light: sumupLight, dark: sumupDark },
-  { name: "Khan Academy", path: "/customers/khan-academy", light: khanacademyLight, dark: khanacademyDark },
-  { name: "Magic Patterns", path: "/customers/magic-patterns-ai-design-tools", light: magicPatternsLight, dark: magicPatternsDark },
-  { name: "Merck", path: "/customers/merckgroup", light: merckLight, dark: merckDark },
+  { name: "SumUp", path: "/users/sumup", light: sumupLight, dark: sumupDark },
+  { name: "Khan Academy", path: "/users/khan-academy", light: khanacademyLight, dark: khanacademyDark },
+  { name: "Magic Patterns", path: "/users/magic-patterns-ai-design-tools", light: magicPatternsLight, dark: magicPatternsDark },
+  { name: "Merck", path: "/users/merckgroup", light: merckLight, dark: merckDark },
 ];
 
 // Companies without customer stories (logos only)
@@ -276,7 +276,7 @@ export function Customers() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
-  const allStories = (getPagesUnderRoute("/customers") as Array<
+  const allStories = (getPagesUnderRoute("/users") as Array<
     Page & { frontMatter: any }
   >).filter(
     (page) => page.frontMatter?.showInCustomerIndex !== false

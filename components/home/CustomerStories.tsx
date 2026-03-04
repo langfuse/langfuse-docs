@@ -4,7 +4,7 @@ import { CustomerCarousel } from "../customers/CustomerCarousel";
 import { getPagesForRoute } from "@/lib/source";
 
 export default function CustomerStories() {
-  const stories = getPagesForRoute("/customers");
+  const stories = getPagesForRoute("/users");
 
   return (
     <HomeSection>
@@ -15,7 +15,7 @@ export default function CustomerStories() {
         h="h2"
         buttons={[
           {
-            href: "/customers",
+            href: "/users",
             text: "See all customer stories",
           },
         ]}
