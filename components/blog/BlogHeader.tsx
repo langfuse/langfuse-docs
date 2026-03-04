@@ -24,7 +24,7 @@ export const BlogHeader = ({
           alt={title}
           width={1200}
           height={630}
-          className="rounded mb-14"
+          className="rounded mb-14 my-0"
         />
       )}
       <span className="text-primary/60">{date}</span>
@@ -35,7 +35,7 @@ export const BlogHeader = ({
             alt={`${title} logo`}
             width={160}
             height={40}
-            className="h-10 w-auto object-contain"
+            className="h-10 w-auto object-contain my-0"
           />
         </div>
       )}
