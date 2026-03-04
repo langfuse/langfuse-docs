@@ -36,6 +36,8 @@ const simpleLinks = [
 
 export function NavLinks() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileProductOpen, setMobileProductOpen] = useState(true);
+  const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false);
 
   return (
     <>
@@ -82,40 +84,76 @@ export function NavLinks() {
 
       {/* Mobile hamburger button */}
       <button
-        className="md:hidden p-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+        className="md:hidden p-0.5 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
         onClick={() => setMobileOpen((v) => !v)}
         aria-label="Toggle navigation menu"
       >
-        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
 
       {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden fixed top-16 left-0 right-0 z-50 bg-background border-b shadow-lg overflow-y-auto max-h-[calc(100vh-4rem)]">
+      <div
+        className={`md:hidden fixed top-16 left-0 right-0 z-50 bg-background border-b shadow-lg transition-all duration-300 ease-out overflow-hidden ${mobileOpen
+            ? "opacity-100 translate-y-0 max-h-[calc(100vh-4rem)]"
+            : "opacity-0 -translate-y-2 max-h-0 pointer-events-none"
+          }`}
+        aria-hidden={!mobileOpen}
+      >
+        <div className="overflow-y-auto max-h-[calc(100vh-4rem)]">
           <div className="px-4 py-4 flex flex-col gap-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2 pt-1 pb-2">Product</p>
-            {productLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="block px-2 py-2 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
-              >
-                {link.name}
-              </Link>
-            ))}
+            <button
+              type="button"
+              className="flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-200"
+              onClick={() => setMobileProductOpen((v) => !v)}
+              aria-expanded={mobileProductOpen}
+            >
+              <span>Product</span>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${mobileProductOpen ? "rotate-180" : "rotate-0"
+                  }`}
+              />
+            </button>
+            {mobileProductOpen && (
+              <div className="flex flex-col gap-1 pl-2">
+                {productLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="block px-2 py-2 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+            )}
 
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2 pt-4 pb-2">Resources</p>
-            {resourcesLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="block px-2 py-2 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
-              >
-                {link.name}
-              </Link>
-            ))}
+            <button
+              type="button"
+              className="mt-3 flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-200"
+              onClick={() => setMobileResourcesOpen((v) => !v)}
+              aria-expanded={mobileResourcesOpen}
+            >
+              <span>Resources</span>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${mobileResourcesOpen ? "rotate-180" : "rotate-0"
+                  }`}
+              />
+            </button>
+            {mobileResourcesOpen && (
+              <div className="flex flex-col gap-1 pl-2">
+                {resourcesLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="block px-2 py-2 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+            )}
 
             <div className="border-t mt-3 pt-3 flex flex-col gap-1">
               {simpleLinks.map((link) => (
@@ -131,7 +169,7 @@ export function NavLinks() {
             </div>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 }
