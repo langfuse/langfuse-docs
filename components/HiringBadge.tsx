@@ -51,7 +51,7 @@ export function HiringBadge() {
   return (
     <div
       ref={containerRef}
-      className="hidden relative lg:block"
+      className="hidden relative min-[1120px]:block"
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

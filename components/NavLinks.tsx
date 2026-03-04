@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 const productLinks = [
   { name: "Overview", href: "/" },
@@ -30,7 +31,7 @@ const resourcesLinks = [
 
 const simpleLinks = [
   { name: "Docs", href: "/docs" },
-  { name: "Changelog", href: "/changelog" },
+  { name: "Changelog", href: "/changelog", tabletHidden: true },
   { name: "Pricing", href: "/pricing" },
 ];
 
@@ -42,7 +43,7 @@ export function NavLinks() {
   return (
     <>
       {/* Desktop nav */}
-      <div className="hidden overflow-x-auto gap-4 items-center nextra-scrollbar ml:auto md:flex">
+      <div className="hidden overflow-x-auto gap-2 lg:gap-4 items-center md:flex">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-1 py-1.5 text-sm whitespace-nowrap ring-inset text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             Product
@@ -75,7 +76,7 @@ export function NavLinks() {
           <Link
             key={link.name}
             href={link.href}
-            className="py-1.5 text-sm font-normal whitespace-nowrap ring-inset text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className={cn("py-1.5 text-sm font-normal whitespace-nowrap ring-inset text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring", link.tabletHidden && "hidden lg:block")}
           >
             {link.name}
           </Link>
@@ -94,8 +95,8 @@ export function NavLinks() {
       {/* Mobile menu */}
       <div
         className={`md:hidden fixed top-16 left-0 right-0 z-50 bg-background border-b shadow-lg transition-all duration-300 ease-out overflow-hidden ${mobileOpen
-            ? "opacity-100 translate-y-0 max-h-[calc(100vh-4rem)]"
-            : "opacity-0 -translate-y-2 max-h-0 pointer-events-none"
+          ? "opacity-100 translate-y-0 max-h-[calc(100vh-4rem)]"
+          : "opacity-0 -translate-y-2 max-h-0 pointer-events-none"
           }`}
         aria-hidden={!mobileOpen}
       >

@@ -12,7 +12,7 @@ export function Navbar() {
         </div>
         <div className="flex flex-row-reverse md:flex-row flex-1 md:gap-4 gap-2">
           <NavLinks />
-          <div className="flex gap-2 justify-end items-center md:gap-4">
+          <div className="flex gap-2 justify-end items-center lg:gap-4">
             <div className="min-w-0 max-w-9 h-9 flex-1 block xl:max-w-[280px]">
               <InkeepSearchBar />
             </div>
