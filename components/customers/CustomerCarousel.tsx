@@ -144,7 +144,7 @@ export const CustomerCarousel = ({
       )}
 
       {/* Carousel */}
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="mx-auto w-full max-w-6xl px-12">
         <Carousel
           setApi={setApi}
           opts={{
