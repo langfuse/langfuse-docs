@@ -45,7 +45,7 @@ export default async function SectionDocPage(props: PageProps) {
     <DocsPage
       toc={isMarketing ? undefined : toc}
       full={false}
-      className="max-w-full"
+      className={isPost ? "max-w-3xl" : "max-w-full"}
       breadcrumb={{ includePage: !isMarketing && !isPost }}
       footer={isMarketing || isPost ? { enabled: false } : undefined}
       tableOfContent={isMarketing ? undefined : { footer: <DocsContributors /> }}
