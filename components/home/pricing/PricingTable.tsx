@@ -195,7 +195,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         name: "Yearly Commitment",
         mainFeatures: [
           "Custom Volume Pricing",
-          "Custom Terms & DPA",
           "Architecture reviews",
           "Billing via AWS Marketplace",
           "Billing via Invoice",
@@ -1150,7 +1149,7 @@ const sections: Section[] = [
             Hobby: "Standard T&Cs & DPA",
             Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
-            Enterprise: "Custom with " + YEARLY_COMMITMENT,
+            Enterprise: "Talk to Sales",
           },
           selfHosted: {
             "Open Source": ENTERPRISE,
@@ -1162,7 +1161,7 @@ const sections: Section[] = [
         href: "/security/dpa",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": ENTERPRISE },
+        
         },
       },
       {
