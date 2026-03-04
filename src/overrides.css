@@ -16,17 +16,19 @@
   --fd-sidebar-width: 360px;
 }
 
-/* Docs sidebar: align content to left edge (remove extra left padding) */
-#nd-docs-layout #nd-sidebar > div:first-child {
-  padding-inline-start: 0;
+.layout-wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
 }
-/* Scroll viewport (nav links) and footer */
-#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport],
-#nd-docs-layout #nd-sidebar > div:nth-child(2) > div {
-  padding-inline-start: 0;
+#nd-docs-layout #nd-sidebar[data-hovered="false"] {
+  background-color: transparent;
 }
-#nd-docs-layout #nd-sidebar > div:last-child {
-  padding-inline-start: 0;
+
+@media (min-width: 1440px) {
+  #nd-docs-layout [data-sidebar-panel] {
+    left: calc((100vw - 1440px) / 2);
+  }
 }
 
 /* Fix nested lists */

@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
  */
 export function DocsLayoutWrapper({ children }: { children: ReactNode }) {
   return (
-    <div style={{ ["--fd-banner-height" as string]: "63px" }}>
+    <div className="layout-wrapper" style={{ ["--fd-banner-height" as string]: "63px" }}>
       <SidebarProvider>{children}</SidebarProvider>
     </div>
   );
