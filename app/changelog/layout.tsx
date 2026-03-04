@@ -13,6 +13,8 @@ export default function ChangelogLayout({
         tree={changelogSource.getPageTree()}
         nav={{ enabled: false }}
         sidebar={{ enabled: false }}
+        themeSwitch={{ enabled: false }}
+        searchToggle={{ enabled: false }}
       >
         {children}
       </DocsLayout>
