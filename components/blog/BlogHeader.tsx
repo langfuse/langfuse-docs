@@ -33,9 +33,9 @@ export const BlogHeader = ({
           <Image
             src={customerLogo}
             alt={`${title} logo`}
-            width={200}
-            height={81}
-            className="h-[81px] w-auto object-contain"
+            width={160}
+            height={40}
+            className="h-10 w-auto object-contain"
           />
         </div>
       )}
