@@ -87,7 +87,7 @@ export const DOCS_STYLE_APP_SECTIONS = new Set([
 ]);
 
 /** Sections that are blog/changelog posts — no left sidebar */
-export const POST_SECTIONS = new Set(["blog", "changelog"]);
+export const POST_SECTIONS = new Set(["blog", "changelog", "users"]);
 
 /** Changelog posts — no sidebars at all, centered narrow content (like marketing) */
 export const CHANGELOG_SECTIONS = new Set(["changelog"]);
