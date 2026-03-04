@@ -29,13 +29,13 @@ export const BlogHeader = ({
       )}
       <span className="text-primary/60">{date}</span>
       {customerLogo && (
-        <div className="bg-white rounded-lg p-3 shadow-sm border my-3">
+        <div className="bg-white rounded-lg p-4 shadow-sm border my-4">
           <Image
             src={customerLogo}
             alt={`${title} logo`}
-            width={160}
-            height={40}
-            className="h-8 w-auto object-contain"
+            width={200}
+            height={81}
+            className="h-[81px] w-auto object-contain"
           />
         </div>
       )}
