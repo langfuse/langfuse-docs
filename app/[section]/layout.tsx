@@ -20,7 +20,6 @@ type LayoutProps = {
 };
 
 const contentWrapperClass = "mx-auto w-full max-w-4xl";
-const postContentWrapperClass = "mx-auto w-full max-w-3xl";
 
 // Synchronous server component — keeps the same RSC context-propagation behaviour
 // as app/docs/layout.tsx (which is also sync). Using React.use() to unwrap the
@@ -60,7 +59,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
             isMarketing || isPost ? { enabled: false } : { banner: <MenuSwitcher /> }
           }
           containerProps={
-            isMarketing || isPost
+            isMarketing
               ? // Force --fd-toc-width:0 so the docs grid doesn't reserve a phantom
                 // 268px TOC column (written to the grid by DocsPage's article via CSS :has()).
                 ({ style: { "--fd-toc-width": "0px" } } as React.ComponentProps<
@@ -69,9 +68,9 @@ export default function SectionLayout({ children, params }: LayoutProps) {
               : undefined
           }
         >
-          {isMarketing || isPost ? (
+          {isMarketing ? (
             <div className="w-full min-w-0 flex justify-center [grid-area:main]">
-              <div className={isPost ? postContentWrapperClass : contentWrapperClass}>
+              <div className={contentWrapperClass}>
                 <MainContentWrapper>{children}</MainContentWrapper>
               </div>
             </div>

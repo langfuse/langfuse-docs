@@ -43,12 +43,12 @@ export default async function SectionDocPage(props: PageProps) {
 
   return (
     <DocsPage
-      toc={isMarketing || isPost ? undefined : toc}
+      toc={isMarketing ? undefined : toc}
       full={false}
       className="max-w-full"
       breadcrumb={{ includePage: !isMarketing && !isPost }}
       footer={isMarketing || isPost ? { enabled: false } : undefined}
-      tableOfContent={isMarketing || isPost ? undefined : { footer: <DocsContributors /> }}
+      tableOfContent={isMarketing ? undefined : { footer: <DocsContributors /> }}
       tableOfContentPopover={{ enabled: false }}
     >
       <SectionDocBodyClient
