@@ -86,13 +86,15 @@ export const DOCS_STYLE_APP_SECTIONS = new Set([
   "library",
 ]);
 
+/** Sections that are blog/changelog posts — no left sidebar, no TOC, centered narrow content */
+export const POST_SECTIONS = new Set(["blog", "changelog"]);
+
 /** Sections that have their own route folder under app/(wide)/ and use wide layout without prose */
 export const WIDE_SECTION_SLUGS = [
   "pricing",
   "pricing-self-host",
   "talk-to-us",
   "watch-demo",
-  "enterprise",
   "startups",
 ] as const;
 export type WideSectionSlug = (typeof WIDE_SECTION_SLUGS)[number];
