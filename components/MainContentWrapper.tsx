@@ -244,7 +244,7 @@ export const CopyMarkdownButton = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleChatGPTClick}
-              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
             >
               <IconChatGPT className="w-4 h-4 shrink-0" />
               <div className="flex flex-col flex-1 min-w-0">
@@ -267,7 +267,7 @@ export const CopyMarkdownButton = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleClaudeClick}
-              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
             >
               <IconClaude className="w-4 h-4 shrink-0" />
               <div className="flex flex-col flex-1 min-w-0">
@@ -291,7 +291,7 @@ export const CopyMarkdownButton = () => {
                 capture("copy_page", { type: "mcp" });
               }}
               target="_blank"
-              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
             >
               <IconMCP className="w-4 h-4 shrink-0" />
               <div className="flex flex-col flex-1 min-w-0">
