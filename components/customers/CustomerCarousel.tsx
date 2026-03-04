@@ -212,7 +212,7 @@ export const CustomerCarousel = ({
 
                   {/* Quote */}
                   {story.frontMatter.customerQuote && (
-                    <blockquote className="mb-4 text-xl leading-relaxed text-gray-500 dark:text-gray-200 italic border-l-4 border-gray-300 dark:border-gray-600 pl-4 !m-0 !mb-4">
+                    <blockquote className="text-xl leading-relaxed text-gray-500 dark:text-gray-200 not-italic !m-0 !mb-4">
                       "{story.frontMatter.customerQuote}"
                     </blockquote>
                   )}
