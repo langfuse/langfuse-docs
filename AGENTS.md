@@ -1,88 +1,66 @@
 # AGENTS.md
 
-This repository contains the website, documentation, and changelog of Langfuse (https://langfuse.com).
+This repository powers the Langfuse website hosted on `langfuse.com`, including both the marketing site and docs content (documentation, blog, changelog, FAQ).
 
-## Development commands
+## Quickstart
 
-### Core development
+- Use **Node.js 22** (`package.json#engines`).
+- Use **pnpm** (`packageManager` is configured in `package.json`).
+- Local dev server runs on **http://localhost:3333**.
 
-- `pnpm dev` — Start development server on localhost:3333
-- `pnpm build` — Build the production version
-- `pnpm start` — Start production server on localhost:3333
+## Commands you will use most
 
-### Content management
+### Development
 
-- `pnpm run prebuild` — Update GitHub stars and generate contributor data (runs automatically before build)
-- `bash scripts/update_cookbook_docs.sh` — Convert Jupyter notebooks to markdown (uses `uv` with inline dependencies)
-- `pnpm run link-check` — Check for broken links in documentation
+- `pnpm dev` — start the local dev server on port 3333.
+- `pnpm build` — build the production site.
+- `pnpm start` — run the production build on port 3333.
 
-### Analysis
+### Content and maintenance
 
-- `pnpm run analyze` — Analyze bundle size using `@next/bundle-analyzer`
+- `pnpm run prebuild` — refresh generated metadata (GitHub stars, contributors, copied markdown sources).
+- `bash scripts/update_cookbook_docs.sh` — convert notebook-based cookbook content into docs markdown.
+- `pnpm run link-check` — validate markdown links.
+- `pnpm run sitemap-check` — validate links from generated sitemap.
 
-## Architecture overview
+### Optional analysis
 
-This is a **Nextra-based documentation site** for Langfuse built with Next.js.
+- `pnpm run analyze` — run a bundle analysis build.
 
-### Technology stack
+## Repository map
 
-- **Nextra** (`3.0.15`) — Documentation framework built on Next.js
-- **Next.js** (`15.2.4`) — React framework
-- **shadcn/ui** — UI component library with semantic color tokens
-- **Tailwind CSS** — Styling (**always use semantic color tokens, never explicit colors**)
-- **TypeScript** — Type safety
-- **pnpm** (`9.5.0`) — Package manager
+- `pages/` — site pages and MDX/Markdown content (marketing pages, docs, blog, changelog, FAQ).
+- `components/` — reusable React components.
+- `components-mdx/` — custom components used from MDX pages.
+- `cookbook/` — source Jupyter notebooks for cookbook guides.
+- `pages/guides/cookbook/` — generated cookbook markdown output.
+- `public/` — static assets.
+- `scripts/` — build and maintenance scripts.
+- `lib/` — shared utilities/config helpers.
 
-### Content architecture
+## Core content types
 
-- **MDX/Markdown pages**: `pages/`
-- **Components**: `components/` (including custom MDX components)
-- **Cookbook source notebooks**: `cookbook/`
-- **Static assets**: `public/`
-
-### Key directories
-
-- `components/` — Reusable React components
-- `pages/` — All site pages (docs, blog, changelog, FAQ)
-- `cookbook/` — Jupyter notebooks that get converted to markdown
-- `components-mdx/` — MDX components used across pages
-- `scripts/` — Build and maintenance scripts
-- `lib/` — Utility functions and configuration
-
-### Content management workflow
-
-1. Edit `.ipynb` files in `cookbook/`
-2. Run `bash scripts/update_cookbook_docs.sh` to convert to markdown
-3. Generated markdown files are placed in `pages/guides/cookbook/`
-4. **Do not edit generated `.md` files directly** — always edit source notebooks
-
-### Key configuration files
-
-- `next.config.mjs` — Next.js config (includes extensive redirects)
-- `theme.config.tsx` — Nextra theme config
-- `components.json` — shadcn/ui config
-- `tailwind.config.js` — Tailwind config
-
-## Styling guidelines
-
-- Use semantic color tokens from shadcn/ui
-- Never use explicit color values
-- Follow shadcn/ui component conventions
-- Use mobile-first responsive design
-
-## Content types
-
-- **Documentation**: `pages/docs/`
-- **Blog**: `pages/blog/`
+- **Docs**: `pages/docs/`
 - **Changelog**: `pages/changelog/`
-- **Cookbook**: `pages/guides/cookbook/` (generated)
+- **Blog**: `pages/blog/`
+- **Guides**: `pages/guides/`
 - **FAQ**: `pages/faq/`
 
-## Development notes
+## Important workflow rules
 
-- Development server runs on port `3333`
-- Requires Node.js `22`
-- Uses pnpm
-- Contributor data and GitHub stars are auto-generated before builds
-- Redirect configuration is extensive and intentional
-- CSP headers are configured for production security
+1. For cookbook changes, edit notebook sources in `cookbook/`.
+2. Regenerate docs with `bash scripts/update_cookbook_docs.sh`.
+3. Do **not** hand-edit generated files in `pages/guides/cookbook/`.
+
+## Styling and implementation guidelines
+
+- Use existing **shadcn/ui** patterns and components where possible.
+- Use **Tailwind semantic tokens** (avoid hard-coded color values).
+- Build mobile-first responsive layouts.
+
+## Key config files
+
+- `next.config.mjs` — Next.js config and redirects.
+- `theme.config.tsx` — Nextra theme configuration.
+- `tailwind.config.js` — Tailwind setup.
+- `components.json` — shadcn/ui component config.
