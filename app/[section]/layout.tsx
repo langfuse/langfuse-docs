@@ -60,6 +60,8 @@ export default function SectionLayout({ children, params }: LayoutProps) {
           sidebar={
             isMarketing || isPost ? { enabled: false } : { banner: <MenuSwitcher /> }
           }
+          themeSwitch={isMarketing || isPost ? { enabled: false } : undefined}
+          searchToggle={isMarketing || isPost ? { enabled: false } : undefined}
           containerProps={
             isMarketing || isChangelog
               ? // Force --fd-toc-width:0 so the docs grid doesn't reserve a phantom
