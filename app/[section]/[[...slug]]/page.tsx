@@ -19,6 +19,7 @@ export default async function SectionDocPage(props: PageProps) {
   const isMarketing = MARKETING_SECTION_SLUGS.has(section as (typeof MARKETING_SLUGS)[number]);
   const isPost = POST_SECTIONS.has(section);
   const isChangelog = CHANGELOG_SECTIONS.has(section);
+  const isCollectionIndex = section === "users" && slug.length === 0;
   const effectiveSlug = isMarketing ? [section] : slug;
 
   if (!SECTION_SLUGS.includes(section as SectionSlug)) {
@@ -44,12 +45,12 @@ export default async function SectionDocPage(props: PageProps) {
 
   return (
     <DocsPage
-      toc={isMarketing || isChangelog ? undefined : toc}
+      toc={isMarketing || isChangelog || isCollectionIndex ? undefined : toc}
       full={false}
-      className={isPost && !isChangelog ? "max-w-3xl" : "max-w-full"}
+      className={isPost && !isChangelog && !isCollectionIndex ? "max-w-3xl" : "max-w-full"}
       breadcrumb={{ includePage: !isMarketing && !isPost }}
       footer={isMarketing || isPost ? { enabled: false } : undefined}
-      tableOfContent={isMarketing || isChangelog ? undefined : { footer: <DocsContributors /> }}
+      tableOfContent={isMarketing || isChangelog || isCollectionIndex ? { enabled: false } : { footer: <DocsContributors /> }}
       tableOfContentPopover={{ enabled: false }}
     >
       <SectionDocBodyClient
