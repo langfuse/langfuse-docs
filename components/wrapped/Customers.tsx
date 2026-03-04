@@ -27,8 +27,8 @@ import magicPatternsLight from "../home/img/magicpatterns_light.png";
 import magicPatternsDark from "../home/img/magicpatterns_dark.png";
 import merckLight from "../home/img/merck-dark.png";
 import merckDark from "../home/img/merck-light.png";
-import juiceboxLight from "../home/img/juicebox_light.svg";
-import juiceboxDark from "../home/img/juicebox_dark.svg";
+import adobeLight from "../home/img/adobe_light.svg";
+import adobeDark from "../home/img/adobe_dark.svg";
 import pigmentLight from "../home/img/pigment_light.svg";
 import pigmentDark from "../home/img/pigment_dark.svg";
 import sevenelevenLight from "../home/img/seveneleven_light.png";
@@ -70,7 +70,7 @@ const companiesWithoutStories = [
   { name: "Twilio", light: twilioLight, dark: twilioDark, isIntuitive: false },
   { name: "Telus", light: telusLight, dark: telusDark, isIntuitive: false },
   { name: "Pigment", light: pigmentLight, dark: pigmentDark, isIntuitive: false },
-  { name: "Juicebox", light: juiceboxLight, dark: juiceboxDark, isIntuitive: false },
+  { name: "Adobe", light: adobeLight, dark: adobeDark, isIntuitive: true },
   { name: "Intuit", light: intuitLight, dark: intuitDark, isIntuitive: true },
   { name: "Seven Eleven Japan", light: sevenelevenLight, dark: sevenelevenDark, isIntuitive: false },
   { name: "Circleback", light: circlebackLight, dark: circlebackDark, isIntuitive: false },
@@ -315,7 +315,7 @@ export function Customers() {
       { type: "logo", name: "Samsara" },
       { type: "logo", name: "Twilio" },
       { type: "logo", name: "Telus" },
-      { type: "logo", name: "Juicebox" },
+      { type: "logo", name: "Adobe" },
       { type: "logo", name: "Seven Eleven Japan" },
       { type: "story", name: "Khan Academy" },
       { type: "logo", name: "Circleback" },
