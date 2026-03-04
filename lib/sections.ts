@@ -86,8 +86,11 @@ export const DOCS_STYLE_APP_SECTIONS = new Set([
   "library",
 ]);
 
-/** Sections that are blog/changelog posts — no left sidebar, no TOC, centered narrow content */
+/** Sections that are blog/changelog posts — no left sidebar */
 export const POST_SECTIONS = new Set(["blog", "changelog"]);
+
+/** Changelog posts — no sidebars at all, centered narrow content (like marketing) */
+export const CHANGELOG_SECTIONS = new Set(["changelog"]);
 
 /** Sections that have their own route folder under app/(wide)/ and use wide layout without prose */
 export const WIDE_SECTION_SLUGS = [
