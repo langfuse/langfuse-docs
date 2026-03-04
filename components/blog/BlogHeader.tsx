@@ -42,7 +42,7 @@ export const BlogHeader = ({
       <h1 className="mt-8 font-bold leading-snug text-balance text-foreground">
         {title}
       </h1>
-      <p className="text-primary/60 text-xl text-balance">{description}</p>
+      <p className="mt-2 text-primary/60 text-xl text-balance">{description}</p>
       <Authors authors={authors} />
     </div>
   );
