@@ -7,6 +7,38 @@ import contributorsData from "../data/generated/contributors.json";
 import Image from "next/image";
 import { HoverCard, HoverCardTrigger } from "@/components/ui/hover-card";
 
+const getGithubEditUrl = (path: string): string | null => {
+  const cleanPath = path.split("#")[0].split("?")[0];
+
+  const [, section, ...slugParts] = cleanPath.split("/");
+
+  const sectionToDir: Record<string, string> = {
+    docs: "content/docs",
+    guides: "content/guides",
+    integrations: "content/integrations",
+    "self-hosting": "content/self-hosting",
+    library: "content/library",
+  };
+
+  const contentDir = sectionToDir[section];
+  if (!contentDir) return null;
+
+  const slugPath = slugParts.join("/");
+  const filePath = `${contentDir}/${slugPath === "" ? "index" : slugPath}.mdx`;
+
+  return `https://github.com/langfuse/langfuse-docs/edit/main/${filePath}`;
+};
+
+const getFeedbackUrl = (pageTitle?: string): string => {
+  const title = (pageTitle ?? "this page").trim();
+  const issueTitle = `Feedback for "${title}"`;
+  const params = new URLSearchParams({
+    title: issueTitle,
+    labels: "feedback",
+  });
+  return `https://github.com/langfuse/langfuse-docs/issues/new?${params.toString()}`;
+};
+
 const getContributors = (path: string): string[] => {
   // Try exact path first, then with/without /index suffix
   const variants = [
@@ -110,10 +142,16 @@ const processContributor = (username: string): ProcessedContributor => {
   };
 };
 
-export const DocsContributors = () => {
+type DocsContributorsProps = {
+  pageTitle?: string;
+};
+
+export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
   const pathname = usePathname() ?? "";
   const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
+  const editUrl = getGithubEditUrl(currentPath);
+  const feedbackUrl = getFeedbackUrl(pageTitle);
 
   // Reset showAll when the page changes
   useEffect(() => {
@@ -130,25 +168,51 @@ export const DocsContributors = () => {
   const remainingCount = Math.max(0, processedContributors.length - 3);
 
   return (
-    <div className="mt-1 pt-4 border-t border-border w-full">
-      <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-        Contributors
+    <>
+      {(editUrl || feedbackUrl) && (
+        <div className="mt-1 pt-3 pb-2 border-t border-border w-full flex flex-col gap-2">
+          {feedbackUrl && (
+            <a
+              href={feedbackUrl}
+              rel="noreferrer noopener"
+              target="_blank"
+              className="font-medium text-xs text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground"
+            >
+              Question? Give us feedback →
+            </a>
+          )}
+          {editUrl && (
+            <a
+              href={editUrl}
+              rel="noreferrer noopener"
+              target="_blank"
+              className="font-medium text-xs text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground"
+            >
+              Edit this page on GitHub
+            </a>
+          )}
+        </div>
+      )}
+      <div className="mt-1 pt-4 border-t border-border w-full">
+        <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+          Contributors
+        </div>
+        <div>
+          {displayedContributors.map((contributor) => (
+            <React.Fragment key={contributor.username}>
+              <ContributorCard contributor={contributor} />
+            </React.Fragment>
+          ))}
+          {remainingCount > 0 && !showAll && (
+            <button
+              onClick={() => setShowAll(true)}
+              className="mt-1 text-xs text-muted-foreground hover:text-foreground italic pl-2 transition-colors cursor-pointer"
+            >
+              ... and {remainingCount} more
+            </button>
+          )}
+        </div>
       </div>
-      <div>
-        {displayedContributors.map((contributor) => (
-          <React.Fragment key={contributor.username}>
-            <ContributorCard contributor={contributor} />
-          </React.Fragment>
-        ))}
-        {remainingCount > 0 && !showAll && (
-          <button
-            onClick={() => setShowAll(true)}
-            className="mt-1 text-xs text-muted-foreground hover:text-foreground italic pl-2 transition-colors cursor-pointer"
-          >
-            ... and {remainingCount} more
-          </button>
-        )}
-      </div>
-    </div>
+    </>
   );
 };

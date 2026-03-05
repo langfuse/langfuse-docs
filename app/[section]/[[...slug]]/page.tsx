@@ -50,8 +50,7 @@ export default async function SectionDocPage(props: PageProps) {
       className={isPost && !isChangelog && !isCollectionIndex ? "max-w-3xl" : "max-w-full"}
       breadcrumb={{ includePage: !isMarketing && !isPost }}
       footer={isMarketing || isPost ? { enabled: false } : undefined}
-      tableOfContent={isMarketing || isChangelog || isCollectionIndex ? { enabled: false } : { footer: <DocsContributors /> }}
-      tableOfContentPopover={{ enabled: false }}
+      tableOfContent={isMarketing || isChangelog || isCollectionIndex ? { enabled: false } : { footer: <DocsContributors pageTitle={page.data.title} /> }}
     >
       <SectionDocBodyClient
         collection={config.collection}
