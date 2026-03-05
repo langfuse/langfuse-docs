@@ -43,7 +43,7 @@ We redesigned the observations and metrics APIs to test the new data model under
 
 [LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) on traces require a separate ClickHouse query, causing delays and backlogs at scale.
 
-[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge#understanding-each-evaluation-target) execute in seconds instead of minutes: 
+[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge#understanding-each-evaluation-target) execute in seconds instead of minutes:
 
 - **Eliminate evaluation delays**: No database query overhead. Execution time is limited only by LLM API rate limits, not database performance
 - **Scale without performance impact**: Run evaluations on every observation without degradation
@@ -118,6 +118,20 @@ The [Observations API v2](/docs/api-and-data-platform/features/observations-api#
 
 See the [v2 APIs announcement](/changelog/2025-12-17-v2-metrics-and-observations-api) for migration guidance and detailed feature comparison.
 
+## A note for self-hosted users
+
+<Callout type="warning">
+  The changes described above are currently available on **Langfuse Cloud only**.
+  We do not have a timeline yet for self-hosted availability.
+</Callout>
+
+Our team is actively working on a path for self-hosters to adopt the new observation-centric data model.
+This is a core priority for our team over the coming weeks.
+Unfortunately, we cannot provide a timeline for a corresponding release, yet.
+
+[//]: # (TODO: Add link to discussion)
+We will share updates in the [changelog](/changelog) and on [GitHub Discussions]()
+as they become available.
 
 ## Get started
 
