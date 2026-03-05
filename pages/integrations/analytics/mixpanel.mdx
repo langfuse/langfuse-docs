@@ -66,6 +66,34 @@ You can use the `AI Company KPIs` template to get started with a pre-built dashb
 
 </Steps>
 
+## Export source (Langfuse v4)
+
+Mixpanel integrations now include an `Export Source` selector. New integrations default to `Enriched observations (recommended)` (trace attributes are directly set on observations).
+
+This source uses enriched observations with trace attributes and provides significantly better export performance. `Scores` are always included, regardless of the selected source.
+
+Available options:
+
+- `Traces and observations (legacy)`
+- `Traces and observations (legacy) and enriched observations`
+- `Enriched observations (recommended)`
+
+<Callout type="warning">
+`Traces and observations (legacy)` sources may be deprecated in the future. All new export jobs should use `Enriched observations (recommended)`, and existing legacy jobs are strongly recommended to upgrade.
+</Callout>
+
+### Upgrade path for existing configurations
+
+Existing integrations continue to use `Traces and observations (legacy)` until changed.
+
+To migrate safely:
+
+1. Switch to `Traces and observations (legacy) and enriched observations`.
+2. Validate downstream dashboards, transformations, and alerts while both sources are exported (this mode creates duplicate records by design).
+3. Switch to `Enriched observations (recommended)` once validation is complete.
+
+For rollout details, see the [Simplify for Scale changelog](/changelog/2026-02-10-simplify-for-scale).
+
 ## Integration details [#details]
 
 On an hourly schedule, Langfuse batches aggregated events and metrics to your Mixpanel instance.
