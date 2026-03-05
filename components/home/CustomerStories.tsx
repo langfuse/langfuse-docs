@@ -21,7 +21,6 @@ export default function CustomerStories() {
         ]}
       />
       <CustomerCarousel
-        path="/users"
         stories={stories as any}
         showDots={true}
         loop={true}
