@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 
 const productLinks = [
   { name: "Overview", href: "/" },
@@ -33,6 +34,19 @@ const simpleLinks = [
   { name: "Docs", href: "/docs" },
   { name: "Changelog", href: "/changelog", tabletHidden: true },
   { name: "Pricing", href: "/pricing" },
+];
+
+const sectionLinks = [
+  { name: "Docs", href: "/docs" },
+  { name: "Self Hosting", href: "/self-hosting" },
+  { name: "Guides", href: "/guides" },
+  { name: "Integrations", href: "/integrations" },
+  { name: "FAQ", href: "/faq" },
+  { name: "Handbook", href: "/handbook" },
+  { name: "Changelog", href: "/changelog" },
+  { name: "Pricing", href: "/pricing" },
+  { name: "Library", href: "/library" },
+  { name: "Security & Compliance", href: "/security" },
 ];
 
 export function NavLinks() {
@@ -92,16 +106,34 @@ export function NavLinks() {
         {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
 
-      {/* Mobile menu */}
+      {/* Mobile menu — backdrop-blur on header creates a CSS containing block,
+           so `top` is relative to the header itself. Use `4rem` (navbar height)
+           to sit flush at the navbar's bottom edge. */}
       <div
-        className={`md:hidden fixed top-16 left-0 right-0 z-50 bg-background border-b shadow-lg transition-all duration-300 ease-out overflow-hidden ${mobileOpen
-          ? "opacity-100 translate-y-0 max-h-[calc(100vh-4rem)]"
-          : "opacity-0 -translate-y-2 max-h-0 pointer-events-none"
-          }`}
+        className={`md:hidden fixed left-0 right-0 z-50 bg-background border-b shadow-lg transition-all duration-300 ease-out overflow-hidden ${
+          mobileOpen
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 -translate-y-2 max-h-0 pointer-events-none"
+        }`}
+        style={{
+          top: "4rem",
+          maxHeight: mobileOpen
+            ? "calc(100vh - 4rem - var(--fd-banner-height, 0px))"
+            : undefined,
+        }}
         aria-hidden={!mobileOpen}
       >
-        <div className="overflow-y-auto max-h-[calc(100vh-4rem)]">
+        <div
+          className="overflow-y-auto"
+          style={{ maxHeight: "calc(100vh - 4rem - var(--fd-banner-height, 0px))" }}
+        >
           <div className="px-4 py-4 flex flex-col gap-1">
+            {/* Search */}
+            <div className="mb-2">
+              <InkeepSearchBar />
+            </div>
+
+            {/* Product */}
             <button
               type="button"
               className="flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-200"
@@ -110,8 +142,9 @@ export function NavLinks() {
             >
               <span>Product</span>
               <ChevronDown
-                className={`h-4 w-4 transition-transform ${mobileProductOpen ? "rotate-180" : "rotate-0"
-                  }`}
+                className={`h-4 w-4 transition-transform ${
+                  mobileProductOpen ? "rotate-180" : "rotate-0"
+                }`}
               />
             </button>
             {mobileProductOpen && (
@@ -129,16 +162,18 @@ export function NavLinks() {
               </div>
             )}
 
+            {/* Resources */}
             <button
               type="button"
-              className="mt-3 flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-200"
+              className="mt-1 flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-200"
               onClick={() => setMobileResourcesOpen((v) => !v)}
               aria-expanded={mobileResourcesOpen}
             >
               <span>Resources</span>
               <ChevronDown
-                className={`h-4 w-4 transition-transform ${mobileResourcesOpen ? "rotate-180" : "rotate-0"
-                  }`}
+                className={`h-4 w-4 transition-transform ${
+                  mobileResourcesOpen ? "rotate-180" : "rotate-0"
+                }`}
               />
             </button>
             {mobileResourcesOpen && (
@@ -156,15 +191,17 @@ export function NavLinks() {
               </div>
             )}
 
+            {/* All sections */}
             <div className="border-t mt-3 pt-3 flex flex-col gap-1">
-              {simpleLinks.map((link) => (
+              {sectionLinks.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
+                  className="flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
                 >
-                  {link.name}
+                  <span>{link.name}</span>
+                  <ChevronRight className="h-4 w-4 opacity-50" />
                 </Link>
               ))}
             </div>
