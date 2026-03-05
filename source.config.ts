@@ -74,8 +74,16 @@ export const changelog = defineDocs({
   },
 });
 
+const guidesFrontmatterSchema = frontmatterSchema.extend({
+  ogImage: z.string().nullish(),
+  category: z.string().nullish(),
+});
+
 export const guides = defineDocs({
   dir: "content/guides",
+  docs: {
+    schema: guidesFrontmatterSchema,
+  },
 });
 
 export const faq = defineDocs({

@@ -1,15 +1,14 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
+import { getPagesUnderRoute } from "@/lib/nextra-shim/context";
 import Link from "next/link";
 import { FileCode, ArrowRight } from "lucide-react";
+
+type CookbookPage = { route?: string; name?: string; frontMatter?: Record<string, any> };
 
 export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
   <>
     {Object.entries(
       (
-        getPagesUnderRoute("/guides/cookbook") as Array<
-          Page & { frontMatter: any }
-        >
+        getPagesUnderRoute("/guides/cookbook") as Array<CookbookPage>
       )
         .filter((page) => page.route !== "/cookbook")
         .filter((page) => page.route !== "/guides/cookbook")
@@ -18,7 +17,7 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
           if (!acc[category]) acc[category] = [];
           acc[category].push(page);
           return acc;
-        }, {} as Record<string, Array<Page & { frontMatter: any }>>)
+        }, {} as Record<string, Array<CookbookPage>>)
     )
       .sort(([categoryA], [categoryB]) => {
         // if categories are provided, use the order of the provided categories

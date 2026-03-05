@@ -52,8 +52,15 @@ var changelog = defineDocs({
     schema: changelogFrontmatterSchema
   }
 });
+var guidesFrontmatterSchema = frontmatterSchema.extend({
+  ogImage: z.string().nullish(),
+  category: z.string().nullish()
+});
 var guides = defineDocs({
-  dir: "content/guides"
+  dir: "content/guides",
+  docs: {
+    schema: guidesFrontmatterSchema
+  }
 });
 var faq = defineDocs({
   dir: "content/faq"
