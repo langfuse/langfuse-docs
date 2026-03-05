@@ -7,6 +7,7 @@ const TITLE = 'Langfuse';
 const INTRO_DESCRIPTION = 'Langfuse is an **open-source LLM engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.';
 const MAIN_SECTIONS = [
     'docs',
+    'integrations',
 ];
 const OPTIONAL_SECTIONS = [
     'self-hosting'
@@ -75,7 +76,7 @@ async function generateLLMsList() {
             }
         });
 
-        // Add optional integrations section at the end
+        // Add optional section at the end
         if (urlsBySection.optional.length > 0) {
             markdownContent += '## Optional\n\n';
             urlsBySection.optional.forEach(({ title, url }) => {
