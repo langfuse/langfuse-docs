@@ -66,6 +66,18 @@ const companies: CompanyLogo[] = [
     customerStoryPath: "/users/khan-academy",
   },
   {
+    name: "Magic Patterns",
+    darkModeImage: magicPatternsLight,
+    lightModeImage: magicPatternsDark,
+    customerStoryPath: "/users/magic-patterns-ai-design-tools",
+  },
+  {
+    name: "Merck",
+    darkModeImage: merckLight,
+    lightModeImage: merckDark,
+    customerStoryPath: "/users/merckgroup",
+  },
+  {
     name: "Telus",
     darkModeImage: telusLight,
     lightModeImage: telusDark,
@@ -165,13 +177,13 @@ const CustomerStoryBadge = ({ small }: { small?: boolean }) => (
   <div
     className={cn(
       "absolute top-0 right-0 z-10 pointer-events-none",
-      !small && "md:top-2 md:right-2"
+      !small && "md:top-2 md:right-2",
     )}
   >
     <div
       className={cn(
         "inline-flex items-center justify-center text-blue-500  text-xs rounded-full  group-hover:w-auto group-hover:h-auto group-hover:px-3 group-hover:py-1 px-2 py-1 transition-all duration-200",
-        !small && "md:bg-blue-500 md:text-white md:px-0 md:py-0 md:w-6 md:h-6"
+        !small && "md:bg-blue-500 md:text-white md:px-0 md:py-0 md:w-6 md:h-6",
       )}
     >
       {small ? (
@@ -179,9 +191,7 @@ const CustomerStoryBadge = ({ small }: { small?: boolean }) => (
       ) : (
         <>
           <span className="md:hidden whitespace-nowrap">Read Story</span>
-          <span className="hidden md:group-hover:inline">
-            Read User Story
-          </span>
+          <span className="hidden md:group-hover:inline">Read User Story</span>
           <span className="hidden md:block group-hover:hidden w-2 h-2 bg-white rounded-full"></span>
         </>
       )}
@@ -209,7 +219,7 @@ export const EnterpriseLogoGrid = ({
       className={cn(
         "grid grid-cols-2 md:grid-cols-4 auto-rows-fr",
         small && "grid-cols-4",
-        className
+        className,
       )}
       role="grid"
       aria-label="Enterprise customers using Langfuse"
@@ -233,7 +243,7 @@ export const EnterpriseLogoGrid = ({
             className={cn(
               baseCellClasses,
               clickableCellClasses,
-              small && smallCellClasses
+              small && smallCellClasses,
             )}
             aria-label={`Read ${company.name} user story`}
             role="gridcell"

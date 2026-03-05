@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -141,17 +143,17 @@ export function PricingCalculator({
 
   return (
     <div className="mx-auto max-w-4xl" id="pricing-calculator">
-      <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary mb-2">
+      <h2 className="mb-2 text-2xl font-bold tracking-tight leading-10 text-primary">
         Pricing Calculator
       </h2>
-      <p className="text-base text-muted-foreground mb-6">
+      <p className="mb-6 text-base text-muted-foreground">
         Enter your monthly billable units to see the graduated pricing
         breakdown.
 
-        
+
       </p>
       <Card>
-        <CardContent className="space-y-6 pt-6">
+        <CardContent className="pt-6 space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="plan" className="block">
@@ -172,7 +174,7 @@ export function PricingCalculator({
               </Select>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center gap-1">
+              <div className="flex gap-1 items-center">
                 <Label htmlFor="events">Monthly Units</Label>
                 <Link
                   href="/docs/administration/billable-units"
@@ -191,33 +193,33 @@ export function PricingCalculator({
             </div>
           </div>
 
-          <div className="border bg-secondary p-4 sm:p-6 rounded-lg">
+          <div className="p-4 rounded-lg border bg-secondary sm:p-6">
             {currentBaseFee > 0 ? (
               <div className="text-center">
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-base sm:text-lg font-medium">
+                <div className="flex flex-col gap-2 justify-center items-center text-base font-medium sm:flex-row sm:gap-4 sm:text-lg">
                   <div className="text-center">
-                    <div className="text-primary text-xl sm:text-2xl font-bold">
+                    <div className="text-xl font-bold text-primary sm:text-2xl">
                       {formatCurrency(currentBaseFee)}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-1">
+                    <div className="mt-1 text-xs text-muted-foreground">
                       {selectedPlan} Base
                     </div>
                   </div>
-                  <div className="text-muted-foreground text-lg sm:text-xl">+</div>
+                  <div className="text-lg text-muted-foreground sm:text-xl">+</div>
                   <div className="text-center">
-                    <div className="text-primary text-xl sm:text-2xl font-bold">
+                    <div className="text-xl font-bold text-primary sm:text-2xl">
                       {formatCurrency(calculatedPrice)}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-1">
+                    <div className="mt-1 text-xs text-muted-foreground">
                       Usage
                     </div>
                   </div>
-                  <div className="text-muted-foreground text-lg sm:text-xl">=</div>
+                  <div className="text-lg text-muted-foreground sm:text-xl">=</div>
                   <div className="text-center">
-                    <div className="text-primary text-xl sm:text-2xl font-bold">
+                    <div className="text-xl font-bold text-primary sm:text-2xl">
                       {formatCurrency(calculatedPrice + currentBaseFee)}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-1">
+                    <div className="mt-1 text-xs text-muted-foreground">
                       Total / Month
                     </div>
                   </div>
@@ -226,10 +228,10 @@ export function PricingCalculator({
             ) : (
               <div className="text-center">
                 <div className="text-center">
-                  <div className="text-2xl sm:text-3xl font-bold text-primary">
+                  <div className="text-2xl font-bold sm:text-3xl text-primary">
                     {formatCurrency(calculatedPrice)}
                   </div>
-                  <div className="text-sm text-muted-foreground mt-1">
+                  <div className="mt-1 text-sm text-muted-foreground">
                     Total Usage Cost / Month
                   </div>
                 </div>
@@ -240,14 +242,14 @@ export function PricingCalculator({
           {/* Breakdown */}
           <div className="space-y-3">
             <div className="font-medium">Pricing tiers breakdown:</div>
-            <div className="border rounded-lg overflow-hidden">
+            <div className="overflow-hidden rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-left">Tier</TableHead>
                     <TableHead className="text-right">Rate</TableHead>
                     <TableHead className="text-right">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex gap-1 justify-end items-center">
                         Your Units
                         <Link aria-label="Learn more about billable units"
                           href="/docs/administration/billable-units"
@@ -274,7 +276,7 @@ export function PricingCalculator({
                         <TableCell className="text-right">
                           {eventsInTier > 0 ? formatNumber(eventsInTier) : "—"}
                         </TableCell>
-                        <TableCell className="text-right font-medium">
+                        <TableCell className="font-medium text-right">
                           {eventsInTier > 0 ? formatCurrency(costForTier) : "—"}
                         </TableCell>
                       </TableRow>
@@ -283,7 +285,7 @@ export function PricingCalculator({
                   {/* Total row */}
                   <TableRow className="border-t-2 bg-muted/30">
                     <TableCell className="font-semibold">Total</TableCell>
-                    <TableCell className="text-right font-semibold">
+                    <TableCell className="font-semibold text-right">
                       {(() => {
                         const totalUnits = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
                         if (totalUnits === 0) return "—";
@@ -291,10 +293,10 @@ export function PricingCalculator({
                         return formatCurrency(avgRate) + "/100k";
                       })()}
                     </TableCell>
-                    <TableCell className="text-right font-semibold">
+                    <TableCell className="font-semibold text-right">
                       {monthlyEvents}
                     </TableCell>
-                    <TableCell className="text-right font-semibold text-primary">
+                    <TableCell className="font-semibold text-right text-primary">
                       {formatCurrency(calculatedPrice)}
                     </TableCell>
                   </TableRow>

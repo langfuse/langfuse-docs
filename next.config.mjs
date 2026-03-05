@@ -1,12 +1,17 @@
-import remarkGfm from "remark-gfm";
-import nextra from "nextra";
+import path from "path";
+import { fileURLToPath } from "url";
+import { createMDX } from "fumadocs-mdx/next";
 import NextBundleAnalyzer from "@next/bundle-analyzer";
 
 import * as redirects from "./lib/redirects.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
+
+const withMDX = createMDX();
 
 /**
  * CSP headers
@@ -32,18 +37,8 @@ const cspHeader =
 `
     : "";
 
-// nextra config
-const withNextra = nextra({
-  theme: "nextra-theme-docs",
-  themeConfig: "./theme.config.tsx",
-  mdxOptions: {
-    remarkPlugins: [remarkGfm],
-  },
-  defaultShowCopyCode: true,
-});
-
-// next config
-const nextraConfig = withNextra({
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   // Enable static export when STATIC_EXPORT env var is set
   ...(process.env.STATIC_EXPORT === "true" && {
     output: "export",
@@ -53,8 +48,53 @@ const nextraConfig = withNextra({
   }),
   experimental: {
     scrollRestoration: true,
+    // Reduce peak memory during production build (helps avoid OOM on Vercel)
+    webpackMemoryOptimizations: true,
+    serverSourceMaps: false,
+  },
+  // Reduce memory usage during build
+  productionBrowserSourceMaps: false,
+  turbopack: {
+    // Fix Turbopack panic when running from a git worktree with multiple lockfiles.
+    // Tell Turbopack to use this worktree's directory as the root.
+    root: __dirname,
   },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
+
+  webpack(config, { isServer, webpack }) {
+    config.resolve = config.resolve ?? {};
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "nextra/context": path.resolve(__dirname, "lib/nextra-shim/context.tsx"),
+      "nextra/hooks": path.resolve(__dirname, "lib/nextra-shim/hooks.ts"),
+      nextra: path.resolve(__dirname, "lib/nextra-shim/nextra-types.ts"),
+      "nextra-theme-docs": path.resolve(__dirname, "lib/nextra-shim/theme-docs.tsx"),
+      "nextra/components": path.resolve(__dirname, "lib/nextra-shim/components.tsx"),
+    };
+    // Prevent client bundle from failing on Node built-ins (e.g. fumadocs-mdx using fs/promises)
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        "fs/promises": false,
+        path: false,
+        os: false,
+        url: false,
+        module: false,
+        stream: false,
+        buffer: false,
+      };
+      // Strip the node: URI scheme prefix so webpack can apply the fallback above.
+      // fumadocs-mdx server code uses `import 'node:fs/promises'` which webpack
+      // doesn't handle natively in browser bundles.
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+          resource.request = resource.request.replace(/^node:/, "");
+        })
+      );
+    }
+    return config;
+  },
 
   images: {
     // Disable image optimization for static export
@@ -175,6 +215,6 @@ const nextraConfig = withNextra({
       ],
     };
   },
-});
+};
 
-export default withBundleAnalyzer(nextraConfig);
+export default withBundleAnalyzer(withMDX(nextConfig));

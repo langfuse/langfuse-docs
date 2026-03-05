@@ -1,99 +1,50 @@
-/* toc items should not be bold */
-.nextra-toc li a {
-  font-weight: normal;
+/* Custom docs nav height (used when nav.component is set in DocsLayout) */
+:root {
+  --fd-nav-height: 4rem;
 }
 
-/* Hide guides and faq from main menu */
-.nextra-nav-container>nav>div>a[href="/guides"] {
-  display: none !important;
+/* Mobile sidebar drawer: push below sticky navbar + optional banner. */
+#nd-sidebar-mobile {
+  top: calc(
+    var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px)
+  ) !important;
+  height: calc(
+    100dvh - var(--fd-nav-height, 4rem) - var(--fd-banner-height, 0px)
+  ) !important;
 }
 
-.nextra-nav-container>nav>div>a[href="/faq"] {
-  display: none !important;
+/* Sidebar/collapsed-trigger sticky top: custom navbar (4rem) + optional banner.
+   Overrides fumadocs' inline --fd-docs-row-1: var(--fd-banner-height, 0px)
+   which only accounts for the banner, not our external custom navbar. */
+#nd-docs-layout {
+  --fd-docs-row-1: calc(
+    var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px)
+  ) !important;
 }
 
-.nextra-nav-container>nav>div>a[href="/self-hosting"] {
-  display: none !important;
+/* Docs left sidebar: max width 360px (Fumadocs default is 268px) */
+#nd-docs-layout [grid-area="sidebar"] {
+  --fd-sidebar-width: 360px;
 }
 
-.nextra-nav-container>nav>div>a[href="/library"] {
-  display: none !important;
+.layout-wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
+}
+#nd-docs-layout #nd-sidebar[data-hovered="false"] {
+  background-color: transparent;
 }
 
-.nextra-nav-container>nav>div>a[href="/security"] {
-  display: none !important;
-}
-
-.nextra-nav-container>nav>div>a[href="/integrations"] {
-  display: none !important;
-}
-
-.nextra-nav-container>nav>div>a[href="/handbook"] {
-  display: none !important;
-}
-
-.nextra-nav-container>nav>div>a[href="/cloud"] {
-  display: none !important;
-}
-
-@media (max-width: 1024px) {
-  .nextra-nav-container>nav>div>a[href="/changelog"] {
-    display: none !important;
+@media (min-width: 1440px) {
+  #nd-docs-layout [data-sidebar-panel] {
+    left: calc((100vw - 1440px) / 2);
   }
-}
-
-/* Less gap in desktop menu */
-.nextra-menu-desktop {
-  gap: 0.1rem;
-
-  /* make menu items more compact */
-  a.nextra-focus,
-  button {
-    padding: 0.225rem 0.5rem !important;
-  }
-
-  /* Make first-level folder names bold */
-  /* >li>button:first-child {
-    font-weight: 600;
-  } */
-}
-
-.nextra-menu-desktop>li:not(:has(*)) {
-  /* only those that have no children */
-  margin-bottom: 0.1rem;
-}
-
-.nextra-nav-container>nav {
-  gap: 0.5rem;
-
-  @media (min-width: 768px) {
-    gap: 1rem;
-  }
-}
-
-/* smaller search bar */
-/* .nextra-nav-container input[type="search"] {
-  width: 8rem;
-
-  @media (min-width: 1024px) {
-    width: 10rem;
-  }
-
-  @media (min-width: 1280px) {
-    width: 16rem;
-  }
-
-  border-radius: 0.25rem;
-} */
-
-/* Fix logo overflowing */
-.nextra-nav-container>nav>a:first-child {
-  flex-shrink: 0;
 }
 
 /* Fix nested lists */
-li>ol,
-li>ul {
+li > ol,
+li > ul {
   margin-top: 0 !important;
 }
 
@@ -102,56 +53,77 @@ media-outlet {
   background-color: transparent !important;
 }
 
-/* More gap between h2 across docs and articles */
-article.nextra-content h2._border-b {
-  /* h2 with border-bottom as this is how h2 is on default docs mode, we do not want to target custom/raw h2 on landingpage, changelog, blog etc. */
-  margin-top: 4rem;
-}
-
-article.nextra-body-typesetting-article h2 {
-  margin-top: 6rem;
-}
-
 svg .nodeLabel,
 svg .edgeLabel {
   font-family: monospace;
 }
 
-/* Fix callout list */
-.nextra-callout ul {
-  margin-top: 0;
-}
-
-/* Overflowing nextra tabs should wrap */
+/* Overflowing tabs should wrap */
 [role="tablist"] {
   flex-wrap: wrap;
   row-gap: 0.2rem;
 }
 
 /* Subsequent details should have less of a gap */
-details+details {
+details + details {
   margin-top: 0.5rem !important;
 }
 
+/* Docs footer pagination: strip card styling, hide description */
+#nd-page > div:last-child > a {
+  border: none !important;
+  background: none !important;
+  padding: 0.25rem 0 !important;
+  border-radius: 0 !important;
+  gap: 0.125rem !important;
+}
+#nd-page > div:last-child > a:hover {
+  background: none !important;
+  color: inherit !important;
+}
+#nd-page > div:last-child > a > p:last-child {
+  display: none !important;
+}
+
 /* Fix detail padding */
-details>div {
+details > div {
   padding: 0.25rem;
 }
 
 /* Details header should be bold */
-details>summary {
+details > summary {
   font-weight: 700;
-}
-
-/* Add muted color variants for icons */
-:root {
-  --muted-green: 84 81% 44%;
-  --muted-magenta: 330 90% 70%;
-  --muted-blue: 239 84% 67%;
 }
 
 /* Remove margin from subseparator parent */
 li:has(> .subseparator) {
   margin: 0 !important;
   padding: 0 !important;
+}
+
+/* Steps component: increment counter and render numbered circles centered on the left border line.
+   .steps has pl-8 (2rem) padding from its left border, so the circle (1.75rem wide)
+   needs left: -(2rem + 0.875rem) = -2.875rem to sit centered on that border. */
+.steps > h2,
+.steps > h3 {
+  counter-increment: step;
+  position: relative;
+}
+.steps > h2::before,
+.steps > h3::before {
+  content: counter(step);
+  position: absolute;
+  left: -2.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-size: 0.875rem;
+  font-weight: 600;
 }

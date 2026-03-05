@@ -5,11 +5,11 @@ import { MessageCircleQuestion } from "lucide-react";
 import Link from "next/link";
 
 export const getFaqPages = () => {
-  return getPagesUnderRoute("/faq/all") as Array<Page & { frontMatter: any }>;
+  return getPagesUnderRoute("/faq/all") as Array<Page & { frontMatter: any; meta?: { title?: string } }>;
 };
 
 export const getFilteredFaqPages = (
-  faqPages: Array<Page & { frontMatter: any }>,
+  faqPages: Array<Page & { frontMatter: any; meta?: { title?: string } }>,
   tags: string[],
   limit: number | undefined = undefined
 ) => {
@@ -42,7 +42,7 @@ export const FaqList = ({
   pages,
   renderAsCards = false,
 }: {
-  pages: Array<Page & { frontMatter: any }>;
+  pages: Array<Page & { frontMatter: any; meta?: { title?: string } }>;
   renderAsCards?: boolean;
 }) => {
   if (renderAsCards) {

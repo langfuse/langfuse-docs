@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,7 +35,7 @@ const GraduatedPricingText = () => {
   return (
     <>
       $8/100k units. Lower with volume (
-      <Link href="#pricing-calculator" className="hover:text-primary underline">
+      <Link href="#pricing-calculator" className="underline hover:text-primary">
         pricing calculator
       </Link>
       )
@@ -1229,7 +1231,7 @@ const FeatureDetails = ({
   return (
     <HoverCard>
       <HoverCardTrigger>
-        <InfoIcon className="inline-block size-3 ml-1" />
+        <InfoIcon className="inline-block ml-1 size-3" />
       </HoverCardTrigger>
       <HoverCardContent className="w-60 text-xs">
         {description}
@@ -1261,7 +1263,7 @@ const FeatureCell = ({
         {value.includes(TEAMS_ADDON) && (
           <HoverCard>
             <HoverCardTrigger>
-              <InfoIcon className="inline-block size-3 ml-1" />
+              <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
               Available as part of the Teams add-on on the Pro plan.
@@ -1271,7 +1273,7 @@ const FeatureCell = ({
         {value.includes(YEARLY_COMMITMENT) && (
           <HoverCard>
             <HoverCardTrigger>
-              <InfoIcon className="inline-block size-3 ml-1" />
+              <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
               Available when committing to a yearly contract on the Enterprise
@@ -1282,7 +1284,7 @@ const FeatureCell = ({
         {value === ENTERPRISE && (
           <HoverCard>
             <HoverCardTrigger>
-              <InfoIcon className="inline-block size-3 ml-1" />
+              <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
               Available as part of the Enterprise add-on for self-hosted
@@ -1296,9 +1298,9 @@ const FeatureCell = ({
     return (
       <div className="flex justify-center">
         {value === true ? (
-          <CheckIcon className="h-5 w-5 text-primary" />
+          <CheckIcon className="w-5 h-5 text-primary" />
         ) : (
-          <MinusIcon className="h-5 w-5 text-muted-foreground" />
+          <MinusIcon className="w-5 h-5 text-muted-foreground" />
         )}
       </div>
     );
@@ -1338,14 +1340,14 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
           {variant === "cloud" &&
             (tier.name === "Core" || tier.name === "Pro") && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <div className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-medium text-center whitespace-nowrap inline-block">
+                <div className="inline-block px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full bg-primary text-primary-foreground">
                   Unlimited Users
                 </div>
               </div>
             )}
 
-          <CardHeader className="p-4 lg:p-6 text-left">
-            <CardTitle className="text-lg text-foreground font-semibold">
+          <CardHeader className="p-4 text-left lg:p-6">
+            <CardTitle className="text-lg font-semibold text-foreground">
               {tier.name}
             </CardTitle>
             <CardDescription className="text-left">
@@ -1364,8 +1366,8 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
           <CardContent className="p-0 px-4 lg:px-6">
             {/* Price information */}
             <div className="h-[60px] flex items-baseline">
-              <span className="font-bold text-3xl">{tier.price}</span>
-              <span className="text-sm leading-4 ml-1">
+              <span className="text-3xl font-bold">{tier.price}</span>
+              <span className="ml-1 text-sm leading-4">
                 {tier.price.includes("$")
                   ? tier.priceUnit
                     ? `/ ${tier.priceUnit}`
@@ -1406,10 +1408,10 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
             {/* Callouts for different tiers - always render container for alignment */}
             <div className="p-6 h-[30px] flex items-center justify-center">
               {tier.calloutLink ? (
-                <div className="text-xs text-muted-foreground text-center">
+                <div className="text-xs text-center text-muted-foreground">
                   <Link
                     href={tier.calloutLink.href}
-                    className="underline hover:text-primary"
+                    className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
                   >
                     {tier.calloutLink.text}
                   </Link>
@@ -1426,26 +1428,26 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
             </>
           )}
           <div className="border-t"></div>
-          <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
+          <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6">
             <ul className="space-y-2.5 text-sm">
               {tier.mainFeatures.map((feature, index) => (
                 <li key={index} className="flex space-x-2">
-                  <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                  <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
                   <span className="text-muted-foreground">{feature}</span>
                 </li>
               ))}
             </ul>
             {tier.addOn && (
-              <div className="mt-3 border rounded pt-4 p-3 relative w-full">
-                <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 -top-0 bg-card px-2 text-xs text-muted-foreground">
+              <div className="relative p-3 pt-4 mt-3 w-full rounded border">
+                <div className="absolute top-0 left-1/2 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-card text-muted-foreground">
                   + optional
                 </div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-bold text-sm text-primary">
+                  <span className="text-sm font-bold text-primary">
                     {tier.addOn.name}
                   </span>
                   {tier.addOn.price && (
-                    <span className="font-bold text-sm text-primary">
+                    <span className="text-sm font-bold text-primary">
                       {tier.addOn.price}
                     </span>
                   )}
@@ -1460,7 +1462,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                 </ul>
                 {tier.addOn.cta && (
                   <Button
-                    className="w-full mt-3"
+                    className="mt-3 w-full"
                     variant="secondary"
                     size="sm"
                     asChild
@@ -1471,7 +1473,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                   </Button>
                 )}
                 {tier.addOn.calloutLink && (
-                  <div className="mt-2 text-xs text-muted-foreground text-center">
+                  <div className="mt-2 text-xs text-center text-muted-foreground">
                     <Link
                       href={tier.addOn.calloutLink.href}
                       className="underline hover:text-primary"
@@ -1559,7 +1561,7 @@ export function PricingTable({
       {/* Feature comparison (up to lg) */}
       <section
         aria-labelledby="mobile-comparison-heading"
-        className="lg:hidden mt-20"
+        className="mt-20 lg:hidden"
       >
         <h2 id="mobile-comparison-heading" className="sr-only">
           Feature comparison
@@ -1574,10 +1576,10 @@ export function PricingTable({
           {selectedTiers.map((tier) => (
             <div
               key={tier.id}
-              className="mb-10 bg-card rounded-lg overflow-hidden border p-4"
+              className="overflow-hidden p-4 mb-10 rounded-lg border bg-card"
             >
               <div className="mb-6">
-                <h4 className="text-lg text-foreground font-semibold">
+                <h4 className="text-lg font-semibold text-foreground">
                   {tier.name}
                 </h4>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -1591,7 +1593,7 @@ export function PricingTable({
                       <TableRow className="bg-muted hover:bg-muted">
                         <TableHead
                           colSpan={2}
-                          className="w-full text-primary font-bold"
+                          className="w-full font-bold text-primary"
                           scope="colgroup"
                         >
                           {section.name}
@@ -1643,15 +1645,16 @@ export function PricingTable({
 
         {isHeaderFixed && (
           <div
-            className="fixed left-0 right-0 bg-muted z-50 shadow-md border-b"
+            className="fixed right-0 left-0 z-50 border-b shadow-md bg-muted"
             style={{ top: "64px" }}
           >
-            <div className="mx-auto max-w-7xl px-6">
+            <div className="flex justify-center items-center px-6 mx-auto max-w-7xl">
               <div className="overflow-hidden pl-[16px]">
                 <table
-                  className="w-full"
+                  className="w-full bg-transparent border-none"
                   style={{
                     width: headerWidth,
+                    margin: 0,
                   }}
                 >
                   <thead>
@@ -1660,7 +1663,7 @@ export function PricingTable({
                         <>
                           <th
                             style={{ width: columnWidths[0] }}
-                            className="text-left font-medium"
+                            className="font-medium text-left bg-transparent border-none"
                             scope="col"
                           ></th>
                           {selectedTiers.map((tier, index) => (
@@ -1669,7 +1672,7 @@ export function PricingTable({
                               style={{
                                 width: columnWidths[index + 1],
                               }}
-                              className="py-2 text-center text-lg text-foreground font-semibold"
+                              className="py-2 text-lg font-semibold text-center bg-transparent border-none text-foreground"
                               scope="col"
                             >
                               {tier.name}
@@ -1682,8 +1685,9 @@ export function PricingTable({
                 </table>
               </div>
             </div>
-          </div>
-        )}
+          </div >
+        )
+        }
 
         <div className="relative">
           <Table
@@ -1749,7 +1753,7 @@ export function PricingTable({
             </TableBody>
           </Table>
         </div>
-      </section>
+      </section >
     </>
   );
 }

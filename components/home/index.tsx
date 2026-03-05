@@ -1,7 +1,6 @@
-import dynamic from "next/dynamic";
+"use client";
 
-// Non-dynamic imports for everyhting that renders on top
-import { Background } from "../Background";
+import dynamic from "next/dynamic";
 import { Hero } from "./Hero";
 import { FeatureTabsSection } from "./FeatureTabsSection";
 
@@ -33,7 +32,7 @@ const CTAGetStarted = dynamic(() => import("./CTAGetStarted"), {
 
 export const Home = () => (
   <>
-    <main className="relative overflow-hidden w-full">
+    <main className="overflow-hidden relative w-full">
       <Hero />
       <FeatureTabsSection />
       <Usage />
@@ -45,6 +44,5 @@ export const Home = () => (
       <WallOfLove />
       <CTAGetStarted />
     </main>
-    <Background />
   </>
 );

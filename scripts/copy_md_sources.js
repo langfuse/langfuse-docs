@@ -1,12 +1,13 @@
 /*
-  Copy all Markdown sources from pages/** (md, mdx) into public/md-src/** as .md files.
+  Copy all Markdown sources from content/** (md, mdx) into public/md-src/** as .md files.
   This runs at build time so the static files can be served directly in production.
+  (Previously copied from pages/; site now uses App Router with content/ only.)
 */
 
 const fs = require('fs');
 const path = require('path');
 
-const SOURCE_DIR = path.join(process.cwd(), 'pages');
+const SOURCE_DIR = path.join(process.cwd(), 'content');
 const OUTPUT_DIR = path.join(process.cwd(), 'public', 'md-src');
 
 /**
@@ -36,36 +37,35 @@ function ensureDir(dirPath) {
 }
 
 /**
- * Determine if path within pages/ should be copied and where.
+ * Determine if path within content/ should be copied and where.
  * - Accept .md and .mdx files only
- * - Exclude next special files and api routes (e.g., pages/api/**, _app, _document, _meta, 404)
- * - Map pages/foo/bar.mdx -> public/md-src/foo/bar.md
- * - Map pages/foo/index.mdx -> public/md-src/foo.md
+ * - Exclude meta.json and non-markdown
+ * - Map content/foo/bar.mdx -> public/md-src/foo/bar.md
+ * - Map content/foo/index.mdx -> public/md-src/foo.md
  */
 function mapDestination(sourceFile) {
     const rel = path.relative(SOURCE_DIR, sourceFile);
-    // Exclude special folders/files
-    if (rel.startsWith('api/')) return null;
     const base = path.basename(rel);
-    if (base.startsWith('_') || base === '404.mdx' || base === '404.md') return null;
+    if (base === 'meta.json' || base.startsWith('_')) return null;
 
     const ext = path.extname(rel).toLowerCase();
     if (ext !== '.md' && ext !== '.mdx') return null;
 
-    // Remove extension
     const withoutExt = rel.slice(0, -ext.length);
-
-    // Handle index files (e.g., docs/index.mdx -> docs.md)
     const parts = withoutExt.split(path.sep);
     let outParts = parts.slice();
     if (parts[parts.length - 1] === 'index') {
-        outParts = parts.slice(0, -1); // drop 'index'
+        outParts = parts.slice(0, -1);
     }
     const outRel = outParts.length ? outParts.join('/') + '.md' : 'index.md';
     return path.join(OUTPUT_DIR, outRel);
 }
 
 function copyAll() {
+    if (!fs.existsSync(SOURCE_DIR)) {
+        console.log('copy_md_sources: content/ not found, skipping');
+        return;
+    }
     const allFiles = walkDir(SOURCE_DIR);
     let copied = 0;
     for (const file of allFiles) {

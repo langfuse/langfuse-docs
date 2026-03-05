@@ -1,20 +1,21 @@
+"use client";
+
 import Image from "next/image";
-import { useRouter } from "next/router";
-import { Page } from "nextra";
+import { usePathname } from "next/navigation";
 import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import { Authors } from "../Authors";
 import { Video } from "../Video";
-import { useConfig } from "nextra-theme-docs";
 
 export const ChangelogHeader = () => {
-  const router = useRouter();
+  const pathname = usePathname();
   const changelogPages = getPagesUnderRoute("/changelog");
-  const page = changelogPages.find(
-    (page) => page.route === router.pathname
-  ) as Page & { frontMatter: any };
+  const page = changelogPages.find((p) => p.route === pathname) as {
+    route?: string;
+    frontMatter?: Record<string, any>;
+  } | undefined;
 
-  const { frontMatter } = useConfig();
+  const frontMatter = page?.frontMatter ?? {};
   const {
     title,
     description,
@@ -75,8 +76,8 @@ export const ChangelogHeader = () => {
           height={630}
           className="rounded border"
           unoptimized={
-            page.frontMatter.gif !== undefined ||
-            page.frontMatter.ogImage?.endsWith(".gif")
+            frontMatter.gif !== undefined ||
+            frontMatter.ogImage?.endsWith(".gif")
           }
         />
       ) : null}
