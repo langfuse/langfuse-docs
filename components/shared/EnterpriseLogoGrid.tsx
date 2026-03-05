@@ -3,8 +3,8 @@ import Link from "next/link";
 import type { StaticImageData } from "next/image";
 import canvaLight from "../home/img/canva_light.png";
 import canvaDark from "../home/img/canva_dark.png";
-import intuitLight from "../home/img/intuit_light.svg";
-import intuitDark from "../home/img/intuit_dark.svg";
+import intuitLightMode from "../home/img/intuit_light.svg";
+import intuitDarkMode from "../home/img/intuit_dark.svg";
 import samsaraLight from "../home/img/samsara_light.png";
 import samsaraDark from "../home/img/samsara_dark.png";
 import khanacademyLight from "../home/img/khanacademy_light.png";
@@ -72,8 +72,8 @@ const companies: CompanyLogo[] = [
   },
   {
     name: "Intuit",
-    darkModeImage: intuitDark,
-    lightModeImage: intuitLight,
+    darkModeImage: intuitDarkMode,
+    lightModeImage: intuitLightMode,
   },
   {
     name: "SumUp",
