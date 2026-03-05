@@ -1,6 +1,6 @@
-import { DocsLayout } from "fumadocs-ui/layouts/flux";
 import { blogSource } from "@/lib/source";
 import { Layout } from "@/components/layout";
+import { FluxLayoutNoPanel } from "@/components/layout/FluxLayoutNoPanel";
 
 export default function BlogLayout({
   children,
@@ -9,7 +9,7 @@ export default function BlogLayout({
 }) {
   return (
     <Layout>
-      <DocsLayout
+      <FluxLayoutNoPanel
         tree={blogSource.getPageTree()}
         nav={{ enabled: false }}
         sidebar={{ enabled: false }}
@@ -17,7 +17,7 @@ export default function BlogLayout({
         searchToggle={{ enabled: false }}
       >
         {children}
-      </DocsLayout>
+      </FluxLayoutNoPanel>
     </Layout>
   );
 }
