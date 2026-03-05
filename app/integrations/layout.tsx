@@ -17,6 +17,7 @@ export default function IntegrationsLayout({
           githubUrl="https://github.com/langfuse/langfuse-docs"
           nav={{ enabled: false }}
           sidebar={{ banner: <MenuSwitcher /> }}
+          searchToggle={{ enabled: false }}
         >
           {children}
         </DocsLayout>
