@@ -95,12 +95,21 @@ li:has(> .subseparator) {
   padding: 0 !important;
 }
 
-/* Steps component: increment counter and render numbered circles on h3 headings */
+/* Steps component: increment counter and render numbered circles centered on the left border line.
+   .steps has pl-8 (2rem) padding from its left border, so the circle (1.75rem wide)
+   needs left: -(2rem + 0.875rem) = -2.875rem to sit centered on that border. */
+.steps > h2,
 .steps > h3 {
   counter-increment: step;
+  position: relative;
 }
+.steps > h2::before,
 .steps > h3::before {
   content: counter(step);
+  position: absolute;
+  left: -2.875rem;
+  top: 50%;
+  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -111,7 +120,4 @@ li:has(> .subseparator) {
   color: hsl(var(--primary-foreground));
   font-size: 0.875rem;
   font-weight: 600;
-  margin-right: 0.75rem;
-  vertical-align: middle;
-  flex-shrink: 0;
 }
