@@ -13,24 +13,32 @@ const OPTIONAL_SECTIONS = [
     'self-hosting'
 ];
 
+// Map section keys to sub-file names and display names
+const SECTION_CONFIG = {
+    docs: { file: 'llms-docs.txt', heading: 'Docs', subFileHeading: 'Langfuse Docs' },
+    integrations: { file: 'llms-integrations.txt', heading: 'Integrations', subFileHeading: 'Langfuse Integrations' },
+    'self-hosting': { file: 'llms-self-hosting.txt', heading: 'Optional: Self-Hosting', subFileHeading: 'Langfuse Self-Hosting' },
+};
+
+function generateTitle(url) {
+    return url.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function generateSubFile(entries, config) {
+    let content = `# ${config.subFileHeading}\n\n`;
+    entries.forEach(({ title, url }) => {
+        const mdUrl = url.endsWith('.md') ? url : `${url}.md`;
+        content += `- [${title}](${mdUrl})\n`;
+    });
+    return content;
+}
+
 async function generateLLMsList() {
     try {
         const sitemapContent = fs.readFileSync(SITEMAP_PATH, 'utf-8');
 
         const parser = new xml2js.Parser();
         const result = await parser.parseStringPromise(sitemapContent);
-
-        // Start building markdown content with the title and blockquote
-        let markdownContent = `# ${TITLE}\n\n`;
-        markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
-
-        // Add Settings section with MCP server information
-        markdownContent += `## Langfuse Docs MCP Server\n\n`;
-        markdownContent += `Connect to the Langfuse Docs MCP server to access documentation directly in your AI editor:\n\n`;
-        markdownContent += `- **Endpoint**: \`https://langfuse.com/api/mcp\`\n`;
-        markdownContent += `- **Transport**: \`streamableHttp\`\n`;
-        markdownContent += `- **Documentation**: [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)\n\n`;
-        markdownContent += `The MCP server provides tools to search Langfuse documentation, GitHub issues, and discussions. See the [installation guide](https://langfuse.com/docs/docs-mcp) for setup instructions in Cursor, VS Code, Claude Desktop, and other MCP clients.\n\n`;
 
         // Create a map to store URLs by section
         const urlsBySection = {
@@ -45,63 +53,64 @@ async function generateLLMsList() {
         const urls = result.urlset.url.map(url => url.loc[0]);
         urls.forEach(url => {
             const urlPath = new URL(url).pathname.split('/')[1]; // Get first part of path
+            const entry = { title: generateTitle(url), url };
 
             if (MAIN_SECTIONS.includes(urlPath)) {
-                urlsBySection[urlPath].push({
-                    title: url.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    url: url
-                });
+                urlsBySection[urlPath].push(entry);
             } else if (OPTIONAL_SECTIONS.includes(urlPath)) {
-                urlsBySection.optional.push({
-                    title: url.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    url: url
-                });
+                urlsBySection.optional.push(entry);
             } else {
-                urlsBySection.other.push({
-                    title: url.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    url: url
-                });
+                urlsBySection.other.push(entry);
             }
         });
 
-        // Generate markdown for main sections
-        MAIN_SECTIONS.forEach(section => {
-            if (urlsBySection[section].length > 0) {
-                markdownContent += `## ${section.charAt(0).toUpperCase() + section.slice(1)}\n\n`;
-                urlsBySection[section].forEach(({ title, url }) => {
-                    const mdUrl = url.endsWith('.md') ? url : `${url}.md`;
-                    markdownContent += `- [${title}](${mdUrl})\n`;
-                });
-                markdownContent += '\n';
-            }
-        });
+        const publicDir = path.join(process.cwd(), 'public');
 
-        // Add optional section at the end
-        if (urlsBySection.optional.length > 0) {
-            markdownContent += '## Optional\n\n';
-            urlsBySection.optional.forEach(({ title, url }) => {
-                const mdUrl = url.endsWith('.md') ? url : `${url}.md`;
-                markdownContent += `- [${title}](${mdUrl})\n`;
-            });
+        // Write sub-files for each section
+        const sectionEntries = {
+            docs: urlsBySection.docs || [],
+            integrations: urlsBySection.integrations || [],
+            'self-hosting': urlsBySection.optional || [],
+        };
+
+        for (const [sectionKey, entries] of Object.entries(sectionEntries)) {
+            if (entries.length > 0) {
+                const config = SECTION_CONFIG[sectionKey];
+                const subFileContent = generateSubFile(entries, config);
+                fs.writeFileSync(path.join(publicDir, config.file), subFileContent);
+            }
         }
 
-        // // Add other section
-        // if (urlsBySection.other.length > 0) {
-        //     markdownContent += '## Other\n\n';
-        //     urlsBySection.other.forEach(({ title, url }) => {
-        //         markdownContent += `- [${title}](${url})\n`;
-        //     });
-        //     markdownContent += '\n';
-        // }
+        // Build concise main llms.txt
+        let markdownContent = `# ${TITLE}\n\n`;
+        markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
-        // Write to llms.txt
-        const outputPath = path.join(process.cwd(), 'public', 'llms.txt');
-        fs.writeFileSync(outputPath, markdownContent);
+        // MCP server section (unchanged)
+        markdownContent += `## Langfuse Docs MCP Server\n\n`;
+        markdownContent += `Connect to the Langfuse Docs MCP server to access documentation directly in your AI editor:\n\n`;
+        markdownContent += `- **Endpoint**: \`https://langfuse.com/api/mcp\`\n`;
+        markdownContent += `- **Transport**: \`streamableHttp\`\n`;
+        markdownContent += `- **Documentation**: [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)\n\n`;
+        markdownContent += `The MCP server provides tools to search Langfuse documentation, GitHub issues, and discussions. See the [installation guide](https://langfuse.com/docs/docs-mcp) for setup instructions in Cursor, VS Code, Claude Desktop, and other MCP clients.\n\n`;
 
-        console.log('Successfully generated llms.txt');
+        // Add each section with sub-file link and comma-separated titles
+        for (const [sectionKey, entries] of Object.entries(sectionEntries)) {
+            if (entries.length > 0) {
+                const config = SECTION_CONFIG[sectionKey];
+                const titles = entries.map(e => e.title).join(', ');
+
+                markdownContent += `## ${config.heading}\n\n`;
+                markdownContent += `For the full list with links to each page, see: https://langfuse.com/${config.file}\n\n`;
+                markdownContent += `Pages: ${titles}\n\n`;
+            }
+        }
+
+        fs.writeFileSync(path.join(publicDir, 'llms.txt'), markdownContent);
+
+        console.log('Successfully generated llms.txt and sub-files');
     } catch (error) {
         console.error('Error generating llms.txt:', error);
     }
 }
 
-generateLLMsList(); 
+generateLLMsList();
