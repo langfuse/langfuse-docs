@@ -1,5 +1,5 @@
 ---
-description: Configure masking to redact sensitive information from inputs and outputs sent to the Langfuse server.
+description: Configure masking to redact sensitive information from inputs, outputs, and metadata sent to the Langfuse server.
 sidebarTitle: Masking
 ---
 
@@ -7,7 +7,7 @@ sidebarTitle: Masking
 
 Masking is a feature that allows precise control over the [tracing](/docs/tracing/overview) data sent to the Langfuse server. With custom masking functions, you can control and sanitize the data that gets traced and sent to the server. Whether it's for **compliance reasons** or to protect **user privacy**, masking sensitive data is a crucial step in responsible application development. It enables you to:
 
-1. Redact sensitive information from trace or observation inputs and outputs.
+1. Redact sensitive information from trace or observation inputs, outputs, and metadata.
 2. Customize the content of events before transmission.
 3. Implement fine-grained data filtering based on your specific requirements.
 
@@ -16,15 +16,15 @@ Learn more about Langfuse's data security and privacy measures concerning the st
 ## How it works
 
 1. You define a custom masking function and pass it to the Langfuse client constructor.
-2. All event inputs and outputs are processed through this function.
+2. All event inputs, outputs, and metadata are processed through this function.
 3. The masked data is then sent to the Langfuse server.
 
-This approach ensures that you have complete control over the event input and output data traced by your application.
+This approach ensures that you have complete control over the event input, output, and metadata traced by your application.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "Langchain (JS/TS)"]}>
 <Tab>
 
-Define a masking function. The masking function will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
+Define a masking function. The masking function will apply to all event inputs, outputs, and metadata regardless of the Langfuse-maintained integration you are using.
 
 ```python
 def masking_function(data: any, **kwargs) -> any:
@@ -157,7 +157,7 @@ In this example, we'll demonstrate how to redact credit card numbers from string
 
 <Callout type="info">
 
-Langfuse's masking feature allows you to define a custom masking function with parameters, which you then pass to the Langfuse client constructor. This function is applied to **all event inputs and outputs**, processing each piece of data to mask or redact sensitive information according to your specifications. By ensuring that all events are processed through your masking function before being sent, Langfuse guarantees that only the masked data is transmitted to the Langfuse server.
+Langfuse's masking feature allows you to define a custom masking function with parameters, which you then pass to the Langfuse client constructor. This function is applied to **all event inputs, outputs, and metadata**, processing each piece of data to mask or redact sensitive information according to your specifications. By ensuring that all events are processed through your masking function before being sent, Langfuse guarantees that only the masked data is transmitted to the Langfuse server.
 
 </Callout>
 

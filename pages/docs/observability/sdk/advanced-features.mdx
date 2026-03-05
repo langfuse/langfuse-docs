@@ -127,6 +127,14 @@ The Langfuse SDK can expose detailed logging and debugging information to help y
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 
+**Via environment variable:**
+
+You can set the log level using the `LANGFUSE_DEBUG` environment variable to enable the debug mode.
+
+```bash
+export LANGFUSE_DEBUG="True"
+```
+
 **In code:**
 
 The Langfuse SDK uses Python's standard `logging` module. The main logger is named `"langfuse"`.
@@ -144,18 +152,18 @@ langfuse_logger.setLevel(logging.DEBUG)
 
 The default log level for the `langfuse` logger is `logging.WARNING`.
 
-**Via environment variable:**
-
-You can also set the log level using the `LANGFUSE_DEBUG` environment variable to enable the debug mode.
-
-```bash
-export LANGFUSE_DEBUG="True"
-```
-
 </Tab>
 <Tab title="JS/TS SDK">
 
 You can configure the global SDK logger to control the verbosity of log output. This is useful for debugging.
+
+**Via environment variable:**
+
+You can set the log level using the `LANGFUSE_LOG_LEVEL` environment variable to enable the debug mode.
+
+```bash
+export LANGFUSE_LOG_LEVEL="DEBUG"
+```
 
 **In code:**
 
@@ -167,14 +175,6 @@ configureGlobalLogger({ level: LogLevel.DEBUG });
 ```
 
 Available log levels are `DEBUG`, `INFO`, `WARN`, and `ERROR`.
-
-**Via environment variable:**
-
-You can also set the log level using the `LANGFUSE_LOG_LEVEL` environment variable to enable the debug mode.
-
-```bash
-export LANGFUSE_LOG_LEVEL="DEBUG"
-```
 
 </Tab>
 </LangTabs>

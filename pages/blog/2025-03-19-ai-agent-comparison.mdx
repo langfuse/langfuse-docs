@@ -1,7 +1,7 @@
 ---
 title: "Comparing Open-Source AI Agent Frameworks"
 date: 2025/03/19
-description: Get an overview of the leading open-source AI agent frameworks—LangGraph, OpenAI Agents SDK, Smolagents, CrewAI, AutoGen, Semantic Kernel, LlamaIndex agents, Strands Agents, and Pydantic AI agents. Compare features, learn when to use each, and see how to track agent behavior with Langfuse
+description: Get an overview of the leading open-source AI agent frameworks—LangGraph, OpenAI Agents SDK, Google ADK, Smolagents, CrewAI, AutoGen, Semantic Kernel, Strands Agents, Pydantic AI, Agno, Mastra, and Microsoft Agent Framework. Compare features, learn when to use each, and see how to track agent behavior with Langfuse
 ogImage: /images/blog/2025-03-19-ai-agent-comparison/agent-comparison.png
 tag: agents, guide
 author: Jannik
@@ -11,12 +11,12 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="Open-Source AI Agent Frameworks: Which One Is Right for You?"
-  description="Explore the leading open-source AI agent frameworks—LangGraph, OpenAI Agents SDK, Smolagents, CrewAI, AutoGen, Semantic Kernel, LlamaIndex agents, Strands Agents, and Pydantic AI agents. Compare features, learn when to use each, and see how to track agent behavior with Langfuse"
+  description="Explore the leading open-source AI agent frameworks—LangGraph, OpenAI Agents SDK, Google ADK, Smolagents, CrewAI, AutoGen, Semantic Kernel, Strands Agents, Pydantic AI, Agno, Mastra, and Microsoft Agent Framework. Compare features, learn when to use each, and see how to track agent behavior with Langfuse"
   date="March 19, 2025"
   authors={["jannikmaierhoefer"]}
 />
 
-Building AI agents used to be a patchwork of scripts, prompt engineering, and trial-and-error. Today, there is a growing landscape of open-source frameworks designed to streamline the process of creating agents that reason, plan, and execute tasks autonomously. This post offers an in-depth look at some of the leading open-source AI agent frameworks out there: **LangGraph, the OpenAI Agents SDK, Smolagents, CrewAI, AutoGen, Semantic Kernel, LlamaIndex agents, Strands Agents, and Pydantic AI agents**. By the time you finish reading, you should have a clearer view of each framework's sweet spot, how they differ, and where they excel in real-world development.
+Building AI agents used to be a patchwork of scripts, prompt engineering, and trial-and-error. Today, there is a growing landscape of open-source frameworks designed to streamline the process of creating agents that reason, plan, and execute tasks autonomously. This post offers an in-depth look at some of the leading open-source AI agent frameworks out there: **LangGraph, the OpenAI Agents SDK, Google ADK, Smolagents, CrewAI, AutoGen, Semantic Kernel, Strands Agents, Pydantic AI, Agno, Mastra, and Microsoft Agent Framework**. By the time you finish reading, you should have a clearer view of each framework's sweet spot, how they differ, and where they excel in real-world development.
 
 One of the biggest challenges in agent development is striking the right balance between giving the AI enough autonomy to handle tasks dynamically and maintaining enough structure for reliability. Each framework has its own philosophy, from explicit graph-based workflows to lightweight code-driven agents. We'll walk through their core ideas, trace how they might fit into your workflow, and examine how you can integrate them with monitoring solutions like Langfuse ([GitHub](https://github.com/langfuse/langfuse)) to evaluate and debug them to make sure they perform in production.
 
@@ -24,7 +24,7 @@ One of the biggest challenges in agent development is striking the right balance
 
 [LangGraph](https://github.com/langchain-ai/langgraph) extends the well-known [LangChain](https://github.com/langchain-ai/langchain) library into a graph-based architecture that treats agent steps like nodes in a directed acyclic graph. Each node handles a prompt or sub-task, and edges control data flow and transitions. This is helpful for complex, multi-step tasks where you need precise control over branching and error handling. LangGraph's DAG philosophy makes it easier to visualize or debug how decisions flow from one step to another, and you still inherit a ton of useful tooling and integrations from LangChain.
 
-<Video src="https://static.langfuse.com/docs-videos/langgraph-overview.mp4" gifStyle />
+<Video src="https://static.langfuse.com/docs-videos/langgraph-overview.mp4" gifStyle aspectRatio={1546 / 1080} />
 _[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a8b0cc9e-da3b-485f-a642-35431a6f9289)_
 
 [How to trace LangGraph agents with Langfuse →](/guides/cookbook/integration_langgraph)
@@ -35,12 +35,29 @@ Developers who prefer to model AI tasks in stateful workflows often gravitate to
 
 The [OpenAI Agents SDK](https://github.com/openai/openai-agents-python) is the latest entrant in the field. It packages OpenAI's capabilities into a more structured toolset for building agents that can reason, plan, and call external APIs or functions. By providing a specialized agent runtime and a straightforward API for assigning roles, tools, and triggers, OpenAI aims to simplify multi-step or multi-agent orchestration. While it's still evolving, developers appreciate the familiar style of prompts and the native integration with OpenAI's model endpoints.
 
-<Video src="https://static.langfuse.com/docs-videos/openai-agents-sdk-trace.mp4" gifStyle />
-_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c74429a6d0489e9259703a1148?timestamp=2025-03-14T08%3A31%3A04.745Z&observation=e83609282c443b0d)_
+<Frame fullWidth>
+  ![OpenAI Agents SDK trace visualization in
+  Langfuse](/images/cookbook/integration_openai-agents/openai-agent-example-trace.png)
+</Frame>
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/483a2afb22b41ee49d7d1e5b41b4967a?timestamp=2025-09-30T09%3A01%3A29.194Z&observation=e3e3580728f3fec4)_
 
 [How to trace the OpenAI Agents SDK with Langfuse →](/integrations/frameworks/openai-agents)
 
 If you are already deep into OpenAI's stack and want an officially supported solution to spin up agents that utilize GPT-4o or GPT-o3, the OpenAI Agents SDK might be your first stop.
+
+## Google Agent Development Kit (ADK)
+
+[Google ADK](https://github.com/google/adk-python) is Google's open-source framework for building, orchestrating, and tracing generative AI agents. It streamlines the path from prototype to production with built-in support for multi-agent orchestration, tool use, and session management. ADK integrates natively with Gemini models and Google's AI ecosystem, while also supporting other model providers. Its declarative agent definition and built-in runner abstraction make it easy to define agents with tools and manage conversational state.
+
+<Frame fullWidth>
+  ![Google ADK trace visualization in
+  Langfuse](/images/cookbook/integration-google-adk/google-adk-trace.png)
+</Frame>
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/b82a0bdc1994fc5d1c8576ca032543f7?timestamp=2025-08-28T07:32:30.303Z&display=details)_
+
+[How to trace Google ADK with Langfuse →](/integrations/frameworks/google-adk)
+
+If you're in Google's ecosystem and want a framework that offers built-in multi-agent orchestration alongside Gemini model support, Google ADK is a strong fit. Its session management and runner abstractions handle much of the boilerplate, letting you focus on agent logic.
 
 ## 🤗 Smolagents
 
@@ -48,7 +65,7 @@ Hugging Face's [smolagents](https://github.com/huggingface/smolagents) takes a r
 
 <Frame fullWidth>
   ![Smolagents Example trace in
-  Langfuse](/images/blog/2025-03-19-ai-agent-comparison/smolagents-trace.png)
+  Langfuse](/images/cookbook/integration-smolagents/smolagent_example_trace.png)
 </Frame>
 
 _[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ce5160f9bfd5a6cd63b07d2bfcec6f54?timestamp=2025-02-11T09%3A25%3A45.163Z&display=details)_
@@ -63,9 +80,9 @@ If you value fast setup and want to watch your AI generate Python code on the fl
 
 <Frame fullWidth>
   ![CrewAI trace visualization in
-  Langfuse](/images/blog/2025-03-19-ai-agent-comparison/crewai-trace.png)
+  Langfuse](/images/cookbook/integration_crewai/crewai-example-trace.png)
 </Frame>
-_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/3b485ea0d723bab3e5e53e72c6b10a71?timestamp=2025-02-24T10%3A34%3A30.423Z&observation=0c53ff94ec9c3da9)_
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a287bb31e317433610d8827617471140?timestamp=2025-07-11T07:45:13.601Z&display=details)_
 
 [How to trace CrewAI agents with Langfuse →](/integrations/frameworks/crewai)
 
@@ -77,9 +94,9 @@ If your use case calls for a multi-agent approach—like a "Planner" agent deleg
 
 <Frame fullWidth>
   ![AutoGen trace visualization in
-  Langfuse](/images/blog/2025-03-19-ai-agent-comparison/autogen-trace.png)
+  Langfuse](/images/cookbook/integration-autogen/autogen-example-trace.png)
 </Frame>
-_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/df850ab499107d4348584cf5933baabd?timestamp=2025-02-04T16%3A55%3A51.660Z&observation=286c648acb0105c2)_
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/1b72c51fabed12ae7df83bfd4a09f545?timestamp=2025-06-06T11:31:33.965Z&display=details)_
 
 [How to trace AutoGen agents with Langfuse →](/integrations/frameworks/autogen)
 
@@ -91,27 +108,13 @@ AutoGen is good if you're building an agent that heavily relies on multi-turn co
 
 <Frame fullWidth>
   ![Semantic Kernel trace visualization in
-  Langfuse](/images/blog/2025-03-19-ai-agent-comparison/semantic-kernel-trace.png)
+  Langfuse](/images/cookbook/integration-semantic-kernel/sematric-kernel-example-trace.png)
 </Frame>
-_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/14c7a9f1cc0d7ff16ac1a057a3d45be9?timestamp=2025-02-04T18%3A00%3A53.475Z&observation=cb3f0fb8a2369414)_
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/51d7ea51af5cf9048f607ac6abb79b4f?timestamp=2025-06-04T08:17:14.026Z&display=details)_
 
 [How to trace Semantic Kernel with Langfuse →](/integrations/frameworks/semantic-kernel)
 
 If you want a more formal approach that merges AI with non-AI services, Semantic Kernel is a strong bet. It has a structured "Planner" abstraction that can handle multi-step tasks, making it well-suited for mission-critical enterprise apps.
-
-## 🦙 LlamaIndex Agents
-
-[LlamaIndex](https://github.com/run-llama/llama_index) started as a retrieval-augmented generation solution for powering chatbots with large document sets. Over time, it added agent-like capabilities to chain queries and incorporate external knowledge sources. LlamaIndex agents are good when your primary need is to retrieve data from local or external stores and fuse that information into coherent answers or actions. The tooling around indexing data, chunking text, and bridging your LLM with a knowledge base is top-notch, and that data-centric approach extends into the agent layer.
-
-<Frame fullWidth>
-  ![LlamaIndex Agents trace visualization in
-  Langfuse](/images/blog/2025-03-19-ai-agent-comparison/llamaindex-agent-trace.png)
-</Frame>
-_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f2bb3e13-aafb-41a0-a852-efd20f12a4f4?timestamp=2025-02-13T16%3A03%3A09.705Z)_
-
-[How to trace LlamaIndex Agents with Langfuse →](/integrations/frameworks/llamaindex-workflows)
-
-If you're solving data-heavy tasks—like question answering on private documents, summarizing large repositories, or building a specialized search agent—LlamaIndex agents could be exactly what you need. The development experience feels intuitive if you've already used LlamaIndex for retrieval, and it pairs nicely with other frameworks that focus on orchestration.
 
 ## Strands Agents
 
@@ -143,21 +146,65 @@ _[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz0
 
 If you're a Python developer who values explicit type contracts, tests, and quick feedback loops, Pydantic AI offers a lightweight yet powerful path to building production-ready agents with minimal boilerplate.
 
+## Agno
+
+[Agno](https://github.com/agno-agi/agno) is a platform and framework for building and managing AI agents with a focus on speed and flexibility. It supports multiple model providers and offers built-in integrations for common tools like web search and financial data. Agno provides both a Python SDK for building agents and a hosted platform for managing them, making it suitable for teams that want to go from local development to a managed deployment quickly. Agents can be equipped with tools, knowledge bases, and memory to handle complex, stateful interactions.
+
+<Frame fullWidth>
+  ![Agno Agents trace visualization in
+  Langfuse](/images/cookbook/integration-agno-agents/agno-agents-openlit.png)
+</Frame>
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/080130871f53145aecf7c29d5dfb6e4c?timestamp=2025-06-11T14:01:32.598Z&display=details)_
+
+[How to trace Agno agents with Langfuse →](/integrations/frameworks/agno-agents)
+
+If you want a framework that combines a clean agent API with an optional managed platform for deployment and monitoring, Agno strikes a good balance between developer experience and operational convenience.
+
+## Mastra
+
+[Mastra](https://github.com/mastra-ai/mastra) is a TypeScript-first agent framework that provides the essential primitives for building AI applications. It enables developers to create AI agents with memory and tool-calling capabilities, implement deterministic LLM workflows, and leverage RAG for knowledge integration. Mastra has native OpenTelemetry support, making observability a first-class concern. For JavaScript and TypeScript teams, Mastra fills a gap that many Python-centric frameworks leave open.
+
+<Frame fullWidth>
+  ![Mastra trace visualization in
+  Langfuse](/images/docs/langfuse-mastra-trace.png)
+</Frame>
+
+[How to trace Mastra agents with Langfuse →](/integrations/frameworks/mastra)
+
+If you're building agents in TypeScript and want a framework designed from the ground up for the JS/TS ecosystem, with built-in support for workflows, RAG, and tool calling, Mastra is a compelling choice.
+
+## Microsoft Agent Framework
+
+The [Microsoft Agent Framework](https://github.com/microsoft/agent-framework) is a newer open-source framework from Microsoft, distinct from both AutoGen and Semantic Kernel. It provides a comprehensive set of tools for creating intelligent agents that can interact with various services, execute tasks, and handle complex workflows. The framework supports multiple LLM providers including Azure OpenAI and OpenAI, and offers built-in observability through OpenTelemetry.
+
+<Frame fullWidth>
+  ![Microsoft Agent Framework trace visualization in
+  Langfuse](/images/cookbook/integration_microsoft-agent-framework/microsoft-agent-framework-example-trace.png)
+</Frame>
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8e419d3288419b5d944270505640e183?observation=2406e8343fd49c0e&timestamp=2025-12-17T09:37:37.258Z)_
+
+[How to trace Microsoft Agent Framework with Langfuse →](/integrations/frameworks/microsoft-agent-framework)
+
+If you're in the Microsoft ecosystem and want a framework that complements AutoGen and Semantic Kernel with a more general-purpose agent runtime, the Microsoft Agent Framework offers a flexible foundation for building production-grade agents.
+
 ## Comparison Table
 
 | **Framework**                                                                      | **Core Paradigm**                    | **Primary Strength**                                              | **Best For**                                                                                        |
 | ---------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | **[LangGraph](https://www.langchain.com/langgraph)**                               | Graph-based workflow of prompts      | Explicit DAG control, branching, debugging                        | Complex multi-step tasks with branching, advanced error handling                                    |
 | **[OpenAI Agents SDK](https://openai.github.io/openai-agents-python/)**            | High-level OpenAI toolchain          | Integrated tools such as web and file search                      | Teams relying on OpenAI's ecosystem who want official support & specialized features                |
+| **[Google ADK](https://github.com/google/adk-python)**                             | Multi-agent orchestration toolkit    | Built-in session management, Gemini-native                        | Teams in Google's ecosystem building multi-agent applications                                       |
 | **[Smolagents](https://huggingface.co/docs/smolagents/en/index)**                  | Code-centric minimal agent loop      | Simple setup, direct code execution                               | Quick automation tasks without heavy orchestration overhead                                         |
 | **[CrewAI](https://www.crewai.com/)**                                              | Multi-agent collaboration (crews)    | Parallel role-based workflows, memory                             | Complex tasks requiring multiple specialists working together                                       |
 | **[AutoGen](https://microsoft.github.io/autogen/stable/)**                         | Asynchronous multi-agent chat        | Live conversations, event-driven                                  | Scenarios needing real-time concurrency, multiple LLM "voices" interacting                          |
 | **[Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/)** | Skill-based, enterprise integrations | Multi-language, enterprise compliance                             | Enterprise settings, .NET ecosystems, or large orgs needing robust skill orchestration              |
-| **[LlamaIndex Agents](https://www.llamaindex.ai/)**                                | RAG with integrated indexing         | Retrieval + agent synergy                                         | Use-cases that revolve around extensive data lookup, retrieval, and knowledge fusion                |
 | **[Strands Agents](https://strandsagents.com)**                                    | Model-agnostic agent toolkit         | Runs anywhere; multi-model via LiteLLM; strong OTEL observability | Teams needing provider-flexible agents (Bedrock, Anthropic, OpenAI, Ollama) with production tracing |
 | **[Pydantic AI](https://ai.pydantic.dev/)**                                        | Type-safe Python agent framework     | Strong type safety & FastAPI-style DX                             | Python developers wanting structured, validated agent logic                                         |
+| **[Agno](https://docs.agno.com/)**                                                 | Managed agent platform + SDK         | Speed, multi-provider, optional hosted platform                   | Teams wanting a fast agent SDK with optional managed deployment                                     |
+| **[Mastra](https://mastra.ai)**                                                    | TypeScript-first agent framework     | Native TS/JS, workflows, RAG, OpenTelemetry                       | JavaScript/TypeScript teams building agents with RAG and tool calling                               |
+| **[Microsoft Agent Framework](https://github.com/microsoft/agent-framework)**      | General-purpose agent runtime        | Multi-provider, OpenTelemetry, Azure integration                  | Microsoft ecosystem teams wanting a flexible agent foundation                                       |
 
-As you can see there are very different approaches to these agent frameworks. Graph-based solutions like LangGraph give you precise control, while conversation-based solutions like AutoGen give you natural, flexible dialogues. Role-based orchestration from CrewAI can tackle complex tasks through a "cast" of specialized agents, whereas Smolagents is ideal for minimal code-driven patterns. Semantic Kernel is positioned in the enterprise space, and LlamaIndex Agents shine for retrieval-centric applications. The OpenAI Agents SDK appeals to users already confident in the OpenAI stack. Strands Agents is model-agnostic with optional deep AWS integrations, and Pydantic AI is tailored for Python environments.
+As you can see there are very different approaches to these agent frameworks. Graph-based solutions like LangGraph give you precise control, while conversation-based solutions like AutoGen give you natural, flexible dialogues. Role-based orchestration from CrewAI can tackle complex tasks through a "cast" of specialized agents, whereas Smolagents is ideal for minimal code-driven patterns. Semantic Kernel is positioned in the enterprise space. The OpenAI Agents SDK appeals to users already in the OpenAI stack, while Google ADK brings multi-agent orchestration to Gemini-powered apps. Strands Agents is model-agnostic with optional deep AWS integrations, and Pydantic AI is tailored for type-safe Python environments. Agno offers a fast agent SDK with an optional managed platform, Mastra caters to TypeScript-first teams, and the Microsoft Agent Framework provides a flexible general-purpose runtime that complements AutoGen and Semantic Kernel.
 
 ## When to Use Each Framework
 
@@ -184,15 +231,18 @@ flowchart TD
     B -->|No| D{"Single-agent approach?"}
 
     %% SINGLE-AGENT BRANCH
-    D -->|"RAG-based retrieval (doc search)"| L["LlamaIndex\n(Retrieving data)"]
     D -->|"Code-gen agent (lightweight)"| M["SmolAgents\n(Small code approach)"]
-    D -->|"Generic OpenAI approach"| N["OpenAI Agents SDK"]
+    D -->|"OpenAI models"| N["OpenAI Agents SDK"]
+    D -->|"Gemini models"| P["Google ADK"]
     D -->|"Provider-flexible agent SDK"| Y["Strands Agents\n(Model-agnostic)"]
+    D -->|"Type-safe Python"| Z["Pydantic AI"]
+    D -->|"TypeScript-first"| T["Mastra\n(TS agent framework)"]
 
     %% MULTI-AGENT BRANCH
     F -->|Graph-based & fine-grained control| G["LangGraph\n(DAG of nodes)"]
     F -->|Role-based, collaborative crew| H["CrewAI\n(Multi-role synergy)"]
-    F -->|Provider-flexible with OTEL| Y["Strands Agents\n(Model-agnostic)"]
+    F -->|Provider-flexible with OTEL| Y
+    F -->|"Google ecosystem"| P
 
     C -->|"Conversation-based (chat & tool calls)"| E["AutoGen (Microsoft)"]
     C -->|"Planner-based (multi-step task)"| X["Semantic Kernel (Microsoft)"]

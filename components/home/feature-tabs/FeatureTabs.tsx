@@ -9,6 +9,7 @@ import {
   useReducer,
 } from "react";
 import { useRouter } from "next/router";
+import Image from "next/image";
 import { TabButton } from "./TabButton";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
@@ -424,6 +425,29 @@ export const FeatureTabs = ({
               )}
             </div>
           )}
+
+          {/* Preload images for all tabs to prevent broken images on tab switch */}
+          <div
+            aria-hidden="true"
+            className="absolute overflow-hidden pointer-events-none"
+            style={{ width: 1, height: 1, opacity: 0.01 }}
+          >
+            {features.map((feature) => (
+              <div
+                key={`preload-${feature.id}`}
+                className="relative"
+                style={{ width: 800, height: 400 }}
+              >
+                <Image
+                  src={feature.image.light}
+                  alt=""
+                  fill
+                  sizes="100vw"
+                  loading="eager"
+                />
+              </div>
+            ))}
+          </div>
 
           <div className="relative overflow-hidden">
             <div

@@ -27,14 +27,16 @@ import magicPatternsLight from "../home/img/magicpatterns_light.png";
 import magicPatternsDark from "../home/img/magicpatterns_dark.png";
 import merckLight from "../home/img/merck-dark.png";
 import merckDark from "../home/img/merck-light.png";
-import juiceboxLight from "../home/img/juicebox_light.svg";
-import juiceboxDark from "../home/img/juicebox_dark.svg";
+import adobeLight from "../home/img/adobe_light.svg";
+import adobeDark from "../home/img/adobe_dark.svg";
 import pigmentLight from "../home/img/pigment_light.svg";
 import pigmentDark from "../home/img/pigment_dark.svg";
 import sevenelevenLight from "../home/img/seveneleven_light.png";
 import sevenelevenDark from "../home/img/seveneleven_dark.png";
 import circlebackLight from "../home/img/circleback_light.png";
 import circlebackDark from "../home/img/circleback_dark.png";
+import canvaLight from "../home/img/canva_light.png";
+import canvaDark from "../home/img/canva_dark.png";
 
 interface CustomerStory {
   route: string;
@@ -53,21 +55,22 @@ interface CustomerStory {
 
 // Companies with customer stories
 const companiesWithStories = [
-  { name: "SumUp", path: "/customers/sumup", light: sumupLight, dark: sumupDark },
-  { name: "Khan Academy", path: "/customers/khan-academy", light: khanacademyLight, dark: khanacademyDark },
-  { name: "Magic Patterns", path: "/customers/magic-patterns-ai-design-tools", light: magicPatternsLight, dark: magicPatternsDark },
-  { name: "Merck", path: "/customers/merckgroup", light: merckLight, dark: merckDark },
+  { name: "Canva", path: "/users/canva", light: canvaLight, dark: canvaDark, isIntuitive: false },
+  { name: "SumUp", path: "/users/sumup", light: sumupLight, dark: sumupDark, isIntuitive: false },
+  { name: "Khan Academy", path: "/users/khan-academy", light: khanacademyLight, dark: khanacademyDark, isIntuitive: false },
+  { name: "Magic Patterns", path: "/users/magic-patterns-ai-design-tools", light: magicPatternsLight, dark: magicPatternsDark, isIntuitive: false },
+  { name: "Merck", path: "/users/merckgroup", light: merckLight, dark: merckDark, isIntuitive: false },
 ];
 
 // Companies without customer stories (logos only)
 // Note: Most logos use counterintuitive naming (_light for dark mode, _dark for light mode)
-// But Intuit uses intuitive naming (_light for light mode, _dark for dark mode)
+// But Intuit and Adobe use intuitive naming (_light for light mode, _dark for dark mode)
 const companiesWithoutStories = [
   { name: "Samsara", light: samsaraLight, dark: samsaraDark, isIntuitive: false },
   { name: "Twilio", light: twilioLight, dark: twilioDark, isIntuitive: false },
   { name: "Telus", light: telusLight, dark: telusDark, isIntuitive: false },
   { name: "Pigment", light: pigmentLight, dark: pigmentDark, isIntuitive: false },
-  { name: "Juicebox", light: juiceboxLight, dark: juiceboxDark, isIntuitive: false },
+  { name: "Adobe", light: adobeLight, dark: adobeDark, isIntuitive: true },
   { name: "Intuit", light: intuitLight, dark: intuitDark, isIntuitive: true },
   { name: "Seven Eleven Japan", light: sevenelevenLight, dark: sevenelevenDark, isIntuitive: false },
   { name: "Circleback", light: circlebackLight, dark: circlebackDark, isIntuitive: false },
@@ -276,7 +279,7 @@ export function Customers() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
-  const allStories = (getPagesUnderRoute("/customers") as Array<
+  const allStories = (getPagesUnderRoute("/users") as Array<
     Page & { frontMatter: any }
   >).filter(
     (page) => page.frontMatter?.showInCustomerIndex !== false
@@ -306,12 +309,13 @@ export function Customers() {
     const order: Array<{ type: "story" | "logo" | "text"; name: string }> = [
       // First column
       { type: "logo", name: "Intuit" },
+      { type: "story", name: "Canva" },
       { type: "story", name: "SumUp" },
       // Continue with rest in desired order...
       { type: "logo", name: "Samsara" },
       { type: "logo", name: "Twilio" },
       { type: "logo", name: "Telus" },
-      { type: "logo", name: "Juicebox" },
+      { type: "logo", name: "Adobe" },
       { type: "logo", name: "Seven Eleven Japan" },
       { type: "story", name: "Khan Academy" },
       { type: "logo", name: "Circleback" },
@@ -421,4 +425,3 @@ export function Customers() {
     </WrappedSection>
   );
 }
-
