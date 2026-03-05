@@ -71,11 +71,6 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
             <span className="hidden sm:inline">Sentiment Classifier</span>
             <span className="sm:hidden">Sentiment</span>
           </TabsTrigger>
-          <TabsTrigger value="voice" className="gap-1.5">
-            <MicIcon className="size-4" />
-            <span className="hidden sm:inline">Voice Agent</span>
-            <span className="sm:hidden">Voice</span>
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="chatbot" forceMount className={activeTab !== "chatbot" ? "hidden" : undefined}>
@@ -90,9 +85,6 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
           <SentimentClassifier />
         </TabsContent>
 
-        <TabsContent value="voice" forceMount className={activeTab !== "voice" ? "hidden" : undefined}>
-          <VoiceAgent />
-        </TabsContent>
       </Tabs>
     </div>
   );

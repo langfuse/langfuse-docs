@@ -1,0 +1,170 @@
+---
+title: "How to Migrate from Helicone to Langfuse"
+description: Step-by-step guide to migrate your prompt management and observability from Helicone to Langfuse, covering prompt templates, variables, versioning, and tracing.
+tags: [migration, integration]
+---
+
+# Migrate from Helicone to Langfuse
+
+Helicone has [moved into maintenance mode](https://www.helicone.ai/blog/joining-mintlify) following its acquisition by Mintlify. This guide covers how to migrate your **prompt management** and **observability/tracing** setup from Helicone to Langfuse.
+
+## Migrating Prompt Management
+
+Helicone offers two approaches to [prompt management](https://docs.helicone.ai/gateway/prompt-integration): a **gateway approach** where you pass a `prompt_id` and the gateway compiles the template server-side in a single API call, and an **SDK approach** where you fetch and compile prompts client-side via the `@helicone/helpers` package. Langfuse uses an SDK-based model similar to Helicone's SDK approach: prompts are [fetched and compiled in your application code](/docs/prompt-management/get-started), with built-in [caching](/docs/prompt-management/features/caching) to keep latency low and ensure [guaranteed availability](/docs/prompt-management/features/guaranteed-availability).
+
+If you used **Helicone's gateway approach**, the main change is moving prompt resolution into your application code. If you already used **Helicone's SDK approach** (`HeliconePromptManager` → `getPromptBody`), the migration is more straightforward — you're replacing one SDK fetch+compile pattern with another.
+
+### 1. Export Prompts from Helicone
+
+Use the [Helicone Prompt API](https://docs.helicone.ai/rest/prompt/query-prompts) to export your existing prompts:
+
+1. **List all prompts** via `POST /v1/prompt-2025/query` to get prompt IDs.
+2. **List versions** for each prompt via `POST /v1/prompt-2025/query/versions`.
+3. **Fetch the full body** for each version via `GET /v1/prompt-2025/{promptVersionId}/prompt-body`.
+4. **Record environment assignments** via `POST /v1/prompt-2025/query/environment-version` to know which version is deployed where (production, staging, etc.).
+
+### 2. Convert Variable Syntax
+
+Helicone uses typed variables (`{{hc:name:type}}`), while Langfuse uses plain `{{variable}}` placeholders compiled at runtime via [`.compile()`](/docs/prompt-management/features/variables).
+
+| Helicone | Langfuse |
+| --- | --- |
+| `{{hc:customer_name:string}}` | `{{customer_name}}` |
+| `{{hc:is_premium:boolean}}` | `{{is_premium}}` |
+
+If you relied on Helicone's type validation, move that logic into your application code before calling `.compile()`.
+
+### 3. Map Prompt Bodies to Langfuse
+
+Helicone stores the full LLM request shape (`model`, `messages`, `temperature`, `tools`, etc.) in a single prompt body. In Langfuse, split this into two parts:
+
+- **Prompt content** (type `chat`): the `messages` array with converted variable syntax. See [prompt data model](/docs/prompt-management/data-model).
+- **Prompt config** (JSON): model parameters (`model`, `temperature`, `max_tokens`) and tool definitions (`tools`, `tool_choice`, `response_format`). See [prompt config](/docs/prompt-management/features/config).
+
+### 4. Recreate Prompts in Langfuse
+
+Create prompts in Langfuse via the [SDK](/docs/prompt-management/get-started) or [API](/docs/api-and-data-platform/features/public-api), setting:
+
+- **Prompt name**: maps to Helicone's `prompt_id`.
+- **Prompt type**: `chat` (since Helicone stores chat messages).
+- **Labels**: map Helicone environments (production/staging) to [Langfuse labels](/docs/prompt-management/features/a-b-testing). For example, the Helicone version assigned to "production" gets the `production` label in Langfuse.
+- **Config JSON**: include model parameters and tool definitions.
+
+### 5. Migrate Prompt Partials and Composition
+
+Helicone prompt partials (`{{hcp:prompt_id:index:environment}}`) pull messages from other prompts. Langfuse offers two alternatives:
+
+- **Shared system instructions**: create a Langfuse *text* prompt for the shared snippet and reference it via [prompt composability](/docs/prompt-management/features/composability).
+- **Multi-message fragments**: fetch both prompts in code, compile each, and merge message arrays — or use [message placeholders](/docs/prompt-management/features/message-placeholders) to insert messages at specific positions at runtime.
+
+### 6. Update Application Code
+
+Replace Helicone's prompt integration with Langfuse's fetch + compile flow.
+
+**If you used Helicone's gateway approach** (`prompt_id` + `inputs` in the API call):
+
+```python
+# Before (Helicone gateway)
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    prompt_id="customer_support",
+    inputs={"customer_name": "Alice", "issue_type": "billing"}
+)
+
+# After (Langfuse)
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+prompt = langfuse.get_prompt("customer_support", label="production", type="chat")
+compiled_messages = prompt.compile(customer_name="Alice", issue_type="billing")
+
+response = client.chat.completions.create(
+    model=prompt.config.get("model", "gpt-4o-mini"),
+    messages=compiled_messages
+)
+```
+
+**If you used Helicone's SDK approach** (`@helicone/helpers` / `HeliconePromptManager`):
+
+```python
+# Before (Helicone SDK)
+# body = prompt_manager.get_prompt_body(prompt_id="customer_support", inputs={...})
+# response = client.chat.completions.create(**body)
+
+# After (Langfuse) — same pattern, different SDK
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+prompt = langfuse.get_prompt("customer_support", label="production", type="chat")
+compiled_messages = prompt.compile(customer_name="Alice", issue_type="billing")
+
+response = client.chat.completions.create(
+    model=prompt.config.get("model", "gpt-4o-mini"),
+    messages=compiled_messages
+)
+```
+
+See the [prompt management get-started guide](/docs/prompt-management/get-started) for full Python and TypeScript examples.
+
+## Migrating Tracing / Observability
+
+Helicone logs LLM requests at the gateway level. Langfuse provides [hierarchical traces](/docs/observability/data-model) with nested spans, giving you visibility into multi-step agent workflows — not just individual LLM calls.
+
+### Option A: Use the Langfuse SDK (Recommended)
+
+Langfuse offers a [Python and TypeScript SDK](/docs/observability/sdk/overview) that can flexibly wrap any application code, plus native [integrations with 80+ frameworks and model providers](/integrations) including OpenAI, LangChain, LlamaIndex, Vercel AI SDK, Anthropic, and many more. You can choose the integration that matches your stack — see the full [integrations overview](/integrations) for all options.
+
+The simplest starting point for OpenAI users is the drop-in [OpenAI SDK wrapper](/integrations/model-providers/openai-py). Since Helicone is OpenAI-compatible, you can even keep Helicone as a gateway during the transition:
+
+```python
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+    api_key="your-api-key",
+    base_url="https://api.openai.com/v1"  # or keep Helicone's URL during transition
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+```
+
+Beyond simple LLM call logging, the Langfuse SDK provides the [`@observe()` decorator](/docs/observability/sdk/instrumentation) (Python) and equivalent patterns in TypeScript to trace any function in your application — creating hierarchical traces with nested spans for multi-step agent workflows, tool calls, retrieval steps, and more. This gives you the full trace context that gateway-only logging cannot provide.
+
+To link traced generations to your migrated prompts, pass the prompt object to the generation. See [linking prompts to traces](/docs/prompt-management/features/link-to-traces).
+
+### Option B: Use OpenTelemetry
+
+If you already have OpenTelemetry instrumentation, you can point your OTLP exporter at [Langfuse's OTLP endpoint](/docs/observability/sdk/instrumentation):
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <base64(public_key:secret_key)>"
+```
+
+Key constraints:
+- Langfuse supports **OTLP over HTTP via both HTTP/JSON and HTTP/protobuf** (`gRPC` is not supported yet).
+- See the [OpenTelemetry integration docs](/docs/observability/sdk/instrumentation) for full setup details.
+
+### Option C: Replace the Gateway with LiteLLM Proxy
+
+If you used Helicone primarily as an AI gateway (multi-provider routing, failover), [LiteLLM Proxy](/integrations/gateways/litellm) is a drop-in replacement with native Langfuse integration:
+
+```yaml
+# litellm_config.yaml
+litellm_settings:
+  callbacks: ["langfuse_otel"]
+```
+
+This preserves the gateway pattern while routing all traces to Langfuse. See the [LiteLLM Proxy integration guide](/integrations/gateways/litellm) for details.
+
+## Further Resources
+
+- [Langfuse Prompt Management Overview](/docs/prompt-management/overview)
+- [Langfuse Observability Overview](/docs/observability/overview)
+- [Langfuse Get Started Guide](/docs/observability/get-started)
+- [Helicone Integration (use Langfuse alongside Helicone)](/integrations/gateways/helicone)
+- [Helicone Prompt Integration Docs](https://docs.helicone.ai/gateway/prompt-integration)
+- [Helicone Prompt API Docs](https://docs.helicone.ai/rest/prompt/query-prompts)
+- [Helicone Announcement](https://www.helicone.ai/blog/joining-mintlify)

@@ -43,7 +43,7 @@ jobs:
             echo "" >> temp_file  # Add a blank line after the marker
             
             # Filter the llms.txt content - replace absolute links with relative ones
-            cat public/llms.txt | sed 's|https://langfuse.com||g' >> temp_file
+            cat public/llms.txt public/llms-docs.txt public/llms-integrations.txt public/llms-self-hosting.txt | sed 's|https://langfuse.com||g' >> temp_file
             
             mv temp_file .cursor/rules/available-internal-links.mdc
             echo "Successfully appended llms.txt content to available-internal-links.mdc with relative links"
