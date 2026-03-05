@@ -19,8 +19,8 @@ import magicPatternsLight from "../home/img/magicpatterns_light.png";
 import magicPatternsDark from "../home/img/magicpatterns_dark.png";
 import merckLight from "../home/img/merck-dark.png";
 import merckDark from "../home/img/merck-light.png";
-import juiceboxLight from "../home/img/juicebox_light.svg";
-import juiceboxDark from "../home/img/juicebox_dark.svg";
+import adobeLight from "../home/img/adobe_light.svg";
+import adobeDark from "../home/img/adobe_dark.svg";
 import pigmentLight from "../home/img/pigment_light.svg";
 import pigmentDark from "../home/img/pigment_dark.svg";
 import sevenelevenLight from "../home/img/seveneleven_light.png";
@@ -55,9 +55,9 @@ const companies: CompanyLogo[] = [
     lightModeImage: twilioDark,
   },
   {
-    name: "Juicebox",
-    darkModeImage: juiceboxLight,
-    lightModeImage: juiceboxDark,
+    name: "Adobe",
+    darkModeImage: adobeDark,
+    lightModeImage: adobeLight,
   },
   {
     name: "Khan Academy",
