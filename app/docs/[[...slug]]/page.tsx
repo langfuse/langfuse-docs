@@ -24,7 +24,7 @@ export default async function DocPage(props: PageProps) {
     <DocsPage
       toc={toc}
       breadcrumb={{ includePage: true, includeRoot: true }}
-      tableOfContent={{ footer: <DocsContributors /> }}
+      tableOfContent={{ footer: <DocsContributors pageTitle={page.data.title} /> }}
       editOnGithub={{
         owner: "langfuse",
         repo: "langfuse-docs",

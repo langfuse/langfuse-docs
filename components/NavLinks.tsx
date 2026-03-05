@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 
 const productLinks = [
-  { name: "Overview", href: "/" },
+  { name: "Overview", href: "/docs" },
   { name: "LLM Observability", href: "/docs/observability/overview" },
   { name: "Prompt Management", href: "/docs/prompt-management/overview" },
   { name: "Evaluation", href: "/docs/evaluation/overview" },
@@ -110,11 +110,10 @@ export function NavLinks() {
            so `top` is relative to the header itself. Use `4rem` (navbar height)
            to sit flush at the navbar's bottom edge. */}
       <div
-        className={`md:hidden fixed left-0 right-0 z-50 bg-background border-b shadow-lg transition-all duration-300 ease-out overflow-hidden ${
-          mobileOpen
+        className={`md:hidden fixed left-0 right-0 z-50 bg-background border-b shadow-lg transition-all duration-300 ease-out overflow-hidden ${mobileOpen
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-2 max-h-0 pointer-events-none"
-        }`}
+          }`}
         style={{
           top: "4rem",
           maxHeight: mobileOpen
@@ -142,9 +141,8 @@ export function NavLinks() {
             >
               <span>Product</span>
               <ChevronDown
-                className={`h-4 w-4 transition-transform ${
-                  mobileProductOpen ? "rotate-180" : "rotate-0"
-                }`}
+                className={`h-4 w-4 transition-transform ${mobileProductOpen ? "rotate-180" : "rotate-0"
+                  }`}
               />
             </button>
             {mobileProductOpen && (
@@ -171,9 +169,8 @@ export function NavLinks() {
             >
               <span>Resources</span>
               <ChevronDown
-                className={`h-4 w-4 transition-transform ${
-                  mobileResourcesOpen ? "rotate-180" : "rotate-0"
-                }`}
+                className={`h-4 w-4 transition-transform ${mobileResourcesOpen ? "rotate-180" : "rotate-0"
+                  }`}
               />
             </button>
             {mobileResourcesOpen && (
