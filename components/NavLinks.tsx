@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
+import type { NavTreeItem, SectionNavData } from "@/lib/nav-tree";
 
 const productLinks = [
   { name: "Overview", href: "/docs" },
@@ -36,23 +37,19 @@ const simpleLinks = [
   { name: "Pricing", href: "/pricing" },
 ];
 
-const sectionLinks = [
-  { name: "Docs", href: "/docs" },
-  { name: "Self Hosting", href: "/self-hosting" },
-  { name: "Guides", href: "/guides" },
-  { name: "Integrations", href: "/integrations" },
-  { name: "FAQ", href: "/faq" },
-  { name: "Handbook", href: "/handbook" },
-  { name: "Changelog", href: "/changelog" },
-  { name: "Pricing", href: "/pricing" },
-  { name: "Library", href: "/library" },
-  { name: "Security & Compliance", href: "/security" },
-];
-
-export function NavLinks() {
+export function NavLinks({
+  sectionNavData,
+}: {
+  sectionNavData: SectionNavData[];
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileProductOpen, setMobileProductOpen] = useState(true);
   const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+
+  const toggleSection = (href: string) => {
+    setOpenSections((prev) => ({ ...prev, [href]: !prev[href] }));
+  };
 
   return (
     <>
@@ -111,8 +108,8 @@ export function NavLinks() {
            to sit flush at the navbar's bottom edge. */}
       <div
         className={`md:hidden fixed left-0 right-0 z-50 bg-background border-b shadow-lg transition-all duration-300 ease-out overflow-hidden ${mobileOpen
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 -translate-y-2 max-h-0 pointer-events-none"
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 -translate-y-2 max-h-0 pointer-events-none"
           }`}
         style={{
           top: "4rem",
@@ -190,21 +187,126 @@ export function NavLinks() {
 
             {/* All sections */}
             <div className="border-t mt-3 pt-3 flex flex-col gap-1">
-              {sectionLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
-                >
-                  <span>{link.name}</span>
-                  <ChevronRight className="h-4 w-4 opacity-50" />
-                </Link>
-              ))}
+              {sectionNavData.map((section) =>
+                section.children.length > 0 ? (
+                  <div key={section.href}>
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-200"
+                      onClick={() => toggleSection(section.href)}
+                      aria-expanded={!!openSections[section.href]}
+                    >
+                      <span>{section.name}</span>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 transition-transform",
+                          openSections[section.href]
+                            ? "rotate-180"
+                            : "rotate-0"
+                        )}
+                      />
+                    </button>
+                    {openSections[section.href] && (
+                      <div className="flex flex-col gap-0.5 pl-2">
+                        {section.children.map((item, i) => (
+                          <MobileNavTreeItem
+                            key={`${item.type}-${item.url || item.name || i}`}
+                            item={item}
+                            onNavigate={() => setMobileOpen(false)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={section.href}
+                    href={section.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
+                  >
+                    <span>{section.name}</span>
+                    <ChevronRight className="h-4 w-4 opacity-50" />
+                  </Link>
+                )
+              )}
             </div>
           </div>
         </div>
       </div>
     </>
+  );
+}
+
+function MobileNavTreeItem({
+  item,
+  onNavigate,
+}: {
+  item: NavTreeItem;
+  onNavigate: () => void;
+}) {
+  if (item.type === "separator") {
+    if (!item.name) return null;
+    return (
+      <div className="px-2 pt-3 pb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        {item.name}
+      </div>
+    );
+  }
+
+  if (item.type === "folder" && item.children && item.children.length > 0) {
+    return <MobileNavFolder item={item} onNavigate={onNavigate} />;
+  }
+
+  if (!item.url) return null;
+
+  return (
+    <Link
+      href={item.url}
+      onClick={onNavigate}
+      className="block px-2 py-1.5 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
+    >
+      {item.name}
+    </Link>
+  );
+}
+
+function MobileNavFolder({
+  item,
+  onNavigate,
+}: {
+  item: NavTreeItem;
+  onNavigate: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div>
+      <button
+        type="button"
+        className="flex w-full items-center justify-between px-2 py-1.5 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+      >
+        <span>{item.name}</span>
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 opacity-60 transition-transform",
+            open ? "rotate-180" : "rotate-0"
+          )}
+        />
+      </button>
+      {open && (
+        <div className="flex flex-col gap-0.5 pl-3">
+          {item.children!.map((child, i) => (
+            <MobileNavTreeItem
+              key={`${child.type}-${child.url || child.name || i}`}
+              item={child}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
