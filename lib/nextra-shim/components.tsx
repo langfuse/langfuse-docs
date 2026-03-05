@@ -77,13 +77,18 @@ const CardComponent = ({
 export function Cards({
   num,
   children,
+  className,
   ...rest
 }: { num?: number; children?: React.ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
-  const cols = num === 1 ? 1 : num === 2 ? 2 : 3;
+  const colsClass =
+    num === 1
+      ? "grid-cols-1"
+      : num === 2
+        ? "grid-cols-1 sm:grid-cols-2"
+        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
   return (
     <div
-      className="grid gap-4 not-prose my-4"
-      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+      className={cn("grid gap-4 not-prose my-4", colsClass, className)}
       {...rest}
     >
       {children}
