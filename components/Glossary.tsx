@@ -586,7 +586,9 @@ const GlossaryEntry = ({ term }: { term: GlossaryTerm }) => {
         </div>
         <div className="flex flex-wrap gap-1.5">
           {term.categories.map((cat) => (
-            <CategoryBadge key={cat} category={cat} />
+            <React.Fragment key={cat}>
+              <CategoryBadge category={cat} />
+            </React.Fragment>
           ))}
         </div>
         <p className="text-sm text-muted-foreground m-0 mt-1">
@@ -693,12 +695,13 @@ export const Glossary = () => {
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-sm text-muted-foreground mr-1">Filter:</span>
           {(Object.keys(CATEGORIES) as CategoryKey[]).map((cat) => (
-            <CategoryBadge
-              key={cat}
-              category={cat}
-              onClick={() => toggleCategory(cat)}
-              isActive={activeCategories.includes(cat)}
-            />
+            <React.Fragment key={cat}>
+              <CategoryBadge
+                category={cat}
+                onClick={() => toggleCategory(cat)}
+                isActive={activeCategories.includes(cat)}
+              />
+            </React.Fragment>
           ))}
           {hasActiveFilters && (
             <button
@@ -756,7 +759,9 @@ export const Glossary = () => {
               {terms
                 .sort((a, b) => a.term.localeCompare(b.term))
                 .map((term) => (
-                  <GlossaryEntry key={term.id} term={term} />
+                  <React.Fragment key={term.id}>
+                    <GlossaryEntry term={term} />
+                  </React.Fragment>
                 ))}
             </div>
           ))

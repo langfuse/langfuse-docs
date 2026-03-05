@@ -12,6 +12,8 @@ You can easily contribute to the docs using GitHub Codespaces. Just click on the
 
 Pre-requisites: Node.js 22, pnpm v9.5.0
 
+To use Node 22 (e.g. with [nvm](https://github.com/nvm-sh/nvm)): `nvm install 22` then `nvm use` (or `nvm use 22`). The repo includes an `.nvmrc` so `nvm use` picks 22 automatically.
+
 1. Optional: Create env based on [.env.template](./.env.template)
 2. Run `pnpm i` to install the dependencies.
 3. Run `pnpm dev` to start the development server on localhost:3333
@@ -57,7 +59,7 @@ Interested in stack of Q&A docs chatbot? Checkout the [blog post](https://langfu
 
 The docs site includes four interconnected features designed to make documentation accessible to LLMs and AI tools:
 
-1. **Markdown URL endpoints** (`.md` suffix): Append `.md` to any URL (e.g., `/docs.md`) to get raw markdown. Built at compile time via `scripts/copy_md_sources.js` which copies all `.mdx` files from `/pages` to `/public/md-src/` as static `.md` files with inlined MDX components.
+1. **Markdown URL endpoints** (`.md` suffix): Append `.md` to any URL (e.g., `/docs.md`) to get raw markdown. Built at compile time via `scripts/copy_md_sources.js` which copies all `.mdx`/`.md` files from `content/` to `public/md-src/` as static `.md` files with inlined MDX components.
 
 2. **Copy as Markdown button**: UI button on docs pages that fetches the `.md` endpoint and copies to clipboard for pasting into ChatGPT/Claude/Cursor.
 

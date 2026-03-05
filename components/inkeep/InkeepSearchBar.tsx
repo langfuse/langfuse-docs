@@ -1,3 +1,5 @@
+'use client';
+
 import dynamic from "next/dynamic";
 import type { InkeepSearchBarProps } from "@inkeep/cxkit-react";
 import useInkeepSettings from "./useInkeepSettings";
@@ -44,7 +46,7 @@ export default function InkeepSearchBar() {
   };
 
   return (
-    <div className="h-9 overflow-hidden">
+    <div className="overflow-hidden h-9">
       <SearchBar {...searchBarProps} />
     </div>
   );

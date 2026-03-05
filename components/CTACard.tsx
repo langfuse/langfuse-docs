@@ -29,13 +29,27 @@ export function CTACard({ title, description, children, className, showArrow = f
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-end items-center md:flex-1">
               {showArrow ? (
                 React.Children.map(children, (child) => {
-                  if (React.isValidElement(child) && (child.type === Button || child.props.asChild)) {
+                  if (React.isValidElement(child) && child.type === Button) {
+                    if (child.props.asChild && React.isValidElement(child.props.children)) {
+                      // asChild: inject arrow inside the <a> so Slot renders <a> with button classes
+                      const linkChild = child.props.children as React.ReactElement;
+                      return React.cloneElement(child, {
+                        children: React.cloneElement(linkChild, {
+                          children: (
+                            <span className="flex items-center gap-2">
+                              {linkChild.props.children}
+                              <ArrowRight className="h-4 w-4" />
+                            </span>
+                          )
+                        })
+                      } as any);
+                    }
                     return React.cloneElement(child, {
                       children: (
-                        <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-2">
                           {child.props.children}
                           <ArrowRight className="h-4 w-4" />
-                        </div>
+                        </span>
                       )
                     } as any);
                   }

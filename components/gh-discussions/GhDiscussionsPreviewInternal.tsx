@@ -270,7 +270,7 @@ const GhDiscussionsPreviewInternal = ({
           {!filterCategory && (
             <TabsList>
               {categories.map((category) => (
-                <TabsTrigger value={category}>
+                <TabsTrigger key={category} value={category}>
                   <IconGithub className="mr-1" />
                   {category}
                 </TabsTrigger>
