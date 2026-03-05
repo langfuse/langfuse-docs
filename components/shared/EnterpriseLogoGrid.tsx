@@ -66,18 +66,6 @@ const companies: CompanyLogo[] = [
     customerStoryPath: "/users/khan-academy",
   },
   {
-    name: "Magic Patterns",
-    darkModeImage: magicPatternsLight,
-    lightModeImage: magicPatternsDark,
-    customerStoryPath: "/users/magic-patterns-ai-design-tools",
-  },
-  {
-    name: "Merck",
-    darkModeImage: merckLight,
-    lightModeImage: merckDark,
-    customerStoryPath: "/users/merckgroup",
-  },
-  {
     name: "Telus",
     darkModeImage: telusLight,
     lightModeImage: telusDark,
