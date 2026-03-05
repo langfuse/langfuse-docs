@@ -5,7 +5,7 @@ import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-50 h-16 border-b backdrop-blur-md border-foreground/10 bg-background/50">
+    <header className="sticky z-50 h-16 border-b backdrop-blur-md border-foreground/10 bg-background/50" style={{ top: 'var(--fd-banner-height, 0px)' }}>
       <nav className="mx-auto flex h-full max-w-360 items-center justify-end gap-4 pl-[max(env(safe-area-inset-left),1.5rem)] pr-[max(env(safe-area-inset-right),1.5rem)]">
         <div className="flex flex-1">
           <NavbarLogo />

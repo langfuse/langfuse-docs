@@ -3,12 +3,17 @@
   --fd-nav-height: 4rem;
 }
 
-/* Mobile sidebar drawer: push below the sticky top navbar (64px / 4rem) so it
-   doesn't slide under it when opened or closed. The overlay can still cover the
-   full viewport — only the content panel needs the offset. */
+/* Mobile sidebar drawer: push below sticky navbar + optional banner. */
 #nd-sidebar-mobile {
-  top: 4rem !important;
-  height: calc(100dvh - 4rem) !important;
+  top: calc(var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px)) !important;
+  height: calc(100dvh - var(--fd-nav-height, 4rem) - var(--fd-banner-height, 0px)) !important;
+}
+
+/* Sidebar/collapsed-trigger sticky top: custom navbar (4rem) + optional banner.
+   Overrides fumadocs' inline --fd-docs-row-1: var(--fd-banner-height, 0px)
+   which only accounts for the banner, not our external custom navbar. */
+#nd-docs-layout {
+  --fd-docs-row-1: calc(var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px)) !important;
 }
 
 /* Docs left sidebar: max width 360px (Fumadocs default is 268px) */
