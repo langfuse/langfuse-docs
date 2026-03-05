@@ -2,7 +2,7 @@ import { FileCode } from "lucide-react";
 
 At runtime, you can fetch the prompt from Langfuse. We recommend using the `production` label to fetch the version intentionally chosen for production. Learn more about control (versions/labels) [here](/docs/prompt-management/features/prompt-version-control).
 
-<LangTabs items={["Python SDK", "JS/TS SDK", "API", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS)", "Vercel AI SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "API", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS)", "Vercel AI SDK", "✨ AI Skill"]}>
 <Tab>
 
 ```python
@@ -400,6 +400,32 @@ const result = await generateText({
     isEnabled: true,
   },
 });
+```
+
+</Tab>
+
+<Tab>
+
+Use the agent mode of your editor to fetch and use Langfuse prompts in your application.
+
+1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
+
+```bash
+# Cursor plugin
+/add-plugin langfuse
+
+# skills CLI
+npx skills add langfuse/skills --skill "langfuse"
+
+# Manual: clone and symlink
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
+```
+
+2. Ask the agent to integrate prompt fetching:
+
+```
+Fetch the "movie-critic" prompt, production version, from Langfuse in line 100 as "movie-critic-prompt".
 ```
 
 </Tab>

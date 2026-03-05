@@ -1,4 +1,4 @@
-<LangTabs items={["Langfuse UI", "Python SDK", "JS/TS SDK", "API", "Migrate from existing code"]}>
+<LangTabs items={["Langfuse UI", "Python SDK", "JS/TS SDK", "API", "✨ AI Skill", "Migrate from existing code"]}>
 <Tab>
 
 Use the Langfuse UI to create a new prompt or update an existing one. You'll need to select the [prompt type](/docs/prompt-management/data-model#text-vs-chat-prompts), you can't change this afterwards. 
@@ -123,14 +123,54 @@ curl -X POST "https://cloud.langfuse.com/api/public/v2/prompts" \
 
 <Tab>
 
+Use the agent mode of your editor to create prompts in Langfuse.
+
+1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
+
+```bash
+# Cursor plugin
+/add-plugin langfuse
+
+# skills CLI
+npx skills add langfuse/skills --skill "langfuse"
+
+# Manual: clone and symlink
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
+```
+
+2. Ask the agent to create your prompt:
+
+```
+Create a prompt in Langfuse called "movie-critic" that takes a movie name and critic level as variables.
+```
+
+</Tab>
+
+<Tab>
+
 If you have prompts in your existing codebase, you can migrate them to Langfuse programmatically.
 
 **Using the Langfuse Skill**
 
-Use the [Langfuse Skill](https://skills.sh/langfuse/skills/langfuse) to automatically migrate hardcoded prompts to Langfuse for version control, A/B testing, and deployment-free iteration:
+1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
 
 ```bash
+# Cursor plugin
+/add-plugin langfuse
+
+# skills CLI
 npx skills add langfuse/skills --skill "langfuse"
+
+# Manual: clone and symlink
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
+```
+
+2. Ask the agent to migrate your prompts:
+
+```
+Migrate the hardcoded prompts in this codebase to Langfuse prompt management.
 ```
 
 **Using the API**
@@ -145,19 +185,7 @@ You can write a script that reads your existing prompts and creates them in Lang
   />
 </Cards>
 
-**Using the MCP Server**
-
-If you use an AI-powered IDE like Cursor or Claude Code, you can connect the [Langfuse MCP Server](/docs/prompt-management/features/mcp-server) and ask your AI agent to create prompts for you. 
-
-<Cards num={1}>
-  <Card
-    title="MCP Server for Prompts"
-    href="/docs/prompt-management/features/mcp-server"
-    arrow
-  />
-</Cards>
-
-**Things to look out for**
+Things to look out for
 
 - Langfuse uses a specific syntax for [variables, prompt references, and message placeholders](/docs/prompt-management/data-model#dynamic-rendering-of-prompts). Make sure to update your prompts to use the correct format, if you want to use Langfuse's dynamic rendering capabilities.
 
