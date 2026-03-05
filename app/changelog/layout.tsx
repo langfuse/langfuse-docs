@@ -1,6 +1,6 @@
-import { DocsLayout } from "fumadocs-ui/layouts/flux";
 import { changelogSource } from "@/lib/source";
 import { Layout } from "@/components/layout";
+import { FluxLayoutNoPanel } from "@/components/layout/FluxLayoutNoPanel";
 
 export default function ChangelogLayout({
   children,
@@ -9,7 +9,7 @@ export default function ChangelogLayout({
 }) {
   return (
     <Layout>
-      <DocsLayout
+      <FluxLayoutNoPanel
         tree={changelogSource.getPageTree()}
         nav={{ enabled: false }}
         sidebar={{ enabled: false }}
@@ -17,7 +17,7 @@ export default function ChangelogLayout({
         searchToggle={{ enabled: false }}
       >
         {children}
-      </DocsLayout>
+      </FluxLayoutNoPanel>
     </Layout>
   );
 }
