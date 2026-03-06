@@ -97,7 +97,7 @@ sessions = langfuse.api.sessions.list(limit=50)
 
 ```python
 # Default high-performance endpoint (formerly score_v_2)
-langfuse.api.scores.get(score_ids = "ScoreId")
+langfuse.api.scores.get_many(score_ids = "ScoreId")
 
 # Legacy v1 endpoint
 langfuse.api.legacy.score_v1.get(score_ids = "ScoreId")
@@ -207,7 +207,7 @@ const sessions = await langfuse.api.sessions.list();
 const session = await langfuse.api.sessions.get("sessionId");
 
 // Fetch list of scores (default high-performance endpoint; formerly scoreV2)
-const scores = await langfuse.api.scores.get();
+const scores = await langfuse.api.scores.getMany();
 
 // Fetch a single score by ID
 const score = await langfuse.api.scores.getById("scoreId");
