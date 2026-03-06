@@ -1,37 +1,5 @@
 import { FileCode } from "lucide-react";
 
-<LangTabs items={["Use AI", "Do it yourself"]}>
-<Tab>
-
-At runtime, you can fetch the prompt from Langfuse. We recommend using the `production` label to fetch the version intentionally chosen for production. Learn more about control (versions/labels) [here](/docs/prompt-management/features/prompt-version-control).
-
-Use the agent mode of your editor to write the code to fetch Langfuse prompts in your application.
-
-1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
-
-```bash
-# Cursor plugin
-/add-plugin langfuse
-
-# skills CLI
-npx skills add langfuse/skills --skill "langfuse"
-
-# Manual: clone and symlink
-git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
-ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
-```
-
-2. Ask the agent to integrate prompt fetching:
-
-```
-Fetch the "movie-critic" prompt, production version, from Langfuse and use it in my application.
-```
-
-Not seeing your latest version? This might be because of the caching behavior. See [prompt caching](/docs/prompt-management/data-model#prompt-caching) for more details.
-
-</Tab>
-<Tab>
-
 At runtime, you can fetch the prompt from Langfuse. We recommend using the `production` label to fetch the version intentionally chosen for production. Learn more about control (versions/labels) [here](/docs/prompt-management/features/prompt-version-control).
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "API", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS)", "Vercel AI SDK"]}>
@@ -439,6 +407,3 @@ const result = await generateText({
 </LangTabs>
 
 Not seeing your latest version? This might be because of the caching behavior. See [prompt caching](/docs/prompt-management/data-model#prompt-caching) for more details.
-
-</Tab>
-</LangTabs>

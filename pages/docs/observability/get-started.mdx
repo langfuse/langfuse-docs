@@ -17,8 +17,10 @@ import GetStartedVercelAiSdk from "@/components-mdx/get-started/vercel-ai-sdk.md
 
 import { BookOpen, Code } from "lucide-react";
 
+<LangTabs items={["Use AI", "Do it yourself"]}>
+<Tab>
+<div style={{marginTop: "-3.5rem"}}>
 <Steps>
-
 ## Get API keys
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
@@ -26,15 +28,32 @@ import { BookOpen, Code } from "lucide-react";
 
 ## Ingest your first trace
 
-<LangTabs items={["Use AI", "Do it yourself"]}>
-<Tab>
-
 Use the Langfuse Skill in your editor's agent mode to automatically instrument your application. It will choose the best option to instrument based on your specific application.
 
 <GetStartedAutoInstall />
 
+## See your trace in Langfuse
+
+After running your application, visit the Langfuse interface to view the trace you just created. _[(Example LangGraph trace in Langfuse)](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7d5f970573b8214d1ca891251e42282c)_
+
+<Video
+  src="https://static.langfuse.com/docs-videos/trace-new-ui.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Steps>
+</div>
 </Tab>
 <Tab>
+<div style={{marginTop: "-3.5rem"}}>
+<Steps>
+## Get API keys
+
+1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
+2.  Create new API credentials in the project settings.
+
+## Ingest your first trace
 
 Choose your framework or SDK to get started:
 
@@ -322,9 +341,6 @@ Explore all integrations and frameworks that Langfuse supports.
 
 </LangTabs>
 
-</Tab>
-</LangTabs>
-
 ## See your trace in Langfuse
 
 After running your application, visit the Langfuse interface to view the trace you just created. _[(Example LangGraph trace in Langfuse)](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7d5f970573b8214d1ca891251e42282c)_
@@ -336,6 +352,9 @@ After running your application, visit the Langfuse interface to view the trace y
 />
 
 </Steps>
+</div>
+</Tab>
+</LangTabs>
 
 #### Not seeing what you expected?
 import { FaqPreview } from "@/components/faq/FaqPreview";
