@@ -2,7 +2,32 @@ import { FileCode } from "lucide-react";
 
 At runtime, you can fetch the prompt from Langfuse. We recommend using the `production` label to fetch the version intentionally chosen for production. Learn more about control (versions/labels) [here](/docs/prompt-management/features/prompt-version-control).
 
-<LangTabs items={["Python SDK", "JS/TS SDK", "API", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS)", "Vercel AI SDK", "✨ AI Skill"]}>
+Use the agent mode of your editor to write the code to fetch Langfuse prompts in your application.
+
+1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
+
+```bash
+# Cursor plugin
+/add-plugin langfuse
+
+# skills CLI
+npx skills add langfuse/skills --skill "langfuse"
+
+# Manual: clone and symlink
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
+```
+
+2. Ask the agent to integrate prompt fetching:
+
+```
+Fetch the "movie-critic" prompt, production version, from Langfuse and use it in my application.
+```
+
+<details>
+<summary>Implement prompt fetching yourself using the SDK or API</summary>
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "API", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS)", "Vercel AI SDK"]}>
 <Tab>
 
 ```python
@@ -337,7 +362,7 @@ const promptTemplate = ChatPromptTemplate.fromMessages(
 
 <Tab>
 
-Use Langfuse Prompt Management with the Vercel AI SDK. 
+Use Langfuse Prompt Management with the Vercel AI SDK.
 
 ```bash
 npm install @langfuse/client ai
@@ -404,33 +429,8 @@ const result = await generateText({
 
 </Tab>
 
-<Tab>
-
-Use the agent mode of your editor to fetch and use Langfuse prompts in your application.
-
-1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
-
-```bash
-# Cursor plugin
-/add-plugin langfuse
-
-# skills CLI
-npx skills add langfuse/skills --skill "langfuse"
-
-# Manual: clone and symlink
-git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
-ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
-```
-
-2. Ask the agent to integrate prompt fetching:
-
-```
-Fetch the "movie-critic" prompt, production version, from Langfuse in line 100 as "movie-critic-prompt".
-```
-
-</Tab>
-
 </LangTabs>
 
-Not seeing your latest version? This might be because of the caching behavior. See [prompt caching](/docs/prompt-management/data-model#prompt-caching) for more details.
+</details>
 
+Not seeing your latest version? This might be because of the caching behavior. See [prompt caching](/docs/prompt-management/data-model#prompt-caching) for more details.

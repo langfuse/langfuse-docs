@@ -1,7 +1,6 @@
-<LangTabs items={["Langfuse UI", "Python SDK", "JS/TS SDK", "API", "✨ AI Skill", "Migrate from existing code"]}>
-<Tab>
+import Env from "@/components-mdx/env-python.mdx";
 
-Use the Langfuse UI to create a new prompt or update an existing one. You'll need to select the [prompt type](/docs/prompt-management/data-model#text-vs-chat-prompts), you can't change this afterwards. 
+Use the Langfuse UI to create a new prompt or update an existing one. You'll need to select the [prompt type](/docs/prompt-management/data-model#text-vs-chat-prompts), you can't change this afterwards.
 
 <Video
   src="https://static.langfuse.com/docs-videos/create-update-prompts.mp4%20MOVED%20TO%20R2.mp4"
@@ -9,10 +8,36 @@ Use the Langfuse UI to create a new prompt or update an existing one. You'll nee
   gifStyle
 />
 
-</Tab>
+<details>
+<summary>Or create the prompt programmatically</summary>
+
+<LangTabs items={["Langfuse AI Skill", "Python SDK", "JS/TS SDK", "API", "Migrate from existing code"]}>
 <Tab>
 
-import Env from "@/components-mdx/env-python.mdx";
+Use the agent mode of your editor to create prompts in Langfuse.
+
+1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
+
+```bash
+# Cursor plugin
+/add-plugin langfuse
+
+# skills CLI
+npx skills add langfuse/skills --skill "langfuse"
+
+# Manual: clone and symlink
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
+```
+
+2. Ask the agent to create your prompt:
+
+```
+Create a prompt in Langfuse called "movie-critic" that takes a movie name and critic level as variables.
+```
+
+</Tab>
+<Tab>
 
 ```bash
 pip install langfuse
@@ -123,32 +148,6 @@ curl -X POST "https://cloud.langfuse.com/api/public/v2/prompts" \
 
 <Tab>
 
-Use the agent mode of your editor to create prompts in Langfuse.
-
-1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
-
-```bash
-# Cursor plugin
-/add-plugin langfuse
-
-# skills CLI
-npx skills add langfuse/skills --skill "langfuse"
-
-# Manual: clone and symlink
-git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
-ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
-```
-
-2. Ask the agent to create your prompt:
-
-```
-Create a prompt in Langfuse called "movie-critic" that takes a movie name and critic level as variables.
-```
-
-</Tab>
-
-<Tab>
-
 If you have prompts in your existing codebase, you can migrate them to Langfuse programmatically.
 
 **Using the Langfuse Skill**
@@ -192,3 +191,5 @@ Things to look out for
 </Tab>
 
 </LangTabs>
+
+</details>
