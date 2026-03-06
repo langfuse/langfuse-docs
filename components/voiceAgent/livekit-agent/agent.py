@@ -39,7 +39,7 @@ def _make_langfuse_exporter(host: str, public_key: str, secret_key: str):
 
     auth = base64.b64encode(f"{public_key}:{secret_key}".encode()).decode()
     return OTLPSpanExporter(
-        endpoint=f"{host.rstrip('/')}/api/public/otel",
+        endpoint=f"{host.rstrip('/')}/api/public/otel/v1/traces",
         headers={"Authorization": f"Basic {auth}"},
     )
 
