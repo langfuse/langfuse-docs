@@ -1,0 +1,118 @@
+---
+title: Integrating Langfuse with Embabel Agents Using OpenTelemetry
+sidebarTitle: Embabel
+logo: /images/integrations/embabel_icon.jpg
+description: Learn how to integrate Langfuse with Embabel Agents using OpenTelemetry for enhanced observability and performance monitoring in your AI agent applications.
+---
+
+# Integrating Langfuse with Embabel Agents
+
+This guide shows how to integrate [Langfuse](/) with [Embabel](https://embabel.com) using OpenTelemetry.
+
+**Embabel**: JVM framework created by Rod Johnson (founder of Spring Framework) for building agentic AI applications. It features a modular planning system (GOAP, Utility AI, state machines) that allows agents to dynamically decide their actions, and includes zero-code observability via OpenTelemetry.
+
+**Langfuse**: Open source LLM engineering platform for observability, evals and prompt management.
+
+## Step 1: Set Up Langfuse
+
+- Sign up for [Langfuse Cloud](https://cloud.langfuse.com/) or [self-host Langfuse](https://langfuse.com/self-hosting).
+- Create a new project in Langfuse and copy your **Public Key** and **Secret Key**.
+
+## Step 2: Add Dependencies
+
+Add the Embabel observability starter and the Langfuse OpenTelemetry exporter to your `pom.xml`:
+
+First, set the Embabel version property in your `pom.xml`:
+
+```xml
+<properties>
+    <embabel-agent.version>0.3.4</embabel-agent.version>
+</properties>
+```
+
+Then add the following dependencies:
+
+```xml
+<dependencies>
+    <!-- Embabel Agent Observability Starter -->
+    <dependency>
+        <groupId>com.embabel.agent</groupId>
+        <artifactId>embabel-agent-starter-observability</artifactId>
+        <version>${embabel-agent.version}</version>
+    </dependency>
+
+    <!-- Langfuse OpenTelemetry Exporter (you can use Zipkin too) -->
+    <dependency>
+        <groupId>com.quantpulsar</groupId>
+        <artifactId>opentelemetry-exporter-langfuse</artifactId>
+        <version>0.4.0</version>
+    </dependency>
+</dependencies>
+```
+
+## Step 3: Configure Observability
+
+Add the following to your `application.properties`:
+
+```properties
+# Enable observability
+embabel.observability.enabled=true
+embabel.observability.service-name=observability
+
+# Enable Spring Boot tracing
+management.tracing.enabled=true
+management.tracing.sampling.probability=1.0
+
+# Langfuse
+management.langfuse.enabled=true
+management.langfuse.endpoint=https://cloud.langfuse.com/api/public/otel
+management.langfuse.public-key=pk-lf-…
+management.langfuse.secret-key=sk-lf-…
+```
+
+Replace `pk-lf-…` and `sk-lf-…` with your actual Langfuse project keys. If you self-host Langfuse, update the endpoint URL accordingly.
+
+<Callout type="info">
+  That's it — no code changes required. The Embabel observability starter
+  handles all the OpenTelemetry instrumentation automatically. For more details,
+  see the [Embabel Observability
+  README](https://github.com/embabel/embabel-agent/blob/main/embabel-agent-observability/README.md).
+</Callout>
+
+## Step 4: Run a Test
+
+Start your application:
+
+```bash
+mvn spring-boot:run
+```
+
+Trigger an agent execution — for example, by calling an endpoint or running a `CommandLineRunner` that invokes an Embabel agent. You should see trace data being exported in the application logs.
+
+## Step 5: Explore Traces in Langfuse
+
+Once traces are flowing, open the [Langfuse dashboard](https://cloud.langfuse.com):
+
+- **Trace list**: See all agent executions with timestamps, latency, and token counts.
+- **Trace timeline**: Drill into a single trace to see the full span hierarchy — agent actions, LLM calls, tool invocations, and planning steps.
+- **Input/Output details**: Inspect prompts sent to the model and completions received, along with metadata like model name and token usage.
+- **Analytics dashboards**: Track cost, latency, and usage trends over time.
+
+## Troubleshooting
+
+**No Traces:**
+
+- Verify that `embabel.observability.enabled` is set to `true`.
+- Check that the OTLP endpoint and credentials are correct.
+- Confirm that an agent action has actually been executed.
+
+**Missing Prompt/Completion:**
+
+- Ensure the sampling probability is set to `1.0` during development.
+- Check that the Langfuse OpenTelemetry exporter dependency is on the classpath.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-embabel"]} />

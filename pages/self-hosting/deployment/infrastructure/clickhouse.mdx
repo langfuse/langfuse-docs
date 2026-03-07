@@ -55,6 +55,7 @@ The ClickHouse user specified in `CLICKHOUSE_USER` must have the following grant
 GRANT INSERT ON default.* TO 'user';
 GRANT SELECT ON default.* TO 'user';
 GRANT ALTER UPDATE, ALTER DELETE ON default.* TO 'user';
+GRANT ALTER DROP INDEX ON default.* TO 'user';
 GRANT CREATE ON default.* TO 'user';
 GRANT DROP TABLE ON default.* TO 'user';
 ```
@@ -98,7 +99,7 @@ CLICKHOUSE_MIGRATION_SSL=true
 ### ClickHouse on Kubernetes (Helm)
 
 The [Bitnami ClickHouse Helm Chart](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse) provides a production ready deployment of ClickHouse using a given Kubernetes cluster.
-We use it as a dependency for [Langfuse K8s](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse).
+We use it as a dependency for [Langfuse K8s](https://github.com/langfuse/langfuse-k8s).
 See [Langfuse on Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
 
 #### Example Configuration
@@ -482,3 +483,7 @@ This will store ClickHouse data within the Azurite bucket.
 Yes, ClickHouse is currently a required component for self-hosting Langfuse. There is no alternative OLAP database supported at this time. Langfuse cannot be self-hosted without using ClickHouse as the main storage solution for traces, observations, and scores.
 
 All self-hosted deployments must include a ClickHouse instance.
+
+### How do I manage ClickHouse storage growth?
+
+Langfuse has a built-in [Data Retention](/docs/administration/data-retention) feature that automatically deletes traces, observations, scores, and media assets older than a configured number of days. This runs nightly and handles cleanup across both ClickHouse and blob storage. You do not need to set ClickHouse TTLs manually.

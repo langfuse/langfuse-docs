@@ -11,7 +11,8 @@ import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 
-const openai = new OpenAI();
+let _openai: OpenAI | null = null;
+const getOpenAI = () => (_openai ??= new OpenAI());
 
 const handler = async (req: Request) => {
   return propagateAttributes({ tags: ["image-generator"] }, async () => {
@@ -44,7 +45,7 @@ const handler = async (req: Request) => {
     });
 
     try {
-      const result = await openai.images.generate({
+      const result = await getOpenAI().images.generate({
         model: "gpt-image-1",
         prompt,
         size: "1024x1024",

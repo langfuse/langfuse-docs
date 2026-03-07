@@ -6,18 +6,18 @@ export default function CustomerStories() {
   return (
     <HomeSection>
       <Header
-        title="Customer Stories"
-        description="See what our customers are saying about Langfuse"
+        title="User Stories"
+        description="See what our users are saying about Langfuse"
         className="mb-8"
         h="h2"
         buttons={[
           {
-            href: "/customers",
-            text: "See all customer stories",
+            href: "/users",
+            text: "See all user stories",
           },
         ]}
       />
-      <CustomerCarousel path="/customers" showDots={true} loop={true} />
+      <CustomerCarousel path="/users" showDots={true} loop={true} />
     </HomeSection>
   );
 }

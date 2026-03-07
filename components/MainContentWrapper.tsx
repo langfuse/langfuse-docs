@@ -36,7 +36,7 @@ import IconMCP from "./icons/mcp";
 const pathsWithoutFooterWidgets = [
   "/imprint",
   "/blog",
-  "/customers",
+  "/users",
   "/careers",
 ];
 const pathsWithCopyAsMarkdownButton = [
@@ -49,7 +49,7 @@ const pathsWithCopyAsMarkdownButton = [
   "/security",
 ];
 const isCustomerStory = (pathname: string) =>
-  pathname.startsWith("/customers/");
+  pathname.startsWith("/users/");
 
 const CopyMarkdownButton = () => {
   const router = useRouter();
