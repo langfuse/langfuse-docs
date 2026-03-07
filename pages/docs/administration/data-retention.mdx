@@ -43,7 +43,7 @@ We use the following properties per entity to decide whether they are outside th
 - **Scores**: `timestamp`
 - **Media Assets**: `created_at`
 
-Deleted assets cannot be recovered.
+Deleted assets cannot be recovered. If you need to preserve data beyond the retention window, you can set up a [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to automatically sync traces, observations, and scores to S3, GCS, or Azure on a recurring schedule.
 
 The retention policy applies to the respective data, independent of any references.
 For example, if a dataset references a trace but the trace is e.g. deleted after 30 days, the dataset run item will point to a non-existent trace.
