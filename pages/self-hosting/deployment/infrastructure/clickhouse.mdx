@@ -483,3 +483,7 @@ This will store ClickHouse data within the Azurite bucket.
 Yes, ClickHouse is currently a required component for self-hosting Langfuse. There is no alternative OLAP database supported at this time. Langfuse cannot be self-hosted without using ClickHouse as the main storage solution for traces, observations, and scores.
 
 All self-hosted deployments must include a ClickHouse instance.
+
+### How do I manage ClickHouse storage growth?
+
+Langfuse has a built-in [Data Retention](/docs/administration/data-retention) feature that automatically deletes traces, observations, scores, and media assets older than a configured number of days. This runs nightly and handles cleanup across both ClickHouse and blob storage. You do not need to set ClickHouse TTLs manually.
