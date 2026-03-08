@@ -6,15 +6,15 @@ description: Conveniently fetch your LLM Observability traces via the SDKs for f
 
 # Query Data via SDKs
 
-Langfuse is [open-source](/open-source) and data tracked with Langfuse is open. You can query data via: [SDKs](#sdks) and [API](#api). For export functionality, see [Export Data](/docs/api-and-data-platform/overview).
+Langfuse is [open-source](/open-source) and data tracked with Langfuse is open. You can query data via [SDKs](#sdks) and the [Public API](/docs/api-and-data-platform/features/public-api). For export functionality, see [Export Data](/docs/api-and-data-platform/overview).
 
 Common use cases:
 
 - Train or fine-tune models on the production traces in Langfuse. E.g. to create a small model after having used a large model in production for a specific use case.
 - Collect few-shot examples to improve quality of output.
-- Programmatically create [datasets](/docs/evaluation/features/datasets).
+- Programmatically create [datasets](/docs/evaluation/experiments/datasets).
 
-If you are new to Langfuse, we recommend familiarizing yourself with the [Langfuse data model](/docs/tracing-data-model).
+If you are new to Langfuse, we recommend familiarizing yourself with the [Langfuse data model](/docs/observability/data-model).
 
 <Callout type="info">
 
@@ -24,7 +24,7 @@ New data is typically available for querying within 15-30 seconds of ingestion, 
 
 ## SDKs [#sdks]
 
-Via the [SDKs](/docs/sdk/overview) for Python and JS/TS you can easily query the API without having to write the HTTP requests yourself.
+Via the [SDKs](/docs/observability/sdk/overview) for Python and JS/TS you can easily query the API without having to write the HTTP requests yourself.
 
 <Callout type="info">
 
@@ -57,7 +57,7 @@ trace = langfuse.api.trace.get("traceId")
 
 ```python
 # v2 API (recommended) - cursor-based pagination, selective field retrieval
-observations = langfuse.api.observations_v_2.get_many(
+observations = langfuse.api.observations_v2.get_many(
     trace_id="abcdef1234",
     type="GENERATION",
     limit=100,
@@ -78,7 +78,7 @@ sessions = langfuse.api.sessions.list(limit=50)
 ### Scores
 
 ```python
-langfuse.api.score_v_2.get(score_ids = "ScoreId")
+langfuse.api.score_v2.get(score_ids = "ScoreId")
 ```
 
 ### Prompts
@@ -109,7 +109,7 @@ query_v2 = """
 }
 """
 
-langfuse.api.metrics_v_2.get(query = query_v2)
+langfuse.api.metrics_v2.metrics(query = query_v2)
 
 # v1 API
 query_v1 = """
@@ -193,7 +193,7 @@ const scores = await langfuse.api.scoreV2.get();
 const score = await langfuse.api.scoreV2.getById("scoreId");
 
 // Fetch metrics (v2 API recommended)
-const metricsV2 = await langfuse.api.metricsV2.get({
+const metricsV2 = await langfuse.api.metricsV2.metrics({
   query: JSON.stringify({
     view: "observations",
     metrics: [{ measure: "totalCost", aggregation: "sum" }],

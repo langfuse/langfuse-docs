@@ -72,20 +72,20 @@ curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
 
 ## Access via SDKs
 
-Both the Langfuse [Python SDK](/docs/sdk/python/decorators) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
+Both the Langfuse [Python SDK](/docs/observability/sdk/overview) and the [JS/TS SDK](/docs/observability/sdk/overview) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
 
 You can use your editor's Intellisense to explore the API methods and their parameters.
 
 <Callout type="info">
 
-When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `get_prompt` (Python) / `getPrompt` (JS/TS) methods on the Langfuse client to benefit from client-side caching, automatic retries, and fallbacks.
+When fetching [prompts](/docs/prompt-management/get-started), please use the `get_prompt` (Python) / `getPrompt` (JS/TS) methods on the Langfuse client to benefit from client-side caching, automatic retries, and fallbacks.
 
 </Callout>
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "Java SDK"]}>
 <Tab>
 
-When using the [Python SDK](/docs/sdk/python/sdk-v3):
+When using the [Python SDK](/docs/observability/sdk/overview):
 
 ```python
 from langfuse import get_client
@@ -96,7 +96,7 @@ langfuse = get_client()
 langfuse.api.trace.get(trace_id)
 
 # async client via asyncio
-await langfuse.async_api.trace(trace_id)
+await langfuse.async_api.trace.get(trace_id)
 
 # explore more endpoints via Intellisense
 langfuse.api.*
@@ -130,7 +130,7 @@ Install Langfuse by adding the following to your `pom.xml`:
   <dependency>
     <groupId>com.langfuse</groupId>
     <artifactId>langfuse-java</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.2.0</version>
   </dependency>
 </dependencies>
 
