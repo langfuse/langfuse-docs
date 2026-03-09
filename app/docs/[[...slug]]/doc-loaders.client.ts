@@ -62,6 +62,8 @@ export const docLoaders: Record<
     import("@/content/docs/prompt-management/overview.mdx?collection=docs"),
   "prompt-management/troubleshooting-and-faq": () =>
     import("@/content/docs/prompt-management/troubleshooting-and-faq.mdx?collection=docs"),
+  "api-and-data-platform/features/cli": () =>
+    import("@/content/docs/api-and-data-platform/features/cli.mdx?collection=docs"),
   "api-and-data-platform/features/export-from-ui": () =>
     import("@/content/docs/api-and-data-platform/features/export-from-ui.mdx?collection=docs"),
   "api-and-data-platform/features/export-to-blob-storage": () =>
