@@ -10,10 +10,20 @@ LLM connections are used to call models in the Langfuse Playground or for LLM-as
 
 ## Setup
 
-Navigate to your `Project Settings` > `LLM Connections` and **click on** `Add new LLM API key`.
+<Tabs items={["Via the UI", "Via the API"]}>
 
-<details>
-<summary>Alternatively, you can use the API</summary>
+<Tab>
+
+1. Navigate to your `Project Settings` > `LLM Connections` and **click on** `Add new LLM API key`.
+2. Enter the name of the LLM connection and the API key for the model you want to use.
+
+<Frame fullWidth>
+  ![New LLM connection](/images/docs/prompt-experiments-new-llm-connection.png)
+</Frame>
+
+</Tab>
+
+<Tab>
 
 You can use the [API](/docs/api-and-data-platform/features/public-api) to manage LLM connections:
 
@@ -22,13 +32,9 @@ GET /api/public/llm-connections
 PUT /api/public/llm-connections
 ```
 
-</details>
+</Tab>
 
-<Frame fullWidth>
-  ![New LLM connection](/images/docs/prompt-experiments-new-llm-connection.png)
-</Frame>
-
-Enter the name of the LLM connection and the API key for the model you want to use.
+</Tabs>
 
 ## Supported providers
 
