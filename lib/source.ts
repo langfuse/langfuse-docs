@@ -24,6 +24,47 @@ export const selfHostingSource = loader({
   source: selfHosting.toFumadocsSource(),
 });
 
+const SELF_HOSTING_BASE = "/self-hosting";
+
+/** Display names for self-hosting sidebar links to main docs (avoid duplicate "Overview"). */
+const SELF_HOSTING_DOC_LINK_NAMES: Record<string, string> = {
+  "/docs/administration/rbac": "RBAC (main docs)",
+  "/docs/administration/data-retention": "Data Retention (main docs)",
+};
+
+function mapSelfHostingTreeNodes(nodes: TreeNode[], baseUrl: string): TreeNode[] {
+  return nodes.map((node) => {
+    const mapped = { ...node };
+    if (node.type === "page" && node.url) {
+      const docLinkName = SELF_HOSTING_DOC_LINK_NAMES[node.url];
+      if (typeof docLinkName === "string") {
+        mapped.name = docLinkName;
+      } else {
+        const slug = slugFromUrl(node.url, baseUrl);
+        const page = selfHostingSource.getPage(slug) as { data?: { sidebarTitle?: string } } | undefined;
+        const sidebarTitle = page?.data?.sidebarTitle;
+        if (typeof sidebarTitle === "string") {
+          mapped.name = sidebarTitle;
+        }
+      }
+    }
+    if (Array.isArray(node.children) && node.children.length > 0) {
+      mapped.children = mapSelfHostingTreeNodes(node.children, baseUrl);
+    }
+    return mapped;
+  });
+}
+
+export function getSelfHostingPageTree(): ReturnType<typeof selfHostingSource.getPageTree> {
+  const root = selfHostingSource.getPageTree();
+  const children = (root as { children?: unknown[] }).children;
+  if (!Array.isArray(children)) return root;
+  return {
+    ...root,
+    children: mapSelfHostingTreeNodes(children as TreeNode[], SELF_HOSTING_BASE),
+  } as ReturnType<typeof selfHostingSource.getPageTree>;
+}
+
 export const blogSource = loader({
   baseUrl: "/blog",
   source: blog.toFumadocsSource(),
@@ -48,6 +89,54 @@ export const integrationsSource = loader({
   baseUrl: "/integrations",
   source: integrations.toFumadocsSource(),
 });
+
+const INTEGRATIONS_BASE = "/integrations";
+
+type TreeNode = { type?: string; name?: string; url?: string; children?: TreeNode[]; [key: string]: unknown };
+
+/** Slug from a page URL (e.g. "/integrations/other/claude-code" -> ["other", "claude-code"]). */
+function slugFromUrl(url: string, baseUrl: string): string[] {
+  const prefix = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  if (url === baseUrl || url === `${baseUrl}/`) return [];
+  if (!url.startsWith(prefix)) return [];
+  const rest = url.slice(prefix.length);
+  return rest ? rest.split("/").filter(Boolean) : [];
+}
+
+function mapIntegrationsTreeNodes(nodes: TreeNode[], baseUrl: string): TreeNode[] {
+  return nodes.map((node) => {
+    const mapped = { ...node };
+    if (node.type === "page" && node.url) {
+      const slug = slugFromUrl(node.url, baseUrl);
+      if (slug.length > 0) {
+        const page = integrationsSource.getPage(slug) as { data?: { sidebarTitle?: string } } | undefined;
+        const sidebarTitle = page?.data?.sidebarTitle;
+        if (typeof sidebarTitle === "string") {
+          mapped.name = sidebarTitle;
+        }
+      }
+    }
+    if (Array.isArray(node.children) && node.children.length > 0) {
+      mapped.children = mapIntegrationsTreeNodes(node.children, baseUrl);
+    }
+    return mapped;
+  });
+}
+
+/**
+ * Integrations page tree with sidebar names replaced by frontmatter `sidebarTitle` when set,
+ * so the sidebar shows short names (e.g. "Claude Code") instead of long titles.
+ * Returns the same shape as integrationsSource.getPageTree() (Root with name + children).
+ */
+export function getIntegrationsPageTree(): ReturnType<typeof integrationsSource.getPageTree> {
+  const root = integrationsSource.getPageTree();
+  const children = (root as { children?: unknown[] }).children;
+  if (!Array.isArray(children)) return root;
+  return {
+    ...root,
+    children: mapIntegrationsTreeNodes(children as TreeNode[], INTEGRATIONS_BASE),
+  } as ReturnType<typeof integrationsSource.getPageTree>;
+}
 
 export const securitySource = loader({
   baseUrl: "/security",

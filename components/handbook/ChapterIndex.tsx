@@ -1,5 +1,5 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
+import { getPagesUnderRoute } from "@/lib/nextra-shim/context";
+import { type Page } from "@/lib/nextra-shim/nextra-types";
 import { CHAPTER_ORDER } from "@/lib/handbook-meta";
 
 export const ChapterIndex = () => {
@@ -7,11 +7,12 @@ export const ChapterIndex = () => {
     Page & { frontMatter: any; meta?: { title?: string } }
   >;
 
-  // Filter out the _meta.tsx file and sort pages
+  // Filter to only chapter overview pages (direct children of /handbook/chapters/)
   const chapterPages = pages
     .filter(
       (page) =>
-        page.route !== "/handbook/chapters" && !page.route.includes("_meta")
+        page.route.startsWith("/handbook/chapters/") &&
+        !page.route.includes("_meta")
     )
     .sort((a, b) => {
       // Extract the chapter name from the route (e.g., "/handbook/chapters/mission" -> "mission")

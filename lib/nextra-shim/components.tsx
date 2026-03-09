@@ -54,6 +54,7 @@ const CardComponent = ({
   href,
   icon,
   arrow,
+  className,
   ...rest
 }: {
   children?: React.ReactNode;
@@ -64,7 +65,7 @@ const CardComponent = ({
 } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
   <a
     href={href}
-    className="block rounded-lg border p-4 hover:border-primary"
+    className={cn("block rounded-lg border p-4 hover:border-primary", className)}
     {...rest}
   >
     {icon && <span className="mb-2 block">{icon}</span>}

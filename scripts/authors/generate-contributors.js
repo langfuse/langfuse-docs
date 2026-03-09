@@ -93,8 +93,8 @@ async function analyzeContributors() {
     console.log('🔍 Analyzing contributors...');
     const startTime = Date.now();
 
-    // Get git history
-    const gitPaths = CONFIG.sections.map(section => section.gitPath).join(' ');
+    // Get git history (include all gitPaths per section for pre/post-migration coverage)
+    const gitPaths = CONFIG.sections.flatMap(section => section.gitPaths ?? [section.gitPath]).join(' ');
     const gitOutput = execSync(
         `git log --pretty=format:"%H|%ae|%ad" --date=iso --no-merges --name-only -- ${gitPaths}`,
         { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }
@@ -119,7 +119,7 @@ async function analyzeContributors() {
                 emailsNeedingAPI.add(currentCommit.email);
             }
         } else if (line.trim() && currentCommit &&
-            CONFIG.sections.some(section => line.startsWith(section.gitPath)) &&
+            CONFIG.sections.some(section => (section.gitPaths ?? [section.gitPath]).some(gp => line.startsWith(gp))) &&
             !line.includes('_meta.')) {
             commits.push({
                 ...currentCommit,
@@ -160,12 +160,18 @@ async function analyzeContributors() {
     const fileContributors = {};
 
     for (const commit of commits) {
-        // Find matching section for this file path
-        const section = CONFIG.sections.find(s => commit.filePath.startsWith(s.gitPath));
+        // Find matching section + the specific gitPath that matched
+        let section = null;
+        let matchedGitPath = null;
+        for (const s of CONFIG.sections) {
+            const paths = s.gitPaths ?? [s.gitPath];
+            const match = paths.find(gp => commit.filePath.startsWith(gp));
+            if (match) { section = s; matchedGitPath = match; break; }
+        }
         if (!section) continue; // Skip if path doesn't match any configured section
 
-        // Convert file path to URL path
-        const urlPath = `${section.urlPrefix}/${commit.filePath.replace(section.gitPath, '').replace(/\.(mdx?|tsx?)$/, '')}`;
+        // Convert file path to URL path (strip whichever gitPath prefix matched)
+        const urlPath = `${section.urlPrefix}/${commit.filePath.replace(matchedGitPath, '').replace(/\.(mdx?|tsx?)$/, '')}`;
 
         const contributor = await resolveContributor(commit.email, commit.hash);
 
