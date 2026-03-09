@@ -38,8 +38,14 @@ var customerFrontmatterSchema = frontmatterSchema.extend({
 var docs = defineDocs({
   dir: "content/docs"
 });
+var selfHostingFrontmatterSchema = frontmatterSchema.extend({
+  sidebarTitle: z.string().nullish()
+});
 var selfHosting = defineDocs({
-  dir: "content/self-hosting"
+  dir: "content/self-hosting",
+  docs: {
+    schema: selfHostingFrontmatterSchema
+  }
 });
 var blog = defineDocs({
   dir: "content/blog",
@@ -67,7 +73,8 @@ var faq = defineDocs({
   dir: "content/faq"
 });
 var integrationsFrontmatterSchema = frontmatterSchema.extend({
-  sidebarTitle: z.string().nullish()
+  sidebarTitle: z.string().nullish(),
+  logo: z.string().nullish()
 });
 var integrations = defineDocs({
   dir: "content/integrations",

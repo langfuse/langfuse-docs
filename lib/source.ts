@@ -24,6 +24,47 @@ export const selfHostingSource = loader({
   source: selfHosting.toFumadocsSource(),
 });
 
+const SELF_HOSTING_BASE = "/self-hosting";
+
+/** Display names for self-hosting sidebar links to main docs (avoid duplicate "Overview"). */
+const SELF_HOSTING_DOC_LINK_NAMES: Record<string, string> = {
+  "/docs/administration/rbac": "RBAC (main docs)",
+  "/docs/administration/data-retention": "Data Retention (main docs)",
+};
+
+function mapSelfHostingTreeNodes(nodes: TreeNode[], baseUrl: string): TreeNode[] {
+  return nodes.map((node) => {
+    const mapped = { ...node };
+    if (node.type === "page" && node.url) {
+      const docLinkName = SELF_HOSTING_DOC_LINK_NAMES[node.url];
+      if (typeof docLinkName === "string") {
+        mapped.name = docLinkName;
+      } else {
+        const slug = slugFromUrl(node.url, baseUrl);
+        const page = selfHostingSource.getPage(slug) as { data?: { sidebarTitle?: string } } | undefined;
+        const sidebarTitle = page?.data?.sidebarTitle;
+        if (typeof sidebarTitle === "string") {
+          mapped.name = sidebarTitle;
+        }
+      }
+    }
+    if (Array.isArray(node.children) && node.children.length > 0) {
+      mapped.children = mapSelfHostingTreeNodes(node.children, baseUrl);
+    }
+    return mapped;
+  });
+}
+
+export function getSelfHostingPageTree(): ReturnType<typeof selfHostingSource.getPageTree> {
+  const root = selfHostingSource.getPageTree();
+  const children = (root as { children?: unknown[] }).children;
+  if (!Array.isArray(children)) return root;
+  return {
+    ...root,
+    children: mapSelfHostingTreeNodes(children as TreeNode[], SELF_HOSTING_BASE),
+  } as ReturnType<typeof selfHostingSource.getPageTree>;
+}
+
 export const blogSource = loader({
   baseUrl: "/blog",
   source: blog.toFumadocsSource(),

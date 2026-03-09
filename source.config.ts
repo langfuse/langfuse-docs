@@ -57,8 +57,15 @@ export const docs = defineDocs({
   dir: "content/docs",
 });
 
+const selfHostingFrontmatterSchema = frontmatterSchema.extend({
+  sidebarTitle: z.string().nullish(),
+});
+
 export const selfHosting = defineDocs({
   dir: "content/self-hosting",
+  docs: {
+    schema: selfHostingFrontmatterSchema,
+  },
 });
 
 export const blog = defineDocs({
@@ -93,6 +100,7 @@ export const faq = defineDocs({
 
 const integrationsFrontmatterSchema = frontmatterSchema.extend({
   sidebarTitle: z.string().nullish(),
+  logo: z.string().nullish(),
 });
 
 export const integrations = defineDocs({
