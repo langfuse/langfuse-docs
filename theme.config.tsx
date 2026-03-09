@@ -70,7 +70,7 @@ const config: DocsThemeConfig = {
           className="whitespace-nowrap"
           variant="outline"
         >
-          <Link href="/talk-to-us">Get Demo</Link>
+          <Link href="/watch-demo">Get Demo</Link>
         </Button>
 
         <ToAppButton />
