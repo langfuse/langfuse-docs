@@ -135,7 +135,7 @@ function loadFilesystemPages(category: string): IntegrationPage[] {
         return {
           route: `/integrations/${slug.join("/")}`,
           name: String(slug[slug.length - 1] || ""),
-          frontMatter: page.data as Record<string, unknown>,
+          frontMatter: page.data as unknown as Record<string, unknown>,
         } as IntegrationPage;
       })
       .filter(Boolean) as IntegrationPage[];
