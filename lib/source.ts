@@ -49,6 +49,50 @@ export const integrationsSource = loader({
   source: integrations.toFumadocsSource(),
 });
 
+const INTEGRATIONS_BASE = "/integrations";
+
+type TreeRoot = { children?: unknown[] };
+type TreeNode = { type?: string; name?: string; url?: string; children?: TreeNode[]; [key: string]: unknown };
+
+/** Slug from a page URL (e.g. "/integrations/other/claude-code" -> ["other", "claude-code"]). */
+function slugFromUrl(url: string, baseUrl: string): string[] {
+  const prefix = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  if (url === baseUrl || url === `${baseUrl}/`) return [];
+  if (!url.startsWith(prefix)) return [];
+  const rest = url.slice(prefix.length);
+  return rest ? rest.split("/").filter(Boolean) : [];
+}
+
+function mapIntegrationsTreeNodes(nodes: TreeNode[], baseUrl: string): TreeNode[] {
+  return nodes.map((node) => {
+    const mapped = { ...node };
+    if (node.type === "page" && node.url) {
+      const slug = slugFromUrl(node.url, baseUrl);
+      if (slug.length > 0) {
+        const page = integrationsSource.getPage(slug) as { data?: { sidebarTitle?: string } } | undefined;
+        const sidebarTitle = page?.data?.sidebarTitle;
+        if (typeof sidebarTitle === "string") {
+          mapped.name = sidebarTitle;
+        }
+      }
+    }
+    if (Array.isArray(node.children) && node.children.length > 0) {
+      mapped.children = mapIntegrationsTreeNodes(node.children, baseUrl);
+    }
+    return mapped;
+  });
+}
+
+/**
+ * Integrations page tree with sidebar names replaced by frontmatter `sidebarTitle` when set,
+ * so the sidebar shows short names (e.g. "Claude Code") instead of long titles.
+ */
+export function getIntegrationsPageTree(): TreeRoot {
+  const root = integrationsSource.getPageTree() as TreeRoot;
+  if (!Array.isArray(root.children)) return root;
+  return { ...root, children: mapIntegrationsTreeNodes(root.children as TreeNode[], INTEGRATIONS_BASE) };
+}
+
 export const securitySource = loader({
   baseUrl: "/security",
   source: security.toFumadocsSource(),

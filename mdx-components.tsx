@@ -1,6 +1,7 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 import React from "react";
+import { Mermaid } from "@/components/Mermaid";
 import NextImage from "next/image";
 import { Frame } from "@/components/Frame";
 import { Video } from "@/components/Video";
@@ -79,6 +80,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     details: MdxDetails,
     summary: MdxSummary,
     AvailabilityBanner,
+    Mermaid,
     ...components,
   };
 }

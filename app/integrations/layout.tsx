@@ -1,5 +1,5 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import { integrationsSource } from "@/lib/source";
+import { getIntegrationsPageTree } from "@/lib/source";
 import { DocsLayoutWrapper } from "@/app/docs/DocsLayoutWrapper";
 import { Layout } from "@/components/layout";
 import { MenuSwitcher } from "@/components/MenuSwitcher";
@@ -13,7 +13,7 @@ export default function IntegrationsLayout({
     <Layout>
       <DocsLayoutWrapper>
         <DocsLayout
-          tree={integrationsSource.getPageTree()}
+          tree={getIntegrationsPageTree()}
           githubUrl="https://github.com/langfuse/langfuse-docs"
           nav={{ enabled: false }}
           sidebar={{ banner: <MenuSwitcher /> }}

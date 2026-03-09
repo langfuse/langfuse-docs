@@ -1,5 +1,6 @@
 import { defineDocs, defineConfig, frontmatterSchema } from "fumadocs-mdx/config";
 import remarkGfm from "remark-gfm";
+import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 
@@ -90,8 +91,15 @@ export const faq = defineDocs({
   dir: "content/faq",
 });
 
+const integrationsFrontmatterSchema = frontmatterSchema.extend({
+  sidebarTitle: z.string().nullish(),
+});
+
 export const integrations = defineDocs({
   dir: "content/integrations",
+  docs: {
+    schema: integrationsFrontmatterSchema,
+  },
 });
 
 export const security = defineDocs({
@@ -119,7 +127,7 @@ export const marketing = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: [remarkGfm],
+    remarkPlugins: [remarkGfm, remarkMdxMermaid],
     providerImportSource: "@/mdx-components",
     // Disable remark-image: many content files reference remote images via https://
     // and the plugin tries to fetch dimensions at compile time, causing build failures

@@ -137,12 +137,12 @@ export const AuthorHoverCardContent = ({
 }) => {
   return (
     <HoverCardContent className="w-56 p-0" side={side} align={align}>
-      <div className="flex flex-col gap-2 text-left w-full">
-        <div className="flex items-center gap-3 justify-start p-3 pb-1">
+      <div className="flex flex-col text-left w-full">
+        <div className="flex items-center gap-3 justify-start p-2.5">
           <Image
             src={author.image}
-            width={40}
-            height={40}
+            width={36}
+            height={36}
             className="rounded-full border border-border"
             alt={`Picture ${author.name}`}
           />
@@ -156,7 +156,7 @@ export const AuthorHoverCardContent = ({
           </div>
         </div>
         <Separator />
-        <div className="flex flex-col gap-1 w-full p-3 pt-1">
+        <div className="flex flex-col gap-0.5 w-full p-2.5 pt-2">
           {author.twitter && (
             <Link
               href={`https://twitter.com/${author.twitter}`}
