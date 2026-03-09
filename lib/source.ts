@@ -51,7 +51,6 @@ export const integrationsSource = loader({
 
 const INTEGRATIONS_BASE = "/integrations";
 
-type TreeRoot = { children?: unknown[] };
 type TreeNode = { type?: string; name?: string; url?: string; children?: TreeNode[]; [key: string]: unknown };
 
 /** Slug from a page URL (e.g. "/integrations/other/claude-code" -> ["other", "claude-code"]). */
@@ -86,11 +85,16 @@ function mapIntegrationsTreeNodes(nodes: TreeNode[], baseUrl: string): TreeNode[
 /**
  * Integrations page tree with sidebar names replaced by frontmatter `sidebarTitle` when set,
  * so the sidebar shows short names (e.g. "Claude Code") instead of long titles.
+ * Returns the same shape as integrationsSource.getPageTree() (Root with name + children).
  */
-export function getIntegrationsPageTree(): TreeRoot {
-  const root = integrationsSource.getPageTree() as TreeRoot;
-  if (!Array.isArray(root.children)) return root;
-  return { ...root, children: mapIntegrationsTreeNodes(root.children as TreeNode[], INTEGRATIONS_BASE) };
+export function getIntegrationsPageTree(): ReturnType<typeof integrationsSource.getPageTree> {
+  const root = integrationsSource.getPageTree();
+  const children = (root as { children?: unknown[] }).children;
+  if (!Array.isArray(children)) return root;
+  return {
+    ...root,
+    children: mapIntegrationsTreeNodes(children as TreeNode[], INTEGRATIONS_BASE),
+  } as ReturnType<typeof integrationsSource.getPageTree>;
 }
 
 export const securitySource = loader({
