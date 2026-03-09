@@ -11,8 +11,11 @@ const CONFIG = {
     // and represents a major documentation area (e.g., /docs, /self-hosting)
     sections: ['docs', 'self-hosting', 'security', 'guides', 'integrations', 'faq', 'handbook'].map(section => ({
         name: section.replace('-', ''),
-        dirPath: path.join(__dirname, `../../pages/${section}`),
-        gitPath: `pages/${section}/`,
+        // Content lives in content/ after the Fumadocs migration
+        dirPath: path.join(__dirname, `../../content/${section}`),
+        // Track both current (content/) and legacy (pages/) git paths to
+        // preserve contributor history from before the migration
+        gitPaths: [`content/${section}/`],
         urlPrefix: `/${section}`
     })),
 
