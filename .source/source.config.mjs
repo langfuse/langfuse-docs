@@ -69,8 +69,14 @@ var guides = defineDocs({
     schema: guidesFrontmatterSchema
   }
 });
+var faqFrontmatterSchema = frontmatterSchema.extend({
+  tags: z.array(z.string()).optional()
+});
 var faq = defineDocs({
-  dir: "content/faq"
+  dir: "content/faq",
+  docs: {
+    schema: faqFrontmatterSchema
+  }
 });
 var integrationsFrontmatterSchema = frontmatterSchema.extend({
   sidebarTitle: z.string().nullish(),

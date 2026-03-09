@@ -94,8 +94,15 @@ export const guides = defineDocs({
   },
 });
 
+const faqFrontmatterSchema = frontmatterSchema.extend({
+  tags: z.array(z.string()).optional(),
+});
+
 export const faq = defineDocs({
   dir: "content/faq",
+  docs: {
+    schema: faqFrontmatterSchema,
+  },
 });
 
 const integrationsFrontmatterSchema = frontmatterSchema.extend({
