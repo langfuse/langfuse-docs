@@ -1,0 +1,45 @@
+---
+date: 2026-03-10
+title: "Code-Based Evaluators"
+description: Run deterministic evaluations directly in Langfuse — no LLM calls, instant results, zero additional cost.
+author: Lotte
+ogImage: /images/changelog/2026-03-10-code-based-evaluators/og.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now set up code-based evaluators that run deterministic checks on your traces and observations — no LLM calls needed. They execute on Langfuse's infrastructure, return results instantly, and cost nothing beyond your Langfuse plan. For many evaluation use cases, this is all you need.
+
+Think regex checks for PII detection, JSON schema validation on structured outputs, checking whether a response stays within a character limit, or verifying that required fields are present in tool calls.
+
+{/* TODO: replace with actual screenshot */}
+<Frame fullWidth>
+  ![Code-based evaluator setup](/images/changelog/2026-03-10-code-based-evaluators/setup.png)
+</Frame>
+
+## How It Works
+
+Code-based evaluators sit alongside [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) in the evaluator setup. Instead of defining a prompt template for a judge model, you write a deterministic function that receives the trace or observation data and returns a score.
+
+Like LLM-as-a-Judge evaluators, code-based evaluators run on Langfuse's infrastructure — configure them once in the UI and they evaluate matching traces automatically as they come in. Same filtering, same targeting, same score output — just without the LLM call.
+
+{/* TODO: replace with actual video */}
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-03-10-code-based-evaluators.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+## When to Use Code-Based vs. LLM-as-a-Judge
+
+**Code-based evaluators** work best for checks with clear pass/fail criteria: format validation, length constraints, regex matching, keyword presence, schema compliance. They're fast, free, and fully deterministic.
+
+**LLM-as-a-Judge** is the right choice when you need subjective assessment: helpfulness, tone, factual accuracy, or nuanced rubric-based scoring where human-like judgment matters.
+
+You can run both types simultaneously on the same traces — use code-based evaluators for structural checks and LLM-as-a-Judge for quality assessment.
+
+## Getting Started
+
+Navigate to your project → Evaluation → New Evaluator → select "Code" as the evaluator type, write your evaluation logic, configure filters, and activate.
