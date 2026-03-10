@@ -13,7 +13,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 ### Development
 
 - `pnpm dev` — start the local dev server on port 3333 (preferred default after install).
-- `pnpm build` — build the production site when you need to validate many pages and the dev server is too slow.
+- `pnpm build` — build the production site when you need to validate many pages and the dev server is too slow. This takes about 10 minutes, so do not run it by default for small changes.
 - `pnpm start` — run the production build on port 3333 when using the production build for broader checks.
 
 ### Content and maintenance
@@ -50,6 +50,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 1. For cookbook changes, edit notebook sources in `cookbook/`.
 2. Regenerate docs with `bash scripts/update_cookbook_docs.sh`.
 3. Do **not** hand-edit generated files in `pages/guides/cookbook/`.
+4. Avoid `pnpm build` for routine edits or small UI/content changes. Prefer targeted checks or `pnpm dev`, and only run the full production build when it is necessary or explicitly requested.
 
 ## Styling and implementation guidelines
 

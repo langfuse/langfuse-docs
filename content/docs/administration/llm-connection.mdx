@@ -17,9 +17,11 @@ LLM connections are used to call models in the Langfuse Playground or for LLM-as
 1. Navigate to your `Project Settings` > `LLM Connections` and **click on** `Add new LLM API key`.
 2. Enter the name of the LLM connection and the API key for the model you want to use.
 
-<Frame fullWidth>
-  ![New LLM connection](/images/docs/prompt-experiments-new-llm-connection.png)
-</Frame>
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-03-06-add-llm-connection-v3.mp4"
+  gifStyle
+  className="mt-4"
+/>
 
 </Tab>
 
@@ -145,7 +147,8 @@ export function ModelList() {
         </li>
         <li>
           <strong>Amazon Bedrock:</strong> All Amazon Bedrock models are
-          supported. The required permission on AWS is `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream`.
+          supported. The required permission on AWS is `bedrock:InvokeModel` and
+          `bedrock:InvokeModelWithResponseStream`.
         </li>
       </ul>
     </div>
@@ -229,7 +232,9 @@ To set this up:
 5. Add any **custom model names** that your gateway exposes.
 
 <Callout type="info">
-  The gateway must support [tool calling](https://platform.openai.com/docs/guides/function-calling) in the OpenAI format for LLM-as-a-Judge evaluations to work.
+  The gateway must support [tool
+  calling](https://platform.openai.com/docs/guides/function-calling) in the
+  OpenAI format for LLM-as-a-Judge evaluations to work.
 </Callout>
 
 For OpenAI-compatible gateways, here is an example tool calling request that must be handled by the gateway to support LLM-as-a-Judge in Langfuse:

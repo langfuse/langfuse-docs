@@ -23,7 +23,6 @@ import { FaqPreview } from "@/components/faq/FaqPreview";
 <Tab>
 
 <Steps>
-
 ## Get API keys
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
@@ -31,23 +30,9 @@ import { FaqPreview } from "@/components/faq/FaqPreview";
 
 ## Ingest your first trace
 
-Use the agent mode of your editor to integrate Langfuse into your existing codebase.
+Use the Langfuse Skill in your editor's agent mode to automatically instrument your application. It will choose the best option to instrument based on your specific application.
 
 <GetStartedAutoInstall />
-
-<Cards num={2}>
-  <Card
-    icon={<BookOpen />}
-    title="Full MCP Server documentation"
-    href="/docs/docs-mcp"
-    arrow
-  />
-  <Card
-    title="All integrations"
-    href="/integrations"
-    arrow
-  />
-</Cards>
 
 ## See your trace in Langfuse
 
@@ -66,7 +51,6 @@ After running your application, visit the Langfuse interface to view the trace y
 <Tab>
 
 <Steps>
-
 ## Get API keys
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
@@ -74,7 +58,7 @@ After running your application, visit the Langfuse interface to view the trace y
 
 ## Ingest your first trace
 
-If you're using one of our supported integrations, following their specific guide will be the fastest way to get started with minimal code changes. For more control, you can instrument your application directly using the Python or JS/TS SDKs.
+Choose your framework or SDK to get started:
 
 <LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Vercel AI SDK", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "More integrations"]}>
 
@@ -371,6 +355,9 @@ After running your application, visit the Langfuse interface to view the trace y
 />
 
 </Steps>
+</div>
+</Tab>
+</LangTabs>
 
 </Tab>
 
@@ -383,6 +370,7 @@ After running your application, visit the Langfuse interface to view the trace y
 ## Next steps
 
 Now that you've ingested your first trace, you can start adding on more functionality to your traces. We recommend starting with the following:
+
 - [Group traces into sessions for multi-turn applications](/docs/observability/features/sessions)
 - [Split traces into environments for different stages of your application](/docs/observability/features/environments)
 - [Add attributes to your traces so you can filter them in the future](/docs/observability/features/tags)

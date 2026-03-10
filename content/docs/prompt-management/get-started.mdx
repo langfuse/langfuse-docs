@@ -18,41 +18,81 @@ import { FaqPreview } from "@/components/faq/FaqPreview";
 <Tab>
 
 <Steps>
-
-### Get API keys
+## Get API keys
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
 2.  Create new API credentials in the project settings.
 
-### Create and use a prompt
+## Create a prompt [#create-update-prompt]
 
-Use the agent mode of your editor to create and integrate Langfuse Prompt Management into your existing codebase.
+Use the agent mode of your editor to create prompts in Langfuse.
 
-<GetStartedAutoInstall />
+1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
+
+```bash
+# Cursor plugin
+/add-plugin langfuse
+
+# skills CLI
+npx skills add langfuse/skills --skill "langfuse"
+
+# Manual: clone and symlink
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
+```
+
+2. Ask the agent to create your prompt:
+
+```
+Create a prompt in Langfuse called "movie-critic" that takes a movie name and critic level as variables.
+```
+
+## Use the prompt in your code [#use-prompt]
+
+Use the agent mode of your editor to write the code to fetch Langfuse prompts in your application.
+
+1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
+
+```bash
+# Cursor plugin
+/add-plugin langfuse
+
+# skills CLI
+npx skills add langfuse/skills --skill "langfuse"
+
+# Manual: clone and symlink
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
+```
+
+2. Ask the agent to integrate prompt fetching:
+
+```
+Fetch the "movie-critic" prompt, production version, from Langfuse and use it in my application.
+```
 
 </Steps>
 
 </Tab>
 
 <Tab>
-
+<div style={{marginTop: "-3.5rem"}}>
 <Steps>
-
-### Get API keys
+## Get API keys
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
 2.  Create new API credentials in the project settings.
 
-### Create a prompt [#create-update-prompt]
+## Create a prompt [#create-update-prompt]
 
 <PromptCreate />
 
-### Use prompt [#use-prompt]
+## Use the prompt in your code [#use-prompt]
 
 <PromptUse />
 
 </Steps>
-
+</div>
 </Tab>
 
 </Tabs>

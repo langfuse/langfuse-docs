@@ -198,9 +198,9 @@ const nextConfig = {
         },
 
         // Content negotiation: /docs or /docs/observability/overview -> /md-src/... .md
-        // Excludes /api, /_next, and /md-src, and avoids double-appending .md.
+        // Excludes /api, /_next, md-src, .md files, and .txt files (served directly from public/).
         {
-          source: "/:path((?!api|_next|md-src)(?!.*\\.md$).*)",
+          source: "/:path((?!api|_next|md-src)(?!.*\\.md$)(?!.*\\.txt$).*)",
           has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
           destination: "/md-src/:path.md",
         },
