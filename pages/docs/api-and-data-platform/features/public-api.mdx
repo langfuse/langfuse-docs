@@ -96,7 +96,10 @@ langfuse = get_client()
 langfuse.api.trace.get(trace_id)
 
 # async client via asyncio
-await langfuse.async_api.trace(trace_id)
+await langfuse.async_api.trace.get(trace_id)
+
+# list traces with pagination
+await langfuse.async_api.trace.list(limit=100)
 
 # explore more endpoints via Intellisense
 langfuse.api.*
