@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { guidesSource } from "@/lib/source";
+import { buildOgImageUrl } from "@/lib/og-url";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 import { SectionDocBodyClientWithDocsBody } from "@/components/SectionDocBodyClientWithDocsBody";
@@ -50,9 +51,16 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     return {
       title: "Not Found",
     };
+  const ogImage = buildOgImageUrl({
+    title: page.data.title,
+    description: page.data.description,
+    section: "Guides",
+  });
   return {
     title: page.data.title,
     description: page.data.description ?? undefined,
+    openGraph: { images: [{ url: ogImage }] },
+    twitter: { images: [{ url: ogImage }] },
   };
 }
 

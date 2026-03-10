@@ -4,14 +4,15 @@ import { NextRequest } from "next/server";
 export const runtime = "edge";
 
 export async function GET(request: NextRequest) {
+  const base = new URL("/", request.url).toString();
   const imageData = (await fetch(
-    new URL("https://langfuse.com/icon256.png")
+    new URL("/icon256.png", base)
   ).then((res) => res.arrayBuffer())) as string;
   const fontGeistMono = await fetch(
-    new URL("https://langfuse.com/fonts/GeistMono-Medium.ttf")
+    new URL("/fonts/GeistMono-Medium.ttf", base)
   ).then((res) => res.arrayBuffer());
   const fontGeistSans = await fetch(
-    new URL("https://langfuse.com/fonts/Geist-Regular.ttf")
+    new URL("/fonts/Geist-Regular.ttf", base)
   ).then((res) => res.arrayBuffer());
 
   const { searchParams } = new URL(request.url);
