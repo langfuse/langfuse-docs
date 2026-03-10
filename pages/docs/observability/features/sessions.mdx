@@ -79,7 +79,7 @@ await startActiveObservation("context-manager", async (span) => {
     async () => {
       // All observations created here automatically have sessionId
       // ... your logic ...
-    }
+    },
   );
 });
 ```
@@ -98,7 +98,7 @@ const processChatMessage = observe(
       return result;
     });
   },
-  { name: "process-chat-message" }
+  { name: "process-chat-message" },
 );
 
 const result = await processChatMessage("Hello!");
@@ -170,9 +170,9 @@ await startActiveObservation("langchain-call", async () => {
       // Pass handler to the chain invocation
       await chain.invoke(
         { input: "<user_input>" },
-        { callbacks: [langfuseHandler] }
+        { callbacks: [langfuseHandler] },
       );
-    }
+    },
   );
 });
 ```
@@ -201,6 +201,7 @@ _Example session spanning multiple traces_
 - Publish a session to share with others as a public link ([example](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/sessions/lf.docs.conversation.TL4KDlo))
 - Bookmark a session to easily find it later
 - Annotate sessions by adding `scores` via the Langfuse UI to record human-in-the-loop evaluations
+- Add `session-level` scores programmatically via SDK or API, for example from user feedback forms, moderation checks, or conversation-level QA pipelines. See [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk).
 - How to [evaluate sessions](/faq/all/evaluating-sessions-conversations) in Langfuse?
 
 ## Related Resources
