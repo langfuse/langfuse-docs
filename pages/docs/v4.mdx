@@ -8,25 +8,30 @@ import { BarChart3, Book, Github, Zap } from "lucide-react";
 
 # Langfuse Cloud: Fast Preview (v4)
 
-Langfuse now delivers faster product performance at scale. This preview brings faster charts, filters, APIs, and evaluation workflows to Langfuse Cloud.
+Langfuse now delivers faster product performance at scale. Chart loading is much shorter, and browsing traces, users, and sessions is faster. The new Observations API v2 and Metrics API v2 query faster at scale. Observation-level evaluations now execute in seconds without a ClickHouse query per evaluation.
 
 We will keep this page updated as we roll out additional related features and share OSS and self-hosted support updates.
 
 ## Get access to the preview
 
-<Steps>
 
-### Enable the beta UI experience
 
 <Frame className="max-w-xs mx-auto">
   ![Beta toggle in Langfuse UI](/images/changelog/2026-03-10-v4-preview/v4-beta-togle.png)
 </Frame>
+
 
 In the UI, a beta toggle is available to opt into the new experience. Not all screens have been migrated to the new data model yet.
 
 <Callout type="info">
 Data from older SDK versions can be delayed by up to 10 minutes in the new UI. Upgrade to the latest SDK versions to see your data in real time.
 </Callout>
+
+### Migrate to the new experience
+
+
+<Steps>
+
 
 ### Upgrade SDKs
 
@@ -36,10 +41,6 @@ Upgrade to the latest major SDK versions to take advantage of the new data model
 - **JS/TS SDK:** v5 ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
 
 The key change: `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, and `tags` to all child observations.
-
-<Callout type="info">
-Set trace-level attributes (`user_id`, `session_id`, propagated `metadata`) as early as possible in your instrumentation so they propagate to all downstream spans automatically. Learn more about [trace-level attributes](/docs/observability/sdk/instrumentation#add-attributes).
-</Callout>
 
 ### Optional: Migrate LLM-as-a-judge evaluations
 
@@ -61,7 +62,7 @@ See the [v2 APIs announcement](/changelog/2025-12-17-v2-metrics-and-observations
 
 ### Faster product performance in the UI
 
-Chart rendering time has been significantly reduced. Queries that previously took seconds or minutes now complete in a few seconds or milliseconds. Browsing traces, users, and sessions is also much faster, and filters respond more quickly in large projects.
+Chart loading time is significantly shorter. You can now confidently load charts over large time ranges. Browsing traces, users, and sessions is also much faster, and filters respond more quickly in large projects.
 
 ### Faster API workflows
 
@@ -69,9 +70,13 @@ The new [Observations API v2](/docs/api-and-data-platform/features/observations-
 
 ### Faster evaluation workflows
 
-[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) execute in seconds instead of minutes as we do not need to query ClickHouse for each evaluation anymore.
+[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) execute in seconds as we do not need to query ClickHouse for each evaluation anymore.
 
 ## Under the hood
+
+<Frame fullWidth>
+  ![Langfuse data model overview](/images/changelog/2026-03-10-v4-preview/data-model.png)
+</Frame>
 
 This preview is powered by a simplified observation-centric data model. Trace-level attributes such as `user_id`, `session_id`, and `metadata` now propagate automatically to observations, which helps remove expensive joins and keep the product fast at larger scale. Learn more in the [data model docs](/docs/observability/data-model) and [Explore Observations in V4](/faq/all/explore-observations-in-v4).
 

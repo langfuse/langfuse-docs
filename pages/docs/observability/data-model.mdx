@@ -150,10 +150,10 @@ There are different types of attributes you can add:
 | [Releases & Versions](/docs/observability/features/releases-and-versioning) | Track application versions and component changes |
 
 
-## ClickHouse data model
+## Underlying data model
 
 <Callout type="info">
-The observation-centric data model is available with Python SDK v4+ and JS/TS SDK v5+. This data model is live on Langfuse Cloud. For OSS deployments, this will be Langfuse V4. See the [changelog post](/changelog/2026-03-10-simplify-for-scale) for more details.
+This data model is live on Langfuse Cloud. For OSS deployments, this will be Langfuse V4. See the [changelog post](/changelog/2026-03-10-simplify-for-scale) for more details.
 </Callout>
 
 To improve query performance at scale, Langfuse introduces an **observation-centric data model**. In this model, context attributes (`user_id`, `session_id`, `metadata`, `tags`) that previously lived only on the trace are propagated to every observation. This eliminates expensive joins between trace and observation tables, enabling single-table queries.
