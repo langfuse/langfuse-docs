@@ -1,19 +1,167 @@
-1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { FileTree } from "nextra/components";
+
+Install the [Langfuse Skill](https://github.com/langfuse/skills) in your coding tool:
+
+<Tabs items={["Cursor", "Claude Code", "Codex", "Other AI Coding Apps"]}>
+
+<Tab>
+
+Langfuse has a [Cursor Plugin](https://cursor.com/docs/plugins) that includes the skill automatically.
+
+<div className="flex gap-2 mt-3 mb-6">
+  <Button asChild>
+    <Link
+      href="https://cursor.com/marketplace/langfuse"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Install Plugin in Cursor
+    </Link>
+  </Button>
+</div>
+</Tab>
+
+<Tab>
+
+Claude stores its skills in a `.claude/skills` directory, you can install skills either globally or per project.
+
+<div className="[&_.nextra-filetree>ul]:block [&_.nextra-filetree>ul]:w-full">
+  <FileTree>
+    <FileTree.Folder name="~/.claude or <project>/.claude" defaultOpen>
+      <FileTree.Folder name="skills" defaultOpen>
+        <FileTree.Folder name="langfuse" defaultOpen>
+        </FileTree.Folder>
+      </FileTree.Folder>
+    </FileTree.Folder>
+  </FileTree>
+</div>
+
+Copy the [Langfuse Skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) to your local claude skills folder. We'd recommend using a symlink to keep the skill up to date.
+
+You can do this using npm ([skills CLI](https://www.npmjs.com/package/skills)): 
 
 ```bash
-# Cursor plugin
-/add-plugin langfuse
+npx skills add langfuse/skills --skill "langfuse" --agent "claude-code"
+```
 
-# skills CLI
-npx skills add langfuse/skills --skill "langfuse"
+<details>
+<summary>Alternatively you can do this manually</summary>
 
-# Manual: clone and symlink
+1. Clone repo somewhere stable
+```bash
 git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
-ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
 ```
 
-2. Ask the agent to instrument your application with Langfuse:
+2. Make sure Claude skills dir exists (common location)
+```bash
+mkdir -p ~/.claude/skills
+```
 
+3. Symlink the skill folder
+```bash
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.claude/skills/langfuse
 ```
-Instrument this application with Langfuse tracing following best practices.
+
+</details>
+
+</Tab>
+
+<Tab>
+
+Codex stores its skills in a `.agents/skills` directory, you can install skills either globally or per project. See [Codex docs: Where to save skills](https://developers.openai.com/codex/skills/#where-to-save-skills).
+
+<div className="[&_.nextra-filetree>ul]:block [&_.nextra-filetree>ul]:w-full">
+  <FileTree>
+    <FileTree.Folder name="~/.agents or <repo>/.agents" defaultOpen>
+      <FileTree.Folder name="skills" defaultOpen>
+        <FileTree.Folder name="langfuse" defaultOpen>
+        </FileTree.Folder>
+      </FileTree.Folder>
+    </FileTree.Folder>
+  </FileTree>
+</div>
+
+Copy the [Langfuse Skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) to your local codex skills folder. We'd recommend using a symlink to keep the skill up to date.
+
+You can do this using npm ([skills CLI](https://www.npmjs.com/package/skills)): 
+
+```bash
+npx skills add langfuse/skills --skill "langfuse" --agent "codex"
 ```
+
+<details>
+<summary>Alternatively you can do this manually</summary>
+
+1. Clone repo somewhere stable
+```bash
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+```
+
+2. Make sure Codex skills dir exists (common location)
+```bash
+mkdir -p ~/.agents/skills
+```
+
+3. Symlink the skill folder
+```bash
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.agents/skills/langfuse
+```
+
+</details>
+
+</Tab>
+
+<Tab>
+
+For other AI coding agents, the skill folder structure is:
+
+<div className="[&_.nextra-filetree>ul]:block [&_.nextra-filetree>ul]:w-full">
+  <FileTree>
+    <FileTree.Folder name="<agent-skill-root>" defaultOpen>
+      <FileTree.Folder name="skills" defaultOpen>
+        <FileTree.Folder name="langfuse" defaultOpen>
+        </FileTree.Folder>
+      </FileTree.Folder>
+    </FileTree.Folder>
+  </FileTree>
+</div>
+
+`<agent-skill-root>` depends on your tool. The npm command below installs to the correct location automatically.
+
+For other AI coding agents, install via npm ([skills CLI](https://www.npmjs.com/package/skills)):
+
+```bash
+npx skills add langfuse/skills --skill "langfuse"
+```
+
+If you want to target a specific agent directly:
+
+```bash
+npx skills add langfuse/skills --skill "langfuse" --agent "<agent-id>"
+```
+
+<details>
+<summary>Alternatively you can do this manually</summary>
+
+1. Clone repo somewhere stable
+```bash
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+```
+
+2. Make sure your agent's skills dir exists
+```bash
+mkdir -p /path/to/<agent-skill-root>/skills
+```
+
+3. Symlink the skill folder
+```bash
+ln -s /path/to/langfuse-skills/skills/langfuse /path/to/<agent-skill-root>/skills/langfuse
+```
+
+</details>
+
+</Tab>
+
+</Tabs>
