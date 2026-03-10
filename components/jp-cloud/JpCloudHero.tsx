@@ -122,7 +122,7 @@ export function JpCloudHero() {
           transition={{ delay: 1.0, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <Button variant="cta" size="xl" asChild>
-            <a href="#waitlist">Join our Japan Mailing List / メーリングリストに参加</a>
+            <a href="https://langfuse.app.n8n.cloud/form/b6fd623f-0d23-43ba-9c69-077675fe9f62">Join our Japan Mailing List / メーリングリストに参加</a>
           </Button>
         </motion.div>
       </div>

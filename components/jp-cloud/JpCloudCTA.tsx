@@ -50,7 +50,7 @@ export function JpCloudCTA() {
 
         <div className="mt-10 flex gap-4 flex-wrap items-center justify-center">
           <Button variant="cta" size="xl" asChild>
-            <a href="#waitlist">
+            <a href="https://langfuse.app.n8n.cloud/form/b6fd623f-0d23-43ba-9c69-077675fe9f62">
               Join our Japan Mailing List / メーリングリストに参加
             </a>
           </Button>
