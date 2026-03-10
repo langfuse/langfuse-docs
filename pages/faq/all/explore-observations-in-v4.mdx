@@ -1,0 +1,84 @@
+---
+title: Explore Observations in V4
+sidebarTitle: Explore Observations in V4
+description: Learn how to use the unified tracing table in Langfuse v4
+tags: [observability]
+---
+
+# Explore Observations in Langfuse Cloud Fast Preview (v4)
+
+Langfuse now uses a single observations table as the main exploration surface.
+Previously, many teams switched between a traces table for request-level context and an observations table for step-level analysis.
+In the v4 experience, you stay in one table and use filters, saved views, and row peek-views to answer both questions.
+
+For the conceptual background, see the [observation-centric data model](/docs/observability/data-model#observation-centric-data-model).
+For broader release context of Langfuse v4, see the [Simplify for Scale changelog post](/changelog/2026-03-10-simplify-for-scale).
+
+
+## Prerequisites
+
+To use the unified table productively, make sure your instrumentation is aligned with the v4 data model.
+
+### 1. Ingest with the latest SDK versions
+
+Use the latest major Langfuse SDKs so your data appears in the unified table in real time:
+
+- Python SDK v4: [migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4)
+- JS/TS SDK v5: [migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)
+
+<Callout type="info">
+If you are still sending data via **older SDK versions**, traces can appear in the unified tracing table with a **delay of up to 10 minutes**.
+</Callout>
+
+### 2. Propagate correlating attributes across spans
+
+Use the SDK propagation helpers to propagate correlating attributes across child observations:
+
+- Python: `propagate_attributes()`
+- JS/TS: `propagateAttributes()`
+
+This is very important for filters to work accurately.
+Attributes such as `userId`, `sessionId`, `tags`, `metadata`, `version`, and `traceName` should be available on observations so you can filter one table by request-level context and still work at observation granularity.
+
+See [Add attributes to observations](/docs/observability/sdk/instrumentation#add-attributes) for the SDK implementation details.
+
+## Set up your default view
+
+We strongly recommend **saved views** in order to configure the default view you and your project members are seeing in the unified tracing table.
+
+Examples for useful views would be
+
+- root observations only (no parent observation). This would be a close analogue to the trace table in the previous table model.
+- observations matching specific names only (these could be the root observation of a subagent execution)
+- LLM generation spans only
+
+You can create a saved view by setting the relevant filters in the filter sidebar of the tracing table and saving that view. You may also promote this to be the **project-default** view or share **permalinks** of the saved view with your teammates.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
+  aspectRatio={16 / 9}
+  className="mt-3"
+/>
+
+## Share feedback
+
+We are still iterating on the unified tracing experience.
+If something feels confusing, missing, or slower than expected, share feedback on via [support](/support).
+
+## FAQ
+
+### Why are observations delayed or missing in the unified table?
+
+The most common reason is that data is still being sent via older SDK versions.
+In the new v4 experience, older SDKs can lead to multi-minute delays before traces show up in the unified table.
+If this happens, upgrade to Python SDK v4 or JS/TS SDK v5 first.
+
+### How can I make this look more like the old traces table?
+
+Create a saved view that filters to the root observation representing the start of each trace in your application.
+That gives you a stable, trace-like list while still letting you drill into lower-level observations when needed.
+
+### Can I get the old experience back?
+
+Yes. For now, you can switch the v4 beta experience off in the UI and return to the previous tracing experience.
+This is temporary, though: the unified table will become the standard experience, so it is worth setting up saved views and instrumentation for the new model.
