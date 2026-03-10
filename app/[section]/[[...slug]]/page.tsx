@@ -5,6 +5,7 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, DOCS_STYLE_APP_SECTIONS, POST_SECTIONS, CHANGELOG_SECTIONS } from "@/lib/sections";
 import type { SectionSlug } from "@/lib/sections";
 import { MARKETING_SLUGS } from "@/lib/source";
+import { buildOgImageUrl } from "@/lib/og-url";
 import { SectionDocBodyClient } from "../SectionDocBodyClient";
 import { DocsContributors } from "@/components/DocsContributors";
 
@@ -74,9 +75,24 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
   const page = config.source.getPage(effectiveSlug);
   if (!page) return { title: "Not Found" };
+  const pageData = page.data as typeof page.data & {
+    ogImage?: string | null;
+    ogVideo?: string | null;
+  };
+  const ogImage = buildOgImageUrl({
+    title: page.data.title,
+    description: page.data.description,
+    section: config.title,
+    staticOgImage: pageData.ogImage,
+  });
   return {
     title: page.data.title,
     description: page.data.description ?? undefined,
+    openGraph: {
+      images: [{ url: ogImage }],
+      ...(pageData.ogVideo ? { videos: [{ url: "https://langfuse.com" + pageData.ogVideo }] } : {}),
+    },
+    twitter: { images: [{ url: ogImage }] },
   };
 }
 

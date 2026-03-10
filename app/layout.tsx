@@ -13,6 +13,14 @@ export const metadata: Metadata = {
   title: { default: "Langfuse", template: "%s - Langfuse" },
   description:
     "Traces, evals, prompt management and metrics to debug and improve your LLM application.",
+  openGraph: {
+    images: [{ url: "https://langfuse.com/og.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "langfuse.com",
+    images: [{ url: "https://langfuse.com/og.png" }],
+  },
 };
 
 export default function RootLayout({
