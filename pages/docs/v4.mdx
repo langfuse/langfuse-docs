@@ -1,12 +1,12 @@
 ---
-title: Langfuse Preview (fast)
+title: Faster Langfuse
 description: Langfuse now delivers faster product performance. Enable the preview and upgrade SDKs to get the new experience without delays.
 ---
 
 import { Callout } from "nextra/components";
 import { BarChart3, Book, Github, Zap } from "lucide-react";
 
-# Langfuse Preview (fast)
+# Langfuse Cloud: Fast Preview (v4)
 
 Langfuse now delivers faster product performance at scale. This preview brings faster charts, filters, APIs, and evaluation workflows to Langfuse Cloud.
 
@@ -69,12 +69,7 @@ The new [Observations API v2](/docs/api-and-data-platform/features/observations-
 
 ### Faster evaluation workflows
 
-[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) execute in seconds instead of minutes:
-
-- **Eliminate evaluation delays:** No database query overhead. Execution time is limited only by LLM API rate limits, not database performance.
-- **Scale without performance impact:** Run evaluations on every observation without degradation.
-- **Faster iteration:** See evaluation results immediately after ingestion, not minutes later.
-- **Higher concurrency:** Process more evaluations per minute.
+[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) execute in seconds instead of minutes as we do not need to query ClickHouse for each evaluation anymore.
 
 ## Under the hood
 
@@ -82,7 +77,7 @@ This preview is powered by a simplified observation-centric data model. Trace-le
 
 ## OSS and self-hosting
 
-This preview is currently available on Langfuse Cloud. We are working on the path for OSS and self-hosted users and will share updates here, in the [changelog](/changelog), and on [GitHub Discussions](https://github.com/orgs/langfuse/discussions) as they become available.
+This preview is currently available on Langfuse Cloud. We are working on the migration path for OSS deployments and will share updates here, in the [changelog](/changelog), and on [GitHub Discussions](https://github.com/orgs/langfuse/discussions) as they become available.
 
 ## Get started
 
