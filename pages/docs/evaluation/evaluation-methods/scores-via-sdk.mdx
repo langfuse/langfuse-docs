@@ -24,6 +24,12 @@ You can use the Langfuse SDKs or API to add scores to traces, observations, sess
 
 ## Ingesting Scores via API/SDKs
 
+Scores can be attached at different levels of granularity: to individual traces, to specific observations within a trace, or to full sessions.
+
+See the [API reference](/docs/api) for full details on the POST and GET endpoints for scores and score configs.
+
+### Trace or Observation-level Scores
+
 You can add scores via the Langfuse SDKs or API. Scores can take one of three data types: **Numeric**, **Categorical** or **Boolean**.
 
 If a score is ingested manually using a `trace_id` to link the score to a trace, it is not necessary to wait until the trace has been created. The score will show up in the scores table and will be linked to the trace once the trace with the same `trace_id` is created.
@@ -337,7 +343,7 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 </Tab>
 </LangTabs>
 
-## Session-level Scores
+### Session-level Scores
 
 To score an entire session (without attaching the score to a trace or observation), provide only `session_id` (Python SDK) or `sessionId` (JS/TS SDK and API).
 
@@ -395,7 +401,7 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 </Tab>
 </LangTabs>
 
-See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+## Advanced
 
 ### Preventing Duplicate Scores
 
