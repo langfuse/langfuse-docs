@@ -96,9 +96,9 @@ Example trace in Langfuse UI
 ### Traces
 
 A `trace` typically represents a single request or operation.
-For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace.
+For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace. 
 
-It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
+It serves as container of observations. Trace attributes such as `user_id`, `session_id`, `tags`, `metadata`, etc. are propagated to all observations within the trace.
 
 ### Sessions
 
@@ -150,35 +150,27 @@ There are different types of attributes you can add:
 | [Releases & Versions](/docs/observability/features/releases-and-versioning) | Track application versions and component changes |
 
 
-## Observation-Centric Data Model
+## ClickHouse data model
 
 <Callout type="info">
-The observation-centric data model is available with Python SDK v4+ and JS/TS SDK v5+. Both data models currently coexist, but Langfuse is gradually transitioning to the observation-centric model. See the [changelog post](/changelog/2026-02-10-simplify-for-scale) for more details.
+The observation-centric data model is available with Python SDK v4+ and JS/TS SDK v5+. This data model is live on Langfuse Cloud. For OSS deployments, this will be Langfuse V4. See the [changelog post](/changelog/2026-03-10-simplify-for-scale) for more details.
 </Callout>
 
-To improve query performance at scale, Langfuse introduces an **observation-centric data model** as part of Langfuse v4 alongside the existing model. In this model, context attributes (`user_id`, `session_id`, `metadata`, `tags`) that previously lived only on the trace are propagated to every observation. This eliminates expensive joins between trace and observation tables, enabling single-table queries.
+To improve query performance at scale, Langfuse introduces an **observation-centric data model**. In this model, context attributes (`user_id`, `session_id`, `metadata`, `tags`) that previously lived only on the trace are propagated to every observation. This eliminates expensive joins between trace and observation tables, enabling single-table queries.
 
 <Frame fullWidth>
-  ![Observation-centric data model](/images/changelog/2026-02-11-v4-preview/data-model.png)
+  ![Observation-centric data model](/images/changelog/2026-03-10-v4-preview/data-model.png)
 </Frame>
 
 ### What changes
+[Guide](/docs/v4) how to adopt the new data model.
 
 | | Classic model | Observation-centric model |
 |---|---|---|
 | **Storage** | Separate mutable Traces and Observations tables | Single immutable Observations table |
-| **Context attributes** | Stored on the trace, joined at query time | Propagated to every observation at ingestion time |
+| **Context attributes** | Stored on the trace, joined at query time | Propagated to every observation on SDK side. |
 | **Trace input/output** | Set directly on the trace | Removed, use observation IO instead. (For legacy LLM-as-a-judge evaluators that depend on trace input and output, users can use the deprecated `set_trace_io` methods in the SDKs.) |
 | **Mutability** | Traces and observations are mutable | Observations are immutable (written once) |
-
-### How to adopt
-
-Upgrade to the latest SDK versions to start ingesting data in the new format:
-
-- **Python SDK v4**: See [migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4)
-- **JS/TS SDK v5**: See [migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)
-
-The key change is that `update_current_trace()` / `updateActiveTrace()` is replaced by `propagate_attributes()`, which automatically flows attributes to all child observations created within its scope.
 
 ## How Langfuse Captures Data
 
