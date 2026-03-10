@@ -10,6 +10,7 @@ This guide walks you through creating and using a prompt with Langfuse. If you'r
 
 import PromptCreate from "@/components-mdx/prompt-create.mdx";
 import PromptUse from "@/components-mdx/prompt-use.mdx";
+import GetStartedAutoInstall from "@/components-mdx/get-started/auto-install.mdx";
 
 <LangTabs items={["Use AI", "Do it yourself"]}>
 <Tab>
@@ -20,25 +21,17 @@ import PromptUse from "@/components-mdx/prompt-use.mdx";
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
 2.  Create new API credentials in the project settings.
 
+## Set up your AI agent
+
+Install the [Langfuse Skill](https://github.com/langfuse/skills) in your editor to create and manage prompts from agent mode.
+
+<GetStartedAutoInstall />
+
 ## Create a prompt [#create-update-prompt]
 
 Use the agent mode of your editor to create prompts in Langfuse.
 
-1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
-
-```bash
-# Cursor plugin
-/add-plugin langfuse
-
-# skills CLI
-npx skills add langfuse/skills --skill "langfuse"
-
-# Manual: clone and symlink
-git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
-ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
-```
-
-2. Ask the agent to create your prompt:
+Ask the agent to create your prompt:
 
 ```
 Create a prompt in Langfuse called "movie-critic" that takes a movie name and critic level as variables.
@@ -48,21 +41,7 @@ Create a prompt in Langfuse called "movie-critic" that takes a movie name and cr
 
 Use the agent mode of your editor to write the code to fetch Langfuse prompts in your application.
 
-1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
-
-```bash
-# Cursor plugin
-/add-plugin langfuse
-
-# skills CLI
-npx skills add langfuse/skills --skill "langfuse"
-
-# Manual: clone and symlink
-git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
-ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
-```
-
-2. Ask the agent to integrate prompt fetching:
+Ask the agent to integrate prompt fetching:
 
 ```
 Fetch the "movie-critic" prompt, production version, from Langfuse and use it in my application.
