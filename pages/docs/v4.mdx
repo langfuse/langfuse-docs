@@ -1,0 +1,151 @@
+---
+title: Langfuse Preview (fast)
+description: Langfuse now delivers faster product performance with a simplified observation-centric data model. Upgrade SDKs to get the new experience without delays.
+---
+
+import { Callout } from "nextra/components";
+import { BarChart3, Book, Github, Zap } from "lucide-react";
+
+# Langfuse Preview (fast)
+
+Langfuse now delivers faster product performance at scale. After processing billions of events per month, we rebuilt core product paths around immutable, observation-centric data so charts, filters, APIs, and evaluations stay fast as usage grows.
+
+<Callout type="info">
+Upgrade to the latest SDK versions to avoid delays in the new experience and to see your data in real time: [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5).
+</Callout>
+
+We will keep this page updated as we roll out additional related features and share OSS and self-hosted support updates.
+
+## What changes
+
+### Observation-centric data model
+
+The data model now centers on [observations](/docs/observability/data-model) as the primary concept.
+
+Context attributes (`user_id`, `session_id`, `metadata`) set at the trace level now propagate automatically to all observations of a trace. This removes the need to repeatedly update trace metadata or patch outputs across observations.
+
+Complex agentic workflows often involve multiple important steps within a single trace. The new observation-centric model lets you filter and analyze individual observations instead of being limited to trace-level inputs and outputs. Saved table filters let teams share common views across a project.
+
+See [Explore Observations in V4](/faq/all/explore-observations-in-v4) for a practical guide to using the unified table, setting up a default saved view, and populating it with the right data.
+
+### Faster product performance
+
+Chart rendering time has been significantly reduced. Queries that previously took seconds or minutes now complete in a few seconds or milliseconds. Database operations have been optimized to reduce query complexity.
+
+Browsing traces, users, and sessions is also much faster. Filters respond more quickly, and large projects stay usable at higher scale.
+
+### New observations and metrics API endpoints
+
+We redesigned the observations and metrics APIs on top of the new data model. The new endpoints offer significant performance improvements:
+
+- **[Observations API v2](/docs/api-and-data-platform/features/observations-api#v2):** Optimized query execution with flexible filtering
+- **[Metrics API v2](/docs/metrics/features/metrics-api#v2):** Faster aggregations across large projects
+
+### Faster LLM-as-a-judge evaluations
+
+[LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) on traces require a separate ClickHouse query, which causes delays and backlogs at scale.
+
+[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) execute in seconds instead of minutes:
+
+- **Eliminate evaluation delays:** No database query overhead. Execution time is limited only by LLM API rate limits, not database performance.
+- **Scale without performance impact:** Run evaluations on every observation without degradation.
+- **Faster iteration:** See evaluation results immediately after ingestion, not minutes later.
+- **Higher concurrency:** Process more evaluations per minute.
+
+[Upgrade existing trace-level evaluators](/faq/all/llm-as-a-judge-migration) to observation-level for immediate performance gains.
+
+## How to unlock the new performance
+
+<Callout type="info">
+Track rollout progress and migration updates on [GitHub Discussions](https://github.com/orgs/langfuse/discussions).
+</Callout>
+
+<Steps>
+
+### Enable the beta UI experience
+
+<Frame className="max-w-xs mx-auto">
+  ![Beta toggle in Langfuse UI](/images/changelog/2026-03-10-v4-preview/v4-beta-togle.png)
+</Frame>
+
+In the UI, a beta toggle is available to opt into the new experience. Not all screens have been migrated to the new data model yet.
+
+<Callout type="info">
+Data from older SDK versions can be delayed by up to 10 minutes in the new UI. Upgrade to the latest SDK versions to see your data in real time.
+</Callout>
+
+### Upgrade SDKs
+
+Upgrade to the latest major SDK versions to take advantage of the observation-centric data model and explore your data in real time:
+
+- **Python SDK:** v4 ([migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
+- **JS/TS SDK:** v5 ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
+
+The key change: `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, and `tags` to all child observations.
+
+<Callout type="info">
+Set trace-level attributes (`user_id`, `session_id`, propagated `metadata`) as early as possible in your instrumentation so they propagate to all downstream spans automatically. Learn more about [trace-level attributes](/docs/observability/sdk/instrumentation#add-attributes).
+</Callout>
+
+### Migrate LLM-as-a-judge evaluations
+
+Upgrade your LLM-as-a-judge evaluations to run at the observation level instead of the trace level for significantly faster execution. Learn more in the [LLM-as-a-judge migration guide](/faq/all/llm-as-a-judge-migration).
+
+### Adopt new observations and metrics API endpoints
+
+The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) deliver significant performance improvements through the new observation-centric data model:
+
+- **Selective field retrieval:** Request only the field groups you need instead of full rows.
+- **Cursor-based pagination:** Consistent performance regardless of result set size.
+- **Optimized querying:** Built on the new immutable events table with no joins required.
+
+See the [v2 APIs announcement](/changelog/2025-12-17-v2-metrics-and-observations-api) for migration guidance and a detailed feature comparison.
+
+</Steps>
+
+## Technical changes
+
+<Frame fullWidth>
+  ![Langfuse data model overview](/images/changelog/2026-03-10-v4-preview/data-model.png)
+</Frame>
+
+The rebuild is based on three core principles:
+
+- **Immutable observations:** Observations are written once and never modified, eliminating deduplication operations.
+- **No joins:** Trace-level attributes propagate to observations in the SDK. Queries run on a single table without joins.
+- **Observation-centric model:** Observations are the primary data source for APIs and UI.
+
+Max shared the technical background at ClickHouse Open House in Amsterdam. Watch the [recording](https://www.youtube.com/watch?v=NXYQ5odATrM).
+
+## Self-hosting
+
+<Callout type="warning">
+The changes described above are currently available on **Langfuse Cloud only**. We do not have a timeline yet for self-hosted availability.
+</Callout>
+
+Our team is actively working on a path for self-hosters to adopt the new observation-centric data model. We will share updates in the [changelog](/changelog) and on [GitHub Discussions](https://github.com/orgs/langfuse/discussions) as they become available.
+
+## Get started
+
+<Cards num={4}>
+  <Card
+    title="SDK Migration Guides"
+    href="/docs/observability/sdk/upgrade-path"
+    icon={<Book />}
+  />
+  <Card
+    title="Observations API v2"
+    href="/docs/api-and-data-platform/features/observations-api#v2"
+    icon={<Zap />}
+  />
+  <Card
+    title="Metrics API v2"
+    href="/docs/metrics/features/metrics-api#v2"
+    icon={<BarChart3 />}
+  />
+  <Card
+    title="Discuss on GitHub"
+    href="https://github.com/orgs/langfuse/discussions"
+    icon={<Github />}
+  />
+</Cards>
