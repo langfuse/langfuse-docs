@@ -1,9 +1,9 @@
 ---
-date: 2026-02-10
-title: "[Draft] Simplify for Scale"
+date: 2026-03-10
+title: "Simplify Langfuse for Scale"
 description: We've rebuilt Langfuse's infrastructure to address performance bottlenecks at scale.
 author: Max,Steffen,Valeriy,Hassieb,Nimar,Marlies
-ogImage: /images/changelog/2026-02-11-v4-preview/v4-banner.png
+ogImage: /images/changelog/2026-03-10-v4-preview/v4-banner.png  
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -21,7 +21,7 @@ The new architecture delivers faster charts and APIs through a simplified data m
 
 The data model now centers on [observations](/docs/observability/data-model#observations) as the primary concept.
 
-Context attributes (`user_id`, `session_id`, `metadata`) set at the trace level now propagate automatically to all child spans. This eliminates the need to repeatedly update trace metadata or patch outputs across observations.
+Context attributes (`user_id`, `session_id`, `metadata`) set at the trace level now propagate automatically to all observations of a Trace. This eliminates the need to repeatedly update trace metadata or patch outputs across observations.
 
 Complex agentic workflows often involve multiple important steps within a single trace. The new observation-centric model lets you filter and analyze individual observations, moving beyond the limitation of viewing only trace-level inputs and outputs. Saved table filters let you persist filter presets across users in a project, making it easier for teams to share common views.
 
@@ -31,7 +31,7 @@ See [Explore Observations in V4](/faq/all/explore-observations-in-v4) for a prac
 
 Chart rendering time has been significantly reduced. Queries that previously took seconds or minutes now complete in few seconds or milliseconds. Database operations have been optimized to reduce query complexity.
 
-This applies to trace exploration, filtering, and analytics across large projects.
+Browsing traces, users and sessions table becomes snappier and filter significantly faster.  
 
 ### 3. New observations and metrics API endpoints
 
@@ -56,7 +56,7 @@ We redesigned the observations and metrics APIs to test the new data model under
 
 ## Technical changes
 <Frame fullWidth>
-  ![Langfuse](/images/changelog/2026-02-11-v4-preview/data-model.png)
+  ![Langfuse](/images/changelog/2026-03-10-v4-preview/data-model.png)
 </Frame>
 
 The rebuild is based on three core principles:
@@ -82,7 +82,7 @@ The new architecture is being rolled out gradually. Here's how to access the per
 ### 1. Enable beta UI experience
 
 <Frame className="max-w-xs mx-auto">
-  ![Beta toggle in Langfuse UI](/images/changelog/2026-02-11-v4-preview/v4-beta-togle.png)
+  ![Beta toggle in Langfuse UI](/images/changelog/2026-03-10-v4-preview/v4-beta-togle.png)
 </Frame>
 
 In the UI, a beta toggle will be available to opt into the new experience. Note that not all UI screens have been migrated to the new data model yet.
@@ -100,7 +100,7 @@ Upgrade to the latest major SDK versions to take advantage of the observation-ce
 - **Python SDK**: v4 ([migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
 - **JS/TS SDK**: v5 ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
 
-The key change: `update_current_trace()` / `updateActiveTrace()` is replaced by `propagate_attributes()`, which automatically flows attributes like `user_id`, `session_id`, `metadata`, and `tags` to all child observations.
+The key change: `update_current_trace()` / `updateActiveTrace()` is replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, and `tags` to all child observations.
 
 <Callout type="info">
 Set trace-level attributes (`user_id`, `session_id`, propagated `metadata`) as early as possible in your instrumentation so they propagate to all downstream spans automatically. Learn more about [trace-level attributes](/docs/observability/sdk/instrumentation#add-attributes).
