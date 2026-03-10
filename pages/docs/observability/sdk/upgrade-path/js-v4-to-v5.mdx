@@ -190,6 +190,23 @@ propagateAttributes(
   evaluators that rely on trace input/output.
 </Callout>
 
+### Public API namespace remapping (`api.*`)
+
+In v5, high-performance Public API resources are now the defaults. The v2
+aliases were removed.
+
+| v4 / transitional name                    | v5 name                               |
+| ----------------------------------------- | ------------------------------------- |
+| `langfuse.api.observationsV2`             | `langfuse.api.observations`           |
+| `langfuse.api.scoreV2`                    | `langfuse.api.scores`                |
+| `langfuse.api.metricsV2`                  | `langfuse.api.metrics`                |
+| `langfuse.api.observations` (legacy v1)   | `langfuse.api.legacy.observationsV1`  |
+| `langfuse.api.score` (legacy v1)          | `langfuse.api.legacy.scoreV1`         |
+| `langfuse.api.metrics` (legacy v1)        | `langfuse.api.legacy.metricsV1`       |
+
+If you still need legacy v1 behavior, switch to the corresponding
+`langfuse.api.legacy.*V1` namespace.
+
 ### [`@langfuse/langchain`](/integrations/frameworks/langchain) internal changes
 
 The `CallbackHandler` now uses `propagateAttributes()` for trace-level attributes. This affects users who:
@@ -219,3 +236,6 @@ The `traceMethod` wrapper now wraps the traced call in `propagateAttributes()` t
 5. Search for `.updateTrace(` → split into `propagateAttributes()` + `.setTraceIO()` + `.setTraceAsPublic()`
 6. Verify propagated metadata values are `Record<string, string>` with values ≤200 characters
 7. Replace `release`/`environment` attribute usage with env vars (`LANGFUSE_RELEASE`, `LANGFUSE_TRACING_ENVIRONMENT`)
+8. Search for `api.observationsV2` / `api.scoreV2` / `api.metricsV2` → replace with `api.observations` / `api.scores` / `api.metrics`
+9. Search for legacy v1 usage on `api.observations` / `api.score` / `api.metrics` → move to `api.legacy.observationsV1` / `api.legacy.scoreV1` / `api.legacy.metricsV1`
+10. Remove any remaining references to `*V2` aliases (they were removed in v5)

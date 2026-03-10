@@ -193,6 +193,23 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation") 
   now propagate to children only — they do not bubble up to the trace.
 </Callout>
 
+### Public API namespace remapping (`api.*`)
+
+In v4, high-performance Public API resources are now the defaults. The v2
+aliases were removed.
+
+| v3 / transitional name                    | v4 name                               |
+| ----------------------------------------- | ------------------------------------- |
+| `langfuse.api.observations_v_2`           | `langfuse.api.observations`           |
+| `langfuse.api.score_v_2`                  | `langfuse.api.scores`                |
+| `langfuse.api.metrics_v_2`                | `langfuse.api.metrics`                |
+| `langfuse.api.observations` (legacy v1)   | `langfuse.api.legacy.observations_v1` |
+| `langfuse.api.score` (legacy v1)          | `langfuse.api.legacy.score_v1`        |
+| `langfuse.api.metrics` (legacy v1)        | `langfuse.api.legacy.metrics_v1`      |
+
+If you still need legacy v1 behavior, switch to the corresponding
+`langfuse.api.legacy.<resource>_v1` namespace.
+
 ### `start_span()` / `start_generation()` → `start_observation()`
 
 Observations are the primary concept in the new model. The unified `start_observation()` API with `as_type` parameter replaces the separate methods.
@@ -295,3 +312,6 @@ The SDK now requires Pydantic v2. If your application still uses Pydantic v1, yo
 8. Search for `CallbackHandler(update_trace=` → remove parameter
 9. Verify metadata values are `dict[str, str]` with values ≤200 chars
 10. Upgrade Pydantic to v2 if still on v1
+11. Search for `api.observations_v_2` / `api.score_v_2` / `api.metrics_v_2` → replace with `api.observations` / `api.scores` / `api.metrics`
+12. Search for legacy v1 usage on `api.observations` / `api.score` / `api.metrics` → move to `api.legacy.observations_v1` / `api.legacy.score_v1` / `api.legacy.metrics_v1`
+13. Remove any remaining references to `*_v_2` aliases (they were removed in v4)
