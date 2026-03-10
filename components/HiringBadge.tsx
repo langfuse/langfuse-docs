@@ -69,7 +69,7 @@ export function HiringBadge() {
         <span className="w-1.5 h-1.5 rounded-full bg-[theme(colors.orange.400)] shrink-0" />
         <span className="relative">
           <span className={cn("block", isHovered && "invisible")}>
-            Hiring in Berlin and SF
+            Hiring in Europe and SF
           </span>
           <span className={cn("absolute left-0 top-0", !isHovered && "invisible")}>
             Looking for GOATS!

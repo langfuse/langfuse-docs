@@ -216,6 +216,14 @@ The Langfuse SDK can expose detailed logging and debugging information to help y
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 
+**Via environment variable:**
+
+You can set the log level using the `LANGFUSE_DEBUG` environment variable to enable the debug mode.
+
+```bash
+export LANGFUSE_DEBUG="True"
+```
+
 **In code:**
 
 The Langfuse SDK uses Python's standard `logging` module. The main logger is named `"langfuse"`.
@@ -233,18 +241,18 @@ langfuse_logger.setLevel(logging.DEBUG)
 
 The default log level for the `langfuse` logger is `logging.WARNING`.
 
-**Via environment variable:**
-
-You can also set the log level using the `LANGFUSE_DEBUG` environment variable to enable the debug mode.
-
-```bash
-export LANGFUSE_DEBUG="True"
-```
-
 </Tab>
 <Tab title="JS/TS SDK">
 
 You can configure the global SDK logger to control the verbosity of log output. This is useful for debugging.
+
+**Via environment variable:**
+
+You can set the log level using the `LANGFUSE_LOG_LEVEL` environment variable to enable the debug mode.
+
+```bash
+export LANGFUSE_LOG_LEVEL="DEBUG"
+```
 
 **In code:**
 
@@ -256,15 +264,6 @@ configureGlobalLogger({ level: LogLevel.DEBUG });
 ```
 
 Available log levels are `DEBUG`, `INFO`, `WARN`, and `ERROR`.
-
-**Via environment variable:**
-
-You can enable debug mode via `LANGFUSE_DEBUG=true` (recommended quick toggle) or set `LANGFUSE_LOG_LEVEL=DEBUG` for explicit log-level control.
-
-```bash
-export LANGFUSE_DEBUG="true"
-export LANGFUSE_LOG_LEVEL="DEBUG"
-```
 
 </Tab>
 </LangTabs>
@@ -664,7 +663,7 @@ from opentelemetry.instrumentation.threading import ThreadingInstrumentor
 ThreadingInstrumentor().instrument()
 ```
 
-For multiprocessing, follow the [OpenTelemetry guidance](https://github.com/open-telemetry/opentelemetry-python/issues/2765#issuecomment-1158402076). If you use Pydantic Logfire, enable `distributed_tracing=True`.
+For multiprocessing, follow the [OpenTelemetry guidance](https://github.com/open-telemetry/opentelemetry-python/issues/2765#issuecomment-1158402076). If you use Pydantic Logfire, enable `distributed_tracing=True`. For tracing across separate services or processes, see [Trace IDs & Distributed Tracing](/docs/observability/features/trace-ids-and-distributed-tracing).
 
 </Tab>
 </LangTabs>

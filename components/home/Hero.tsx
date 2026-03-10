@@ -49,7 +49,7 @@ export function Hero() {
             <Link href="https://cloud.langfuse.com">Sign up</Link>
           </Button>
           <Button size="lg" variant="secondary" asChild>
-            <Link href="/talk-to-us">Get Demo</Link>
+            <Link href="/watch-demo">Get Demo</Link>
           </Button>
           <Button variant="secondary" size="lg" asChild>
             <Link href="/docs">View docs</Link>

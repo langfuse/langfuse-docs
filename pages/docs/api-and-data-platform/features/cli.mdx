@@ -1,0 +1,44 @@
+---
+title: Langfuse CLI
+sidebarTitle: CLI
+description: Interact with the full Langfuse API from the command line. Built for AI agents and power users.
+---
+
+# Langfuse CLI
+
+The Langfuse CLI wraps the entire [Langfuse API](/docs/api-and-data-platform/features/public-api) so you can interact with Langfuse directly from the terminal. It is built for AI coding agents and power users who prefer the command line.
+
+<Frame fullWidth>
+  ![Langfuse CLI](/images/changelog/2026-02-17-langfuse-cli.jpg)
+</Frame>
+
+Read the full documentation in the dedicated [CLI GitHub Repo](https://github.com/langfuse/langfuse-cli).
+
+
+Get started by running:
+
+```bash
+npx langfuse-cli api <resource> <action>
+```
+
+Or just ask your coding agent to do it for you:
+
+```markdown
+please install langfuse-cli
+```
+
+## What it can do
+
+The CLI can do anything the [Langfuse API](/docs/api-and-data-platform/features/public-api) can do. 
+
+It dynamically wraps the full OpenAPI spec, so every endpoint (traces, prompts, datasets, scores, sessions, metrics, and more) is available as a CLI command. See the full [API Reference](https://api.reference.langfuse.com) for details.
+
+## Why use it
+
+- **Let your coding agent manage Langfuse for you.** Cursor, Claude Code, Windsurf, etc. can use the CLI to create datasets, pull traces, update prompts, and more without you leaving the editor.
+- **Script your workflows.** Automate repetitive tasks like exporting traces, batch-scoring, or syncing prompts across environments in CI/CD or bash scripts.
+- **Faster than the UI for quick lookups.** Grab the last 5 traces, check a prompt version, or list scores in seconds.
+
+## Pairs with Agent Skills
+
+The CLI is designed to work together with [Agent Skills](https://github.com/langfuse/skills). The main Langfuse skill teaches agents how to discover endpoints, follow common workflows, and access documentation, all through the CLI. Read more about Skills and the full agent story in [the blog post](/blog/2026-02-13-will-you-be-my-cli).

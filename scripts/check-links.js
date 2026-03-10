@@ -8,6 +8,9 @@ const http = require('http');
 const { URL } = require('url');
 
 const readFileAsync = promisify(fs.readFile);
+const EXCLUDED_HOSTNAMES = new Set([
+    'status.langfuse.com',
+]);
 
 // Configuration options
 const CONFIG = {
@@ -256,6 +259,18 @@ function processLinks(links) {
             continue;
         }
 
+        // Skip absolute URLs that are intentionally excluded from link checks
+        if (trimmedLink.startsWith('http://') || trimmedLink.startsWith('https://')) {
+            try {
+                const parsedUrl = new URL(trimmedLink);
+                if (EXCLUDED_HOSTNAMES.has(parsedUrl.hostname)) {
+                    continue;
+                }
+            } catch (error) {
+                continue;
+            }
+        }
+
         let processedLink = trimmedLink;
 
         // Convert relative paths to localhost URLs
@@ -448,4 +463,4 @@ async function main() {
     }
 }
 
-main(); 
+main();

@@ -25,6 +25,11 @@ export default {
     type: "page",
     display: "hidden",
   },
+  cloud: {
+    type: "page",
+    title: "Cloud",
+    display: "hidden",
+  },
   product: {
     title: "Product",
     type: "menu",
@@ -64,8 +69,8 @@ export default {
         href: "/docs/roadmap",
       },
       customers: {
-        title: "Customers",
-        href: "/customers",
+        title: "Users",
+        href: "/users",
       },
       exampleproject: {
         title: "Example Project",
@@ -140,8 +145,8 @@ export default {
     },
     display: "hidden",
   },
-  customers: {
-    title: "Customers",
+  users: {
+    title: "Users",
     type: "page",
     display: "hidden",
     theme: {

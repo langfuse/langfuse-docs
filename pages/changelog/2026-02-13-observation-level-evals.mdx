@@ -1,0 +1,81 @@
+---
+date: 2026-02-13
+title: "Evaluate Individual Operations: Faster, More Precise LLM-as-a-Judge"
+description: Observation-level evaluations enable precise operation-specific scoring for production monitoring.
+author: Marlies,Hassieb
+ogImage: /images/changelog/2026-02-13-observation-evals.jpg
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Callout } from "nextra/components";
+
+<ChangelogHeader />
+
+[LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) can now be run on individual observations—LLM calls, retrievals, tool executions, or any operation within your traces. Previously, evaluations could only be run on [entire traces](/docs/evaluation/evaluation-methods/llm-as-a-judge#understanding-each-evaluation-target). This architectural shift delivers dramatically faster execution and operation-level precision for production monitoring.
+
+**Example**: In a RAG pipeline with 10 operations (retrieval → reranking → generation → citation), evaluate only the final generation for helpfulness and the retrieval step for relevance—not the entire workflow. Each operation gets its own score.
+
+```
+Target: Individual observations
+Filter: type = "GENERATION" AND name = "final-response"
+Result: One score per matching observation
+Speed: Seconds per evaluation
+```
+
+Scores attach to specific observations in the trace tree. Filter by observation type, name, metadata, or trace-level attributes to target exactly what matters. Run different evaluators on different operations simultaneously.
+
+<Frame fullWidth>
+  ![Observation-level evaluation in trace tree](/images/changelog/2026-02-13-observation-level-evals.png)
+</Frame>
+
+## Why This Matters
+
+**Operation-level precision**
+Evaluate only what matters. Target final LLM responses, retrieval steps, or specific tool calls—not entire workflows. Reduces evaluation volume and cost by filtering to specific operations.
+
+**Compositional evaluation**
+Run different evaluators on different operations simultaneously. Toxicity on LLM outputs, relevance on retrievals, accuracy on generations—all within one trace. Stack observation filters (type, name, metadata) with trace attributes filters (userId, sessionId, tags).
+
+**Scalable architecture**
+Built for high-volume workloads. At ingest time, observations are evaluated against filter criteria, added to an evaluation queue, and processed asynchronously. No joins, no complex queries—just fast, reliable evaluation at scale.
+
+## Getting Started
+
+Navigate to your project → Evaluation → LLM-as-a-Judge → Set up Evaluator
+
+1. Select or create an evaluator template
+2. Choose "Live Observations" as your evaluation target
+3. Configure observation filters (type, name, metadata)
+4. Add trace-level filters (userId, sessionId, tags) if needed
+5. Map variables from observation fields (input, output, metadata)
+6. Set sampling percentage to manage evaluation costs
+
+[Follow the complete LLM-as-a-Judge setup guide](/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step) for detailed configuration steps and examples.
+
+## Requirements
+
+- **SDK version**: Python v3+ (OTel-based) or JS/TS v4+ (OTel-based)
+  - [Python v2 → v3 upgrade guide](/docs/observability/sdk/upgrade-path#python-sdk-v2--v3)
+  - [JS/TS v3 → v4 upgrade guide](/docs/observability/sdk/upgrade-path#jsts-sdk-v3--v4)
+- **Trace attribute filtering**: Use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation to filter observations by trace-level attributes (userId, sessionId, tags, metadata)
+
+<Callout type="info">
+Existing trace-level evaluators continue to work. For users with existing evaluations, see the [upgrade guide](/faq/all/llm-as-a-judge-migration) to transition to observation-level for faster execution.
+</Callout>
+
+## Learn More
+
+import { Book, Gauge } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="LLM-as-a-Judge Complete Guide"
+    href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+    icon={<Book />}
+  />
+  <Card
+    title="Observation-Level Setup"
+    href="/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step"
+    icon={<Gauge />}
+  />
+</Cards>

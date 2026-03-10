@@ -8,26 +8,89 @@ description: Get started with Langfuse Prompt Management.
 
 This guide walks you through creating and using a prompt with Langfuse. If you're looking to understand what prompt management is and why it matters, check out the [Prompt Management Overview](/docs/prompt-management/overview) first. For details on how prompts are structured in Langfuse and how it works in the background, see [Core Concepts](/docs/prompt-management/data-model).
 
-<Steps>
+import PromptCreate from "@/components-mdx/prompt-create.mdx";
+import PromptUse from "@/components-mdx/prompt-use.mdx";
 
-### Get API keys
+<LangTabs items={["Use AI", "Do it yourself"]}>
+<Tab>
+<div style={{marginTop: "-3.5rem"}}>
+<Steps>
+## Get API keys
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
 2.  Create new API credentials in the project settings.
 
-### Create a prompt [#create-update-prompt]
+## Create a prompt [#create-update-prompt]
 
-import PromptCreate from "@/components-mdx/prompt-create.mdx";
+Use the agent mode of your editor to create prompts in Langfuse.
+
+1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
+
+```bash
+# Cursor plugin
+/add-plugin langfuse
+
+# skills CLI
+npx skills add langfuse/skills --skill "langfuse"
+
+# Manual: clone and symlink
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
+```
+
+2. Ask the agent to create your prompt:
+
+```
+Create a prompt in Langfuse called "movie-critic" that takes a movie name and critic level as variables.
+```
+
+## Use the prompt in your code [#use-prompt]
+
+Use the agent mode of your editor to write the code to fetch Langfuse prompts in your application.
+
+1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
+
+```bash
+# Cursor plugin
+/add-plugin langfuse
+
+# skills CLI
+npx skills add langfuse/skills --skill "langfuse"
+
+# Manual: clone and symlink
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
+```
+
+2. Ask the agent to integrate prompt fetching:
+
+```
+Fetch the "movie-critic" prompt, production version, from Langfuse and use it in my application.
+```
+
+</Steps>
+</div>
+</Tab>
+<Tab>
+<div style={{marginTop: "-3.5rem"}}>
+<Steps>
+## Get API keys
+
+1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
+2.  Create new API credentials in the project settings.
+
+## Create a prompt [#create-update-prompt]
 
 <PromptCreate />
 
-### Use prompt [#use-prompt]
-
-import PromptUse from "@/components-mdx/prompt-use.mdx";
+## Use the prompt in your code [#use-prompt]
 
 <PromptUse />
 
 </Steps>
+</div>
+</Tab>
+</LangTabs>
 
 #### Not seeing what you expected?
 import { FaqPreview } from "@/components/faq/FaqPreview";

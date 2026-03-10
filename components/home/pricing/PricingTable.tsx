@@ -110,7 +110,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       href: "https://cloud.langfuse.com",
       featured: true,
       description:
-        "For production projects. Longer data retention and unlimited users.",
+        "For production projects. Longer data access and unlimited users.",
       price: "$29",
       priceDiscountCta: {
         name: "Discounts available",
@@ -148,7 +148,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         <>
           100k units / month included, additional: <GraduatedPricingText />
         </>,
-        "Unlimited data access",
+        "3 years data access",
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
@@ -195,7 +195,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         name: "Yearly Commitment",
         mainFeatures: [
           "Custom Volume Pricing",
-          "Custom Terms & DPA",
           "Architecture reviews",
           "Billing via AWS Marketplace",
           "Billing via Invoice",
@@ -441,8 +440,8 @@ const sections: Section[] = [
           cloud: {
             Hobby: "30 days",
             Core: "90 days",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
+            Pro: "3 years",
+            Enterprise: "3 years",
           },
         },
       },
@@ -1150,7 +1149,7 @@ const sections: Section[] = [
             Hobby: "Standard T&Cs & DPA",
             Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
-            Enterprise: "Custom with " + YEARLY_COMMITMENT,
+            Enterprise: "Talk to Sales",
           },
           selfHosted: {
             "Open Source": ENTERPRISE,
@@ -1162,7 +1161,7 @@ const sections: Section[] = [
         href: "/security/dpa",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": ENTERPRISE },
+        
         },
       },
       {

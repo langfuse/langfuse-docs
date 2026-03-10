@@ -1,6 +1,6 @@
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
-import IsoSVG from "./security/iso27001.svg";
+import IsoPNG from "./security/iso27001.png";
 import Soc2SVG from "./security/soc2.svg";
 import GdprSVG from "./security/gdpr.svg";
 import HipaaSVG from "./security/hipaa.svg";
@@ -30,11 +30,11 @@ export default function Security() {
       <div className="grid grid-cols-2 md:grid-cols-4 place-items-center gap-8 sm:gap-10 md:gap-16 mt-10">
         <Link href="/security/iso27001">
           <Image
-            src={IsoSVG}
+            src={IsoPNG}
             alt="ISO 27001"
             width={100}
             height={100}
-            className="w-24 h-auto invert dark:invert-0"
+            className="w-24 h-auto dark:invert"
           />
         </Link>
         <Link href="/security/soc2">
