@@ -70,7 +70,7 @@ const config: DocsThemeConfig = {
           className="whitespace-nowrap"
           variant="outline"
         >
-          <Link href="/talk-to-us">Get Demo</Link>
+          <Link href="/watch-demo">Get Demo</Link>
         </Button>
 
         <ToAppButton />
@@ -222,15 +222,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "v4-beta-release",
+    key: "joining-clickhouse",
     dismissible: true,
     content: (
-      <Link href="/changelog/2026-02-10-simplify-for-scale">
+      <Link href="/blog/joining-clickhouse">
         {/* mobile */}
-        <span className="sm:hidden">Langfuse v4 (Beta) →</span>
+        <span className="sm:hidden">Langfuse joins ClickHouse! →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse v4 (Beta) - Making Langfuse significantly faster →
+          Langfuse joins ClickHouse! Learn more →
         </span>
       </Link>
     ),
