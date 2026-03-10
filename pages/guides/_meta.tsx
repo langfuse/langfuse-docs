@@ -6,6 +6,7 @@ export default {
     title: <MenuSwitcher />,
   },
   index: "Overview",
+  "explore-observations-in-v4": "Explore Observations in V4",
   cookbook: "Cookbooks",
   videos: "Videos",
 };
