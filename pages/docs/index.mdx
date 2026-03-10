@@ -1,55 +1,21 @@
 ---
 title: Langfuse Documentation
-description: Langfuse is an open source LLM engineering platform for tracing, prompts, evaluations, and analytics.
+description: Langfuse is an open source LLM engineering platform. It includes observability, analytics, and experimentation features.
 ---
 
 # Langfuse Overview
 
-Langfuse is an **open-source LLM engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams trace, manage prompts, evaluate quality, and improve their LLM applications. Langfuse is open, self-hostable, and extensible ([_why Langfuse?_](/why)).
-
-Langfuse combines three core workflows:
-
-- **Observability:** Trace your application to understand behavior in production.
-- **Prompt Management:** Version and ship prompts as production assets.
-- **Evaluation:** Measure quality with scores, datasets, and experiments.
-
-If you are new to Langfuse, the goal should be to get to your first trace or first managed prompt quickly. Once that is in place, you can expand into the other workflows over time.
+Langfuse is an **open-source LLM engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow. Langfuse is open, self-hostable, and extensible ([_why langfuse?_](/why)).
 
 import { FeatureOverview } from "@/components/FeatureOverview";
 import {
   TextQuote,
   GitPullRequestArrow,
   ThumbsUp,
+  FlaskConical,
 } from "lucide-react";
 
 <FeatureOverview />
-
-## Quickstarts [#quickstarts]
-
-Choose the path that best fits what you want to do first:
-
-<Cards num={1}>
-  <Card
-    icon={<TextQuote size="24" />}
-    title="Get First Trace"
-    href="/docs/observability/get-started"
-    arrow
-  />
-  <Card
-    icon={<GitPullRequestArrow size="24" />}
-    title="Manage First Prompt"
-    href="/docs/prompt-management/get-started"
-    arrow
-  />
-  <Card
-    icon={<ThumbsUp size="24" />}
-    title="Set Up Evals"
-    href="/docs/evaluation/overview"
-    arrow
-  />
-</Cards>
-
-If you prefer end-to-end examples, go to [Guides](/guides). It collects walkthroughs, tutorials, videos, and cookbook examples for tracing, prompt management, and evaluation.
 
 ## Observability [#observability]
 
@@ -116,11 +82,7 @@ import EvaluationOverview from "@/components-mdx/evaluation-overview-gifs.mdx";
 
 ## Where to start?
 
-Start with the workflow that matches your immediate goal, then expand over time:
-
-- Add tracing if you need visibility into application behavior.
-- Add prompt management if prompts need versioning and release controls.
-- Add evaluations when you want to measure quality systematically.
+Setting up the full process of online tracing, prompt management, production evaluations to identify issues, and offline evaluations on datasets requires some time. This guide is meant to help you figure out what is most important for your use case.
 
 _Simplified lifecycle from PoC to production:_
 
@@ -140,6 +102,31 @@ _Simplified lifecycle from PoC to production:_
   ![Langfuse Features along the development
   lifecycle](/images/docs/features-dark.png)
 </Frame>
+
+## Quickstarts
+
+Get up and running with Langfuse in minutes. Choose the path that best fits your current needs:
+
+<Cards num={1}>
+  <Card
+    icon={<TextQuote size="24" />}
+    title="Integrate LLM Application/Agent Tracing"
+    href="/docs/observability/get-started"
+    arrow
+  />
+  <Card
+    icon={<GitPullRequestArrow size="24" />}
+    title="Integrate Prompt Management"
+    href="/docs/prompt-management/get-started"
+    arrow
+  />
+  <Card
+    icon={<ThumbsUp size="24" />}
+    title="Setup Evaluations"
+    href="/docs/evaluation/overview"
+    arrow
+  />
+</Cards>
 
 ## Why Langfuse?
 
