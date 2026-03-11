@@ -26,7 +26,8 @@ We are still working on the upgrade path for self-hosters and will eventually re
 
 With this change, we are moving to an observation-centric data model based on a new, wide, and (mostly) immutable ClickHouse table.
 This eliminates joins and deduplication at read-time and optimizes for the most performant ClickHouse access patterns.
-Initial table loads go from seconds to milliseconds for longer durations, and dashboard charts for large projects support move from 10s of seconds to seconds.
+Initial table loads for large amounts of data go from seconds to milliseconds.
+Dashboard load times for large projects improve by at least 10x for longer durations.
 
 <Frame className="flex-1">
   ![Performance Shift](/images/blog/2026-03-10-simplify-langfuse-for-scale/speed.png)
@@ -41,7 +42,7 @@ We were working against our own data model: large users could view only a few da
 
 ### The Cost of Updates
 
-Two years ago, LLM API calls had high latencies and users wanted to see prompts to LLMs in our UI as early as possible.
+Two years ago, LLM API calls had high latencies and users wanted to see their traces in our UI as early as possible.
 Hence, we designed the SDKs to send multiple events: one event for the invocation of the LLM API, another one for the response of the LLM, and maybe even further ones in case users update some metadata.
 Seeing inputs early was convenient, so we flushed them quickly and patched outputs and metadata as they arrived. At a lower scale, this was perfectly feasible.
 
