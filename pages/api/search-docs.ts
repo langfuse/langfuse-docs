@@ -1,5 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { searchLangfuseDocsWithInkeep, isNonEmptyString } from "./inkeep-search";
+import { PostHog } from "posthog-node";
+import { waitUntil } from "@vercel/functions";
+
+const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
+  ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
+      flushAt: 1,
+      flushInterval: 0,
+    })
+  : undefined;
 
 // Public, unauthenticated GET endpoint that exposes the Inkeep docs search used by MCP.
 // Usage: /api/search-docs?query=<url-encoded question>
@@ -35,6 +45,25 @@ export default async function handler(
       error: "Missing or invalid 'query' parameter",
     });
   }
+
+  // Fire PostHog event immediately so it has time to flush
+  waitUntil(
+    (async () => {
+      try {
+        posthog?.capture({
+          distinctId: "docs-search-api",
+          event: "docs_search:query",
+          properties: {
+            query,
+            $process_person_profile: false,
+          },
+        });
+        await posthog?.flush();
+      } catch (error) {
+        console.error("Error tracking PostHog event:", error);
+      }
+    })()
+  );
 
   try {
     const inkeepResult = await searchLangfuseDocsWithInkeep(query);
