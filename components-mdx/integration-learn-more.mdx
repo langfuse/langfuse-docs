@@ -10,12 +10,12 @@ import {
 
 ## Interoperability with the Python SDK
 
-You can use this integration together with the Langfuse [SDKs](/docs/observability/sdk/overview) to add additional attributes to the trace.
+You can use this integration together with the Langfuse [SDKs](/docs/observability/sdk/overview) to add additional attributes to the observation.
 
 <Tabs items={["Decorator", "Context Manager"]}>
 <Tabs.Tab>
 
-The [`@observe()` decorator](/docs/observability/sdk/instrumentation#custom-instrumentation) provides a convenient way to automatically wrap your instrumented code and add additional attributes to the trace.
+The [`@observe()` decorator](/docs/observability/sdk/instrumentation#custom-instrumentation) provides a convenient way to automatically wrap your instrumented code and add additional attributes to the observation.
 
 ```python
 from langfuse import observe, propagate_attributes, get_client
@@ -28,19 +28,13 @@ def my_llm_pipeline(input):
     with propagate_attributes(
         user_id="user_123",
         session_id="session_abc",
-        tags=["agent", "my-trace"],
+        tags=["agent", "my-observation"],
         metadata={"email": "user@langfuse.com"},
         version="1.0.0"
     ):
 
         # YOUR APPLICATION CODE HERE
         result = call_llm(input)
-
-        # Update the trace input and output
-        langfuse.update_current_trace(
-            input=input,
-            output=result,
-        )
 
         return result
 ```
@@ -50,14 +44,14 @@ Learn more about using the Decorator in the [Langfuse SDK instrumentation docs](
 </Tabs.Tab>
 <Tabs.Tab>
 
-The [Context Manager](/docs/observability/sdk/instrumentation#custom-instrumentation) allows you to wrap your instrumented code using context managers (with `with` statements), which allows you to add additional attributes to the trace.
+The [Context Manager](/docs/observability/sdk/instrumentation#custom-instrumentation) allows you to wrap your instrumented code using context managers (with `with` statements), which allows you to add additional attributes to the observation.
 
 ```python
 from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-with langfuse.start_as_current_observation(as_type="span", name="my-trace") as span:
+with langfuse.start_as_current_observation(as_type="span", name="my-observation") as observation:
     # Add additional attributes (user_id, session_id, metadata, version, tags) to all spans created within this execution scope
     with propagate_attributes(
         user_id="user_123",
@@ -68,12 +62,6 @@ with langfuse.start_as_current_observation(as_type="span", name="my-trace") as s
     
         # YOUR APPLICATION CODE HERE
         result = call_llm("some input")
-
-        # Update the trace input and output
-        langfuse.start_as_current_observation(
-            input=input,
-            output=result,
-        )
 
 # Flush events in short-lived applications
 langfuse.flush()
@@ -87,7 +75,7 @@ Learn more about using the Context Manager in the [Langfuse SDK instrumentation 
 ## Troubleshooting
 
 <details>
-<summary>No traces appearing</summary>
+<summary>No observations appearing</summary>
 
 First, enable [debug mode](/docs/observability/sdk/advanced-features#logging--debugging) in the Python SDK:
 
@@ -97,8 +85,8 @@ export LANGFUSE_DEBUG="True"
 
 Then run your application and check the debug logs:
 
-- **OTel spans appear in the logs:** Your application is instrumented correctly but traces are not reaching Langfuse. To resolve this:
-  1. Call [`langfuse.flush()`](/docs/observability/sdk/instrumentation#client-lifecycle--flushing) at the end of your application to ensure all traces are exported.
+- **OTel observations appear in the logs:** Your application is instrumented correctly but observations are not reaching Langfuse. To resolve this:
+  1. Call [`langfuse.flush()`](/docs/observability/sdk/instrumentation#client-lifecycle--flushing) at the end of your application to ensure all observations are exported.
   2. Verify that you are using the correct API keys and base URL.
 - **No OTel spans in the logs:** Your application is not instrumented correctly. Make sure the instrumentation runs before your application code.
 
