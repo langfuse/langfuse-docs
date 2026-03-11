@@ -93,6 +93,33 @@ Also on Langfuse Cloud, we have seen a decline in relative S3 cost as users adop
 
 ## A Shift to Immutability
 
+```mermaid
+  gantt
+      title Langfuse Data Model Evolution
+      dateFormat YYYY-MM
+      tickInterval 6month
+      axisFormat %b %Y
+
+      section Foundation
+      Node.js + Postgres              :milestone, 2023-05, 0d
+      Redis + Worker                  :milestone, 2024-07, 0d
+
+      section Scale
+      ClickHouse OLAP store           :milestone, 2024-12, 0d
+      OTel Tracing Support            :milestone, 2025-02, 0d
+      OTel-based SDKs                 :milestone, 2025-05, 0d
+
+      section Migration
+      AggregatingMergeTree (aborted)  :milestone, crit, 2025-08, 0d
+      Dual Write Logic                :milestone, 2025-11, 0d
+      Data Migration Model            :milestone, 2025-12, 0d
+      Observations-centric preview    :milestone, active, 2026-03, 0d
+```
+
+<Frame className="flex-1">
+  ![Data Volume Growth](/images/blog/2026-03-10-simplify-langfuse-for-scale/event_growth.png)
+</Frame>
+
 ### Experiments with AggregatingMergeTrees
 
 Before deciding to denormalize trace attributes to spans, we tried to cut S3 costs and improve performance while keeping the two-table structure.
