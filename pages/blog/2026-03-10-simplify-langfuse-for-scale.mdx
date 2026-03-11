@@ -250,7 +250,8 @@ With storage being relatively cheap, maintaining multiple synchronized represent
 
 Our existing public APIs had patterns that worked at small scale and became liabilities at large scale.
 `GET /api/public/traces` and `GET /api/public/traces/:id` pulled in related scores and observations with limited pagination and no required time filter, meaning any call could trigger a full-table scan.
-If a user searched for a specific `sessionId`, we would have to scan their entire history to check whether it is present and if a trace contained thousands of observations, we would read and process all of them.
+ClickHouse prunes data most effectively by its ordering key, which starts with `project_id` and a time component.
+Without a time-based filter in the query, ClickHouse cannot skip any time-based data ranges and must read through all parts of the project to find matching records.
 We kept adding opt-in improvements to keep our API contracts: field selection, deduplication opt-outs.
 But the defaults remained dangerous.
 
