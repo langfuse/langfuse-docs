@@ -24,9 +24,10 @@ For the rollout summary and upgrade guidance, see the [changelog post](/changelo
 It is live in Beta on Langfuse Cloud across all regions.
 We are still working on the upgrade path for self-hosters and will eventually release it as a V4 major version.
 
-With this change, we are moving to an observation-centric data model based on a new, wide, (mostly) immutable ClickHouse table.
+With this change, we are moving to an observation-centric data model based on a new, wide, and (mostly) immutable ClickHouse table.
 This eliminates joins and deduplication at read-time and optimizes for the most performant ClickHouse access patterns.
-Initial table loads go from seconds to milliseconds for longer durations, and dashboard charts for large projects support move from 10s of seconds to seconds.
+Initial table loads for large amounts of data go from seconds to milliseconds.
+Dashboard load times for large projects improve by at least 10x for longer durations.
 
 <Frame className="flex-1">
   ![Performance Shift](/images/blog/2026-03-10-simplify-langfuse-for-scale/speed.png)
@@ -35,12 +36,13 @@ Initial table loads go from seconds to milliseconds for longer durations, and da
 ## Growing Pain
 
 At our initial scale, carrying our Postgres access patterns over to ClickHouse worked well enough.
+We kept `traces` and `observations` as separate entities where traces stored common metadata and observations represented individual operations.
 By the second half of 2025, that approach had become costly.
 We were working against our own data model: large users could view only a few days of data in their dashboards, listing recent traces took seconds, and some users saw high latencies and error rates on our public APIs.
 
 ### The Cost of Updates
 
-Two years ago, LLM API calls had high latencies and users wanted to see prompts to LLMs in our UI as early as possible.
+Two years ago, LLM API calls had high latencies and users wanted to see their traces in our UI as early as possible.
 Hence, we designed the SDKs to send multiple events: one event for the invocation of the LLM API, another one for the response of the LLM, and maybe even further ones in case users update some metadata.
 Seeing inputs early was convenient, so we flushed them quickly and patched outputs and metadata as they arrived. At a lower scale, this was perfectly feasible.
 
@@ -74,19 +76,19 @@ At scale, such joins are expensive in any database and became a persistent ceili
 With different join algorithms like `grace_hash_joins` and improvements around join reordering and filter push-downs we found them to work reliably within ClickHouse, but could not reach the response times we desired.
 We figured we should avoid the join cost of combining `traces` and `observations` altogether by denormalizing into a single table.
 
-While growing 19x in terms of data processed through the year, our ClickHouse node-sizes grew from 16 GiB nodes to 236 GiB nodes (a 14.75x increase).
+While growing 19x in terms of data processed through the year, our ClickHouse node-sizes grew 15 times.
 Still, some queries on longer durations produced out of memory terminations.
-Eventually, we knew that adding more compute would not be a feasible strategy to handle the growth.
+Eventually, we knew that adding more compute would not be a practical strategy to handle the growth.
 
 ### Our AWS S3 bill
 
 To support updates using the ReplacingMergeTree strategy, we used S3 as a raw event store.
-Each update contained only the diff from the previous record, stored under a consistent prefix.
-Producing the latest state of a row meant listing, fetching, and merging every file under that prefix.
+Each update contains only the diff to the previous record and we stored them on a consistent prefix.
+On read, we listed, fetched, and merged all files under that prefix into a final row.
 This worked as S3 scales very well and is read-after-write consistent.
 Yet the S3 API calls were costly for us and our self-hosting users.
 We decided on this option within the V3 go-live, as adding a different database such as Cassandra to our stack would have made Langfuse even more complex for self-hosters.
-In addition, scaling linearly with throughput is a nice property compared to fixed infrastructure components.
+In addition, scaling linearly with throughput is a nice property compared to fixed infrastructure components for deployments that vary widely in traffic.
 
 The first win on cost reduction came with OpenTelemetry spans.
 Because spans are immutable, we could write an entire batch as one object and fetch it as one \- no merging required.
@@ -95,34 +97,9 @@ Also on Langfuse Cloud, we have seen a decline in relative S3 cost as users adop
 
 ## A Shift to Immutability
 
-```mermaid
-  gantt
-      title Langfuse Data Model Evolution
-      dateFormat YYYY-MM
-      tickInterval 6month
-      axisFormat %b %Y
-
-      section Foundation
-      Node.js + Postgres              :milestone, 2023-05, 0d
-      Redis + Worker                  :milestone, 2024-07, 0d
-
-      section Scale
-      ClickHouse OLAP store           :milestone, 2024-12, 0d
-      OTel Tracing Support            :milestone, 2025-02, 0d
-      OTel-based SDKs                 :milestone, 2025-05, 0d
-
-      section Migration
-      AggregatingMergeTree (aborted)  :milestone, crit, 2025-08, 0d
-      Dual Write Logic                :milestone, 2025-11, 0d
-      Data Migration Model            :milestone, 2025-12, 0d
-      Observations-centric preview    :milestone, active, 2026-03, 0d
-```
-
 <Frame className="flex-1">
-  ![Data Volume Growth](/images/blog/2026-03-10-simplify-langfuse-for-scale/event_growth.png)
+  ![Scaling Milestones](/images/blog/2026-03-10-simplify-langfuse-for-scale/milestones.png)
 </Frame>
-
-Note: We intend to overlay growth with the timeline chart.
 
 ### Experiments with AggregatingMergeTrees
 
@@ -130,8 +107,10 @@ Before deciding to denormalize trace attributes to spans, we tried to cut S3 cos
 AggregatingMergeTrees in ClickHouse looked promising: move trace updates off S3 and into native ClickHouse aggregation, while making Otel-native observations immutable.
 
 Initially, we used an ordering key in ClickHouse that included `project_id, toDate(timestamp), trace_id`.
-This allowed us to effectively prune by timeframe and join the traces table effectively with observations as they share common properties in the ordering key.
-Once traces span multiple days, we observed inconsistencies, though. Some properties were present on one day and some on the next day. Resolving those required additional aggregations which became expensive at scale across days.
+This allowed us to effectively filter by timeframe and join the traces table efficiently with observations as they share common properties in the ordering key.
+Once traces span multiple days, we observed inconsistencies, though.
+Some properties were present on one day and some on the next day.
+Resolving those required additional aggregations which became slow to compute at scale across days.
 
 Next, we used `project_id, trace_id` as the ordering key in combination with different TTLs on tables. E.g., we used `traces_amt_3d`, `traces_amt_7d`, and more.
 Depending on the user-selected timeframe we would pick the appropriate one. This reduced inconsistency, but costs stepped up significantly once a query crossed over to the next boundary.
@@ -167,7 +146,7 @@ Getting them onto every observation record, in real time, required rethinking ho
 We ruled out staging tables and batch jobs as a long-term strategy.
 They would have broken the real-time data availability that engineers depend on when debugging.
 The solution is a new propagation method in our SDKs, designed around OpenTelemetry’s Context and Baggages.
-For users on older SDK versions, the existing tables provide immediate access and a delayed propagation populates data into the new table.
+For users on older SDK versions, the existing tables provide immediate access and a delayed propagation populates data into the new format.
 
 The query benefits are direct.
 Filtering by `user_id` is now a column filter on one table.
@@ -184,7 +163,7 @@ The most visible product change in V4 is the shift to an observations-first UI.
 For many users, the traces table was the primary entry point for debugging.
 We think that was a limitation of the old model rather than the right default.
 
-With thousands of observations in a single agentic trace, an observations-first view is more useful: filter for root spans, drill into a specific agent, or scan all activity across your application.
+With thousands of observations in a single agentic trace, an observations-first view is more useful: find your most expensive interaction, drill into a specific agent, or find failed tool invocations.
 With faster load times, expanded filter capabilities, and saved views this becomes a superior experience to understand your application.
 The `trace_id` becomes a correlation handle—like `session_id` or `user_id`—rather than its own top-level entity.
 This also resolves a long-standing source of confusion around the two-entity model.
@@ -194,41 +173,19 @@ This also resolves a long-standing source of confusion around the two-entity mod
 ### Dual Write
 
 Before migrating the historic data, we had to write all incoming records into the old and new format.
-The problem: live ingestion, where trace metadata can arrive *after* the first spans of a trace.
+The problem: live ingestion, where trace metadata can arrive *after* the first observation of a trace.
 We needed strong write consistency across all observation records, server-side, without breaking existing SDK contracts.
 
 We evaluated per-event delays, shared metadata stores (Cassandra, DynamoDB), and S3-based reprocessing.
 Each introduced new infrastructure, new cost models, new scaling patterns.
 
 The solution: a staging table that receives all incoming observations and trace records, plus a micro-batch job that joins trace metadata onto observations every 3 minutes with a 5-minute delay.
-Based on observed data distributions, this window captures the correct metadata for the vast majority of traces while keeping data available quickly.
-For newly incoming spans, the full data is propagated, but past spans remain as they are.
+Based on observed data distributions, this is the ideal tradeoff of pushing most trace attributes to respective spans while making data available quickly in the new UI.
+For newly incoming observations, the full data is propagated, but past observations remain as they are.
 
-```mermaid
-flowchart TD
-  subgraph Ingestion Path
-    A[Observation arrives] --> B{SDK version?}
-    B -->|New SDK| C[Write to new tables]
-    B -->|New SDK| D[Write to old tables]
-    B -->|Old SDK| D[Write to old tables]
-    B -->|Old SDK| F[Write to staging table]
-  end
-
-  subgraph Background Reconciliation
-    G[Check partitions, starting from cursor] --> H{Partition eligible?}
-    H -->|No| I[Skip - partition]
-    H -->|Yes| J[Read observations from partition]
-    J --> K[Merge with traces table to propagate metadata]
-    K --> L[Write enriched rows to new tables]
-    L --> M[Advance cursor to last processed partition]
-  end
-
-  F -->|staging data| J
-
-  style F fill:#f9f,stroke:#333
-  style C fill:#9f9,stroke:#333
-  style L fill:#9f9,stroke:#333
-```
+<Frame className="flex-1">
+  ![Dual Write](/images/blog/2026-03-10-simplify-langfuse-for-scale/dual_write.png)
+</Frame>
 
 Early results were strong.
 Then individual records went missing.
@@ -237,7 +194,7 @@ In the worst cases, individual nodes were learning about new data 25 minutes aft
 Working with the ClickHouse team directly, we identified the root cause, shipped a mitigation, and got a patch upstream.
 
 A separate issue: propagation job runtimes drifted from 25–45 seconds per run to multiple minutes.
-This correlated with a materialized view we have added on the destination table, which removed insert parallelization by default.
+This correlated with a materialized view we have added on the new immutable table, which removed insert parallelization by default.
 Removing that bottleneck brought runtimes back to \~45 seconds. `parallel_view_processing=1` worked like magic here.
 `EXPLAIN PIPELINE graph-1 … FORMAT LineAsString` and a corresponding graphviz editor are some of our new best friends when debugging query performance.
 
@@ -255,6 +212,7 @@ Removing that bottleneck brought runtimes back to \~45 seconds. `parallel_view_p
 
 ### Data Migration
 
+With live data being written into both formats, we had to move the historic data into the new immutable table.
 Moving petabytes of data between table structures is harder than it looks.
 The obvious approach \- `INSERT INTO events SELECT * FROM observations JOIN traces` \- was slow, expensive, and had a long feedback cycle when errors surfaced.
 We tuned query parameters, enabled disk spilling, and tried chunked inserts. None of it was fast or durable enough.
@@ -281,6 +239,7 @@ Digging in with ClickHouse engineers surfaced three issues:
 
 **Row size was limiting merge progress.** Some parts stalled around \~100 GiB, close to the 150 GiB merge size limit, so further merges didn't trigger. Dropping redundant data (raw event copies, duplicate metadata representations) reduced row size, increased records per part, and unblocked merges.
 
+This was due to our individual rows being huge with multiple Megabytes of strings and maps.
 The final piece was a new derived table.
 A materialized view forwards all incoming event data, truncating large metadata, input, and output fields, into a separate ClickHouse table.
 The core table handles all dashboard and table-loading queries; the full table is only hit for individual record retrieval.
@@ -292,6 +251,8 @@ With storage being relatively cheap, maintaining multiple synchronized represent
 
 Our existing public APIs had patterns that worked at small scale and became liabilities at large scale.
 `GET /api/public/traces` and `GET /api/public/traces/:id` pulled in related scores and observations with limited pagination and no required time filter, meaning any call could trigger a full-table scan.
+ClickHouse prunes data most effectively by its ordering key, which starts with `project_id` and a time component.
+Without a time-based filter in the query, ClickHouse cannot skip any time-based data ranges and must read through all parts of the project to find matching records.
 We kept adding opt-in improvements to keep our API contracts: field selection, deduplication opt-outs.
 But the defaults remained dangerous.
 
