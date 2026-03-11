@@ -24,7 +24,7 @@ For the rollout summary and upgrade guidance, see the [changelog post](/changelo
 It is live in Beta on Langfuse Cloud across all regions.
 We are still working on the upgrade path for self-hosters and will eventually release it as a V4 major version.
 
-With this change, we are moving to an observation-centric data model based on a new, wide, (mostly) immutable ClickHouse table.
+With this change, we are moving to an observation-centric data model based on a new, wide, and (mostly) immutable ClickHouse table.
 This eliminates joins and deduplication at read-time and optimizes for the most performant ClickHouse access patterns.
 Initial table loads go from seconds to milliseconds for longer durations, and dashboard charts for large projects support move from 10s of seconds to seconds.
 
