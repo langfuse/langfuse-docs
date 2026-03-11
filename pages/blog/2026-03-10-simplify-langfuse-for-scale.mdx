@@ -44,7 +44,7 @@ Hence, we designed the SDKs to send multiple events: one event for the invocatio
 Seeing inputs early was convenient, so we flushed them quickly and patched outputs and metadata as they arrived. At a lower scale, this was perfectly feasible.
 
 In Langfuse V2 we used Postgres, where this translated to straightforward upserts.
-When we moved to ClickHouse 1.5 years ago, ReplacingMergeTree was the main option for handling updates, and it required writing full-row replacements rather than updating individual fields.
+When we moved to ClickHouse in December 2024, ReplacingMergeTree was the main option for handling updates, and it required writing full-row replacements rather than updating individual fields.
 We insert a new row with the same identifier and the new properties.
 
 Implementing updates with a ReplacingMergeTree came at a higher read-time cost at an increasing scale.
