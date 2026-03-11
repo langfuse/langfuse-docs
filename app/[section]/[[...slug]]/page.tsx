@@ -147,7 +147,7 @@ export function generateStaticParams() {
     const tags = ((p.data as unknown as Record<string, unknown>).tags as string[] | undefined) ?? [];
     for (const t of tags) allTags.add(t);
   }
-  for (const tag of allTags) {
+  for (const tag of Array.from(allTags)) {
     if (!faqConfig.source.getPage(["tag", tag])) {
       params.push({ section: "faq", slug: ["tag", tag] });
     }

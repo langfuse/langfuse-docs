@@ -716,5 +716,5 @@ export function getSectionDocLoader(collection: string, slug: string[]) {
   const loaders = sectionLoaders[collection];
   if (!loaders) return undefined;
   const key = slug.length === 0 ? '' : slug.join('/');
-  return loaders[key] ?? loaders[`${key}/index`];
+  return loaders[key];
 }
