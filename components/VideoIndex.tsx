@@ -7,7 +7,10 @@ export const VideoIndex = () => {
   const pages = (
     getPagesUnderRoute("/guides/videos") as Array<{ route?: string; name?: string; frontMatter?: Record<string, any> }>
   ).filter(
-    (page) => page.route !== "/guides/videos" && !!page.frontMatter?.ogImage
+    (page) =>
+      page.route !== "/guides/videos" &&
+      page.route !== "/guides/videos/index" &&
+      !!page.frontMatter?.ogImage
   );
 
   return (
