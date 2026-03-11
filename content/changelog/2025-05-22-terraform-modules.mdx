@@ -9,72 +9,7 @@ showOgInHeader: false
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
-import { useData } from "nextra/hooks";
-import { Playground } from "nextra/components";
-
-export const getStaticProps = async () => {
-  const [awsRes, gcpRes, azureRes] = await Promise.all([
-    fetch(
-      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-aws/refs/heads/main/README.md"
-    ),
-    fetch(
-      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-gcp/main/README.md"
-    ),
-    fetch(
-      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-azure/main/README.md"
-    ),
-  ]);
-  const [awsReadme, gcpReadme, azureReadme] = await Promise.all([
-    awsRes.text(),
-    gcpRes.text(),
-    azureRes.text(),
-  ]);
-  return {
-    props: {
-      ssg: {
-        awsTerraformReadme: awsReadme,
-        gcpTerraformReadme: gcpReadme,
-        azureTerraformReadme: azureReadme,
-      },
-    },
-  };
-};
-
-export function AwsTerraformReadme() {
-  const { awsTerraformReadme } = useData();
-  if (!awsTerraformReadme) {
-    return <p>Error loading README content.</p>;
-  }
-  const readmeString =
-    typeof awsTerraformReadme === "string"
-      ? awsTerraformReadme
-      : JSON.stringify(awsTerraformReadme);
-  return <Playground source={readmeString} />;
-}
-
-export function GcpTerraformReadme() {
-  const { gcpTerraformReadme } = useData();
-  if (!gcpTerraformReadme) {
-    return <p>Error loading README content.</p>;
-  }
-  const readmeString =
-    typeof gcpTerraformReadme === "string"
-      ? gcpTerraformReadme
-      : JSON.stringify(gcpTerraformReadme);
-  return <Playground source={readmeString} />;
-}
-
-export function AzureTerraformReadme() {
-  const { azureTerraformReadme } = useData();
-  if (!azureTerraformReadme) {
-    return <p>Error loading README content.</p>;
-  }
-  const readmeString =
-    typeof azureTerraformReadme === "string"
-      ? azureTerraformReadme
-      : JSON.stringify(azureTerraformReadme);
-  return <Playground source={readmeString} />;
-}
+import { GitHubReadme } from "@/components/GitHubReadme";
 
 <ChangelogHeader />
 
@@ -109,7 +44,7 @@ Use the following snippets to include the respective module in your Terraform co
     Checkout the [Readme](https://github.com/langfuse/langfuse-terraform-aws) for the full deployment guide.
 
     <div className="p-6 mt-6 border bg-card rounded-md">
-      <AwsTerraformReadme />
+      <GitHubReadme url="https://raw.githubusercontent.com/langfuse/langfuse-terraform-aws/refs/heads/main/README.md" />
     </div>
 
   </Tab>
@@ -118,7 +53,7 @@ Use the following snippets to include the respective module in your Terraform co
     Checkout the [Readme](https://github.com/langfuse/langfuse-terraform-gcp) for the full deployment guide.
 
     <div className="p-6 mt-6 border bg-card rounded-md">
-      <GcpTerraformReadme />
+      <GitHubReadme url="https://raw.githubusercontent.com/langfuse/langfuse-terraform-gcp/main/README.md" />
     </div>
 
   </Tab>
@@ -127,7 +62,7 @@ Use the following snippets to include the respective module in your Terraform co
     Checkout the [Readme](https://github.com/langfuse/langfuse-terraform-azure) for the full deployment guide.
 
     <div className="p-6 mt-6 border bg-card rounded-md">
-      <AzureTerraformReadme />
+      <GitHubReadme url="https://raw.githubusercontent.com/langfuse/langfuse-terraform-azure/main/README.md" />
     </div>
 
   </Tab>

@@ -489,7 +489,6 @@ export const sectionLoaders: Record<
     "all/where-are-langfuse-api-keys": () => import("@/content/faq/all/where-are-langfuse-api-keys.mdx?collection=faq"),
     "all/where-is-my-project": () => import("@/content/faq/all/where-is-my-project.mdx?collection=faq"),
     "": () => import("@/content/faq/index.mdx?collection=faq"),
-    "tag/[tag]": () => import("@/content/faq/tag/[tag].mdx?collection=faq"),
     "tag/cloud": () => import("@/content/faq/tag/cloud.mdx?collection=faq"),
     "tag/product": () => import("@/content/faq/tag/product.mdx?collection=faq"),
     "tag/prompt-management": () => import("@/content/faq/tag/prompt-management.mdx?collection=faq"),
@@ -717,5 +716,5 @@ export function getSectionDocLoader(collection: string, slug: string[]) {
   const loaders = sectionLoaders[collection];
   if (!loaders) return undefined;
   const key = slug.length === 0 ? '' : slug.join('/');
-  return loaders[key];
+  return loaders[key] ?? loaders[`${key}/index`];
 }

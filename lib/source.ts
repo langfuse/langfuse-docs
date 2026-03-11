@@ -17,11 +17,13 @@ import {
 export const source = loader({
   baseUrl: "/docs",
   source: docs.toFumadocsSource(),
+  pageTree: { idPrefix: "docs" },
 });
 
 export const selfHostingSource = loader({
   baseUrl: "/self-hosting",
   source: selfHosting.toFumadocsSource(),
+  pageTree: { idPrefix: "self-hosting" },
 });
 
 const SELF_HOSTING_BASE = "/self-hosting";
@@ -78,6 +80,7 @@ export const changelogSource = loader({
 export const guidesSource = loader({
   baseUrl: "/guides",
   source: guides.toFumadocsSource(),
+  pageTree: { idPrefix: "guides" },
 });
 
 export const faqSource = loader({
@@ -88,6 +91,7 @@ export const faqSource = loader({
 export const integrationsSource = loader({
   baseUrl: "/integrations",
   source: integrations.toFumadocsSource(),
+  pageTree: { idPrefix: "integrations" },
 });
 
 const INTEGRATIONS_BASE = "/integrations";
@@ -146,6 +150,7 @@ export const securitySource = loader({
 export const librarySource = loader({
   baseUrl: "/library",
   source: library.toFumadocsSource(),
+  pageTree: { idPrefix: "library" },
 });
 
 export const usersSource = loader({

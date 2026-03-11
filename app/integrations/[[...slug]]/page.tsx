@@ -21,19 +21,11 @@ export default async function IntegrationsPage(props: PageProps) {
   if (!page) notFound();
 
   const { toc } = page.data;
-  const filePath = `${CONTENT_DIR}/${slug.length === 0 ? "index" : slug.join("/")}.mdx`;
-
   return (
     <DocsPage
       toc={toc}
       breadcrumb={{ includePage: true, includeRoot: true }}
       tableOfContent={{ footer: <DocsContributors pageTitle={page.data.title} /> }}
-      editOnGithub={{
-        owner: "langfuse",
-        repo: "langfuse-docs",
-        sha: "main",
-        path: filePath,
-      }}
     >
       <SectionDocBodyClientWithDocsBody
         collection={COLLECTION}

@@ -1,10 +1,14 @@
 "use client";
 
 import { use } from "react";
+import { usePathname } from "next/navigation";
 import { DocsBody } from "fumadocs-ui/page";
 import { getMDXComponents } from "@/mdx-components";
 import { getSectionDocLoader } from "@/lib/section-loaders.generated";
 import { notFound } from "next/navigation";
+import { CopyMarkdownButton, DocsFeedback, DocsSupport } from "@/components/MainContentWrapper";
+import { NotebookBanner } from "@/components/NotebookBanner";
+import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 
 type Props = {
   collection: string;
@@ -45,10 +49,21 @@ export function SectionDocBodyClientWithDocsBody({
 
   const mod = use(getCachedLoaderPromise(collection, slug, loader));
   const MDX = mod.default;
+  const pathname = usePathname();
+  const cookbook = COOKBOOK_ROUTE_MAPPING.find((c) => c.path === pathname);
 
   return (
     <DocsBody>
+      <div className="mb-4">
+        <CopyMarkdownButton key={pathname} />
+      </div>
+      {cookbook && <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />}
       <MDX components={getMDXComponents()} />
+      <hr className="my-4 border-t dark:border-neutral-800" />
+      <div className="flex flex-wrap gap-6 justify-between items-center py-6" id="docs-feedback">
+        <DocsFeedback key={pathname} />
+        <DocsSupport />
+      </div>
     </DocsBody>
   );
 }

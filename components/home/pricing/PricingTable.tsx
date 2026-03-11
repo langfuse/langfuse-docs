@@ -1321,10 +1321,10 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
         "mt-12",
         selectedTiers.length === 1
           ? "flex justify-center"
-          : "grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
-        selectedTiers.length === 4 && "md:grid-cols-4",
-        selectedTiers.length === 3 && "md:grid-cols-3",
-        selectedTiers.length === 2 && "md:grid-cols-2",
+          : "grid grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
+        selectedTiers.length === 4 && "lg:grid-cols-4",
+        selectedTiers.length === 3 && "lg:grid-cols-3",
+        selectedTiers.length === 2 && "lg:grid-cols-2",
       )}
     >
       {selectedTiers.map((tier) => (
@@ -1350,7 +1350,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
             <CardTitle className="text-lg font-semibold text-foreground">
               {tier.name}
             </CardTitle>
-            <CardDescription className="text-left">
+            <CardDescription className="text-left max-w-[18ch]">
               {tier.description}
               {tier.learnMore && (
                 <>
@@ -1582,7 +1582,7 @@ export function PricingTable({
                 <h4 className="text-lg font-semibold text-foreground">
                   {tier.name}
                 </h4>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-muted-foreground max-w-[18ch]">
                   {tier.description}
                 </p>
               </div>

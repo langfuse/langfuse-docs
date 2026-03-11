@@ -6,7 +6,7 @@ import { DocsBody } from "fumadocs-ui/page";
 import { getMDXComponents } from "../../../mdx-components";
 import { getDocLoader } from "./doc-loaders.client";
 import { notFound } from "next/navigation";
-import { CopyMarkdownButton } from "@/components/MainContentWrapper";
+import { CopyMarkdownButton, DocsFeedback, DocsSupport } from "@/components/MainContentWrapper";
 
 type DocBodyClientProps = {
   slugPromise: Promise<{ slug?: string[] }>;
@@ -45,6 +45,11 @@ export function DocBodyClient({ slugPromise }: DocBodyClientProps) {
         <CopyMarkdownButton key={pathname} />
       </div>
       <MDX components={getMDXComponents()} />
+      <hr className="my-4 border-t dark:border-neutral-800" />
+      <div className="flex flex-wrap gap-6 justify-between items-center py-6" id="docs-feedback">
+        <DocsFeedback key={pathname} />
+        <DocsSupport />
+      </div>
     </DocsBody>
   );
 }

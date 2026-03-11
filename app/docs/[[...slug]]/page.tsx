@@ -19,19 +19,11 @@ export default async function DocPage(props: PageProps) {
 
   const { toc } = page.data;
 
-  const filePath = `content/docs/${slug.length === 0 ? "index" : slug.join("/")}.mdx`;
-
   return (
     <DocsPage
       toc={toc}
       breadcrumb={{ includePage: true, includeRoot: true }}
       tableOfContent={{ footer: <DocsContributors pageTitle={page.data.title} /> }}
-      editOnGithub={{
-        owner: "langfuse",
-        repo: "langfuse-docs",
-        sha: "main",
-        path: filePath,
-      }}
     >
       <DocBodyClient slugPromise={props.params} />
     </DocsPage>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DocsPage } from "fumadocs-ui/page";
+import { DocsPage, DocsBody } from "fumadocs-ui/page";
 import type { TOCItemType } from "fumadocs-core/toc";
 import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, DOCS_STYLE_APP_SECTIONS, POST_SECTIONS, CHANGELOG_SECTIONS } from "@/lib/sections";
 import type { SectionSlug } from "@/lib/sections";
@@ -8,6 +8,8 @@ import { MARKETING_SLUGS } from "@/lib/source";
 import { buildOgImageUrl } from "@/lib/og-url";
 import { SectionDocBodyClient } from "../SectionDocBodyClient";
 import { DocsContributors } from "@/components/DocsContributors";
+import { FaqPreview } from "@/components/faq/FaqPreview";
+import { formatTag } from "@/components/faq/FaqIndex";
 
 type PageProps = {
   params: Promise<{ section: string; slug?: string[] }>;
@@ -31,6 +33,23 @@ export default async function SectionDocPage(props: PageProps) {
   }
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
   const page = config.source.getPage(effectiveSlug);
+
+  // Special case: /faq/tag/[tag] pages without dedicated content files
+  if (!page && section === "faq" && slug.length === 2 && slug[0] === "tag") {
+    const tag = decodeURIComponent(slug[1]);
+    return (
+      <DocsPage
+        toc={[]}
+        breadcrumb={{ includePage: true, includeRoot: true }}
+        tableOfContent={{ footer: undefined }}
+      >
+        <DocsBody>
+          <h1>FAQ: {formatTag(tag)}</h1>
+          <FaqPreview tags={[tag]} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
 
   if (!page) notFound();
 
@@ -74,6 +93,14 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   }
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
   const page = config.source.getPage(effectiveSlug);
+
+  // Metadata for dynamic /faq/tag/[tag] pages
+  if (!page && section === "faq" && slug.length === 2 && slug[0] === "tag") {
+    const tag = decodeURIComponent(slug[1]);
+    const title = `FAQ: ${formatTag(tag)}`;
+    return { title, description: `Frequently asked questions about ${formatTag(tag)}.` };
+  }
+
   if (!page) return { title: "Not Found" };
   const pageData = page.data as typeof page.data & {
     ogImage?: string | null;
@@ -112,5 +139,19 @@ export function generateStaticParams() {
       }
     }
   }
+
+  // Add dynamic /faq/tag/[tag] pages for tags without dedicated content files
+  const faqConfig = SECTION_CONFIG["faq"];
+  const allTags = new Set<string>();
+  for (const p of faqConfig.source.getPages()) {
+    const tags = ((p.data as Record<string, unknown>).tags as string[]) || [];
+    for (const t of tags) allTags.add(t);
+  }
+  for (const tag of allTags) {
+    if (!faqConfig.source.getPage(["tag", tag])) {
+      params.push({ section: "faq", slug: ["tag", tag] });
+    }
+  }
+
   return params;
 }
