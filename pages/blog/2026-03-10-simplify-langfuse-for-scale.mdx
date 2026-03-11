@@ -44,12 +44,13 @@ Hence, we designed the SDKs to send multiple events: one event for the invocatio
 Seeing inputs early was convenient, so we flushed them quickly and patched outputs and metadata as they arrived. At a lower scale, this was perfectly feasible.
 
 In Langfuse V2 we used Postgres, where this translated to straightforward upserts.
-When we moved to ClickHouse, we shifted to ReplacingMergeTree and had to write full-row replacements instead of patches.
+When we moved to ClickHouse 1.5 years ago, ReplacingMergeTree was the main option for handling updates, and it required writing full-row replacements rather than updating individual fields.
 We insert a new row with the same identifier and the new properties.
 
-Updates in ClickHouse come at a high cost when reading, though.
+Implementing updates with a ReplacingMergeTree came at a higher read-time cost at an increasing scale.
 As ClickHouse does not guarantee when rows are deduplicated, we need to force the database to first deduplicate billions of records first before running the actual queries.
 Scanning billions of records to surface only the latest version of each row \- before a single result can be returned \- consumed lots of CPU and memory, and resulted in high API latencies across Langfuses for long query durations.
+Using deduplication options like `LIMIT BY`, `FINAL`, and aggregations got significantly faster in ClickHouse since our adoption, but remained a hidden tax on query performance.
 Every query touching historical data carried this overhead.
 
 In 2025 we switched from our proprietary ingestion to OpenTelemetry.
@@ -62,12 +63,14 @@ For self-hosting users with OpenTelemetry-only clients, this unlocked read-time 
 
 ### The Cost of Joins
 
-Our original model split data across two tables: `traces` and `observations`.
+Our original two-entity model split data across two tables: `traces` and `observations`.
 Traces held their own inputs and outputs and shared metadata \- `user_id`, `session_id`, `tags` \- while observations recorded single operations within a trace such as LLM API calls or tool invocations.
 
 Answering "What's the total cost for this user?" or "How many LLM calls happened in this session?" required joining two tables with billions of records.
 Early on this was manageable.
-At scale, it became a persistent ceiling on what large projects could query from their history.
+At scale, such joins are expensive in any database and became a persistent ceiling on what large projects could query from their history.
+With different join algorithms like `grace_hash_joins` and improvements around join reordering and filter push-downs we found them to work reliably within ClickHouse, but could not reach the response times we desired.
+We figured we should avoid the join cost of combining `traces` and `observations` altogether by denormalizing into a single table.
 
 While growing 19x in terms of data processed through the year, our ClickHouse node-sizes grew from 16 GiB nodes to 236 GiB nodes (a 14.75x increase).
 Still, some queries on longer durations produced out of memory terminations.
@@ -79,7 +82,7 @@ To support updates using the ReplacingMergeTree strategy, we used S3 as a raw ev
 Each update contains only the diff to the previous record and we stored them on a consistent prefix.
 On read, we listed, fetched, and merged all files under that prefix into a final row.
 This worked as S3 scales very well and is read-after-write consistent.
-Yet, the S3 API calls were very expensive for us and our self-hosting users.
+Yet the S3 API calls were costly for us and our self-hosting users.
 We decided on this option within the V3 go-live, as adding a different database such as Cassandra to our stack would have made Langfuse even more complex for self-hosters.
 In addition, scaling linearly with throughput is a nice property compared to fixed infrastructure components.
 
@@ -92,7 +95,7 @@ Also on Langfuse Cloud, we have seen a decline in relative S3 cost as users adop
 
 ### Experiments with AggregatingMergeTrees
 
-Before deciding to denormalise trace attributes to spans, we tried to cut S3 costs and improve performance while keeping the two-table structure.
+Before deciding to denormalize trace attributes to spans, we tried to cut S3 costs and improve performance while keeping the two-table structure.
 AggregatingMergeTrees in ClickHouse looked promising: move trace updates off S3 and into native ClickHouse aggregation, while making Otel-native observations immutable.
 
 Initially, we used an ordering key in ClickHouse that included `project_id, toDate(timestamp), trace_id`.
@@ -106,19 +109,23 @@ We were close to shipping this when we pulled the plug.
 Optimizing cost while preserving the same experience wasn't the right framing.
 Simplifying the model was.
 
-### Why All Updates Had to Go
+### Why We Moved Away from Updates
 
 We created a board with all database access patterns and how expensive they were.
 We then tried to come up with a number of solutions to break the expensive query patterns.
-Every update and deduplication approach we tested hit the same wall: you cannot produce results from a table until you've scanned enough of it to confirm no newer row exists.
-At hundreds of gigabytes and billions of records, that scan takes longer than users can wait.
+The deduplication-based approaches available to us at the time all shared the same trade-off: the database had to scan enough data to confirm no newer row existed before producing results.
+At hundreds of gigabytes and billions of records, that scan took longer than users could wait.
 
-Immutable records change this entirely.
-With no duplicates, the ordering key becomes authoritative \- data can be streamed in disk order, and ClickHouse's MergeTree optimizations apply.
+Since then, ClickHouse has continued to improve `FINAL` performance and introduced new options like lightweight updates.
+But at our scale, we were looking for every possible advantage: every reduction in cost, every millisecond off query latency.
+The most optimal path for us was a design that avoided update overhead entirely.
+
+Immutable records gave us exactly that.
+With no duplicates, the ordering key becomes authoritative - data can be streamed in disk order, and ClickHouse's MergeTree optimizations apply fully.
 Table load times dropped from seconds to tens of milliseconds.
 
 One caveat: not every update had to disappear.
-ClickHouse's lightweight update feature (patch parts) handles low-volume cases, like bookmarking a trace or publishing from the UI, without reintroducing the deduplication problem.
+For parts of our workload where update volume is manageable - like bookmarking a trace or publishing from the UI - ClickHouse's lightweight updates provide an ergonomic and simple solution without needing to use ReplacingMergeTree and handle read-time deduplication.
 
 ### From Two Tables to One
 
@@ -224,20 +231,20 @@ We tuned query parameters, enabled disk spilling, and tried chunked inserts. Non
 We even wrote a Rust tool that loaded observation chunks into memory, fetched matching traces, and wrote merged events and then ran it on a 100-core, 1.5 TB-memory EC2 instance.
 The network became the bottleneck, which was worse for throughput than memory.
 
-What worked: duplicating the raw tables with a new ordering key, freezing them (stopping merges to prevent part modifications in ClickHouse), then processing one part at a time.
+What worked: duplicating the raw tables with a new ordering key, freezing the new tables (stopping merges to prevent part modifications in ClickHouse), then processing one part at a time.
 This lets us scale concurrency, keep memory bounded, and resume from any checkpoint.
 With the part-freeze we could be sure that background merges don’t produce new parts which may lead to duplicate processing.
-The background migration framework we built for V3 handled coordination and progress tracking.
+The [background migration](https://langfuse.com/self-hosting/upgrade/background-migrations) framework we built for V3 handled coordination and progress tracking.
 We fetched a full part list ahead of time and concurrently processed and replicated up to 15 parts at the same time.
 This approach moved us from per-partition concurrency to per-part concurrency and we could quadruple our throughput while increasing stability at the same time.
 
 ### Why Were We Still Slow?
 
-With the new data model in place, query improvements came in at 2–3x.
+With the new data model in place, queries were 2-3 times faster.
 Better, but well below the 10–20x improvements we expected.
 Digging in with ClickHouse engineers surfaced three issues:
 
-**Part count was too high.** Partitions had \~1,000 parts where 150–200 is typical. This fragmented data and made scans inefficient. ClickHouse needed to make too many S3 API calls to scan large amounts of data efficiently.
+**Part count was too high.** Partitions had \~1,000 parts where 150–200 is typical. This fragmented data and made scans inefficient. ClickHouse needed to process too many file reads to scan large amounts of data efficiently.
 
 **Index files were too large.** Granule size was capped by the default size limit, making the index denser than necessary. Increasing the maximum granule size kept the index sparse, improved lookup speed, and allowed for better data pruning. We kept the default of 8192 rows, but moved from 10MiB per granule to 64MiB per granule as the maximum size.
 
