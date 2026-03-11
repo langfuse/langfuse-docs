@@ -57,7 +57,8 @@ for (const { dir, collection } of SECTIONS) {
   if (files.length === 0) continue;
   lines.push(`  ${JSON.stringify(collection)}: {`);
   for (const { slug, path: filePath } of files) {
-    const slugKey = slug === "index" ? "" : slug;
+    // Strip trailing /index (subfolder index files) and root index
+    const slugKey = slug === "index" ? "" : slug.replace(/\/index$/, "");
     const importPath = `@/content/${dir}/${filePath}?collection=${collection}`;
     lines.push(`    ${JSON.stringify(slugKey)}: () => import(${JSON.stringify(importPath)}),`);
   }
