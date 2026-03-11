@@ -144,7 +144,7 @@ export function generateStaticParams() {
   const faqConfig = SECTION_CONFIG["faq"];
   const allTags = new Set<string>();
   for (const p of faqConfig.source.getPages()) {
-    const tags = ((p.data as Record<string, unknown>).tags as string[]) || [];
+    const tags = ((p.data as unknown as Record<string, unknown>).tags as string[] | undefined) ?? [];
     for (const t of tags) allTags.add(t);
   }
   for (const tag of allTags) {
