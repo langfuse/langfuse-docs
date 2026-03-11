@@ -222,15 +222,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "joining-clickhouse",
+    key: "v4-beta-release",
     dismissible: true,
     content: (
-      <Link href="/blog/joining-clickhouse">
+      <Link href="/changelog/2026-03-10-simplify-for-scale">
         {/* mobile */}
-        <span className="sm:hidden">Langfuse joins ClickHouse! →</span>
+        <span className="sm:hidden">Langfuse just got faster →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse joins ClickHouse! Learn more →
+          Langfuse just got faster – read about the launch →
         </span>
       </Link>
     ),

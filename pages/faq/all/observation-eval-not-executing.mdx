@@ -1,0 +1,149 @@
+---
+title: Why is my observation-level evaluator not executing?
+description: If you set up an observation-level LLM-as-a-Judge evaluator but no scores appear, here's how to diagnose and fix it.
+tags: [evaluation]
+---
+
+# Why is my observation-level evaluator not executing?
+
+You've set up an observation-level [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator, but no scores appear. The evaluator log may be empty, or you don't see any executions even though the preview in the setup wizard shows matching data. 
+
+There are a couple of things you can check:
+
+1. [Are you on a compatible SDK version or ingestion method?](#incompatible-sdk-version-or-ingestion-method)
+2. [If using trace-level filters: are you propagating attributes to observations?](#trace-level-attributes-not-propagated-to-observations)
+3. [Do your filters match actual observation data?](#filter-configuration-mismatch)
+4. [Do all mapped variables exist on matching observations?](#variable-mapping-references-missing-data)
+5. [Is your evaluator's LLM connection working?](#llm-connection)
+
+## Incompatible SDK version or ingestion method
+
+Observation-level evaluators only work with data ingested via the [OTEL endpoint](/integrations/native/opentelemetry). This means you need either:
+
+- An **OTel-based SDK**: Python v3+ or JS/TS v4+ (these use the OTEL endpoint automatically)
+- **Direct OTEL ingestion**: Sending OpenTelemetry spans to Langfuse's `/api/public/otel` endpoint
+
+Data sent via the **legacy REST ingestion API** (`/api/public/ingestion`) or **legacy SDKs** (Python v2, JS/TS v3) does not produce observations in the format required for observation-level evaluation.
+
+**How to check your SDK version:**
+
+<LangTabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```bash
+pip show langfuse
+```
+
+You need version `3.0.0` or higher. If you're on v2, follow the [Python v2 → v3 migration guide](/docs/observability/sdk/upgrade-path/python-v2-to-v3).
+
+</Tab>
+<Tab>
+
+```bash
+npm list langfuse
+```
+
+You need version `4.0.0` or higher. If you're on v3, follow the [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path/js-v3-to-v4).
+
+</Tab>
+</LangTabs>
+
+**If you're using a custom ingestion pipeline** (not an SDK), you need to send data to the OTEL endpoint instead of the legacy ingestion endpoint. See [OpenTelemetry integration](/integrations/native/opentelemetry#opentelemetry-endpoint) for details on the endpoint format and authentication.
+
+## Trace-level attributes not propagated to observations
+
+When your evaluator uses trace-level filters like `tags`, `userId`, `sessionId`, or `metadata`, the evaluator checks these attributes **on the observation itself**, it does not look up the parent trace. If you only set these attributes on the trace (e.g., via `update_current_trace()`), the observations won't have them, and the evaluator won't match.
+
+**Solution**: Use `propagate_attributes()` (Python) or `propagateAttributes()` (JS/TS) to copy trace-level attributes to all observations created within a scope.
+
+<LangTabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(as_type="span", name="user-workflow"):
+    with propagate_attributes(
+        user_id="user_123",
+        session_id="session_abc",
+        tags=["online_evaluator:my-eval"],
+        metadata={"team": "support"},
+    ):
+        # All observations created inside this block
+        # inherit the propagated attributes
+        with langfuse.start_as_current_observation(
+            as_type="generation", name="llm-call"
+        ):
+            pass
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+
+await startActiveObservation("user-workflow", async () => {
+  await propagateAttributes(
+    {
+      userId: "user_123",
+      sessionId: "session_abc",
+      tags: ["online_evaluator:my-eval"],
+      metadata: { team: "support" },
+    },
+    async () => {
+      // All observations created inside this callback
+      // inherit the propagated attributes
+    }
+  );
+});
+```
+
+</Tab>
+</LangTabs>
+
+Call `propagate_attributes()` early in your trace, before creating the observations you want to evaluate. Only attributes propagated this way will be available for filter matching on observations. See the [instrumentation guide](/docs/observability/sdk/instrumentation#add-attributes-to-observations) for more details.
+
+## Filter configuration mismatch
+
+Your evaluator filters might not match what's actually on the observations. Because there's no error when nothing matches (the evaluator simply doesn't run), this can be hard to spot.
+
+**Common mismatches:**
+
+- **Observation name**: The name must exactly match what your instrumentation produces. Go to a trace in the Langfuse UI, click on the observation you want to evaluate, and check its name.
+- **Observation type**: Make sure you're filtering for the right type (`GENERATION`, `SPAN`, or `EVENT`). An LLM call is typically a `GENERATION`, while a wrapper function is usually a `SPAN`.
+- **Tag values**: Tags are matched as exact strings. If your evaluator filters for `my-eval` but your observation has `online_evaluator:my-eval`, they won't match.
+- **Metadata values**: Similar to tags, metadata keys and values must match exactly.
+
+**How to check**: Use the evaluator preview in the setup wizard. It shows observations from the last 24 hours that match your filters. If the preview shows matches but evaluations still don't run, the issue is likely one of the other causes on this page (SDK version, attribute propagation, or ingestion method).
+
+## Variable mapping references missing data
+
+All variable mappings in your evaluator are **required**. If an observation matches your filters but a mapped field doesn't exist on it (e.g., you mapped a variable to `observation.metadata.tool_call` and that field isn't present), the evaluator will error instead of producing a score.
+
+**How to check**: Go to the evaluator's log tab. If you see error entries, click into them for details.
+
+<Frame>
+  ![Evaluator logs showing status and results](/images/docs/faq-evaluator-logs.png)
+</Frame>
+
+**How to fix:**
+
+- Make sure the field exists on every observation that matches your filters
+- If only some observations have the field, tighten your filters (e.g., add an observation name filter) to exclude observations that are missing it
+- Consider mapping variables to fields that are always present, like `observation.input` or `observation.output`
+
+## LLM connection
+
+If observations are matching (you can see entries in the evaluator log) but scores still aren't appearing, the issue may be with the LLM connection used by the evaluator.
+
+**How to check**: Go to **Settings → LLM Connections** and verify:
+- The API key is valid and not expired
+- The model supports structured output (required for parsing evaluation results)
+
+See [LLM Connections](/docs/administration/llm-connection) for configuration details.
+
+
+Still stuck? Reach out to [support](/support).

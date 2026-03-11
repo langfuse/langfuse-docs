@@ -106,7 +106,7 @@ If you want to have more control or your media is not base64 encoded, you can up
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 ```python
-from langfuse import get_client, observe
+from langfuse import get_client, observe, propagate_attributes
 from langfuse.media import LangfuseMedia
 
 # Create a LangfuseMedia object from a file
@@ -124,10 +124,11 @@ pdf_media = LangfuseMedia(content_bytes=pdf_bytes, content_type="application/pdf
 def process_document():
     langfuse = get_client()
 
-    # Update the current trace with the media file
-    langfuse.update_current_trace(
+    # Propagate metadata (including media) to all child observations
+    with propagate_attributes(
         metadata={"document": pdf_media}
-    )
+    ):
+        pass
 
     # Or update the current span
     langfuse.update_current_span(
