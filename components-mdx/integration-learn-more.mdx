@@ -37,6 +37,9 @@ def my_llm_pipeline(input):
         result = call_llm(input)
 
         return result
+
+# Run the function
+my_llm_pipeline("Hi")
 ```
 
 Learn more about using the Decorator in the [Langfuse SDK instrumentation docs](/docs/observability/sdk/instrumentation#custom-instrumentation).
@@ -51,15 +54,20 @@ from langfuse import get_client, propagate_attributes
 
 langfuse = get_client()
 
-with langfuse.start_as_current_observation(as_type="span", name="my-observation") as observation:
-    # Add additional attributes (user_id, session_id, metadata, version, tags) to all spans created within this execution scope
+with langfuse.start_as_current_observation(
+    as_type="span",
+    name="my-observation",
+    trace_context={"trace_id": "abcdef1234567890abcdef1234567890"},  # Must be 32 hex chars
+) as observation:
+
+    # Add additional attributes (user_id, session_id, metadata, version, tags)
+    # to all observations created within this execution scope
     with propagate_attributes(
         user_id="user_123",
         session_id="session_abc",
         metadata={"experiment": "variant_a", "env": "prod"},
-        version="1.0"
+        version="1.0",
     ):
-    
         # YOUR APPLICATION CODE HERE
         result = call_llm("some input")
 
