@@ -1,5 +1,5 @@
 ---
-title: Evaluation
+title: Evaluation of Rag with Ragas
 description: Use RAGAS to evaluate your RAG pipelines traced with Langfuse to measure the quality of your retrieval and sythesis.
 category: Evaluation
 ---

@@ -1,5 +1,5 @@
 ---
-title: OpenLLMetry Integration via OpenTelemetry
+title: Otel Integration Openllmetry
 description: Example cookbook for the OpenLLMetry Langfuse integration using OpenTelemetry.
 category: Integrations
 ---

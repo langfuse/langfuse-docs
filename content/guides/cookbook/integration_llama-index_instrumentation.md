@@ -1,5 +1,5 @@
 ---
-title: LlamaIndex Integration (Instrumentation Module)
+title: Integration Llama Index Instrumentation
 description: Example cookbook for the experimental LlamaIndex Langfuse integration using the instrumentation module of LlamaIndex.
 category: Integrations
 ---

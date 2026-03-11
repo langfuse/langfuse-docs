@@ -1,5 +1,5 @@
 ---
-title: Langserve Integration
+title: Langserve
 description: This guide shows how to natively integrate Langfuse with LangChain's Langserve for observability, metrics, evals, prompt management, playground, datasets.
 category: Integrations
 sidebarTitle: Langserve

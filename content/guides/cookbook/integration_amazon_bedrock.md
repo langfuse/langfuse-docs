@@ -1,5 +1,5 @@
 ---
-title: Amazon Bedrock Integration
+title: Amazon Bedrock
 sidebarTitle: Amazon Bedrock
 seoTitle: Open Source Observability and Metrics for Amazon Bedrock
 description: Open source observability for Amazon Bedrock applications and the Bedrock SDK.

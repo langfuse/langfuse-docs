@@ -1,5 +1,5 @@
 ---
-title: Monitoring LlamaIndex applications with PostHog and Langfuse
+title: Monitoring Llamaindex applications with PostHog and Langfuse
 description: Learn how to build and monitor a RAG application using LlamaIndex with Mistral, Langfuse, and PostHog. This step-by-step guide covers setup, integration, and analytics for optimizing LLM performance.
 category: Integrations
 ---

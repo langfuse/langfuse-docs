@@ -1,5 +1,5 @@
 ---
-title: Langfuse Prompt Management Performance Test
+title: Prompt Management Performance Benchmark
 description: Performance benchmark on Langfuse Prompt Management measuring latency of retrieving and compiling prompts.
 category: Prompt Management
 ---

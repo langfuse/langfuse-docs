@@ -1,5 +1,5 @@
 ---
-title: OSS Observability for OpenAI Assistants API
+title: OpenAI Assistants API
 sidebarTitle: OpenAI Assistants API
 description: Use of Langfuse decorator to trace calls made to openai assistants
 category: Integrations

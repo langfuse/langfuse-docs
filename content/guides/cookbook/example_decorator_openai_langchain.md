@@ -1,5 +1,5 @@
 ---
-title: Langfuse Decorator with OpenAI and Langchain
+title: Example Decorator Openai Langchain
 description: LLM Rap Battle traced using the Langfuse Decorator, OpenAI & Langchain Integration
 category: Integrations
 ---

@@ -1,5 +1,5 @@
 ---
-title: Langfuse Prompt Management for OpenAI Functions
+title: Prompt Management Openai Functions
 description: Cookbook on how to use Langfuse Prompt Management to version control prompts collaboratively when using OpenAI functions.
 category: Prompt Management
 ---
