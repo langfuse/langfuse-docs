@@ -81,8 +81,8 @@ Eventually, we knew that adding more compute would not be a feasible strategy to
 ### Our AWS S3 bill
 
 To support updates using the ReplacingMergeTree strategy, we used S3 as a raw event store.
-Each update contains only the diff to the previous record and we stored them on a consistent prefix.
-On read, we listed, fetched, and merged all files under that prefix into a final row.
+Each update contained only the diff from the previous record, stored under a consistent prefix.
+Producing the latest state of a row meant listing, fetching, and merging every file under that prefix.
 This worked as S3 scales very well and is read-after-write consistent.
 Yet the S3 API calls were costly for us and our self-hosting users.
 We decided on this option within the V3 go-live, as adding a different database such as Cassandra to our stack would have made Langfuse even more complex for self-hosters.
@@ -167,7 +167,7 @@ Getting them onto every observation record, in real time, required rethinking ho
 We ruled out staging tables and batch jobs as a long-term strategy.
 They would have broken the real-time data availability that engineers depend on when debugging.
 The solution is a new propagation method in our SDKs, designed around OpenTelemetry’s Context and Baggages.
-For users on older SDK versions, the existing tables provide immediate access and a delayed propagation populates data into the new format.
+For users on older SDK versions, the existing tables provide immediate access and a delayed propagation populates data into the new table.
 
 The query benefits are direct.
 Filtering by `user_id` is now a column filter on one table.
