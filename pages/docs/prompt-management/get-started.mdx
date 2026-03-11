@@ -10,6 +10,7 @@ This guide walks you through creating and using a prompt with Langfuse. If you'r
 
 import PromptCreate from "@/components-mdx/prompt-create.mdx";
 import PromptUse from "@/components-mdx/prompt-use.mdx";
+import GetStartedAutoInstall from "@/components-mdx/get-started/auto-install.mdx";
 
 <LangTabs items={["Use AI", "Do it yourself"]}>
 <Tab>
@@ -20,52 +21,36 @@ import PromptUse from "@/components-mdx/prompt-use.mdx";
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
 2.  Create new API credentials in the project settings.
 
+## Set up your AI agent
+
+Use the [Langfuse Skill](https://github.com/langfuse/skills) in your editor’s agent mode to automatically create, edit, and use prompts.
+
+> What is a Skill? A reusable instruction package for AI coding agents. It gives your agent Langfuse-specific workflows and best practices out of the box.
+
+<GetStartedAutoInstall />
+
 ## Create a prompt [#create-update-prompt]
 
-Use the agent mode of your editor to create prompts in Langfuse.
-
-1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
-
-```bash
-# Cursor plugin
-/add-plugin langfuse
-
-# skills CLI
-npx skills add langfuse/skills --skill "langfuse"
-
-# Manual: clone and symlink
-git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
-ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
-```
-
-2. Ask the agent to create your prompt:
+Start a new agent session, then prompt it to create your prompt:
 
 ```
-Create a prompt in Langfuse called "movie-critic" that takes a movie name and critic level as variables.
+"Create a prompt in Langfuse called 'movie-critic' that takes a movie name 
+and critic level as variables."
+```
+
+Or prompt it to migrate your existing prompts to Langfuse:
+
+```
+"Migrate the hardcoded prompts in this codebase to Langfuse."
 ```
 
 ## Use the prompt in your code [#use-prompt]
 
-Use the agent mode of your editor to write the code to fetch Langfuse prompts in your application.
-
-1. Install the [Langfuse Skill](https://github.com/langfuse/skills):
-
-```bash
-# Cursor plugin
-/add-plugin langfuse
-
-# skills CLI
-npx skills add langfuse/skills --skill "langfuse"
-
-# Manual: clone and symlink
-git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
-ln -s /path/to/langfuse-skills/skills/langfuse ~/.skills/langfuse
-```
-
-2. Ask the agent to integrate prompt fetching:
+If you haven't started a new agent session yet, start one and prompt it to integrate prompt fetching:
 
 ```
-Fetch the "movie-critic" prompt, production version, from Langfuse and use it in my application.
+"Fetch the 'movie-critic' prompt, production version, from Langfuse 
+and use it in my application."
 ```
 
 </Steps>
