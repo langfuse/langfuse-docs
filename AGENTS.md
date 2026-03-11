@@ -65,6 +65,20 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 - `tailwind.config.js` — Tailwind setup.
 - `components.json` — shadcn/ui component config.
 
+## Writing guidelines
+
+### Changelog entries
+
+Changelog entries live in `pages/changelog/`.
+
+- Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
+- Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
+- Follow the intro immediately with 2-3 concrete example use cases to show relevance. Don't put them in a separate section.
+- Keep it concise — every sentence should add new information. Don't repeat what was already said.
+- Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text.
+- Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
+- Tone: helpful and conversational, not marketing copy. No filler headings like "Why This Matters", or "Key Benefits."
+
 ## Review guidelines
 
 Please check the following:

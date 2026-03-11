@@ -10,44 +10,122 @@ Use these methods to harden your Langfuse instrumentation, protect sensitive dat
 
 ## Filtering by Instrumentation Scope [#filtering-by-instrumentation-scope]
 
-You can configure the SDK to filter out spans from specific instrumentation libraries that expose OTel spans that the Langfuse SDK picks up but you don't want to send to Langfuse.
+Langfuse now applies a **default span filter** in both SDKs to keep exports LLM-focused without extra configuration.
 
-**How it works:**
+By default, a span is exported if **any** of these are true:
 
-When third-party libraries create OpenTelemetry spans (through their instrumentation packages), each span has an associated "instrumentation scope" that identifies which library created it. The Langfuse SDK filters spans at the export level based on these scope names.
+- It was created by the Langfuse SDK (`instrumentation_scope.name == "langfuse-sdk"`)
+- It has at least one `gen_ai.*` attribute
+- It comes from a known LLM instrumentation scope (for example `openinference.*`, `langsmith`, `haystack`, `litellm`, `agent_framework`, `strands-agents`, `vllm`, `opentelemetry.instrumentation.anthropic`)
 
-You can see the instrumentation scope name for any span in the Langfuse UI under the observation's metadata (`metadata.scope.name`). Use this to identify which scopes you want to filter.
+If you want another integration added to the default instrumentation scope allowlist, open an issue in [langfuse/langfuse](https://github.com/langfuse/langfuse/issues) with the scope name and a sample span.
+
+You can inspect a span's instrumentation scope in Langfuse under `metadata.scope.name`. Filtered-out spans do not appear in the UI.
+
+To identify filtered scopes:
+
+1. Enable debug logging (`Langfuse(debug=True)` or `LANGFUSE_DEBUG="True"` on Python, `LANGFUSE_DEBUG="true"` or `LANGFUSE_LOG_LEVEL="DEBUG"` on JS/TS).
+2. Run your application and check logs for dropped-span messages and instrumentation scope names.
+3. Add those scopes to your allowlist logic by composing with `is_default_export_span` / `isDefaultExportSpan`.
+4. Optional: temporarily use `should_export_span=lambda span: True` or `shouldExportSpan: () => true` to inspect all spans, then restore filtering.
+
+<Callout type="info" title="Behavior Change">
+  Earlier SDK versions exported all non-blocked spans by default. To restore
+  that behavior, provide an always-true custom filter callback.
+</Callout>
 
 <Callout type="warning" title="Filtering Spans May Break Trace Trees">
   Filtering spans may break the parent-child relationships in your traces. For
   example, if you filter out a parent span but keep its children, you may see
-  "orphaned" observations in the Langfuse UI or [traces without any input or output](/faq/all/empty-trace-input-and-output#3-your-root-span-is-being-filtered-out).
+  "orphaned" observations in the Langfuse UI. Please use the debugging flow above to re-add filtered out spans.
 </Callout>
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 
-Provide the `blocked_instrumentation_scopes` parameter to the `Langfuse` client to filter out spans from specific instrumentation libraries.
+Default behavior (recommended):
 
 ```python
 from langfuse import Langfuse
 
-# Filter out database spans
+# Smart default filter (Langfuse + GenAI/LLM spans)
+langfuse = Langfuse()
+```
+
+Export everything:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(should_export_span=lambda span: True)
+```
+
+Passing `should_export_span` replaces the default filter. To keep default behavior and extend it, compose with `is_default_export_span`.
+
+Compose custom logic with built-in predicates:
+
+```python
+from langfuse import Langfuse
+from langfuse.span_filter import is_default_export_span
+
 langfuse = Langfuse(
-    blocked_instrumentation_scopes=["sqlalchemy", "psycopg"]
+    should_export_span=lambda span: (
+        is_default_export_span(span)
+        or (
+            span.instrumentation_scope is not None
+            and span.instrumentation_scope.name.startswith("my_framework")
+        )
+    )
+)
+```
+
+Only export spans created by the Langfuse SDK:
+
+```python
+from langfuse import Langfuse
+from langfuse.span_filter import is_langfuse_span
+
+langfuse = Langfuse(should_export_span=is_langfuse_span)
+```
+
+Available Python helpers: `is_default_export_span`, `is_langfuse_span`, `is_genai_span`, `is_known_llm_instrumentor`, `KNOWN_LLM_INSTRUMENTATION_SCOPE_PREFIXES`.
+
+`blocked_instrumentation_scopes` still works for backward compatibility, but is deprecated and planned for removal in a future version. Prefer expressing deny rules in `should_export_span`.
+
+Deprecated compatibility example:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(
+    should_export_span=lambda span: True,
+    blocked_instrumentation_scopes=["sqlalchemy", "psycopg"],
 )
 ```
 
 </Tab>
 <Tab title="JS/TS SDK">
 
-You can provide a predicate function `shouldExportSpan` to the `LangfuseSpanProcessor` to decide on a per-span basis whether it should be exported to Langfuse.
+Default behavior (recommended):
+
+```ts filename="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  // Smart default filter (Langfuse + GenAI/LLM spans)
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+
+Custom filtering:
 
 ```ts filename="instrumentation.ts" /shouldExportSpan/
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
 
-// Example: Filter out all spans from the 'express' instrumentation
 const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
   otelSpan.instrumentationScope.name !== "express";
 
@@ -58,13 +136,24 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-If you want to include only LLM observability related spans, you can configure an allowlist like so:
+Passing `shouldExportSpan` replaces the default filter, so include default conditions in your callback if you want to extend rather than replace the default behavior.
+
+Compose with the default filter:
 
 ```ts filename="instrumentation.ts"
-import { ShouldExportSpan } from "@langfuse/otel";
+import { isDefaultExportSpan, type ShouldExportSpan } from "@langfuse/otel";
 
 const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
-  ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name);
+  isDefaultExportSpan(otelSpan) ||
+  otelSpan.instrumentationScope.name.startsWith("my-framework");
+```
+
+Available JS/TS helpers from `@langfuse/otel`: `isDefaultExportSpan`, `isLangfuseSpan`, `isGenAISpan`, `isKnownLLMInstrumentor`, `KNOWN_LLM_INSTRUMENTATION_SCOPE_PREFIXES`.
+
+Export everything:
+
+```ts filename="instrumentation.ts"
+new LangfuseSpanProcessor({ shouldExportSpan: () => true });
 ```
 
 </Tab>
@@ -250,10 +339,10 @@ Benefits of isolation:
 - Independent configuration and sampling rates
 
 <Callout type="warning">
-While TracerProviders are isolated, they share the same OpenTelemetry context for tracking active spans. This can cause span relationship issues where: 
+While TracerProviders are isolated, they share the same OpenTelemetry context for tracking active spans. This can cause span relationship issues where:
 
-- A parent span from one TracerProvider might have children from another TracerProvider 
-- Some spans may appear "orphaned" if their parent spans belong to a different TracerProvider 
+- A parent span from one TracerProvider might have children from another TracerProvider
+- Some spans may appear "orphaned" if their parent spans belong to a different TracerProvider
 - Trace hierarchies may be incomplete or confusing
 
 Plan your instrumentation carefully to avoid confusing trace structures.
@@ -266,10 +355,10 @@ Plan your instrumentation carefully to avoid confusing trace structures.
 ```python {4, 5}
 from opentelemetry.sdk.trace import TracerProvider
 from langfuse import Langfuse
- 
+
 langfuse_tracer_provider = TracerProvider() # do not set to global tracer provider to keep isolation
 langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
-langfuse.start_span(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
+langfuse.start_observation(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
 ```
 
 </Tab>
@@ -279,13 +368,13 @@ Isolate Langfuse spans with a custom provider and avoid sending them to other ex
 ```ts /setLangfuseTracerProvider/
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { setLangfuseTracerProvider } from "@langfuse/tracing";
- 
+
 // Create a new TracerProvider and register the LangfuseSpanProcessor
 // do not set this TracerProvider as the global TracerProvider
 const langfuseTracerProvider = new NodeTracerProvider({
   spanProcessors: [new LangfuseSpanProcessor()],
 })
- 
+
 // Register the isolated TracerProvider
 setLangfuseTracerProvider(langfuseTracerProvider)
 ```
@@ -316,12 +405,12 @@ The Langfuse Python SDK supports routing traces to different projects within the
 
 Third-party libraries that emit OpenTelemetry spans automatically (e.g., HTTP clients, databases, other instrumentation libraries) do **not** have the Langfuse public key span attribute. As a result:
 
-- These spans cannot be routed to a specific project
-- They are processed by all span processors and sent to all projects
-- All projects will receive these third-party spans
+- Third-party spans that pass the export filter and have no public key cannot be routed to a specific project
+- These spans are processed by all span processors and can be sent to all projects
+- With the default filter, this mainly affects GenAI/LLM spans from third-party instrumentors (infrastructure spans are typically filtered out)
 
 **Why is this experimental?**
-This approach requires that the `public_key` parameter be passed to all Langfuse SDK executions across all integrations to ensure proper routing, and third-party spans will appear in all projects.
+This approach requires that the `public_key` parameter be passed to all Langfuse SDK executions across all integrations to ensure proper routing, and third-party spans that pass filtering may appear in all projects.
 
 ### Initialization
 
@@ -451,7 +540,7 @@ response_b = chain.invoke(
 
 - Every Langfuse SDK execution across all integrations must include the appropriate public key parameter
 - Missing public key parameters may result in traces being routed to the default project or lost
-- Third-party OpenTelemetry spans (from HTTP clients, databases, etc.) will appear in all projects since they lack the Langfuse public key attribute
+- Third-party OpenTelemetry spans that pass filtering may appear in all projects since they lack the Langfuse public key attribute
 
 </Tab>
 
@@ -480,7 +569,7 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-This configuration will send every trace to both projects. You can also configure a custom `shouldExportSpan` filter for each processor to control which traces go to which project.
+This configuration sends every span accepted by each processor's filter to both projects. You can configure a custom `shouldExportSpan` filter for each processor to control which traces go to which project.
 
 
 </Tab>
@@ -578,5 +667,3 @@ For multiprocessing, follow the [OpenTelemetry guidance](https://github.com/open
 
 </Tab>
 </LangTabs>
-
-
