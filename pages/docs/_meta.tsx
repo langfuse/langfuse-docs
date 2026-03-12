@@ -8,6 +8,10 @@ export default {
   index: "Overview",
   demo: "Example Project",
   "ask-ai": "Ask AI",
+  v4: {
+    title: "Langfuse Preview (fast)",
+    display: "hidden",
+  },
 
   "-- Get Started": {
     type: "separator",

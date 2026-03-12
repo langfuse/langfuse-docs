@@ -13,7 +13,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 ### Development
 
 - `pnpm dev` — start the local dev server on port 3333 (preferred default after install).
-- `pnpm build` — build the production site when you need to validate many pages and the dev server is too slow.
+- `pnpm build` — build the production site when you need to validate many pages and the dev server is too slow. This takes about 10 minutes, so do not run it by default for small changes.
 - `pnpm start` — run the production build on port 3333 when using the production build for broader checks.
 
 ### Content and maintenance
@@ -50,6 +50,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 1. For cookbook changes, edit notebook sources in `cookbook/`.
 2. Regenerate docs with `bash scripts/update_cookbook_docs.sh`.
 3. Do **not** hand-edit generated files in `pages/guides/cookbook/`.
+4. Avoid `pnpm build` for routine edits or small UI/content changes. Prefer targeted checks or `pnpm dev`, and only run the full production build when it is necessary or explicitly requested.
 
 ## Styling and implementation guidelines
 
@@ -63,6 +64,20 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 - `theme.config.tsx` — Nextra theme configuration.
 - `tailwind.config.js` — Tailwind setup.
 - `components.json` — shadcn/ui component config.
+
+## Writing guidelines
+
+### Changelog entries
+
+Changelog entries live in `pages/changelog/`.
+
+- Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
+- Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
+- Follow the intro immediately with 2-3 concrete example use cases to show relevance. Don't put them in a separate section.
+- Keep it concise — every sentence should add new information. Don't repeat what was already said.
+- Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text.
+- Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
+- Tone: helpful and conversational, not marketing copy. No filler headings like "Why This Matters", or "Key Benefits."
 
 ## Review guidelines
 
