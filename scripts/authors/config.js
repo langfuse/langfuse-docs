@@ -15,7 +15,7 @@ const CONFIG = {
         dirPath: path.join(__dirname, `../../content/${section}`),
         // Track both current (content/) and legacy (pages/) git paths to
         // preserve contributor history from before the migration
-        gitPaths: [`content/${section}/`],
+        gitPaths: [`content/${section}/`, `pages/${section}/`],
         urlPrefix: `/${section}`
     })),
 
@@ -28,7 +28,7 @@ const CONFIG = {
     },
 
     // Contributors to exclude from the widget
-    excludedContributors: ['cursoragent']
+    excludedContributors: ['cursoragent', 'ArkuVonSymfon']
 };
 
 module.exports = { CONFIG };

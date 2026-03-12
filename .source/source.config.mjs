@@ -39,7 +39,8 @@ var docs = defineDocs({
   dir: "content/docs"
 });
 var selfHostingFrontmatterSchema = frontmatterSchema.extend({
-  sidebarTitle: z.string().nullish()
+  sidebarTitle: z.string().nullish(),
+  label: z.string().nullish()
 });
 var selfHosting = defineDocs({
   dir: "content/self-hosting",
