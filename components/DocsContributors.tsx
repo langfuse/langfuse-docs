@@ -15,6 +15,7 @@ const getGithubEditUrl = (path: string): string | null => {
   const sectionToDir: Record<string, string> = {
     docs: "content/docs",
     guides: "content/guides",
+    handbook: "content/handbook",
     integrations: "content/integrations",
     "self-hosting": "content/self-hosting",
     library: "content/library",
