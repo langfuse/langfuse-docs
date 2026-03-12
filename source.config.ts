@@ -59,6 +59,7 @@ export const docs = defineDocs({
 
 const selfHostingFrontmatterSchema = frontmatterSchema.extend({
   sidebarTitle: z.string().nullish(),
+  label: z.string().nullish(),
 });
 
 export const selfHosting = defineDocs({

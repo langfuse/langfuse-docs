@@ -21,6 +21,7 @@ export default async function SelfHostingPage(props: PageProps) {
   if (!page) notFound();
 
   const { toc } = page.data;
+  const versionLabel = (page.data as { label?: string }).label;
   return (
     <DocsPage
       toc={toc}
@@ -30,6 +31,7 @@ export default async function SelfHostingPage(props: PageProps) {
       <SectionDocBodyClientWithDocsBody
         collection={COLLECTION}
         slugPromise={props.params}
+        versionLabel={versionLabel}
       />
     </DocsPage>
   );

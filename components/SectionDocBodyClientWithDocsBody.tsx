@@ -13,6 +13,8 @@ import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 type Props = {
   collection: string;
   slugPromise: Promise<{ slug?: string[] }>;
+  /** Optional version label (e.g. "Version: v3") shown next to Copy page. Used by self-hosting. */
+  versionLabel?: string | null;
 };
 
 const loaderPromiseCache = new Map<
@@ -41,6 +43,7 @@ function getCachedLoaderPromise(
 export function SectionDocBodyClientWithDocsBody({
   collection,
   slugPromise,
+  versionLabel,
 }: Props) {
   const params = use(slugPromise);
   const slug = params.slug ?? [];
@@ -54,7 +57,12 @@ export function SectionDocBodyClientWithDocsBody({
 
   return (
     <DocsBody>
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap gap-2 items-center">
+        {versionLabel != null && versionLabel !== "" && (
+          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
+            {versionLabel}
+          </span>
+        )}
         <CopyMarkdownButton key={pathname} />
       </div>
       {cookbook && <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />}
