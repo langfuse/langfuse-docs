@@ -46,6 +46,20 @@ langfuse = get_client()  # uses environment variables to authenticate
 
 The `api` namespace is auto-generated from the Public API (OpenAPI). Method names mirror REST resources and support filters and pagination.
 
+<Callout type="warning">
+
+From Python SDK v4 and JS/TS SDK v5 onward, the high-performance endpoints are
+the defaults:
+
+- `api.observations` (formerly `api.observations_v_2` / `api.observationsV2`)
+- `api.scores` (formerly `api.score_v_2` / `api.scoreV2`)
+- `api.metrics` (formerly `api.metrics_v_2` / `api.metricsV2`)
+
+The old v2 aliases were removed in these major releases. Legacy v1 endpoints
+are now available under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`).
+
+</Callout>
+
 ### Traces
 
 ```python
@@ -56,17 +70,21 @@ trace = langfuse.api.trace.get("traceId")
 ### Observations
 
 ```python
-# v2 API (recommended) - cursor-based pagination, selective field retrieval
-observations = langfuse.api.observations_v_2.get_many(
+# Default high-performance endpoint (formerly observations_v_2)
+observations = langfuse.api.observations.get_many(
     trace_id="abcdef1234",
     type="GENERATION",
     limit=100,
     fields="core,basic,usage"
 )
 
-# v1 API
-observations = langfuse.api.observations.get_many(trace_id="abcdef1234", type="GENERATION", limit=100)
-observation = langfuse.api.observations.get("observationId")
+# Legacy v1 endpoint
+legacy_observations = langfuse.api.legacy.observations_v1.get_many(
+    trace_id="abcdef1234",
+    type="GENERATION",
+    limit=100
+)
+legacy_observation = langfuse.api.legacy.observations_v1.get("observationId")
 ```
 
 ### Sessions
@@ -78,7 +96,11 @@ sessions = langfuse.api.sessions.list(limit=50)
 ### Scores
 
 ```python
-langfuse.api.score_v_2.get(score_ids = "ScoreId")
+# Default high-performance endpoint (formerly score_v_2)
+langfuse.api.scores.get_many(score_ids = "ScoreId")
+
+# Legacy v1 endpoint
+langfuse.api.legacy.score_v1.get(score_ids = "ScoreId")
 ```
 
 ### Prompts
@@ -97,7 +119,7 @@ Please refer to the [prompt management documentation](/docs/prompt-management/ge
 ### Metrics
 
 ```python
-# v2 API (recommended) - optimized performance, observations view only
+# Default high-performance endpoint (formerly metrics_v_2)
 query_v2 = """
 {
   "view": "observations",
@@ -109,9 +131,9 @@ query_v2 = """
 }
 """
 
-langfuse.api.metrics_v_2.get(query = query_v2)
+langfuse.api.metrics.get(query = query_v2)
 
-# v1 API
+# Legacy v1 endpoint
 query_v1 = """
 {
   "view": "traces",
@@ -123,7 +145,7 @@ query_v1 = """
 }
 """
 
-langfuse.api.metrics.metrics(query = query_v1)
+langfuse.api.legacy.metrics_v1.metrics(query = query_v1)
 ```
 
 #### Async equivalents
@@ -166,19 +188,17 @@ const traces = await langfuse.api.trace.list();
 // Fetch a single trace by ID
 const trace = await langfuse.api.trace.get("traceId");
 
-// Fetch list of observations (v2 API recommended)
-const observationsV2 = await langfuse.api.observationsV2.getMany({
+// Fetch list of observations (default high-performance endpoint; formerly observationsV2)
+const observations = await langfuse.api.observations.getMany({
   traceId: "abcdef1234",
   type: "GENERATION",
   limit: 100,
   fields: "core,basic,usage"
 });
 
-// Fetch list of observations (v1 API)
-const observations = await langfuse.api.observations.getMany();
-
-// Fetch a single observation by ID
-const observation = await langfuse.api.observations.get("observationId");
+// Fetch list of observations (legacy v1 endpoint)
+const legacyObservations = await langfuse.api.legacy.observationsV1.getMany();
+const legacyObservation = await langfuse.api.legacy.observationsV1.get("observationId");
 
 // Fetch list of sessions
 const sessions = await langfuse.api.sessions.list();
@@ -186,14 +206,17 @@ const sessions = await langfuse.api.sessions.list();
 // Fetch a single session by ID
 const session = await langfuse.api.sessions.get("sessionId");
 
-// Fetch list of scores
-const scores = await langfuse.api.scoreV2.get();
+// Fetch list of scores (default high-performance endpoint; formerly scoreV2)
+const scores = await langfuse.api.scores.getMany();
 
 // Fetch a single score by ID
-const score = await langfuse.api.scoreV2.getById("scoreId");
+const score = await langfuse.api.scores.getById("scoreId");
 
-// Fetch metrics (v2 API recommended)
-const metricsV2 = await langfuse.api.metricsV2.get({
+// Legacy v1 scores endpoint
+const legacyScores = await langfuse.api.legacy.scoreV1.get();
+
+// Fetch metrics (default high-performance endpoint; formerly metricsV2)
+const metrics = await langfuse.api.metrics.get({
   query: JSON.stringify({
     view: "observations",
     metrics: [{ measure: "totalCost", aggregation: "sum" }],
@@ -204,6 +227,11 @@ const metricsV2 = await langfuse.api.metricsV2.get({
   })
 });
 
+// Legacy v1 namespaces:
+// - langfuse.api.legacy.observationsV1
+// - langfuse.api.legacy.scoreV1
+// - langfuse.api.legacy.metricsV1
+
 // Explore more entities via Intellisense
 ```
 
@@ -211,3 +239,8 @@ The above examples show the current JavaScript SDK API methods. All methods supp
 
 </Tab>
 </LangTabs>
+
+## Related Resources
+
+- For large-scale data exports (e.g., all traces for fine-tuning or analytics), consider using the [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to automatically sync data to S3, GCS, or Azure on a schedule instead of paginating through the API.
+- To manually export filtered data from the Langfuse UI, see [Export from UI](/docs/api-and-data-platform/features/export-from-ui).
