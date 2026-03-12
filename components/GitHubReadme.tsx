@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { RenderedReadmeContent } from "@/components/RenderedReadmeContent";
 
 /**
  * Fetches and renders a README from GitHub at runtime.
- * Replaces the old Nextra getStaticProps/useData pattern.
+ * Renders as formatted markdown (headings, lists, tables) for all README usages
+ * (terraform, k8s, n8n, changelog, etc.).
  */
 export function GitHubReadme({ url }: { url: string }) {
   const [content, setContent] = useState<string | null>(null);
@@ -26,9 +28,5 @@ export function GitHubReadme({ url }: { url: string }) {
       <p className="text-sm text-muted-foreground">Loading README…</p>
     );
 
-  return (
-    <pre className="p-4 overflow-auto rounded-lg border bg-muted/50 text-sm max-h-[70vh]">
-      <code>{content}</code>
-    </pre>
-  );
+  return <RenderedReadmeContent content={content} />;
 }
