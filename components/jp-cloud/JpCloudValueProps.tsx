@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, Zap, LayoutDashboard } from "lucide-react";
+import { Shield, Zap, LayoutDashboard, Lock } from "lucide-react";
 
 const JAPAN_RED = "#BC002D";
 
@@ -12,9 +12,18 @@ const valueProps = [
     enTitle: "Data Residency",
     jpTitle: "データレジデンシー",
     enDescription:
-      "Your traces, evaluations, and prompts stay in Japan. Meet local data sovereignty and compliance requirements with confidence.",
+      "All traces, evaluations, and prompts stay in Japan. ClickHouse and AWS infrastructure hosted in ap-northeast-1 (Tokyo).",
     jpDescription:
-      "トレース、評価、プロンプトのすべてのデータが日本国内に保存されます。データ主権とコンプライアンス要件を安心して満たすことができます。",
+      "トレース、評価、プロンプトのすべてのデータが日本国内に保存されます。ClickHouseおよびAWSインフラは東京リージョン（ap-northeast-1）で運用されます。",
+  },
+  {
+    icon: Lock,
+    enTitle: "Enterprise Security",
+    jpTitle: "エンタープライズセキュリティ",
+    enDescription:
+      "SOC 2 Type II and ISO 27001 certified. GDPR compliant with equivalence for Japanese data protection requirements.",
+    jpDescription:
+      "SOC 2 Type IIおよびISO 27001認証取得済み。GDPRに準拠し、日本のデータ保護要件にも対応しています。",
   },
   {
     icon: Zap,
@@ -28,11 +37,11 @@ const valueProps = [
   {
     icon: LayoutDashboard,
     enTitle: "Full Platform",
-    jpTitle: "フルプラットフォーム",
+    jpTitle: "全機能を日本リージョンで",
     enDescription:
-      "All Langfuse features — observability, evaluations, prompt management, and metrics — available in the Japan region.",
+      "LLM observability, AI app debugging, prompt management, evaluation, and metrics — all available in the Japan region.",
     jpDescription:
-      "トレーシング、評価、プロンプト管理、メトリクスなど、Langfuseのすべての機能を日本リージョンでご利用いただけます。",
+      "LLM監視ツール、AIアプリデバッグ、プロンプト管理、評価、メトリクスなど、Langfuseのすべての機能をご利用いただけます。",
   },
 ];
 
@@ -54,7 +63,7 @@ export function JpCloudValueProps() {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {valueProps.map((prop, index) => (
           <motion.div
             key={prop.enTitle}
@@ -63,14 +72,17 @@ export function JpCloudValueProps() {
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <Card className="h-full border-l-2 hover:shadow-md transition-shadow" style={{ borderLeftColor: JAPAN_RED + "50" }}>
+            <Card
+              className="h-full border-l-2 hover:shadow-md transition-shadow"
+              style={{ borderLeftColor: JAPAN_RED + "50" }}
+            >
               <CardContent className="p-6 pt-6">
                 <prop.icon
                   className="w-8 h-8 mb-4"
                   style={{ color: JAPAN_RED }}
                   strokeWidth={1.5}
                 />
-                <h3 className="text-xl font-semibold text-foreground">
+                <h3 className="text-lg font-semibold text-foreground">
                   {prop.enTitle}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-0.5">

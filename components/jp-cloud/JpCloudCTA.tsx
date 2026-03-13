@@ -36,16 +36,16 @@ export function JpCloudCTA() {
       >
         <BilingualHeading
           en="Be the first to know"
-          jp="いち早くお知らせを受け取る"
+          jp="最新情報を受け取る"
           className="text-3xl sm:text-4xl lg:text-5xl font-bold font-mono tracking-tight"
         />
 
         <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Join our Japan mailing list to stay updated on the cloud region
-          launch, events in Japan, and Japan-specific Langfuse news.
+          Join our Japan mailing list for updates on the cloud region launch,
+          local events, and Japan-specific Langfuse news.
         </p>
         <p className="mt-2 text-base text-muted-foreground/70 max-w-2xl mx-auto">
-          日本メーリングリストにご登録いただくと、クラウドリージョンのローンチ、日本でのイベント、日本向けのLangfuse最新情報をお届けします。
+          日本リージョンのローンチ情報、国内イベント、日本向けの最新ニュースをお届けします。
         </p>
 
         <div className="mt-10 flex gap-4 flex-wrap items-center justify-center">
@@ -59,6 +59,28 @@ export function JpCloudCTA() {
         <p className="mt-8 text-xs text-muted-foreground/50">
           You can unsubscribe at any time. / いつでも配信停止できます。
         </p>
+
+        <div className="mt-10 flex items-center justify-center">
+          <a
+            href="https://x.com/LangfuseJP"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <svg
+              fill="currentColor"
+              width="16"
+              height="16"
+              viewBox="0 0 24 22"
+              aria-label="X"
+            >
+              <path d="M16.99 0H20.298L13.071 8.26L21.573 19.5H14.916L9.702 12.683L3.736 19.5H0.426L8.156 10.665L0 0H6.826L11.539 6.231L16.99 0ZM15.829 17.52H17.662L5.83 1.876H3.863L15.829 17.52Z" />
+            </svg>
+            <span>
+              Follow @LangfuseJP on X / Langfuse Japan公式Xをフォロー
+            </span>
+          </a>
+        </div>
       </motion.div>
     </section>
   );
