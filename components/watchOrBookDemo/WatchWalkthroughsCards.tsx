@@ -1,4 +1,4 @@
-import { Cards as NextraCards } from "nextra/components";
+import { Cards as NextraCards } from "@/lib/nextra-shim/components";
 import { WALKTHROUGH_TABS } from "./constants";
 
 export const WatchWalkthroughsCards = () => (

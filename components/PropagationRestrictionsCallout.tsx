@@ -1,4 +1,4 @@
-import { Callout } from "nextra/components";
+import { Callout } from "@/lib/nextra-shim/components";
 
 interface PropagationRestrictionsCalloutProps {
   attributes?: ("userId" | "sessionId" | "metadata" | "version" | "tags" | "traceName")[];

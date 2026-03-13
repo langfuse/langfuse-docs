@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { guidesSource } from "@/lib/source";
-import { buildOgImageUrl } from "@/lib/og-url";
+import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 import { SectionDocBodyClientWithDocsBody } from "@/components/SectionDocBodyClientWithDocsBody";
@@ -43,15 +43,25 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     return {
       title: "Not Found",
     };
+  const pageData = page.data as typeof page.data & {
+    canonical?: string | null;
+    seoTitle?: string | null;
+    ogImage?: string | null;
+  };
+  const pagePath = `/guides${slug.length > 0 ? `/${slug.join("/")}` : ""}`;
+  const canonicalUrl = pageData.canonical ?? buildPageUrl(pagePath);
+  const seoTitle = pageData.seoTitle || page.data.title;
   const ogImage = buildOgImageUrl({
-    title: page.data.title,
+    title: seoTitle,
     description: page.data.description,
     section: "Guides",
+    staticOgImage: pageData.ogImage,
   });
   return {
-    title: page.data.title,
+    title: seoTitle,
     description: page.data.description ?? undefined,
-    openGraph: { images: [{ url: ogImage }] },
+    alternates: { canonical: canonicalUrl },
+    openGraph: { images: [{ url: ogImage }], url: canonicalUrl },
     twitter: { images: [{ url: ogImage }] },
   };
 }

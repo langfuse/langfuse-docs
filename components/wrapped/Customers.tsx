@@ -1,9 +1,9 @@
 "use client";
 
-import { getPagesUnderRoute } from "nextra/context";
+import { getPagesUnderRoute } from "@/lib/nextra-shim/context";
 import Link from "next/link";
 import Image from "next/image";
-import { type Page } from "nextra";
+import { type Page } from "@/lib/nextra-shim/nextra-types";
 import { useMemo, useRef } from "react";
 import { useInView } from "framer-motion";
 import { motion } from "framer-motion";

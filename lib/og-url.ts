@@ -1,5 +1,10 @@
 const BASE_URL = "https://langfuse.com";
 
+/** Returns the absolute canonical URL for a given site-relative path (e.g. "/docs/foo"). */
+export function buildPageUrl(path: string): string {
+  return `${BASE_URL}${path}`;
+}
+
 export function buildOgImageUrl({
   title,
   description,

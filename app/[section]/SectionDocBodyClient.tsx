@@ -6,7 +6,7 @@ import { DocsBody } from "fumadocs-ui/page";
 import { getMDXComponents } from "@/mdx-components";
 import { getSectionDocLoader } from "@/lib/section-loaders.generated";
 import { notFound } from "next/navigation";
-import { CopyMarkdownButton } from "@/components/MainContentWrapper";
+import { CopyMarkdownButton, DocsFeedback, DocsSupport } from "@/components/MainContentWrapper";
 
 type SectionDocBodyClientProps = {
   collection: string;
@@ -56,6 +56,11 @@ export function SectionDocBodyClient({
           <CopyMarkdownButton key={pathname} />
         </div>
         {content}
+        <hr className="my-4 border-t dark:border-neutral-800" />
+        <div className="flex flex-wrap gap-6 justify-between items-center py-6" id="docs-feedback">
+          <DocsFeedback key={pathname} />
+          <DocsSupport />
+        </div>
       </DocsBody>
     );
   }

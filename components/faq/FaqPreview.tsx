@@ -1,6 +1,6 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
-import { Cards } from "nextra/components";
+import { getPagesUnderRoute } from "@/lib/nextra-shim/context";
+import { type Page } from "@/lib/nextra-shim/nextra-types";
+import { Cards } from "@/lib/nextra-shim/components";
 import { MessageCircleQuestion } from "lucide-react";
 import Link from "next/link";
 

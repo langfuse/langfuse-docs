@@ -10,6 +10,7 @@ import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://langfuse.com"),
   title: { default: "Langfuse", template: "%s - Langfuse" },
   description:
     "Traces, evals, prompt management and metrics to debug and improve your LLM application.",

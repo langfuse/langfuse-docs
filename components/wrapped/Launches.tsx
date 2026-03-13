@@ -1,8 +1,8 @@
 "use client";
 
-import { getPagesUnderRoute } from "nextra/context";
+import { getPagesUnderRoute } from "@/lib/nextra-shim/context";
 import Link from "next/link";
-import { type Page } from "nextra";
+import { type Page } from "@/lib/nextra-shim/nextra-types";
 import { motion, useInView } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { WrappedSection } from "./components/WrappedSection";

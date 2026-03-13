@@ -1,4 +1,4 @@
-import { Cards } from "nextra/components";
+import { Cards } from "@/lib/nextra-shim/components";
 import { Users } from "lucide-react";
 import { TEAMS } from "@/lib/handbook-meta";
 

@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { marked } from "marked";
 
+// Force Node.js runtime (required for Puppeteer/Chromium — not compatible with Edge runtime)
+export const runtime = "nodejs";
+// Allow up to 60 s for PDF generation (default 10 s is too short for Chromium startup)
+export const maxDuration = 60;
+
 const ALLOWED_HOSTNAMES = [
   "langfuse.com",
   "raw.githubusercontent.com",

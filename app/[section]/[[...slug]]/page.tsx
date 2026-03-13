@@ -5,7 +5,7 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, DOCS_STYLE_APP_SECTIONS, POST_SECTIONS, CHANGELOG_SECTIONS } from "@/lib/sections";
 import type { SectionSlug } from "@/lib/sections";
 import { MARKETING_SLUGS } from "@/lib/source";
-import { buildOgImageUrl } from "@/lib/og-url";
+import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { SectionDocBodyClient } from "../SectionDocBodyClient";
 import { DocsContributors } from "@/components/DocsContributors";
 import { FaqPreview } from "@/components/faq/FaqPreview";
@@ -103,21 +103,38 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 
   if (!page) return { title: "Not Found" };
   const pageData = page.data as typeof page.data & {
+    canonical?: string | null;
+    noindex?: boolean | null;
+    seoTitle?: string | null;
     ogImage?: string | null;
     ogVideo?: string | null;
   };
+  const pagePath = isMarketing
+    ? `/${section}`
+    : `/${section}${slug.length > 0 ? `/${slug.join("/")}` : ""}`;
+  const canonicalUrl = pageData.canonical ?? buildPageUrl(pagePath);
+  const seoTitle = pageData.seoTitle || page.data.title;
   const ogImage = buildOgImageUrl({
-    title: page.data.title,
+    title: seoTitle,
     description: page.data.description,
     section: config.title,
     staticOgImage: pageData.ogImage,
   });
+  // ogVideo may be an absolute URL (https://...) or a site-relative path (/images/...)
+  const ogVideoUrl = pageData.ogVideo
+    ? pageData.ogVideo.startsWith("http")
+      ? pageData.ogVideo
+      : buildPageUrl(pageData.ogVideo)
+    : null;
   return {
-    title: page.data.title,
+    title: seoTitle,
     description: page.data.description ?? undefined,
+    alternates: { canonical: canonicalUrl },
+    ...(pageData.noindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       images: [{ url: ogImage }],
-      ...(pageData.ogVideo ? { videos: [{ url: "https://langfuse.com" + pageData.ogVideo }] } : {}),
+      url: canonicalUrl,
+      ...(ogVideoUrl ? { videos: [{ url: ogVideoUrl }] } : {}),
     },
     twitter: { images: [{ url: ogImage }] },
   };

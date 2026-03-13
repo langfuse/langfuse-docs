@@ -231,6 +231,18 @@ async function main() {
             .sort()
             .reduce((acc, key) => ({ ...acc, [key]: contributors[key] }), {});
 
+        // Guard: if we generated 0 pages but an existing file has data,
+        // the git history is likely too shallow (e.g. Vercel shallow clone).
+        // Keep the existing file rather than overwriting with empty data.
+        const pageCount = Object.keys(sorted).length;
+        if (pageCount === 0 && fs.existsSync(CONFIG.contributors)) {
+            const existing = JSON.parse(fs.readFileSync(CONFIG.contributors, 'utf8'));
+            if (Object.keys(existing).length > 0) {
+                console.log('⚠️  Generated 0 pages — git history appears shallow. Keeping existing contributors.json.');
+                return;
+            }
+        }
+
         fs.writeFileSync(CONFIG.contributors, JSON.stringify(sorted, null, 2));
         console.log('✅ Generated contributors.json');
 

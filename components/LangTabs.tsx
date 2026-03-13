@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
-import { Tabs } from "nextra/components";
+import { Tabs } from "@/lib/nextra-shim/components";
 
 const KEY = "synced-tabs:language";
 const normalize = (s: string) => s.trim().toLowerCase();

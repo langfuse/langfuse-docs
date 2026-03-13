@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { getPagesUnderRoute } from "nextra/context";
+import { getPagesUnderRoute } from "@/lib/nextra-shim/context";
 import Link from "next/link";
 import { Authors } from "../Authors";
 import { Video } from "../Video";
