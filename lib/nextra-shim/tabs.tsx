@@ -17,6 +17,16 @@ function toValue(s: string): string {
   return s.toLowerCase().replace(/\s/g, "-");
 }
 
+/** Flatten so that Fragment wrappers (e.g. from MDX) don't hide Tab children; we need one injected value per Tab. */
+function flattenTabChildren(children: React.ReactNode): React.ReactElement[] {
+  return React.Children.toArray(children).flatMap((child) => {
+    if (React.isValidElement(child) && child.type === React.Fragment) {
+      return flattenTabChildren(child.props.children);
+    }
+    return React.isValidElement(child) ? [child] : [];
+  });
+}
+
 /** Tab panel — server-safe, no hooks. Value is injected by the parent Tabs wrapper. */
 export const Tab = ({
   value: valueProp,
@@ -59,13 +69,12 @@ export function Tabs({
 }: TabsProps) {
   const values = items.map(toValue);
 
-  // Inject values into children by position (server-side, no type check needed).
-  // React.cloneElement is valid in RSC.
+  // Flatten Fragment wrappers (MDX often passes a single Fragment containing all Tabs)
+  // so we inject one value per Tab. Then inject values into children by position.
+  const flat = flattenTabChildren(children);
   let childIndex = 0;
-  const tabChildren = React.Children.map(children, (child) => {
-    if (!React.isValidElement(child)) return child;
+  const tabChildren = flat.map((child) => {
     const existingValue = (child.props as { value?: string }).value;
-    // Only inject if value is not already explicitly set.
     if (existingValue != null && existingValue !== "") return child;
     const injectedValue = values[childIndex++];
     if (injectedValue == null) return child;

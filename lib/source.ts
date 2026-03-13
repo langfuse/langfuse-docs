@@ -226,11 +226,24 @@ export function getPagesForRoute(route: string) {
         } | undefined;
         if (!page) return null;
         const path = slug.length ? `/${slug.join("/")}` : "";
+        const rawData = page.data as Record<string, unknown>;
+        // Only keep primitive values (null, string, number, boolean) so the result
+        // is safe to pass as props to Client Components. This excludes functions
+        // (body, getText, getMDAST), module namespace objects (_exports), arrays
+        // (toc), and other non-serializable fumadocs internals.
+        const frontMatter = Object.fromEntries(
+          Object.entries(rawData).filter(([, v]) =>
+            v === null ||
+            typeof v === "string" ||
+            typeof v === "number" ||
+            typeof v === "boolean"
+          )
+        );
         return {
           route: `${src.baseUrl}${path}`,
-          name: page.data?.title,
-          title: page.data?.title,
-          frontMatter: { ...page.data, date: (page.data as { date?: string })?.date },
+          name: rawData?.title as string | undefined,
+          title: rawData?.title as string | undefined,
+          frontMatter,
         };
       })
       .filter(Boolean) as Array<{
