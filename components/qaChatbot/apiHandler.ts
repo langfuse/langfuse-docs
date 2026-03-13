@@ -119,7 +119,8 @@ export const handler = async (req: Request) => {
             { output: latestText },
             { asType: "generation" },
           );
-          trace.getActiveSpan().end();
+          setActiveTraceIO({ output: latestText });
+          trace.getActiveSpan()?.end();
         },
       });
 
