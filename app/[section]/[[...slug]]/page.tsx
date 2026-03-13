@@ -4,12 +4,15 @@ import { DocsPage, DocsBody } from "fumadocs-ui/page";
 import type { TOCItemType } from "fumadocs-core/toc";
 import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, DOCS_STYLE_APP_SECTIONS, POST_SECTIONS, CHANGELOG_SECTIONS } from "@/lib/sections";
 import type { SectionSlug } from "@/lib/sections";
-import { MARKETING_SLUGS } from "@/lib/source";
+import { MARKETING_SLUGS, getPagesForRoute } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { SectionDocBodyClient } from "../SectionDocBodyClient";
 import { DocsContributors } from "@/components/DocsContributors";
 import { FaqPreview } from "@/components/faq/FaqPreview";
 import { formatTag } from "@/components/faq/FaqIndex";
+import { ChangelogFrontMatterProvider } from "@/components/changelog/ChangelogFrontMatterContext";
+import type { ChangelogFrontMatter } from "@/components/changelog/ChangelogFrontMatterContext";
+import { WrappedDataProvider } from "@/components/wrapped/WrappedDataContext";
 
 type PageProps = {
   params: Promise<{ section: string; slug?: string[] }>;
@@ -63,6 +66,59 @@ export default async function SectionDocPage(props: PageProps) {
       : { body: data.body, toc: data.toc ?? [] };
   const toc: TOCItemType[] = loaded.toc ?? [];
 
+  const bodyClient = (
+    <SectionDocBodyClient
+      collection={config.collection}
+      slugPromise={Promise.resolve({ slug: effectiveSlug })}
+      withProse
+    />
+  );
+
+  // Strip functions and non-serializable objects from page.data / frontMatter
+  // before passing to client component context providers.
+  function primitiveOnly(obj: Record<string, unknown>): Record<string, unknown> {
+    return Object.fromEntries(
+      Object.entries(obj).filter(([, v]) =>
+        v === null ||
+        typeof v === "string" ||
+        typeof v === "number" ||
+        typeof v === "boolean" ||
+        (Array.isArray(v) && v.every((item) => typeof item !== "function"))
+      )
+    );
+  }
+
+  // Wrap with context providers so client components in MDX can receive
+  // server-fetched data without importing lib/source themselves.
+  const bodyWithContext = isChangelog ? (
+    <ChangelogFrontMatterProvider
+      frontMatter={primitiveOnly(page.data as unknown as Record<string, unknown>) as ChangelogFrontMatter}
+    >
+      {bodyClient}
+    </ChangelogFrontMatterProvider>
+  ) : section === "wrapped" ? (
+    <WrappedDataProvider
+      data={{
+        usersPages: getPagesForRoute("/users").map(({ route, name, title, frontMatter }) => ({
+          route,
+          name,
+          title,
+          frontMatter: frontMatter ? primitiveOnly(frontMatter) : undefined,
+        })),
+        changelogPages: getPagesForRoute("/changelog").map(({ route, name, title, frontMatter }) => ({
+          route,
+          name,
+          title,
+          frontMatter: frontMatter ? primitiveOnly(frontMatter) : undefined,
+        })),
+      }}
+    >
+      {bodyClient}
+    </WrappedDataProvider>
+  ) : (
+    bodyClient
+  );
+
   return (
     <DocsPage
       toc={isMarketing || isChangelog || isCollectionIndex ? undefined : toc}
@@ -72,11 +128,7 @@ export default async function SectionDocPage(props: PageProps) {
       footer={isMarketing || isPost ? { enabled: false } : undefined}
       tableOfContent={isMarketing || isChangelog || isCollectionIndex ? { enabled: false } : { footer: <DocsContributors pageTitle={page.data.title} /> }}
     >
-      <SectionDocBodyClient
-        collection={config.collection}
-        slugPromise={Promise.resolve({ slug: effectiveSlug })}
-        withProse
-      />
+      {bodyWithContext}
     </DocsPage>
   );
 }

@@ -1,10 +1,9 @@
 "use client";
 
-import { getPagesUnderRoute } from "@/lib/nextra-shim/context";
 import Link from "next/link";
 import Image from "next/image";
-import { type Page } from "@/lib/nextra-shim/nextra-types";
 import { useMemo, useRef } from "react";
+import { useWrappedData, type PageData } from "./WrappedDataContext";
 import { useInView } from "framer-motion";
 import { motion } from "framer-motion";
 import { WrappedSection } from "./components/WrappedSection";
@@ -295,9 +294,9 @@ export function Customers() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
-  const allStories = (
-    getPagesUnderRoute("/users") as Array<Page & { frontMatter: any }>
-  ).filter((page) => page.frontMatter?.showInCustomerIndex !== false);
+  const allStories = useWrappedData().usersPages.filter(
+    (page: PageData) => page.frontMatter?.showInCustomerIndex !== false,
+  ) as Array<CustomerStory>;
 
   // Match stories with companies
   const customerStories = companiesWithStories
