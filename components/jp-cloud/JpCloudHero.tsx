@@ -109,8 +109,8 @@ export function JpCloudHero() {
           transition={{ delay: 0.8, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <BilingualHeading
-            en="Your LLM engineering platform, hosted in Japan"
-            jp="日本でホストされるLLMエンジニアリングプラットフォーム"
+            en="LLM observability, prompt management & evaluation — hosted in Japan"
+            jp="LLMオブザーバビリティ・プロンプト管理・評価基盤を日本リージョンで提供"
             className="mt-6 text-base sm:text-lg lg:text-xl font-medium text-muted-foreground"
           />
         </motion.div>
