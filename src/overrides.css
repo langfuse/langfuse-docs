@@ -32,6 +32,37 @@
   --fd-sidebar-width: 360px;
 }
 
+/* Docs sidebar: scroll the entire sidebar as one unit instead of only the bottom nav tree.
+   By default Fumadocs makes only the SidebarViewport (ScrollArea) scroll. We make the
+   aside #nd-sidebar the scroll container and disable the inner ScrollArea. */
+#nd-docs-layout #nd-sidebar {
+  overflow-y: auto;
+}
+#nd-docs-layout #nd-sidebar > div.flex-1 {
+  flex: none;
+  overflow: visible;
+  min-height: 0;
+}
+/* Inner viewport: allow full height so the aside scrolls (Radix or first child of scroll area) */
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport],
+#nd-docs-layout #nd-sidebar > div.flex-1 > div:first-child,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport],
+#nd-sidebar-mobile > div.flex-1 > div:first-child {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Same full-sidebar scroll for mobile docs drawer */
+#nd-sidebar-mobile {
+  overflow-y: auto;
+}
+#nd-sidebar-mobile > div.flex-1 {
+  flex: none;
+  overflow: visible;
+  min-height: 0;
+}
+
 .layout-wrapper {
   max-width: 1440px;
   margin: 0 auto;
@@ -39,6 +70,15 @@
 }
 #nd-docs-layout #nd-sidebar[data-hovered="false"] {
   background-color: transparent;
+}
+
+/* External links in docs/section sidebars: show only the arrow after the text (label often has ↗).
+   Hide the leading external-link icon that Fumadocs adds so we don’t get "icon + text ↗".
+   Applies globally to all section sidebars (docs, integrations, self-hosting, guides, library)
+   since they share #nd-sidebar / #nd-sidebar-mobile. */
+#nd-docs-layout #nd-sidebar a[target="_blank"] > :first-child,
+#nd-sidebar-mobile a[target="_blank"] > :first-child {
+  display: none;
 }
 
 @media (min-width: 1440px) {
@@ -104,6 +144,12 @@ details > summary {
 li:has(> .subseparator) {
   margin: 0 !important;
   padding: 0 !important;
+}
+
+/* Sidebar subheadings (separator labels e.g. "Working at Langfuse", "Chapters", "Resources") */
+#nd-docs-layout #nd-sidebar li > p,
+#nd-sidebar-mobile li > p {
+  font-weight: 700;
 }
 
 /* Steps component: increment counter and render numbered circles centered on the left border line.

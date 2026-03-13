@@ -20,7 +20,7 @@ const FumadocsTabsList = React.forwardRef<
   <FumadocsTabsListPrimitive
     ref={ref}
     className={cn(
-      "flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose",
+      "flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose bg-muted rounded-t-lg",
       className
     )}
     {...props}
@@ -36,7 +36,7 @@ const FumadocsTabsTrigger = React.forwardRef<
     ref={ref}
     value={value}
     className={cn(
-      "inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary",
+      "inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b-2 border-transparent py-2 text-sm font-medium transition-colors hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary data-[state=active]:font-medium",
       className
     )}
     {...props}
@@ -62,17 +62,29 @@ const CardComponent = ({
   href?: string;
   icon?: React.ReactNode;
   arrow?: boolean;
-} & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-  <a
-    href={href}
-    className={cn("block rounded-lg border p-4 hover:border-primary", className)}
-    {...rest}
-  >
-    {icon && <span className="mb-2 block">{icon}</span>}
-    {title && <h3 className="font-semibold">{title}</h3>}
-    {children}
-  </a>
-);
+} & React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+  const isRowLayout = className?.includes("flex-row");
+  return (
+    <a
+      href={href}
+      className={cn("block rounded-lg border p-4 hover:border-primary", className)}
+      {...rest}
+    >
+      {icon && (
+        <span
+          className={cn(
+            "shrink-0",
+            !isRowLayout && "mb-2 block"
+          )}
+        >
+          {icon}
+        </span>
+      )}
+      {title && <h3 className="font-semibold">{title}</h3>}
+      {children}
+    </a>
+  );
+};
 
 /** Wrapper for card grids; accepts num (columns) and does not forward it to the DOM. */
 export function Cards({
@@ -111,7 +123,7 @@ export const Tab = ({
   return (
     <FumadocsTabsContent
       value={value!}
-      className={cn("p-4 prose-no-margin", className)}
+      className={cn("p-4 prose-no-margin bg-background rounded-b-lg", className)}
       {...props}
     >
       {children}
@@ -185,7 +197,7 @@ export function Tabs({
     <FumadocsTabs
       value={value}
       onValueChange={onValueChange}
-      className="flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4"
+      className="flex flex-col overflow-hidden rounded-xl border border-border my-4"
     >
       <FumadocsTabsList>
         {items.map((item, i) => (
