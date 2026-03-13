@@ -1,8 +1,8 @@
-import base64
 import logging
 import os
 
 from dotenv import load_dotenv
+from langfuse import Langfuse
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.util.types import AttributeValue
 
@@ -28,27 +28,18 @@ logger = logging.getLogger("langfuse-trace-example")
 
 load_dotenv()
 
-# This example shows how to use the langfuse tracer to trace the agent session.
+# This example shows how to use the Langfuse SDK to capture OTel spans emitted by LiveKit.
+# The Langfuse Python SDK registers a LangfuseSpanProcessor on the TracerProvider which
+# handles batching, auth, and export. We pass should_export_span=lambda span: True so that
+# all LiveKit spans are captured (the default filter only exports known LLM/GenAI spans).
 # To enable tracing, set the trace provider with `set_tracer_provider` in the module level or
 # inside the entrypoint before the `AgentSession.start()`.
-
-
-def _make_langfuse_exporter(host: str, public_key: str, secret_key: str):
-    """Create an OTLPSpanExporter configured for a single Langfuse instance."""
-    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-
-    auth = base64.b64encode(f"{public_key}:{secret_key}".encode()).decode()
-    return OTLPSpanExporter(
-        endpoint=f"{host.rstrip('/')}/api/public/otel/v1/traces",
-        headers={"Authorization": f"Basic {auth}"},
-    )
 
 
 def setup_langfuse(
     metadata: dict[str, AttributeValue] | None = None,
 ) -> TracerProvider:
     from opentelemetry.sdk.trace import SpanProcessor
-    from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
     eu_host = os.getenv("NEXT_PUBLIC_EU_LANGFUSE_BASE_URL")
     eu_public_key = os.getenv("NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY")
@@ -81,15 +72,24 @@ def setup_langfuse(
 
     trace_provider = TracerProvider()
     trace_provider.add_span_processor(LangfuseAttributeSpanProcessor())
-    trace_provider.add_span_processor(
-        BatchSpanProcessor(_make_langfuse_exporter(eu_host, eu_public_key, eu_secret_key))
-    )
-    trace_provider.add_span_processor(
-        BatchSpanProcessor(_make_langfuse_exporter(us_host, us_public_key, us_secret_key))
-    )
-    trace_provider.add_span_processor(
-        BatchSpanProcessor(_make_langfuse_exporter(jp_host, jp_public_key, jp_secret_key))
-    )
+
+    # Initialize a Langfuse client per region. Each call registers a LangfuseSpanProcessor
+    # on the shared TracerProvider, handling batching/auth/export to the respective region.
+    # should_export_span=lambda span: True bypasses the default LLM-only filter so that
+    # all LiveKit agent spans (STT, TTS, LLM, turn detection, etc.) are captured.
+    for host, public_key, secret_key in [
+        (eu_host, eu_public_key, eu_secret_key),
+        (us_host, us_public_key, us_secret_key),
+        (jp_host, jp_public_key, jp_secret_key),
+    ]:
+        Langfuse(
+            public_key=public_key,
+            secret_key=secret_key,
+            base_url=host,
+            tracer_provider=trace_provider,
+            should_export_span=lambda span: True,
+        )
+
     set_tracer_provider(trace_provider, metadata=metadata)
     return trace_provider
 

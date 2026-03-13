@@ -317,19 +317,6 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
           Powered by LiveKit Agents. All voice interactions are traced in the
           public example project.
         </p>
-        <p className="mt-1 text-xs text-muted-foreground text-center relative z-10 italic">
-          Note: LiveKit traces are delayed by approximately 10 minutes in the
-          new{" "}
-          <a
-            href="/blog/2026-03-10-simplify-langfuse-for-scale"
-            className="underline hover:text-foreground"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Fast View (preview)
-          </a>
-          .
-        </p>
       </div>
     </div>
   );
