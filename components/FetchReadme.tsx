@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Playground } from "@/lib/nextra-shim/components";
+import { RenderedReadmeContent } from "@/components/RenderedReadmeContent";
 
 export function FetchReadme({ url }: { url: string }) {
   const [content, setContent] = useState<string | null>(null);
@@ -16,5 +16,5 @@ export function FetchReadme({ url }: { url: string }) {
 
   if (error) return <p>Error loading content: {error}</p>;
   if (content === null) return <p>Loading…</p>;
-  return <Playground source={content} />;
+  return <RenderedReadmeContent content={content} />;
 }

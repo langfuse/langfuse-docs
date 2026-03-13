@@ -223,7 +223,7 @@ export const IntegrationIndex = () => {
                         className="flex flex-row items-center justify-start gap-2"
                         icon={
                           (page as any).frontMatter?.logo ? (
-                            <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
+                            <div className="w-6 h-6 shrink-0 dark:bg-white rounded-sm p-1 flex items-center justify-center">
                               <img
                                 src={(page as any).frontMatter.logo}
                                 alt=""
@@ -255,7 +255,7 @@ export const IntegrationIndex = () => {
                     className="flex flex-row items-center justify-start gap-2"
                     icon={
                       page.frontMatter?.logo ? (
-                        <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
+                        <div className="w-6 h-6 shrink-0 dark:bg-white rounded-sm p-1 flex items-center justify-center">
                           <img
                             src={page.frontMatter.logo}
                             alt=""

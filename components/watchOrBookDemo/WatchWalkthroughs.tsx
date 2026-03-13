@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { WALKTHROUGH_TABS } from "./constants";
 import { BookOpen, ExternalLink } from "lucide-react";
@@ -32,6 +32,7 @@ function VideoPlayer({ videoId, title }: VideoPlayerProps) {
 
 function WatchWalkthroughsInner({ className }: { className?: string }) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const tab = searchParams.get("tab");
@@ -43,7 +44,7 @@ function WatchWalkthroughsInner({ className }: { className?: string }) {
   const handleTabChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", value);
-    router.replace(`?${params.toString()}`);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return (

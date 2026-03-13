@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { RenderedReadmeContent } from "@/components/RenderedReadmeContent";
 
 /**
  * Fetches and renders the cursor-langfuse README from GitHub at runtime.
- * Replaces the old Nextra getStaticProps/useData pattern.
+ * Renders as formatted markdown (headings, lists, tables) like the integration docs.
  */
 export function CursorLangfuseReadme() {
   const [content, setContent] = useState<string | null>(null);
@@ -23,11 +24,10 @@ export function CursorLangfuseReadme() {
   }, []);
 
   if (error) return <p>Error loading README content.</p>;
-  if (!content) return <p className="text-sm text-muted-foreground">Loading README…</p>;
+  if (!content)
+    return (
+      <p className="text-sm text-muted-foreground">Loading README…</p>
+    );
 
-  return (
-    <pre className="p-4 overflow-auto rounded-lg border bg-muted/50 text-sm max-h-[70vh]">
-      <code>{content}</code>
-    </pre>
-  );
+  return <RenderedReadmeContent content={content} />;
 }
