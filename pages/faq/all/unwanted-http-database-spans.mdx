@@ -16,23 +16,25 @@ You can often recognize these spans by their names: `GET /api/...`, `sql`, `put_
 
 ## Why this happens
 
-The Langfuse SDKs (Python v3+, JS/TS v4+) are built on [OpenTelemetry (OTEL)](https://opentelemetry.io/). By default, the SDK attaches to the [**global TracerProvider**](/faq/all/existing-otel-setup#global-tracer-provider), which is a single hub that all OTEL-instrumented libraries in your app share. Every span from every library flows through every processor attached to that provider. There's no automatic filtering, so Langfuse can't tell the difference between an LLM call and a database query.
+The Langfuse SDKs are built on [OpenTelemetry (OTEL)](https://opentelemetry.io/). The SDK attaches to the [**global TracerProvider**](/faq/all/existing-otel-setup#global-tracer-provider), which is a single hub that all OTEL-instrumented libraries in your app share. Every span from every library flows through every processor attached to that provider.
+
+The Python v3 and JS/TS v4 SDKs have no automatic filtering — Langfuse exports all spans it receives, including HTTP requests, database queries, and framework internals. This issue is resolved in the Python v4+ and JS/TS v5+ SDKs, which apply a [default span filter](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) that automatically drops non-LLM spans.
 
 ```
 ┌────────────────────────────────────────────────┐
-│            Global TracerProvider                │
-│                                                 │
-│  All spans from all libraries:                  │
+│            Global TracerProvider               │
+│                                                │
+│  All spans from all libraries:                 │
 │  ├── LLM calls (OpenAI, Anthropic, ...)    ✅  │
 │  ├── HTTP requests (axios, fetch, ...)     ❌  │
 │  ├── Database queries (SQL, Redis, ...)    ❌  │
 │  └── Framework spans (FastAPI, Express)    ❌  │
-│                                                 │
-│  → ALL of these get sent to Langfuse            │
+│                                                │
+│  → ALL of these get sent to Langfuse           │
 └────────────────────────────────────────────────┘
 ```
 
-This typically happens when:
+If you're on the Python v4+ or JS/TS v5+ SDKs, this problem should not occur as these versions filter out non-LLM spans by default. On older SDK versions, this typically happens when:
 
 - You're using OTEL auto-instrumentation (e.g. `getNodeAutoInstrumentations()` in JS or Python auto-instrumentation), which automatically instruments every library it can find, including HTTP clients, databases, and web frameworks. See [unwanted spans in Langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse).
 - Another observability tool (Sentry, Datadog, Logfire) already set up the global TracerProvider, and Langfuse is attached to it too. See [using Langfuse with an existing OTEL setup](/faq/all/existing-otel-setup) or [with Sentry](/faq/all/existing-sentry-setup).
@@ -42,7 +44,32 @@ For a deeper explanation of how the global TracerProvider works and how multiple
 
 ## How to fix it
 
-You need to tell Langfuse which spans to keep and which to ignore. Each span carries an **instrumentation scope**, a label identifying which library created it. You can [filter on these](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
+### Upgrade to the latest SDKs (recommended)
+
+The Langfuse Python SDK v4+ and JS/TS SDK v5+ apply a **default span filter** that automatically keeps only LLM-related spans and drops HTTP, database, and framework spans — no configuration needed. See [Filtering by Instrumentation Scope](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) for full details on what the default filter keeps and how to customize it.
+
+```python
+# Python v4+ — smart default filter, no configuration needed
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+```
+
+```typescript
+// JS/TS v5+ — smart default filter, no configuration needed
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+
+### Customize filtering
+
+If the default filter doesn't match your needs, you can customize which spans are exported. Each span carries an **instrumentation scope**, a label identifying which library created it.
 
 To find the scope name of a span, click on any observation in the Langfuse UI and look for `metadata.scope.name`.
 
@@ -50,53 +77,41 @@ To find the scope name of a span, click on any observation in the Langfuse UI an
 
 <Tab>
 
-**Block specific scopes** you don't want:
+**Compose with the default filter** to add additional scopes:
 
 ```python
 from langfuse import Langfuse
+from langfuse.span_filter import is_default_export_span
 
 langfuse = Langfuse(
-    blocked_instrumentation_scopes=[
-        # HTTP clients
-        "opentelemetry.instrumentation.requests",
-        "opentelemetry.instrumentation.httpx",
-
-        # Web frameworks
-        "opentelemetry.instrumentation.fastapi",
-        "opentelemetry.instrumentation.starlette",
-        "flask",
-        "django",
-
-        # Databases
-        "sqlalchemy",
-        "psycopg",
-        "psycopg2",
-    ]
+    should_export_span=lambda span: (
+        is_default_export_span(span)
+        or (
+            span.instrumentation_scope is not None
+            and span.instrumentation_scope.name.startswith("my_framework")
+        )
+    )
 )
+```
+
+Or **export everything** (not recommended):
+
+```python
+langfuse = Langfuse(should_export_span=lambda span: True)
 ```
 
 </Tab>
 
 <Tab>
 
-**Allow only LLM-related scopes** (recommended for JS/TS):
+**Compose with the default filter** to add additional scopes:
 
 ```typescript
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { isDefaultExportSpan, type ShouldExportSpan } from "@langfuse/otel";
 
-const allowedScopes = ["langfuse-sdk", "ai", "openai", "@ai-sdk/openai"];
-
-const sdk = new NodeSDK({
-  spanProcessors: [
-    new LangfuseSpanProcessor({
-      shouldExportSpan: ({ otelSpan }) =>
-        allowedScopes.includes(otelSpan.instrumentationScope.name),
-    }),
-  ],
-});
-
-sdk.start();
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  isDefaultExportSpan(otelSpan) ||
+  otelSpan.instrumentationScope.name.startsWith("my-framework");
 ```
 
 Or **block specific scopes**:
@@ -114,7 +129,7 @@ new LangfuseSpanProcessor({
 
 </LangTabs>
 
-For the full list of filtering options, see the [SDK advanced features docs](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope). The exact scope names depend on the libraries you use, so always check `metadata.scope.name` in the Langfuse UI to confirm which scopes to filter.
+For the full list of filtering options and helper functions, see the [SDK advanced features docs](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope). The exact scope names depend on the libraries you use, so always check `metadata.scope.name` in the Langfuse UI to confirm which scopes to filter.
 
 <Callout type="warning" title="Filtering can cause orphaned traces">
   If you filter out a parent span (e.g. a FastAPI request that wraps your LLM call), its children will appear as disconnected top-level traces. See [orphaned traces](/faq/all/existing-otel-setup#orphaned-traces) for workarounds.
