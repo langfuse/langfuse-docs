@@ -119,7 +119,6 @@ export const handler = async (req: Request) => {
             { output: latestText },
             { asType: "generation" },
           );
-          setActiveTraceIO({ output: latestText });
           trace.getActiveSpan().end();
         },
       });
@@ -138,6 +137,7 @@ export const handler = async (req: Request) => {
 export const POST = observe(handler, {
   name: "handle-chatbot-message",
   endOnExit: false, // end after stream has finished
+  asType: "agent",
 });
 
 export const maxDuration = 30;

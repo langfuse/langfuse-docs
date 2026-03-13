@@ -53,6 +53,11 @@ const usLangfuseWebClient = new LangfuseWeb({
   baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
 });
 
+const jpLangfuseWebClient = new LangfuseWeb({
+  publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
+  baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
+});
+
 type ChatProps = HTMLAttributes<HTMLDivElement>;
 
 export const Chat = ({ className, ...props }: ChatProps) => {
@@ -121,7 +126,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
     setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
 
     // Send feedback to Langfuse
-    for (const client of [eulangfuseWebClient, usLangfuseWebClient]) {
+    for (const client of [eulangfuseWebClient, usLangfuseWebClient, jpLangfuseWebClient]) {
       client.score({
         traceId: messageId,
         id: `user-feedback-${messageId}`,

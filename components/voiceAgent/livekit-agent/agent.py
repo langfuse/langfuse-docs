@@ -58,10 +58,16 @@ def setup_langfuse(
     us_public_key = os.getenv("NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY")
     us_secret_key = os.getenv("US_LANGFUSE_SECRET_KEY")
 
+    jp_host = os.getenv("NEXT_PUBLIC_JP_LANGFUSE_BASE_URL")
+    jp_public_key = os.getenv("NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY")
+    jp_secret_key = os.getenv("JP_LANGFUSE_SECRET_KEY")
+
     if not all([eu_host, eu_public_key, eu_secret_key]):
         raise ValueError("EU Langfuse env vars must be set: NEXT_PUBLIC_EU_LANGFUSE_BASE_URL, NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY, EU_LANGFUSE_SECRET_KEY")
     if not all([us_host, us_public_key, us_secret_key]):
         raise ValueError("US Langfuse env vars must be set: NEXT_PUBLIC_US_LANGFUSE_BASE_URL, NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY, US_LANGFUSE_SECRET_KEY")
+    if not all([jp_host, jp_public_key, jp_secret_key]):
+        raise ValueError("JP Langfuse env vars must be set: NEXT_PUBLIC_JP_LANGFUSE_BASE_URL, NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY, JP_LANGFUSE_SECRET_KEY")
 
     class LangfuseAttributeSpanProcessor(SpanProcessor):
         """Adds Langfuse trace attributes to every span."""
@@ -80,6 +86,9 @@ def setup_langfuse(
     )
     trace_provider.add_span_processor(
         BatchSpanProcessor(_make_langfuse_exporter(us_host, us_public_key, us_secret_key))
+    )
+    trace_provider.add_span_processor(
+        BatchSpanProcessor(_make_langfuse_exporter(jp_host, jp_public_key, jp_secret_key))
     )
     set_tracer_provider(trace_provider, metadata=metadata)
     return trace_provider
