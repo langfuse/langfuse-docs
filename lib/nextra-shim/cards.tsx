@@ -25,7 +25,7 @@ const CardComponent = ({
     className={cn("block rounded-lg border p-4 hover:border-primary", className)}
     {...rest}
   >
-    {icon && <span className="mb-2 block">{icon}</span>}
+    {icon && <span className="block">{icon}</span>}
     {title && <h3 className="font-semibold">{title}</h3>}
     {children}
   </a>

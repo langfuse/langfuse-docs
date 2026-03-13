@@ -21,7 +21,7 @@ const FumadocsTabsList = React.forwardRef<
   <FumadocsTabsListPrimitive
     ref={ref}
     className={cn(
-      "flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose",
+      "flex overflow-x-auto overflow-y-hidden flex-nowrap gap-1 px-4 pt-1 rounded-t-xl border-b text-muted-foreground not-prose bg-muted/50 border-border min-h-11",
       className
     )}
     {...props}
@@ -37,7 +37,7 @@ const FumadocsTabsTrigger = React.forwardRef<
     ref={ref}
     value={value}
     className={cn(
-      "inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary",
+      "inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-2 border-transparent px-2.5 pb-2 pt-1.5 -mb-px text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-muted-blue data-[state=active]:text-muted-blue data-[state=active]:font-medium",
       className
     )}
     {...props}
@@ -97,7 +97,7 @@ export function TabsClient({
     <FumadocsTabs
       value={value}
       onValueChange={onValueChange}
-      className="flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4"
+      className="flex overflow-hidden flex-col my-4 rounded-xl border border-border bg-card"
     >
       <FumadocsTabsList>
         {items.map((item, i) => (
@@ -138,7 +138,7 @@ export const FileTreeFolder = ({
         </svg>
         <svg
           viewBox="0 0 16 16"
-          className="h-4 w-4 shrink-0 text-muted-foreground"
+          className="w-4 h-4 shrink-0 text-muted-foreground"
           fill="currentColor"
         >
           <path d="M1.75 1A1.75 1.75 0 000 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0016 13.25v-8.5A1.75 1.75 0 0014.25 3H7.5L6.25 1h-4.5z" />

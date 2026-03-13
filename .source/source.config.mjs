@@ -26,7 +26,8 @@ var changelogFrontmatterSchema = baseFrontmatterSchema.extend({
   date: yamlDateField,
   author: z.string().nullish(),
   ogImage: z.string().nullish(),
-  ogVideo: z.string().nullish()
+  ogVideo: z.string().nullish(),
+  badge: z.string().nullish()
 });
 var customerFrontmatterSchema = baseFrontmatterSchema.extend({
   // Use .nullish() so empty YAML values (parsed as null) are accepted too

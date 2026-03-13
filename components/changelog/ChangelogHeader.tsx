@@ -42,7 +42,7 @@ export const ChangelogHeader = () => {
       </Link>
 
       <div>
-        <div className="text-lg text-primary/60 mb-3">
+        <div className="flex flex-wrap items-center gap-2 text-lg text-primary/60 mb-3">
           {date &&
             new Date(date).toLocaleDateString("en-US", {
               year: "numeric",
@@ -50,7 +50,11 @@ export const ChangelogHeader = () => {
               day: "numeric",
               timeZone: "UTC",
             })}
-          {!!badge && ` | ${badge}`}
+          {!!badge && (
+            <span className="inline-block px-2 py-1 text-xs font-bold rounded-md bg-muted text-muted-foreground">
+              {badge}
+            </span>
+          )}
         </div>
         <div className="flex flex-col gap-5 md:gap-10 md:flex-row justify-between md:items-center">
           <div>

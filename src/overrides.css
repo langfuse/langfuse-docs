@@ -72,6 +72,25 @@
   background-color: transparent;
 }
 
+/* Reduce height (less padding) of sidebar nav items */
+#nd-docs-layout #nd-sidebar a,
+#nd-docs-layout #nd-sidebar button,
+#nd-sidebar-mobile a,
+#nd-sidebar-mobile button {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  min-height: unset !important;
+}
+#nd-docs-layout #nd-sidebar ul li,
+#nd-sidebar-mobile ul li {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+#nd-docs-layout #nd-sidebar ul,
+#nd-sidebar-mobile ul {
+  gap: 0 !important;
+}
+
 /* External links in docs/section sidebars: show only the arrow after the text (label often has ↗).
    Hide the leading external-link icon that Fumadocs adds so we don’t get "icon + text ↗".
    Applies globally to all section sidebars (docs, integrations, self-hosting, guides, library)
@@ -148,8 +167,10 @@ li:has(> .subseparator) {
 
 /* Sidebar subheadings (separator labels e.g. "Working at Langfuse", "Chapters", "Resources") */
 #nd-docs-layout #nd-sidebar li > p,
-#nd-sidebar-mobile li > p {
-  font-weight: 700;
+#nd-sidebar-mobile li > p,
+#nd-docs-layout #nd-sidebar .subseparator,
+#nd-sidebar-mobile .subseparator {
+  font-weight: 700 !important;
 }
 
 /* Steps component: increment counter and render numbered circles centered on the left border line.

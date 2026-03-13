@@ -190,6 +190,12 @@ const nextConfig = {
       // Run BEFORE Next serves pages/public files so it can override HTML routes
       // when the client explicitly asks for markdown.
       beforeFiles: [
+        // /support.md → raw markdown from the Support page (content/marketing/support.mdx → md-src/marketing/support.md)
+        {
+          source: "/support.md",
+          destination: "/md-src/marketing/support.md",
+        },
+
         // Optional: make "/" negotiable too (remove if you don't have md-src/index.md)
         {
           source: "/",

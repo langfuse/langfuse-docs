@@ -34,13 +34,14 @@ const blogFrontmatterSchema = baseFrontmatterSchema.extend({
   showInBlogIndex: z.boolean().nullish(),
 });
 
-// Extended schema for changelog pages — adds date, author, ogImage, ogVideo fields
-// that the Changelog widget reads from frontMatter.
+// Extended schema for changelog pages — adds date, author, ogImage, ogVideo, badge
+// that the Changelog widget and ChangelogHeader read from frontMatter.
 const changelogFrontmatterSchema = baseFrontmatterSchema.extend({
   date: yamlDateField,
   author: z.string().nullish(),
   ogImage: z.string().nullish(),
   ogVideo: z.string().nullish(),
+  badge: z.string().nullish(),
 });
 
 // Extended schema for customer story pages — preserves all default fields and

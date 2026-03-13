@@ -29,7 +29,7 @@ export const Tab = ({
   return (
     <FumadocsTabsContent
       value={value!}
-      className={cn("p-4 prose-no-margin", className)}
+      className={cn("p-4 prose-no-margin bg-background rounded-b-xl", className)}
       {...props}
     >
       {children}

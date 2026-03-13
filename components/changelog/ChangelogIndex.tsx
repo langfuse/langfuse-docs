@@ -146,7 +146,7 @@ export const ChangelogIndex = ({
                 })
                 : null}
               {page.frontMatter?.badge && (
-                <div className="hidden px-2 py-1 mb-5 text-xs font-bold rounded-sm md:inline-block bg-primary/10 text-primary">
+                <div className="inline-block px-2 py-1 mt-2 mb-5 text-xs font-bold rounded-md bg-muted text-muted-foreground">
                   {page.frontMatter.badge}
                 </div>
               )}

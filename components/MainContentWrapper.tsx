@@ -38,7 +38,10 @@ const pathsWithoutFooterWidgets = [
   "/imprint",
   "/blog",
   "/users",
+  "/support",
+  "/about",
   "/careers",
+  "/press",
   "/watch-demo",
 ];
 const pathsWithCopyAsMarkdownButton = [
