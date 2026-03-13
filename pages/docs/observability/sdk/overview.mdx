@@ -359,7 +359,7 @@ graph TD
 - **Context Propagation**: OpenTelemetry automatically handles the propagation of the current trace and span context. This means when you call another function (whether it's also traced by Langfuse, an OTel-instrumented library, or a manually created span), the new span will automatically become a child of the currently active span, forming a correct trace hierarchy.
 - [**Attribute Propagation**](/docs/observability/sdk/instrumentation#add-attributes-to-observations): Certain trace attributes (`user_id`, `session_id`, `metadata`, `version`, `tags`) can be automatically propagated to all child observations using `propagate_attributes()`. This ensures consistent attribute coverage across all observations in a trace. See the [instrumentation docs](/docs/observability/sdk/python/instrumentation#propagating-trace-attributes) for details.
 
-The Langfuse SDKs provides wrappers around OTel spans ([`LangfuseSpan`](https://python.reference.langfuse.com/langfuse#LangfuseSpan), [`LangfuseGeneration`](https://python.reference.langfuse.com/langfuse#LangfuseGeneration)) that offer convenient methods for interacting with Langfuse-specific features like scoring and media handling, while still being native OTel spans under the hood. You can also use these wrapper objects to add Langfuse trace attributes via [`update_trace()`](https://python.reference.langfuse.com/langfuse#LangfuseEvent.update) or use [`propagate_attributes()`](https://python.reference.langfuse.com/langfuse#propagate_attributes) for automatic propagation to all child observations.
+The Langfuse SDKs provide wrappers around OTel spans ([`LangfuseSpan`](https://python.reference.langfuse.com/langfuse#LangfuseSpan), [`LangfuseGeneration`](https://python.reference.langfuse.com/langfuse#LangfuseGeneration)) that offer convenient methods for interacting with Langfuse-specific features like scoring and media handling, while still being native OTel spans under the hood. You can also use these wrapper objects to add Langfuse trace attributes via [`update_trace()`](https://python.reference.langfuse.com/langfuse#LangfuseEvent.update) or use [`propagate_attributes()`](https://python.reference.langfuse.com/langfuse#propagate_attributes) for automatic propagation to all child observations.
 
 ## Learn more
 
@@ -406,12 +406,13 @@ The Langfuse SDKs provides wrappers around OTel spans ([`LangfuseSpan`](https://
 
 ## Other languages
 
-Langfuse mantains SDKs for Python and JavaScript/TypeScript. For other languages, you can use our [OpenTelemetry endpoint](/integrations/native/opentelemetry) to instrument your application and use the [public API](/docs/api-and-data-platform/features/public-api) to use Langfuse prompt management, evaluation and querying.
+Langfuse maintains SDKs for Python and JavaScript/TypeScript. For other languages, you can use our [OpenTelemetry endpoint](/integrations/native/opentelemetry) to instrument your application and use the [public API](/docs/api-and-data-platform/features/public-api) to use Langfuse prompt management, evaluation, and querying.
 
 ### Instrumentation
 
-To instrument your application, you can send OpenTelemetry spans to the [Langfuse OTel endpoint](/integrations/native/opentelemetry). For this you can use the following OpenTelemetry SDKs:
+To instrument your application, you can send OpenTelemetry spans to the [Langfuse OTel endpoint](/integrations/native/opentelemetry). For this, you can use the following OpenTelemetry SDKs:
 
+- [JetBrains Tracy for Kotlin/Java](https://github.com/JetBrains/tracy)
 - [OpenTelemetry Java](https://opentelemetry.io/docs/languages/java/)
 - [OpenTelemetry .NET](https://opentelemetry.io/docs/languages/net/)
 - [OpenTelemetry Go](https://opentelemetry.io/docs/languages/go/)
@@ -422,6 +423,6 @@ To instrument your application, you can send OpenTelemetry spans to the [Langfus
 - [OpenTelemetry Rust](https://opentelemetry.io/docs/languages/rust/)
 - [OpenTelemetry Swift](https://opentelemetry.io/docs/languages/swift/)
 
-### Prompt management, evaluation and querying:
+### Prompt management, evaluation, and querying:
 
-To use other Langfuse features, you can use the [public API](/docs/api-and-data-platform/features/public-api) integrate Langfuse from any runtime. We also provide a list of community maintained SDKs [here](https://github.com/langfuse/langfuse-examples?tab=readme-ov-file#community-maintained-sdks).
+To use other Langfuse features, you can use the [public API](/docs/api-and-data-platform/features/public-api) to integrate Langfuse from any runtime. We also provide a list of community-maintained SDKs [here](https://github.com/langfuse/langfuse-examples?tab=readme-ov-file#community-maintained-sdks).

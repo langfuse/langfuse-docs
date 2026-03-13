@@ -15,6 +15,14 @@ export default {
       layout: "raw",
     },
   },
+  "jp-cloud": {
+    type: "page",
+    title: "Langfuse Cloud Japan Region",
+    display: "hidden",
+    theme: {
+      layout: "raw",
+    },
+  },
   imprint: {
     title: "Imprint",
     type: "page",

@@ -52,6 +52,10 @@ import ArchitectureDescription from "@/components-mdx/architecture-description-v
 
 <ArchitectureDescription />
 
+## Timezone Requirement
+
+All infrastructure components (ClickHouse and Postgres) **must** run with their timezone set to UTC. Non-UTC timezones will cause queries to return incorrect or empty results. See the [timezone troubleshooting FAQ](/faq/all/self-hosting-timezone-errors) for how to verify this.
+
 ## Optimized for performance, reliability, and uptime
 
 Langfuse self-hosted is optimized for production environments. It is the exact same codebase as Langfuse Cloud, just deployed on your own infrastructure. The Langfuse teams serves thousands of teams with Langfuse Cloud with high availability ([status page](https://status.langfuse.com)) and performance.
