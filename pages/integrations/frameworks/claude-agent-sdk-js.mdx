@@ -51,21 +51,31 @@ Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); // 🇪🇺 EU 
 
 Set up the OpenTelemetry SDK with the `LangfuseSpanProcessor` and the [`ClaudeAgentSDKInstrumentation`](https://github.com/Arize-ai/openinference/tree/main/js/packages/openinference-instrumentation-claude-agent-sdk) from OpenInference. The instrumentation automatically captures agent runs and tool calls, sending them as OpenTelemetry spans to Langfuse.
 
-Since the Claude Agent SDK is ESM-only, you must use `manuallyInstrument()` instead of relying on auto-instrumentation.
+We also provide a custom [`shouldExportSpan`](https://langfuse.com/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) filter to include spans from the `@arizeai/openinference-instrumentation-claude-agent-sdk` instrumentation scope alongside the default Langfuse filter.
 
 
 ```typescript
 import { NodeSDK } from "npm:@opentelemetry/sdk-node";
-import { LangfuseSpanProcessor } from "npm:@langfuse/otel";
+import { LangfuseSpanProcessor, isDefaultExportSpan } from "npm:@langfuse/otel";
 import { ClaudeAgentSDKInstrumentation } from "npm:@arizeai/openinference-instrumentation-claude-agent-sdk";
 
-import * as ClaudeAgentSDK from "npm:@anthropic-ai/claude-agent-sdk";
+import * as ClaudeAgentSDKModule from "npm:@anthropic-ai/claude-agent-sdk";
+
+// Create mutable copy — Deno's ESM namespace objects are read-only
+const ClaudeAgentSDK = { ...ClaudeAgentSDKModule };
 
 const instrumentation = new ClaudeAgentSDKInstrumentation();
 instrumentation.manuallyInstrument(ClaudeAgentSDK);
 
 const sdk = new NodeSDK({
-  spanProcessors: [new LangfuseSpanProcessor()],
+  spanProcessors: [
+    new LangfuseSpanProcessor({
+      shouldExportSpan: ({ otelSpan }) =>
+        isDefaultExportSpan(otelSpan) ||
+        otelSpan.instrumentationScope.name ===
+          "@arizeai/openinference-instrumentation-claude-agent-sdk",
+    }),
+  ],
   instrumentations: [instrumentation],
 });
 
@@ -83,7 +93,7 @@ const { query } = ClaudeAgentSDK;
 for await (const message of query({
   prompt: "What is the capital of France? Answer in a single sentence.",
   options: {
-    model: "claude-sonnet-4-5-20250514",
+    model: "claude-sonnet-4-5",
   },
 })) {
   if (message.type === "assistant") {
@@ -99,7 +109,6 @@ await sdk.shutdown();
 After running the agent, navigate to your Langfuse Trace Table. You will find detailed traces of the agent's execution, providing insights into every agent step, tool call, input, output, and performance metric.
 
 ![Claude Agent SDK JS/TS example trace in Langfuse](https://langfuse.com/images/cookbook/integration_claude_agent_sdk/claude-agent-sdk-js-example-trace.png)
-
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more-js.mdx";
