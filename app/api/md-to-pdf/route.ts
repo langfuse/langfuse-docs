@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { marked } from "marked";
 
+// Force Node.js runtime (required for Puppeteer/Chromium — not compatible with Edge runtime)
+export const runtime = "nodejs";
+// Allow up to 60 s for PDF generation (default 10 s is too short for Chromium startup)
+export const maxDuration = 60;
+
 const ALLOWED_HOSTNAMES = [
   "langfuse.com",
   "raw.githubusercontent.com",
@@ -52,6 +57,21 @@ export async function GET(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    // For langfuse.com page URLs (not already ending in .md/.mdx), rewrite to
+    // the raw-markdown endpoint: /path → /path.md (served from public/md-src/).
+    const isLangfuseHost =
+      markdownUrl.hostname === "langfuse.com" ||
+      markdownUrl.hostname === "localhost" ||
+      markdownUrl.hostname === "127.0.0.1";
+    if (
+      isLangfuseHost &&
+      !markdownUrl.pathname.endsWith(".md") &&
+      !markdownUrl.pathname.endsWith(".mdx")
+    ) {
+      markdownUrl = new URL(markdownUrl.toString());
+      markdownUrl.pathname = markdownUrl.pathname.replace(/\/$/, "") + ".md";
     }
 
     const response = await fetch(markdownUrl.toString());

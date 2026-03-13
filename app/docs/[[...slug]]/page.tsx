@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { source } from "@/lib/source";
-import { buildOgImageUrl } from "@/lib/og-url";
+import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { DocBodyClient } from "./DocBodyClient";
 import { DocsContributors } from "@/components/DocsContributors";
+import { DocBodyChrome } from "@/components/DocBodyChrome";
+import { getMDXComponents } from "@/mdx-components";
+import type { ComponentType } from "react";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
@@ -18,6 +20,7 @@ export default async function DocPage(props: PageProps) {
   if (!page) notFound();
 
   const { toc } = page.data;
+  const MDX = page.data.body as ComponentType<{ components?: Record<string, ComponentType> }>;
 
   return (
     <DocsPage
@@ -25,7 +28,9 @@ export default async function DocPage(props: PageProps) {
       breadcrumb={{ includePage: true, includeRoot: true }}
       tableOfContent={{ footer: <DocsContributors pageTitle={page.data.title} /> }}
     >
-      <DocBodyClient slugPromise={props.params} />
+      <DocBodyChrome>
+        <MDX components={getMDXComponents()} />
+      </DocBodyChrome>
     </DocsPage>
   );
 }
@@ -38,15 +43,23 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     return {
       title: "Not Found",
     };
+  const pageData = page.data as typeof page.data & {
+    canonical?: string | null;
+    seoTitle?: string | null;
+  };
+  const pagePath = `/docs${slug.length > 0 ? `/${slug.join("/")}` : ""}`;
+  const canonicalUrl = pageData.canonical ?? buildPageUrl(pagePath);
+  const seoTitle = pageData.seoTitle || page.data.title;
   const ogImage = buildOgImageUrl({
-    title: page.data.title,
+    title: seoTitle,
     description: page.data.description,
     section: "Docs",
   });
   return {
-    title: page.data.title,
+    title: seoTitle,
     description: page.data.description ?? undefined,
-    openGraph: { images: [{ url: ogImage }] },
+    alternates: { canonical: canonicalUrl },
+    openGraph: { images: [{ url: ogImage }], url: canonicalUrl },
     twitter: { images: [{ url: ogImage }] },
   };
 }

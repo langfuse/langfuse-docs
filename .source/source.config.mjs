@@ -8,19 +8,27 @@ var yamlDateField = z.union([
   z.string(),
   z.date().transform((d) => d.toISOString().split("T")[0])
 ]).nullish();
-var blogFrontmatterSchema = frontmatterSchema.extend({
+var baseFrontmatterSchema = frontmatterSchema.extend({
+  canonical: z.string().nullish(),
+  noindex: z.boolean().nullish(),
+  // Optional SEO title override: when set, used for <title> and OG title
+  // instead of the navigation title (keeps sidebar labels short).
+  seoTitle: z.string().nullish()
+});
+var blogFrontmatterSchema = baseFrontmatterSchema.extend({
   date: yamlDateField,
   tag: z.string().nullish(),
   author: z.string().nullish(),
   ogImage: z.string().nullish(),
   showInBlogIndex: z.boolean().nullish()
 });
-var changelogFrontmatterSchema = frontmatterSchema.extend({
+var changelogFrontmatterSchema = baseFrontmatterSchema.extend({
   date: yamlDateField,
   author: z.string().nullish(),
-  ogImage: z.string().nullish()
+  ogImage: z.string().nullish(),
+  ogVideo: z.string().nullish()
 });
-var customerFrontmatterSchema = frontmatterSchema.extend({
+var customerFrontmatterSchema = baseFrontmatterSchema.extend({
   // Use .nullish() so empty YAML values (parsed as null) are accepted too
   date: yamlDateField,
   ogImage: z.string().nullish(),
@@ -36,9 +44,10 @@ var customerFrontmatterSchema = frontmatterSchema.extend({
   showInCustomerIndex: z.boolean().nullish()
 });
 var docs = defineDocs({
-  dir: "content/docs"
+  dir: "content/docs",
+  docs: { schema: baseFrontmatterSchema }
 });
-var selfHostingFrontmatterSchema = frontmatterSchema.extend({
+var selfHostingFrontmatterSchema = baseFrontmatterSchema.extend({
   sidebarTitle: z.string().nullish(),
   label: z.string().nullish()
 });
@@ -60,7 +69,7 @@ var changelog = defineDocs({
     schema: changelogFrontmatterSchema
   }
 });
-var guidesFrontmatterSchema = frontmatterSchema.extend({
+var guidesFrontmatterSchema = baseFrontmatterSchema.extend({
   ogImage: z.string().nullish(),
   category: z.string().nullish()
 });
@@ -70,7 +79,7 @@ var guides = defineDocs({
     schema: guidesFrontmatterSchema
   }
 });
-var faqFrontmatterSchema = frontmatterSchema.extend({
+var faqFrontmatterSchema = baseFrontmatterSchema.extend({
   tags: z.array(z.string()).optional()
 });
 var faq = defineDocs({
@@ -79,7 +88,7 @@ var faq = defineDocs({
     schema: faqFrontmatterSchema
   }
 });
-var integrationsFrontmatterSchema = frontmatterSchema.extend({
+var integrationsFrontmatterSchema = baseFrontmatterSchema.extend({
   sidebarTitle: z.string().nullish(),
   logo: z.string().nullish()
 });
@@ -90,10 +99,12 @@ var integrations = defineDocs({
   }
 });
 var security = defineDocs({
-  dir: "content/security"
+  dir: "content/security",
+  docs: { schema: baseFrontmatterSchema }
 });
 var library = defineDocs({
-  dir: "content/library"
+  dir: "content/library",
+  docs: { schema: baseFrontmatterSchema }
 });
 var customers = defineDocs({
   dir: "content/customers",
@@ -102,10 +113,12 @@ var customers = defineDocs({
   }
 });
 var handbook = defineDocs({
-  dir: "content/handbook"
+  dir: "content/handbook",
+  docs: { schema: baseFrontmatterSchema }
 });
 var marketing = defineDocs({
-  dir: "content/marketing"
+  dir: "content/marketing",
+  docs: { schema: baseFrontmatterSchema }
 });
 var source_config_default = defineConfig({
   mdxOptions: {

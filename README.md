@@ -2,7 +2,7 @@
 
 # Langfuse Docs
 
-Repo for [langfuse.com](https://langfuse.com). Based on [Nextra](https://nextra.site/).
+Repo for [langfuse.com](https://langfuse.com). Built with [Fumadocs](https://fumadocs.vercel.app/) and Next.js App Router.
 
 ## GitHub Codespaces
 
@@ -22,7 +22,7 @@ To use Node 22 (e.g. with [nvm](https://github.com/nvm-sh/nvm)): `nvm install 22
 
 All Jupyter notebooks are in the `cookbook/` directory. For JS/TS notebooks we use Deno, see Readme in cookbook folder for more details.
 
-To render them within the documentation site, we convert them to markdown using `jupyter nbconvert`, move them to right path in the pages/ directory where they are rendered by Nextra (remark).
+To render them within the documentation site, we convert them to markdown using `jupyter nbconvert`, move them to the right path in the `content/guides/cookbook/` directory where they are picked up by Fumadocs.
 
 Steps after updating notebooks:
 
@@ -30,7 +30,7 @@ Steps after updating notebooks:
 2. Run `bash scripts/update_cookbook_docs.sh` (uv will automatically handle dependencies)
 3. Commit the changed markdown files
 
-**Note**: All `.md` files or `.mdx` files that contain "source: ⚠️ Jupyter Notebook" on top in the `pages/` directory are automatically generated from Jupyter notebooks. Do not edit them manually as they will be overwritten. Always edit the Jupyter notebooks and run the conversion script.
+**Note**: All `.md` or `.mdx` files that contain "source: ⚠️ Jupyter Notebook" on top in `content/guides/cookbook/` are automatically generated from Jupyter notebooks. Do not edit them manually — they will be overwritten. Always edit the Jupyter notebooks and run the conversion script.
 
 ## Media
 
@@ -48,8 +48,8 @@ To embed a "gif", actually embed a video and use `gifMode` (`<Video src="" gifMo
 
 ## Stack
 
-- [Nextra](https://nextra.site/)
-- [Next.js](https://nextjs.org/)
+- [Fumadocs](https://fumadocs.vercel.app/) (docs framework)
+- [Next.js](https://nextjs.org/) App Router
 - [shadcn/ui](https://ui.shadcn.com)
 - [Tailwind CSS](https://tailwindcss.com/)
 
