@@ -34,6 +34,7 @@ import IconChatGPT from "./icons/chatgpt";
 import IconClaude from "./icons/claude";
 import IconMCP from "./icons/mcp";
 
+/** Paths where the page already shows feedback (DocBodyChrome); skip duplicate here. */
 const pathsWithoutFooterWidgets = [
   "/imprint",
   "/blog",
@@ -43,6 +44,19 @@ const pathsWithoutFooterWidgets = [
   "/careers",
   "/press",
   "/watch-demo",
+  "/enterprise",
+  "/changelog",
+  "/cn",
+  "/community",
+  "/cookie-policy",
+  "/find-us",
+  "/jp",
+  "/kr",
+  "/oss-friends",
+  "/privacy",
+  "/research",
+  "/terms",
+  "/wrapped",
 ];
 const pathsWithCopyAsMarkdownButton = [
   "/docs",

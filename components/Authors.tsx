@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -79,6 +81,7 @@ export const Author = (props: { author: string; hideLastName?: boolean }) => {
         <div
           className="flex items-center gap-4 cursor-default"
           key={props.author}
+          suppressHydrationWarning
         >
           <Image
             src={author.image}
@@ -111,6 +114,7 @@ export const AuthorAvatar = (props: { author: string }) => {
           className="group shrink-0 relative"
           key={props.author}
           title={author.name}
+          suppressHydrationWarning
         >
           <Image
             src={author.image}
