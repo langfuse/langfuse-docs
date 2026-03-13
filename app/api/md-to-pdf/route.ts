@@ -59,6 +59,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // For langfuse.com page URLs (not already ending in .md/.mdx), rewrite to
+    // the raw-markdown endpoint: /path → /path.md (served from public/md-src/).
+    const isLangfuseHost =
+      markdownUrl.hostname === "langfuse.com" ||
+      markdownUrl.hostname === "localhost" ||
+      markdownUrl.hostname === "127.0.0.1";
+    if (
+      isLangfuseHost &&
+      !markdownUrl.pathname.endsWith(".md") &&
+      !markdownUrl.pathname.endsWith(".mdx")
+    ) {
+      markdownUrl = new URL(markdownUrl.toString());
+      markdownUrl.pathname = markdownUrl.pathname.replace(/\/$/, "") + ".md";
+    }
+
     const response = await fetch(markdownUrl.toString());
     if (!response.ok) {
       return NextResponse.json(

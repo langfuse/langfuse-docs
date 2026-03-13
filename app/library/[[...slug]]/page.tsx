@@ -3,15 +3,14 @@ import { librarySource } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { SectionDocBodyClientWithDocsBody } from "@/components/SectionDocBodyClientWithDocsBody";
 import { DocsContributors } from "@/components/DocsContributors";
+import { DocBodyChrome } from "@/components/DocBodyChrome";
+import { getMDXComponents } from "@/mdx-components";
+import type { ComponentType } from "react";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
-
-const COLLECTION = "library";
-const CONTENT_DIR = "content/library";
 
 export default async function LibraryPage(props: PageProps) {
   const params = await props.params;
@@ -21,16 +20,17 @@ export default async function LibraryPage(props: PageProps) {
   if (!page) notFound();
 
   const { toc } = page.data;
+  const MDX = page.data.body as ComponentType<{ components?: Record<string, ComponentType> }>;
+
   return (
     <DocsPage
       toc={toc}
       breadcrumb={{ includePage: true, includeRoot: true }}
       tableOfContent={{ footer: <DocsContributors pageTitle={page.data.title} /> }}
     >
-      <SectionDocBodyClientWithDocsBody
-        collection={COLLECTION}
-        slugPromise={props.params}
-      />
+      <DocBodyChrome>
+        <MDX components={getMDXComponents()} />
+      </DocBodyChrome>
     </DocsPage>
   );
 }

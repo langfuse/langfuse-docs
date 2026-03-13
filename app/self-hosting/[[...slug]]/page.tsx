@@ -3,15 +3,14 @@ import { selfHostingSource } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { SectionDocBodyClientWithDocsBody } from "@/components/SectionDocBodyClientWithDocsBody";
 import { DocsContributors } from "@/components/DocsContributors";
+import { DocBodyChrome } from "@/components/DocBodyChrome";
+import { getMDXComponents } from "@/mdx-components";
+import type { ComponentType } from "react";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
-
-const COLLECTION = "selfHosting";
-const CONTENT_DIR = "content/self-hosting";
 
 export default async function SelfHostingPage(props: PageProps) {
   const params = await props.params;
@@ -21,18 +20,18 @@ export default async function SelfHostingPage(props: PageProps) {
   if (!page) notFound();
 
   const { toc } = page.data;
-  const versionLabel = (page.data as { label?: string }).label;
+  const versionLabel = (page.data as { label?: string }).label ?? null;
+  const MDX = page.data.body as ComponentType<{ components?: Record<string, ComponentType> }>;
+
   return (
     <DocsPage
       toc={toc}
       breadcrumb={{ includePage: true, includeRoot: true }}
       tableOfContent={{ footer: <DocsContributors pageTitle={page.data.title} /> }}
     >
-      <SectionDocBodyClientWithDocsBody
-        collection={COLLECTION}
-        slugPromise={props.params}
-        versionLabel={versionLabel}
-      />
+      <DocBodyChrome versionLabel={versionLabel}>
+        <MDX components={getMDXComponents()} />
+      </DocBodyChrome>
     </DocsPage>
   );
 }

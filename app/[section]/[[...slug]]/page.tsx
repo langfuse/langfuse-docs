@@ -6,8 +6,10 @@ import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, 
 import type { SectionSlug } from "@/lib/sections";
 import { MARKETING_SLUGS, getPagesForRoute } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
-import { SectionDocBodyClient } from "../SectionDocBodyClient";
 import { DocsContributors } from "@/components/DocsContributors";
+import { DocBodyChrome } from "@/components/DocBodyChrome";
+import { getMDXComponents } from "@/mdx-components";
+import type { ComponentType } from "react";
 import { FaqPreview } from "@/components/faq/FaqPreview";
 import { formatTag } from "@/components/faq/FaqIndex";
 import { ChangelogFrontMatterProvider } from "@/components/changelog/ChangelogFrontMatterContext";
@@ -66,12 +68,11 @@ export default async function SectionDocPage(props: PageProps) {
       : { body: data.body, toc: data.toc ?? [] };
   const toc: TOCItemType[] = loaded.toc ?? [];
 
+  const MDX = loaded.body as ComponentType<{ components?: Record<string, ComponentType> }>;
   const bodyClient = (
-    <SectionDocBodyClient
-      collection={config.collection}
-      slugPromise={Promise.resolve({ slug: effectiveSlug })}
-      withProse
-    />
+    <DocBodyChrome withProse>
+      <MDX components={getMDXComponents()} />
+    </DocBodyChrome>
   );
 
   // Strip functions and non-serializable objects from page.data / frontMatter

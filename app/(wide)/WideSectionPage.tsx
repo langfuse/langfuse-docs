@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SECTION_CONFIG, WIDE_SECTIONS } from "@/lib/sections";
 import type { WideSectionSlug } from "@/lib/sections";
-import { SectionDocBodyClient } from "@/app/[section]/SectionDocBodyClient";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
+import { getMDXComponents } from "@/mdx-components";
+import type { ComponentType } from "react";
 
 export async function generateWideSectionMetadata(section: WideSectionSlug): Promise<Metadata> {
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
@@ -37,10 +38,17 @@ export default async function WideSectionPage({ section }: Props) {
   const page = config.source.getPage([section]);
   if (!page) notFound();
 
+  const data = page.data as {
+    load?: () => Promise<{ body: unknown }>;
+    body?: unknown;
+  };
+  const body =
+    typeof data.load === "function" ? (await data.load()).body : data.body;
+  const MDX = body as ComponentType<{ components?: Record<string, ComponentType> }>;
+
   return (
-    <SectionDocBodyClient
-      collection={config.collection}
-      slugPromise={Promise.resolve({ slug: [section] })}
-    />
+    <div className="flex-1">
+      <MDX components={getMDXComponents()} />
+    </div>
   );
 }

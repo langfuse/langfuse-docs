@@ -7,7 +7,7 @@ import { Frame } from "@/components/Frame";
 import { Video } from "@/components/Video";
 import { LangTabs } from "@/components/LangTabs";
 import { FetchReadme } from "@/components/FetchReadme";
-import { Callout, Tabs, Tab, Cards, Steps, FileTree } from "@/lib/nextra-shim/components";
+import { Callout, Tabs, Tab, Cards, Card, Steps, FileTree, FileTreeFile, FileTreeFolder } from "@/lib/nextra-shim/components";
 import { MdxDetails, MdxSummary } from "@/components/MdxDetails";
 import { AvailabilityBanner } from "@/components/availability";
 
@@ -73,9 +73,12 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Tab,
     "Tabs.Tab": Tab,
     Cards,
-    Card: Cards.Card,
+    Card,
+    "Cards.Card": Card,
     Steps,
     FileTree,
+    "FileTree.File": FileTreeFile,
+    "FileTree.Folder": FileTreeFolder,
     FetchReadme,
     details: MdxDetails,
     summary: MdxSummary,
