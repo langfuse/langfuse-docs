@@ -39,7 +39,7 @@ export function JpCloudSocialProof() {
           Trusted Worldwide
         </h2>
         <p className="mt-3 text-lg text-muted-foreground">
-          世界中で信頼されています
+          世界中のチームに選ばれています
         </p>
       </motion.div>
 
