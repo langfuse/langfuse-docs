@@ -210,6 +210,15 @@ aliases were removed.
 If you still need legacy v1 behavior, switch to the corresponding
 `langfuse.api.legacy.<resource>_v1` namespace.
 
+<Callout type="warning">
+  If you use self-hosted Langfuse, do not use the new default
+  `langfuse.api.observations` or `langfuse.api.metrics` methods yet. They now
+  point to the Observations v2 and Metrics v2 endpoints, which are not
+  available on self-hosted deployments yet. Use
+  `langfuse.api.legacy.observations_v1` and
+  `langfuse.api.legacy.metrics_v1` instead.
+</Callout>
+
 ### `start_span()` / `start_generation()` → `start_observation()`
 
 Observations are the primary concept in the new model. The unified `start_observation()` API with `as_type` parameter replaces the separate methods.
