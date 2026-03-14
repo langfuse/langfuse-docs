@@ -207,6 +207,15 @@ aliases were removed.
 If you still need legacy v1 behavior, switch to the corresponding
 `langfuse.api.legacy.*V1` namespace.
 
+<Callout type="warning">
+  If you use self-hosted Langfuse, do not use the new default
+  `langfuse.api.observations` or `langfuse.api.metrics` methods yet. They now
+  point to the Observations v2 and Metrics v2 endpoints, which are not
+  available on self-hosted deployments yet. Use
+  `langfuse.api.legacy.observationsV1` and `langfuse.api.legacy.metricsV1`
+  instead.
+</Callout>
+
 ### [`@langfuse/langchain`](/integrations/frameworks/langchain) internal changes
 
 The `CallbackHandler` now uses `propagateAttributes()` for trace-level attributes. This affects users who:
