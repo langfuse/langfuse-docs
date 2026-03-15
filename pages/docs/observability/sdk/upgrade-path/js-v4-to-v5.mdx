@@ -247,4 +247,5 @@ The `traceMethod` wrapper now wraps the traced call in `propagateAttributes()` t
 7. Replace `release`/`environment` attribute usage with env vars (`LANGFUSE_RELEASE`, `LANGFUSE_TRACING_ENVIRONMENT`)
 8. Search for `api.observationsV2` / `api.scoreV2` / `api.metricsV2` → replace with `api.observations` / `api.scores` / `api.metrics`
 9. Search for legacy v1 usage on `api.observations` / `api.score` / `api.metrics` → move to `api.legacy.observationsV1` / `api.legacy.scoreV1` / `api.legacy.metricsV1`
-10. Remove any remaining references to `*V2` aliases (they were removed in v5)
+10. If you are self-hosting Langfuse, do not use `api.observations` or `api.metrics` yet; use `api.legacy.observationsV1` and `api.legacy.metricsV1` until Observations v2 and Metrics v2 are available on self-hosted deployments
+11. Remove any remaining references to `*V2` aliases (they were removed in v5)
