@@ -13,13 +13,11 @@ GET /api/public/metrics
 The **Metrics API** enables you to retrieve customized analytics from your Langfuse data.
 This endpoint allows you to specify dimensions, metrics, filters, and time granularity to build powerful custom reports and dashboards for your LLM applications.
 
-## Metrics API v2 (Beta) [#v2]
+## Metrics API v2 [#v2]
 
 <Callout type="warning">
 
-The v2 Metrics API is currently in **beta**. The API is stable for production use, but some parameters and behaviors may change based on user feedback before general availability.
-
-**Cloud-only (Beta):** The v2 Metrics API is only available on Langfuse Cloud and currently in beta. We are working on a robust migration path for self-hosted deployments.
+**Cloud-only:** The v2 Metrics API is only available on Langfuse Cloud. We are working on a robust migration path for self-hosted deployments.
 
 **Data availability note:** When using current SDK versions, data may take approximately 5 minutes to appear on v2 endpoints. We will be releasing updated SDK versions soon that will make data available immediately.
 
@@ -195,7 +193,7 @@ query = """
 }
 """
 
-langfuse.api.metrics.metrics(query = query)
+langfuse.api.legacy.metrics_v1.metrics(query = query)
 ```
 
   </Tab>

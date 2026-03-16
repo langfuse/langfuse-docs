@@ -246,7 +246,7 @@ evaluation_batch = {
 }
  
 for t in traces_sample:
-    observations = [langfuse.api.observations.get(o) for o in t.observations]
+    observations = [langfuse.api.legacy.observations_v1.get(o) for o in t.observations]
     for o in observations:
         if o.name == 'retrieval':
             question = o.input['question']
@@ -407,5 +407,4 @@ for _, row in df.iterrows():
 In Langfuse, you can now see the scores for each trace and monitor them over time.
 
 ![UpTrain Evals on a list of traces in Langfuse](https://langfuse.com/images/cookbook/uptrain-batch.png)
-
 

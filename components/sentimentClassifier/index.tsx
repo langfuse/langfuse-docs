@@ -22,6 +22,11 @@ const usLangfuseWebClient = new LangfuseWeb({
   baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
 });
 
+const jpLangfuseWebClient = new LangfuseWeb({
+  publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
+  baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
+});
+
 type SentimentResult = {
   sentiment: "positive" | "negative" | "neutral";
   confidence: number;
@@ -116,7 +121,7 @@ export const SentimentClassifier = ({
   const handleFeedback = (value: number) => {
     if (!result) return;
     setFeedback(value);
-    for (const client of [eulangfuseWebClient, usLangfuseWebClient]) {
+    for (const client of [eulangfuseWebClient, usLangfuseWebClient, jpLangfuseWebClient]) {
       client.score({
         traceId: result.traceId,
         id: `user-feedback-${result.traceId}`,

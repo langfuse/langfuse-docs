@@ -44,9 +44,21 @@ to manually apply the migrations.
 
 ### Timezones
 
-Langfuse expects that its infrastructure components default to UTC.
-Especially Postgres and ClickHouse settings that overwrite the UTC default are not supported and may lead to unexpected behavior.
-Please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046) if you would like us to consider supporting other timezones.
+<Callout type="warning">
+
+**ClickHouse must run with its timezone set to UTC** (the default). Langfuse does not support non-UTC ClickHouse timezones. Running ClickHouse with a different timezone (e.g. via the [`timezone`](https://clickhouse.com/docs/en/operations/server-configuration-parameters/settings#timezone) server setting) will cause queries to return incorrect or empty results.
+
+</Callout>
+
+You can verify your ClickHouse timezone by running:
+
+```sql
+SELECT timezone()
+```
+
+This should return `UTC`. If it does not, update your ClickHouse server configuration to remove any custom timezone setting and restart the server.
+
+The same requirement applies to [Postgres](/self-hosting/deployment/infrastructure/postgres) — all infrastructure components must use UTC. Please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046) if you would like us to consider supporting other timezones.
 
 ## User Permissions
 
