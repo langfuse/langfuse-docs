@@ -140,12 +140,13 @@ If you already have OpenTelemetry instrumentation, you can point your OTLP expor
 
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
-export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <base64(public_key:secret_key)>"
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <base64(public_key:secret_key)>,x-langfuse-ingestion-version=4"
 ```
 
 Key constraints:
 - Langfuse supports **OTLP over HTTP via both HTTP/JSON and HTTP/protobuf** (`gRPC` is not supported yet).
-- See the [OpenTelemetry integration docs](/docs/observability/sdk/instrumentation) for full setup details.
+- The `x-langfuse-ingestion-version=4` header enables real-time visibility in the Langfuse v4 tracing table for data sent directly via OTEL.
+- See the [OpenTelemetry integration docs](/integrations/native/opentelemetry) for full setup details.
 
 ### Option C: Replace the Gateway with LiteLLM Proxy
 
