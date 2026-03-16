@@ -224,10 +224,18 @@ li:has(> .subseparator) {
 
 /* Changelog: horizontal padding on narrow viewports so content isn't flush to edges. */
 @media (max-width: 1024px) {
+  [data-changelog-content] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
   .changelog-page,
-  .changelog-page #nd-page {
-    padding-left: 1rem;
-    padding-right: 1rem;
+  .changelog-page #nd-page,
+  .changelog-page [grid-area="main"],
+  .changelog-page article,
+  .changelog-page .flex-1,
+  .changelog-page main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
   }
 }
 

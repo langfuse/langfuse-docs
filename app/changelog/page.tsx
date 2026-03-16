@@ -39,7 +39,7 @@ export default function ChangelogIndexPage() {
     .map(toSerializableChangelogPage);
 
   return (
-    <div className="md:container">
+    <div className="px-4 md:container md:px-0">
       <div className="flex flex-col items-center content-center text-center my-10">
         <Header
           title="Changelog"
