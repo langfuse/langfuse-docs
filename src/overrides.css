@@ -32,15 +32,28 @@
   --fd-sidebar-width: 360px;
 }
 
-/* Sidebar: consistent left padding so section switcher and tree align on all screens */
+/* Sidebar: left padding so elements inside aren't flush to the edge. */
+#nd-docs-layout #nd-sidebar,
+#nd-sidebar-mobile {
+  padding-left: 1rem !important;
+}
+/* Sidebar inner wrapper (banner + tree): add left padding so all content is indented. */
 #nd-docs-layout #nd-sidebar > div.flex-1 > div:first-child,
 #nd-sidebar-mobile > div.flex-1 > div:first-child {
-  padding-left: 1rem;
+  padding-left: 1rem !important;
 }
-/* Align tree labels with section link text (icon w-7 + gap-3 = 2.5rem) */
-#nd-docs-layout #nd-sidebar > div.flex-1 > div:first-child > nav,
-#nd-sidebar-mobile > div.flex-1 > div:first-child > nav {
-  padding-left: 2.5rem;
+/* Sidebar scroll content (div with p-4 / overscroll-contain): ensure left padding on the viewport. */
+#nd-docs-layout #nd-sidebar div.overscroll-contain,
+#nd-sidebar-mobile div.overscroll-contain,
+#nd-docs-layout #nd-sidebar [class*="overscroll-contain"],
+#nd-sidebar-mobile [class*="overscroll-contain"] {
+  padding-left: 1rem !important;
+}
+
+/* Tree nav: extra indent so labels align with section link text (icon w-7 + gap-3 = 2.5rem). */
+#nd-docs-layout #nd-sidebar nav,
+#nd-sidebar-mobile nav {
+  padding-left: 2.5rem !important;
 }
 
 /* Docs sidebar: scroll the entire sidebar as one unit instead of only the bottom nav tree.
@@ -209,8 +222,8 @@ li:has(> .subseparator) {
   }
 }
 
-/* Changelog: horizontal padding on mobile so content isn't flush to edges. */
-@media (max-width: 768px) {
+/* Changelog: horizontal padding on narrow viewports so content isn't flush to edges. */
+@media (max-width: 1024px) {
   .changelog-page,
   .changelog-page #nd-page {
     padding-left: 1rem;

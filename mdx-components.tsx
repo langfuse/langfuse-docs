@@ -49,19 +49,22 @@ function MdxParagraph({ children, ...props }: React.HTMLAttributes<HTMLElement>)
 function MdxImage(props: React.ImgHTMLAttributes<HTMLImageElement>) {
   const { src, alt, width, height, ...rest } = props;
   if (!src) return null;
-  if (width && height) {
-    return (
-      <NextImage
-        src={src}
-        alt={alt ?? ""}
-        width={Number(width)}
-        height={Number(height)}
-        {...(rest as object)}
-      />
-    );
-  }
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt ?? ""} {...rest} />;
+  // Always use next/image so Vercel optimises + compresses every image.
+  // For images without explicit dimensions (the common case in MDX — `![alt](url)`)
+  // we use width=0/height=0 + sizes + style so the image fills its container
+  // while keeping the correct aspect ratio. This is the Next.js-recommended
+  // pattern for images with unknown intrinsic dimensions.
+  return (
+    <NextImage
+      src={src}
+      alt={alt ?? ""}
+      width={width ? Number(width) : 0}
+      height={height ? Number(height) : 0}
+      sizes={!width || !height ? "(max-width: 768px) 100vw, 800px" : undefined}
+      style={{ width: "100%", height: "auto" }}
+      {...(rest as object)}
+    />
+  );
 }
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
