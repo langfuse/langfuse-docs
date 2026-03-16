@@ -10,10 +10,14 @@ import {
   BarChart3Icon,
   MicIcon,
 } from "lucide-react";
-import { Chat } from "@/components/qaChatbot";
-import { SentimentClassifier } from "@/components/sentimentClassifier";
-import { ImageGenerator } from "@/components/imageGenerator";
-import { VoiceAgent } from "@/components/voiceAgent";
+import dynamic from "next/dynamic";
+
+// Lazy-load all tab content so their heavy deps (katex, livekit, AI SDKs) are NOT
+// pulled into the catch-all [section]/[[...slug]] bundle that serves every docs page.
+const Chat = dynamic(() => import("@/components/qaChatbot").then((m) => ({ default: m.Chat })));
+const SentimentClassifier = dynamic(() => import("@/components/sentimentClassifier").then((m) => ({ default: m.SentimentClassifier })));
+const ImageGenerator = dynamic(() => import("@/components/imageGenerator").then((m) => ({ default: m.ImageGenerator })));
+const VoiceAgent = dynamic(() => import("@/components/voiceAgent").then((m) => ({ default: m.VoiceAgent })));
 
 const TAB_MAP: Record<string, string> = {
   chatbot: "chatbot",

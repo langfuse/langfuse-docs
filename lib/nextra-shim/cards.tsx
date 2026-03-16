@@ -75,7 +75,7 @@ export const Callout = ({
   emoji?: string;
 } & React.ComponentProps<"div">) => (
   <div
-    className={`rounded-lg border p-4 my-4 ${
+    className={`rounded-lg border px-4 py-2 my-4 ${
       type === "info"
         ? "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50"
         : type === "warning"

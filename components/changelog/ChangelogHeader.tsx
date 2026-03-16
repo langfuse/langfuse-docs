@@ -36,6 +36,7 @@ export const ChangelogHeader = () => {
     <div className="mt-4 md:mt-10 flex flex-col gap-2 md:gap-4">
       <Link
         href={`/changelog#${slug}`}
+        className="no-underline hover:no-underline mb-2"
       >
         ← Back to changelog
       </Link>

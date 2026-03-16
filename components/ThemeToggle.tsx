@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -15,30 +15,57 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8"
-        aria-label="Toggle theme"
-        disabled
+      <div
+        className="flex h-8 items-center rounded-full border border-border bg-muted/30 px-1.5 py-0.5"
+        aria-hidden
       >
-        <Sun className="h-4 w-4" />
-      </Button>
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted">
+          <Sun className="h-4 w-4 text-foreground" />
+        </span>
+        <span className="flex h-7 w-7 items-center justify-center rounded-full">
+          <Moon className="h-4 w-4 text-muted-foreground" />
+        </span>
+      </div>
     );
   }
 
   const isDark = resolvedTheme === "dark";
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8"
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      onClick={() => setTheme?.(isDark ? "light" : "dark")}
+    <div
+      className="flex h-8 items-center rounded-full border border-border bg-muted/30 px-1.5 py-0.5"
+      role="group"
+      aria-label="Theme"
     >
-      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-    </Button>
+      <button
+        type="button"
+        onClick={() => setTheme?.("light")}
+        aria-label="Switch to light mode"
+        aria-pressed={!isDark}
+        className={cn(
+          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors",
+          !isDark
+            ? "bg-muted text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Sun className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => setTheme?.("dark")}
+        aria-label="Switch to dark mode"
+        aria-pressed={isDark}
+        className={cn(
+          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors",
+          isDark
+            ? "bg-muted text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Moon className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 

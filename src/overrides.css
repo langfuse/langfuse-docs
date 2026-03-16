@@ -32,6 +32,17 @@
   --fd-sidebar-width: 360px;
 }
 
+/* Sidebar: consistent left padding so section switcher and tree align on all screens */
+#nd-docs-layout #nd-sidebar > div.flex-1 > div:first-child,
+#nd-sidebar-mobile > div.flex-1 > div:first-child {
+  padding-left: 1rem;
+}
+/* Align tree labels with section link text (icon w-7 + gap-3 = 2.5rem) */
+#nd-docs-layout #nd-sidebar > div.flex-1 > div:first-child > nav,
+#nd-sidebar-mobile > div.flex-1 > div:first-child > nav {
+  padding-left: 2.5rem;
+}
+
 /* Docs sidebar: scroll the entire sidebar as one unit instead of only the bottom nav tree.
    By default Fumadocs makes only the SidebarViewport (ScrollArea) scroll. We make the
    aside #nd-sidebar the scroll container and disable the inner ScrollArea. */
@@ -72,6 +83,17 @@
   background-color: transparent;
 }
 
+/* Sidebar active link: use blue (muted-blue) so blog/changelog and docs look the same. */
+#nd-docs-layout #nd-sidebar [data-active="true"],
+#nd-sidebar-mobile [data-active="true"] {
+  color: hsl(var(--muted-blue)) !important;
+  background-color: hsl(var(--muted-blue) / 0.1) !important;
+}
+#nd-docs-layout #nd-sidebar [data-active="true"]::before,
+#nd-sidebar-mobile [data-active="true"]::before {
+  background-color: hsl(var(--muted-blue)) !important;
+}
+
 /* Reduce height (less padding) of sidebar nav items */
 #nd-docs-layout #nd-sidebar a,
 #nd-docs-layout #nd-sidebar button,
@@ -110,6 +132,12 @@
 li > ol,
 li > ul {
   margin-top: 0 !important;
+}
+
+/* Prose images: no vertical margin (override default 2em) */
+.prose :where(img):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /* No dark background of videos */
@@ -171,6 +199,14 @@ li:has(> .subseparator) {
 #nd-docs-layout #nd-sidebar .subseparator,
 #nd-sidebar-mobile .subseparator {
   font-weight: 700 !important;
+}
+
+/* Main content: horizontal padding on narrow viewports so content isn't flush to edges (RWD). */
+@media (max-width: 1024px) {
+  #nd-page {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 
 /* Changelog: horizontal padding on mobile so content isn't flush to edges. */

@@ -15,7 +15,7 @@ interface CTACardProps {
 export function CTACard({ title, description, children, className, showArrow = false }: CTACardProps) {
   return (
     <Card className={cn("border bg-card mt-8", className)}>
-      <CardContent className="p-8">
+      <CardContent>
         <div className="flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-1 md:flex-[2] space-y-2">
             <h3 className="text-xl font-semibold text-foreground">
