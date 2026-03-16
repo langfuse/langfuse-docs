@@ -323,4 +323,5 @@ The SDK now requires Pydantic v2. If your application still uses Pydantic v1, yo
 10. Upgrade Pydantic to v2 if still on v1
 11. Search for `api.observations_v_2` / `api.score_v_2` / `api.metrics_v_2` → replace with `api.observations` / `api.scores` / `api.metrics`
 12. Search for legacy v1 usage on `api.observations` / `api.score` / `api.metrics` → move to `api.legacy.observations_v1` / `api.legacy.score_v1` / `api.legacy.metrics_v1`
-13. Remove any remaining references to `*_v_2` aliases (they were removed in v4)
+13. If you are self-hosting Langfuse, do not use `api.observations` or `api.metrics` yet; use `api.legacy.observations_v1` and `api.legacy.metrics_v1` until Observations v2 and Metrics v2 are available on self-hosted deployments
+14. Remove any remaining references to `*_v_2` aliases (they were removed in v4)
