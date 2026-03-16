@@ -75,7 +75,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
           {isMarketing || isChangelog ? (
             <div className="w-full min-w-0 flex justify-center [grid-area:main]">
               <div
-                className={`${contentWrapperClass} ${isChangelog ? "px-4 md:px-6 lg:px-8" : ""}`}
+                className={`${contentWrapperClass} ${isChangelog ? "px-3 md:px-4" : ""}`}
                 data-changelog-content={isChangelog ? "" : undefined}
               >
                 <MainContentWrapper>{children}</MainContentWrapper>

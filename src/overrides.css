@@ -32,29 +32,9 @@
   --fd-sidebar-width: 360px;
 }
 
-/* Sidebar: left padding so elements inside aren't flush to the edge. */
-#nd-docs-layout #nd-sidebar,
-#nd-sidebar-mobile {
-  padding-left: 1rem !important;
-}
-/* Sidebar inner wrapper (banner + tree): add left padding so all content is indented. */
-#nd-docs-layout #nd-sidebar > div.flex-1 > div:first-child,
-#nd-sidebar-mobile > div.flex-1 > div:first-child {
-  padding-left: 1rem !important;
-}
-/* Sidebar scroll content (div with p-4 / overscroll-contain): ensure left padding on the viewport. */
-#nd-docs-layout #nd-sidebar div.overscroll-contain,
-#nd-sidebar-mobile div.overscroll-contain,
-#nd-docs-layout #nd-sidebar [class*="overscroll-contain"],
-#nd-sidebar-mobile [class*="overscroll-contain"] {
-  padding-left: 1rem !important;
-}
-
-/* Tree nav: extra indent so labels align with section link text (icon w-7 + gap-3 = 2.5rem). */
-#nd-docs-layout #nd-sidebar nav,
-#nd-sidebar-mobile nav {
-  padding-left: 2.5rem !important;
-}
+/* Sidebar/tree left alignment: let fumadocs' own p-4 (1rem) on the scroll container
+   plus the per-item paddingInlineStart (0.5rem from fumadocs) give 1.5rem total —
+   matching the navbar's pl-[1.5rem] so nav items align with the Langfuse logo. */
 
 /* Docs sidebar: scroll the entire sidebar as one unit instead of only the bottom nav tree.
    By default Fumadocs makes only the SidebarViewport (ScrollArea) scroll. We make the
@@ -222,11 +202,11 @@ li:has(> .subseparator) {
   }
 }
 
-/* Changelog: horizontal padding on narrow viewports so content isn't flush to edges. */
+/* Changelog: modest horizontal padding on narrow viewports (layout also adds px-3 md:px-4). */
 @media (max-width: 1024px) {
   [data-changelog-content] {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
   }
   .changelog-page,
   .changelog-page #nd-page,
@@ -234,8 +214,8 @@ li:has(> .subseparator) {
   .changelog-page article,
   .changelog-page .flex-1,
   .changelog-page main {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
   }
 }
 
