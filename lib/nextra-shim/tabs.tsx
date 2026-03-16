@@ -35,10 +35,13 @@ export const Tab = ({
   children,
   ...props
 }: React.ComponentProps<typeof FumadocsTabsContent> & { title?: string }) => {
-  const value = valueProp ?? (title != null ? toValue(title) : undefined);
+  // Do NOT derive value from title: when Tab is pre-rendered on the server as a child
+  // of a "use client" LangTabs, the title-derived value prevents the parent Tabs shim
+  // from applying the correct positional injection on the client side.
+  // Use "" as placeholder so all tabs are eligible for positional injection.
   return (
     <FumadocsTabsContent
-      value={value!}
+      value={valueProp ?? ""}
       className={cn("p-4 prose-no-margin bg-background rounded-b-xl", className)}
       {...props}
     >

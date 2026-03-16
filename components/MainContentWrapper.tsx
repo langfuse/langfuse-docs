@@ -369,7 +369,7 @@ export const MainContentWrapper = (props) => {
           pathname === path || (pathname ?? "").startsWith(path + "/")
       ) ? (
         <div
-          className="flex flex-wrap gap-6 justify-between items-center px-4 py-6 pt-8 md:px-6 md:pt-8 xl:px-8 xl:pt-14"
+          className="flex flex-wrap gap-6 justify-between items-center px-4 py-4 md:px-6 xl:px-8"
           id="docs-feedback"
         >
           <DocsFeedback key={pathname} />

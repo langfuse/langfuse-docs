@@ -108,11 +108,11 @@ const GhDiscussionsPreviewInternal = ({
 
     return (
       <>
-        <ul className="space-y-3 pt-3">
+        <ul className="space-y-3 pt-2">
           {displayedDiscussions.map((discussion) => (
             <li
               key={discussion.number}
-              className="flex items-center space-x-1 pb-3 border-b last:border-none px-1"
+              className="flex items-center space-x-1 pb-3 border-b last:border-none last:pb-0 px-1"
             >
               <div className="flex flex-col items-center min-w-[60px] gap-0.5">
                 <span className="text-lg font-semibold leading-none">

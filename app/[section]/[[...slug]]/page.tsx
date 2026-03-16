@@ -124,7 +124,13 @@ export default async function SectionDocPage(props: PageProps) {
     <DocsPage
       toc={isMarketing || isChangelog || isCollectionIndex ? undefined : toc}
       full={isCollectionIndex}
-      className={isPost && !isChangelog && !isCollectionIndex ? "max-w-3xl" : "max-w-full"}
+      className={
+        isPost && !isChangelog && !isCollectionIndex
+          ? "max-w-3xl post-page"
+          : isChangelog
+            ? "max-w-full changelog-page post-page"
+            : "max-w-full"
+      }
       breadcrumb={{ includePage: !isMarketing && !isPost }}
       footer={isMarketing || isPost ? { enabled: false } : undefined}
       tableOfContent={isMarketing || isChangelog || isCollectionIndex ? { enabled: false } : { footer: <DocsContributors pageTitle={page.data.title} /> }}

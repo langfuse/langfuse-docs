@@ -33,16 +33,15 @@ export const ChangelogHeader = () => {
   const slug = pathname.replace(/^\/changelog\//, "");
 
   return (
-    <div className="md:mt-10 flex flex-col gap-10">
+    <div className="mt-4 md:mt-10 flex flex-col gap-2 md:gap-4">
       <Link
         href={`/changelog#${slug}`}
-        className="md:mb-10"
       >
         ← Back to changelog
       </Link>
 
       <div>
-        <div className="flex flex-wrap items-center gap-2 text-lg text-primary/60 mb-3">
+        <div className="flex flex-wrap items-center gap-2 text-lg text-primary/60 mb-2 md:mb-3">
           {date &&
             new Date(date).toLocaleDateString("en-US", {
               year: "numeric",
@@ -56,7 +55,7 @@ export const ChangelogHeader = () => {
             </span>
           )}
         </div>
-        <div className="flex flex-col gap-5 md:gap-10 md:flex-row justify-between md:items-center">
+        <div className="flex flex-col gap-2 md:gap-6 md:flex-row justify-between md:items-center">
           <div>
             <h1 className="text-2xl md:text-3xl text-pretty font-mono">
               {title}

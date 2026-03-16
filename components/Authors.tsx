@@ -49,7 +49,7 @@ export const Authors = (props: { authors: string[] }) => {
   // Show only overlapping avatars when there are more than 2 authors
   if (props.authors.length > 2) {
     return (
-      <div className="flex justify-center py-7 max-w-xl">
+      <div className="flex justify-center py-4 max-w-xl">
         <div className="flex -space-x-2">
           {props.authors.map((author) => (
             <AuthorAvatar author={author} key={author} />
@@ -60,7 +60,7 @@ export const Authors = (props: { authors: string[] }) => {
   }
 
   return (
-    <div className="flex flex-wrap gap-x-10 gap-y-6 justify-center py-7 max-w-xl">
+    <div className="flex flex-wrap gap-x-10 gap-y-6 justify-center py-4 max-w-xl">
       {props.authors.map((author) => (
         <Author
           author={author}
@@ -142,7 +142,7 @@ export const AuthorHoverCardContent = ({
   return (
     <HoverCardContent className="w-56 p-0" side={side} align={align}>
       <div className="flex flex-col text-left w-full">
-        <div className="flex items-center gap-3 justify-start p-2.5">
+        <div className="flex items-center gap-3 justify-start p-2">
           <Image
             src={author.image}
             width={36}
@@ -160,7 +160,7 @@ export const AuthorHoverCardContent = ({
           </div>
         </div>
         <Separator />
-        <div className="flex flex-col gap-0.5 w-full p-2.5 pt-2">
+        <div className="flex flex-col gap-0.5 w-full p-2">
           {author.twitter && (
             <Link
               href={`https://twitter.com/${author.twitter}`}

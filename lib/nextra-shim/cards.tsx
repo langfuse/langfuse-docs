@@ -94,7 +94,10 @@ export function Steps({
   ...props
 }: { children?: React.ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className="steps ml-4 border-l pl-8 [counter-reset:step]" {...props}>
+    <div
+      className="steps ml-2 border-l pl-4 [counter-reset:step] md:ml-4 md:pl-8"
+      {...props}
+    >
       {children}
     </div>
   );

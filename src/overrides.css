@@ -166,11 +166,35 @@ li:has(> .subseparator) {
 }
 
 /* Sidebar subheadings (separator labels e.g. "Working at Langfuse", "Chapters", "Resources") */
-#nd-docs-layout #nd-sidebar li > p,
-#nd-sidebar-mobile li > p,
+#nd-docs-layout #nd-sidebar p,
+#nd-sidebar-mobile p,
 #nd-docs-layout #nd-sidebar .subseparator,
 #nd-sidebar-mobile .subseparator {
   font-weight: 700 !important;
+}
+
+/* Changelog: horizontal padding on mobile so content isn't flush to edges. */
+@media (max-width: 768px) {
+  .changelog-page,
+  .changelog-page #nd-page {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Blog/changelog: reduce vertical margins on mobile so content isn't mostly whitespace. */
+@media (max-width: 768px) {
+  .post-page .flex-1 > div:first-child {
+    margin-bottom: 0.5rem !important;
+  }
+  .post-page .flex-1 > hr {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .post-page #docs-feedback {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
 }
 
 /* Steps component: increment counter and render numbered circles centered on the left border line.
@@ -180,6 +204,10 @@ li:has(> .subseparator) {
 .steps > h3 {
   counter-increment: step;
   position: relative;
+}
+.steps > h2:first-child,
+.steps > h3:first-child {
+  margin-top: 0;
 }
 .steps > h2::before,
 .steps > h3::before {
@@ -198,4 +226,21 @@ li:has(> .subseparator) {
   color: hsl(var(--primary-foreground));
   font-size: 0.875rem;
   font-weight: 600;
+}
+
+/* Steps: compact layout on mobile so numbers/headlines don't dominate; more space for body text. */
+@media (max-width: 768px) {
+  .steps > h2,
+  .steps > h3 {
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+  .steps > h2::before,
+  .steps > h3::before {
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 0.75rem;
+    /* pl-4 = 1rem; circle radius 0.625rem → center on border */
+    left: -1.625rem;
+  }
 }
