@@ -179,6 +179,7 @@ export const MARKETING_SLUGS = [
   "find-us",
   "imprint",
   "jp",
+  "jp-cloud",
   "kr",
   "oss-friends",
   "press",
