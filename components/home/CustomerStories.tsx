@@ -6,7 +6,7 @@ import { usersSource } from "@/lib/source";
 export default function CustomerStories() {
   const stories: CustomerStory[] = usersSource.getPages().map((page) => ({
     route: page.url,
-    frontMatter: page.data as CustomerStory["frontMatter"],
+    frontMatter: page.data as unknown as CustomerStory["frontMatter"],
   }));
 
   return (

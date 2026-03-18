@@ -16,9 +16,11 @@ export async function generateWideSectionMetadata(section: WideSectionSlug): Pro
   };
   const canonicalUrl = buildPageUrl(`/${section}`);
   const seoTitle = pageData.seoTitle || page.data.title;
+  const sectionTitle = config.title ?? seoTitle;
   const ogImage = buildOgImageUrl({
     title: seoTitle,
     description: page.data.description,
+    section: sectionTitle,
     staticOgImage: pageData.ogImage,
   });
   return {

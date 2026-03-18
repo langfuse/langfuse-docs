@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 interface CardsProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Number of columns (1 | 2 | 3). Defaults to 2. */
   num?: number;
+  className?: string;
+  children?: React.ReactNode;
 }
 
 export type CardProps = Omit<FumadocsCardProps, "title"> & {

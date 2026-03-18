@@ -41,6 +41,7 @@ const changelogFrontmatterSchema = baseFrontmatterSchema.extend({
   author: z.string().nullish(),
   ogImage: z.string().nullish(),
   ogVideo: z.string().nullish(),
+  gif: z.string().nullish(),
   badge: z.string().nullish(),
 });
 

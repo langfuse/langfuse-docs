@@ -23,7 +23,7 @@ export { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./collapsib
 export { Separator } from "./separator";
 
 // Overlay
-export { Dialog, DialogPortal, DialogOverlay, DialogClose, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "./dialog";
+export { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "./dialog";
 export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuGroup, DropdownMenuPortal, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuRadioGroup } from "./dropdown-menu";
 export { Popover, PopoverTrigger, PopoverContent } from "./popover";
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip";
@@ -42,7 +42,7 @@ export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableC
 export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
 export { Badge } from "./badge";
 export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from "./breadcrumb";
-export { NumberTicker } from "./number-ticker";
+export { default as NumberTicker } from "./number-ticker";
 export { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./pagination";
 export { ScrollArea, ScrollBar } from "./scroll-area";
 export { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "./carousel";
