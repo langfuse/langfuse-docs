@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocsPage, DocsBody } from "fumadocs-ui/page";
 import type { TOCItemType } from "fumadocs-core/toc";
-import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, DOCS_STYLE_APP_SECTIONS, POST_SECTIONS, CHANGELOG_SECTIONS } from "@/lib/sections";
-import type { SectionSlug } from "@/lib/sections";
-import { MARKETING_SLUGS, getPagesForRoute } from "@/lib/source";
+import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, WIDE_SECTIONS, DOCS_STYLE_APP_SECTIONS, POST_SECTIONS, CHANGELOG_SECTIONS } from "@/lib/source";
+import type { SectionSlug } from "@/lib/source";
+import { MARKETING_SLUGS, usersSource, changelogSource } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { DocsContributors } from "@/components/DocsContributors";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
@@ -100,17 +100,17 @@ export default async function SectionDocPage(props: PageProps) {
   ) : section === "wrapped" ? (
     <WrappedDataProvider
       data={{
-        usersPages: getPagesForRoute("/users").map(({ route, name, title, frontMatter }) => ({
-          route,
-          name,
-          title,
-          frontMatter: frontMatter ? primitiveOnly(frontMatter) : undefined,
+        usersPages: usersSource.getPages().map((p) => ({
+          route: p.url,
+          name: p.data.title,
+          title: p.data.title,
+          frontMatter: primitiveOnly(p.data as unknown as Record<string, unknown>),
         })),
-        changelogPages: getPagesForRoute("/changelog").map(({ route, name, title, frontMatter }) => ({
-          route,
-          name,
-          title,
-          frontMatter: frontMatter ? primitiveOnly(frontMatter) : undefined,
+        changelogPages: changelogSource.getPages().map((p) => ({
+          route: p.url,
+          name: p.data.title,
+          title: p.data.title,
+          frontMatter: primitiveOnly(p.data as unknown as Record<string, unknown>),
         })),
       }}
     >

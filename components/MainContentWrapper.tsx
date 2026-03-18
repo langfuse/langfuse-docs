@@ -1,11 +1,10 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { useConfig } from "@/lib/nextra-shim/theme-docs";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import { Button } from "./ui/button";
+import { Link } from "./ui/link";
 import {
   Copy as CopyIcon,
   Check as CheckIcon,
@@ -20,8 +19,7 @@ import { Textarea } from "./ui/textarea";
 import { NotebookBanner } from "./NotebookBanner";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import Link from "next/link";
+import { Image } from "./ui/image";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
 import {
@@ -66,6 +64,7 @@ const pathsWithCopyAsMarkdownButton = [
   "/integrations",
   "/handbook",
   "/security",
+  "/library",
 ];
 const isCustomerStory = (pathname: string) =>
   pathname.startsWith("/users/");
@@ -332,12 +331,9 @@ export const CopyMarkdownButton = () => {
 
 export const MainContentWrapper = (props) => {
   const pathname = usePathname();
-  const { frontMatter } = useConfig();
   const cookbook = COOKBOOK_ROUTE_MAPPING.find(
     (cookbook) => cookbook.path === pathname
   );
-
-  const versionLabel = frontMatter.label;
 
   const shouldShowCopyButton = pathsWithCopyAsMarkdownButton.some((prefix) =>
     (pathname ?? "").startsWith(prefix)
@@ -345,14 +341,9 @@ export const MainContentWrapper = (props) => {
 
   return (
     <>
-      {(versionLabel || shouldShowCopyButton) && (
+      {shouldShowCopyButton && (
         <div className="flex flex-wrap gap-2 items-center mt-5">
-          {versionLabel != null && (
-            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
-              {versionLabel as ReactNode}
-            </span>
-          )}
-          {shouldShowCopyButton && <CopyMarkdownButton key={pathname} />}
+          <CopyMarkdownButton key={pathname} />
         </div>
       )}
 
@@ -384,10 +375,10 @@ export const DocsSupport = () => {
   return (
     <div className="flex gap-3 items-center">
       <Button variant="outline" size="sm" asChild>
-        <a href="/support">
+        <Link href="/support">
           <span>Support</span>
           <LifeBuoy className="ml-2 w-4 h-4" />
-        </a>
+        </Link>
       </Button>
     </div>
   );

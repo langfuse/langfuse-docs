@@ -1,26 +1,25 @@
-import { getPagesUnderRoute } from "@/lib/nextra-shim/context";
-import { type Page } from "@/lib/nextra-shim/nextra-types";
-import { Cards } from "@/lib/nextra-shim/components";
+import { faqSource } from "@/lib/source";
+import { Cards } from "@/components/docs";
 import { MessageCircleQuestion } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 
-export const getFaqPages = () => {
-  return getPagesUnderRoute("/faq/all") as Array<Page & { frontMatter: any; meta?: { title?: string } }>;
-};
+type FaqPage = ReturnType<typeof faqSource.getPages>[number];
+
+export const getFaqPages = () => faqSource.getPages();
 
 export const getFilteredFaqPages = (
-  faqPages: Array<Page & { frontMatter: any; meta?: { title?: string } }>,
+  faqPages: FaqPage[],
   tags: string[],
   limit: number | undefined = undefined
 ) => {
   return faqPages
-    .filter((page) => page.route !== "/faq/all")
+    .filter((page) => page.url !== "/faq/all")
     .filter((page) => {
-      const faqTags = page.frontMatter?.tags || [];
+      const faqTags = (page.data.tags as string[] | undefined) ?? [];
       return faqTags.some((tag) => tags.includes(tag));
     })
     .sort((a, b) =>
-      (a.frontMatter?.title || "").localeCompare(b.frontMatter?.title || "")
+      (a.data.title ?? "").localeCompare(b.data.title ?? "")
     )
     .slice(0, limit);
 };
@@ -34,7 +33,6 @@ export const FaqPreview = ({
 }) => {
   const faqPages = getFaqPages();
   const filteredFaqPages = getFilteredFaqPages(faqPages, tags);
-
   return <FaqList pages={filteredFaqPages} renderAsCards={renderAsCards} />;
 };
 
@@ -42,7 +40,7 @@ export const FaqList = ({
   pages,
   renderAsCards = false,
 }: {
-  pages: Array<Page & { frontMatter: any; meta?: { title?: string } }>;
+  pages: FaqPage[];
   renderAsCards?: boolean;
 }) => {
   if (renderAsCards) {
@@ -50,9 +48,9 @@ export const FaqList = ({
       <Cards num={1}>
         {pages.map((page) => (
           <Cards.Card
-            href={page.route}
-            key={page.route}
-            title={page.meta?.title || page.frontMatter?.title || page.name}
+            href={page.url}
+            key={page.url}
+            title={page.data.title}
             icon={<MessageCircleQuestion />}
             arrow
           >
@@ -68,17 +66,11 @@ export const FaqList = ({
         {pages.map((page) => (
           <li
             className="my-2"
-            id={page.route.replace("/faq/all/", "")}
-            key={page.route.replace("/faq/all/", "")}
+            id={page.url.replace("/faq/all/", "")}
+            key={page.url.replace("/faq/all/", "")}
           >
-            <Link
-              key={page.route}
-              href={page.route}
-              className="_text-primary-600 _underline _decoration-from-font [text-underline-position:from-font]"
-            >
-              <span className="">
-                {page.meta?.title || page.frontMatter?.title || page.name}
-              </span>
+            <Link href={page.url} variant="underline">
+              <span>{page.data.title}</span>
             </Link>
           </li>
         ))}

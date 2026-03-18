@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SECTION_CONFIG, WIDE_SECTIONS } from "@/lib/sections";
-import type { WideSectionSlug } from "@/lib/sections";
+import { SECTION_CONFIG, WIDE_SECTIONS } from "@/lib/source";
+import type { WideSectionSlug } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { getMDXComponents } from "@/mdx-components";
 import type { ComponentType } from "react";

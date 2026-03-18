@@ -136,7 +136,10 @@ export const ChangelogIndex = ({
             id={page.route.replace("/changelog/", "")}
             key={page.route.replace("/changelog/", "")}
           >
-            <div className="hidden sticky top-24 flex-col gap-2 items-start self-start text-lg opacity-80 md:flex group-hover:opacity-100">
+            <div
+              className="hidden sticky flex-col gap-2 items-start self-start text-lg opacity-80 md:flex group-hover:opacity-100"
+              style={{ top: "calc(var(--fd-banner-height, 0px) + 6rem)" }}
+            >
               {page.frontMatter?.date
                 ? new Date(page.frontMatter.date).toLocaleDateString("en-US", {
                   year: "numeric",

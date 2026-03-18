@@ -43,10 +43,10 @@ function mapSelfHostingTreeNodes(nodes: TreeNode[], baseUrl: string): TreeNode[]
         mapped.name = docLinkName;
       } else {
         const slug = slugFromUrl(node.url, baseUrl);
-        const page = selfHostingSource.getPage(slug) as { data?: { sidebarTitle?: string } } | undefined;
-        const sidebarTitle = page?.data?.sidebarTitle;
-        if (typeof sidebarTitle === "string") {
-          mapped.name = sidebarTitle;
+        const page = selfHostingSource.getPage(slug) as { data?: ShortTitleData } | undefined;
+        const label = page?.data?.shortTitle ?? page?.data?.sidebarTitle;
+        if (typeof label === "string") {
+          mapped.name = label;
         }
       }
     }
@@ -97,6 +97,7 @@ export const integrationsSource = loader({
 const INTEGRATIONS_BASE = "/integrations";
 
 type TreeNode = { type?: string; name?: string; url?: string; children?: TreeNode[]; [key: string]: unknown };
+type ShortTitleData = { shortTitle?: string; sidebarTitle?: string };
 
 /** Slug from a page URL (e.g. "/integrations/other/claude-code" -> ["other", "claude-code"]). */
 function slugFromUrl(url: string, baseUrl: string): string[] {
@@ -107,16 +108,57 @@ function slugFromUrl(url: string, baseUrl: string): string[] {
   return rest ? rest.split("/").filter(Boolean) : [];
 }
 
+/**
+ * Walk a page tree and replace each node's `name` with `shortTitle ?? sidebarTitle`
+ * when either field is set in the page's frontmatter. Falls back to the existing name.
+ */
+function applyShortTitles(
+  nodes: TreeNode[],
+  getPage: (slug: string[]) => { data?: ShortTitleData } | undefined,
+  baseUrl: string
+): TreeNode[] {
+  return nodes.map((node) => {
+    const mapped = { ...node };
+    if (node.type === "page" && node.url) {
+      const slug = slugFromUrl(node.url, baseUrl);
+      const page = getPage(slug);
+      const label = page?.data?.shortTitle ?? page?.data?.sidebarTitle;
+      if (typeof label === "string") {
+        mapped.name = label;
+      }
+    }
+    if (Array.isArray(node.children) && node.children.length > 0) {
+      mapped.children = applyShortTitles(node.children, getPage, baseUrl);
+    }
+    return mapped;
+  });
+}
+
+/**
+ * Returns a wrapped getPageTree() for any loader source that applies
+ * shortTitle / sidebarTitle overrides to sidebar node names.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getPageTreeWithShortTitles(src: { getPageTree: () => any; getPage: (slug: string[]) => any }, baseUrl: string) {
+  const root = src.getPageTree();
+  const children = (root as { children?: unknown[] }).children;
+  if (!Array.isArray(children)) return root;
+  return {
+    ...root,
+    children: applyShortTitles(children as TreeNode[], (slug) => src.getPage(slug), baseUrl),
+  };
+}
+
 function mapIntegrationsTreeNodes(nodes: TreeNode[], baseUrl: string): TreeNode[] {
   return nodes.map((node) => {
     const mapped = { ...node };
     if (node.type === "page" && node.url) {
       const slug = slugFromUrl(node.url, baseUrl);
       if (slug.length > 0) {
-        const page = integrationsSource.getPage(slug) as { data?: { sidebarTitle?: string } } | undefined;
-        const sidebarTitle = page?.data?.sidebarTitle;
-        if (typeof sidebarTitle === "string") {
-          mapped.name = sidebarTitle;
+        const page = integrationsSource.getPage(slug) as { data?: ShortTitleData } | undefined;
+        const label = page?.data?.shortTitle ?? page?.data?.sidebarTitle;
+        if (typeof label === "string") {
+          mapped.name = label;
         }
       }
     }
@@ -195,65 +237,98 @@ export const MARKETING_SLUGS = [
   "wrapped",
 ] as const;
 
-const routeToSource: Record<
-  string,
-  { getPage: (slug: string[]) => unknown; generateParams: () => { slug: string[] }[]; baseUrl: string }
-> = {
-  "/blog":               { ...blogSource,          baseUrl: "/blog" },
-  "/changelog":          { ...changelogSource,     baseUrl: "/changelog" },
-  "/guides":             { ...guidesSource,         baseUrl: "/guides" },
-  "/guides/videos":      { ...guidesSource,         baseUrl: "/guides" },
-  "/guides/cookbook":    { ...guidesSource,         baseUrl: "/guides" },
-  "/faq":                { ...faqSource,            baseUrl: "/faq" },
-  "/faq/all":            { ...faqSource,            baseUrl: "/faq" },
-  "/integrations":       { ...integrationsSource,   baseUrl: "/integrations" },
-  "/security":           { ...securitySource,       baseUrl: "/security" },
-  "/library":            { ...librarySource,        baseUrl: "/library" },
-  "/users":              { ...usersSource,           baseUrl: "/users" },
-  "/handbook":           { ...handbookSource,       baseUrl: "/handbook" },
-  "/handbook/chapters":  { ...handbookSource,       baseUrl: "/handbook" },
-  "/self-hosting":       { ...selfHostingSource,    baseUrl: "/self-hosting" },
-};
+// ---------------------------------------------------------------------------
+// Section routing config (formerly lib/sections.ts)
+// Single source of truth: every section is defined once here alongside its loader.
+// ---------------------------------------------------------------------------
 
-export function getPagesForRoute(route: string) {
-  const src = routeToSource[route];
-  if (!src) return [];
-  try {
-    const params = src.generateParams();
-    return params
-      .map(({ slug }) => {
-        const page = src.getPage(slug) as {
-          data: { title?: string; description?: string; date?: string; tag?: string; [k: string]: unknown };
-        } | undefined;
-        if (!page) return null;
-        const path = slug.length ? `/${slug.join("/")}` : "";
-        const rawData = page.data as Record<string, unknown>;
-        // Only keep primitive values (null, string, number, boolean) so the result
-        // is safe to pass as props to Client Components. This excludes functions
-        // (body, getText, getMDAST), module namespace objects (_exports), arrays
-        // (toc), and other non-serializable fumadocs internals.
-        const frontMatter = Object.fromEntries(
-          Object.entries(rawData).filter(([, v]) =>
-            v === null ||
-            typeof v === "string" ||
-            typeof v === "number" ||
-            typeof v === "boolean"
-          )
-        );
-        return {
-          route: `${src.baseUrl}${path}`,
-          name: rawData?.title as string | undefined,
-          title: rawData?.title as string | undefined,
-          frontMatter,
-        };
-      })
-      .filter(Boolean) as Array<{
-        route: string;
-        name?: string;
-        title?: string;
-        frontMatter?: Record<string, unknown>;
-      }>;
-  } catch {
-    return [];
-  }
-}
+const DOC_SECTIONS = {
+  "self-hosting": {
+    source: selfHostingSource,
+    collection: "selfHosting",
+    title: "Self-hosting",
+  },
+  blog: {
+    source: blogSource,
+    collection: "blog",
+    title: "Blog",
+  },
+  changelog: {
+    source: changelogSource,
+    collection: "changelog",
+    title: "Changelog",
+  },
+  guides: {
+    source: guidesSource,
+    collection: "guides",
+    title: "Guides",
+  },
+  faq: {
+    source: faqSource,
+    collection: "faq",
+    title: "FAQ",
+  },
+  integrations: {
+    source: integrationsSource,
+    collection: "integrations",
+    title: "Integrations",
+  },
+  security: {
+    source: securitySource,
+    collection: "security",
+    title: "Security",
+  },
+  library: {
+    source: librarySource,
+    collection: "library",
+    title: "Library",
+  },
+  users: {
+    source: usersSource,
+    collection: "customers",
+    title: "Users",
+  },
+  handbook: {
+    source: handbookSource,
+    collection: "handbook",
+    title: "Handbook",
+  },
+} as const;
+
+const marketingEntries = Object.fromEntries(
+  MARKETING_SLUGS.map((s) => [
+    s,
+    { source: marketingSource, collection: "marketing" as const, title: s },
+  ])
+);
+
+export const SECTION_CONFIG = { ...DOC_SECTIONS, ...marketingEntries } as const;
+export const SECTION_SLUGS = Object.keys(SECTION_CONFIG) as (keyof typeof SECTION_CONFIG)[];
+export type SectionSlug = (typeof SECTION_SLUGS)[number];
+export const MARKETING_SECTION_SLUGS = new Set(MARKETING_SLUGS);
+
+/** Sections that have their own app route (app/integrations, app/self-hosting, etc.). Exclude from [section]. */
+export const DOCS_STYLE_APP_SECTIONS = new Set([
+  "integrations",
+  "self-hosting",
+  "guides",
+  "library",
+]);
+
+/** Sections that are blog/changelog posts — no left sidebar */
+export const POST_SECTIONS = new Set(["blog", "changelog", "users"]);
+
+/** Changelog posts — no sidebars at all, centered narrow content */
+export const CHANGELOG_SECTIONS = new Set(["changelog"]);
+
+/** Sections that have their own route folder under app/(wide)/ */
+export const WIDE_SECTION_SLUGS = [
+  "pricing",
+  "pricing-self-host",
+  "talk-to-us",
+  "watch-demo",
+  "startups",
+] as const;
+export type WideSectionSlug = (typeof WIDE_SECTION_SLUGS)[number];
+export const WIDE_SECTIONS = new Set<string>(WIDE_SECTION_SLUGS);
+

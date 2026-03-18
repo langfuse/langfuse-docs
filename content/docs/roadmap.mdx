@@ -16,36 +16,31 @@ Langfuse is [open source](/open-source) and we want to be fully transparent what
 
 ## 🚀 Released
 
-import { getPagesUnderRoute } from "nextra/context";
-import Link from "next/link";
+import { changelogSource } from "@/lib/source";
+import { Link } from "@/components/ui/link";
 
 export const ChangelogList = () => (
   <ul className="list-disc list pl-6">
-    {getPagesUnderRoute("/changelog")
+    {changelogSource
+      .getPages()
       .sort(
         (a, b) =>
-          new Date(b.frontMatter.date).getTime() -
-          new Date(a.frontMatter.date).getTime()
+          new Date(String(b.data.date || 0)).getTime() -
+          new Date(String(a.data.date || 0)).getTime()
       )
       .slice(0, 10)
-      .map((page, i) => (
+      .map((page) => (
         <li
           className="my-2"
-          id={page.route.replace("/changelog/", "")}
-          key={page.route.replace("/changelog/", "")}
+          id={page.url.replace("/changelog/", "")}
+          key={page.url.replace("/changelog/", "")}
         >
-          <Link
-            key={page.route}
-            href={page.route}
-            className="_text-primary-600 _underline _decoration-from-font [text-underline-position:from-font]"
-          >
-            <span className="">
-              {page.meta?.title || page.frontMatter?.title || page.name}
-            </span>
+          <Link href={page.url} variant="underline">
+            <span>{page.data.title}</span>
           </Link>
           <span className="text-primary/60 ml-2 hidden sm:inline">
-            {page.frontMatter?.date
-              ? `(${new Date(page.frontMatter.date).toLocaleDateString(
+            {page.data.date
+              ? `(${new Date(String(page.data.date)).toLocaleDateString(
                   "en-US",
                   {
                     year: "numeric",

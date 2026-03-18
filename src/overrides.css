@@ -41,6 +41,20 @@
    aside #nd-sidebar the scroll container and disable the inner ScrollArea. */
 #nd-docs-layout #nd-sidebar {
   overflow-y: auto;
+  scrollbar-width: thin;
+}
+#nd-docs-layout #nd-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+#nd-docs-layout #nd-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+#nd-docs-layout #nd-sidebar::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 2px;
+}
+#nd-docs-layout #nd-sidebar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
 }
 #nd-docs-layout #nd-sidebar > div.flex-1 {
   flex: none;
@@ -60,6 +74,20 @@
 /* Same full-sidebar scroll for mobile docs drawer */
 #nd-sidebar-mobile {
   overflow-y: auto;
+  scrollbar-width: thin;
+}
+#nd-sidebar-mobile::-webkit-scrollbar {
+  width: 4px;
+}
+#nd-sidebar-mobile::-webkit-scrollbar-track {
+  background: transparent;
+}
+#nd-sidebar-mobile::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 2px;
+}
+#nd-sidebar-mobile::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
 }
 #nd-sidebar-mobile > div.flex-1 {
   flex: none;
@@ -125,6 +153,19 @@
 li > ol,
 li > ul {
   margin-top: 0 !important;
+}
+
+/* GH discussions list: no vertical margin/padding (lives inside prose) */
+ul[data-gh-discussions-list] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Tab content: ensure first heading clears the tab list (avoids overlap with tab labels) */
+[role="tabpanel"].prose-no-margin {
+  padding-top: 2rem;
 }
 
 /* Prose images: no vertical margin (override default 2em) */
@@ -235,22 +276,28 @@ li:has(> .subseparator) {
 }
 
 /* Steps component: increment counter and render numbered circles centered on the left border line.
-   .steps has pl-8 (2rem) padding from its left border, so the circle (1.75rem wide)
-   needs left: -(2rem + 0.875rem) = -2.875rem to sit centered on that border. */
+   .fd-steps (fumadocs) / .steps (legacy) has pl-8 (2rem) padding from its left border,
+   so the circle (1.75rem wide) needs left: -(2rem + 0.875rem) = -2.875rem to sit centered. */
+.fd-steps > h2,
+.fd-steps > h3,
 .steps > h2,
 .steps > h3 {
   counter-increment: step;
   position: relative;
 }
+.fd-steps > h2:first-child,
+.fd-steps > h3:first-child,
 .steps > h2:first-child,
 .steps > h3:first-child {
   margin-top: 0;
 }
+.fd-steps > h2::before,
+.fd-steps > h3::before,
 .steps > h2::before,
 .steps > h3::before {
   content: counter(step);
   position: absolute;
-  left: -2.875rem;
+  left: -2.625rem;
   top: 50%;
   transform: translateY(-50%);
   display: inline-flex;
@@ -267,17 +314,21 @@ li:has(> .subseparator) {
 
 /* Steps: compact layout on mobile so numbers/headlines don't dominate; more space for body text. */
 @media (max-width: 768px) {
+  .fd-steps > h2,
+  .fd-steps > h3,
   .steps > h2,
   .steps > h3 {
     font-size: 1rem;
     line-height: 1.35;
   }
+  .fd-steps > h2::before,
+  .fd-steps > h3::before,
   .steps > h2::before,
   .steps > h3::before {
     width: 1.25rem;
     height: 1.25rem;
     font-size: 0.75rem;
-    /* pl-4 = 1rem; circle radius 0.625rem → center on border */
-    left: -1.625rem;
+    /* fd-steps padding-left 1.75rem + half circle 0.625rem */
+    left: -2.375rem;
   }
 }

@@ -1,10 +1,13 @@
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
-import { CustomerCarousel } from "../customers/CustomerCarousel";
-import { getPagesForRoute } from "@/lib/source";
+import { CustomerCarousel, type CustomerStory } from "../customers/CustomerCarousel";
+import { usersSource } from "@/lib/source";
 
 export default function CustomerStories() {
-  const stories = getPagesForRoute("/users");
+  const stories: CustomerStory[] = usersSource.getPages().map((page) => ({
+    route: page.url,
+    frontMatter: page.data as CustomerStory["frontMatter"],
+  }));
 
   return (
     <HomeSection>
@@ -21,7 +24,7 @@ export default function CustomerStories() {
         ]}
       />
       <CustomerCarousel
-        stories={stories as any}
+        stories={stories}
         showDots={true}
         loop={true}
       />

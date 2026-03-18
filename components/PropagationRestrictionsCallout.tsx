@@ -1,4 +1,5 @@
-import { Callout } from "@/lib/nextra-shim/components";
+import { Callout } from "@/components/docs";
+import { Link } from "@/components/ui/link";
 
 interface PropagationRestrictionsCalloutProps {
   attributes?: ("userId" | "sessionId" | "metadata" | "version" | "tags" | "traceName")[];
@@ -66,13 +67,13 @@ export function PropagationRestrictionsCallout({
       {!isGeneric ? (
         <div className="mt-4 pt-3 border-t border-border">
           <strong>Learn more:</strong>{" "}
-          <a href={pythonLink} className="underline">
+          <Link href={pythonLink} variant="underline">
             Python SDK
-          </a>
+          </Link>
           {" | "}
-          <a href={tsLink} className="underline">
+          <Link href={tsLink} variant="underline">
             TypeScript SDK
-          </a>
+          </Link>
         </div>
       ) : null}
     </Callout>

@@ -16,14 +16,14 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <div
-        className="flex h-8 items-center rounded-full border border-border bg-muted/30 px-1.5 py-0.5"
+        className="flex h-8 items-center rounded-full border border-border bg-muted/30 px-1"
         aria-hidden
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted">
-          <Sun className="h-4 w-4 text-foreground" />
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted">
+          <Sun className="h-3.5 w-3.5 text-foreground" />
         </span>
-        <span className="flex h-7 w-7 items-center justify-center rounded-full">
-          <Moon className="h-4 w-4 text-muted-foreground" />
+        <span className="flex h-6 w-6 items-center justify-center rounded-full">
+          <Moon className="h-3.5 w-3.5 text-muted-foreground" />
         </span>
       </div>
     );
@@ -33,7 +33,7 @@ export function ThemeToggle() {
 
   return (
     <div
-      className="flex h-8 items-center rounded-full border border-border bg-muted/30 px-1.5 py-0.5"
+      className="flex h-8 items-center rounded-full border border-border bg-muted/30 px-1"
       role="group"
       aria-label="Theme"
     >
@@ -43,13 +43,13 @@ export function ThemeToggle() {
         aria-label="Switch to light mode"
         aria-pressed={!isDark}
         className={cn(
-          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors",
+          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors",
           !isDark
             ? "bg-muted text-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground"
         )}
       >
-        <Sun className="h-4 w-4" />
+        <Sun className="h-3.5 w-3.5" />
       </button>
       <button
         type="button"
@@ -57,13 +57,13 @@ export function ThemeToggle() {
         aria-label="Switch to dark mode"
         aria-pressed={isDark}
         className={cn(
-          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors",
+          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors",
           isDark
             ? "bg-muted text-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground"
         )}
       >
-        <Moon className="h-4 w-4" />
+        <Moon className="h-3.5 w-3.5" />
       </button>
     </div>
   );

@@ -3,13 +3,14 @@ import type { MDXComponents } from "mdx/types";
 import React from "react";
 import dynamic from "next/dynamic";
 import { Mermaid } from "@/components/Mermaid";
-import NextImage from "next/image";
+import { Image } from "@/components/ui/image";
 import { Frame } from "@/components/Frame";
 import { LangTabs } from "@/components/LangTabs";
 import { FetchReadme } from "@/components/FetchReadme";
-import { Callout, Tabs, Tab, Cards, Card, Steps, FileTree, FileTreeFile, FileTreeFolder } from "@/lib/nextra-shim/components";
+import { Callout, Tabs, Tab, Cards, Card, Steps, FileTree, FileTreeFile, FileTreeFolder, Playground } from "@/components/docs";
 import { MdxDetails, MdxSummary } from "@/components/MdxDetails";
 import { AvailabilityBanner } from "@/components/availability";
+import { Link as MdxLink, type LinkProps } from "@/components/ui/link";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
 // It only downloads on pages that actually render a <Video> tag.
@@ -46,31 +47,11 @@ function MdxParagraph({ children, ...props }: React.HTMLAttributes<HTMLElement>)
   return <p {...props}>{children}</p>;
 }
 
-function MdxImage(props: React.ImgHTMLAttributes<HTMLImageElement>) {
-  const { src, alt, width, height, ...rest } = props;
-  if (!src) return null;
-  // Always use next/image so Vercel optimises + compresses every image.
-  // For images without explicit dimensions (the common case in MDX — `![alt](url)`)
-  // we use width=0/height=0 + sizes + style so the image fills its container
-  // while keeping the correct aspect ratio. This is the Next.js-recommended
-  // pattern for images with unknown intrinsic dimensions.
-  return (
-    <NextImage
-      src={src}
-      alt={alt ?? ""}
-      width={width ? Number(width) : 0}
-      height={height ? Number(height) : 0}
-      sizes={!width || !height ? "(max-width: 768px) 100vw, 800px" : undefined}
-      style={{ width: "100%", height: "auto" }}
-      {...(rest as object)}
-    />
-  );
-}
-
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
-    img: MdxImage,
+    a: (props: LinkProps) => <MdxLink variant="underline" {...props} />,
+    img: Image,
     p: MdxParagraph,
     Frame,
     Video,
@@ -91,6 +72,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     summary: MdxSummary,
     AvailabilityBanner,
     Mermaid,
+    Playground,
     ...components,
   };
 }

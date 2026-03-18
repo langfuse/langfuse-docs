@@ -3,6 +3,7 @@ import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { DocsLayoutWrapper } from "./DocsLayoutWrapper";
 import { Layout } from "@/components/layout";
 import { MenuSwitcher } from "@/components/MenuSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 /**
  * Shared wrapper used by all sidebar-based section layouts
@@ -25,6 +26,7 @@ export function SharedDocsLayout({
           nav={{ enabled: false }}
           sidebar={{ banner: <MenuSwitcher /> }}
           searchToggle={{ enabled: false }}
+          themeSwitch={{ component: <div className="ms-auto"><ThemeToggle /></div> }}
         >
           {children}
         </DocsLayout>

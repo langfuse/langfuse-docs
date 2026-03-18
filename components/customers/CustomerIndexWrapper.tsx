@@ -1,19 +1,16 @@
-// Server component — no "use client". Fetches customer stories server-side
-// and passes them as props to the client-side CustomerIndex.
-// Use this in MDX files instead of CustomerIndex when you need path-based fetching.
-import { getPagesForRoute } from "@/lib/source";
+// Server component — fetches customer stories server-side and passes them to CustomerIndex.
+import { usersSource } from "@/lib/source";
 import { CustomerIndex } from "./CustomerIndex";
 import { type CustomerStory } from "./CustomerCarousel";
 
 interface CustomerIndexWrapperProps {
-  path?: string;
   maxItems?: number;
 }
 
-export function CustomerIndexWrapper({
-  path = "/users",
-  maxItems,
-}: CustomerIndexWrapperProps) {
-  const stories = getPagesForRoute(path) as CustomerStory[];
+export function CustomerIndexWrapper({ maxItems }: CustomerIndexWrapperProps) {
+  const stories: CustomerStory[] = usersSource.getPages().map((page) => ({
+    route: page.url,
+    frontMatter: page.data as CustomerStory["frontMatter"],
+  }));
   return <CustomerIndex stories={stories} maxItems={maxItems} />;
 }

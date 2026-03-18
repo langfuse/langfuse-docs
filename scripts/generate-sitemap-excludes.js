@@ -1,10 +1,14 @@
 /**
- * Reads all content/**\/*.mdx files, extracts frontmatter, and writes
- * .sitemap-excludes.json containing paths that next-sitemap should omit:
- *   - noindex: true  → page is intentionally hidden from search
- *   - canonical: <url> that differs from the page's own URL
- *                  → the canonical URL is the authoritative version; Google
- *                     recommends only canonical URLs appear in the sitemap
+ * Reads all content/**\/*.mdx files, extracts frontmatter, and writes two files:
+ *
+ *   .sitemap-excludes.json  — paths next-sitemap should omit:
+ *     - noindex: true  → page is intentionally hidden from search
+ *     - canonical: <url> that differs from the page's own URL
+ *
+ *   .sitemap-all-pages.json — ALL valid page paths (i.e., not excluded).
+ *     Used by next-sitemap's additionalPaths to include pages that are
+ *     server-rendered (not statically built) and therefore missed by
+ *     next-sitemap's default build-output discovery.
  *
  * Run automatically as part of `prebuild` before `next-sitemap`.
  */
@@ -13,7 +17,21 @@ const fs = require("fs");
 const path = require("path");
 
 const contentDir = path.join(__dirname, "../content");
-const outputFile = path.join(__dirname, "../.sitemap-excludes.json");
+const excludesFile = path.join(__dirname, "../.sitemap-excludes.json");
+const allPagesFile = path.join(__dirname, "../.sitemap-all-pages.json");
+
+// Cookbook routes that have a canonical docsPath duplicate — excluded from sitemap
+let cookbookExcluded = new Set();
+try {
+  const cookbookRoutes = require("../cookbook/_routes.json");
+  for (const { notebook, docsPath } of cookbookRoutes) {
+    if (docsPath) {
+      cookbookExcluded.add(`/guides/cookbook/${notebook.replace(".ipynb", "")}`);
+    }
+  }
+} catch {
+  // cookbook/_routes.json not available — skip
+}
 
 /** Parse the YAML front-matter block (between first pair of ---). */
 function readFrontmatter(src) {
@@ -51,6 +69,7 @@ function contentPathToRoute(filePath) {
     handbook: "handbook",
     security: "security",
     blog: "blog",
+    customers: "users",
     // marketing pages are served at the root (no section prefix)
     marketing: "",
   };
@@ -82,7 +101,8 @@ function walkDir(dir) {
   return files;
 }
 
-const excludePaths = new Set();
+const excludePaths = new Set([...cookbookExcluded]);
+const allRoutes = new Set();
 
 for (const filePath of walkDir(contentDir)) {
   let src;
@@ -92,24 +112,34 @@ for (const filePath of walkDir(contentDir)) {
     continue;
   }
   const fm = readFrontmatter(src);
-  if (!fm.noindex && !fm.canonical) continue;
-
   const route = contentPathToRoute(filePath);
   if (!route) continue;
 
+  // Determine if this page should be excluded
+  let exclude = false;
   if (fm.noindex === "true") {
-    excludePaths.add(route);
+    exclude = true;
   } else if (fm.canonical) {
     // Normalise: strip https://langfuse.com prefix so we compare path-to-path
     const canonical = fm.canonical.replace(/^https?:\/\/langfuse\.com/, "");
-    // If the canonical differs from this page's own route, exclude it
-    if (canonical !== route) {
-      excludePaths.add(route);
-    }
+    if (canonical !== route) exclude = true;
+  } else if (cookbookExcluded.has(route)) {
+    exclude = true;
+  }
+
+  if (exclude) {
+    excludePaths.add(route);
+  } else {
+    allRoutes.add(route);
   }
 }
 
-fs.writeFileSync(outputFile, JSON.stringify([...excludePaths].sort(), null, 2));
+fs.writeFileSync(excludesFile, JSON.stringify([...excludePaths].sort(), null, 2));
 console.log(
   `[generate-sitemap-excludes] Wrote ${excludePaths.size} excluded path(s) to .sitemap-excludes.json`
+);
+
+fs.writeFileSync(allPagesFile, JSON.stringify([...allRoutes].sort(), null, 2));
+console.log(
+  `[generate-sitemap-excludes] Wrote ${allRoutes.size} page path(s) to .sitemap-all-pages.json`
 );

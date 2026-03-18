@@ -1,10 +1,5 @@
 "use client";
 
-/**
- * Client-only parts of the nextra-shim Tabs/FileTree.
- * Requires "use client" because TabsClient uses useState/useEffect
- * and FileTreeFolder uses useState.
- */
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -151,3 +146,5 @@ export const FileTreeFolder = ({
     </li>
   );
 };
+
+export { FumadocsTabsContent as TabsContent };

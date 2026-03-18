@@ -3,41 +3,32 @@ import { BlogIndex } from "@/components/blog/BlogIndex";
 import { Header } from "@/components/Header";
 import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 import Link from "next/link";
-import { getPagesForRoute } from "@/lib/source";
+import { blogSource } from "@/lib/source";
 import type { BlogPageItem } from "@/components/blog/BlogIndex";
 
-/** Serializable blog page for client (no functions/non-serializable fields). */
-function toSerializableBlogPage(
-  p: ReturnType<typeof getPagesForRoute>[number]
-): BlogPageItem {
-  const fm = p.frontMatter ?? {};
-  return {
-    route: p.route ?? "",
-    name: p.name ?? p.title,
-    title: p.title,
-    frontMatter: {
-      title: typeof fm.title === "string" ? fm.title : undefined,
-      description: typeof fm.description === "string" ? fm.description : undefined,
-      date: typeof fm.date === "string" ? fm.date : undefined,
-      tag: typeof fm.tag === "string" ? fm.tag : undefined,
-      ogImage: typeof fm.ogImage === "string" ? fm.ogImage : undefined,
-      author: typeof fm.author === "string" ? fm.author : undefined,
-      showInBlogIndex:
-        typeof fm.showInBlogIndex === "boolean" ? fm.showInBlogIndex : undefined,
-    },
-  };
-}
-
 export default function BlogIndexPage() {
-  const rawPages = getPagesForRoute("/blog");
-  const pages: BlogPageItem[] = rawPages
-    .filter((p) => p.route !== "/blog" && p.frontMatter?.showInBlogIndex !== false)
+  const pages: BlogPageItem[] = blogSource
+    .getPages()
+    .filter((p) => p.url !== "/blog" && p.data.showInBlogIndex !== false)
     .sort(
       (a, b) =>
-        new Date((b.frontMatter?.date as string) ?? 0).getTime() -
-        new Date((a.frontMatter?.date as string) ?? 0).getTime()
+        new Date((b.data.date as string) ?? 0).getTime() -
+        new Date((a.data.date as string) ?? 0).getTime()
     )
-    .map(toSerializableBlogPage);
+    .map((p) => ({
+      route: p.url,
+      name: p.data.title,
+      title: p.data.title,
+      frontMatter: {
+        title: p.data.title,
+        description: p.data.description as string | undefined,
+        date: p.data.date as string | undefined,
+        tag: p.data.tag as string | undefined,
+        ogImage: p.data.ogImage as string | undefined,
+        author: p.data.author as string | undefined,
+        showInBlogIndex: p.data.showInBlogIndex as boolean | undefined,
+      },
+    }));
 
   return (
     <div className="mx-auto max-w-360 pl-[max(env(safe-area-inset-left),1.5rem)] pr-[max(env(safe-area-inset-right),1.5rem)]">

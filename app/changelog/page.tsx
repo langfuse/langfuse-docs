@@ -4,39 +4,31 @@ import type { ChangelogPageItem } from "@/components/changelog/ChangelogIndex";
 import { Header } from "@/components/Header";
 import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 import Link from "next/link";
-import { getPagesForRoute } from "@/lib/source";
-
-/** Keep only serializable fields so we can pass pages to a client component. */
-function toSerializableChangelogPage(
-  p: (ReturnType<typeof getPagesForRoute>[number] & { route: string })
-): ChangelogPageItem {
-  const fm = p.frontMatter ?? {};
-  return {
-    route: p.route,
-    name: p.name ?? p.title,
-    title: p.title,
-    frontMatter: {
-      title: typeof fm.title === "string" ? fm.title : undefined,
-      description: typeof fm.description === "string" ? fm.description : undefined,
-      date: typeof fm.date === "string" ? fm.date : undefined,
-      ogImage: typeof fm.ogImage === "string" ? fm.ogImage : undefined,
-      ogVideo: typeof fm.ogVideo === "string" ? fm.ogVideo : undefined,
-      gif: typeof fm.gif === "string" ? fm.gif : undefined,
-      badge: typeof fm.badge === "string" ? fm.badge : undefined,
-    },
-  };
-}
+import { changelogSource } from "@/lib/source";
 
 export default function ChangelogIndexPage() {
-  const rawPages = getPagesForRoute("/changelog");
-  const pages: ChangelogPageItem[] = rawPages
-    .filter((p) => p.route !== "/changelog")
+  const pages: ChangelogPageItem[] = changelogSource
+    .getPages()
+    .filter((p) => p.url !== "/changelog")
     .sort(
       (a, b) =>
-        new Date((b.frontMatter?.date as string) ?? 0).getTime() -
-        new Date((a.frontMatter?.date as string) ?? 0).getTime()
+        new Date((b.data.date as string) ?? 0).getTime() -
+        new Date((a.data.date as string) ?? 0).getTime()
     )
-    .map(toSerializableChangelogPage);
+    .map((p) => ({
+      route: p.url,
+      name: p.data.title,
+      title: p.data.title,
+      frontMatter: {
+        title: p.data.title,
+        description: p.data.description as string | undefined,
+        date: p.data.date as string | undefined,
+        ogImage: p.data.ogImage as string | undefined,
+        ogVideo: p.data.ogVideo as string | undefined,
+        gif: p.data.gif as string | undefined,
+        badge: p.data.badge as string | undefined,
+      },
+    }));
 
   return (
     <div className="px-4 md:container md:px-0">

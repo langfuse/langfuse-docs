@@ -1,37 +1,35 @@
-import { getPagesUnderRoute } from "@/lib/nextra-shim/context";
+import { guidesSource } from "@/lib/source";
 import { Video, ArrowRight } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { Image } from "@/components/ui/image";
+import { Link } from "@/components/ui/link";
 
 export const VideoIndex = () => {
-  const pages = (
-    getPagesUnderRoute("/guides/videos") as Array<{ route?: string; name?: string; frontMatter?: Record<string, any> }>
-  ).filter(
-    (page) =>
-      page.route !== "/guides/videos" &&
-      page.route !== "/guides/videos/index" &&
-      !!page.frontMatter?.ogImage
-  );
+  const pages = guidesSource
+    .getPages()
+    .filter(
+      (page) =>
+        page.url.startsWith("/guides/videos/") &&
+        !!(page.data.ogImage as string | undefined)
+    );
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 not-prose my-4">
       {pages.map((page) => {
-        const title =
-          page.frontMatter?.title ||
-          page.name
-            .split("_")
-            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
+        const title = page.data.title ?? page.slugs[page.slugs.length - 1]
+          .split("_")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+        const ogImage = page.data.ogImage as string;
 
         return (
           <Link
-            href={page.route}
-            key={page.route}
+            href={page.url}
+            key={page.url}
             className="flex flex-col rounded-lg border overflow-hidden hover:border-primary transition-colors"
           >
             <div className="relative aspect-video w-full shrink-0">
               <Image
-                src={page.frontMatter.ogImage}
+                src={ogImage}
                 alt={title}
                 fill
                 className="object-cover"

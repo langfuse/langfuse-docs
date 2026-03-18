@@ -3,6 +3,7 @@
 import { Server, LibraryBig, BookOpen, FileCode, Unplug } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const SECTIONS = [
   { title: "Docs", path: "/docs", Icon: LibraryBig },
@@ -16,26 +17,31 @@ export const MenuSwitcher = () => {
   const pathname = usePathname();
   return (
     <div className="hidden my-2 md:block">
-      {SECTIONS.map((item) =>
-        pathname?.startsWith(item.path) ? (
-          <div
-            key={item.path}
-            className="flex flex-row gap-3 items-center mb-1.5 group text-muted-blue"
-          >
-            <item.Icon className="p-1 w-7 h-7 rounded border bg-muted-blue/10 text-muted-blue" />
-            {item.title}
-          </div>
-        ) : (
+      {SECTIONS.map((item) => {
+        const isActive = pathname?.startsWith(item.path);
+        return (
           <Link
             href={item.path}
             key={item.path}
-            className="flex flex-row gap-3 items-center mb-1.5 group text-muted-foreground hover:text-foreground"
+            className={cn(
+              "flex flex-row gap-3 items-center mb-1.5 group",
+              isActive
+                ? "text-muted-blue"
+                : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            <item.Icon className="p-1 w-7 h-7 rounded border group-hover:bg-muted" />
+            <item.Icon
+              className={cn(
+                "p-1 w-7 h-7 rounded border",
+                isActive
+                  ? "bg-muted-blue/10 text-muted-blue"
+                  : "group-hover:bg-muted"
+              )}
+            />
             {item.title}
           </Link>
-        )
-      )}
+        );
+      })}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { source } from "@/lib/source";
+import { source, getPageTreeWithShortTitles } from "@/lib/source";
 import { SharedDocsLayout } from "./SharedDocsLayout";
 
 export default function DocsPageLayout({
@@ -6,5 +6,5 @@ export default function DocsPageLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={source.getPageTree()}>{children}</SharedDocsLayout>;
+  return <SharedDocsLayout tree={getPageTreeWithShortTitles(source, "/docs")}>{children}</SharedDocsLayout>;
 }

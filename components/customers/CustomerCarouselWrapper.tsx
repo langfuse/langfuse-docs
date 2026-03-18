@@ -1,23 +1,22 @@
-// Server component — no "use client". Fetches customer stories server-side
-// and passes them as props to the client-side CustomerCarousel.
-// Use this in MDX files instead of CustomerCarousel when you need path-based fetching.
-import { getPagesForRoute } from "@/lib/source";
+// Server component — fetches customer stories server-side and passes them to CustomerCarousel.
+import { usersSource } from "@/lib/source";
 import { CustomerCarousel, type CustomerStory } from "./CustomerCarousel";
 
 interface CustomerCarouselWrapperProps {
-  path?: string;
   showDots?: boolean;
   loop?: boolean;
   className?: string;
 }
 
 export function CustomerCarouselWrapper({
-  path = "/users",
   showDots,
   loop,
   className,
 }: CustomerCarouselWrapperProps) {
-  const stories = getPagesForRoute(path) as CustomerStory[];
+  const stories: CustomerStory[] = usersSource.getPages().map((page) => ({
+    route: page.url,
+    frontMatter: page.data as CustomerStory["frontMatter"],
+  }));
   return (
     <CustomerCarousel
       stories={stories}

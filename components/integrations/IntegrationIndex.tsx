@@ -1,6 +1,5 @@
 import { integrationsSource } from "@/lib/source";
-import { type Page } from "@/lib/nextra-shim/nextra-types";
-import { Cards } from "@/lib/nextra-shim/components";
+import { Cards } from "@/components/docs";
 import {
   Puzzle,
   Globe,
@@ -118,7 +117,7 @@ const categoryConfig = {
   },
 };
 
-type IntegrationPage = Page & { frontMatter: any };
+type IntegrationPage = { route: string; name?: string; frontMatter: any };
 type ProcessedIntegrationPage = IntegrationPage & { title: string };
 
 /**
