@@ -4,8 +4,7 @@ import {
   Tabs as FumadocsTabs,
   TabsList as FumadocsTabsList,
   TabsTrigger as FumadocsTabsTrigger,
-  TabsContent as FumadocsTabsContent,
-} from "fumadocs-ui/components/ui/tabs";
+} from "fumadocs-ui/components/tabs";
 import { cn } from "@/lib/utils";
 
 const KEY = "synced-tabs:language";
@@ -35,7 +34,7 @@ const store: Store = {
     if (typeof window !== "undefined") {
       try {
         window.localStorage.setItem(KEY, label);
-      } catch {}
+      } catch { }
     }
   },
 };
@@ -44,7 +43,7 @@ if (typeof window !== "undefined") {
   try {
     const saved = window.localStorage.getItem(KEY);
     if (saved != null) storeEntry.value = saved;
-  } catch {}
+  } catch { }
   window.addEventListener("storage", (e: StorageEvent) => {
     if (e.key !== KEY) return;
     const next = e.newValue == null ? null : e.newValue;
@@ -149,8 +148,8 @@ export function LangTabs(props: {
   return (
     <div ref={containerRef}>
       <FumadocsTabs
-        value={internalValue}
-        onValueChange={handleValueChange}
+        key={internalValue}
+        defaultValue={internalValue}
         className="flex overflow-hidden flex-col my-4 rounded-xl border border-border bg-card"
       >
         <FumadocsTabsList
@@ -162,6 +161,7 @@ export function LangTabs(props: {
             <FumadocsTabsTrigger
               key={i}
               value={values[i]}
+              onClick={() => handleValueChange(values[i])}
               className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-2 border-transparent px-2.5 pb-2 pt-1.5 -mb-px text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-muted-blue data-[state=active]:text-muted-blue data-[state=active]:font-medium"
             >
               {typeof item === "string" ? item : item?.label ?? String(i)}
