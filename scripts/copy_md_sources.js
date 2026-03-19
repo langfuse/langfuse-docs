@@ -1,7 +1,6 @@
 /*
   Copy all Markdown sources from content/** (md, mdx) into public/md-src/** as .md files.
   This runs at build time so the static files can be served directly in production.
-  (Previously copied from pages/; site now uses App Router with content/ only.)
 */
 
 const fs = require('fs');

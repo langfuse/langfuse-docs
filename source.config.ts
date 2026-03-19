@@ -22,6 +22,9 @@ const baseFrontmatterSchema = frontmatterSchema.extend({
   // Optional SEO title override: when set, used for <title> and OG title
   // instead of the navigation title (keeps sidebar labels short).
   seoTitle: z.string().nullish(),
+  // Optional per-page OG image override (site-relative path, e.g. /images/foo.jpg).
+  // When set, used instead of the generated /api/og card.
+  ogImage: z.string().nullish(),
 });
 
 // Extended schema for blog pages — adds date, tag, author, ogImage fields
@@ -30,7 +33,6 @@ const blogFrontmatterSchema = baseFrontmatterSchema.extend({
   date: yamlDateField,
   tag: z.string().nullish(),
   author: z.string().nullish(),
-  ogImage: z.string().nullish(),
   showInBlogIndex: z.boolean().nullish(),
 });
 
@@ -39,7 +41,6 @@ const blogFrontmatterSchema = baseFrontmatterSchema.extend({
 const changelogFrontmatterSchema = baseFrontmatterSchema.extend({
   date: yamlDateField,
   author: z.string().nullish(),
-  ogImage: z.string().nullish(),
   ogVideo: z.string().nullish(),
   gif: z.string().nullish(),
   badge: z.string().nullish(),
@@ -50,7 +51,6 @@ const changelogFrontmatterSchema = baseFrontmatterSchema.extend({
 const customerFrontmatterSchema = baseFrontmatterSchema.extend({
   // Use .nullish() so empty YAML values (parsed as null) are accepted too
   date: yamlDateField,
-  ogImage: z.string().nullish(),
   tag: z.string().nullish(),
   author: z.string().nullish(),
   customerLogo: z.string().nullish(),
@@ -98,7 +98,6 @@ export const changelog = defineDocs({
 });
 
 const guidesFrontmatterSchema = baseFrontmatterSchema.extend({
-  ogImage: z.string().nullish(),
   category: z.string().nullish(),
 });
 

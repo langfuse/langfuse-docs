@@ -7,15 +7,11 @@ const CONFIG = {
     authors: path.join(__dirname, '../../data/authors.json'),
 
     // Documentation sections to analyze for contributor data
-    // Each section corresponds to a top-level directory in the pages folder
-    // and represents a major documentation area (e.g., /docs, /self-hosting)
+    // Each section is a top-level directory under content/ (App Router)
     sections: ['docs', 'self-hosting', 'security', 'guides', 'integrations', 'faq', 'handbook'].map(section => ({
         name: section.replace('-', ''),
-        // Content lives in content/ after the Fumadocs migration
         dirPath: path.join(__dirname, `../../content/${section}`),
-        // Track both current (content/) and legacy (pages/) git paths to
-        // preserve contributor history from before the migration
-        gitPaths: [`content/${section}/`, `pages/${section}/`],
+        gitPaths: [`content/${section}/`],
         urlPrefix: `/${section}`
     })),
 

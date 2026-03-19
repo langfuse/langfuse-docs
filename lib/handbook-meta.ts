@@ -1,5 +1,5 @@
 /**
- * Formerly from pages/handbook/chapters/_meta and pages/handbook/_meta.
+ * Handbook navigation. Content lives under content/handbook/.
  * CHAPTER_ORDER: order of chapter slugs for display.
  * TEAMS: handbook section paths with display name and first page.
  */

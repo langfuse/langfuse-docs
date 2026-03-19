@@ -48,7 +48,7 @@ When you move or rename a documentation page, always add a redirect from the old
 
 **Example prompt for Cursor / Claude Code:** You can ask the AI to add redirects for all page changes on your current branch. Copy-paste something like:
 
-> Look at the git diff on my current branch for the `pages/` directory. For every file that was moved or renamed (or whose path changed), add a permanent redirect in `lib/redirects.js`: old URL → new URL. Use the same pattern as existing redirects: create a new dated constant (e.g. `myChangeRedirects202601`) with a short comment, add `[oldPath, newPath]` tuples (paths relative to site root, e.g. `/docs/foo` not `pages/docs/foo.mdx`), and spread it into the `permanentRedirects` array. Only add redirects for pages that actually changed path; do not add redirects for edits to existing files.
+> Look at the git diff on my current branch for the `content/` directory. For every file that was moved or renamed (or whose path changed), add a permanent redirect in `lib/redirects.js`: old URL → new URL. Use the same pattern as existing redirects: create a new dated constant (e.g. `myChangeRedirects202601`) with a short comment, add `[oldPath, newPath]` tuples (paths relative to site root, e.g. `/docs/foo` not `content/docs/foo.mdx`), and spread it into the `permanentRedirects` array. Only add redirects for pages that actually changed path; do not add redirects for edits to existing files.
 
 ## Changelog
 

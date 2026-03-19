@@ -211,7 +211,7 @@ const nextConfig = {
     // Serve any ".md" path by mapping to the static copy in public/md-src
     // Example: /docs.md -> /md-src/docs.md, /docs/observability/overview.md -> /md-src/docs/observability/overview.md
     return {
-      // Run BEFORE Next serves pages/public files so it can override HTML routes
+      // Run BEFORE Next serves content/public files so it can override HTML routes
       // when the client explicitly asks for markdown.
       beforeFiles: [
         // /support.md → raw markdown from the Support page (content/marketing/support.mdx → md-src/marketing/support.md)

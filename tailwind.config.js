@@ -4,7 +4,7 @@ module.exports = {
   content: [
     "./components/**/*.{js,jsx,ts,tsx,mdx}",
     "./components-mdx/**/*.{js,jsx,ts,tsx,mdx}",
-    "./pages/**/*.{js,jsx,ts,tsx,mdx}",
+    "./content/**/*.{js,jsx,ts,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/**/*.{js,jsx,ts,tsx,mdx}",
     "./lib/**/*.{js,jsx,ts,tsx,mdx}",
