@@ -1,25 +1,10 @@
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import { CustomerCarousel, type CustomerStory } from "../customers/CustomerCarousel";
-import { usersSource } from "@/lib/source";
 
-export default function CustomerStories() {
-  const stories: CustomerStory[] = usersSource.getPages().map((page) => ({
-    route: page.url,
-    frontMatter: {
-      title: page.data.title,
-      description: page.data.description,
-      customerLogo: page.data.customerLogo ?? undefined,
-      customerLogoDark: page.data.customerLogoDark ?? undefined,
-      customerQuote: page.data.customerQuote ?? undefined,
-      quoteAuthor: page.data.quoteAuthor ?? undefined,
-      quoteRole: page.data.quoteRole ?? undefined,
-      quoteCompany: page.data.quoteCompany ?? undefined,
-      quoteAuthorImage: page.data.quoteAuthorImage ?? undefined,
-      showInCustomerIndex: page.data.showInCustomerIndex ?? undefined,
-    },
-  }));
+export type { CustomerStory };
 
+export default function CustomerStories({ stories }: { stories: CustomerStory[] }) {
   return (
     <HomeSection>
       <Header
