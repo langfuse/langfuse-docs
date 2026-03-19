@@ -1,0 +1,122 @@
+---
+title: Kubit for LLM Apps with Langfuse
+sidebarTitle: Kubit
+logo: /images/integrations/kubit_icon.svg
+description: Display your Langfuse metrics in Kubit dashboards.
+---
+
+import { Callout } from 'nextra/components'
+
+# Kubit Integration
+
+[Kubit](https://kubit.ai) is a popular choice for warehouse-native product analytics. While Langfuse offers [metrics](/docs/metrics/overview) out of the box, many of our users have asked for a way to **integrate their LLM related metrics that they capture with Langfuse into their Kubit dashboards**.
+
+We've built an integration to make it easy to answer questions like:
+
+- _"Are my most active users also the ones who are most engaged with my LLM features?"_
+- _"Does interacting with an LLM feature relate to higher retention rates?"_
+- _"How does the LLM feature impact my conversion rates?"_
+- _"Does the user feedback that I capture in Langfuse correlate with the user behavior that I see in Kubit?"_
+
+## Example dashboard
+
+<Video
+  src="https://static.langfuse.com/docs-videos/kubit-dashboard.mp4"
+  aspectRatio={1768 / 1080}
+  gifStyle
+/>
+
+## Get started
+
+<Steps>
+
+### Enable the integration
+
+Configure this integration in your Langfuse project settings. You will need to provide your Kubit API key.
+<Frame className="max-w-lg block">
+  ![Posthog Integration Settings](/images/docs/kubit-settings.png)
+</Frame>
+
+### Initial sync
+
+Once integrated, Langfuse will sync all historical data from your project to Kubit. After the initial sync, new data is automatically synced on a schedule (defaults to every hour) to keep your Kubit dashboards up to date.
+
+### Build a dashboard in Kubit
+
+Once integrated, you can build reports and dashboards in Kubit for advanced product analytics. See [reference below](#details)) for the Langfuse event properties.
+<Frame className="max-w-lg block">
+  ![Posthog Integration Settings](/images/docs/kubit-sample-dashboard.png)
+</Frame>
+
+</Steps>
+
+## Integration details [#details]
+
+On a scheduled Sync Interval (default is 60 minutes), Langfuse sends event batches to your Kubit instance.
+
+### Metadata matching
+
+Matching of metadata helps to join the data from Langfuse with the data from Kubit:
+
+| Langfuse                                                      | Kubit                     | Notes                                                                                                                                                                  |
+| ------------------------------------------------------------- | ------------------------- | -----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`user_id`](/docs/observability/features/users)               | `user_id`                 |                                                                                                                                                                        |
+| `trace.timestamp`, `generation.started_at`, `score.timestamp` | `event_ts`                | Sent as milliseconds since epoch                                                                                                                                       |
+| `trace.session_id`                                            | `session_id`              | If you are already storing your session_id elsewhere, e.g. in Langfuse trace [metadata](/docs/observability/features/metadata), Kubit can also consume it from there . |
+
+### Events
+
+The integration sends the following events to Kubit.
+
+Is there any additional information that would be helpful? You can request more events or properties [here](/ideas).
+
+#### Event: `Observation`
+
+- `ts`: Milliseconds since epoch when the Observation happened.
+- `id`: Unique ID of the Observation.
+- `name`: Name of the Observation, Tool, Agent or Span.
+- `type: The [Observation type](/docs/observability/features/observation-types).
+- `project_id`: Project or app name.
+- `environment`: [Environments](/docs/observability/features/environments) allow you to organize your Observations from different contexts such as production, staging, or development.
+- `user_id`: Unique ID of the [User](/docs/observability/features/users)
+- `trace_id`: The [ID of the Trace](/docs/observability/features/trace-ids-and-distributed-tracing) associated with the Observation
+- `trace_name`: The name of the Trace.
+- `version`: [Version](/docs/observability/features/releases-and-versioning#versions) of the observation
+- `release`: [Overall version](/docs/observability/features/releases-and-versioning#releases) of your application.
+- `tags`: [Categories of the Observation](/docs/observability/features/tags), useful for filtering.
+- `session_id`: Used to track a [complete interaction](/docs/observability/features/sessions) spanning multiple Traces.
+- `user_prompt`: The user prompt extracted from the Trace `input`
+- `level`: See [Log Level](/docs/observability/features/log-levels)
+- `parent_id`: This is the parent Observation ID which is used to construct [Agent Graphs](/docs/observability/features/agent-graphs)
+- `start_time`: When the Observation started (ms).
+- `end_time`: When the Observation ended (ms).
+- `latency`: `end_time - start_time` (ms).
+- `completion_start_time`: time at which the user sees the AI start responding (ms).
+- `time_to_first_token`: `completion_start_time - start_time` (ms). Measures network latency and the model's processing time to understand the prompt.
+- `generation_time`: `end_time - completion_start_time` (ms). Measures the speed at which the model streams the rest of the tokens.
+- `input`: The raw input string.
+- `output`: The raw output string.
+- `status_message`: The raw status message.
+- `prompt_name`: Name of the prompt, see [Prompt Management](/docs/prompt-management/overview) for more information.
+- `prompt_version`: Version of the prompt, see [Prompt Management](/docs/prompt-management/overview) for more information.
+- `model_name`: The human-readable model name, e.g. "gpt-4.1", "o4-mini", "gemini-3-flash-preview"
+- `model_parameters`: Parameters such as Temperature, Top-P, Top-K - could be useful to analyze experiments with model parameters.
+- `input_tokens`: Number of tokens utilized in prompting the generation.
+- `output_tokens`: Number of tokens produced by the generation.
+- `total_tokens`: Total number of tokens consumed in the generation process.
+- `input_cost`: $ cost incurred in prompting the generation.
+- `output_cost`: $ cost produced by the generation.
+- `total_cost`: total $ cost incurred in the generation process.
+- `score_name`: The name associated with the score.
+- `score_value`: The value of the score.
+- `score_string_value`: The string value of the score. For BOOLEAN and CATEGORICAL scores, this will be the string representation of the value.
+- `score_data_type`: The data type of the score (NUMERIC, BOOLEAN, CATEGORICAL).
+- `trace_id`: The unique identifier of the trace associated with the score.
+
+<Callout type="info">
+  You can use [masking](/docs/observability/features/masking) to redact/omit sensitive information contained in the `input` or `output`.
+</Callout>
+
+## Troubleshooting
+
+**Missing data in Kubit?** Please check that you have correctly configured the Kubit API key in your Langfuse project settings. The integration syncs data every hour, so there may be a short lag before new events appear. Reach out to us if you encounter any other issues with the integration.
