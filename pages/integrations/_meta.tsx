@@ -11,6 +11,7 @@ export default {
   "model-providers": "Model Providers",
   gateways: "Gateways",
   "no-code": "No-Code Agent Builders",
+  "agentic-data-stack": "Agentic Data Stack",
   analytics: "Analytics",
   "data-platform": "Data Platform",
   other: "Other",
