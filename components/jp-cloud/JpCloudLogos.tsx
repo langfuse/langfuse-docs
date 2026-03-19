@@ -13,8 +13,8 @@ import twilioLight from "@/components/home/img/twilio_light.svg";
 import twilioDark from "@/components/home/img/twilio_dark.svg";
 import intuitLight from "@/components/home/img/intuit_light.svg";
 import intuitDark from "@/components/home/img/intuit_dark.svg";
-import sevenelevenLight from "@/components/home/img/seveneleven_light.png";
-import sevenelevenDark from "@/components/home/img/seveneleven_dark.png";
+import freeeLight from "@/components/home/img/freee_light.png";
+import freeeDark from "@/components/home/img/freee_dark.png";
 
 type Logo = {
   name: string;
@@ -23,7 +23,7 @@ type Logo = {
 };
 
 const logos: Logo[] = [
-  { name: "7&i Holdings", light: sevenelevenDark, dark: sevenelevenLight },
+  { name: "freee", light: freeeDark, dark: freeeLight },
   { name: "Canva", light: canvaDark, dark: canvaLight },
   { name: "Twilio", light: twilioDark, dark: twilioLight },
   { name: "Intuit", light: intuitLight, dark: intuitDark },

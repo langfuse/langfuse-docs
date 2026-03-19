@@ -23,8 +23,8 @@ import adobeLight from "../home/img/adobe_light.svg";
 import adobeDark from "../home/img/adobe_dark.svg";
 import pigmentLight from "../home/img/pigment_light.svg";
 import pigmentDark from "../home/img/pigment_dark.svg";
-import sevenelevenLight from "../home/img/seveneleven_light.png";
-import sevenelevenDark from "../home/img/seveneleven_dark.png";
+import freeeLight from "../home/img/freee_light.png";
+import freeeDark from "../home/img/freee_dark.png";
 import circlebackLight from "../home/img/circleback_light.png";
 import circlebackDark from "../home/img/circleback_dark.png";
 import appleLight from "../home/img/apple_light.svg";
@@ -97,9 +97,9 @@ const companies: CompanyLogo[] = [
     lightModeImage: samsaraDark,
   },
   {
-    name: "Seven Eleven Japan",
-    darkModeImage: sevenelevenLight,
-    lightModeImage: sevenelevenDark,
+    name: "freee",
+    darkModeImage: freeeLight,
+    lightModeImage: freeeDark,
   },
   {
     name: "Magic Patterns",
