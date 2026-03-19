@@ -19,6 +19,14 @@ const discounts = [
     },
   },
   {
+    name: "Non-profit organizations",
+    description: "USD 199 in credits / month",
+    cta: {
+      text: "Learn more and apply",
+      href: "/non-profit",
+    },
+  },
+  {
     name: "Open-source projects",
     description: "USD 300 in credits / month, first year",
   },
@@ -30,7 +38,7 @@ export const PricingDiscounts = () => (
       <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary">
         Discounts
       </h2>
-      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {discounts.map((discount) => (
           <div
             key={discount.name}

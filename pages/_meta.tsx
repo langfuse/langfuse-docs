@@ -214,6 +214,15 @@ export default {
       timestamp: false,
     },
   },
+  "non-profit": {
+    title: "Non-Profit",
+    type: "page",
+    display: "hidden",
+    theme: {
+      typesetting: "article",
+      timestamp: false,
+    },
+  },
   library: {
     title: "Library",
     type: "page",
