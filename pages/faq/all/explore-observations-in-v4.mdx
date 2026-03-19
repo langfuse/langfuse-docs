@@ -12,22 +12,23 @@ Previously, many teams switched between a traces table for request-level context
 In the v4 experience, you stay in one table and use filters, saved views, and row peek-views to answer both questions.
 
 For the conceptual background, see the [observation-centric data model](/docs/observability/data-model#observation-centric-data-model).
-For broader release context of Langfuse v4, see the [Simplify for Scale changelog post](/changelog/2026-03-10-simplify-for-scale).
+For broader release context of Langfuse v4, see the [Fast Preview (v4) docs](/docs/v4).
 
 
 ## Prerequisites
 
 To use the unified table productively, make sure your instrumentation is aligned with the v4 data model.
 
-### 1. Ingest with the latest SDK versions
+### 1. Ingest with a v4-compatible setup
 
-Use the latest major Langfuse SDKs so your data appears in the unified table in real time:
+Use one of these ingestion paths so your data appears in the unified table in real time:
 
 - Python SDK v4: [migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4)
 - JS/TS SDK v5: [migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)
+- Direct OpenTelemetry ingestion: set `x-langfuse-ingestion-version: 4` on your OTEL span exporter. If you use OTLP HTTP environment variables, add `x-langfuse-ingestion-version=4` to `OTEL_EXPORTER_OTLP_HEADERS`. See [OpenTelemetry setup](/integrations/native/opentelemetry).
 
 <Callout type="info">
-If you are still sending data via **older SDK versions**, traces can appear in the unified tracing table with a **delay of up to 10 minutes**.
+If you are still sending data via **older SDK versions**, or via **direct OpenTelemetry ingestion without `x-langfuse-ingestion-version: 4`**, traces can appear in the unified tracing table with a **delay of up to 10 minutes**.
 </Callout>
 
 ### 2. Propagate correlating attributes across spans
@@ -44,7 +45,7 @@ See [Add attributes to observations](/docs/observability/sdk/instrumentation#add
 
 ## Set up your default view
 
-We strongly recommend **saved views** in order to configure the default view you and your project members are seeing in the unified tracing table.
+We strongly recommend **saved views** in order to configure the default view you and your project members are seeing in the unified tracing table. For users that previously relied heavily on the UI trace table, this is the first step in order to set up an equivalent view.
 
 Examples for useful views would be
 
@@ -69,9 +70,9 @@ If something feels confusing, missing, or slower than expected, share feedback o
 
 ### Why are observations delayed or missing in the unified table?
 
-The most common reason is that data is still being sent via older SDK versions.
-In the new v4 experience, older SDKs can lead to multi-minute delays before traces show up in the unified table.
-If this happens, upgrade to Python SDK v4 or JS/TS SDK v5 first.
+The most common reason is that data is still being sent via older SDK versions or through a direct OpenTelemetry exporter without `x-langfuse-ingestion-version: 4`.
+In the new v4 experience, those setups can lead to multi-minute delays before traces show up in the unified table.
+If this happens, upgrade to Python SDK v4 or JS/TS SDK v5, or add the ingestion version header to your OTEL exporter.
 
 ### How can I make this look more like the old traces table?
 

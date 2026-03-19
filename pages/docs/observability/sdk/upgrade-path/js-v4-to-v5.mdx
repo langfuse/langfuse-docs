@@ -207,6 +207,15 @@ aliases were removed.
 If you still need legacy v1 behavior, switch to the corresponding
 `langfuse.api.legacy.*V1` namespace.
 
+<Callout type="warning">
+  If you use self-hosted Langfuse, do not use the new default
+  `langfuse.api.observations` or `langfuse.api.metrics` methods yet. They now
+  point to the Observations v2 and Metrics v2 endpoints, which are not
+  available on self-hosted deployments yet. Use
+  `langfuse.api.legacy.observationsV1` and `langfuse.api.legacy.metricsV1`
+  instead.
+</Callout>
+
 ### [`@langfuse/langchain`](/integrations/frameworks/langchain) internal changes
 
 The `CallbackHandler` now uses `propagateAttributes()` for trace-level attributes. This affects users who:
@@ -238,4 +247,5 @@ The `traceMethod` wrapper now wraps the traced call in `propagateAttributes()` t
 7. Replace `release`/`environment` attribute usage with env vars (`LANGFUSE_RELEASE`, `LANGFUSE_TRACING_ENVIRONMENT`)
 8. Search for `api.observationsV2` / `api.scoreV2` / `api.metricsV2` → replace with `api.observations` / `api.scores` / `api.metrics`
 9. Search for legacy v1 usage on `api.observations` / `api.score` / `api.metrics` → move to `api.legacy.observationsV1` / `api.legacy.scoreV1` / `api.legacy.metricsV1`
-10. Remove any remaining references to `*V2` aliases (they were removed in v5)
+10. If you are self-hosting Langfuse, do not use `api.observations` or `api.metrics` yet; use `api.legacy.observationsV1` and `api.legacy.metricsV1` until Observations v2 and Metrics v2 are available on self-hosted deployments
+11. Remove any remaining references to `*V2` aliases (they were removed in v5)

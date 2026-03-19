@@ -67,7 +67,7 @@ Configure these via environment variables:
 
 ```bash
 QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: set this to the Langfuse OTLP URL (e.g. https://cloud.langfuse.com/api/public/otel).
-QUARKUS_OTEL_EXPORTER_OTLP_HEADERS: set this to Authorization=Basic <base64 public:secret>.
+QUARKUS_OTEL_EXPORTER_OTLP_HEADERS: set this to Authorization=Basic <base64 public:secret>,x-langfuse-ingestion-version=4.
 ```
 
 </Tab>
@@ -76,7 +76,7 @@ QUARKUS_OTEL_EXPORTER_OTLP_HEADERS: set this to Authorization=Basic <base64 publ
 Making the following configuration in `application.properties`:
 
 ```bash
-quarkus.otel.exporter.otlp.headers=Authorization=Basic <base64 of public:key>
+quarkus.otel.exporter.otlp.headers=Authorization=Basic <base64 of public:key>,x-langfuse-ingestion-version=4
 quarkus.otel.exporter.otlp.endpoint=https://cloud.langfuse.com/api/public/otel
 quarkus.otel.exporter.otlp.traces.protocol=http/protobuf
 ```
