@@ -14,6 +14,7 @@ import {
 } from "@/lib/source";
 import { MenuSwitcher } from "@/components/MenuSwitcher";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { SectionLayoutWrapper } from "./SectionLayoutWrapper";
 
 type LayoutProps = {
@@ -61,7 +62,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
           sidebar={
             isMarketing || isPost ? { enabled: false } : { banner: <MenuSwitcher /> }
           }
-          themeSwitch={isMarketing || isPost ? { enabled: false } : undefined}
+          themeSwitch={isMarketing || isPost ? { enabled: false } : { component: <div className="ms-auto"><ThemeToggle /></div> }}
           searchToggle={{ enabled: false }}
           containerProps={
             isMarketing || isChangelog
