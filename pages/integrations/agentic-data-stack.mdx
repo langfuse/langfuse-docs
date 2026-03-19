@@ -1,0 +1,165 @@
+---
+title: "Agentic Data Stack: LibreChat + ClickHouse + Langfuse"
+sidebarTitle: Agentic Data Stack
+logo: /images/logos/clickhouse_icon.svg
+description: Deploy the open-source Agentic Data Stack with ClickHouse, LibreChat, and Langfuse. Full LLM observability for agentic analytics — self-hosted with Docker Compose.
+category: Integrations
+---
+
+# Agentic Data Stack
+
+The [Agentic Data Stack](https://clickhouse.com/ai) is an open-source, self-hosted stack for agentic analytics built by [ClickHouse](https://clickhouse.com). It connects a chat UI ([LibreChat](https://www.librechat.ai/)) to your data ([ClickHouse](https://clickhouse.com)) via [MCP](https://modelcontextprotocol.io), with full LLM observability powered by Langfuse — all deployable with a single `docker compose up` command.
+
+| Component | Role |
+| --- | --- |
+| [**LibreChat**](https://www.librechat.ai/) | Chat UI with multi-model support (OpenAI, Anthropic, Google, and more) |
+| [**ClickHouse**](https://clickhouse.com) | Fast analytical database for querying your data |
+| [**ClickHouse MCP**](https://github.com/ClickHouse/mcp-clickhouse) | MCP server that gives AI agents access to ClickHouse |
+| [**Langfuse**](https://langfuse.com) | LLM observability — traces, evaluations, prompt management |
+
+<Frame className="my-10 max-w-2xl mx-auto">
+  ![Agentic Data Stack architecture — LibreChat connects to LLMs, ClickHouse via MCP, and Langfuse for observability](/images/docs/agentic-data-stack/architecture.png)
+</Frame>
+
+Users interact with LibreChat, which routes prompts to LLMs and queries ClickHouse through MCP. Langfuse captures every LLM call, so you can trace agent workflows, debug issues, and monitor cost and latency.
+
+There are two ways to use Langfuse with the Agentic Data Stack:
+
+1. **Add Langfuse to an existing LibreChat instance** — Connect [Langfuse Cloud](https://cloud.langfuse.com) or a self-hosted Langfuse instance to your running LibreChat deployment.
+2. **Deploy the full Agentic Data Stack** — Spin up everything (LibreChat, ClickHouse, Langfuse, and supporting services) from the official [Docker Compose setup](https://github.com/ClickHouse/agentic-data-stack).
+
+---
+
+## Option 1: Trace LibreChat with Langfuse [#trace-librechat]
+
+If you already have a LibreChat instance running, you can add Langfuse tracing with three environment variables. LibreChat has [native Langfuse support](https://www.librechat.ai/docs/configuration/langfuse) built in.
+
+<Steps>
+
+### Get Langfuse API keys
+
+Sign up for [Langfuse Cloud](https://cloud.langfuse.com) (or use a [self-hosted instance](/self-hosting)) and create a new project. Copy the public and secret keys from your project settings.
+
+### Configure LibreChat
+
+Add the following to the `.env` file in your LibreChat installation directory:
+
+```bash
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+
+# EU region
+LANGFUSE_BASE_URL=https://cloud.langfuse.com
+
+# US region
+# LANGFUSE_BASE_URL=https://us.cloud.langfuse.com
+```
+
+For self-hosted Langfuse, set `LANGFUSE_BASE_URL` to your instance URL (e.g., `http://localhost:3000`).
+
+### Restart LibreChat
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+### View traces in Langfuse
+
+Every chat message now generates a trace in Langfuse. Open your Langfuse project to see prompts, completions, latency, cost, and the full call hierarchy:
+
+<Frame className="my-10" fullWidth>
+  ![LibreChat trace in Langfuse showing an agent run with LLM calls, latency, and cost](/images/cookbook/integration_librechat/librechat-example-trace.png)
+</Frame>
+
+</Steps>
+
+---
+
+## Option 2: Deploy the Full Agentic Data Stack [#deploy-agentic-data-stack]
+
+The [Agentic Data Stack repository](https://github.com/ClickHouse/agentic-data-stack) provides a Docker Compose setup that deploys everything together. Langfuse tracing is pre-configured — LibreChat automatically sends traces to the co-deployed Langfuse instance.
+
+<Steps>
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2+
+- An API key for at least one LLM provider (OpenAI, Anthropic, or Google)
+
+### Clone the repository
+
+```bash
+git clone https://github.com/ClickHouse/agentic-data-stack.git
+cd agentic-data-stack
+```
+
+### Prepare the environment
+
+Run the interactive setup script. It generates secure credentials for all services and prompts you to configure LLM API keys:
+
+```bash
+./scripts/prepare-demo.sh
+```
+
+Any providers you skip will be set to `user_provided`, letting users enter their own keys in the LibreChat UI.
+
+You can also generate credentials non-interactively:
+
+```bash
+USER_EMAIL="you@example.com" USER_PASSWORD="supersecret" USER_NAME="YourName" ./scripts/generate-env.sh
+```
+
+### Start the stack
+
+```bash
+docker compose up -d
+```
+
+This starts all services: LibreChat, ClickHouse, ClickHouse MCP, Langfuse, PostgreSQL, MongoDB, Redis, MinIO, and supporting services.
+
+### Access the services
+
+| Service | URL |
+| --- | --- |
+| **LibreChat** (Chat UI) | [http://localhost:3080](http://localhost:3080) |
+| **Langfuse** (Observability) | [http://localhost:3000](http://localhost:3000) |
+| **MinIO Console** (Object storage) | [http://localhost:9091](http://localhost:9091) |
+
+Sign in with the credentials you configured during setup. The same email and password work for both LibreChat and Langfuse.
+
+### View traces in Langfuse
+
+Open Langfuse at [http://localhost:3000](http://localhost:3000). The stack pre-configures a project with API keys that LibreChat uses automatically. Every conversation in LibreChat generates a trace in Langfuse, so you can:
+
+- **Trace agent workflows** — See the full execution path from prompt to tool calls and responses
+- **Debug issues** — Inspect individual LLM calls, including input/output, latency, and errors
+- **Monitor cost and latency** — Track token usage and spend across models
+- **Evaluate quality** — Score outputs with [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) or [human annotations](/docs/evaluation/evaluation-methods/annotation-queues)
+
+<Frame className="my-10" fullWidth>
+  ![LibreChat trace in Langfuse showing an agent run with LLM calls, latency, and cost](/images/cookbook/integration_librechat/librechat-example-trace.png)
+</Frame>
+
+### Reset and start fresh
+
+To tear down all containers and delete all data:
+
+```bash
+./scripts/reset-all.sh
+./scripts/prepare-demo.sh
+docker compose up -d
+```
+
+</Steps>
+
+---
+
+## Learn More
+
+- [Agentic Data Stack repository](https://github.com/ClickHouse/agentic-data-stack) — Source code and full documentation
+- [clickhouse.com/ai](https://clickhouse.com/ai) — The Agentic Data Stack
+- [LibreChat documentation](https://www.librechat.ai/docs) — LibreChat setup and configuration
+- [LibreChat Langfuse integration](https://www.librechat.ai/docs/configuration/langfuse) — Langfuse observability for LibreChat
+- [ClickHouse MCP server](https://github.com/ClickHouse/mcp-clickhouse) — Connect AI agents to ClickHouse
+- [Self-host Langfuse](/self-hosting) — Deploy Langfuse on your own infrastructure
