@@ -24,8 +24,8 @@ export type CardProps = Omit<FumadocsCardProps, "title"> & {
   arrow?: boolean;
 };
 
-export function Card({ title = "", arrow: _arrow, ...props }: CardProps) {
-  return <FumadocsCard title={title} {...props} />;
+export function Card({ title = "", arrow: _arrow, className, ...props }: CardProps) {
+  return <FumadocsCard title={title} className={cn('flex flex-row gap-2 items-center', className)} {...props} />;
 }
 
 function CardsBase({ num, className, ...props }: CardsProps) {
