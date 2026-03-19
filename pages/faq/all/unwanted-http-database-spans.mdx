@@ -73,7 +73,7 @@ If the default filter doesn't match your needs, you can customize which spans ar
 
 To find the scope name of a span, click on any observation in the Langfuse UI and look for `metadata.scope.name`.
 
-<LangTabs items={["Python", "JS/TS"]}>
+<LangTabs items={["Python SDK v4+", "JS/TS SDK v5+", "Python SDK v3", "JS/TS SDK v4"]}>
 
 <Tab>
 
@@ -123,6 +123,59 @@ new LangfuseSpanProcessor({
   shouldExportSpan: ({ otelSpan }) =>
     !blockedScopes.includes(otelSpan.instrumentationScope.name),
 });
+```
+
+</Tab>
+
+<Tab>
+
+**Block specific scopes** you don't want:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(
+    blocked_instrumentation_scopes=[
+        # HTTP clients
+        "opentelemetry.instrumentation.requests",
+        "opentelemetry.instrumentation.httpx",
+
+        # Web frameworks
+        "opentelemetry.instrumentation.fastapi",
+        "opentelemetry.instrumentation.starlette",
+        "flask",
+        "django",
+
+        # Databases
+        "sqlalchemy",
+        "psycopg",
+        "psycopg2",
+    ]
+)
+```
+
+</Tab>
+
+<Tab>
+
+**Block specific scopes** you don't want:
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const blockedScopes = ["express", "http", "pg", "redis", "fastify"];
+
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor({
+      shouldExportSpan: ({ otelSpan }) =>
+        !blockedScopes.includes(otelSpan.instrumentationScope.name),
+    }),
+  ],
+});
+
+sdk.start();
 ```
 
 </Tab>
