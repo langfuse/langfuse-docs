@@ -10,7 +10,18 @@ interface CustomerIndexWrapperProps {
 export function CustomerIndexWrapper({ maxItems }: CustomerIndexWrapperProps) {
   const stories: CustomerStory[] = usersSource.getPages().map((page) => ({
     route: page.url,
-    frontMatter: page.data as unknown as CustomerStory["frontMatter"],
+    frontMatter: {
+      title: page.data.title,
+      description: page.data.description,
+      customerLogo: page.data.customerLogo ?? undefined,
+      customerLogoDark: page.data.customerLogoDark ?? undefined,
+      customerQuote: page.data.customerQuote ?? undefined,
+      quoteAuthor: page.data.quoteAuthor ?? undefined,
+      quoteRole: page.data.quoteRole ?? undefined,
+      quoteCompany: page.data.quoteCompany ?? undefined,
+      quoteAuthorImage: page.data.quoteAuthorImage ?? undefined,
+      showInCustomerIndex: page.data.showInCustomerIndex ?? undefined,
+    },
   }));
   return <CustomerIndex stories={stories} maxItems={maxItems} />;
 }

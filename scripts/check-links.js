@@ -352,7 +352,7 @@ async function checkFileLinks(filePath) {
 }
 
 async function main() {
-    const pagesDir = path.join(process.cwd(), 'pages');
+    const pagesDir = path.join(process.cwd(), 'content');
     let hasErrors = false;
     const allBrokenLinks = []; // Collect all broken links for final report
 
