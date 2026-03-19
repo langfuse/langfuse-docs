@@ -25,7 +25,7 @@ In the UI, a "Preview" toggle is available in the bottom left to opt into the ne
 The toggle is reversible, you can always switch back to the previous experience.
 
 <Callout type="info">
-Data from SDKs `langfuse-js` < `5.0.0` and `langfuse-python` < `4.0.0` is delayed for up to 10 minutes in the new UI. Upgrade to the latest SDK versions to see your data in real time.
+Data from SDKs `langfuse-js` < `5.0.0`, `langfuse-python` < `4.0.0`, or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes in the new UI. Upgrade to the latest SDKs or set that header on your OTEL span exporter to see new data in real time.
 </Callout>
 
 ### Migrate to the new experience
@@ -34,14 +34,15 @@ Data from SDKs `langfuse-js` < `5.0.0` and `langfuse-python` < `4.0.0` is delaye
 <Steps>
 
 
-### Upgrade SDKs
+### Use a v4-compatible ingestion path
 
-Upgrade to the latest major SDK versions to take advantage of the new data model and explore your data in real time:
+To take advantage of the new data model and explore your data in real time, use one of these ingestion paths:
 
 - **Python SDK:** v4 ([migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
 - **JS/TS SDK:** v5 ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
+- **Direct OpenTelemetry ingestion:** set `x-langfuse-ingestion-version: 4` on your OTEL span exporter ([OpenTelemetry setup](/integrations/native/opentelemetry))
 
-The key change: `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, and `tags` to all child observations.
+For SDK users, the key change is that `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, and `tags` to all child observations.
 
 ### Optional: Migrate LLM-as-a-judge evaluations
 
@@ -63,7 +64,7 @@ See the [v2 APIs announcement](/changelog/2025-12-17-v2-metrics-and-observations
 
 ### Faster product performance in the UI
 
-Chart loading time is significantly shorter. You can now confidently load charts over large time ranges. Browsing traces, users, and sessions is also much faster, and filters respond more quickly in large projects. [Learn more the new unified tracing table in UI](/faq/all/explore-observations-in-v4).
+Chart loading time is significantly shorter. You can now confidently load charts over large time ranges. Browsing traces, users, and sessions is also much faster, and filters respond more quickly in large projects. [Learn more about the new unified tracing table in the UI](/faq/all/explore-observations-in-v4).
 
 ### Faster API workflows
 

@@ -48,7 +48,7 @@ langfuse_auth = base64.b64encode(
 
 # Configure OpenTelemetry endpoint & headers
 os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ["LANGFUSE_BASE_URL"] + "/api/public/otel"
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {langfuse_auth}"
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {langfuse_auth},x-langfuse-ingestion-version=4"
 ```
 
 **2.2 Configure AWS Credentials**
@@ -207,7 +207,7 @@ DISABLE_ADOT_OBSERVABILITY=true
 
 # Configure OTEL to export to Langfuse
 OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
-OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic $(echo -n 'pk-xxx:sk-xxx' | base64)"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic $(echo -n 'pk-xxx:sk-xxx' | base64),x-langfuse-ingestion-version=4"
 ```
 
 For US region, use `https://us.cloud.langfuse.com/api/public/otel` as the endpoint.
@@ -227,7 +227,7 @@ launch_result = agentcore_runtime.launch(
     env_vars={
         "DISABLE_ADOT_OBSERVABILITY": "true",
         "OTEL_EXPORTER_OTLP_ENDPOINT": f"{LANGFUSE_BASE_URL}/api/public/otel",
-        "OTEL_EXPORTER_OTLP_HEADERS": f"Authorization=Basic {langfuse_auth}",
+        "OTEL_EXPORTER_OTLP_HEADERS": f"Authorization=Basic {langfuse_auth},x-langfuse-ingestion-version=4",
     }
 )
 ```

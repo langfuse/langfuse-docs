@@ -55,7 +55,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪�
 # OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel" # 🇺🇸 US data region
 # OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:3000/api/public/otel" # 🏠 Local deployment (>= v3.22.0)
 
-OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
 ```
 
 <Callout type="info">
@@ -64,6 +64,12 @@ Langfuse uses [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentica
 
 You can use the following command to get the base64 encoded API keys (referred to as `AUTH_STRING`): `echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64`.
 For long API Keys on GNU systems, you may have to add `-w 0` at the end since `base64` auto-wraps columns.
+
+</Callout>
+
+<Callout type="info">
+
+If you want spans ingested directly via OpenTelemetry to appear in real time in Langfuse Cloud Fast Preview (v4), include the `x-langfuse-ingestion-version: 4` header. If your setup uses signal-specific header settings, add the same value to `OTEL_EXPORTER_OTLP_TRACES_HEADERS`.
 
 </Callout>
 
@@ -215,6 +221,7 @@ exporters:
     # endpoint: "https://us.cloud.langfuse.com/api/public/otel" # US data region
     headers:
       Authorization: "Basic ${AUTH_STRING}" # Previously encoded API keys
+      x-langfuse-ingestion-version: "4"
 
 service:
   pipelines:
@@ -255,6 +262,7 @@ exporters:
     # endpoint: "https://us.cloud.langfuse.com/api/public/otel" # US data region
     headers:
       Authorization: "Basic ${AUTH_STRING}" # Previously encoded API keys
+      x-langfuse-ingestion-version: "4"
 
 service:
   pipelines:

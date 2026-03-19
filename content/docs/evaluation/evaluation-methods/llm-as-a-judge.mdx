@@ -382,7 +382,7 @@ If your observation-level evaluator isn't executing, see [Why is my observation-
 
 You can run observation-level LLM-as-a-Judge on historical data from the observations table. This is useful if you have already ingested production data and want to score matching observations retroactively with a new or updated evaluator.
 
-**Prerequisite**: Enable the **[Fast Mode](/docs/v4)** toggle for the evaluator. To use the same evaluator on newly ingested data in real time, also upgrade to the latest SDKs: Python v4+ or JS/TS v5+.
+**Prerequisite**: Enable the **[Fast Mode](/docs/v4)** toggle for the evaluator. To use the same evaluator on newly ingested data in real time, either upgrade to the latest SDKs (Python v4+ or JS/TS v5+) or, if you ingest directly via OTEL, set `x-langfuse-ingestion-version: 4` on your OTEL span exporter.
 
 To backfill scores:
 
