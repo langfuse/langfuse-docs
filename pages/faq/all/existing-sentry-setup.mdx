@@ -8,11 +8,9 @@ tags: [observability, integration]
 
 This guide covers how to configure Langfuse alongside Sentry. If you haven't already, read [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup) to understand the general concepts.
 
-> **Note:** This guide focuses on the **Sentry JavaScript/Node SDK**, which automatically initializes OpenTelemetry and claims the global TracerProvider. The Python `sentry_sdk` does not have this behavior, so Python users can typically use a standard [isolated TracerProvider](#isolated-tracer-provider) without special Sentry configuration.
+## Why Sentry can conflict with Langfuse
 
-## Why Sentry Requires Special Configuration
-
-Sentry's JavaScript SDK automatically initializes OpenTelemetry when you call `Sentry.init()`. This includes:
+Sentry's JavaScript/Node SDK (v8+) and Python SDK (v3+) automatically initialize OpenTelemetry when you call `Sentry.init()`. This includes:
 - Creating a `SentrySpanProcessor`
 - Setting up `SentryPropagator` for distributed tracing
 - Installing `SentryContextManager`
@@ -20,11 +18,61 @@ Sentry's JavaScript SDK automatically initializes OpenTelemetry when you call `S
 
 Because Sentry "claims" the global TracerProvider, simply initializing Langfuse afterward won't work: Langfuse's span processor never gets attached to the provider Sentry controls.
 
+> **Note:** The Python `sentry_sdk` v2.x does **not** use OpenTelemetry by default. It uses Sentry's own instrumentation engine, so Python v2.x users typically don't need any special configuration and can use [Option A](#sentry-without-otel) directly.
+
 ## Setup options
 
-### Option A: Shared TracerProvider (Recommended) [#shared-tracer-provider]
+### Option A: Use Sentry without OpenTelemetry (simplest) [#sentry-without-otel]
 
-Disable Sentry's automatic OTEL setup and configure a shared TracerProvider that includes both Sentry and Langfuse processors. This gives you distributed tracing across both tools.
+If you don't need Sentry's performance tracing (i.e., you primarily use Sentry for error monitoring), you can disable Sentry's OTEL integration entirely. This is the simplest way to avoid conflicts since Sentry and Langfuse never interact at the OpenTelemetry level.
+
+<LangTabs items={["JS/TS", "Python"]}>
+<Tab>
+
+```typescript
+import * as Sentry from "@sentry/node";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Initialize Sentry for error monitoring only, no OTEL, no tracing
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  skipOpenTelemetrySetup: true,
+  // Do NOT set tracesSampleRate - this disables Sentry's performance tracing
+});
+
+// Langfuse owns the global TracerProvider with no conflicts
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+sdk.start();
+```
+
+</Tab>
+<Tab>
+
+```python
+import sentry_sdk
+from langfuse import Langfuse
+
+# Python sentry_sdk v2.x uses its own instrumentation by default, no OTEL conflict
+sentry_sdk.init(
+    dsn=os.environ["SENTRY_DSN"],
+    traces_sample_rate=1.0,  # Sentry tracing works independently of OTEL
+)
+
+# Langfuse initializes normally
+langfuse = Langfuse()
+```
+
+For Python `sentry_sdk` v3+, which uses OTEL under the hood, use [Option B](#shared-tracer-provider) or [Option C](#isolated-tracer-provider) instead.
+
+</Tab>
+</LangTabs>
+
+### Option B: Shared TracerProvider [#shared-tracer-provider]
+
+If you need both Sentry's performance tracing **and** Langfuse, disable Sentry's automatic OTEL setup and configure a shared TracerProvider that includes both processors. This gives you distributed tracing across both tools.
 
 ```bash
 npm install @sentry/opentelemetry
@@ -76,7 +124,7 @@ Sentry.init({
 });
 ```
 
-If you set this to `0.1`, only 10% of your LLM calls will appear in Langfuse. To send all traces to Langfuse while sampling for Sentry, use the [isolated TracerProvider](#isolated-tracer-provider) approach instead (Option B).
+If you set this to `0.1`, only 10% of your LLM calls will appear in Langfuse. To send all traces to Langfuse while sampling for Sentry, use the [isolated TracerProvider](#isolated-tracer-provider) approach instead (Option C).
 
 #### Filtering Langfuse Spans
 
@@ -111,7 +159,7 @@ When using `skipOpenTelemetrySetup: true`, you must manually configure all of Se
 If you omit any of these, Sentry's tracing may not work correctly.
 
 
-### Option B: Isolated TracerProvider [#isolated-tracer-provider]
+### Option C: Isolated TracerProvider [#isolated-tracer-provider]
 
 If you don't need distributed tracing across Sentry and Langfuse spans, you can use a completely [isolated TracerProvider](/docs/observability/sdk/advanced-features#isolated-tracer-provider) for Langfuse. This is simpler to configure and avoids sampling conflicts.
 
@@ -173,13 +221,13 @@ langfuse = Langfuse(tracer_provider=TracerProvider())
 
 **Cause:** Sentry initialized OTEL before Langfuse could attach its processor.
 
-**Solution:** Use Option A (shared setup) with `skipOpenTelemetrySetup: true`, or Option B (isolated provider).
+**Solution:** Use Option A (Sentry without OTEL), Option B (shared setup) with `skipOpenTelemetrySetup: true`, or Option C (isolated provider).
 
 #### Setting skipOpenTelemetrySetup breaks Sentry tracing
 
 **Cause:** You're not manually configuring all required Sentry OTEL components.
 
-**Solution:** Ensure you're registering the provider with `SentryPropagator` and `SentryContextManager` as shown in Option A.
+**Solution:** Ensure you're registering the provider with `SentryPropagator` and `SentryContextManager` as shown in Option B.
 
 #### Infrastructure spans appearing in Langfuse
 
@@ -189,9 +237,9 @@ langfuse = Langfuse(tracer_provider=TracerProvider())
 
 #### Only some traces appear in Langfuse
 
-**Cause:** Sentry's `tracesSampleRate` is less than 1.0 and you're using Option A (shared provider).
+**Cause:** Sentry's `tracesSampleRate` is less than 1.0 and you're using Option B (shared provider).
 
-**Solution:** Set `tracesSampleRate: 1.0` if you want all traces, or use Option B (isolated provider) to avoid the sampling issue.
+**Solution:** Set `tracesSampleRate: 1.0` if you want all traces, or use Option C (isolated provider) to avoid the sampling issue.
 
 ## AWS Lambda Considerations
 
