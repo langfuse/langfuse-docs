@@ -103,11 +103,25 @@ management:
   observations:
     annotations:
       enabled: true # Enable @Observed (if you use observation annotations in code)
+    enable:
+      "http.server.requests": false # Suppress duplicate Micrometer HTTP server spans
+      "http.client.requests": false # Suppress duplicate Micrometer HTTP client spans
+
+otel:
+  instrumentation:
+    spring-webmvc:
+      enabled: false # Suppress duplicate OTel HTTP server spans
+    spring-web:
+      enabled: false # Suppress duplicate OTel HTTP client spans
 ```
 
-**Add Custom Span Processor** (`ChatModelCompletionContentObservationFilter.java`):
+The `management.observations.enable` and `otel.instrumentation` blocks suppress duplicate HTTP spans. Both Micrometer and the OpenTelemetry Java instrumentation produce HTTP spans by default. Disabling both prevents noisy duplicates in your traces.
 
-Add a custom span processor to include prompt and completion properties on the spans emitted by OpenTelemetry.
+**Add Observation Filter** (`ChatModelCompletionContentObservationFilter.java`):
+
+<Callout type="warning">
+  This filter is **required** for input and output to appear on generation observations in Langfuse. The `log-prompt` and `log-completion` properties above only enable data collection within Spring AI's observation context, but they do not automatically add prompt/completion content as OpenTelemetry span attributes. Without this filter, your generation spans will have `null` input and output in Langfuse.
+</Callout>
 
 ```java
 package com.langfuse.springai;
@@ -181,6 +195,7 @@ With these configurations and dependencies in place, your Spring Boot applicatio
 
 Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc., and – since we enabled them – events for the prompt and response content​
 
+
 ## Step 2: Configure Langfuse
 
 Now that your Spring AI application is emitting OpenTelemetry trace data, the next step is to direct that data to Langfuse.
@@ -226,17 +241,18 @@ Create a custom span and set the Langfuse-specific attributes directly:
 
 ```java
 public String processUserRequest(String userInput, String userId) {
-    // Create a new span with user and session attributes
+    // Create a new span with user, session, and observation attributes
     Span span = tracer.spanBuilder("user-interaction")
             .setAttribute("langfuse.user.id", userId)
             .setAttribute("langfuse.session.id", UUID.randomUUID().toString())
+            .setAttribute("langfuse.observation.input", userInput)
             .startSpan();
 
     // Make sure to set the new span as active.
     try (Scope ignored = span.makeCurrent()) {
-        // Your AI processing logic here
         // Any spans created within this scope will be children of the parent span
         String result = performAiOperation(userInput);
+        span.setAttribute("langfuse.observation.output", result);
         return result;
     } finally {
         span.end();
@@ -264,6 +280,8 @@ private String performAiOperation(String userInput) {
   the trace after it has been written.
 </Callout>
 
+You can also set `langfuse.observation.input` and `langfuse.observation.output` on any custom span to populate the input/output fields on that observation in Langfuse. This is useful for custom spans that wrap business logic or multi-step workflows where you want to capture what went in and what came out.
+
 ## Troubleshooting
 
 **No Traces:**
@@ -274,6 +292,7 @@ private String performAiOperation(String userInput) {
 **Missing Prompt/Completion:**
 
 - Ensure `log-prompt` and `log-completion` are `true`.
+- Verify the `ChatModelCompletionContentObservationFilter` is registered as a Spring `@Component`. Without it, prompt and completion data won't be added as span attributes even if logging is enabled.
 - Sampling probability must be high enough.
 
 ## GitHub Discussions
