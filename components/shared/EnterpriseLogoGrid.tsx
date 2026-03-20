@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import type { StaticImageData } from "next/image";
@@ -23,8 +25,8 @@ import adobeLight from "../home/img/adobe_light.svg";
 import adobeDark from "../home/img/adobe_dark.svg";
 import pigmentLight from "../home/img/pigment_light.svg";
 import pigmentDark from "../home/img/pigment_dark.svg";
-import sevenelevenLight from "../home/img/seveneleven_light.png";
-import sevenelevenDark from "../home/img/seveneleven_dark.png";
+import freeeLight from "../home/img/freee_light.png";
+import freeeDark from "../home/img/freee_dark.png";
 import circlebackLight from "../home/img/circleback_light.png";
 import circlebackDark from "../home/img/circleback_dark.png";
 import appleLight from "../home/img/apple_light.svg";
@@ -97,9 +99,9 @@ const companies: CompanyLogo[] = [
     lightModeImage: samsaraDark,
   },
   {
-    name: "Seven Eleven Japan",
-    darkModeImage: sevenelevenLight,
-    lightModeImage: sevenelevenDark,
+    name: "freee",
+    darkModeImage: freeeLight,
+    lightModeImage: freeeDark,
   },
   {
     name: "Magic Patterns",
@@ -165,13 +167,13 @@ const CustomerStoryBadge = ({ small }: { small?: boolean }) => (
   <div
     className={cn(
       "absolute top-0 right-0 z-10 pointer-events-none",
-      !small && "md:top-2 md:right-2"
+      !small && "md:top-2 md:right-2",
     )}
   >
     <div
       className={cn(
         "inline-flex items-center justify-center text-blue-500  text-xs rounded-full  group-hover:w-auto group-hover:h-auto group-hover:px-3 group-hover:py-1 px-2 py-1 transition-all duration-200",
-        !small && "md:bg-blue-500 md:text-white md:px-0 md:py-0 md:w-6 md:h-6"
+        !small && "md:bg-blue-500 md:text-white md:px-0 md:py-0 md:w-6 md:h-6",
       )}
     >
       {small ? (
@@ -179,9 +181,7 @@ const CustomerStoryBadge = ({ small }: { small?: boolean }) => (
       ) : (
         <>
           <span className="md:hidden whitespace-nowrap">Read Story</span>
-          <span className="hidden md:group-hover:inline">
-            Read User Story
-          </span>
+          <span className="hidden md:group-hover:inline">Read User Story</span>
           <span className="hidden md:block group-hover:hidden w-2 h-2 bg-white rounded-full"></span>
         </>
       )}
@@ -209,7 +209,7 @@ export const EnterpriseLogoGrid = ({
       className={cn(
         "grid grid-cols-2 md:grid-cols-4 auto-rows-fr",
         small && "grid-cols-4",
-        className
+        className,
       )}
       role="grid"
       aria-label="Enterprise customers using Langfuse"
@@ -233,7 +233,7 @@ export const EnterpriseLogoGrid = ({
             className={cn(
               baseCellClasses,
               clickableCellClasses,
-              small && smallCellClasses
+              small && smallCellClasses,
             )}
             aria-label={`Read ${company.name} user story`}
             role="gridcell"

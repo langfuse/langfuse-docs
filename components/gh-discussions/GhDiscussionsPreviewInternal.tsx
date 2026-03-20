@@ -100,32 +100,36 @@ const GhDiscussionsPreviewInternal = ({
 
     if (displayedDiscussions.length === 0) {
       return (
-        <div className="text-center py-8">
-          <p className="text-primary/70 text-sm">No discussions found.</p>
+        <div className="py-8 text-center">
+          <p className="text-sm text-primary/70">No discussions found.</p>
         </div>
       );
     }
 
     return (
       <>
-        <ul className="space-y-3 pt-3">
+        <ul
+          className="list-none"
+          data-gh-discussions-list
+          style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}
+        >
           {displayedDiscussions.map((discussion) => (
             <li
               key={discussion.number}
-              className="flex items-center space-x-1 pb-3 border-b last:border-none px-1"
+              className="flex items-center px-1 pb-3 space-x-1 border-b last:border-none"
             >
               <div className="flex flex-col items-center min-w-[60px] gap-0.5">
                 <span className="text-lg font-semibold leading-none">
                   {discussion.upvotes}
                 </span>
-                <span className="text-xs text-primary/70 leading-none">
+                <span className="text-xs leading-none text-primary/70">
                   votes
                 </span>
               </div>
               <div className="flex flex-col items-start">
                 <Link
                   href={discussion.href}
-                  className="text-primary hover:underline font-medium text-sm leading-none text-balance"
+                  className="text-sm font-medium leading-none no-underline text-primary text-balance hover:no-underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -139,7 +143,7 @@ const GhDiscussionsPreviewInternal = ({
                   </span>
 
                   <span>•</span>
-                  <div className="inline-flex items-center gap-1">
+                  <div className="inline-flex gap-1 items-center">
                     <span
                       className={`h-4 inline-flex items-center gap-1 px-1.5 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-primary/70 dark:text-gray-200`}
                     >
@@ -187,7 +191,7 @@ const GhDiscussionsPreviewInternal = ({
     }
 
     return (
-      <Pagination className="border-t py-1">
+      <Pagination className="py-1 border-t">
         <PaginationContent className="gap-1 items-center">
           <PaginationItem>
             <PaginationPrevious
@@ -196,7 +200,7 @@ const GhDiscussionsPreviewInternal = ({
               className="cursor-pointer select-none"
             />
           </PaginationItem>
-          <div className="hidden sm:flex gap-1 items-center">
+          <div className="hidden gap-1 items-center sm:flex">
             {pageNumbers.map((pageNumber, index) =>
               pageNumber === null ? (
                 <PaginationItem key={`ellipsis-${index}`}>
@@ -259,18 +263,18 @@ const GhDiscussionsPreviewInternal = ({
   })();
 
   return (
-    <div className={cn("w-full mt-4", className)}>
+    <div className={cn("mt-4 w-full", className)}>
       {/* Hidden links for indexing */}
       <div className="hidden">{generateHiddenLinks()}</div>
       <Tabs
         defaultValue={getDefaultTab()}
         onValueChange={(value) => setCurrentPage(1)}
       >
-        <div className="flex flex-wrap justify-between items-center mb-2 gap-2">
+        <div className="flex flex-wrap gap-2 justify-between items-center mb-2">
           {!filterCategory && (
             <TabsList>
               {categories.map((category) => (
-                <TabsTrigger value={category}>
+                <TabsTrigger key={category} value={category}>
                   <IconGithub className="mr-1" />
                   {category}
                 </TabsTrigger>
@@ -278,7 +282,7 @@ const GhDiscussionsPreviewInternal = ({
             </TabsList>
           )}
           <div className="flex items-center space-x-2 w-full sm:w-auto">
-            <div className="relative w-36 sm:w-48 h-9">
+            <div className="relative w-36 h-9 sm:w-48">
               <Input
                 type="text"
                 placeholder="Search..."
@@ -287,9 +291,9 @@ const GhDiscussionsPreviewInternal = ({
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full h-full pl-8"
+                className="pl-8 w-full h-full"
               />
-              <IconSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-primary/70" />
+              <IconSearch className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-primary/70" />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -298,7 +302,7 @@ const GhDiscussionsPreviewInternal = ({
                   size="sm"
                   className="whitespace-nowrap"
                 >
-                  <IconSort className="mr-2 h-4 w-4" />
+                  <IconSort className="mr-2 w-4 h-4" />
                   {sortType.charAt(0).toUpperCase() + sortType.slice(1)}
                 </Button>
               </DropdownMenuTrigger>
@@ -334,14 +338,14 @@ const GhDiscussionsPreviewInternal = ({
             </Button>
           </div>
         </div>
-        <div className="border rounded bg-card">
+        <div className="rounded border">
           <TabsContent value="Support">
             {renderDiscussions("Support")}
           </TabsContent>
           <TabsContent value="Ideas">{renderDiscussions("Ideas")}</TabsContent>
         </div>
       </Tabs>
-      <div className="text-xs text-primary/70 mt-2">
+      <div className="mt-2 text-xs text-primary/70">
         <span>
           Discussions last updated:{" "}
           {new Date(discussionsCached.updated_at).toLocaleString()} ({timeDiff})

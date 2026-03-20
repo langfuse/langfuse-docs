@@ -1,0 +1,73 @@
+---
+title: Export to Blob Storage
+description: Export traces, observations, enriched observations, and scores to Blob Storage, e.g. S3, GCS, or Azure Blob Storage.
+sidebarTitle: Export to Blob Storage
+---
+
+# Export via Blob Storage Integration
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
+You can create schedule exports to a Blob Storage, e.g. S3, GCS, or Azure Blob Storage, for `traces`, `observations`, enriched observations, and `scores`.
+
+Those exports can run on an `hourly`, `daily`, or `weekly` schedule.
+Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
+Select whether you want to use S3, a S3 compatible storage, Google Cloud Storage, or Azure Blob Storage.
+
+## Start exporting via Blob Storage
+
+To set up the export navigate to `Your Project` > `Settings` > `Integrations` > `Blob Storage`.
+
+Fill in the settings to authenticate with your vendor, enable the integration, and press save.
+Within an hour an initial export should start and continue based on the schedule you have selected.
+The export supports CSV, JSON, and JSONL file formats.
+Read [our blob storage documentation](/self-hosting/deployment/infrastructure/blobstorage) for more information on how to get credentials for your specific vendor.
+
+<Frame className="my-10" fullWidth>
+  ![Blob Storage Integration Setup](/images/docs/blob-storage.png)
+</Frame>
+
+## Export source (Langfuse v4)
+
+Blob Storage integrations now include an `Export Source` selector. New integrations default to `Enriched observations (recommended)` (trace attributes are directly set on observations).
+
+This source uses enriched observations with trace attributes and provides significantly better export performance. `Scores` are always included, regardless of the selected source.
+
+Available options:
+
+- `Traces and observations (legacy)`
+- `Traces and observations (legacy) and enriched observations`
+- `Enriched observations (recommended)`
+
+<Callout type="warning">
+  `Traces and observations (legacy)` sources may be deprecated in the future.
+  All new export jobs should use `Enriched observations (recommended)`, and
+  existing legacy jobs are strongly recommended to upgrade.
+</Callout>
+
+### Upgrade path for existing configurations
+
+Existing integrations continue to use `Traces and observations (legacy)` until changed.
+
+To migrate safely:
+
+1. Switch to `Traces and observations (legacy) and enriched observations`.
+2. Validate downstream jobs and data consumers while both sources are exported (this mode creates duplicate records by design).
+3. Switch to `Enriched observations (recommended)` once validation is complete.
+
+For rollout details, see the [Simplify for Scale changelog](/changelog/2026-03-10-simplify-for-scale).
+
+## Alternatives
+
+You can also export data via:
+
+- [UI](/docs/api-and-data-platform/features/export-from-ui) - Manual batch-exports from the Langfuse UI
+- [SDKs/API](/docs/api-and-data-platform/features/public-api) - Programmatic access using Langfuse SDKs or API

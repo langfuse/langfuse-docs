@@ -1,12 +1,13 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
-import { Cards } from "nextra/components";
+import { faqSource } from "@/lib/source";
+import { Cards } from "@/components/docs";
 import { MessageCircleQuestion } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
+
+type FaqPage = ReturnType<typeof faqSource.getPages>[number];
 
 const PREVIEW_PAGES_PER_TAG = 5;
 
-const wordCasing = {
+const wordCasing: Record<string, string> = {
   api: "API",
   openai: "OpenAI",
   langchain: "LangChain",
@@ -21,19 +22,17 @@ export const formatTag = (tag: string) =>
     .join(" ");
 
 export const FaqIndex = () => {
-  const pages = getPagesUnderRoute("/faq/all") as Array<
-    Page & { frontMatter: any }
-  >;
+  const pages = faqSource.getPages();
   const categorizedPages = pages
-    .filter((page) => page.route !== "/faq/all")
+    .filter((page) => page.url !== "/faq/all")
     .reduce((acc, page) => {
-      const tags = page.frontMatter?.tags || ["Other"];
-      tags.forEach((tag: string) => {
+      const tags = (page.data.tags as string[] | undefined) ?? ["Other"];
+      tags.forEach((tag) => {
         if (!acc[tag]) acc[tag] = [];
         acc[tag].push(page);
       });
       return acc;
-    }, {} as Record<string, Array<Page & { frontMatter: any }>>);
+    }, {} as Record<string, FaqPage[]>);
 
   return (
     <>
@@ -51,11 +50,9 @@ export const FaqIndex = () => {
             <Cards num={1}>
               {pages.slice(0, PREVIEW_PAGES_PER_TAG).map((page) => (
                 <Cards.Card
-                  href={page.route}
-                  key={page.route}
-                  title={
-                    page.meta?.title || page.frontMatter?.title || page.name
-                  }
+                  href={page.url}
+                  key={page.url}
+                  title={page.data.title}
                   icon={<MessageCircleQuestion />}
                   arrow
                 >
@@ -64,7 +61,7 @@ export const FaqIndex = () => {
               ))}
             </Cards>
             <p className="mt-4">
-              <Link href={`/faq/tag/${encodeURIComponent(tag)}`}>
+              <Link href={`/faq/tag/${encodeURIComponent(tag)}`} variant="underline">
                 {pages.length > PREVIEW_PAGES_PER_TAG
                   ? `View all (${pages.length - PREVIEW_PAGES_PER_TAG} more) ->`
                   : `View all ->`}

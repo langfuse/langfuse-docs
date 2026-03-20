@@ -5,9 +5,24 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
 import { cn } from "@/lib/utils";
 
-const TooltipProvider = TooltipPrimitive.Provider;
+// Cast to make `children` optional — with React 19 types, React.FC<P> no
+// longer adds implicit `children` via PropsWithChildren, so JSX children
+// don't automatically satisfy a required `children` prop in the strict
+// attribute check. Making it optional here allows the standard JSX usage
+// `<TooltipProvider>...</TooltipProvider>` to remain valid.
+const TooltipProvider = TooltipPrimitive.Provider as React.ComponentType<
+  Omit<
+    React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Provider>,
+    "children"
+  > & { children?: React.ReactNode }
+>;
 
-const Tooltip = TooltipPrimitive.Root;
+const Tooltip = TooltipPrimitive.Root as React.ComponentType<
+  Omit<
+    React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>,
+    "children"
+  > & { children?: React.ReactNode }
+>;
 
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
