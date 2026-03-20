@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import useInkeepSettings from "./useInkeepSettings";
 import type { InkeepModalSearchAndChatProps } from "@inkeep/cxkit-react";
-import { Search } from "lucide-react";
 
 export default function InkeepCustomTrigger() {
   const [isOpen, setIsOpen] = useState(false);
   const [CustomTrigger, setCustomTrigger] =
-    useState<(e: InkeepModalSearchAndChatProps) => JSX.Element>();
+    useState<(e: InkeepModalSearchAndChatProps) => React.ReactElement>();
 
   const { baseSettings, aiChatSettings, searchSettings, modalSettings } =
     useInkeepSettings();

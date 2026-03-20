@@ -1,8 +1,10 @@
-import { useRouter } from "next/router";
+"use client";
+
+import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { useConfig } from "nextra-theme-docs";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import { Button } from "./ui/button";
+import { Link } from "./ui/link";
 import {
   Copy as CopyIcon,
   Check as CheckIcon,
@@ -14,30 +16,45 @@ import {
   Loader2,
 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
-import { Background } from "./Background";
 import { NotebookBanner } from "./NotebookBanner";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import Link from "next/link";
+import { Image } from "./ui/image";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import IconChatGPT from "./icons/chatgpt";
 import IconClaude from "./icons/claude";
 import IconMCP from "./icons/mcp";
 
+/** Paths where the page already shows feedback (DocBodyChrome); skip duplicate here. */
 const pathsWithoutFooterWidgets = [
   "/imprint",
   "/blog",
   "/users",
+  "/support",
+  "/about",
   "/careers",
+  "/press",
+  "/watch-demo",
+  "/enterprise",
+  "/changelog",
+  "/cn",
+  "/community",
+  "/cookie-policy",
+  "/find-us",
+  "/jp",
+  "/kr",
+  "/oss-friends",
+  "/privacy",
+  "/research",
+  "/terms",
+  "/wrapped",
 ];
 const pathsWithCopyAsMarkdownButton = [
   "/docs",
@@ -47,12 +64,13 @@ const pathsWithCopyAsMarkdownButton = [
   "/integrations",
   "/handbook",
   "/security",
+  "/library",
 ];
 const isCustomerStory = (pathname: string) =>
   pathname.startsWith("/users/");
 
-const CopyMarkdownButton = () => {
-  const router = useRouter();
+export const CopyMarkdownButton = () => {
+  const pathname = usePathname();
   const capture = usePostHogClientCapture();
   const [copyState, setCopyState] = useState<
     "idle" | "loading" | "copied" | "error"
@@ -70,7 +88,7 @@ const CopyMarkdownButton = () => {
   }, []);
 
   const getMarkdownUrl = () => {
-    let basePath = router.pathname;
+    let basePath = pathname ?? "";
     if (basePath.startsWith("/")) basePath = basePath.substring(1);
     if (basePath.endsWith("/")) basePath = basePath.slice(0, -1);
     if (!basePath) basePath = "index"; // Handle root index page
@@ -163,6 +181,13 @@ const CopyMarkdownButton = () => {
   const isDisabled = copyState === "loading" || copyState === "copied";
   const isError = copyState === "error";
 
+  // Self-guard: only render on pages that should have the copy button.
+  // All hooks are above so this conditional return is safe.
+  const shouldShow = pathsWithCopyAsMarkdownButton.some((prefix) =>
+    (pathname ?? "").startsWith(prefix)
+  );
+  if (!shouldShow) return null;
+
   let buttonText = "Copy page";
   let ButtonIcon = CopyIcon;
   if (copyState === "loading") {
@@ -176,7 +201,7 @@ const CopyMarkdownButton = () => {
   }
 
   return (
-    <div className="inline-flex items-center rounded-md bg-secondary overflow-hidden">
+    <div className="inline-flex overflow-hidden items-center rounded-md bg-secondary">
       <button
         type="button"
         disabled={isDisabled || isError}
@@ -211,7 +236,7 @@ const CopyMarkdownButton = () => {
                 : ""
             )}
           >
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="w-3 h-3" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[200px]">
@@ -220,7 +245,7 @@ const CopyMarkdownButton = () => {
             disabled={isDisabled}
             className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
           >
-            <CopyIcon className="h-4 w-4 shrink-0" />
+            <CopyIcon className="w-4 h-4 shrink-0" />
             <div className="flex flex-col">
               <span className="font-medium">Copy page</span>
               <span className="text-xs text-muted-foreground">
@@ -234,11 +259,11 @@ const CopyMarkdownButton = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleChatGPTClick}
-              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
             >
-              <IconChatGPT className="h-4 w-4 shrink-0" />
+              <IconChatGPT className="w-4 h-4 shrink-0" />
               <div className="flex flex-col flex-1 min-w-0">
-                <span className="font-medium flex items-center gap-1">
+                <span className="flex gap-1 items-center font-medium">
                   Open in ChatGPT
                   <ExternalLink
                     className="h-[1em] w-[1em] shrink-0"
@@ -257,11 +282,11 @@ const CopyMarkdownButton = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleClaudeClick}
-              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
             >
-              <IconClaude className="h-4 w-4 shrink-0" />
+              <IconClaude className="w-4 h-4 shrink-0" />
               <div className="flex flex-col flex-1 min-w-0">
-                <span className="font-medium flex items-center gap-1">
+                <span className="flex gap-1 items-center font-medium">
                   Open in Claude
                   <ExternalLink
                     className="h-[1em] w-[1em] shrink-0"
@@ -281,11 +306,11 @@ const CopyMarkdownButton = () => {
                 capture("copy_page", { type: "mcp" });
               }}
               target="_blank"
-              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
             >
-              <IconMCP className="h-4 w-4 shrink-0" />
+              <IconMCP className="w-4 h-4 shrink-0" />
               <div className="flex flex-col flex-1 min-w-0">
-                <span className="font-medium flex items-center gap-1">
+                <span className="flex gap-1 items-center font-medium">
                   Install Docs MCP server
                   <ExternalLink
                     className="h-[1em] w-[1em] shrink-0"
@@ -305,69 +330,62 @@ const CopyMarkdownButton = () => {
 };
 
 export const MainContentWrapper = (props) => {
-  const router = useRouter();
-  const { frontMatter } = useConfig();
+  const pathname = usePathname();
   const cookbook = COOKBOOK_ROUTE_MAPPING.find(
-    (cookbook) => cookbook.path === router.pathname
+    (cookbook) => cookbook.path === pathname
   );
 
-  const versionLabel = frontMatter.label;
-
   const shouldShowCopyButton = pathsWithCopyAsMarkdownButton.some((prefix) =>
-    router.pathname.startsWith(prefix)
+    (pathname ?? "").startsWith(prefix)
   );
 
   return (
     <>
-      {(versionLabel || shouldShowCopyButton) && (
-        <div className="flex items-center gap-2 flex-wrap mt-5">
-          {versionLabel && (
-            <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-              {versionLabel}
-            </span>
-          )}
-          {shouldShowCopyButton && <CopyMarkdownButton key={router.pathname} />}
+      {shouldShowCopyButton && (
+        <div className="flex flex-wrap gap-2 items-center mt-5">
+          <CopyMarkdownButton key={pathname} />
         </div>
       )}
 
       {cookbook ? (
-        <NotebookBanner src={cookbook.ipynbPath} className="mb-4 mt-4" />
+        <NotebookBanner src={cookbook.ipynbPath} className="mt-4 mb-4" />
       ) : null}
 
+
       {props.children}
-      {isCustomerStory(router.pathname) && <CustomerStoryCTA />}
+      {isCustomerStory(pathname ?? "") && <CustomerStoryCTA />}
+      <hr className="mx-4 my-4 border-t dark:border-neutral-800 md:mx-6 xl:mx-8" />
       {!pathsWithoutFooterWidgets.some(
         (path) =>
-          router.pathname === path || router.pathname.startsWith(path + "/")
+          pathname === path || (pathname ?? "").startsWith(path + "/")
       ) ? (
         <div
-          className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t dark:border-neutral-800"
+          className="flex flex-wrap gap-6 justify-between items-center px-4 py-4 md:px-6 xl:px-8"
           id="docs-feedback"
         >
-          <DocsFeedback key={router.pathname} />
+          <DocsFeedback key={pathname} />
           <DocsSupport />
         </div>
       ) : null}
-      <Background />
     </>
   );
 };
 
 export const DocsSupport = () => {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex gap-3 items-center">
       <Button variant="outline" size="sm" asChild>
-        <a href="/support">
+        <Link href="/support">
           <span>Support</span>
-          <LifeBuoy className="h-4 w-4 ml-2" />
-        </a>
+          <LifeBuoy className="ml-2 w-4 h-4" />
+        </Link>
       </Button>
     </div>
   );
 };
 
 export const DocsFeedback = () => {
-  const router = useRouter();
+  const pathname = usePathname();
   const [selected, setSelected] = useState<
     "positive" | "negative" | "submitted" | null
   >(null);
@@ -388,7 +406,7 @@ export const DocsFeedback = () => {
     fetch("/api/feedback", {
       method: "POST",
       body: JSON.stringify({
-        page: router.pathname,
+        page: pathname ?? "",
         feedback: newSelection,
       }),
     })
@@ -408,7 +426,7 @@ export const DocsFeedback = () => {
     fetch("/api/feedback", {
       method: "POST",
       body: JSON.stringify({
-        page: router.pathname,
+        page: pathname ?? "",
         feedback: selected,
         comment: feedbackComment,
       }),
@@ -426,7 +444,7 @@ export const DocsFeedback = () => {
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex gap-3 items-center">
       <span className="text-sm font-medium">Was this page helpful?</span>
       <div className="flex gap-2">
         <Button
@@ -435,7 +453,7 @@ export const DocsFeedback = () => {
           onClick={() => handleFeedbackSelection("positive")}
           disabled={submitting}
         >
-          <ThumbsUp className="h-4 w-4 text-green-600" />
+          <ThumbsUp className="w-4 h-4 text-green-600" />
           <span className="sr-only">Yes</span>
         </Button>
         <Button
@@ -444,7 +462,7 @@ export const DocsFeedback = () => {
           onClick={() => handleFeedbackSelection("negative")}
           disabled={submitting}
         >
-          <ThumbsDown className="h-4 w-4 text-red-600" />
+          <ThumbsDown className="w-4 h-4 text-red-600" />
           <span className="sr-only">No</span>
         </Button>
       </div>
@@ -463,8 +481,8 @@ export const DocsFeedback = () => {
         <DialogContent className="max-w-lg">
           {selected === "submitted" ? (
             // Thank you view
-            <div className="flex flex-col gap-4 text-center items-center py-4">
-              <ThumbsUp className="h-12 w-12 text-green-500" />
+            <div className="flex flex-col gap-4 items-center py-4 text-center">
+              <ThumbsUp className="w-12 h-12 text-green-500" />
               <h4 className="text-lg font-semibold">
                 Thank you for your feedback!
               </h4>
@@ -487,9 +505,9 @@ export const DocsFeedback = () => {
             // Positive feedback follow-up
             <div className="flex flex-col gap-6">
               <div className="flex gap-4 items-start">
-                <ThumbsUp className="h-8 w-8 text-green-500 mt-1" />
+                <ThumbsUp className="mt-1 w-8 h-8 text-green-500" />
                 <div>
-                  <h4 className="text-lg font-semibold mb-2">
+                  <h4 className="mb-2 text-lg font-semibold">
                     What was most helpful?
                   </h4>
                   <p className="text-sm text-muted-foreground">

@@ -5,6 +5,7 @@ import IconDiscord from "@/components/icons/discord";
 import IconX from "@/components/icons/x";
 import IconYoutube from "@/components/icons/youtube";
 import IconLinkedin from "@/components/icons/linkedin";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const socialLinks = [
   {
@@ -38,63 +39,63 @@ const menuItems: {
   heading: string;
   items: { name: string; href: string }[];
 }[] = [
-  {
-    heading: "Product",
-    items: [
-      { name: "Observability", href: "/docs/observability/overview" },
-      {
-        name: "Prompt Management",
-        href: "/docs/prompt-management/overview",
-      },
-      { name: "Evaluation", href: "/docs/evaluation/overview" },
-      { name: "Metrics", href: "/docs/metrics/overview" },
-      {
-        name: "Playground",
-        href: "/docs/prompt-management/features/playground",
-      },
-      { name: "Pricing", href: "/pricing" },
-      { name: "Enterprise", href: "/enterprise" },
-    ],
-  },
-  {
-    heading: "Developers",
-    items: [
-      { name: "Documentation", href: "/docs" },
-      { name: "Self-Hosting", href: "/self-hosting" },
-      { name: "SDKs", href: "/docs/observability/sdk/overview" },
-      { name: "Integrations", href: "/integrations" },
-      {
-        name: "API Reference",
-        href: "/docs/api-and-data-platform/overview",
-      },
-      { name: "Status", href: "https://status.langfuse.com" },
-      { name: "Talk to Us", href: "/talk-to-us" },
-    ],
-  },
-  {
-    heading: "Resources",
-    items: [
-      { name: "Blog", href: "/blog" },
-      { name: "Changelog", href: "/changelog" },
-      { name: "Roadmap", href: "/docs/roadmap" },
-      { name: "Interactive Demo", href: "/docs/demo" },
-      { name: "Customers", href: "/customers" },
-      { name: "AI Engineering Library", href: "/library" },
-      { name: "Guides & Cookbooks", href: "/guides" },
-    ],
-  },
-  {
-    heading: "Company",
-    items: [
-      { name: "About Us", href: "/about" },
-      { name: "Careers", href: "/careers" },
-      { name: "Press", href: "/press" },
-      { name: "Security", href: "/security" },
-      { name: "Support", href: "/support" },
-      { name: "Open Source", href: "/handbook/chapters/open-source" },
-    ],
-  },
-];
+    {
+      heading: "Product",
+      items: [
+        { name: "Observability", href: "/docs/observability/overview" },
+        {
+          name: "Prompt Management",
+          href: "/docs/prompt-management/overview",
+        },
+        { name: "Evaluation", href: "/docs/evaluation/overview" },
+        { name: "Metrics", href: "/docs/metrics/overview" },
+        {
+          name: "Playground",
+          href: "/docs/prompt-management/features/playground",
+        },
+        { name: "Pricing", href: "/pricing" },
+        { name: "Enterprise", href: "/enterprise" },
+      ],
+    },
+    {
+      heading: "Developers",
+      items: [
+        { name: "Documentation", href: "/docs" },
+        { name: "Self-Hosting", href: "/self-hosting" },
+        { name: "SDKs", href: "/docs/observability/sdk/overview" },
+        { name: "Integrations", href: "/integrations" },
+        {
+          name: "API Reference",
+          href: "/docs/api-and-data-platform/overview",
+        },
+        { name: "Status", href: "https://status.langfuse.com" },
+        { name: "Talk to Us", href: "/talk-to-us" },
+      ],
+    },
+    {
+      heading: "Resources",
+      items: [
+        { name: "Blog", href: "/blog" },
+        { name: "Changelog", href: "/changelog" },
+        { name: "Roadmap", href: "/docs/roadmap" },
+        { name: "Interactive Demo", href: "/docs/demo" },
+        { name: "Users", href: "/users" },
+        { name: "AI Engineering Library", href: "/library" },
+        { name: "Guides & Cookbooks", href: "/guides" },
+      ],
+    },
+    {
+      heading: "Company",
+      items: [
+        { name: "About Us", href: "/about" },
+        { name: "Careers", href: "/careers" },
+        { name: "Press", href: "/press" },
+        { name: "Security", href: "/security" },
+        { name: "Support", href: "/support" },
+        { name: "Open Source", href: "/handbook/chapters/open-source" },
+      ],
+    },
+  ];
 
 const bottomLinks: { name: string; href: string }[] = [
   { name: "Terms", href: "/terms" },
@@ -148,7 +149,7 @@ const FooterMenu = () => {
             </Link>
           ))}
         </div>
-        <div className="flex gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           {socialLinks.map((link) => {
             const Icon = link.icon;
             const isExternal = link.href.startsWith("http");
@@ -167,6 +168,9 @@ const FooterMenu = () => {
               </a>
             );
           })}
+          <div className="border-l border-border/50 pl-1.5 ml-1">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 

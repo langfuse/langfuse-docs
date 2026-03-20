@@ -1,6 +1,6 @@
-import { Cards } from "nextra/components";
+import { Cards } from "@/components/docs";
 import { Users } from "lucide-react";
-import { TEAMS } from "@/pages/handbook/_meta";
+import { TEAMS } from "@/lib/handbook-meta";
 
 export const TeamsIndex = () => {
   return (

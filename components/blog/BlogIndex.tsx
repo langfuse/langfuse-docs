@@ -1,43 +1,61 @@
-import { getPagesUnderRoute } from "nextra/context";
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { type Page } from "nextra";
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/router";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+
+export type BlogPageItem = {
+  route: string;
+  name?: string;
+  title?: string;
+  frontMatter?: {
+    title?: string;
+    description?: string;
+    date?: string;
+    tag?: string;
+    ogImage?: string;
+    author?: string;
+    showInBlogIndex?: boolean;
+    [key: string]: unknown;
+  };
+};
 
 export const BlogIndex = ({
   maxItems,
   path = "/blog",
+  pages: initialPages,
 }: {
   maxItems?: number;
   path?: string;
+  pages?: BlogPageItem[];
 }) => {
+  const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   // Initialize selected tag from URL parameter
   useEffect(() => {
-    const tag = router.query.tag as string | undefined;
+    const tag = searchParams.get("tag") ?? undefined;
     setSelectedTag(tag || null);
-  }, [router.query.tag]);
+  }, [searchParams]);
 
-  const posts = useMemo(
-    () =>
-      (getPagesUnderRoute(path) as Array<Page & { frontMatter: any }>)
-        .filter((page) => page.frontMatter?.showInBlogIndex !== false)
-        .sort(
-          (a, b) =>
-            new Date(b.frontMatter.date).getTime() -
-            new Date(a.frontMatter.date).getTime()
-        )
-        .slice(0, maxItems),
-    [maxItems]
-  );
+  const posts = useMemo(() => {
+    const list = initialPages ?? [];
+    return list
+      .filter((page) => page.frontMatter?.showInBlogIndex !== false)
+      .sort(
+        (a, b) =>
+          new Date((b.frontMatter?.date ?? "") as string).getTime() -
+          new Date((a.frontMatter?.date ?? "") as string).getTime()
+      )
+      .slice(0, maxItems);
+  }, [initialPages, path, maxItems]);
 
-  // Function to normalize and split tags
-  const normalizeTags = (tagString?: string) => {
-    if (!tagString) return [];
+  const normalizeTags = (tagString?: string): string[] => {
+    if (tagString == null || typeof tagString !== "string") return [];
     return tagString
       .split(",")
       .map((tag) => tag.trim().toLowerCase())
@@ -55,75 +73,82 @@ export const BlogIndex = ({
     [posts, selectedTag]
   );
 
-  // Get unique tags
+  // Get unique tags, sorted alphabetically for consistent category row
   const tags = useMemo(() => {
-    const allTags = posts.flatMap((page) =>
-      normalizeTags(page.frontMatter?.tag)
+    const allTags: string[] = posts.flatMap((page) =>
+      normalizeTags(page.frontMatter?.tag as string)
     );
-    return Array.from(new Set(allTags));
+    return Array.from(new Set(allTags)).sort((a, b) => a.localeCompare(b));
   }, [posts]);
 
   const handleTagClick = (tag: string) => {
     const newTag = selectedTag === tag ? null : tag;
-    setSelectedTag(newTag);
+    setSelectedTag(newTag ?? null);
 
-    // Update URL parameter
-    const query = { ...router.query };
+    const params = new URLSearchParams(searchParams.toString());
     if (newTag) {
-      query.tag = newTag;
+      params.set("tag", newTag);
     } else {
-      delete query.tag;
+      params.delete("tag");
     }
-    router.push({ pathname: router.pathname, query }, undefined, {
-      shallow: true,
-    });
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
   };
 
   return (
     <div>
-      <div className="flex gap-2 flex-wrap mb-10 justify-center">
-        {tags.map((tag) => (
+      {tags.length > 0 ? (
+        <div className="flex flex-wrap gap-2 justify-center mb-10 mt-2">
           <Button
-            key={tag}
-            onClick={() => handleTagClick(tag)}
-            variant={
-              selectedTag
-                ?.toLowerCase()
-                .split(",")
-                .map((t) => t.trim())
-                .includes(tag)
-                ? "default"
-                : "secondary"
-            }
+            onClick={() => handleTagClick("")}
+            variant={selectedTag ? "secondary" : "default"}
             size="pill"
           >
-            {tag.charAt(0).toUpperCase() + tag.slice(1)}
+            All
           </Button>
-        ))}
-      </div>
+          {tags.map((tag) => (
+            <Button
+              key={tag}
+              onClick={() => handleTagClick(tag)}
+              variant={
+                selectedTag
+                  ?.toLowerCase()
+                  .split(",")
+                  .map((t) => t.trim())
+                  .includes(tag)
+                  ? "default"
+                  : "secondary"
+              }
+              size="pill"
+            >
+              {tag.charAt(0).toUpperCase() + tag.slice(1)}
+            </Button>
+          ))}
+        </div>
+      ) : null}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7">
+      <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 xl:grid-cols-3">
         {filteredPosts.map((page) => (
           <Link key={page.route} href={page.route} className="block mb-8 group">
             {page.frontMatter?.ogImage ? (
-              <div className="mt-4 rounded relative aspect-video overflow-hidden">
+              <div className="overflow-hidden relative mt-4 rounded aspect-video">
                 <Image
                   src={page.frontMatter.ogImage}
-                  className="object-cover transform group-hover:scale-105 transition-transform"
+                  className="object-cover transition-transform transform group-hover:scale-105"
                   alt={page.frontMatter?.title ?? "Blog post image"}
                   fill={true}
                   sizes="(min-width: 1024px) 33vw, 100vw"
                 />
               </div>
             ) : null}
-            <h2 className="block font-mono mt-8 text-2xl opacity-90 group-hover:opacity-100">
-              {page.meta?.title || page.frontMatter?.title || page.name}
+            <h2 className="block mt-8 font-mono text-2xl opacity-90 group-hover:opacity-100">
+              {page.frontMatter?.title || page.name}
             </h2>
-            <div className="opacity-80 mt-2 group-hover:opacity-100">
+            <div className="mt-2 opacity-80 group-hover:opacity-100">
               {page.frontMatter?.description} <span>Read more →</span>
             </div>
-            <div className="flex gap-2 flex-wrap mt-3 items-baseline">
-              {normalizeTags(page.frontMatter?.tag).map((tag, index) => (
+            <div className="flex flex-wrap gap-2 items-baseline mt-3">
+              {normalizeTags(page.frontMatter?.tag as string).map((tag, index) => (
                 <Button
                   key={index}
                   onClick={(e) => {
@@ -146,12 +171,12 @@ export const BlogIndex = ({
                 </Button>
               ))}
               {page.frontMatter?.date ? (
-                <span className="opacity-60 text-sm group-hover:opacity-100">
+                <span className="text-sm opacity-60 group-hover:opacity-100">
                   {page.frontMatter.date}
                 </span>
               ) : null}
               {page.frontMatter?.author ? (
-                <span className="opacity-60 text-sm group-hover:opacity-100">
+                <span className="text-sm opacity-60 group-hover:opacity-100">
                   by {page.frontMatter.author}
                 </span>
               ) : null}
