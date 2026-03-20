@@ -62,9 +62,8 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
 
       const { token, url } = await res.json();
 
-      const { Room, RoomEvent, ConnectionState, Track } = await import(
-        "livekit-client"
-      );
+      const { Room, RoomEvent, ConnectionState, Track } =
+        await import("livekit-client");
 
       const room = new Room();
       roomRef.current = room;
@@ -79,22 +78,19 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
             el.play().catch(() => {});
             setAgentState("speaking");
           }
-        }
+        },
       );
 
-      room.on(
-        RoomEvent.TrackUnsubscribed,
-        (track) => {
-          if (track.kind === Track.Kind.Audio) {
-            track.detach();
-            if (audioElementRef.current) {
-              audioElementRef.current.remove();
-              audioElementRef.current = null;
-            }
-            setAgentState("listening");
+      room.on(RoomEvent.TrackUnsubscribed, (track) => {
+        if (track.kind === Track.Kind.Audio) {
+          track.detach();
+          if (audioElementRef.current) {
+            audioElementRef.current.remove();
+            audioElementRef.current = null;
           }
+          setAgentState("listening");
         }
-      );
+      });
 
       // Listen for agent state changes via data messages
       room.on(RoomEvent.DataReceived, (payload: Uint8Array) => {
@@ -112,15 +108,12 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
         }
       });
 
-      room.on(
-        RoomEvent.ConnectionStateChanged,
-        (state) => {
-          if (state === ConnectionState.Disconnected) {
-            setAgentState("idle");
-            roomRef.current = null;
-          }
+      room.on(RoomEvent.ConnectionStateChanged, (state) => {
+        if (state === ConnectionState.Disconnected) {
+          setAgentState("idle");
+          roomRef.current = null;
         }
-      );
+      });
 
       room.on(RoomEvent.Disconnected, () => {
         setAgentState("idle");
@@ -129,9 +122,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
 
       // Track when the agent starts/stops speaking via active speaker changes
       room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
-        const agentSpeaking = speakers.some(
-          (s) => !s.isLocal
-        );
+        const agentSpeaking = speakers.some((s) => !s.isLocal);
         if (agentSpeaking) {
           setAgentState("speaking");
         } else if (roomRef.current) {
@@ -211,7 +202,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
               <p className="text-xs text-muted-foreground">
                 See the{" "}
                 <a
-                  href="/docs/integrations/livekit"
+                  href="/integrations/frameworks/livekit"
                   className="underline hover:text-foreground"
                 >
                   LiveKit integration docs
@@ -243,7 +234,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                       ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       : "bg-primary text-primary-foreground hover:bg-primary/90",
                     agentState === "connecting" &&
-                      "opacity-50 cursor-not-allowed"
+                      "opacity-50 cursor-not-allowed",
                   )}
                 >
                   {agentState === "connecting" ? (
@@ -262,7 +253,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                   "text-sm mb-4",
                   agentState === "error"
                     ? "text-destructive"
-                    : "text-muted-foreground"
+                    : "text-muted-foreground",
                 )}
               >
                 {stateLabel[agentState]}
@@ -283,7 +274,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                         "text-sm px-3 py-2 rounded-lg",
                         t.role === "user"
                           ? "bg-primary/10 text-foreground ml-8"
-                          : "bg-muted text-foreground mr-8"
+                          : "bg-muted text-foreground mr-8",
                       )}
                     >
                       <span className="text-xs text-muted-foreground font-medium">
@@ -301,7 +292,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                   Start a voice conversation with the AI agent. The full STT →
                   LLM → TTS pipeline is traced in Langfuse via{" "}
                   <a
-                    href="/docs/integrations/livekit"
+                    href="/integrations/frameworks/livekit"
                     className="underline hover:text-foreground"
                   >
                     LiveKit Agents
