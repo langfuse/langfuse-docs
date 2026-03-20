@@ -18,7 +18,7 @@ This approach has become one of the most popular methods for evaluating LLM appl
 
 ## How LLM-as-a-Judge Works
 
-The core idea is straightforward: present an LLM with the input, the application's output, and a scoring rubric, then ask it to evaluate the output. The judge model produces a [`score`](/docs/evaluation/core-concepts#scores) along with chain-of-thought reasoning explaining its assessment.
+The core idea is straightforward: present an LLM with the input, the application's output, and a scoring rubric, then ask it to evaluate the output. The judge model produces a [`score`](/docs/evaluation/core-concepts#scores) along with reasoning explaining its assessment.
 
 A typical LLM-as-a-Judge prompt includes:
 1. **Evaluation criteria** — a rubric defining what "good" looks like (e.g., "Score 1 if the answer is factually incorrect, 5 if fully accurate and well-sourced")
@@ -26,7 +26,7 @@ A typical LLM-as-a-Judge prompt includes:
 3. **Output to evaluate** — the application's response
 4. **Optional reference** — ground truth or expected output for comparison
 
-The judge model then returns a structured score and reasoning that can be tracked, aggregated, and analyzed over time.
+The judge model then returns a structured score and reasoning that can be tracked, aggregated, and analyzed over time. In Langfuse, that score can be numeric or categorical. Use numeric scores for continuous judgments like helpfulness from `0` to `1`. Use categorical scores when you want explicit labels such as `correct`, `partially_correct`, or `incorrect`.
 
 ## Why use LLM-as-a-Judge?
 
@@ -231,10 +231,12 @@ Langfuse ships a growing catalog of evaluators built and maintained by us and pa
 
 When the library doesn't fit your specific needs, add your own:
 
-1. Draft an evaluation prompt with `{{variables}}` placeholders (`input`, `output`, `ground_truth` …).
-2. Optional: Customize the **score** (0-1) and **reasoning** prompts to guide the LLM in scoring.
-3. Optional: Pin a custom dedicated model for this evaluator. If no custom model is specified, it will use the default evaluation model (see Section 2).
-4. Save → the evaluator can now be reused across your project.
+1. Draft an evaluation prompt with `{{variables}}` placeholders (`input`, `output`, `ground_truth` ...).
+2. Choose a **score type**: use **Numeric** for gradients like helpfulness or faithfulness, or **Categorical** for discrete labels.
+3. If you choose **Categorical**, define the allowed categories. Optionally enable **Allow multiple matches** if more than one label can apply. Langfuse will create one score per selected category.
+4. Optional: Customize the **score reasoning** prompt and the numeric **score output** prompt or categorical **category selection** prompt.
+5. Optional: Pin a custom dedicated model for this evaluator. If no custom model is specified, it will use the default evaluation model (see Section 2).
+6. Save → the evaluator can now be reused across your project.
 
 </Tab>
 </Tabs>

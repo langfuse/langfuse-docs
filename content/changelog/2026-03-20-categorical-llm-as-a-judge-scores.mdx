@@ -1,0 +1,37 @@
+---
+date: 2026-03-20
+title: Categorical LLM-as-a-Judge Scores
+description: LLM-as-a-Judge evaluators can now return categorical scores in addition to numeric ones.
+author: Hassieb
+showOgInHeader: false
+canonical: /docs/evaluation/evaluation-methods/llm-as-a-judge
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+LLM-as-a-Judge evaluators in Langfuse can now return categorical scores in addition to numeric ones. You can define a fixed set of allowed categories in the evaluator template, have the judge choose from them, and store the result as a native categorical score in Langfuse.
+
+This is especially useful when the right answer is a label instead of a gradient:
+
+- Classify answers as `correct`, `partially_correct`, or `incorrect`
+- Mark support replies as `resolved`, `needs_follow_up`, or `escalate`
+- Label safety outcomes as `safe`, `needs_review`, or `blocked`
+
+Numeric scores are still the right fit for continuous dimensions like helpfulness, completeness, or faithfulness. But when your team needs explicit states for filtering, dashboards, or routing, categorical outputs are easier to interpret and act on.
+
+## What's New
+
+- Choose `Numeric` or `Categorical` when creating a custom LLM-as-a-Judge evaluator
+- Define the allowed category values directly in the evaluator template
+- Optionally allow multiple matches when more than one label applies; Langfuse creates one score per selected category
+- View categorical results in evaluator logs and reuse them across Langfuse's existing score tooling
+
+## Get started
+
+<Cards num={2}>
+  <Card title="LLM-as-a-Judge Documentation" href="/docs/evaluation/evaluation-methods/llm-as-a-judge" icon={<Book />} />
+  <Card title="What Are Scores?" href="/faq/all/what-are-scores" icon={<Book />} />
+</Cards>
