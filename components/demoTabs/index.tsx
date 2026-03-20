@@ -1,13 +1,8 @@
 "use client";
 
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import type { HTMLAttributes } from "react";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   MessageSquareIcon,
@@ -15,11 +10,14 @@ import {
   BarChart3Icon,
   MicIcon,
 } from "lucide-react";
-import { Chat } from "@/components/qaChatbot";
-import { SentimentClassifier } from "@/components/sentimentClassifier";
-import { ImageGenerator } from "@/components/imageGenerator";
-import { VoiceAgent } from "@/components/voiceAgent";
-import { Loader } from "@/components/ai-elements/loader";
+import dynamic from "next/dynamic";
+
+// Lazy-load all tab content so their heavy deps (katex, livekit, AI SDKs) are NOT
+// pulled into the catch-all [section]/[[...slug]] bundle that serves every docs page.
+const Chat = dynamic(() => import("@/components/qaChatbot").then((m) => ({ default: m.Chat })));
+const SentimentClassifier = dynamic(() => import("@/components/sentimentClassifier").then((m) => ({ default: m.SentimentClassifier })));
+const ImageGenerator = dynamic(() => import("@/components/imageGenerator").then((m) => ({ default: m.ImageGenerator })));
+const VoiceAgent = dynamic(() => import("@/components/voiceAgent").then((m) => ({ default: m.VoiceAgent })));
 
 const TAB_MAP: Record<string, string> = {
   chatbot: "chatbot",
@@ -78,19 +76,35 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="chatbot" forceMount className={activeTab !== "chatbot" ? "hidden" : undefined}>
+        <TabsContent
+          value="chatbot"
+          forceMount
+          className={activeTab !== "chatbot" ? "hidden" : undefined}
+        >
           <Chat />
         </TabsContent>
 
-        <TabsContent value="image" forceMount className={activeTab !== "image" ? "hidden" : undefined}>
+        <TabsContent
+          value="image"
+          forceMount
+          className={activeTab !== "image" ? "hidden" : undefined}
+        >
           <ImageGenerator />
         </TabsContent>
 
-        <TabsContent value="sentiment" forceMount className={activeTab !== "sentiment" ? "hidden" : undefined}>
+        <TabsContent
+          value="sentiment"
+          forceMount
+          className={activeTab !== "sentiment" ? "hidden" : undefined}
+        >
           <SentimentClassifier />
         </TabsContent>
 
-        <TabsContent value="voice" forceMount className={activeTab !== "voice" ? "hidden" : undefined}>
+        <TabsContent
+          value="voice"
+          forceMount
+          className={activeTab !== "voice" ? "hidden" : undefined}
+        >
           <VoiceAgent />
         </TabsContent>
       </Tabs>

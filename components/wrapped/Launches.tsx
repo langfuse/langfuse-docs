@@ -1,10 +1,9 @@
 "use client";
 
-import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
-import { type Page } from "nextra";
 import { motion, useInView } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
+import { useWrappedData } from "./WrappedDataContext";
 import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
@@ -178,24 +177,22 @@ function MonthBox({ month, year, launches, animationProps }: MonthBoxProps) {
 }
 
 export function Launches() {
-  const allPages = (
-    getPagesUnderRoute("/changelog") as Array<Page & { frontMatter: any }>
-  )
-    .filter(
+  const allPages = useWrappedData()
+    .changelogPages.filter(
       (page) =>
         page.frontMatter?.date &&
-        new Date(page.frontMatter.date).getFullYear() === 2025
+        new Date(page.frontMatter.date as string).getFullYear() === 2025
     )
     .sort(
       (a, b) =>
-        new Date(a.frontMatter.date).getTime() -
-        new Date(b.frontMatter.date).getTime()
+        new Date(a.frontMatter?.date as string).getTime() -
+        new Date(b.frontMatter?.date as string).getTime()
     );
 
   // Group by month
   const launchesByMonth = allPages.reduce(
     (acc, page) => {
-      const date = new Date(page.frontMatter.date);
+      const date = new Date(page.frontMatter?.date as string);
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const key = `${date.getFullYear()}-${month}`;
 
@@ -204,7 +201,7 @@ export function Launches() {
       }
 
       acc[key].push({
-        title: page.frontMatter.title || page.name || "Untitled",
+        title: (page.frontMatter?.title as string | undefined) || page.name || "Untitled",
         route: page.route,
       });
 

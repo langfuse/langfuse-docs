@@ -1,9 +1,10 @@
-import dynamic from "next/dynamic";
+"use client";
 
-// Non-dynamic imports for everyhting that renders on top
-import { Background } from "../Background";
+import dynamic from "next/dynamic";
 import { Hero } from "./Hero";
 import { FeatureTabsSection } from "./FeatureTabsSection";
+import type { CustomerStory } from "../customers/CustomerCarousel";
+import type { ChangelogItem } from "./Changelog";
 
 // Dynamic imports for everything that is below the fold
 const Usage = dynamic(() => import("./Usage"), {
@@ -31,20 +32,24 @@ const CTAGetStarted = dynamic(() => import("./CTAGetStarted"), {
   ssr: false,
 });
 
-export const Home = () => (
+export interface HomeProps {
+  customerStories: CustomerStory[];
+  changelogItems: ChangelogItem[];
+}
+
+export const Home = ({ customerStories, changelogItems }: HomeProps) => (
   <>
-    <main className="relative overflow-hidden w-full">
+    <main className="overflow-hidden relative w-full">
       <Hero />
       <FeatureTabsSection />
       <Usage />
       <IntegrationsGrid />
-      <OpenSource />
+      <OpenSource changelogItems={changelogItems} />
       <Security />
-      <CustomerStories />
+      <CustomerStories stories={customerStories} />
       <Pricing />
       <WallOfLove />
       <CTAGetStarted />
     </main>
-    <Background />
   </>
 );

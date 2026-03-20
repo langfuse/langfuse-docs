@@ -1,8 +1,10 @@
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
-import { CustomerCarousel } from "../customers/CustomerCarousel";
+import { CustomerCarousel, type CustomerStory } from "../customers/CustomerCarousel";
 
-export default function CustomerStories() {
+export type { CustomerStory };
+
+export default function CustomerStories({ stories }: { stories: CustomerStory[] }) {
   return (
     <HomeSection>
       <Header
@@ -17,7 +19,11 @@ export default function CustomerStories() {
           },
         ]}
       />
-      <CustomerCarousel path="/users" showDots={true} loop={true} />
+      <CustomerCarousel
+        stories={stories}
+        showDots={true}
+        loop={true}
+      />
     </HomeSection>
   );
 }

@@ -53,3 +53,5 @@ export default function NumberTicker({
     />
   );
 }
+
+export { NumberTicker };

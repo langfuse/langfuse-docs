@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "../ui/button";
 import { Copy } from "lucide-react";
 import { useState } from "react";
@@ -83,20 +85,20 @@ export const CopyAgentOnboardingPrompt = () => {
   };
 
   return (
-    <div className="space-y-2 mt-3">
+    <div className="mt-3 space-y-2">
       <Button
         onClick={handleCopy}
-        className="flex items-center gap-2"
+        className="flex gap-2 items-center"
         variant={copied ? "secondary" : "default"}
       >
-        <Copy className="h-4 w-4" />
+        <Copy className="w-4 h-4" />
         {copied ? "Copied!" : "Copy Agent Prompt to Clipboard"}
       </Button>
       <details className="text-xs text-muted-foreground">
         <summary className="cursor-pointer hover:text-foreground">
           View prompt
         </summary>
-        <pre className="mt-2 whitespace-pre-wrap break-words bg-muted p-2 rounded text-xs">
+        <pre className="p-2 mt-2 text-xs whitespace-pre-wrap break-words rounded bg-muted">
           {agenticOnboardingPrompt}
         </pre>
       </details>

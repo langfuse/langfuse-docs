@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Header } from "../../Header";
 import { HomeSection } from "../components/HomeSection";
@@ -22,7 +24,7 @@ type DeploymentOptionParams = {
 const deploymentOptions: Record<DeploymentOption, DeploymentOptionParams> = {
   cloud: {
     switch: (
-      <span className="flex flex-row items-center gap-x-1">
+      <span className="flex flex-row gap-x-1 items-center">
         Langfuse Cloud
         <span className="hidden md:block"> (we host)</span>
       </span>
@@ -34,7 +36,7 @@ const deploymentOptions: Record<DeploymentOption, DeploymentOptionParams> = {
   },
   selfHosted: {
     switch: (
-      <span className="flex flex-row items-center gap-x-1">
+      <span className="flex flex-row gap-x-1 items-center">
         Self-hosted
         <span className="hidden md:block"> (you host)</span>
       </span>
@@ -71,7 +73,7 @@ export function PricingPage({
             <Tabs
               defaultValue={variant}
               value={variant}
-              className="mt-4 flex justify-center"
+              className="flex justify-center mt-4"
               onValueChange={(value) => {
                 if (!isPricingPage) {
                   setLocalVariant(value as "cloud" | "selfHosted");
@@ -116,7 +118,7 @@ export function PricingPage({
           </>
         ) : (
           <>
-            <div className="text-center mt-10">
+            <div className="mt-10 text-center">
               For a detailed comparison and FAQ, see our{" "}
               <Link
                 href={deploymentOptions[variant].href}
