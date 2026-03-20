@@ -231,22 +231,33 @@ async function main() {
             .sort()
             .reduce((acc, key) => ({ ...acc, [key]: contributors[key] }), {});
 
-        // Guard: if the result is significantly smaller than the committed file,
-        // the git history is likely shallow (Vercel default clone depth) or
-        // the GitHub API was rate-limited. Keep the existing file rather than
-        // overwriting good data with a partial set.
-        const pageCount = Object.keys(sorted).length;
+        // Merge with existing file so shallow clones (Vercel default) or
+        // rate-limited runs don't lose previously discovered contributors.
         if (fs.existsSync(CONFIG.contributors)) {
             const existing = JSON.parse(fs.readFileSync(CONFIG.contributors, 'utf8'));
-            const existingCount = Object.keys(existing).length;
-            if (existingCount > 0 && pageCount < existingCount * 0.5) {
-                console.log(`⚠️  Generated only ${pageCount} pages vs ${existingCount} existing — likely shallow clone or rate limit. Keeping existing contributors.json.`);
-                return;
-            }
-        }
 
-        fs.writeFileSync(CONFIG.contributors, JSON.stringify(sorted, null, 2));
-        console.log('✅ Generated contributors.json');
+            for (const [urlPath, existingContributors] of Object.entries(existing)) {
+                if (!Array.isArray(existingContributors)) continue;
+                if (!sorted[urlPath]) {
+                    sorted[urlPath] = existingContributors;
+                } else {
+                    const merged = new Set(sorted[urlPath]);
+                    for (const c of existingContributors) merged.add(c);
+                    sorted[urlPath] = [...merged];
+                }
+            }
+
+            // Re-sort keys after merge
+            const merged = Object.keys(sorted)
+                .sort()
+                .reduce((acc, key) => ({ ...acc, [key]: sorted[key] }), {});
+
+            fs.writeFileSync(CONFIG.contributors, JSON.stringify(merged, null, 2));
+            console.log(`✅ Merged contributors.json (${Object.keys(merged).length} pages)`);
+        } else {
+            fs.writeFileSync(CONFIG.contributors, JSON.stringify(sorted, null, 2));
+            console.log('✅ Generated contributors.json');
+        }
 
     } catch (error) {
         console.error('❌ Error:', error.message);
