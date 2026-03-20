@@ -11,7 +11,9 @@ const CONFIG = {
     sections: ['docs', 'self-hosting', 'security', 'guides', 'integrations', 'faq', 'handbook'].map(section => ({
         name: section.replace('-', ''),
         dirPath: path.join(__dirname, `../../content/${section}`),
-        gitPaths: [`content/${section}/`],
+        // Include both new (content/) and old (pages/) paths so the full
+        // git history before the Nextra→Fumadocs migration is captured.
+        gitPaths: [`content/${section}/`, `pages/${section}/`],
         urlPrefix: `/${section}`
     })),
 
