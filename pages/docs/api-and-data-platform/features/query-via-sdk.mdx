@@ -1,36 +1,124 @@
 ---
 title: Query Data via SDKs
 sidebarTitle: Query via SDKs
-description: Conveniently fetch your LLM Observability traces via the SDKs for few-shotting, fine-tuning or further analysis.
+description: Query observations, traces, and scores from Langfuse programmatically via the Python and JS/TS SDKs.
 ---
 
 # Query Data via SDKs
 
-Langfuse is [open-source](/open-source) and data tracked with Langfuse is open. You can query data via: [SDKs](#sdks) and [API](#api). For export functionality, see [Export Data](/docs/api-and-data-platform/overview).
+Langfuse is [open-source](/open-source) and all data tracked with Langfuse is accessible programmatically. The SDKs wrap the [Public API](/docs/api-and-data-platform/features/public-api) so you can query data without writing raw HTTP requests.
 
 Common use cases:
 
-- Train or fine-tune models on the production traces in Langfuse. E.g. to create a small model after having used a large model in production for a specific use case.
-- Collect few-shot examples to improve quality of output.
-- Programmatically create [datasets](/docs/evaluation/features/datasets).
+- Collect production examples for few-shot prompts.
+- Export traces and generations for fine-tuning.
+- Build custom dashboards or downstream pipelines.
+- Programmatically create [datasets](/docs/evaluation/experiments/datasets) from production data.
 
-If you are new to Langfuse, we recommend familiarizing yourself with the [Langfuse data model](/docs/tracing-data-model).
-
-<Callout type="info">
-
-New data is typically available for querying within 15-30 seconds of ingestion, though processing times may vary at times. Please visit [status.langfuse.com](https://status.langfuse.com) if you encounter any issues.
-
-</Callout>
-
-## SDKs [#sdks]
-
-Via the [SDKs](/docs/sdk/overview) for Python and JS/TS you can easily query the API without having to write the HTTP requests yourself.
+If you are new to Langfuse, familiarize yourself with the [data model](/docs/observability/data-model) first.
 
 <Callout type="info">
 
-If you need aggregated metrics (e.g., counts, costs, usage) rather than individual entities, consider the [Metrics API](/docs/metrics/features/metrics-api). It is optimized for aggregate queries and higher rate limits.
+New data is typically available for querying within 15-30 seconds of ingestion, though processing times may vary. Check [status.langfuse.com](https://status.langfuse.com) if you encounter any issues.
 
 </Callout>
+
+## Recommended vs. legacy endpoints [#recommended-vs-legacy]
+
+Langfuse provides **high-performance** endpoints optimized for querying large datasets with cursor-based pagination and flexible field selection. These are the recommended defaults.
+
+| Resource | Recommended (high-performance) | Legacy |
+| --- | --- | --- |
+| **Observations** | `api.observations` | `api.legacy.observations_v1` / `observationsV1` |
+| **Scores** | `api.scores` | `api.legacy.score_v1` / `scoreV1` |
+| **Metrics** | `api.metrics` | `api.legacy.metrics_v1` / `metricsV1` |
+| **Traces** | `api.trace` (unchanged) | — |
+
+<Callout type="warning">
+
+From **Python SDK v4** and **JS/TS SDK v5** onward, the high-performance endpoints are the defaults:
+
+- `api.observations` (formerly `api.observations_v_2` / `api.observationsV2`)
+- `api.scores` (formerly `api.score_v_2` / `api.scoreV2`)
+- `api.metrics` (formerly `api.metrics_v_2` / `api.metricsV2`)
+
+The old v2 aliases were removed in these major releases. Legacy v1 endpoints are now available under `api.legacy.*`.
+
+</Callout>
+
+<Callout type="info">
+
+If you need aggregated metrics (counts, costs, usage) rather than individual entities, consider the [Metrics API](/docs/metrics/features/metrics-api) which is optimized for aggregate queries and has higher rate limits.
+
+</Callout>
+
+Both SDKs authenticate via the `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_HOST` environment variables.
+The `api` namespace is auto-generated from the [Public API](/docs/api-and-data-platform/features/public-api) (OpenAPI spec). Method names mirror the REST resources and support filters and pagination.
+
+---
+
+## Observations (recommended) [#observations]
+
+The observations endpoint is the **primary and recommended way to query LLM call data** from Langfuse. It covers all observation types — generations, spans, events, and more — with cursor-based pagination and selectable field groups.
+
+### Field selection [#observations-fields]
+
+By default, the `core` and `basic` field groups are returned. Request additional groups via the `fields` parameter to include cost, token usage, model info, inputs/outputs, and more.
+
+| Field group | Fields included |
+| --- | --- |
+| `core` | `id`, `traceId`, `startTime`, `endTime`, `projectId`, `parentObservationId`, `type` |
+| `basic` | `name`, `level`, `statusMessage`, `version`, `environment`, `bookmarked`, `public`, `userId`, `sessionId` |
+| `time` | `completionStartTime`, `createdAt`, `updatedAt` |
+| `io` | `input`, `output` |
+| `metadata` | `metadata` (truncated to 200 chars by default) |
+| `model` | `providedModelName`, `internalModelId`, `modelParameters` |
+| `usage` | `usageDetails`, `costDetails`, `totalCost` |
+| `prompt` | `promptId`, `promptName`, `promptVersion` |
+| `metrics` | `latency`, `timeToFirstToken` |
+
+### Advanced filtering with the `filter` parameter [#observations-advanced-filter]
+
+For complex queries, use the structured `filter` parameter. It accepts a JSON string with an array of filter conditions. When provided, it takes precedence over individual query parameter filters.
+
+Each filter condition has the following structure:
+
+```json
+{
+  "type": "string",
+  "column": "name",
+  "operator": "=",
+  "value": "chat-completion"
+}
+```
+
+**Supported filter types and operators:**
+
+| Type | Operators |
+| --- | --- |
+| `string` | `=`, `contains`, `does not contain`, `starts with`, `ends with` |
+| `number` | `=`, `>`, `<`, `>=`, `<=` |
+| `datetime` | `>`, `<`, `>=`, `<=` |
+| `stringOptions` | `any of`, `none of` |
+| `arrayOptions` | `any of`, `none of`, `all of` |
+| `stringObject` | `=`, `contains`, `does not contain`, `starts with`, `ends with` (requires `key`) |
+| `numberObject` | `=`, `>`, `<`, `>=`, `<=` (requires `key`) |
+| `boolean` | `=`, `<>` |
+| `null` | `is null`, `is not null` |
+
+**Available columns:**
+
+- **Core fields:** `id`, `type`, `name`, `traceId`, `startTime`, `endTime`, `environment`, `level`, `statusMessage`, `version`, `userId`, `sessionId`
+- **Trace fields:** `traceName`, `traceTags` / `tags`
+- **Performance:** `latency`, `timeToFirstToken`, `tokensPerSecond`
+- **Token usage:** `inputTokens`, `outputTokens`, `totalTokens`
+- **Cost:** `inputCost`, `outputCost`, `totalCost`
+- **Model:** `model` (alias: `providedModelName`), `promptName`, `promptVersion`
+- **Metadata:** `metadata` (use with `stringObject`, `numberObject`, or `categoryOptions` type and a `key`)
+
+All conditions in the filter array are combined with AND logic.
+
+### Examples [#observations-examples]
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
@@ -41,137 +129,230 @@ pip install langfuse
 
 ```python
 from langfuse import get_client
-langfuse = get_client()  # uses environment variables to authenticate
+
+langfuse = get_client()
 ```
 
-The `api` namespace is auto-generated from the Public API (OpenAPI). Method names mirror REST resources and support filters and pagination.
-
-<Callout type="warning">
-
-From Python SDK v4 and JS/TS SDK v5 onward, the high-performance endpoints are
-the defaults:
-
-- `api.observations` (formerly `api.observations_v_2` / `api.observationsV2`)
-- `api.scores` (formerly `api.score_v_2` / `api.scoreV2`)
-- `api.metrics` (formerly `api.metrics_v_2` / `api.metricsV2`)
-
-The old v2 aliases were removed in these major releases. Legacy v1 endpoints
-are now available under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`).
-
-</Callout>
-
-### Traces
+#### Basic query
 
 ```python
-traces = langfuse.api.trace.list(limit=100, user_id="user_123", tags=["production"])  # pagination via cursor
-trace = langfuse.api.trace.get("traceId")
+observations = langfuse.api.observations.get_many(limit=50)
+
+for obs in observations.data:
+    print(obs["id"], obs["type"], obs["name"])
 ```
 
-### Observations
+#### Field selection
 
 ```python
-# Default high-performance endpoint (formerly observations_v_2)
 observations = langfuse.api.observations.get_many(
-    trace_id="abcdef1234",
+    fields="core,basic,usage,model,metrics",
+    limit=50,
+)
+
+for obs in observations.data:
+    print(obs["name"], obs.get("providedModelName"), obs.get("totalCost"), obs.get("latency"))
+```
+
+To retrieve full (non-truncated) metadata values for specific keys, use `expand_metadata`:
+
+```python
+observations = langfuse.api.observations.get_many(
+    fields="core,metadata",
+    expand_metadata="system_prompt,config",
+    limit=50,
+)
+```
+
+#### Filter by observation type
+
+Common types: `GENERATION`, `SPAN`, `EVENT`, `AGENT`, `TOOL`.
+
+```python
+generations = langfuse.api.observations.get_many(
+    type="GENERATION",
+    fields="core,basic,usage,model",
+    limit=100,
+)
+```
+
+#### Filter by name
+
+```python
+observations = langfuse.api.observations.get_many(
+    name="chat-completion",
+    type="GENERATION",
+    limit=50,
+)
+```
+
+#### Filter by trace
+
+```python
+observations = langfuse.api.observations.get_many(
+    trace_id="trace-abc-123",
+    fields="core,basic,io,usage",
+)
+```
+
+#### Filter by time range
+
+```python
+from datetime import datetime, timedelta, timezone
+
+observations = langfuse.api.observations.get_many(
+    from_start_time=datetime.now(timezone.utc) - timedelta(hours=24),
+    to_start_time=datetime.now(timezone.utc),
+    type="GENERATION",
+    fields="core,basic,usage",
+    limit=100,
+)
+```
+
+#### Filter by environment
+
+```python
+observations = langfuse.api.observations.get_many(
+    environment=["production", "staging"],
     type="GENERATION",
     limit=100,
-    fields="core,basic,usage"
 )
+```
 
-# Legacy v1 endpoint
-legacy_observations = langfuse.api.legacy.observations_v1.get_many(
-    trace_id="abcdef1234",
+#### Filter by trace tags
+
+```python
+import json
+
+observations = langfuse.api.observations.get_many(
+    filter=json.dumps([
+        {
+            "type": "arrayOptions",
+            "column": "traceTags",
+            "operator": "any of",
+            "value": ["production", "high-priority"]
+        }
+    ]),
+    fields="core,basic,usage",
+    limit=100,
+)
+```
+
+#### Filter by metadata
+
+Metadata filters use `stringObject` or `numberObject` types with a `key` to target specific metadata fields.
+
+```python
+import json
+
+observations = langfuse.api.observations.get_many(
+    filter=json.dumps([
+        {
+            "type": "stringObject",
+            "column": "metadata",
+            "key": "customer_tier",
+            "operator": "=",
+            "value": "enterprise"
+        }
+    ]),
+    fields="core,basic,metadata",
+    expand_metadata="customer_tier",
+    limit=100,
+)
+```
+
+#### Filter by cost or latency
+
+```python
+import json
+
+expensive_slow_generations = langfuse.api.observations.get_many(
+    filter=json.dumps([
+        {"type": "string", "column": "type", "operator": "=", "value": "GENERATION"},
+        {"type": "number", "column": "totalCost", "operator": ">=", "value": 0.10},
+        {"type": "number", "column": "latency", "operator": ">=", "value": 5.0},
+    ]),
+    fields="core,basic,usage,model,metrics",
+    limit=100,
+)
+```
+
+#### Filter by model
+
+```python
+import json
+
+observations = langfuse.api.observations.get_many(
+    filter=json.dumps([
+        {"type": "string", "column": "model", "operator": "=", "value": "gpt-4o"},
+    ]),
+    fields="core,basic,usage,model",
+    limit=100,
+)
+```
+
+#### Combine multiple filters
+
+```python
+import json
+from datetime import datetime, timedelta, timezone
+
+observations = langfuse.api.observations.get_many(
+    filter=json.dumps([
+        {"type": "string", "column": "type", "operator": "=", "value": "GENERATION"},
+        {"type": "string", "column": "model", "operator": "starts with", "value": "gpt-4"},
+        {"type": "arrayOptions", "column": "traceTags", "operator": "any of", "value": ["production"]},
+        {"type": "stringObject", "column": "metadata", "key": "feature", "operator": "=", "value": "chat"},
+        {
+            "type": "datetime",
+            "column": "startTime",
+            "operator": ">=",
+            "value": (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+        },
+    ]),
+    fields="core,basic,usage,model,metadata,metrics",
+    limit=100,
+)
+```
+
+#### Cursor-based pagination
+
+The cursor is returned in `response.meta.cursor` and should be passed in subsequent requests to retrieve the next page.
+
+```python
+all_observations = []
+cursor = None
+
+while True:
+    response = langfuse.api.observations.get_many(
+        type="GENERATION",
+        fields="core,basic,usage",
+        limit=500,
+        cursor=cursor,
+    )
+    all_observations.extend(response.data)
+
+    cursor = response.meta.cursor
+    if not cursor:
+        break
+
+print(f"Fetched {len(all_observations)} observations")
+```
+
+#### Async usage
+
+All endpoints are also available as async via `async_api`:
+
+```python
+observations = await langfuse.async_api.observations.get_many(
     type="GENERATION",
-    limit=100
+    fields="core,basic,usage",
+    limit=100,
 )
-legacy_observation = langfuse.api.legacy.observations_v1.get("observationId")
 ```
-
-### Sessions
-
-```python
-sessions = langfuse.api.sessions.list(limit=50)
-```
-
-### Scores
-
-```python
-# Default high-performance endpoint (formerly score_v_2)
-langfuse.api.scores.get_many(score_ids = "ScoreId")
-
-# Legacy v1 endpoint
-langfuse.api.legacy.score_v1.get(score_ids = "ScoreId")
-```
-
-### Prompts
-
-Please refer to the [prompt management documentation](/docs/prompt-management/get-started) on fetching prompts.
-
-### Datasets
-
-```python
-# Namespaces:
-# - langfuse.api.datasets.*
-# - langfuse.api.dataset_items.*
-# - langfuse.api.dataset_run_items.*
-```
-
-### Metrics
-
-```python
-# Default high-performance endpoint (formerly metrics_v_2)
-query_v2 = """
-{
-  "view": "observations",
-  "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
-  "dimensions": [{"field": "providedModelName"}],
-  "filters": [],
-  "fromTimestamp": "2025-05-01T00:00:00Z",
-  "toTimestamp": "2025-05-13T00:00:00Z"
-}
-"""
-
-langfuse.api.metrics.get(query = query_v2)
-
-# Legacy v1 endpoint
-query_v1 = """
-{
-  "view": "traces",
-  "metrics": [{"measure": "count", "aggregation": "count"}],
-  "dimensions": [{"field": "name"}],
-  "filters": [],
-  "fromTimestamp": "2025-05-01T00:00:00Z",
-  "toTimestamp": "2025-05-13T00:00:00Z"
-}
-"""
-
-langfuse.api.legacy.metrics_v1.metrics(query = query_v1)
-```
-
-#### Async equivalents
-
-```python
-# All endpoints are also available as async under `async_api`:
-trace = await langfuse.async_api.trace.get("traceId")
-traces = await langfuse.async_api.trace.list(limit=100)
-```
-
-#### Common filtering & pagination
-
-- limit, cursor (pagination)
-- time range filters (e.g., start_time, end_time)
-- entity filters: user_id, session_id, trace_id, type, name, tags, level, etc.
-
-See the Public API for the exact parameters per resource.
 
 </Tab>
 <Tab title="JS/TS SDK">
-
-<Callout type="info">
-
-The methods on the `langfuse.api` are auto-generated from the API reference and cover all entities. You can explore more entities via Intellisense
-
-</Callout>
 
 ```bash
 npm install @langfuse/client
@@ -181,66 +362,429 @@ npm install @langfuse/client
 import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
+```
 
-// Fetch list of traces, supports filters and pagination
-const traces = await langfuse.api.trace.list();
+#### Basic query
 
-// Fetch a single trace by ID
-const trace = await langfuse.api.trace.get("traceId");
+```ts
+const observations = await langfuse.api.observations.getMany({ limit: 50 });
 
-// Fetch list of observations (default high-performance endpoint; formerly observationsV2)
+for (const obs of observations.data) {
+  console.log(obs.id, obs.type, obs.name);
+}
+```
+
+#### Field selection
+
+```ts
 const observations = await langfuse.api.observations.getMany({
-  traceId: "abcdef1234",
-  type: "GENERATION",
-  limit: 100,
-  fields: "core,basic,usage"
+  fields: "core,basic,usage,model,metrics",
+  limit: 50,
 });
 
-// Fetch list of observations (legacy v1 endpoint)
-const legacyObservations = await langfuse.api.legacy.observationsV1.getMany();
-const legacyObservation = await langfuse.api.legacy.observationsV1.get("observationId");
+for (const obs of observations.data) {
+  console.log(obs.name, obs.providedModelName, obs.totalCost, obs.latency);
+}
+```
 
-// Fetch list of sessions
-const sessions = await langfuse.api.sessions.list();
+To retrieve full (non-truncated) metadata values for specific keys, use `expandMetadata`:
 
-// Fetch a single session by ID
-const session = await langfuse.api.sessions.get("sessionId");
+```ts
+const observations = await langfuse.api.observations.getMany({
+  fields: "core,metadata",
+  expandMetadata: "system_prompt,config",
+  limit: 50,
+});
+```
 
-// Fetch list of scores (default high-performance endpoint; formerly scoreV2)
-const scores = await langfuse.api.scores.getMany();
+#### Filter by observation type
 
-// Fetch a single score by ID
-const score = await langfuse.api.scores.getById("scoreId");
+Common types: `GENERATION`, `SPAN`, `EVENT`, `AGENT`, `TOOL`.
 
-// Legacy v1 scores endpoint
-const legacyScores = await langfuse.api.legacy.scoreV1.get();
+```ts
+const generations = await langfuse.api.observations.getMany({
+  type: "GENERATION",
+  fields: "core,basic,usage,model",
+  limit: 100,
+});
+```
 
-// Fetch metrics (default high-performance endpoint; formerly metricsV2)
-const metrics = await langfuse.api.metrics.get({
+#### Filter by name
+
+```ts
+const observations = await langfuse.api.observations.getMany({
+  name: "chat-completion",
+  type: "GENERATION",
+  limit: 50,
+});
+```
+
+#### Filter by trace
+
+```ts
+const observations = await langfuse.api.observations.getMany({
+  traceId: "trace-abc-123",
+  fields: "core,basic,io,usage",
+});
+```
+
+#### Filter by time range
+
+```ts
+const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+const now = new Date().toISOString();
+
+const observations = await langfuse.api.observations.getMany({
+  fromStartTime: oneDayAgo,
+  toStartTime: now,
+  type: "GENERATION",
+  fields: "core,basic,usage",
+  limit: 100,
+});
+```
+
+#### Filter by environment
+
+```ts
+const observations = await langfuse.api.observations.getMany({
+  environment: ["production", "staging"],
+  type: "GENERATION",
+  limit: 100,
+});
+```
+
+#### Filter by trace tags
+
+```ts
+const observations = await langfuse.api.observations.getMany({
+  filter: JSON.stringify([
+    {
+      type: "arrayOptions",
+      column: "traceTags",
+      operator: "any of",
+      value: ["production", "high-priority"],
+    },
+  ]),
+  fields: "core,basic,usage",
+  limit: 100,
+});
+```
+
+#### Filter by metadata
+
+Metadata filters use `stringObject` or `numberObject` types with a `key` to target specific metadata fields.
+
+```ts
+const observations = await langfuse.api.observations.getMany({
+  filter: JSON.stringify([
+    {
+      type: "stringObject",
+      column: "metadata",
+      key: "customer_tier",
+      operator: "=",
+      value: "enterprise",
+    },
+  ]),
+  fields: "core,basic,metadata",
+  expandMetadata: "customer_tier",
+  limit: 100,
+});
+```
+
+#### Filter by cost or latency
+
+```ts
+const expensiveSlowGenerations = await langfuse.api.observations.getMany({
+  filter: JSON.stringify([
+    { type: "string", column: "type", operator: "=", value: "GENERATION" },
+    { type: "number", column: "totalCost", operator: ">=", value: 0.1 },
+    { type: "number", column: "latency", operator: ">=", value: 5.0 },
+  ]),
+  fields: "core,basic,usage,model,metrics",
+  limit: 100,
+});
+```
+
+#### Filter by model
+
+```ts
+const observations = await langfuse.api.observations.getMany({
+  filter: JSON.stringify([
+    { type: "string", column: "model", operator: "=", value: "gpt-4o" },
+  ]),
+  fields: "core,basic,usage,model",
+  limit: 100,
+});
+```
+
+#### Combine multiple filters
+
+```ts
+const sevenDaysAgo = new Date(
+  Date.now() - 7 * 24 * 60 * 60 * 1000
+).toISOString();
+
+const observations = await langfuse.api.observations.getMany({
+  filter: JSON.stringify([
+    { type: "string", column: "type", operator: "=", value: "GENERATION" },
+    {
+      type: "string",
+      column: "model",
+      operator: "starts with",
+      value: "gpt-4",
+    },
+    {
+      type: "arrayOptions",
+      column: "traceTags",
+      operator: "any of",
+      value: ["production"],
+    },
+    {
+      type: "stringObject",
+      column: "metadata",
+      key: "feature",
+      operator: "=",
+      value: "chat",
+    },
+    {
+      type: "datetime",
+      column: "startTime",
+      operator: ">=",
+      value: sevenDaysAgo,
+    },
+  ]),
+  fields: "core,basic,usage,model,metadata,metrics",
+  limit: 100,
+});
+```
+
+#### Cursor-based pagination
+
+The cursor is returned in `response.meta.cursor` and should be passed in subsequent requests to retrieve the next page.
+
+```ts
+const allObservations = [];
+let cursor: string | undefined;
+
+do {
+  const response = await langfuse.api.observations.getMany({
+    type: "GENERATION",
+    fields: "core,basic,usage",
+    limit: 500,
+    cursor,
+  });
+  allObservations.push(...response.data);
+  cursor = response.meta.cursor;
+} while (cursor);
+
+console.log(`Fetched ${allObservations.length} observations`);
+```
+
+</Tab>
+</LangTabs>
+
+---
+
+## Other endpoints [#other-endpoints]
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
+
+### Traces [#traces]
+
+```python
+traces = langfuse.api.trace.list(
+    limit=100,
+    user_id="user_123",
+    tags=["production"],
+)
+
+trace = langfuse.api.trace.get("trace-id")
+```
+
+The trace `list` endpoint supports filtering by `user_id`, `session_id`, `name`, `tags`, `version`, `release`, `environment`, `from_timestamp`/`to_timestamp`, and the structured `filter` parameter.
+
+<Callout type="info">
+
+Fetching a single trace via `trace.get()` returns the trace **with all its observations** included. For querying observations at scale, prefer the [observations endpoint](#observations) instead.
+
+</Callout>
+
+### Scores [#scores]
+
+```python
+scores = langfuse.api.scores.get_many(
+    trace_id="trace-id",
+    name="relevance",
+    limit=100,
+)
+
+score = langfuse.api.scores.get_by_id("score-id")
+```
+
+The scores endpoint supports filtering by `user_id`, `name`, `source`, `data_type`, `trace_id`, `observation_id`, `session_id`, `config_id`, `queue_id`, `trace_tags`, `environment`, `from_timestamp`/`to_timestamp`, and the structured `filter` parameter.
+
+### Sessions [#sessions]
+
+```python
+sessions = langfuse.api.sessions.list(limit=50)
+session = langfuse.api.sessions.get("session-id")
+```
+
+### Datasets [#datasets]
+
+```python
+datasets = langfuse.api.datasets.list()
+dataset = langfuse.api.datasets.get("dataset-name")
+runs = langfuse.api.datasets.get_runs("dataset-name")
+```
+
+### Prompts [#prompts]
+
+See the [prompt management documentation](/docs/prompt-management/get-started) for details on fetching prompts.
+
+### Metrics [#metrics]
+
+```python
+import json
+
+result = langfuse.api.metrics.get(
+    query=json.dumps({
+        "view": "observations",
+        "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+        "dimensions": [{"field": "providedModelName"}],
+        "filters": [],
+        "fromTimestamp": "2025-05-01T00:00:00Z",
+        "toTimestamp": "2025-05-31T00:00:00Z",
+    })
+)
+```
+
+See the [Metrics API documentation](/docs/metrics/features/metrics-api) for full details.
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+### Traces [#traces]
+
+```ts
+const traces = await langfuse.api.trace.list({
+  limit: 100,
+  userId: "user_123",
+  tags: ["production"],
+});
+
+const trace = await langfuse.api.trace.get("trace-id");
+```
+
+The trace `list` endpoint supports filtering by `userId`, `sessionId`, `name`, `tags`, `version`, `release`, `environment`, `fromTimestamp`/`toTimestamp`, and the structured `filter` parameter.
+
+<Callout type="info">
+
+Fetching a single trace via `trace.get()` returns the trace **with all its observations** included. For querying observations at scale, prefer the [observations endpoint](#observations) instead.
+
+</Callout>
+
+### Scores [#scores]
+
+```ts
+const scores = await langfuse.api.scores.getMany({
+  traceId: "trace-id",
+  name: "relevance",
+  limit: 100,
+});
+
+const score = await langfuse.api.scores.getById("score-id");
+```
+
+The scores endpoint supports filtering by `userId`, `name`, `source`, `dataType`, `traceId`, `observationId`, `sessionId`, `configId`, `queueId`, `traceTags`, `environment`, `fromTimestamp`/`toTimestamp`, and the structured `filter` parameter.
+
+### Sessions [#sessions]
+
+```ts
+const sessions = await langfuse.api.sessions.list({ limit: 50 });
+const session = await langfuse.api.sessions.get("session-id");
+```
+
+### Datasets [#datasets]
+
+```ts
+const datasets = await langfuse.api.datasets.list();
+const dataset = await langfuse.api.datasets.get("dataset-name");
+const runs = await langfuse.api.datasets.getRuns("dataset-name");
+```
+
+### Prompts [#prompts]
+
+See the [prompt management documentation](/docs/prompt-management/get-started) for details on fetching prompts.
+
+### Metrics [#metrics]
+
+```ts
+const result = await langfuse.api.metrics.get({
   query: JSON.stringify({
     view: "observations",
     metrics: [{ measure: "totalCost", aggregation: "sum" }],
     dimensions: [{ field: "providedModelName" }],
     filters: [],
     fromTimestamp: "2025-05-01T00:00:00Z",
-    toTimestamp: "2025-05-13T00:00:00Z"
-  })
+    toTimestamp: "2025-05-31T00:00:00Z",
+  }),
 });
-
-// Legacy v1 namespaces:
-// - langfuse.api.legacy.observationsV1
-// - langfuse.api.legacy.scoreV1
-// - langfuse.api.legacy.metricsV1
-
-// Explore more entities via Intellisense
 ```
 
-The above examples show the current JavaScript SDK API methods. All methods support filters and pagination as shown in the code examples.
+See the [Metrics API documentation](/docs/metrics/features/metrics-api) for full details.
 
 </Tab>
 </LangTabs>
 
-## Related Resources
+---
 
-- For large-scale data exports (e.g., all traces for fine-tuning or analytics), consider using the [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to automatically sync data to S3, GCS, or Azure on a schedule instead of paginating through the API.
-- To manually export filtered data from the Langfuse UI, see [Export from UI](/docs/api-and-data-platform/features/export-from-ui).
+## Legacy endpoints [#legacy-endpoints]
+
+The legacy v1 endpoints use page-based pagination and return a fixed set of fields. They remain available under `api.legacy.*` but are **not recommended** for new integrations.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
+
+```python
+legacy_observations = langfuse.api.legacy.observations_v1.get_many(
+    trace_id="trace-id",
+    type="GENERATION",
+    page=1,
+    limit=100,
+)
+legacy_observation = langfuse.api.legacy.observations_v1.get("observation-id")
+
+legacy_scores = langfuse.api.legacy.score_v1.get(score_ids="score-id")
+```
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+```ts
+const legacyObservations =
+  await langfuse.api.legacy.observationsV1.getMany({
+    traceId: "trace-id",
+    type: "GENERATION",
+    page: 1,
+    limit: 100,
+  });
+const legacyObservation =
+  await langfuse.api.legacy.observationsV1.get("observation-id");
+
+const legacyScores = await langfuse.api.legacy.scoreV1.get();
+```
+
+</Tab>
+</LangTabs>
+
+---
+
+## Related resources [#related-resources]
+
+- [Public API reference](https://api.reference.langfuse.com) — full OpenAPI spec for all endpoints.
+- [Metrics API](/docs/metrics/features/metrics-api) — optimized endpoint for aggregate queries (counts, costs, usage).
+- [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) — scheduled data sync to S3, GCS, or Azure for large-scale exports.
+- [Export from UI](/docs/api-and-data-platform/features/export-from-ui) — download filtered data directly from the Langfuse dashboard.
+- [Data Model](/docs/observability/data-model) — understand traces, observations, and scores.
