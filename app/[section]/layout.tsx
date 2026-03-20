@@ -12,7 +12,7 @@ import {
   CHANGELOG_SECTIONS,
   getPageTreeWithShortTitles,
 } from "@/lib/source";
-import { MenuSwitcher } from "@/components/MenuSwitcher";
+import { MENU_SWITCHER_SECTION_SLUGS, MenuSwitcher } from "@/components/MenuSwitcher";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SectionLayoutWrapper } from "./SectionLayoutWrapper";
@@ -48,6 +48,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
   );
   const isPost = POST_SECTIONS.has(section);
   const isChangelog = CHANGELOG_SECTIONS.has(section);
+  const showMenuSwitcher = MENU_SWITCHER_SECTION_SLUGS.has(section);
 
   // Render DocsLayout from the server component so its LayoutContextProvider
   // correctly propagates context to DocsPage in the page component.
@@ -60,7 +61,9 @@ export default function SectionLayout({ children, params }: LayoutProps) {
           githubUrl="https://github.com/langfuse/langfuse-docs"
           nav={{ enabled: false }}
           sidebar={
-            isMarketing || isPost ? { enabled: false } : { banner: <MenuSwitcher /> }
+            isMarketing || isPost || !showMenuSwitcher
+              ? { enabled: false }
+              : { banner: <MenuSwitcher /> }
           }
           themeSwitch={isMarketing || isPost ? { enabled: false } : { component: <div className="ms-auto"><ThemeToggle /></div> }}
           searchToggle={{ enabled: false }}

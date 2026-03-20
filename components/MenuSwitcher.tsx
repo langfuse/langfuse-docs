@@ -13,6 +13,10 @@ const SECTIONS = [
   { title: "AI Engineering Library", path: "/library", Icon: BookOpen },
 ] as const;
 
+export const MENU_SWITCHER_SECTION_SLUGS = new Set(
+  SECTIONS.map((section) => section.path.replace(/^\//, ""))
+);
+
 export const MenuSwitcher = () => {
   const pathname = usePathname();
   return (
