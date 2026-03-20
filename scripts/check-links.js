@@ -14,34 +14,43 @@ const EXCLUDED_HOSTNAMES = new Set([
 
 // Configuration options
 const CONFIG = {
-    // File processing concurrency - much higher for local dev server
-    maxFileConcurrency: 50,        // Number of files to process simultaneously
-    fileBatchDelay: 0,             // Delay between file batches (ms) - no delay needed locally
-
-    // Link checking concurrency - much higher for local dev server
-    maxLinkConcurrency: 100,       // Number of links to check simultaneously per file
-    linkBatchDelay: 0,             // Delay between link batches (ms) - no delay needed locally
+    // The migrated App Router site is less tolerant of request bursts than the old setup.
+    maxFileConcurrency: 5,
+    fileBatchDelay: 25,
+    maxLinkConcurrency: 8,
+    linkBatchDelay: 25,
 
     // Link checking timeouts
-    linkTimeout: 2000,             // Timeout for localhost link checks (ms) - 2s is plenty for local
-    externalLinkTimeout: 10000,    // Timeout for external link checks (ms) - 10s for external services
+    linkTimeout: 10000,
+    externalLinkTimeout: 10000,
 
     // Progress reporting
-    progressInterval: 20,          // Report progress every N files
-    debugLogging: false,           // Enable/disable per-file processing logs
+    progressInterval: 20,
+    debugLogging: false,
 };
 
-// Optimized link checker for local dev server
+function shouldRetryWithGet(url, result) {
+    if (result.statusCode === 405 || // Method Not Allowed
+        result.statusCode === 501 || // Not Implemented
+        result.statusCode === 400) { // Bad Request (some servers reject HEAD)
+        return true;
+    }
+
+    if (!url.includes('localhost:3333') || result.statusCode !== 0 || !result.error) {
+        return false;
+    }
+
+    return result.error === 'Timeout' ||
+        result.error.includes('ECONNRESET') ||
+        result.error.includes('socket hang up');
+}
+
 async function checkLink(url, timeout = CONFIG.linkTimeout) {
-    // For localhost, HEAD requests usually work fine, but if they fail, fallback to GET
+    // Prefer HEAD so static assets do not need to be downloaded, but fall back to GET
+    // for localhost when HEAD is rejected or hangs.
     const headResult = await makeRequest(url, 'HEAD', timeout);
 
-    // If HEAD fails with method-related errors, try GET
-    if (headResult.statusCode === 405 || // Method Not Allowed
-        headResult.statusCode === 501 || // Not Implemented
-        headResult.statusCode === 400 || // Bad Request (some servers reject HEAD)
-        (headResult.statusCode === 0 && headResult.error && headResult.error.includes('ECONNRESET'))) {
-
+    if (shouldRetryWithGet(url, headResult)) {
         return await makeRequest(url, 'GET', timeout);
     }
 
@@ -72,10 +81,8 @@ async function makeRequest(url, method, timeout) {
                 // Consider 2xx and 3xx as successful
                 const success = res.statusCode >= 200 && res.statusCode < 400;
 
-                // For GET requests, we should consume the response to avoid hanging connections
-                if (method === 'GET') {
-                    res.resume(); // Consume response data
-                }
+                // Always consume the response so keep-alive sockets can be reused.
+                res.resume();
 
                 resolve({
                     url: url,
@@ -378,6 +385,10 @@ async function main() {
 
         const files = findFiles(pagesDir);
         console.log(`Found ${files.length} files to check (.md, .mdx, .tsx, .ts)\n`);
+        console.log(
+            `Using ${CONFIG.maxFileConcurrency} files x ${CONFIG.maxLinkConcurrency} links, ` +
+            `${CONFIG.linkTimeout}ms localhost timeout`
+        );
 
         // Process files with configured concurrency
         const maxConcurrent = CONFIG.maxFileConcurrency;
