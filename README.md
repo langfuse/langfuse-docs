@@ -4,10 +4,6 @@
 
 Repo for [langfuse.com](https://langfuse.com). Built with [Fumadocs](https://fumadocs.vercel.app/) and Next.js App Router.
 
-## GitHub Codespaces
-
-You can easily contribute to the docs using GitHub Codespaces. Just click on the "Code" button and select "Open with Codespaces". This will open a new Codespace with all the dependencies installed and the development server running.
-
 ## Local Development
 
 Pre-requisites: Node.js 22, pnpm v9.5.0
