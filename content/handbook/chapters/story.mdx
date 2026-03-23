@@ -164,6 +164,18 @@ Over these months, we grew rapidly on the business side and decided to make some
 - Price Drop: the Core plan decreased in price by 50% from $59 to $29/month to make it super easy to get started with Langfuse for even the smallest teams
 - Self-serve Enterprise: again, we like to let customers serve themselves whenever it is possible and do not want to force them to go through a sales process or call when it is not necessary
 
+### Jan 2026: Langfuse joins ClickHouse
+
+On January 16, ClickHouse [acquired Langfuse](/blog/joining-clickhouse). We did not plan to sell the company -- we actually had term sheets for a Series A and were looking forward to some days off over Christmas. What changed was realizing how much faster we can go together with ClickHouse while staying true to what makes Langfuse work: open source, self-hosting, and a product built for real production workloads.
+
+Because Langfuse already ran on ClickHouse since v3, we had been collaborating closely for a long time: sharing feedback with the database team, co-hosting community meetups in Berlin, San Francisco, and Amsterdam, and introducing thousands of self-hosted teams to ClickHouse through the v2 to v3 upgrade path. Langfuse Cloud is a large ClickHouse Cloud customer; teams at ClickHouse use Langfuse to improve their agentic applications. In many ways we already operated like long-term partners, and this acquisition made that partnership permanent.
+
+Nothing changed for users: Langfuse stays open source under its existing MIT license, self-hosting remains a first-class path, and Langfuse Cloud continues running as before. The whole team joined ClickHouse to keep building Langfuse, now with more resources behind performance, reliability, and enterprise readiness.
+
+### Mar 2026: Simplifying Langfuse for Scale
+
+After 19x growth in data processed over the year, we hit the limits of the data model carried over from the Postgres era. We shifted to an observations-centric data model: a single wide, mostly immutable ClickHouse table that eliminates joins and read-time deduplication. Dashboard load times for large projects improved by at least 10x, and initial table loads went from seconds to milliseconds. This is live in beta on Langfuse Cloud and will ship as v4 for self-hosters. Learn more in our [technical blog](/blog/2026-03-10-simplify-langfuse-for-scale).
+
 </Steps>
 
 ## Where are we headed?
