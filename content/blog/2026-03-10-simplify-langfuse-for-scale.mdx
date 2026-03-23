@@ -23,6 +23,10 @@ For the rollout summary and upgrade guidance, see the [changelog post](/changelo
 It is live in Beta on Langfuse Cloud across all regions.
 We are still working on the upgrade path for self-hosters and will eventually release it as a V4 major version.
 
+<Frame className="flex-1">
+  ![Langfuse gets Faster](/images/blog/2026-03-10-simplify-langfuse-for-scale/og.jpg)
+</Frame>
+
 With this change, we are moving to an observation-centric data model based on a new, wide, and (mostly) immutable ClickHouse table.
 This eliminates joins and deduplication at read-time and optimizes for the most performant ClickHouse access patterns.
 Initial table loads for large amounts of data go from seconds to milliseconds.
