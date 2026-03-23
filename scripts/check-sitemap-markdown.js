@@ -86,7 +86,11 @@ async function parseSitemap(xmlContent) {
 function toLocalMarkdownUrl(absoluteUrl) {
   const parsed = new URL(absoluteUrl);
   const pathname = parsed.pathname;
-  const mdPath = pathname.endsWith('.md') ? pathname : `${pathname}.md`;
+  const normalizedPathname =
+    pathname === '/' ? '/index' : pathname.replace(/\/+$/, '');
+  const mdPath = normalizedPathname.endsWith('.md')
+    ? normalizedPathname
+    : `${normalizedPathname}.md`;
   return `${LOCAL_SERVER_BASE}${mdPath}`;
 }
 
