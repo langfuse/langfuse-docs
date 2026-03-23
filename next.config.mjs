@@ -60,6 +60,10 @@ const nextConfig = {
     root: __dirname,
   },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
+  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
+  outputFileTracingIncludes: {
+    "/api/md-to-pdf": ["node_modules/@sparticuz/chromium/bin/**"],
+  },
 
   webpack(config, { isServer, webpack }) {
     config.resolve = config.resolve ?? {};
