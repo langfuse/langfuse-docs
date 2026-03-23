@@ -15,7 +15,7 @@ Add a new team member to Langfuse. Ask the user for the following information be
 
 Once you have the information, update the following 3 files:
 
----
+--- 
 
 ### 1. `data/authors.json`
 
