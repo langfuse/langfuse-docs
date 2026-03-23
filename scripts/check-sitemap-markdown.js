@@ -30,6 +30,7 @@ function fetchUrl(url, headers = {}) {
           response.statusCode < 400 &&
           response.headers.location
         ) {
+          response.resume();
           const redirectUrl = response.headers.location;
           const resolvedUrl = redirectUrl.startsWith('http')
             ? redirectUrl
@@ -63,7 +64,7 @@ function fetchUrl(url, headers = {}) {
 
 async function parseSitemap(xmlContent) {
   const parser = new xml2js.Parser();
-  const parseString = promisify(parser.parseString);
+  const parseString = promisify(parser.parseString.bind(parser));
 
   try {
     const result = await parseString(xmlContent);
