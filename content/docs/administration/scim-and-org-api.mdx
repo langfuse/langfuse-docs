@@ -65,9 +65,14 @@ Use `/api/public/scim` as the base URI for them.
 
 To create a new user within Langfuse, you can use the SCIM-style endpoints and `POST /Users`.
 This will create a new user if the email does not exist yet.
-Then it will add the user to the organization with role `NONE`.
+Then it will add the user to the organization with role `NONE` (unless a `roles` attribute is provided, see [Okta guide below](#okta)).
 
 Afterward, the role can be updated using the membership endpoints either on an organization or a project level (see above).
+
+<Callout type="warn">
+  When SCIM deprovisions and re-provisions a user (e.g. during initial SCIM setup or IdP sync), the user's organization role may be overwritten with the role configured in the SCIM `roles` attribute (defaulting to `NONE`).
+  To avoid accidental role downgrades, make sure the `roles` attribute in your IdP is set to the correct value - e.g. `OWNER` for organization owners - **before** enabling SCIM provisioning.
+</Callout>
 
 To remove a user from an organization, call the `DELETE /Users/{id}` endpoint.
 This will not delete the user itself, only its membership with the organization.
@@ -135,10 +140,10 @@ To setup user provisioning in Okta, follow these steps:
      - **Variable Name**: `roles`
      - **External Name**: `roles`
      - **External Namespace**: `urn:ietf:params:scim:schemas:core:2.0:User`
-     - **Attribute members**: `NONE`, `VIEWER`, `MEMBER`, `ADMIN`
+     - **Attribute members**: `NONE`, `VIEWER`, `MEMBER`, `ADMIN`, `OWNER`
      - **Attribute type**: `Personal`
    - In the **Provisioning** tab, modify the `roles` attribute to set default permissions for new users.
-   - You can set it for all users of the application to provide a default. Set it to "NONE", "VIEWER", "MEMBER", or "ADMIN".
+   - You can set it for all users of the application to provide a default. Set it to "NONE", "VIEWER", "MEMBER", "ADMIN", or "OWNER".
 5. **Assign Users**:
    - Navigate to the **Assignments** tab.
    - Click **Assign** > **Assign to People**.
@@ -149,3 +154,4 @@ To setup user provisioning in Okta, follow these steps:
 ##### Troubleshooting
 
 - **Users are provisioned with NONE/VIEWER permissions instead of their intended `role`**: This usually happens if the `roles` attribute has an attribute type `Group` instead of `Personal`.
+- **User lost their role after enabling SCIM**: During initial SCIM setup, if a user is deprovisioned and re-provisioned, their organization role is overwritten with the value from the SCIM `roles` attribute. If no role is configured in the IdP, the default is `NONE`. To fix this, ensure the correct role (including `OWNER` for organization owners) is set in the IdP profile before provisioning.
