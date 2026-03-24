@@ -1,11 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
-import {
-  Tabs as FumadocsTabs,
-  TabsList as FumadocsTabsList,
-  TabsTrigger as FumadocsTabsTrigger,
-} from "fumadocs-ui/components/tabs";
-import { cn } from "@/lib/utils";
+import { Tabs as FumadocsTabs } from "fumadocs-ui/components/tabs";
 
 const KEY = "synced-tabs:language";
 const normalize = (s: string) => s.trim().toLowerCase();
@@ -82,6 +77,10 @@ export function LangTabs(props: {
 
   const values = useMemo(
     () => labels.map((l, i) => (l ? toValue(l) : String(i))),
+    [labels],
+  );
+  const resolvedItems = useMemo(
+    () => labels.map((label, index) => label ?? String(index)),
     [labels],
   );
 
@@ -161,26 +160,10 @@ export function LangTabs(props: {
   return (
     <div ref={containerRef}>
       <FumadocsTabs
-        key={internalValue}
-        defaultValue={internalValue}
-        className="flex overflow-hidden flex-col my-4 rounded-xl border border-border bg-card"
+        value={internalValue}
+        onValueChange={handleValueChange}
+        items={resolvedItems}
       >
-        <FumadocsTabsList
-          className={cn(
-            "flex overflow-x-auto overflow-y-hidden flex-nowrap gap-1 px-4 pt-1 rounded-t-xl border-b text-muted-foreground not-prose bg-muted/50 border-border min-h-11",
-          )}
-        >
-          {items.map((item, i) => (
-            <FumadocsTabsTrigger
-              key={i}
-              value={values[i]}
-              onClick={() => handleValueChange(values[i])}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-2 border-transparent px-2.5 pb-2 pt-1.5 -mb-px text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:font-medium"
-            >
-              {typeof item === "string" ? item : (item?.label ?? String(i))}
-            </FumadocsTabsTrigger>
-          ))}
-        </FumadocsTabsList>
         {React.Children.map(children, (child, i) => {
           if (!React.isValidElement(child)) return child;
           return React.cloneElement(
