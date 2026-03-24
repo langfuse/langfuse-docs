@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 import type { InkeepEmbeddedChatProps } from "@inkeep/cxkit-react";
 import useInkeepSettings from "./useInkeepSettings";

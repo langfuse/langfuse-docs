@@ -1,5 +1,7 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { useTheme } from "nextra-theme-docs";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { Loader } from "./ai-elements/loader";
 

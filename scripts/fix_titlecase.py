@@ -59,7 +59,7 @@ def fix_file(path: str):
 
 
 def main():
-    root = 'pages/docs'
+    root = 'content/docs'
     for dirpath, dirnames, filenames in os.walk(root):
         for name in filenames:
             if name.endswith('.mdx'):

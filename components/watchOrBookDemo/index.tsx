@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Background } from "@/components/Background";
 import { Header } from "@/components/Header";
 import { ContactSalesForm } from "@/components/ContactSalesForm";
@@ -254,7 +255,7 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
 
           {/* Right Column: Calendar or Walkthroughs */}
           <div className={isDiscoverOpen ? "flex-1 md:flex-[0.6]" : "flex-1"}>
-            {!isDiscoverOpen ? <ContactFormSection /> : <WatchWalkthroughs />}
+            {!isDiscoverOpen ? <ContactFormSection /> : <Suspense><WatchWalkthroughs /></Suspense>}
           </div>
         </div>
       </div>

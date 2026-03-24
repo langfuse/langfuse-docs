@@ -1,6 +1,5 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
-import { Cards } from "nextra/components";
+import { integrationsSource } from "@/lib/source";
+import { Cards } from "@/components/docs";
 import {
   Puzzle,
   Globe,
@@ -11,8 +10,10 @@ import {
   Code,
   Database,
 } from "lucide-react";
-import nativeIntegrationsMeta from "../../pages/integrations/native/_meta";
-import dataPlatformIntegrationsMeta from "../../pages/integrations/data-platform/_meta";
+import {
+  nativeIntegrationsMeta,
+  dataPlatformIntegrationsMeta,
+} from "@/lib/integrations-meta";
 
 /**
  * Transforms meta config entries into integration page objects
@@ -116,23 +117,27 @@ const categoryConfig = {
   },
 };
 
-type IntegrationPage = Page & { frontMatter: any };
+type IntegrationPage = { route: string; name?: string; frontMatter: any };
 type ProcessedIntegrationPage = IntegrationPage & { title: string };
 
 /**
- * Loads pages from the filesystem for a given category
+ * Loads pages from the fumadocs integration source for a given category
  */
 function loadFilesystemPages(category: string): IntegrationPage[] {
   try {
-    const pages = getPagesUnderRoute(
-      `/integrations/${category}`
-    ) as IntegrationPage[];
-    // Filter out category index pages and only keep actual integration pages
-    return pages.filter(
-      (page) =>
-        page.route !== `/integrations/${category}` &&
-        page.route !== `/integrations/${category}/index`
-    );
+    const allParams = integrationsSource.generateParams();
+    return allParams
+      .filter(({ slug }) => slug.length >= 2 && slug[0] === category)
+      .map(({ slug }) => {
+        const page = integrationsSource.getPage(slug);
+        if (!page) return null;
+        return {
+          route: `/integrations/${slug.join("/")}`,
+          name: String(slug[slug.length - 1] || ""),
+          frontMatter: page.data as unknown as Record<string, unknown>,
+        } as IntegrationPage;
+      })
+      .filter(Boolean) as IntegrationPage[];
   } catch (error) {
     // Category directory doesn't exist or has no pages
     return [];
@@ -214,9 +219,10 @@ export const IntegrationIndex = () => {
                         href={page.route}
                         key={page.route}
                         title={page.title}
+                        className="flex flex-row items-center justify-start gap-2"
                         icon={
                           (page as any).frontMatter?.logo ? (
-                            <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
+                            <div className="w-6 h-6 shrink-0 dark:bg-white rounded-sm p-1 flex items-center justify-center">
                               <img
                                 src={(page as any).frontMatter.logo}
                                 alt=""
@@ -245,9 +251,10 @@ export const IntegrationIndex = () => {
                     href={page.route}
                     key={page.route}
                     title={page.title}
+                    className="flex flex-row items-center justify-start gap-2"
                     icon={
                       page.frontMatter?.logo ? (
-                        <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
+                        <div className="w-6 h-6 shrink-0 dark:bg-white rounded-sm p-1 flex items-center justify-center">
                           <img
                             src={page.frontMatter.logo}
                             alt=""

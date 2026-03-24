@@ -1,100 +1,177 @@
-/* toc items should not be bold */
-.nextra-toc li a {
-  font-weight: normal;
+/* Custom docs nav height (used when nav.component is set in DocsLayout) */
+:root {
+  --fd-nav-height: 4rem;
 }
 
-/* Hide guides and faq from main menu */
-.nextra-nav-container>nav>div>a[href="/guides"] {
-  display: none !important;
+/* Hide search button in the collapsed-sidebar trigger panel */
+[data-sidebar-panel] [data-search] {
+  display: none;
 }
 
-.nextra-nav-container>nav>div>a[href="/faq"] {
-  display: none !important;
+/* Mobile sidebar drawer: push below sticky navbar + optional banner. */
+#nd-sidebar-mobile {
+  top: calc(
+    var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px)
+  ) !important;
+  height: calc(
+    100dvh - var(--fd-nav-height, 4rem) - var(--fd-banner-height, 0px)
+  ) !important;
 }
 
-.nextra-nav-container>nav>div>a[href="/self-hosting"] {
-  display: none !important;
+/* Sidebar/collapsed-trigger sticky top: custom navbar (4rem) + optional banner.
+   Overrides fumadocs' inline --fd-docs-row-1: var(--fd-banner-height, 0px)
+   which only accounts for the banner, not our external custom navbar. */
+#nd-docs-layout {
+  --fd-docs-row-1: calc(
+    var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px)
+  ) !important;
 }
 
-.nextra-nav-container>nav>div>a[href="/library"] {
-  display: none !important;
+/* Docs left sidebar: max width 360px (Fumadocs default is 268px) */
+#nd-docs-layout [grid-area="sidebar"] {
+  --fd-sidebar-width: 360px;
 }
 
-.nextra-nav-container>nav>div>a[href="/security"] {
-  display: none !important;
+/* Sidebar/tree left alignment: let fumadocs' own p-4 (1rem) on the scroll container
+   plus the per-item paddingInlineStart (0.5rem from fumadocs) give 1.5rem total —
+   matching the navbar's pl-[1.5rem] so nav items align with the Langfuse logo. */
+
+/* Docs sidebar: scroll the entire sidebar as one unit instead of only the bottom nav tree.
+   By default Fumadocs makes only the SidebarViewport (ScrollArea) scroll. We make the
+   aside #nd-sidebar the scroll container and disable the inner ScrollArea. */
+#nd-docs-layout #nd-sidebar {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+#nd-docs-layout #nd-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+#nd-docs-layout #nd-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+#nd-docs-layout #nd-sidebar::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 2px;
+}
+#nd-docs-layout #nd-sidebar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+#nd-docs-layout #nd-sidebar > div.flex-1 {
+  flex: none;
+  overflow: visible;
+  min-height: 0;
+}
+/* Inner viewport: allow full height so the aside scrolls (Radix or first child of scroll area) */
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport],
+#nd-docs-layout #nd-sidebar > div.flex-1 > div:first-child,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport],
+#nd-sidebar-mobile > div.flex-1 > div:first-child {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
 }
 
-.nextra-nav-container>nav>div>a[href="/integrations"] {
-  display: none !important;
+/* Same full-sidebar scroll for mobile docs drawer */
+#nd-sidebar-mobile {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+#nd-sidebar-mobile::-webkit-scrollbar {
+  width: 4px;
+}
+#nd-sidebar-mobile::-webkit-scrollbar-track {
+  background: transparent;
+}
+#nd-sidebar-mobile::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 2px;
+}
+#nd-sidebar-mobile::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+#nd-sidebar-mobile > div.flex-1 {
+  flex: none;
+  overflow: visible;
+  min-height: 0;
 }
 
-.nextra-nav-container>nav>div>a[href="/handbook"] {
-  display: none !important;
+.layout-wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
+}
+#nd-docs-layout #nd-sidebar[data-hovered="false"] {
+  background-color: transparent;
 }
 
-.nextra-nav-container>nav>div>a[href="/cloud"] {
-  display: none !important;
+/* Sidebar active link: use blue (muted-blue) so blog/changelog and docs look the same. */
+#nd-docs-layout #nd-sidebar [data-active="true"],
+#nd-sidebar-mobile [data-active="true"] {
+  color: hsl(var(--muted-blue)) !important;
+  background-color: hsl(var(--muted-blue) / 0.1) !important;
+}
+#nd-docs-layout #nd-sidebar [data-active="true"]::before,
+#nd-sidebar-mobile [data-active="true"]::before {
+  background-color: hsl(var(--muted-blue)) !important;
 }
 
-@media (max-width: 1024px) {
-  .nextra-nav-container>nav>div>a[href="/changelog"] {
-    display: none !important;
+/* Reduce height (less padding) of sidebar nav items */
+#nd-docs-layout #nd-sidebar a,
+#nd-docs-layout #nd-sidebar button,
+#nd-sidebar-mobile a,
+#nd-sidebar-mobile button {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  min-height: unset !important;
+}
+#nd-docs-layout #nd-sidebar ul li,
+#nd-sidebar-mobile ul li {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+#nd-docs-layout #nd-sidebar ul,
+#nd-sidebar-mobile ul {
+  gap: 0 !important;
+}
+
+/* External links in docs/section sidebars: show only the arrow after the text (label often has ↗).
+   Hide the leading external-link icon that Fumadocs adds so we don’t get "icon + text ↗".
+   Applies globally to all section sidebars (docs, integrations, self-hosting, guides, library)
+   since they share #nd-sidebar / #nd-sidebar-mobile. */
+#nd-docs-layout #nd-sidebar a[target="_blank"] > :first-child,
+#nd-sidebar-mobile a[target="_blank"] > :first-child {
+  display: none;
+}
+
+@media (min-width: 1440px) {
+  #nd-docs-layout [data-sidebar-panel] {
+    left: calc((100vw - 1440px) / 2);
   }
-}
-
-/* Less gap in desktop menu */
-.nextra-menu-desktop {
-  gap: 0.1rem;
-
-  /* make menu items more compact */
-  a.nextra-focus,
-  button {
-    padding: 0.225rem 0.5rem !important;
-  }
-
-  /* Make first-level folder names bold */
-  /* >li>button:first-child {
-    font-weight: 600;
-  } */
-}
-
-.nextra-menu-desktop>li:not(:has(*)) {
-  /* only those that have no children */
-  margin-bottom: 0.1rem;
-}
-
-.nextra-nav-container>nav {
-  gap: 0.5rem;
-
-  @media (min-width: 768px) {
-    gap: 1rem;
-  }
-}
-
-/* smaller search bar */
-/* .nextra-nav-container input[type="search"] {
-  width: 8rem;
-
-  @media (min-width: 1024px) {
-    width: 10rem;
-  }
-
-  @media (min-width: 1280px) {
-    width: 16rem;
-  }
-
-  border-radius: 0.25rem;
-} */
-
-/* Fix logo overflowing */
-.nextra-nav-container>nav>a:first-child {
-  flex-shrink: 0;
 }
 
 /* Fix nested lists */
-li>ol,
-li>ul {
+li > ol,
+li > ul {
   margin-top: 0 !important;
+}
+
+/* GH discussions list: no vertical margin/padding (lives inside prose) */
+ul[data-gh-discussions-list] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Tab content: ensure first heading clears the tab list (avoids overlap with tab labels) */
+[role="tabpanel"].prose-no-margin {
+  padding-top: 2rem;
+}
+
+/* Prose images: no vertical margin (override default 2em) */
+.prose :where(img):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /* No dark background of videos */
@@ -102,56 +179,156 @@ media-outlet {
   background-color: transparent !important;
 }
 
-/* More gap between h2 across docs and articles */
-article.nextra-content h2._border-b {
-  /* h2 with border-bottom as this is how h2 is on default docs mode, we do not want to target custom/raw h2 on landingpage, changelog, blog etc. */
-  margin-top: 4rem;
-}
-
-article.nextra-body-typesetting-article h2 {
-  margin-top: 6rem;
-}
-
 svg .nodeLabel,
 svg .edgeLabel {
   font-family: monospace;
 }
 
-/* Fix callout list */
-.nextra-callout ul {
-  margin-top: 0;
-}
-
-/* Overflowing nextra tabs should wrap */
+/* Overflowing tabs should wrap */
 [role="tablist"] {
   flex-wrap: wrap;
   row-gap: 0.2rem;
 }
 
 /* Subsequent details should have less of a gap */
-details+details {
+details + details {
   margin-top: 0.5rem !important;
 }
 
+/* Docs footer pagination: strip card styling, hide description */
+#nd-page > div:last-child > a {
+  border: none !important;
+  background: none !important;
+  padding: 0.25rem 0 !important;
+  border-radius: 0 !important;
+  gap: 0.125rem !important;
+}
+#nd-page > div:last-child > a:hover {
+  background: none !important;
+  color: inherit !important;
+}
+#nd-page > div:last-child > a > p:last-child {
+  display: none !important;
+}
+
 /* Fix detail padding */
-details>div {
+details > div {
   padding: 0.25rem;
 }
 
 /* Details header should be bold */
-details>summary {
+details > summary {
   font-weight: 700;
-}
-
-/* Add muted color variants for icons */
-:root {
-  --muted-green: 84 81% 44%;
-  --muted-magenta: 330 90% 70%;
-  --muted-blue: 239 84% 67%;
 }
 
 /* Remove margin from subseparator parent */
 li:has(> .subseparator) {
   margin: 0 !important;
   padding: 0 !important;
+}
+
+/* Sidebar subheadings (separator labels e.g. "Working at Langfuse", "Chapters", "Resources") */
+#nd-docs-layout #nd-sidebar p,
+#nd-sidebar-mobile p,
+#nd-docs-layout #nd-sidebar .subseparator,
+#nd-sidebar-mobile .subseparator {
+  font-weight: 700 !important;
+}
+
+/* Main content: horizontal padding on narrow viewports so content isn't flush to edges (RWD). */
+@media (max-width: 1024px) {
+  #nd-page {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Changelog: modest horizontal padding on narrow viewports (layout also adds px-3 md:px-4). */
+@media (max-width: 1024px) {
+  [data-changelog-content] {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  .changelog-page,
+  .changelog-page #nd-page,
+  .changelog-page [grid-area="main"],
+  .changelog-page article,
+  .changelog-page .flex-1,
+  .changelog-page main {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* Blog/changelog: reduce vertical margins on mobile so content isn't mostly whitespace. */
+@media (max-width: 768px) {
+  .post-page .flex-1 > div:first-child {
+    margin-bottom: 0.5rem !important;
+  }
+  .post-page .flex-1 > hr {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .post-page #docs-feedback {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+}
+
+/* Steps component: increment counter and render numbered circles centered on the left border line.
+   .fd-steps (fumadocs) / .steps (legacy) has pl-8 (2rem) padding from its left border,
+   so the circle (1.75rem wide) needs left: -(2rem + 0.875rem) = -2.875rem to sit centered. */
+.fd-steps > h2,
+.fd-steps > h3,
+.steps > h2,
+.steps > h3 {
+  counter-increment: step;
+  position: relative;
+}
+.fd-steps > h2:first-child,
+.fd-steps > h3:first-child,
+.steps > h2:first-child,
+.steps > h3:first-child {
+  margin-top: 0;
+}
+.fd-steps > h2::before,
+.fd-steps > h3::before,
+.steps > h2::before,
+.steps > h3::before {
+  content: counter(step);
+  position: absolute;
+  left: -2.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Steps: compact layout on mobile so numbers/headlines don't dominate; more space for body text. */
+@media (max-width: 768px) {
+  .fd-steps > h2,
+  .fd-steps > h3,
+  .steps > h2,
+  .steps > h3 {
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+  .fd-steps > h2::before,
+  .fd-steps > h3::before,
+  .steps > h2::before,
+  .steps > h3::before {
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 0.75rem;
+    /* fd-steps padding-left 1.75rem + half circle 0.625rem */
+    left: -2.375rem;
+  }
 }

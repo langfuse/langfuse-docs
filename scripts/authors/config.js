@@ -7,12 +7,13 @@ const CONFIG = {
     authors: path.join(__dirname, '../../data/authors.json'),
 
     // Documentation sections to analyze for contributor data
-    // Each section corresponds to a top-level directory in the pages folder
-    // and represents a major documentation area (e.g., /docs, /self-hosting)
+    // Each section is a top-level directory under content/ (App Router)
     sections: ['docs', 'self-hosting', 'security', 'guides', 'integrations', 'faq', 'handbook'].map(section => ({
         name: section.replace('-', ''),
-        dirPath: path.join(__dirname, `../../pages/${section}`),
-        gitPath: `pages/${section}/`,
+        dirPath: path.join(__dirname, `../../content/${section}`),
+        // Include both new (content/) and old (pages/) paths so the full
+        // git history before the Nextra→Fumadocs migration is captured.
+        gitPaths: [`content/${section}/`, `pages/${section}/`],
         urlPrefix: `/${section}`
     })),
 
@@ -25,7 +26,7 @@ const CONFIG = {
     },
 
     // Contributors to exclude from the widget
-    excludedContributors: ['cursoragent']
+    excludedContributors: ['cursoragent', 'ArkuVonSymfon']
 };
 
 module.exports = { CONFIG };
