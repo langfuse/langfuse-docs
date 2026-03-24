@@ -41,7 +41,7 @@ You should see your LLM calls, tool calls, and other important steps represented
 
 For example
 - an LLM call should show up as a <Fan size={16} className="text-muted-magenta inline" /> `generation`. This is important because a `generation` can carry [cost, token usage, and model information](#track-model-tokens-and-cost-on-generations).
-- a tool call should show up as a <Wrench size={16} className="text-orange-600 inline" /> `tool`. You can then filter on tool call observations when you create LLM as a judges.
+- a tool call should show up as a <Wrench size={16} className="text-orange-600 inline" /> `tool`. You can then filter on tool call observations when you create [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators.
 
 Framework integrations typically set these types automatically. If you're instrumenting manually, you can set them via the `as_type` parameter (Python) or `asType` (JS/TS). See the [observation types docs](/docs/observability/features/observation-types) for a full list.
 
@@ -90,7 +90,7 @@ Observations have a number of attributes that can be useful for your use cases. 
 - **Filtering**: You can filter by metadata keys in the Langfuse UI, which is helpful when you need to find traces with specific characteristics.
 - **Annotation context**: When doing manual review, metadata gives annotators extra information to make better judgments.
 
-### Track model, tokens, and cost on generations
+### Track model, tokens, and cost on generations [#track-model-tokens-and-cost-on-generations]
 
 If you want to understand what your LLM usage costs, broken down by model, by user, by feature, you need three things on your `generation` observations:
 
