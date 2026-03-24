@@ -8,12 +8,12 @@ author: Steffen, Valeriy, Max
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
 
 <BlogHeader
   title="Simplifying Langfuse for Scale"
   description="A deep dive into how we moved Langfuse to an observations-first data model."
   authors={["steffenschmitz", "valeriy", "maxdeichmann"]}
-  image="/images/blog/2026-03-10-simplify-langfuse-for-scale/og.jpg"
 />
 
 Langfuse is building the open source LLM engineering platform to help teams build production-grade LLM applications faster.
@@ -24,14 +24,14 @@ For the rollout summary and upgrade guidance, see the [changelog post](/changelo
 It is live in Beta on Langfuse Cloud across all regions.
 We are still working on the upgrade path for self-hosters and will eventually release it as a V4 major version.
 
+<Frame className="flex-1">
+  ![Langfuse gets Faster](/images/blog/2026-03-10-simplify-langfuse-for-scale/og.jpg)
+</Frame>
+
 With this change, we are moving to an observation-centric data model based on a new, wide, and (mostly) immutable ClickHouse table.
 This eliminates joins and deduplication at read-time and optimizes for the most performant ClickHouse access patterns.
 Initial table loads for large amounts of data go from seconds to milliseconds.
 Dashboard load times for large projects improve by at least 10x for longer durations.
-
-<Frame className="flex-1">
-  ![Performance Shift](/images/blog/2026-03-10-simplify-langfuse-for-scale/speed.png)
-</Frame>
 
 ## Growing Pain
 
