@@ -28,28 +28,28 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 
 ## Repository map
 
-- `pages/` — site pages and MDX/Markdown content (marketing pages, docs, blog, changelog, FAQ).
+- `content/` — site pages and MDX/Markdown content (marketing pages, docs, blog, changelog, FAQ).
 - `components/` — reusable React components.
 - `components-mdx/` — custom components used from MDX pages.
 - `cookbook/` — source Jupyter notebooks for cookbook guides.
-- `pages/guides/cookbook/` — generated cookbook markdown output.
+- `content/guides/cookbook/` — generated cookbook markdown output.
 - `public/` — static assets.
 - `scripts/` — build and maintenance scripts.
 - `lib/` — shared utilities/config helpers.
 
 ## Core content types
 
-- **Docs**: `pages/docs/`
-- **Changelog**: `pages/changelog/`
-- **Blog**: `pages/blog/`
-- **Guides**: `pages/guides/`
-- **FAQ**: `pages/faq/`
+- **Docs**: `content/docs/`
+- **Changelog**: `content/changelog/`
+- **Blog**: `content/blog/`
+- **Guides**: `content/guides/`
+- **FAQ**: `content/faq/`
 
 ## Important workflow rules
 
 1. For cookbook changes, edit notebook sources in `cookbook/`.
 2. Regenerate docs with `bash scripts/update_cookbook_docs.sh`.
-3. Do **not** hand-edit generated files in `pages/guides/cookbook/`.
+3. Do **not** hand-edit generated files in `content/guides/cookbook/`.
 4. Avoid `pnpm build` for routine edits or small UI/content changes. Prefer targeted checks or `pnpm dev`, and only run the full production build when it is necessary or explicitly requested.
 
 ## Styling and implementation guidelines
@@ -69,7 +69,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 
 ### Changelog entries
 
-Changelog entries live in `pages/changelog/`.
+Changelog entries live in `content/changelog/`.
 
 - Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
 - Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.

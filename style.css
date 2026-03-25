@@ -1,7 +1,180 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind CSS v4 entry point */
+@import "tailwindcss";
 
+/* fumadocs-ui: neutral theme colors (defines --color-fd-* variables in @theme) */
+@import "fumadocs-ui/css/neutral.css";
+/* fumadocs-ui: component styles and utilities (depends on neutral.css colors) */
+@import "fumadocs-ui/css/preset.css";
+
+/* Dark mode via class on <html> element */
+@variant dark (&:is(.dark *));
+
+/* Custom theme tokens */
+@theme {
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Semantic color tokens (resolved from CSS custom properties at runtime) */
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-muted-green: hsl(var(--muted-green));
+  --color-muted-blue: hsl(var(--muted-blue));
+  --color-muted-magenta: hsl(var(--muted-magenta));
+
+  /* Border radius */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Container: use Tailwind default so max-w-2xl stays 42rem (672px). Use max-w-[1400px] or a custom var for wide layout. */
+  --container-2xl: 42rem;
+
+  /* Large display headings: line-height 1 (restore pre-upgrade behavior) */
+  --text-5xl--line-height: 1;
+  --text-6xl--line-height: 1;
+  --text-7xl--line-height: 1;
+  --text-8xl--line-height: 1;
+  --text-9xl--line-height: 1;
+
+  /* Animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-border-beam: border-beam calc(var(--duration) * 1s) infinite linear;
+  --animate-meteor: meteor 5s linear infinite;
+  --animate-spin-custom: spin-custom calc(var(--speed) * 2) infinite linear;
+  --animate-slide: slide var(--speed) ease-in-out infinite alternate;
+  --animate-gradient: gradient 6s linear infinite;
+  --animate-marquee: marquee var(--duration) linear infinite;
+  --animate-grid: grid 20s linear infinite;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  --animate-fall: fall 1.5s linear forwards;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes border-beam {
+    100% {
+      offset-distance: 100%;
+    }
+  }
+  @keyframes grid {
+    0% {
+      transform: translateY(-50%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  @keyframes meteor {
+    0% {
+      transform: rotate(215deg) translateX(0);
+      opacity: 1;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      transform: rotate(215deg) translateX(-500px);
+      opacity: 0;
+    }
+  }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes gradient {
+    to {
+      background-position: 200% center;
+    }
+  }
+  @keyframes spin-custom {
+    0% {
+      rotate: 0deg;
+    }
+    15%,
+    35% {
+      rotate: 90deg;
+    }
+    65%,
+    85% {
+      rotate: 270deg;
+    }
+    100% {
+      rotate: 360deg;
+    }
+  }
+  @keyframes slide {
+    to {
+      transform: translate(calc(100cqw - 100%), 0);
+    }
+  }
+  @keyframes fall {
+    0% {
+      transform: translateY(0px) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(250px) rotate(360deg);
+      opacity: 0;
+    }
+  }
+}
+
+/* CSS custom properties for shadcn/ui color system */
 @layer base {
   :root {
     --background: 0 0% 99%;
@@ -33,6 +206,10 @@
     --destructive-foreground: 210 40% 98%;
 
     --radius: 0.5rem;
+
+    --muted-green: 84 81% 44%;
+    --muted-magenta: 330 90% 70%;
+    --muted-blue: 239 84% 67%;
   }
 
   :root[class~="dark"] {
@@ -42,7 +219,7 @@
     --muted: 0 0% 18%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 14% 4.9%;
     --popover-foreground: 210 40% 98%;
 
     --card: 0 0% 0%;
@@ -64,34 +241,69 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 85.7% 97.3%;
   }
-}
 
-
-@layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground !important;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background! text-foreground!;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 
   footer {
-    @apply bg-background text-foreground !important;
+    @apply bg-background! text-foreground!;
   }
 
   h1 {
-    @apply tracking-tight font-mono leading-tight;
+    @apply tracking-tight font-mono;
   }
 
   h2 {
     @apply tracking-tight;
   }
 
-  /* Style Headers in Markdown tables */
-
+  /* Style headers in Markdown tables */
   th {
     @apply bg-muted text-left p-4 font-mono;
+  }
+}
+
+/* Body content area inside <details> — adds horizontal padding so text
+   doesn't run flush against the border. */
+@layer base {
+  details > *:not(summary) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  details > *:last-child:not(summary) {
+    padding-bottom: 0.75rem;
+  }
+}
+
+/* Override the Tailwind v4 auto-generated animation utilities that use
+   animation: var(--animate-*).  The nested var() chain (--animate-foo
+   contains var(--speed) / var(--duration)) can be silently invalid in
+   some browsers.  Explicit shorthand values are unambiguous and reliable. */
+@layer utilities {
+  .animate-slide {
+    animation: slide var(--speed) ease-in-out infinite alternate;
+  }
+  .animate-spin-custom {
+    animation: spin-custom calc(var(--speed) * 2) infinite linear;
+  }
+  .animate-marquee {
+    animation: marquee var(--duration) linear infinite;
+  }
+  .animate-marquee-vertical {
+    animation: marquee-vertical var(--duration) linear infinite;
+  }
+  .animate-border-beam {
+    animation: border-beam calc(var(--duration) * 1s) infinite linear;
+  }
+  .animate-grid {
+    animation: grid 20s linear infinite;
   }
 }

@@ -1,0 +1,126 @@
+---
+title: Faster Langfuse
+description: Langfuse now delivers faster product performance. Enable the preview and upgrade SDKs to get the new experience without delays.
+---
+
+import { BarChart3, Book, Github, LayoutDashboard, Table, Zap } from "lucide-react";
+
+# Langfuse Cloud: Fast Preview (v4)
+
+Langfuse now delivers faster product performance at scale. Chart loading is much shorter, and browsing traces, users, and sessions is faster. The new Observations API v2 and Metrics API v2 query faster at scale. Observation-level evaluations now execute in seconds without a ClickHouse query per evaluation.
+
+We will keep this page updated as we roll out additional related features and share OSS and self-hosted support updates.
+
+## Get access to the preview
+
+
+
+<Frame className="max-w-xs mx-auto">
+  ![Beta toggle in Langfuse UI](/images/changelog/2026-03-10-v4-preview/v4-beta-togle.png)
+</Frame>
+
+
+In the UI, a "Preview" toggle is available in the bottom left to opt into the new experience. Not all screens have been migrated to the new data model yet.
+
+The toggle is reversible, you can always switch back to the previous experience.
+
+<Callout type="info">
+Data from SDKs `langfuse-js` < `5.0.0`, `langfuse-python` < `4.0.0`, or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes in the new UI. Upgrade to the latest SDKs or set that header on your OTEL span exporter to see new data in real time.
+</Callout>
+
+### Migrate to the new experience
+
+
+<Steps>
+
+
+### Use a v4-compatible ingestion path
+
+To take advantage of the new data model and explore your data in real time, use one of these ingestion paths:
+
+- **Python SDK:** v4 ([migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
+- **JS/TS SDK:** v5 ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
+- **Direct OpenTelemetry ingestion:** set `x-langfuse-ingestion-version: 4` on your OTEL span exporter ([OpenTelemetry setup](/integrations/native/opentelemetry))
+
+For SDK users, the key change is that `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, and `tags` to all child observations.
+
+### Optional: Migrate LLM-as-a-judge evaluations
+
+Upgrade your LLM-as-a-judge evaluations to run at the observation level instead of the trace level for significantly faster execution. Learn more in the [LLM-as-a-judge migration guide](/faq/all/llm-as-a-judge-migration).
+
+### Optional: Adopt new observations and metrics API endpoints
+
+The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) deliver significant performance improvements through the new data model:
+
+- **Selective field retrieval:** Request only the field groups you need instead of full rows.
+- **Cursor-based pagination:** Consistent performance regardless of result set size.
+- **Optimized querying:** Built on the new immutable events table with no joins required.
+
+See the [v2 APIs announcement](/changelog/2025-12-17-v2-metrics-and-observations-api) for migration guidance and a detailed feature comparison.
+
+</Steps>
+
+## What's faster now
+
+### Faster product performance in the UI
+
+Chart loading time is significantly shorter. You can now confidently load charts over large time ranges. Browsing traces, users, and sessions is also much faster, and filters respond more quickly in large projects. [Learn more about the new unified tracing table in the UI](/faq/all/explore-observations-in-v4).
+
+### Faster API workflows
+
+The new [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) are designed for faster querying and aggregations at scale.
+
+### Faster evaluation workflows
+
+[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) execute in seconds as we do not need to query ClickHouse for each evaluation anymore.
+
+## Under the hood
+
+<Frame fullWidth>
+  ![Langfuse data model overview](/images/changelog/2026-03-10-v4-preview/data-model.png)
+</Frame>
+
+This preview is powered by a simplified observation-centric data model. Trace-level attributes such as `user_id`, `session_id`, and `metadata` now propagate automatically to observations, which helps remove expensive joins and keep the product fast at larger scale. Learn more in the [data model docs](/docs/observability/data-model) and [Explore Observations in V4](/faq/all/explore-observations-in-v4).
+
+## OSS and self-hosting
+
+This preview is currently available on Langfuse Cloud. We are working on the migration path for OSS deployments and will share updates here, in the [changelog](/changelog), and in the dedicated [v4 GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518) as they become available.
+
+## Questions on v4?
+
+If you have questions about the rollout, migration steps, SDK upgrades, or anything unclear in the new experience, please ask them in the dedicated [v4 GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518). We will use that thread for rollout updates and answers.
+
+## Get started
+
+<Cards num={4}>
+  <Card
+    title="SDK Migration Guides"
+    href="/docs/observability/sdk/upgrade-path"
+    icon={<Book />}
+  />
+  <Card
+    title="UI Tracing Table Setup"
+    href="/faq/all/explore-observations-in-v4"
+    icon={<Table />}
+  />
+  <Card
+    title="Observations API v2"
+    href="/docs/api-and-data-platform/features/observations-api#v2"
+    icon={<Zap />}
+  />
+  <Card
+    title="Metrics API v2"
+    href="/docs/metrics/features/metrics-api#v2"
+    icon={<BarChart3 />}
+  />
+  <Card
+    title="Dashboard Changes in v4"
+    href="/docs/metrics/v4-dashboard-changes"
+    icon={<LayoutDashboard />}
+  />
+  <Card
+    title="Ask Questions on v4"
+    href="https://github.com/orgs/langfuse/discussions/12518"
+    icon={<Github />}
+  />
+</Cards>
