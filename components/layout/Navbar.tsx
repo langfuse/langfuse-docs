@@ -7,6 +7,7 @@ import {
   getSelfHostingPageTree,
   guidesSource,
   getIntegrationsPageTree,
+  getPageTreeWithShortTitles,
   faqSource,
   handbookSource,
   librarySource,
@@ -17,7 +18,7 @@ import { serializePageTree, type SectionNavData } from "@/lib/nav-tree";
 const sectionNavData: SectionNavData[] = [
   { name: "Docs", href: "/docs", children: serializePageTree(source.getPageTree()) },
   { name: "Self Hosting", href: "/self-hosting", children: serializePageTree(getSelfHostingPageTree()) },
-  { name: "Guides", href: "/guides", children: serializePageTree(guidesSource.getPageTree()) },
+  { name: "Guides", href: "/guides", children: serializePageTree(getPageTreeWithShortTitles(guidesSource, "/guides")) },
   { name: "Integrations", href: "/integrations", children: serializePageTree(getIntegrationsPageTree()) },
   { name: "FAQ", href: "/faq", children: serializePageTree(faqSource.getPageTree()) },
   { name: "Handbook", href: "/handbook", children: serializePageTree(handbookSource.getPageTree()) },

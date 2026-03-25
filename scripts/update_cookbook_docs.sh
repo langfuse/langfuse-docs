@@ -7,7 +7,7 @@ uv run --with nbconvert --python 3.12 -- python -m nbconvert --to markdown cookb
 
 # delete all files in content/guides/cookbook/ (except index.mdx)
 echo "Deleting all files in content/guides/cookbook/ (keeping index.mdx)"
-find ./content/guides/cookbook/ -type f -not -name "index.mdx" -delete
+find ./content/guides/cookbook/ -type f -not -name "index.mdx" -not -name "meta.json" -delete
 
 # script needs to be executed from the root directory
 echo "Moving docs..."

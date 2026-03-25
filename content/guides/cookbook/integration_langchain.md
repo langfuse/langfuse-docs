@@ -1,10 +1,10 @@
 ---
-title: Integration Langchain
+source: ⚠️ Jupyter Notebook
+title: "Cookbook: Langchain Integration (Python)"
+sidebarTitle: "Cookbook: Langchain Integration (Python)"
 description: Cookbook with examples of the Langfuse Integration for Langchain (Python).
 category: Integrations
 ---
-
-<!-- NOTEBOOK_METADATA source: "⚠️ Jupyter Notebook" title: "Cookbook: Langchain Integration (Python)" sidebarTitle: "Cookbook: Langchain Integration (Python)" description: "Cookbook with examples of the Langfuse Integration for Langchain (Python)." category: "Integrations" -->
 
 # Cookbook: Langchain Integration (Python)
 

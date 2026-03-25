@@ -1,7 +1,7 @@
 ---
 source: Jupyter Notebook
 title: Agent Evaluation - How to Evaluate LLM Agents
-seoTitle: Agent Evaluation - How to Evaluate LLM Agents (Metrics, Strategies & Examples)
+seoTitle: "Agent Evaluation - How to Evaluate LLM Agents (Metrics, Strategies & Examples)"
 description: Complete guide to agent evaluation. Learn agent evaluation metrics like trajectory accuracy and tool selection, evaluation strategies (black-box, glass-box, white-box), and how to build automated agent evaluation pipelines with LLM-as-a-judge scoring.
 category: Evaluation
 ---
@@ -129,7 +129,7 @@ from pydantic_ai.mcp import MCPServerStreamableHTTP, CallToolFunc, ToolResult
 LANGFUSE_MCP_URL = "https://langfuse.com/api/mcp"
 
 async def run_agent(item, system_prompt="You are an expert on Langfuse. ", model="openai:gpt-4o-mini"):
-    langfuse.update_current_observation(input=item.input)
+    langfuse.update_current_trace(input=item.input)
 
     tool_call_history = []
 
@@ -156,7 +156,7 @@ async def run_agent(item, system_prompt="You are an expert on Langfuse. ", model
     async with agent:
         result = await agent.run(item.input["question"])
         
-        langfuse.update_current_observation(
+        langfuse.update_current_trace(
             output=result.output,
             metadata={"tool_call_history": tool_call_history},
         )

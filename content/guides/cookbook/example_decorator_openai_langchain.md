@@ -3,7 +3,6 @@ title: Example Decorator Openai Langchain
 description: LLM Rap Battle traced using the Langfuse Decorator, OpenAI & Langchain Integration
 category: Integrations
 ---
-
 # Example: Langfuse Decorator + OpenAI Integration + Langchain Integration
 
 

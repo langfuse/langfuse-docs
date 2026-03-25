@@ -127,7 +127,7 @@ LANGFUSE_AUTH = base64.b64encode(
 
 host = os.environ.get("LANGFUSE_OTEL_HOST")
 os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = host + "/api/public/otel"
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH},x-langfuse-ingestion-version=4"
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
 
 litellm.callbacks = ["langfuse_otel"]
 ```

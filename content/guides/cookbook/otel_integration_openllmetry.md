@@ -3,7 +3,6 @@ title: Otel Integration Openllmetry
 description: Example cookbook for the OpenLLMetry Langfuse integration using OpenTelemetry.
 category: Integrations
 ---
-
 # OpenLLMetry Integration via OpenTelemetry
 
 Langfuse provides a backend built on OpenTelemetry for ingesting trace data, and you can use different instrumentation libraries to export traces from your applications. In this guide, we showcase how to instrument your LLM application using the [OpenLLMetry instrumentation library](https://github.com/traceloop/openllmetry) by Traceloop.

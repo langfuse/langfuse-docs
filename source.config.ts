@@ -99,6 +99,7 @@ export const changelog = defineDocs({
 
 const guidesFrontmatterSchema = baseFrontmatterSchema.extend({
   category: z.string().nullish(),
+  sidebarTitle: z.string().nullish(),
 });
 
 export const guides = defineDocs({

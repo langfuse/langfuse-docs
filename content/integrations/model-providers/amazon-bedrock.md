@@ -1,11 +1,10 @@
 ---
-title: Amazon Bedrock Integration
+title: Integration Amazon Bedrock
 sidebarTitle: Amazon Bedrock
 seoTitle: Open Source Observability and Metrics for Amazon Bedrock
 description: Open source observability for Amazon Bedrock applications and the Bedrock SDK.
 logo: /images/integrations/bedrock_icon.png
 ---
-
 # Amazon Bedrock Integration
 
 [**Amazon Bedrock**](https://aws.amazon.com/bedrock/) is a fully managed AWS service that lets you use foundation models and custom models to generate text, images, and audio.

@@ -3,34 +3,118 @@ import shutil
 import os
 import re
 
+# Words that should stay lowercase in title case (unless first word)
+_TITLE_CASE_MINOR_WORDS = {
+    'a', 'an', 'the', 'and', 'but', 'or', 'nor', 'for', 'yet', 'so',
+    'at', 'by', 'in', 'of', 'on', 'to', 'up', 'as', 'is', 'if', 'it',
+    'with', 'from', 'into', 'via',
+}
+
+def smart_title_case(s):
+    """Title-case a string, keeping minor words (prepositions, articles) lowercase."""
+    words = s.split()
+    result = []
+    for i, word in enumerate(words):
+        if i == 0 or word.lower() not in _TITLE_CASE_MINOR_WORDS:
+            result.append(word.capitalize())
+        else:
+            result.append(word.lower())
+    return ' '.join(result)
+
+
 # Function to transform custom metadata, tabs, callouts, steps, and components
-def transform_content_to_mdx(markdown_content):
+def transform_content_to_mdx(markdown_content, notebook_name=None):
     was_transformed_overall = False
-    metadata_was_processed = False 
-    content_for_processing = markdown_content 
+    uses_mdx_components = False
+    metadata_was_processed = False
+    content_for_processing = markdown_content
     generated_yaml_frontmatter = "" 
 
     attribute_parser_regex = re.compile(r'(\w+):\s*"([^"]*)"')
 
+    # Helper: quote a YAML value if it contains special characters
+    def yaml_quote(value):
+        """Quote a YAML value only when it contains characters that would
+        break plain-scalar parsing (colons, hash signs, flow indicators, etc.).
+        Commas, periods, and apostrophes are safe unquoted."""
+        if any(c in value for c in ':{}[]&*?|>!%@`"#'):
+            value = value.replace('"', '\\"')
+            value = f'"{value}"'
+        return value
+
     # --- Stage 1: Custom Notebook Metadata Comment to YAML Frontmatter ---
-    metadata_at_start_pattern = re.compile(
-        r"^\s*(<!--\s*NOTEBOOK_METADATA\s*(.*?)\s*-->)\s*\n?(.*)",
+    # Search for NOTEBOOK_METADATA anywhere in the content (it may be preceded
+    # by a raw-cell YAML frontmatter block from nbconvert).
+    metadata_anywhere_pattern = re.compile(
+        r"<!--\s*NOTEBOOK_METADATA\s*(.*?)\s*-->",
         re.DOTALL
     )
-    match_at_start = metadata_at_start_pattern.match(content_for_processing)
-    if match_at_start:
-        metadata_was_processed = True 
-        was_transformed_overall = True 
-        attributes_string = match_at_start.group(2).strip()
-        content_after_comment = match_at_start.group(3)
+    metadata_match = metadata_anywhere_pattern.search(content_for_processing)
+    if metadata_match:
+        metadata_was_processed = True
+        was_transformed_overall = True
+        attributes_string = metadata_match.group(1).strip()
+        # Remove the NOTEBOOK_METADATA comment from content
+        content_for_processing = content_for_processing[:metadata_match.start()] + content_for_processing[metadata_match.end():]
+        # Also strip any existing YAML frontmatter (e.g. from a raw cell) since
+        # NOTEBOOK_METADATA is the authoritative source.
+        content_for_processing = re.sub(
+            r"^\s*---\s*\n.*?\n---\s*\n",
+            "",
+            content_for_processing,
+            count=1,
+            flags=re.DOTALL
+        )
+        content_for_processing = content_for_processing.lstrip("\n")
         yaml_lines = []
         for attr_match in attribute_parser_regex.finditer(attributes_string):
             key = attr_match.group(1)
             value = attr_match.group(2)
-            yaml_lines.append(f"{key}: {value}")
-        if yaml_lines: 
+            # Strip leading markdown heading syntax from title values
+            if key == "title":
+                value = re.sub(r'^#+\s*', '', value)
+            yaml_lines.append(f"{key}: {yaml_quote(value)}")
+        if yaml_lines:
             generated_yaml_frontmatter = f"---\n" + "\n".join(yaml_lines) + "\n---\n\n"
-        content_for_processing = content_after_comment
+    else:
+        # No NOTEBOOK_METADATA found — check if the content already has YAML
+        # frontmatter (e.g. from a raw cell in the notebook).
+        existing_frontmatter_match = re.match(
+            r"^\s*---\s*\n(.*?)\n---\s*\n(.*)",
+            content_for_processing,
+            re.DOTALL
+        )
+        if existing_frontmatter_match:
+            # Content already has valid frontmatter — leave it as-is.
+            # Verify it has a title field; if not, inject one.
+            fm_block = existing_frontmatter_match.group(1)
+            if not re.search(r"^title\s*:", fm_block, re.MULTILINE):
+                # Prefer filename-derived title for sidebar (shorter/cleaner).
+                if notebook_name:
+                    title = smart_title_case(notebook_name.replace('.ipynb', '').replace('_', ' ').replace('-', ' '))
+                else:
+                    heading_match = re.search(r"^#\s+(.+)", existing_frontmatter_match.group(2), re.MULTILINE)
+                    if heading_match:
+                        title = heading_match.group(1).strip()
+                    else:
+                        title = "Untitled"
+                title = yaml_quote(title)
+                fm_block = f"title: {title}\n{fm_block}"
+                content_for_processing = f"---\n{fm_block}\n---\n{existing_frontmatter_match.group(2)}"
+        else:
+            # No frontmatter at all — generate minimal frontmatter from content.
+            # Fumadocs requires at least a `title` field in frontmatter.
+            # Prefer filename-derived title for sidebar (shorter/cleaner).
+            if notebook_name:
+                title = smart_title_case(notebook_name.replace('.ipynb', '').replace('_', ' ').replace('-', ' '))
+            else:
+                heading_match = re.match(r"^\s*#\s+(.+)", content_for_processing, re.MULTILINE)
+                if heading_match:
+                    title = heading_match.group(1).strip()
+                else:
+                    title = "Untitled"
+            title = yaml_quote(title)
+            generated_yaml_frontmatter = f"---\ntitle: {title}\n---\n\n"
     
     # --- Stage 2: Tab Transformation --- 
     master_tabs_pattern = re.compile(
@@ -38,8 +122,9 @@ def transform_content_to_mdx(markdown_content):
         re.DOTALL | re.MULTILINE
     )
     def replace_tabs_block_match(match_obj):
-        nonlocal was_transformed_overall 
-        was_transformed_overall = True 
+        nonlocal was_transformed_overall, uses_mdx_components
+        was_transformed_overall = True
+        uses_mdx_components = True
         items_list_str_from_comment = match_obj.group(1)
         inner_content_of_tabs_block = match_obj.group(2)
         parsed_items_for_tabs_prop = []
@@ -72,8 +157,9 @@ def transform_content_to_mdx(markdown_content):
         re.DOTALL | re.MULTILINE
     )
     def replace_callout_block_match(match_obj):
-        nonlocal was_transformed_overall
+        nonlocal was_transformed_overall, uses_mdx_components
         was_transformed_overall = True
+        uses_mdx_components = True
         attributes_string_from_comment = match_obj.group(1)
         content_of_callout = match_obj.group(2).strip()
         props_for_mdx_component = []
@@ -94,8 +180,9 @@ def transform_content_to_mdx(markdown_content):
         re.DOTALL | re.MULTILINE
     )
     def replace_steps_simplified_match(match_obj):
-        nonlocal was_transformed_overall
-        was_transformed_overall = True 
+        nonlocal was_transformed_overall, uses_mdx_components
+        was_transformed_overall = True
+        uses_mdx_components = True
         # Group 1 is the content between STEPS_START and STEPS_END
         inner_content = match_obj.group(1).strip() 
         # The inner_content is directly placed inside <Steps>
@@ -116,8 +203,9 @@ def transform_content_to_mdx(markdown_content):
     imports_seen: set[str] = set()
 
     def replace_component_comment(match_obj):
-        nonlocal was_transformed_overall, imports_seen
+        nonlocal was_transformed_overall, uses_mdx_components, imports_seen
         was_transformed_overall = True
+        uses_mdx_components = True
         attr_string = match_obj.group(1)
         attrs = {k: v for k, v in attribute_parser_regex.findall(attr_string)}
         title = attrs.pop("title", "").strip() or attrs.pop("name", "").strip()
@@ -137,7 +225,7 @@ def transform_content_to_mdx(markdown_content):
 
     final_assembled_content = generated_yaml_frontmatter + content_for_processing
     
-    return final_assembled_content, was_transformed_overall, metadata_was_processed
+    return final_assembled_content, was_transformed_overall, metadata_was_processed, uses_mdx_components
 
 # --- Main script execution logic (remains the same) ---
 try:
@@ -170,9 +258,9 @@ for mapping in mappings:
         print(f"Error reading source file {source_path}: {e}. Skipping.")
         continue
     
-    processed_content_final, was_transformed_final, metadata_found = transform_content_to_mdx(original_md_content)
-    
-    output_extension = ".mdx" if metadata_found else ".md"
+    processed_content_final, was_transformed_final, metadata_found, needs_mdx = transform_content_to_mdx(original_md_content, notebook_filename)
+
+    output_extension = ".mdx" if needs_mdx else ".md"
     
     filename_base_no_ext = notebook_filename.replace('.ipynb', '')
 
@@ -201,7 +289,15 @@ for mapping in mappings:
 
     for full_destination_path in destination_paths_to_write:
         os.makedirs(os.path.dirname(full_destination_path), exist_ok=True)
-        
+
+        # Remove the opposite-extension file to avoid duplicate slugs
+        # (e.g. if writing .md, remove any existing .mdx at the same path)
+        opposite_ext = ".md" if output_extension == ".mdx" else ".mdx"
+        opposite_path = full_destination_path.rsplit(output_extension, 1)[0] + opposite_ext
+        if os.path.exists(opposite_path):
+            os.remove(opposite_path)
+            print(f"Removed stale file: {opposite_path}")
+
         print(f"Processing: {notebook_filename} -> {full_destination_path} (Overall Transformed: {was_transformed_final}, Metadata Found: {metadata_found})")
         try:
             with open(full_destination_path, 'w', encoding='utf-8') as f_out:

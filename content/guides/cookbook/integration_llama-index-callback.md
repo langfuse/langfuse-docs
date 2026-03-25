@@ -3,7 +3,6 @@ title: Integration Llama Index Callback
 description: Example cookbook for the LlamaIndex Langfuse integration.
 category: Integrations
 ---
-
 # Cookbook LlamaIndex Integration
 
 This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/integrations/frameworks/llamaindex). It uses a very simple Index and Query.

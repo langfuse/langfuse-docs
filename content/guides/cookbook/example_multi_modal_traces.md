@@ -3,7 +3,6 @@ title: Example Multi Modal Traces
 category: Examples
 description: Examples of how to use multi-modality and attachments with the Langfuse Python SDK.
 ---
-
 # Example: Multi-modality and attachments
 
 These are examples of how to use multi-modality and attachments with the Langfuse Python SDK.

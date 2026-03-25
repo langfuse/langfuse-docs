@@ -191,7 +191,6 @@ Simple example:
 
 
 ```python
-# Default high-performance endpoint (formerly observations_v_2)
 observations = langfuse.api.observations.get_many(limit=50)
 # pydantic_list_to_dataframe(observations.data).head(1)
 ```
@@ -212,8 +211,7 @@ observations
 
 
 ```python
-# Single-observation retrieval via legacy v1 endpoint
-observation = langfuse.api.legacy.observations_v1.get("24ef0545d1a9d66d")
+observation = langfuse.api.observations.get("24ef0545d1a9d66d")
 # print(observation.json(indent=1))
 ```
 

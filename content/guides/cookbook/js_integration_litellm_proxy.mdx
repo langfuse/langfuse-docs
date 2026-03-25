@@ -1,6 +1,6 @@
 ---
 source: ⚠️ Jupyter Notebook
-title: LiteLLM (Proxy) + Langfuse OpenAI Integration (JS/TS)
+title: Cookbook - LiteLLM (Proxy) + Langfuse OpenAI Integration (JS/TS)
 sidebarTitle: LiteLLM (Proxy) + Langfuse OpenAI Integration (JS/TS)
 description: The stack to use any of 100+ models in your JS/TS application without having to change your code and with full observability.
 category: Examples
@@ -116,7 +116,7 @@ Use the context manager of the Langfuse TypeScript SDK to group multiple LiteLLM
 
 
 ```typescript
-import { startActiveObservation, startObservation, propagateAttributes } from "npm:@langfuse/tracing";
+import { startActiveObservation, startObservation } from "npm:@langfuse/tracing";
 import { observeOpenAI } from "npm:@langfuse/openai";
 
 const client = observeOpenAI(new OpenAI({baseURL: PROXY_URL}));
@@ -148,20 +148,6 @@ await startActiveObservation("user-request", async (span) => {
       {role: "user", content: "2 + 3 = "}
     ],
   }); 
-
-  // Propagate trace attributes
-  await propagateAttributes({
-    traceName: "LLM Calculator",
-    tags: ["updated"],
-    metadata: {"env": "development"},
-    release: "v0.0.2",
-  }, async () => {});
-
-  // Set input on the root observation
-  span.update({
-    input: systemPrompt,
-  });
-
 });
 ```
 

@@ -1,6 +1,6 @@
 ---
 source: ⚠️ Jupyter Notebook
-title: JS/TS SDK Example
+title: Langfuse JS/TS SDK
 sidebarTitle: JS/TS SDK Example
 description: End-to-end example of how to use the Langfuse TypeScript SDK to trace LLM applications.
 category: Examples

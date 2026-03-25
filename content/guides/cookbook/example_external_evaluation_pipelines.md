@@ -1,6 +1,6 @@
 ---
 source: Jupyter Notebook
-title: External Evaluation Pipelines
+title: Evaluate Langfuse LLM Traces with an External Evaluation Pipeline
 description: This notebook explains how to build an external evaluation pipeline to measure the performance of your production LLM application using Langfuse.
 category: Evaluation
 sidebarTitle: External Evaluation Pipelines
