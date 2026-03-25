@@ -8,6 +8,8 @@ description: >-
   CustomerStoryCTA/BlogHeader for customers.
 ---
 
+> **Single source of truth:** maintain this skill under **`.cursor/skills/customer-story-setup/`** only. **Claude Code** loads the same file via symlink **`.claude/skills/customer-story-setup`** → `../../.cursor/skills/customer-story-setup` (no duplicate `SKILL.md`).
+
 # Customer story setup (MD → MDX)
 
 Turns a plain **Markdown draft** into **`content/customers/<slug>.mdx`** in the same pattern as `content/customers/canva.mdx` and `cresta.mdx`.
