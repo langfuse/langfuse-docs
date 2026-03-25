@@ -3,6 +3,50 @@
   --fd-nav-height: 4rem;
 }
 
+/*
+ * Docs chrome (docs-chrome class on SharedDocsLayout wrapper):
+ * NavbarDocs (60px) + DocsSecondaryNav (40px) = 100px = 6.25rem total.
+ * Override --fd-nav-height so fumadocs calculates sidebar sticky-top and
+ * mobile drawer offset correctly. No banner in docs pages so --fd-banner-height = 0px.
+ */
+.docs-chrome {
+  --fd-nav-height: 6.25rem; /* 60px navbar + 40px secondary nav */
+  --fd-banner-height: 0px;
+}
+
+/* ─── Pattern-bg on docs main content area only ──────────────────────────── */
+/* Pattern-bg on docs main content area — identical to .pattern-bg on HomeMainArea */
+#nd-page {
+  background-image: url("/images/patterns/pattern.png");
+  background-size: 40px 40px;
+  background-position: center;
+  background-repeat: repeat;
+  --cursor-x: 50%;
+  --cursor-y: 50%;
+  position: relative;
+  isolation: isolate;
+  transition: --cursor-x 0.2s ease-out, --cursor-y 0.2s ease-out;
+}
+
+/* Direct children: position: relative so they land in the same stacking
+ * tier as ::before and paint on top (tree order puts them after ::before). */
+#nd-page > * {
+  position: relative;
+}
+
+#nd-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
+    hsl(var(--background) / 0.15),
+    hsl(var(--background) / 0.85)
+  );
+}
+
 /* Hide search button in the collapsed-sidebar trigger panel */
 [data-sidebar-panel] [data-search] {
   display: none;
@@ -29,7 +73,7 @@
 
 /* Docs left sidebar: max width 360px (Fumadocs default is 268px) */
 #nd-docs-layout [grid-area="sidebar"] {
-  --fd-sidebar-width: 360px;
+  --fd-sidebar-width: 240px;
 }
 
 /* Sidebar/tree left alignment: let fumadocs' own p-4 (1rem) on the scroll container

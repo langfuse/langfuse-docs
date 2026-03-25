@@ -307,3 +307,45 @@
     animation: grid 20s linear infinite;
   }
 }
+
+/* ─── Pattern background (40×40 grid with cursor-spotlight) ──────────────────
+ * Used in the docs content area between sidebar and TOC.
+ * @property declarations allow CSS transitions on these custom properties.
+ * The headless <DocsPatternBg /> client component updates --cursor-x/--cursor-y
+ * on the element via onMouseMove.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@property --cursor-x {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+@property --cursor-y {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+
+.pattern-bg {
+  background-image: url("/images/patterns/pattern.png");
+  background-size: 40px 40px;
+  background-position: center;
+  background-repeat: repeat;
+  --cursor-x: 50%;
+  --cursor-y: 50%;
+  position: relative;
+  isolation: isolate;
+  transition: --cursor-x 0.2s ease-out, --cursor-y 0.2s ease-out;
+}
+
+.pattern-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
+    hsl(var(--background) / 0.15),
+    hsl(var(--background) / 0.85)
+  );
+}

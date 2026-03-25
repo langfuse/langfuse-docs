@@ -5,12 +5,11 @@ import type { ReactNode } from "react";
 
 /**
  * Wraps docs layout so SidebarTrigger has a SidebarProvider.
- * Sidebar sticky top is handled via --fd-docs-row-1 override in overrides.css:
- *   calc(var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px))
+ * Pattern-bg is applied to #nd-page directly via CSS + DocsPatternTracker.
  */
 export function DocsLayoutWrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="layout-wrapper">
+    <div className="layout-wrapper flex-1">
       <SidebarProvider>{children}</SidebarProvider>
     </div>
   );
