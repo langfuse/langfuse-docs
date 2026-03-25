@@ -1,25 +1,33 @@
 ---
-title: Explore Observations in V4
+title: How do I work with observations in Langfuse v4?
 sidebarTitle: Explore Observations in V4
-description: Learn how to use the unified tracing table in Langfuse v4
-tags: [observability]
+description: Guide for transitioning from the traces table to the unified observations table in Langfuse v4, with before/after workflow comparisons and SDK upgrade steps.
+tags: [observability, tracing, evaluation]
 ---
 
 # Explore Observations in Langfuse Cloud Fast Preview (v4)
 
-Langfuse now uses a single observations table as the main exploration surface.
-Previously, many teams switched between a traces table for request-level context and an observations table for step-level analysis.
-In the v4 experience, you stay in one table and use filters, saved views, and row peek-views to answer both questions.
+In v4, Langfuse replaces the separate traces and observations tables with a **single unified observations table**. Trace input and trace output no longer exist. Removing them was required to eliminate one of the key scaling bottlenecks. All inputs and outputs now live exclusively on observations. Use filters, [saved views](/docs/observability/features/saved-views), and row peek-views to surface the data that matters most.
 
-For the conceptual background, see the [observation-centric data model](/docs/observability/data-model#observation-centric-data-model).
-For broader release context of Langfuse v4, see the [Fast Preview (v4) docs](/docs/v4).
+For conceptual background, see the [observation-centric data model](/docs/observability/data-model#observation-centric-data-model). For broader release context, see the [Fast Preview (v4) docs](/docs/v4).
 
+## Before → After
 
-## Prerequisites
+| I want to have… | v3 | v4 |
+|---|---|---|
+| One row per trace | Traces table | Filter to the most relevant span(s) per trace, save as a [saved view](/docs/observability/features/saved-views) |
+| One row per trace, scoped to a user or session | Traces table → filter by user/session | Same as above, add user_id or session_id filter |
+| Cost, latency, or errors by user, session, or span name | Traces table with filters | [Self-serve dashboards](/docs/metrics) |
 
-To use the unified table productively, make sure your instrumentation is aligned with the v4 data model.
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
+  aspectRatio={16 / 9}
+  className="mt-3"
+/>
 
-### 1. Ingest with a v4-compatible setup
+## Upgrade checklist
+
+### Ingest with a v4-compatible setup
 
 Use one of these ingestion paths so your data appears in the unified table in real time:
 
@@ -31,7 +39,7 @@ Use one of these ingestion paths so your data appears in the unified table in re
 If you are still sending data via **older SDK versions**, or via **direct OpenTelemetry ingestion without `x-langfuse-ingestion-version: 4`**, traces can appear in the unified tracing table with a **delay of up to 10 minutes**.
 </Callout>
 
-### 2. Propagate correlating attributes across spans
+### Propagate correlating attributes across spans
 
 Use the SDK propagation helpers to propagate correlating attributes across child observations:
 
@@ -43,28 +51,10 @@ Attributes such as `userId`, `sessionId`, `tags`, `metadata`, `version`, and `tr
 
 See [Add attributes to observations](/docs/observability/sdk/instrumentation#add-attributes) for the SDK implementation details.
 
-## Set up your default view
-
-We strongly recommend **saved views** in order to configure the default view you and your project members are seeing in the unified tracing table. For users that previously relied heavily on the UI trace table, this is the first step in order to set up an equivalent view.
-
-Examples for useful views would be
-
-- root observations only (no parent observation). This would be a close analogue to the trace table in the previous table model.
-- observations matching specific names only (these could be the root observation of a subagent execution)
-- LLM generation spans only
-
-You can create a saved view by setting the relevant filters in the filter sidebar of the tracing table and saving that view. You may also promote this to be the **project-default** view or share **permalinks** of the saved view with your teammates.
-
-<Video
-  src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
-  aspectRatio={16 / 9}
-  className="mt-3"
-/>
-
 ## Share feedback
 
 We are still iterating on the unified tracing experience.
-If something feels confusing, missing, or slower than expected, share feedback on via [support](/support).
+If something feels confusing, missing, or slower than expected, share feedback via [support](/support).
 
 ## FAQ
 
