@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import Changelog from "./Changelog";
+import Changelog, { type ChangelogItem } from "./Changelog";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import ShimmerButton from "../magicui/shimmer-button";
@@ -63,17 +63,16 @@ function ScrollingDiscussions({
   return (
     <div className="absolute inset-0 overflow-hidden opacity-50 pointer-events-none">
       <div
-        className="animate-marquee-vertical space-y-0"
+        className="space-y-0"
         style={
           {
-            "--duration": speed,
             "--gap": "0px",
-            animationDirection: "reverse",
+            animation: `marquee-vertical ${speed} linear infinite reverse`,
           } as React.CSSProperties
         }
       >
         {/* Duplicate discussions to create seamless loop */}
-        {[...discussions].map((discussion, index) => (
+        {[...discussions, ...discussions].map((discussion, index) => (
           <DiscussionItem
             key={`${discussion.number}-${index}`}
             discussion={discussion}
@@ -176,7 +175,7 @@ const ideasDiscussionsTop50 = ideasDiscussions.slice(0, 20);
 const supportCount = supportDiscussions.length;
 const ideasCount = ideasDiscussions.length;
 
-export default function OpenSource() {
+export default function OpenSource({ changelogItems }: { changelogItems?: ChangelogItem[] }) {
   const [releaseData, setReleaseData] = useState<ReleaseData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -249,7 +248,7 @@ export default function OpenSource() {
       </Link>
 
       <div className="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-3 w-full max-w-6xl mx-auto px-5">
-        <Changelog />
+        <Changelog items={changelogItems ?? []} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <StatBox

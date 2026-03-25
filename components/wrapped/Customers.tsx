@@ -1,10 +1,9 @@
 "use client";
 
-import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import Image from "next/image";
-import { type Page } from "nextra";
 import { useMemo, useRef } from "react";
+import { useWrappedData, type PageData } from "./WrappedDataContext";
 import { useInView } from "framer-motion";
 import { motion } from "framer-motion";
 import { WrappedSection } from "./components/WrappedSection";
@@ -55,11 +54,26 @@ interface CustomerStory {
 
 // Companies with customer stories
 const companiesWithStories = [
-  { name: "Canva", path: "/users/canva", lightModeImage: canvaDark, darkModeImage: canvaLight },
-  { name: "SumUp", path: "/users/sumup", lightModeImage: sumupDark, darkModeImage: sumupLight },
-  { name: "Khan Academy", path: "/users/khan-academy", lightModeImage: khanacademyDark, darkModeImage: khanacademyLight },
-  { name: "Magic Patterns", path: "/users/magic-patterns-ai-design-tools", lightModeImage: magicPatternsDark, darkModeImage: magicPatternsLight },
-  { name: "Merck", path: "/users/merckgroup", lightModeImage: merckDark, darkModeImage: merckLight },
+  { name: "Canva", path: "/users/canva", light: canvaDark, dark: canvaLight },
+  { name: "SumUp", path: "/users/sumup", light: sumupLight, dark: sumupDark },
+  {
+    name: "Khan Academy",
+    path: "/users/khan-academy",
+    light: khanacademyLight,
+    dark: khanacademyDark,
+  },
+  {
+    name: "Magic Patterns",
+    path: "/users/magic-patterns-ai-design-tools",
+    light: magicPatternsLight,
+    dark: magicPatternsDark,
+  },
+  {
+    name: "Merck",
+    path: "/users/merckgroup",
+    light: merckLight,
+    dark: merckDark,
+  },
 ];
 
 // Companies without customer stories (logos only)
@@ -69,9 +83,21 @@ const companiesWithoutStories = [
   { name: "Telus", lightModeImage: telusDark, darkModeImage: telusLight },
   { name: "Pigment", lightModeImage: pigmentDark, darkModeImage: pigmentLight },
   { name: "Adobe", lightModeImage: adobeLight, darkModeImage: adobeDark },
-  { name: "Intuit", lightModeImage: intuitLightMode, darkModeImage: intuitDarkMode },
-  { name: "Seven Eleven Japan", lightModeImage: sevenelevenDark, darkModeImage: sevenelevenLight },
-  { name: "Circleback", lightModeImage: circlebackDark, darkModeImage: circlebackLight },
+  {
+    name: "Intuit",
+    lightModeImage: intuitLightMode,
+    darkModeImage: intuitDarkMode,
+  },
+  {
+    name: "Seven Eleven Japan",
+    lightModeImage: sevenelevenDark,
+    darkModeImage: sevenelevenLight,
+  },
+  {
+    name: "Circleback",
+    lightModeImage: circlebackDark,
+    darkModeImage: circlebackLight,
+  },
 ];
 
 function CustomerStoryCard({ story }: { story: CustomerStory }) {
@@ -104,7 +130,7 @@ function CustomerStoryCard({ story }: { story: CustomerStory }) {
           </div>
         )}
       </div>
-      
+
       <div className="absolute inset-0 transition-transform duration-700 [transform-style:preserve-3d] [transform:rotateY(180deg)] lg:[transform:rotateY(0deg)] lg:group-hover:[transform:rotateY(180deg)]">
         {/* Front side - Logo only */}
         <div className="absolute inset-0 flex items-center justify-center p-6 lg:p-8 [backface-visibility:hidden]">
@@ -215,9 +241,7 @@ function CustomerStoryCard({ story }: { story: CustomerStory }) {
                   <div className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
                     {story.frontMatter.quoteRole}
                     {story.frontMatter.quoteRole &&
-                      story.frontMatter.quoteCompany && (
-                        <span> at </span>
-                      )}
+                      story.frontMatter.quoteCompany && <span> at </span>}
                     {story.frontMatter.quoteCompany}
                   </div>
                 )}
@@ -263,24 +287,22 @@ function CompanyLogo({
 
 type CustomerItem =
   | { type: "story"; story: CustomerStory & { company: any } }
-  | { type: "logo"; company: typeof companiesWithoutStories[0] }
+  | { type: "logo"; company: (typeof companiesWithoutStories)[0] }
   | { type: "text"; text: string };
 
 export function Customers() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
-  const allStories = (getPagesUnderRoute("/users") as Array<
-    Page & { frontMatter: any }
-  >).filter(
-    (page) => page.frontMatter?.showInCustomerIndex !== false
-  );
+  const allStories = useWrappedData().usersPages.filter(
+    (page: PageData) => page.frontMatter?.showInCustomerIndex !== false,
+  ) as Array<CustomerStory>;
 
   // Match stories with companies
   const customerStories = companiesWithStories
     .map((company) => {
       const story = allStories.find(
-        (s) => s.route === company.path || s.route === `${company.path}/`
+        (s) => s.route === company.path || s.route === `${company.path}/`,
       );
       return story ? { ...story, company } : null;
     })
@@ -290,10 +312,10 @@ export function Customers() {
   const orderedItems = useMemo(() => {
     // Create maps for easy lookup
     const storyMap = new Map(
-      customerStories.map((story) => [story.company.name, story])
+      customerStories.map((story) => [story.company.name, story]),
     );
     const logoMap = new Map(
-      companiesWithoutStories.map((company) => [company.name, company])
+      companiesWithoutStories.map((company) => [company.name, company]),
     );
 
     // Define the exact order
@@ -354,7 +376,7 @@ export function Customers() {
             const row = Math.floor(index / columns);
             const col = index % columns;
             const delay = (row + col) * 0.1; // Stagger delay
-            
+
             const animationProps = {
               initial: { opacity: 0, y: 20, scale: 0.95 },
               animate: isInView
@@ -369,9 +391,7 @@ export function Customers() {
 
             // Use negative margins to overlap borders on all sides except first item
             // For columns layout, we overlap top and left borders
-            const marginClass = index === 0 
-              ? "" 
-              : "-mt-[1px] -ml-[1px]";
+            const marginClass = index === 0 ? "" : "-mt-[1px] -ml-[1px]";
 
             if (item.type === "story") {
               return (

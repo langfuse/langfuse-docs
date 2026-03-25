@@ -22,8 +22,6 @@ const items = [
     jpTitle: "日本市場での展開",
     enDescription: (
       <>
-        Through our Japan Cloud partnership, Langfuse has a direct presence in
-        the Japanese market with dedicated local teams.{" "}
         <a
           href="https://gao-ai.com"
           target="_blank"
@@ -32,7 +30,9 @@ const items = [
         >
           GAO, Inc.
         </a>{" "}
-        drives the local Langfuse community (
+        is the authorized reseller of Langfuse in Japan for Langfuse Enterprises
+        (Cloud and Self-Hosted deployments). GAO drives the local Langfuse
+        community (
         <a
           href="https://x.com/LangfuseJP"
           target="_blank"
@@ -41,12 +41,11 @@ const items = [
         >
           @LangfuseJP
         </a>
-        ).
+        ) and provides dedicated local presence in the Japanese market.
       </>
     ),
     jpDescription: (
       <>
-        Japan Cloudとのパートナーシップにより、専任の現地チームとともに日本市場で直接サービスを展開しています。
         <a
           href="https://gao-ai.com"
           target="_blank"
@@ -55,7 +54,7 @@ const items = [
         >
           ガオ株式会社
         </a>
-        が日本のLangfuseコミュニティ（
+        はLangfuse Enterprises（クラウドおよびセルフホスト）の日本における正式リセラーです。Langfuseコミュニティ（
         <a
           href="https://x.com/LangfuseJP"
           target="_blank"
@@ -64,7 +63,7 @@ const items = [
         >
           @LangfuseJP
         </a>
-        ）を運営しています。
+        ）を運営し、日本市場での専任チームによる現地サポートを提供しています。
       </>
     ),
   },

@@ -3,13 +3,22 @@
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import type { ComponentProps, HTMLAttributes, ReactNode } from 'react';
 import { createContext, useContext, useState } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import dynamic from 'next/dynamic';
+import type { SyntaxHighlighterProps } from 'react-syntax-highlighter';
 import {
   oneDark,
   oneLight,
 } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+// Dynamically import the full Prism highlighter so the ~1.5 MB refractor language
+// bundle is NOT pulled into the shared webpack chunk loaded on every route.
+// It only downloads when a <CodeBlock> is actually rendered on screen.
+const SyntaxHighlighter = dynamic<SyntaxHighlighterProps>(
+  () => import('react-syntax-highlighter').then((m) => ({ default: m.Prism as React.ComponentType<SyntaxHighlighterProps> })),
+  { ssr: false, loading: () => null }
+);
 
 type CodeBlockContextType = {
   code: string;

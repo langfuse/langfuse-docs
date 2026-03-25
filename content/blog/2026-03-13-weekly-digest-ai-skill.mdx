@@ -1,0 +1,155 @@
+---
+title: "How We Built an Agent Skill to Synthesize what Langfuse Users want"
+date: 2026/03/13
+description: "We built an AI agent skill that synthesizes GitHub issues, support tickets, and meeting notes into a weekly digest, and used Langfuse to monitor and improve it."
+ogImage: /images/blog/2026-03-13-weekly-digest/header.png
+tag: engineering
+author: Lotte
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
+import { FileTree } from "@/components/docs";
+
+<BlogHeader
+  title="How We Built an Agent Skill to Synthesize what Langfuse Users want"
+  description="We built an AI agent skill that synthesizes GitHub issues, support tickets, and meeting notes into a weekly digest, and used Langfuse to monitor and improve it."
+  date="March 13, 2026"
+  authors={["lotteverheyden"]}
+/>
+
+At Langfuse user inputs land on our desks through a variety of channels. Support tickets and Github issues go directly to engineers. Meeting notes from customer interactions get shared around. People notice patterns and flag them in Slack. It works, but nobody has time to consolidate what's on our customers mind in one single source of truth every week.
+
+So we built an AI agent skill that does it for us: it reads through our support tickets, GitHub issues, and meeting transcriptions and synthesizes them into a weekly digest of what users are experiencing.
+
+## The Skill
+
+The skill is a small set of scripts that fetch data and a `SKILL.md` file that tells the agent how to process it:
+
+<div className="[&_.nextra-filetree>ul]:block [&_.nextra-filetree>ul]:w-full">
+  <FileTree>
+    <FileTree.File name="SKILL.md" />
+    <FileTree.Folder name="scripts" defaultOpen>
+      <FileTree.File name="fetch-github-issues.py" />
+      <FileTree.File name="fetch-meeting-notes.py" />
+      <FileTree.File name="fetch-plain-tickets.py" />
+    </FileTree.Folder>
+  </FileTree>
+</div>
+
+Last week the skill processed 481 support tickets, 53 open and 14 recently closed GitHub issues, and 38 meeting transcriptions. We traced every execution with Langfuse, so we can see exactly what the skill does: which data it fetches, how it processes it, and what output it produces. You can find the full setup in the [langfuse-examples repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/weekly-user-topics-digest).
+
+### Grouping Tickets into Attention Points
+
+The skill groups issues into topics and identifies the most important ones. 
+
+A support ticket may say "prompt caching not traced," a GitHub issue says "cache tokens double-counted.", same underlying bug. The skill merges them into a single digest entry:
+
+> **Anthropic cache tokens double-counted, inflating costs ~2x**
+> When using Anthropic prompt caching via pydantic-ai/OTel, Langfuse adds cache_read + cache_write tokens on top of the already-inclusive `input_tokens` count, resulting in ~2x inflated token counts and costs.
+> - Sources:
+> - [GitHub #12306](https://github.com/langfuse/langfuse/issues/12306) - 1 thumbs up, 0 comments - no engineer response
+> - [Plain: Prompt caching not traced] - User reporting prompt caching not showing up in traces
+
+Every item links directly to its source, so we can read the original tickets to get the full context.
+
+## Iterating on the Skill
+
+The first version of the digest wasn't great. The loop to improve it works like this: run the skill, open the trace in Langfuse, and leave comments directly on the parts of the output that are off ("this item is too vague," "these two should be merged," "this link is wrong"). Then point another agent at those comments and have it update `SKILL.md` accordingly. Each cycle takes about ten minutes. Nine iterations later, the digest was in a completely different place. (For a deeper look at this pattern, see our [post on using agent skills for prompt improvement](/blog/2026-02-16-prompt-improvement-claude-skills).)
+
+<details>
+<summary>First iteration output (excerpt)</summary>
+
+**Top Topics This Week:**
+
+**1. Tracing Reliability & Data Loss** *(Severity: High)*
+- **What users are experiencing**: Missing traces, broken nesting after SDK updates, empty traces in production, and traces intermittently disappearing from list view.
+- **Evidence**: ~65 Plain tickets + GitHub #12434, #12576, #12541 + multiple reports of data loss in production environments
+- **Who's affected**: Production users across all tiers, directly eroding trust
+- **Category**: Bug / Reliability
+
+**3. Token Count & Cost Calculation Errors** *(Severity: High)*
+- **What users are experiencing**: Duplicate token counts in Strands-Agent traces, Anthropic cache tokens double-counted, dataset run costs overcounted, and missing prices for Gemini 2.5/3 and Claude 4.5 Sonnet.
+- **Evidence**: GitHub #7549 (4 thumbs up, 18 comments), #12306, #12489, #12531 + Plain tickets on Gemini thinking tokens
+- **Who's affected**: Users relying on cost tracking for budgeting
+- **Category**: Bug
+
+**7. SDK Upgrade Path Pain** *(Severity: Medium)*
+- **What users are experiencing**: Breaking changes across v2 to v3 to v4 to v5, stale version numbers in bundles (`@langfuse/core@5.0.0` reports as 4.6.1), Python 3.14 incompatibility due to Pydantic v1.
+- **Evidence**: ~21 Plain tickets (10 still snoozed) + GitHub #9618 (48 thumbs up, highest signal issue this week, now closed)
+- **Who's affected**: All SDK users upgrading
+- **Category**: UX Friction
+
+The full output had 10 categories like this, plus recurring themes and a "What to Watch" section, all at this same level of vagueness, all grouped by product area.
+
+</details>
+
+<details>
+<summary>Last iteration output (excerpt)</summary>
+
+**Top Topics This Week:**
+
+**V4 toggle causes traces to disappear or queries to slow down**
+Multiple users reported that enabling the new V4/Fast trace experience caused traces to stop appearing entirely or dashboard queries to take longer. One user had to switch back to the legacy implementation to get traces flowing again.
+- Sources:
+  - [Plain ticket: Re: Product Update](#) - "I deactivated the fast trace feature, and my traces reappeared. So, I switched back to the legacy implementation for now."
+  - [Plain ticket: Re: Product Update](#) - "I used the 'V4 beta' toggle and now my queries were taking longer time"
+  - [Circleback: Langfuse Friday Demo](#) - Team acknowledged V4 launched this week; lazy loading fixes shipped or nearly shipped
+
+---
+
+**Clear Action Needed:**
+
+**Dashboard metadata filtering returns no results**
+Users who add metadata filters to custom dashboards get empty results, even when the traces clearly have the matching metadata. A community PR (#12528) has been proposed.
+- Sources:
+  - [GitHub #11942](https://github.com/langfuse/langfuse/issues/11942) - 1 thumbs up, 6 comments - confirmed bug, community fix proposed
+  - [Plain ticket: Filter dashboard groups](#) - User asking about filtering dashboard groups
+
+The full output had 5 more sections (Roadmap Input, Integration Issues, What to Watch), each with this level of specificity, categorized by what kind of decision the item requires rather than by product area.
+
+</details>
+
+Compare the two: the first version groups by product area with vague descriptions ("users are experiencing tracing issues"). The last groups by decision type (is the path forward clear, or does this need discussion?) with descriptions specific enough that you can understand the problem without clicking through. Issues are properly deduplicated across sources, and every item links directly to the ticket, issue, or meeting it came from.
+
+## Eval Setup
+
+We set up [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) in Langfuse to score each digest automatically:
+
+- **actionability**: is each item specific enough that an engineer could decide what to do with it? "Users are having tracing issues" is not useful. "12 users reported that trace filtering by tag doesn't work in the EU region" is.
+- **cites-sources**: does every claim link back to a specific source? A digest that makes unsourced claims is worse than no digest at all.
+- **categories**: how many categories does the digest produce? A simple consistency check: 3 one week and 15 the next means the instructions are too loose.
+
+Here are the scores across all nine runs (earliest at the top):
+
+| Run | actionability | cites-sources | categories |
+|-----|--------------|---------------|------------|
+| 1   | 0.70         | 0             | 0          |
+| 2   | 0.75         | 0             | 11         |
+| 3   | 0.92         | 0             | 13         |
+| 4   | 0.90         | 0             | 10         |
+| 5   | 0.95         | 1             | 3          |
+| 6   | 0.90         | 1             | 4          |
+| 7   | 0.05         | 1             | 0          |
+| 8   | 0.90         | 1             | 5          |
+| 9   | 0.85         | 1             | 4          |
+
+The early runs cited no sources and produced too many category counts (12-13). After run 4, source attribution hit 1.0 and categories stabilized around 3-5. Run 7 shows a regression where a prompt change accidentally made the descriptions too vague. The evaluator caught it, and we fixed it in the next iteration.
+
+## What We Learned
+
+### Agents fail silently on missing data
+
+In one iteration, the Circleback MCP server was down. The skill just skipped it and produced a digest from two out of three sources, without mentioning it. The output still looked complete but was missing information. Any agent that pulls from multiple sources needs to stop and say so when one is unavailable.
+
+### Links will be wrong
+
+The skill produced Circleback links that pointed to the generic app URL instead of specific meeting notes, and Plain links missing the workspace ID. The model doesn't know the URL structure of every SaaS tool. Give it explicit examples of correct links, and validate the format in your evaluation.
+
+### "Recent activity" doesn't mean "relevant this week"
+
+The second version flagged a six-month-old GitHub issue as a current bug because it had a recent comment. The comment was just someone confirming a workaround. For any agent working with time-scoped data: don't just check *when* something was updated, check *what* the update actually says.
+
+### Category names carry implicit assumptions
+
+The third version introduced a "Quick Fixes" category, but AI doesn't know how quick a fix will be. We renamed it to reflect what we *do* know: whether the path forward is clear or needs discussion. Watch for labels that embed assumptions the model can't verify.

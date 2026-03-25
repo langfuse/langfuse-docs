@@ -19,22 +19,30 @@ const discounts = [
     },
   },
   {
+    name: "Non-profits",
+    description: "USD 199 in credits / month",
+    cta: {
+      text: "Learn more and apply",
+      href: "/non-profit",
+    },
+  },
+  {
     name: "Open-source projects",
     description: "USD 300 in credits / month, first year",
   },
 ];
 
 export const PricingDiscounts = () => (
-  <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-8 mt-8" id="discounts">
+  <div className="px-6 pt-8 mx-auto mt-8 max-w-7xl lg:px-8" id="discounts">
     <div className="mx-auto max-w-4xl">
-      <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary">
+      <h2 className="text-2xl font-bold tracking-tight leading-10 text-primary">
         Discounts
       </h2>
-      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 mt-3 sm:grid-cols-2 lg:grid-cols-4">
         {discounts.map((discount) => (
           <div
             key={discount.name}
-            className="rounded-lg border border-gray-200 p-4 shadow-sm"
+            className="p-4 rounded-lg border border-gray-200 shadow-sm"
           >
             <dt className="text-base font-semibold leading-7 text-primary">
               {discount.name}

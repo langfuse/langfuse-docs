@@ -1,9 +1,8 @@
-import { getPagesUnderRoute } from "nextra/context";
+"use client";
+
 import Link from "next/link";
-import Image from "next/image";
-import { type Page } from "nextra";
 import { Video } from "../Video";
-import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Head from "next/head";
 import {
@@ -15,28 +14,40 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import Image from "next/image";
+
+export type ChangelogPageItem = {
+  route: string;
+  name?: string;
+  title?: string;
+  frontMatter?: {
+    date?: string;
+    title?: string;
+    description?: string;
+    badge?: React.ReactNode;
+    ogVideo?: string;
+    ogImage?: string;
+    gif?: string;
+    [key: string]: unknown;
+  };
+};
 
 export const ChangelogIndex = ({
+  pages: initialPages,
   itemsPerPage = 50,
 }: {
+  pages: ChangelogPageItem[];
   itemsPerPage?: number;
 }) => {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const page = Number(router.query.page) || 1;
+    const page = Number(searchParams.get("page")) || 1;
     setCurrentPage(page);
-  }, [router.query.page]);
+  }, [searchParams]);
 
-  const allPages = (
-    getPagesUnderRoute("/changelog") as Array<Page & { frontMatter: any }>
-  ).sort(
-    (a, b) =>
-      new Date(b.frontMatter.date).getTime() -
-      new Date(a.frontMatter.date).getTime()
-  );
-
+  const allPages = initialPages;
   const totalPages = Math.ceil(allPages.length / itemsPerPage);
   const paginatedPages = allPages.slice(
     (currentPage - 1) * itemsPerPage,
@@ -84,7 +95,7 @@ export const ChangelogIndex = ({
               className="cursor-pointer select-none"
             />
           </PaginationItem>
-          <div className="hidden sm:flex gap-1 items-center">
+          <div className="hidden gap-1 items-center sm:flex">
             {pageNumbers.map((pageNumber, index) =>
               pageNumber === null ? (
                 <PaginationItem key={`ellipsis-${index}`}>
@@ -118,24 +129,27 @@ export const ChangelogIndex = ({
 
   return (
     <>
-      <div className="mt-12 max-w-6xl mx-auto divide-y divide-primary/10 border-b border-primary/10">
+      <div className="mx-auto mt-12 max-w-6xl border-b divide-y divide-primary/10 border-primary/10">
         {paginatedPages.map((page, i) => (
           <div
-            className="md:grid md:grid-cols-4 md:gap-5 py-16 transition-all"
+            className="py-16 transition-all md:grid md:grid-cols-4 md:gap-5"
             id={page.route.replace("/changelog/", "")}
             key={page.route.replace("/changelog/", "")}
           >
-            <div className="hidden md:flex opacity-80 text-lg group-hover:opacity-100 sticky top-24 self-start flex-col items-start gap-2">
+            <div
+              className="hidden sticky flex-col gap-2 items-start self-start text-lg opacity-80 md:flex group-hover:opacity-100"
+              style={{ top: "calc(var(--fd-banner-height, 0px) + 6rem)" }}
+            >
               {page.frontMatter?.date
                 ? new Date(page.frontMatter.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    timeZone: "UTC",
-                  })
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  timeZone: "UTC",
+                })
                 : null}
               {page.frontMatter?.badge && (
-                <div className="hidden md:inline-block px-2 py-1 text-xs font-bold bg-primary/10 text-primary rounded-sm mb-5">
+                <div className="inline-block px-2 py-1 mt-2 mb-5 text-xs font-bold rounded-md bg-muted text-muted-foreground">
                   {page.frontMatter.badge}
                 </div>
               )}
@@ -147,46 +161,47 @@ export const ChangelogIndex = ({
                     src={page.frontMatter.ogVideo}
                     aspectRatio={16 / 9}
                     gifStyle
-                    className="mb-14 rounded relative overflow-hidden shadow-md group-hover:shadow-lg ring-0 border-0"
+                    className="overflow-hidden relative mb-14 rounded border-0 ring-0 shadow-md group-hover:shadow-lg"
                   />
                 ) : page.frontMatter?.ogImage ? (
-                  <div className="mb-14 rounded relative aspect-video overflow-hidden shadow-md group-hover:shadow-lg border">
+                  <div className="overflow-hidden relative mb-14 rounded border shadow-md aspect-video group-hover:shadow-lg">
                     <Image
-                      src={page.frontMatter.gif ?? page.frontMatter.ogImage}
+                      src={(page.frontMatter.gif ?? page.frontMatter.ogImage) as string}
                       className="object-cover"
-                      alt={page.frontMatter?.title ?? "Blog post image"}
+                      alt={(page.frontMatter?.title ?? "Blog post image") as string}
                       fill={true}
                       sizes="(min-width: 1024px) 1000px, 100vw"
                       priority={i < 3}
                       unoptimized={
                         page.frontMatter.gif !== undefined ||
-                        page.frontMatter.ogImage?.endsWith(".gif")
+                        (typeof page.frontMatter.ogImage === "string" &&
+                          page.frontMatter.ogImage.endsWith(".gif"))
                       }
                     />
                   </div>
                 ) : null}
-                <div className="md:hidden opacity-80 text-sm mb-4 group-hover:opacity-100">
+                <div className="mb-4 text-sm opacity-80 md:hidden group-hover:opacity-100">
                   {page.frontMatter?.date
                     ? new Date(page.frontMatter.date).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          timeZone: "UTC",
-                        }
-                      )
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        timeZone: "UTC",
+                      }
+                    )
                     : null}
                   {page.frontMatter?.badge && (
-                    <div className="inline-block px-2 py-1 text-xs font-bold bg-primary/10 text-primary rounded-sm ml-3">
+                    <div className="inline-block px-2 py-1 ml-3 text-xs font-bold rounded-sm bg-primary/10 text-primary">
                       {page.frontMatter.badge}
                     </div>
                   )}
                 </div>
-                <h2 className="block font-mono text-2xl md:text-3xl opacity-90 group-hover:opacity-100">
-                  {page.meta?.title || page.frontMatter?.title || page.name}
+                <h2 className="block font-mono text-2xl opacity-90 md:text-3xl group-hover:opacity-100">
+                  {page.frontMatter?.title || page.name}
                 </h2>
-                <div className="opacity-80 mt-4 text-lg group-hover:opacity-100">
+                <div className="mt-4 text-lg opacity-80 group-hover:opacity-100">
                   {page.frontMatter?.description}
                 </div>
               </Link>
