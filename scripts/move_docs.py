@@ -188,15 +188,15 @@ for mapping in mappings:
         if len(path_parts) > 1:
             dir_path_from_docs_path = os.path.join(*path_parts[:-1])
             final_docs_path_filename_part = name_without_ext + output_extension
-            dest_path_str = os.path.join("pages", dir_path_from_docs_path, final_docs_path_filename_part)
+            dest_path_str = os.path.join("content", dir_path_from_docs_path, final_docs_path_filename_part)
         else:
-             dest_path_str = os.path.join("pages", name_without_ext + output_extension)
+             dest_path_str = os.path.join("content", name_without_ext + output_extension)
         destination_paths_to_write.append(dest_path_str)
-    
+
     # Only add to guides/cookbook if the mapping is marked as a guide (default True)
     if mapping.get('isGuide', True):
         guide_dest_filename = filename_base_no_ext + output_extension
-        guide_dest_path_str = os.path.join("pages", "guides", "cookbook", guide_dest_filename)
+        guide_dest_path_str = os.path.join("content", "guides", "cookbook", guide_dest_filename)
         destination_paths_to_write.append(guide_dest_path_str)
 
     for full_destination_path in destination_paths_to_write:

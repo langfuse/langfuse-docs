@@ -1,0 +1,153 @@
+---
+title: Authentication & SSO
+sidebarTitle: Authentication & SSO
+description: Overview of Single Sign-On (SSO) methods in Langfuse
+---
+
+# Authentication & SSO
+
+By default, Langfuse supports email/password and social logins (Sign in with Google, GitHub, Microsoft).
+
+For increased security, you can also configure Enterprise SSO (e.g. Okta, Authentik, GitHub Enterprise, OneLogin, Azure AD, Keycloak, JumpCloud etc.) via OIDC.
+
+<Callout type="info">
+
+For more details on authorization, please refer to the [RBAC docs](/docs/administration/rbac).
+
+</Callout>
+
+<Callout type="info">
+
+For self-hosted instances, please refer to the [Self-hosted Authentication and SSO guide](/self-hosting/security/authentication-and-sso).
+
+</Callout>
+
+## Email/Password authentication
+
+By default, Langfuse uses email and password authentication. Langfuse enforces standard password complexity requirements.
+
+If you signed up with a social login, you can add a password via the "reset password" link in the login page.
+
+## Social Logins
+
+For simplified access, users can sign in using their existing social accounts:
+
+- Google
+- GitHub
+- Azure AD (Entra ID)
+
+For security reasons, Langfuse does not support switching between social logins or signing up with a social login after signing up with email/password.
+
+## Enterprise SSO & SSO Enforcement [#sso]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
+Langfuse supports **Enterprise SSO** (e.g. Okta, Authentik, OneLogin, Azure AD, Keycloak, WorkOS, JumpCloud etc.) via OIDC. Please reach out to [support](/support) to enable this feature.
+
+<Callout type="info">
+
+  Langfuse supports multiple domains per customer organization, but each domain must be exclusively owned by your organization.
+  Shared domains (e.g., from subcontractors or consultancies) are not supported.
+
+</Callout>
+
+Details:
+
+- **Migration:** Existing users who signed up with an email/password or social logins are automatically migrated to the Enterprise SSO provider once it is set up.
+- **Authorization:** Enterprise SSO does not automatically provision [roles](/docs/administration/rbac) for new users upon signup. Users must be invited to an organization, either through the UI (settings > members) or the [SCIM API](/docs/administration/scim-and-org-api).
+- **Signing in:** To sign in with an Enterprise SSO provider, please (1) enter your email address, and (2) press "Continue". You will be redirected to the Enterprise SSO provider to authenticate.
+
+<Frame className="max-w-lg">
+  ![SSO Sign-in Flow](/images/security/sso-signin.png)
+</Frame>
+
+<Callout type="info">
+
+  Langfuse supports authentication via **OIDC only**. SAML is not supported.
+
+</Callout>
+
+### Vendor Guides
+
+#### Okta [#okta]
+
+##### Step 1: Create an OIDC Application in Okta
+
+1. Log in to the Okta Admin Console
+2. Navigate to **Applications** > **Applications**
+3. Click **Create App Integration**
+4. Select **OIDC - OpenID Connect** as the Sign-in method
+5. Select **Web Application** as the Application type
+6. Click **Next**
+
+##### Step 2: Configure the Application
+
+1. Enter an **App integration name** (e.g., "Langfuse")
+2. Set the **Sign-in redirect URI** to:
+   `https://<langfuse-url>/api/auth/callback/<domain>.okta`
+   Example: `https://cloud.langfuse.com/api/auth/callback/example.com.okta`
+3. (Optional) Set a **Sign-out redirect URI** if needed
+4. (Scopes) Scopes are not used by Langfuse during authentication
+5. Under **Assignments**, choose how to assign users
+6. Click **Save**
+
+##### Step 3: Retrieve Credentials
+
+1. On the application's **General** tab, copy the **Client ID** and **Client Secret**
+2. Note your Okta **Issuer URL** (e.g., `https://example.okta.com`)
+
+##### Step 4: Share Credentials with Langfuse
+
+Share the following with Langfuse via [support](/support):
+
+- **Instance URL** (e.g., `https://cloud.langfuse.com` or `https://us.cloud.langfuse.com`)
+- **Issuer URL** (e.g., `https://example.okta.com`)
+- **Client ID**
+- **Client Secret**
+
+You can share the credentials with any secure method.
+Usually, sharing via password managers works best.
+
+##### Step 5: Assign Users
+
+1. In Okta, go to your Langfuse application's **Assignments** tab
+2. Assign users or groups who should have access to Langfuse
+
+##### IdP-Initiated SSO [#okta-idp-initiated-sso]
+
+Langfuse supports **IdP-initiated SSO** (Identity Provider-initiated Single Sign-On), where users can start the SSO flow directly from Okta instead of starting from Langfuse.
+
+_Example of IdP-initiated SSO authentication flow (Okta):_
+
+<Video
+  src="https://static.langfuse.com/docs-videos/idp-initiated-sign-in.mp4"
+  aspectRatio={1812 / 1080}
+  title="IdP-Initiated SSO Authentication Flow"
+  className="max-w-xl"
+  gifStyle
+/>
+
+To enable IdP-initiated SSO, configure Okta to redirect users to:
+
+```
+https://cloud.langfuse.com/auth/sso-initiate?provider=<PROVIDER>
+```
+
+- Replace `<PROVIDER>` with the last part of your callback URL, e.g. `example.com.okta`.
+- Use the `Redirect to app to initiate login (OIDC Compliant)` option in Okta's settings.
+
+##### User Provisioning with SCIM
+
+For automated user provisioning, see the [Okta SCIM Setup Guide](/docs/administration/scim-and-org-api#okta).
+
+## Related Resources
+
+- [SCIM & Organization API](/docs/administration/scim-and-org-api) to automate user provisioning, role assignments, and project setup after configuring SSO

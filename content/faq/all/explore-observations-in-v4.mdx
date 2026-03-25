@@ -1,0 +1,75 @@
+---
+title: How do I work with observations in Langfuse v4?
+sidebarTitle: Explore Observations in V4
+description: Guide for transitioning from the traces table to the unified observations table in Langfuse v4, with before/after workflow comparisons and SDK upgrade steps.
+tags: [observability, tracing, evaluation]
+---
+
+# Explore Observations in Langfuse Cloud Fast Preview (v4)
+
+In v4, Langfuse replaces the separate traces and observations tables with a **single unified observations table**. Trace input and trace output no longer exist. Removing them was required to eliminate one of the key scaling bottlenecks. All inputs and outputs now live exclusively on observations. Use filters, [saved views](/changelog/2025-05-20-save-table-views), and row peek-views to surface the data that matters most.
+
+For conceptual background, see the [observation-centric data model](/docs/observability/data-model#underlying-data-model). For broader release context, see the [Fast Preview (v4) docs](/docs/v4).
+
+## Before → After
+
+| I want to have… | v3 | v4 |
+|---|---|---|
+| One row per trace | Traces table | Filter to the most relevant span(s) per trace, save as a [saved view](/changelog/2025-05-20-save-table-views) |
+| One row per trace, scoped to a user or session | Traces table → filter by user/session | Same as above, add user_id or session_id filter |
+| Cost, latency, or errors by user, session, or span name | Traces table with filters | [Self-serve dashboards](/docs/metrics) |
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
+  aspectRatio={16 / 9}
+  className="mt-3"
+/>
+
+## Upgrade checklist
+
+### Ingest with a v4-compatible setup
+
+Use one of these ingestion paths so your data appears in the unified table in real time:
+
+- Python SDK v4: [migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4)
+- JS/TS SDK v5: [migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)
+- Direct OpenTelemetry ingestion: set `x-langfuse-ingestion-version: 4` on your OTEL span exporter. If you use OTLP HTTP environment variables, add `x-langfuse-ingestion-version=4` to `OTEL_EXPORTER_OTLP_HEADERS`. See [OpenTelemetry setup](/integrations/native/opentelemetry).
+
+<Callout type="info">
+If you are still sending data via **older SDK versions**, or via **direct OpenTelemetry ingestion without `x-langfuse-ingestion-version: 4`**, traces can appear in the unified tracing table with a **delay of up to 10 minutes**.
+</Callout>
+
+### Propagate correlating attributes across spans
+
+Use the SDK propagation helpers to propagate correlating attributes across child observations:
+
+- Python: `propagate_attributes()`
+- JS/TS: `propagateAttributes()`
+
+This is very important for filters to work accurately.
+Attributes such as `userId`, `sessionId`, `tags`, `metadata`, `version`, and `traceName` should be available on observations so you can filter one table by request-level context and still work at observation granularity.
+
+See [Add attributes to observations](/docs/observability/sdk/instrumentation#add-attributes) for the SDK implementation details.
+
+## Share feedback
+
+We are still iterating on the unified tracing experience.
+If something feels confusing, missing, or slower than expected, share feedback via [support](/support).
+
+## FAQ
+
+### Why are observations delayed or missing in the unified table?
+
+The most common reason is that data is still being sent via older SDK versions or through a direct OpenTelemetry exporter without `x-langfuse-ingestion-version: 4`.
+In the new v4 experience, those setups can lead to multi-minute delays before traces show up in the unified table.
+If this happens, upgrade to Python SDK v4 or JS/TS SDK v5, or add the ingestion version header to your OTEL exporter.
+
+### How can I make this look more like the old traces table?
+
+Create a saved view that filters to the root observation representing the start of each trace in your application.
+That gives you a stable, trace-like list while still letting you drill into lower-level observations when needed.
+
+### Can I get the old experience back?
+
+Yes. For now, you can switch the v4 beta experience off in the UI and return to the previous tracing experience.
+This is temporary, though: the unified table will become the standard experience, so it is worth setting up saved views and instrumentation for the new model.

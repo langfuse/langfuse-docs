@@ -27,7 +27,7 @@ export const CustomerStoryCTA = () => {
         </div>
         <div className="mt-4">
           <span className="text-sm text-muted-foreground">or </span>
-          <Link href="/talk-to-us" className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">
+          <Link href="/talk-to-us" className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 no-underline">
             Talk to an expert
           </Link>
         </div>

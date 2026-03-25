@@ -1,0 +1,251 @@
+---
+title: "JS/TS v4 → v5"
+description: Migration guide for upgrading the Langfuse JS/TS SDK from v4 to v5.
+category: SDKs
+---
+
+# JS/TS v4 → v5
+
+The JS/TS SDK v5 introduces the **[observation-centric data model](/docs/observability/data-model)**. In this model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
+
+This changes how you set trace attributes: instead of imperatively updating the trace with `updateActiveTrace()`, you use `propagateAttributes()` — a function that wraps a callback, automatically applying attributes to all child observations created within its scope.
+
+<Callout type="warning">
+  v5 changes default OpenTelemetry export behavior: Langfuse now applies a smart
+  default span filter. If you previously expected all spans to be exported
+  (including non-LLM spans), review the first breaking change below.
+</Callout>
+
+## Breaking Changes
+
+### Smart default span filtering replaces export-all behavior
+
+In previous versions, exporting all OpenTelemetry spans by default increased trace noise from infrastructure and non-LLM instrumentation (HTTP, DB, queues, framework internals). To keep traces focused and useful, v5 introduces a smart default span filter.
+
+By default, v5 exports a span if any of these are true:
+
+- The span was created by Langfuse (`langfuse-sdk`)
+- The span has `gen_ai.*` attributes
+- The span instrumentation scope matches known LLM scope prefixes (for example `openinference`, `langsmith`, `haystack`, `litellm`)
+
+Before v5, all spans were exported unless you implemented a custom `shouldExportSpan` function.
+
+#### Keep pre-v5 "export everything" behavior
+
+```typescript
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const spanProcessor = new LangfuseSpanProcessor({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+  secretKey: process.env.LANGFUSE_SECRET_KEY!,
+  shouldExportSpan: () => true,
+});
+```
+
+#### Compose custom rules with default behavior
+
+`shouldExportSpan` is a full override in v5. If you want to extend (not replace) default filtering, compose with `isDefaultExportSpan`.
+
+```typescript
+import { LangfuseSpanProcessor, isDefaultExportSpan } from "@langfuse/otel";
+
+const spanProcessor = new LangfuseSpanProcessor({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+  secretKey: process.env.LANGFUSE_SECRET_KEY!,
+  shouldExportSpan: ({ otelSpan }) =>
+    isDefaultExportSpan(otelSpan) ||
+    otelSpan.instrumentationScope.name.startsWith("my_framework"),
+});
+```
+
+#### Possible trace-tree side effects and how to debug
+
+Filtering can break trace trees when intermediate or parent spans are dropped while child spans are still exported. If traces appear disconnected, enable SDK debug logging to inspect dropped spans, then allowlist the required scopes in your callback.
+
+- JS/TS debug mode: set `LANGFUSE_DEBUG="true"` (or `LANGFUSE_LOG_LEVEL="DEBUG"`).
+- See [SDK advanced features](/docs/observability/sdk/advanced-features) and [OpenTelemetry troubleshooting for unwanted spans](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse).
+
+### `updateActiveTrace()` decomposed into 3 functions
+
+In the new model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) must live on every observation, not just the trace. `propagateAttributes()` wraps a callback — the current and all child spans created inside the callback automatically inherit the attributes. Spans created _before_ the callback are **not** retroactively updated.
+
+**v4:**
+
+```typescript
+import { updateActiveTrace, startActiveObservation } from "@langfuse/tracing";
+
+await startActiveObservation("my-operation", async (span) => {
+  updateActiveTrace({
+    name: "user-workflow",
+    userId: "user-123",
+    sessionId: "session-456",
+    tags: ["production"],
+    public: true,
+    metadata: { testRun: "server-export" },
+    input: { query: "hello" },
+    output: { response: "world" },
+  });
+});
+```
+
+**v5:**
+
+```typescript
+import {
+  propagateAttributes,
+  startActiveObservation,
+  setActiveTraceIO,
+  setActiveTraceAsPublic,
+} from "@langfuse/tracing";
+
+await propagateAttributes(
+  {
+    traceName: "user-workflow", // was "name"
+    userId: "user-123",
+    sessionId: "session-456",
+    tags: ["production"],
+    metadata: { testRun: "server-export" },
+  },
+  async () => {
+    await startActiveObservation("my-operation", async (span) => {
+      setActiveTraceIO({
+        input: { query: "hello" },
+        output: { response: "world" },
+      });
+      setActiveTraceAsPublic();
+    });
+  },
+);
+```
+
+**Key differences:**
+
+| Attribute                                | v4                                      | v5                                                           |
+| ---------------------------------------- | --------------------------------------- | ------------------------------------------------------------ |
+| `name`                                   | `updateActiveTrace({name: ...})`        | `propagateAttributes({traceName: ...}, cb)`                  |
+| `userId`, `sessionId`, `tags`, `version` | `updateActiveTrace({...})`              | `propagateAttributes({...}, cb)`                             |
+| `metadata`                               | `updateActiveTrace({metadata: any})`    | `propagateAttributes({metadata: Record<string,string>}, cb)` |
+| `input`, `output`                        | `updateActiveTrace({...})`              | `setActiveTraceIO({...})` (deprecated)                       |
+| `public`                                 | `updateActiveTrace({public: true})`     | `setActiveTraceAsPublic()`                                   |
+| `release`                                | `updateActiveTrace({release: ...})`     | Removed — use `LANGFUSE_RELEASE` env var                     |
+| `environment`                            | `updateActiveTrace({environment: ...})` | Removed — use `LANGFUSE_TRACING_ENVIRONMENT` env var         |
+
+<Callout type="warning">
+  `setActiveTraceIO()` is deprecated and exists only for backward compatibility
+  with trace-level
+  [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+  evaluators that rely on trace input/output. For new code, set input/output on
+  the root observation directly.
+</Callout>
+
+### `.updateTrace()` → `.setTraceIO()` + `.setTraceAsPublic()`
+
+The same decomposition applies on all observation wrapper classes (`LangfuseSpan`, `LangfuseGeneration`, etc.).
+
+**v4:**
+
+```typescript
+import { startObservation } from "@langfuse/tracing";
+
+const span = startObservation("my-op");
+span.updateTrace({
+  name: "my-trace",
+  userId: "user-123",
+  sessionId: "session-456",
+  tags: ["prod"],
+  public: true,
+  input: { query: "hello" },
+  output: { response: "world" },
+});
+```
+
+**v5:**
+
+```typescript
+import { propagateAttributes, startObservation } from "@langfuse/tracing";
+
+propagateAttributes(
+  {
+    traceName: "my-trace",
+    userId: "user-123",
+    sessionId: "session-456",
+    tags: ["prod"],
+  },
+  () => {
+    const span = startObservation("my-op");
+    span.setTraceIO({
+      input: { query: "hello" },
+      output: { response: "world" },
+    });
+    span.setTraceAsPublic();
+    span.end();
+  },
+);
+```
+
+<Callout type="warning">
+  `.setTraceIO()` is deprecated and exists only for backward compatibility with
+  trace-level
+  [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+  evaluators that rely on trace input/output.
+</Callout>
+
+### Public API namespace remapping (`api.*`)
+
+In v5, high-performance Public API resources are now the defaults. The v2
+aliases were removed.
+
+| v4 / transitional name                    | v5 name                               |
+| ----------------------------------------- | ------------------------------------- |
+| `langfuse.api.observationsV2`             | `langfuse.api.observations`           |
+| `langfuse.api.scoreV2`                    | `langfuse.api.scores`                |
+| `langfuse.api.metricsV2`                  | `langfuse.api.metrics`                |
+| `langfuse.api.observations` (legacy v1)   | `langfuse.api.legacy.observationsV1`  |
+| `langfuse.api.score` (legacy v1)          | `langfuse.api.legacy.scoreV1`         |
+| `langfuse.api.metrics` (legacy v1)        | `langfuse.api.legacy.metricsV1`       |
+
+If you still need legacy v1 behavior, switch to the corresponding
+`langfuse.api.legacy.*V1` namespace.
+
+<Callout type="warning">
+  If you use self-hosted Langfuse, do not use the new default
+  `langfuse.api.observations` or `langfuse.api.metrics` methods yet. They now
+  point to the Observations v2 and Metrics v2 endpoints, which are not
+  available on self-hosted deployments yet. Use
+  `langfuse.api.legacy.observationsV1` and `langfuse.api.legacy.metricsV1`
+  instead.
+</Callout>
+
+### [`@langfuse/langchain`](/integrations/frameworks/langchain) internal changes
+
+The `CallbackHandler` now uses `propagateAttributes()` for trace-level attributes. This affects users who:
+
+- Subclass `CallbackHandler`
+- Depend on the internal span-creation behavior
+- Rely on `traceMetadata` accepting non-string values — non-string values are now serialized via `JSON.stringify` before being passed to `propagateAttributes`, which requires `Record<string, string>`
+
+### [`@langfuse/openai`](/integrations/model-providers/openai-py) internal changes
+
+The `traceMethod` wrapper now wraps the traced call in `propagateAttributes()` to set `userId`, `sessionId`, `tags`, and `traceName`, instead of calling `.updateTrace()` on the observation. (If you rely on attributes being set on parent observations as well, wrap the entire execution in with `propagateAttributes`).
+
+### Removed attributes
+
+| Removed       | Replacement                                                    |
+| ------------- | -------------------------------------------------------------- |
+| `release`     | Set via `LANGFUSE_RELEASE` env var                             |
+| `environment` | Set via `LANGFUSE_TRACING_ENVIRONMENT` env var                 |
+| `public`      | Replaced by `setActiveTraceAsPublic()` / `.setTraceAsPublic()` |
+
+## Migration Checklist
+
+1. Audit traces/dashboards that depended on non-LLM OpenTelemetry spans: these may stop appearing with the v5 default filter
+2. If needed, set `shouldExportSpan: () => true` on `LangfuseSpanProcessor` to preserve pre-v5 "export all spans" behavior
+3. If you use custom filtering, compose with `isDefaultExportSpan` to keep the default LLM-focused behavior
+4. Search for `updateActiveTrace` → split into `propagateAttributes()` + `setActiveTraceIO()` (when relying on legacy trace-level LLM-as-a-judge configurations) + `setActiveTraceAsPublic()`
+5. Search for `.updateTrace(` → split into `propagateAttributes()` + `.setTraceIO()` + `.setTraceAsPublic()`
+6. Verify propagated metadata values are `Record<string, string>` with values ≤200 characters
+7. Replace `release`/`environment` attribute usage with env vars (`LANGFUSE_RELEASE`, `LANGFUSE_TRACING_ENVIRONMENT`)
+8. Search for `api.observationsV2` / `api.scoreV2` / `api.metricsV2` → replace with `api.observations` / `api.scores` / `api.metrics`
+9. Search for legacy v1 usage on `api.observations` / `api.score` / `api.metrics` → move to `api.legacy.observationsV1` / `api.legacy.scoreV1` / `api.legacy.metricsV1`
+10. If you are self-hosting Langfuse, do not use `api.observations` or `api.metrics` yet; use `api.legacy.observationsV1` and `api.legacy.metricsV1` until Observations v2 and Metrics v2 are available on self-hosted deployments
+11. Remove any remaining references to `*V2` aliases (they were removed in v5)

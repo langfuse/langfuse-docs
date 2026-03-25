@@ -1,39 +1,47 @@
+"use client";
+
 import { Server, LibraryBig, BookOpen, FileCode, Unplug } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import React from "react";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+const SECTIONS = [
+  { title: "Docs", path: "/docs", Icon: LibraryBig },
+  { title: "Integrations", path: "/integrations", Icon: Unplug },
+  { title: "Self Hosting", path: "/self-hosting", Icon: Server },
+  { title: "Guides", path: "/guides", Icon: FileCode },
+  { title: "AI Engineering Library", path: "/library", Icon: BookOpen },
+] as const;
 
 export const MenuSwitcher = () => {
-  const { asPath } = useRouter();
+  const pathname = usePathname();
   return (
-    <div className="-mx-2 hidden md:block">
-      {[
-        { title: "Docs", path: "/docs", Icon: LibraryBig },
-        { title: "Integrations", path: "/integrations", Icon: Unplug },
-        { title: "Self Hosting", path: "/self-hosting", Icon: Server },
-        { title: "Guides", path: "/guides", Icon: FileCode },
-        { title: "AI Engineering Library", path: "/library", Icon: BookOpen },
-        // { title: "FAQ", path: "/faq", Icon: CircleHelp },
-      ].map((item) =>
-        asPath.startsWith(item.path) ? (
-          <div
-            key={item.path}
-            className="group mb-3 flex flex-row items-center gap-3 _text-primary-800 dark:_text-primary-600"
-          >
-            <item.Icon className="w-7 h-7 p-1 border rounded _bg-primary-100 dark:_bg-primary-400/10" />
-            {item.title}
-          </div>
-        ) : (
+    <div className="hidden my-2 md:block">
+      {SECTIONS.map((item) => {
+        const isActive = pathname?.startsWith(item.path);
+        return (
           <Link
             href={item.path}
             key={item.path}
-            className="group mb-3 flex flex-row items-center gap-3 text-gray-500 hover:text-primary/100"
+            className={cn(
+              "flex flex-row gap-3 items-center mb-1.5 group",
+              isActive
+                ? "text-muted-blue"
+                : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            <item.Icon className="w-7 h-7 p-1 border rounded group-hover:bg-border/30" />
+            <item.Icon
+              className={cn(
+                "p-1 w-7 h-7 rounded border",
+                isActive
+                  ? "bg-muted-blue/10 text-muted-blue"
+                  : "group-hover:bg-muted"
+              )}
+            />
             {item.title}
           </Link>
-        )
-      )}
+        );
+      })}
     </div>
   );
 };

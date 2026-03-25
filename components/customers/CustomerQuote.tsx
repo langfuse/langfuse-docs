@@ -70,7 +70,7 @@ export const CustomerQuote = ({
 
   return (
     <div ref={ref} className={`my-24 ${className}`}>
-      <blockquote className="text-2xl font-normal leading-relaxed mb-4 relative">
+      <blockquote className="text-2xl font-normal leading-relaxed mb-4 relative border-none pl-0">
         {/* Hidden text to maintain layout height */}
         <span className="invisible" aria-hidden="true">
           <span className={openingQuoteStyle}>"</span>{quote}<span className={quoteMarkStyle}>"</span>
