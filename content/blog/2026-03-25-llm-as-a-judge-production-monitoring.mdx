@@ -1,0 +1,104 @@
+---
+title: "The Rage Clicks of LLMs: High-Signal Production Monitoring for AI Support Agents"
+date: 2026/03/25
+description: How to use LLM-as-a-judge to detect specific interesting events in your LLM app — not to grade quality, but to catch the signals that tell you something worth acting on just happened.
+tag: engineering
+author: Annabell
+ogImage: /images/blog/2026-03-25-llm-as-a-judge-production-monitoring/og.jpg
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="The Rage Clicks of LLMs: High-Signal Production Monitoring for AI Support Agents"
+  description="How to use LLM-as-a-judge to detect specific interesting events in your LLM app — not to grade quality, but to catch the signals that tell you something worth acting on just happened."
+  date="March 25, 2026"
+  authors={["annabellschafer"]}
+/>
+
+import { Frame } from "@/components/Frame";
+
+Traditional production apps are monitored for high-signal indicators that something's going wrong: rage clicks, error rates, timeouts. These are binary, easy-to-detect signals that tell you immediately when users are unhappy or the app is misbehaving.
+
+LLM-powered apps have the same need — but the problem is harder. Outputs are non-deterministic. A broken response doesn't throw an exception. A user who didn't get what they needed might just silently leave. You can't monitor what you can't measure.
+
+Quality scores and evals are only a part of the picture here. Alongside them, you want event detection: using LLM-as-a-judge not to grade responses, but to detect when something specific and interesting happened in a conversation. Here's how we got there, and what we built.
+
+## It Started With "That Is Not True"
+
+A user was interacting with our support agent. At some point they replied: *"that is not true."*
+
+We pulled up the trace in Langfuse and stepped through the conversation. The agent had given an answer that was confidently wrong — not hallucinated, but outdated. A recent release had changed the behavior the agent was describing, and the documentation hadn't caught up. The agent was working from stale information.
+
+<Frame fullWidth>
+  ![Trace showing user disagreement](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/user-disagreement-trace.png)
+</Frame>
+
+We fixed the docs gap. But the more important question was: how many other conversations like this had we missed? The user who said "that is not true" was the exception — most users who got a wrong answer had just moved on. We'd been lucky to catch this one.
+
+That's what led us to build a dedicated evaluator for user disagreement. Not to grade the quality of responses, but to detect a specific event: the user pushed back. When that fires, it means something broke down and someone should look at it.
+
+## The Mental Model: Event Detection, Not Quality Grading
+
+The key shift: stop asking "how good was this response?" and start asking "did something specific happen here?"
+
+This is how traditional production monitoring works. A rage click isn't a quality metric — it doesn't tell you how good the page is on a scale of 1–5. It tells you that something specific happened: a user clicked something repeatedly in frustration. That signal is binary, actionable, and doesn't require any subjective judgment.
+
+LLM-as-a-judge can work the same way. Instead of asking a model to score helpfulness, ask it a yes/no question: did the user disagree with the assistant? Did the user ask for something outside the agent's scope? Did the assistant say something it shouldn't have?
+
+Good event detectors are:
+- **Binary.** Yes or no — did the event occur? This maps directly to filtering, alerting, and routing.
+- **Narrow.** One check per detector. The more specific the event, the more actionable the signal.
+- **Tied to an action.** Every detector should answer "and then what?" — who sees it, what do they do with it?
+
+## Four Events Worth Detecting
+
+We built template evaluators in Langfuse for each of these, available directly in the app.
+
+### 1. User Disagreement
+
+**What it detects:** The user explicitly pushed back on or corrected the assistant's response.
+
+**Why it matters:** This is the closest LLM equivalent to a 404. Something in the interaction broke down — the knowledge base has a gap, the assistant misunderstood the intent, or the system prompt is steering the model wrong. Unlike a silent exit, a user who disagrees is telling you exactly where it went wrong.
+
+**What to do with it:** Filter traces where this fires and look for patterns. The same topic triggering disagreement repeatedly is a documentation or system prompt fix waiting to happen — exactly like our docs gap above.
+
+### 2. Out-of-Scope Request
+
+**What it detects:** A mismatch between what the user asked and what the agent is designed to do.
+
+**Why it matters:** Every LLM app has a defined scope. When users bump into its edges repeatedly, that's signal — either the scope needs expanding, the system prompt needs better framing, or users need clearer expectations set upfront. If this fires on the same type of request repeatedly, you have a product decision to make.
+
+**What to do with it:** Aggregate by request type. A cluster of similar out-of-scope requests is direct input for your roadmap or onboarding copy.
+
+### 3. User Feedback Surfaced
+
+**What it detects:** The user shared product feedback — a feature request, a bug report, a complaint — in the middle of a conversation.
+
+**Why it matters:** Support conversations are a rich, underutilized source of product signal. Users often share direct feedback in passing during an interaction. Without a detector, that signal disappears into unread logs.
+
+**What to do with it:** Route flagged traces to whoever owns the feedback loop — product, PM, or a dedicated channel. You don't need to read every conversation, just the ones where something worth capturing surfaced.
+
+### 4. Compliance Boundary Crossed
+
+**What it detects:** The assistant shared something it shouldn't have — information outside its authorized scope, internal details, or content that violates your guidelines.
+
+**Why it matters:** As agents handle more context and take on more complex tasks, the risk of inadvertent disclosure goes up. These violations often don't look like errors — they look like helpful responses. You need an explicit check because nothing else will catch it.
+
+**What to do with it:** Treat this like a security monitor. Flag immediately, review promptly.
+
+## Setting This Up in Langfuse
+
+Each of these is available as a template evaluator in Langfuse — you can enable them directly without writing the prompts from scratch. They run as [online evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge), scoring new production traces automatically as they arrive.
+
+If you want to write your own or adapt the templates:
+
+1. **Write a narrow prompt.** Give the conversation as input, ask for yes/no and a one-line reason. Keep the task as specific as possible — the more focused the check, the more reliable the signal.
+2. **Sample.** You don't need to run every trace through every scorer. A 20–30% sample is enough to surface patterns.
+3. **Route the results.** Use Langfuse's filtering to find flagged traces. Connect to Slack, Linear, or wherever your team tracks issues.
+
+## Takeaway
+
+Quality scores tell you how good your app is on average. Event detectors tell you when something specific happened that's worth acting on. Both are useful — but for production monitoring, event detection is the right tool.
+
+Start with user disagreement. It's the clearest signal, the easiest to act on, and the one most likely to surface something real. We found a docs gap on the first week of running it.
