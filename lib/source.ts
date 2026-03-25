@@ -224,6 +224,7 @@ export const MARKETING_SLUGS = [
   "jp",
   "jp-cloud",
   "kr",
+  "non-profit",
   "oss-friends",
   "press",
   "pricing",
