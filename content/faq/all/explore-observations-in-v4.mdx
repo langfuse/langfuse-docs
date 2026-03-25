@@ -7,7 +7,7 @@ tags: [observability, tracing, evaluation]
 
 # Explore Observations in Langfuse Cloud Fast Preview (v4)
 
-In v4, Langfuse replaces the separate traces and observations tables with a **single unified observations table**. Trace input and trace output no longer exist. Removing them was required to eliminate one of the key scaling bottlenecks. All inputs and outputs now live exclusively on observations. Use filters, [saved views](/changelog/save-table-views), and row peek-views to surface the data that matters most.
+In v4, Langfuse replaces the separate traces and observations tables with a **single unified observations table**. Trace input and trace output no longer exist. Removing them was required to eliminate one of the key scaling bottlenecks. All inputs and outputs now live exclusively on observations. Use filters, [saved views](/changelog/2025-05-20-save-table-views), and row peek-views to surface the data that matters most.
 
 For conceptual background, see the [observation-centric data model](/docs/observability/data-model#observation-centric-data-model). For broader release context, see the [Fast Preview (v4) docs](/docs/v4).
 
@@ -15,7 +15,7 @@ For conceptual background, see the [observation-centric data model](/docs/observ
 
 | I want to have… | v3 | v4 |
 |---|---|---|
-| One row per trace | Traces table | Filter to the most relevant span(s) per trace, save as a [saved view](/changelog/save-table-views) |
+| One row per trace | Traces table | Filter to the most relevant span(s) per trace, save as a [saved view](/changelog/2025-05-20-save-table-views) |
 | One row per trace, scoped to a user or session | Traces table → filter by user/session | Same as above, add user_id or session_id filter |
 | Cost, latency, or errors by user, session, or span name | Traces table with filters | [Self-serve dashboards](/docs/metrics) |
 
