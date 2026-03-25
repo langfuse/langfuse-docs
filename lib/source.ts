@@ -287,7 +287,7 @@ const DOC_SECTIONS = {
   users: {
     source: usersSource,
     collection: "customers",
-    title: "Users",
+    title: "User stories",
   },
   handbook: {
     source: handbookSource,
