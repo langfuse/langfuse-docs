@@ -15,6 +15,18 @@ We will keep this page updated as we roll out additional related features and sh
 V4 introduces a **single unified observations table** where all inputs, outputs, and context attributes live directly on observations. See the [guide on working with the observation-centric data model in v4](/faq/all/explore-observations-in-v4) for before/after workflows and saved view setup.
 </Callout>
 
+## Why observations-first?
+
+With traces as the primary entity, the traces table showed one row per request. To find an expensive LLM call, you had to open a trace and scan its children. To find all errors across your project, you had to check traces one by one. With observations-first, you can directly query across all operations — find every GPT-4 call over $0.10, every retrieval that took more than 2 seconds, or every tool call that errored — without knowing which trace they belong to.
+
+As agentic applications produce traces with hundreds or thousands of operations, the trace-level view becomes less useful as a starting point. The observations table lets you start with the question ("which LLM calls are slow?") rather than the container ("which trace has a slow call somewhere inside it?"). The `trace_id` becomes a correlation handle — like `session_id` or `user_id` — that you filter by when you want to see everything in a single request, rather than a top-level entity you browse.
+
+This approach aligns with how modern observability platforms like [Datadog](https://docs.datadoghq.com/tracing/trace_explorer/) and [Honeycomb](https://www.honeycomb.io/blog/structured-events-basis-observability) have evolved: a flat, filterable table of spans with rich attributes as the primary exploration surface, with trace waterfall views available as a drill-down for investigating individual requests.
+
+<Callout type="info">
+**Tip:** To recreate the old traces-table experience, filter for root spans (observations with no parent) and save it as a [saved view](/changelog/2025-05-20-save-table-views). We recommend this as one of your first saved views when getting started with v4.
+</Callout>
+
 ## Get access to the preview
 
 

@@ -168,6 +168,25 @@ With faster load times, expanded filter capabilities, and saved views this becom
 The `trace_id` becomes a correlation handle—like `session_id` or `user_id`—rather than its own top-level entity.
 This also resolves a long-standing source of confusion around the two-entity model.
 
+This isn't a novel pattern.
+Datadog's [Trace Explorer](https://docs.datadoghq.com/tracing/trace_explorer/) defaults to a flat list of spans, using faceted filters and saved views as the primary navigation mechanism.
+Honeycomb built their entire platform around the idea that [structured events are the basis of observability](https://www.honeycomb.io/blog/structured-events-basis-observability) — one span equals one event, and traces are just a visualization you stitch together from events sharing a trace ID.
+The broader observability community has been moving in this direction: Ivan Burmistrov's widely circulated essay ["All you need is Wide Events"](https://isburmistrov.substack.com/p/all-you-need-is-wide-events-not-metrics) argues that the separation into metrics, logs, and traces is artificial — what matters is a single table of wide, richly attributed events that you can slice by any dimension.
+
+For Langfuse users, this means the observations table is now the primary workspace.
+Filters, sorting, and [saved views](/changelog/2025-05-20-save-table-views) replace the old traces-table browsing.
+The trace waterfall view isn't going away — it's still one click away from any observation row when you need the full picture of a request.
+But discovery starts with the flat table: filter by model, cost, latency, user, session, or error status to find the observations that matter, then drill into the trace for context.
+
+### What this means for how you use Langfuse
+
+For users upgrading to the new experience, here is the practical shift:
+
+- **The observations table is your starting point.** Instead of scanning a list of traces, use filters to surface the operations you care about — expensive LLM calls, errors, slow retrievals. Each row is one operation with all its context (input, output, cost, latency, metadata) directly available.
+- **Saved views replace the traces table.** Create a saved view that filters for root spans to get the familiar one-row-per-trace view. Then create additional views for your most common debugging workflows. Most teams find they need 2-3 views to feel productive.
+- **`trace_id` is a filter, not a destination.** When you want to see all operations in a single request, filter by `trace_id`. When you want to see all operations for a user, filter by `user_id`. They work the same way — `trace_id` is no longer special.
+- **The trace waterfall is a drill-down, not the entry point.** Click any observation row to open its full trace context. The flat table is for discovery; the waterfall is for investigation.
+
 ## Road to V4: Implementation Hurdles
 
 ### Dual Write

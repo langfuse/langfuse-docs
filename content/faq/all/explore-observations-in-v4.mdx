@@ -7,9 +7,30 @@ tags: [observability, tracing, evaluation]
 
 # Explore Observations in Langfuse Cloud Fast Preview (v4)
 
-In v4, Langfuse replaces the separate traces and observations tables with a **single unified observations table**. Trace input and trace output no longer exist. Removing them was required to eliminate one of the key scaling bottlenecks. All inputs and outputs now live exclusively on observations. Use filters, [saved views](/changelog/2025-05-20-save-table-views), and row peek-views to surface the data that matters most.
+## How to think about the new model
+
+In v4, every operation your application performs — LLM calls, tool executions, retrievals, agent steps — is a first-class row in a single table. Think of it like a spreadsheet where each row is one operation, and you can slice by any column. The trace is just one column (`trace_id`) that groups related operations together, the same way `session_id` or `user_id` groups things.
+
+This is more powerful than the old two-table model: instead of opening a trace and then scanning its children to find what went wrong, you can directly query across all operations. Find every GPT-4 call over $0.10, every retrieval that took more than 2 seconds, or every tool call that errored — without knowing which trace they belong to.
+
+You will notice more rows in the table than before — that's expected. Each row is now one operation, not one trace. The key is to use filters and [saved views](/changelog/2025-05-20-save-table-views) to focus on what matters. Most users start with "root spans only" or "generations only" and go from there.
 
 For conceptual background, see the [observation-centric data model](/docs/observability/data-model#underlying-data-model). For broader release context, see the [Fast Preview (v4) docs](/docs/v4).
+
+## Common views (recipes)
+
+These are some of the most useful starting points. Each can be saved as a [saved view](/changelog/2025-05-20-save-table-views) for one-click access.
+
+| I want to see… | How to filter |
+|---|---|
+| All traces (like the old table) | Filter for root spans (observations with no parent), save as a view |
+| All LLM generations | Filter `type = generation` |
+| Expensive LLM calls | Filter `type = generation`, sort by `total_cost` descending |
+| Errors for a specific user | Filter by `user_id` and `level = ERROR` |
+| Slow spans in a session | Filter by `session_id`, sort by `latency` descending |
+| All operations for one trace | Filter by `trace_id` |
+
+We recommend setting up 2-3 saved views for your most common debugging workflows so the observations table feels immediately useful to your team.
 
 ## Before → After
 
@@ -66,8 +87,12 @@ If this happens, upgrade to Python SDK v4 or JS/TS SDK v5, or add the ingestion 
 
 ### How can I make this look more like the old traces table?
 
-Create a saved view that filters to the root observation representing the start of each trace in your application.
-That gives you a stable, trace-like list while still letting you drill into lower-level observations when needed.
+Create a saved view that filters to the root observation representing the start of each trace in your application (observations with no parent).
+That gives you a stable, trace-like list while still letting you drill into lower-level observations when needed. We recommend naming this view "Traces" so it feels familiar to your team.
+
+### The table shows too many rows — how do I make sense of it?
+
+This is the most common reaction when first switching to the observations table. The old traces table showed one row per request; the new table shows every operation. The solution is filters and saved views — not scrolling. Start by filtering for root spans to get the trace-like view, then gradually explore more specific views (e.g., "all generations," "errors only"). Once you save 2-3 views that match your debugging workflows, the table will feel more focused than the old traces table, not less.
 
 ### Can I get the old experience back?
 
