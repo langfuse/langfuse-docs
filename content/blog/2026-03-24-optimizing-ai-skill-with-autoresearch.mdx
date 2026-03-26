@@ -23,14 +23,9 @@ import { Frame } from "@/components/Frame";
 
 [Autoresearch](https://github.com/karpathy/autoresearch) is a minimal ~630-line Python script that automates the experimentation loop. An outer "optimizer" agent reads a target file, generates a hypothesis for how to improve it, and makes changes. An inner loop then runs the modified file against an evaluator that scores the result. If the score improves, the change is kept; if not, it's discarded. This repeats indefinitely, you just kill it when you're done.
 
-There are three main files in the package: 
-
-| Ingredient | Description |
-|------------|-------------|
-| `train.py` | The file being optimized |
-| `prepare.py` | Data prep, dataloader, and evaluation — the target function you're scoring against |
-| `program.md` | Instructions for the optimizer agent |
-| `results.tsv` | Experiment log (generated at runtime) |
+<Frame fullWidth>
+  ![Autoresearch loop](/images/blog/2026-03-24-optimizing-ai-skill-with-autoresearch/autoresearch-loop.png)
+</Frame>
 
 The result is hands-off iteration at machine speed. Karpathy reported ~12 experiments per hour, meaning ~100 experiments overnight.
 
@@ -44,7 +39,7 @@ The Langfuse skill is quite broad. It has instructions for general best practice
       <FileTree.File name="SKILL.md" />
       <FileTree.Folder name="references" defaultOpen>
         <FileTree.File name="instrumentation.md" />
-        <FileTree.File name="prompt-migration.md ←" />
+        <FileTree.File name="prompt-migration.md" />
         <FileTree.File name="..." />
       </FileTree.Folder>
     </FileTree.Folder>
@@ -61,7 +56,6 @@ To make this approach work for an AI skill, we made a couple of adaptations to t
 | `prepare.py` | `evaluate.py` | Evaluation harness: runs `claude -p "Migrate my prompts to Langfuse"` against test codebases and scores the result based on a target function |
 | `program.md` | `program.md` | Instructions for the optimizer agent |
 |  | `test_cases repo` | A repository with example code bases that contain hardcoded prompts |
-| `results.tsv` | `results.tsv` | Experiment log |
 
 We used the following target function:
 
@@ -367,6 +361,10 @@ Autoresearch added an explicit step: "Before writing ANY code, make a complete l
 **1. Skipping doc fetching**
 
 The main skill file says "Documentation First: always fetch current docs before writing code" because Langfuse updates frequently. Autoresearch changed this to "For tasks covered by a reference file, follow that file directly." This saves turns and improves the efficiency score. It also means the skill will silently use outdated instructions when the API changes. While this improved executions for the test harness today, it will break in production tomorrow.
+
+<Frame fullWidth>
+  ![Doc fetching diff](/images/blog/2026-03-24-optimizing-ai-skill-with-autoresearch/doc-fetching-diff.png)
+</Frame>
 
 **2. Removing the approval gate and switching to curl**
 
