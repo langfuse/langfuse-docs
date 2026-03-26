@@ -110,15 +110,11 @@ The full call tree is stitched together across language boundaries, with no manu
 
 ### Debugging agent chains with trace data
 
-Seeing the full trace across services helps with latency and cost analysis; the deeper value is debugging agent reasoning. An agentic pipeline is a chain of LLM calls where each step’s output feeds into the next. When the final response is wrong, the root cause is often not the last generation-it is often a misleading intermediate output several steps earlier that sent the rest of the chain in the wrong direction.
+In an agentic pipeline, the root cause of a wrong final response is often a misleading intermediate output several steps earlier. Without structured traces, that is hard to diagnose as individual step logs look fine in isolation, but the reasoning divergence only shows up when you see the full chain in sequence.
 
-Without structured traces, that is hard to diagnose. The final response looks wrong, but logs for each individual step may look reasonable in isolation. The issue only shows up when engineers can see the full chain of prompts and completions in sequence and pinpoint where the reasoning diverged.
+The typed trace tree makes the causal chain explicit. Each generation node records the full prompt and completion, so Cresta’s engineers can walk from root to leaf and pinpoint exactly where the output went wrong - for example, intent detection returning “billing inquiry” when the customer was asking about a cancellation, with every downstream step following that incorrect signal.
 
-That is where the typed trace tree helps. Each generation node records the full prompt (including context injected from prior steps) and the completion returned. Walking the tree from root to leaf, Cresta’s team can identify the specific step where the output diverged-for example, intent detection returning “billing inquiry” when the customer was actually asking about a service cancellation, with every downstream step following that incorrect signal.
-
-The trace makes the causal chain explicit. Instead of guessing what went wrong and re-running the pipeline with ad hoc logging, engineers can inspect each prompt, each completion, and each handoff between steps.
-
-The [Playground](/docs/prompt-management/features/playground) goes further. After engineers identify the problematic generation, they can replay the chain from that point with modified [prompts](/docs/prompt-management/overview) while keeping prior inputs and context fixed-without reproducing the full end-to-end request or standing up test fixtures. They edit the prompt at the failing step, re-run, and see how the change propagates through the rest of the chain. The iteration cycle shifts from “ship a prompt change to staging and wait for a similar request” to “replay this exact failure with a candidate fix in seconds.”
+The [Playground](/docs/prompt-management/features/playground) goes further: engineers can replay the chain from the failing step with a modified [prompt](/docs/prompt-management/overview), keeping prior context fixed, and see the fix propagate in seconds rather than waiting for similar production traffic.
 
 ## What comes next
 
