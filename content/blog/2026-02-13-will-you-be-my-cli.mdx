@@ -58,10 +58,10 @@ We've published three Langfuse-specific skills to start with, more will follow:
   ![Skills](/images/blog/2026-02-13-will-you-be-my-cli/skills-2.png)
 </Frame>
 
-**What are Skills?**  
+**What are Skills?**
 Skills follow the open [Agent Skills](https://github.com/anthropics/skills) standard. Each skill is a self-contained folder with a `SKILL.md` entrypoint that combines YAML frontmatter (metadata and trigger conditions) with markdown instructions. Skills can optionally bundle supporting files like reference docs, templates, and executable scripts. They work across Claude Code, Cursor, and other compatible AI coding agents. (For a deep dive, see this [guide to building skills](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf?hsLang=en).)
 
-**How They Work**  
+**How They Work**
 Skills use a progressive disclosure model: the YAML frontmatter (name, description, trigger phrases) is always loaded into the agent's context so it knows when a skill is relevant, but the full instructions are only loaded on demand. This keeps context usage low while giving agents access to specialized knowledge. Unlike documentation that tells you what is possible, skills provide step-by-step workflows with decision trees, error handling, and best practices — they tell agents _how_ to accomplish a specific goal. Multiple skills can be loaded simultaneously, and they compose well with CLI tools and MCP servers.
 
 <Tabs items={["Main Langfuse Skill", "Observability Skill"]}>
@@ -204,7 +204,7 @@ It's a CLI tool built on [specli](https://github.com/vercel-labs/specli) that ge
   ![Langfuse CLI](/images/blog/2026-02-13-will-you-be-my-cli/cli.png)
 </Frame>
 
-**For Agents: Reference in the Langfuse Skill**  
+**For Agents: Reference in the Langfuse Skill**
 In the main Langfuse Skill (see above) we include a reference that teaches AI agents how to use the CLI:
 
 ````markdown filename="skills/langfuse/references/cli.md"
@@ -303,7 +303,7 @@ We exposed a public RAG endpoint as a REST API and included it in our Skill. Thi
 
 Instead of reading through dozens of documentation pages, agents can ask natural language questions and get synthesized answers with source citations.
 
-**The RAG API**  
+**The RAG API**
 Any agent (or human) can now query Langfuse docs without authentication:
 
 ```shell
@@ -327,7 +327,7 @@ Response:
 }
 ```
 
-**Implementation**  
+**Implementation**
 We are using [Inkeep](https://inkeep.com/) to power [Ask AI](/docs/ask-ai) on our website and it also exposes a [RAG API](https://docs.inkeep.com/ai-api/rag-mode/http-request) with raw access to the data:
 
 ```ts
@@ -362,7 +362,7 @@ We implemented [llms.txt](https://langfuse.com/llms.txt), a standard proposed by
   ![llms.txt overview](/images/blog/2026-02-13-will-you-be-my-cli/llms.txt.png)
 </Frame>
 
-**What is llms.txt?**  
+**What is llms.txt?**
 It's a simple markdown file that gives LLMs a high-level overview and links to detailed documentation—all in one place. Here's what ours looks like:
 
 ```markdown filename="https://langfuse.com/llms.txt"
@@ -377,13 +377,13 @@ Connect to the Langfuse Docs MCP server to access documentation...
 
 ## Docs
 
-- [Observability Overview](/docs/observability/overview.md)
-- [Prompt Management](/docs/prompt-management/overview.md)
-- [Evaluation](/docs/evaluation/overview.md)
+- [Observability Overview](/docs/observability/overview)
+- [Prompt Management](/docs/prompt-management/overview)
+- [Evaluation](/docs/evaluation/overview)
   ...
 ```
 
-**Implementation**  
+**Implementation**
 We auto-generate this file from our sitemap using a [simple Node.js script](https://github.com/langfuse/langfuse-docs/blob/main/scripts/generate_llms_txt.js) that runs at build time:
 
 ```javascript
@@ -413,14 +413,14 @@ We also built a public, unauthenticated MCP server specifically for documentatio
   ![Docs MCP Server](/images/blog/2026-02-13-will-you-be-my-cli/mcp.png)
 </Frame>
 
-**What It Provides**  
+**What It Provides**
 The docs MCP server exposes three tools:
 
 1. **`searchLangfuseDocs`** \- Semantic search over all documentation
 2. **`getLangfuseDocsPage`** \- Fetch specific pages as markdown
 3. **`getLangfuseOverview`** \- Get the documentation index (llms.txt)
 
-**Installation**  
+**Installation**
 No authentication required. Works in Cursor, VS Code, Claude Desktop, and any MCP-compatible client:
 
 ```json
@@ -456,7 +456,7 @@ For this, we built an authenticated MCP server that provides access to your Lang
 
 We have written in more detail about how it works and how we built it here: [Blog: Building Langfuse’s MCP Server](https://langfuse.com/blog/2025-12-09-building-langfuse-mcp-server)
 
-**Authentication**  
+**Authentication**
 The MCP server uses your Langfuse API keys (public and secret key) to authenticate and access your project data. This gives agents the same level of access you have through the web UI or API.
 
 ```json
