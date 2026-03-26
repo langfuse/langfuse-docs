@@ -17,7 +17,7 @@ You will notice more rows in the table than before — that's expected. Each row
 
 For conceptual background, see the [observation-centric data model](/docs/observability/data-model#underlying-data-model). For broader release context, see the [Fast Preview (v4) docs](/docs/v4).
 
-## Common views (recipes)
+## Common views
 
 These are some of the most useful starting points. Each can be saved as a [saved view](/changelog/2025-05-20-save-table-views) for one-click access.
 
@@ -27,19 +27,12 @@ These are some of the most useful starting points. Each can be saved as a [saved
 | All LLM generations | Filter `type = generation` |
 | Expensive LLM calls | Filter `type = generation`, sort by `total_cost` descending |
 | Errors for a specific user | Filter by `user_id` and `level = ERROR` |
-| Slow observations in a session | Filter by `session_id`, sort by `latency` descending |
+| Operations scoped to a session | Filter by `session_id`, sort by `latency` descending |
 | All operations for one trace | Filter by `trace_id` |
 | Model performance comparison | Filter `type = generation`, group by `model` in a [dashboard](/docs/metrics) or sort by `model` column |
+| Cost, latency, or errors by dimension | [Self-serve dashboards](/docs/metrics) |
 
 We recommend setting up 2-3 saved views for your most common debugging workflows so the observations table feels immediately useful to your team.
-
-## Before → After
-
-| I want to have… | v3 | v4 |
-|---|---|---|
-| Specific operations across traces | Not directly possible — had to open traces individually | Filter by observation name, type, model, or any attribute, then save as a [saved view](/changelog/2025-05-20-save-table-views) |
-| Operations scoped to a user or session | Traces table → filter by user/session | Filter by `user_id` or `session_id` directly on the observations table |
-| Cost, latency, or errors by user, session, or observation name | Traces table with filters | [Self-serve dashboards](/docs/metrics) |
 
 <Video
   src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
