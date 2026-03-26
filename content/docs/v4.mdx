@@ -21,7 +21,7 @@ With traces as the primary entity, the traces table showed one row per request. 
 
 As agentic applications produce traces with hundreds or thousands of operations, the trace-level view becomes less useful as a starting point. The observations table lets you start with the question ("which LLM calls are slow?") rather than the container ("which trace has a slow call somewhere inside it?"). The `trace_id` becomes a correlation handle — like `session_id` or `user_id` — that you filter by when you want to see everything in a single request, rather than a top-level entity you browse.
 
-This approach aligns with how modern observability platforms like [Datadog](https://docs.datadoghq.com/tracing/trace_explorer/) and [Honeycomb](https://www.honeycomb.io/blog/structured-events-basis-observability) have evolved: a flat, filterable table of observations with rich attributes as the primary exploration surface, with trace waterfall views available as a drill-down for investigating individual requests.
+This approach aligns with where the observability community is heading — what Charity Majors calls [Observability 2.0](https://charity.wtf/tag/observability-2-0/) and what Ivan Burmistrov describes as [Wide Events](https://isburmistrov.substack.com/p/all-you-need-is-wide-events-not-metrics): a flat, filterable table of richly attributed observations as the primary exploration surface, with trace waterfall views available as a drill-down for investigating individual requests.
 
 <Callout type="info">
 **Tip:** To recreate the old traces-table experience, filter for root observations (observations with no parent) and save it as a [saved view](/changelog/2025-05-20-save-table-views). We recommend this as one of your first saved views when getting started with v4.
