@@ -51,6 +51,8 @@ type Tier = {
   id: string;
   href: string;
   featured: boolean;
+  cardClassName?: string;
+  pillClassName?: string;
   description: string;
   pill?: React.ReactNode;
   price: string;
@@ -233,6 +235,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-self-hosted-enterprise",
       href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
       featured: false,
+      cardClassName:
+        "border-[#FAFF6A] bg-[#FAFF6A12] dark:bg-[#FAFF6A14] dark:border-[#FAFF6A]",
+      pillClassName: "bg-[#FAFF6A] text-[#1A1A1A]",
       description:
         "Dedicated Langfuse deployment with enterprise capabilities and support.",
       pill: (
@@ -1405,13 +1410,19 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
             key={tier.id}
             className={cn(
               tier.featured && "border-primary",
+              tier.cardClassName,
               "relative h-full flex flex-col",
               selectedTiers.length === 1 && "w-full max-w-lg",
             )}
           >
             {tier.pill && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full bg-primary text-primary-foreground">
+                <div
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full",
+                    tier.pillClassName ?? "bg-primary text-primary-foreground",
+                  )}
+                >
                   {tier.pill}
                 </div>
               </div>
