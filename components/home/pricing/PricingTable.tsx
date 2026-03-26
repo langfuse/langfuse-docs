@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/hover-card";
 import { TrustedBy } from "../components/TrustedBy";
 import { trustedByData } from "@/data/trusted-by";
+import Image from "next/image";
 
 // Reusable graduated pricing text with calculator link
 const GraduatedPricingText = () => {
@@ -47,10 +48,12 @@ type DeploymentOption = "cloud" | "selfHosted";
 
 type Tier = {
   name: string;
+  displayName?: string;
   id: string;
   href: string;
   featured: boolean;
   description: string;
+  pill?: React.ReactNode;
   price: string;
   priceUnit?: string;
   mainFeatures: (string | React.ReactNode)[];
@@ -86,6 +89,8 @@ type Tier = {
 const TEAMS_ADDON = "Teams add-on";
 const YEARLY_COMMITMENT = "Yearly Commitment";
 const ENTERPRISE = "Enterprise";
+const SELF_HOSTED_OPEN_SOURCE = "Open Source";
+const SELF_HOSTED_ENTERPRISE = "Enterprise";
 
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
@@ -208,7 +213,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
   ],
   selfHosted: [
     {
-      name: "Open Source",
+      name: SELF_HOSTED_OPEN_SOURCE,
       id: "tier-self-hosted-oss",
       href: "/self-hosting",
       featured: true,
@@ -224,29 +229,44 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Community support",
       ],
       cta: "Deployment guide",
-      addOn: {
-        name: "Enterprise",
-        price: "Custom Pricing",
-        mainFeatures: [
-          "All Open Source features",
-          "Management APIs",
-          "Project-level RBAC",
-          "Data Retention Policies",
-          "Audit Logs",
-          "ISO27001 and InfoSec reviews",
-          "Dedicated support engineer",
-          "Support SLA",
-          "Billing via AWS Marketplace",
-          "Billing via Invoice",
-        ],
-        cta: {
-          text: "Talk to sales",
-          href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
-        },
-        calloutLink: {
-          text: "Enterprise FAQ",
-          href: "/enterprise",
-        },
+    },
+    {
+      name: SELF_HOSTED_ENTERPRISE,
+      id: "tier-self-hosted-enterprise",
+      href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
+      featured: false,
+      description:
+        "Dedicated Langfuse deployment with enterprise capabilities and support",
+      pill: (
+        <>
+          <span className="inline-flex rounded-sm p-0.5">
+            <Image
+              src="/images/logos/clickhouse_icon.svg"
+              alt=""
+              width={14}
+              height={14}
+              className="size-3.5 rounded-[2px]"
+            />
+          </span>
+          ClickHouse Cloud / BYOC / Private
+        </>
+      ),
+      price: "Custom Pricing",
+      mainFeatures: [
+        "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
+        "Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private",
+        "Langfuse pricing is additive to your ClickHouse commercial plan",
+        "Dedicated support engineer for deployment and hosting guidance",
+        "Solutions architect support during evaluation and rollout",
+        "Direct access to the product team for feedback",
+        "SOC 2 Type II and ISO 27001 reports",
+        "Support SLA",
+        "Billing via AWS Marketplace or invoice",
+      ],
+      cta: "Talk to sales",
+      calloutLink: {
+        text: "Enterprise FAQ",
+        href: "/enterprise",
       },
     },
   ],
@@ -811,6 +831,86 @@ const sections: Section[] = [
     ],
   },
   {
+    name: "Deployment",
+    href: "/self-hosting",
+    features: [
+      {
+        name: "ClickHouse deployment model",
+        description:
+          "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private.",
+        tiers: {
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: "Self-managed ClickHouse OSS",
+            [SELF_HOSTED_ENTERPRISE]:
+              "Bundled: ClickHouse Cloud / BYOC / Private",
+          },
+        },
+      },
+      {
+        name: "Deployment templates",
+        description:
+          "Use Langfuse deployment docs and templates for supported self-hosted setups.",
+        href: "/self-hosting",
+        tiers: {
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: true,
+            [SELF_HOSTED_ENTERPRISE]: true,
+          },
+        },
+      },
+      {
+        name: "Local (Docker Compose)",
+        href: "/self-hosting/deployment/docker-compose",
+        tiers: {
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: true,
+            [SELF_HOSTED_ENTERPRISE]: true,
+          },
+        },
+      },
+      {
+        name: "Kubernetes (Helm)",
+        href: "/self-hosting/deployment/kubernetes-helm",
+        tiers: {
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: true,
+            [SELF_HOSTED_ENTERPRISE]: true,
+          },
+        },
+      },
+      {
+        name: "AWS (Terraform)",
+        href: "/self-hosting/deployment/aws",
+        tiers: {
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: true,
+            [SELF_HOSTED_ENTERPRISE]: true,
+          },
+        },
+      },
+      {
+        name: "Azure (Terraform)",
+        href: "/self-hosting/deployment/azure",
+        tiers: {
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: true,
+            [SELF_HOSTED_ENTERPRISE]: true,
+          },
+        },
+      },
+      {
+        name: "GCP (Terraform)",
+        href: "/self-hosting/deployment/gcp",
+        tiers: {
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: true,
+            [SELF_HOSTED_ENTERPRISE]: true,
+          },
+        },
+      },
+    ],
+  },
+  {
     name: "Support",
     href: "/support",
     features: [
@@ -856,6 +956,8 @@ const sections: Section[] = [
       {
         name: "Dedicated Support Engineer",
         href: "/support#onboarding",
+        description:
+          "Includes deployment and hosting guidance for your dedicated Langfuse environment.",
         tiers: {
           cloud: {
             Hobby: false,
@@ -869,6 +971,8 @@ const sections: Section[] = [
       {
         name: "Onboarding & Architectural guidance",
         href: "/support#onboarding",
+        description:
+          "Deployment, hosting, and rollout guidance for production self-hosted environments.",
         tiers: {
           cloud: {
             Hobby: false,
@@ -878,6 +982,28 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": ENTERPRISE,
+          },
+        },
+      },
+      {
+        name: "Solutions architect support",
+        description:
+          "Pre-sales and rollout support for architecture planning and deployment readiness.",
+        tiers: {
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: false,
+            [SELF_HOSTED_ENTERPRISE]: true,
+          },
+        },
+      },
+      {
+        name: "Product team feedback channel",
+        description:
+          "Direct access to the Langfuse product team for roadmap and product feedback.",
+        tiers: {
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: false,
+            [SELF_HOSTED_ENTERPRISE]: true,
           },
         },
       },
@@ -924,21 +1050,6 @@ const sections: Section[] = [
             Core: "US or EU",
             Pro: "US or EU",
             Enterprise: "US or EU",
-          },
-        },
-      },
-      {
-        name: "Data masking",
-        href: "/docs/observability/features/masking",
-        tiers: {
-          cloud: {
-            Hobby: true,
-            Core: true,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
           },
         },
       },
@@ -993,6 +1104,32 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": true },
+        },
+      },
+      {
+        name: "Client-side data masking",
+        href: "/docs/observability/features/masking",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: true,
+            [SELF_HOSTED_ENTERPRISE]: true,
+          },
+        },
+      },
+      {
+        name: "Server-side data masking",
+        href: "/self-hosting/security/data-masking",
+        tiers: {
+          selfHosted: {
+            [SELF_HOSTED_OPEN_SOURCE]: false,
+            [SELF_HOSTED_ENTERPRISE]: true,
+          },
         },
       },
       {
@@ -1250,6 +1387,44 @@ const FeatureDetails = ({
   );
 };
 
+const getFeatureValue = ({
+  feature,
+  tierName,
+  variant,
+}: {
+  feature: Section["features"][number];
+  tierName: string;
+  variant: DeploymentOption;
+}): boolean | string | React.ReactNode => {
+  const tierValues = feature.tiers[variant];
+
+  if (!tierValues) {
+    return false;
+  }
+
+  if (variant !== "selfHosted") {
+    return tierValues[tierName] ?? false;
+  }
+
+  const directValue = tierValues[tierName];
+
+  if (directValue === ENTERPRISE) {
+    return tierName === SELF_HOSTED_ENTERPRISE;
+  }
+
+  if (tierName in tierValues) {
+    return directValue ?? false;
+  }
+
+  const openSourceValue = tierValues[SELF_HOSTED_OPEN_SOURCE];
+
+  if (tierName === SELF_HOSTED_ENTERPRISE) {
+    return openSourceValue === ENTERPRISE ? true : (openSourceValue ?? false);
+  }
+
+  return openSourceValue === ENTERPRISE ? false : (openSourceValue ?? false);
+};
+
 // Helper component for feature cell rendering
 const FeatureCell = ({
   value,
@@ -1287,8 +1462,7 @@ const FeatureCell = ({
               <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
-              Available as part of the Enterprise add-on for self-hosted
-              deployments.
+              Available on Enterprise.
             </HoverCardContent>
           </HoverCard>
         )}
@@ -1321,172 +1495,177 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
         "mt-12",
         selectedTiers.length === 1
           ? "flex justify-center"
-          : "grid grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
+          : "grid grid-cols-1 gap-y-6 gap-x-6 md:grid-cols-2 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
         selectedTiers.length === 4 && "lg:grid-cols-4",
         selectedTiers.length === 3 && "lg:grid-cols-3",
         selectedTiers.length === 2 && "lg:grid-cols-2",
       )}
     >
-      {selectedTiers.map((tier) => (
-        <Card
-          key={tier.id}
-          className={cn(
-            tier.featured && "border-primary",
-            "relative h-full flex flex-col",
-            selectedTiers.length === 1 && "w-full max-w-lg",
-          )}
-        >
-          {/* Unlimited Users callout for Core and Pro */}
-          {variant === "cloud" &&
-            (tier.name === "Core" || tier.name === "Pro") && (
+      {selectedTiers.map((tier) => {
+        const topPill =
+          variant === "cloud" && (tier.name === "Core" || tier.name === "Pro")
+            ? "Unlimited Users"
+            : tier.pill;
+
+        return (
+          <Card
+            key={tier.id}
+            className={cn(
+              tier.featured && "border-primary",
+              "relative h-full flex flex-col",
+              selectedTiers.length === 1 && "w-full max-w-lg",
+            )}
+          >
+            {topPill && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <div className="inline-block px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full bg-primary text-primary-foreground">
-                  Unlimited Users
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full bg-primary text-primary-foreground">
+                  {topPill}
                 </div>
               </div>
             )}
 
-          <CardHeader className="p-4 text-left lg:p-6">
-            <CardTitle className="text-lg font-semibold text-foreground">
-              {tier.name}
-            </CardTitle>
-            <CardDescription className="text-left max-w-[18ch]">
-              {tier.description}
-              {tier.learnMore && (
-                <>
-                  {" "}
-                  <Link href={tier.learnMore} className="underline">
-                    Learn more
-                  </Link>
-                  .
-                </>
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0 px-4 lg:px-6">
-            {/* Price information */}
-            <div className="h-[60px] flex items-baseline">
-              <span className="text-3xl font-bold">{tier.price}</span>
-              <span className="ml-1 text-sm leading-4">
-                {tier.price.includes("$")
-                  ? tier.priceUnit
-                    ? `/ ${tier.priceUnit}`
-                    : "/ month"
-                  : ""}
-              </span>
-            </div>
-
-            <div>
-              {tier.ctaCallout ? (
-                <div className="flex gap-2">
-                  <Button
-                    className="flex-1"
-                    variant={tier.featured ? "default" : "outline"}
-                    asChild
-                  >
-                    <Link href={tier.href}>{tier.cta}</Link>
-                  </Button>
-                  <Button className="flex-1" variant="secondary" asChild>
-                    <Link href={tier.ctaCallout.href}>
-                      {tier.ctaCallout.text}
+            <CardHeader className="p-4 text-left lg:p-6">
+              <CardTitle className="text-lg font-semibold text-foreground">
+                {tier.displayName ?? tier.name}
+              </CardTitle>
+              <CardDescription className="text-left max-w-[24ch]">
+                {tier.description}
+                {tier.learnMore && (
+                  <>
+                    {" "}
+                    <Link href={tier.learnMore} className="underline">
+                      Learn more
                     </Link>
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <Button
-                    className="w-full"
-                    variant={tier.featured ? "default" : "outline"}
-                    asChild
-                  >
-                    <Link href={tier.href}>{tier.cta}</Link>
-                  </Button>
-                </>
-              )}
-            </div>
-
-            {/* Callouts for different tiers - always render container for alignment */}
-            <div className="p-6 h-[30px] flex items-center justify-center">
-              {tier.calloutLink ? (
-                <div className="text-xs text-center text-muted-foreground">
-                  <Link
-                    href={tier.calloutLink.href}
-                    className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
-                  >
-                    {tier.calloutLink.text}
-                  </Link>
-                </div>
-              ) : null}
-            </div>
-          </CardContent>
-
-          {/* Trusted by section for cloud tiers */}
-          {variant === "cloud" && (
-            <>
-              <div className="border-t"></div>
-              <TrustedBy customers={trustedByData.cloud[tier.name]} />
-            </>
-          )}
-          <div className="border-t"></div>
-          <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6">
-            <ul className="space-y-2.5 text-sm">
-              {tier.mainFeatures.map((feature, index) => (
-                <li key={index} className="flex space-x-2">
-                  <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                  <span className="text-muted-foreground">{feature}</span>
-                </li>
-              ))}
-            </ul>
-            {tier.addOn && (
-              <div className="relative p-3 pt-4 mt-3 w-full rounded border">
-                <div className="absolute top-0 left-1/2 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-card text-muted-foreground">
-                  + optional
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-bold text-primary">
-                    {tier.addOn.name}
-                  </span>
-                  {tier.addOn.price && (
-                    <span className="text-sm font-bold text-primary">
-                      {tier.addOn.price}
-                    </span>
-                  )}
-                </div>
-                <ul className="mt-1 space-y-1 text-sm">
-                  {tier.addOn.mainFeatures.map((feature) => (
-                    <li key={feature} className="flex space-x-2">
-                      <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                {tier.addOn.cta && (
-                  <Button
-                    className="mt-3 w-full"
-                    variant="secondary"
-                    size="sm"
-                    asChild
-                  >
-                    <Link href={tier.addOn.cta.href}>
-                      {tier.addOn.cta.text}
-                    </Link>
-                  </Button>
+                    .
+                  </>
                 )}
-                {tier.addOn.calloutLink && (
-                  <div className="mt-2 text-xs text-center text-muted-foreground">
-                    <Link
-                      href={tier.addOn.calloutLink.href}
-                      className="underline hover:text-primary"
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0 px-4 lg:px-6">
+              {/* Price information */}
+              <div className="h-[60px] flex items-baseline">
+                <span className="text-3xl font-bold">{tier.price}</span>
+                <span className="ml-1 text-sm leading-4">
+                  {tier.price.includes("$")
+                    ? tier.priceUnit
+                      ? `/ ${tier.priceUnit}`
+                      : "/ month"
+                    : ""}
+                </span>
+              </div>
+
+              <div>
+                {tier.ctaCallout ? (
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1"
+                      variant={tier.featured ? "default" : "outline"}
+                      asChild
                     >
-                      {tier.addOn.calloutLink.text}
+                      <Link href={tier.href}>{tier.cta}</Link>
+                    </Button>
+                    <Button className="flex-1" variant="secondary" asChild>
+                      <Link href={tier.ctaCallout.href}>
+                        {tier.ctaCallout.text}
+                      </Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Button
+                      className="w-full"
+                      variant={tier.featured ? "default" : "outline"}
+                      asChild
+                    >
+                      <Link href={tier.href}>{tier.cta}</Link>
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              {/* Callouts for different tiers - always render container for alignment */}
+              <div className="p-6 h-[30px] flex items-center justify-center">
+                {tier.calloutLink ? (
+                  <div className="text-xs text-center text-muted-foreground">
+                    <Link
+                      href={tier.calloutLink.href}
+                      className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
+                    >
+                      {tier.calloutLink.text}
                     </Link>
                   </div>
-                )}
+                ) : null}
               </div>
+            </CardContent>
+
+            {/* Trusted by section for cloud tiers */}
+            {variant === "cloud" && (
+              <>
+                <div className="border-t"></div>
+                <TrustedBy customers={trustedByData.cloud[tier.name]} />
+              </>
             )}
-          </CardFooter>
-        </Card>
-      ))}
+            <div className="border-t"></div>
+            <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6">
+              <ul className="space-y-2.5 text-sm">
+                {tier.mainFeatures.map((feature, index) => (
+                  <li key={index} className="flex space-x-2">
+                    <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                    <span className="text-muted-foreground">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              {tier.addOn && (
+                <div className="relative p-3 pt-4 mt-3 w-full rounded border">
+                  <div className="absolute top-0 left-1/2 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-card text-muted-foreground">
+                    + optional
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-bold text-primary">
+                      {tier.addOn.name}
+                    </span>
+                    {tier.addOn.price && (
+                      <span className="text-sm font-bold text-primary">
+                        {tier.addOn.price}
+                      </span>
+                    )}
+                  </div>
+                  <ul className="mt-1 space-y-1 text-sm">
+                    {tier.addOn.mainFeatures.map((feature) => (
+                      <li key={feature} className="flex space-x-2">
+                        <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                        <span className="text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {tier.addOn.cta && (
+                    <Button
+                      className="mt-3 w-full"
+                      variant="secondary"
+                      size="sm"
+                      asChild
+                    >
+                      <Link href={tier.addOn.cta.href}>
+                        {tier.addOn.cta.text}
+                      </Link>
+                    </Button>
+                  )}
+                  {tier.addOn.calloutLink && (
+                    <div className="mt-2 text-xs text-center text-muted-foreground">
+                      <Link
+                        href={tier.addOn.calloutLink.href}
+                        className="underline hover:text-primary"
+                      >
+                        {tier.addOn.calloutLink.text}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardFooter>
+          </Card>
+        );
+      })}
     </div>
   );
 }
@@ -1505,6 +1684,9 @@ export function PricingTable({
   const tableRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLTableSectionElement>(null);
   const selectedTiers = tiers[variant];
+  const visibleSections = sections.filter((section) =>
+    section.features.some((feature) => variant in feature.tiers),
+  );
 
   useEffect(() => {
     if (!isPricingPage) return;
@@ -1580,15 +1762,15 @@ export function PricingTable({
             >
               <div className="mb-6">
                 <h4 className="text-lg font-semibold text-foreground">
-                  {tier.name}
+                  {tier.displayName ?? tier.name}
                 </h4>
-                <p className="mt-2 text-sm text-muted-foreground max-w-[18ch]">
+                <p className="mt-2 text-sm text-muted-foreground max-w-[24ch]">
                   {tier.description}
                 </p>
               </div>
               <Table>
                 <TableBody>
-                  {sections.map((section) => (
+                  {visibleSections.map((section) => (
                     <React.Fragment key={section.name}>
                       <TableRow className="bg-muted hover:bg-muted">
                         <TableHead
@@ -1616,7 +1798,11 @@ export function PricingTable({
                             </TableHead>
                             <TableCell className="w-3/12 text-center">
                               <FeatureCell
-                                value={feature.tiers[variant][tier.name]}
+                                value={getFeatureValue({
+                                  feature,
+                                  tierName: tier.name,
+                                  variant,
+                                })}
                               />
                             </TableCell>
                           </TableRow>
@@ -1719,10 +1905,13 @@ export function PricingTable({
               </tr>
             </thead>
             <TableBody>
-              {sections.map((section) => (
+              {visibleSections.map((section) => (
                 <React.Fragment key={section.name}>
                   <TableRow className="bg-muted/50">
-                    <TableCell colSpan={5} className="font-medium">
+                    <TableCell
+                      colSpan={selectedTiers.length + 1}
+                      className="font-medium"
+                    >
                       {section.name}
                       <FeatureDetails
                         description={section.description}
@@ -1744,7 +1933,11 @@ export function PricingTable({
                         {selectedTiers.map((tier) => (
                           <TableCell key={tier.id}>
                             <FeatureCell
-                              value={feature.tiers[variant][tier.name]}
+                              value={getFeatureValue({
+                                feature,
+                                tierName: tier.name,
+                                variant,
+                              })}
                             />
                           </TableCell>
                         ))}
