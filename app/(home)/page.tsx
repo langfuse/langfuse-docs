@@ -1,12 +1,12 @@
 import { Home } from "@/components/home";
 import { usersSource, changelogSource } from "@/lib/source";
+import { sortCustomerStoriesByMetaOrder } from "@/lib/sortCustomerStoriesByMeta";
 import type { CustomerStory } from "@/components/customers/CustomerCarousel";
 import type { ChangelogItem } from "@/components/home/Changelog";
 
 export default function HomePage() {
-  const customerStories: CustomerStory[] = usersSource
-    .getPages()
-    .map((page) => ({
+  const customerStories: CustomerStory[] = sortCustomerStoriesByMetaOrder(
+    usersSource.getPages().map((page) => ({
       route: page.url,
       frontMatter: {
         title: page.data.title,
@@ -20,7 +20,8 @@ export default function HomePage() {
         quoteAuthorImage: page.data.quoteAuthorImage ?? undefined,
         showInCustomerIndex: page.data.showInCustomerIndex ?? undefined,
       },
-    }));
+    })),
+  );
 
   const changelogItems: ChangelogItem[] = changelogSource
     .getPages()
