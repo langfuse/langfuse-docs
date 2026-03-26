@@ -17,25 +17,15 @@ V4 introduces a **single unified observations table** where all inputs, outputs,
 
 ## Why observations-first?
 
-As agentic applications grow more complex, a single trace can contain hundreds or thousands of operations — LLM calls, tool executions, retrieval steps, agent handoffs. The old traces table showed one row per request, which meant the operations engineers actually care about were hidden inside. To find an expensive LLM call, you had to open a trace and scan its children. To find all errors across your project, you had to check traces one by one.
+As agentic applications grow more complex, a single trace can contain hundreds or thousands of operations — LLM calls, tool executions, retrieval steps, agent handoffs. The old traces table showed one row per request, which meant the operations engineers actually care about were hidden inside. With observations-first, you can directly query across all operations — start with the question ("which LLM calls are slow?") rather than the container ("which trace has a slow call somewhere inside it?").
 
-With observations-first, you can directly query across all operations — find every GPT-4 call over $0.10, every retrieval that took more than 2 seconds, or every tool call that errored — without knowing which trace they belong to. The observations table lets you start with the question ("which LLM calls are slow?") rather than the container ("which trace has a slow call somewhere inside it?"). The `trace_id` becomes a correlation handle — like `session_id` or `user_id` — that you filter by when you want to see everything in a single request, rather than a top-level entity you browse.
-
-<Callout type="info">
-**Tip:** Filter by observation name, type, or model to surface the operations most relevant to your workflow, then save the result as a [saved view](/changelog/2025-05-20-save-table-views). We recommend setting up 2-3 saved views when getting started with v4.
-</Callout>
-
-### Recommended starter views
-
-A [saved view](/changelog/2025-05-20-save-table-views) stores your current filters, visible columns, sort order, and time range as a one-click shortcut in the table header. We recommend creating these three views when getting started:
-
-| View name | Filter | Purpose |
-|---|---|---|
-| Key operations | Filter by observation `name` matching your most important operations | Focus on the observations that matter most to your application |
-| Generations | `type = generation` | All LLM calls with cost and latency at a glance |
-| Errors | `level = ERROR` | Surface all failed operations across your project |
-
-Once saved, these views appear in the table header for one-click access. Most teams add 1-2 more views specific to their debugging workflows over time.
+<Cards num={1}>
+  <Card
+    title="Guide: Working with Observations in v4"
+    href="/faq/all/explore-observations-in-v4"
+    icon={<Table />}
+  />
+</Cards>
 
 ## Get access to the preview
 
