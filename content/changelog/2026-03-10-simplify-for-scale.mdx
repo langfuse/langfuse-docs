@@ -25,6 +25,10 @@ Langfuse is rolling out a simplified architecture built for significantly faster
 To avoid delays in the new experience and see your data in real time, upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5).
 </Callout>
 
+## What changes for you
+
+The main table in Langfuse is now **observations** — every LLM call, tool execution, and agent step is a row you can query directly. As agentic applications grow more complex, a single trace can contain thousands of operations, and the interesting ones are rarely at the top level. `trace_id` works like any other filter column (`session_id`, `user_id`, `score`) to group related observations together. Filter by observation name, type, or model to surface the operations that matter most — then save that view for one-click access. See the [guide on working with observations in v4](/faq/all/explore-observations-in-v4) for common workflows and [saved views](/changelog/2025-05-20-save-table-views) to get started.
+
 ## What's faster now
 
 ### Faster product performance in the UI
@@ -41,9 +45,18 @@ The new [Observations API v2](/docs/api-and-data-platform/features/observations-
 
 ## Working with the new observations table
 
-In v4, Langfuse uses a single unified observations table as the main exploration surface. All inputs, outputs, and context attributes live directly on observations, enabling faster filtering and aggregation at scale.
+In v4, Langfuse uses a single unified observations table as the main exploration surface. All inputs, outputs, and context attributes live directly on observations, enabling faster filtering and aggregation at scale. As agentic applications produce traces with hundreds or thousands of operations, this flat, filterable table becomes more powerful than a grouped traces view as engineers need to find specific operations across traces, not just browse one trace at a time.
 
-See the [guide on working with the observation-centric data model in v4](/faq/all/explore-observations-in-v4) for before/after workflows, saved view setup, and upgrade steps.
+You will notice more rows than before. Each row is now one operation, not one trace. Use filters and [saved views](/changelog/2025-05-20-save-table-views) to focus on what matters. Most users start with one of these common views:
+
+| View | How to set it up |
+|---|---|
+| Key operations | Filter by observation `name` or `type` matching your most important operations |
+| Expensive LLM calls | Filter `type = generation`, sort by `total_cost` descending |
+| Errors for a specific user | Filter `user_id`, `level = ERROR` |
+| Slow observations in a session | Filter `session_id`, sort by `latency` descending |
+
+See the [full guide on working with the observation-centric data model in v4](/faq/all/explore-observations-in-v4) for detailed before/after workflows, saved view setup, and upgrade steps.
 
 ## Learn more
 
