@@ -9,11 +9,11 @@ tags: [observability, tracing, evaluation]
 
 ## How to think about the new model
 
-In v4, every operation your application performs — LLM calls, tool executions, retrievals, agent steps — is a first-class row in a single observations (spans) table. Think of it like a spreadsheet where each row is one operation, and you can slice by any column. The trace is just one column (`trace_id`) that groups related operations together, the same way `session_id` or `user_id` groups things.
+In v4, every operation your application performs — LLM calls, tool executions, retrievals, agent steps — is a first-class row in a single observations table. Think of it like a spreadsheet where each row is one operation, and you can slice by any column. The trace is just one column (`trace_id`) that groups related operations together, the same way `session_id` or `user_id` groups things.
 
 This is more powerful than the old two-table model: instead of opening a trace and then scanning its children to find what went wrong, you can directly query across all operations. Find every GPT-4 call over $0.10, every retrieval that took more than 2 seconds, or every tool call that errored — without knowing which trace they belong to.
 
-You will notice more rows in the table than before — that's expected. Each row is now one operation, not one trace. The key is to use filters and [saved views](/changelog/2025-05-20-save-table-views) to focus on what matters. Most users start with "root spans only" or "generations only" and go from there. The filter sidebar shows available values with counts, so you can discover which models, span names, or error levels are most common before committing to a filter.
+You will notice more rows in the table than before — that's expected. Each row is now one operation, not one trace. The key is to use filters and [saved views](/changelog/2025-05-20-save-table-views) to focus on what matters. Most users start with "root observations only" or "generations only" and go from there. The filter sidebar shows available values with counts, so you can discover which models, observation names, or error levels are most common before committing to a filter.
 
 For conceptual background, see the [observation-centric data model](/docs/observability/data-model#underlying-data-model). For broader release context, see the [Fast Preview (v4) docs](/docs/v4).
 
@@ -23,11 +23,11 @@ These are some of the most useful starting points. Each can be saved as a [saved
 
 | I want to see… | How to filter |
 |---|---|
-| All traces (like the old table) | Filter for root spans (observations with no parent), save as a view |
+| All traces (like the old table) | Filter for root observations (observations with no parent), save as a view |
 | All LLM generations | Filter `type = generation` |
 | Expensive LLM calls | Filter `type = generation`, sort by `total_cost` descending |
 | Errors for a specific user | Filter by `user_id` and `level = ERROR` |
-| Slow spans in a session | Filter by `session_id`, sort by `latency` descending |
+| Slow observations in a session | Filter by `session_id`, sort by `latency` descending |
 | All operations for one trace | Filter by `trace_id` |
 | Model performance comparison | Filter `type = generation`, group by `model` in a [dashboard](/docs/metrics) or sort by `model` column |
 
@@ -37,9 +37,9 @@ We recommend setting up 2-3 saved views for your most common debugging workflows
 
 | I want to have… | v3 | v4 |
 |---|---|---|
-| One row per trace | Traces table | Filter for root spans (observations with no parent), save as a [saved view](/changelog/2025-05-20-save-table-views) |
+| One row per trace | Traces table | Filter for root observations (observations with no parent), save as a [saved view](/changelog/2025-05-20-save-table-views) |
 | One row per trace, scoped to a user or session | Traces table → filter by user/session | Same as above, add user_id or session_id filter |
-| Cost, latency, or errors by user, session, or span name | Traces table with filters | [Self-serve dashboards](/docs/metrics) |
+| Cost, latency, or errors by user, session, or observation name | Traces table with filters | [Self-serve dashboards](/docs/metrics) |
 
 <Video
   src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
@@ -61,7 +61,7 @@ Use one of these ingestion paths so your data appears in the unified table in re
 If you are still sending data via **older SDK versions**, or via **direct OpenTelemetry ingestion without `x-langfuse-ingestion-version: 4`**, traces can appear in the unified tracing table with a **delay of up to 10 minutes**.
 </Callout>
 
-### Propagate correlating attributes across spans
+### Propagate correlating attributes across observations
 
 Use the SDK propagation helpers to propagate correlating attributes across child observations:
 
@@ -93,7 +93,7 @@ That gives you a stable, trace-like list while still letting you drill into lowe
 
 ### The table shows too many rows — how do I make sense of it?
 
-This is the most common reaction when first switching to the observations table. The old traces table showed one row per request; the new table shows every operation. The solution is filters and saved views — not scrolling. Start by filtering for root spans to get the trace-like view, then gradually explore more specific views (e.g., "all generations," "errors only"). Once you save 2-3 views that match your debugging workflows, the table will feel more focused than the old traces table, not less.
+This is the most common reaction when first switching to the observations table. The old traces table showed one row per request; the new table shows every operation. The solution is filters and saved views — not scrolling. Start by filtering for root observations to get the trace-like view, then gradually explore more specific views (e.g., "all generations," "errors only"). Once you save 2-3 views that match your debugging workflows, the table will feel more focused than the old traces table, not less.
 
 ### Can I get the old experience back?
 

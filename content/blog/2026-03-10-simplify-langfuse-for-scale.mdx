@@ -29,7 +29,7 @@ We are still working on the upgrade path for self-hosters and will eventually re
   ![Langfuse gets Faster](/images/blog/2026-03-10-simplify-langfuse-for-scale/og.jpg)
 </Frame>
 
-With this change, we are moving to an observation-centric (spans) data model based on a new, wide, and (mostly) immutable ClickHouse table.
+With this change, we are moving to an observation-centric data model based on a new, wide, and (mostly) immutable ClickHouse table.
 This eliminates joins and deduplication at read-time and optimizes for the most performant ClickHouse access patterns.
 Initial table loads for large amounts of data go from seconds to milliseconds.
 Dashboard load times for large projects improve by at least 10x for longer durations.
@@ -61,7 +61,7 @@ Every query touching historical data carried this overhead.
 In 2025 we switched from our proprietary ingestion to OpenTelemetry.
 First released as an endpoint in January, we then migrated all of our first-party SDKs over to OpenTelemetry protocols over the summer.
 By now, roughly 60% of all observations in Langfuse Cloud come via the OpenTelemetry endpoint.
-As OpenTelemetry spans are immutable, all observations ingested into Langfuse are immutable.
+As OpenTelemetry observations are immutable, all observations ingested into Langfuse are immutable.
 These observations carry trace-level data which update the trace table, though.
 
 For self-hosting users with OpenTelemetry-only clients, this unlocked read-time optimizations where we could skip the deduplication on our `observations` table.
@@ -91,8 +91,8 @@ Yet the S3 API calls were costly for us and our self-hosting users.
 We decided on this option within the V3 go-live, as adding a different database such as Cassandra to our stack would have made Langfuse even more complex for self-hosters.
 In addition, scaling linearly with throughput is a nice property compared to fixed infrastructure components for deployments that vary widely in traffic.
 
-The first win on cost reduction came with OpenTelemetry spans.
-Because spans are immutable, we could write an entire batch as one object and fetch it as one \- no merging required.
+The first win on cost reduction came with OpenTelemetry.
+Because observations are immutable, we could write an entire batch as one object and fetch it as one \- no merging required.
 Trace-level attributes still followed the original path, but that optimization alone cut S3 costs by \~85% for some self-hosters and for OpenTelemetry-only projects.
 Also on Langfuse Cloud, we have seen a decline in relative S3 cost as users adopted the new SDKs.
 
@@ -104,7 +104,7 @@ Also on Langfuse Cloud, we have seen a decline in relative S3 cost as users adop
 
 ### Experiments with AggregatingMergeTrees
 
-Before deciding to denormalize trace attributes to spans, we tried to cut S3 costs and improve performance while keeping the two-table structure.
+Before deciding to denormalize trace attributes to observations, we tried to cut S3 costs and improve performance while keeping the two-table structure.
 AggregatingMergeTrees in ClickHouse looked promising: move trace updates off S3 and into native ClickHouse aggregation, while making Otel-native observations immutable.
 
 Initially, we used an ordering key in ClickHouse that included `project_id, toDate(timestamp), trace_id`.
@@ -170,8 +170,8 @@ The `trace_id` becomes a correlation handle—like `session_id` or `user_id`—r
 This also resolves a long-standing source of confusion around the two-entity model.
 
 This isn't a novel pattern.
-Datadog's [Trace Explorer](https://docs.datadoghq.com/tracing/trace_explorer/) defaults to a flat list of spans, using faceted filters and saved views as the primary navigation mechanism.
-Honeycomb built their entire platform around the idea that [structured events are the basis of observability](https://www.honeycomb.io/blog/structured-events-basis-observability) — one span equals one event, and traces are just a visualization you stitch together from events sharing a trace ID.
+Datadog's [Trace Explorer](https://docs.datadoghq.com/tracing/trace_explorer/) defaults to a flat list of observations, using faceted filters and saved views as the primary navigation mechanism.
+Honeycomb built their entire platform around the idea that [structured events are the basis of observability](https://www.honeycomb.io/blog/structured-events-basis-observability) — one observation equals one event, and traces are just a visualization you stitch together from events sharing a trace ID.
 The broader observability community has been moving in this direction: Ivan Burmistrov's widely circulated essay ["All you need is Wide Events"](https://isburmistrov.substack.com/p/all-you-need-is-wide-events-not-metrics) argues that the separation into metrics, logs, and traces is artificial — what matters is a single table of wide, richly attributed events that you can slice by any dimension.
 
 For Langfuse users, this means the observations table is now the primary workspace.
@@ -181,12 +181,12 @@ But discovery starts with the flat table: filter by model, cost, latency, user, 
 
 ### What this means for how you use Langfuse
 
-This is not a Langfuse-specific pattern — Datadog, Honeycomb, and the broader observability community have converged on spans-first exploration as the default. You are learning a portable mental model, not a proprietary one.
+This is not a Langfuse-specific pattern — Datadog, Honeycomb, and the broader observability community have converged on observations-first exploration as the default. You are learning a portable mental model, not a proprietary one.
 
 For users upgrading to the new experience, here is the practical shift:
 
 - **The observations table is your starting point.** Instead of scanning a list of traces, use filters to surface the operations you care about — expensive LLM calls, errors, slow retrievals. Each row is one operation with all its context (input, output, cost, latency, metadata) directly available.
-- **Saved views replace the traces table.** Create a saved view that filters for root spans to get the familiar one-row-per-trace view. Then create additional views for your most common debugging workflows. Most teams find they need 2-3 views to feel productive.
+- **Saved views replace the traces table.** Create a saved view that filters for root observations to get the familiar one-row-per-trace view. Then create additional views for your most common debugging workflows. Most teams find they need 2-3 views to feel productive.
 - **`trace_id` is a filter, not a destination.** When you want to see all operations in a single request, filter by `trace_id`. When you want to see all operations for a user, filter by `user_id`. They work the same way — `trace_id` is no longer special.
 - **The trace waterfall is a drill-down, not the entry point.** Click any observation row to open its full trace context. The flat table is for discovery; the waterfall is for investigation.
 
@@ -202,7 +202,7 @@ We evaluated per-event delays, shared metadata stores (Cassandra, DynamoDB), and
 Each introduced new infrastructure, new cost models, new scaling patterns.
 
 The solution: a staging table that receives all incoming observations and trace records, plus a micro-batch job that joins trace metadata onto observations every 3 minutes with a 5-minute delay.
-Based on observed data distributions, this is the ideal tradeoff of pushing most trace attributes to respective spans while making data available quickly in the new UI.
+Based on observed data distributions, this is the ideal tradeoff of pushing most trace attributes to respective observations while making data available quickly in the new UI.
 For newly incoming observations, the full data is propagated, but past observations remain as they are.
 
 <Frame className="flex-1">
