@@ -1,0 +1,574 @@
+---
+title: Teach Me How to Trace
+date: 2026/03/26
+description: A compact walkthrough for tracing your first LLM app with Langfuse, then layering in tool calls, observation types, prompt management, and sessions.
+tag: guide
+author: Annabell
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Teach Me How to Trace"
+  description="A compact walkthrough for tracing your first LLM app with Langfuse, then layering in tool calls, observation types, prompt management, and sessions."
+  date="March 26, 2026"
+  authors={["annabellschafer"]}
+/>
+
+If you want to teach a person or a coding agent how Langfuse tracing works, this is the shortest useful path I know: start with one traced LLM call, then add one concept at a time until the shape of a production app becomes visible.
+
+This is useful when you want to instrument a brand-new chatbot, understand what a trace is before diving into evals, or give an AI coding agent a single link and a clear assignment: teach me how to trace.
+
+The goal is not to memorize every Langfuse feature. The goal is to build tracing intuition. After working through this once, you should be able to look at a chatbot, agent, or multi-step workflow and immediately ask the right questions: what should be one trace, what should be a nested observation, where should tool calls appear, and when should multiple traces roll up into a session.
+
+For the basic installation and credentials, start with the [Tracing Get Started guide](/docs/observability/get-started). When you are ready to move your system prompt into Langfuse, use the [Prompt Management Get Started guide](/docs/prompt-management/get-started).
+
+## How to Use This Post
+
+There are two good ways to use this post:
+
+1. Read it straight through if you want the mental model first.
+2. Paste the prompt below into your coding agent and let it walk you through the steps interactively inside your own codebase.
+
+If you use an agent, pick a pace:
+
+- `go slow`: one concept at a time, with a pause after each step
+- `go fast`: batch the implementation, but still explain the trace structure after each major milestone
+
+## The Prompt to Give Your Coding Agent
+
+If you want an agent to guide you through this interactively, send it this:
+
+```text filename="Agent instruction"
+Teach me how to trace with Langfuse in this codebase.
+
+Start by briefly explaining why tracing matters and what we are going to build,
+so I know where this walkthrough is headed. Then pause and ask whether I want
+"go slow" or "go fast".
+
+Start with the Langfuse tracing get started flow, then guide me through these
+concepts in order:
+0. install dependencies and set up API keys
+1. a minimal traced LLM call
+2. a tool call inside the same flow
+3. observation types
+4. how to read the trace structure
+5. sessions for multi-turn chat
+6. prompt management and linking prompts to traces
+
+Rules:
+- Focus on observability first.
+- Use the smallest working example possible.
+- Use Anthropic's native Python SDK, not an OpenAI compatibility layer.
+- Ask me to take action so I stay engaged.
+- After each step, explain what changed in the trace and where I can inspect it.
+- Before moving to the next step, ask me to explain the concept back in my own words.
+- If I say "go slow", stop after each step and wait.
+- If I say "go fast", batch steps together but still explain the trace structure.
+- Keep signposting progress so I know what step we are on and what comes next.
+- Use this same chat thread for the whole walkthrough.
+- If you need to use tools or make changes, explain why before doing it.
+- Use Langfuse best practices and current SDK APIs.
+```
+
+That prompt works because it asks the agent to do two jobs at once: instrument the app, and teach the mental model behind the instrumentation.
+
+## The Path We Will Follow
+
+We will build up one example in six steps:
+
+1. create one trace for one LLM call
+2. add a tool call so the trace becomes multi-step
+3. label the steps with observation types
+4. learn how to read the trace tree and timeline
+5. group multiple chat turns into a session
+6. move the prompt into Langfuse and link it to the trace
+
+That progression is deliberate. Each step answers a question that comes up naturally in the previous one.
+
+## Before Step 1: Install Packages and Set API Keys
+
+This walkthrough uses Anthropic's native Python SDK together with the Langfuse Python SDK, so you need credentials for both Langfuse and Anthropic.
+
+First, create your Langfuse account and copy the keys:
+
+1. Sign up for Langfuse at [langfuse.com/cloud](https://langfuse.com/cloud) or use your self-hosted instance.
+2. Create or open a project in Langfuse.
+3. In that project, open `Settings` -> `API Keys`.
+4. Create a new API key pair.
+5. Copy the `Public Key` and `Secret Key` into your local environment.
+
+Then create your model-provider key:
+
+1. Create an Anthropic API key in the [Anthropic Console](https://console.anthropic.com/).
+2. Copy it into your local environment as `ANTHROPIC_API_KEY`.
+
+This post uses Anthropic all the way through, so every code example below uses the native `anthropic` Python package.
+
+Then install the packages:
+
+```bash
+pip install anthropic langfuse
+```
+
+And set the environment variables:
+
+```bash filename=".env"
+ANTHROPIC_API_KEY="sk-ant-..."
+
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
+LANGFUSE_BASE_URL="https://cloud.langfuse.com" # EU region
+# LANGFUSE_BASE_URL="https://us.cloud.langfuse.com" # US region
+```
+
+If you are using a short-lived script, notebook, or CLI job, remember to call `langfuse.flush()` before the process exits. Otherwise, the trace may still be buffered locally and never reach Langfuse.
+
+The examples in this post use the current v4-style Langfuse Python SDK APIs such as `observe()`, `get_client()`, `propagate_attributes()`, and `update_current_generation()`, not the older trace-update patterns.
+
+Once this is in place, every code example below should run as written.
+
+## Step 1: Start with One Traced LLM Call
+
+The first milestone is not "full observability." It is one trace you can inspect end to end.
+
+```python filename="main.py"
+from anthropic import Anthropic
+from langfuse import get_client, observe
+
+langfuse = get_client()
+anthropic_client = Anthropic()
+MODEL = "claude-sonnet-4-20250514"
+
+
+def extract_text(response) -> str:
+    return "\n".join(block.text for block in response.content if block.type == "text")
+
+
+@observe(name="claude-generation", as_type="generation")
+def call_claude(question: str, system_prompt: str) -> str:
+    messages = [{"role": "user", "content": question}]
+
+    langfuse.update_current_generation(
+        input=messages,
+        model=MODEL,
+        metadata={"provider": "anthropic"},
+    )
+
+    response = anthropic_client.messages.create(
+        model=MODEL,
+        max_tokens=300,
+        system=system_prompt,
+        messages=messages,
+    )
+
+    text = extract_text(response)
+    langfuse.update_current_generation(
+        output=text,
+        usage_details={
+            "input": response.usage.input_tokens,
+            "output": response.usage.output_tokens,
+            "cache_read_input_tokens": getattr(
+                response.usage, "cache_read_input_tokens", 0
+            ),
+        },
+    )
+
+    return text
+
+
+@observe(name="answer-question")
+def answer_question(question: str) -> str:
+    system_prompt = "You are a concise and helpful assistant."
+    return call_claude(question, system_prompt)
+
+
+if __name__ == "__main__":
+    print(answer_question("Why is the sky blue?"))
+    langfuse.flush()
+```
+
+This already teaches the core idea:
+
+- One user request creates one trace.
+- The Claude call becomes a nested `generation`.
+- The trace gives you input, output, latency, model usage, and cost in one place.
+
+If you only remember one thing from this post, remember this: a trace usually maps to one user-facing operation. In a chat app, that is often one turn.
+
+## Pause and Read the First Trace
+
+Open the trace in Langfuse and look at three things first:
+
+- The root observation: this is the operation you named `answer-question`.
+- The nested generation: this is the actual model call, with prompt, response, token usage, and model parameters.
+- The timeline/tree view: this is where you start seeing which step took time and which step produced the answer.
+
+Strictly speaking, Langfuse nests observations inside a trace. It does not usually "nest traces." A trace is the container. The steps inside it are observations.
+
+If you are doing this with an agent, this is a good point for a check-in: can you explain why the Claude call is a nested `generation` instead of a second trace?
+
+## Step 2: Add a Tool Call
+
+A single generation is enough to explain the basics. Real applications usually do more than that. They call tools, fetch context, hit APIs, or run multiple model calls in sequence.
+
+Here is the same example with one tool call added:
+
+```python filename="main.py"
+import json
+
+from anthropic import Anthropic
+from langfuse import get_client, observe
+
+langfuse = get_client()
+anthropic_client = Anthropic()
+MODEL = "claude-sonnet-4-20250514"
+
+TOOLS = [
+    {
+        "name": "lookup_order",
+        "description": "Look up the latest status of an order by its order_id.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "order_id": {
+                    "type": "string",
+                    "description": "The order identifier.",
+                }
+            },
+            "required": ["order_id"],
+        },
+    }
+]
+
+
+@observe(name="lookup-order")
+def lookup_order(order_id: str) -> dict:
+    fake_db = {
+        "A-100": {"status": "shipped", "eta": "tomorrow"},
+        "B-200": {"status": "processing", "eta": "in 2 days"},
+    }
+    return fake_db.get(order_id, {"status": "not_found"})
+
+
+def extract_text(response) -> str:
+    return "\n".join(block.text for block in response.content if block.type == "text")
+
+
+@observe(name="claude-generation", as_type="generation")
+def run_claude(messages: list[dict], system_prompt: str, tools: list[dict] | None = None):
+    langfuse.update_current_generation(
+        input=messages,
+        model=MODEL,
+        metadata={"provider": "anthropic"},
+    )
+
+    request = {
+        "model": MODEL,
+        "max_tokens": 300,
+        "system": system_prompt,
+        "messages": messages,
+    }
+    if tools is not None:
+        request["tools"] = tools
+
+    response = anthropic_client.messages.create(**request)
+    langfuse.update_current_generation(
+        output=extract_text(response) or response.stop_reason,
+        usage_details={
+            "input": response.usage.input_tokens,
+            "output": response.usage.output_tokens,
+            "cache_read_input_tokens": getattr(
+                response.usage, "cache_read_input_tokens", 0
+            ),
+        },
+        metadata={"stop_reason": response.stop_reason},
+    )
+    return response
+
+
+@observe(name="support-chat")
+def answer_question(question: str) -> str:
+    system_prompt = "You are a support bot. Use the tool when the user asks about an order."
+    messages = [{"role": "user", "content": question}]
+
+    first_response = run_claude(messages, system_prompt, tools=TOOLS)
+    messages.append({"role": "assistant", "content": first_response.content})
+
+    tool_results = []
+    for block in first_response.content:
+        if block.type != "tool_use" or block.name != "lookup_order":
+            continue
+
+        result = lookup_order(block.input["order_id"])
+        tool_results.append(
+            {
+                "type": "tool_result",
+                "tool_use_id": block.id,
+                "content": json.dumps(result),
+            }
+        )
+
+    if not tool_results:
+        return extract_text(first_response)
+
+    messages.append({"role": "user", "content": tool_results})
+    final_response = run_claude(messages, system_prompt, tools=TOOLS)
+    return extract_text(final_response)
+
+
+if __name__ == "__main__":
+    print(answer_question("Where is order A-100?"))
+    langfuse.flush()
+```
+
+Now the trace becomes more interesting:
+
+- The root observation represents the whole support flow.
+- Each model call is still captured as a `generation`.
+- The order lookup shows up as its own nested observation.
+
+One Anthropic-specific detail is worth noticing here: Claude returns `tool_use` blocks in the assistant response, and you send the tool output back in a following user message as `tool_result` blocks. That is different from APIs that use a dedicated `tool` message role.
+
+This is where tracing starts to become operationally useful. If the answer is wrong, you can see whether the model misunderstood the user, called the wrong tool, or got bad tool output.
+
+If you are doing this interactively, pause here and ask: which part of the bad answer came from the model, and which part came from the tool path?
+
+## Step 3: Add Observation Types
+
+Once you have multiple steps, the next improvement is semantic structure. Not every observation is just a generic span.
+
+Update the decorators like this:
+
+```python filename="main.py"
+from langfuse import observe
+
+
+@observe(name="lookup-order", as_type="tool")
+def lookup_order(order_id: str) -> dict:
+    ...
+
+
+@observe(name="claude-generation", as_type="generation")
+def run_claude(messages: list[dict], system_prompt: str, tools: list[dict] | None = None):
+    ...
+
+
+@observe(name="support-chat", as_type="agent")
+def answer_question(question: str) -> str:
+    ...
+```
+
+After this small change your trace has clearer meaning:
+
+- `agent` for the orchestration step
+- `tool` for the order lookup
+- `generation` for the model calls
+
+This matters because traces are not only for debugging one run. Over time, typed observations make it easier to filter, analyze, and compare behavior across many runs.
+
+At this point, the trace is not just readable. It is starting to be queryable in a meaningful way.
+
+## Step 4: Read the Trace Structure
+
+By now, your trace has enough shape to be genuinely useful. This is the right time to slow down and learn how to read it.
+
+When you open the trace in Langfuse, look at it in this order:
+
+- start at the root `agent` observation to understand the full request
+- inspect the nested `generation` observations to see how the model handled the turn
+- inspect the `tool` observation to see the exact input and output of the external call
+- switch to the timeline or tree view to understand sequence, nesting, and latency
+
+This is the point where tracing starts to feel different from logs. You do not just see that something happened. You see how the request was built up, which step depended on which other step, and where the system spent time.
+
+For a single chat turn, this trace shape is usually what you want: one trace with multiple nested observations.
+
+## Step 5: Group Chat Turns into a Session
+
+For chat applications, one trace per turn is usually the right level of detail. But a conversation is bigger than one turn. That is where sessions come in.
+
+Use the same `session_id` across turns:
+
+```python filename="main.py"
+from anthropic import Anthropic
+from langfuse import get_client, observe, propagate_attributes
+
+langfuse = get_client()
+anthropic_client = Anthropic()
+MODEL = "claude-sonnet-4-20250514"
+
+
+def extract_text(response) -> str:
+    return "\n".join(block.text for block in response.content if block.type == "text")
+
+
+@observe(name="claude-generation", as_type="generation")
+def run_claude(question: str, system_prompt: str) -> str:
+    messages = [{"role": "user", "content": question}]
+    langfuse.update_current_generation(
+        input=messages,
+        model=MODEL,
+        metadata={"provider": "anthropic"},
+    )
+
+    response = anthropic_client.messages.create(
+        model=MODEL,
+        max_tokens=300,
+        system=system_prompt,
+        messages=messages,
+    )
+
+    text = extract_text(response)
+    langfuse.update_current_generation(
+        output=text,
+        usage_details={
+            "input": response.usage.input_tokens,
+            "output": response.usage.output_tokens,
+            "cache_read_input_tokens": getattr(
+                response.usage, "cache_read_input_tokens", 0
+            ),
+        },
+    )
+
+    return text
+
+
+@observe(name="chat-turn", as_type="agent")
+def handle_turn(question: str) -> str:
+    system_prompt = "You are a helpful support bot."
+    return run_claude(question, system_prompt)
+
+
+def run_turn(question: str, user_id: str, session_id: str) -> str:
+    with propagate_attributes(user_id=user_id, session_id=session_id):
+        return handle_turn(question)
+
+
+if __name__ == "__main__":
+    print(run_turn("My package is late.", "user-123", "chat-456"))
+    print(run_turn("Can you summarize the status again?", "user-123", "chat-456"))
+    langfuse.flush()
+```
+
+Now each turn is still its own trace, but Langfuse groups them into one session. That is usually what you want for chatbots and agents:
+
+- traces for debugging one turn
+- sessions for understanding the whole conversation
+
+## Step 6: Move the System Prompt into Langfuse
+
+At this point you have observability and session structure. The next useful step is to stop hardcoding the system prompt and fetch it from Langfuse instead.
+
+Create a prompt once in Langfuse, for example `teach-me-how-to-trace-support`, then fetch it at runtime:
+
+```python filename="main.py"
+from anthropic import Anthropic
+from langfuse import get_client, observe
+
+langfuse = get_client()
+anthropic_client = Anthropic()
+MODEL = "claude-sonnet-4-20250514"
+
+
+def extract_text(response) -> str:
+    return "\n".join(block.text for block in response.content if block.type == "text")
+
+
+@observe(name="claude-generation", as_type="generation")
+def run_claude(messages: list[dict], system_prompt: str, prompt=None) -> str:
+    generation_update = {
+        "input": messages,
+        "model": MODEL,
+        "metadata": {"provider": "anthropic"},
+    }
+    if prompt is not None:
+        generation_update["prompt"] = prompt
+
+    langfuse.update_current_generation(**generation_update)
+
+    response = anthropic_client.messages.create(
+        model=MODEL,
+        max_tokens=300,
+        system=system_prompt,
+        messages=messages,
+    )
+
+    text = extract_text(response)
+    langfuse.update_current_generation(
+        output=text,
+        usage_details={
+            "input": response.usage.input_tokens,
+            "output": response.usage.output_tokens,
+            "cache_read_input_tokens": getattr(
+                response.usage, "cache_read_input_tokens", 0
+            ),
+        },
+    )
+
+    return text
+
+
+@observe(name="support-chat", as_type="agent")
+def answer_question(question: str) -> str:
+    prompt = langfuse.get_prompt("teach-me-how-to-trace-support")
+    system_prompt = prompt.compile(product_name="Langfuse")
+    messages = [{"role": "user", "content": question}]
+    return run_claude(messages, system_prompt, prompt=prompt)
+
+
+if __name__ == "__main__":
+    print(answer_question("What does Langfuse help me with?"))
+    langfuse.flush()
+```
+
+This is a small code change, but an important workflow change:
+
+- You can update prompts without hunting through code.
+- Langfuse links the prompt version to the generation when you attach it via `update_current_generation(prompt=prompt)`.
+- Later, you can compare prompt versions against production traces.
+
+This is the point where prompt management and observability start reinforcing each other.
+
+If you are teaching this with an agent, this is another good stop: ask the learner what new question Langfuse can answer now that prompt versions are linked to traces.
+
+## What to Look at in Langfuse
+
+Once the example above is running, you already have enough structure to do real debugging:
+
+- inspect one bad answer and see the exact model call that produced it
+- compare traces with and without tool use
+- check whether the tool output was wrong or the model used it poorly
+- review a whole chat session instead of isolated turns
+
+That gets you surprisingly far before you need more advanced workflows.
+
+## What You Should Understand Now
+
+If this walkthrough worked, you should now have a simple but durable mental model:
+
+- one user-facing operation is usually one trace
+- the steps inside it are nested observations
+- model calls are generations
+- tool calls should appear as their own observations
+- multi-turn chat usually means many traces grouped by one session
+- prompts can be versioned and linked directly to the traces that used them
+
+That is enough to start instrumenting real applications without treating tracing as a black box.
+
+## What to Do Next
+
+After the basics are in place, the next things worth adding are:
+
+- [Prompt Management](/docs/prompt-management/get-started) if you have not moved prompts out of code yet
+- [Datasets](/docs/evaluation/experiments/datasets) to turn good and bad traces into a repeatable test set
+- [LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) to score traces automatically
+
+In practice, this is a strong progression:
+
+1. Trace the app.
+2. Read real traces and do manual error analysis.
+3. Move prompts into Langfuse and link them to traces.
+4. Turn recurring failures into datasets and evaluators.
+
+That sequence keeps the learning curve shallow while still getting you to a production-grade workflow.
