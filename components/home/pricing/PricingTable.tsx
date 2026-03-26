@@ -1400,18 +1400,30 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
       )}
     >
       {selectedTiers.map((tier) => {
+        const isSelfHostedEnterpriseTier =
+          variant === "selfHosted" && tier.id === "tier-self-hosted-enterprise";
+
         return (
           <Card
             key={tier.id}
             className={cn(
               tier.featured && "border-primary",
+              isSelfHostedEnterpriseTier &&
+                "border-amber-300/80 bg-amber-50/60 dark:border-amber-500/60 dark:bg-amber-500/10",
               "relative h-full flex flex-col",
               selectedTiers.length === 1 && "w-full max-w-lg",
             )}
           >
             {tier.pill && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full bg-primary text-primary-foreground">
+                <div
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full",
+                    isSelfHostedEnterpriseTier
+                      ? "bg-amber-200 text-amber-950 dark:bg-amber-300 dark:text-amber-950"
+                      : "bg-primary text-primary-foreground",
+                  )}
+                >
                   {tier.pill}
                 </div>
               </div>
