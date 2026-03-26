@@ -1,6 +1,6 @@
 ---
-title: Faster Langfuse
-description: Langfuse now delivers faster product performance. Enable the preview and upgrade SDKs to get the new experience without delays.
+title: "Langfuse v4: Faster and Observations-First"
+description: Langfuse v4 delivers faster performance and introduces an observations-first data model. Enable the preview and upgrade SDKs to get started.
 ---
 
 import { BarChart3, Book, Github, LayoutDashboard, Table, Zap } from "lucide-react";
@@ -12,7 +12,7 @@ Langfuse now delivers faster product performance at scale. Chart loading is much
 We will keep this page updated as we roll out additional related features and share OSS and self-hosted support updates.
 
 <Callout type="info">
-V4 introduces a **single unified observations table** where all inputs, outputs, and context attributes live directly on observations. See the [guide on working with the observation-centric data model in v4](/faq/all/explore-observations-in-v4) for before/after workflows and saved view setup.
+V4 introduces a **single unified observations (spans) table** where all inputs, outputs, and context attributes live directly on observations. See the [guide on working with the observation-centric data model in v4](/faq/all/explore-observations-in-v4) for before/after workflows and saved view setup.
 </Callout>
 
 ## Why observations-first?
@@ -26,6 +26,18 @@ This approach aligns with how modern observability platforms like [Datadog](http
 <Callout type="info">
 **Tip:** To recreate the old traces-table experience, filter for root spans (observations with no parent) and save it as a [saved view](/changelog/2025-05-20-save-table-views). We recommend this as one of your first saved views when getting started with v4.
 </Callout>
+
+### Recommended starter views
+
+A [saved view](/changelog/2025-05-20-save-table-views) stores your current filters, visible columns, sort order, and time range as a one-click shortcut in the table header. We recommend creating these three views when getting started:
+
+| View name | Filter | Purpose |
+|---|---|---|
+| Traces | Root spans (no parent) | Recreates the old traces table — one row per request |
+| Generations | `type = generation` | All LLM calls with cost and latency at a glance |
+| Errors | `level = ERROR` | Surface all failed operations across your project |
+
+Once saved, these views appear in the table header for one-click access. Most teams add 1-2 more views specific to their debugging workflows over time.
 
 ## Get access to the preview
 

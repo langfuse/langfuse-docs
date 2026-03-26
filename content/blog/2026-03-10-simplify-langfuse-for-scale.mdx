@@ -20,6 +20,7 @@ Langfuse is building the open source LLM engineering platform to help teams buil
 In December 2024, we released Langfuse [V3](https://langfuse.com/blog/2024-12-langfuse-v3-infrastructure-evolution) where we moved all tracing data from Postgres to ClickHouse.
 
 Today, we are sharing a major next step in product performance and making the product simpler: our shift to an observations-centric data model.
+For you, this means a single table where every LLM call, tool execution, and agent step is directly queryable — no more opening traces one by one to find what you need.
 For the rollout summary and upgrade guidance, see the [changelog post](/changelog/2026-03-10-simplify-for-scale).
 It is live in Beta on Langfuse Cloud across all regions.
 We are still working on the upgrade path for self-hosters and will eventually release it as a V4 major version.
@@ -28,7 +29,7 @@ We are still working on the upgrade path for self-hosters and will eventually re
   ![Langfuse gets Faster](/images/blog/2026-03-10-simplify-langfuse-for-scale/og.jpg)
 </Frame>
 
-With this change, we are moving to an observation-centric data model based on a new, wide, and (mostly) immutable ClickHouse table.
+With this change, we are moving to an observation-centric (spans) data model based on a new, wide, and (mostly) immutable ClickHouse table.
 This eliminates joins and deduplication at read-time and optimizes for the most performant ClickHouse access patterns.
 Initial table loads for large amounts of data go from seconds to milliseconds.
 Dashboard load times for large projects improve by at least 10x for longer durations.
@@ -179,6 +180,8 @@ The trace waterfall view isn't going away — it's still one click away from any
 But discovery starts with the flat table: filter by model, cost, latency, user, session, or error status to find the observations that matter, then drill into the trace for context.
 
 ### What this means for how you use Langfuse
+
+This is not a Langfuse-specific pattern — Datadog, Honeycomb, and the broader observability community have converged on spans-first exploration as the default. You are learning a portable mental model, not a proprietary one.
 
 For users upgrading to the new experience, here is the practical shift:
 
