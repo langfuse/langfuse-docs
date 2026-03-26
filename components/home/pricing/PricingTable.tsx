@@ -48,7 +48,6 @@ type DeploymentOption = "cloud" | "selfHosted";
 
 type Tier = {
   name: string;
-  displayName?: string;
   id: string;
   href: string;
   featured: boolean;
@@ -88,9 +87,6 @@ type Tier = {
 
 const TEAMS_ADDON = "Teams add-on";
 const YEARLY_COMMITMENT = "Yearly Commitment";
-const ENTERPRISE = "Enterprise";
-const SELF_HOSTED_OPEN_SOURCE = "Open Source";
-const SELF_HOSTED_ENTERPRISE = "Enterprise";
 
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
@@ -116,6 +112,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-core",
       href: "https://cloud.langfuse.com",
       featured: true,
+      pill: "Unlimited Users",
       description:
         "For production projects. Longer data access and unlimited users.",
       price: "$29",
@@ -143,6 +140,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-pro",
       href: "https://cloud.langfuse.com",
       featured: false,
+      pill: "Unlimited Users",
       price: "$199",
       description:
         "For scaling projects. Unlimited history, high rate limits, all features.",
@@ -213,7 +211,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
   ],
   selfHosted: [
     {
-      name: SELF_HOSTED_OPEN_SOURCE,
+      name: "Open Source",
       id: "tier-self-hosted-oss",
       href: "/self-hosting",
       featured: true,
@@ -231,12 +229,12 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       cta: "Deployment guide",
     },
     {
-      name: SELF_HOSTED_ENTERPRISE,
+      name: "Enterprise",
       id: "tier-self-hosted-enterprise",
       href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
       featured: false,
       description:
-        "Dedicated Langfuse deployment with enterprise capabilities and support",
+        "Dedicated Langfuse deployment with enterprise capabilities and support.",
       pill: (
         <>
           <span className="inline-flex rounded-sm p-0.5">
@@ -304,9 +302,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -319,9 +315,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -334,9 +328,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -349,9 +341,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -361,7 +351,7 @@ const sections: Section[] = [
         href: "/integrations",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -369,7 +359,7 @@ const sections: Section[] = [
         href: "/docs/observability/sdk/overview",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -379,7 +369,7 @@ const sections: Section[] = [
         href: "/docs/opentelemetry/get-started",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -387,7 +377,7 @@ const sections: Section[] = [
         href: "/integrations/gateways/litellm",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -395,7 +385,7 @@ const sections: Section[] = [
         href: "/api-and-data-platform/features/public-api",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -410,9 +400,7 @@ const sections: Section[] = [
             Pro: "100k units",
             Enterprise: "100k units",
           },
-          selfHosted: {
-            "Open Source": "Unlimited",
-          },
+          selfHosted: { "Open Source": "Unlimited", Enterprise: "Unlimited" },
         },
       },
       {
@@ -451,9 +439,7 @@ const sections: Section[] = [
             Pro: "Free while in beta",
             Enterprise: "Free while in beta",
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -491,7 +477,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/get-started",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -503,9 +489,7 @@ const sections: Section[] = [
             Pro: "Unlimited",
             Enterprise: "Unlimited",
           },
-          selfHosted: {
-            "Open Source": "Unlimited",
-          },
+          selfHosted: { "Open Source": "Unlimited", Enterprise: "Unlimited" },
         },
       },
       {
@@ -514,7 +498,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/features/prompt-version-control",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -524,7 +508,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/features/composability",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -533,7 +517,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/features/caching",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -542,7 +526,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/features/playground",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -551,9 +535,7 @@ const sections: Section[] = [
         href: "/docs/evaluation/dataset-runs/native-run",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -563,7 +545,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/features/webhooks-slack-integrations",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -578,9 +560,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -595,7 +575,7 @@ const sections: Section[] = [
         href: "/docs/evaluation/dataset-runs/datasets",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -605,7 +585,7 @@ const sections: Section[] = [
         href: "/docs/evaluation/experiments/experiments-via-sdk",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -615,7 +595,7 @@ const sections: Section[] = [
         href: "/docs/evaluation/experiments/experiments-via-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -623,7 +603,7 @@ const sections: Section[] = [
         href: "/docs/evaluation/evaluation-methods/custom-scores",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -631,7 +611,7 @@ const sections: Section[] = [
         href: "/faq/all/user-feedback",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -639,7 +619,7 @@ const sections: Section[] = [
         href: "/guides/cookbook/example_external_evaluation_pipelines",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -654,9 +634,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -665,7 +643,7 @@ const sections: Section[] = [
         href: "/docs/scores/annotation",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -679,9 +657,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
     ],
@@ -698,9 +674,7 @@ const sections: Section[] = [
             Pro: "Unlimited",
             Enterprise: "Unlimited",
           },
-          selfHosted: {
-            "Open Source": "Unlimited",
-          },
+          selfHosted: { "Open Source": "Unlimited", Enterprise: "Unlimited" },
         },
       },
       {
@@ -712,9 +686,7 @@ const sections: Section[] = [
             Pro: "Unlimited",
             Enterprise: "Unlimited",
           },
-          selfHosted: {
-            "Open Source": "Unlimited",
-          },
+          selfHosted: { "Open Source": "Unlimited", Enterprise: "Unlimited" },
         },
       },
     ],
@@ -733,9 +705,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -796,7 +766,7 @@ const sections: Section[] = [
         href: "/docs/api-and-data-platform/features/query-via-sdk#ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -804,7 +774,7 @@ const sections: Section[] = [
         href: "/integrations/analytics/posthog",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -812,7 +782,7 @@ const sections: Section[] = [
         href: "/integrations/analytics/mixpanel",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -825,7 +795,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
     ],
@@ -840,9 +810,8 @@ const sections: Section[] = [
           "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private.",
         tiers: {
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: "Self-managed ClickHouse OSS",
-            [SELF_HOSTED_ENTERPRISE]:
-              "Bundled: ClickHouse Cloud / BYOC / Private",
+            "Open Source": "Self-managed ClickHouse OSS",
+            Enterprise: "Bundled: ClickHouse Cloud / BYOC / Private",
           },
         },
       },
@@ -853,8 +822,8 @@ const sections: Section[] = [
         href: "/self-hosting",
         tiers: {
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: true,
-            [SELF_HOSTED_ENTERPRISE]: true,
+            "Open Source": true,
+            Enterprise: true,
           },
         },
       },
@@ -863,8 +832,8 @@ const sections: Section[] = [
         href: "/self-hosting/deployment/docker-compose",
         tiers: {
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: true,
-            [SELF_HOSTED_ENTERPRISE]: true,
+            "Open Source": true,
+            Enterprise: true,
           },
         },
       },
@@ -873,8 +842,8 @@ const sections: Section[] = [
         href: "/self-hosting/deployment/kubernetes-helm",
         tiers: {
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: true,
-            [SELF_HOSTED_ENTERPRISE]: true,
+            "Open Source": true,
+            Enterprise: true,
           },
         },
       },
@@ -883,8 +852,8 @@ const sections: Section[] = [
         href: "/self-hosting/deployment/aws",
         tiers: {
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: true,
-            [SELF_HOSTED_ENTERPRISE]: true,
+            "Open Source": true,
+            Enterprise: true,
           },
         },
       },
@@ -893,8 +862,8 @@ const sections: Section[] = [
         href: "/self-hosting/deployment/azure",
         tiers: {
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: true,
-            [SELF_HOSTED_ENTERPRISE]: true,
+            "Open Source": true,
+            Enterprise: true,
           },
         },
       },
@@ -903,8 +872,8 @@ const sections: Section[] = [
         href: "/self-hosting/deployment/gcp",
         tiers: {
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: true,
-            [SELF_HOSTED_ENTERPRISE]: true,
+            "Open Source": true,
+            Enterprise: true,
           },
         },
       },
@@ -919,7 +888,7 @@ const sections: Section[] = [
         href: "/docs/ask-ai",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -927,7 +896,7 @@ const sections: Section[] = [
         href: "/support#community",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -935,7 +904,7 @@ const sections: Section[] = [
         href: "/support#in-app",
         tiers: {
           cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -948,9 +917,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -965,7 +932,7 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -980,9 +947,7 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -991,8 +956,8 @@ const sections: Section[] = [
           "Pre-sales and rollout support for architecture planning and deployment readiness.",
         tiers: {
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: false,
-            [SELF_HOSTED_ENTERPRISE]: true,
+            "Open Source": false,
+            Enterprise: true,
           },
         },
       },
@@ -1002,8 +967,8 @@ const sections: Section[] = [
           "Direct access to the Langfuse product team for roadmap and product feedback.",
         tiers: {
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: false,
-            [SELF_HOSTED_ENTERPRISE]: true,
+            "Open Source": false,
+            Enterprise: true,
           },
         },
       },
@@ -1030,9 +995,7 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -1062,9 +1025,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -1077,9 +1038,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -1091,7 +1050,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -1103,7 +1062,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -1117,8 +1076,8 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: true,
-            [SELF_HOSTED_ENTERPRISE]: true,
+            "Open Source": true,
+            Enterprise: true,
           },
         },
       },
@@ -1127,8 +1086,8 @@ const sections: Section[] = [
         href: "/self-hosting/security/data-masking",
         tiers: {
           selfHosted: {
-            [SELF_HOSTED_OPEN_SOURCE]: false,
-            [SELF_HOSTED_ENTERPRISE]: true,
+            "Open Source": false,
+            Enterprise: true,
           },
         },
       },
@@ -1142,7 +1101,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1155,9 +1114,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1170,21 +1127,21 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "Organization Creators",
         href: "/self-hosting/administration/organization-creators",
         tiers: {
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "UI Customization",
         href: "/self-hosting/administration/ui-customization",
         tiers: {
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1197,21 +1154,21 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "Admin API (project management, SCIM)",
         href: "/docs/administration/scim-and-org-api",
         tiers: {
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "Instance Management API",
         href: "/self-hosting/administration/instance-management-api",
         tiers: {
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -1228,9 +1185,7 @@ const sections: Section[] = [
             Pro: "Self-serve",
             Enterprise: "Self-serve, Contact sales for " + YEARLY_COMMITMENT,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1242,9 +1197,7 @@ const sections: Section[] = [
             Pro: "Credit card",
             Enterprise: "Credit card, Invoice",
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1256,9 +1209,7 @@ const sections: Section[] = [
             Pro: "Monthly",
             Enterprise: YEARLY_COMMITMENT,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1270,9 +1221,7 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: YEARLY_COMMITMENT,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -1290,9 +1239,7 @@ const sections: Section[] = [
             Pro: "Standard T&Cs & DPA",
             Enterprise: "Talk to Sales",
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1300,7 +1247,6 @@ const sections: Section[] = [
         href: "/security/dpa",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-        
         },
       },
       {
@@ -1313,7 +1259,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1338,7 +1284,7 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: YEARLY_COMMITMENT,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -1387,44 +1333,6 @@ const FeatureDetails = ({
   );
 };
 
-const getFeatureValue = ({
-  feature,
-  tierName,
-  variant,
-}: {
-  feature: Section["features"][number];
-  tierName: string;
-  variant: DeploymentOption;
-}): boolean | string | React.ReactNode => {
-  const tierValues = feature.tiers[variant];
-
-  if (!tierValues) {
-    return false;
-  }
-
-  if (variant !== "selfHosted") {
-    return tierValues[tierName] ?? false;
-  }
-
-  const directValue = tierValues[tierName];
-
-  if (directValue === ENTERPRISE) {
-    return tierName === SELF_HOSTED_ENTERPRISE;
-  }
-
-  if (tierName in tierValues) {
-    return directValue ?? false;
-  }
-
-  const openSourceValue = tierValues[SELF_HOSTED_OPEN_SOURCE];
-
-  if (tierName === SELF_HOSTED_ENTERPRISE) {
-    return openSourceValue === ENTERPRISE ? true : (openSourceValue ?? false);
-  }
-
-  return openSourceValue === ENTERPRISE ? false : (openSourceValue ?? false);
-};
-
 // Helper component for feature cell rendering
 const FeatureCell = ({
   value,
@@ -1453,16 +1361,6 @@ const FeatureCell = ({
             <HoverCardContent className="w-60">
               Available when committing to a yearly contract on the Enterprise
               plan.
-            </HoverCardContent>
-          </HoverCard>
-        )}
-        {value === ENTERPRISE && (
-          <HoverCard>
-            <HoverCardTrigger>
-              <InfoIcon className="inline-block ml-1 size-3" />
-            </HoverCardTrigger>
-            <HoverCardContent className="w-60">
-              Available on Enterprise.
             </HoverCardContent>
           </HoverCard>
         )}
@@ -1502,11 +1400,6 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
       )}
     >
       {selectedTiers.map((tier) => {
-        const topPill =
-          variant === "cloud" && (tier.name === "Core" || tier.name === "Pro")
-            ? "Unlimited Users"
-            : tier.pill;
-
         return (
           <Card
             key={tier.id}
@@ -1516,17 +1409,17 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
               selectedTiers.length === 1 && "w-full max-w-lg",
             )}
           >
-            {topPill && (
+            {tier.pill && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full bg-primary text-primary-foreground">
-                  {topPill}
+                  {tier.pill}
                 </div>
               </div>
             )}
 
             <CardHeader className="p-4 text-left lg:p-6">
               <CardTitle className="text-lg font-semibold text-foreground">
-                {tier.displayName ?? tier.name}
+                {tier.name}
               </CardTitle>
               <CardDescription className="text-left max-w-[24ch]">
                 {tier.description}
@@ -1762,7 +1655,7 @@ export function PricingTable({
             >
               <div className="mb-6">
                 <h4 className="text-lg font-semibold text-foreground">
-                  {tier.displayName ?? tier.name}
+                  {tier.name}
                 </h4>
                 <p className="mt-2 text-sm text-muted-foreground max-w-[24ch]">
                   {tier.description}
@@ -1798,11 +1691,9 @@ export function PricingTable({
                             </TableHead>
                             <TableCell className="w-3/12 text-center">
                               <FeatureCell
-                                value={getFeatureValue({
-                                  feature,
-                                  tierName: tier.name,
-                                  variant,
-                                })}
+                                value={
+                                  feature.tiers[variant]?.[tier.name] ?? false
+                                }
                               />
                             </TableCell>
                           </TableRow>
@@ -1873,9 +1764,8 @@ export function PricingTable({
                 </table>
               </div>
             </div>
-          </div >
-        )
-        }
+          </div>
+        )}
 
         <div className="relative">
           <Table
@@ -1933,11 +1823,9 @@ export function PricingTable({
                         {selectedTiers.map((tier) => (
                           <TableCell key={tier.id}>
                             <FeatureCell
-                              value={getFeatureValue({
-                                feature,
-                                tierName: tier.name,
-                                variant,
-                              })}
+                              value={
+                                feature.tiers[variant]?.[tier.name] ?? false
+                              }
                             />
                           </TableCell>
                         ))}
@@ -1948,7 +1836,7 @@ export function PricingTable({
             </TableBody>
           </Table>
         </div>
-      </section >
+      </section>
     </>
   );
 }
