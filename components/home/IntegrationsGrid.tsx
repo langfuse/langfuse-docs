@@ -313,7 +313,7 @@ function IntegrationTile({ title, href, icon }: IntegrationTileProps) {
 
 export default function IntegrationsGrid() {
   return (
-    <HomeSection>
+    <HomeSection id="integrations">
       <Header
         title="Works with any LLM app and model"
         description="SDKs for Python & JS/TS, native integrations for popular libraries and support for OpenTelemetry"

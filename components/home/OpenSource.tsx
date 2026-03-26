@@ -214,7 +214,7 @@ export default function OpenSource({ changelogItems }: { changelogItems?: Change
   };
 
   return (
-    <HomeSection className="flex flex-col items-center">
+    <HomeSection id="open-source" className="flex flex-col items-center">
       <Header
         title="Proudly Open Source"
         description={

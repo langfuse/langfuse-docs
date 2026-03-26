@@ -23,10 +23,11 @@ export function HomeMainArea({ children }: { children: ReactNode }) {
   return (
     <main
       ref={ref}
-      className="pattern-bg flex-1 min-w-0"
+      className="flex-1 min-w-0 rounded-sm bg-surface-1 pattern-bg"
       onMouseMove={handleMouseMove}
+      id="home-main-area"
     >
-      <div className="relative">{children}</div>
+      <div className="relative z-1">{children}</div>
     </main>
   );
 }

@@ -17,7 +17,7 @@ export function Logo({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const images = (
-    <div className="flex gap-2 items-center cursor-pointer -mr-4 md:-mr-0">
+    <div className="flex gap-2 items-center -mr-4 cursor-pointer md:mr-0">
       <Image
         src="/langfuse_logo_white.svg"
         alt="Langfuse Logo"

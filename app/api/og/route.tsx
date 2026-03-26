@@ -11,8 +11,8 @@ export async function GET(request: NextRequest) {
   const fontGeistMono = await fetch(
     new URL("/fonts/GeistMono-Medium.ttf", base)
   ).then((res) => res.arrayBuffer());
-  const fontGeistSans = await fetch(
-    new URL("/fonts/Geist-Regular.ttf", base)
+  const fontInter = await fetch(
+    new URL("/fonts/InterVariable.ttf", base)
   ).then((res) => res.arrayBuffer());
 
   const { searchParams } = new URL(request.url);
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
           height: "100%",
           width: "100%",
           backgroundColor: "#000000",
-          fontFamily: "GeistSans",
+          fontFamily: "Inter",
           color: "#fff",
           padding: 0,
           fontWeight: 500,
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
       height: 630,
       fonts: [
         { name: "GeistMono", data: fontGeistMono, style: "normal" },
-        { name: "GeistSans", data: fontGeistSans, style: "normal" },
+        { name: "Inter", data: fontInter, style: "normal" },
       ],
     }
   );

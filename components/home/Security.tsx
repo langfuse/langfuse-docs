@@ -10,7 +10,7 @@ import { FORTUNE_50_COMPANIES, FORTUNE_500_COMPANIES } from "./Usage";
 
 export default function Security() {
   return (
-    <HomeSection className="flex flex-col items-center">
+    <HomeSection id="security" className="flex flex-col items-center">
       <Header
         title="Enterprise Security"
         description={

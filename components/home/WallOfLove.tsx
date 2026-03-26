@@ -4,7 +4,7 @@ import { TestimonialsGrid } from "./TestimonialsGrid";
 
 export const WallOfLove = () => {
   return (
-    <HomeSection>
+    <HomeSection id="community">
       <Header
         title="Join the Community"
         description="100.000+ people have built on Langfuse."

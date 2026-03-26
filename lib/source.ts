@@ -322,14 +322,14 @@ export const POST_SECTIONS = new Set(["blog", "changelog", "users"]);
 /** Changelog posts — no sidebars at all, centered narrow content */
 export const CHANGELOG_SECTIONS = new Set(["changelog"]);
 
-/** Sections that have their own route folder under app/(wide)/ */
-export const WIDE_SECTION_SLUGS = [
+/** Sections served as standalone marketing pages under app/(home)/(marketing)/ */
+export const MARKETING_SECTION_SLUGS_STANDALONE = [
   "pricing",
   "pricing-self-host",
   "talk-to-us",
   "watch-demo",
   "startups",
 ] as const;
-export type WideSectionSlug = (typeof WIDE_SECTION_SLUGS)[number];
-export const WIDE_SECTIONS = new Set<string>(WIDE_SECTION_SLUGS);
+export type MarketingSlug = (typeof MARKETING_SECTION_SLUGS_STANDALONE)[number];
+export const MARKETING_SECTIONS = new Set<string>(MARKETING_SECTION_SLUGS_STANDALONE);
 

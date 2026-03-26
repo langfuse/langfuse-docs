@@ -6,7 +6,7 @@ export type { CustomerStory };
 
 export default function CustomerStories({ stories }: { stories: CustomerStory[] }) {
   return (
-    <HomeSection>
+    <HomeSection id="customers">
       <Header
         title="User Stories"
         description="See what our users are saying about Langfuse"

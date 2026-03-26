@@ -193,6 +193,57 @@
   }
 }
 
+/* ─── TOC (right sidebar) ─────────────────────────────────────────────────── */
+
+/* Reduce fumadocs' default pt-12 top padding */
+#nd-toc {
+  padding-top: 1.5rem;
+}
+
+/* "On this page" heading: bold, primary color, hide the icon */
+#toc-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+#toc-title svg {
+  display: none;
+}
+
+/* Scroll area: flex-grow so it fills available height; dashed bottom border */
+#nd-toc > div.ms-px {
+  flex: 1;
+  border-bottom: 1px dashed var(--text-links);
+  padding-bottom: 0.75rem;
+  margin-bottom: 0;
+}
+
+/* Items container: use line-structure color for the left border */
+#nd-toc .border-s {
+  border-color: var(--line-structure);
+}
+
+/* TocThumb (moving bar): use text-links (indigo/purple) */
+#nd-toc .bg-fd-primary {
+  background-color: var(--text-links) !important;
+}
+
+/* TOC items: default state */
+#nd-toc a[data-active] {
+  color: var(--text-tertiary);
+}
+/* TOC items: active state */
+#nd-toc a[data-active="true"] {
+  color: var(--text-primary) !important;
+}
+
+/* Footer slot: dashed top border to match scroll area bottom */
+#nd-toc .toc-footer {
+  border-top: 1px dashed var(--text-links);
+  padding-top: 1rem;
+}
+
 /* Fix nested lists */
 li > ol,
 li > ul {

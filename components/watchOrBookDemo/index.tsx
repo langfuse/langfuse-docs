@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense } from "react";
-import { Background } from "@/components/Background";
 import { Header } from "@/components/Header";
 import { ContactSalesForm } from "@/components/ContactSalesForm";
 import { CheckCircle2, ArrowRight } from "lucide-react";
@@ -259,8 +258,6 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
           </div>
         </div>
       </div>
-
-      <Background />
     </HomeSection>
   );
 }

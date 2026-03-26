@@ -60,7 +60,7 @@ export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
 
 export default function UsageSection() {
   return (
-    <HomeSection>
+    <HomeSection id="platform">
       <Usage />
     </HomeSection>
   );

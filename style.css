@@ -12,7 +12,7 @@
 /* Custom theme tokens */
 @theme {
   --font-sans:
-    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+    var(--font-inter), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono:
     var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
@@ -49,6 +49,35 @@
   --color-muted-green: hsl(var(--muted-green));
   --color-muted-blue: hsl(var(--muted-blue));
   --color-muted-magenta: hsl(var(--muted-magenta));
+
+  /* ── Figma design tokens ──────────────────────────────────────────────── */
+  /* line */
+  --color-line-structure: var(--line-structure);
+  --color-line-divider-dash: var(--line-divider-dash);
+  --color-line-cta: var(--line-cta);
+  --color-line-code-border: var(--line-code-border);
+
+  /* surface */
+  --color-surface-bg: var(--surface-bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-code: var(--surface-code);
+  --color-surface-cta-primary: var(--surface-cta-primary);
+  --color-surface-beige-accent: var(--surface-beige-accent);
+  --color-surface-button-grey: var(--surface-button-grey);
+  --color-surface-code-grey: var(--surface-code-grey);
+  --color-surface-code-button: var(--surface-code-button);
+
+  /* text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-code-secondary: var(--text-code-secondary);
+  --color-text-links: var(--text-links);
+  --color-text-code-orange: var(--text-code-orange);
+  --color-text-code-pink: var(--text-code-pink);
+  --color-text-code-blue: var(--text-code-blue);
 
   /* Border radius */
   --radius-lg: var(--radius);
@@ -210,6 +239,35 @@
     --muted-green: 84 81% 44%;
     --muted-magenta: 330 90% 70%;
     --muted-blue: 239 84% 67%;
+
+    /* ── Figma design tokens — light ────────────────────────────────────── */
+    /* line */
+    --line-structure: #CFCFC9;
+    --line-divider-dash: #BEBEB6;
+    --line-cta: #404039;
+    --line-code-border: #333333;
+
+    /* surface */
+    --surface-bg: #F6F6F3;
+    --surface-1: #EDEDE8;
+    --surface-2: #E5E5E1;
+    --surface-code: #333333;
+    --surface-cta-primary: #FBFF81;
+    --surface-beige-accent: #F1EDE1;
+    --surface-button-grey: #403D391A; /* #403D39 at 10% */
+    --surface-code-grey: #3D3D3D;
+    --surface-code-button: #51504F;
+
+    /* text */
+    --text-primary: #222220;
+    --text-secondary: #3D3D38;
+    --text-tertiary: #6B6B66;
+    --text-disabled: #A7A7A0;
+    --text-code-secondary: #FFFCF280; /* #FFFCF2 at 50% */
+    --text-links: #4F39F6;
+    --text-code-orange: #C17E2E;
+    --text-code-pink: #D05376;
+    --text-code-blue: #438AA5;
   }
 
   :root[class~="dark"] {
@@ -240,6 +298,35 @@
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 85.7% 97.3%;
+
+    /* ── Figma design tokens — dark ─────────────────────────────────────── */
+    /* line */
+    --line-structure: #2C2C29;
+    --line-divider-dash: #232320;
+    --line-cta: #B8B6A0;
+    --line-code-border: #3A3A38;
+
+    /* surface */
+    --surface-bg: #171714;
+    --surface-1: #1E1E1B;
+    --surface-2: #252522;
+    --surface-code: #0E0E0C;
+    --surface-cta-primary: #4C4D23;
+    --surface-beige-accent: #F1EDE1;
+    --surface-button-grey: #FFFFFF1A; /* #FFFFFF at 10% */
+    --surface-code-grey: #2A2A2A;
+    --surface-code-button: #3A3937;
+
+    /* text */
+    --text-primary: #E8E8E4;
+    --text-secondary: #B4B4AE;
+    --text-tertiary: #7A7A74;
+    --text-disabled: #4A4A45;
+    --text-code-secondary: #E8E8DC80; /* #E8E8DC at 50% */
+    --text-links: #7B8FF8;
+    --text-code-orange: #E8935A;
+    --text-code-pink: #E86B9A;
+    --text-code-blue: #6AB8CC;
   }
 
   * {
@@ -247,18 +334,14 @@
   }
 
   body {
-    @apply bg-background! text-foreground!;
+    @apply bg-surface-1! text-foreground!;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
   }
 
-  footer {
-    @apply bg-background! text-foreground!;
-  }
-
   h1 {
-    @apply tracking-tight font-mono;
+    @apply font-mono tracking-tight;
   }
 
   h2 {
@@ -267,7 +350,7 @@
 
   /* Style headers in Markdown tables */
   th {
-    @apply bg-muted text-left p-4 font-mono;
+    @apply p-4 font-mono text-left bg-muted;
   }
 }
 

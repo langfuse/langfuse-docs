@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SECTION_CONFIG, WIDE_SECTIONS } from "@/lib/source";
-import type { WideSectionSlug } from "@/lib/source";
+import { SECTION_CONFIG, MARKETING_SECTIONS } from "@/lib/source";
+import type { MarketingSlug } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { getMDXComponents } from "@/mdx-components";
 import type { ComponentType } from "react";
 
-export async function generateWideSectionMetadata(section: WideSectionSlug): Promise<Metadata> {
+export async function generateMarketingMetadata(section: MarketingSlug): Promise<Metadata> {
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
   const page = config.source.getPage([section]);
   if (!page) return { title: "Not Found" };
@@ -32,10 +32,10 @@ export async function generateWideSectionMetadata(section: WideSectionSlug): Pro
   };
 }
 
-type Props = { section: WideSectionSlug };
+type Props = { section: MarketingSlug };
 
-export default async function WideSectionPage({ section }: Props) {
-  if (!WIDE_SECTIONS.has(section)) notFound();
+export default async function MarketingPage({ section }: Props) {
+  if (!MARKETING_SECTIONS.has(section)) notFound();
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
   const page = config.source.getPage([section]);
   if (!page) notFound();

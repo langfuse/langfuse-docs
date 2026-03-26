@@ -1,9 +1,22 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { RootProvider } from "fumadocs-ui/provider/next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import localFont from "next/font/local";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
+
+const interVariable = localFont({
+  src: "../public/fonts/InterVariable.ttf",
+  variable: "--font-inter",
+  display: "swap",
+  weight: "100 900",
+});
+
+const geistMono = localFont({
+  src: "../public/fonts/GeistMono-Medium.ttf",
+  variable: "--font-geist-mono",
+  display: "swap",
+  weight: "500",
+});
 import { Hubspot } from "@/components/analytics/hubspot";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
@@ -32,7 +45,7 @@ export default function RootLayout({
       lang="en"
       dir="ltr"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${interVariable.variable} ${geistMono.variable}`}
     >
       <body className="font-sans antialiased">
         <PostHogProvider>

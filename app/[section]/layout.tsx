@@ -7,7 +7,7 @@ import {
   SECTION_SLUGS,
   DOCS_STYLE_APP_SECTIONS,
   MARKETING_SECTION_SLUGS,
-  WIDE_SECTIONS,
+  MARKETING_SECTIONS,
   POST_SECTIONS,
   CHANGELOG_SECTIONS,
   getPageTreeWithShortTitles,
@@ -36,8 +36,8 @@ export default function SectionLayout({ children, params }: LayoutProps) {
   if (DOCS_STYLE_APP_SECTIONS.has(section)) {
     notFound();
   }
-  if (WIDE_SECTIONS.has(section)) {
-    notFound(); /* wide sections are served by app/(wide)/<section>/page.tsx */
+  if (MARKETING_SECTIONS.has(section)) {
+    notFound(); /* marketing sections are served by app/(home)/(marketing)/<section>/page.tsx */
   }
 
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
