@@ -236,8 +236,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
       featured: false,
       cardClassName:
-        "border-[#FFD300] bg-[#FFD3000F] dark:bg-[#FFD30014] dark:border-[#FFD300]",
-      pillClassName: "bg-[#FFD300] text-[#1A1A1A]",
+        "border-[#FAFF6A] bg-[#FAFF6A12] dark:bg-[#FAFF6A14] dark:border-[#FAFF6A]",
+      pillClassName: "bg-[#FAFF6A] text-[#1A1A1A]",
       description:
         "Dedicated Langfuse deployment with enterprise capabilities and support.",
       pill: (
