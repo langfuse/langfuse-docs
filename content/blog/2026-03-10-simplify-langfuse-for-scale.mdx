@@ -20,7 +20,8 @@ Langfuse is building the open source LLM engineering platform to help teams buil
 In December 2024, we released Langfuse [V3](https://langfuse.com/blog/2024-12-langfuse-v3-infrastructure-evolution) where we moved all tracing data from Postgres to ClickHouse.
 
 Today, we are sharing a major next step in product performance and making the product simpler: our shift to an observations-centric data model.
-For you, this means a single table where every LLM call, tool execution, and agent step is directly queryable — no more opening traces one by one to find what you need.
+For you, this means every LLM call, tool execution, and agent step lives in one queryable table. As agentic applications grow more complex, a single trace can contain thousands of operations, and the interesting ones are rarely at the top level. Use filters and saved views to focus on exactly what matters — whether that's tracing a single request end-to-end or spotting patterns across your entire project, like which model calls are driving up cost or where latency spikes.
+
 For the rollout summary and upgrade guidance, see the [changelog post](/changelog/2026-03-10-simplify-for-scale).
 It is live in Beta on Langfuse Cloud across all regions.
 We are still working on the upgrade path for self-hosters and will eventually release it as a V4 major version.
@@ -61,7 +62,7 @@ Every query touching historical data carried this overhead.
 In 2025 we switched from our proprietary ingestion to OpenTelemetry.
 First released as an endpoint in January, we then migrated all of our first-party SDKs over to OpenTelemetry protocols over the summer.
 By now, roughly 60% of all observations in Langfuse Cloud come via the OpenTelemetry endpoint.
-As OpenTelemetry observations are immutable, all observations ingested into Langfuse are immutable.
+As OpenTelemetry spans are immutable, all observations ingested into Langfuse are immutable.
 These observations carry trace-level data which update the trace table, though.
 
 For self-hosting users with OpenTelemetry-only clients, this unlocked read-time optimizations where we could skip the deduplication on our `observations` table.
@@ -92,7 +93,7 @@ We decided on this option within the V3 go-live, as adding a different database 
 In addition, scaling linearly with throughput is a nice property compared to fixed infrastructure components for deployments that vary widely in traffic.
 
 The first win on cost reduction came with OpenTelemetry.
-Because observations are immutable, we could write an entire batch as one object and fetch it as one \- no merging required.
+Because spans are immutable, we could write an entire batch as one object and fetch it as one \- no merging required.
 Trace-level attributes still followed the original path, but that optimization alone cut S3 costs by \~85% for some self-hosters and for OpenTelemetry-only projects.
 Also on Langfuse Cloud, we have seen a decline in relative S3 cost as users adopted the new SDKs.
 
@@ -164,36 +165,19 @@ The most visible product change in V4 is the shift to an observations-first UI.
 For many users, the traces table was the primary entry point for debugging.
 We think that was a limitation of the old model rather than the right default.
 
-With thousands of observations in a single agentic trace, an observations-first view is more useful: find your most expensive interaction, drill into a specific agent, or find failed tool invocations.
+With agentic applications producing traces that contain hundreds or thousands of operations, the one-row-per-trace view was increasingly hiding the signal engineers need. A developer debugging a multi-step agent doesn't just want to know that a trace failed — they want to find the specific tool call that errored, the specific LLM call that was expensive, or the specific retrieval that returned irrelevant results. The observations table lets them start with that question directly.
 With faster load times, expanded filter capabilities, and saved views this becomes a superior experience to understand your application.
 The `trace_id` becomes a correlation handle—like `session_id` or `user_id`—rather than its own top-level entity.
 This also resolves a long-standing source of confusion around the two-entity model.
 
 This isn't a novel pattern.
-The broader observability community has been converging on this approach for years.
-Charity Majors describes it as [Observability 2.0](https://charity.wtf/tag/observability-2-0/): instead of scattering telemetry across separate metrics, logs, and trace stores, you keep one unified source of truth — arbitrarily-wide structured events in columnar storage, queryable by any dimension.
-Ivan Burmistrov's widely circulated essay ["All you need is Wide Events"](https://isburmistrov.substack.com/p/all-you-need-is-wide-events-not-metrics) makes a similar case: the separation into three pillars is artificial — what matters is a single table of richly attributed events that you can slice and dice without predetermined aggregations.
-Uber's engineering team arrived at the same conclusion when they [rebuilt their logging platform on ClickHouse](https://www.uber.com/en-DE/blog/logging/), moving from Elasticsearch to a schema-flexible columnar model where wide, structured events with 40+ fields are the primary unit of analysis.
+The broader observability community has been converging on this approach. Ivan Burmistrov's widely circulated essay ["All you need is Wide Events"](https://isburmistrov.substack.com/p/all-you-need-is-wide-events-not-metrics) argues that the separation into metrics, logs, and traces is artificial — what matters is a single table of richly attributed events you can slice and dice without predetermined aggregations. Uber's engineering team arrived at the same conclusion when they [rebuilt their logging platform on ClickHouse](https://www.uber.com/en-DE/blog/logging/), moving to a schema-flexible columnar model where wide, structured events are the primary unit of analysis.
 
-As part of ClickHouse, Langfuse is uniquely positioned to take this further.
-The ClickHouse team has written about [the convergence of observability and business analytics](https://clickhouse.com/blog/ai-redrawing-database-market#a_unified_data_platform) — the insight that API calls are purchases, errors are failed transactions, and separating operational data from business data is an outdated convention.
-With Langfuse running natively on ClickHouse Cloud, the same infrastructure that powers your LLM observability can query alongside your business data: correlate model costs with revenue, join agent performance with user engagement, or build dashboards that span both operational and product metrics — all without moving data between systems.
-
-For Langfuse users, this means the observations table is now the primary workspace.
+For Langfuse users, this means the new table is now the primary workspace.
 Filters, sorting, and [saved views](/changelog/2025-05-20-save-table-views) replace the old traces-table browsing.
-The trace waterfall view isn't going away — it's still one click away from any observation row when you need the full picture of a request.
-But discovery starts with the flat table: filter by model, cost, latency, user, session, or error status to find the observations that matter, then drill into the trace for context.
+The trace waterfall view isn't going away. It's still one click away from any observation row when you need the full picture of a request.
+But discovery starts with the flat table: filter by observation name, type, model, cost, latency, user, session, or error status to surface the operations that matter, then drill into the trace for context.
 
-### What this means for how you use Langfuse
-
-This is not a Langfuse-specific pattern — the broader observability community has converged on observations-first exploration as the default, from [Observability 2.0](https://charity.wtf/tag/observability-2-0/) to [Wide Events](https://isburmistrov.substack.com/p/all-you-need-is-wide-events-not-metrics) to [Uber's ClickHouse-based logging platform](https://www.uber.com/en-DE/blog/logging/). You are learning a portable mental model, not a proprietary one.
-
-For users upgrading to the new experience, here is the practical shift:
-
-- **The observations table is your starting point.** Instead of scanning a list of traces, use filters to surface the operations you care about — expensive LLM calls, errors, slow retrievals. Each row is one operation with all its context (input, output, cost, latency, metadata) directly available.
-- **Saved views replace the traces table.** Create a saved view that filters for root observations to get the familiar one-row-per-trace view. Then create additional views for your most common debugging workflows. Most teams find they need 2-3 views to feel productive.
-- **`trace_id` is a filter, not a destination.** When you want to see all operations in a single request, filter by `trace_id`. When you want to see all operations for a user, filter by `user_id`. They work the same way — `trace_id` is no longer special.
-- **The trace waterfall is a drill-down, not the entry point.** Click any observation row to open its full trace context. The flat table is for discovery; the waterfall is for investigation.
 
 ## Road to V4: Implementation Hurdles
 

@@ -11,7 +11,7 @@ import { ArrowRight } from "lucide-react";
 
 <ChangelogHeader />
 
-Charts, filters, and APIs across Langfuse Cloud are now significantly faster — and you get a more powerful way to explore your data: a single observations table where every LLM call, tool execution, and agent step is directly queryable.
+Langfuse is rolling out a simplified architecture built for significantly faster product performance at scale. Charts, filters, APIs are becoming much faster across Langfuse Cloud.
 
 <Cards num={1}>
   <Card
@@ -27,9 +27,7 @@ To avoid delays in the new experience and see your data in real time, upgrade to
 
 ## What changes for you
 
-The main table in Langfuse is now **observations**. Traces are no longer a separate table — instead, `trace_id` is a filter column you can use to group observations belonging to the same trace, just like `session_id` or `user_id`. This means you can now query across all operations directly: find every expensive LLM call, every failed tool invocation, or every slow retrieval — without opening individual traces first.
-
-If you want the familiar one-row-per-trace view, filter for root observations and save it as a [saved view](/changelog/2025-05-20-save-table-views). See the [guide on working with observations in v4](/faq/all/explore-observations-in-v4) for more before/after workflows.
+The main table in Langfuse is now **observations** — every LLM call, tool execution, and agent step is a row you can query directly. As agentic applications grow more complex, a single trace can contain thousands of operations, and the interesting ones are rarely at the top level. `trace_id` works like any other filter column (`session_id`, `user_id`, `score`) to group related observations together. Filter by observation name, type, or model to surface the operations that matter most — then save that view for one-click access. See the [guide on working with observations in v4](/faq/all/explore-observations-in-v4) for common workflows and [saved views](/changelog/2025-05-20-save-table-views) to get started.
 
 ## What's faster now
 
@@ -47,13 +45,13 @@ The new [Observations API v2](/docs/api-and-data-platform/features/observations-
 
 ## Working with the new observations table
 
-In v4, Langfuse uses a single unified observations table as the main exploration surface. All inputs, outputs, and context attributes live directly on observations, enabling faster filtering and aggregation at scale. This approach aligns with where the observability community is heading — what is broadly described as [Observability 2.0](https://charity.wtf/tag/observability-2-0/) and [Wide Events](https://isburmistrov.substack.com/p/all-you-need-is-wide-events-not-metrics): a flat, filterable table of richly attributed observations is more powerful than a grouped traces view, especially as agentic applications produce thousands of operations per trace.
+In v4, Langfuse uses a single unified observations table as the main exploration surface. All inputs, outputs, and context attributes live directly on observations, enabling faster filtering and aggregation at scale. This approach aligns with where the observability community is heading. Ivan Burmistrov's widely circulated essay ["All you need is Wide Events"](https://isburmistrov.substack.com/p/all-you-need-is-wide-events-not-metrics) argues that the separation into metrics, logs, and traces is artificial — what matters is a single table of richly attributed events you can slice and dice without predetermined aggregations. Uber's engineering team arrived at the same conclusion when they [rebuilt their logging platform on ClickHouse](https://www.uber.com/en-DE/blog/logging/), moving to a schema-flexible columnar model where wide, structured events are the primary unit of analysis. As agentic applications produce traces with hundreds or thousands of operations, this flat, filterable table becomes more powerful than a grouped traces view — engineers need to find specific operations across traces, not just browse one trace at a time.
 
-You will notice more rows than before — that's expected. Each row is now one operation, not one trace. Use filters and [saved views](/changelog/2025-05-20-save-table-views) to focus on what matters. Most users start with one of these common views:
+You will notice more rows than before. Each row is now one operation, not one trace. Use filters and [saved views](/changelog/2025-05-20-save-table-views) to focus on what matters. Most users start with one of these common views:
 
 | View | How to set it up |
 |---|---|
-| All traces (like the old table) | Filter for root observations (no parent observation), save as a view |
+| Key operations | Filter by observation `name` or `type` matching your most important operations |
 | Expensive LLM calls | Filter `type = generation`, sort by `total_cost` descending |
 | Errors for a specific user | Filter `user_id`, `level = ERROR` |
 | Slow observations in a session | Filter `session_id`, sort by `latency` descending |
