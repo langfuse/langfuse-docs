@@ -51,6 +51,8 @@ type Tier = {
   id: string;
   href: string;
   featured: boolean;
+  cardClassName?: string;
+  pillClassName?: string;
   description: string;
   pill?: React.ReactNode;
   price: string;
@@ -233,6 +235,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-self-hosted-enterprise",
       href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
       featured: false,
+      cardClassName:
+        "border-[#FFD300] bg-[#FFD3000F] dark:bg-[#FFD30014] dark:border-[#FFD300]",
+      pillClassName: "bg-[#FFD300] text-[#1A1A1A]",
       description:
         "Dedicated Langfuse deployment with enterprise capabilities and support.",
       pill: (
@@ -1400,16 +1405,12 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
       )}
     >
       {selectedTiers.map((tier) => {
-        const isSelfHostedEnterpriseTier =
-          variant === "selfHosted" && tier.id === "tier-self-hosted-enterprise";
-
         return (
           <Card
             key={tier.id}
             className={cn(
               tier.featured && "border-primary",
-              isSelfHostedEnterpriseTier &&
-                "border-amber-300/80 bg-amber-50/60 dark:border-amber-500/60 dark:bg-amber-500/10",
+              tier.cardClassName,
               "relative h-full flex flex-col",
               selectedTiers.length === 1 && "w-full max-w-lg",
             )}
@@ -1419,9 +1420,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                 <div
                   className={cn(
                     "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full",
-                    isSelfHostedEnterpriseTier
-                      ? "bg-amber-200 text-amber-950 dark:bg-amber-300 dark:text-amber-950"
-                      : "bg-primary text-primary-foreground",
+                    tier.pillClassName ?? "bg-primary text-primary-foreground",
                   )}
                 >
                   {tier.pill}
