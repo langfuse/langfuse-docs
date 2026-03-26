@@ -22,15 +22,7 @@ Traditional production apps are monitored for high-signal indicators that someth
 
 LLM-powered apps have the same need - but the problem is harder. Outputs are non-deterministic. A broken response doesn't throw an exception. A user who didn't get what they needed might just silently leave. You can't monitor what you can't measure.
 
-Quality scores and evals are only a part of the picture here. Alongside them, you want event detection: using [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) not to grade responses, but to detect when something specific and interesting happened in a conversation. Here's how we detect those events in our AI Customer Support Agent.
-
-## The Mental Model: Event Detection complementing Quality Grading
-
-The key shift for production signal detection is to start asking "did something specific happen here?"
-
-This is how traditional production monitoring works. A rage click isn't a quality metric - it doesn't tell you how good the page is on a scale of 1-5. It tells you that something specific happened: a user clicked something repeatedly in frustration. That signal is binary, actionable, and doesn't require any subjective judgment.
-
-LLM-as-a-judge can work the same way. Instead of asking a model to score helpfulness, ask it a yes/no question: did the user disagree with the assistant? Did the user ask for something outside the agent's scope? Did the assistant say something it shouldn't have?
+A rage click isn't a quality metric - it tells you something specific happened: a user clicked something repeatedly in frustration. [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) can work the same way. Instead of asking a model to score helpfulness, ask it a yes/no question: did the user disagree with the assistant? Did the user ask for something outside the agent's scope? Quality scores tell you how good your app is on average - event detectors tell you when something specific happened that's worth acting on.
 
 Good event detectors are:
 - **Binary.** Yes or no - did the event occur? This maps directly to filtering, alerting, and routing.
