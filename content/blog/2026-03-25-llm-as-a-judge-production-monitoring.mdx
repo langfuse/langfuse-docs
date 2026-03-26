@@ -1,7 +1,7 @@
 ---
 title: "The Rage Clicks of LLM apps: High-Signal Production Monitoring for AI Customer Support Agents"
 date: 2026/03/26
-description: How to use LLM-as-a-judge to detect specific interesting events in your LLM app - not to grade quality, but to catch the signals that tell you something worth acting on just happened.
+description: How to use LLM-as-a-judge to detect interesting events in your LLM app - not to grade quality, but to catch the signals that tell you something worth acting on just happened.
 tag: engineering
 author: Annabell
 ogImage: /images/blog/2026-03-25-llm-as-a-judge-production-monitoring/og.jpg
@@ -11,7 +11,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="The Rage Clicks of LLM apps: High-Signal Production Monitoring for AI Support Agents"
-  description="How to use LLM-as-a-judge to detect specific interesting events in your LLM app - not to grade quality, but to catch the signals that tell you something worth acting on just happened."
+  description="How to use LLM-as-a-judge to detect interesting events in your LLM app - not to grade quality, but to catch the signals that tell you something worth acting on just happened."
   date="March 25, 2026"
   authors={["annabellschafer"]}
 />
@@ -20,9 +20,9 @@ import { Frame } from "@/components/Frame";
 
 Traditional production apps are monitored for high-signal indicators that something's going wrong: rage clicks, error rates, timeouts. These are binary, easy-to-detect signals that tell you immediately when users are unhappy or the app is misbehaving.
 
-LLM-powered apps have the same need - but the problem is harder. Outputs are non-deterministic. A broken response doesn't throw an exception. A user who didn't get what they needed might just silently leave. You can't monitor what you can't measure.
+LLM-powered apps have the same need - but the problem is harder as outputs are non-deterministic. A broken response doesn't throw an exception. A user who didn't get what they needed might just silently leave. But how do you measure these subtle signals?
 
-A rage click isn't a quality metric - it tells you something specific happened: a user clicked something repeatedly in frustration. [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) can work the same way. Instead of asking a model to score helpfulness, ask it a yes/no question: did the user disagree with the assistant? Did the user ask for something outside the agent's scope? Quality scores tell you how good your app is on average - event detectors tell you when something specific happened that's worth acting on.
+Instead of asking a model to score helpfulness, ask it a yes/no question: did the user disagree with the assistant? Did the user ask for something outside the agent's scope?
 
 Good event detectors are:
 - **Binary.** Yes or no - did the event occur? This maps directly to filtering, alerting, and routing.
@@ -31,7 +31,7 @@ Good event detectors are:
 
 ## Three Events Worth Detecting in a Customer Support Agent
 
-We built [template evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) in Langfuse for each of these, available to copy.
+We built template [evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) in Langfuse for each of these, available to copy.
 
 ### 1. User Disagreement
 
@@ -343,7 +343,7 @@ Each of these is available as a template evaluator for Langfuse - you can enable
 If you want to write your own or adapt the templates:
 
 1. **Write a narrow prompt.** Give the conversation as input, ask for yes/no and a one-line reason. Keep the task as specific as possible - the more focused the check, the more reliable the signal.
-2. **Review the results.** Use Langfuse's filtering to find flagged traces. Review where valuable info is included.
+2. **Review the results.** Use Langfuse's filtering to find flagged traces. Review where valuable info is included. Use what you find to improve your agent's system prompt - [automatic prompt improvement](/blog/2026-02-16-prompt-improvement-claude-skills) is a natural next step here.
 3. **Fintune your evaluators.** To keep your evaluators high signal you want to adjust them over time. LLM as a judge instructions are prompts, and they equally [need to be improved as the prompts](/blog/2026-02-16-prompt-improvement-claude-skills) in your production system.
 
 ## Takeaway
