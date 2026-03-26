@@ -4,7 +4,7 @@ import {
   Tabs as FumadocsTabs,
   TabsList as FumadocsTabsList,
   TabsTrigger as FumadocsTabsTrigger,
-} from "fumadocs-ui/components/ui/tabs";
+} from "fumadocs-ui/components/tabs";
 import { cn } from "@/lib/utils";
 
 const KEY = "synced-tabs:language";
@@ -160,8 +160,8 @@ export function LangTabs(props: {
   return (
     <div ref={containerRef}>
       <FumadocsTabs
-        value={internalValue}
-        onValueChange={handleValueChange}
+        key={internalValue}
+        defaultValue={internalValue}
         className="flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4"
       >
         <FumadocsTabsList
@@ -173,6 +173,7 @@ export function LangTabs(props: {
             <FumadocsTabsTrigger
               key={i}
               value={values[i]}
+              onClick={() => handleValueChange(values[i])}
               className={cn(
                 "inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary",
               )}
