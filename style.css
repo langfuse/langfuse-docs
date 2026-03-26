@@ -283,6 +283,35 @@
   }
 }
 
+@layer components {
+  /*
+   * Keep tabs panel spacing consistent:
+   * - remove extra top offset from first-child margins/padding in MDX blocks
+   * - keep code-only tabs visually aligned with text+code tabs
+   */
+  .tabs-content-normalized > :first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .tabs-content-normalized > :last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .tabs-content-normalized > figure {
+    margin-top: 0 !important;
+  }
+
+  .tabs-content-normalized > figure:only-child,
+  .tabs-content-normalized > pre:only-child {
+    margin: 0 !important;
+  }
+
+  .tabs-content-normalized > figure:only-child {
+    border: 1px solid hsl(var(--border)) !important;
+  }
+}
+
 /* Override the Tailwind v4 auto-generated animation utilities that use
    animation: var(--animate-*).  The nested var() chain (--animate-foo
    contains var(--speed) / var(--duration)) can be silently invalid in
