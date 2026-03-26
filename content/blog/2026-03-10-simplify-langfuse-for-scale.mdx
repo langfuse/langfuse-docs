@@ -20,6 +20,8 @@ Langfuse is building the open source LLM engineering platform to help teams buil
 In December 2024, we released Langfuse [V3](https://langfuse.com/blog/2024-12-langfuse-v3-infrastructure-evolution) where we moved all tracing data from Postgres to ClickHouse.
 
 Today, we are sharing a major next step in product performance and making the product simpler: our shift to an observations-centric data model.
+For you, this means every LLM call, tool execution, and agent step lives in one queryable table. As agentic applications grow more complex, a single trace can contain thousands of operations, and the interesting ones are rarely at the top level. Use filters and saved views to focus on exactly what matters — whether that's tracing a single request end-to-end or spotting patterns across your entire project, like which model calls are driving up cost or where latency spikes.
+
 For the rollout summary and upgrade guidance, see the [changelog post](/changelog/2026-03-10-simplify-for-scale).
 It is live in Beta on Langfuse Cloud across all regions.
 We are still working on the upgrade path for self-hosters and will eventually release it as a V4 major version.
@@ -90,7 +92,7 @@ Yet the S3 API calls were costly for us and our self-hosting users.
 We decided on this option within the V3 go-live, as adding a different database such as Cassandra to our stack would have made Langfuse even more complex for self-hosters.
 In addition, scaling linearly with throughput is a nice property compared to fixed infrastructure components for deployments that vary widely in traffic.
 
-The first win on cost reduction came with OpenTelemetry spans.
+The first win on cost reduction came with OpenTelemetry.
 Because spans are immutable, we could write an entire batch as one object and fetch it as one \- no merging required.
 Trace-level attributes still followed the original path, but that optimization alone cut S3 costs by \~85% for some self-hosters and for OpenTelemetry-only projects.
 Also on Langfuse Cloud, we have seen a decline in relative S3 cost as users adopted the new SDKs.
@@ -103,7 +105,7 @@ Also on Langfuse Cloud, we have seen a decline in relative S3 cost as users adop
 
 ### Experiments with AggregatingMergeTrees
 
-Before deciding to denormalize trace attributes to spans, we tried to cut S3 costs and improve performance while keeping the two-table structure.
+Before deciding to denormalize trace attributes to observations, we tried to cut S3 costs and improve performance while keeping the two-table structure.
 AggregatingMergeTrees in ClickHouse looked promising: move trace updates off S3 and into native ClickHouse aggregation, while making Otel-native observations immutable.
 
 Initially, we used an ordering key in ClickHouse that included `project_id, toDate(timestamp), trace_id`.
@@ -163,10 +165,19 @@ The most visible product change in V4 is the shift to an observations-first UI.
 For many users, the traces table was the primary entry point for debugging.
 We think that was a limitation of the old model rather than the right default.
 
-With thousands of observations in a single agentic trace, an observations-first view is more useful: find your most expensive interaction, drill into a specific agent, or find failed tool invocations.
+With agentic applications producing traces that contain hundreds or thousands of operations, the one-row-per-trace view was increasingly hiding the signal engineers need. A developer debugging a multi-step agent doesn't just want to know that a trace failed — they want to find the specific tool call that errored, the specific LLM call that was expensive, or the specific retrieval that returned irrelevant results. The observations table lets them start with that question directly.
 With faster load times, expanded filter capabilities, and saved views this becomes a superior experience to understand your application.
 The `trace_id` becomes a correlation handle—like `session_id` or `user_id`—rather than its own top-level entity.
 This also resolves a long-standing source of confusion around the two-entity model.
+
+This isn't a novel pattern.
+The broader observability community has been converging on this approach. Ivan Burmistrov's widely circulated essay ["All you need is Wide Events"](https://isburmistrov.substack.com/p/all-you-need-is-wide-events-not-metrics) argues that the separation into metrics, logs, and traces is artificial — what matters is a single table of richly attributed events you can slice and dice without predetermined aggregations. Uber's engineering team arrived at the same conclusion when they [rebuilt their logging platform on ClickHouse](https://www.uber.com/en-DE/blog/logging/), moving to a schema-flexible columnar model where wide, structured events are the primary unit of analysis.
+
+For Langfuse users, this means the new table is now the primary workspace.
+Filters, sorting, and [saved views](/changelog/2025-05-20-save-table-views) replace the old traces-table browsing.
+The trace waterfall view isn't going away. It's still one click away from any observation row when you need the full picture of a request.
+But discovery starts with the flat table: filter by observation name, type, model, cost, latency, user, session, or error status to surface the operations that matter, then drill into the trace for context.
+
 
 ## Road to V4: Implementation Hurdles
 
@@ -180,7 +191,7 @@ We evaluated per-event delays, shared metadata stores (Cassandra, DynamoDB), and
 Each introduced new infrastructure, new cost models, new scaling patterns.
 
 The solution: a staging table that receives all incoming observations and trace records, plus a micro-batch job that joins trace metadata onto observations every 3 minutes with a 5-minute delay.
-Based on observed data distributions, this is the ideal tradeoff of pushing most trace attributes to respective spans while making data available quickly in the new UI.
+Based on observed data distributions, this is the ideal tradeoff of pushing most trace attributes to respective observations while making data available quickly in the new UI.
 For newly incoming observations, the full data is propagated, but past observations remain as they are.
 
 <Frame className="flex-1">

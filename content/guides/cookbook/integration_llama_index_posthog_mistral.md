@@ -9,7 +9,7 @@ category: Integrations
 In this cookbook, we show you how to build a RAG application with [LlamaIndex](https://www.llamaindex.ai/), observe the steps with [Langfuse](https://langfuse.com/), and analyze the data in [PostHog](https://posthog.com/).
 
 ## What is Langfuse?
-[Langfuse](https://langfuse.com/) is an open-source LLM engineering platform designed to help engineers understand and optimize user interactions with their language model applications. It provides tools for tracking, debugging, and improving LLM performance in real-world use cases. Langfuse is available both as a managed [cloud solution](https://cloud.langfuse.com/) and for [local or self-hosted](https://langfuse.com/docs/deployment/feature-overview) deployments.
+[Langfuse](https://langfuse.com/) is an open-source LLM engineering platform designed to help engineers understand and optimize user interactions with their language model applications. It provides tools for tracking, debugging, and improving LLM performance in real-world use cases. Langfuse is available both as a managed [cloud solution](https://langfuse.com/cloud) and for [local or self-hosted](https://langfuse.com/docs/deployment/feature-overview) deployments.
 
 ## What is PostHog?
 [PostHog](https://posthog.com/) is a popular choice for product analytics. Combining Langfuse's LLM analytics with PostHog's product analytics makes it easy to:
@@ -221,7 +221,7 @@ Finally, we connect PostHog to our Langfuse account. Below is a summary of the s
 
 1. [Sign up](https://us.posthog.com/) for your free PostHog account if you haven't already
 2. Copy both your project API key and host from your [project settings](https://us.posthog.com/project/settings/project-details).
-3. In your [Langfuse dashboard](https://cloud.langfuse.com/), click on **Settings** and scroll down to the **Integrations** section to find the PostHog integration.
+3. In your [Langfuse dashboard](https://langfuse.com/cloud), click on **Settings** and scroll down to the **Integrations** section to find the PostHog integration.
 4. Click **Configure** and paste in your PostHog host and project API key (you can find these in your [PostHog project settings](https://us.posthog.com/settings/project)).
 5. Click **Enabled** and then **Save**.
 
