@@ -5,8 +5,8 @@ description: Learn how Cresta uses Langfuse to trace multi-service LLM pipelines
 ogImage:
 tag: customer-story
 author: Annabell
-customerLogo: "/images/customers/cresta/cresta-logo-light.png"
-customerLogoDark: "/images/customers/cresta/cresta-logo-dark.png"
+customerLogo: "/images/customers/cresta/Cresta-light.png"
+customerLogoDark: "/images/customers/cresta/Cresta-dark.png"
 customerQuote: "Langfuse’s trace trees let us follow agent behavior across services - so we debug the full chain, not just the final response."
 quoteAuthor: "[Speaker name]"
 quoteRole: "[Title]"
@@ -22,7 +22,7 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 <BlogHeader
   title="How Cresta traces multi-service AI agent pipelines with Langfuse"
   description="Learn how Cresta uses Langfuse to trace multi-service LLM pipelines, establish data sovereignty, and work with traces across customers."
-  customerLogo="/images/customers/cresta/cresta-logo-light.png"
+  customerLogo="/images/customers/cresta/Cresta-light.png"
   authors={["annabellschafer"]}
   date="March 26, 2026"
 />
@@ -30,6 +30,8 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 ## About Cresta
 
 [Cresta](https://cresta.com/) is an enterprise generative AI platform for contact centers, built to deploy human-centric AI agents, real-time agent assistance, and conversation intelligence on customer data at scale. Teams use Cresta to automate and improve customer experience across sales, care, collections, and more-without sacrificing the trust and control enterprises require.
+
+![Cresta platform overview - Deliver brand-defining CX for less](/images/customers/cresta/cresta_overview.png)
 
 <CustomerQuote
   quote="Langfuse’s trace trees let us follow agent behavior across services-so we debug the full chain, not just the final response."
@@ -63,7 +65,7 @@ Each node captures structured data appropriate to its type: prompts and completi
 
 ### Data sovereignty
 
-Cresta chose to [self-host Langfuse](/self-hosting) rather than using only a managed SaaS offering. Traces capture the content of customer conversations; even though personally identifiable information (PII) is redacted before recording (either upstream before LLM processing or just-in-time at the tracing layer), keeping trace data inside Cresta’s infrastructure boundary was a requirement for them.
+Cresta achieves full data sovereignty by [self-hosting Langfuse](/self-hosting) Langfuse. Traces capture the content of customer conversations; even though personally identifiable information (PII) is redacted before recording (either upstream before LLM processing or just-in-time at the tracing layer).
 
 Cresta deploys one Langfuse instance per Kubernetes cluster, co-located with the services that produce traces:
 
@@ -73,7 +75,8 @@ Cresta deploys one Langfuse instance per Kubernetes cluster, co-located with the
   </Frame>
 </div>
 
-No trace data leaves the cluster boundary. That also gives Cresta direct control over retention policies, backup schedules, and resource allocation.
+No trace data ever leaves the cluster boundary which was an important requirement for the team. That also gives Cresta direct control over retention policies, backup schedules, and resource allocation.
+
 
 ### Multi-tenant trace isolation
 
