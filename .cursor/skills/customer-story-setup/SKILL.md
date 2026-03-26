@@ -54,6 +54,10 @@ Produce a **numbered checklist** for the user (and keep it in the PR description
 1. **Folder**: **`public/images/customers/<slug>/`**
 2. For each asset: **filename**, **purpose**, **where it appears** (section + suggested alt text)
 3. Remind: customer posts use **`<Frame fullWidth>`** around markdown images, e.g. `![Alt](mdc:/images/customers/<slug>/file.png)` per site conventions
+4. **Size each image by aspect ratio** (run `sips -g pixelWidth -g pixelHeight <file>` to get dimensions):
+   - **Portrait / square** (ratio ≤ 1:1) → `<div className="flex justify-center"><Frame fullWidth className="w-1/2">…</Frame></div>`
+   - **Landscape** (~1.5:1) → `<div className="flex justify-center"><Frame fullWidth className="w-2/3">…</Frame></div>`
+   - **Panoramic** (> 2:1) → `<Frame fullWidth className="w-full">…</Frame>` (no centering wrapper needed)
 
 If the draft says “screenshot here” without files, **list placeholders** in MDX with consistent paths so the user can drop files in later.
 
@@ -81,7 +85,7 @@ Do **not** pepper every noun with links. Use paths from **`llms-docs.txt` / avai
 3. **`BlogHeader`**: `title`, `description`, `customerLogo`, `authors`, `date`; optional `image` for hero.
 4. **Body headings**: **One conceptual H1 only** (from `BlogHeader`). Body uses **`##`** and **`###`**; do not skip levels.
 5. **Quote block**: `<CustomerQuote quote="…" name="…" role="…" company="…" />` — align `role` / `company` with frontmatter so the byline reads “Name, Role at Company” (avoid duplicating company name in `role`).
-6. **Images**: `<Frame fullWidth>` + `![alt](/images/customers/<slug>/…)` 
+6. **Images**: size by aspect ratio (see checklist item 4 under Images above) — portrait/square → `w-1/2` centered, landscape → `w-2/3` centered, panoramic → `w-full`
 7. **Closing**: `<ImpactChart items={[{ area, impact }, …]} />` (optional) then `<CustomerStoryCTA />`.
 
 **Reference implementations:** `content/customers/canva.mdx`, `content/customers/cresta.mdx`.
@@ -110,6 +114,7 @@ Do **not** pepper every noun with links. Use paths from **`llms-docs.txt` / avai
 - [ ] Image checklist given to user with folder path
 - [ ] Company website link in About section
 - [ ] Docs links only where agreed; no broken internal URLs
+- [ ] Replace all em dashes (—) with regular hyphens (-) — the linter will do this anyway; better to do it upfront
 - [ ] Follow `AGENTS.md` / `documentation-pages.mdc`: one H1 via BlogHeader, American English, accessible alt text
 
 ---
