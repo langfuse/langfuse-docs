@@ -22,7 +22,7 @@ Traditional production apps are monitored for high-signal indicators that someth
 
 LLM-powered apps have the same need - but the problem is harder. Outputs are non-deterministic. A broken response doesn't throw an exception. A user who didn't get what they needed might just silently leave. You can't monitor what you can't measure.
 
-Quality scores and evals are only a part of the picture here. Alongside them, you want event detection: using LLM-as-a-judge not to grade responses, but to detect when something specific and interesting happened in a conversation. Here's how we detect those events in our AI Customer Support Agent.
+Quality scores and evals are only a part of the picture here. Alongside them, you want event detection: using [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) not to grade responses, but to detect when something specific and interesting happened in a conversation. Here's how we detect those events in our AI Customer Support Agent.
 
 ## The Mental Model: Event Detection complementing Quality Grading
 
@@ -39,7 +39,7 @@ Good event detectors are:
 
 ## Three Events Worth Detecting in a Customer Support Agent
 
-We built template evaluators in Langfuse for each of these, available to copy.
+We built [template evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) in Langfuse for each of these, available to copy.
 
 ### 1. User Disagreement
 
@@ -47,7 +47,7 @@ We built template evaluators in Langfuse for each of these, available to copy.
 
 **Why it matters:** This is the closest LLM equivalent to a 404. Something in the interaction broke down, the knowledge base has a gap, the assistant misunderstood the intent, or the system prompt is steering the model wrong. Unlike a silent exit, a user who disagrees is telling you exactly where it went wrong.
 
-**What to do with it:** Filter traces where this fires and look for patterns. The same topic triggering disagreement repeatedly is a documentation or system prompt fix waiting to happen. This evaluator helps us to quickly detect potential docs gaps.
+**What to do with it:** Filter [traces](/docs/observability/overview) where this fires and look for patterns. The same topic triggering disagreement repeatedly is a documentation or system prompt fix waiting to happen. This evaluator helps us to quickly detect potential docs gaps.
 
 You can see [our version of this evaluator](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/evals?peek=bd0f9452-a64b-4cca-853c-f608bc6e104b) running in our sample project, or use the template prompt below as a starting point:
 
