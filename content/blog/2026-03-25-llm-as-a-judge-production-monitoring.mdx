@@ -310,9 +310,9 @@ Score true if the last user message contains at least one of:
 
 ---
 
-## Score 0 Even If…
+## Score false Even If…
 
-Score 0 if the user does not express feature feedback, including when:
+Score false if the user does not express feature feedback, including when:
 
 - The user asks a how-to or troubleshooting question without commenting on the feature itself.
 - The user reports a bug or outage without adding an opinion or observation about the feature ("it won't load" alone is not feedback - it's a support request).
@@ -326,7 +326,7 @@ Score 0 if the user does not express feature feedback, including when:
 
 Return exactly:
 \`\`\`
-SCORE: <0 or 1>
+SCORE: <true or false>
 COMMENT: <one concise explanation identifying the feedback signal or lack of it, and the feature it refers to if applicable>
 \`\`\`
 
@@ -341,7 +341,7 @@ Last user message: {{last_user_message}}
 
 Now produce:
 \`\`\`
-SCORE: <0 or 1>
+SCORE: <true or false>
 COMMENT: <concise justification>
 \`\`\`
 ```
