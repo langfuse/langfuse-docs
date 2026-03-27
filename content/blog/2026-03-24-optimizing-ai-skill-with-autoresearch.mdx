@@ -1,5 +1,5 @@
 ---
-title: "We Pointed Autoresearch at Our AI Skill and Learned to Write Better Tests"
+title: "We Used Autoresearch on Our AI Skill, It Taught Us to Write Better Tests"
 date: 2026/03/24
 description: "We applied Karpathy's autoresearch to optimize our Langfuse prompt migration skill — and got a lesson in why the target function matters more than the optimizer."
 tag: engineering
@@ -12,17 +12,13 @@ import { Tweet } from "@/components/Tweet";
 import { Frame } from "@/components/Frame";
 
 <BlogHeader
-  title="We Pointed Autoresearch at Our AI Skill and Learned to Write Better Tests"
+  title="We Used Autoresearch on Our AI Skill, It Taught Us to Write Better Tests"
   description="We applied Karpathy's autoresearch to optimize our Langfuse prompt migration skill — and got a lesson in why the target function matters more than the optimizer."
   date="March 24, 2026"
   authors={["lotteverheyden"]}
 />
 
-<Frame fullWidth>
-  ![We Pointed Autoresearch at Our AI Skill and Learned to Write Better Tests](/images/blog/2026-03-24-optimizing-ai-skill-with-autoresearch/og.jpg)
-</Frame>
-
-[Autoresearch](https://github.com/karpathy/autoresearch) has generated a lot of excitement since Karpathy released package, even he himself finding 20 improvements to code he'd hand-tuned for months. It's designed for optimizing code, but the underlying principle applies more broadly. After seeing [this post](https://x.com/aakashgupta/status/2034833389941837920?s=20) online, it made us wonder: how well would it do optimizing the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse)?
+[Autoresearch](https://github.com/karpathy/autoresearch) has generated a lot of excitement since Karpathy released the package, even he himself finding 20 improvements to code he'd hand-tuned for months. It's designed for optimizing code, but the underlying principle applies more broadly. After seeing [this post](https://x.com/aakashgupta/status/2034833389941837920?s=20) online, it made us wonder: how well would it do optimizing the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse)?
 
 ## What is Autoresearch
 
@@ -53,7 +49,7 @@ The Langfuse skill is quite broad. It has instructions for general best practice
 
 The specific prompt migration instructions are in `references/prompt-migration.md`. 
 
-To make this approach work for an AI skill, we made a couple of adaptations to the autoresearch setup:
+To make this approach work for an AI skill instead of code, we made a couple of adaptations to the autoresearch setup:
 
 | Autoresearch | Our Equivalent | Description |
 |:---|:---|:---|
@@ -76,7 +72,7 @@ We also added a stopping criterion, which was not present in the original projec
 
 ### Test Case Repositories
 
-We built 6 test codebases of increasing difficulty:
+We built 6 test codebases of increasing difficulty. In each experiment, the agent runs the skill against all 6 and the evaluator scores the results.
 
 | Case | Description | Prompts | Difficulty |
 |------|-------------|---------|------------|
