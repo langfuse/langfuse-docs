@@ -17,7 +17,7 @@ const FumadocsTabsList = React.forwardRef<
     ref={ref}
     className={cn(
       "flex overflow-x-auto overflow-y-hidden flex-nowrap gap-1 px-4 pt-1 rounded-t-xl border-b text-muted-foreground not-prose bg-muted/50 border-border min-h-11",
-      className
+      className,
     )}
     {...props}
   />
@@ -32,8 +32,8 @@ const FumadocsTabsTrigger = React.forwardRef<
     ref={ref}
     value={value}
     className={cn(
-      "inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-2 border-transparent px-2.5 pb-2 pt-1.5 -mb-px text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-muted-blue data-[state=active]:text-muted-blue data-[state=active]:font-medium",
-      className
+      "inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-2 border-transparent px-2.5 pb-2 pt-1.5 -mb-px text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:font-medium",
+      className,
     )}
     {...props}
   />
@@ -63,7 +63,7 @@ export function TabsClient({
   children,
 }: TabsClientProps) {
   const [internalValue, setInternalValue] = React.useState(
-    values[defaultIndex] ?? values[0]
+    values[defaultIndex] ?? values[0],
   );
 
   React.useEffect(() => {
@@ -73,7 +73,9 @@ export function TabsClient({
   }, [id, persist, values]);
 
   const controlledValue =
-    selectedIndex !== undefined ? values[selectedIndex] ?? values[0] : undefined;
+    selectedIndex !== undefined
+      ? (values[selectedIndex] ?? values[0])
+      : undefined;
   const value = controlledValue ?? internalValue;
 
   const onValueChange = React.useCallback(
@@ -85,7 +87,7 @@ export function TabsClient({
         if (idx !== -1) onChange(idx);
       }
     },
-    [id, persist, onChange, values]
+    [id, persist, onChange, values],
   );
 
   return (

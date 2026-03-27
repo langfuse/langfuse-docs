@@ -1,6 +1,6 @@
 ---
-title: Faster Langfuse
-description: Langfuse now delivers faster product performance. Enable the preview and upgrade SDKs to get the new experience without delays.
+title: "Langfuse v4: Faster and Observations-First"
+description: Langfuse v4 delivers faster performance and introduces an observations-first data model. Enable the preview and upgrade SDKs to get started.
 ---
 
 import { BarChart3, Book, Github, LayoutDashboard, Table, Zap } from "lucide-react";
@@ -14,6 +14,18 @@ We will keep this page updated as we roll out additional related features and sh
 <Callout type="info">
 V4 introduces a **single unified observations table** where all inputs, outputs, and context attributes live directly on observations. See the [guide on working with the observation-centric data model in v4](/faq/all/explore-observations-in-v4) for before/after workflows and saved view setup.
 </Callout>
+
+## Why observations-first?
+
+As agentic applications grow more complex, a single trace can contain hundreds or thousands of operations — LLM calls, tool executions, retrieval steps, agent handoffs. The old traces table showed one row per request, which meant the operations engineers actually care about were hidden inside. With observations-first, you can directly query across all operations — start with the question ("which LLM calls are slow?") rather than the container ("which trace has a slow call somewhere inside it?").
+
+<Cards num={1}>
+  <Card
+    title="Guide: Working with Observations in v4"
+    href="/faq/all/explore-observations-in-v4"
+    icon={<Table />}
+  />
+</Cards>
 
 ## Get access to the preview
 

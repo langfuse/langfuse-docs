@@ -23,6 +23,7 @@ const checkMode = process.argv.includes("--check");
 const sharedSkillsRoot = resolve(repoRoot, ".agents/skills");
 const claudeRoot = resolve(repoRoot, ".agents/claude");
 const cursorCommandsRoot = resolve(repoRoot, ".agents/cursor/commands");
+const cursorSkillsRoot = resolve(repoRoot, ".cursor/skills");
 const cursorRulesRoot = resolve(repoRoot, ".agents/cursor/rules");
 
 const sortEntries = (entries) =>
@@ -266,6 +267,10 @@ const symlinkOutputs = [
     path: resolve(repoRoot, ".claude/skills", name),
     target: resolve(sharedSkillsRoot, name),
   })),
+  ...sharedSkillNames.map((name) => ({
+    path: resolve(repoRoot, ".cursor/skills", name),
+    target: resolve(sharedSkillsRoot, name),
+  })),
   ...cursorCommandNames.map((name) => ({
     path: resolve(repoRoot, ".cursor/commands", name),
     target: resolve(cursorCommandsRoot, name),
@@ -279,6 +284,10 @@ const symlinkOutputs = [
 const managedDirectoryEntries = [
   {
     path: resolve(repoRoot, ".claude/skills"),
+    expectedChildren: new Set(sharedSkillNames),
+  },
+  {
+    path: cursorSkillsRoot,
     expectedChildren: new Set(sharedSkillNames),
   },
   {

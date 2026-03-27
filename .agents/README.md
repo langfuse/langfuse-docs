@@ -11,7 +11,8 @@ tools. Do not keep durable shared guidance only in `.claude/` or `.cursor/`.
 - `AGENTS.md`: canonical shared root instructions
 - `config.json`: shared bootstrap and MCP configuration used to generate
   tool-specific shims
-- `skills/`: shared, tool-neutral implementation guidance
+- `skills/`: shared, tool-neutral implementation guidance projected into
+  `.claude/skills/` and `.cursor/skills/`
 - `claude/`: canonical Claude-specific inputs that are projected into `.claude/`
 - `cursor/`: canonical Cursor rules and commands that are projected into
   `.cursor/`
@@ -73,6 +74,7 @@ Generated local artifacts:
 - `.claude/settings.json`
 - `.claude/launch.json`
 - `.claude/skills/*`
+- `.cursor/skills/*`
 - `.cursor/environment.json`
 - `.cursor/mcp.json`
 - `.cursor/commands/*`

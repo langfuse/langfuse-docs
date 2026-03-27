@@ -18,24 +18,20 @@ import GetStartedVercelAiSdk from "@/components-mdx/get-started/vercel-ai-sdk.md
 import { BookOpen, Code } from "lucide-react";
 import { FaqPreview } from "@/components/faq/FaqPreview";
 
-<Tabs items={["✨ Use AI", "Do it yourself"]}>
+## Agentic installation [#agentic-installation]
+This guide helps you get started with Langfuse tracing using your coding agent / agentic IDE.
 
-<Tab>
-
-<div className="pt-3">
 <Steps>
-## Get API keys
+### Get API keys
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
 2.  Create new API credentials in the project settings.
 
-## Set up your AI agent
-
-Use the [Langfuse Skill](https://github.com/langfuse/skills) in your editor’s agent mode to automatically instrument your application. It will choose the best option to instrument based on your specific application.
-
-> What is a Skill? A reusable instruction package for AI coding agents. It gives your agent Langfuse-specific workflows and best practices out of the box.
+### Set up your AI agent
 
 <GetStartedAutoInstall />
+
+### Instrument your codebase
 
 Start a new agent session, then prompt it to instrument your codebase:
 
@@ -43,7 +39,7 @@ Start a new agent session, then prompt it to instrument your codebase:
 "Instrument this application with Langfuse tracing following best practices."
 ```
 
-## See your trace in Langfuse
+### See your trace in Langfuse
 
 After running your application, visit the Langfuse interface to view the trace you just created. _[(Example LangGraph trace in Langfuse)](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7d5f970573b8214d1ca891251e42282c)_
 
@@ -56,19 +52,17 @@ After running your application, visit the Langfuse interface to view the trace y
 _[What does a good trace look like?](/faq/all/what-does-a-good-trace-look-like)_
 
 </Steps>
-</div>
 
-</Tab>
-
-<Tab>
+## Manual installation [#manual-installation]
+This guide helps you get started with Langfuse tracing manually.
 
 <Steps>
-## Get API keys
+### Get API keys
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
 2.  Create new API credentials in the project settings.
 
-## Ingest your first trace
+### Ingest your first trace
 
 Choose your framework or SDK to get started:
 
@@ -356,7 +350,7 @@ Explore all integrations and frameworks that Langfuse supports.
 
 </LangTabs>
 
-## See your trace in Langfuse
+### See your trace in Langfuse
 
 After running your application, visit the Langfuse interface to view the trace you just created. _[(Example LangGraph trace in Langfuse)](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7d5f970573b8214d1ca891251e42282c)_
 
@@ -369,11 +363,8 @@ After running your application, visit the Langfuse interface to view the trace y
 _[What does a good trace look like?](/faq/all/what-does-a-good-trace-look-like)_
 
 </Steps>
-</Tab>
 
-</Tabs>
-
-#### Not seeing what you expected?
+## Not seeing what you expected?
 
 <FaqPreview tags={["observability-get-started"]} />
 

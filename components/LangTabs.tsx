@@ -34,7 +34,7 @@ const store: Store = {
     if (typeof window !== "undefined") {
       try {
         window.localStorage.setItem(KEY, label);
-      } catch { }
+      } catch {}
     }
   },
 };
@@ -43,7 +43,7 @@ if (typeof window !== "undefined") {
   try {
     const saved = window.localStorage.getItem(KEY);
     if (saved != null) storeEntry.value = saved;
-  } catch { }
+  } catch {}
   window.addEventListener("storage", (e: StorageEvent) => {
     if (e.key !== KEY) return;
     const next = e.newValue == null ? null : e.newValue;
@@ -69,27 +69,39 @@ export function LangTabs(props: {
   const labels: (string | null)[] = useMemo(() => {
     return items.map((it) => {
       if (typeof it === "string") return it;
-      if (it && typeof it === "object" && "label" in it && typeof it.label === "string")
+      if (
+        it &&
+        typeof it === "object" &&
+        "label" in it &&
+        typeof it.label === "string"
+      )
         return it.label as string;
       return null;
     });
   }, [items]);
 
-  const values = useMemo(() => labels.map((l, i) => (l ? toValue(l) : String(i))), [labels]);
-
+  const values = useMemo(
+    () => labels.map((l, i) => (l ? toValue(l) : String(i))),
+    [labels],
+  );
   const storedLabel = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,
-    store.getSnapshot
+    store.getSnapshot,
   );
 
-  const initialLabel = useMemo(() => labels[defaultIndex] ?? null, [labels, defaultIndex]);
+  const initialLabel = useMemo(
+    () => labels[defaultIndex] ?? null,
+    [labels, defaultIndex],
+  );
 
   useEffect(() => {
     if (storedLabel == null && initialLabel) store.set(initialLabel);
   }, [storedLabel, initialLabel]);
 
-  const [internalValue, setInternalValue] = React.useState(values[defaultIndex] ?? values[0]);
+  const [internalValue, setInternalValue] = React.useState(
+    values[defaultIndex] ?? values[0],
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
   const pendingOffsetRef = useRef<number | null>(null);
@@ -98,7 +110,7 @@ export function LangTabs(props: {
     const target = storedLabel ?? initialLabel;
     if (target) {
       const idx = labels.findIndex(
-        (l) => typeof l === "string" && normalize(l) === normalize(target)
+        (l) => typeof l === "string" && normalize(l) === normalize(target),
       );
       if (idx !== -1) {
         setInternalValue(values[idx]);
@@ -150,11 +162,11 @@ export function LangTabs(props: {
       <FumadocsTabs
         key={internalValue}
         defaultValue={internalValue}
-        className="flex overflow-hidden flex-col my-4 rounded-xl border border-border bg-card"
+        className="flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4"
       >
         <FumadocsTabsList
           className={cn(
-            "flex overflow-x-auto overflow-y-hidden flex-nowrap gap-1 px-4 pt-1 rounded-t-xl border-b text-muted-foreground not-prose bg-muted/50 border-border min-h-11"
+            "flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose",
           )}
         >
           {items.map((item, i) => (
@@ -162,17 +174,22 @@ export function LangTabs(props: {
               key={i}
               value={values[i]}
               onClick={() => handleValueChange(values[i])}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-2 border-transparent px-2.5 pb-2 pt-1.5 -mb-px text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-muted-blue data-[state=active]:text-muted-blue data-[state=active]:font-medium"
+              className={cn(
+                "inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary",
+              )}
             >
-              {typeof item === "string" ? item : item?.label ?? String(i)}
+              {typeof item === "string" ? item : (item?.label ?? String(i))}
             </FumadocsTabsTrigger>
           ))}
         </FumadocsTabsList>
         {React.Children.map(children, (child, i) => {
           if (!React.isValidElement(child)) return child;
-          return React.cloneElement(child as React.ReactElement<{ value: string }>, {
-            value: values[i] ?? String(i),
-          });
+          return React.cloneElement(
+            child as React.ReactElement<{ value: string }>,
+            {
+              value: values[i] ?? String(i),
+            },
+          );
         })}
       </FumadocsTabs>
     </div>
