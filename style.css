@@ -393,9 +393,8 @@
 
 /* ─── Pattern background (40×40 grid with cursor-spotlight) ──────────────────
  * Used in the docs content area between sidebar and TOC.
- * @property declarations allow CSS transitions on these custom properties.
- * The headless <DocsPatternBg /> client component updates --cursor-x/--cursor-y
- * on the element via onMouseMove.
+ * @property declarations register --cursor-x/--cursor-y as typed percentages.
+ * Client code updates them via lib/patternSpotlight (rAF + smoothing).
  * ─────────────────────────────────────────────────────────────────────────── */
 @property --cursor-x {
   syntax: "<percentage>";
@@ -411,13 +410,14 @@
 .pattern-bg {
   background-image: url("/images/patterns/pattern.png");
   background-size: 40px 40px;
-  background-position: center;
+  background-position: top center;
   background-repeat: repeat;
   --cursor-x: 50%;
   --cursor-y: 50%;
   position: relative;
   isolation: isolate;
-  transition: --cursor-x 0.2s ease-out, --cursor-y 0.2s ease-out;
+  /* Spotlight motion is smoothed in JS (lib/patternSpotlight.ts); avoid
+     transitioning @property here — it fights rapid mousemove and feels laggy. */
 }
 
 /* Dark: PNG grid is tuned for light surfaces — use subtle CSS grid + softer spotlight */
@@ -446,4 +446,34 @@
     hsl(var(--background) / 0.22),
     hsl(var(--background) / 0.94)
   );
+}
+
+.logo-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    url("/images/buttons/button-base.png"),
+    url("/images/buttons/button-corners.png");
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center;
+  background-size: cover, 100% 100%;
+  transition: all 120ms ease;
+}
+
+.button-wrapper {
+  position: relative;
+  background-image: none;
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center;
+  background-size: cover, 100% 100%;
+  transition: background-image 120ms ease;
+}
+
+.button-wrapper:hover {
+  background-image:
+    url("/images/buttons/button-base.png"),
+    url("/images/buttons/button-corners.png");
 }

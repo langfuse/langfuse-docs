@@ -1,6 +1,11 @@
 "use client";
 
-import { useCallback, useRef, type ReactNode } from "react";
+import {
+  createPatternSpotlightState,
+  disposePatternSpotlight,
+  updatePatternSpotlightTarget,
+} from "@/lib/patternSpotlight";
+import { useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
 
 /**
  * Center content area for HomeLayout.
@@ -9,16 +14,21 @@ import { useCallback, useRef, type ReactNode } from "react";
  */
 export function HomeMainArea({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
+  const spotlightState = useMemo(() => createPatternSpotlightState(), []);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    el.style.setProperty("--cursor-x", `${x}%`);
-    el.style.setProperty("--cursor-y", `${y}%`);
-  }, []);
+  useEffect(() => () => disposePatternSpotlight(spotlightState), [spotlightState]);
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const el = ref.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      updatePatternSpotlightTarget(() => ref.current, spotlightState, x, y);
+    },
+    [spotlightState]
+  );
 
   return (
     <main

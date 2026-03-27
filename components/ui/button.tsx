@@ -14,32 +14,23 @@ type ButtonVariantOptions = {
   className?: string;
 };
 
-const sizeClasses: Record<ButtonSize, { root: string; label: string; key: string }> = {
+const sizeClasses: Record<ButtonSize, { root: string }> = {
   default: {
     root: "h-[32px]",
-    label: "px-3",
-    key: "min-w-[32px] px-3",
   },
   small: {
     root: "h-[26px]",
-    label: "px-2.5",
-    key: "min-w-[26px] px-2.5",
   },
 };
 
-const variantClasses: Record<
-  ButtonVariant,
-  { root: string; label: string; key: string }
-> = {
+const variantClasses: Record<ButtonVariant, { root: string; key: string }> = {
   primary: {
-    root: "rounded-[1px] border border-text-secondary bg-text-primary text-primary-foreground [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
-    label: "text-surface-bg",
-    key: "border-l border-primary-foreground/20 bg-primary-foreground/15 text-primary-foreground",
+    root: "border-text-secondary bg-text-primary text-surface-bg",
+    key: "border-px border-[rgba(64,61,57,0.30)] bg-[rgba(105,105,94,0.10)]",
   },
   secondary: {
-    root: "rounded-[1px] border border-line-structure bg-surface-bg text-secondary-foreground [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
-    label: "text-text-secondary",
-    key: "border-l border-border bg-muted text-muted-foreground",
+    root: "border-line-structure bg-surface-bg text-text-secondary",
+    key: "bg-[rgba(105,105,94,0.10)]",
   },
 };
 
@@ -47,7 +38,7 @@ const buttonBaseClasses =
   "inline-flex w-full min-w-0 max-w-full items-center justify-center gap-[6px] overflow-hidden p-[3px_3px_3px_8px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
 
 const labelTypographyClasses =
-  "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal]";
+  "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] p-0";
 
 function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -58,7 +49,9 @@ function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 function buttonVariants({ variant = "primary", size = "default", className }: ButtonVariantOptions) {
-  return cn(buttonBaseClasses, variantClasses[variant].root, sizeClasses[size].root, className);
+  return cn(
+    'rounded-[1px] border [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]',
+    buttonBaseClasses, variantClasses[variant].root, sizeClasses[size].root, className);
 }
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -146,27 +139,21 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         </Slot>
       );
     }
-
-    const selectedSize = sizeClasses[resolvedSize];
-    const selectedVariant = variantClasses[resolvedVariant];
     const content = hasShortcut ? (
       <>
         <span
           className={cn(
-            "flex min-w-0 flex-1 items-center truncate",
-            labelTypographyClasses,
-            selectedVariant.label,
-            selectedSize.label
+            "flex flex-1 items-center min-w-0 truncate",
+            labelTypographyClasses
           )}
         >
           {children}
         </span>
         <kbd
           className={cn(
-            "flex shrink-0 items-center justify-center not-italic",
+            "flex justify-center items-center not-italic shrink-0 w-[20px] h-[20px] rounded-px",
             labelTypographyClasses,
-            selectedVariant.key,
-            selectedSize.key
+            variantClasses[resolvedVariant].key
           )}
           aria-hidden
         >
@@ -176,9 +163,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ) : (
       <span
         className={cn(
-          "flex min-w-0 items-center truncate",
-          labelTypographyClasses,
-          selectedVariant.label
+          "flex items-center min-w-0 truncate",
+          labelTypographyClasses
         )}
       >
         {children}
@@ -186,7 +172,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
 
     return (
-      <div className={cn("p-2 button-wrapper", wrapperClassName)}>
+      <div className={cn("p-1 button-wrapper", wrapperClassName)}>
         {isLink ? (
           <a
             ref={setAnchorRef}
@@ -208,7 +194,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 size: resolvedSize,
                 className,
               }),
-              hasShortcut ? "gap-0 justify-start px-0 py-0" : "justify-center px-3"
+              !hasShortcut ? "gap-0 justify-start" : "gap-1.5 justify-center"
             )}
             aria-keyshortcuts={hasShortcut ? keyDisplay : undefined}
             {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
@@ -225,7 +211,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 size: resolvedSize,
                 className,
               }),
-              hasShortcut ? "gap-0 justify-start px-0 py-0" : "justify-center px-3"
+              hasShortcut ? "gap-0 justify-start" : "gap-3 justify-center"
             )}
             aria-keyshortcuts={hasShortcut ? keyDisplay : undefined}
             {...props}

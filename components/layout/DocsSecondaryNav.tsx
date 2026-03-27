@@ -16,26 +16,28 @@ const SECTIONS = [
 export function DocsSecondaryNav() {
   const pathname = usePathname();
   return (
-    <div className="sticky z-40 border-b border-foreground/10 bg-background/80 backdrop-blur-md overflow-x-auto" style={{ top: "60px" }}>
-      <nav className="mx-auto flex max-w-360 items-stretch gap-0 pl-[max(env(safe-area-inset-left),0.5rem)] pr-[max(env(safe-area-inset-right),0.5rem)]">
-        {SECTIONS.map((item) => {
-          const isActive = pathname?.startsWith(item.path);
-          return (
-            <Link
-              href={item.path}
-              key={item.path}
-              className={cn(
-                "flex items-center gap-2 px-3 h-[40px] text-sm whitespace-nowrap border-b-2 -mb-px transition-colors shrink-0",
-                isActive
-                  ? "border-foreground text-foreground font-medium"
-                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-foreground/40"
-              )}
-            >
-              <item.Icon className="h-4 w-4 shrink-0" />
-              <span>{item.title}</span>
-            </Link>
-          );
-        })}
+    <div className="overflow-x-auto overflow-y-hidden sticky z-40 bg-surface-1" style={{ top: "60px" }}>
+      <nav className="px-px mx-auto max-w-360 bg-line-structure">
+        <div className="flex gap-0 items-stretch rounded-sm bg-surface-1">
+          {SECTIONS.map((item) => {
+            const isActive = pathname?.startsWith(item.path);
+            return (
+              <Link
+                href={item.path}
+                key={item.path}
+                className={cn(
+                  "flex gap-2 items-center px-3 -mb-px text-sm whitespace-nowrap border-b-2 transition-colors h-[40px] shrink-0",
+                  isActive
+                    ? "font-medium border-text-primary text-text-primary"
+                    : "border-transparent text-text-tertiary hover:border-line-structure hover:text-text-secondary"
+                )}
+              >
+                <item.Icon className="w-4 h-4 shrink-0" />
+                <span>{item.title}</span>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
     </div>
   );

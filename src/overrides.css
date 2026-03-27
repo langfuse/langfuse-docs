@@ -21,11 +21,12 @@
   background-size: 40px 40px;
   background-position: center;
   background-repeat: repeat;
+  background-color: var(--surface-bg);
   --cursor-x: 50%;
   --cursor-y: 50%;
   position: relative;
   isolation: isolate;
-  transition: --cursor-x 0.2s ease-out, --cursor-y 0.2s ease-out;
+  max-width: none;
 }
 
 .dark #nd-page {
@@ -48,7 +49,7 @@
   z-index: 0;
   background: radial-gradient(
     circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
-    hsl(var(--background) / 0.15),
+    hsl(var(--background) / 0.45),
     hsl(var(--background) / 0.85)
   );
 }
@@ -85,9 +86,12 @@
   ) !important;
 }
 
-/* Docs left sidebar: max width 360px (Fumadocs default is 268px) */
-#nd-docs-layout [grid-area="sidebar"] {
+/* Sidebar + TOC width: 240px to match NavbarDocs grid-cols-[240px_1fr_240px].
+   [grid-area="sidebar"] is a Tailwind utility class not an HTML attr, so we target
+   #nd-docs-layout directly (--fd-sidebar-col: var(--fd-sidebar-width) is resolved here). */
+#nd-docs-layout {
   --fd-sidebar-width: 240px;
+  --fd-toc-width: 240px;
 }
 
 /* Sidebar/tree left alignment: let fumadocs' own p-4 (1rem) on the scroll container
@@ -157,9 +161,51 @@
   max-width: 1440px;
   margin: 0 auto;
   position: relative;
+  border-right: 1px solid var(--line-structure);
+  background-color: var(--surface-1);
+}
+
+/* ─── HomeSidebar/HomeAside corner effect for docs layout ────────────────────
+ * HomeSidebar: outer aside has bg-line-structure + p-px pt-0; inner nav has rounded-sm bg-surface-1.
+ * Docs sidebar: outer [data-sidebar-placeholder] = bg-line-structure; inner #nd-sidebar is absolute
+ * so we use inset (not padding) to leave a 1px gap on right/bottom/left revealing the outer bg.
+ * TOC: #nd-toc IS the grid item; #nd-docs-layout gets bg-line-structure so margin on #nd-toc
+ * reveals it as a 1px strip matching the HomeAside separator. */
+
+#nd-docs-layout {
+  border-top: 1px solid var(--line-structure);
+  background-color: var(--line-structure); /* revealed at sidebar/toc margins as 1px separators */
+}
+
+/* Sidebar outer: provides line-structure background visible at #nd-sidebar corners */
+#nd-docs-layout [data-sidebar-placeholder] {
+  background-color: var(--line-structure);
+}
+
+/* Sidebar inner (#nd-sidebar is position:absolute inside the placeholder):
+   inset 1px right/bottom/left (pt-0: top stays flush) to expose line-structure at edges.
+   Remove fumadocs' border-inline-end; add rounded-sm + surface-1 bg.
+   Only apply inset when expanded (data-collapsed="false") to not break collapse animation. */
+#nd-docs-layout #nd-sidebar[data-collapsed="false"] {
+  inset: 0 1px 1px 1px !important;
+  width: auto !important;
+}
+#nd-docs-layout #nd-sidebar {
+  border-inline-end: none !important;
+  border-radius: calc(var(--radius) - 4px);
+  background-color: var(--surface-1) !important;
 }
 #nd-docs-layout #nd-sidebar[data-hovered="false"] {
-  background-color: transparent;
+  background-color: var(--surface-1) !important;
+}
+
+/* TOC: margin 1px on left/bottom (right handled by layout-wrapper border) to expose line-structure.
+   Add padding-inline-start to match HomeAside's px-2.5 */
+#nd-docs-layout #nd-toc {
+  margin: 0 0 1px 1px;
+  border-radius: calc(var(--radius) - 4px);
+  background-color: var(--surface-1) !important;
+  padding-inline-start: 0.625rem; /* px-2.5 to match HomeAside */
 }
 
 /* Sidebar active link: use blue (muted-blue) so blog/changelog and docs look the same. */

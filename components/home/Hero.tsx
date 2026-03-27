@@ -1,63 +1,75 @@
-import Link from "next/link";
 import { Button } from "../ui/button";
+import { Box } from "../ui/box";
+import { Text } from "../ui/text";
 import { HomeSection } from "./components/HomeSection";
-import { ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+/**
+ * One line: sharp-edged yellow bar sized to the line (screenshot 1), not a
+ * single merged block. Multiply only on the bar; text stays opaque on top.
+ */
+function HeroTitleLine({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-block isolate relative rounded-none">
+      <span
+        className="pointer-events-none absolute inset-0 top-[10px] max-h-[51px] rounded-none bg-[#FBFF7A] mix-blend-multiply"
+        aria-hidden
+      />
+      <span className="relative z-10 text-text-primary">{children}</span>
+    </span>
+  );
+}
 
 export function Hero() {
   return (
-    <HomeSection className="py-0 pt-0 lg:py-0 lg:pt-0 pb-0 lg:pb-0 first:pt-4">
-      {/* HERO */}
-      <div className="flex flex-col items-center justify-center gap-5 md:min-h-[calc(min(calc(60vh-100px),60vw))] pb-10 pt-5 lg:pt-10 2xl:pt-20">
-        <Link
-          href="/blog/joining-clickhouse"
-          className="flex flex-row items-center gap-x-2 gap-y-1 rounded-full px-4 py-2 border transition-opacity hover:opacity-80"
-          style={{
-            backgroundColor: "rgb(250, 255, 105)",
-            borderColor: "rgb(250, 255, 105)",
-          }}
+    <HomeSection className="pt-[40px]">
+      <Box className="flex flex-col items-center px-4 py-8 -mb-px sm:px-8 sm:py-10">
+        <Text className="max-w-xl">
+          Tracing, prompt management, evaluation, and experiments. Debug
+          production issues in minutes, not hours. Works with any model, any
+          framework, any stack.
+        </Text>
+      </Box>
+      <Box className="flex flex-col gap-10 items-center px-4 py-8 sm:px-8 sm:py-10">
+        <h1
+          className={cn(
+            "flex flex-col items-center gap-1.5 text-center font-sans text-[68px] font-medium not-italic leading-[105%] text-balance",
+            "[leading-trim:both] [text-edge:cap]"
+          )}
         >
-          <div className="text-black text-sm font-semibold">
-            ClickHouse acquires Langfuse! 🎉
-          </div>
-          <ArrowRight className="h-4 w-4 text-black" />
-        </Link>
-
-        <h1 className="mt-2 text-4xl sm:text-7xl lg:text-8xl font-bold font-mono text-center text-balance lg:text-wrap">
-          Open Source LLM&nbsp;Engineering Platform
+          <HeroTitleLine>Open Source LLM</HeroTitleLine>
+          <HeroTitleLine>Engineering Platform</HeroTitleLine>
         </h1>
-        <span className="mt-2 text-primary/70 text-base sm:text-xl lg:text-3xl md:text-balance font-semibold max-w-screen-lg text-center px-4">
-          <Link href="/docs/observability/overview" className="underline">
-            Traces
-          </Link>
-          ,{" "}
-          <Link href="/docs/evaluation/overview" className="underline">
-            evals
-          </Link>
-          ,{" "}
-          <Link href="/docs/prompt-management/overview" className="underline">
-            prompt management
-          </Link>{" "}
-          and{" "}
-          <Link href="/docs/metrics/overview" className="underline">
-            metrics
-          </Link>{" "}
-          to debug and improve your LLM application.
-        </span>
+        <div className="flex flex-col gap-6">
+          <Text className="max-w-xl">
+            Tracing, prompt management, evaluation, and experiments. Debug
+            production issues in minutes, not hours. Works with any model, any
+            framework, any stack.
+          </Text>
+          <div className="flex flex-wrap gap-4 justify-center items-center">
+            <Button
+              variant="primary"
+              shortcutKey="s"
+              href="https://cloud.langfuse.com"
+            >
+              Start free
+            </Button>
 
-        <div className="flex gap-4 flex-wrap items-center justify-center my-4">
-          <Button variant="cta" size="lg" asChild>
-            <Link href="https://cloud.langfuse.com">Sign up</Link>
-          </Button>
-          <Button size="lg" variant="secondary" asChild>
-            <Link href="/watch-demo">Get Demo</Link>
-          </Button>
-          <Button variant="secondary" size="lg" asChild>
-            <Link href="/docs">View docs</Link>
-          </Button>
+            <Button variant="secondary" shortcutKey="d" href="/docs">
+              Documentation
+            </Button>
+          </div>
         </div>
-      </div>
+      </Box>
+      <Box className="flex flex-col items-center px-4 py-8 -mt-px sm:px-8 sm:py-10">
+        <Text className="max-w-xl">
+          Tracing, prompt management, evaluation, and experiments. Debug
+          production issues in minutes, not hours. Works with any model, any
+          framework, any stack.
+        </Text>
+      </Box>
 
-      {/* <div className="aspect-video bg-blue-200"></div>
+      {/* <div className="bg-blue-200 aspect-video"></div>
       <Video
         src="https://static.langfuse.com/docs-videos/langfuse-10min-demo-4k-60fps.mp4"
         aspectRatio={16 / 9}

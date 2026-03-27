@@ -15,6 +15,17 @@ export { Image } from "./image";
 export { Button, buttonVariants } from "./button";
 export type { ButtonProps } from "./button";
 
+export { Box, cornersFromNeighbors, cornersForGridCell } from "./box";
+export type {
+  BoxProps,
+  BoxCornerKey,
+  BoxCorners,
+  BoxNeighbors,
+} from "./box";
+
+export { Text, textBodyMRegularClassName, textBodySRegularClassName } from "./text";
+export type { TextProps } from "./text";
+
 // Layout / composition
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";

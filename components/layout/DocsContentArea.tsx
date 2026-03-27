@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  createPatternSpotlightState,
+  disposePatternSpotlight,
+  updatePatternSpotlightTarget,
+} from "@/lib/patternSpotlight";
 import { useEffect } from "react";
 
 /**
@@ -11,8 +16,11 @@ import { useEffect } from "react";
  */
 export function DocsPatternTracker() {
   useEffect(() => {
+    const spotlightState = createPatternSpotlightState();
+    const getPage = () => document.getElementById("nd-page");
+
     const handler = (e: MouseEvent) => {
-      const page = document.getElementById("nd-page");
+      const page = getPage();
       if (!page) return;
       const rect = page.getBoundingClientRect();
       // Only update when cursor is inside the content area
@@ -25,11 +33,13 @@ export function DocsPatternTracker() {
         return;
       const x = ((e.clientX - rect.left) / rect.width) * 100;
       const y = ((e.clientY - rect.top) / rect.height) * 100;
-      page.style.setProperty("--cursor-x", `${x}%`);
-      page.style.setProperty("--cursor-y", `${y}%`);
+      updatePatternSpotlightTarget(getPage, spotlightState, x, y);
     };
     window.addEventListener("mousemove", handler, { passive: true });
-    return () => window.removeEventListener("mousemove", handler);
+    return () => {
+      window.removeEventListener("mousemove", handler);
+      disposePatternSpotlight(spotlightState);
+    };
   }, []);
 
   return null;

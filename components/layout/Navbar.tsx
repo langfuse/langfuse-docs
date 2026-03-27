@@ -1,4 +1,3 @@
-import { NavbarLogo } from "@/components/NavbarLogo";
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
 import { NavLinks } from "@/components/NavLinks";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@/lib/source";
 import { serializePageTree, type SectionNavData } from "@/lib/nav-tree";
 import { cn } from "@/lib/utils";
+import { Logo } from "../Logo";
 
 const sectionNavData: SectionNavData[] = [
   { name: "Docs", href: "/docs", children: serializePageTree(source.getPageTree()) },
@@ -36,7 +36,7 @@ export function Navbar() {
       <nav className="flex mx-auto h-full max-w-360">
         <div className={cn(cornersStyle, 'max-w-[240px]')}>
           <div className={contentStyle}>
-            <NavbarLogo />
+            <Logo wrapInLink={false} />
           </div>
         </div>
         <div className={cn(cornersStyle, 'px-0')}>
