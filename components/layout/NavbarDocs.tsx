@@ -1,4 +1,4 @@
-import { Logo } from "@/components/logo";
+import { Logo } from "@/components/Logo";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 import { ToAppButton } from "@/components/ToAppButton";
 import { GithubMenuBadge } from "@/components/GitHubBadge";

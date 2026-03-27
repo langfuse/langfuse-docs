@@ -8,6 +8,7 @@ import type { AnchorHTMLAttributes } from "react";
  *
  * Variants:
  *   default   — inherits text color, no underline (navigation use)
+ *   nav       — Body-S/Regular: tertiary text, 13px / 430 / 120% / -0.26px (navbar)
  *   text      — muted text, lightens on hover (sidebar / metadata)
  *   underline — always underlined (inline prose / MDX content)
  *   button    — solid primary button
@@ -23,6 +24,7 @@ const linkVariants = cva(
     variants: {
       variant: {
         default: "text-foreground hover:text-muted-foreground",
+        nav: "text-text-tertiary hover:text-text-secondary no-underline font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] [text-shadow:0_0_0_#B5AFEA]",
         text: "text-muted-foreground hover:text-foreground",
         underline:
           "text-primary underline underline-offset-4 decoration-primary/50 hover:decoration-primary",

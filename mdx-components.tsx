@@ -9,7 +9,7 @@ import { LangTabs } from "@/components/LangTabs";
 import { FetchReadme } from "@/components/FetchReadme";
 import { Callout, Tabs, Tab, Cards, Card, Steps, FileTree, FileTreeFile, FileTreeFolder, Playground } from "@/components/docs";
 import { MdxDetails, MdxSummary } from "@/components/MdxDetails";
-import { AvailabilityBanner } from "@/components/availability";
+import { AvailabilityBanner } from "@/components/Availability";
 import { Link as MdxLink, type LinkProps } from "@/components/ui/link";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.

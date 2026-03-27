@@ -1,6 +1,6 @@
-import { Banner } from "./Banner";
-import { Navbar } from "./Navbar";
-import { Footer } from "./Footer";
+import { Banner } from "../../layout/Banner";
+import { Navbar } from "../../layout/Navbar";
+import { Footer } from "../../layout/Footer";
 import { HomeSidebar } from "./HomeSidebar";
 import { HomeAside } from "./HomeAside";
 import { HomeMainArea } from "./HomeMainArea";

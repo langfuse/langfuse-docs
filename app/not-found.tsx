@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { NotFoundAnimation } from "@/components/not-found-animation";
+import { NotFoundAnimation } from "@/components/NotFoundAnimation";
 
 export default function NotFound() {
   return (

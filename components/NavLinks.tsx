@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import {
@@ -37,6 +37,10 @@ const simpleLinks = [
   { name: "Pricing", href: "/pricing" },
 ];
 
+/** Matches ui/link `variant="nav"` (Body-S/Regular) for dropdown triggers */
+const navTriggerClassName =
+  "flex items-center gap-1 py-1.5 whitespace-nowrap ring-inset font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] [text-shadow:0_0_0_#B5AFEA] text-text-tertiary hover:text-text-secondary hover:bg-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
 export function NavLinks({
   sectionNavData,
 }: {
@@ -56,28 +60,32 @@ export function NavLinks({
       {/* Desktop nav */}
       <div className="hidden overflow-x-auto gap-2 lg:gap-4 items-center md:flex">
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-1 py-1.5 text-sm whitespace-nowrap ring-inset text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <DropdownMenuTrigger className={navTriggerClassName}>
             Product
             <ChevronDown className="h-3.5 w-3.5 opacity-60" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             {productLinks.map((link) => (
               <DropdownMenuItem key={link.name} asChild>
-                <Link href={link.href}>{link.name}</Link>
+                <Link href={link.href} variant="nav">
+                  {link.name}
+                </Link>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-1 px3- py-1.5 text-sm font-medium whitespace-nowrap ring-inset text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <DropdownMenuTrigger className={navTriggerClassName}>
             Resources
             <ChevronDown className="h-3.5 w-3.5 opacity-60" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             {resourcesLinks.map((link) => (
               <DropdownMenuItem key={link.name} asChild>
-                <Link href={link.href}>{link.name}</Link>
+                <Link href={link.href} variant="nav">
+                  {link.name}
+                </Link>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -87,7 +95,11 @@ export function NavLinks({
           <Link
             key={link.name}
             href={link.href}
-            className={cn("py-1.5 text-sm font-normal whitespace-nowrap ring-inset text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring", link.tabletHidden && "hidden lg:block")}
+            variant="nav"
+            className={cn(
+              "py-1.5 whitespace-nowrap ring-inset transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              link.tabletHidden && "hidden lg:block"
+            )}
           >
             {link.name}
           </Link>
@@ -148,8 +160,9 @@ export function NavLinks({
                   <Link
                     key={link.name}
                     href={link.href}
+                    variant="nav"
                     onClick={() => setMobileOpen(false)}
-                    className="block px-2 py-2 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
+                    className="block px-2 py-2 hover:bg-accent rounded-md"
                   >
                     {link.name}
                   </Link>
@@ -176,8 +189,9 @@ export function NavLinks({
                   <Link
                     key={link.name}
                     href={link.href}
+                    variant="nav"
                     onClick={() => setMobileOpen(false)}
-                    className="block px-2 py-2 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
+                    className="block px-2 py-2 hover:bg-accent rounded-md"
                   >
                     {link.name}
                   </Link>
@@ -222,8 +236,9 @@ export function NavLinks({
                   <Link
                     key={section.href}
                     href={section.href}
+                    variant="nav"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
+                    className="flex items-center justify-between px-2 py-2 font-medium hover:bg-accent rounded-md"
                   >
                     <span>{section.name}</span>
                     <ChevronRight className="h-4 w-4 opacity-50" />
@@ -263,8 +278,9 @@ function MobileNavTreeItem({
   return (
     <Link
       href={item.url}
+      variant="nav"
       onClick={onNavigate}
-      className="block px-2 py-1.5 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
+      className="block px-2 py-1.5 hover:bg-accent rounded-md"
     >
       {item.name}
     </Link>

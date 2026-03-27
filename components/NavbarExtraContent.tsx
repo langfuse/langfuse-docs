@@ -6,8 +6,8 @@ export function NavbarExtraContent() {
   return (
     <>
       <ToAppButton />
-      <Button size="xs" asChild className="whitespace-nowrap" variant="outline">
-        <Link href="/talk-to-us">Get Demo</Link>
+      <Button href='/talk-to-us' variant="secondary" size="small" shortcutKey="g">
+        Get Demo
       </Button>
     </>
   );

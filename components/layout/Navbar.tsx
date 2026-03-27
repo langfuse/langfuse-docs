@@ -27,7 +27,7 @@ const sectionNavData: SectionNavData[] = [
   { name: "Security & Compliance", href: "/security", children: serializePageTree(securitySource.getPageTree()) },
 ];
 
-const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px pb-0')
+const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px py-0')
 const contentStyle = cn('flex items-center w-full bg-surface-1 rounded-sm px-2.5 py-3')
 
 export function Navbar() {
@@ -40,7 +40,7 @@ export function Navbar() {
           </div>
         </div>
         <div className={cn(cornersStyle, 'px-0')}>
-          <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 rounded-sm md:flex-row md:gap-4 bg-surface-1'>
+          <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1'>
             <NavLinks sectionNavData={sectionNavData} />
           </div>
         </div>

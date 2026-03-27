@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { BlogIndex } from "@/components/blog/BlogIndex";
 import { Header } from "@/components/Header";
-import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+import { ProductUpdateSignup } from "@/components/ProductUpdateSignup";
 import Link from "next/link";
 import { blogSource } from "@/lib/source";
 import type { BlogPageItem } from "@/components/blog/BlogIndex";

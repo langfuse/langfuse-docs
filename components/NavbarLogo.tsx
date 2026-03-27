@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "@/components/logo";
+import { Logo } from "@/components/Logo";
 // import { HiringBadge } from "@/components/HiringBadge";
 
 export function NavbarLogo({ linkToHome = true }: { linkToHome?: boolean }) {

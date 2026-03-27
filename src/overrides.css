@@ -28,6 +28,12 @@
   transition: --cursor-x 0.2s ease-out, --cursor-y 0.2s ease-out;
 }
 
+.dark #nd-page {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.45) 1px, transparent 1px);
+}
+
 /* Direct children: position: relative so they land in the same stacking
  * tier as ::before and paint on top (tree order puts them after ::before). */
 #nd-page > * {
@@ -44,6 +50,14 @@
     circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
     hsl(var(--background) / 0.15),
     hsl(var(--background) / 0.85)
+  );
+}
+
+.dark #nd-page::before {
+  background: radial-gradient(
+    circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
+    hsl(var(--background) / 0.22),
+    hsl(var(--background) / 0.94)
   );
 }
 

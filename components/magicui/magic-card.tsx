@@ -1,6 +1,5 @@
 "use client";
 
-import clsx, { ClassValue } from "clsx";
 import {
   CSSProperties,
   ReactElement,
@@ -9,11 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from "@/lib/utils";
 
 interface MousePosition {
   x: number;
