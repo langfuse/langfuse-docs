@@ -42,13 +42,15 @@ function ensureDir(dirPath) {
  * - Map content/foo/bar.mdx -> public/md-src/foo/bar.md
  * - Map content/foo/index.mdx -> public/md-src/foo.md
  */
-function mapDestination(sourceFile) {
-    const rel = path.relative(SOURCE_DIR, sourceFile);
+function mapDestinations(sourceFile, options = {}) {
+    const sourceDir = options.sourceDir ?? SOURCE_DIR;
+    const outputDir = options.outputDir ?? OUTPUT_DIR;
+    const rel = path.relative(sourceDir, sourceFile);
     const base = path.basename(rel);
-    if (base === 'meta.json' || base.startsWith('_')) return null;
+    if (base === 'meta.json' || base.startsWith('_')) return [];
 
     const ext = path.extname(rel).toLowerCase();
-    if (ext !== '.md' && ext !== '.mdx') return null;
+    if (ext !== '.md' && ext !== '.mdx') return [];
 
     const withoutExt = rel.slice(0, -ext.length);
     const parts = withoutExt.split(path.sep);
@@ -57,37 +59,51 @@ function mapDestination(sourceFile) {
         outParts = parts.slice(0, -1);
     }
     const outRel = outParts.length ? outParts.join('/') + '.md' : 'index.md';
-    return path.join(OUTPUT_DIR, outRel);
+    const destinations = [path.join(outputDir, outRel)];
+
+    // Preserve legacy root-level markdown URLs for marketing pages (e.g., /terms.md).
+    if (parts[0] === 'marketing' && parts.length === 2 && parts[1] !== 'index') {
+        destinations.push(path.join(outputDir, `${parts[1]}.md`));
+    }
+
+    return destinations;
 }
 
-function copyAll() {
-    if (!fs.existsSync(SOURCE_DIR)) {
+function copyAll(options = {}) {
+    const sourceDir = options.sourceDir ?? SOURCE_DIR;
+    const outputDir = options.outputDir ?? OUTPUT_DIR;
+
+    if (!fs.existsSync(sourceDir)) {
         console.log('copy_md_sources: content/ not found, skipping');
         return;
     }
-    const allFiles = walkDir(SOURCE_DIR);
+    const allFiles = walkDir(sourceDir);
     let copied = 0;
     for (const file of allFiles) {
-        const dest = mapDestination(file);
-        if (!dest) continue;
-        const dir = path.dirname(dest);
-        ensureDir(dir);
         const originalContent = fs.readFileSync(file, 'utf8');
         const processed = inlineComponentsMdx(originalContent, file);
-        fs.writeFileSync(dest, processed, 'utf8');
-        copied += 1;
+        const destinations = mapDestinations(file, { sourceDir, outputDir });
+        for (const dest of destinations) {
+            const dir = path.dirname(dest);
+            ensureDir(dir);
+            fs.writeFileSync(dest, processed, 'utf8');
+            copied += 1;
+        }
     }
     console.log(`Copied ${copied} markdown source files into public/md-src`);
 }
 
-function cleanOutputDir() {
-    if (fs.existsSync(OUTPUT_DIR)) {
-        fs.rmSync(OUTPUT_DIR, { recursive: true, force: true });
+function cleanOutputDir(options = {}) {
+    const outputDir = options.outputDir ?? OUTPUT_DIR;
+    if (fs.existsSync(outputDir)) {
+        fs.rmSync(outputDir, { recursive: true, force: true });
     }
 }
 
-cleanOutputDir();
-copyAll();
+if (require.main === module) {
+    cleanOutputDir();
+    copyAll();
+}
 
 /**
  * Inline imports of MDX components from the components-mdx directory.
@@ -152,4 +168,11 @@ function resolveComponentPath(rootDir, relImport) {
     return null;
 }
 
+module.exports = {
+    SOURCE_DIR,
+    OUTPUT_DIR,
+    mapDestinations,
+    copyAll,
+    cleanOutputDir,
+};
 
