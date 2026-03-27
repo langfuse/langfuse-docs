@@ -1,0 +1,263 @@
+---
+title: Observability for AG2 with Langfuse Integration
+sidebarTitle: AG2
+logo: /images/integrations/ag2_icon.svg
+description: Integrate Langfuse with AG2 via native OpenTelemetry tracing for full observability into multi-agent conversations, LLM calls, tool executions, and costs.
+category: Integrations
+---
+
+# Integrate Langfuse with AG2
+
+This guide shows how to integrate **Langfuse** with **AG2** using AG2's built-in OpenTelemetry tracing for full observability into your multi-agent workflows.
+
+> **What is AG2?** [AG2](https://ag2.ai/) ([GitHub](https://github.com/ag2ai/ag2)) is an open-source Python framework for building multi-agent AI systems. AG2 provides tools for orchestrating collaborative agents, tool use, group chats, and distributed agent-to-agent (A2A) deployments. AG2 v0.11+ includes native [OpenTelemetry tracing](https://docs.ag2.ai/docs/user-guide/tracing/opentelemetry) that captures every conversation, agent turn, LLM call, tool execution, and speaker selection as structured spans.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
+
+## Getting Started
+
+AG2's native OpenTelemetry tracing exports rich, hierarchical spans that Langfuse ingests directly — no intermediary libraries needed.
+
+<Steps>
+### Step 1: Install Dependencies
+
+```python
+%pip install "ag2[openai,tracing]" opentelemetry-exporter-otlp langfuse -U
+```
+
+### Step 2: Configure Langfuse SDK
+
+Set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your OpenAI key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+Initialize the Langfuse client and verify the connection:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+```
+
+### Step 3: Configure OpenTelemetry to Export to Langfuse
+
+Set up an OpenTelemetry `TracerProvider` that exports spans directly to Langfuse's OTel endpoint:
+
+```python
+import base64
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+LANGFUSE_PUBLIC_KEY = os.environ["LANGFUSE_PUBLIC_KEY"]
+LANGFUSE_SECRET_KEY = os.environ["LANGFUSE_SECRET_KEY"]
+LANGFUSE_BASE_URL = os.environ["LANGFUSE_BASE_URL"]
+
+auth = base64.b64encode(
+    f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()
+).decode()
+
+resource = Resource.create({"service.name": "ag2-langfuse-demo"})
+tracer_provider = TracerProvider(resource=resource)
+
+exporter = OTLPSpanExporter(
+    endpoint=f"{LANGFUSE_BASE_URL}/api/public/otel/v1/traces",
+    headers={"Authorization": f"Basic {auth}"},
+)
+tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
+trace.set_tracer_provider(tracer_provider)
+```
+
+### Step 4: Instrument Agents and Run
+
+Create AG2 agents and instrument them with AG2's built-in tracing:
+
+```python
+from autogen import ConversableAgent, LLMConfig
+from autogen.opentelemetry import instrument_agent, instrument_llm_wrapper
+
+llm_config = LLMConfig({"model": "gpt-4o-mini"})
+
+assistant = ConversableAgent(
+    name="assistant",
+    system_message="You are a helpful assistant.",
+    llm_config=llm_config,
+    human_input_mode="NEVER",
+)
+
+user_proxy = ConversableAgent(
+    name="user_proxy",
+    human_input_mode="NEVER",
+    max_consecutive_auto_reply=1,
+)
+
+# Instrument agents and LLM calls
+instrument_llm_wrapper(tracer_provider=tracer_provider)
+instrument_agent(assistant, tracer_provider=tracer_provider)
+instrument_agent(user_proxy, tracer_provider=tracer_provider)
+
+# Run a chat — traces are sent to Langfuse automatically
+result = user_proxy.run(
+    assistant,
+    message="What is the capital of France?",
+    max_turns=2,
+)
+result.process()
+
+# Flush spans before exit
+tracer_provider.shutdown()
+```
+
+### Step 5: View Traces in Langfuse
+
+After executing the application, navigate to your Langfuse Trace Table. You will see hierarchical traces showing the full conversation flow — each agent turn, LLM call (with model, tokens, and cost), and tool execution nested in a tree that mirrors your agent workflow.
+
+AG2's tracing emits 7 span types that map to Langfuse observations:
+
+| AG2 span type | What it captures |
+|---|---|
+| `conversation` | Overall chat with total token usage and cost |
+| `agent` | Individual agent turn with input/output messages |
+| `llm` | LLM API call with model, tokens, cost, parameters |
+| `tool` | Tool execution with arguments and return value |
+| `code_execution` | Code execution with output |
+| `human_input` | Human input prompt and response |
+| `speaker_selection` | Group chat speaker selection with candidates |
+
+</Steps>
+
+## Tool Use Example
+
+AG2 traces tool executions with full argument and return value capture:
+
+```python
+from typing import Annotated
+from autogen import ConversableAgent, LLMConfig
+from autogen.opentelemetry import instrument_agent, instrument_llm_wrapper
+from autogen.tools import tool
+
+@tool(description="Get weather information for a city")
+def get_weather(city: Annotated[str, "The city name"]) -> str:
+    """Get weather information for a city."""
+    weather_data = {
+        "new york": "Sunny, 72F",
+        "london": "Cloudy, 15C",
+        "tokyo": "Rainy, 18C",
+    }
+    return weather_data.get(city.lower(), f"Weather data not available for {city}")
+
+llm_config = LLMConfig({"model": "gpt-4o-mini"})
+
+weather_agent = ConversableAgent(
+    name="weather",
+    system_message="Use the get_weather tool to answer weather questions.",
+    functions=[get_weather],
+    llm_config=llm_config,
+    human_input_mode="NEVER",
+)
+
+instrument_llm_wrapper(tracer_provider=tracer_provider)
+instrument_agent(weather_agent, tracer_provider=tracer_provider)
+
+result = weather_agent.run(message="What is the weather in Tokyo?", max_turns=2)
+result.process()
+```
+
+In Langfuse, `execute_tool get_weather` spans appear nested under the agent span, with tool arguments and return values visible in the observation input/output.
+
+## Group Chat Example
+
+For group chats, use `instrument_pattern` to instrument all agents in a single call:
+
+```python
+from autogen import ConversableAgent, LLMConfig
+from autogen.agentchat import run_group_chat
+from autogen.agentchat.group.patterns import AutoPattern
+from autogen.opentelemetry import instrument_llm_wrapper, instrument_pattern
+
+llm_config = LLMConfig({"model": "gpt-4o-mini"})
+
+researcher = ConversableAgent(
+    name="researcher",
+    system_message="You research topics and provide factual information.",
+    llm_config=llm_config,
+    human_input_mode="NEVER",
+)
+
+writer = ConversableAgent(
+    name="writer",
+    system_message="You write clear summaries. Say TERMINATE when done.",
+    llm_config=llm_config,
+    human_input_mode="NEVER",
+)
+
+user = ConversableAgent(name="user", human_input_mode="NEVER", llm_config=False)
+
+pattern = AutoPattern(
+    initial_agent=researcher,
+    agents=[researcher, writer],
+    user_agent=user,
+    group_manager_args={"llm_config": llm_config},
+)
+
+instrument_llm_wrapper(tracer_provider=tracer_provider)
+instrument_pattern(pattern, tracer_provider=tracer_provider)
+
+result = run_group_chat(
+    pattern=pattern,
+    messages="Explain quantum computing in simple terms.",
+    max_rounds=5,
+)
+result.process()
+```
+
+This produces hierarchical traces in Langfuse including `speaker_selection` spans that show which agent was chosen and why.
+
+## Distributed Tracing with A2A
+
+AG2 supports the [A2A (Agent-to-Agent) protocol](https://google.github.io/A2A/) for distributed multi-service deployments. When agents run as separate services, AG2 propagates W3C Trace Context headers across HTTP calls, and Langfuse stitches the spans into a unified trace.
+
+```python
+from autogen.a2a import A2aAgentServer
+from autogen.opentelemetry import instrument_a2a_server
+
+server = A2aAgentServer(agent, url="http://localhost:18123/")
+instrument_a2a_server(server, tracer_provider=tracer_provider)
+```
+
+## Environment Variables (Alternative Setup)
+
+Instead of configuring the exporter in code, you can use environment variables:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic $(echo -n 'pk-lf-...:sk-lf-...' | base64)"
+export OTEL_SERVICE_NAME="ag2-app"
+```
+
+## Learn More
+
+- [AG2 OpenTelemetry documentation](https://docs.ag2.ai/docs/user-guide/tracing/opentelemetry)
+- [AG2 GitHub](https://github.com/ag2ai/ag2)
+- [Langfuse OpenTelemetry integration](/docs/integrations/native/opentelemetry)
+- [OpenTelemetry GenAI Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-agent-spans/)
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
