@@ -1,0 +1,161 @@
+---
+title: "How Cresta traces multi-service AI agent pipelines with Langfuse"
+date: March 26, 2026
+description: Learn how Cresta uses Langfuse to trace multi-service LLM pipelines, establish data sovereignty, and work with traces across customers.
+ogImage:
+canonical: https://cresta.com/blog/observability-for-ai-agents-tracing-multi-service-llm-pipelines-with-langfuse
+tag: customer-story
+author: Annabell
+customerLogo: "/images/customers/cresta/Cresta-light.png"
+customerLogoDark: "/images/customers/cresta/Cresta-dark.png"
+customerQuote: 'Langfuse has made it a lot easier for us at Cresta to iterate on LLM behavior. It has sped up how quickly we can test, learn, improve the model, and build great AI agents.'
+quoteAuthor: "Jove Zhong"
+quoteRole: "Head of FDE"
+quoteCompany: "Cresta"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { ImpactChart } from "@/components/customers/ImpactChart";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="How Cresta traces multi-service AI agent pipelines with Langfuse"
+  description="Learn how Cresta uses Langfuse to trace multi-service LLM pipelines, establish data sovereignty, and work with traces across customers."
+  customerLogo="/images/customers/cresta/Cresta-light.png"
+  authors={["annabellschafer", "jamesidzik", "masoudassali"]}
+  date="March 26, 2026"
+/>
+
+## About Cresta
+
+[Cresta](https://cresta.com/) is an enterprise generative AI platform for contact centers, built to deploy human-centric AI agents, real-time agent assistance, and conversation intelligence on customer data at scale. Teams use Cresta to automate and improve customer experience across sales, care, collections, and more-without sacrificing the trust and control enterprises require.
+
+![Cresta platform overview - Deliver brand-defining CX for less](/images/customers/cresta/cresta_overview.png)
+
+<CustomerQuote
+  quote="Langfuse has made it a lot easier for us at Cresta to iterate on LLM behavior. It has sped up how quickly we can test, learn, improve the model, and build great AI agents."
+  name="Jove Zhong"
+  role="Head of FDE"
+  company="Cresta"
+  image="/images/people/jovezhong.jpg"
+/>
+
+## Observability for multi-service LLM pipelines with Langfuse
+
+On Cresta’s platform, AI agents in production are not single model calls. An end customer might only see a generated response, but behind the scenes the agent runs intent detection, knowledge retrieval, tool execution, and safety validation-often many times-each with its own model, latency profile, and failure mode. A 200 OK from the agent endpoint says little about whether retrieval returned irrelevant documents or a guardrail silently rewrote the output.
+
+To run and improve those systems, teams need a trace of each step: inputs and outputs, latency, and cost. That visibility - [observability](/docs/observability/overview) in practice - is what makes it possible to evaluate, improve, and scale agents over time.
+
+```text
+Infrastructure:  request → service → response → metric
+Agent pipeline:  request → retrieve → rank → generate → validate → tool_call → generate → response
+```
+
+### Tracing agent pipelines
+
+Langfuse organizes AI agent execution into trace trees. Each node represents a typed observation (an LLM generation, a retrieval lookup, a tool call) with structured fields appropriate to that type. A single agent turn produces a tree like this:
+
+<div className="flex justify-center">
+  <Frame fullWidth className="w-2/3">
+    ![Langfuse trace tree showing nested generations, retrievals, and tool calls for an agent turn](/images/customers/cresta/trace-tree-agent-pipeline.png)
+  </Frame>
+</div>
+
+Each node captures structured data appropriate to its type: prompts and completions for generations, document counts and relevance scores for retrievals, pass/fail results for guardrails. That granularity turns debugging from “something is slow” into “the response synthesis step used 3x the expected tokens because the retrieval returned policy documents in two languages.” Because observations are typed, Cresta’s team can query across traces-for example, surface generations where `total_tokens > 2000`, or filter retrievals by document count to find cases where the knowledge base returned too many or too few results. Token usage is tracked per observation.
+
+### Data sovereignty
+
+Cresta achieves full data sovereignty by [self-hosting Langfuse](/self-hosting) Langfuse. Traces capture the content of customer conversations; even though personally identifiable information (PII) is redacted before recording (either upstream before LLM processing or just-in-time at the tracing layer).
+
+Cresta deploys one Langfuse instance per Kubernetes cluster, co-located with the services that produce traces:
+
+<div className="flex justify-center">
+  <Frame fullWidth className="w-2/3">
+    ![Diagram of one Langfuse instance per Kubernetes cluster, co-located with tracing services](/images/customers/cresta/self-hosted-langfuse-per-cluster.png)
+  </Frame>
+</div>
+
+No trace data ever leaves the cluster boundary which was an important requirement for the team. That also gives Cresta direct control over retention policies, backup schedules, and resource allocation.
+
+
+### Multi-tenant trace isolation
+
+In a multi-tenant environment, trace isolation is a compliance requirement. Different customers have different data handling agreements, and the underlying conversation data requires strict segregation even after PII redaction.
+
+Cresta uses per-customer Langfuse organizations and projects, each with its own API credentials. When a trace is created, the tracing library resolves the correct credentials based on the customer context from the incoming request. Service developers do not handle API keys or routing logic directly:
+
+```python
+with start_retrieval("knowledge-search") as span:
+    docs = await vector_store.search(query)
+    span.set_output({"doc_count": len(docs)})
+
+# The tracing library automatically:
+# 1. Reads customer_id from the request context (set by auth middleware)
+# 2. Resolves credentials for that customer's Langfuse organization
+# 3. Exports the span to the correct destination
+```
+
+Customer A’s traces are physically separated from Customer B’s, with no possibility of cross-contamination, even when both are served by the same pods.
+
+### Cross-service trace propagation
+
+A single customer interaction often touches multiple services: a Go agent service, a Python RAG pipeline, a separate function bundle for tool execution. The trace needs to follow the request across all of them.
+
+Cresta propagates trace context through gRPC metadata headers, injected and extracted by interceptors on each service (you can also combine this with [OpenTelemetry](/integrations/native/opentelemetry) for wider instrumentation):
+
+<Frame fullWidth className="w-full">
+  ![Illustration of trace context propagation via gRPC metadata across Go and Python services](/images/customers/cresta/grpc-trace-propagation.png)
+</Frame>
+
+The downstream service joins the existing trace without any manual setup. Each service initializes its own root span, and any observations it creates nest under that root. Both services export their spans independently, and Langfuse reconstructs the full tree from matching trace and span IDs. In the Langfuse UI, Cresta’s engineers see the complete cross-service picture:
+
+The full call tree is stitched together across language boundaries, with no manual ID threading or log correlation.
+
+### Debugging agent chains with trace data
+
+In an agentic pipeline, the root cause of a wrong final response is often a misleading intermediate output several steps earlier. Without structured traces, that is hard to diagnose as individual step logs look fine in isolation, but the reasoning divergence only shows up when you see the full chain in sequence.
+
+The typed trace tree makes the causal chain explicit. Each generation node records the full prompt and completion, so Cresta’s engineers can walk from root to leaf and pinpoint exactly where the output went wrong - for example, intent detection returning “billing inquiry” when the customer was asking about a cancellation, with every downstream step following that incorrect signal.
+
+The [Playground](/docs/prompt-management/features/playground) goes further: engineers can replay the chain from the failing step with a modified [prompt](/docs/prompt-management/overview), keeping prior context fixed, and see the fix propagate in seconds rather than waiting for similar production traffic.
+
+## What comes next
+
+LLM observability is still a young discipline, and Cresta is actively exploring several directions:
+
+- **[Scores](/docs/evaluation/evaluation-methods/scores-via-sdk) on traces**: attaching automated quality scores (relevance, faithfulness, coherence) directly to trace observations, tightening the loop between production behavior and offline [experiments](/docs/evaluation/core-concepts#experiments). Complement with [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) where appropriate.
+- **Prompt engineering co-pilot**: a freeform drafting surface (canvas-style UI) for non-technical users, with quick actions (refine, format, shorten) and guided conversation aligned to prompt best practices. Optional inputs such as Langfuse traces, eval runs, and plain-language feedback ground suggestions in observed behavior while avoiding overfitting to a single metric.
+- **Regression detection across [prompt versions](/docs/prompt-management/features/prompt-version-control)**: comparing trace-level metrics before and after a prompt change to quantify impact, rather than relying on offline evaluation alone.
+
+The more precisely teams can see what an AI agent is doing, the more effectively they can improve it. Observability is not separate from AI agent quality - it is a prerequisite for it.
+
+## Business impact
+
+<ImpactChart
+  items={[
+    {
+      area: "Granular agent observability",
+      impact:
+        "Typed trace trees break down multi-step pipelines so teams can pinpoint latency, cost, and reasoning failures-not just a single end-to-end response.",
+    },
+    {
+      area: "Data sovereignty",
+      impact:
+        "Self-hosted Langfuse per cluster keeps trace data inside Cresta’s boundary, with full control over retention and backups.",
+    },
+    {
+      area: "Cross-service debugging",
+      impact:
+        "gRPC propagation and unified trace IDs give engineers one view across Go, Python, and other services without manual log correlation.",
+    },
+    {
+      area: "Faster iteration",
+      impact:
+        "Sandbox replay lets engineers test prompt fixes on real failing traces in seconds instead of waiting for similar production traffic.",
+    },
+  ]}
+/>
+
+<CustomerStoryCTA />
