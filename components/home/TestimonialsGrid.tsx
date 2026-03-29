@@ -89,7 +89,7 @@ export const TestimonialsGrid = () => {
   }
 
   return (
-    <>
+    <div className="not-prose">
       {/* Testimonials Grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {columns.map((column, columnIndex) => (
@@ -163,6 +163,6 @@ export const TestimonialsGrid = () => {
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 }; 
