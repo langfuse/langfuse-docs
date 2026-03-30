@@ -49,7 +49,7 @@ export default async function WideSectionPage({ section }: Props) {
   const MDX = body as ComponentType<{ components?: Record<string, ComponentType> }>;
 
   return (
-    <div className="flex-1">
+    <div className="prose flex-1">
       <MDX components={getMDXComponents()} />
     </div>
   );
