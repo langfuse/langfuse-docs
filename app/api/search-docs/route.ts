@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchLangfuseDocsWithInkeep, isNonEmptyString } from "@/lib/inkeep-search";
+import { PostHog } from "posthog-node";
+import { waitUntil } from "@vercel/functions";
+
+const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
+  ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
+      flushAt: 1,
+      flushInterval: 0,
+      
+    })
+  : undefined;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
