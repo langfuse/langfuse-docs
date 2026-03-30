@@ -48,8 +48,10 @@ export default async function WideSectionPage({ section }: Props) {
     typeof data.load === "function" ? (await data.load()).body : data.body;
   const MDX = body as ComponentType<{ components?: Record<string, ComponentType> }>;
 
+  const hasProse = section === "startups";
+
   return (
-    <div className="prose flex-1">
+    <div className={hasProse ? "prose flex-1" : "flex-1"}>
       <MDX components={getMDXComponents()} />
     </div>
   );
