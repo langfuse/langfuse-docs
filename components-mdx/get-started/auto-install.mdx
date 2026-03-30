@@ -1,17 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
+import AgentPromptObservability from "@/components-mdx/get-started/agent-prompt-observability.mdx";
+import AgentPromptPromptManagement from "@/components-mdx/get-started/agent-prompt-prompt-management.mdx";
+import { CopyAgentPromptButton } from "@/components-mdx/get-started/copy-agent-prompt-button";
 
 Install the [Langfuse AI Skill](https://github.com/langfuse/skills) to let your coding agent access all Langfuse features.
 
-<Tabs items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}>
+<Tabs
+  items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}
+  className="my-0"
+>
 
 <Tab>
 
-Ask your coding agent to install the skill by pointing to the [GitHub repository](https://github.com/langfuse/skills).
+Ask your coding agent to set up Langfuse by following the get-started guide for this page:
 
-```txt filename="Agent instruction"
-"Install the Langfuse AI skill from github.com/langfuse/skills."
-```
+{props.topic === "observability" && <AgentPromptObservability />}
+{props.topic === "prompt-management" && <AgentPromptPromptManagement />}
+<CopyAgentPromptButton topic={props.topic} />
 
 </Tab>
 
@@ -19,7 +25,7 @@ Ask your coding agent to install the skill by pointing to the [GitHub repository
 
 Langfuse has a [Cursor Plugin](https://cursor.com/docs/plugins) that includes the skill automatically.
 
-<div className="flex gap-2 mt-3 mb-6">
+<div className="flex gap-2 mt-3">
   <Button asChild>
     <Link
       href="https://cursor.com/marketplace/langfuse"
@@ -30,6 +36,11 @@ Langfuse has a [Cursor Plugin](https://cursor.com/docs/plugins) that includes th
     </Link>
   </Button>
 </div>
+
+After installing the plugin, prompt your coding agent:
+
+{props.topic === "observability" && <AgentPromptObservability />}
+{props.topic === "prompt-management" && <AgentPromptPromptManagement />}
 </Tab>
 
 <Tab>
