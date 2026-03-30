@@ -8,7 +8,6 @@ const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
       host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
       flushAt: 1,
       flushInterval: 0,
-      
     })
   : undefined;
 
@@ -31,6 +30,24 @@ export async function GET(request: NextRequest) {
       { status: 400, headers: corsHeaders }
     );
   }
+
+  waitUntil(
+    (async () => {
+      try {
+        posthog?.capture({
+          distinctId: "docs-search-api",
+          event: "docs_search:query",
+          properties: {
+            query,
+            $process_person_profile: false,
+          },
+        });
+        await posthog?.flush();
+      } catch (error) {
+        console.error("Error tracking PostHog event:", error);
+      }
+    })()
+  );
 
   try {
     const inkeepResult = await searchLangfuseDocsWithInkeep(query);
