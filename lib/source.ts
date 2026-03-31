@@ -224,6 +224,7 @@ export const MARKETING_SLUGS = [
   "jp",
   "jp-cloud",
   "kr",
+  "non-profit",
   "oss-friends",
   "press",
   "pricing",
@@ -287,7 +288,7 @@ const DOC_SECTIONS = {
   users: {
     source: usersSource,
     collection: "customers",
-    title: "Users",
+    title: "User stories",
   },
   handbook: {
     source: handbookSource,

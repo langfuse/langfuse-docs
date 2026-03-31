@@ -1,0 +1,162 @@
+---
+title: Dashboard Changes in Langfuse v4
+description: How dashboards change in Langfuse v4 — what stays the same, what's different, and expected numerical differences when switching between Langfuse v3 and Langfuse v4.
+---
+
+# Dashboard Changes in Langfuse v4
+
+This page explains how dashboards behave differently in [Langfuse v4](/docs/v4) compared to Langfuse v3. If you have enabled the Langfuse v4 preview toggle, use this as a reference for understanding any differences you observe.
+
+Langfuse has two types of dashboards:
+
+- **Home dashboard** — the built-in dashboard shown on the project home page with fixed tiles (trace counts, latency percentiles, score histograms, model usage, etc.).
+- **[Custom dashboards](/docs/metrics/features/custom-dashboards)** — user-created dashboards with configurable widgets.
+
+Some changes below affect only one type; others affect both. Each section notes which dashboards it applies to.
+
+## Background: from traces to observations
+
+In Langfuse, **observations** (also known as "spans" in OpenTelemetry) are the individual operations within a trace — LLM calls, tool executions, retrieval steps, and so on.
+
+In Langfuse v3, a `trace` is a first-class record in its own table, and observations are separate records that reference it via a foreign key. Queries JOIN these tables at read time to combine trace metadata with observation metrics.
+
+Langfuse v4 adopts an [OpenTelemetry-native data model](/docs/observability/data-model). In OTEL, there is no "trace" object — only observations arranged in a parent-child hierarchy. The root observation (an observation with no parent) _is_ the trace. A trace ID is a shared identifier that groups related observations together.
+
+In Langfuse v4, all data lives in a single denormalized ClickHouse table — the **wide observations table**. Each observation row carries the full trace context (user ID, session ID, tags, environment, etc.) already materialized on it — no JOINs required. For data ingested via older SDKs (both Langfuse and OTEL), Langfuse creates a **synthetic root observation** for each trace to fit the unified model (see [section 6](#6-synthetic-root-observations-appear-in-the-wide-observations-table)). Newer OTEL SDKs that use direct event writes do not need synthetic root observations — the real OTEL root observation already serves as the natural root entry. See the [SDK upgrade guides](/docs/observability/sdk/upgrade-path) for migration instructions.
+
+This has two consequences for dashboards:
+
+1. **Observations are the primary query surface**, not traces. Trace-level metrics are derived from observations — e.g., counting distinct trace IDs rather than counting rows in a traces table.
+2. **The legacy "traces view"** still exists for backward compatibility but is expensive to query at scale because it must reconstruct trace-level fields by aggregating across all observations belonging to a trace. It is no longer possible to create new [custom widgets](/docs/metrics/features/custom-dashboards) relying on this view, and existing widgets should be migrated away from it.
+
+---
+
+## What stays the same
+
+- All dashboard filters (name, userId, tags, environment, type, model, etc.) are supported. Some filter behaviors are refined in Langfuse v4 (see sections 9 and 11 below).
+- The query API shape (dimensions, metrics, filters, time series granularity) is unchanged.
+- Score aggregate tables, histograms, and time series produce the same output format.
+- Trends, distributions, and relative comparisons across all metrics remain consistent. Individual absolute values (e.g., observation counts) may differ by a fixed offset because synthetic root observations — absent as separate records in Langfuse v3 — are now included in the observation count.
+
+---
+
+## What changes
+
+### 1. Trace counts are computed from the wide observations table
+
+*Applies to: home dashboard and custom dashboards*
+
+In Langfuse v3, trace counts come from the dedicated traces table (`SELECT count(*) FROM traces`). In Langfuse v4, trace counts are computed as `uniq(trace_id)` from the wide observations table — counting distinct trace IDs across all observations.
+
+This is a deliberate performance choice. The Langfuse v4 traces view must aggregate multiple rows per trace to reconstruct trace-level fields, which is expensive for large projects. The wide observations table avoids this entirely — each row already carries the trace context, so counting distinct trace IDs is a lightweight scan.
+
+<Callout type="info">
+Because `uniq()` is an approximate counting function, trace counts may differ slightly from Langfuse v3's exact counts. The difference is negligible for practical purposes.
+</Callout>
+
+### 2. "Traces by time" becomes "Observations by time"
+
+*Applies to: home dashboard*
+
+In Langfuse v3, this chart has two tabs: "Traces" (trace count over time) and "Observations by Level." In Langfuse v4, the "Traces" tab is removed. The chart shows only "Observations by Level" and is titled "Observations by time."
+
+### 3. Trace latency percentiles may be removed
+
+*Applies to: home dashboard*
+
+The trace latency table currently queries the traces view, which is one of the slowest dashboard queries at scale. If the performance cannot be brought to acceptable levels before release, this tile will be removed from the Langfuse v4 dashboard. Observation-level latency metrics (which query the wide observations table directly) will remain.
+
+### 4. Trace time bucketing uses the root observation's start time
+
+*Applies to: home dashboard and custom dashboards*
+
+Langfuse v3 assigns traces to time buckets using the trace record's `timestamp` field. Langfuse v4 uses the root observation's `start_time` — when the traced operation actually began. For data from older SDKs, the synthetic root observation mirrors the original trace timestamp, so the two should closely match. In edge cases where a trace record's creation time differs from the root observation's start, a trace could shift by one time bucket at a boundary.
+
+If a trace has no root observation at all, Langfuse v4 falls back to the earliest observation's start time for bucketing. This keeps the trace visible in time-series charts. However, in projects that mix ingestion paths — for example, some traces from older SDKs (which always produce root observations) and some from the direct-write OTEL path (which may not, e.g., distributed traces where the root observation lives in another service) — traces without root observations can be dropped from time-series charts.
+
+<Callout type="warn">
+If you use the direct-write OTEL path and see traces missing from time-series charts, check whether those traces have a root observation. This is most likely to happen in projects that combine multiple ingestion paths.
+</Callout>
+
+### 5. Traces without observations in the time window are no longer dropped
+
+*Applies to: home dashboard and custom dashboards*
+
+In Langfuse v3, dashboard tiles that combined trace counts with observation-level metrics (like latency or token usage) could silently exclude traces whose child observations fell outside the selected time window. For example, a long-running trace that started before your selected range but had no observations within it would disappear from results — even though the trace itself was in range.
+
+In Langfuse v4, traces are always included if they fall within the time window, regardless of when their child observations occurred.
+
+### 6. Synthetic root observations appear in the wide observations table
+
+*Applies to: home dashboard and custom dashboards*
+
+For data ingested via older SDKs (both Langfuse and OTEL), Langfuse v4 creates a synthetic root observation for each trace with an ID in the format `t-{traceId}`. These entries carry the trace's metadata (name, tags, user, etc.) but have no duration, cost, or token usage. If you query or filter by observation ID, you may encounter them.
+
+<Callout type="info">
+Newer OTEL SDKs that use direct event writes do not produce synthetic root observations — the real OTEL root observation (with actual duration and metrics) serves as the root entry directly.
+</Callout>
+
+### 7. Score histograms are computed server-side
+
+*Applies to: home dashboard*
+
+Langfuse v3 fetches up to 10,000 raw score values from ClickHouse and builds histogram bins in the browser. Langfuse v4 computes histograms server-side — all scores are included regardless of dataset size. If you have more than 10,000 scores, Langfuse v4 histograms will better reflect the true distribution. Histogram bin boundaries and bar heights may also look slightly different because Langfuse v4 uses a different binning algorithm.
+
+### 8. Trace name resolves from the root observation
+
+*Applies to: home dashboard and custom dashboards*
+
+In Langfuse v3, the trace name comes from the explicit `trace.name` field set by the SDK. In Langfuse v4, if the dedicated `trace_name` field is empty (common with OTEL-native ingestion where no explicit trace object is sent), the system falls back to the root observation's own `name` field. This means OTEL traces that previously appeared unnamed in dashboards will now display the root observation name.
+
+The fallback applies everywhere trace name is used — including observation-level and score charts.
+
+### 9. Score environment filtering is more precise
+
+*Applies to: home dashboard and custom dashboards*
+
+In Langfuse v3, filtering scores by environment uses the _parent trace's_ environment. In Langfuse v4, the filter applies directly to the score's own `environment` field. If a score's environment differs from its parent trace's, Langfuse v4 returns it while Langfuse v3 may not. This means Langfuse v4 can return additional score rows that Langfuse v3 silently excluded.
+
+### 10. High-cardinality dimensions require top-N queries
+
+*Applies to: home dashboard and custom dashboards*
+
+Dimensions like `userId`, `traceId`, and `sessionId` can have millions of unique values. In Langfuse v3, queries grouping by these dimensions could produce unbounded result sets and slow down or time out.
+
+Langfuse v4 enforces guardrails: when a query groups by a high-cardinality dimension, it must specify a row limit and sort order (e.g., "top 20 users by cost, descending"). Time-series charts cannot use high-cardinality dimensions at all — the combination of many unique values and many time buckets produces too many rows. Built-in dashboard tiles like the "User consumption" chart already follow this pattern. [Custom widgets](/docs/metrics/features/custom-dashboards) that violate these constraints will show a validation error explaining what to fix.
+
+Additionally, some very-high-cardinality fields (`id`, `traceId`, `parentObservationId`) are no longer available as dimensions in the custom widget builder. These fields are useful for filtering but not for grouping — a chart grouped by individual trace ID is not meaningful.
+
+### 11. Empty strings and NULL are now equivalent in filters
+
+*Applies to: home dashboard and custom dashboards*
+
+In Langfuse v3, empty string (`""`) and NULL are distinct values — filtering for "is null" does not match an empty string, and vice versa. In Langfuse v4, they are treated as equivalent: "is null" matches both NULL and empty string values, and "does not contain" excludes both. For example, filtering for "parentObservationId is null" now returns observations that have no parent regardless of whether the underlying value is stored as NULL or an empty string.
+
+### 12. Custom widgets track their minimum required version
+
+*Applies to: custom dashboards*
+
+[Custom dashboard widgets](/docs/metrics/features/custom-dashboards) now carry a `min_version` field that is auto-detected when the widget is saved. If a widget uses dimensions or measures that only exist in Langfuse v4 (such as `costByType` or `usageByType`), it is automatically tagged as requiring Langfuse v4. Widgets that only use fields available in both versions remain compatible with Langfuse v3.
+
+When the Langfuse v4 preview is enabled, the widget builder uses Langfuse v4 view definitions — exposing v4-only measures and dimensions. The traces view is excluded from Langfuse v4 in the widget builder; a warning is shown if a widget still targets it, and the widget falls back to Langfuse v3 definitions for that view.
+
+---
+
+## Expected numerical differences
+
+For most dashboards, Langfuse v3 and Langfuse v4 numbers closely track each other. The known differences:
+
+| Metric                    | Expected difference                                      |
+| ------------------------- | -------------------------------------------------------- |
+| Observation counts        | May differ (synthetic root observations, absent in Langfuse v3, are now included) |
+| Trace total counts        | May differ slightly (approximate counting via `uniq()`)  |
+| Trace counts by name      | May differ slightly (approximate counting via `uniq()`)  |
+| Trace time-series buckets | May shift by one bucket at window boundaries             |
+| Score counts and averages | May differ slightly due to changed query and filter paths |
+| Score histogram totals    | Within ±1 (ClickHouse histogram rounding)                |
+| Cost and token sums       | Trends match; totals may differ by a fixed offset from root observations |
+| User consumption          | May differ slightly (approximate counting, time boundaries) |
+
+<Callout type="info">
+Data is internally consistent within Langfuse v4. Absolute numbers may differ slightly from Langfuse v3 due to the changes above, but trends, distributions, and relative comparisons match.
+</Callout>

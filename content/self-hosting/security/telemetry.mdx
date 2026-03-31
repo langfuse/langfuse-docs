@@ -1,0 +1,57 @@
+---
+title: Telemetry (self-hosted)
+sidebarTitle: Telemetry
+description: Learn what telemetry Langfuse sends from self-hosted deployments, why it is collected, and when it can be disabled.
+label: "Version: v3"
+---
+
+# Telemetry
+
+Langfuse self-hosted sends a small amount of deployment telemetry to Langfuse.
+
+For Langfuse Enterprise (self-hosted), this telemetry is used for license compliance and to understand license usage at a high level.
+For Langfuse OSS, the same telemetry helps us understand adoption and prioritize improvements and roadmap items.
+
+<Callout type="info">
+  Langfuse does not send raw traces, prompts, observations, scores, or dataset
+  contents from your self-hosted deployment. Only high-level aggregated usage
+  metrics are shared.
+</Callout>
+
+## Where telemetry is sent
+
+Telemetry is sent to Langfuse's telemetry pipeline via PostHog Cloud.
+
+Implementation reference: [Telemetry job](https://github.com/langfuse/langfuse/blob/main/web/src/features/telemetry/index.ts)
+
+## What is sent
+
+Langfuse calculates these values locally and sends a single telemetry event.
+All metrics are aggregated across all projects of the instance before they are sent.
+Langfuse does not send raw ClickHouse rows or per-project breakdowns.
+
+| Field                             | Meaning                                                                                                                            | Source                     |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `langfuseVersion`                 | The running Langfuse version                                                                                                       | Application metadata       |
+| `eeLicenseKey`                    | The configured `LANGFUSE_EE_LICENSE_KEY`, if present                                                                               | Environment variable       |
+| `userDomains`                     | Up to 30 email domains from the local `users` table with user counts. Raw email addresses are not sent as they are considered PII. | Postgres                   |
+| `totalProjects`                   | Current number of non-deleted projects                                                                                             | Postgres                   |
+| `traces`                          | Total traces created in the reporting window                                                                                       | Local ClickHouse aggregate |
+| `scores`                          | Total scores created in the reporting window                                                                                       | Local ClickHouse aggregate |
+| `observations`                    | Total observations created in the reporting window                                                                                 | Local ClickHouse aggregate |
+| `datasets`                        | Total datasets created in the reporting window                                                                                     | Postgres                   |
+| `datasetItems`                    | Total dataset items created in the reporting window                                                                                | Postgres                   |
+| `datasetRuns`                     | Total dataset runs created in the reporting window                                                                                 | Postgres                   |
+| `datasetRunItems`                 | Total dataset run items created in the reporting window                                                                            | Local ClickHouse aggregate |
+| `startTimeframe` / `endTimeframe` | The reporting window used for the counts above                                                                                     | Application metadata       |
+
+## Can I disable telemetry?
+
+### Langfuse OSS
+
+Yes. Set `TELEMETRY_ENABLED=false` on all Langfuse application containers.
+
+### Langfuse Enterprise (self-hosted)
+
+Enterprise self-hosted telemetry is used for license compliance and cannot be disabled.
+If you have procurement, network, or privacy questions, please [contact us](/support).
