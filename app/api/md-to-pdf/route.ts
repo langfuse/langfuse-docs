@@ -1,3 +1,5 @@
+import { promises as fs } from "fs";
+import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import { marked } from "marked";
 
@@ -11,6 +13,15 @@ const ALLOWED_HOSTNAMES = [
   "raw.githubusercontent.com",
   "github.com",
 ];
+const LOCAL_MARKDOWN_ROOT = path.resolve(process.cwd(), "public", "md-src");
+const PDF_VIEWPORT = {
+  width: 1280,
+  height: 800,
+  deviceScaleFactor: 1,
+  isMobile: false,
+  hasTouch: false,
+  isLandscape: false,
+} as const;
 
 function removeAnchorTags(content: string): string {
   return content.replace(/\s*\[#[\w-]+\]/g, "");
@@ -21,6 +32,92 @@ function processCallouts(content: string): string {
     /<Callout\s+type=["'](\w+)["']\s*>([\s\S]*?)<\/Callout>/g;
   return content.replace(calloutRegex, (match, type, innerContent) => {
     return `<div class="callout callout-${type}">${innerContent}</div>`;
+  });
+}
+
+function getLocalMarkdownCandidates(markdownUrl: URL): string[] {
+  const normalizedPath = decodeURIComponent(markdownUrl.pathname)
+    .replace(/\/+/g, "/")
+    .replace(/^\/+|\/+$/g, "");
+  const withoutExtension = normalizedPath.replace(/\.mdx?$/i, "");
+
+  if (!withoutExtension) {
+    return ["index.md"];
+  }
+
+  const segments = withoutExtension.split("/").filter(Boolean);
+  if (segments.some((segment) => segment === "." || segment === "..")) {
+    return [];
+  }
+
+  const basePath = segments.join("/");
+  const candidates = [`${basePath}.md`];
+
+  // Single-segment routes like /terms are exported under public/md-src/marketing.
+  if (segments.length === 1) {
+    candidates.push(`marketing/${segments[0]}.md`);
+  }
+
+  return candidates;
+}
+
+async function readLocalMarkdown(markdownUrl: URL): Promise<string | null> {
+  for (const relativeCandidate of getLocalMarkdownCandidates(markdownUrl)) {
+    const absoluteCandidate = path.resolve(
+      LOCAL_MARKDOWN_ROOT,
+      relativeCandidate
+    );
+    const isWithinMarkdownRoot =
+      absoluteCandidate === LOCAL_MARKDOWN_ROOT ||
+      absoluteCandidate.startsWith(`${LOCAL_MARKDOWN_ROOT}${path.sep}`);
+
+    if (!isWithinMarkdownRoot) {
+      continue;
+    }
+
+    try {
+      return await fs.readFile(absoluteCandidate, "utf8");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
+
+  return null;
+}
+
+async function launchBrowser() {
+  if (process.env.NODE_ENV === "development") {
+    const puppeteerModule = await import("puppeteer");
+    const puppeteer =
+      "default" in puppeteerModule ? puppeteerModule.default : puppeteerModule;
+
+    return puppeteer.launch({
+      headless: true,
+      defaultViewport: PDF_VIEWPORT,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+  }
+
+  const puppeteerCoreModule = await import("puppeteer-core");
+  const chromiumModule = await import("@sparticuz/chromium");
+  const puppeteer =
+    "default" in puppeteerCoreModule
+      ? puppeteerCoreModule.default
+      : puppeteerCoreModule;
+  const chromium =
+    "default" in chromiumModule ? chromiumModule.default : chromiumModule;
+  const headlessMode = "shell";
+
+  return puppeteer.launch({
+    args: puppeteer.defaultArgs({
+      args: chromium.args,
+      headless: headlessMode,
+    }),
+    defaultViewport: PDF_VIEWPORT,
+    executablePath: await chromium.executablePath(),
+    headless: headlessMode,
   });
 }
 
@@ -74,15 +171,22 @@ export async function GET(request: NextRequest) {
       markdownUrl.pathname = markdownUrl.pathname.replace(/\/$/, "") + ".md";
     }
 
-    const response = await fetch(markdownUrl.toString());
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: `Failed to fetch markdown: ${response.statusText}` },
-        { status: response.status }
-      );
+    let markdownContent = isLangfuseHost
+      ? await readLocalMarkdown(markdownUrl)
+      : null;
+
+    if (markdownContent === null) {
+      const response = await fetch(markdownUrl.toString());
+      if (!response.ok) {
+        return NextResponse.json(
+          { error: `Failed to fetch markdown: ${response.statusText}` },
+          { status: response.status }
+        );
+      }
+
+      markdownContent = await response.text();
     }
 
-    let markdownContent = await response.text();
     markdownContent = markdownContent.replace(
       /^---\r?\n[\s\S]*?\r?\n---\r?\n/,
       ""
@@ -122,24 +226,7 @@ export async function GET(request: NextRequest) {
       </html>
     `;
 
-    const isDev = process.env.NODE_ENV === "development";
-    let browser;
-
-    if (isDev) {
-      const puppeteer = await import("puppeteer");
-      browser = await puppeteer.default.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      });
-    } else {
-      const puppeteerCore = await import("puppeteer-core");
-      const chromium = await import("@sparticuz/chromium");
-      browser = await puppeteerCore.default.launch({
-        args: chromium.default.args,
-        executablePath: await chromium.default.executablePath(),
-        headless: true,
-      });
-    }
+    const browser = await launchBrowser();
 
     try {
       const page = await browser.newPage();
