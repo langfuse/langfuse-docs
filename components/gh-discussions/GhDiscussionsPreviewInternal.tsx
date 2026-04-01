@@ -195,7 +195,6 @@ const GhDiscussionsPreviewInternal = ({
         <PaginationContent className="gap-1 items-center">
           <PaginationItem>
             <PaginationPrevious
-              size="xs"
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               className="cursor-pointer select-none"
             />

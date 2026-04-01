@@ -43,7 +43,7 @@ const textButtonBaseClasses =
   "inline-flex w-full min-w-0 max-w-full items-center justify-center gap-[6px] overflow-hidden px-0 py-1 shadow-none border-0 rounded-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
 
 const buttonBaseClasses =
-  "inline-flex w-full min-w-0 max-w-full items-center justify-center no-underline gap-[6px] overflow-hidden p-[3px_3px_3px_8px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex w-full min-w-0 max-w-full items-center justify-center no-underline gap-[6px] overflow-hidden py-0.75 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
 
 const labelTypographyClasses =
   "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] p-0";
@@ -215,6 +215,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const hasIcon = Boolean(icon);
     const hasStartIcon = hasIcon && iconPosition === "start";
     const hasEndIcon = hasIcon && iconPosition === "end";
+    const isSmallSize = resolvedSize === "small";
+    const leftPaddingClass = hasStartIcon ? "pl-[3px]" : isSmallSize ? "pl-[6px]" : "pl-[8px]";
+    const rightPaddingClass =
+      hasEndIcon || hasShortcut ? "pr-[3px]" : isSmallSize ? "pr-[6px]" : "pr-[8px]";
+    const buttonPaddingClasses = `${leftPaddingClass} ${rightPaddingClass}`;
 
     const controlClassName = buttonVariants({
       variant: resolvedVariant,
@@ -222,8 +227,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       className: cn(
         className,
         isTextVariant && wrapperClassName,
-        !isTextVariant && hasStartIcon && "!pl-[3px]",
-        !isTextVariant && hasEndIcon && !hasShortcut && "!pr-[3px]",
+        !isTextVariant && buttonPaddingClasses
       ),
     });
 
