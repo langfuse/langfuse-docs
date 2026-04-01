@@ -54,7 +54,7 @@ export function ProductUpdateSignup(props: {
         type="submit"
         variant="secondary"
         disabled={isSubmitting}
-        size={props.small && "small"}
+        size={props.small ? "small" : undefined}
       >
         {isSubmitting ? <>Submitting...</> : <>Get updates</>}
       </Button>
