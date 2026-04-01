@@ -1,25 +1,48 @@
 ---
-title: Explore Observations in V4
+title: How do I work with observations in Langfuse v4?
 sidebarTitle: Explore Observations in V4
-description: Learn how to use the unified tracing table in Langfuse v4
-tags: [observability]
+description: Guide for transitioning from the traces table to the unified observations table in Langfuse v4, with before/after workflow comparisons and SDK upgrade steps.
+tags: [observability, tracing, evaluation]
 ---
 
 # Explore Observations in Langfuse Cloud Fast Preview (v4)
 
-Langfuse now uses a single observations table as the main exploration surface.
-Previously, many teams switched between a traces table for request-level context and an observations table for step-level analysis.
-In the v4 experience, you stay in one table and use filters, saved views, and row peek-views to answer both questions.
+## How to think about the new model
 
-For the conceptual background, see the [observation-centric data model](/docs/observability/data-model#observation-centric-data-model).
-For broader release context of Langfuse v4, see the [Fast Preview (v4) docs](/docs/v4).
+In v4, every operation your application performs — LLM calls, tool executions, retrievals, agent steps — is a first-class row in a single observations table. Think of it like a spreadsheet where each row is one operation, and you can slice by any column. The trace is just one column (`trace_id`) that groups related operations together, the same way `session_id` or `user_id` groups things.
 
+As agentic applications grow more complex, a single trace can contain hundreds or thousands of operations. The old traces table showed one row per request — to find an expensive LLM call or a failed tool invocation, you had to open traces one by one and scan their children. With the observations table, you can query across all operations directly: find every GPT-4 call over $0.10, every retrieval that took more than 2 seconds, or every tool call that errored — without knowing which trace they belong to.
 
-## Prerequisites
+You will notice more rows in the table than before — that's expected. Each row is now one operation, not one trace. The key is to use filters and [saved views](/changelog/2025-05-20-save-table-views) to focus on what matters. Filter by observation name, type, or model to surface the operations you care about, then save that as a view. The filter sidebar shows available values with counts, so you can discover which models, observation names, or error levels are most common before committing to a filter.
 
-To use the unified table productively, make sure your instrumentation is aligned with the v4 data model.
+For conceptual background, see the [observation-centric data model](/docs/observability/data-model#underlying-data-model). For broader release context, see the [Fast Preview (v4) docs](/docs/v4).
 
-### 1. Ingest with a v4-compatible setup
+## Common views
+
+These are some of the most useful starting points. Each can be saved as a [saved view](/changelog/2025-05-20-save-table-views) for one-click access.
+
+| I want to see… | How to filter |
+|---|---|
+| Key operations | Filter by observation `name` or `type` matching your most important operations |
+| All LLM generations | Filter `type = generation` |
+| Expensive LLM calls | Filter `type = generation`, sort by `total_cost` descending |
+| Errors for a specific user | Filter by `user_id` and `level = ERROR` |
+| Operations scoped to a session | Filter by `session_id`, sort by `latency` descending |
+| All operations for one trace | Filter by `trace_id` |
+| Model latency comparison | Filter `type = generation`, group by `model` in a [dashboard](/docs/metrics) or sort by `model` column |
+| Cost, latency, or errors by dimension | [Self-serve dashboards](/docs/metrics) |
+
+We recommend setting up 2-3 saved views for your most common debugging workflows so the observations table feels immediately useful to your team.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
+  aspectRatio={16 / 9}
+  className="mt-3"
+/>
+
+## Upgrade checklist
+
+### Ingest with a v4-compatible setup
 
 Use one of these ingestion paths so your data appears in the unified table in real time:
 
@@ -31,7 +54,7 @@ Use one of these ingestion paths so your data appears in the unified table in re
 If you are still sending data via **older SDK versions**, or via **direct OpenTelemetry ingestion without `x-langfuse-ingestion-version: 4`**, traces can appear in the unified tracing table with a **delay of up to 10 minutes**.
 </Callout>
 
-### 2. Propagate correlating attributes across spans
+### Propagate correlating attributes across observations
 
 Use the SDK propagation helpers to propagate correlating attributes across child observations:
 
@@ -43,28 +66,10 @@ Attributes such as `userId`, `sessionId`, `tags`, `metadata`, `version`, and `tr
 
 See [Add attributes to observations](/docs/observability/sdk/instrumentation#add-attributes) for the SDK implementation details.
 
-## Set up your default view
-
-We strongly recommend **saved views** in order to configure the default view you and your project members are seeing in the unified tracing table. For users that previously relied heavily on the UI trace table, this is the first step in order to set up an equivalent view.
-
-Examples for useful views would be
-
-- root observations only (no parent observation). This would be a close analogue to the trace table in the previous table model.
-- observations matching specific names only (these could be the root observation of a subagent execution)
-- LLM generation spans only
-
-You can create a saved view by setting the relevant filters in the filter sidebar of the tracing table and saving that view. You may also promote this to be the **project-default** view or share **permalinks** of the saved view with your teammates.
-
-<Video
-  src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
-  aspectRatio={16 / 9}
-  className="mt-3"
-/>
-
 ## Share feedback
 
 We are still iterating on the unified tracing experience.
-If something feels confusing, missing, or slower than expected, share feedback on via [support](/support).
+If something feels confusing, missing, or slower than expected, share feedback via [support](/support).
 
 ## FAQ
 
@@ -74,10 +79,13 @@ The most common reason is that data is still being sent via older SDK versions o
 In the new v4 experience, those setups can lead to multi-minute delays before traces show up in the unified table.
 If this happens, upgrade to Python SDK v4 or JS/TS SDK v5, or add the ingestion version header to your OTEL exporter.
 
-### How can I make this look more like the old traces table?
+### How can I get a focused view of my most important operations?
 
-Create a saved view that filters to the root observation representing the start of each trace in your application.
-That gives you a stable, trace-like list while still letting you drill into lower-level observations when needed.
+Create a saved view that filters by the observation names, types, or models most relevant to your workflow — for example, filter `type = generation` to see all LLM calls, or filter by a specific observation `name` to track a key step in your pipeline. Save 2-3 of these views and they become one-click shortcuts in the table header.
+
+### The table shows too many rows — how do I make sense of it?
+
+This is the most common reaction when first switching to the observations table. As agentic applications grow more complex, a single trace can contain hundreds or thousands of operations — showing one row per trace was actually hiding the signal you need. The solution is filters and saved views — not scrolling. Start by filtering for the observation types or names most relevant to your workflow (e.g., "all generations," "errors only," or a specific agent step). Once you save 2-3 views that match your debugging workflows, the table will feel more focused than the old traces table, not less.
 
 ### Can I get the old experience back?
 

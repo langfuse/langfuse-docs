@@ -1,0 +1,30 @@
+---
+date: 2026-03-23
+title: Updates to Dashboards
+description: Detailed reference for how dashboards behave differently in Langfuse v4 — trace counts, histograms, filters, and more.
+ogImage: /images/changelog/2026-03-23-v4-dashboard-changes.jpg
+author: Valeriy
+canonical: /docs/metrics/v4-dashboard-changes
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+With the [recent performance & data model upgrades](/docs/v4) on Langfuse Cloud, we have also updated the dashboards to be powered by a new observation-centric data model.
+
+We have published a detailed [reference page covering all the changes](/docs/metrics/v4-dashboard-changes) — what stays the same, what's different, and expected numerical differences when switching to the new observation-centric data model.
+
+## Key Changes
+
+- **Trace counts** are now computed as `uniq(trace_id)` from the wide observations table instead of counting rows in the traces table
+- **"Traces by time"** is replaced by **"Observations by time"**, reflecting the shift to observations as the primary unit
+- **Score histograms** are now computed server-side, including all scores regardless of dataset size
+- **Trace names** fall back to the root observation name for OTEL-native ingestion, so previously unnamed traces now display correctly
+- **High-cardinality dimensions** (like userId) now require top-N queries with explicit limits
+- **NULL and empty strings** are treated as equivalent in filters
+
+<Cards num={1}>
+  <Card title="Read about all the changes here" href="/docs/metrics/v4-dashboard-changes" icon={<Book />} />
+</Cards>

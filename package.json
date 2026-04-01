@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "description": "Langfuse docs",
   "scripts": {
+    "agents:check": "node scripts/agents/sync-agent-shims.mjs --check",
+    "agents:sync": "node scripts/agents/sync-agent-shims.mjs",
     "dev": "next dev -p 3333 -H 127.0.0.1",
+    "postinstall": "bash scripts/postinstall.sh",
     "prebuild": "node scripts/update-github-stars.js && node scripts/authors/generate-contributors.js && node scripts/copy_md_sources.js && node scripts/generate-sitemap-excludes.js",
     "build": "next build",
     "postbuild": "pnpm run postbuild:sitemap && pnpm run postbuild:cleanup && pnpm run postbuild:llms-txt",
