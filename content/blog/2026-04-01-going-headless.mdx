@@ -1,0 +1,77 @@
+---
+title: "We're Going Fully Headless. The UI is Dead."
+date: 2026/04/01
+description: Effective today, every button in Langfuse has been metaphorically deprecated in favor of npx langfuse-cli api <resource> <action>.
+author: Marc, Lotte
+tag: product
+ogImage: /images/blog/2026-04-01-going-headless/cover.png
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="We're Going Fully Headless. The UI is Dead."
+  description="Effective today, every button in Langfuse has been metaphorically deprecated in favor of npx langfuse-cli api <resource> <action>."
+  authors={["marcklingen", "lotteverheyden"]}
+/>
+
+We're going fully headless.
+
+Effective today, every button in Langfuse has been metaphorically deprecated in favor of `npx langfuse-cli api <resource> <action>`.
+
+Over the past year, we've watched something shift in how the best AI teams work. It started subtly — evals running in CI, prompts versioned in Git, scores written by judge models instead of humans. Then it accelerated. Agents writing code, debugging their own outputs, orchestrating entire feature development cycles with minimal human input. The coding agent — Cursor, Claude Code, Codex — is no longer a novelty. It's the primary driver of developer tooling.
+
+And here's the thing: agents don't click. They don't open browser tabs, navigate sidebars, or fill out forms. They call APIs. They run CLIs. They work in the terminal, in the editor, in the same environment where your actual stack lives. The mental model of a human sitting in a dashboard — scrolling, clicking, saving — maps to a world that is rapidly receding in the rearview mirror.
+
+We see this playing out in our own user base. The teams using Langfuse most effectively aren't the ones with the most dashboards open. They're the ones whose agents manage Langfuse for them — pulling traces, building datasets, iterating on prompts, running experiments — all programmatically, all without a browser tab in sight. When your eval pipeline runs at 3am, it doesn't need a Save button. It needs a CLI.
+
+> "The best interface for an agentic stack is one your agents can call at 3am without waking you up."
+>
+> — Someone at Langfuse, probably
+
+So we're going with it. Every action you used to take in the UI now has a CLI equivalent. Here's what the migration looks like:
+
+| What you used to do in the UI | CLI equivalent |
+|---|---|
+| Open the prompt editor, edit, save, promote to production | `npx langfuse-cli api prompts create` |
+| Score a trace from the trace detail page | `npx langfuse-cli api scores create` |
+| Create a dataset and populate it from traces | `npx langfuse-cli api dataset-items create` |
+
+But really — the idea isn't that _you_ type these. It's that your agent does. Give Cursor, Claude Code, or Codex a goal in plain language, and they'll reach for the CLI to get it done. An entire prompt improvement loop, no browser tab required:
+
+```bash
+# You, to your agent:
+# "Pull the last 10 traces with low quality scores, build a dataset
+# from them, and update the prompt to fix the patterns you see."
+
+# Agent discovers available resources first
+npx langfuse-cli api __schema
+# ✓ 26 resources available: traces, prompts, scores, datasets, ...
+
+npx langfuse-cli api scores list --name quality --limit 10
+# ✓ 10 traces with score < 0.5 returned
+
+npx langfuse-cli api datasets create --name "low-quality-q1"
+# ✓ Dataset created
+
+npx langfuse-cli api dataset-items create --dataset-name "low-quality-q1" ...
+# ✓ Items added
+
+npx langfuse-cli api prompts create --name "summarizer" --commit-message "fix q1 regressions"
+# ✓ Prompt updated. Version 4.
+# No browser tab opened. No button clicked. Just vibes and CLIs.
+```
+
+We believe the teams shipping the best AI products aren't spending their afternoons clicking in dashboards. The agent layer is the new power user — and agents don't need a Save button.
+
+Happy April 1st. The CLI is real, though. And it's genuinely very good.
+
+---
+
+_\* This is an April Fools post. The dashboard is staying. But the CLI is real — and if your agents aren't using it yet, they should be._
+
+## Resources
+
+- [Langfuse CLI docs](/docs/api-and-data-platform/cli)
+- [Agentic setup guide](/docs/agent-setup)
+- [Will you be my CLI?](/blog/2026-02-13-will-you-be-my-cli)
