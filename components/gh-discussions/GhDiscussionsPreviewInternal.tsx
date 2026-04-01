@@ -295,12 +295,11 @@ const GhDiscussionsPreviewInternal = ({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  className="whitespace-nowrap"
+                  variant="secondary"
+                  icon={<IconSort className="w-4 h-4" />}
+                  iconPosition="end"
                 >
-                  <IconSort className="mr-2 w-4 h-4" />
-                  {sortType.charAt(0).toUpperCase() + sortType.slice(1)}
+                  <span className="min-w-12 text-center">{sortType.charAt(0).toUpperCase() + sortType.slice(1)}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -322,16 +321,15 @@ const GhDiscussionsPreviewInternal = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="secondary" asChild size="sm">
-              <Link
-                href="https://github.com/orgs/langfuse/discussions/new/choose"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="whitespace-nowrap"
-              >
-                <IconGithub className="mr-2" />
-                New
-              </Link>
+            <Button
+              variant="secondary"
+              href="https://github.com/orgs/langfuse/discussions/new/choose"
+              target="_blank"
+              rel="noopener noreferrer"
+              icon={<IconGithub className="w-5 h-5" />}
+              iconPosition="end"
+            >
+              <span className="min-w-12 text-center">New</span>
             </Button>
           </div>
         </div>

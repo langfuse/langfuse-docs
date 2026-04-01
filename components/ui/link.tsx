@@ -27,7 +27,7 @@ const linkVariants = cva(
         nav: "text-text-tertiary hover:text-text-secondary no-underline font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] [text-shadow:0_0_0_#B5AFEA]",
         text: "text-muted-foreground hover:text-foreground",
         underline:
-          "text-primary underline underline-offset-4 decoration-primary/50 hover:decoration-primary",
+          "text-text-links underline underline-offset-2 decoration-text-links hover:text-primary hover:decoration-primary font-normal",
         button:
           "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/80 h-10 px-4 py-2",
         outline:
