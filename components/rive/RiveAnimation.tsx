@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRive, Layout, Fit, Alignment, EventType } from "@rive-app/react-webgl2";
-import type { Rive } from "@rive-app/react-webgl2";
+import type { Event, EventCallback, Rive } from "@rive-app/react-webgl2";
 
 type FitOption = "contain" | "cover" | "fill" | "fitWidth" | "fitHeight" | "none" | "scaleDown";
 
@@ -110,7 +110,7 @@ function RiveInstance({
 
   useEffect(() => {
     if (!rive) return;
-    const handler = (e: { data: unknown }) => {
+    const handler: EventCallback = (e: Event) => {
       const states = e.data;
       if (Array.isArray(states)) {
         onStateChangeRef.current?.(states as string[]);

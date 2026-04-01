@@ -5,6 +5,7 @@ import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 import { DocsContributors } from "@/components/DocsContributors";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
+import { DocsFooter } from "@/components/DocsFooter";
 import { getMDXComponents } from "@/mdx-components";
 import type { ComponentType } from "react";
 
@@ -27,6 +28,7 @@ export default async function DocPage(props: PageProps) {
       toc={toc}
       breadcrumb={{ includePage: true, includeRoot: true }}
       tableOfContent={{ footer: <DocsContributors pageTitle={page.data.title} /> }}
+      footer={{ component: <DocsFooter /> }}
     >
       <DocBodyChrome>
         <MDX components={getMDXComponents()} />

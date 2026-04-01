@@ -374,11 +374,8 @@ export const MainContentWrapper = (props) => {
 export const DocsSupport = () => {
   return (
     <div className="flex gap-3 items-center">
-      <Button variant="outline" size="sm" asChild>
-        <Link href="/support">
-          <span>Support</span>
-          <LifeBuoy className="ml-2 w-4 h-4" />
-        </Link>
+      <Button variant="secondary" size="small" href="/support" icon={<LifeBuoy className="w-4 h-4" />} iconPosition="end">
+        Support
       </Button>
     </div>
   );
@@ -448,22 +445,23 @@ export const DocsFeedback = () => {
       <span className="text-sm font-medium">Was this page helpful?</span>
       <div className="flex gap-2">
         <Button
-          variant="outline"
-          size="sm"
+          variant="secondary"
+          size="small"
           onClick={() => handleFeedbackSelection("positive")}
           disabled={submitting}
+          icon={<ThumbsUp className="w-3.25 h-3.25" />}
         >
-          <ThumbsUp className="w-4 h-4 text-green-600" />
-          <span className="sr-only">Yes</span>
+          Good
         </Button>
         <Button
-          variant="outline"
-          size="sm"
+          variant="secondary"
+          size="small"
           onClick={() => handleFeedbackSelection("negative")}
           disabled={submitting}
+          icon={<ThumbsDown className="w-3.25 h-3.25" />}
+          className="pl-0.75 pr-1.5"
         >
-          <ThumbsDown className="w-4 h-4 text-red-600" />
-          <span className="sr-only">No</span>
+          Bad
         </Button>
       </div>
 

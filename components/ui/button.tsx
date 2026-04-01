@@ -44,7 +44,7 @@ const textButtonBaseClasses =
   "inline-flex w-full min-w-0 max-w-full items-center justify-center gap-[6px] overflow-hidden px-0 py-1 shadow-none border-0 rounded-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
 
 const buttonBaseClasses =
-  "inline-flex w-full min-w-0 max-w-full items-center justify-center gap-[6px] overflow-hidden p-[3px_3px_3px_8px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex w-full min-w-0 max-w-full items-center justify-center no-underline gap-[6px] overflow-hidden py-0.75 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
 
 const labelTypographyClasses =
   "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] p-0";
@@ -77,6 +77,8 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   className?: string;
   asChild?: boolean;
   shortcutKey?: string;
+  icon?: React.ReactNode;
+  iconPosition?: "start" | "end";
   wrapperClassName?: string;
   href?: string;
   target?: React.HTMLAttributeAnchorTarget;
@@ -91,6 +93,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size,
       asChild = false,
       shortcutKey,
+      icon,
+      iconPosition = "start",
       wrapperClassName,
       href,
       target,
@@ -162,8 +166,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         </Slot>
       );
     }
+    const iconEl = icon ? (
+      <span
+        className="button-icon-area flex shrink-0 items-center justify-center h-full aspect-square rounded-[1px] border-[0.5px] border-[rgba(64,61,57,0.20)] bg-[rgba(64,61,57,0.10)] dark:bg-transparent p-[2px] text-button-icon"
+        aria-hidden
+      >
+        {icon}
+      </span>
+    ) : null;
+
     const content = hasShortcut ? (
       <>
+        {iconPosition === "start" && iconEl}
         <span
           className={cn(
             "flex flex-1 items-center min-w-0 truncate",
@@ -172,6 +186,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         >
           {children}
         </span>
+        {iconPosition === "end" && iconEl}
         <kbd
           className={cn(
             "flex justify-center items-center not-italic shrink-0 w-[20px] h-[20px] rounded-px",
@@ -184,30 +199,47 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         </kbd>
       </>
     ) : (
-      <span
-        className={cn(
-          "flex items-center min-w-0 truncate",
-          labelTypographyClasses
-        )}
-      >
-        {children}
-      </span>
+      <>
+        {iconPosition === "start" && iconEl}
+        <span
+          className={cn(
+            "flex items-center min-w-0 truncate",
+            labelTypographyClasses
+          )}
+        >
+          {children}
+        </span>
+        {iconPosition === "end" && iconEl}
+      </>
     );
+
+    const hasIcon = Boolean(icon);
+    const hasStartIcon = hasIcon && iconPosition === "start";
+    const hasEndIcon = hasIcon && iconPosition === "end";
+    const isSmallSize = resolvedSize === "small";
+    const leftPaddingClass = hasStartIcon ? "pl-[3px]" : isSmallSize ? "pl-[6px]" : "pl-[8px]";
+    const rightPaddingClass =
+      hasEndIcon || hasShortcut ? "pr-[3px]" : isSmallSize ? "pr-[6px]" : "pr-[8px]";
+    const buttonPaddingClasses = `${leftPaddingClass} ${rightPaddingClass}`;
 
     const controlClassName = buttonVariants({
       variant: resolvedVariant,
       size: resolvedSize,
-      className: cn(className, isTextVariant && wrapperClassName),
+      className: cn(
+        className,
+        isTextVariant && wrapperClassName,
+        !isTextVariant && buttonPaddingClasses
+      ),
     });
 
     const linkControlClassName = cn(
       controlClassName,
-      !hasShortcut ? "gap-0 justify-start" : "gap-1.5 justify-center"
+      !hasShortcut && !hasIcon ? "gap-0 justify-start" : "gap-[6px] justify-center"
     );
 
     const buttonControlClassName = cn(
       controlClassName,
-      hasShortcut ? "gap-0 justify-start" : "gap-3 justify-center"
+      hasShortcut || hasIcon ? "gap-[6px] justify-start" : "gap-3 justify-center"
     );
 
     const linkEl = (

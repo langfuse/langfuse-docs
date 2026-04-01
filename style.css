@@ -79,6 +79,9 @@
   --color-text-code-pink: var(--text-code-pink);
   --color-text-code-blue: var(--text-code-blue);
 
+  /* button */
+  --color-button-icon: var(--button-icon-color);
+
   /* Border radius */
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -242,32 +245,35 @@
 
     /* ── Figma design tokens — light ────────────────────────────────────── */
     /* line */
-    --line-structure: #CFCFC9;
-    --line-divider-dash: #BEBEB6;
+    --line-structure: #cfcfc9;
+    --line-divider-dash: #bebeb6;
     --line-cta: #404039;
     --line-code-border: #333333;
 
     /* surface */
-    --surface-bg: #F6F6F3;
-    --surface-1: #EDEDE8;
-    --surface-2: #E5E5E1;
+    --surface-bg: #f6f6f3;
+    --surface-1: #edede8;
+    --surface-2: #e5e5e1;
     --surface-code: #333333;
-    --surface-cta-primary: #FBFF81;
-    --surface-beige-accent: #F1EDE1;
-    --surface-button-grey: #403D391A; /* #403D39 at 10% */
-    --surface-code-grey: #3D3D3D;
-    --surface-code-button: #51504F;
+    --surface-cta-primary: #fbff81;
+    --surface-beige-accent: #f1ede1;
+    --surface-button-grey: #403d391a; /* #403D39 at 10% */
+    --surface-code-grey: #3d3d3d;
+    --surface-code-button: #51504f;
 
     /* text */
     --text-primary: #222220;
-    --text-secondary: #3D3D38;
-    --text-tertiary: #6B6B66;
-    --text-disabled: #A7A7A0;
-    --text-code-secondary: #FFFCF280; /* #FFFCF2 at 50% */
-    --text-links: #4F39F6;
-    --text-code-orange: #C17E2E;
-    --text-code-pink: #D05376;
-    --text-code-blue: #438AA5;
+    --text-secondary: #3d3d38;
+    --text-tertiary: #6b6b66;
+    --text-disabled: #a7a7a0;
+    --text-code-secondary: #fffcf280; /* #FFFCF2 at 50% */
+    --text-links: #4f39f6;
+    --text-code-orange: #c17e2e;
+    --text-code-pink: #d05376;
+    --text-code-blue: #438aa5;
+
+    /* button */
+    --button-icon-color: var(--text-tertiary);
   }
 
   :root[class~="dark"] {
@@ -301,32 +307,35 @@
 
     /* ── Figma design tokens — dark ─────────────────────────────────────── */
     /* line */
-    --line-structure: #2C2C29;
+    --line-structure: #2c2c29;
     --line-divider-dash: #232320;
-    --line-cta: #B8B6A0;
-    --line-code-border: #3A3A38;
+    --line-cta: #b8b6a0;
+    --line-code-border: #3a3a38;
 
     /* surface */
     --surface-bg: #171714;
-    --surface-1: #1E1E1B;
+    --surface-1: #1e1e1b;
     --surface-2: #252522;
-    --surface-code: #0E0E0C;
-    --surface-cta-primary: #4C4D23;
-    --surface-beige-accent: #F1EDE1;
-    --surface-button-grey: #FFFFFF1A; /* #FFFFFF at 10% */
-    --surface-code-grey: #2A2A2A;
-    --surface-code-button: #3A3937;
+    --surface-code: #0e0e0c;
+    --surface-cta-primary: #4c4d23;
+    --surface-beige-accent: #f1ede1;
+    --surface-button-grey: #ffffff1a; /* #FFFFFF at 10% */
+    --surface-code-grey: #2a2a2a;
+    --surface-code-button: #3a3937;
 
     /* text */
-    --text-primary: #E8E8E4;
-    --text-secondary: #B4B4AE;
-    --text-tertiary: #7A7A74;
-    --text-disabled: #4A4A45;
-    --text-code-secondary: #E8E8DC80; /* #E8E8DC at 50% */
-    --text-links: #7B8FF8;
-    --text-code-orange: #E8935A;
-    --text-code-pink: #E86B9A;
-    --text-code-blue: #6AB8CC;
+    --text-primary: #e8e8e4;
+    --text-secondary: #b4b4ae;
+    --text-tertiary: #7a7a74;
+    --text-disabled: #4a4a45;
+    --text-code-secondary: #e8e8dc80; /* #E8E8DC at 50% */
+    --text-links: #7b8ff8;
+    --text-code-orange: #e8935a;
+    --text-code-pink: #e86b9a;
+    --text-code-blue: #6ab8cc;
+
+    /* button */
+    --button-icon-color: var(--text-primary);
   }
 
   * {
@@ -499,7 +508,6 @@
   transition: background-image 120ms ease;
   background-repeat: repeat-x;
   background-size: auto 100%;
-
 }
 
 .link-box:hover {
@@ -546,6 +554,18 @@
   opacity: 1;
 }
 
+.dark .button-icon-area {
+  background-image: url("/images/buttons/button-icon-line-overlay.svg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
 .custom-card-shadow {
-  box-shadow: -23px 51px 16px 0 rgba(0, 0, 0, 0.00), -15px 33px 14px 0 rgba(0, 0, 0, 0.01), -8px 18px 12px 0 rgba(0, 0, 0, 0.02), -4px 8px 9px 0 rgba(0, 0, 0, 0.03), -1px 2px 5px 0 rgba(0, 0, 0, 0.04);
+  box-shadow:
+    -23px 51px 16px 0 rgba(0, 0, 0, 0),
+    -15px 33px 14px 0 rgba(0, 0, 0, 0.01),
+    -8px 18px 12px 0 rgba(0, 0, 0, 0.02),
+    -4px 8px 9px 0 rgba(0, 0, 0, 0.03),
+    -1px 2px 5px 0 rgba(0, 0, 0, 0.04);
 }
