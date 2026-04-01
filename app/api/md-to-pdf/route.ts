@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { marked } from "marked";
+import { MARKETING_SLUGS } from "@/lib/marketing-slugs";
 
 // Force Node.js runtime (required for Puppeteer/Chromium — not compatible with Edge runtime)
 export const runtime = "nodejs";
@@ -11,6 +12,30 @@ const ALLOWED_HOSTNAMES = [
   "raw.githubusercontent.com",
   "github.com",
 ];
+
+const MARKETING_SLUG_SET = new Set<string>(MARKETING_SLUGS);
+
+/**
+ * Map public Langfuse URLs to paths under public/md-src/ (see scripts/copy_md_sources.js).
+ * - Marketing pages are served at /{slug} but copied to md-src/marketing/{slug}.md.
+ * - User stories use /users/* but content lives in content/customers → md-src/customers/*.md.
+ */
+function langfusePathToMdSrcPath(pathname: string): string {
+  if (pathname === "/users.md") {
+    return "/customers.md";
+  }
+  if (pathname.startsWith("/users/")) {
+    return `/customers/${pathname.slice("/users/".length)}`;
+  }
+  const rootFile = pathname.match(/^\/([^/]+)\.md$/);
+  if (rootFile) {
+    const slug = rootFile[1];
+    if (MARKETING_SLUG_SET.has(slug)) {
+      return `/marketing/${slug}.md`;
+    }
+  }
+  return pathname;
+}
 
 function removeAnchorTags(content: string): string {
   return content.replace(/\s*\[#[\w-]+\]/g, "");
@@ -72,6 +97,11 @@ export async function GET(request: NextRequest) {
     ) {
       markdownUrl = new URL(markdownUrl.toString());
       markdownUrl.pathname = markdownUrl.pathname.replace(/\/$/, "") + ".md";
+    }
+
+    if (isLangfuseHost) {
+      markdownUrl = new URL(markdownUrl.toString());
+      markdownUrl.pathname = langfusePathToMdSrcPath(markdownUrl.pathname);
     }
 
     const response = await fetch(markdownUrl.toString());
