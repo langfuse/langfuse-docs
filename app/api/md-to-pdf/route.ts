@@ -134,9 +134,37 @@ export async function GET(request: NextRequest) {
     } else {
       const puppeteerCore = await import("puppeteer-core");
       const chromium = await import("@sparticuz/chromium");
+      // Optional override: absolute path to the `bin` folder that holds *.br files
+      // (same directory Sparticuz expects when packaging omits it from the trace).
+      const brotliBinDir = process.env.SPARTICUZ_CHROMIUM_BIN_DIR?.trim();
+
+      let executablePath: string;
+      try {
+        executablePath = await chromium.default.executablePath(
+          brotliBinDir || undefined
+        );
+      } catch (resolveErr) {
+        const err =
+          resolveErr instanceof Error
+            ? resolveErr
+            : new Error(String(resolveErr));
+        console.error("[md-to-pdf] chromium.executablePath failed", {
+          message: err.message,
+          sparticuzBinDirOverride: Boolean(brotliBinDir),
+          vercel: Boolean(process.env.VERCEL),
+        });
+        throw err;
+      }
+
+      if (process.env.VERCEL) {
+        console.log("[md-to-pdf] chromium binary resolved", {
+          basename: executablePath.split(/[/\\]/).pop(),
+        });
+      }
+
       browser = await puppeteerCore.default.launch({
         args: chromium.default.args,
-        executablePath: await chromium.default.executablePath(),
+        executablePath,
         headless: true,
       });
     }
