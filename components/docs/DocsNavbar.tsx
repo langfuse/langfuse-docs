@@ -1,7 +1,7 @@
+/** @TODO safe to remove? */
 "use client";
 
 import { SidebarTrigger } from "fumadocs-ui/components/sidebar/base";
-import { NavbarLogo } from "@/components/NavbarLogo";
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 import { MenuIcon } from "lucide-react";
@@ -23,8 +23,6 @@ export function DocsNavbar() {
         >
           <MenuIcon className="size-5" />
         </SidebarTrigger>
-
-        <NavbarLogo />
 
         <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
           <div className="hidden min-w-0 max-w-[240px] flex-1 md:block lg:max-w-[280px]">
