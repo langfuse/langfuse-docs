@@ -1,4 +1,4 @@
-import { HomeSection } from "./components/HomeSection";
+import { HomeSection } from "./HomeSection";
 import { Header } from "../Header";
 import IsoPNG from "./security/iso27001.png";
 import Soc2SVG from "./security/soc2.svg";

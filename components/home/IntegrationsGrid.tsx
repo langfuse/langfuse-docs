@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 import IconPython from "../icons/python";
 import IconTypescript from "../icons/typescript";
 import IconOpenai from "../icons/openai";
-import { HomeSection } from "./components/HomeSection";
+import { HomeSection } from "./HomeSection";
 import { Header } from "../Header";
 import React from "react";
 

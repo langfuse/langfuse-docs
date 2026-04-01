@@ -448,32 +448,77 @@
   );
 }
 
-.logo-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
+/* Rive section text swap animation (Emil Kowalski style).
+   Children stagger: heading enters first, body follows 50ms later.
+   Exit is instant — React remounts via key change, no exit needed. */
+@keyframes rive-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rive-text-enter > * {
+  animation: rive-text-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rive-text-enter > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip-label[data-state="delayed-open"],
+.tooltip-label[data-state="instant-open"] {
+  animation: tooltip-in 0.12s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.tooltip-label[data-state="closed"] {
+  opacity: 0;
+}
+
+[data-radix-popper-content-wrapper]:has(.pointer-events-none) {
   pointer-events: none;
-  z-index: 0;
-  background-image:
-    url("/images/buttons/button-base.png"),
-    url("/images/buttons/button-corners.png");
-  background-repeat: no-repeat, no-repeat;
-  background-position: center, center;
-  background-size: cover, 100% 100%;
-  transition: all 120ms ease;
+}
+
+.link-box {
+  position: relative;
+  transition: background-image 120ms ease;
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+
+}
+
+.link-box:hover {
+  background-image: url("/images/buttons/button-base.png");
+}
+
+.with-stripes {
+  background-image: url("/images/buttons/button-base.png");
 }
 
 .button-wrapper {
   position: relative;
-  background-image: none;
-  background-repeat: no-repeat, no-repeat;
-  background-position: center, center;
-  background-size: cover, 100% 100%;
   transition: background-image 120ms ease;
 }
 
 .button-wrapper:hover {
-  background-image:
-    url("/images/buttons/button-base.png"),
-    url("/images/buttons/button-corners.png");
+  background-image: url("/images/buttons/button-base.png");
+}
+
+.custom-card-shadow {
+  box-shadow: -23px 51px 16px 0 rgba(0, 0, 0, 0.00), -15px 33px 14px 0 rgba(0, 0, 0, 0.01), -8px 18px 12px 0 rgba(0, 0, 0, 0.02), -4px 8px 9px 0 rgba(0, 0, 0, 0.03), -1px 2px 5px 0 rgba(0, 0, 0, 0.04);
 }

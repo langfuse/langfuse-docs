@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Header } from "../../Header";
-import { HomeSection } from "../components/HomeSection";
+import { HomeSection } from "../HomeSection";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "../../ui/tabs";
 import { useState } from "react";

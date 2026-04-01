@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRive, Layout, Fit, Alignment } from "@rive-app/react-webgl2";
+import { useEffect, useRef, useState } from "react";
+import { useRive, Layout, Fit, Alignment, EventType } from "@rive-app/react-webgl2";
 import type { Rive } from "@rive-app/react-webgl2";
 
 type FitOption = "contain" | "cover" | "fill" | "fitWidth" | "fitHeight" | "none" | "scaleDown";
 
 type RiveAnimationProps = {
   src: string;
-  /** Artboard name from the Rive file. Defaults to the file’s default artboard. */
+  /** Artboard name from the Rive file. Defaults to the file's default artboard. */
   artboard?: string;
   /** Exact state machine name, or `"auto"` to use the first available one. */
   stateMachine?: string | "auto";
@@ -16,6 +16,8 @@ type RiveAnimationProps = {
   fit?: FitOption;
   className?: string;
   autoplay?: boolean;
+  /** Called with the list of currently-active state names on every state machine transition. */
+  onStateChange?: (states: string[]) => void;
 };
 
 const FIT_MAP: Record<FitOption, Fit> = {
@@ -39,6 +41,7 @@ function RiveInstance({
   className,
   autoplay = true,
   onLoaded,
+  onStateChange,
 }: RiveAnimationProps & { onLoaded?: (smNames: string[]) => void }) {
   const { RiveComponent, rive } = useRive(
     {
@@ -97,6 +100,22 @@ function RiveInstance({
     rive.resizeToCanvas();
     rive.setupRiveListeners();
   }, [rive, fit]);
+
+  // Use a ref to avoid re-subscribing the Rive listener on every parent render.
+  const onStateChangeRef = useRef(onStateChange);
+  useEffect(() => { onStateChangeRef.current = onStateChange; });
+
+  useEffect(() => {
+    if (!rive) return;
+    const handler = (e: { data: unknown }) => {
+      const states = e.data;
+      if (Array.isArray(states)) {
+        onStateChangeRef.current?.(states as string[]);
+      }
+    };
+    rive.on(EventType.StateChange, handler);
+    return () => { rive.off(EventType.StateChange, handler); };
+  }, [rive]);
 
   return (
     <RiveComponent

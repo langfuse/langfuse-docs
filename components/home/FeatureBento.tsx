@@ -7,7 +7,7 @@ import {
   ThumbsUp,
   FlaskConical,
 } from "lucide-react";
-import { HomeSection } from "./components/HomeSection";
+import { HomeSection } from "./HomeSection";
 import { Header } from "../Header";
 import bentoTracePng from "./img/bento_trace.png";
 import bentoTraceDarkPng from "./img/bento_trace_dark.png";

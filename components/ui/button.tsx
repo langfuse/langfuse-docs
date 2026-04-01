@@ -4,8 +4,9 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 
 import { cn } from "@/lib/utils";
+import { HoverCorners } from "./corner-box";
 
-type ButtonVariant = "primary" | "secondary";
+type ButtonVariant = "primary" | "secondary" | "text";
 type ButtonSize = "default" | "small";
 
 type ButtonVariantOptions = {
@@ -32,7 +33,14 @@ const variantClasses: Record<ButtonVariant, { root: string; key: string }> = {
     root: "border-line-structure bg-surface-bg text-text-secondary",
     key: "bg-[rgba(105,105,94,0.10)]",
   },
+  text: {
+    root: "border-transparent bg-transparent text-text-secondary shadow-none [box-shadow:none] hover:bg-transparent hover:text-text-primary",
+    key: "",
+  },
 };
+
+const textButtonBaseClasses =
+  "inline-flex w-full min-w-0 max-w-full items-center justify-center gap-[6px] overflow-hidden px-0 py-1 shadow-none border-0 rounded-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
 
 const buttonBaseClasses =
   "inline-flex w-full min-w-0 max-w-full items-center justify-center gap-[6px] overflow-hidden p-[3px_3px_3px_8px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
@@ -49,6 +57,14 @@ function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 function buttonVariants({ variant = "primary", size = "default", className }: ButtonVariantOptions) {
+  if (variant === "text") {
+    return cn(
+      textButtonBaseClasses,
+      variantClasses.text.root,
+      size === "small" ? "min-h-[26px]" : "min-h-[32px]",
+      className
+    );
+  }
   return cn(
     'rounded-[1px] border [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]',
     buttonBaseClasses, variantClasses[variant].root, sizeClasses[size].root, className);
@@ -85,7 +101,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const resolvedVariant: ButtonVariant =
-      variant === "secondary" ? "secondary" : "primary";
+      variant === "secondary"
+        ? "secondary"
+        : variant === "text"
+          ? "text"
+          : "primary";
     const resolvedSize: ButtonSize = size === "small" ? "small" : "default";
 
     const innerRef = React.useRef<HTMLElement | null>(null);
@@ -106,7 +126,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }, []);
 
     const trimmed = shortcutKey?.trim() ?? "";
-    const hasShortcut = !asChild && trimmed.length > 0;
+    const isTextVariant = resolvedVariant === "text";
+    const hasShortcut =
+      !asChild && !isTextVariant && trimmed.length > 0;
     const keyDisplay = hasShortcut ? trimmed.slice(0, 1).toUpperCase() : "";
     const keyLetter = trimmed.slice(0, 1).toLowerCase();
 
@@ -171,54 +193,65 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       </span>
     );
 
+    const controlClassName = buttonVariants({
+      variant: resolvedVariant,
+      size: resolvedSize,
+      className: cn(className, isTextVariant && wrapperClassName),
+    });
+
+    const linkControlClassName = cn(
+      controlClassName,
+      !hasShortcut ? "gap-0 justify-start" : "gap-1.5 justify-center"
+    );
+
+    const buttonControlClassName = cn(
+      controlClassName,
+      hasShortcut ? "gap-0 justify-start" : "gap-3 justify-center"
+    );
+
+    const linkEl = (
+      <a
+        ref={setAnchorRef}
+        href={href}
+        target={target}
+        rel={rel}
+        aria-disabled={disabled || undefined}
+        tabIndex={disabled ? -1 : undefined}
+        onClick={
+          disabled
+            ? (e) => {
+                e.preventDefault();
+              }
+            : undefined
+        }
+        className={linkControlClassName}
+        aria-keyshortcuts={hasShortcut ? keyDisplay : undefined}
+        {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+      >
+        {content}
+      </a>
+    );
+
+    const buttonEl = (
+      <button
+        ref={setRefs}
+        disabled={disabled}
+        className={buttonControlClassName}
+        aria-keyshortcuts={hasShortcut ? keyDisplay : undefined}
+        {...props}
+      >
+        {content}
+      </button>
+    );
+
+    if (isTextVariant) {
+      return isLink ? linkEl : buttonEl;
+    }
+
     return (
-      <div className={cn("p-1 button-wrapper", wrapperClassName)}>
-        {isLink ? (
-          <a
-            ref={setAnchorRef}
-            href={href}
-            target={target}
-            rel={rel}
-            aria-disabled={disabled || undefined}
-            tabIndex={disabled ? -1 : undefined}
-            onClick={
-              disabled
-                ? (e) => {
-                  e.preventDefault();
-                }
-                : undefined
-            }
-            className={cn(
-              buttonVariants({
-                variant: resolvedVariant,
-                size: resolvedSize,
-                className,
-              }),
-              !hasShortcut ? "gap-0 justify-start" : "gap-1.5 justify-center"
-            )}
-            aria-keyshortcuts={hasShortcut ? keyDisplay : undefined}
-            {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
-          >
-            {content}
-          </a>
-        ) : (
-          <button
-            ref={setRefs}
-            disabled={disabled}
-            className={cn(
-              buttonVariants({
-                variant: resolvedVariant,
-                size: resolvedSize,
-                className,
-              }),
-              hasShortcut ? "gap-0 justify-start" : "gap-3 justify-center"
-            )}
-            aria-keyshortcuts={hasShortcut ? keyDisplay : undefined}
-            {...props}
-          >
-            {content}
-          </button>
-        )}
+      <div className={cn("relative group p-1 button-wrapper", wrapperClassName)}>
+        <HoverCorners />
+        {isLink ? linkEl : buttonEl}
       </div>
     );
   }

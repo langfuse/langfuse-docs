@@ -1,5 +1,5 @@
 import Marquee from "@/components/magicui/marquee";
-import { HomeSection } from "./components/HomeSection";
+import { HomeSection } from "./HomeSection";
 import { Header } from "../Header";
 import IconTypescript from "../icons/typescript";
 import IconPython from "../icons/python";

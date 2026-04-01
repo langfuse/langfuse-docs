@@ -1,4 +1,4 @@
-import { HomeSection } from "./components/HomeSection";
+import { HomeSection } from "./HomeSection";
 import { Header } from "../Header";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";

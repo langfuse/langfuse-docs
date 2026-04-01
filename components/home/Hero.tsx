@@ -1,7 +1,9 @@
-import { Button } from "../ui/button";
-import { Box } from "../ui/box";
-import { Text } from "../ui/text";
-import { HomeSection } from "./components/HomeSection";
+import { Button } from "@/components/ui/button";
+import { CornerBox } from "@/components/ui/corner-box";
+import { Text } from "@/components/ui/text";
+import { HomeSection } from "@/components/home/HomeSection";
+import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
+import { Dot } from "@/components/ui/dot";
 import { cn } from "@/lib/utils";
 
 /**
@@ -23,14 +25,14 @@ function HeroTitleLine({ children }: { children: React.ReactNode }) {
 export function Hero() {
   return (
     <HomeSection className="pt-[40px]">
-      <Box className="flex flex-col items-center px-4 py-8 -mb-px sm:px-8 sm:py-10">
-        <Text className="max-w-xl">
-          Tracing, prompt management, evaluation, and experiments. Debug
-          production issues in minutes, not hours. Works with any model, any
-          framework, any stack.
-        </Text>
-      </Box>
-      <Box className="flex flex-col gap-10 items-center px-4 py-8 sm:px-8 sm:py-10">
+      <CornerBox className="flex gap-6 justify-center items-center px-4 py-[10px] -mb-px">
+        <Text size="s"><b className="text-primary">19</b> of Fortune 50</Text>
+        <Dot />
+        <Text size="s"><b className="text-primary">10+ billion</b> observations/month</Text>
+        <Dot />
+        <Text size="s"><b className="text-primary">100,000+</b> engineers building on Langfuse</Text>
+      </CornerBox>
+      <CornerBox className="flex flex-col gap-10 items-center px-4 py-8 sm:px-8 sm:py-10">
         <h1
           className={cn(
             "flex flex-col items-center gap-1.5 text-center font-sans text-[68px] font-medium not-italic leading-[105%] text-balance",
@@ -46,7 +48,7 @@ export function Hero() {
             production issues in minutes, not hours. Works with any model, any
             framework, any stack.
           </Text>
-          <div className="flex flex-wrap gap-4 justify-center items-center">
+          <div className="flex flex-wrap gap-3 justify-center items-center">
             <Button
               variant="primary"
               shortcutKey="s"
@@ -54,28 +56,15 @@ export function Hero() {
             >
               Start free
             </Button>
-
             <Button variant="secondary" shortcutKey="d" href="/docs">
               Documentation
             </Button>
           </div>
         </div>
-      </Box>
-      <Box className="flex flex-col items-center px-4 py-8 -mt-px sm:px-8 sm:py-10">
-        <Text className="max-w-xl">
-          Tracing, prompt management, evaluation, and experiments. Debug
-          production issues in minutes, not hours. Works with any model, any
-          framework, any stack.
-        </Text>
-      </Box>
-
-      {/* <div className="bg-blue-200 aspect-video"></div>
-      <Video
-        src="https://static.langfuse.com/docs-videos/langfuse-10min-demo-4k-60fps.mp4"
-        aspectRatio={16 / 9}
-        title="Langfuse Walkthrough"
-        posterStartTime={86}
-      /> */}
+      </CornerBox>
+      <CornerBox className="-mt-px">
+        <EnterpriseLogoGrid />
+      </CornerBox>
     </HomeSection>
   );
 }

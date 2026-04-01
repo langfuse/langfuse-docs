@@ -7,26 +7,21 @@ import type { StaticImageData } from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
-import canvaLight from "@/components/home/img/canva_light.png";
-import canvaDark from "@/components/home/img/canva_dark.png";
-import twilioLight from "@/components/home/img/twilio_light.svg";
-import twilioDark from "@/components/home/img/twilio_dark.svg";
-import intuitLight from "@/components/home/img/intuit_light.svg";
-import intuitDark from "@/components/home/img/intuit_dark.svg";
-import freeeLight from "@/components/home/img/freee_light.png";
-import freeeDark from "@/components/home/img/freee_dark.png";
+import canvaLogo from "@/components/home/img/canva.svg";
+import twilioLogo from "@/components/home/img/twilio.svg";
+import intuitLogo from "@/components/home/img/intuit.svg";
+import freeeLogo from "@/components/home/img/freee.svg";
 
 type Logo = {
   name: string;
-  light: StaticImageData;
-  dark: StaticImageData;
+  logo: StaticImageData;
 };
 
 const logos: Logo[] = [
-  { name: "freee", light: freeeDark, dark: freeeLight },
-  { name: "Canva", light: canvaDark, dark: canvaLight },
-  { name: "Twilio", light: twilioDark, dark: twilioLight },
-  { name: "Intuit", light: intuitLight, dark: intuitDark },
+  { name: "freee", logo: freeeLogo },
+  { name: "Canva", logo: canvaLogo },
+  { name: "Twilio", logo: twilioLogo },
+  { name: "Intuit", logo: intuitLogo },
 ];
 
 export function JpCloudLogos() {
@@ -60,15 +55,9 @@ export function JpCloudLogos() {
             className="flex items-center justify-center h-16 md:h-20 px-6 md:px-10 border border-border/50 -mr-px -mb-px bg-card"
           >
             <Image
-              src={logo.light}
+              src={logo.logo}
               alt={`${logo.name} logo`}
-              className="object-contain max-h-8 max-w-full dark:hidden"
-              sizes="(max-width: 768px) 40vw, 20vw"
-            />
-            <Image
-              src={logo.dark}
-              alt={`${logo.name} logo`}
-              className="object-contain max-h-8 max-w-full hidden dark:block"
+              className="object-contain max-h-8 max-w-full"
               sizes="(max-width: 768px) 40vw, 20vw"
             />
           </div>

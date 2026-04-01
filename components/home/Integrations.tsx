@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { AnimatedBeam } from "@/components/magicui/animated-beam";
 import { forwardRef, useRef, type ReactNode } from "react";
 import { ArrowUpRightFromSquare, Code, MoreHorizontal } from "lucide-react";
-import { HomeSection } from "./components/HomeSection";
+import { HomeSection } from "./HomeSection";
 import { Header } from "../Header";
 import LlamaindexIcon from "./img/llamaindex_icon.png";
 import LangfuseIcon from "@/public/icon.svg";

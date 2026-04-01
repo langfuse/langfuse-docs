@@ -18,7 +18,7 @@ import sumupLight from "./img/sumup_light.svg";
 import sumupDark from "./img/sumup_dark.svg";
 import khanacademyLight from "./img/khanacademy_light.png";
 import khanacademyDark from "./img/khanacademy_dark.png";
-import { HomeSection } from "./components/HomeSection";
+import { HomeSection } from "./HomeSection";
 
 type User = {
   name: string;

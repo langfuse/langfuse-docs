@@ -1,4 +1,4 @@
-import { HomeSection } from "./components/HomeSection";
+import { HomeSection } from "./HomeSection";
 import { Header } from "../Header";
 import { TestimonialsGrid } from "./TestimonialsGrid";
 

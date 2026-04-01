@@ -10,7 +10,7 @@ import { SDK_INSTALLS_PER_MONTH, DOCKER_PULLS } from "@/components/home/Usage";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { WatchWalkthroughs } from "@/components/watchOrBookDemo/WatchWalkthroughs";
-import { HomeSection } from "@/components/home/components/HomeSection";
+import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 
 function SwitchToggle({
@@ -240,9 +240,8 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
         <div className="flex flex-col md:flex-row gap-14">
           {/* Left Column: Content based on switch */}
           <div
-            className={`flex flex-col gap-4 ${
-              isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
-            }`}
+            className={`flex flex-col gap-4 ${isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
+              }`}
           >
             <SwitchToggle checked={isDiscoverOpen} page={page} />
             {!isDiscoverOpen ? (

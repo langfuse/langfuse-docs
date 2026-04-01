@@ -1,4 +1,4 @@
-import { HomeSection } from "./components/HomeSection";
+import { HomeSection } from "./HomeSection";
 import { Header } from "../Header";
 import { CustomerCarousel, type CustomerStory } from "../customers/CustomerCarousel";
 
