@@ -50,7 +50,7 @@ const reasons = [
 
 export function WhyLangfuse() {
   return (
-    <HomeSection className="pt-20">
+    <HomeSection id="why-langfuse" className="pt-20">
       <div className="flex flex-col gap-3 mb-10">
         <Heading as="h2" size="normal">
           Why choose <TextHighlight>Langfuse</TextHighlight>?

@@ -80,34 +80,32 @@ const linkClassName =
 export function Footer() {
   return (
     <footer className="mx-auto w-full max-w-[840px] pb-8 mt-20">
+      {/* Social icons row */}
+      <CornerBox className="flex gap-5 items-center p-4 -mb-px">
+        {socialLinks.map((s) => {
+          const Icon = s.icon;
+          const isExternal = s.href.startsWith("http");
+          return (
+            <Link
+              key={s.name}
+              href={s.href}
+              aria-label={s.name}
+              className={linkClassName}
+              {...(isExternal && { target: "_blank", rel: "nofollow noreferrer" })}
+            >
+              <Icon className="size-5" />
+            </Link>
+          );
+        })}
+      </CornerBox>
       <CornerBox className="flex flex-col">
-
-        {/* Social icons row */}
-        <div className="flex gap-5 items-center p-4">
-          {socialLinks.map((s) => {
-            const Icon = s.icon;
-            const isExternal = s.href.startsWith("http");
-            return (
-              <Link
-                key={s.name}
-                href={s.href}
-                aria-label={s.name}
-                className={linkClassName}
-                {...(isExternal && { target: "_blank", rel: "nofollow noreferrer" })}
-              >
-                <Icon className="size-5" />
-              </Link>
-            );
-          })}
-        </div>
-
         {/* Link columns */}
         <div className="grid grid-cols-2 gap-8 p-4 md:grid-cols-4">
           {menuItems.map((col) => (
             <div key={col.heading} className="flex flex-col gap-4">
               <Text
                 size="s"
-                className="font-mono font-medium tracking-widest text-left uppercase text-text-tertiary"
+                className="font-mono text-left text-text-disabled"
               >
                 {col.heading}
               </Text>
@@ -141,10 +139,10 @@ export function Footer() {
         </div>
       </CornerBox>
       <CornerBox className="flex justify-between items-center p-4 -mt-px">
-        <Text size="s" className="font-mono text-left">
+        <Text size="s" className="font-mono text-left text-text-disabled">
           &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH / Finto Technologies Inc.
         </Text>
-        <Text size="s" className="font-mono text-left">
+        <Text size="s" className="font-mono text-left text-text-disabled">
           Design by{" "}
           <Link
             href="https://altalogy.com"
@@ -152,7 +150,7 @@ export function Footer() {
             rel="nofollow noreferrer"
             className={linkClassName}
           >
-            <span className="font-bold text-text-primary">Altalogy</span>
+            <span>Altalogy</span>
           </Link>
         </Text>
       </CornerBox>

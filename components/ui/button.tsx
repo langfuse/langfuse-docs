@@ -5,6 +5,7 @@ import { Slot } from "@radix-ui/react-slot";
 
 import { cn } from "@/lib/utils";
 import { HoverCorners } from "./corner-box";
+import NextLink from "next/link";
 
 type ButtonVariant = "primary" | "secondary" | "text";
 type ButtonSize = "default" | "small";
@@ -242,7 +243,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
 
     const linkEl = (
-      <a
+      <NextLink
         ref={setAnchorRef}
         href={href}
         target={target}
@@ -261,7 +262,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
       >
         {content}
-      </a>
+      </NextLink>
     );
 
     const buttonEl = (
@@ -281,7 +282,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     return (
-      <div className={cn("relative group p-1 button-wrapper", wrapperClassName)}>
+      <div className={cn("relative p-1 group button-wrapper", wrapperClassName)}>
         <HoverCorners />
         {isLink ? linkEl : buttonEl}
       </div>

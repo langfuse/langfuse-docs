@@ -15,6 +15,8 @@ type RiveAnimationProps = {
   animation?: string;
   fit?: FitOption;
   className?: string;
+  /** Visual zoom factor (1 = default, >1 zoom in). */
+  zoom?: number;
   autoplay?: boolean;
   /** Called with the list of currently-active state names on every state machine transition. */
   onStateChange?: (states: string[]) => void;
@@ -39,6 +41,7 @@ function RiveInstance({
   animation,
   fit = "contain",
   className,
+  zoom = 1,
   autoplay = true,
   onLoaded,
   onStateChange,
@@ -118,10 +121,15 @@ function RiveInstance({
   }, [rive]);
 
   return (
-    <RiveComponent
-      className={className}
-      style={{ width: "100%", height: "100%", touchAction: "none" }}
-    />
+    <div
+      className="w-full h-full overflow-hidden"
+      style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}
+    >
+      <RiveComponent
+        className={className}
+        style={{ width: "100%", height: "100%", touchAction: "none" }}
+      />
+    </div>
   );
 }
 

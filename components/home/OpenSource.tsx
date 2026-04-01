@@ -2,6 +2,7 @@ import { HomeSection } from "@/components/home/HomeSection";
 import { CornerBox, Heading, TextHighlight } from "@/components/ui";
 import { cornersForGridCell } from "@/components/ui/corner-box";
 import { Text } from "@/components/ui/text";
+import { BulletList } from "./BulletList";
 
 const COLS = 2;
 
@@ -59,19 +60,12 @@ export const OpenSource = () => {
           return (
             <CornerBox
               key={card.title}
-              className="flex flex-col gap-3 p-6 -mt-px -ml-px first:ml-0"
+              className="flex flex-col gap-3 p-6 -mt-px -ml-px"
             >
               <Text className="font-medium text-left text-text-secondary">
                 {card.title}
               </Text>
-              <ul className="flex flex-col gap-1.5">
-                {card.bullets.map((b) => (
-                  <li key={b} className="flex gap-2 items-baseline">
-                    <span className="shrink-0 w-1 h-1 rounded-full bg-text-tertiary mt-[0.45em]" aria-hidden />
-                    <Text size="s" className="text-left">{b}</Text>
-                  </li>
-                ))}
-              </ul>
+              <BulletList items={card.bullets.map((b) => ({ label: b }))} />
             </CornerBox>
           );
         })}

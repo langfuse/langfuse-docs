@@ -527,6 +527,33 @@
   background-image: url("/images/buttons/button-base.png");
 }
 
+.box-custom-hover {
+  position: relative;
+}
+
+.box-custom-hover:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/buttons/button-base.png");
+  background-size: contain;
+  background-position: center;
+  transition: all 120ms ease;
+  transform: scale(1);
+  transform-origin: center;
+  transform-box: fill-box;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.box-custom-hover:hover:after {
+  transform: scaleX(1.025) scaleY(1.05);
+  transform-origin: center;
+  transform-box: fill-box;
+  opacity: 1;
+}
+
 .dark .button-icon-area {
   background-image: url("/images/buttons/button-icon-line-overlay.svg");
   background-repeat: no-repeat;

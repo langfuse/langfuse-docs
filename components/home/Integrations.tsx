@@ -1,265 +1,125 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { AnimatedBeam } from "@/components/magicui/animated-beam";
-import { forwardRef, useRef, type ReactNode } from "react";
-import { ArrowUpRightFromSquare, Code, MoreHorizontal } from "lucide-react";
-import { HomeSection } from "./HomeSection";
-import { Header } from "../Header";
-import LlamaindexIcon from "./img/llamaindex_icon.png";
-import LangfuseIcon from "@/public/icon.svg";
-import LangchainIcon from "./img/langchain_icon.png";
-import HaystackIcon from "./img/haystack_icon.png";
-import LitellmIcon from "./img/litellm_icon.png";
 import Image from "next/image";
-import Link from "next/link";
-import IconPython from "../icons/python";
-import IconTypescript from "../icons/typescript";
-import IconOpenai from "../icons/openai";
+import { HomeSection } from "./HomeSection";
+import { Heading, TextHighlight, ChipCard } from "@/components/ui";
+import { Text } from "@/components/ui/text";
+import IconPython from "@/components/icons/python";
+import IconTypescript from "@/components/icons/typescript";
+import IconOpenai from "@/components/icons/openai";
 
-const Circle = forwardRef<
-  HTMLDivElement,
+const groups = [
   {
-    className?: string;
-    title?: string;
-    href?: string;
-    children?: ReactNode;
-  }
->(({ className, children, title, href }, ref) => {
-  // Conditionally render as next/Link if href is provided
-  const Component = href ? Link : "div";
+    title: "LLM Providers",
+    href: "/integrations/model-providers",
+    items: [
+      { label: "OpenAI", icon: <Image src="/images/integrations/openai_icon.svg" alt="" width={18} height={18} /> },
+      { label: "Anthropic", icon: <Image src="/images/integrations/anthropic_icon.png" alt="" width={18} height={18} /> },
+      { label: "Cohere", icon: <Image src="/images/integrations/cohere_icon.svg" alt="" width={18} height={18} /> },
+      { label: "Google Gemini", icon: <Image src="/images/integrations/google_gemini_icon.svg" alt="" width={18} height={18} /> },
+      { label: "Mistral AI", icon: <Image src="/images/integrations/mistral_icon.svg" alt="" width={18} height={18} /> },
+      { label: "Meta Llama", icon: <Image src="/images/integrations/microsoft_icon.svg" alt="" width={18} height={18} /> },
+      { label: "Azure OpenAI", icon: <Image src="/images/integrations/microsoft_icon.svg" alt="" width={18} height={18} /> },
+      { label: "AWS Bedrock", icon: <Image src="/images/integrations/bedrock_icon.png" alt="" width={18} height={18} /> },
+    ],
+  },
+  {
+    title: "Agent Frameworks",
+    href: "/integrations/frameworks",
+    items: [
+      { label: "LangChain", icon: <Image src="/images/integrations/langchain_icon.png" alt="" width={18} height={18} /> },
+      { label: "LlamaIndex", icon: <Image src="/images/integrations/llamaindex_icon.png" alt="" width={18} height={18} /> },
+      { label: "Vercel AI SDK", icon: <Image src="/images/integrations/vercel_ai_sdk_icon.png" alt="" width={18} height={18} /> },
+      { label: "Haystack", icon: <Image src="/images/integrations/haystack_icon.png" alt="" width={18} height={18} /> },
+      { label: "LiteLLM", icon: <Image src="/images/integrations/litellm_icon.png" alt="" width={18} height={18} /> },
+      { label: "OpenAI SDK", icon: <Image src="/images/integrations/openai_icon.svg" alt="" width={18} height={18} /> },
+      { label: "DSPy", icon: <Image src="/images/integrations/dspy_icon.png" alt="" width={18} height={18} /> },
+      { label: "Anthropic SDK", icon: <Image src="/images/integrations/anthropic_icon.png" alt="" width={18} height={18} /> },
+      { label: "LangGraph", icon: <Image src="/images/integrations/langchain_icon.png" alt="" width={18} height={18} /> },
+      { label: "Instructor", icon: <Image src="/images/integrations/instructor_icon.svg" alt="" width={18} height={18} /> },
+    ],
+  },
+  {
+    title: "Vector DBs and Infrastructure",
+    href: "/integrations",
+    items: [
+      { label: "Pinecone", icon: <Image src="/images/integrations/opentelemetry_icon.svg" alt="" width={18} height={18} /> },
+      { label: "Weaviate", icon: <Image src="/images/integrations/milvus_icon.svg" alt="" width={18} height={18} /> },
+      { label: "Qdrant", icon: <Image src="/images/integrations/opentelemetry_icon.svg" alt="" width={18} height={18} /> },
+      { label: "Chroma", icon: <Image src="/images/integrations/opentelemetry_icon.svg" alt="" width={18} height={18} /> },
+      { label: "Supabase", icon: <Image src="/images/integrations/opentelemetry_icon.svg" alt="" width={18} height={18} /> },
+      { label: "PostgreSQL", icon: <Image src="/images/integrations/opentelemetry_icon.svg" alt="" width={18} height={18} /> },
+    ],
+  },
+  {
+    title: "Native Integrations",
+    href: "/integrations",
+    items: [
+      { label: "Python", icon: <IconPython className="w-[18px] h-[18px]" /> },
+      { label: "TypeScript", icon: <IconTypescript className="w-[18px] h-[18px]" /> },
+      { label: "Next.js", icon: <IconOpenai className="w-[18px] h-[18px]" /> },
+      { label: "Node.js", icon: <IconOpenai className="w-[18px] h-[18px]" /> },
+      { label: "Flowise", icon: <Image src="/images/integrations/flowise_icon.svg" alt="" width={18} height={18} /> },
+      { label: "Langflow", icon: <Image src="/images/integrations/langflow_icon.svg" alt="" width={18} height={18} /> },
+    ],
+  },
+];
 
+function IntegrationLabel({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <Component
-      className={cn(
-        "z-10 flex flex-row items-center gap-4 group",
-        href ? "cursor-pointer" : "cursor-default",
-        className
-      )}
-      title={"Langfuse " + title + " documentation"}
-      href={href}
-    >
-      {title && (
-        <span
-          className={cn(
-            "w-[4.4rem] md:w-36 text-right text-sm md:text-base",
-            title.length > 20 && "text-xs md:text-xs"
-          )}
-        >
-          {title}
-        </span>
-      )}
-      <div
-        ref={ref}
-        className={cn(
-          "flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 text-black",
-          href && "group-hover:bg-slate-200"
-        )}
-      >
-        {href && (
-          <ArrowUpRightFromSquare
-            className="hidden group-hover:block"
-            size={18}
-          />
-        )}
-        <span className={cn(href && "group-hover:hidden")}>{children}</span>
-      </div>
-    </Component>
+    <span className="inline-flex items-center gap-2 rounded-[2px] px-1.5 py-1 border border-line-structure bg-surface-bg text-[13px] font-normal text-text-secondary leading-none whitespace-nowrap">
+      <span className="shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+        {icon}
+      </span>
+      {label}
+    </span>
   );
-});
+}
 
-export default function Integrations() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const inPythonRef = useRef<HTMLDivElement>(null);
-  const inTypescriptRef = useRef<HTMLDivElement>(null);
-  const inOpenAiRef = useRef<HTMLDivElement>(null);
-  const inLangchainRef = useRef<HTMLDivElement>(null);
-  const inApiRef = useRef<HTMLDivElement>(null);
-  const inLlamaindexRef = useRef<HTMLDivElement>(null);
-  const inLitellmRef = useRef<HTMLDivElement>(null);
-  const inHaystackRef = useRef<HTMLDivElement>(null);
-  const inMoreRef = useRef<HTMLDivElement>(null);
-
-  const langfuseNodeRef = useRef<HTMLDivElement>(null);
-
+function IntegrationGroup({
+  title,
+  href,
+  items,
+}: {
+  title: string;
+  href: string;
+  items: { label: string; icon: React.ReactNode }[];
+}) {
   return (
-    <HomeSection>
-      <Header
-        title="Works with any LLM app and model"
-        description="SDKs for Python & JS/TS and native integrations for popular libraries. Missing an integration? Let us know!"
-        buttons={[
-          {
-            href: "/integrations",
-            text: "Integration docs",
-          },
-        ]}
-      />
-      <div
-        className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-card py-4 px-2 md:p-12"
-        ref={containerRef}
-      >
-        <div className="flex h-full w-full flex-col items-stretch justify-between gap-2 md:gap-4">
-          <div className="flex flex-row items-center justify-between">
-            <Circle
-              ref={inPythonRef}
-              title="Python SDK"
-              href="/docs/sdk/python"
-            >
-              <IconPython className="h-9 w-9" />
-            </Circle>
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <Circle
-              ref={inTypescriptRef}
-              title="JS/TS SDK"
-              href="/docs/sdk/typescript/guide"
-            >
-              <IconTypescript className="h-7 w-7" />
-            </Circle>
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <Circle
-              ref={inOpenAiRef}
-              title="OpenAI SDK"
-              href="/integrations/model-providers/openai-py"
-            >
-              <IconOpenai className="h-7 w-7" />
-            </Circle>
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <Circle
-              ref={inLangchainRef}
-              title="Langchain"
-              href="/integrations/frameworks/langchain"
-            >
-              <Image
-                src={LangchainIcon}
-                alt="Langchain Icon"
-                width={40}
-                height={40}
-              />
-            </Circle>
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <Circle
-              ref={inLlamaindexRef}
-              title="Llama-Index"
-              href="/integrations/frameworks/llamaindex"
-            >
-              <Image
-                src={LlamaindexIcon}
-                alt="Llama-index Icon"
-                width={35}
-                height={35}
-              />
-            </Circle>
-            <Circle ref={langfuseNodeRef} className="h-16 w-16">
-              <Image
-                src={LangfuseIcon}
-                alt="Langfuse Icon"
-                width={28}
-                height={28}
-              />
-            </Circle>
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <Circle
-              ref={inLitellmRef}
-              title="LiteLLM (proxy)"
-              href="/integrations/gateways/litellm"
-            >
-              <Image
-                src={LitellmIcon}
-                alt="Langchain Icon"
-                width={40}
-                height={40}
-              />
-            </Circle>
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <Circle
-              ref={inHaystackRef}
-              title="Haystack"
-              href="/integrations/frameworks/haystack"
-            >
-              <Image
-                src={HaystackIcon}
-                alt="Langchain Icon"
-                width={28}
-                height={28}
-              />
-            </Circle>
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <Circle ref={inApiRef} title="API" href="/docs/api-and-data-platform/features/public-api">
-              <Code className="h-6 w-6" />
-            </Circle>
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <Circle
-              ref={inMoreRef}
-              title="DSPy, Dify, Flowise, Langflow, Instructor, Vercel AI SDK, Mirascope, ..."
-              href="/integrations"
-            >
-              <MoreHorizontal className="h-5 w-5" />
-            </Circle>
-          </div>
-        </div>
+    <ChipCard tooltip="See all" href={href} className="flex flex-col gap-4 items-start p-5 -mt-px -ml-px first:ml-0">
+      <Text size="s" className="font-medium text-left text-text-secondary">
+        {title}
+      </Text>
+      <div className="flex flex-wrap gap-2">
+        {items.map((item) => (
+          <IntegrationLabel key={item.label} icon={item.icon} label={item.label} />
+        ))}
+      </div>
+    </ChipCard>
+  );
+}
 
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={inPythonRef}
-          toRef={langfuseNodeRef}
-          duration={3}
-        />
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={inTypescriptRef}
-          toRef={langfuseNodeRef}
-          duration={3}
-        />
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={inLangchainRef}
-          toRef={langfuseNodeRef}
-          duration={3}
-        />
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={inOpenAiRef}
-          toRef={langfuseNodeRef}
-          duration={3}
-        />
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={inApiRef}
-          toRef={langfuseNodeRef}
-          duration={3}
-        />
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={inLlamaindexRef}
-          toRef={langfuseNodeRef}
-          duration={3}
-        />
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={inLitellmRef}
-          toRef={langfuseNodeRef}
-          duration={3}
-        />
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={inHaystackRef}
-          toRef={langfuseNodeRef}
-          duration={3}
-        />
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={inMoreRef}
-          toRef={langfuseNodeRef}
-          duration={3}
-        />
+export function Integrations() {
+  return (
+    <HomeSection id="integrations" className="pt-20">
+      <div className="flex flex-col gap-4 items-start mb-10">
+        <Heading>
+          <TextHighlight>Framework agnostic.</TextHighlight> Works with your stack.
+        </Heading>
+        <Text className="text-left">
+          80+ integrations. OpenTelemetry native. No framework lock-in.
+        </Text>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2.5">
+        {groups.map((group) => (
+          <IntegrationGroup
+            key={group.title}
+            title={group.title}
+            href={group.href}
+            items={group.items}
+          />
+        ))}
       </div>
     </HomeSection>
   );
