@@ -211,7 +211,6 @@ const GhDiscussionsPreviewInternal = ({
                   <PaginationLink
                     onClick={() => setCurrentPage(pageNumber)}
                     isActive={currentPage === pageNumber}
-                    size="xs"
                     className="cursor-pointer select-none"
                   >
                     {pageNumber}
@@ -222,7 +221,6 @@ const GhDiscussionsPreviewInternal = ({
           </div>
           <PaginationItem>
             <PaginationNext
-              size="xs"
               onClick={() =>
                 setCurrentPage((prev) => Math.min(totalPages, prev + 1))
               }
