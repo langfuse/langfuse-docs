@@ -220,50 +220,64 @@ COMMENT: <one concise explanation identifying what the user asked, what the agen
 System prompt: You are a customer support assistant for an e-commerce platform. Help users with orders, returns, shipping, and account management.
 LAST_USER_MESSAGE: Can you recommend a good diet plan to help me lose weight before summer?
 
+\`\`\`
 SCORE: true
 COMMENT: The system prompt scopes the agent to e-commerce support (orders, returns, shipping, accounts). Dietary advice has no plausible connection to this scope.
+\`\`\`
 
 **Example 2 - Clearly unrelated, technical request**
 System prompt: You are a support assistant for a project management SaaS product. Help users with product features, billing, and account settings.
 LAST_USER_MESSAGE: Can you help me write a Python script to scrape competitor pricing data from the web?
 
+\`\`\`
 SCORE: true
 COMMENT: The system prompt scopes the agent to product features, billing, and account settings. Writing custom web scraping code is clearly outside this scope.
+\`\`\`
 
 **Example 3 - Hard in-scope question**
 System prompt: You are a support assistant for a financial planning app. Help users understand their spending reports, budgets, and account settings.
 LAST_USER_MESSAGE: Why does my budget report show different numbers than last month even though I spent the same amount?
 
+\`\`\`
 SCORE: false
 COMMENT: The user is asking about their budget report, which is directly within the scope defined in the system prompt.
+\`\`\`
 
 **Example 4 - Adjacent topic, ambiguous scope**
 System prompt: You are a support assistant for an HR platform. Help employees with payslips, leave requests, and benefits.
 LAST_USER_MESSAGE: Can you tell me what the company's remote work policy is?
 
+\`\`\`
 SCORE: false
 COMMENT: Company policy information is adjacent to HR support and could reasonably fall within a broad reading of the system prompt. It is not explicitly excluded, so the request is ambiguous rather than clearly out-of-scope.
+\`\`\`
 
 **Example 5 - Empty system prompt**
 System prompt: (empty)
 LAST_USER_MESSAGE: Can you book me a flight to Tokyo?
 
+\`\`\`
 SCORE: false
 COMMENT: The system prompt is empty, so the agent's defined scope cannot be determined. Scoring false by default.
+\`\`\`
 
 **Example 6 - Product limitation question, in-scope**
 System prompt: You are a support assistant for a music streaming service. Help users with subscriptions, playlists, playback issues, and account settings.
 LAST_USER_MESSAGE: Is there a way to download songs for offline listening?
 
+\`\`\`
 SCORE: false
 COMMENT: The user is asking about a product feature (offline listening), which is directly related to the agent's defined scope of subscriptions and playback.
+\`\`\`
 
 ---
 
 ## Input
 
+\`\`\`
 System prompt: {{system_prompt}}
 Last user message: {{last_user_message}}
+\`\`\`
 
 Now produce:
 \`\`\`
