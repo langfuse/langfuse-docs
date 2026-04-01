@@ -59,6 +59,13 @@ const nextConfig = {
     // Tell Turbopack to use this worktree's directory as the root.
     root: __dirname,
   },
+  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
+  outputFileTracingIncludes: {
+    "/api/md-to-pdf": [
+      "./public/md-src/**/*",
+      "./node_modules/@sparticuz/chromium/**/*",
+    ],
+  },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
 
   webpack(config, { isServer, webpack }) {

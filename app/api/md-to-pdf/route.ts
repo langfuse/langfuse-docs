@@ -8,11 +8,12 @@ export const runtime = "nodejs";
 // Allow up to 60 s for PDF generation (default 10 s is too short for Chromium startup)
 export const maxDuration = 60;
 
-const ALLOWED_HOSTNAMES = [
+const LEGACY_ALLOWED_URL_HOSTNAMES = new Set([
   "langfuse.com",
-  "raw.githubusercontent.com",
-  "github.com",
-];
+  "www.langfuse.com",
+  "localhost",
+  "127.0.0.1",
+]);
 const LOCAL_MARKDOWN_ROOT = path.resolve(process.cwd(), "public", "md-src");
 const PDF_VIEWPORT = {
   width: 1280,
@@ -35,23 +36,28 @@ function processCallouts(content: string): string {
   });
 }
 
-function getLocalMarkdownCandidates(markdownUrl: URL): string[] {
-  const normalizedPath = decodeURIComponent(markdownUrl.pathname)
+function normalizeMarkdownPath(requestedPath: string): string | null {
+  const normalizedPath = decodeURIComponent(requestedPath)
     .replace(/\/+/g, "/")
     .replace(/^\/+|\/+$/g, "");
   const withoutExtension = normalizedPath.replace(/\.mdx?$/i, "");
 
   if (!withoutExtension) {
-    return ["index.md"];
+    return "index.md";
   }
 
   const segments = withoutExtension.split("/").filter(Boolean);
   if (segments.some((segment) => segment === "." || segment === "..")) {
-    return [];
+    return null;
   }
 
-  const basePath = segments.join("/");
-  const candidates = [`${basePath}.md`];
+  return `${segments.join("/")}.md`;
+}
+
+function getLocalMarkdownCandidates(normalizedMarkdownPath: string): string[] {
+  const withoutExtension = normalizedMarkdownPath.replace(/\.mdx?$/i, "");
+  const segments = withoutExtension.split("/").filter(Boolean);
+  const candidates = [normalizedMarkdownPath];
 
   // Single-segment routes like /terms are exported under public/md-src/marketing.
   if (segments.length === 1) {
@@ -61,8 +67,12 @@ function getLocalMarkdownCandidates(markdownUrl: URL): string[] {
   return candidates;
 }
 
-async function readLocalMarkdown(markdownUrl: URL): Promise<string | null> {
-  for (const relativeCandidate of getLocalMarkdownCandidates(markdownUrl)) {
+async function readLocalMarkdown(
+  normalizedMarkdownPath: string
+): Promise<string | null> {
+  for (const relativeCandidate of getLocalMarkdownCandidates(
+    normalizedMarkdownPath
+  )) {
     const absoluteCandidate = path.resolve(
       LOCAL_MARKDOWN_ROOT,
       relativeCandidate
@@ -121,70 +131,97 @@ async function launchBrowser() {
   });
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    const url = request.nextUrl.searchParams.get("url");
-    const disposition = request.nextUrl.searchParams.get("disposition");
-
-    if (!url || typeof url !== "string") {
-      return NextResponse.json(
-        { error: "Missing or invalid 'url' query parameter" },
-        { status: 400 }
-      );
+function getRequestedMarkdownSource(request: NextRequest):
+  | { normalizedPath: string; sourceLabel: string }
+  | { errorResponse: NextResponse } {
+  const pathParam = request.nextUrl.searchParams.get("path");
+  if (pathParam && typeof pathParam === "string") {
+    const normalizedPath = normalizeMarkdownPath(pathParam);
+    if (!normalizedPath) {
+      return {
+        errorResponse: NextResponse.json(
+          { error: "Invalid 'path' query parameter" },
+          { status: 400 }
+        ),
+      };
     }
 
-    let markdownUrl: URL;
-    try {
-      markdownUrl = new URL(url);
-    } catch {
-      return NextResponse.json(
+    return {
+      normalizedPath,
+      sourceLabel: `/${normalizedPath}`,
+    };
+  }
+
+  const urlParam = request.nextUrl.searchParams.get("url");
+  if (!urlParam || typeof urlParam !== "string") {
+    return {
+      errorResponse: NextResponse.json(
+        { error: "Missing 'path' or legacy 'url' query parameter" },
+        { status: 400 }
+      ),
+    };
+  }
+
+  let markdownUrl: URL;
+  try {
+    markdownUrl = new URL(urlParam);
+  } catch {
+    return {
+      errorResponse: NextResponse.json(
         { error: "Invalid URL format" },
         { status: 400 }
-      );
-    }
+      ),
+    };
+  }
 
-    if (
-      process.env.NODE_ENV !== "development" &&
-      !ALLOWED_HOSTNAMES.includes(markdownUrl.hostname)
-    ) {
-      return NextResponse.json(
+  const allowedLegacyHostnames = new Set(LEGACY_ALLOWED_URL_HOSTNAMES);
+  allowedLegacyHostnames.add(request.nextUrl.hostname);
+
+  if (!allowedLegacyHostnames.has(markdownUrl.hostname)) {
+    return {
+      errorResponse: NextResponse.json(
         {
-          error: `Fetching from ${markdownUrl.hostname} is not permitted.`,
-          allowed: ALLOWED_HOSTNAMES,
+          error: `Reading markdown from ${markdownUrl.hostname} is not permitted.`,
+          allowed: Array.from(allowedLegacyHostnames),
         },
         { status: 400 }
-      );
+      ),
+    };
+  }
+
+  const normalizedPath = normalizeMarkdownPath(markdownUrl.pathname);
+  if (!normalizedPath) {
+    return {
+      errorResponse: NextResponse.json(
+        { error: "Invalid URL path" },
+        { status: 400 }
+      ),
+    };
+  }
+
+  return {
+    normalizedPath,
+    sourceLabel: markdownUrl.toString(),
+  };
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const disposition = request.nextUrl.searchParams.get("disposition");
+
+    const requestedSource = getRequestedMarkdownSource(request);
+    if ("errorResponse" in requestedSource) {
+      return requestedSource.errorResponse;
     }
 
-    // For langfuse.com page URLs (not already ending in .md/.mdx), rewrite to
-    // the raw-markdown endpoint: /path → /path.md (served from public/md-src/).
-    const isLangfuseHost =
-      markdownUrl.hostname === "langfuse.com" ||
-      markdownUrl.hostname === "localhost" ||
-      markdownUrl.hostname === "127.0.0.1";
-    if (
-      isLangfuseHost &&
-      !markdownUrl.pathname.endsWith(".md") &&
-      !markdownUrl.pathname.endsWith(".mdx")
-    ) {
-      markdownUrl = new URL(markdownUrl.toString());
-      markdownUrl.pathname = markdownUrl.pathname.replace(/\/$/, "") + ".md";
-    }
-
-    let markdownContent = isLangfuseHost
-      ? await readLocalMarkdown(markdownUrl)
-      : null;
-
+    let markdownContent = await readLocalMarkdown(requestedSource.normalizedPath);
     if (markdownContent === null) {
-      const response = await fetch(markdownUrl.toString());
-      if (!response.ok) {
-        return NextResponse.json(
-          { error: `Failed to fetch markdown: ${response.statusText}` },
-          { status: response.status }
-        );
-      }
-
-      markdownContent = await response.text();
+      return NextResponse.json(
+        {
+          error: `Markdown source not found for ${requestedSource.sourceLabel}`,
+        },
+        { status: 404 }
+      );
     }
 
     markdownContent = markdownContent.replace(
@@ -195,8 +232,8 @@ export async function GET(request: NextRequest) {
     let htmlContent = await marked.parse(markdownContent);
     htmlContent = processCallouts(htmlContent);
 
-    const pathname = markdownUrl.pathname;
-    const filename = pathname.split("/").pop() || "document.md";
+    const filename =
+      requestedSource.normalizedPath.split("/").pop() || "document.md";
     const baseFilename = filename.replace(/\.mdx?$/i, "");
     const documentTitle = `Langfuse - ${baseFilename}`;
 
@@ -220,7 +257,7 @@ export async function GET(request: NextRequest) {
           </style>
         </head>
         <body>
-          <div class="source-url"><strong>Source:</strong> ${markdownUrl.toString()}</div>
+          <div class="source-url"><strong>Source:</strong> ${requestedSource.sourceLabel}</div>
           ${htmlContent}
         </body>
       </html>
