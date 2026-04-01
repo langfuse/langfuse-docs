@@ -22,6 +22,16 @@ Traditional production apps are monitored for high-signal indicators that someth
 
 LLM-powered apps have the same need - but the problem is harder as outputs are non-deterministic. A broken response doesn't throw an exception. A user who didn't get what they needed might just silently leave. But how do you measure these subtle signals?
 
+One answer is surprisingly simple: detect when users curse. Boris Cherny, creator of Claude Code, [shared how his team does it](https://x.com/bcherny):
+
+<Frame>
+  ![Boris Cherny tweet about the fucks chart](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/boris_cherny_tweet.png)
+</Frame>
+
+Anthropic's own leaked internal evals for Claude Code confirm this isn't just one team's hack - profanity frequency ("fucks per conversation") shows up as a real signal they track. When users curse at your AI, something went wrong. It's a high-signal, zero-ambiguity event that tells you far more than an average satisfaction score ever could.
+
+Here's how you can build your own version of this for your support agent.
+
 Instead of asking a model to score helpfulness, ask it a yes/no question: did the user disagree with the assistant? Did the user ask for something outside the agent's scope?
 
 Good event detectors are:
