@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { AnchorProvider, useActiveAnchors } from "fumadocs-core/toc";
 import { Github } from "lucide-react";
@@ -16,14 +16,16 @@ type TocItem = { id: string; title: string; depth: number; url: string };
 // ─── Static section list for the homepage ────────────────────────────────────
 
 const HOME_SECTIONS: TocItem[] = [
-  { id: "features",     title: "Features",      depth: 2, url: "#features" },
-  { id: "platform",     title: "Platform",      depth: 2, url: "#platform" },
-  { id: "integrations", title: "Integrations",  depth: 2, url: "#integrations" },
-  { id: "open-source",  title: "Open Source",   depth: 2, url: "#open-source" },
-  { id: "security",     title: "Security",      depth: 2, url: "#security" },
-  { id: "customers",    title: "Customers",     depth: 2, url: "#customers" },
-  { id: "pricing",      title: "Pricing",       depth: 2, url: "#pricing" },
-  { id: "community",    title: "Community",     depth: 2, url: "#community" },
+  { id: "features",        title: "Features",         depth: 2, url: "#features" },
+  { id: "demo",            title: "Demo",             depth: 2, url: "#demo" },
+  { id: "all-the-tools",   title: "Platform",         depth: 2, url: "#all-the-tools" },
+  { id: "integrations",    title: "Integrations",     depth: 2, url: "#integrations" },
+  { id: "open-source",     title: "Open Source",      depth: 2, url: "#open-source" },
+  { id: "developer-tools", title: "Developer Tools",  depth: 2, url: "#developer-tools" },
+  { id: "enterprise",      title: "Security",         depth: 2, url: "#enterprise" },
+  { id: "why-langfuse",    title: "Why Langfuse",     depth: 2, url: "#why-langfuse" },
+  { id: "quickstart",      title: "Quickstart",       depth: 2, url: "#quickstart" },
+  { id: "faq",             title: "FAQ",              depth: 2, url: "#faq" },
 ];
 
 // ─── Scan DOM for h2/h3 headings (non-homepage pages) ────────────────────────
@@ -64,42 +66,62 @@ function XIcon({ className }: { className?: string }) {
 
 function TocOnThisPage({ items }: { items: TocItem[] }) {
   const active = useActiveAnchors();
+  const activeId = active[0] ?? null;
+  const listRef = useRef<HTMLDivElement>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number } | null>(null);
+
+  useEffect(() => {
+    if (!activeId || !listRef.current) return;
+    const el = listRef.current.querySelector(`[data-id="${activeId}"]`) as HTMLElement | null;
+    if (!el) return;
+    setIndicatorStyle({ top: el.offsetTop, height: el.offsetHeight });
+  }, [activeId]);
+
   if (items.length === 0) return null;
 
   return (
     <div className="flex-1 min-h-0">
-      <Text
-        size="s"
-        className="block text-left font-medium text-text-primary mb-3"
-      >
+      <Text size="s" className="block text-left font-medium text-text-primary mb-3">
         On this page
       </Text>
 
-      <div className="flex flex-col border-l border-line-structure overflow-auto [scrollbar-width:none]">
-        {items.map((item) => {
-          const isActive = active.includes(item.id);
-          return (
-            <Link
-              key={item.url}
-              href={item.url}
-              className={cn(
-                "py-1.5 transition-colors wrap-anywhere",
-                item.depth === 3 ? "ps-6" : item.depth >= 4 ? "ps-8" : "ps-3",
-                // Active: overlay the container border with a 2px primary marker
-                isActive
-                  ? "-ml-px border-l-2 border-text-primary text-text-primary"
-                  : "text-text-tertiary hover:text-text-secondary"
-              )}
-            >
-              <Text
-                size="s"
-                className="text-left text-inherit transition-[color]"
+      <div className="relative flex flex-col overflow-auto [scrollbar-width:none]">
+        {/* Static track */}
+        <div className="absolute left-0 top-0 bottom-0 w-px bg-line-structure" />
+
+        {/* Snake indicator */}
+        {indicatorStyle && (
+          <div
+            className="absolute left-0 w-0.5 bg-text-primary"
+            style={{
+              top: indicatorStyle.top,
+              height: indicatorStyle.height,
+              transition: "top 0.2s cubic-bezier(0.4,0,0.2,1), height 0.2s cubic-bezier(0.4,0,0.2,1)",
+            }}
+          />
+        )}
+
+        <div ref={listRef} className="flex flex-col">
+          {items.map((item) => {
+            const isActive = activeId === item.id;
+            return (
+              <Link
+                key={item.url}
+                href={item.url}
+                data-id={item.id}
+                className={cn(
+                  "py-1.5 ps-3 transition-colors duration-150 wrap-anywhere",
+                  item.depth === 3 ? "ps-6" : item.depth >= 4 ? "ps-8" : "ps-3",
+                  isActive ? "text-text-primary" : "text-text-tertiary hover:text-text-secondary"
+                )}
               >
-                {item.title}
-              </Text>
-            </Link>
-          );
-        })}
+                <Text size="s" className="text-left text-inherit">
+                  {item.title}
+                </Text>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

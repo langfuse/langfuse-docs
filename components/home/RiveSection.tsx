@@ -32,7 +32,7 @@ export const RiveSection = () => {
   const [label, setLabel] = useState<RiveLabel>(LABELS["obs-active"]);
 
   return (
-    <HomeSection className="pt-20 lg:pt-10 2xl:pt-20">
+    <HomeSection id="demo" className="pt-20 lg:pt-10 2xl:pt-20">
       <div className="flex flex-col gap-4 items-start">
         <Heading>
           Made for the <TextHighlight>entire development life-cycle.</TextHighlight>
@@ -47,6 +47,7 @@ export const RiveSection = () => {
           src={RIVE_FILE}
           stateMachine="Langfuse_SM"
           fit="cover"
+          zoom={1.3}
           className="w-full h-full"
           onStateChange={(states) => {
             const match = states.find((s) => s in LABELS);

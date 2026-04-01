@@ -25,6 +25,9 @@ export {
 export { LinkBox } from "./link-box";
 export type { LinkBoxProps, LinkBoxTooltipPlacement } from "./link-box";
 
+export { ChipCard } from "./chip-card";
+export type { ChipCardProps } from "./chip-card";
+
 export { Text, textBodyMRegularClassName, textBodySRegularClassName } from "./text";
 export type { TextProps } from "./text";
 

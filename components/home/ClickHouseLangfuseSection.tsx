@@ -10,21 +10,20 @@ import { cn } from "@/lib/utils";
  */
 export function ClickHouseLangfuseSection() {
   return (
-    <HomeSection className="pt-6 pb-6 sm:pt-8 sm:pb-10">
+    <HomeSection id="quickstart" className="pt-20">
       <div
         className={cn(
-          "flex flex-col gap-8 items-center px-4 py-10 sm:gap-10 sm:py-12",
-          "rounded-sm border pattern-bg border-line-structure bg-surface-1"
+          "flex flex-col gap-2.5 items-center"
         )}
       >
-        <div className="flex max-w-[min(100%,640px)] flex-col items-center gap-6 text-center">
-          <Text size="s" className="text-text-tertiary">
-            ClickHouse × Langfuse
-          </Text>
-          <Heading>
-            <span className="block">Traces in 5 minutes.</span>
-            <span className="block">No credit card.</span>
-          </Heading>
+        <div className="flex max-w-[min(100%,640px)] flex-col items-center gap-8 text-center">
+          <div className='flex flex-col gap-4.5 items-center'>
+            <Text>ClickHouse x Langfuse</Text>
+            <Heading className="text-primary">
+              <span className="block">Traces in 5 minutes.</span>
+              <span className="block">No credit card.</span>
+            </Heading>
+          </div>
           <div className="flex flex-wrap gap-3 justify-center items-center">
             <Button
               variant="primary"
@@ -39,7 +38,7 @@ export function ClickHouseLangfuseSection() {
           </div>
         </div>
         <ClickHouseLangfuseCodeBlocks />
-        <Text size="s" className="max-w-xl text-text-tertiary">
+        <Text size="s" className="w-full max-w-[min(100%,560px)] border-t border-line-structure pt-2.5">
           Free tier: 50k observations/month. No credit card required.
         </Text>
       </div>
