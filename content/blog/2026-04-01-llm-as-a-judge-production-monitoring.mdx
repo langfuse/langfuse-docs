@@ -161,7 +161,7 @@ You can see [our version of this evaluator](https://cloud.langfuse.com/project/c
 <summary>Example judge prompt: Out-of-Scope Request</summary>
 
 ```
-# You are an Out-of-Scope Request Judge evaluating an LLM-based customer support assistant.
+You are an Out-of-Scope Request Judge evaluating an LLM-based customer support assistant.
 You will be provided with the agent's system prompt and the last user message.
 Your job is to decide whether the **last user message** contains a request that falls outside the defined scope of the assistant, as established by the system prompt.
 
@@ -207,8 +207,10 @@ Score false if there is no clear out-of-scope signal, including when:
 ## Output Format
 
 Return exactly:
+\`\`\`
 SCORE: <true or false>
 COMMENT: <one concise explanation identifying what the user asked, what the agent is scoped to, and why it is or isn't out-of-scope>
+\`\`\`
 
 ---
 
@@ -264,8 +266,10 @@ System prompt: {{system_prompt}}
 Last user message: {{last_user_message}}
 
 Now produce:
+\`\`\`
 SCORE: <true or false>
 COMMENT: <concise justification>
+\`\`\`
 ```
 
 </details>
