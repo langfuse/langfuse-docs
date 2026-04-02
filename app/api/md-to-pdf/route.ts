@@ -1,17 +1,6 @@
-import { createRequire } from "node:module";
-import path from "node:path";
 import { NextRequest, NextResponse } from "next/server";
 import { marked } from "marked";
-const require = createRequire(path.join(process.cwd(), "package.json"));
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { stripMdxForPlainMarkdown } = require(
-  path.join(process.cwd(), "lib/stripMdxForPlainMarkdown.js")
-) as {
-  stripMdxForPlainMarkdown: (
-    content: string,
-    options?: { unwrapCalloutsForPlainMd?: boolean }
-  ) => string;
-};
+import { stripMdxForPlainMarkdown } from "@/lib/stripMdxForPlainMarkdown.js";
 
 // Force Node.js runtime (required for Puppeteer/Chromium — not compatible with Edge runtime)
 export const runtime = "nodejs";
