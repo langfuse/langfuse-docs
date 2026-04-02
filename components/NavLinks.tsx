@@ -22,6 +22,7 @@ const productLinks = [
 ];
 
 const resourcesLinks = [
+  { name: "Academy", href: "/academy" },
   { name: "Blog", href: "/blog" },
   { name: "Changelog", href: "/changelog" },
   { name: "Roadmap", href: "/docs/roadmap" },

@@ -13,6 +13,7 @@ import {
   customers,
   handbook,
   marketing,
+  academy,
 } from "../.source/server";
 
 export const source = loader({
@@ -206,6 +207,12 @@ export const handbookSource = loader({
   source: handbook.toFumadocsSource(),
 });
 
+export const academySource = loader({
+  baseUrl: "/academy",
+  source: academy.toFumadocsSource(),
+  pageTree: { idPrefix: "academy" },
+});
+
 export const marketingSource = loader({
   baseUrl: "",
   source: marketing.toFumadocsSource(),
@@ -295,6 +302,11 @@ const DOC_SECTIONS = {
     collection: "handbook",
     title: "Handbook",
   },
+  academy: {
+    source: academySource,
+    collection: "academy",
+    title: "Academy",
+  },
 } as const;
 
 const marketingEntries = Object.fromEntries(
@@ -315,6 +327,7 @@ export const DOCS_STYLE_APP_SECTIONS = new Set([
   "self-hosting",
   "guides",
   "library",
+  "academy",
 ]);
 
 /** Sections that are blog/changelog posts — no left sidebar */

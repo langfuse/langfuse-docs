@@ -153,6 +153,11 @@ export const handbook = defineDocs({
   docs: { schema: baseFrontmatterSchema },
 });
 
+export const academy = defineDocs({
+  dir: "content/academy",
+  docs: { schema: baseFrontmatterSchema },
+});
+
 export const marketing = defineDocs({
   dir: "content/marketing",
   docs: { schema: baseFrontmatterSchema },

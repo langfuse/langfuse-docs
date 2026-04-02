@@ -1,0 +1,151 @@
+---
+title: Observability Core Concepts
+description: Understand how Langfuse structures traces, observations, and sessions — the building blocks of LLM observability.
+---
+
+# Core Concepts
+
+This page digs into the underlying concepts of how Langfuse structures and captures your data. Understanding these will make setting up and working with your traces easier.
+
+## Observations, Traces, and Sessions
+
+Langfuse organizes an application's data into three core concepts: observations, traces, and sessions.
+
+```mermaid
+flowchart LR
+
+    subgraph SESSION [session]
+        direction TB
+
+        subgraph TRACE1 [trace]
+            direction LR
+            O1[observation]
+            O2[observation]
+            O3[observation]
+        end
+
+        subgraph TRACE2 [trace]
+            direction LR
+            O4[observation]
+            O5[observation]
+            O6[observation]
+        end
+
+        subgraph TRACE3 [trace]
+            direction LR
+            O7[observation]
+            O8[observation]
+            O9[observation]
+        end
+
+    end
+    classDef sessionBox fill:none,stroke:#888,stroke-width:2px;
+    classDef traceBox fill:none,stroke:#aaa,stroke-width:1.5px;
+
+    %% Assign classes
+    class SESSION sessionBox;
+    class TRACE1,TRACE2,TRACE3 traceBox;
+```
+
+import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
+
+### Observations
+
+`Observations` are the individual steps within a trace. Langfuse supports a number of LLM application specific [observation types](/docs/observability/features/observation-types), for example _generations_, _toolcalls_, _RAG retrieval steps_, etc.
+
+Observations can be nested. The example below shows a trace with a nested observation.
+
+<div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
+
+<div className="border rounded py-4 px-4 flex flex-col items-center justify-center bg-card">
+
+Hierarchical structure of observations in Langfuse
+
+<div className="flex-1 flex items-center justify-center ">
+
+```mermaid
+classDiagram
+    Trace "1" *-- "n" Observation
+    Observation o-- Observation: Nesting
+```
+
+</div>
+
+</div>
+
+<div className="border rounded py-4 px-4 text-center block dark:hidden bg-card">
+
+Example trace in Langfuse UI
+
+![Trace in Langfuse UI](/images/docs/tracing-observation-tree-light.png)
+
+</div>
+
+<div className="border rounded py-4 px-4 text-center bg-card hidden dark:block">
+
+Example trace in Langfuse UI
+
+![Trace in Langfuse UI](/images/docs/tracing-observation-tree-dark.png)
+
+</div>
+
+</div>
+
+### Traces
+
+A `trace` typically represents a single request or operation.
+For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace.
+
+It serves as container of observations. Trace attributes such as `user_id`, `session_id`, `tags`, `metadata`, etc. are propagated to all observations within the trace.
+
+### Sessions
+
+Optionally, traces can be grouped into [sessions](/docs/observability/features/sessions).
+Sessions are used to group traces that are part of the same user interaction.
+A common example is a thread in a chat interface.
+
+<div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
+
+<div className="border rounded py-4 text-center px-4 flex flex-col bg-card">
+
+Optionally, sessions aggregate traces
+
+<div className="flex-1 flex items-center justify-center">
+
+```mermaid
+classDiagram
+    Session "1" o-- "n" Trace
+```
+
+</div>
+
+</div>
+
+<div className="border rounded py-4 px-4 text-center block bg-card">
+
+Example session in Langfuse UI
+
+<Frame fullWidth>![Session view](/images/docs/session.png)</Frame>
+
+</div>
+
+</div>
+
+Using sessions is recommended for applications with multi-turn conversations or workflows. Please refer to the [Sessions](/docs/observability/features/sessions) documentation to add sessions to your traces.
+
+## Adding Attributes
+
+Once you've structured your data into traces and observations, you can enrich them with additional attributes. These attributes act as labels that help you filter, segment, and analyze your traces for specific use cases.
+
+There are different types of attributes you can add:
+
+| Attribute | Description |
+|-----------|-------------|
+| [Environments](/docs/observability/features/environments) | Separate data from different deployment contexts like `production`, `staging`, or `development` |
+| [Tags](/docs/observability/features/tags) | Flexible labels to categorize traces by feature, API endpoint, or workflow |
+| [User](/docs/observability/features/users) | Track which end-user triggered each trace |
+| [Metadata](/docs/observability/features/metadata) | Flexible key-value store for custom information |
+| [Releases & Versions](/docs/observability/features/releases-and-versioning) | Track application versions and component changes |
+
+The next page goes deeper into when it makes sense to add certain attributes. 
+

@@ -1,7 +1,6 @@
 ---
 title: What does a good trace look like?
 description: A guide to structuring your Langfuse traces for effective debugging, evaluation, and cost tracking.
-tags: [observability, observability-get-started]
 ---
 
 import { Fan, Wrench } from "lucide-react";
@@ -37,7 +36,7 @@ When you click on a trace, you see the trace tree. There are two things you can 
 
 ### Are the right steps showing up?
 
-You should see your LLM calls, tool calls, and other important steps represented in the tree. They should have the correct [observation type](/docs/observability/features/observation-types). 
+You should see your LLM calls, tool calls, and other important steps represented in the tree. They should have the correct [observation type](/docs/observability/features/observation-types).
 
 For example
 - an LLM call should show up as a <Fan size={16} className="text-muted-magenta inline" /> `generation`. This is important because a `generation` can carry [cost, token usage, and model information](#track-model-tokens-and-cost-on-generations).
@@ -73,7 +72,7 @@ For your **most viewed observations**, take some extra care to set them up. You 
 
 ![Tracing table with input and output](/images/docs/faq/good-trace-tracing-table-io.png)
 
-Typical input/output for `GENERATION` observations: 
+Typical input/output for `GENERATION` observations:
 - For a chatbot: the user message (input) and the assistant response (output).
 - For a RAG pipeline: the user query and the generated answer.
 - For a classification task: the text being classified and the predicted label.
@@ -112,7 +111,7 @@ You can see these attributes on the `GENERATION` observation in the Langfuse UI.
 
 One property of tags is that they are **immutable and must be set at observation creation time**. This makes them great for things you know upfront (where the request came from, which feature it's part of), but not for things you learn later.
 
-If you need to label traces based on something determined after the fact, like an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluation result, use [scores](/docs/evaluation/overview) instead. 
+If you need to label traces based on something determined after the fact, like an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluation result, use [scores](/docs/evaluation/overview) instead.
 
 ### Link prompts to traces
 
@@ -142,4 +141,3 @@ This makes sense when:
 If your application is single-request/single-response with no continuity between calls, you probably don't need sessions.
 
 ![Sessions view in Langfuse](/images/docs/faq/good-trace-sessions-view.png)
-
