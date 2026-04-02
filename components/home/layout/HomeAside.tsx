@@ -177,7 +177,13 @@ export function HomeAside() {
   const items = pathname === "/" ? HOME_SECTIONS : domItems;
 
   return (
-    <aside className="hidden lg:flex flex-col bg-line-structure sticky top-16 h-[calc(100vh-4rem)] p-px pt-0 w-[240px] shrink-0">
+    <aside
+      className="hidden lg:flex flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0"
+      style={{
+        top: "calc(var(--fd-banner-height, 0px) + 4rem)",
+        height: "calc(100vh - var(--fd-banner-height, 0px) - 4rem)",
+      }}
+    >
       <nav className="flex flex-col flex-1 gap-4 px-4 py-4 rounded-sm bg-surface-1 overflow-y-auto overflow-x-hidden">
         <AnchorProvider toc={items} single>
           <TocOnThisPage items={items} />

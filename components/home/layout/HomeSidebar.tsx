@@ -97,7 +97,13 @@ export function HomeSidebar() {
   const latestReleaseDate = changelogItems[0]?.date;
 
   return (
-    <aside className="hidden lg:flex flex-col bg-line-structure sticky top-16 h-[calc(100vh-4rem)] p-px pt-0 w-[240px] shrink-0">
+    <aside
+      className="hidden lg:flex flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0"
+      style={{
+        top: "calc(var(--fd-banner-height, 0px) + 4rem)",
+        height: "calc(100vh - var(--fd-banner-height, 0px) - 4rem)",
+      }}
+    >
       <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 rounded-sm bg-surface-1">
         <div className="pb-px bg-line-structure">
           <div className="px-2 py-4 rounded-sm bg-surface-1">
