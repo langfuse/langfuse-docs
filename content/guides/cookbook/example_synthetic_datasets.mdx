@@ -1,6 +1,6 @@
 ---
 source: ⚠️ Jupyter Notebook
-title: Synthetic Datasets
+title: Synthetic Dataset Generation for LLM Evaluation
 sidebarTitle: Synthetic Datasets
 description: Notebook on generating synthetic datasets for LLM application and AI agents evaluation. 
 category: Evaluation
