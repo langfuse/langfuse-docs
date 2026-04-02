@@ -109,6 +109,13 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
                 key={item.url}
                 href={item.url}
                 data-id={item.id}
+                onClick={(e) => {
+                  const target = document.getElementById(item.id);
+                  if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }}
                 className={cn(
                   "py-1.5 ps-3 transition-colors duration-150 wrap-anywhere",
                   item.depth === 3 ? "ps-6" : item.depth >= 4 ? "ps-8" : "ps-3",

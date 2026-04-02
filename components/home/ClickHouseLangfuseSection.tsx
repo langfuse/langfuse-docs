@@ -39,7 +39,7 @@ export function ClickHouseLangfuseSection() {
         </div>
         <ClickHouseLangfuseCodeBlocks />
         <Text size="s" className="w-full max-w-[min(100%,560px)] border-t border-line-structure pt-2.5">
-          Free tier: 50k observations/month. No credit card required.
+          Free tier: <span className="text-primary">50k observations/month</span>. No credit card required.
         </Text>
       </div>
     </HomeSection>

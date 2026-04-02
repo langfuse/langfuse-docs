@@ -3,13 +3,13 @@
 import { useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { CornerBox } from "@/components/ui/corner-box";
+import { BoxCorners, CornerBox } from "@/components/ui/corner-box";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 
-import twilioLogo from "./img/twilio.svg";
-import canvaLogo from "./img/canva.svg";
-import adobeLogo from "./img/adobe.svg";
+import twilioLogo from "./img/twilio-signet.svg";
+import canvaLogo from "./img/canva-signet.svg";
+import sumupLogo from "./img/sumup-signet.svg";
 import { cn } from "@/lib/utils";
 
 const stories = [
@@ -26,19 +26,19 @@ const stories = [
     href: "/customers/canva",
   },
   {
-    name: "Adobe",
-    logo: adobeLogo as StaticImageData,
+    name: "SumUp",
+    logo: sumupLogo as StaticImageData,
     description: "Adobe uses Langfuse to evaluate prompt quality and track LLM usage across their creative cloud products.",
     href: "/customers/adobe",
   },
 ] as const;
 
-export function FeaturedCustomers() {
+export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br: true } }: { corners?: BoxCorners }) {
   const [active, setActive] = useState(0);
   const story = stories[active];
 
   return (
-    <CornerBox className="flex gap-6 items-center p-4 pr-5 -mt-px">
+    <CornerBox className="flex gap-6 items-center p-4 pr-5 -mt-px" corners={corners}>
       <div className="flex gap-1 shrink-0">
         {stories.map((s, i) => {
           const isActive = i === active;
@@ -54,14 +54,14 @@ export function FeaturedCustomers() {
                 className="flex justify-center items-center p-0.75 w-11 h-11 border-none cursor-pointer"
                 corners={isActive ? undefined : { tl: false, tr: false, bl: false, br: false }}
               >
-                <div className={cn("w-full h-full transition-colors duration-150", isActive ? "bg-surface-code" : "bg-surface-2")}>
+                <div className={cn("flex justify-center items-center w-full h-full transition-colors duration-150", isActive ? "bg-surface-code" : "bg-surface-2")}>
                   <Image
                     src={s.logo}
                     alt={s.name}
                     width={56}
                     height={16}
                     className={[
-                      "object-contain w-full h-full",
+                      "object-contain w-5 h-5",
                       isActive ? "brightness-0 invert" : "",
                     ].join(" ")}
                   />

@@ -1,6 +1,7 @@
 "use client";
 
 import { HomeSection } from "@/components/home/HomeSection";
+import Image from "next/image";
 import {
   CornerBox,
   Heading,
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
+import cliVisual from "./img/visuals/visual-langfuse-cli.svg";
 
 const CLI_HREF = "/docs/api-and-data-platform/features/cli";
 const DOCS_MCP_HREF = "/docs/docs-mcp";
@@ -46,8 +48,8 @@ export const DeveloperTools = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2">
-          <CornerBox className="flex relative z-0 flex-col p-5 min-h-0 md:row-span-2">
-            <div className="flex min-h-[280px] flex-1 flex-col gap-3 md:min-h-[320px]">
+          <CornerBox className="flex relative z-0 flex-col p-0 min-h-0 md:row-span-2">
+            <div className="flex flex-col flex-1 gap-3 p-4">
               <Link
                 href={CLI_HREF}
                 className="text-left text-[15px] font-medium text-text-secondary"
@@ -59,9 +61,12 @@ export const DeveloperTools = () => {
                 Langfuse for you, or script your workflows in CI/CD.
               </Text>
             </div>
+            <div className="flex flex-1 justify-center items-center">
+              <Image src={cliVisual} alt="Langfuse CLI" width={100} height={100} className="object-contain w-full h-full" />
+            </div>
           </CornerBox>
 
-          <CornerBox className="flex relative z-0 flex-col gap-3 p-5 -ml-px">
+          <CornerBox className="flex relative z-0 flex-col gap-3 p-4 -ml-px">
             <Link
               href={DOCS_MCP_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
@@ -74,7 +79,7 @@ export const DeveloperTools = () => {
             </Text>
           </CornerBox>
 
-          <CornerBox className="flex relative z-0 flex-col gap-3 p-5 -mt-px -ml-px">
+          <CornerBox className="flex relative z-0 flex-col gap-3 p-4 -mt-px -ml-px">
             <Link
               href={PLATFORM_MCP_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"

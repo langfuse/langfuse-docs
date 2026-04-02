@@ -1,9 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import { HomeSection } from "./HomeSection";
 import { Heading, TextHighlight, ChipCard } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import { FeaturedCustomers } from "./FeaturedCustomers";
+import observabilityVisual from "./img/tools/observability.svg";
+import promptManagementVisual from "./img/tools/prompt.svg";
+import evaluationVisual from "./img/tools/evaluation.svg";
+import playgroundVisual from "./img/tools/playground.svg";
+import experimentsVisual from "./img/tools/experiments.svg";
+import humanAnnotationVisual from "./img/tools/human.svg";
+import metricsAlertsVisual from "./img/tools/metrics.svg";
 
 const tools = [
   {
@@ -13,6 +21,7 @@ const tools = [
     href: "/docs/tracing",
     tooltip: "Read more",
     span: "col-span-1",
+    visual: observabilityVisual,
   },
   {
     title: "Prompt Management",
@@ -21,6 +30,7 @@ const tools = [
     href: "/docs/prompts",
     tooltip: "Read more",
     span: "col-span-1",
+    visual: promptManagementVisual,
   },
   {
     title: "Evaluation",
@@ -29,6 +39,7 @@ const tools = [
     href: "/docs/scores",
     tooltip: "Read more",
     span: "col-span-1",
+    visual: evaluationVisual,
   },
   {
     title: "Playground",
@@ -37,6 +48,7 @@ const tools = [
     href: "/docs/playground",
     tooltip: "Read more",
     span: "col-span-1",
+    visual: playgroundVisual,
   },
   {
     title: "Experiments",
@@ -45,6 +57,7 @@ const tools = [
     href: "/docs/experimentation",
     tooltip: "Read more",
     span: "col-span-1",
+    visual: experimentsVisual,
   },
   {
     title: "Human Annotation",
@@ -53,6 +66,7 @@ const tools = [
     href: "/docs/human-feedback",
     tooltip: "Read more",
     span: "col-span-1",
+    visual: humanAnnotationVisual,
   },
   {
     title: "Metrics & Alerts",
@@ -61,6 +75,7 @@ const tools = [
     href: "/docs/analytics",
     tooltip: "Read more",
     span: "col-span-1",
+    visual: metricsAlertsVisual,
   },
 ];
 
@@ -84,15 +99,19 @@ export function AllTheTools() {
                 key={tool.title}
                 href={tool.href}
                 tooltip={tool.tooltip}
-                className="flex flex-col gap-3 p-5 -mt-px -ml-px first:ml-0 items-start min-h-[220px]"
+                className="flex flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start min-h-[300px]"
               >
-                <Text size="s" className="font-medium text-left text-text-secondary">
-                  {tool.title}
-                </Text>
-                <Text size="s" className="text-left">
-                  {tool.description}
-                </Text>
-                <div className="flex-1 w-full" />
+                <div className="flex flex-col gap-3 p-4">
+                  <Text size="s" className="font-medium text-left text-text-secondary">
+                    {tool.title}
+                  </Text>
+                  <Text size="s" className="text-left">
+                    {tool.description}
+                  </Text>
+                </div>
+                <div className="flex-1 w-full">
+                  <Image src={tool.visual} alt={tool.title} width={100} height={100} className="object-contain w-full h-full" />
+                </div>
               </ChipCard>
             ))}
           </div>
@@ -102,20 +121,24 @@ export function AllTheTools() {
                 key={tool.title}
                 href={tool.href}
                 tooltip={tool.tooltip}
-                className="flex flex-col gap-3 p-5 -mt-px -ml-px first:ml-0 items-start min-h-[220px]"
+                className="flex flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start min-h-[280px]"
               >
-                <Text size="s" className="font-medium text-left text-text-secondary">
-                  {tool.title}
-                </Text>
-                <Text size="s" className="text-left">
-                  {tool.description}
-                </Text>
-                <div className="flex-1 w-full" />
+                <div className="flex flex-col gap-3 p-4">
+                  <Text size="s" className="font-medium text-left text-text-secondary">
+                    {tool.title}
+                  </Text>
+                  <Text size="s" className="text-left">
+                    {tool.description}
+                  </Text>
+                </div>
+                <div className="flex-1 w-full">
+                  <Image src={tool.visual} alt={tool.title} width={100} height={100} className="object-contain w-full h-full" />
+                </div>
               </ChipCard>
             ))}
           </div>
         </div>
-        <FeaturedCustomers />
+        <FeaturedCustomers corners={{ tl: false, tr: false, bl: false, br: false }} />
       </div>
     </HomeSection>
   );
