@@ -14,7 +14,7 @@ import { FAQ } from "./FAQ";
 
 export const Home = () => (
   <>
-    <main className="overflow-hidden relative w-full">
+    <main className="overflow-hidden relative w-full hero-bg">
       <Hero />
       <FeatureTabsSection />
       <RiveSection />
