@@ -75,18 +75,6 @@ export async function GET(request: NextRequest) {
       markdownUrl.pathname = markdownUrl.pathname.replace(/\/$/, "") + ".md";
     }
 
-    // In development, rewrite langfuse.com URLs to localhost so we can test
-    // against the local md-src files without hitting production.
-    if (isLangfuseHost && markdownUrl.hostname === "langfuse.com") {
-      const isDev = process.env.NODE_ENV === "development";
-      if (isDev) {
-        markdownUrl = new URL(markdownUrl.toString());
-        markdownUrl.protocol = "http:";
-        markdownUrl.hostname = "localhost";
-        markdownUrl.port = "3333";
-      }
-    }
-
     const response = await fetch(markdownUrl.toString());
     if (!response.ok) {
       return NextResponse.json(
