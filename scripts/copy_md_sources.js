@@ -5,6 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { stripMdxForPlainMarkdown } = require('../lib/stripMdxForPlainMarkdown.js');
 
 const SOURCE_DIR = path.join(process.cwd(), 'content');
 const OUTPUT_DIR = path.join(process.cwd(), 'public', 'md-src');
@@ -36,9 +37,24 @@ function ensureDir(dirPath) {
 }
 
 /**
+ * Map content directory names to URL path prefixes.
+ * Must match the baseUrl values in lib/source.ts so that the generic rewrite
+ * /:path*.md → /md-src/:path*.md resolves correctly.
+ *
+ * - "marketing" → "" (pages served at /{slug})
+ * - "customers" → "users" (pages served at /users/{slug})
+ * - All other directories keep their name (already match the URL structure).
+ */
+const CONTENT_DIR_TO_URL_PREFIX = {
+    marketing: '',
+    customers: 'users',
+};
+
+/**
  * Determine if path within content/ should be copied and where.
  * - Accept .md and .mdx files only
  * - Exclude meta.json and non-markdown
+ * - Remap content directories to match URL structure (see CONTENT_DIR_TO_URL_PREFIX)
  * - Map content/foo/bar.mdx -> public/md-src/foo/bar.md
  * - Map content/foo/index.mdx -> public/md-src/foo.md
  */
@@ -52,9 +68,23 @@ function mapDestination(sourceFile) {
 
     const withoutExt = rel.slice(0, -ext.length);
     const parts = withoutExt.split(path.sep);
+
+    // Remap the top-level content directory to match URL structure
+    const topDir = parts[0];
+    if (topDir in CONTENT_DIR_TO_URL_PREFIX) {
+        const urlPrefix = CONTENT_DIR_TO_URL_PREFIX[topDir];
+        if (urlPrefix === '') {
+            // Strip the directory entirely (e.g. marketing/terms → terms)
+            parts.splice(0, 1);
+        } else {
+            // Replace directory name (e.g. customers/canva → users/canva)
+            parts[0] = urlPrefix;
+        }
+    }
+
     let outParts = parts.slice();
-    if (parts[parts.length - 1] === 'index') {
-        outParts = parts.slice(0, -1);
+    if (outParts.length > 0 && outParts[outParts.length - 1] === 'index') {
+        outParts = outParts.slice(0, -1);
     }
     const outRel = outParts.length ? outParts.join('/') + '.md' : 'index.md';
     return path.join(OUTPUT_DIR, outRel);
@@ -73,7 +103,10 @@ function copyAll() {
         const dir = path.dirname(dest);
         ensureDir(dir);
         const originalContent = fs.readFileSync(file, 'utf8');
-        const processed = inlineComponentsMdx(originalContent, file);
+        const inlined = inlineComponentsMdx(originalContent, file);
+        const processed = stripMdxForPlainMarkdown(inlined, {
+            unwrapCalloutsForPlainMd: true,
+        });
         fs.writeFileSync(dest, processed, 'utf8');
         copied += 1;
     }

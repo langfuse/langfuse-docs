@@ -14,9 +14,6 @@ import {
   handbook,
   marketing,
 } from "../.source/server";
-import { MARKETING_SLUGS } from "./marketing-slugs";
-
-export { MARKETING_SLUGS };
 
 export const source = loader({
   baseUrl: "/docs",
@@ -213,6 +210,34 @@ export const marketingSource = loader({
   baseUrl: "",
   source: marketing.toFumadocsSource(),
 });
+
+/** Slugs that are single marketing pages (content/marketing/*.mdx) */
+export const MARKETING_SLUGS = [
+  "about",
+  "careers",
+  "cn",
+  "community",
+  "cookie-policy",
+  "enterprise",
+  "find-us",
+  "imprint",
+  "jp",
+  "jp-cloud",
+  "kr",
+  "non-profit",
+  "oss-friends",
+  "press",
+  "pricing",
+  "pricing-self-host",
+  "privacy",
+  "research",
+  "startups",
+  "support",
+  "talk-to-us",
+  "terms",
+  "watch-demo",
+  "wrapped",
+] as const;
 
 // ---------------------------------------------------------------------------
 // Section routing config (formerly lib/sections.ts)

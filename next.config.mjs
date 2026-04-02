@@ -67,6 +67,7 @@ const nextConfig = {
   // matches `/api/md-to-pdf` via `contains: true`).
   outputFileTracingIncludes: {
     "/api/md-to-pdf": [
+      "./lib/stripMdxForPlainMarkdown.js",
       "./node_modules/@sparticuz/chromium/**",
       "./node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/**",
     ],
@@ -225,12 +226,6 @@ const nextConfig = {
       // Run BEFORE Next serves content/public files so it can override HTML routes
       // when the client explicitly asks for markdown.
       beforeFiles: [
-        // /support.md → raw markdown from the Support page (content/marketing/support.mdx → md-src/marketing/support.md)
-        {
-          source: "/support.md",
-          destination: "/md-src/marketing/support.md",
-        },
-
         // Optional: make "/" negotiable too (remove if you don't have md-src/index.md)
         {
           source: "/",
