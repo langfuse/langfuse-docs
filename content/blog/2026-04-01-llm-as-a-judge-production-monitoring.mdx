@@ -57,33 +57,34 @@ We built template [evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judg
   You can see these evaluators live in our [public demo project](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces?viewId=cmmkkfk1a03jiad07lkjcuir7&orderBy=order-DESC_column-startTime&dateRange=7d&search=&peek=ec3d57e9040f0f8f&observation=ec3d57e9040f0f8f&traceId=76eef62999b4ee69f1eae83dcbafcb47&timestamp=2026-03-27T11%3A53%3A01.922Z).
 </Callout>
 
-### 1. User Cursing
+### 1. User curses
 
-**What it detects:** The user used profanity or explicit language during the conversation.
+**What it detects:** The user expressed profanity or intense frustration during the conversation.
 
 <Frame fullWidth>
-  ![User cursing evaluator example](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/example-user-cursing.png)
+  ![User cur
+  sing evaluator example](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/example-user-cursing.png)
 </Frame>
 
-**Why it matters:** Cursing is the bluntest signal available - zero ambiguity, near-zero false positives. When a user swears at your agent, something went wrong. It requires no inference and no threshold-setting. The downside is low recall: most frustrated users don't curse, so it only catches the most extreme cases. But when it fires, it's worth reading.
+**Why it matters:** User distress — whether it's explicit profanity or intense frustration — is one of the clearest signals available. When a user swears at your agent, something went wrong. It requires no inference and no threshold-setting. The downside is low recall: most frustrated users don't curse, so it only catches the most extreme cases. But when it fires, it's worth reading.
 
 **What to do with it:** Treat these as high-priority traces to review. Cursing usually accompanies a concrete failure - a wrong answer, a repeated misunderstanding, a dead end. Reading a handful of these per week often surfaces the clearest failure patterns.
 
 You can see [our version of this evaluator](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/evals?peek=e716ad75-cbf3-465e-afa5-804f3c504ba0) running in our sample project, or use the template prompt below as a starting point:
 
 <details>
-<summary>Example judge prompt: User Cursing</summary>
+<summary>Example judge prompt: User Distress</summary>
 
 ```
-You are a User Profanity Judge evaluating an LLM-based customer support assistant.
+You are a User Distress Judge evaluating an LLM-based customer support assistant.
 You will be provided with a transcript of the conversation between the assistant and the user (and sometimes metadata), along with the last user message separately.
-Your job is to decide whether the **last user message** contains profanity, explicit language, or strong expletives.
+Your job is to decide whether the **last user message** contains profanity, explicit language, strong expletives, or clear intense frustration beyond mild annoyance.
 
 ## Important Constraints
 
 - Do not assume knowledge about the specific product or service being supported.
 - You are judging the presence of profanity in the **last user message** only, not in the assistant's responses.
-- Mild expressions of frustration ("this is annoying", "ugh", "seriously?") do not count. Only score true for explicit profanity or strong expletives.
+- Score true for explicit profanity, strong expletives, or clear intense frustration that goes beyond mild annoyance. Mild expressions ("this is annoying", "ugh", "seriously?") do not count.
 - If there is no prior assistant message in `CONVERSATION_HISTORY`, still score based solely on `LAST_USER_MESSAGE`.
 
 ---
@@ -107,7 +108,7 @@ Score true if the last user message contains at least one of:
 
 ## Score false Even If…
 
-Score false if there is no explicit profanity, including when:
+Score false if there is no profanity or intense frustration signal, including when:
 
 - The user expresses mild frustration without expletives: "this is so annoying", "ugh", "seriously?".
 - The user asks a blunt or impatient question without profanity.
