@@ -1,6 +1,7 @@
 import { use } from "react";
 import { notFound } from "next/navigation";
 import { Layout } from "@/components/layout";
+import { HomeLayout } from "@/components/home/layout/HomeLayout";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import {
   SECTION_CONFIG,
@@ -37,7 +38,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
     notFound();
   }
   if (MARKETING_SECTIONS.has(section)) {
-    notFound(); /* marketing sections are served by app/(home)/(marketing)/<section>/page.tsx */
+    return <HomeLayout>{children}</HomeLayout>;
   }
 
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];

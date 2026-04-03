@@ -71,6 +71,8 @@ function RiveInstance({
     },
     {
       shouldResizeCanvasToContainer: true,
+      /** Crisp rendering on retina / high-DPI displays (runtime caps DPR at 3). */
+      useDevicePixelRatio: true,
       /** Avoid pausing the renderer when scrolled; can interfere with input in some layouts. */
       shouldUseIntersectionObserver: false,
       /** Offscreen GL can occasionally desync hit-testing; disable for interactive scenes. */
@@ -122,8 +124,11 @@ function RiveInstance({
 
   return (
     <div
-      className="w-full h-full overflow-hidden"
-      style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}
+      className="overflow-hidden w-full h-full will-change-transform"
+      style={{
+        transform: `translateZ(0) scale(${zoom})`,
+        transformOrigin: "center center",
+      }}
     >
       <RiveComponent
         className={className}

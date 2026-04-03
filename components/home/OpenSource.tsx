@@ -47,7 +47,7 @@ export const OpenSource = () => {
   return (
     <HomeSection id="open-source" className="pt-20">
       <div className="flex flex-col gap-4 items-start mb-10">
-        <Heading>
+        <Heading className="text-left max-w-[12ch] sm:max-w-none">
           <TextHighlight>Open Platform.</TextHighlight> Open Source.
         </Heading>
         <Text className="text-left max-w-[48ch]">
@@ -55,12 +55,12 @@ export const OpenSource = () => {
         </Text>
       </div>
 
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2">
         {cards.map((card) => {
           return (
             <CornerBox
               key={card.title}
-              className="flex flex-col gap-3 p-6 -mt-px -ml-px"
+              className="flex flex-col gap-3 p-3 -mt-px -ml-px sm:p-4"
             >
               <Text className="font-medium text-left text-text-secondary">
                 {card.title}

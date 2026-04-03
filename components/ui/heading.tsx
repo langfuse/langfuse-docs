@@ -14,7 +14,7 @@ export interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
 const sizeClasses: Record<HeadingSize, string> = {
   // 68px / line-height 105%
   big: cn(
-    "text-[54px] lg:text-[68px] leading-[105%]",
+    "text-[35px] sm:text-[44px] md:text-[54px] lg:text-[68px] leading-[105%]",
     "text-center"
   ),
   // 50px / line-height 110% (between big and normal)

@@ -86,7 +86,7 @@ function IntegrationGroup({
   items: { label: string; icon: React.ReactNode }[];
 }) {
   return (
-    <ChipCard tooltip="See all" href={href} className="flex flex-col gap-4 items-start p-5 -mt-px -ml-px first:ml-0">
+    <ChipCard tooltip="See all" href={href} className="flex flex-col gap-4 items-start p-2 -mt-px -ml-px sm:p-4 first:ml-0">
       <Text size="s" className="font-medium text-left text-text-secondary">
         {title}
       </Text>
@@ -103,7 +103,7 @@ export function Integrations() {
   return (
     <HomeSection id="integrations" className="pt-20">
       <div className="flex flex-col gap-4 items-start mb-10">
-        <Heading>
+        <Heading className="text-left max-w-[16ch] sm:max-w-none">
           <TextHighlight>Framework agnostic.</TextHighlight> Works with your stack.
         </Heading>
         <Text className="text-left">
@@ -111,7 +111,7 @@ export function Integrations() {
         </Text>
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         {groups.map((group) => (
           <IntegrationGroup
             key={group.title}

@@ -79,7 +79,7 @@ const linkClassName =
 
 export function Footer() {
   return (
-    <footer className="mx-auto w-full max-w-[840px] pb-8 mt-20">
+    <footer className="mx-auto w-full px-4 sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px] pb-8 mt-20">
       {/* Social icons row */}
       <CornerBox className="flex gap-5 items-center p-4 -mb-px">
         {socialLinks.map((s) => {
