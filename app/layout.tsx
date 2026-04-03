@@ -17,6 +17,13 @@ const geistMono = localFont({
   display: "swap",
   weight: "500",
 });
+
+const f37Analog = localFont({
+  src: "../public/fonts/F37Analog-Medium.woff2",
+  variable: "--font-analog",
+  display: "swap",
+  weight: "500",
+});
 import { Hubspot } from "@/components/analytics/hubspot";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
@@ -45,7 +52,7 @@ export default function RootLayout({
       lang="en"
       dir="ltr"
       suppressHydrationWarning
-      className={`${interVariable.variable} ${geistMono.variable}`}
+      className={`${interVariable.variable} ${geistMono.variable} ${f37Analog.variable}`}
     >
       <body className="font-sans antialiased">
         <PostHogProvider>

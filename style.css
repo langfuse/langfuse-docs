@@ -17,6 +17,7 @@
   --font-mono:
     var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-analog: var(--font-analog), serif;
 
   /* Semantic color tokens (resolved from CSS custom properties at runtime) */
   --color-border: hsl(var(--border));
@@ -86,6 +87,9 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  /* Custom breakpoint: 1440px for wide layouts (right sidebar) */
+  --breakpoint-wide: 1440px;
 
   /* Container: use Tailwind default so max-w-2xl stays 42rem (672px). Use max-w-[1400px] or a custom var for wide layout. */
   --container-2xl: 42rem;
@@ -349,8 +353,17 @@
       "calt" 1;
   }
 
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-analog), serif;
+  }
+
   h1 {
-    @apply font-mono tracking-tight;
+    @apply tracking-tight;
   }
 
   h2 {

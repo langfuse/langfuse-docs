@@ -36,7 +36,7 @@ export const HomeSection = forwardRef<
         else if (ref) (ref as React.MutableRefObject<HTMLElement | null>).current = node;
       }}
       className={cn(
-        "mx-auto w-full max-w-[840px]",
+        "mx-auto w-full max-w-[640px] lg:max-w-[840px]",
         "transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
         className

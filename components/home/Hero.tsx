@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { CornerBox } from "@/components/ui/corner-box";
+import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
@@ -25,7 +26,7 @@ function HeroTitleLine({ children }: { children: React.ReactNode }) {
 export function Hero() {
   return (
     <HomeSection className="pt-[40px]">
-      <CornerBox className="flex gap-6 justify-center items-center px-4 py-[10px] -mb-px">
+      <CornerBox className="flex gap-3 lg:gap-6 justify-center items-center px-4 py-[10px] -mb-px">
         <Text size="s"><b className="text-primary">19</b> of Fortune 50</Text>
         <Dot />
         <Text size="s"><b className="text-primary">10+ billion</b> observations/month</Text>
@@ -33,15 +34,17 @@ export function Hero() {
         <Text size="s"><b className="text-primary">100,000+</b> engineers building on Langfuse</Text>
       </CornerBox>
       <CornerBox className="flex flex-col gap-10 items-center px-4 py-8 sm:px-8 sm:py-10">
-        <h1
+        <Heading
+          as="h1"
+          size="big"
           className={cn(
-            "flex flex-col items-center gap-1.5 text-center font-sans text-[68px] font-medium not-italic leading-[105%] text-balance",
+            "flex flex-col items-center gap-1.5 text-center font-medium leading-[105%] text-balance",
             "[leading-trim:both] [text-edge:cap]"
           )}
         >
           <HeroTitleLine>Open Source LLM</HeroTitleLine>
           <HeroTitleLine>Engineering Platform</HeroTitleLine>
-        </h1>
+        </Heading>
         <div className="flex flex-col gap-6">
           <Text className="max-w-xl">
             Tracing, prompt management, evaluation, and experiments. Debug

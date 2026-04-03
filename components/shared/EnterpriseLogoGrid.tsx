@@ -135,14 +135,14 @@ export const EnterpriseLogoGrid = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-2 md:grid-cols-8 auto-rows-fr",
+        "grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-8 auto-rows-fr",
         small && "grid-cols-4",
         className,
       )}
       role="grid"
       aria-label="Enterprise customers using Langfuse"
     >
-      {companies.map((company) => {
+      {companies.map((company, index) => {
         const hasStory = Boolean(company.customerStoryPath);
         return (
           <LinkBox
@@ -150,7 +150,7 @@ export const EnterpriseLogoGrid = ({
             href={company.customerStoryPath}
             tooltip={hasStory ? "Case study" : undefined}
             tooltipPlacement="bottom-center"
-            className={cellClassName}
+            className={cn(cellClassName, index > 11 ? "hidden lg:flex" : index > 5 ? "hidden sm:flex" : "flex")}
             role="gridcell"
             aria-label={
               hasStory
