@@ -69,7 +69,7 @@ const tools = [
     visual: humanAnnotationVisual,
   },
   {
-    title: "Metrics & Alerts",
+    title: "Cost & Latency",
     description:
       "Monitor cost, latency, and quality with dashboards and automated alerts.",
     href: "/docs/analytics",
@@ -93,15 +93,15 @@ export function AllTheTools() {
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 xl:grid-cols-3">
             {tools.slice(0, 3).map((tool) => (
               <ChipCard
                 key={tool.title}
                 href={tool.href}
                 tooltip={tool.tooltip}
-                className="flex flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start min-h-[300px]"
+                className="flex flex-col sm:flex-row xl:flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start sm:max-h-[200px] xl:max-h-none xl:min-h-[300px] overflow-clip"
               >
-                <div className="flex flex-col gap-3 p-4">
+                <div className="flex flex-col flex-1 gap-3 p-2 sm:p-4">
                   <Text size="s" className="font-medium text-left text-text-secondary">
                     {tool.title}
                   </Text>
@@ -110,20 +110,20 @@ export function AllTheTools() {
                   </Text>
                 </div>
                 <div className="flex-1 w-full">
-                  <Image src={tool.visual} alt={tool.title} width={100} height={100} className="object-contain w-full h-full" />
+                  <Image src={tool.visual} alt={tool.title} width={100} height={100} className="object-contain w-full h-full sm:-translate-y-[40px] xl:translate-y-0" />
                 </div>
               </ChipCard>
             ))}
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
             {tools.slice(3).map((tool) => (
               <ChipCard
                 key={tool.title}
                 href={tool.href}
                 tooltip={tool.tooltip}
-                className="flex flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start min-h-[280px]"
+                className="flex flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start xl:min-h-[280px]"
               >
-                <div className="flex flex-col gap-3 p-4">
+                <div className="flex flex-col gap-3 p-2 sm:p-4">
                   <Text size="s" className="font-medium text-left text-text-secondary">
                     {tool.title}
                   </Text>
@@ -131,7 +131,7 @@ export function AllTheTools() {
                     {tool.description}
                   </Text>
                 </div>
-                <div className="flex-1 w-full">
+                <div className="hidden flex-1 w-full xl:flex">
                   <Image src={tool.visual} alt={tool.title} width={100} height={100} className="object-contain w-full h-full" />
                 </div>
               </ChipCard>

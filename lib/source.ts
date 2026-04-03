@@ -330,6 +330,7 @@ export const MARKETING_SECTION_SLUGS_STANDALONE = [
   "watch-demo",
   "startups",
 ] as const;
-export type MarketingSlug = (typeof MARKETING_SECTION_SLUGS_STANDALONE)[number];
-export const MARKETING_SECTIONS = new Set<string>(MARKETING_SECTION_SLUGS_STANDALONE);
+export type MarketingSlug = (typeof MARKETING_SLUGS)[number];
+/** All marketing pages — use HomeLayout instead of DocsLayout */
+export const MARKETING_SECTIONS = new Set<string>(MARKETING_SLUGS);
 

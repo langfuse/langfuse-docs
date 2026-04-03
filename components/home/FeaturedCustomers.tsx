@@ -38,41 +38,58 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
   const story = stories[active];
 
   return (
-    <CornerBox className="flex gap-6 items-center p-4 pr-5 -mt-px" corners={corners}>
-      <div className="flex gap-1 shrink-0">
-        {stories.map((s, i) => {
-          const isActive = i === active;
-          return (
-            <button
-              key={s.name}
-              onClick={() => setActive(i)}
-              aria-label={s.name}
-              aria-pressed={isActive}
-              className="relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <CornerBox
-                className="flex justify-center items-center p-0.75 w-11 h-11 border-none cursor-pointer"
-                corners={isActive ? undefined : { tl: false, tr: false, bl: false, br: false }}
+    <CornerBox className="flex flex-col gap-3 p-4 -mt-px lg:flex-row lg:items-center lg:gap-6 lg:pr-5" corners={corners}>
+      {/* Row 1 (mobile) / left side (desktop): logo switchers + button */}
+      <div className="flex items-center gap-6 lg:contents">
+        <div className="flex gap-1 shrink-0">
+          {stories.map((s, i) => {
+            const isActive = i === active;
+            return (
+              <button
+                key={s.name}
+                onClick={() => setActive(i)}
+                aria-label={s.name}
+                aria-pressed={isActive}
+                className="relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <div className={cn("flex justify-center items-center w-full h-full transition-colors duration-150", isActive ? "bg-surface-code" : "bg-surface-2")}>
-                  <Image
-                    src={s.logo}
-                    alt={s.name}
-                    width={56}
-                    height={16}
-                    className={[
-                      "object-contain w-5 h-5",
-                      isActive ? "brightness-0 invert" : "",
-                    ].join(" ")}
-                  />
-                </div>
-              </CornerBox>
-            </button>
-          );
-        })}
+                <CornerBox
+                  className="flex justify-center items-center p-0.75 w-11 h-11 border-none cursor-pointer"
+                  corners={isActive ? undefined : { tl: false, tr: false, bl: false, br: false }}
+                >
+                  <div className={cn("flex justify-center items-center w-full h-full transition-colors duration-150", isActive ? "bg-surface-code" : "bg-surface-2")}>
+                    <Image
+                      src={s.logo}
+                      alt={s.name}
+                      width={56}
+                      height={16}
+                      className={[
+                        "object-contain w-5 h-5",
+                        isActive ? "brightness-0 invert" : "",
+                      ].join(" ")}
+                    />
+                  </div>
+                </CornerBox>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Button: right of logos on mobile, far right on desktop */}
+        <div className="shrink-0 ml-auto lg:ml-0 lg:order-last">
+          <Button
+            href="https://cloud.langfuse.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            shortcutKey="s"
+            variant="secondary"
+            size="small"
+          >
+            Start free
+          </Button>
+        </div>
       </div>
 
-      {/* Content */}
+      {/* Row 2 (mobile) / middle (desktop): animated content */}
       <div className="overflow-hidden flex-1 min-w-0">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -106,24 +123,11 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
                 />
               </svg>
             </a>
-            <Text size="s" className="text-left mt-0.5 truncate text-text-tertiary">
+            <Text size="s" className="text-left mt-0.5 lg:truncate text-text-tertiary">
               {story.description}
             </Text>
           </motion.div>
         </AnimatePresence>
-      </div>
-
-      <div className="shrink-0">
-        <Button
-          href="https://cloud.langfuse.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          shortcutKey="s"
-          variant="secondary"
-          size="small"
-        >
-          Start free
-        </Button>
       </div>
     </CornerBox>
   );

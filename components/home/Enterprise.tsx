@@ -43,13 +43,13 @@ export const Enterprise = () => {
         </Text>
       </div>
 
-      <div className="grid grid-cols-2 items-stretch">
+      <div className="flex flex-col-reverse items-stretch sm:grid sm:grid-cols-2">
         <div className="flex flex-col flex-1">
-          <CornerBox className="flex flex-col flex-1 gap-3 p-5 -mt-px">
+          <CornerBox className="flex flex-col flex-1 gap-3 p-3 -mt-px sm:p-4">
             <Text size="s" className="font-medium text-left text-text-secondary">Architecture</Text>
             <BulletList items={architecture} />
           </CornerBox>
-          <CornerBox className="flex flex-col flex-1 gap-3 p-5 -mt-px">
+          <CornerBox className="flex flex-col flex-1 gap-3 p-3 -mt-px sm:p-4">
             <Text size="s" className="font-medium text-left text-text-secondary">Open APIs</Text>
             <BulletList items={openApis} />
           </CornerBox>

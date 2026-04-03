@@ -9,7 +9,7 @@ export const textBodyMRegularClassName = cn(
 
 /** Body-S / Regular — Inter 13px. */
 export const textBodySRegularClassName = cn(
-  "text-center font-sans text-[13px] font-[430] not-italic leading-[120%] tracking-[-0.26px] [font-variant-numeric:ordinal] text-text-tertiary"
+  "text-center font-sans text-[13px] font-[430] not-italic leading-[150%] lg:leading-[120%] tracking-[-0.26px] [font-variant-numeric:ordinal] text-text-tertiary"
 );
 
 /** Body-XS Mono / Regular — Geist Mono 10px underlined. */

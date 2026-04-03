@@ -178,18 +178,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const content = hasShortcut ? (
       <>
         {iconPosition === "start" && iconEl}
-        <span
+        <kbd
           className={cn(
             "flex flex-1 items-center min-w-0 truncate",
             labelTypographyClasses
           )}
         >
           {children}
-        </span>
+        </kbd>
         {iconPosition === "end" && iconEl}
         <kbd
           className={cn(
-            "flex justify-center items-center not-italic shrink-0 w-[20px] h-[20px] rounded-px",
+            "hidden lg:flex justify-center items-center not-italic shrink-0 w-[20px] h-[20px] rounded-px",
             labelTypographyClasses,
             variantClasses[resolvedVariant].key
           )}
@@ -219,7 +219,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const isSmallSize = resolvedSize === "small";
     const leftPaddingClass = hasStartIcon ? "pl-[3px]" : isSmallSize ? "pl-[6px]" : "pl-[8px]";
     const rightPaddingClass =
-      hasEndIcon || hasShortcut ? "pr-[3px]" : isSmallSize ? "pr-[6px]" : "pr-[8px]";
+      hasEndIcon || hasShortcut ? "pr-1.5 lg:pr-[3px]" : isSmallSize ? "pr-[6px]" : "pr-[8px]";
     const buttonPaddingClasses = `${leftPaddingClass} ${rightPaddingClass}`;
 
     const controlClassName = buttonVariants({

@@ -46,7 +46,7 @@ export function Navbar() {
         </div>
         <div className={cn(cornersStyle, 'flex-1 justify-end pl-0 lg:justify-center lg:max-w-[240px] lg:pl-px')}>
           <div className={cn(contentStyle, 'justify-end rounded-l-none lg:justify-center lg:rounded-l-sm')}>
-            <NavbarExtraContent />
+            <NavbarExtraContent sectionNavData={sectionNavData} />
           </div>
         </div>
       </nav>

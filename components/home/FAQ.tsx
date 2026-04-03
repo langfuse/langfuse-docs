@@ -109,8 +109,8 @@ export function FAQ() {
 
   return (
     <HomeSection id="faq" className="pt-20">
-      <div className="grid grid-cols-[1fr_2fr] gap-16 items-start">
-        <Heading as="h2" className="sticky top-8 text-left">
+      <div className="grid lg:grid-cols-[1fr_2fr] gap-16 items-start">
+        <Heading as="h2" className="hidden top-8 text-left lg:block">
           FAQ
         </Heading>
 
