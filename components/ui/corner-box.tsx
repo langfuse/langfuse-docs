@@ -66,8 +66,8 @@ const cornerLayout: Record<
   { className: string; rotateClass: string }
 > = {
   tl: { className: "-top-px -left-px", rotateClass: "" },
-  tr: { className: "-top-px -right-px", rotateClass: "rotate-90" },
-  br: { className: "-bottom-px -right-px", rotateClass: "rotate-180" },
+  tr: { className: "-top-px right-0", rotateClass: "rotate-90" },
+  br: { className: "-bottom-px right-0", rotateClass: "rotate-180" },
   bl: { className: "-bottom-px -left-px", rotateClass: "-rotate-90" },
 };
 
@@ -145,7 +145,7 @@ export function HoverCorners() {
             key={key}
             className={cn(
               "absolute z-10 origin-center pointer-events-none size-2",
-              "opacity-0 group-hover:opacity-100 transition-opacity duration-120",
+              "opacity-0 transition-opacity group-hover:opacity-100 duration-120",
               pos,
               rotateClass
             )}

@@ -14,7 +14,7 @@ export interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
 const sizeClasses: Record<HeadingSize, string> = {
   // 68px / line-height 105%
   big: cn(
-    "text-[68px] leading-[105%]",
+    "text-[54px] lg:text-[68px] leading-[105%]",
     "text-center"
   ),
   // 50px / line-height 110% (between big and normal)
@@ -30,7 +30,7 @@ const sizeClasses: Record<HeadingSize, string> = {
 /** Shared typographic base for all heading sizes. */
 const headingBaseClasses = cn(
   "text-text-primary",
-  "font-medium not-italic",
+  "font-analog font-medium not-italic",
   "[font-variant-numeric:ordinal]",
   "[font-feature-settings:'dlig'_on]"
 );

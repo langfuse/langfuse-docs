@@ -34,18 +34,18 @@ export function Navbar() {
   return (
     <header className="sticky z-50 h-16 border-b backdrop-blur-md bg-surface-1 border-line-structure" style={{ top: 'var(--fd-banner-height, 0px)' }}>
       <nav className="flex mx-auto h-full max-w-360">
-        <div className={cn(cornersStyle, 'max-w-[240px]')}>
-          <div className={contentStyle}>
-            <Logo wrapInLink={false} />
+        <div className={cn(cornersStyle, 'pr-0 lg:max-w-[240px] lg:pr-px')}>
+          <div className={cn(contentStyle, 'rounded-r-none lg:rounded-r-sm')}>
+            <Logo />
           </div>
         </div>
-        <div className={cn(cornersStyle, 'px-0')}>
+        <div className={cn(cornersStyle, 'hidden px-0 lg:flex')}>
           <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1'>
             <NavLinks sectionNavData={sectionNavData} />
           </div>
         </div>
-        <div className={cn(cornersStyle, 'max-w-[240px]')}>
-          <div className={contentStyle}>
+        <div className={cn(cornersStyle, 'flex-1 justify-end pl-0 lg:justify-center lg:max-w-[240px] lg:pl-px')}>
+          <div className={cn(contentStyle, 'justify-end rounded-l-none lg:justify-center lg:rounded-l-sm')}>
             <NavbarExtraContent />
           </div>
         </div>
