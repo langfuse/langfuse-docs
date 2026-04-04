@@ -148,7 +148,7 @@ jobs:
       - name: Build next.js app
         run: pnpm build
 
-      - name: Start server and check sitemap links
+      - name: Start server and check sitemap links and markdown endpoints
         run: |
           # Start the server in the background and capture its PID
           pnpm start & SERVER_PID=$!
@@ -159,14 +159,20 @@ jobs:
           # Run the sitemap checker
           pnpm sitemap-check
 
-          # Store the exit code
+          # Store the sitemap checker exit code
           SITEMAP_CHECK_EXIT=$?
+
+          # Run the sitemap markdown endpoint checker
+          pnpm sitemap-markdown-check
+
+          # Store the markdown checker exit code
+          SITEMAP_MARKDOWN_CHECK_EXIT=$?
 
           # Kill the server using the captured PID
           kill $SERVER_PID || true
 
-          # Exit with the sitemap checker's exit code
-          exit $SITEMAP_CHECK_EXIT
+          # Exit with non-zero if either checker fails
+          exit $((SITEMAP_CHECK_EXIT || SITEMAP_MARKDOWN_CHECK_EXIT))
 
   # Summary job that depends on all other jobs
   # This allows you to require only this single check in branch protection rules
