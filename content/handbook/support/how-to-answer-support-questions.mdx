@@ -1,0 +1,58 @@
+---
+title: How to Answer Support Questions
+---
+
+# How to Answer Support Questions
+
+This guide outlines how to handle common support questions in a consistent way. Use each question as a playbook: identify the issue, check the relevant systems, and reply with the next clear action for the user.
+
+## I have higher costs than usual
+
+1. Go to Stripe.
+2. Open the user's account and review the latest invoice, subscription, and billing history.
+3. Check whether the increase came from a plan change, usage increase, additional seats, or a one-off charge.
+4. Cross-check the account in Langfuse to confirm workspace usage and any recent changes that could explain the increase.
+5. Reply with the specific reason for the higher cost and link the relevant invoice or billing page if helpful.
+6. If the charge still looks wrong, escalate internally before confirming any refund or billing correction.
+
+## I was charged unexpectedly
+
+1. Open the user's account in Stripe.
+2. Check whether the charge is tied to a renewal, subscription update, failed payment retry, or duplicate subscription.
+3. Confirm the billing status and current plan in Langfuse.
+4. Look for any recent account changes that may have triggered the charge.
+5. Reply with the exact source of the charge and the date it was created.
+6. If the charge appears incorrect, escalate to the owner before promising a refund or account credit.
+
+## I want to change or cancel my plan
+
+1. Confirm which workspace and subscription the user is referring to.
+2. Check the current subscription in Stripe.
+3. Point the user to the billing settings if they can self-serve the change.
+4. If self-serve is not possible, confirm the requested change internally before making any manual update.
+5. Reply with what will happen next, including whether the change is immediate or takes effect at the next billing cycle.
+
+## I am missing data or traces
+
+1. Ask for the project, timeframe, and example trace or observation IDs if the user has them.
+2. Check whether data ingestion is still active and whether there are any obvious spikes or drops.
+3. Review recent errors, ingestion issues, or configuration changes that could explain missing data.
+4. Confirm whether the data is delayed, filtered, or actually missing.
+5. Reply with the current status and the next action, such as waiting for delayed processing, fixing configuration, or escalating for investigation.
+
+## I am getting an error in the product
+
+1. Ask for the exact error message, the affected project, and the steps to reproduce it.
+2. Check whether the issue is already known in Pylon, Linear, or recent support threads.
+3. Review logs, recent changes, and account context to reproduce or narrow down the problem.
+4. If you can identify a workaround, share it immediately.
+5. If this looks like a bug, create or link the relevant Linear issue and connect it to the support thread in Pylon.
+6. Reply with the current status, workaround if available, and whether engineering is investigating.
+
+## General response pattern
+
+1. Clarify the exact user question.
+2. Check the relevant system, such as Pylon, Stripe, Langfuse, or Linear.
+3. Identify the root cause or the most likely explanation.
+4. Reply with a direct answer and the next clear action.
+5. If follow-up work is needed, assign an owner and close the loop once resolved.
