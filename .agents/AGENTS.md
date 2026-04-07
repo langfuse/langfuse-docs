@@ -64,6 +64,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 - `theme.config.tsx` — Nextra theme configuration.
 - `tailwind.config.js` — Tailwind setup.
 - `components.json` — shadcn/ui component config.
+- `lib/content-dir-map.js` — single source of truth for mapping `content/` top-level directories to URL prefixes; keep this updated when adding/renaming content sections so `lib/source.ts` and `scripts/copy_md_sources.js` stay in sync.
 
 ## Writing guidelines
 
@@ -91,3 +92,4 @@ Please check the following:
 - Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
 - We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.
 - When deep-linking to a section via a link that uses the `#` anchor, make sure the anchor is explicitly defined in the source page via `[#anchor]` at the end of the header line, e.g. `## Get Started [#get-started]`.
+- If a page/route includes a top-of-file comment that points to an `md-override` source, verify both files are kept in sync whenever either side is edited.

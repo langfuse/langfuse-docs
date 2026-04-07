@@ -6,9 +6,11 @@
 const fs = require('fs');
 const path = require('path');
 const { stripMdxForPlainMarkdown } = require('../lib/stripMdxForPlainMarkdown.js');
+const { CONTENT_DIR_TO_URL_PREFIX } = require('../lib/content-dir-map.js');
 
 const SOURCE_DIR = path.join(process.cwd(), 'content');
 const OUTPUT_DIR = path.join(process.cwd(), 'public', 'md-src');
+const OVERRIDE_DIR = path.join(process.cwd(), 'md-override');
 
 /**
  * Recursively walk a directory collecting file paths.
@@ -37,20 +39,6 @@ function ensureDir(dirPath) {
 }
 
 /**
- * Map content directory names to URL path prefixes.
- * Must match the baseUrl values in lib/source.ts so that the generic rewrite
- * /:path*.md → /md-src/:path*.md resolves correctly.
- *
- * - "marketing" → "" (pages served at /{slug})
- * - "customers" → "users" (pages served at /users/{slug})
- * - All other directories keep their name (already match the URL structure).
- */
-const CONTENT_DIR_TO_URL_PREFIX = {
-    marketing: '',
-    customers: 'users',
-};
-
-/**
  * Determine if path within content/ should be copied and where.
  * - Accept .md and .mdx files only
  * - Exclude meta.json and non-markdown
@@ -69,17 +57,12 @@ function mapDestination(sourceFile) {
     const withoutExt = rel.slice(0, -ext.length);
     const parts = withoutExt.split(path.sep);
 
-    // Remap the top-level content directory to match URL structure
     const topDir = parts[0];
-    if (topDir in CONTENT_DIR_TO_URL_PREFIX) {
-        const urlPrefix = CONTENT_DIR_TO_URL_PREFIX[topDir];
-        if (urlPrefix === '') {
-            // Strip the directory entirely (e.g. marketing/terms → terms)
-            parts.splice(0, 1);
-        } else {
-            // Replace directory name (e.g. customers/canva → users/canva)
-            parts[0] = urlPrefix;
-        }
+    const urlPrefix = CONTENT_DIR_TO_URL_PREFIX[topDir];
+    if (urlPrefix === '') {
+        parts.splice(0, 1);
+    } else if (typeof urlPrefix === 'string') {
+        parts[0] = urlPrefix;
     }
 
     let outParts = parts.slice();
@@ -119,8 +102,30 @@ function cleanOutputDir() {
     }
 }
 
+/**
+ * Copy hand-authored .md files from md-override/ into public/md-src/,
+ * overwriting any auto-generated version for that path.
+ */
+function applyOverrides() {
+    if (!fs.existsSync(OVERRIDE_DIR)) return;
+    const files = walkDir(OVERRIDE_DIR);
+    let overridden = 0;
+    for (const file of files) {
+        if (path.extname(file).toLowerCase() !== '.md') continue;
+        const rel = path.relative(OVERRIDE_DIR, file);
+        const dest = path.join(OUTPUT_DIR, rel);
+        ensureDir(path.dirname(dest));
+        fs.copyFileSync(file, dest);
+        overridden += 1;
+    }
+    if (overridden > 0) {
+        console.log(`Applied ${overridden} markdown override(s) from md-override/`);
+    }
+}
+
 cleanOutputDir();
 copyAll();
+applyOverrides();
 
 /**
  * Inline imports of MDX components from the components-mdx directory.

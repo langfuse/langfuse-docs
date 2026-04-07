@@ -14,20 +14,30 @@ import {
   handbook,
   marketing,
 } from "../.source/server";
+// @ts-expect-error -- plain JS module shared with CJS scripts
+import { CONTENT_DIR_TO_URL_PREFIX } from "./content-dir-map.js";
+
+function baseUrl(contentDir: string): string {
+  const prefix = CONTENT_DIR_TO_URL_PREFIX[contentDir];
+  if (typeof prefix !== "string") {
+    throw new Error(`Missing content-dir-map entry for "${contentDir}"`);
+  }
+  return prefix === "" ? "" : `/${prefix}`;
+}
 
 export const source = loader({
-  baseUrl: "/docs",
+  baseUrl: baseUrl("docs"),
   source: docs.toFumadocsSource(),
   pageTree: { idPrefix: "docs" },
 });
 
 export const selfHostingSource = loader({
-  baseUrl: "/self-hosting",
+  baseUrl: baseUrl("self-hosting"),
   source: selfHosting.toFumadocsSource(),
   pageTree: { idPrefix: "self-hosting" },
 });
 
-const SELF_HOSTING_BASE = "/self-hosting";
+const SELF_HOSTING_BASE = baseUrl("self-hosting");
 
 /** Display names for self-hosting sidebar links to main docs (avoid duplicate "Overview"). */
 const SELF_HOSTING_DOC_LINK_NAMES: Record<string, string> = {
@@ -69,33 +79,33 @@ export function getSelfHostingPageTree(): ReturnType<typeof selfHostingSource.ge
 }
 
 export const blogSource = loader({
-  baseUrl: "/blog",
+  baseUrl: baseUrl("blog"),
   source: blog.toFumadocsSource(),
 });
 
 export const changelogSource = loader({
-  baseUrl: "/changelog",
+  baseUrl: baseUrl("changelog"),
   source: changelog.toFumadocsSource(),
 });
 
 export const guidesSource = loader({
-  baseUrl: "/guides",
+  baseUrl: baseUrl("guides"),
   source: guides.toFumadocsSource(),
   pageTree: { idPrefix: "guides" },
 });
 
 export const faqSource = loader({
-  baseUrl: "/faq",
+  baseUrl: baseUrl("faq"),
   source: faq.toFumadocsSource(),
 });
 
 export const integrationsSource = loader({
-  baseUrl: "/integrations",
+  baseUrl: baseUrl("integrations"),
   source: integrations.toFumadocsSource(),
   pageTree: { idPrefix: "integrations" },
 });
 
-const INTEGRATIONS_BASE = "/integrations";
+const INTEGRATIONS_BASE = baseUrl("integrations");
 
 type TreeNode = { type?: string; name?: string; url?: string; children?: TreeNode[]; [key: string]: unknown };
 type ShortTitleData = { shortTitle?: string; sidebarTitle?: string };
@@ -186,28 +196,28 @@ export function getIntegrationsPageTree(): ReturnType<typeof integrationsSource.
 }
 
 export const securitySource = loader({
-  baseUrl: "/security",
+  baseUrl: baseUrl("security"),
   source: security.toFumadocsSource(),
 });
 
 export const librarySource = loader({
-  baseUrl: "/library",
+  baseUrl: baseUrl("library"),
   source: library.toFumadocsSource(),
   pageTree: { idPrefix: "library" },
 });
 
 export const usersSource = loader({
-  baseUrl: "/users",
+  baseUrl: baseUrl("customers"),
   source: customers.toFumadocsSource(),
 });
 
 export const handbookSource = loader({
-  baseUrl: "/handbook",
+  baseUrl: baseUrl("handbook"),
   source: handbook.toFumadocsSource(),
 });
 
 export const marketingSource = loader({
-  baseUrl: "",
+  baseUrl: baseUrl("marketing"),
   source: marketing.toFumadocsSource(),
 });
 
