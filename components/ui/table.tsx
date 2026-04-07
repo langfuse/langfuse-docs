@@ -1,17 +1,20 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { CornerBox } from "./corner-box";
 
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
   <div className="overflow-auto w-full">
-    <table
-      ref={ref}
-      className={cn("my-0! w-full h-full text-sm caption-bottom", className)}
-      {...props}
-    />
+    <CornerBox noBorder>
+      <table
+        ref={ref}
+        className={cn("my-0! w-full h-full text-sm caption-bottom", className)}
+        {...props}
+      />
+    </CornerBox>
   </div>
 ));
 Table.displayName = "Table";

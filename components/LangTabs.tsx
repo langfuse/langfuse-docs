@@ -2,10 +2,12 @@
 import React, { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import {
   Tabs as FumadocsTabs,
+  Tab as FumadocsTab,
   TabsList as FumadocsTabsList,
   TabsTrigger as FumadocsTabsTrigger,
 } from "fumadocs-ui/components/tabs";
 import { cn } from "@/lib/utils";
+import { CornerBox } from "./ui";
 
 const KEY = "synced-tabs:language";
 const normalize = (s: string) => s.trim().toLowerCase();
@@ -56,6 +58,13 @@ if (typeof window !== "undefined") {
 
 function toValue(s: string): string {
   return s.toLowerCase().replace(/\s/g, "-");
+}
+
+export function LangTab({
+  className,
+  ...props
+}: React.ComponentProps<typeof FumadocsTab>) {
+  return <FumadocsTab className={cn("prose-no-margin bg-transparent bg-stripe-pattern pt-4 stripe-pattern--base-mix text-sm rounded-none", className)} {...props} />;
 }
 
 export function LangTabs(props: {
@@ -147,34 +156,38 @@ export function LangTabs(props: {
 
   return (
     <div ref={containerRef}>
-      <FumadocsTabs
-        key={internalValue}
-        defaultValue={internalValue}
-        className="flex overflow-hidden flex-col my-4 rounded-xl border border-border bg-card"
-      >
-        <FumadocsTabsList
-          className={cn(
-            "flex overflow-x-auto overflow-y-hidden flex-nowrap gap-1 px-4 pt-1 rounded-t-xl border-b text-muted-foreground not-prose bg-muted/50 border-border min-h-11"
-          )}
+      <CornerBox>
+        <FumadocsTabs
+          key={internalValue}
+          defaultValue={internalValue}
+          className="flex overflow-hidden flex-col my-0 border border-border rounded-none"
         >
-          {items.map((item, i) => (
-            <FumadocsTabsTrigger
-              key={i}
-              value={values[i]}
-              onClick={() => handleValueChange(values[i])}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-2 border-transparent px-2.5 pb-2 pt-1.5 -mb-px text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-muted-blue data-[state=active]:text-muted-blue data-[state=active]:font-medium"
-            >
-              {typeof item === "string" ? item : item?.label ?? String(i)}
-            </FumadocsTabsTrigger>
-          ))}
-        </FumadocsTabsList>
-        {React.Children.map(children, (child, i) => {
-          if (!React.isValidElement(child)) return child;
-          return React.cloneElement(child as React.ReactElement<{ value: string }>, {
-            value: values[i] ?? String(i),
-          });
-        })}
-      </FumadocsTabs>
+          <FumadocsTabsList
+            className={cn(
+              "flex overflow-x-auto overflow-y-hidden flex-nowrap gap-2 sm:gap-4 pt-1 px-4 rounded-none border-b not-prose border-line-structure min-h-9"
+            )}
+          >
+            {items.map((item, i) => (
+              <FumadocsTabsTrigger
+                key={i}
+                value={values[i]}
+                onClick={() => handleValueChange(values[i])}
+                className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-1 border-transparent pb-2 pt-1.5 text-xs text-text-tertiary transition-colors hover:text-foreground cursor-pointer disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-line-cta data-[state=active]:text-text-primary data-[state=active]:font-medium"
+              >
+                {typeof item === "string" ? item : item?.label ?? String(i)}
+              </FumadocsTabsTrigger>
+            ))}
+          </FumadocsTabsList>
+          {React.Children.map(children, (child, i) => {
+            if (!React.isValidElement(child)) return child;
+            return React.cloneElement(child as React.ReactElement<{ value: string }>, {
+              value: values[i] ?? String(i),
+            });
+          })}
+        </FumadocsTabs>
+      </CornerBox>
     </div>
   );
 }
+
+export const LangTabsWithTab = Object.assign(LangTabs, { Tab: LangTab });

@@ -1,7 +1,6 @@
 import { use } from "react";
 import { notFound } from "next/navigation";
-import { Layout } from "@/components/layout";
-import { HomeLayout } from "@/components/home/layout/HomeLayout";
+import { DocsSecondaryNav, HomeLayout, DocsSecondaryNavMobile, Layout } from "@/components/layout";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import {
   SECTION_CONFIG,
@@ -13,7 +12,6 @@ import {
   CHANGELOG_SECTIONS,
   getPageTreeWithShortTitles,
 } from "@/lib/source";
-import { MenuSwitcher } from "@/components/MenuSwitcher";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SectionLayoutWrapper } from "./SectionLayoutWrapper";
@@ -59,19 +57,19 @@ export default function SectionLayout({ children, params }: LayoutProps) {
         <DocsLayout
           tree={tree}
           githubUrl="https://github.com/langfuse/langfuse-docs"
-          nav={{ enabled: false }}
+          nav={isMarketing || isPost ? { enabled: false } : { component: <DocsSecondaryNavMobile /> }}
           sidebar={
-            isMarketing || isPost ? { enabled: false } : { banner: <MenuSwitcher /> }
+            isMarketing || isPost ? { enabled: false } : { banner: <DocsSecondaryNav /> }
           }
           themeSwitch={isMarketing || isPost ? { enabled: false } : { component: <div className="ms-auto"><ThemeToggle /></div> }}
           searchToggle={{ enabled: false }}
           containerProps={
             isMarketing || isChangelog
               ? // Force --fd-toc-width:0 so the docs grid doesn't reserve a phantom
-                // 268px TOC column (written to the grid by DocsPage's article via CSS :has()).
-                ({ style: { "--fd-toc-width": "0px" } } as React.ComponentProps<
-                  typeof DocsLayout
-                >["containerProps"])
+              // 268px TOC column (written to the grid by DocsPage's article via CSS :has()).
+              ({ style: { "--fd-toc-width": "0px" } } as React.ComponentProps<
+                typeof DocsLayout
+              >["containerProps"])
               : undefined
           }
         >

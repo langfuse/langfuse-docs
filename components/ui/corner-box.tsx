@@ -66,9 +66,20 @@ const cornerLayout: Record<
   { className: string; rotateClass: string }
 > = {
   tl: { className: "-top-px -left-px", rotateClass: "" },
-  tr: { className: "-top-px right-0", rotateClass: "rotate-90" },
-  br: { className: "-bottom-px right-0", rotateClass: "rotate-180" },
+  tr: { className: "-top-px -right-px", rotateClass: "rotate-90" },
+  br: { className: "-bottom-px -right-px", rotateClass: "rotate-180" },
   bl: { className: "-bottom-px -left-px", rotateClass: "-rotate-90" },
+};
+
+/** Flush to edges when there is no border (padding box matches content edge). */
+const cornerLayoutNoBorder: Record<
+  BoxCornerKey,
+  { className: string; rotateClass: string }
+> = {
+  tl: { className: "top-0 left-0", rotateClass: "" },
+  tr: { className: "top-0 right-0", rotateClass: "rotate-90" },
+  br: { className: "bottom-0 right-0", rotateClass: "rotate-180" },
+  bl: { className: "bottom-0 left-0", rotateClass: "-rotate-90" },
 };
 
 function CornerBracket({ className }: { className?: string }) {
@@ -94,6 +105,8 @@ export interface CornerBoxProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Per-corner bracket visibility. Omitted keys default to true. */
   corners?: BoxCorners;
   withStripes?: boolean;
+  /** Omit border; corner brackets align flush (`top-0` / `left-0` etc.) instead of −1px inset for border stroke. */
+  noBorder?: boolean;
 }
 
 /**
@@ -102,14 +115,24 @@ export interface CornerBoxProps extends React.HTMLAttributes<HTMLDivElement> {
  * individual corners so shared vertices don’t stack two SVGs.
  */
 const CornerBox = React.forwardRef<HTMLDivElement, CornerBoxProps>(
-  ({ className, corners, withStripes, children, ...props }, ref) => {
+  ({ className, corners, withStripes, noBorder, children, ...props }, ref) => {
     const resolved = resolveCorners(corners);
+    const layout = noBorder ? cornerLayoutNoBorder : cornerLayout;
 
     return (
-      <div ref={ref} className={cn("relative border bg-surface-bg border-line-structure", withStripes && "with-stripes", className)} {...props}>
-        {(Object.keys(cornerLayout) as BoxCornerKey[]).map((cornerKey) => {
+      <div
+        ref={ref}
+        className={cn(
+          "relative bg-surface-bg",
+          !noBorder && "border border-line-structure",
+          withStripes && "with-stripes",
+          className
+        )}
+        {...props}
+      >
+        {(Object.keys(layout) as BoxCornerKey[]).map((cornerKey) => {
           if (!resolved[cornerKey]) return null;
-          const { className: pos, rotateClass } = cornerLayout[cornerKey];
+          const { className: pos, rotateClass } = layout[cornerKey];
           return (
             <div
               key={cornerKey}

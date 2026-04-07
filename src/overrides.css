@@ -24,8 +24,9 @@
   background-color: var(--surface-bg);
   --cursor-x: 50%;
   --cursor-y: 50%;
-  position: relative;
-  isolation: isolate;
+  /* @TODO - probably not needed
+   position: relative;
+  isolation: isolate; */
   max-width: none;
 }
 
@@ -67,7 +68,8 @@
   display: none;
 }
 
-/* Mobile sidebar drawer: push below sticky navbar + optional banner. */
+/* Mobile sidebar drawer: push below sticky navbar + optional banner.
+   Slide from left instead of right; full width. */
 #nd-sidebar-mobile {
   top: calc(
     var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px)
@@ -75,6 +77,13 @@
   height: calc(
     100dvh - var(--fd-nav-height, 4rem) - var(--fd-banner-height, 0px)
   ) !important;
+  /* Override fumadocs defaults: left-aligned, full width */
+  inset-inline-end: unset !important;
+  inset-inline-start: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  border-inline-start: none !important;
+  --fd-sidebar-drawer-offset: -100%;
 }
 
 /* Sidebar/collapsed-trigger sticky top: custom navbar (4rem) + optional banner.
@@ -88,10 +97,22 @@
 
 /* Sidebar + TOC width: 240px to match NavbarDocs grid-cols-[240px_1fr_240px].
    [grid-area="sidebar"] is a Tailwind utility class not an HTML attr, so we target
-   #nd-docs-layout directly (--fd-sidebar-col: var(--fd-sidebar-width) is resolved here). */
+   #nd-docs-layout directly (--fd-sidebar-col: var(--fd-sidebar-width) is resolved here).
+   At smaller breakpoints the sidebar/TOC panels are hidden by fumadocs, so collapse
+   the grid column widths to 0px to reclaim space. */
 #nd-docs-layout {
   --fd-sidebar-width: 240px;
   --fd-toc-width: 240px;
+}
+@media (max-width: 1279px) {
+  #nd-docs-layout {
+    --fd-toc-width: 0px;
+  }
+}
+@media (max-width: 768px) {
+  #nd-docs-layout {
+    --fd-sidebar-width: 0px;
+  }
 }
 
 /* Sidebar/tree left alignment: let fumadocs' own p-4 (1rem) on the scroll container
@@ -174,7 +195,9 @@
 
 #nd-docs-layout {
   border-top: 1px solid var(--line-structure);
-  background-color: var(--line-structure); /* revealed at sidebar/toc margins as 1px separators */
+  background-color: var(
+    --line-structure
+  ); /* revealed at sidebar/toc margins as 1px separators */
 }
 
 /* Sidebar outer: provides line-structure background visible at #nd-sidebar corners */
@@ -205,7 +228,6 @@
   margin: 0 0 1px 1px;
   border-radius: calc(var(--radius) - 4px);
   background-color: var(--surface-1) !important;
-  padding-inline-start: 0.625rem; /* px-2.5 to match HomeAside */
 }
 
 /* Sidebar active link: use blue (muted-blue) so blog/changelog and docs look the same. */
@@ -257,15 +279,36 @@
 
 /* Reduce fumadocs' default pt-12 top padding */
 #nd-toc {
-  padding-top: 1.5rem;
+  --text-links: var(--line-cta);
+  padding: 0;
+  max-height: calc(100dvh - 102px);
+}
+
+#nd-toc > div {
+  padding-left: 1rem;
+  padding-right: 0.625rem;
+}
+
+#nd-toc > div > div.ease-linear {
+  transition:
+    top 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#nd-toc .text-sm {
+  font-size: 0.813rem;
 }
 
 /* "On this page" heading: bold, primary color, hide the icon */
 #toc-title {
   font-size: 0.875rem;
   font-weight: 600;
+  font-family: var(--font-sans);
   color: var(--text-primary);
   margin-bottom: 0.5rem;
+  margin-top: 0.75rem;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
 }
 #toc-title svg {
   display: none;
@@ -274,7 +317,7 @@
 /* Scroll area: flex-grow so it fills available height; dashed bottom border */
 #nd-toc > div.ms-px {
   flex: 1;
-  border-bottom: 1px dashed var(--text-links);
+  border-bottom: 1px solid var(--text-links);
   padding-bottom: 0.75rem;
   margin-bottom: 0;
 }
@@ -300,7 +343,7 @@
 
 /* Footer slot: dashed top border to match scroll area bottom */
 #nd-toc .toc-footer {
-  border-top: 1px dashed var(--text-links);
+  border-top: 1px solid var(--line-structure);
   padding-top: 1rem;
 }
 
@@ -318,15 +361,64 @@ ul[data-gh-discussions-list] {
   padding-bottom: 0 !important;
 }
 
-/* Tab content: ensure first heading clears the tab list (avoids overlap with tab labels) */
-[role="tabpanel"].prose-no-margin {
-  padding-top: 2rem;
-}
-
 /* Prose images: no vertical margin (override default 2em) */
 .prose :where(img):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
   margin-top: 0;
   margin-bottom: 0;
+}
+
+/* Prose (Docs) font */
+.prose {
+  --tw-prose-body: var(--text-secondary);
+  font-size: 0.875rem;
+
+  :where(ul):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    list-style-type: square;
+  }
+
+  :where(table):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    border-radius: 0;
+    font-family: var(--font-sans);
+    background-color: var(--surface-1);
+    font-weight: 430;
+    font-size: 0.813rem;
+  }
+
+  :where(th):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    background-color: var(--surface-bg);
+  }
+
+  :where(h1, h2, h3, h4, h5, h6):not(
+    :where([class~="not-prose"], [class~="not-prose"] *)
+  ) {
+    font-weight: 500;
+  }
+}
+
+[role="tabpanel"].prose-no-margin figure:only-child {
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .prose :where(ul):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    list-style-type: square;
+    list-style-position: outside;
+    padding-inline-start: 32px;
+  }
+
+  .prose
+    :where(ul > li):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    margin-inline-start: 0;
+    padding-inline-start: 10px;
+  }
+}
+
+/* Code snippets styles */
+.prose .shiki {
+  border-radius: 2px;
+  background-color: var(--surface-1);
+  border: 1px solid var(--line-structure);
+  box-shadow: none;
 }
 
 /* No dark background of videos */
@@ -430,9 +522,14 @@ li:has(> .subseparator) {
   }
 }
 
-/* Steps component: increment counter and render numbered circles centered on the left border line.
+/* Steps component: increment counter and render numbered squares centered on the left border line.
    .fd-steps (fumadocs) / .steps (legacy) has pl-8 (2rem) padding from its left border,
    so the circle (1.75rem wide) needs left: -(2rem + 0.875rem) = -2.875rem to sit centered. */
+.fd-steps {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+}
+
 .fd-steps > h2,
 .fd-steps > h3,
 .steps > h2,
@@ -460,11 +557,30 @@ li:has(> .subseparator) {
   justify-content: center;
   width: 1.75rem;
   height: 1.75rem;
-  border-radius: 9999px;
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
+  background-color: var(--surface-bg);
+  color: hsl(var(--text-primary));
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 400;
+  border: 1px solid var(--line-structure);
+}
+
+/* frame decoration */
+.fd-steps > h2::after,
+.fd-steps > h3::after {
+  content: "";
+  position: absolute;
+  left: -2.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.75rem;
+  height: 1.75rem;
+  background-color: hsl(var(--foreground) / 0.6);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3Cpath d='M8 28V27H3C1.89543 27 1 26.1046 1 25V20H0V28H8Z' fill='black'/%3E%3Cpath d='M20 28V27H25C26.1046 27 27 26.1046 27 25V20H28V28H20Z' fill='black'/%3E%3Cpath d='M20 0V1H25C26.1046 1 27 1.89543 27 3V8H28V0H20Z' fill='black'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3Cpath d='M8 28V27H3C1.89543 27 1 26.1046 1 25V20H0V28H8Z' fill='black'/%3E%3Cpath d='M20 28V27H25C26.1046 27 27 26.1046 27 25V20H28V28H20Z' fill='black'/%3E%3Cpath d='M20 0V1H25C26.1046 1 27 1.89543 27 3V8H28V0H20Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 /* Steps: compact layout on mobile so numbers/headlines don't dominate; more space for body text. */

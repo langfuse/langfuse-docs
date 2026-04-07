@@ -48,7 +48,7 @@ export function ProductUpdateSignup(props: {
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className={cn("rounded-r-none h-11 px-4 py-2", props.small && "h-9")}
+        className={cn("rounded-r-none mt-1 z-10", props.small && "h-8")}
       />
       <Button
         type="submit"

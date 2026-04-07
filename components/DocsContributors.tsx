@@ -166,7 +166,7 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
   const remainingCount = Math.max(0, processedContributors.length - 3);
 
   return (
-    <div className="toc-footer flex flex-col gap-5">
+    <div className="toc-footer flex flex-col gap-5 pb-4">
       {/* Actions */}
       {(editUrl || feedbackUrl) && (
         <div>

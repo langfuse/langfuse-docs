@@ -5,12 +5,13 @@ import dynamic from "next/dynamic";
 import { Mermaid } from "@/components/Mermaid";
 import { Image } from "@/components/ui/image";
 import { Frame } from "@/components/Frame";
-import { LangTabs } from "@/components/LangTabs";
+import { LangTab, LangTabs, LangTabsWithTab } from "@/components/LangTabs";
 import { FetchReadme } from "@/components/FetchReadme";
-import { Callout, Tabs, Tab, Cards, Card, Steps, FileTree, FileTreeFile, FileTreeFolder, Playground } from "@/components/docs";
-import { MdxDetails, MdxSummary } from "@/components/MdxDetails";
+import { Cards, Card, Steps, FileTree, FileTreeFile, FileTreeFolder, Playground } from "@/components/docs";
 import { AvailabilityBanner } from "@/components/Availability";
 import { Link as MdxLink, type LinkProps } from "@/components/ui/link";
+import { Callout } from "@/components/ui/callout";
+import { Table } from "@/components/ui/table";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
 // It only downloads on pages that actually render a <Video> tag.
@@ -23,17 +24,6 @@ const BLOCK_TAGS = new Set([
 
 function MdxParagraph({ children, ...props }: React.HTMLAttributes<HTMLElement>) {
   const childrenArray = React.Children.toArray(children);
-
-  // If children contain MdxSummary, render without any wrapping element.
-  // <summary> MUST be a direct child of <details> for the browser to recognize it
-  // as the disclosure widget. React does not auto-correct invalid DOM nesting
-  // the way the HTML parser does, so a <p> or <div> wrapping <summary> keeps it trapped.
-  const hasSummary = childrenArray.some(
-    (child) => React.isValidElement(child) && child.type === MdxSummary
-  );
-  if (hasSummary) {
-    return <>{children}</>;
-  }
 
   const hasBlock = childrenArray.some(
     (child) =>
@@ -57,9 +47,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Video,
     LangTabs,
     Callout,
-    Tabs,
-    Tab,
-    "Tabs.Tab": Tab,
+    Tabs: LangTabsWithTab,
+    Tab: LangTab,
+    table: Table,
     Cards,
     Card,
     "Cards.Card": Card,
@@ -68,8 +58,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     "FileTree.File": FileTreeFile,
     "FileTree.Folder": FileTreeFolder,
     FetchReadme,
-    details: MdxDetails,
-    summary: MdxSummary,
     AvailabilityBanner,
     Mermaid,
     Playground,

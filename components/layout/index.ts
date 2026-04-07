@@ -4,7 +4,7 @@ export { Footer } from "./Footer";
 export { Layout } from "./Layout";
 export { HomeLayout } from "../home/layout/HomeLayout";
 export { NavbarDocs } from "./NavbarDocs";
-export { DocsSecondaryNav } from "./DocsSecondaryNav";
+export { DocsSecondaryNav, DocsSecondaryNavMobile } from "./DocsSecondaryNav";
 export { DocsPatternTracker } from "./DocsContentArea";
 export { HomeSidebar } from "../home/layout/HomeSidebar";
 export { HomeAside } from "../home/layout/HomeAside";
