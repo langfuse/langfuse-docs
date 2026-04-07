@@ -59,9 +59,14 @@ function mapDestination(sourceFile) {
 
     const topDir = parts[0];
     const urlPrefix = CONTENT_DIR_TO_URL_PREFIX[topDir];
-    if (urlPrefix === '') {
+    if (typeof urlPrefix !== "string") {
+        throw new Error(
+            `copy_md_sources: missing content-dir-map entry for "${topDir}" (add it to lib/content-dir-map.js, same as lib/source.ts baseUrl())`
+        );
+    }
+    if (urlPrefix === "") {
         parts.splice(0, 1);
-    } else if (typeof urlPrefix === 'string') {
+    } else {
         parts[0] = urlPrefix;
     }
 
