@@ -23,10 +23,11 @@ function removeAnchorTags(content: string): string {
 }
 
 function processCallouts(content: string): string {
-  const calloutRegex =
-    /<Callout\s+type=["'](\w+)["']\s*>([\s\S]*?)<\/Callout>/g;
-  return content.replace(calloutRegex, (match, type, innerContent) => {
-    return `<div class="callout callout-${type}">${innerContent}</div>`;
+  const calloutRegex = /<Callout([^>]*)>([\s\S]*?)<\/Callout>/g;
+  return content.replace(calloutRegex, (match, attrs, innerContent) => {
+    const typeMatch = attrs.match(/\btype=["'](\w+)["']/);
+    const kind = typeMatch?.[1] ?? "info";
+    return `<div class="callout callout-${kind}">${innerContent}</div>`;
   });
 }
 
