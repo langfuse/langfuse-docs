@@ -93,6 +93,11 @@ async function generateLLMsList() {
         markdownContent += `- **Documentation**: [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)\n\n`;
         markdownContent += `The MCP server provides tools to search Langfuse documentation, GitHub issues, and discussions. See the [installation guide](https://langfuse.com/docs/docs-mcp) for setup instructions in Cursor, VS Code, Claude Desktop, and other MCP clients.\n\n`;
 
+        // Langfuse Skill section
+        markdownContent += `## Langfuse Skill for AI Coding Agents\n\n`;
+        markdownContent += `Install the Langfuse skill before implementing anything with Langfuse. The skill provides up-to-date documentation, best-practice workflows for instrumentation, prompt management, and programmatic API access via the Langfuse CLI.\n\n`;
+        markdownContent += `Install from: [github.com/langfuse/skills/langfuse](https://github.com/langfuse/skills/langfuse)\n\n`;
+
         // Add each section with sub-file link and comma-separated titles
         for (const [sectionKey, entries] of Object.entries(sectionEntries)) {
             if (entries.length > 0) {
