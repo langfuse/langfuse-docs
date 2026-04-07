@@ -13,6 +13,42 @@ You see traces appearing in Langfuse, but how do you know if you've done it well
 
 Langfuse's [data model](/docs/observability/data-model) has three levels of grouping: observations (individual steps) are grouped into traces via a `trace_id`, and traces can be grouped into sessions via a `session_id`.
 
+```mermaid
+flowchart LR
+
+    subgraph SESSION [session]
+        direction TB
+
+        subgraph TRACE1 [trace]
+            direction LR
+            O1[observation]
+            O2[observation]
+            O3[observation]
+        end
+
+        subgraph TRACE2 [trace]
+            direction LR
+            O4[observation]
+            O5[observation]
+            O6[observation]
+        end
+
+        subgraph TRACE3 [trace]
+            direction LR
+            O7[observation]
+            O8[observation]
+            O9[observation]
+        end
+
+    end
+    classDef sessionBox fill:none,stroke:#888,stroke-width:2px;
+    classDef traceBox fill:none,stroke:#aaa,stroke-width:1.5px;
+
+    %% Assign classes
+    class SESSION sessionBox;
+    class TRACE1,TRACE2,TRACE3 traceBox;
+```
+
 A trace represents one self-contained unit of work in your application. Good examples of a typical trace:
 - One chatbot turn (user sends a message, your app retrieves context, calls the LLM, returns a response)
 - One agent run (the agent receives a task, reasons, calls tools, and produces a result)
