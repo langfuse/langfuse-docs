@@ -14,7 +14,6 @@ import {
   handbook,
   marketing,
 } from "../.source/server";
-// @ts-expect-error -- plain JS module shared with CJS scripts
 import { CONTENT_DIR_TO_URL_PREFIX } from "./content-dir-map.js";
 
 function baseUrl(contentDir: string): string {
