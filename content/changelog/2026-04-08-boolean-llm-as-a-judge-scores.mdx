@@ -1,0 +1,35 @@
+---
+date: 2026-04-08
+title: Boolean LLM-as-a-Judge Scores
+description: LLM-as-a-Judge evaluators can now return boolean scores for `true` / `false` decisions.
+author: Hassieb
+canonical: /docs/evaluation/evaluation-methods/llm-as-a-judge
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+LLM-as-a-Judge evaluators in Langfuse can now return boolean scores in addition to numeric and categorical ones. This makes it easier to model simple decisions directly as native `true` or `false` scores and analyze them across your existing score tooling.
+
+This is especially useful when the right answer is a binary judgment:
+
+- Detect `User Disagreement` as `true` or `false`
+- Detect `Out-of-Scope Request` as `true` or `false`
+- Detect `Insufficient Answer` as `true` or `false`
+
+Numeric scores are still the right fit for continuous dimensions like helpfulness or faithfulness. Categorical scores remain best when you need more than two explicit labels. Boolean scores are the simplest option when the evaluator should return `true` or `false`. For concrete prompt examples, see [LLM-as-a-Judge for Production Monitoring](/blog/2026-04-01-llm-as-a-judge-production-monitoring).
+
+## What's New
+
+- Choose `Boolean` when creating a custom LLM-as-a-Judge evaluator
+- Store `true` / `false` outcomes as native boolean scores
+- Analyze boolean evaluator outputs in dashboards, filters, and score analytics alongside your existing scores
+
+## Get started
+
+<Cards num={2}>
+  <Card title="LLM-as-a-Judge Documentation" href="/docs/evaluation/evaluation-methods/llm-as-a-judge" icon={<Book />} />
+  <Card title="What Are Scores?" href="/faq/all/what-are-scores" icon={<Book />} />
+</Cards>
