@@ -57,7 +57,7 @@ export function DocsSecondaryNavMobile() {
   const isRoot = activeSection && pathname === activeSection.path;
 
   return (
-    <div className="flex items-center h-[40px] px-3 gap-2 md:hidden sticky z-40 bg-surface-1 border-b border-line-structure [grid-area:header]" style={{ top: "60px" }}>
+    <div className="flex items-center h-[40px] px-3 gap-2 md:hidden sticky z-41 bg-surface-1 border-b border-line-structure [grid-area:header]" style={{ top: "60px" }}>
       <button
         aria-label={open ? "Close Sidebar" : "Open Sidebar"}
         onClick={() => setOpen((prev) => !prev)}
@@ -84,7 +84,7 @@ export function DocsSecondaryNav() {
   const pathname = usePathname();
   return (
     <div className="hidden md:block overflow-x-auto overflow-y-hidden sticky z-40 bg-surface-1" style={{ top: "60px" }}>
-      <nav className="px-px mx-auto max-w-360 bg-line-structure">
+      <nav className="px-px mx-auto max-w-360 bg-line-structure border-b border-line-structure">
         <div className="flex gap-0 items-stretch rounded-sm bg-surface-1">
           {SECTIONS.map((item) => {
             const isActive = pathname?.startsWith(item.path);

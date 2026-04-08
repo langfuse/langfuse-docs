@@ -7,6 +7,7 @@ import IconX from "@/components/icons/x";
 import IconYoutube from "@/components/icons/youtube";
 import IconLinkedin from "@/components/icons/linkedin";
 import InkeepChatButton from "@/components/inkeep/InkeepChatButton";
+import { cn } from "@/lib/utils";
 
 const socialLinks = [
   { name: "GitHub", href: "https://github.com/langfuse/langfuse", icon: IconGithub },
@@ -77,9 +78,9 @@ const bottomLinks = [
 const linkClassName =
   "text-text-tertiary transition-colors hover:text-text-primary";
 
-export function Footer() {
+export function Footer({ className }: { className?: string }) {
   return (
-    <footer className="mx-auto w-full px-4 sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px] pb-8 mt-20">
+    <footer className={cn("mx-auto w-full px-4 sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px] pb-8 mt-20", className)}>
       {/* Social icons row */}
       <CornerBox className="flex gap-5 items-center p-4 -mb-px">
         {socialLinks.map((s) => {

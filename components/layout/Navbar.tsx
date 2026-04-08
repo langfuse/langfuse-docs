@@ -14,7 +14,7 @@ import { serializePageTree, type SectionNavData } from "@/lib/nav-tree";
 import { cn } from "@/lib/utils";
 import { Logo } from "../Logo";
 
-const sectionNavData: SectionNavData[] = [
+export const sectionNavData: SectionNavData[] = [
   { name: "Docs", href: "/docs", children: serializePageTree(source.getPageTree()) },
   { name: "Self Hosting", href: "/self-hosting", children: serializePageTree(getSelfHostingPageTree()) },
   { name: "Guides", href: "/guides", children: serializePageTree(guidesSource.getPageTree()) },

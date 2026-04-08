@@ -127,7 +127,7 @@
   scrollbar-width: thin;
 }
 #nd-docs-layout #nd-sidebar::-webkit-scrollbar {
-  width: 4px;
+  width: 2px;
 }
 #nd-docs-layout #nd-sidebar::-webkit-scrollbar-track {
   background: transparent;
@@ -160,7 +160,7 @@
   scrollbar-width: thin;
 }
 #nd-sidebar-mobile::-webkit-scrollbar {
-  width: 4px;
+  width: 2px;
 }
 #nd-sidebar-mobile::-webkit-scrollbar-track {
   background: transparent;
@@ -230,15 +230,12 @@
   background-color: var(--surface-1) !important;
 }
 
-/* Sidebar active link: use blue (muted-blue) so blog/changelog and docs look the same. */
+/* Sidebar active link */
 #nd-docs-layout #nd-sidebar [data-active="true"],
 #nd-sidebar-mobile [data-active="true"] {
-  color: hsl(var(--muted-blue)) !important;
-  background-color: hsl(var(--muted-blue) / 0.1) !important;
-}
-#nd-docs-layout #nd-sidebar [data-active="true"]::before,
-#nd-sidebar-mobile [data-active="true"]::before {
-  background-color: hsl(var(--muted-blue)) !important;
+  color: hsl(var(--text-primary)) !important;
+  font-weight: 580 !important;
+  background-color: transparent !important;
 }
 
 /* Reduce height (less padding) of sidebar nav items */
@@ -249,7 +246,181 @@
   padding-top: 0.25rem !important;
   padding-bottom: 0.25rem !important;
   min-height: unset !important;
+  border-radius: 0;
+  position: relative;
 }
+
+#nd-docs-layout #nd-sidebar a:hover,
+#nd-docs-layout #nd-sidebar button:hover,
+#nd-sidebar-mobile a:hover,
+#nd-sidebar-mobile button:hover {
+  background: none !important;
+}
+
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a,
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] button,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Background tile overlay — uses ::before so it can extend beyond the element
+   via negative margins (matching the ::after corner brackets sizing). */
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a::before,
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] button::before,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a::before,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: calc(100% + 12px) !important;
+  height: auto !important;
+  padding: inherit;
+  margin: -2px -6px;
+  box-sizing: border-box;
+  opacity: 0;
+  background-image: url("/images/buttons/button-base.png");
+  background-origin: content-box;
+  background-clip: content-box;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a:hover::before,
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  button:hover::before,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a:hover::before,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button:hover::before {
+  opacity: 1;
+}
+
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::before,
+#nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::before {
+  opacity: 1;
+  background-color: hsl(0 0% 100% / 0.25);
+  position: relative;
+  z-index: -1;
+}
+
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a:hover::before,
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  button:hover::before,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a:hover::before,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button:hover::before {
+  opacity: 1;
+  background-color: hsl(0 0% 100% / 0.5);
+  position: relative;
+  z-index: -1;
+}
+
+.dark
+  #nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::before,
+.dark
+  #nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::before {
+  background-color: hsl(0 0% 0% / 0.25);
+}
+
+.dark
+  #nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  a:hover::before,
+.dark
+  #nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  button:hover::before,
+.dark #nd-sidebar-mobile [data-radix-scroll-area-viewport] a:hover::before,
+.dark
+  #nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  button:hover::before {
+  background-color: hsla(0, 0%, 0%, 0.35);
+}
+
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::after,
+#nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::after {
+  opacity: 1;
+}
+
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a::after,
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] button::after,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a::after,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: calc(100% + 12px);
+  padding: inherit;
+  margin: -4px -6px;
+  box-sizing: border-box;
+  opacity: 0;
+  background-color: hsl(var(--foreground) / 0.6);
+  -webkit-mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  -webkit-mask-size: 8px 8px;
+  mask-size: 8px 8px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-origin: content-box;
+  mask-origin: content-box;
+  transition: opacity 0.2s ease;
+}
+
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a:hover::after,
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  button:hover::after,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a:hover::after,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button:hover::after {
+  opacity: 1;
+}
+
 #nd-docs-layout #nd-sidebar ul li,
 #nd-sidebar-mobile ul li {
   margin-top: 0 !important;
@@ -258,6 +429,11 @@
 #nd-docs-layout #nd-sidebar ul,
 #nd-sidebar-mobile ul {
   gap: 0 !important;
+}
+
+#nd-docs-layout #nd-sidebar > div:first-child,
+#nd-sidebar-mobile #nd-sidebar > div:first-child {
+  display: none !important;
 }
 
 /* External links in docs/section sidebars: show only the arrow after the text (label often has ↗).
@@ -479,7 +655,8 @@ li:has(> .subseparator) {
 #nd-sidebar-mobile p,
 #nd-docs-layout #nd-sidebar .subseparator,
 #nd-sidebar-mobile .subseparator {
-  font-weight: 700 !important;
+  font-weight: 580 !important;
+  color: var(--text-primary);
 }
 
 /* Main content: horizontal padding on narrow viewports so content isn't flush to edges (RWD). */

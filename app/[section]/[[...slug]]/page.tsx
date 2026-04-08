@@ -16,6 +16,8 @@ import { formatTag } from "@/components/faq/FaqIndex";
 import { ChangelogFrontMatterProvider } from "@/components/changelog/ChangelogFrontMatterContext";
 import type { ChangelogFrontMatter } from "@/components/changelog/ChangelogFrontMatterContext";
 import { WrappedDataProvider } from "@/components/wrapped/WrappedDataContext";
+import { Footer } from "@/components/layout";
+import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
 
 type PageProps = {
   params: Promise<{ section: string; slug?: string[] }>;
@@ -138,7 +140,7 @@ export default async function SectionDocPage(props: PageProps) {
             : "max-w-full"
       }
       breadcrumb={{ includePage: !isPost }}
-      footer={isPost ? { enabled: false } : { component: <DocsFooter /> }}
+      footer={isPost ? { enabled: false } : { component: <DocsAndPageFooter /> }}
       tableOfContent={isChangelog || isCollectionIndex ? { enabled: false } : { footer: <DocsContributors pageTitle={page.data.title} /> }}
     >
       {bodyWithContext}

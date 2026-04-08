@@ -59,7 +59,7 @@ export function DocBodyChrome({
         <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
       )}
       {children}
-      <hr className="my-4 border-t dark:border-neutral-800" />
+      <hr className="mt-12 mb-0 border-t dark:border-neutral-800" />
       <div
         className="flex flex-wrap gap-6 justify-between items-center py-6"
         id="docs-feedback"
@@ -67,6 +67,7 @@ export function DocBodyChrome({
         <DocsFeedback key={pathname} />
         <DocsSupport />
       </div>
+      <hr className="mb-12 mt-0 border-t dark:border-neutral-800" />
     </DocsBody>
   );
 }

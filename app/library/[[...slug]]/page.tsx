@@ -7,6 +7,7 @@ import { DocsContributors } from "@/components/DocsContributors";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { getMDXComponents } from "@/mdx-components";
 import type { ComponentType } from "react";
+import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
@@ -27,6 +28,7 @@ export default async function LibraryPage(props: PageProps) {
       toc={toc}
       breadcrumb={{ includePage: true, includeRoot: true }}
       tableOfContent={{ footer: <DocsContributors pageTitle={page.data.title} /> }}
+      footer={{ component: <DocsAndPageFooter /> }}
     >
       <DocBodyChrome>
         <MDX components={getMDXComponents()} />

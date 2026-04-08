@@ -3,6 +3,7 @@ import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { sectionNavData } from "./Navbar";
 
 const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px py-0')
 const contentStyle = cn('flex items-center w-full bg-surface-1 rounded-sm px-2.5 py-3')
@@ -29,9 +30,9 @@ export function NavbarDocs() {
             <InkeepSearchBar />
           </div>
         </div>
-        <div className={cn(cornersStyle, 'max-w-[240px]')}>
-          <div className={contentStyle}>
-            <NavbarExtraContent />
+        <div className={cn(cornersStyle, 'flex-1 justify-end pl-0 lg:justify-center lg:max-w-[240px] lg:pl-px')}>
+          <div className={cn(contentStyle, 'justify-end rounded-l-none lg:justify-center lg:rounded-l-sm')}>
+            <NavbarExtraContent sectionNavData={sectionNavData} />
           </div>
         </div>
       </nav>

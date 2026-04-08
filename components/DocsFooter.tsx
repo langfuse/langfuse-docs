@@ -52,13 +52,7 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
   if (!previous && !next) return null;
 
   return (
-    <div
-      className={cn(
-        "mt-8 grid grid-cols-2 gap-2",
-        className
-      )}
-      {...props}
-    >
+    <div className={cn("grid grid-cols-2 gap-2", className)} {...props}>
       {previous ? (
         <Button
           href={previous.url}
