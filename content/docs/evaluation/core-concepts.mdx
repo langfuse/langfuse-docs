@@ -40,63 +40,9 @@ LLM applications often have a constant loop of testing and monitoring.
 
 ## Scores [#scores]
 
-Scores are Langfuse's universal data object for storing evaluation results. Any time you want to assign a quality judgment to an LLM output, whether by a [human annotation](/docs/evaluation/evaluation-methods/scores-via-ui), an [LLM judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), a [programmatic check](/docs/evaluation/evaluation-methods/scores-via-sdk), or end-user feedback, the result is stored as a score.
+[Scores](/docs/evaluation/scores/overview) are Langfuse's universal data object for storing evaluation results. Any time you want to assign a quality judgment to an LLM output, whether by a human annotation, an LLM judge, a programmatic check, or end-user feedback, the result is stored as a score.
 
-Every score has a **name** (like `"correctness"` or `"helpfulness"`), a **value**, and a **[data type](#score-types)**. Scores also support an optional **[comment](#score-comments)** for additional context.
-
-Scores can be attached to [traces](/docs/observability/data-model#traces), [observations](/docs/observability/data-model#observations), [sessions](/docs/observability/data-model#sessions), or [dataset runs](/docs/evaluation/evaluation-methods/data-model). Most commonly, scores are attached to traces to evaluate a single end-to-end interaction.
-
-Once you have scores, they show up in [score analytics](/docs/evaluation/evaluation-methods/score-analytics), can be visualized in [custom dashboards](/docs/metrics/features/custom-dashboards), and can be queried via the [API](/docs/api).
-
-### When to Use Scores [#when-to-use-scores]
-
-Scores become useful when you want to go beyond observing what your application does and start measuring how well it does it. Common use cases:
-
-- **Collecting user feedback**: Capture thumbs up/down or star ratings from your users and attach them to traces. See the [user feedback guide](/docs/observability/features/user-feedback).
-- **Monitoring production quality**: Set up automated evaluators (like [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)) to continuously score live traces for things like hallucination, relevance, or tone.
-- **Running guardrails**: Score whether outputs pass safety checks like PII detection, format validation, or content policy compliance.
-- **Comparing changes with experiments**: When you change a prompt, model, or pipeline, run an [experiment](/docs/evaluation/experiments) to score the new version against a dataset.
-
-### Score Types [#score-types]
-
-Langfuse supports four score data types:
-
-| Type | Value | Use when |
-| --- | --- | --- |
-| `NUMERIC` | Float (e.g. `0.9`) | Continuous judgments like accuracy, relevance, or similarity scores |
-| `CATEGORICAL` | String from predefined categories (e.g. `"correct"`, `"partially correct"`) | Discrete classifications where the set of possible values is known upfront |
-| `BOOLEAN` | `0` or `1` | Pass/fail checks like hallucination detection or format validation |
-| `TEXT` | Free-form string (1–500 characters) | Open-ended annotations like reviewer notes or qualitative feedback. Often used for [open coding](https://en.wikipedia.org/wiki/Open_coding) before formalizing into quantifiable scores via [axial coding](https://en.wikipedia.org/wiki/Axial_coding). |
-
-<Callout type="info">
-Text scores are designed for qualitative, open-ended scoring. Because free-form text cannot be meaningfully aggregated or compared, text scores are not supported in [experiments](#experiments), [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), or [score analytics](/docs/evaluation/evaluation-methods/score-analytics).
-</Callout>
-
-### How to Create Scores [#how-to-create-scores]
-
-There are four ways to add scores:
-
-- **LLM-as-a-Judge**: Set up [automated evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) that score traces based on custom criteria (e.g. hallucination, tone, relevance). These can return numeric or categorical scores plus reasoning, and can run on live production traces or on experiment results.
-- **Scores via UI**: Team members [manually score](/docs/evaluation/evaluation-methods/scores-via-ui) traces, observations, or sessions directly in the Langfuse UI. Requires a [score config](/faq/all/manage-score-configs) to be set up first.
-- **Annotation Queues**: Set up [structured review workflows](/docs/evaluation/evaluation-methods/annotation-queues) where reviewers work through batches of traces.
-- **Scores via API/SDK**: [Programmatically add scores](/docs/evaluation/evaluation-methods/scores-via-sdk) from your application code. This is the way to go for user feedback (thumbs up/down, star ratings), guardrail results, or custom evaluation pipelines.
-
-### Should I Use Scores or Tags? [#scores-vs-tags]
-
-| | Scores | Tags |
-|---|---|---|
-| **Purpose** | Measure _how good_ something is | Describe _what_ something is |
-| **Data** | Numeric, categorical, boolean, or text value | Simple string label |
-| **When added** | Can be added at any time, including long after the trace was created | Set during tracing and cannot be changed afterwards |
-| **Used for** | Quality measurement, analytics, experiments | Filtering, segmentation, organizing |
-
-As a rule of thumb: if you already know the category at tracing time (e.g. which feature or API endpoint triggered the trace), use a [tag](/docs/observability/features/tags). If you need to classify or evaluate traces later, use a score.
-
-### Score Comments [#score-comments]
-
-Every score supports an optional **comment** field. Use it to capture reasoning (e.g. why an LLM judge assigned a particular score), reviewer notes, or context that helps others understand the score value. Comments are shown alongside scores in the Langfuse UI.
-
-Use a [`TEXT` score](#score-types) instead of comments to capture standalone qualitative feedback — comments are best for additional reasoning on an existing score.
+Scores can be attached to traces, observations, sessions, or dataset runs. Every score has a **name**, a **value**, and a **data type** (`NUMERIC`, `CATEGORICAL`, `BOOLEAN`, or `TEXT`). Learn more about [score types](/docs/evaluation/scores/overview#score-types), [how to create scores](/docs/evaluation/scores/overview#how-to-create-scores), and [score analytics](/docs/evaluation/scores/score-analytics) on the dedicated [Scores](/docs/evaluation/scores/overview) page.
 
 ## Evaluation Methods [#evaluation-methods]
 
@@ -110,7 +56,7 @@ Evaluation methods are the functions that score traces, observations, sessions, 
 | [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues) | Structured human review workflows with customizable queues | Building ground truth, systematic labeling, team collaboration |
 | [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) | Programmatically add scores using the Langfuse API or SDK | Custom evaluation pipelines, deterministic checks, automated workflows |
 
-When setting up new evaluation methods, you can use [Score Analytics](/docs/evaluation/evaluation-methods/score-analytics) to analyze or sense-check the scores you produce. 
+When setting up new evaluation methods, you can use [Score Analytics](/docs/evaluation/scores/score-analytics) to analyze or sense-check the scores you produce.
 ## Experiments [#experiments]
 
 An experiment runs your application against a dataset and evaluates the outputs. This is how you test changes before deploying to production.
@@ -128,7 +74,7 @@ Before diving into experiments, it's helpful to understand the building blocks i
 | **Score** | The output of an evaluation. See [Scores](#scores) for the available data types and details.|
 | **Experiment Run** | A single execution of your task against all items in a dataset, producing outputs (and scores). |
 
-You can find the data model for these objects [here](/docs/evaluation/evaluation-methods/data-model).
+You can find the data model for these objects [here](/docs/evaluation/experiments/data-model).
 
 
 ### How these work together
@@ -145,7 +91,7 @@ Often, you want to score these experiment results. You can use various [evaluati
 
 You can compare experiment runs to see if a new prompt version improves scores, or identify specific inputs where your application struggles. Based on these experiment results, you can decide whether the change is ready to be deployed to production. 
 
-You can find more details on how these objects link together under the hood on the [data model page](/docs/evaluation/evaluation-methods/data-model). 
+You can find more details on how these objects link together under the hood on the [data model page](/docs/evaluation/experiments/data-model).
 
 
 ### Two ways to run experiments
