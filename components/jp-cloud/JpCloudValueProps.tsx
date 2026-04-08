@@ -41,7 +41,7 @@ const valueProps = [
     enDescription:
       "LLM observability, AI app debugging, prompt management, evaluation, and metrics — all available in the Japan region.",
     jpDescription:
-      "LLM監視ツール、AIアプリデバッグ、プロンプト管理、評価、メトリクスなど、Langfuseのすべての機能をご利用いただけます。",
+      "LLM オブザーバビリティ、AIアプリデバッグ、プロンプト管理、評価、メトリクスなど、Langfuseのすべての機能をご利用いただけます。",
   },
 ];
 
