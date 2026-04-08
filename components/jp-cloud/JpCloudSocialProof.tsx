@@ -21,7 +21,7 @@ const stats = [
   {
     getValue: () => (DOCKER_PULLS / 1_000_000).toFixed(0) + "M+",
     en: "Docker Pulls",
-    jp: "Docker プル",
+    jp: "Docker Pull",
   },
 ];
 
