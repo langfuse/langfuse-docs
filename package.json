@@ -7,7 +7,7 @@
     "agents:sync": "node scripts/agents/sync-agent-shims.mjs",
     "dev": "next dev -p 3333 -H 127.0.0.1",
     "postinstall": "bash scripts/postinstall.sh",
-    "prebuild": "node scripts/generate_brand_assets_zip.js && node scripts/update-github-stars.js && node scripts/authors/generate-contributors.js && node scripts/copy_md_sources.js && node scripts/generate-sitemap-excludes.js",
+    "prebuild": "node scripts/generate_brand_assets_zip.js && node scripts/generate-default-og-png.mjs && node scripts/update-github-stars.js && node scripts/authors/generate-contributors.js && node scripts/copy_md_sources.js && node scripts/generate-sitemap-excludes.js",
     "build": "next build",
     "postbuild": "pnpm run postbuild:sitemap && pnpm run postbuild:cleanup && pnpm run postbuild:llms-txt",
     "build:static": "cross-env STATIC_EXPORT=true pnpm run prebuild && cross-env STATIC_EXPORT=true next build && pnpm run postbuild:static",
@@ -123,6 +123,8 @@
     "cross-env": "^7.0.3",
     "markdown-link-check": "^3.13.6",
     "puppeteer": "^24.23.0",
+    "satori": "^0.26.0",
+    "sharp": "^0.34.5",
     "typescript": "^5.6.3",
     "xml2js": "^0.6.2"
   },

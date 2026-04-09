@@ -4,17 +4,22 @@ import { RootProvider } from "fumadocs-ui/provider/next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { DevAriaHiddenConsoleFilter } from "@/components/DevAriaHiddenConsoleFilter";
+import {
+  buildDefaultSiteOgImageUrl,
+  SITE_DEFAULT_OG_DESCRIPTION,
+} from "@/lib/og-url";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { Hubspot } from "@/components/analytics/hubspot";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
 
+const defaultOgImageUrl = buildDefaultSiteOgImageUrl();
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://langfuse.com"),
   title: { default: "Langfuse", template: "%s - Langfuse" },
-  description:
-    "Traces, evals, prompt management and metrics to debug and improve your LLM application.",
+  description: SITE_DEFAULT_OG_DESCRIPTION,
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -25,12 +30,12 @@ export const metadata: Metadata = {
     shortcut: ["/favicon.ico"],
   },
   openGraph: {
-    images: [{ url: "https://langfuse.com/og.png" }],
+    images: [{ url: defaultOgImageUrl }],
   },
   twitter: {
     card: "summary_large_image",
     site: "langfuse.com",
-    images: [{ url: "https://langfuse.com/og.png" }],
+    images: [{ url: defaultOgImageUrl }],
   },
 };
 
