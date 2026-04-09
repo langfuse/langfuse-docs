@@ -11,6 +11,7 @@ import { Callout, Tabs, Tab, Cards, Card, Steps, FileTree, FileTreeFile, FileTre
 import { MdxDetails, MdxSummary } from "@/components/MdxDetails";
 import { AvailabilityBanner } from "@/components/availability";
 import { Link as MdxLink, type LinkProps } from "@/components/ui/link";
+import { ImprovementLoop } from "@/components/academy/ImprovementLoop";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
 // It only downloads on pages that actually render a <Video> tag.
@@ -73,6 +74,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     AvailabilityBanner,
     Mermaid,
     Playground,
+    ImprovementLoop,
     ...components,
   };
 }

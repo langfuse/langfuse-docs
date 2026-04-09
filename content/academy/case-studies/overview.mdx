@@ -1,0 +1,61 @@
+---
+title: Case Studies
+description: Real application examples with detailed Langfuse setups — traces, evaluators, datasets, annotation queues, and more.
+---
+
+# Case Studies
+
+Let's dissect a couple of examples.
+
+## Customer support chatbot
+
+For this one we'll refer to the [Langfuse demo project](/docs/demo).
+
+things to highlight:
+- identify main observation (handle-chatbot-message)
+    clear input/output
+    clear naming
+    session ID, user ID
+- hierarchy makes sense, observation types
+- token usage, latency and cost are present on relevant observations
+- on the actual generation call, the model, prompt are present
+- toolcalls:
+    input and output are there. readability on this is a bit less important to us, we dont really look at it in a table to get an overview. And we can still use jsonpath easily for mappings where we need it (evaluators, putting in dataset, ...)
+
+## RAG pipeline
+
+Context: an internal knowledge base assistant. Users ask questions, the app retrieves relevant docs from a vector store, then generates an answer grounded in those docs.
+
+Trace structure:
+- trace: `answer-question`
+    - span: `retrieve-documents` — input: user query, output: list of retrieved chunks
+    - generation: `generate-answer` — input: user query + retrieved context, output: final answer
+
+Things to highlight:
+- metadata on `retrieve-documents`: number of chunks retrieved, similarity scores, collection name. Useful for filtering (e.g. find all traces where retrieval returned fewer than 3 chunks)
+- prompt management: the system prompt that instructs the model how to use retrieved context is managed in Langfuse and linked to the `generate-answer` generation. Can track how answer quality changes across prompt versions
+- clear input/output on the trace level: user question as input, final answer as output. Makes the tracing table scannable
+- environment attribute set to `development` / `production` so test queries don't pollute prod dashboards
+
+## Coding agent
+
+Context: a coding agent that takes a task description, plans an approach, then executes steps (reading files, writing code, running tests) in a loop until done.
+
+Trace structure:
+- trace: `execute-task`
+    - generation: `plan` — input: task description, output: step-by-step plan
+    - span: `execution-loop` (may repeat multiple times)
+        - tool: `read-file` — input: file path, output: file contents
+        - generation: `decide-next-step` — input: current state, output: next action
+        - tool: `write-file` — input: file path + content
+        - tool: `run-tests` — input: test command, output: test results
+    - generation: `summarize` — input: execution history, output: summary for user
+
+Things to highlight:
+- agent graph: the trace tree is deep and branching, the agent graph view makes it much easier to understand the flow
+- tags: set at trace creation to capture business-level dimensions. E.g. `source:slack`, `task-type:refactor`, `repo:frontend`. Enables filtering and dashboard breakdowns ("how does cost differ between `refactor` and `bugfix` tasks?")
+- cost tracking: many LLM calls in one trace, cost rolls up to the trace level. Important to monitor since agent runs can get expensive
+- deep hierarchy: the execution loop span groups related observations together, making it easy to see what happened in each iteration even when the trace has 20+ observations
+
+## What clicksights is doing?
+See circleback call
