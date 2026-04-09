@@ -24,6 +24,7 @@ import IconSort from "../icons/sort";
 import IconSearch from "../icons/search";
 import { cn } from "@/lib/utils";
 import IconMessage from "../icons/message";
+import { DropdownButton } from "../ui/dropdown-button";
 
 type SortType = "upvotes" | "recent";
 
@@ -111,7 +112,6 @@ const GhDiscussionsPreviewInternal = ({
         <ul
           className="list-none"
           data-gh-discussions-list
-          style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}
         >
           {displayedDiscussions.map((discussion) => (
             <li
@@ -191,33 +191,31 @@ const GhDiscussionsPreviewInternal = ({
     }
 
     return (
-      <Pagination className="py-1 border-t">
-        <PaginationContent className="gap-1 items-center">
+      <Pagination className="py-8 border-t">
+        <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              className="cursor-pointer select-none"
+              className="cursor-pointer select-none mt-0.5"
             />
           </PaginationItem>
-          <div className="hidden gap-1 items-center sm:flex">
-            {pageNumbers.map((pageNumber, index) =>
-              pageNumber === null ? (
-                <PaginationItem key={`ellipsis-${index}`}>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              ) : (
-                <PaginationItem key={pageNumber}>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(pageNumber)}
-                    isActive={currentPage === pageNumber}
-                    className="cursor-pointer select-none"
-                  >
-                    {pageNumber}
-                  </PaginationLink>
-                </PaginationItem>
-              )
-            )}
-          </div>
+          {pageNumbers.map((pageNumber, index) =>
+            pageNumber === null ? (
+              <PaginationItem key={`ellipsis-${index}`}>
+                <PaginationEllipsis />
+              </PaginationItem>
+            ) : (
+              <PaginationItem key={pageNumber}>
+                <PaginationLink
+                  onClick={() => setCurrentPage(pageNumber)}
+                  isActive={currentPage === pageNumber}
+                  className="cursor-pointer select-none"
+                >
+                  {pageNumber}
+                </PaginationLink>
+              </PaginationItem>
+            )
+          )}
           <PaginationItem>
             <PaginationNext
               onClick={() =>
@@ -294,13 +292,12 @@ const GhDiscussionsPreviewInternal = ({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="secondary"
+                <DropdownButton
                   icon={<IconSort className="w-4 h-4" />}
                   iconPosition="end"
                 >
                   <span className="min-w-12 text-center">{sortType.charAt(0).toUpperCase() + sortType.slice(1)}</span>
-                </Button>
+                </DropdownButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem

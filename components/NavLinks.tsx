@@ -199,7 +199,7 @@ function NavDropdown({
           open ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-1 pointer-events-none"
         )}
         style={{
-          top: "calc(var(--fd-banner-height, 0px) + 4.1rem)",
+          top: "calc(var(--fd-banner-height, 0px) + 1.1rem)",
         }}
       >
         <NavDropdownPanel links={links} featured={featured} />

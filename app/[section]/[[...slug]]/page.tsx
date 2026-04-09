@@ -8,7 +8,6 @@ import { MARKETING_SLUGS, usersSource, changelogSource } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { DocsContributors } from "@/components/DocsContributors";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
-import { DocsFooter } from "@/components/DocsFooter";
 import { getMDXComponents } from "@/mdx-components";
 import type { ComponentType } from "react";
 import { FaqPreview } from "@/components/faq/FaqPreview";

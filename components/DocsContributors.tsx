@@ -86,7 +86,7 @@ const ContributorCardContent = forwardRef<
       className="rounded-full shrink-0"
       alt={contributor.name}
     />
-    <span className="text-sm text-text-secondary truncate">{contributor.name}</span>
+    <span className="text-sm text-text-tertiary truncate">{contributor.name}</span>
   </a>
 ));
 ContributorCardContent.displayName = "ContributorCardContent";
@@ -177,7 +177,7 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
                 href={feedbackUrl}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="flex items-center gap-1 text-sm text-text-secondary hover:text-text-primary transition-colors"
+                className="flex items-center gap-1 text-sm text-text-tertiary hover:text-text-primary transition-colors"
               >
                 Give us feedback
                 <ArrowUpRight size={13} className="shrink-0" />
@@ -188,7 +188,7 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
                 href={editUrl}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+                className="text-sm text-text-tertiary hover:text-text-primary transition-colors"
               >
                 Edit this page on GitHub
               </a>
@@ -210,7 +210,7 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
             {remainingCount > 0 && !showAll && (
               <button
                 onClick={() => setShowAll(true)}
-                className="text-xs text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer text-left py-1"
+                className="text-xs text-text-tertiary hover:text-text-tertiary transition-colors cursor-pointer text-left py-1"
               >
                 +{remainingCount} more
               </button>

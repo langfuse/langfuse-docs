@@ -16,14 +16,14 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <div
-        className="flex h-8 items-center rounded-full border border-border bg-muted/30 px-1"
+        className="inline-flex h-[26px] w-fit items-center justify-center gap-0.5 rounded-[1px] border border-line-structure bg-transparent p-0.5"
         aria-hidden
       >
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted">
-          <Sun className="h-3.5 w-3.5 text-foreground" />
+        <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[1px] border border-line-structure bg-surface-1 text-text-primary">
+          <Sun className="h-3.5 w-3.5" />
         </span>
-        <span className="flex h-6 w-6 items-center justify-center rounded-full">
-          <Moon className="h-3.5 w-3.5 text-muted-foreground" />
+        <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[1px] border border-transparent text-text-secondary">
+          <Moon className="h-3.5 w-3.5" />
         </span>
       </div>
     );
@@ -33,7 +33,7 @@ export function ThemeToggle() {
 
   return (
     <div
-      className="flex h-8 items-center rounded-full border border-border bg-muted/30 px-1"
+      className="inline-flex h-[26px] w-fit items-center justify-center gap-0.5 rounded-[1px] border border-line-structure bg-transparent p-0.5"
       role="group"
       aria-label="Theme"
     >
@@ -43,10 +43,10 @@ export function ThemeToggle() {
         aria-label="Switch to light mode"
         aria-pressed={!isDark}
         className={cn(
-          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors",
+          "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[1px] border border-transparent text-text-secondary transition-colors hover:bg-surface-1 hover:text-text-primary",
           !isDark
-            ? "bg-muted text-foreground shadow-sm"
-            : "text-muted-foreground hover:text-foreground"
+            ? "border-line-structure bg-surface-bg text-text-primary"
+            : ""
         )}
       >
         <Sun className="h-3.5 w-3.5" />
@@ -57,10 +57,10 @@ export function ThemeToggle() {
         aria-label="Switch to dark mode"
         aria-pressed={isDark}
         className={cn(
-          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors",
+          "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[1px] border border-transparent text-text-secondary transition-colors hover:bg-surface-1 hover:text-text-primary",
           isDark
-            ? "bg-muted text-foreground shadow-sm"
-            : "text-muted-foreground hover:text-foreground"
+            ? "border-line-structure bg-surface-bg text-text-primary"
+            : ""
         )}
       >
         <Moon className="h-3.5 w-3.5" />
