@@ -9,6 +9,8 @@ export const maxDuration = 60;
 
 const ALLOWED_HOSTNAMES = [
   "langfuse.com",
+  "localhost",
+  "127.0.0.1",
   "raw.githubusercontent.com",
   "github.com",
 ];
@@ -45,7 +47,9 @@ export async function GET(request: NextRequest) {
 
     let markdownUrl: URL;
     try {
-      markdownUrl = new URL(url);
+      markdownUrl = url.startsWith("/")
+        ? new URL(url, request.nextUrl.origin)
+        : new URL(url);
     } catch {
       return NextResponse.json(
         { error: "Invalid URL format" },
