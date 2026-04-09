@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Banner } from "../../layout/Banner";
 import { Navbar } from "../../layout/Navbar";
 import { Footer } from "../../layout/Footer";
@@ -6,7 +7,9 @@ import { HomeAside } from "./HomeAside";
 import { HomeMainArea } from "./HomeMainArea";
 
 type HomeLayoutProps = {
-  children: React.ReactNode;
+  children: ReactNode;
+  /** Right TOC / utility column. Default: true. */
+  showAside?: boolean;
 };
 
 /**
@@ -14,7 +17,10 @@ type HomeLayoutProps = {
  * Three-column grid matching the docs layout structure:
  * [HomeSidebar 240px] | [content 1fr, pattern-bg] | [HomeAside 240px]
  */
-export function HomeLayout({ children }: HomeLayoutProps) {
+export function HomeLayout({
+  children,
+  showAside = true,
+}: HomeLayoutProps) {
   return (
     <>
       <Banner />
@@ -25,7 +31,7 @@ export function HomeLayout({ children }: HomeLayoutProps) {
           {children}
           <Footer />
         </HomeMainArea>
-        <HomeAside />
+        {showAside ? <HomeAside /> : null}
       </div>
     </>
   );

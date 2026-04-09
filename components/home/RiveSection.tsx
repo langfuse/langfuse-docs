@@ -71,7 +71,7 @@ export const RiveSection = () => {
   const [label, setLabel] = useState<RiveLabel>(OVERVIEW);
 
   return (
-    <HomeSection id="demo" className="pt-20 lg:pt-10 2xl:pt-20">
+    <HomeSection id="demo" className="pt-20">
       <div className="flex flex-col gap-4 items-start">
         <Heading>
           Made for the <TextHighlight>entire</TextHighlight><TextHighlight className="sm:pl-1.5">development life-cycle.</TextHighlight>

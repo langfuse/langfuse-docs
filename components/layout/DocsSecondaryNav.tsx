@@ -71,7 +71,7 @@ export function DocsSecondaryNavMobile() {
       {pageName && !isRoot && (
         <>
           <ChevronRight className="w-3.5 h-3.5 text-text-tertiary shrink-0" />
-          <span className="text-sm font-medium text-text-primary truncate">
+          <span className="text-sm font-medium truncate text-text-primary">
             {pageName}
           </span>
         </>
@@ -83,8 +83,8 @@ export function DocsSecondaryNavMobile() {
 export function DocsSecondaryNav() {
   const pathname = usePathname();
   return (
-    <div className="hidden md:block overflow-x-auto overflow-y-hidden sticky z-40 bg-surface-1" style={{ top: "60px" }}>
-      <nav className="px-px mx-auto max-w-360 bg-line-structure border-b border-line-structure">
+    <div className="hidden overflow-x-auto overflow-y-hidden sticky z-40 md:block bg-surface-1" style={{ top: "60px" }}>
+      <nav className="px-px mx-auto border-b max-w-360 bg-line-structure border-line-structure">
         <div className="flex gap-0 items-stretch rounded-sm bg-surface-1">
           {SECTIONS.map((item) => {
             const isActive = pathname?.startsWith(item.path);
@@ -95,7 +95,7 @@ export function DocsSecondaryNav() {
                 className={cn(
                   "flex gap-2 items-center px-3 -mb-px text-sm whitespace-nowrap border-b-2 transition-colors h-[40px] shrink-0",
                   isActive
-                    ? "font-medium border-text-primary text-text-primary"
+                    ? "font-medium with-stripes-alt border-text-primary text-text-primary"
                     : "border-transparent text-text-tertiary hover:border-line-structure hover:text-text-secondary"
                 )}
               >

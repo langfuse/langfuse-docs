@@ -534,6 +534,20 @@
     );
 }
 
+.with-stripes-alt {
+  --stripe-base: var(--color-surface-2);
+  --stripe-mix: 20%;
+  --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.2));
+  background:
+    repeating-linear-gradient(
+      315deg,
+      var(--stripe-base),
+      var(--stripe-base) 2px,
+      var(--stripe-line) 4px,
+      var(--stripe-base) 4px
+    );
+}
+
 
 
 /* Richer stripe tint from theme border + base (OK Lab); falls back to rgba above. */
@@ -559,19 +573,16 @@
   content: "";
   position: absolute;
   inset: 0;
-  transition: opacity 120ms ease, transform 120ms ease;
-  transform: scale(1);
-  transform-origin: center;
-  transform-box: fill-box;
+  transition:
+    opacity 120ms ease,
+    inset 120ms ease;
   opacity: 0;
   pointer-events: none;
   z-index: -1;
 }
 
 .box-custom-hover:hover:after {
-  transform: scaleX(1.025) scaleY(1.05);
-  transform-origin: center;
-  transform-box: fill-box;
+  inset: -6px;
   opacity: 1;
 }
 

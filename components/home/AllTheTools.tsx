@@ -110,7 +110,14 @@ export function AllTheTools() {
                   </Text>
                 </div>
                 <div className="flex-1 w-full">
-                  <Image src={tool.visual} alt={tool.title} width={100} height={100} className="object-contain w-full h-full sm:-translate-y-[40px] xl:translate-y-0" />
+                  <Image
+                    src={tool.visual}
+                    alt={tool.title}
+                    width={100}
+                    height={100}
+                    className="object-contain w-full h-full sm:-translate-y-[40px] xl:translate-y-0"
+                    quality={100}
+                  />
                 </div>
               </ChipCard>
             ))}
@@ -132,7 +139,13 @@ export function AllTheTools() {
                   </Text>
                 </div>
                 <div className="hidden flex-1 w-full xl:flex">
-                  <Image src={tool.visual} alt={tool.title} width={100} height={100} className="object-contain w-full h-full" />
+                  <Image
+                    src={tool.visual}
+                    alt={tool.title}
+                    width={100}
+                    height={100}
+                    className="object-contain w-full h-full"
+                    quality={100} />
                 </div>
               </ChipCard>
             ))}
