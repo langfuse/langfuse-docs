@@ -19,7 +19,7 @@ export function NavbarDocs() {
           <div className={contentStyle}>
             <Link href="/" className="flex gap-2 items-center shrink-0">
               <Logo wrapInLink={false} />
-              <span className="hidden text-sm font-medium text-text-tertiary sm:inline">
+              <span className="hidden text-sm font-medium text-text-tertiary md:inline">
                 Docs
               </span>
             </Link>

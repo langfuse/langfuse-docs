@@ -47,8 +47,8 @@ export function DocBodyChrome({
 
   return (
     <DocsBody className="flex-1">
-      <div className="mx-auto w-full max-w-[680px]">
-        <div className="mb-4 flex flex-wrap gap-2 items-center">
+      <div className="mx-auto w-full max-w-[680px] ">
+        <div className="mb-4 flex flex-wrap gap-2 items-center sm:absolute right-0 top-[-62px]">
           {versionLabel != null && versionLabel !== "" && (
             <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
               {versionLabel}
@@ -68,7 +68,7 @@ export function DocBodyChrome({
           <DocsFeedback key={pathname} />
           <DocsSupport />
         </div>
-        <hr className="mb-12 mt-0 border-t dark:border-neutral-800" />
+        <hr className="mt-0 mb-12 border-t dark:border-neutral-800" />
       </div>
     </DocsBody>
   );

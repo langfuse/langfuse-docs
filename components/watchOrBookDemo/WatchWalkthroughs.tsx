@@ -54,7 +54,7 @@ function WatchWalkthroughsInner({ className }: { className?: string }) {
         onValueChange={handleTabChange}
         className="w-full"
       >
-        <TabsList className="flex-row flex-wrap gap-2 justify-center p-2 mx-auto h-auto">
+        <TabsList className="flex-row flex-wrap gap-2 justify-center mx-auto h-auto">
           {WALKTHROUGH_TABS.map((tab) => (
             <TabsTrigger
               key={tab.id}

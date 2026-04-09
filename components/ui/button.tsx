@@ -57,6 +57,12 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return Boolean(target.closest("[contenteditable='true']"));
 }
 
+function hasRenderableChildren(children: React.ReactNode): boolean {
+  return React.Children.toArray(children).some(
+    (child) => child !== null && child !== undefined && child !== false && child !== ""
+  );
+}
+
 function buttonVariants({ variant = "primary", size = "default", className }: ButtonVariantOptions) {
   if (variant === "text") {
     return cn(
@@ -132,8 +138,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const trimmed = shortcutKey?.trim() ?? "";
     const isTextVariant = resolvedVariant === "text";
+    const hasChildren = hasRenderableChildren(children);
+    const isIconOnly = Boolean(icon) && !hasChildren;
     const hasShortcut =
-      !asChild && !isTextVariant && trimmed.length > 0;
+      !asChild && !isTextVariant && trimmed.length > 0 && hasChildren;
     const keyDisplay = hasShortcut ? trimmed.slice(0, 1).toUpperCase() : "";
     const keyLetter = trimmed.slice(0, 1).toLowerCase();
 
@@ -175,7 +183,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       </span>
     ) : null;
 
-    const content = hasShortcut ? (
+    const content = isIconOnly ? (
+      <span
+        className="flex h-full w-full items-center justify-center text-button-icon [&>*]:max-w-full"
+        aria-hidden
+      >
+        {icon}
+      </span>
+    ) : hasShortcut ? (
       <>
         {iconPosition === "start" && iconEl}
         <kbd
@@ -217,10 +232,23 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const hasStartIcon = hasIcon && iconPosition === "start";
     const hasEndIcon = hasIcon && iconPosition === "end";
     const isSmallSize = resolvedSize === "small";
-    const leftPaddingClass = hasStartIcon ? "pl-[3px]" : isSmallSize ? "pl-[6px]" : "pl-[8px]";
+    const leftPaddingClass = isIconOnly
+      ? "px-0"
+      : hasStartIcon
+        ? "pl-[3px]"
+        : isSmallSize
+          ? "pl-[6px]"
+          : "pl-[8px]";
     const rightPaddingClass =
-      hasEndIcon || hasShortcut ? "pr-1.5 lg:pr-[3px]" : isSmallSize ? "pr-[6px]" : "pr-[8px]";
+      isIconOnly
+        ? ""
+        : hasEndIcon || hasShortcut
+          ? "pr-1.5 lg:pr-[3px]"
+          : isSmallSize
+            ? "pr-[6px]"
+            : "pr-[8px]";
     const buttonPaddingClasses = `${leftPaddingClass} ${rightPaddingClass}`;
+    const iconOnlySizeClass = isIconOnly ? (isSmallSize ? "w-[26px]" : "w-[32px]") : "";
 
     const controlClassName = buttonVariants({
       variant: resolvedVariant,
@@ -228,18 +256,23 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       className: cn(
         className,
         isTextVariant && wrapperClassName,
-        !isTextVariant && buttonPaddingClasses
+        !isTextVariant && buttonPaddingClasses,
+        iconOnlySizeClass
       ),
     });
 
     const linkControlClassName = cn(
       controlClassName,
-      !hasShortcut && !hasIcon ? "gap-0 justify-start" : "gap-[6px] justify-center"
+      isIconOnly
+        ? "gap-0 justify-center"
+        : !hasShortcut && !hasIcon
+          ? "gap-0 justify-start"
+          : "gap-[6px] justify-center"
     );
 
     const buttonControlClassName = cn(
       controlClassName,
-      hasShortcut || hasIcon ? "gap-[6px] justify-start" : "gap-3 justify-center"
+      isIconOnly ? "gap-0 justify-center" : hasShortcut || hasIcon ? "gap-[6px] justify-start" : "gap-3 justify-center"
     );
 
     const linkEl = (

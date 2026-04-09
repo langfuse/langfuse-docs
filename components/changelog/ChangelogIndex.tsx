@@ -91,7 +91,7 @@ export const ChangelogIndex = ({
           <PaginationItem>
             <PaginationPrevious
               href={pageHref(currentPage - 1)}
-              className="cursor-pointer select-none"
+              className="cursor-pointer select-none mt-0.25"
             />
           </PaginationItem>
           <div className="hidden gap-1 items-center sm:flex">
