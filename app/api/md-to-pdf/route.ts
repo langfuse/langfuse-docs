@@ -61,6 +61,10 @@ export async function GET(request: NextRequest) {
       ...ALLOWED_HOSTNAMES,
       request.nextUrl.hostname,
     ]);
+    const firstPartyHostnames = new Set([
+      "langfuse.com",
+      request.nextUrl.hostname,
+    ]);
 
     if (
       process.env.NODE_ENV !== "development" &&
@@ -81,10 +85,8 @@ export async function GET(request: NextRequest) {
     //   /terms        -> /md-src/terms.md
     //   /docs/foo     -> /md-src/docs/foo.md
     //   /terms.md     -> /md-src/terms.md
-    const isLangfuseHost =
-      markdownUrl.hostname === "langfuse.com" ||
-      markdownUrl.hostname === "localhost" ||
-      markdownUrl.hostname === "127.0.0.1";
+    
+    const isLangfuseHost = firstPartyHostnames.has(markdownUrl.hostname);
 
     // In local dev, callers may still pass production URLs.
     // Route those requests to the local dev server.
