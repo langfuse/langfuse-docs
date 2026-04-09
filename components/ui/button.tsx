@@ -28,11 +28,11 @@ const sizeClasses: Record<ButtonSize, { root: string }> = {
 const variantClasses: Record<ButtonVariant, { root: string; key: string }> = {
   primary: {
     root: "border-text-secondary bg-text-primary text-surface-bg",
-    key: "border-px border-[rgba(64,61,57,0.30)] bg-[rgba(105,105,94,0.10)]",
+    key: "border border-[rgba(64,61,57,0.30)] bg-[rgba(64,61,57,0.40)]",
   },
   secondary: {
-    root: "border-line-structure bg-surface-bg text-text-secondary",
-    key: "bg-[rgba(105,105,94,0.10)]",
+    root: "border-line-structure group-hover:border-black bg-surface-bg text-text-secondary",
+    key: "border border-[rgba(64,61,57,0.20)] grou bg-[rgba(64,61,57,0.10)]",
   },
   text: {
     root: "border-transparent bg-transparent text-text-secondary shadow-none [box-shadow:none] hover:bg-transparent hover:text-text-primary",
@@ -185,7 +185,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const content = isIconOnly ? (
       <span
-        className="flex h-full w-full items-center justify-center text-button-icon [&>*]:max-w-full"
+        className="flex h-full w-full items-center justify-center text-button-icon *:max-w-full"
         aria-hidden
       >
         {icon}
@@ -237,16 +237,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       : hasStartIcon
         ? "pl-[3px]"
         : isSmallSize
-          ? "pl-[6px]"
-          : "pl-[8px]";
+          ? "pl-[8px]"
+          : "pl-[10px]";
     const rightPaddingClass =
       isIconOnly
         ? ""
         : hasEndIcon || hasShortcut
           ? "pr-1.5 lg:pr-[3px]"
           : isSmallSize
-            ? "pr-[6px]"
-            : "pr-[8px]";
+            ? "pr-[8px]"
+            : "pr-[10px]";
     const buttonPaddingClasses = `${leftPaddingClass} ${rightPaddingClass}`;
     const iconOnlySizeClass = isIconOnly ? (isSmallSize ? "w-[26px]" : "w-[32px]") : "";
 
@@ -267,7 +267,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ? "gap-0 justify-center"
         : !hasShortcut && !hasIcon
           ? "gap-0 justify-start"
-          : "gap-[6px] justify-center"
+          : "gap-[6px] justify-start"
     );
 
     const buttonControlClassName = cn(
@@ -315,7 +315,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     return (
-      <div className={cn("relative p-1 group button-wrapper", wrapperClassName)}>
+      <div
+        className={cn(
+          "relative flex items-center p-1 group button-wrapper",
+          wrapperClassName,
+          size === "small" ? "max-h-[34px]" : "max-h-[40px]"
+        )}
+      >
         <HoverCorners />
         {isLink ? linkEl : buttonEl}
       </div>

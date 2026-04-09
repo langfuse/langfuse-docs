@@ -33,7 +33,7 @@ function CardVisualSlot({ className }: { className?: string }) {
 
 export const DeveloperTools = () => {
   return (
-    <HomeSection id="developer-tools" className="pt-20 lg:pt-10 2xl:pt-20">
+    <HomeSection id="developer-tools" className="pt-20">
       <div className="flex relative flex-col gap-8 md:gap-10">
         <div className="flex max-w-[52ch] flex-col gap-4">
           <Heading className="text-left max-w-[16ch] sm:max-w-none">

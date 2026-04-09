@@ -42,6 +42,19 @@
   position: relative;
 }
 
+/*
+ * Docs reading column (SharedDocsLayout / .docs-chrome only):
+ * Constrain each *direct* child of #nd-page to 680px — breadcrumb, .prose
+ * (DocBodyChrome), prev/next (DocsFooter). Nested MDX is not targeted.
+ * Site <footer> from DocsAndPageFooter stays full width.
+ */
+.docs-chrome #nd-page > *:not(footer) {
+  max-width: 42.5rem; /* 680px */
+  width: 100%;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
 #nd-page::before {
   content: "";
   position: absolute;
@@ -123,7 +136,11 @@
    By default Fumadocs makes only the SidebarViewport (ScrollArea) scroll. We make the
    aside #nd-sidebar the scroll container and disable the inner ScrollArea. */
 #nd-docs-layout #nd-sidebar {
+  overflow-x: hidden;
+  overflow-x: clip;
   overflow-y: auto;
+  min-width: 0;
+  max-width: 100%;
   scrollbar-width: thin;
 }
 #nd-docs-layout #nd-sidebar::-webkit-scrollbar {
@@ -143,6 +160,8 @@
   flex: none;
   overflow: visible;
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
 }
 /* Inner viewport: allow full height so the aside scrolls (Radix or first child of scroll area) */
 #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport],
@@ -152,11 +171,17 @@
   overflow: visible !important;
   height: auto !important;
   max-height: none !important;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Same full-sidebar scroll for mobile docs drawer */
 #nd-sidebar-mobile {
+  overflow-x: hidden;
+  overflow-x: clip;
   overflow-y: auto;
+  min-width: 0;
+  max-width: 100%;
   scrollbar-width: thin;
 }
 #nd-sidebar-mobile::-webkit-scrollbar {
@@ -176,6 +201,8 @@
   flex: none;
   overflow: visible;
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .layout-wrapper {
@@ -203,6 +230,11 @@
 /* Sidebar outer: provides line-structure background visible at #nd-sidebar corners */
 #nd-docs-layout [data-sidebar-placeholder] {
   background-color: var(--line-structure);
+  /* Grid/flex: allow column to shrink so deep trees don’t force horizontal overflow */
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Sidebar inner (#nd-sidebar is position:absolute inside the placeholder):
@@ -263,10 +295,30 @@
 #nd-sidebar-mobile [data-radix-scroll-area-viewport] button {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
+  isolation: isolate;
+  z-index: 0;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/*
+ * Nested page-tree links sit inside Radix CollapsibleContent, which uses overflow-hidden
+ * for height animation. That clips row ::before/::after that extend with negative margins.
+ * Radix sets --radix-collapsible-content-height on that div; only open folders need visible overflow.
+ */
+#nd-docs-layout
+  #nd-sidebar
+  [style*="--radix-collapsible-content-height"][data-state="open"],
+#nd-sidebar-mobile
+  [style*="--radix-collapsible-content-height"][data-state="open"] {
+  overflow: visible !important;
 }
 
 /* Background tile overlay — uses ::before so it can extend beyond the element
-   via negative margins (matching the ::after corner brackets sizing). */
+   via negative margins (matching the ::after corner brackets sizing).
+   Never padding: inherit — nested items use large paddingInlineStart (Fumadocs depth). */
 #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a::before,
 #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] button::before,
 #nd-sidebar-mobile [data-radix-scroll-area-viewport] a::before,
@@ -279,9 +331,10 @@
   bottom: 0 !important;
   width: calc(100% + 12px) !important;
   height: auto !important;
-  padding: inherit;
-  margin: -2px -6px;
+  padding: 0 !important;
+  margin: 0 -6px;
   box-sizing: border-box;
+  z-index: -1;
   opacity: 0;
   --stripe-period: 6px;
   --stripe-base: transparent;
@@ -298,14 +351,36 @@
   transition: opacity 0.2s ease;
 }
 
-#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a:hover::before,
+/*
+ * Nested tree rows: Fumadocs draws the vertical rail on SidebarFolderContent with
+ * before:start-2.5 (0.625rem). Start stripe + corner mask there so they line up with
+ * the guide instead of the text block (padding-inline-start is larger).
+ */
 #nd-docs-layout
   #nd-sidebar
   [data-radix-scroll-area-viewport]
-  button:hover::before,
-#nd-sidebar-mobile [data-radix-scroll-area-viewport] a:hover::before,
-#nd-sidebar-mobile [data-radix-scroll-area-viewport] button:hover::before {
-  opacity: 1;
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  a::before,
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  a::after,
+#nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  a::before,
+#nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  a::after {
+  /* Match Fumadocs rail: before:start-2.5; logical props for RTL */
+  left: auto !important;
+  right: auto !important;
+  inset-inline-start: 0.625rem !important;
+  inset-inline-end: -6px !important;
+  width: auto !important;
+  margin: 0 !important;
 }
 
 #nd-docs-layout
@@ -317,8 +392,6 @@
   [data-active="true"]::before {
   opacity: 1;
   background-color: hsl(0 0% 100% / 0.25);
-  position: relative;
-  z-index: -1;
 }
 
 #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a:hover::before,
@@ -330,8 +403,6 @@
 #nd-sidebar-mobile [data-radix-scroll-area-viewport] button:hover::before {
   opacity: 1;
   background-color: hsl(0 0% 100% / 0.5);
-  position: relative;
-  z-index: -1;
 }
 
 .dark
@@ -384,9 +455,11 @@
   top: 0;
   right: 0;
   bottom: 0;
+  padding: 0 !important;
   width: calc(100% + 12px);
-  margin: -4px -6px;
+  margin: 0 -6px;
   box-sizing: border-box;
+  z-index: -1;
   opacity: 0;
   background-color: hsl(var(--foreground) / 0.6);
   -webkit-mask-image:
@@ -413,8 +486,9 @@
   mask-size: 8px 8px;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  -webkit-mask-origin: content-box;
-  mask-origin: content-box;
+  /* padding-box: full row incl. Fumadocs depth padding; content-box misaligned corners on nested items */
+  -webkit-mask-origin: padding-box;
+  mask-origin: padding-box;
   transition: opacity 0.2s ease;
 }
 

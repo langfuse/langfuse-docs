@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { DocsLayoutWrapper } from "./DocsLayoutWrapper";
-import { NavbarDocs, DocsSecondaryNav, DocsSecondaryNavMobile, Footer } from "@/components/layout";
+import { NavbarDocs, DocsSecondaryNav, DocsSecondaryNavMobile } from "@/components/layout";
 import { DocsPatternTracker } from "@/components/layout/DocsContentArea";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -24,7 +24,7 @@ export function SharedDocsLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="docs-chrome flex min-h-screen flex-col">
+    <div className="flex flex-col min-h-screen docs-chrome">
       <DocsPatternTracker />
       <NavbarDocs />
       <DocsSecondaryNav />

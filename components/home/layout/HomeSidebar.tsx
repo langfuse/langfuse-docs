@@ -107,7 +107,7 @@ export function HomeSidebar() {
       <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 rounded-sm bg-surface-1">
         <div className="pb-px bg-line-structure">
           <div className="px-2 py-4 rounded-sm bg-surface-1">
-            <Text size="s" className="px-2 mb-2 font-medium text-left text-text-primary">Community Stats</Text>
+            <Text size="s" className="px-2 mb-3 font-[430] text-left text-text-primary">Community Stats</Text>
             {communityStats.map((stat) => (
               <LinkBox
                 key={stat.label}
@@ -144,8 +144,8 @@ export function HomeSidebar() {
         {/* ── Changelog ─────────────────────────────────────────────────── */}
         <div className="pb-px bg-line-structure">
           <div className="px-2 py-4 rounded-sm bg-surface-1">
-            <div className="flex justify-between items-center px-2 mb-2">
-              <Text size="s" className="font-medium text-left text-text-primary">
+            <div className="flex justify-between items-center px-2 mb-3">
+              <Text size="s" className="font-[430] text-left text-text-primary">
                 Changelog
               </Text>
               <Link href="/changelog">
@@ -154,25 +154,26 @@ export function HomeSidebar() {
                 </Text>
               </Link>
             </div>
-
-            {changelogItems.map((item) => (
-              <LinkBox
-                key={item.route}
-                href={item.route}
-                tooltip="Read article"
-                tooltipPlacement="bottom-right"
-                className="block px-2 w-full hover:bg-surface-bg"
-              >
-                <div className="flex flex-col gap-1.5">
-                  <Text size="s" className="leading-snug text-left group-hover:text-text-primary">
-                    {item.title}
-                  </Text>
-                  <Text size="xs" className="text-left no-underline group-hover:text-text-primary">
-                    {formatRelativeDate(item.date)}
-                  </Text>
-                </div>
-              </LinkBox>
-            ))}
+            <div className="flex flex-col gap-2">
+              {changelogItems.map((item) => (
+                <LinkBox
+                  key={item.route}
+                  href={item.route}
+                  tooltip="Read article"
+                  tooltipPlacement="bottom-right"
+                  className="block px-2 w-full hover:bg-surface-bg"
+                >
+                  <div className="flex flex-col gap-1.5">
+                    <Text size="s" className="leading-snug text-left group-hover:text-text-primary">
+                      {item.title}
+                    </Text>
+                    <Text size="xs" className="text-left no-underline group-hover:text-text-primary">
+                      {formatRelativeDate(item.date)}
+                    </Text>
+                  </div>
+                </LinkBox>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -181,7 +182,7 @@ export function HomeSidebar() {
           <div className="px-2 py-4 rounded-sm bg-surface-1">
             <Text
               size="s"
-              className="block px-2 mb-2 font-medium text-left text-text-primary"
+              className="block px-2 mb-2 font-[430] text-left text-text-primary"
             >
               Self Hosting Guides
             </Text>

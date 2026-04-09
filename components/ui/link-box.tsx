@@ -58,7 +58,7 @@ const LinkBox = React.forwardRef<HTMLAnchorElement | HTMLDivElement, LinkBoxProp
     const [followOpen, setFollowOpen] = React.useState(false);
     const [followPos, setFollowPos] = React.useState({ x: 0, y: 0 });
 
-    const boxClassName = cn("link-box group py-2.5 px-4.5", className);
+    const boxClassName = cn("link-box group py-1.25 px-4.5", className);
 
     const linkProps =
       href !== undefined && href !== null && href !== ""

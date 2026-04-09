@@ -371,7 +371,12 @@ export const MainContentWrapper = (props) => {
 export const DocsSupport = () => {
   return (
     <div className="flex gap-3 items-center">
-      <Button variant="secondary" size="small" href="/support" icon={<LifeBuoy className="w-4 h-4" />} iconPosition="end">
+      <Button
+        variant="secondary"
+        size="small"
+        href="/support"
+        icon={<LifeBuoy className="w-3.25 h-3.25" />}
+      >
         Support
       </Button>
     </div>
