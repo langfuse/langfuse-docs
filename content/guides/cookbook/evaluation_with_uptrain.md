@@ -26,8 +26,8 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # ???? EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # ???? US region
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -90,16 +90,16 @@ res = eval_llm.evaluate(
 ```
 
     [32m2025-06-17 10:43:14.568[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
-    100%|██████████| 4/4 [00:01<00:00,  2.85it/s]
+    100%|??????????| 4/4 [00:01<00:00,  2.85it/s]
     /Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/uptrain/operators/language/llm.py:271: RuntimeWarning: coroutine 'LLMMulticlient.async_fetch_responses' was never awaited
       with ThreadPoolExecutor(max_workers=1) as executor:
     RuntimeWarning: Enable tracemalloc to get the object allocation traceback
     [32m2025-06-17 10:43:15.996[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
-    100%|██████████| 4/4 [00:01<00:00,  2.74it/s]
+    100%|??????????| 4/4 [00:01<00:00,  2.74it/s]
     [32m2025-06-17 10:43:17.464[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
-    100%|██████████| 4/4 [00:03<00:00,  1.19it/s]
+    100%|??????????| 4/4 [00:03<00:00,  1.19it/s]
     [32m2025-06-17 10:43:20.860[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
-    100%|██████████| 4/4 [00:01<00:00,  3.13it/s]
+    100%|??????????| 4/4 [00:01<00:00,  3.13it/s]
     [32m2025-06-17 10:43:22.148[0m | [1mINFO    [0m | [36muptrain.framework.evalllm[0m:[36mevaluate[0m:[36m376[0m - [1mLocal server not running, start the server to log data and visualize in the dashboard![0m
 
 
@@ -246,7 +246,7 @@ evaluation_batch = {
 }
  
 for t in traces_sample:
-    observations = [langfuse.api.legacy.observations_v1.get(o) for o in t.observations]
+    observations = [langfuse.api.observations.get(o) for o in t.observations]
     for o in observations:
         if o.name == 'retrieval':
             question = o.input['question']
@@ -274,16 +274,16 @@ res = eval_llm.evaluate(
 ```
 
     [32m2025-06-17 10:46:35.647[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
-    100%|██████████| 4/4 [00:01<00:00,  3.06it/s]
+    100%|??????????| 4/4 [00:01<00:00,  3.06it/s]
     /Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/uptrain/operators/language/llm.py:271: RuntimeWarning: coroutine 'LLMMulticlient.async_fetch_responses' was never awaited
       with ThreadPoolExecutor(max_workers=1) as executor:
     RuntimeWarning: Enable tracemalloc to get the object allocation traceback
     [32m2025-06-17 10:46:36.963[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
-    100%|██████████| 4/4 [00:02<00:00,  1.88it/s]
+    100%|??????????| 4/4 [00:02<00:00,  1.88it/s]
     [32m2025-06-17 10:46:39.097[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
-    100%|██████████| 4/4 [00:03<00:00,  1.12it/s]
+    100%|??????????| 4/4 [00:03<00:00,  1.12it/s]
     [32m2025-06-17 10:46:42.703[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
-    100%|██████████| 4/4 [00:01<00:00,  3.87it/s]
+    100%|??????????| 4/4 [00:01<00:00,  3.87it/s]
     [32m2025-06-17 10:46:43.749[0m | [1mINFO    [0m | [36muptrain.framework.evalllm[0m:[36mevaluate[0m:[36m376[0m - [1mLocal server not running, start the server to log data and visualize in the dashboard![0m
 
 
@@ -407,4 +407,5 @@ for _, row in df.iterrows():
 In Langfuse, you can now see the scores for each trace and monitor them over time.
 
 ![UpTrain Evals on a list of traces in Langfuse](https://langfuse.com/images/cookbook/uptrain-batch.png)
+
 

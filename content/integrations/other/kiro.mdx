@@ -1,0 +1,199 @@
+---
+title: "Trace Kiro IDE with Langfuse"
+sidebarTitle: Kiro
+logo: /images/integrations/kiro_icon.png
+description: "Trace Kiro IDE AI agent activity during coding sessions with Langfuse for comprehensive observability of prompts, tool use, file operations, and task execution."
+category: Integrations
+---
+
+# Kiro IDE Tracing with Langfuse
+
+> **What is Kiro?** [**Kiro**](https://kiro.dev) is an AI-powered IDE by AWS that features AI agents to help you write, edit, debug, and understand code. Kiro provides a [hooks system](https://kiro.dev/docs/hooks/) that lets you run custom scripts at different lifecycle points during AI agent activity.
+
+> **What is Langfuse?** [**Langfuse**](https://langfuse.com/) is an open-source LLM engineering platform. It helps teams trace LLM applications, debug issues, evaluate quality, and monitor costs in production.
+
+## What Can This Integration Trace?
+
+Using [Kiro Hooks](https://kiro.dev/docs/hooks/), this integration automatically captures AI agent activity and sends traces to Langfuse. All 10 Kiro hook types are supported:
+
+| Kiro Hook Type | What It Traces |
+|---|---|
+| Prompt Submit | User prompts and queries |
+| Agent Stop | Agent completion with status scores |
+| Pre Tool Use | Tool invocations before execution |
+| Post Tool Use | Tool results and duration |
+| File Create | New file creation |
+| File Save | File modifications |
+| File Delete | File deletions |
+| Pre Task Execution | Spec task start |
+| Post Task Execution | Spec task completion |
+| Manual Trigger | On-demand trace events |
+
+Key observability features include:
+
+- **Traces grouped by conversation**: Each conversation gets its own trace in Langfuse
+- **Sessions grouped by workspace**: All traces from the same workspace folder are grouped into a session
+- **Dynamic tagging**: Automatic tags based on tool type, file operations, and model
+- **Completion status scoring**: Scores (0-1) recorded on agent completion
+- **Non-blocking error handling**: Tracing never interferes with your coding flow
+
+## How It Works
+
+```
+Kiro triggers hook event
+    → Shell command runs hook-handler.js
+    → Reads input from stdin + environment variables
+    → Creates/updates Langfuse trace for the conversation
+    → Routes to event-specific handler
+    → Creates spans, generations, scores in Langfuse
+    → Flushes data before exit
+```
+
+### Trace Hierarchy
+
+Each conversation produces a trace with the following structure:
+
+- **Trace** — one per conversation
+  - **Session** — grouped by workspace folder
+  - **Generations** — user prompts
+  - **Spans** — tool use, file operations, task execution
+  - **Events** — agent stop, manual triggers
+  - **Scores** — completion status (0-1)
+
+## Quick Start
+
+<Steps>
+
+### Set Up Langfuse
+
+1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
+2. Create a new project and copy your API keys from the project settings.
+
+### Clone the Example Repository
+
+Clone the [langfuse-examples](https://github.com/langfuse/langfuse-examples) repository:
+
+```bash
+git clone https://github.com/langfuse/langfuse-examples.git
+```
+
+### Copy Hook Files to Your Project
+
+Copy both the Kiro hook definitions and the handler code to your project:
+
+```bash
+cp -r langfuse-examples/applications/kiro-langfuse/.kiro/hooks/ your-project/.kiro/hooks/
+cp -r langfuse-examples/applications/kiro-langfuse/hooks/ your-project/hooks/
+```
+
+This adds:
+- `.kiro/hooks/` — Kiro hook definition files (one per hook type)
+- `hooks/` — The Node.js handler code and Langfuse client
+
+### Install Dependencies
+
+```bash
+cd your-project/hooks && npm install
+```
+
+### Configure Langfuse Credentials
+
+Create a `.env` file in your project root with your Langfuse API keys:
+
+```bash
+# Langfuse credentials - get these from https://cloud.langfuse.com
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+
+# Optional: self-hosted Langfuse URL (defaults to cloud.langfuse.com)
+# LANGFUSE_BASE_URL=https://your-langfuse-instance.com
+```
+
+**Environment Variables:**
+
+| Variable | Description | Required |
+|---|---|---|
+| `LANGFUSE_PUBLIC_KEY` | Your Langfuse public key | Yes |
+| `LANGFUSE_SECRET_KEY` | Your Langfuse secret key | Yes |
+| `LANGFUSE_BASE_URL` | Langfuse base URL (`https://cloud.langfuse.com` for EU, `https://us.cloud.langfuse.com` for US) | No (defaults to EU) |
+
+### Enable Hooks in Kiro
+
+Open the Hook UI in Kiro:
+- **Mac**: `Cmd + Shift + P` → "Kiro: Open Kiro Hook UI"
+- **Windows/Linux**: `Ctrl + Shift + P` → "Kiro: Open Kiro Hook UI"
+
+The hook files in `.kiro/hooks/` will appear automatically. Toggle on the hooks you want to trace.
+
+Each hook file follows this format:
+
+```json
+{
+  "version": "1.0.0",
+  "enabled": true,
+  "name": "Langfuse - Prompt Submit",
+  "when": {
+    "type": "promptSubmit"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "KIRO_HOOK_EVENT=prompt_submit node hooks/hook-handler.js"
+  }
+}
+```
+
+### View Traces in Langfuse
+
+Open your [Langfuse dashboard](https://cloud.langfuse.com) and navigate to **Traces**. You can:
+
+- Filter by tag `kiro` to see all Kiro traces
+- Filter by session name (your workspace folder) to see traces from a specific project
+- Click a trace to see the full conversation breakdown with nested spans, generations, and scores
+
+</Steps>
+
+## Customization
+
+### Filter Specific Tools
+
+Edit `.kiro/hooks/langfuse-pre-tool-use.kiro.hook` and update the `"toolName"` field to target specific tools. The following built-in categories are supported:
+
+- `read` — all built-in file read tools
+- `write` — all built-in file write tools
+- `shell` — all built-in shell command-related tools
+- `web` — all built-in web tools
+- `spec` — all built-in spec tools
+- `*` — all tools (built-in and MCP)
+
+You can also use prefix filters to target tools by source:
+
+- `@mcp` — all MCP tools
+- `@powers` — all Powers tools
+- `@builtin` — all built-in tools
+
+Prefixes starting with `@` are matched by regex, so you can use patterns like `@mcp.*sql.*` to match specific MCP tools by name.
+
+You can also configure tool hooks via the Kiro Hook UI — type each tool name and press Enter to add it.
+
+### Filter Specific Files
+
+Edit `.kiro/hooks/langfuse-file-save.kiro.hook` and change `"patterns": ["**/*"]` to target specific files:
+
+- `["src/**/*.ts"]` — TypeScript source files
+- `["**/*.js", "**/*.ts"]` — JS and TS files
+- `["**/*", "!node_modules/**"]` — exclude node_modules
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) v18+
+- [Kiro IDE](https://kiro.dev) installed
+- A [Langfuse](https://langfuse.com) account (cloud or self-hosted)
+
+## Resources
+
+- [kiro-langfuse Example](https://github.com/langfuse/langfuse-examples/tree/main/applications/kiro-langfuse)
+- [Kiro Hooks Documentation](https://kiro.dev/docs/hooks/)
+- [Kiro Hook Types](https://kiro.dev/docs/hooks/types/)
+- [Kiro Hook Actions](https://kiro.dev/docs/hooks/actions/)
+- [Langfuse Observability Documentation](/docs/observability/overview)
+- [Langfuse Sessions](/docs/observability/features/sessions)
