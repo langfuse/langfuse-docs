@@ -1,18 +1,23 @@
 ---
-title: Trace Restate Workflows with Langfuse
+title: Trace Restate Agents with Langfuse
 sidebarTitle: Restate
 logo: /images/integrations/restate_icon.png
-description: Learn how to use Langfuse to monitor and evaluate resilient Restate agentic workflows via OpenTelemetry
+description: Learn how to use Langfuse to monitor and evaluate resilient Restate agents and workflows via OpenTelemetry
 category: Integrations
 ---
 
-# Trace Restate Workflows with Langfuse
+# Trace Restate Agents with Langfuse
 
-This guide shows how to integrate Langfuse into your [Restate](https://restate.dev/) agentic workflows for full observability — LLM calls, tool invocations, and durable workflow steps — all in a single unified trace.
+This guide shows how to integrate Langfuse into your [Restate](https://restate.dev/) agents and workflows for full observability — LLM calls, tool invocations, and durable workflow steps — all in a single unified trace.
 
 > **What is Restate?** [Restate](https://restate.dev/) is a durable execution platform that makes agents and workflows resumable and resilient. Every non-deterministic action (LLM calls, tool API calls, MCP calls) is persisted in a durable journal. On failure, Restate replays the journal and resumes where it left off — with automatic retries, recovery, and idempotent execution.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents. It helps you monitor LLM calls, tool usage, cost, latency, and run automated evaluations.
+
+## Supported Agent Frameworks
+
+Restate offers [SDK integrations](https://docs.restate.dev/ai) for multiple agent frameworks: OpenAI Agents SDK, Pydantic AI, Google ADK, pure Restate agents, etc.
+The example below uses the OpenAI Agents SDK. To learn how to integrate Langfuse and Restate with other frameworks, consult [the Restate documentation](https://docs.restate.dev/ai/ecosystem-integrations/langfuse).
 
 ## Versioning
 
@@ -21,7 +26,7 @@ Restate's [versioning model](https://docs.restate.dev/operate/versioning) ensure
 ## 1. Install Dependencies
 
 ```bash
-pip install restate-sdk[serde] openai-agents langfuse openinference-instrumentation-openai-agents hypercorn
+pip install restate-sdk openai-agents langfuse openinference-instrumentation-openai-agents hypercorn
 ```
 
 ## 2. Configure Environment
@@ -31,7 +36,7 @@ Set up your API keys. You can get Langfuse keys from [Langfuse Cloud](https://la
 ```bash filename=".env"
 LANGFUSE_PUBLIC_KEY=pk-lf-...
 LANGFUSE_SECRET_KEY=sk-lf-...
-LANGFUSE_HOST=https://cloud.langfuse.com
+LANGFUSE_BASE_URL=https://cloud.langfuse.com
 OPENAI_API_KEY=sk-proj-...
 ```
 
@@ -46,92 +51,77 @@ from restate.ext.openai import restate_context, DurableRunner, durable_function_
 
 # Durable tool — executed exactly once, even across retries
 @durable_function_tool
-async def check_fraud_database(customer_id: str) -> dict[str, str]:
-    """Check the claim against the fraud database."""
-    return await restate_context().run_typed(
-        "Query fraud DB", query_fraud_db, claim_id=customer_id
-    )
+async def get_weather(city: str) -> dict:
+    """Get the current weather for a given city."""
 
-# LLM agents
-parse_agent = Agent(
-    name="DocumentParser",
-    instructions="Extract the customer ID, claim amount, currency, category, and description.",
-    output_type=ClaimData,
+    # Do durable steps using the Restate context
+    async def call_weather_api(city: str) -> dict:
+        return {"temperature": 23, "description": "Sunny and warm."}
+
+    return await restate_context().run_typed("Get weather", call_weather_api, city=city)
+
+
+# AGENT
+weather_agent = Agent(
+    name="WeatherAgent",
+    instructions="You are a helpful agent that provides weather updates.",
+    tools=[get_weather],
 )
 
-analysis_agent = Agent(
-    name="ClaimsAnalyst",
-    instructions="Assess whether this claim is valid and provide detailed reasoning.",
-    output_type=ClaimAssessment,
-    tools=[check_fraud_database],
-)
 
-# Main orchestrator
-claim_service = restate.Service("InsuranceClaimAgent")
+# AGENT SERVICE
+agent_service = restate.Service("agent")
 
-@claim_service.handler()
-async def run(ctx: restate.Context, req: ClaimDocument) -> str:
-    # Step 1: Parse the claim document (LLM step)
-    parsed = await DurableRunner.run(parse_agent, req.text)
-    claim: ClaimData = parsed.final_output
 
-    # Step 2: Analyze the claim (LLM step)
-    response = await DurableRunner.run(analysis_agent, claim.model_dump_json())
-    assessment: ClaimAssessment = response.final_output
+@agent_service.handler()
+async def run(_ctx: restate.Context, message: str) -> str:
+    # Runner that persists the agent execution for recoverability
+    result = await DurableRunner.run(weather_agent, message)
+    return result.final_output
 
-    if not assessment.valid:
-        return "Claim rejected"
-
-    # Step 3: Convert currency (regular durable step, no LLM)
-    converted = await ctx.run_typed(
-        "Convert currency", convert_currency, amount=claim.amount
-    )
-
-    # Step 4: Process reimbursement (regular durable step, no LLM)
-    await ctx.run_typed("Reimburse", reimburse, amount=converted)
-
-    return "Claim reimbursed"
-```
-
-## 4. Enable Langfuse Tracing
-
-Initialize the Langfuse client and set up the tracing processor. This connects the OpenAI Agents SDK spans to Restate's execution traces, so everything appears as a single unified trace in Langfuse.
-
-```python filename="__main__.py"
-import hypercorn
-import asyncio
-import restate
-
-from langfuse import get_client
-from opentelemetry import trace as trace_api
-from openinference.instrumentation import OITracer, TraceConfig
-from agents import set_trace_processors
-
-from utils.tracing import RestateTracingProcessor
-from agent import claim_service
-
-# Initialize Langfuse (sets up the global OTel tracer provider + exporter)
-langfuse = get_client()
-tracer = OITracer(
-    trace_api.get_tracer("openinference.openai_agents"), config=TraceConfig()
-)
-set_trace_processors([RestateTracingProcessor(tracer)])
 
 if __name__ == "__main__":
-    app = restate.app(services=[claim_service])
+    import hypercorn
+    import asyncio
+    from agent import agent_service
+
+    app = restate.app(services=[agent_service])
 
     conf = hypercorn.Config()
     conf.bind = ["0.0.0.0:9080"]
     asyncio.run(hypercorn.asyncio.serve(app, conf))
 ```
 
-The `RestateTracingProcessor` (available in [Restate's example repo](https://github.com/restatedev/ai-examples/blob/main/openai-agents/examples/langfuse/utils/tracing.py)) flattens the OpenAI Agents SDK spans under Restate's parent span, so the trace hierarchy in Langfuse mirrors the actual execution flow.
+## 4. Enable Langfuse Tracing
+
+Initialize the Langfuse client and set up the tracing processor. This connects the OpenAI Agents SDK spans to Restate's execution traces, so everything appears as a single unified trace in Langfuse.
+
+```python filename="agent.py"
+from langfuse import get_client
+from opentelemetry import trace as trace_api
+from openinference.instrumentation import OITracer, TraceConfig
+from openinference.instrumentation.openai_agents._processor import OpenInferenceTracingProcessor
+from agents import set_trace_processors
+from restate.ext.tracing import RestateTracer
+
+# Initialize Langfuse (sets up the global OTel tracer provider + exporter)
+langfuse = get_client()
+tracer = OITracer(
+    RestateTracer(trace_api.get_tracer("openinference.openai_agents")),
+    config=TraceConfig(),
+)
+set_trace_processors([OpenInferenceTracingProcessor(tracer)])
+```
+
+The `RestateTracer` flattens the OpenAI Agents SDK spans under Restate's parent span, so the trace hierarchy in Langfuse mirrors the actual execution flow.
 
 Restate also exports its own execution traces (workflow steps, retries, recovery) as OpenTelemetry spans. By pointing Restate's tracing endpoint at Langfuse, both agentic and workflow spans appear in the same trace.
 
 ## 5. View Traces in Langfuse
 
-After running the workflow, the trace in Langfuse shows both the agentic steps and the workflow steps. For LLM calls, you can inspect inputs, prompts, model configuration, and outputs.
+After running the agent ([see instructions](https://docs.restate.dev/ai/ecosystem-integrations/langfuse)), the trace in Langfuse shows both the agentic steps and the workflow steps. For LLM calls, you can inspect inputs, prompts, model configuration, and outputs.
+
+![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_restate/restate-trace.png)
 
 ## Prompt Management with Restate
 
