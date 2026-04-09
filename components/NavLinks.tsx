@@ -101,7 +101,7 @@ function NavDropdownPanel({
 }) {
   return (
     <CornerBox className="flex p-0 min-w-max bg-surface-1">
-      <div className="flex flex-col border-r border-line-structure min-w-[220px] overflow-hidden">
+      <div className="flex flex-col border-r border-line-structure min-w-[220px] px-1 overflow-hidden">
         {links.map((link) => {
           const Icon = link.icon;
           return (
@@ -199,7 +199,7 @@ function NavDropdown({
           open ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-1 pointer-events-none"
         )}
         style={{
-          top: "calc(var(--fd-banner-height, 0px) + 1.1rem)",
+          top: "66px",
         }}
       >
         <NavDropdownPanel links={links} featured={featured} />

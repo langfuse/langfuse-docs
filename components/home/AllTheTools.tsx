@@ -99,7 +99,7 @@ export function AllTheTools() {
                 key={tool.title}
                 href={tool.href}
                 tooltip={tool.tooltip}
-                className="flex flex-col sm:flex-row xl:flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start sm:max-h-[200px] xl:max-h-none xl:min-h-[300px] overflow-clip"
+                className="flex flex-col sm:flex-row xl:flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start sm:max-h-[200px] xl:max-h-none xl:min-h-[200px]"
               >
                 <div className="flex flex-col flex-1 gap-3 p-2 sm:p-4">
                   <Text size="s" className="font-medium text-left text-text-secondary">

@@ -506,62 +506,49 @@
 
 .link-box {
   position: relative;
-  transition: background-image 120ms ease;
-  background-repeat: repeat-x;
-  background-size: auto 100%;
-}
-
-.link-box:hover {
-  background-image: url("/images/buttons/button-base.png");
-}
-
-.with-stripes {
-  background-image: url("/images/buttons/button-base.png");
 }
 
 /**
- * Diagonal stripe overlay on a solid base. Set `--stripe-color` on the element
- * (or a parent). Optional knobs:
- *   --stripe-angle   default 120deg
- *   --stripe-mix     default 14% (how much of --stripe-color in each line)
- *   --stripe-line-end default 1px (line thickness along the gradient axis)
- *   --stripe-period  default 6px (repeat: line + gap)
- *   --stripe-base    default var(--color-surface-bg) (layer under stripes)
- *
- * Line stops use opaque mixes with --stripe-base (not transparent) so edges stay
- * sharp; color-mix(in oklab, …, transparent) in gradients tends to look soft.
+ * Diagonal stripe overlay on a solid base.
+ * Override `--stripe-color` on the element to change the line color.
+ * Knobs:
+ *   --stripe-period  default 6px  — tile size; visual period ≈ period × 0.707
+ *   --stripe-base    default var(--color-surface-bg) (solid layer under stripes)
  */
-.bg-stripe-pattern {
-  --stripe-angle: 135deg;
-  --stripe-mix: 10%;
-  --stripe-line-end: 1px;
-  --stripe-period: 5px;
+.bg-stripe-pattern,
+.with-stripes,
+.link-box:hover,
+.button-wrapper:hover,
+.box-custom-hover:after,
+.card-hover-stripes:after {
+  --stripe-mix: 20%;
   --stripe-base: var(--color-surface-bg);
-  --stripe-line: color-mix(
-    in oklab,
-    var(--stripe-color, var(--color-fd-border)) var(--stripe-mix),
-    var(--stripe-base)
-  );
+  --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.1));
   background:
     repeating-linear-gradient(
-      var(--stripe-angle),
-      var(--stripe-line) 0 var(--stripe-line-end),
-      var(--stripe-base) var(--stripe-line-end) var(--stripe-period)
-    ),
-    var(--stripe-base);
+      315deg,
+      var(--stripe-base),
+      var(--stripe-base) 2px,
+      var(--stripe-line) 4px,
+      var(--stripe-base) 4px
+    );
 }
 
-.bg-stripe-pattern.stripe-pattern--base-mix {
-  --stripe-mix: 20%;
+
+
+/* Richer stripe tint from theme border + base (OK Lab); falls back to rgba above. */
+@supports (color: color-mix(in lab, red, red)) {
+  .bg-stripe-pattern {
+    --stripe-line: color-mix(
+      in oklab,
+      var(--stripe-color, var(--color-fd-border)) var(--stripe-mix),
+      var(--stripe-base)
+    );
+  }
 }
 
 .button-wrapper {
   position: relative;
-  transition: background-image 120ms ease;
-}
-
-.button-wrapper:hover {
-  background-image: url("/images/buttons/button-base.png");
 }
 
 .box-custom-hover {
@@ -572,10 +559,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("/images/buttons/button-base.png");
-  background-size: contain;
-  background-position: center;
-  transition: all 120ms ease;
+  transition: opacity 120ms ease, transform 120ms ease;
   transform: scale(1);
   transform-origin: center;
   transform-box: fill-box;
@@ -599,9 +583,6 @@
   content: "";
   position: absolute;
   inset: -4px;
-  background-image: url("/images/buttons/button-base.png");
-  background-size: contain;
-  background-position: center;
   transition: opacity 220ms ease;
   opacity: 0;
   pointer-events: none;

@@ -283,9 +283,17 @@
   margin: -2px -6px;
   box-sizing: border-box;
   opacity: 0;
-  background-image: url("/images/buttons/button-base.png");
-  background-origin: content-box;
-  background-clip: content-box;
+  --stripe-period: 6px;
+  --stripe-base: transparent;
+  --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.1));
+  background:
+    repeating-linear-gradient(
+      315deg,
+      var(--stripe-base),
+      var(--stripe-base) 2px,
+      var(--stripe-line) 4px,
+      var(--stripe-base) 4px
+    );
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
@@ -377,7 +385,6 @@
   right: 0;
   bottom: 0;
   width: calc(100% + 12px);
-  padding: inherit;
   margin: -4px -6px;
   box-sizing: border-box;
   opacity: 0;

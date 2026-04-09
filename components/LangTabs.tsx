@@ -64,7 +64,7 @@ export function LangTab({
   className,
   ...props
 }: React.ComponentProps<typeof FumadocsTab>) {
-  return <FumadocsTab className={cn("prose-no-margin bg-transparent bg-stripe-pattern pt-4 stripe-pattern--base-mix text-sm rounded-none", className)} {...props} />;
+  return <FumadocsTab className={cn("prose-no-margin bg-transparent bg-stripe-pattern pt-4 text-sm rounded-none", className)} {...props} />;
 }
 
 export function LangTabs(props: {
