@@ -9,8 +9,8 @@ export const maxDuration = 60;
 
 const ALLOWED_HOSTNAMES = [
   "langfuse.com",
-  "localhost",
-  "127.0.0.1",
+  //"localhost",
+  //"127.0.0.1",
   "raw.githubusercontent.com",
   "github.com",
 ];
