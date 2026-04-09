@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
-/** White wordmark PNG (2233×527); renders on the black OG card background. */
+/** White wordmark PNG (2233×527); kept in sync from `public/langfuse-wordart-white.svg` via `scripts/sync-wordmark-png-for-og.mjs` (prebuild). */
 const WORDMARK_PATH =
   "/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.png";
 const WORDMARK_ASPECT = 2233 / 527;
