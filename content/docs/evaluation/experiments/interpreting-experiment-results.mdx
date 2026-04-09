@@ -11,7 +11,7 @@ description: Systematically evaluate changes to your AI application by comparing
 
 When developing AI agents, every change to your application—whether a prompt adjustment, a model swap, or a tool update—is like a new experiment. To determine if these changes represent genuine progress, you must follow a systematic cycle of Analyse, Measure, and Improve.
 
-The experiment UI helps with such systematic evaluation. The change to your application produces a so-called **Candidate** (new experiment) when run against a set of fixed test data. To assess progress, you compare the **Candidate** against a **Baseline** (reference experiment often corresponding to production standard). This process validates that the candidate delivers measurable improvement without regressing on existing performance.
+The experiment UI helps with such systematic evaluation. Let's assume the change to your application produces a so-called **Candidate** (new experiment) when run against a set of fixed test data. To assess progress, you compare this **Candidate** against a **Baseline** (reference experiment often corresponding to production standard). This process helps validate that the candidate delivers measurable improvement without regressing on existing performance.
 
 {/* TODO: Replace with actual GIF path after upload to static.langfuse.com/docs-videos */}
 <Video
@@ -23,17 +23,17 @@ The experiment UI helps with such systematic evaluation. The change to your appl
 
 ## Identify Baseline and Candidate Runs [#identify-runs]
 
-Before comparing, isolate the relevant experiment runs using filters. For example, you can filter by dataset version, prompt ID, or configuration key to ensure you are comparing apples to apples.
+Before comparing, isolate the relevant experiments using filters. For example, you can filter by dataset version, prompt ID, or configuration key to ensure you are comparing apples to apples.
 
 Example filters:
 
-- **Dataset:** Ensure both runs used the same dataset to maintain a controlled comparison.
+- **Dataset:** Ensure both experiments used the same dataset to maintain a controlled comparison.
 - **Metadata:** Filter by version tags, prompt IDs, or configuration keys (e.g., `model: gpt-4o` vs. `model: claude-3.5-sonnet`).
-- **Configuration:** Isolate runs based on architectural changes such as retrieval strategies or temperature settings.
+- **Configuration:** Isolate experiments based on architectural changes such as retrieval strategies or temperature settings.
 
 ## Compare Performance [#compare-performance]
 
-Use comparison mode to measure the performance delta between Baseline and Candidate(s). You can compare multiple candidates against the baseline to observe performance trends across the cohort.
+Use comparison mode to measure the performance delta between Baseline and Candidate.
 
 {/* TODO: Replace with actual image path after upload */}
 <Frame fullWidth>
@@ -44,7 +44,7 @@ Use comparison mode to measure the performance delta between Baseline and Candid
 
 1. **Set the Baseline:** Designate your reference run. All metrics display relative to this run.
 2. **Evaluate the Candidate:** Select the experiment run to validate.
-3. **Detect Regressions:** Sort results by largest negative deltas. In agentic workflows, improvements in one area often cause failures elsewhere.
+3. **Detect Regressions:** Filter results by score thresholds. In agentic workflows, improvements in one area often cause failures elsewhere.
 4. **Validate Improvement:** Review aggregate scores. A successful candidate shows statistically significant improvement on core metrics without violating performance constraints.
 
 ### Multi-Candidate & Spreadsheet-Like Comparison [#multi-candidate]
@@ -65,6 +65,7 @@ When a candidate fails to outperform the baseline, use these filters for post-mo
 
 ## Related Resources [#related-resources]
 
+- [Evaluation Overview](/docs/evaluation/overview) - Run evaluators on experiments to generate performance scores and thresholds
 - [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) - Programmatically run experiments with custom scoring
 - [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) - Execute prompt experiments from the UI
 - [Datasets](/docs/evaluation/experiments/datasets) - Create and manage evaluation datasets
