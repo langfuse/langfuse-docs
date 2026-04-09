@@ -134,7 +134,7 @@ export default function CloudRegionSelectorPage() {
         <div className="text-center sm:mx-auto sm:w-full">
           <a href="/" aria-label="Langfuse Home" className="inline-flex">
             <Image
-              src="/langfuse_logo.svg"
+              src="/langfuse-wordart.svg"
               alt="Langfuse"
               width={152}
               height={20}
@@ -142,7 +142,7 @@ export default function CloudRegionSelectorPage() {
               className="h-auto w-36 dark:hidden"
             />
             <Image
-              src="/langfuse_logo_white.svg"
+              src="/langfuse-wordart-white.svg"
               alt="Langfuse"
               width={152}
               height={20}

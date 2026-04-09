@@ -19,14 +19,14 @@ export function Logo({
   const images = (
     <div className="flex gap-2 items-center cursor-pointer -mr-4 md:-mr-0">
       <Image
-        src="/langfuse_logo_white.svg"
+        src="/langfuse-wordart-white.svg"
         alt="Langfuse Logo"
         width={120}
         height={20}
         className="hidden dark:block max-w-28 sm:max-w-none"
       />
       <Image
-        src="/langfuse_logo.svg"
+        src="/langfuse-wordart.svg"
         alt="Langfuse Logo"
         width={120}
         height={20}
