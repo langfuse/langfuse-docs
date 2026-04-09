@@ -58,7 +58,7 @@ export function Hero() {
           </div>
         </div>
       </CornerBox>
-      <CornerBox className="-mt-px">
+      <CornerBox className="pr-px pb-px -mt-px">
         <EnterpriseLogoGrid />
       </CornerBox>
     </HomeSection>

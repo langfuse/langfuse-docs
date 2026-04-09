@@ -59,7 +59,6 @@ const menuItems: { heading: string; items: { name: string; href: string }[] }[] 
     items: [
       { name: "About Us", href: "/about" },
       { name: "Careers", href: "/careers" },
-      { name: "Media Kit", href: "/media-kit" },
       { name: "Press", href: "/press" },
       { name: "Security", href: "/security" },
       { name: "Support", href: "/support" },
@@ -80,7 +79,7 @@ const linkClassName =
 
 export function Footer({ className }: { className?: string }) {
   return (
-    <footer className={cn("mx-auto w-full px-4 sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px] pb-8 mt-20", className)}>
+    <footer className={cn("px-4 pb-8 mx-auto mt-20 w-full sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]", className)}>
       {/* Social icons row */}
       <CornerBox className="flex gap-5 items-center p-4 -mb-px">
         {socialLinks.map((s) => {

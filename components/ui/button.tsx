@@ -67,7 +67,7 @@ function buttonVariants({ variant = "primary", size = "default", className }: Bu
     );
   }
   return cn(
-    'rounded-[1px] border [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]',
+    'rounded-[2px] border [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]',
     buttonBaseClasses, variantClasses[variant].root, sizeClasses[size].root, className);
 }
 
@@ -168,7 +168,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
     const iconEl = icon ? (
       <span
-        className="button-icon-area flex shrink-0 items-center justify-center h-full aspect-square [&>*]:max-w-full rounded-[1px] border-[0.5px] border-[rgba(64,61,57,0.20)] bg-[rgba(64,61,57,0.10)] dark:bg-transparent p-[2px] text-button-icon"
+        className="button-icon-area flex shrink-0 items-center justify-center h-full aspect-square *:max-w-full rounded-[1px] border-[0.5px] border-[rgba(64,61,57,0.20)] bg-[rgba(64,61,57,0.10)] dark:bg-transparent p-[2px] text-button-icon"
         aria-hidden
       >
         {icon}

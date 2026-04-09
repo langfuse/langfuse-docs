@@ -47,27 +47,29 @@ export function DocBodyChrome({
 
   return (
     <DocsBody className="flex-1">
-      <div className="mb-4 flex flex-wrap gap-2 items-center">
-        {versionLabel != null && versionLabel !== "" && (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
-            {versionLabel}
-          </span>
+      <div className="mx-auto w-full max-w-[680px]">
+        <div className="mb-4 flex flex-wrap gap-2 items-center">
+          {versionLabel != null && versionLabel !== "" && (
+            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
+              {versionLabel}
+            </span>
+          )}
+          <CopyMarkdownButton key={pathname} />
+        </div>
+        {cookbook && (
+          <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
         )}
-        <CopyMarkdownButton key={pathname} />
+        {children}
+        <hr className="mt-12 mb-0 border-t dark:border-neutral-800" />
+        <div
+          className="flex flex-wrap gap-6 justify-between items-center py-6"
+          id="docs-feedback"
+        >
+          <DocsFeedback key={pathname} />
+          <DocsSupport />
+        </div>
+        <hr className="mb-12 mt-0 border-t dark:border-neutral-800" />
       </div>
-      {cookbook && (
-        <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
-      )}
-      {children}
-      <hr className="mt-12 mb-0 border-t dark:border-neutral-800" />
-      <div
-        className="flex flex-wrap gap-6 justify-between items-center py-6"
-        id="docs-feedback"
-      >
-        <DocsFeedback key={pathname} />
-        <DocsSupport />
-      </div>
-      <hr className="mb-12 mt-0 border-t dark:border-neutral-800" />
     </DocsBody>
   );
 }

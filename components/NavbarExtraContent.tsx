@@ -11,7 +11,7 @@ export function NavbarExtraContent({
   return (
     <>
       <ToAppButton />
-      <Button href='/talk-to-us' className="hidden sm:block" variant="secondary" size="small" shortcutKey="g">
+      <Button href='/talk-to-us' className="hidden sm:flex" variant="secondary" size="small" shortcutKey="g">
         Get Demo
       </Button>
       <MobileMenu sectionNavData={sectionNavData} />

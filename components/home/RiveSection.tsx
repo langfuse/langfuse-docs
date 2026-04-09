@@ -146,11 +146,11 @@ export const RiveSection = () => {
             className="w-full h-full"
             onStateChange={(states) => {
               const match = states.find((s) => s in LABELS);
-              if (match) setLabel(LABELS[match]);
+              setLabel(match ? LABELS[match] : OVERVIEW);
             }}
           />
         </div>
-        <CornerBox className="p-2 sm:p-4 -mt-px min-h-[72px] flex flex-col justify-center">
+        <CornerBox className="p-2 sm:p-4 -mt-px min-h-[110px] flex flex-col justify-start">
           <div key={label.heading} className="rive-text-enter flex flex-col gap-1.5">
             <Text className="font-medium text-left text-text-primary">
               {label.heading}
