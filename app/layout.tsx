@@ -3,6 +3,7 @@ import Script from "next/script";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { DevAriaHiddenConsoleFilter } from "@/components/DevAriaHiddenConsoleFilter";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { Hubspot } from "@/components/analytics/hubspot";
 import "../style.css";
@@ -44,6 +45,7 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <body className="font-sans antialiased">
+        {process.env.NODE_ENV === "development" && <DevAriaHiddenConsoleFilter />}
         <PostHogProvider>
           <RootProvider>{children}</RootProvider>
         </PostHogProvider>
