@@ -20,6 +20,8 @@ export default function InkeepChatButton() {
     aiChatSettings,
     searchSettings,
     modalSettings,
+    label: "Ask AI",
+    avatar: "/langfuse-icon.svg",
   };
 
   return (
