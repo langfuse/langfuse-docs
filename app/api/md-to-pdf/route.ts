@@ -57,14 +57,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const allowedHostnames = new Set([
+      ...ALLOWED_HOSTNAMES,
+      request.nextUrl.hostname,
+    ]);
+
     if (
       process.env.NODE_ENV !== "development" &&
-      !ALLOWED_HOSTNAMES.includes(markdownUrl.hostname)
+      !allowedHostnames.has(markdownUrl.hostname)
     ) {
       return NextResponse.json(
         {
           error: `Fetching from ${markdownUrl.hostname} is not permitted.`,
-          allowed: ALLOWED_HOSTNAMES,
+          allowed: Array.from(allowedHostnames),
         },
         { status: 400 }
       );
