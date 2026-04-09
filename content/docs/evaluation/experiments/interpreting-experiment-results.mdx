@@ -1,0 +1,70 @@
+---
+title: Interpreting Experiment Results
+description: Compare experiment runs against a baseline to identify regressions and validate improvements in the Langfuse UI.
+---
+
+# Interpreting Experiment Results [#interpreting-experiment-results]
+
+<Callout type="info">
+  **Beta:** Experiment analysis in the UI is currently in beta. Features and workflows are evolving based on feedback.
+</Callout>
+
+When developing AI agents, every change to your application—whether a prompt adjustment, a model swap, or a tool update—is like a new experiment. To determine if these changes represent genuine progress, you must follow a systematic cycle of Analyse, Measure, and Improve.
+
+The experiment comparison UI enables such systematic evaluation. The change to your application produces a so-called **Candidate** (new experiment) when run against a set of fixed test data. To assess progress, you compare the **Candidate** against a **Baseline** (reference experiment often corresponding to production standard). This process validates that the candidate delivers measurable improvement without regressing on existing performance.
+
+{/* TODO: Replace with actual GIF path after upload to static.langfuse.com/docs-videos */}
+<Video
+  src="https://static.langfuse.com/docs-videos/PLACEHOLDER-experiment-analysis.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+  title="Experiment comparison workflow"
+/>
+
+## Identify Baseline and Candidate Runs [#identify-runs]
+
+Before comparing, isolate the relevant experiment runs using filters. For example, you can filter by dataset version, prompt ID, or configuration key to ensure you are comparing apples to apples.
+
+Example filters:
+
+- **Dataset:** Ensure both runs used the same dataset to maintain a controlled comparison.
+- **Metadata:** Filter by version tags, prompt IDs, or configuration keys (e.g., `model: gpt-4o` vs. `model: claude-3.5-sonnet`).
+- **Configuration:** Isolate runs based on architectural changes such as retrieval strategies or temperature settings.
+
+## Compare Performance [#compare-performance]
+
+Use comparison mode to measure the performance delta between Baseline and Candidate(s). You can compare multiple candidates against the baseline to observe performance trends across the cohort.
+
+{/* TODO: Replace with actual image path after upload */}
+<Frame fullWidth>
+  ![Experiment comparison view](/images/docs/PLACEHOLDER-experiment-comparison.png)
+</Frame>
+
+### Regression-First Analysis [#regression-first]
+
+1. **Set the Baseline:** Designate your reference run. All metrics display relative to this run.
+2. **Evaluate the Candidate:** Select the experiment run to validate.
+3. **Detect Regressions:** Sort results by largest negative deltas. In agentic workflows, improvements in one area often cause failures elsewhere.
+4. **Validate Improvement:** Review aggregate scores. A successful candidate shows statistically significant improvement on core metrics without violating performance constraints.
+
+### Multi-Candidate & Spreadsheet-Like Comparison [#multi-candidate]
+
+When testing multiple hypotheses (e.g., `Prompt_A`, `Prompt_B`, `Prompt_C`), you can view runs side-by-side without a fixed baseline to observe performance trends across the cohort. This "spreadsheet-like" view is useful if you have not yet established a baseline, or simply want to compare results at a glance. You may **clear the baseline at any time** to enable this side-by-side comparison mode.
+
+> **Tip:** Clearing the baseline transforms the UI into a flexible table, making it easy to scan, filter, and compare multiple experiment results just like in a spreadsheet—even before a definitive baseline is chosen.
+
+## Regression Triage [#regression-triage]
+
+When a candidate fails to outperform the baseline, use these filters for post-mortem analysis:
+
+| Filter | Purpose |
+|--------|---------|
+| **Score Thresholds** | Filter runs below critical quality bars (e.g., `Accuracy < 0.7`) |
+| **Metadata Cohorts** | Identify if failures localize to specific input types (e.g., `context: long`) |
+| **Trace Inspection** | Move from aggregate metrics to individual traces for qualitative analysis |
+
+## Related Resources [#related-resources]
+
+- [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) - Programmatically run experiments with custom scoring
+- [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) - Execute prompt experiments from the UI
+- [Datasets](/docs/evaluation/experiments/datasets) - Create and manage evaluation datasets
