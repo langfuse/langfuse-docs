@@ -383,7 +383,7 @@ const glossaryTerms: GlossaryTerm[] = [
   {
     term: "Score",
     id: "score",
-    definition: "The output of an evaluation. Scores can be numeric, categorical, or boolean and are assigned to traces, observations, sessions, or dataset runs.",
+    definition: "The output of an evaluation. Scores can be numeric, categorical, boolean, or text and are assigned to traces, observations, sessions, or dataset runs.",
     link: "/docs/evaluation/scores/data-model#scores",
     categories: ["EVALUATION"],
     relatedTerms: ["Score Config", "Evaluator", "LLM-as-a-Judge", "Annotation Queue"],
