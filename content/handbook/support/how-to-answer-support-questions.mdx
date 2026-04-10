@@ -1,5 +1,6 @@
 ---
 title: How to Answer Support Questions
+description: This internal guide outlines how the langfuse team handles support questions.
 ---
 
 # How to Answer Support Questions
@@ -29,8 +30,8 @@ Tools you can use to provide better support:
 4. Cross-check the account in Langfuse Impersonation View to confirm workspace usage and any recent changes that could explain the increase.
 5. Reply with the specific reason for the higher cost and link the relevant invoice or billing page if helpful.
 6. If the charge still looks wrong, escalate internally before confirming any refund or billing correction.
-7. **Important:** sometimes Langfuse previously logged unrelated events from OTEL which led to higher costs. [Read more](https://langfuse.com/faq/all/existing-otel-setup#unwanted-spans-in-langfuse:~:text=Your%20Langfuse%20dashboard,libraries%20if%20needed)
-8. For refunds above 2K, loop in the COO on Pylon as `@tag`.
+7. **Important:** sometimes Langfuse previously logged unrelated events from OTEL which led to higher costs. [Read more](https://langfuse.com/faq/all/existing-otel-setup#unwanted-spans-in-langfuse)
+8. For refunds above USD 2,000, loop in the team.
 
 ## Do you have a bug bounty program / Security Request
 
@@ -46,7 +47,7 @@ Best,
 Y
 ```
 
-## I am unable to see view X in langfuse cloud
+## I am unable to see view X in Langfuse Cloud
 
 1. First verify that Fast Mode (Preview) is toggled on.
 
@@ -69,26 +70,25 @@ Best,
 Y
 ```
 
-## Our ingestion is very slow for Z, is this an issue on our side?
+## Our ingestion is very slow for [X], is this an issue on our side?
 
 1. First check our status page: `status.langfuse.com`.
-2. If there is a known issue with Z, answer in the following way:
+2. If no issues is reported on the status page, check DataDog dashboards for any queue delays. 
+2. If there is a known issue with [X], answer in the following way:
 
 ```text
 Hello X,
 we are aware of this issue and are working on it.
 We will provide an update on our status page as soon as we have it fixed.
+You can follow the progress on our status page: https://status.langfuse.com
 Best,
 Y
 ```
 
-3. If this issue is not known, make sure that this is not a common issue by comparing to other support tickets.
-4. If other support tickets experience the same, escalate to engineering.
-5. If there are no other support tickets referencing this issue, keep the message in mind in case it is the first message of many.
-6. Ask the customer about their setup. Are they self-hosted or running on cloud?
-7. If they are self-hosted, ask them about their implementation and which version of Langfuse they are using.
-8. For cloud, try to find a solution internally.
-9. Communicate with your fellow support engineers in finding a solution here.
+3. If this issue is not known, make sure that this is not reported by multiple customers at the same time. If other support tickets experience the same, escalate to engineering. If there are no other support tickets referencing this issue, keep the message in mind in case it is the first message of many.
+5. Ask the customer about their setup. Are they self-hosted or running on cloud?
+6. If they are self-hosted, ask them about their implementation and which version of Langfuse they are using.
+7. For cloud, try to find a solution internally.
 
 ## A customer is leaving Langfuse
 
@@ -121,6 +121,8 @@ Please let me know if that solves it.
 Best,
 Y
 ```
+
+4. If this does not solve the issue, check if other users are experiencing the same issue. If so, escalate to engineering.
 
 
 
