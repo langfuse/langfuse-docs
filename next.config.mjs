@@ -61,6 +61,18 @@ const nextConfig = {
   },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
 
+  // Sparticuz Chromium ships brotli-compressed binaries under `bin/`; Next's file tracer
+  // often omits them from the serverless bundle, breaking `executablePath()` on Vercel.
+  // Keys are matched with picomatch against normalized app routes (e.g. `/app/api/md-to-pdf`
+  // matches `/api/md-to-pdf` via `contains: true`).
+  outputFileTracingIncludes: {
+    "/api/md-to-pdf": [
+      "./lib/stripMdxForPlainMarkdown.js",
+      "./node_modules/@sparticuz/chromium/**",
+      "./node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/**",
+    ],
+  },
+
   webpack(config, { isServer, webpack }) {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
@@ -214,12 +226,6 @@ const nextConfig = {
       // Run BEFORE Next serves content/public files so it can override HTML routes
       // when the client explicitly asks for markdown.
       beforeFiles: [
-        // /support.md → raw markdown from the Support page (content/marketing/support.mdx → md-src/marketing/support.md)
-        {
-          source: "/support.md",
-          destination: "/md-src/marketing/support.md",
-        },
-
         // Optional: make "/" negotiable too (remove if you don't have md-src/index.md)
         {
           source: "/",
