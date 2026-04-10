@@ -19,7 +19,7 @@ export function ClickHouseLangfuseSection() {
         <div className="flex max-w-[min(100%,640px)] flex-col items-center gap-8 text-center">
           <div className='flex flex-col gap-4.5 items-center'>
             <Text>ClickHouse x Langfuse</Text>
-            <Heading className="text-primary">
+            <Heading className="text-primary" size="large">
               <span className="block">Traces in 5 minutes.</span>
               <span className="block">No credit card.</span>
             </Heading>

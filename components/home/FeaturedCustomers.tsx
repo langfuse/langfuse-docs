@@ -81,8 +81,6 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
             target="_blank"
             rel="noopener noreferrer"
             shortcutKey="s"
-            variant="secondary"
-            size="small"
           >
             Start free
           </Button>
