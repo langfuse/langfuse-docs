@@ -101,11 +101,11 @@ With the **Enriched observations** export, you can compute trace-level metrics f
 | `session_id` | string or null | Associated session identifier. | Null when not set. Direct access to session context without joining traces. |
 | `dataset_run_id` | string or null | Associated dataset run identifier (if score came from an evaluation run). | Links scores to experiment/evaluation runs. Null for ad-hoc or annotation scores. |
 | `name` | string | Score name (e.g. `accuracy`, `helpfulness`, `hallucination`). | Group/filter by score metric name. |
-| `value` | number | Numeric score value. | For `BOOLEAN`: 0 or 1. For `CATEGORICAL`: index of the category. For `NUMERIC`: the raw value. |
+| `value` | number | Numeric score value. | For `BOOLEAN`: 0 or 1. For `CATEGORICAL`: index of the category. For `NUMERIC`: the raw value. For `TEXT`: always 0 (not meaningful — use `string_value` instead). |
 | `source` | string | Score source: `API`, `ANNOTATION`, `EVAL`. | `API` = programmatic via SDK, `ANNOTATION` = human annotation in UI, `EVAL` = LLM-as-judge evaluator. |
 | `comment` | string or null | Optional human comment or evaluator reasoning. | Context for the score. Useful for annotation workflows. |
-| `data_type` | string | Score data type: `NUMERIC`, `BOOLEAN`, or `CATEGORICAL`. | Determines how to interpret `value` and `string_value`. |
-| `string_value` | string or null | String representation for categorical scores. | The category label (e.g. `"positive"`, `"neutral"`). Null for numeric/boolean scores. |
+| `data_type` | string | Score data type: `NUMERIC`, `BOOLEAN`, `CATEGORICAL`, or `TEXT`. | Determines how to interpret `value` and `string_value`. |
+| `string_value` | string or null | String representation for categorical and text scores. | For `CATEGORICAL`: the category label (e.g. `"positive"`, `"neutral"`). For `TEXT`: the free-text content (1–500 characters). Null for numeric scores. |
 | `created_at` | string (timestamp) | Row creation time. | System timestamp. |
 | `updated_at` | string (timestamp) | Last update time. | Incremental processing. |
 
