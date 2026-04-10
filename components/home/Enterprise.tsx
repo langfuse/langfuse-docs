@@ -45,17 +45,17 @@ export const Enterprise = () => {
 
       <div className="flex flex-col-reverse items-stretch sm:grid sm:grid-cols-2">
         <div className="flex flex-col flex-1">
-          <CornerBox className="flex flex-col flex-1 gap-3 p-3 -mt-px sm:p-4">
+          <CornerBox hoverStripes className="flex flex-col flex-1 gap-3 p-3 -mt-px sm:p-4">
             <Text size="s" className="font-medium text-left text-text-secondary">Architecture</Text>
             <BulletList items={architecture} />
           </CornerBox>
-          <CornerBox className="flex flex-col flex-1 gap-3 p-3 -mt-px sm:p-4">
+          <CornerBox hoverStripes className="flex flex-col flex-1 gap-3 p-3 -mt-px sm:p-4">
             <Text size="s" className="font-medium text-left text-text-secondary">Open APIs</Text>
             <BulletList items={openApis} />
           </CornerBox>
         </div>
 
-        <CornerBox className="flex relative flex-col -mt-px -ml-px min-h-[350px]">
+        <CornerBox hoverStripes className="flex relative flex-col -mt-px -ml-px min-h-[350px]">
           <div className="flex flex-col gap-3 p-4">
             <Text size="s" className="font-medium text-left text-text-secondary">Security</Text>
             <BulletList items={security} />

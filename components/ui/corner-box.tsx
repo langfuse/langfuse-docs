@@ -105,6 +105,8 @@ export interface CornerBoxProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Per-corner bracket visibility. Omitted keys default to true. */
   corners?: BoxCorners;
   withStripes?: boolean;
+  /** Diagonal stripe background on hover (same tokens as `bg-stripe-pattern`). */
+  hoverStripes?: boolean;
   /** Omit border; corner brackets align flush (`top-0` / `left-0` etc.) instead of −1px inset for border stroke. */
   noBorder?: boolean;
 }
@@ -115,7 +117,7 @@ export interface CornerBoxProps extends React.HTMLAttributes<HTMLDivElement> {
  * individual corners so shared vertices don’t stack two SVGs.
  */
 const CornerBox = React.forwardRef<HTMLDivElement, CornerBoxProps>(
-  ({ className, corners, withStripes, noBorder, children, ...props }, ref) => {
+  ({ className, corners, withStripes, hoverStripes, noBorder, children, ...props }, ref) => {
     const resolved = resolveCorners(corners);
     const layout = noBorder ? cornerLayoutNoBorder : cornerLayout;
 
@@ -126,6 +128,8 @@ const CornerBox = React.forwardRef<HTMLDivElement, CornerBoxProps>(
           "relative bg-surface-bg",
           !noBorder && "border border-line-structure",
           withStripes && "with-stripes",
+          hoverStripes &&
+            "group corner-box-hover-stripes transition-[background] duration-180 ease-out",
           className
         )}
         {...props}

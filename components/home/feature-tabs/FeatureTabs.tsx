@@ -10,12 +10,21 @@ import {
   useState,
 } from "react";
 import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { TabButton } from "./TabButton";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { Dot } from "@/components/ui/dot";
 import { CornerBox } from "@/components/ui/corner-box";
+
+/** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
+const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
+
+const contentTransition = (reduceMotion: boolean) =>
+  reduceMotion
+    ? { duration: 0.12, ease: "easeOut" as const }
+    : { duration: 0.5, ease: CONTENT_EASE };
 
 export interface FeatureTabsProps {
   features: FeatureTabData[];
@@ -30,7 +39,6 @@ type TabState = {
   isAutoAdvancePaused: boolean;
   autoAdvanceProgress: number;
   isInViewport: boolean;
-  isAutoTransitioning: boolean;
   isHovered: boolean;
 };
 
@@ -41,7 +49,6 @@ type TabAction =
   | { type: "RESUME_AUTO_ADVANCE" }
   | { type: "SET_AUTO_ADVANCE_PROGRESS"; payload: number }
   | { type: "SET_IN_VIEWPORT"; payload: boolean }
-  | { type: "SET_AUTO_TRANSITIONING"; payload: boolean }
   | { type: "SET_HOVERED"; payload: boolean }
   | { type: "RESET_PROGRESS" };
 
@@ -63,8 +70,6 @@ const tabStateReducer = (state: TabState, action: TabAction): TabState => {
       return { ...state, autoAdvanceProgress: action.payload };
     case "SET_IN_VIEWPORT":
       return { ...state, isInViewport: action.payload };
-    case "SET_AUTO_TRANSITIONING":
-      return { ...state, isAutoTransitioning: action.payload };
     case "SET_HOVERED":
       return { ...state, isHovered: action.payload };
     case "RESET_PROGRESS":
@@ -80,7 +85,6 @@ const initialTabState: TabState = {
   isAutoAdvancePaused: false,
   autoAdvanceProgress: 0,
   isInViewport: false,
-  isAutoTransitioning: false,
   isHovered: false,
 };
 
@@ -111,9 +115,8 @@ export const FeatureTabs = ({
   const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
-  const advanceFadeOutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const advanceFadeInRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const reduceMotion = useReducedMotion();
   const [observeRoot, setObserveRoot] = useState<HTMLDivElement | null>(null);
   const isMountedRef = useRef(true);
 
@@ -172,21 +175,9 @@ export const FeatureTabs = ({
     }
   }, []);
 
-  const clearAdvanceTransitionTimers = useCallback(() => {
-    if (advanceFadeOutRef.current) {
-      clearTimeout(advanceFadeOutRef.current);
-      advanceFadeOutRef.current = null;
-    }
-    if (advanceFadeInRef.current) {
-      clearTimeout(advanceFadeInRef.current);
-      advanceFadeInRef.current = null;
-    }
-  }, []);
-
   const clearAllTimers = useCallback(() => {
     clearAutoAdvanceTimer();
-    clearAdvanceTransitionTimers();
-  }, [clearAutoAdvanceTimer, clearAdvanceTransitionTimers]);
+  }, [clearAutoAdvanceTimer]);
 
   const advanceToNextTab = useCallback(() => {
     if (!defaultAutoAdvance.enabled || isAutoAdvancePausedRef.current) {
@@ -197,26 +188,11 @@ export const FeatureTabs = ({
     const nextIndex = (currentIndex + 1) % features.length;
     const nextTab = features[nextIndex];
 
-    dispatch({ type: "SET_AUTO_TRANSITIONING", payload: true });
+    dispatch({ type: "RESET_PROGRESS" });
 
-    advanceFadeOutRef.current = setTimeout(() => {
-      if (!isMountedRef.current) {
-        return;
-      }
-
-      dispatch({ type: "RESET_PROGRESS" });
-
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("tab", nextTab.id);
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-
-      advanceFadeInRef.current = setTimeout(() => {
-        if (!isMountedRef.current) {
-          return;
-        }
-        dispatch({ type: "SET_AUTO_TRANSITIONING", payload: false });
-      }, 50);
-    }, 100);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", nextTab.id);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [
     features,
     activeTab,
@@ -488,15 +464,21 @@ export const FeatureTabs = ({
       </CornerBox>
 
       <CornerBox className="p-4 -mt-px" withStripes>
-        <div
-          className={`${state.isAutoTransitioning
-            ? "transition-opacity duration-100 ease-in-out opacity-30"
-            : "transition-opacity duration-200 ease-in-out opacity-100"
-            }`}
-        >
-          {activeFeature ? (
-            <TabContent feature={activeFeature} priority />
-          ) : null}
+        <div className="relative w-full min-h-[410px] overflow-hidden">
+          <AnimatePresence mode="sync" initial={false}>
+            {activeFeature ? (
+              <motion.div
+                key={activeFeature.id}
+                className="absolute inset-0 w-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={contentTransition(Boolean(reduceMotion))}
+              >
+                <TabContent feature={activeFeature} priority />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
       </CornerBox>
     </div>

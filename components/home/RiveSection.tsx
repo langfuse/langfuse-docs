@@ -142,20 +142,20 @@ export const RiveSection = () => {
             src={RIVE_FILE}
             stateMachine="Langfuse_SM"
             fit="cover"
-            zoom={1.3}
-            className="w-full h-full"
+            zoom={1.4}
+            className="w-full h-full -translate-x-4 -translate-y-6"
             onStateChange={(states) => {
               const match = states.find((s) => s in LABELS);
               setLabel(match ? LABELS[match] : OVERVIEW);
             }}
           />
         </div>
-        <CornerBox className="p-2 sm:p-4 -mt-px min-h-[110px] flex flex-col justify-start">
+        <CornerBox className="p-2 sm:p-4 -mt-px min-h-[110px] bg-transparent flex flex-col justify-start">
           <div key={label.heading} className="rive-text-enter flex flex-col gap-1.5">
             <Text className="font-medium text-left text-text-primary">
               {label.heading}
             </Text>
-            <Text size="s" className="text-left max-w-[74ch]">{label.body}</Text>
+            <Text size="s" className="text-left max-w-[60ch]">{label.body}</Text>
           </div>
         </CornerBox>
       </div>
