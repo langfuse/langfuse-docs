@@ -60,7 +60,7 @@ export const Releases = ({
               release={release}
               icon={
                 <span>
-                  <img src="/icon.svg" alt="langfuse" className="h-5 w-5" />
+                  <img src="/langfuse-icon.svg" alt="langfuse" className="h-5 w-5" />
                 </span>
               }
             />
