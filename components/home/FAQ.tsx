@@ -105,7 +105,7 @@ function AccordionIcon({ isOpen }: { isOpen: boolean }) {
 }
 
 export function FAQ() {
-  const [openItem, setOpenItem] = useState<string>("");
+  const [openItem, setOpenItem] = useState<string>(faqs[0].question);
 
   return (
     <HomeSection id="faq" className="pt-20">

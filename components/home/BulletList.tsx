@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Text } from "@/components/ui/text";
 
 export interface BulletItem {
@@ -15,16 +16,16 @@ export function BulletList({ items }: { items: BulletItem[] }) {
             aria-hidden
           />
           {item.href ? (
-            <a
+            <Link
               href={item.href}
-              className="text-[13px] leading-snug font-[430] tracking-[-0.26px] text-text-tertiary underline decoration-line-structure underline-offset-2 transition-colors group-hover:text-text-secondary"
+              className="text-[14px] leading-snug font-[430] tracking-[-0.26px] text-text-tertiary underline decoration-line-structure underline-offset-2 transition-colors group-hover:text-text-secondary"
             >
               {item.label}
-            </a>
+            </Link>
           ) : (
             <Text
               size="s"
-              className="text-left text-text-tertiary transition-colors group-hover:text-text-secondary"
+              className="text-left transition-colors text-text-tertiary group-hover:text-text-secondary"
             >
               {item.label}
             </Text>

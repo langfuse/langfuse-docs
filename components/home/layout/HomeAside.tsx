@@ -17,16 +17,16 @@ type TocItem = { id: string; title: string; depth: number; url: string };
 // ─── Static section list for the homepage ────────────────────────────────────
 
 const HOME_SECTIONS: TocItem[] = [
-  { id: "features",        title: "Features",         depth: 2, url: "#features" },
-  { id: "demo",            title: "Demo",             depth: 2, url: "#demo" },
-  { id: "all-the-tools",   title: "Platform",         depth: 2, url: "#all-the-tools" },
-  { id: "integrations",    title: "Integrations",     depth: 2, url: "#integrations" },
-  { id: "open-source",     title: "Open Source",      depth: 2, url: "#open-source" },
-  { id: "developer-tools", title: "Developer Tools",  depth: 2, url: "#developer-tools" },
-  { id: "enterprise",      title: "Security",         depth: 2, url: "#enterprise" },
-  { id: "why-langfuse",    title: "Why Langfuse",     depth: 2, url: "#why-langfuse" },
-  { id: "quickstart",      title: "Quickstart",       depth: 2, url: "#quickstart" },
-  { id: "faq",             title: "FAQ",              depth: 2, url: "#faq" },
+  { id: "features", title: "Features", depth: 2, url: "#features" },
+  { id: "demo", title: "Demo", depth: 2, url: "#demo" },
+  { id: "all-the-tools", title: "Platform", depth: 2, url: "#all-the-tools" },
+  { id: "integrations", title: "Integrations", depth: 2, url: "#integrations" },
+  { id: "open-source", title: "Open Source", depth: 2, url: "#open-source" },
+  { id: "developer-tools", title: "Developer Tools", depth: 2, url: "#developer-tools" },
+  { id: "enterprise", title: "Security", depth: 2, url: "#enterprise" },
+  { id: "why-langfuse", title: "Why Langfuse", depth: 2, url: "#why-langfuse" },
+  { id: "quickstart", title: "Quickstart", depth: 2, url: "#quickstart" },
+  { id: "faq", title: "FAQ", depth: 2, url: "#faq" },
 ];
 
 // ─── Scan DOM for h2/h3 headings (non-homepage pages) ────────────────────────
@@ -71,14 +71,14 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex-1 min-h-0 px-4">
-      <Text size="s" className="block text-left font-medium text-text-primary mb-3 -ml-1.5">
+    <div className="flex-1 min-h-0">
+      <Text size="s" className="block text-left font-[580] text-text-primary mb-3">
         On this page
       </Text>
 
       <div className="relative flex flex-col overflow-auto [scrollbar-width:none]">
         {/* Static track */}
-        <div className="absolute left-0 top-0 bottom-0 w-px bg-line-structure" />
+        <div className="absolute top-0 bottom-0 left-0 w-px bg-line-structure" />
 
         {/* Snake indicator */}
         {indicatorStyle && (
@@ -129,9 +129,11 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
 
 function TocCommunity() {
   return (
-    <div className="px-4 pb-4 pt-3 border-t border-line-structure">
-      <p className="text-sm font-medium text-text-primary mb-3">Community</p>
-      <div className="flex items-center gap-3">
+    <div className="pt-4 border-t border-dashed border-line-divider-dash">
+      <Text size="s" className="block mb-3 font-medium text-left text-text-primary">
+        Community
+      </Text>
+      <div className="flex gap-3 items-center">
         <Link
           href="https://github.com/langfuse/langfuse"
           target="_blank"
@@ -173,7 +175,7 @@ export function HomeAside() {
         height: "calc(100vh - var(--fd-banner-height, 0px) - 4rem)",
       }}
     >
-      <nav className="flex flex-col flex-1 gap-4 pt-4 rounded-sm bg-surface-1 overflow-y-auto overflow-x-hidden">
+      <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 gap-4 px-4 py-4 rounded-sm bg-surface-1">
         <AnchorProvider toc={items} single>
           <TocOnThisPage items={items} />
         </AnchorProvider>

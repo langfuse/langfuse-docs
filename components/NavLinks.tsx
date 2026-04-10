@@ -101,14 +101,14 @@ function NavDropdownPanel({
 }) {
   return (
     <CornerBox className="flex p-0 min-w-max bg-surface-1">
-      <div className="flex flex-col border-r border-line-structure min-w-[220px] p-4 overflow-hidden">
+      <div className="flex flex-col gap-[6px] border-r border-line-structure min-w-[220px] p-3.5 overflow-hidden">
         {links.map((link) => {
           const Icon = link.icon;
           return (
             <Link
               key={link.href}
               href={link.href}
-              className="link-box relative group flex items-center gap-3 px-2 py-2.5 no-underline hover:bg-surface-bg transition-colors"
+              className="flex relative gap-3 items-center p-1 no-underline transition-colors link-box group hover:bg-surface-bg"
             >
               <HoverCorners />
               <Icon className="size-[15px] shrink-0 text-text-tertiary group-hover:text-text-secondary transition-colors" />

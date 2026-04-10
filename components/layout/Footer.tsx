@@ -100,7 +100,7 @@ export function Footer({ className }: { className?: string }) {
       </CornerBox>
       <CornerBox className="flex flex-col bg-transparent">
         {/* Link columns */}
-        <div className="grid grid-cols-2 gap-8 p-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 justify-between items-stretch p-4 md:flex md:flex-row">
           {menuItems.map((col) => (
             <div key={col.heading} className="flex flex-col gap-4">
               <Text
@@ -126,7 +126,7 @@ export function Footer({ className }: { className?: string }) {
       </CornerBox>
       <CornerBox className="flex flex-col -mt-px bg-transparent">
         {/* Bottom bar */}
-        <div className="flex flex-wrap gap-y-2 gap-x-6 items-center p-4">
+        <div className="flex flex-wrap gap-y-2 gap-x-6 items-center px-4 py-2.5">
           <div className="flex flex-wrap gap-y-1 gap-x-4">
             {bottomLinks.map((link) => (
               <Link key={link.name} href={link.href} className={linkClassName}>
@@ -138,7 +138,7 @@ export function Footer({ className }: { className?: string }) {
           </div>
         </div>
       </CornerBox>
-      <CornerBox className="flex justify-between items-center p-4 -mt-px bg-transparent">
+      <CornerBox className="flex justify-between items-center px-4 py-2.5 -mt-px bg-transparent">
         <Text size="s" className="font-mono text-left text-text-disabled">
           &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH / Finto Technologies Inc.
         </Text>
