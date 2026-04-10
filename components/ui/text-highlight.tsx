@@ -23,7 +23,7 @@ const TextHighlight = React.forwardRef<HTMLSpanElement, TextHighlightProps>(
     >
       <span
         className={cn(
-          "absolute inset-x-0 top-1/2 h-[0.75em] -translate-y-1/2",
+          "absolute inset-x-0 top-1/2 h-[0.76em] -translate-y-[52%]",
           "bg-[#FBFF7A]",
           highlightClassName
         )}

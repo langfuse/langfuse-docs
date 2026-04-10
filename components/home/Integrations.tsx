@@ -67,7 +67,7 @@ const groups = [
 
 function IntegrationLabel({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-[2px] px-1.5 py-1 border border-line-structure bg-surface-bg text-[13px] font-normal text-text-secondary leading-none whitespace-nowrap">
+    <span className="integration-chip inline-flex items-center gap-2 px-1.5 py-1 border border-line-structure text-[13px] font-normal text-text-secondary leading-none whitespace-nowrap">
       <span className="shrink-0 w-[18px] h-[18px] flex items-center justify-center">
         {icon}
       </span>
@@ -86,7 +86,11 @@ function IntegrationGroup({
   items: { label: string; icon: React.ReactNode }[];
 }) {
   return (
-    <ChipCard tooltip="See all" href={href} className="flex flex-col gap-4 items-start p-2 -mt-px -ml-px sm:p-4 first:ml-0">
+    <ChipCard
+      tooltip="See all"
+      href={href}
+      className="integration-group flex flex-col gap-3.5 items-start p-3 -mt-px -ml-px sm:p-4.5 first:ml-0"
+    >
       <Text size="s" className="font-medium text-left text-text-secondary">
         {title}
       </Text>

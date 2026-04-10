@@ -13,6 +13,10 @@ import experimentsVisual from "./img/tools/experiments.svg";
 import humanAnnotationVisual from "./img/tools/human.svg";
 import metricsAlertsVisual from "./img/tools/metrics.svg";
 
+/** Chip tool card body copy (Figma: 14 / 400 / 150% / -0.07px). */
+const toolDescriptionClassName =
+  "text-left sm:text-[14px] font-normal not-italic leading-[150%] tracking-[-0.07px] text-text-tertiary";
+
 const tools = [
   {
     title: "Observability",
@@ -94,30 +98,31 @@ export function AllTheTools() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-1 gap-2 xl:grid-cols-3">
-            {tools.slice(0, 3).map((tool) => (
+            {tools.slice(0, 3).map((tool, index) => (
               <ChipCard
                 key={tool.title}
                 href={tool.href}
                 tooltip={tool.tooltip}
-                className="flex flex-col sm:flex-row xl:flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start sm:max-h-[200px] xl:max-h-none xl:min-h-[200px]"
+                className='p-0'
               >
-                <div className="flex flex-col flex-1 gap-3 p-2 sm:p-4">
-                  <Text size="s" className="font-medium text-left text-text-secondary">
-                    {tool.title}
-                  </Text>
-                  <Text size="s" className="text-left">
-                    {tool.description}
-                  </Text>
-                </div>
-                <div className="flex-1 w-full">
-                  <Image
-                    src={tool.visual}
-                    alt={tool.title}
-                    width={100}
-                    height={100}
-                    className="object-contain w-full h-full sm:-translate-y-[40px] xl:translate-y-0"
-                    quality={100}
-                  />
+                <div className="flex flex-col sm:flex-row xl:flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start min-h-0 overflow-hidden sm:max-h-[200px] xl:max-h-[337px] h-full">
+                  <div className="flex flex-col flex-1 gap-1 p-4 pb-2.5 min-h-0 shrink-0 h-full">
+                    <Text size="s" className="font-medium text-left text-text-secondary">
+                      {tool.title}
+                    </Text>
+                    <Text size="s" className={toolDescriptionClassName}>
+                      {tool.description}
+                    </Text>
+                  </div>
+                  <div className="flex-1 w-full overflow-clip">
+                    <Image
+                      src={tool.visual}
+                      alt={tool.title}
+                      width={100}
+                      height={100}
+                      className="object-contain w-full h-full sm:-translate-y-[40px] xl:translate-y-0"
+                      quality={100} />
+                  </div>
                 </div>
               </ChipCard>
             ))}
@@ -128,24 +133,26 @@ export function AllTheTools() {
                 key={tool.title}
                 href={tool.href}
                 tooltip={tool.tooltip}
-                className="flex flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start xl:min-h-[280px]"
+                className="p-0"
               >
-                <div className="flex flex-col gap-3 p-2 sm:p-4">
-                  <Text size="s" className="font-medium text-left text-text-secondary">
-                    {tool.title}
-                  </Text>
-                  <Text size="s" className="text-left">
-                    {tool.description}
-                  </Text>
-                </div>
-                <div className="hidden flex-1 w-full xl:flex">
-                  <Image
-                    src={tool.visual}
-                    alt={tool.title}
-                    width={100}
-                    height={100}
-                    className="object-contain w-full h-full"
-                    quality={100} />
+                <div className="flex flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start xl:min-h-[277px] xl:max-h-[277px] overflow-hidden h-full">
+                  <div className="flex flex-col gap-1 p-2 pb-2.5 sm:p-4 h-full">
+                    <Text size="s" className="font-medium text-left text-text-secondary">
+                      {tool.title}
+                    </Text>
+                    <Text size="s" className={toolDescriptionClassName}>
+                      {tool.description}
+                    </Text>
+                  </div>
+                  <div className="hidden flex-1 w-full overflow-clip xl:flex">
+                    <Image
+                      src={tool.visual}
+                      alt={tool.title}
+                      width={100}
+                      height={100}
+                      className="object-contain w-full h-full -translate-y-[20px]"
+                      quality={100} />
+                  </div>
                 </div>
               </ChipCard>
             ))}

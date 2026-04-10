@@ -108,21 +108,23 @@ export function HomeSidebar() {
         <div className="pb-px bg-line-structure">
           <div className="px-2 py-4 rounded-sm bg-surface-1">
             <Text size="s" className="px-2 mb-3 font-[430] text-left text-text-primary">Community Stats</Text>
-            {communityStats.map((stat) => (
-              <LinkBox
-                key={stat.label}
-                href={stat.href}
-                tooltip={stat.tooltip}
-                className="block px-2 w-full hover:bg-surface-bg"
-              >
-                <div className="flex gap-2 justify-between items-center w-full">
-                  <Text size="s" className="text-left group-hover:text-text-primary">{stat.label}</Text>
-                  <Text size="s" className="tabular-nums text-right shrink-0 group-hover:text-text-primary">
-                    {stat.value}
-                  </Text>
-                </div>
-              </LinkBox>
-            ))}
+            <div className="flex flex-col gap-[2px] mb-[2px]">
+              {communityStats.map((stat) => (
+                <LinkBox
+                  key={stat.label}
+                  href={stat.href}
+                  tooltip={stat.tooltip}
+                  className="block px-2 w-full hover:bg-surface-bg"
+                >
+                  <div className="flex gap-2 justify-between items-center w-full">
+                    <Text size="s" className="text-left group-hover:text-text-primary">{stat.label}</Text>
+                    <Text size="s" className="tabular-nums text-right shrink-0 group-hover:text-text-primary">
+                      {stat.value}
+                    </Text>
+                  </div>
+                </LinkBox>
+              ))}
+            </div>
 
             {latestReleaseDate && (
               <LinkBox
@@ -186,14 +188,15 @@ export function HomeSidebar() {
             >
               Self Hosting Guides
             </Text>
-
-            {selfHostingLinks.map((link) => (
-              <LinkBox key={link.href} href={link.href} className="block px-2 w-full hover:bg-surface-bg">
-                <Text size="s" className="text-left text-text-tertiary group-hover:text-text-primary">
-                  {link.label}
-                </Text>
-              </LinkBox>
-            ))}
+            <div className="flex flex-col gap-[2px]">
+              {selfHostingLinks.map((link) => (
+                <LinkBox key={link.href} href={link.href} className="block px-2 w-full hover:bg-surface-bg">
+                  <Text size="s" className="text-left text-text-tertiary group-hover:text-text-primary">
+                    {link.label}
+                  </Text>
+                </LinkBox>
+              ))}
+            </div>
           </div>
         </div>
       </nav>

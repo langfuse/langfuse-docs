@@ -510,6 +510,36 @@
 }
 
 /**
+ * Home / Integrations: chips use surface bg; hovering the whole group lifts all chips.
+ * (Figma: 40% white overlay on surface-bg, 2px radius.)
+ */
+.integration-chip {
+  border-radius: 2px;
+  background-color: var(--surface-bg);
+  transition: background 0.15s ease;
+}
+
+.integration-group:hover .integration-chip {
+  background:
+    linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0.4) 100%
+    ),
+    var(--surface-bg);
+}
+
+.dark .integration-group:hover .integration-chip {
+  background:
+    linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.1) 100%
+    ),
+    var(--surface-bg);
+}
+
+/**
  * Diagonal stripe overlay on a solid base.
  * Override `--stripe-color` on the element to change the line color.
  * Knobs:
@@ -521,7 +551,8 @@
 .link-box:hover,
 .button-wrapper:hover,
 .box-custom-hover:after,
-.card-hover-stripes:after {
+.card-hover-stripes:after,
+.corner-box-hover-stripes:hover {
   --stripe-mix: 20%;
   --stripe-base: var(--color-surface-bg);
   --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.1));
@@ -549,7 +580,8 @@
 
 /* Richer stripe tint from theme border + base (OK Lab); falls back to rgba above. */
 @supports (color: color-mix(in lab, red, red)) {
-  .bg-stripe-pattern {
+  .bg-stripe-pattern,
+  .corner-box-hover-stripes:hover {
     --stripe-line: color-mix(
       in oklab,
       var(--stripe-color, var(--color-fd-border)) var(--stripe-mix),

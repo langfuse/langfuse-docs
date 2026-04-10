@@ -38,9 +38,9 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
   const story = stories[active];
 
   return (
-    <CornerBox className="flex flex-col gap-3 p-4 -mt-px lg:flex-row lg:items-center lg:gap-6 lg:pr-5" corners={corners}>
+    <CornerBox className="flex flex-col gap-3 p-4 -mt-px lg:flex-row lg:items-center lg:gap-6" corners={corners}>
       {/* Row 1 (mobile) / left side (desktop): logo switchers + button */}
-      <div className="flex items-center gap-6 lg:contents">
+      <div className="flex gap-6 items-center lg:contents">
         <div className="flex gap-1 shrink-0">
           {stories.map((s, i) => {
             const isActive = i === active;
@@ -75,7 +75,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
         </div>
 
         {/* Button: right of logos on mobile, far right on desktop */}
-        <div className="shrink-0 ml-auto lg:ml-0 lg:order-last">
+        <div className="ml-auto shrink-0 lg:ml-0 lg:order-last">
           <Button
             href="https://cloud.langfuse.com"
             target="_blank"

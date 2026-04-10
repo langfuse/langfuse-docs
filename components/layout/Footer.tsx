@@ -81,7 +81,7 @@ export function Footer({ className }: { className?: string }) {
   return (
     <footer className={cn("px-4 pb-8 mx-auto mt-20 w-full sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]", className)}>
       {/* Social icons row */}
-      <CornerBox className="flex gap-5 items-center p-4 -mb-px">
+      <CornerBox className="flex gap-5 items-center p-4 -mb-px bg-transparent border-t-0!" corners={{ tl: false, tr: false }}>
         {socialLinks.map((s) => {
           const Icon = s.icon;
           const isExternal = s.href.startsWith("http");
@@ -98,7 +98,7 @@ export function Footer({ className }: { className?: string }) {
           );
         })}
       </CornerBox>
-      <CornerBox className="flex flex-col">
+      <CornerBox className="flex flex-col bg-transparent">
         {/* Link columns */}
         <div className="grid grid-cols-2 gap-8 p-4 md:grid-cols-4">
           {menuItems.map((col) => (
@@ -124,7 +124,7 @@ export function Footer({ className }: { className?: string }) {
           ))}
         </div>
       </CornerBox>
-      <CornerBox className="flex flex-col -mt-px">
+      <CornerBox className="flex flex-col -mt-px bg-transparent">
         {/* Bottom bar */}
         <div className="flex flex-wrap gap-y-2 gap-x-6 items-center p-4">
           <div className="flex flex-wrap gap-y-1 gap-x-4">
@@ -138,7 +138,7 @@ export function Footer({ className }: { className?: string }) {
           </div>
         </div>
       </CornerBox>
-      <CornerBox className="flex justify-between items-center p-4 -mt-px">
+      <CornerBox className="flex justify-between items-center p-4 -mt-px bg-transparent">
         <Text size="s" className="font-mono text-left text-text-disabled">
           &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH / Finto Technologies Inc.
         </Text>

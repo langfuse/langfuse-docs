@@ -1,10 +1,7 @@
 import { HomeSection } from "@/components/home/HomeSection";
 import { CornerBox, Heading, TextHighlight } from "@/components/ui";
-import { cornersForGridCell } from "@/components/ui/corner-box";
 import { Text } from "@/components/ui/text";
 import { BulletList } from "./BulletList";
-
-const COLS = 2;
 
 const cards = [
   {
@@ -41,8 +38,6 @@ const cards = [
   },
 ];
 
-const ROWS = Math.ceil(cards.length / COLS);
-
 export const OpenSource = () => {
   return (
     <HomeSection id="open-source" className="pt-20">
@@ -60,7 +55,8 @@ export const OpenSource = () => {
           return (
             <CornerBox
               key={card.title}
-              className="flex flex-col gap-3 p-3 -mt-px -ml-px sm:p-4"
+              hoverStripes
+              className="flex flex-col gap-1 p-3 -mt-px -ml-px sm:p-4"
             >
               <Text className="font-medium text-left text-text-secondary">
                 {card.title}
