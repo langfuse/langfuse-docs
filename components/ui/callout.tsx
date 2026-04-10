@@ -1,6 +1,7 @@
 import type { ReactNode, ComponentProps, CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
 import { CornerBox } from './corner-box';
+import { Text } from './text';
 import IconInfo from '@/components/icons/info';
 import IconIdea from '@/components/icons/idea';
 import IconSuccess from '@/components/icons/success';
@@ -54,7 +55,7 @@ export function CalloutContainer({
     <CornerBox>
       <div
         className={cn(
-          'bg-stripe-pattern flex gap-2 border p-2 sm:p-4 text-sm text-primary',
+          'bg-stripe-pattern flex border p-4 gap-2 text-sm text-primary',
           className,
         )}
         style={
@@ -74,7 +75,7 @@ export function CalloutContainer({
             success: <IconSuccess className={iconClass} />,
             idea: <IconIdea className={iconClass} />,
           }[type]}
-        <div className="flex flex-col gap-2 min-w-0 flex-1">{children}</div>
+        <div className="flex flex-col min-w-0 flex-1">{children}</div>
       </div>
     </CornerBox>
   );
@@ -82,16 +83,16 @@ export function CalloutContainer({
 
 export function CalloutTitle({ children, className, ...props }: ComponentProps<'p'>) {
   return (
-    <p className={cn('font-medium my-0!', className)} {...props}>
+    <Text size="m" className={cn('font-medium my-0! text-text-primary font-medium text-left', className)} {...props}>
       {children}
-    </p>
+    </Text>
   );
 }
 
 export function CalloutDescription({ children, className, ...props }: ComponentProps<'div'>) {
   return (
     <div
-      className={cn('text-text-secondary prose-no-margin empty:hidden', className)}
+      className={cn('text-text-secondary text-[14px] prose-no-margin empty:hidden', className)}
       {...props}
     >
       {children}

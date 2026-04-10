@@ -31,7 +31,7 @@ const variantClasses: Record<ButtonVariant, { root: string; key: string }> = {
     key: "border border-[rgba(64,61,57,0.30)] bg-[rgba(64,61,57,0.40)]",
   },
   secondary: {
-    root: "border-line-structure group-hover:border-black bg-surface-bg text-text-secondary",
+    root: "border-line-structure group-hover:border-line-cta bg-surface-bg text-text-secondary",
     key: "border border-[rgba(64,61,57,0.20)] grou bg-[rgba(64,61,57,0.10)]",
   },
   text: {
