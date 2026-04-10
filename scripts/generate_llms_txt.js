@@ -96,7 +96,7 @@ async function generateLLMsList() {
         // Langfuse Skill section
         markdownContent += `## Langfuse Skill for AI Coding Agents\n\n`;
         markdownContent += `Install the Langfuse skill before implementing anything with Langfuse. The skill provides up-to-date documentation, best-practice workflows for instrumentation, prompt management, and programmatic API access via the Langfuse CLI.\n\n`;
-        markdownContent += `Install from: [github.com/langfuse/skills/langfuse](https://github.com/langfuse/skills/langfuse)\n\n`;
+        markdownContent += `Install from: [github.com/langfuse/skills](https://github.com/langfuse/skills/tree/main/skills/langfuse)\n\n`;
 
         // Add each section with sub-file link and comma-separated titles
         for (const [sectionKey, entries] of Object.entries(sectionEntries)) {
