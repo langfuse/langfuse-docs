@@ -9,15 +9,15 @@ import { BarChart3, Book, Github, LayoutDashboard, Table, Zap } from "lucide-rea
 
 ## At a glance
 
-Langfuse is now observations-first — queries that used to require expensive joins now run instantly, even across traces with thousands of steps.
+Langfuse is now observations-first. Queries that used to require expensive joins now run an order of magnitude faster. This change was necessary do allow Langfuse scale for agentic applications.
 
-**What changed:** Every LLM call, tool, and agent step is a directly queryable row. Trace attributes (`user_id`, `session_id`, etc.) propagate to all child observations automatically. Input/output are no longer stored on traces.
+**What changed:** We move from traces and observations as separate entities to observations only. A trace ID remains a correlating identifier for a group of observations. Trace attributes (`user_id`, `session_id`, etc.) must be set on _all_ observations for efficient queries and aggregations. Traces have no longer separate input and output.
 
 **How to adopt:**
-- **SDK:** Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace `update_current_trace()` with `propagate_attributes()`.
-- **OTEL:** Set `x-langfuse-ingestion-version: 4` on your span exporter. ([setup guide](/integrations/native/opentelemetry))
-- **UI:** Enable the **Preview** toggle (bottom-left) to opt in. (Legacy view remains available.)
-- **Saved views & evals:** Filter observations directly in the new unified table; migrate evals to the observation level. ([saved views guide](/faq/all/explore-observations-in-v4), [evals migration guide](/faq/all/llm-as-a-judge-migration))
+- **SDK:** Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace trace update calls with `propagate_attributes()`.
+- **OTEL:** Set the `x-langfuse-ingestion-version: 4` HTTP header on your span exporter. Propagate trace attributes to _all_ observations. [See setup guide](/integrations/native/opentelemetry)
+- **UI:** Enable the **Preview** toggle (bottom-left) to opt in. Filter observations directly in the new unified table and create saved views for productive defaults. [See saved views guide](/faq/all/explore-observations-in-v4)
+- **Evals:** Migrate evals to the observation level. [See evals migration guide](/faq/all/llm-as-a-judge-migration))
 
 ---
 
