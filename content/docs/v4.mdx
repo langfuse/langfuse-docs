@@ -7,19 +7,22 @@ import { BarChart3, Book, Github, LayoutDashboard, Table, Zap } from "lucide-rea
 
 # Langfuse Cloud: Fast Preview (v4)
 
-## TL;DR
+## At a glance
 
-**What changed:** Langfuse is now observations-first. The main table is observations — every LLM call, tool execution, and agent step is a directly queryable row. Trace-level attributes (`user_id`, `session_id`, `metadata`, `tags`) now live on each observation rather than on a separate traces table.
+**What changed:** Langfuse is now observations-first. Every LLM call, tool execution, and agent step is a directly queryable row in the main observations table. Trace-level attributes (`user_id`, `session_id`, `metadata`, `tags`) now propagate to each observation. Input and output are no longer stored on traces directly.
 
-**Why it changed:** As agentic workloads scale to hundreds or thousands of operations per trace, the old two-table model (traces + observations with joins) became a performance bottleneck. By denormalizing all attributes onto observations — the same approach used by other observability tools — Langfuse can run analytical queries without expensive joins, keeping charts, filters, and APIs fast at any scale. See the [changelog entry](/changelog/2026-03-10-simplify-for-scale) for more background.
+**Why it's faster:** Query directly across all operations without expensive joins — charts, filters, and APIs stay fast at any scale, even as traces grow to hundreds or thousands of operations. See the [changelog entry](/changelog/2026-03-10-simplify-for-scale) for more background.
 
 **How to adopt:**
 - **SDK upgrade:** Update to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()` to push `user_id`, `session_id`, etc. to all child observations.
 - **Direct OTEL ingestion:** Set the `x-langfuse-ingestion-version: 4` header on your span exporter ([setup guide](/integrations/native/opentelemetry)).
 - **UI opt-in:** Use the **Preview** toggle in the bottom-left of the Langfuse UI to enable the new experience. It's reversible. The legacy view is slower during this transition period — we run background backfills to keep both data models in sync.
 - **Saved views:** Set up saved views on the new unified tracing table to surface the observations that matter most — [guide here](/faq/all/explore-observations-in-v4).
+- **LLM-as-a-judge evals:** Migrate your evaluations to run at the observation level for faster execution — [migration guide](/faq/all/llm-as-a-judge-migration).
 
 ---
+
+## Overview
 
 Langfuse now delivers faster product performance at scale. Chart loading is much shorter, and browsing traces, users, and sessions is faster. The new Observations API v2 and Metrics API v2 query faster at scale. Observation-level evaluations now execute in seconds without a ClickHouse query per evaluation.
 
