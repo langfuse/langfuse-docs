@@ -169,7 +169,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
           "Enterprise SSO (e.g. Okta)",
           "SSO enforcement",
           "Fine-grained RBAC",
-          "Support via Dedicated Slack Channel",
+          "Support via Dedicated Slack / MS Teams Channel",
         ],
       },
       cta: "Sign up",
@@ -913,7 +913,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Private Slack channel",
+        name: "Private Slack / MS Teams channel",
         href: "/support#slack",
         tiers: {
           cloud: {
