@@ -9,16 +9,15 @@ import { BarChart3, Book, Github, LayoutDashboard, Table, Zap } from "lucide-rea
 
 ## At a glance
 
-**What changed:** Langfuse is now observations-first. Every LLM call, tool execution, and agent step is a directly queryable row in the main observations table. Trace-level attributes (`user_id`, `session_id`, `metadata`, `tags`) now propagate to each observation. Input and output are no longer stored on traces directly.
+Langfuse is now observations-first — queries that used to require expensive joins now run instantly, even across traces with thousands of steps.
 
-**Why it's faster:** Query directly across all operations without expensive joins — charts, filters, and APIs stay fast at any scale, even as traces grow to hundreds or thousands of operations. See the [changelog entry](/changelog/2026-03-10-simplify-for-scale) for more background.
+**What changed:** Every LLM call, tool, and agent step is a directly queryable row. Trace attributes (`user_id`, `session_id`, etc.) propagate to all child observations automatically. Input/output are no longer stored on traces.
 
 **How to adopt:**
-- **SDK upgrade:** Update to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()` to push `user_id`, `session_id`, etc. to all child observations.
-- **Direct OTEL ingestion:** Set the `x-langfuse-ingestion-version: 4` header on your span exporter ([setup guide](/integrations/native/opentelemetry)).
-- **UI opt-in:** Use the **Preview** toggle in the bottom-left of the Langfuse UI to enable the new experience. It's reversible. The legacy view is slower during this transition period — we run background backfills to keep both data models in sync.
-- **Saved views:** Set up saved views on the new unified tracing table to surface the observations that matter most — [guide here](/faq/all/explore-observations-in-v4).
-- **LLM-as-a-judge evals:** Migrate your evaluations to run at the observation level for faster execution — [migration guide](/faq/all/llm-as-a-judge-migration).
+- **SDK:** Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace `update_current_trace()` with `propagate_attributes()`.
+- **OTEL:** Set `x-langfuse-ingestion-version: 4` on your span exporter. ([setup guide](/integrations/native/opentelemetry))
+- **UI:** Enable the **Preview** toggle (bottom-left) to opt in. (Legacy view remains available.)
+- **Saved views & evals:** Filter observations directly in the new unified table; migrate evals to the observation level. ([saved views guide](/faq/all/explore-observations-in-v4), [evals migration guide](/faq/all/llm-as-a-judge-migration))
 
 ---
 
