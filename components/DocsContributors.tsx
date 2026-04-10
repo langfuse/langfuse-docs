@@ -6,7 +6,9 @@ import { allAuthors, Author, AuthorHoverCardContent } from "./Authors";
 import contributorsData from "../data/generated/contributors.json";
 import Image from "next/image";
 import { HoverCard, HoverCardTrigger } from "@/components/ui/hover-card";
-import { ArrowUpRight, Github } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import IconGithub from "@/components/icons/github";
+import IconX from "@/components/icons/x";
 import InkeepChatButton from "@/components/inkeep/InkeepChatButton";
 import Link from "next/link";
 
@@ -76,13 +78,13 @@ const ContributorCardContent = forwardRef<
     href={contributor.profileUrl}
     target="_blank"
     rel="noopener noreferrer"
-    className="flex items-center gap-2 py-1 rounded-sm hover:opacity-80 transition-opacity"
+    className="flex items-center gap-2.5 py-1 rounded-sm hover:opacity-80 transition-opacity"
     {...props}
   >
     <Image
       src={contributor.image}
-      width={28}
-      height={28}
+      width={22}
+      height={22}
       className="rounded-full shrink-0"
       alt={contributor.name}
     />
@@ -126,21 +128,6 @@ const processContributor = (username: string): ProcessedContributor => {
   };
 };
 
-// ─── X / Twitter icon (simple SVG) ───────────────────────────────────────────
-
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-  );
-}
-
 // ─── Main component ───────────────────────────────────────────────────────────
 
 type DocsContributorsProps = {
@@ -166,11 +153,11 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
   const remainingCount = Math.max(0, processedContributors.length - 3);
 
   return (
-    <div className="toc-footer flex flex-col gap-5 pb-4">
+    <div className="toc-footer flex flex-col border-t border-line-structure !p-0">
       {/* Actions */}
       {(editUrl || feedbackUrl) && (
-        <div>
-          <p className="text-sm font-semibold text-text-primary mb-2">Actions</p>
+        <div className="border-b border-line-structure px-4 pb-4 pt-3">
+          <p className="text-sm font-medium text-text-primary mb-3">Actions</p>
           <div className="flex flex-col gap-1.5">
             {feedbackUrl && (
               <a
@@ -199,9 +186,9 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
 
       {/* Contributors */}
       {processedContributors.length > 0 && (
-        <div>
-          <p className="text-sm font-semibold text-text-primary mb-1">Contributors</p>
-          <div className="flex flex-col">
+        <div className="px-4 pb-4 pt-3 border-b border-line-structure">
+          <p className="text-sm font-medium text-text-primary mb-3">Contributors</p>
+          <div className="flex flex-col gap-1">
             {displayedContributors.map((contributor) => (
               <React.Fragment key={contributor.username}>
                 <ContributorCard contributor={contributor} />
@@ -220,26 +207,26 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
       )}
 
       {/* Community */}
-      <div>
-        <p className="text-sm font-semibold text-text-primary mb-2">Community</p>
+      <div className="px-4 pb-4 pt-3">
+        <p className="text-sm font-medium text-text-primary mb-3">Community</p>
         <div className="flex items-center gap-3">
           <Link
             href="https://github.com/langfuse/langfuse"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-text-tertiary hover:text-text-primary transition-colors"
+            className="text-text-disabled hover:text-text-primary transition-colors"
             aria-label="GitHub"
           >
-            <Github size={18} />
+            <IconGithub className="size-5" />
           </Link>
           <Link
             href="https://x.com/langfuse"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-text-tertiary hover:text-text-primary transition-colors"
+            className="text-text-disabled hover:text-text-primary transition-colors mt-0.5"
             aria-label="X / Twitter"
           >
-            <XIcon className="size-[17px]" />
+            <IconX className="size-5" />
           </Link>
           <div className="ml-auto">
             <InkeepChatButton />

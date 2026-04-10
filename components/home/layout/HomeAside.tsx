@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { AnchorProvider, useActiveAnchors } from "fumadocs-core/toc";
-import { Github } from "lucide-react";
 import InkeepChatButton from "@/components/inkeep/InkeepChatButton";
 import { Link } from "@/components/ui/link";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
+import IconGithub from "@/components/icons/github";
+import IconX from "@/components/icons/x";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -50,16 +51,6 @@ function useDOMHeadings(): TocItem[] {
   }, [pathname]);
 
   return items;
-}
-
-// ─── X / Twitter icon ────────────────────────────────────────────────────────
-
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-  );
 }
 
 // ─── "On this page" TOC ───────────────────────────────────────────────────────
@@ -144,22 +135,22 @@ function TocCommunity() {
       </Text>
       <div className="flex gap-3 items-center">
         <Link
-          href="https://github.com/langfuse"
+          href="https://github.com/langfuse/langfuse"
           target="_blank"
           rel="noopener noreferrer"
-          className="transition-colors text-text-tertiary hover:text-text-primary"
+          className="text-text-disabled hover:text-text-primary transition-colors"
           aria-label="GitHub"
         >
-          <Github size={18} />
+          <IconGithub className="size-5" />
         </Link>
         <Link
           href="https://x.com/langfuse"
           target="_blank"
           rel="noopener noreferrer"
-          className="transition-colors text-text-tertiary hover:text-text-primary"
+          className="text-text-disabled hover:text-text-primary transition-colors mt-0.5"
           aria-label="X / Twitter"
         >
-          <XIcon className="size-[17px]" />
+          <IconX className="size-5" />
         </Link>
         <div className="ml-auto">
           <InkeepChatButton />

@@ -339,14 +339,13 @@
   --stripe-period: 6px;
   --stripe-base: transparent;
   --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.1));
-  background:
-    repeating-linear-gradient(
-      315deg,
-      var(--stripe-base),
-      var(--stripe-base) 2px,
-      var(--stripe-line) 4px,
-      var(--stripe-base) 4px
-    );
+  background: repeating-linear-gradient(
+    315deg,
+    var(--stripe-base),
+    var(--stripe-base) 2px,
+    var(--stripe-line) 4px,
+    var(--stripe-base) 4px
+  );
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
@@ -562,7 +561,7 @@
   font-weight: 600;
   font-family: var(--font-sans);
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
   margin-top: 0.75rem;
   padding-left: 0.625rem;
   padding-right: 0.625rem;
@@ -596,12 +595,6 @@
 /* TOC items: active state */
 #nd-toc a[data-active="true"] {
   color: var(--text-primary) !important;
-}
-
-/* Footer slot: dashed top border to match scroll area bottom */
-#nd-toc .toc-footer {
-  border-top: 1px solid var(--line-structure);
-  padding-top: 1rem;
 }
 
 /* Fix nested lists */

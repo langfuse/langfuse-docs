@@ -163,16 +163,14 @@ export function LangTabs(props: {
           className="flex overflow-hidden flex-col my-0 border border-border rounded-none"
         >
           <FumadocsTabsList
-            className={cn(
-              "flex overflow-x-auto overflow-y-hidden flex-nowrap gap-2 sm:gap-4 pt-1 px-4 rounded-none border-b not-prose border-line-structure min-h-9"
-            )}
+            className={"flex overflow-x-auto overflow-y-hidden flex-nowrap gap-2 sm:gap-4 pt-1 px-4 rounded-none border-b not-prose border-line-structure min-h-9 bg-surface-bg"}
           >
             {items.map((item, i) => (
               <FumadocsTabsTrigger
                 key={i}
                 value={values[i]}
                 onClick={() => handleValueChange(values[i])}
-                className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-1 border-transparent pb-2 pt-1.5 text-xs text-text-tertiary transition-colors hover:text-foreground cursor-pointer disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-line-cta data-[state=active]:text-text-primary data-[state=active]:font-medium"
+                className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-1 border-transparent pb-2 pt-1.5 text-xs text-text-tertiary transition-colors font-[430] hover:text-foreground cursor-pointer disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-line-cta data-[state=active]:text-text-primary data-[state=active]:font-medium"
               >
                 {typeof item === "string" ? item : item?.label ?? String(i)}
               </FumadocsTabsTrigger>
