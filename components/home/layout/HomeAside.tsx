@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { AnchorProvider, useActiveAnchors } from "fumadocs-core/toc";
-import { Github } from "lucide-react";
 import InkeepChatButton from "@/components/inkeep/InkeepChatButton";
 import { Link } from "@/components/ui/link";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
+import IconGithub from "@/components/icons/github";
+import IconX from "@/components/icons/x";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -52,16 +53,6 @@ function useDOMHeadings(): TocItem[] {
   return items;
 }
 
-// ─── X / Twitter icon ────────────────────────────────────────────────────────
-
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-  );
-}
-
 // ─── "On this page" TOC ───────────────────────────────────────────────────────
 
 function TocOnThisPage({ items }: { items: TocItem[] }) {
@@ -80,8 +71,8 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex-1 min-h-0">
-      <Text size="s" className="block text-left font-medium text-text-primary mb-3">
+    <div className="flex-1 min-h-0 px-4">
+      <Text size="s" className="block text-left font-medium text-text-primary mb-3 -ml-1.5">
         On this page
       </Text>
 
@@ -138,28 +129,26 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
 
 function TocCommunity() {
   return (
-    <div className="pt-4 border-t border-dashed border-line-divider-dash">
-      <Text size="s" className="block text-left font-medium text-text-primary mb-3">
-        Community
-      </Text>
-      <div className="flex gap-3 items-center">
+    <div className="px-4 pb-4 pt-3 border-t border-line-structure">
+      <p className="text-sm font-medium text-text-primary mb-3">Community</p>
+      <div className="flex items-center gap-3">
         <Link
-          href="https://github.com/langfuse"
+          href="https://github.com/langfuse/langfuse"
           target="_blank"
           rel="noopener noreferrer"
-          className="transition-colors text-text-tertiary hover:text-text-primary"
+          className="text-text-disabled hover:text-text-primary transition-colors"
           aria-label="GitHub"
         >
-          <Github size={18} />
+          <IconGithub className="size-5" />
         </Link>
         <Link
           href="https://x.com/langfuse"
           target="_blank"
           rel="noopener noreferrer"
-          className="transition-colors text-text-tertiary hover:text-text-primary"
+          className="text-text-disabled hover:text-text-primary transition-colors mt-0.5"
           aria-label="X / Twitter"
         >
-          <XIcon className="size-[17px]" />
+          <IconX className="size-5" />
         </Link>
         <div className="ml-auto">
           <InkeepChatButton />
@@ -184,7 +173,7 @@ export function HomeAside() {
         height: "calc(100vh - var(--fd-banner-height, 0px) - 4rem)",
       }}
     >
-      <nav className="flex flex-col flex-1 gap-4 px-4 py-4 rounded-sm bg-surface-1 overflow-y-auto overflow-x-hidden">
+      <nav className="flex flex-col flex-1 gap-4 pt-4 rounded-sm bg-surface-1 overflow-y-auto overflow-x-hidden">
         <AnchorProvider toc={items} single>
           <TocOnThisPage items={items} />
         </AnchorProvider>
