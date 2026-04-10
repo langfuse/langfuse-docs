@@ -23,18 +23,21 @@ const sizeClass: Record<"m" | "s" | "xs", string> = {
   xs: textBodyXsMonoRegularClassName,
 };
 
-export type TextProps = React.HTMLAttributes<HTMLParagraphElement> & {
-  /** Body-M (15px), Body-S (13px), or Body-XS Mono (10px). Default `"m"`. */
-  size?: "m" | "s" | "xs";
-};
+export type TextProps<T extends React.ElementType = "p"> =
+  React.ComponentPropsWithoutRef<T> & {
+    /** Body-M (15px), Body-S (13px), or Body-XS Mono (10px). Default `"m"`. */
+    size?: "m" | "s" | "xs";
+    /** Render as a different element. Default `"p"`. */
+    as?: T;
+  };
 
 /**
- * Body copy primitive (`<p>`). Centered tertiary text; default Body-M/Regular.
+ * Body copy primitive. Centered tertiary text; default Body-M/Regular.
  * Override alignment or color via `className`.
  */
-const Text = React.forwardRef<HTMLParagraphElement, TextProps>(
-  ({ className, size = "m", ...props }, ref) => (
-    <p
+const Text = React.forwardRef<HTMLElement, TextProps>(
+  ({ className, size = "m", as: Comp = "p", ...props }, ref) => (
+    <Comp
       ref={ref}
       className={cn(sizeClass[size], className)}
       {...props}

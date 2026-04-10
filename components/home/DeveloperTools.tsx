@@ -16,6 +16,7 @@ const CLI_HREF = "/docs/api-and-data-platform/features/cli";
 const DOCS_MCP_HREF = "/docs/docs-mcp";
 const PLATFORM_MCP_HREF = "/docs/api-and-data-platform/features/mcp-server";
 
+/** @TODO - can we remove this? */
 function CardVisualSlot({ className }: { className?: string }) {
   return (
     <div

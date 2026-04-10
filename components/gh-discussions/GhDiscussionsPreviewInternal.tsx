@@ -110,13 +110,13 @@ const GhDiscussionsPreviewInternal = ({
     return (
       <>
         <ul
-          className="list-none"
+          className="list-none not-prose"
           data-gh-discussions-list
         >
           {displayedDiscussions.map((discussion) => (
             <li
               key={discussion.number}
-              className="flex items-center px-1 pb-3 space-x-1 border-b last:border-none"
+              className="flex items-center p-4 border-b last:border-none"
             >
               <div className="flex flex-col items-center min-w-[60px] gap-0.5">
                 <span className="text-lg font-semibold leading-none">
