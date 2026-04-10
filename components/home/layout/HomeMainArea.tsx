@@ -33,7 +33,7 @@ export function HomeMainArea({ children }: { children: ReactNode }) {
   return (
     <main
       ref={ref}
-      className="flex-1 min-w-0 rounded-sm bg-surface-1 pattern-bg"
+      className="flex-1 min-w-0 rounded-sm pattern-bg"
       onMouseMove={handleMouseMove}
       id="home-main-area"
     >
