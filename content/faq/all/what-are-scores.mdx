@@ -10,15 +10,15 @@ Scores are covered in detail on the [Evaluation Concepts](/docs/evaluation/score
 
 - [When to use scores](/docs/evaluation/scores/overview#when-to-use-scores) — user feedback, production monitoring, guardrails, experiments
 - [Score types](/docs/evaluation/scores/overview#score-types) — numeric, categorical, boolean, and text
-- [Score configs](/docs/evaluation/scores/data-model#score-configs) — enforce schemas and validate values on ingestion
-- [Scores vs tags](/docs/evaluation/scores/overview-vs-tags) — when to use which
+- [Score configs](/docs/evaluation/scores/data-model#score-config) — enforce schemas and validate values on ingestion
+- [Scores vs tags](/docs/evaluation/scores/overview#scores-vs-tags) — when to use which
 - [Score comments](/docs/evaluation/scores/overview#score-comments) — add context to any score
 
 ## How to Create Scores
 
 There are four ways to add scores:
 
-- **LLM-as-a-Judge**: Set up [automated evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) that score traces based on custom criteria.
-- **Scores via UI**: Team members [manually score](/docs/evaluation/evaluation-methods/scores-via-ui) traces, observations, or sessions in the Langfuse UI.
+- **LLM-as-a-Judge**: Set up [automated evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) that score traces based on custom criteria (e.g. hallucination, tone, relevance). These can return numeric, categorical, or boolean (`true` / `false`) scores plus reasoning, and can run on live production traces or on experiment results.
+- **Annotation in the UI**: Team members [manually score](/docs/evaluation/evaluation-methods/annotation) traces, observations, or sessions directly in the Langfuse dashboard. Requires a [score config](/faq/all/manage-score-configs) to be set up first.
 - **Annotation queues**: Set up [structured review workflows](/docs/evaluation/evaluation-methods/annotation-queues) where reviewers work through batches of traces.
-- **Scores via API/SDK**: [Programmatically add scores](/docs/evaluation/evaluation-methods/scores-via-sdk) from your application code — for user feedback, guardrail results, or custom evaluation pipelines.
+- **Scores via API/SDK**: [Programmatically add scores](/docs/evaluation/evaluation-methods/scores-via-sdk) from your application code — for user feedback, guardrail results, custom evaluation pipelines, or open-ended text feedback.
