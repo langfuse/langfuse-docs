@@ -15,7 +15,7 @@ This is a deep dive into the configuration of S3. Follow one of the [deployment 
 
 Langfuse uses S3 or another S3-compatible blob storage (referred to as S3 going forward) to store raw events, multi-modal inputs, batch exports, and other files.
 In addition, we have dedicated implementations for [Azure Blob Storage](#azure-blob-storage) and [Google Cloud Storage](#google-cloud-storage).
-You can use a managed service on AWS, or CloudFlare, or host it yourself using MinIO.
+You can use a managed service on AWS, CloudFlare, or Tigris, or host it yourself using MinIO.
 We use it as a scalable and durable storage solution for large files with strong read-after-write guarantees.
 This guide covers how to configure S3 within Langfuse and how to connect your own S3-compatible storage.
 
@@ -228,6 +228,30 @@ LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=<secret-access-key>
 LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://${ACCOUNT_ID}.r2.cloudflarestorage.com
 ```
 
+### Tigris
+
+[Tigris](https://www.tigrisdata.com/) is S3-compatible object storage with zero egress fees and a free tier (5 GB).
+Create a bucket and access key pair from the [Tigris Dashboard](https://console.tigris.dev/).
+Access keys are prefixed with `tid_` and secrets with `tsec_`.
+
+#### Example Configuration
+
+Set the following environment variables to connect Langfuse with your Tigris bucket:
+
+```yaml
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse
+LANGFUSE_S3_EVENT_UPLOAD_REGION=auto
+LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=tid_YOUR_ACCESS_KEY
+LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=tsec_YOUR_SECRET_KEY
+LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://t3.storage.dev
+```
+
+<Callout type="info">
+
+Tigris uses virtual-hosted-style addressing by default. Do not set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE` to `true`.
+
+</Callout>
+
 ### Azure Blob Storage [#azure-blob-storage]
 
 [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs/) is a globally available object storage by Microsoft Azure.
@@ -326,6 +350,7 @@ Configure a lifecycle expiration rule for your storage provider:
 - **Amazon S3** — Create an S3 Lifecycle expiration rule that deletes objects after N days. See [Managing the lifecycle of objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html).
 - **MinIO** — Use `mc ilm rule add --expire-days` to set an expiration rule. See [mc ilm rule add](https://min.io/docs/minio/linux/reference/minio-mc/mc-ilm-rule-add.html).
 - **Cloudflare R2** — Configure object lifecycle expiration rules via the R2 dashboard or API. See [Object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
+- **Tigris** — Configure object lifecycle expiration rules via the Tigris Dashboard or AWS CLI. See [Object Lifecycle](https://www.tigrisdata.com/docs/objects/object-lifecycle/).
 - **Azure Blob Storage** — Create a lifecycle management policy with a delete action. See [Configure a lifecycle management policy](https://learn.microsoft.com/en-us/azure/storage/blobs/lifecycle-management-policy-configure).
 - **Google Cloud Storage** — Use Object Lifecycle Management with a Delete action and an age condition. See [Object Lifecycle Management](https://cloud.google.com/storage/docs/lifecycle).
 
