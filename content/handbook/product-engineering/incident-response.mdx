@@ -4,49 +4,40 @@ title: Incident Response
 
 # Langfuse Incident Response Plan
 
----
+### Declaring an incident
 
-### On-Call
+**Any team member** can declare an incident at any time — don't wait for certainty. When in doubt, page.
 
-On-call schedules are managed in **PagerDuty**. Declaring an incident in incident.io triggers a PagerDuty alert — the on-call engineer's phone will ring within 1–2 minutes.
+1. Log in to **incident.io** (Slack SSO) → **"Declare Incident"**, or use `/incident` in the **#incidents** Slack channel.
+2. Fill in a summary, affected service(s), and **always select the highest severity** — this is not published externally.
 
-**When to page:** platform outages, security issues, elevated errors, a customer seeing another customer's data. When in doubt, page.
+incident.io will automatically create a Slack channel, page the on-call engineer via PagerDuty, and post to **#incidents**. On-call schedules are managed in **PagerDuty** — the on-call engineer's phone will ring within 1–2 minutes.
 
----
-
-### Declaration
-
-**Any team member** can declare an incident at any time. Don't wait for certainty.
-
-1. Log in to **incident.io** (Slack SSO) → **"Declare Incident"**. Alternatively, use the `/incident` command in the #incidents Slack channel. This can also be used if you are not signed up to incident.io.
-2. Fill in a summary, affected service(s), and **always select the highest severity** — this is not published externally. For now we only have high severity incidents.
-
-incident.io will automatically create a **Slack channel**, page the **on-call engineer** via PagerDuty, and post to **#incidents**.
-
----
-
-### Incident Lead
-
-The **first engineer to join** the incident channel is the Incident Lead. Assign yourself the role in incident.io. Pull respective [DRIs](https://langfuse.com/handbook/how-we-work/ownership) of affected components or Max in if needed. If required, pull someone from the business side in to monitor Slack channels and support tickets.
-
-The Incident Lead owns mitigation, coordinates all system changes, keeps the channel and status page updated, and decides when to adjust severity or dissolve the call.
-
----
+**When to page:** platform outages, security issues, elevated errors, a customer seeing another customer's data.
 
 ### Response
 
-1. **Triage** — Join the Slack channel, collect evidence (screenshots, metrics, logs), update [status.langfuse.com](https://status.langfuse.com) via incident.io. For critical incidents, enable the product announcement banner.
-2. **Mitigate** — Restore the system first: rollback, scale up, feature-flag, hotfix. Root cause comes later.
-3. **Stabilize** — Mark as mitigated in incident.io, update status page, monitor for 15–30 min, then dissolve the call.
+The **first engineer to join** the incident channel is the **Incident Lead**. Assign yourself the role in incident.io. Pull in [DRIs](https://langfuse.com/handbook/how-we-work/ownership) of affected components or Max if needed. For customer-facing incidents, pull someone from the business side to monitor Slack channels and support tickets.
 
----
+1. **Triage** — Collect evidence (screenshots, metrics, logs), publish a status page update (see below). For critical incidents, enable the product announcement banner.
+2. **Mitigate** — Restore the system first: rollback, scale up, feature-flag, hotfix. Root cause comes later.
+3. **Stabilize** — Mark as mitigated in incident.io, update the status page, monitor for 15–30 min, then dissolve the call.
 
 ### Status page
 
-The incident lead makes sure that we always keep the status page up to date with concise and accurate information. The status page is updated via incident.io. The status page is published to [status.langfuse.com](https://status.langfuse.com).
+Status pages are extremely important — they are our mechanism to show transparency to users, which builds trust. **When in doubt, always set up a status page.**
 
----
+The following should **always** have a status page:
 
-### Resolution & Post-Mortem
+- Eval execution delays
+- Ingestion delays
+- Errors/latencies on public APIs
+- Login issues
+
+To publish: go to **"Status Pages"** in [incident.io](https://app.incident.io/langfuse/status-pages/01KACEF364R1KBTHMW81VH6867/overview/now), select our public status page, and hit **"Publish Incident"**. Declaring an incident via `/incident` in Slack does **not** automatically create a public status page update — you must publish it separately.
+
+The incident lead keeps the [status page](https://status.langfuse.com) up to date with concise and accurate information throughout the incident.
+
+### Post-mortem
 
 After mitigation, find and fix the root cause. Complete the post-mortem in [Linear](https://linear.app/langfuse/view/incidents-952de24cfbb8) using the auto-generated timeline, covering: summary, impact, root cause, contributing factors, and action items with owners. Track follow-ups in the Linear ticket. Share in **#team-engineering**.
