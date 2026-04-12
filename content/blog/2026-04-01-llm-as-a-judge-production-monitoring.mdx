@@ -1,0 +1,578 @@
+---
+title: "The Rage Clicks of LLM apps: High-Signal Production Monitoring for AI Customer Support Agents"
+date: 2026/04/01
+description: How to use LLM-as-a-judge to detect when your users say "f**k".
+tag: engineering
+author: Annabell
+ogImage: /images/blog/2026-03-25-llm-as-a-judge-production-monitoring/og.jpg
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="The Rage Clicks of LLM apps: High-Signal Production Monitoring for AI Support Agents"
+  description="How to use LLM-as-a-judge to detect when your users say &quot;f**k&quot; - and other high-signal events worth acting on."
+  date="April 1, 2026"
+  authors={["annabellschafer"]}
+/>
+
+import { Frame } from "@/components/Frame";
+
+Traditional production apps are monitored for high-signal indicators that something's going wrong: rage clicks, error rates, timeouts. These are binary, easy-to-detect signals that tell you immediately when users are unhappy or the app is misbehaving.
+
+LLM-powered apps have the same need - but the problem is harder as outputs are non-deterministic. A broken response doesn't throw an exception. A user who didn't get what they needed might just silently leave. But how do you measure these subtle signals?
+
+One answer is surprisingly simple: detect when users curse. Boris Cherny, creator of Claude Code, [shared how his team does it](https://x.com/bcherny):
+
+<Frame>
+  ![Boris Cherny tweet about the fucks chart](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/boris_cherny_tweet.png)
+</Frame>
+
+Anthropic's own leaked internal evals for Claude Code confirm this isn't just one team's hack - profanity frequency ("fucks per conversation") shows up as a real signal they track. When users curse at your AI, something went wrong. It's a high-signal, zero-ambiguity event that tells you far more than an average satisfaction score ever could.
+
+Here's how you can build your own version of this for your support agent.
+
+Instead of asking a model to score helpfulness, ask it a yes/no question: did the user disagree with the assistant? Did the user ask for something outside the agent's scope?
+
+Good event detectors are:
+- **Binary.** Yes or no - did the event occur? This maps directly to filtering, alerting, and routing.
+- **Narrow.** One check per detector. The more specific the event, the more actionable the signal.
+- **Tied to an action.** Every detector should answer "and then what?". Who sees it, what do they do with it?
+
+## Four Events Worth Detecting in a Customer Support Agent
+
+There are many things that can go wrong in a free text human - LLM interaction. The four events we opted for in our customer support agent use case are the following:
+1. The user curses
+2. The user disagrees with the assistant's response
+3. The user asks something outside of the scope of the agent
+4. The user asks the agent to elaborate, signaling the answer wasn't enough
+
+We built template [evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) in Langfuse for each of these, available to copy.
+
+<Frame>
+  ![Evaluator scores on a trace in Langfuse](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/scores_in_ui.png)
+</Frame>
+
+<Callout type="info">
+  You can see these evaluators live in our [public demo project](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces?viewId=cmmkkfk1a03jiad07lkjcuir7&orderBy=order-DESC_column-startTime&dateRange=7d&search=&peek=ec3d57e9040f0f8f&observation=ec3d57e9040f0f8f&traceId=76eef62999b4ee69f1eae83dcbafcb47&timestamp=2026-03-27T11%3A53%3A01.922Z).
+</Callout>
+
+### 1. User curses
+
+**What it detects:** The user expressed profanity or intense frustration during the conversation.
+
+<Frame fullWidth>
+  ![User cur
+  sing evaluator example](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/example-user-cursing.png)
+</Frame>
+
+**Why it matters:** User distress — whether it's explicit profanity or intense frustration — is one of the clearest signals available. When a user swears at your agent, something went wrong. It requires no inference and no threshold-setting. The downside is low recall: most frustrated users don't curse, so it only catches the most extreme cases. But when it fires, it's worth reading.
+
+**What to do with it:** Treat these as high-priority traces to review. Cursing usually accompanies a concrete failure - a wrong answer, a repeated misunderstanding, a dead end. Reading a handful of these per week often surfaces the clearest failure patterns.
+
+You can see [our version of this evaluator](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/evals?peek=e716ad75-cbf3-465e-afa5-804f3c504ba0) running in our sample project, or use the template prompt below as a starting point:
+
+<details>
+<summary>Example judge prompt: User Distress</summary>
+
+```
+You are a User Distress Judge evaluating an LLM-based customer support assistant.
+You will be provided with a transcript of the conversation between the assistant and the user (and sometimes metadata), along with the last user message separately.
+Your job is to decide whether the **last user message** contains profanity, explicit language, strong expletives, or clear intense frustration beyond mild annoyance.
+
+## Important Constraints
+
+- Do not assume knowledge about the specific product or service being supported.
+- You are judging the presence of profanity in the **last user message** only, not in the assistant's responses.
+- Score true for explicit profanity, strong expletives, or clear intense frustration that goes beyond mild annoyance. Mild expressions ("this is annoying", "ugh", "seriously?") do not count.
+- If there is no prior assistant message in `CONVERSATION_HISTORY`, still score based solely on `LAST_USER_MESSAGE`.
+
+---
+
+## Score
+
+- **true (Frustration Signal):** The last user message contains explicit profanity, strong expletives, or strong frustration that clearly goes beyond mild annoyance.
+- **false (No Signal):** The last user message does not contain explicit profanity or strong frustration - including mild irritation, neutral questions, or general conversation.
+
+---
+
+## Decision Rules (score true if ANY apply)
+
+Score true if the last user message contains at least one of:
+
+- **Explicit profanity:** Use of common expletives (e.g. "fuck", "shit", "damn", "crap" in a frustrated context, and similar).
+- **Directed frustration with profanity:** User swears at or about the assistant or product: "this is fucking useless", "what the hell is wrong with this thing".
+- **Strong frustration without profanity:** User expresses intense, explicit frustration that goes clearly beyond mild annoyance: "this is absolutely useless", "this is a complete disaster", "I can't believe how broken this is".
+
+---
+
+## Score false Even If…
+
+Score false if there is no profanity or intense frustration signal, including when:
+
+- The user expresses mild frustration without expletives: "this is so annoying", "ugh", "seriously?".
+- The user asks a blunt or impatient question without profanity.
+- The user requests escalation to a human agent without using profanity.
+
+---
+
+## Output Format
+
+Return exactly:
+\`\`\`
+SCORE: <true or false>
+COMMENT: <one concise explanation identifying the profanity signal or lack of it>
+\`\`\`
+
+---
+
+## Examples (few-shot)
+
+**Example 1 - Explicit profanity directed at the assistant**
+LAST_USER_MESSAGE: What the fuck, I've followed every step you gave me and it still doesn't work.
+
+\`\`\`
+SCORE: true
+COMMENT: The user uses explicit profanity ("what the fuck") in direct response to the assistant's instructions failing.
+\`\`\`
+
+**Example 2 - Profanity directed at the product**
+LAST_USER_MESSAGE: This fucking feature has been broken for weeks, why is nobody fixing it?
+
+\`\`\`
+SCORE: true
+COMMENT: The user uses explicit profanity ("fucking") to express frustration with the product.
+\`\`\`
+
+**Example 3 - Strong frustration, no profanity**
+LAST_USER_MESSAGE: This is absolutely useless. I've been trying to sort this out for an hour and nothing works.
+
+\`\`\`
+SCORE: true
+COMMENT: The user expresses strong, explicit frustration ("absolutely useless") that goes beyond mild annoyance and signals a clear breakdown in the interaction.
+\`\`\`
+
+**Example 4 - Mild frustration only**
+LAST_USER_MESSAGE: Ugh, seriously? I already tried that three times.
+
+\`\`\`
+SCORE: false
+COMMENT: "Ugh" and "seriously?" are mild expressions of frustration, not explicit profanity.
+\`\`\`
+
+**Example 5 - Neutral follow-up**
+LAST_USER_MESSAGE: OK that still didn't work. Can I speak to someone?
+
+\`\`\`
+SCORE: false
+COMMENT: The user is frustrated but uses no profanity. Requesting escalation without expletives.
+\`\`\`
+
+---
+
+## Input
+
+\`\`\`
+Conversation history: {{conversation_history}}
+Last user message: {{last_user_message}}
+\`\`\`
+
+Now produce:
+\`\`\`
+SCORE: <true or false>
+COMMENT: <concise justification>
+\`\`\`
+```
+
+</details>
+
+### 2. User Disagreement
+
+**What it detects:** The user explicitly pushed back on or corrected the assistant's response.
+
+<Frame fullWidth>
+  ![User disagreement evaluator example](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/example-user-disagreement.png)
+</Frame>
+
+**Why it matters:** This is the closest LLM equivalent to a 404. Something in the interaction broke down, the knowledge base has a gap, the assistant misunderstood the intent, or the system prompt is steering the model wrong. Unlike a silent exit, a user who disagrees is telling you exactly where it went wrong.
+
+**What to do with it:** Filter [traces](/docs/observability/overview) where this fires and look for patterns. The same topic triggering disagreement repeatedly is a documentation or system prompt fix waiting to happen. This evaluator helps us to quickly detect potential docs gaps.
+
+You can see [our version of this evaluator](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/evals?peek=bd0f9452-a64b-4cca-853c-f608bc6e104b) running in our sample project, or use the template prompt below as a starting point:
+
+<details>
+<summary>Example judge prompt: User Disagreement</summary>
+
+```
+You are a User Disagreement Judge evaluating an LLM-based customer support assistant.
+You will be provided with a transcript of the conversation between the assistant and the user (and sometimes metadata), along with the last user message separately.
+Your job is to decide whether the **last user message** explicitly or implicitly signals disagreement with, rejection of, or dissatisfaction about the **immediately preceding assistant response** (i.e., the final `role: assistant` turn in `CONVERSATION_HISTORY`).
+
+## Important Constraints
+
+- Do not assume knowledge about the specific product or service being supported.
+- You are judging the user's stance toward the **assistant's response** (agreement vs disagreement), not whether the product or service itself is functioning correctly.
+- The **last assistant response** to evaluate against is the final `role: assistant` turn in `CONVERSATION_HISTORY`.
+- If there is no prior assistant message in `CONVERSATION_HISTORY`, score false.
+
+---
+
+## Score
+
+- **true (User Disagreement):** The user signals the assistant's prior response was wrong, unhelpful, or didn't work. If the user only reports that a product feature or service isn't working without explicitly rejecting the assistant's prior response, score false.
+- **false (No Disagreement):** The user does not signal disagreement with the prior response.
+
+---
+
+## Decision Rules (score true if ANY apply)
+
+Score true if at least one is true:
+
+- **Direct rejection / correction:** User says the assistant is wrong or misunderstood: "That's wrong", "You misunderstood what I meant", "That's not what I asked", "That's not right".
+- **Mismatch with what the user sees in the product or docs:** User says they can't find the option, setting, or step the assistant referenced: "I don't see that option", "That button doesn't exist", "My version doesn't have that", "That's not in the docs".
+- **Followed steps but it didn't work:** User reports they tried the instructions and the problem persists: "I did that and it still doesn't work", "That didn't fix it", "Following those steps didn't help", "I already tried that".
+- **Repeated/rephrased ask indicating the answer missed:** User asks the same question again in a way that implies the assistant didn't address it, rather than adding a new constraint.
+
+---
+
+## Score false Even If…
+
+Score false if the user does not reject the assistant response, including when:
+
+- The user asks a neutral follow-up or clarification without saying something is missing or wrong.
+- The user asks a new, related question (expanding scope) without implying the previous answer failed.
+- The user requests escalation to a human agent without blaming the assistant response.
+- The user reports a general product or service issue without tying it to the assistant's prior guidance being wrong.
+- There is **no prior assistant message** in `CONVERSATION_HISTORY` - score false in this case.
+
+---
+
+## Output Format
+
+Return exactly:
+\`\`\`
+SCORE: <true or false>
+COMMENT: <one concise explanation referencing the main disagreement signal or lack of it>
+\`\`\`
+
+---
+
+## Input
+
+\`\`\`
+Conversation history: {{conversation_history}}
+Last user message: {{last_user_message}}
+\`\`\`
+
+Now produce:
+\`\`\`
+SCORE: <true or false>
+COMMENT: <concise justification>
+\`\`\`
+```
+
+</details>
+
+### 3. Out-of-Scope Request
+
+**What it detects:** A mismatch between what the user asked and what the agent is designed to do.
+
+<Frame fullWidth>
+  ![Out-of-scope request evaluator example](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/example-out-of-scope.png)
+</Frame>
+
+**Why it matters:** Every LLM app has a defined scope. When users bump into its edges repeatedly, that's signal - either the scope needs expanding, the system prompt needs better framing, or users need clearer expectations set upfront. If this fires on the same type of request repeatedly, you have a product decision to make.
+
+**What to do with it:** Aggregate by request type. A cluster of similar out-of-scope requests is input for where the expectations towards your AI agent are not met.
+
+You can see [our version of this evaluator](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/evals?peek=38089bd6-e1f8-4559-8681-43b9bdaebde0) running in our sample project, or use the template prompt below as a starting point:
+
+<details>
+<summary>Example judge prompt: Out-of-Scope Request</summary>
+
+```
+You are an Out-of-Scope Request Judge evaluating an LLM-based customer support assistant.
+You will be provided with the agent's system prompt and the last user message.
+Your job is to decide whether the **last user message** contains a request that falls outside the defined scope of the assistant, as established by the system prompt.
+
+## Important Constraints
+
+- The agent's scope is defined **exclusively by the system prompt**. Do not use any other source to infer scope.
+- You are judging the **last user message** against the agent's defined scope - not whether a hypothetical assistant would handle it well.
+- If the system prompt is empty or too vague to determine scope confidently, score false and note this in your comment.
+- Do not penalise edge cases or ambiguous requests that could reasonably fall within a broad reading of the scope. Only score true when the request is clearly outside the agent's purpose.
+- A request being difficult, unusual, or niche does not make it out-of-scope - only scope it against what the system prompt defines.
+
+---
+
+## Score
+
+- **true (Out-of-Scope Request):** The last user message clearly requests something that falls outside the agent's defined scope.
+- **false (In-Scope or Ambiguous):** The last user message falls within, or could reasonably fall within, the agent's defined scope - or the scope is too ambiguous to make a confident determination.
+
+---
+
+## Decision Rules
+
+Score true if BOTH of the following are true:
+
+1. The last user message asks for something with **no plausible connection** to the agent's defined scope (e.g. asking a software support bot for medical advice, asking a billing assistant to write code, asking a streaming service bot to book travel).
+2. The mismatch is **clear and unambiguous** - not a matter of interpretation or an adjacent topic that a broad reading of the scope could accommodate.
+
+Score false in all other cases, including when the request is adjacent, partially related, or when the scope definition is too vague to rule it out.
+
+---
+
+## Score false Even If...
+
+Score false if there is no clear out-of-scope signal, including when:
+
+- The request is adjacent to the agent's scope and could reasonably be interpreted as in-scope.
+- The request is unusual or niche but still within the agent's defined domain.
+- The system prompt is absent or too vague to determine scope confidently.
+- The user asks about a limitation or gap in the product, which is still a product-related question.
+
+---
+
+## Output Format
+
+Return exactly:
+\`\`\`
+SCORE: <true or false>
+COMMENT: <one concise explanation identifying what the user asked, what the agent is scoped to, and why it is or isn't out-of-scope>
+\`\`\`
+
+---
+
+## Examples (few-shot)
+
+**Example 1 - Clearly unrelated request**
+System prompt: You are a customer support assistant for an e-commerce platform. Help users with orders, returns, shipping, and account management.
+LAST_USER_MESSAGE: Can you recommend a good diet plan to help me lose weight before summer?
+
+\`\`\`
+SCORE: true
+COMMENT: The system prompt scopes the agent to e-commerce support (orders, returns, shipping, accounts). Dietary advice has no plausible connection to this scope.
+\`\`\`
+
+**Example 2 - Clearly unrelated, technical request**
+System prompt: You are a support assistant for a project management SaaS product. Help users with product features, billing, and account settings.
+LAST_USER_MESSAGE: Can you help me write a Python script to scrape competitor pricing data from the web?
+
+\`\`\`
+SCORE: true
+COMMENT: The system prompt scopes the agent to product features, billing, and account settings. Writing custom web scraping code is clearly outside this scope.
+\`\`\`
+
+**Example 3 - Hard in-scope question**
+System prompt: You are a support assistant for a financial planning app. Help users understand their spending reports, budgets, and account settings.
+LAST_USER_MESSAGE: Why does my budget report show different numbers than last month even though I spent the same amount?
+
+\`\`\`
+SCORE: false
+COMMENT: The user is asking about their budget report, which is directly within the scope defined in the system prompt.
+\`\`\`
+
+**Example 4 - Adjacent topic, ambiguous scope**
+System prompt: You are a support assistant for an HR platform. Help employees with payslips, leave requests, and benefits.
+LAST_USER_MESSAGE: Can you tell me what the company's remote work policy is?
+
+\`\`\`
+SCORE: false
+COMMENT: Company policy information is adjacent to HR support and could reasonably fall within a broad reading of the system prompt. It is not explicitly excluded, so the request is ambiguous rather than clearly out-of-scope.
+\`\`\`
+
+**Example 5 - Empty system prompt**
+System prompt: (empty)
+LAST_USER_MESSAGE: Can you book me a flight to Tokyo?
+
+\`\`\`
+SCORE: false
+COMMENT: The system prompt is empty, so the agent's defined scope cannot be determined. Scoring false by default.
+\`\`\`
+
+**Example 6 - Product limitation question, in-scope**
+System prompt: You are a support assistant for a music streaming service. Help users with subscriptions, playlists, playback issues, and account settings.
+LAST_USER_MESSAGE: Is there a way to download songs for offline listening?
+
+\`\`\`
+SCORE: false
+COMMENT: The user is asking about a product feature (offline listening), which is directly related to the agent's defined scope of subscriptions and playback.
+\`\`\`
+
+---
+
+## Input
+
+\`\`\`
+System prompt: {{system_prompt}}
+Last user message: {{last_user_message}}
+\`\`\`
+
+Now produce:
+\`\`\`
+SCORE: <true or false>
+COMMENT: <concise justification>
+\`\`\`
+```
+
+</details>
+
+### 4. Insufficient Answer
+
+**What it detects:** The user asked the agent to elaborate or answer more, signaling the previous response didn't meet their needs.
+
+<Frame fullWidth>
+  ![Insufficient answer evaluator example](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/example-insufficient-answer.png)
+</Frame>
+
+**Why it matters:** This catches a different failure mode than disagreement. A user who disagrees tells you the agent was *wrong*. A user asking for more tells you the agent was *insufficient* - the answer was too brief, too vague, or sidestepped the actual question. This often points to knowledge base gaps, an overly cautious system prompt, or topics where the agent hedges instead of answering directly.
+
+**What to do with it:** Filter for traces where this fires and look at the preceding assistant turn. Recurring topics where users ask for more are candidates for expanding your knowledge base or loosening system prompt constraints.
+
+You can see [our version of this evaluator](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/evals?peek=639b636f-2ccb-4d86-8bec-48bce21cc880) running in our sample project, or use the template prompt below as a starting point:
+
+<details>
+<summary>Example judge prompt: Insufficient Answer</summary>
+
+```
+You are an Insufficient Answer Judge evaluating an LLM-based customer support assistant.
+You will be provided with a transcript of the conversation between the assistant and the user (and sometimes metadata), along with the last user message separately.
+Your job is to decide whether the **last user message** signals that the immediately preceding assistant response was insufficient - too brief, too vague, or failed to fully address what the user needed.
+
+## Important Constraints
+
+- Do not assume knowledge about the specific product or service being supported.
+- You are judging whether the user is signaling the **assistant's prior response was insufficient**, not whether they are asking a new, unrelated question.
+- The **last assistant response** to evaluate against is the final `role: assistant` turn in `CONVERSATION_HISTORY`.
+- If there is no prior assistant message in `CONVERSATION_HISTORY`, score false.
+
+---
+
+## Score
+
+- **true (Insufficient Answer):** The last user message signals that the prior assistant response did not fully meet their needs - they want more detail, more specificity, or a more direct answer to what they originally asked.
+- **false (No Signal):** The last user message does not signal insufficiency - e.g., it asks a new question, confirms understanding, or moves the conversation forward naturally.
+
+---
+
+## Decision Rules (score true if ANY apply)
+
+Score true if the last user message contains at least one of:
+
+- **Explicit elaboration request tied to the prior response:** "can you explain more?", "can you go into more detail?", "that's not enough detail", "can you be more specific?", "tell me more about that".
+- **Implied insufficiency:** "is that all?", "what else?", "that doesn't really answer my question", "I'm still not sure how to do this after reading that".
+- **Repeated ask:** User rephrases or repeats a question they already asked, implying the first answer missed the mark rather than adding a new constraint.
+
+---
+
+## Score false Even If…
+
+Score false if there is no clear insufficiency signal, including when:
+
+- The user asks a new, related question that expands the scope rather than pushing back on the prior answer.
+- The user asks "what else can you help me with?" as a general prompt rather than a reaction to a specific answer.
+- The user asks a follow-up that builds naturally on a complete answer without implying it was lacking.
+- There is no prior assistant message in `CONVERSATION_HISTORY`.
+
+---
+
+## Output Format
+
+Return exactly:
+\`\`\`
+SCORE: <true or false>
+COMMENT: <one concise explanation identifying the insufficiency signal or lack of it>
+\`\`\`
+
+---
+
+## Examples (few-shot)
+
+**Example 1 - Explicit request for more detail**
+CONVERSATION_HISTORY: [... assistant: "You can export your data from the Settings page."]
+LAST_USER_MESSAGE: Can you go into more detail on how to do that? I'm not sure where exactly to look.
+
+\`\`\`
+SCORE: true
+COMMENT: The user explicitly requests more detail ("go into more detail"), signaling the prior answer was too brief to be actionable.
+\`\`\`
+
+**Example 2 - Implied insufficiency**
+CONVERSATION_HISTORY: [... assistant: "There are several ways to configure this depending on your setup."]
+LAST_USER_MESSAGE: That doesn't really answer my question. I need to know specifically what to do when the integration keeps timing out.
+
+\`\`\`
+SCORE: true
+COMMENT: The user explicitly states the answer didn't address their question ("that doesn't really answer my question") and restates their original need.
+\`\`\`
+
+**Example 3 - Repeated ask after a vague response**
+CONVERSATION_HISTORY: [... user: "How do I reset my API key?" ... assistant: "API keys can be managed from your account settings." ... user: "OK but how exactly do I reset it?"]
+LAST_USER_MESSAGE: OK but how exactly do I reset it?
+
+\`\`\`
+SCORE: true
+COMMENT: The user is repeating their original question with added emphasis ("how exactly"), indicating the assistant's prior response did not provide a sufficient answer.
+\`\`\`
+
+**Example 4 - Natural follow-up, not insufficiency**
+CONVERSATION_HISTORY: [... assistant: "To reset your API key, go to Settings > API > Regenerate Key. This will immediately invalidate your old key."]
+LAST_USER_MESSAGE: Got it, thanks. And is there a way to set an expiry date on the new key?
+
+\`\`\`
+SCORE: false
+COMMENT: The user acknowledged the answer ("got it, thanks") and is asking a new, related question - not signaling the prior response was insufficient.
+\`\`\`
+
+**Example 5 - New question, expanding scope**
+CONVERSATION_HISTORY: [... assistant: "Your invoice is available under Billing > Invoices and can be downloaded as a PDF."]
+LAST_USER_MESSAGE: OK great. Can you also help me update my billing address?
+
+\`\`\`
+SCORE: false
+COMMENT: The user confirmed the answer was sufficient and is moving on to a new, unrelated request. No insufficiency signal.
+\`\`\`
+
+**Example 6 - "Is that all?" as genuine confirmation**
+CONVERSATION_HISTORY: [... assistant: "The only thing you need to do is toggle the setting in your dashboard - there's nothing else required on your end."]
+LAST_USER_MESSAGE: Oh great, is that really all I need to do?
+
+\`\`\`
+SCORE: false
+COMMENT: The user is confirming a simple answer, not expressing that it was insufficient. The context makes clear this is a satisfied clarification, not a request for more.
+\`\`\`
+
+---
+
+## Input
+
+\`\`\`
+Conversation history: {{conversation_history}}
+Last user message: {{last_user_message}}
+\`\`\`
+
+Now produce:
+\`\`\`
+SCORE: <true or false>
+COMMENT: <concise justification>
+\`\`\`
+```
+
+</details>
+
+## Setting This Up in Langfuse
+
+Each of these is available as a template evaluator for Langfuse - you can enable them directly by copying over and customizing without writing the prompts from scratch. They run as [online evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge), scoring new production traces automatically as they arrive.
+
+If you want to write your own or adapt the templates:
+
+1. **Write a narrow prompt.** Give the conversation as input, ask for yes/no and a one-line reason. Keep the task as specific as possible - the more focused the check, the more reliable the signal.
+2. **Review the results.** Use Langfuse's filtering to find flagged traces. Review where valuable info is included. Use what you find to improve your agent's system prompt - [automatic prompt improvement](/blog/2026-02-16-prompt-improvement-claude-skills) is a natural next step here.
+3. **Finetune your evaluators.** To keep your evaluators high signal you want to adjust them over time. LLM as a judge instructions are prompts, and they equally [need to be improved as the prompts](/blog/2026-02-16-prompt-improvement-claude-skills) in your production system.
+
+## Takeaway
+
+Quality scores tell you how good your app is on average. Event detectors tell you when something specific happened that's worth acting on. Both are useful - but for production monitoring, event detection is an important tool that captures information beyond quality evaluation.
+
+User disagreement and people cursing are what we recommend to start with in Customer Support use cases. They're the clearest signals, the easiest to act on, and the ones most likely to surface something real. We found a docs gap on the first week of running them.

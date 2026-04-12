@@ -214,6 +214,7 @@ export const marketingSource = loader({
 /** Slugs that are single marketing pages (content/marketing/*.mdx) */
 export const MARKETING_SLUGS = [
   "about",
+  "brand",
   "careers",
   "cn",
   "community",
@@ -288,7 +289,7 @@ const DOC_SECTIONS = {
   users: {
     source: usersSource,
     collection: "customers",
-    title: "Users",
+    title: "User stories",
   },
   handbook: {
     source: handbookSource,

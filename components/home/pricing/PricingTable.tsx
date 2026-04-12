@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/hover-card";
 import { TrustedBy } from "../components/TrustedBy";
 import { trustedByData } from "@/data/trusted-by";
+import Image from "next/image";
 
 // Reusable graduated pricing text with calculator link
 const GraduatedPricingText = () => {
@@ -50,7 +51,10 @@ type Tier = {
   id: string;
   href: string;
   featured: boolean;
+  cardClassName?: string;
+  pillClassName?: string;
   description: string;
+  pill?: React.ReactNode;
   price: string;
   priceUnit?: string;
   mainFeatures: (string | React.ReactNode)[];
@@ -85,7 +89,6 @@ type Tier = {
 
 const TEAMS_ADDON = "Teams add-on";
 const YEARLY_COMMITMENT = "Yearly Commitment";
-const ENTERPRISE = "Enterprise";
 
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
@@ -111,6 +114,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-core",
       href: "https://cloud.langfuse.com",
       featured: true,
+      pill: "Unlimited Users",
       description:
         "For production projects. Longer data access and unlimited users.",
       price: "$29",
@@ -138,6 +142,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-pro",
       href: "https://cloud.langfuse.com",
       featured: false,
+      pill: "Unlimited Users",
       price: "$199",
       description:
         "For scaling projects. Unlimited history, high rate limits, all features.",
@@ -164,7 +169,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
           "Enterprise SSO (e.g. Okta)",
           "SSO enforcement",
           "Fine-grained RBAC",
-          "Support via Dedicated Slack Channel",
+          "Support via Dedicated Slack / MS Teams Channel",
         ],
       },
       cta: "Sign up",
@@ -224,29 +229,47 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Community support",
       ],
       cta: "Deployment guide",
-      addOn: {
-        name: "Enterprise",
-        price: "Custom Pricing",
-        mainFeatures: [
-          "All Open Source features",
-          "Management APIs",
-          "Project-level RBAC",
-          "Data Retention Policies",
-          "Audit Logs",
-          "ISO27001 and InfoSec reviews",
-          "Dedicated support engineer",
-          "Support SLA",
-          "Billing via AWS Marketplace",
-          "Billing via Invoice",
-        ],
-        cta: {
-          text: "Talk to sales",
-          href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
-        },
-        calloutLink: {
-          text: "Enterprise FAQ",
-          href: "/enterprise",
-        },
+    },
+    {
+      name: "Enterprise",
+      id: "tier-self-hosted-enterprise",
+      href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
+      featured: false,
+      cardClassName:
+        "border-[#FAFF6A] bg-[#FAFF6A12] dark:bg-[#FAFF6A14] dark:border-[#FAFF6A]",
+      pillClassName: "bg-[#FAFF6A] text-[#1A1A1A]",
+      description:
+        "Dedicated Langfuse deployment with enterprise capabilities and support.",
+      pill: (
+        <>
+          <span className="inline-flex rounded-sm p-0.5">
+            <Image
+              src="/images/logos/clickhouse_icon.svg"
+              alt=""
+              width={14}
+              height={14}
+              className="size-3.5 rounded-[2px]"
+            />
+          </span>
+          ClickHouse Cloud / BYOC / Private
+        </>
+      ),
+      price: "Custom Pricing",
+      mainFeatures: [
+        "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
+        "Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private",
+        "Langfuse pricing is additive to your ClickHouse commercial plan",
+        "Dedicated support engineer for deployment and hosting guidance",
+        "Solutions architect support during evaluation and rollout",
+        "Direct access to the product team for feedback",
+        "SOC 2 Type II and ISO 27001 reports",
+        "Support SLA",
+        "Billing via AWS Marketplace or invoice",
+      ],
+      cta: "Talk to sales",
+      calloutLink: {
+        text: "Enterprise FAQ",
+        href: "/enterprise",
       },
     },
   ],
@@ -284,9 +307,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -299,9 +320,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -314,9 +333,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -329,9 +346,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -341,7 +356,7 @@ const sections: Section[] = [
         href: "/integrations",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -349,7 +364,7 @@ const sections: Section[] = [
         href: "/docs/observability/sdk/overview",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -359,7 +374,7 @@ const sections: Section[] = [
         href: "/docs/opentelemetry/get-started",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -367,7 +382,7 @@ const sections: Section[] = [
         href: "/integrations/gateways/litellm",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -375,7 +390,7 @@ const sections: Section[] = [
         href: "/api-and-data-platform/features/public-api",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -390,9 +405,7 @@ const sections: Section[] = [
             Pro: "100k units",
             Enterprise: "100k units",
           },
-          selfHosted: {
-            "Open Source": "Unlimited",
-          },
+          selfHosted: { "Open Source": "Unlimited", Enterprise: "Unlimited" },
         },
       },
       {
@@ -431,9 +444,7 @@ const sections: Section[] = [
             Pro: "Free while in beta",
             Enterprise: "Free while in beta",
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -471,7 +482,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/get-started",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -483,9 +494,7 @@ const sections: Section[] = [
             Pro: "Unlimited",
             Enterprise: "Unlimited",
           },
-          selfHosted: {
-            "Open Source": "Unlimited",
-          },
+          selfHosted: { "Open Source": "Unlimited", Enterprise: "Unlimited" },
         },
       },
       {
@@ -494,7 +503,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/features/prompt-version-control",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -504,7 +513,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/features/composability",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -513,7 +522,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/features/caching",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -522,7 +531,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/features/playground",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -531,9 +540,7 @@ const sections: Section[] = [
         href: "/docs/evaluation/dataset-runs/native-run",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -543,7 +550,7 @@ const sections: Section[] = [
         href: "/docs/prompt-management/features/webhooks-slack-integrations",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -558,9 +565,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -575,7 +580,7 @@ const sections: Section[] = [
         href: "/docs/evaluation/dataset-runs/datasets",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -585,7 +590,7 @@ const sections: Section[] = [
         href: "/docs/evaluation/experiments/experiments-via-sdk",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -595,7 +600,7 @@ const sections: Section[] = [
         href: "/docs/evaluation/experiments/experiments-via-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -603,7 +608,7 @@ const sections: Section[] = [
         href: "/docs/evaluation/evaluation-methods/custom-scores",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -611,7 +616,7 @@ const sections: Section[] = [
         href: "/faq/all/user-feedback",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -619,7 +624,7 @@ const sections: Section[] = [
         href: "/guides/cookbook/example_external_evaluation_pipelines",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -634,9 +639,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -645,7 +648,7 @@ const sections: Section[] = [
         href: "/docs/scores/annotation",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -659,9 +662,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
     ],
@@ -678,9 +679,7 @@ const sections: Section[] = [
             Pro: "Unlimited",
             Enterprise: "Unlimited",
           },
-          selfHosted: {
-            "Open Source": "Unlimited",
-          },
+          selfHosted: { "Open Source": "Unlimited", Enterprise: "Unlimited" },
         },
       },
       {
@@ -692,9 +691,7 @@ const sections: Section[] = [
             Pro: "Unlimited",
             Enterprise: "Unlimited",
           },
-          selfHosted: {
-            "Open Source": "Unlimited",
-          },
+          selfHosted: { "Open Source": "Unlimited", Enterprise: "Unlimited" },
         },
       },
     ],
@@ -713,9 +710,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -776,7 +771,7 @@ const sections: Section[] = [
         href: "/docs/api-and-data-platform/features/query-via-sdk#ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -784,7 +779,7 @@ const sections: Section[] = [
         href: "/integrations/analytics/posthog",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -792,7 +787,7 @@ const sections: Section[] = [
         href: "/integrations/analytics/mixpanel",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -805,7 +800,86 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+    ],
+  },
+  {
+    name: "Deployment",
+    href: "/self-hosting",
+    features: [
+      {
+        name: "ClickHouse deployment model",
+        description:
+          "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private.",
+        tiers: {
+          selfHosted: {
+            "Open Source": "Self-managed ClickHouse OSS",
+            Enterprise: "Bundled: ClickHouse Cloud / BYOC / Private",
+          },
+        },
+      },
+      {
+        name: "Deployment templates",
+        description:
+          "Use Langfuse deployment docs and templates for supported self-hosted setups.",
+        href: "/self-hosting",
+        tiers: {
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Local (Docker Compose)",
+        href: "/self-hosting/deployment/docker-compose",
+        tiers: {
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Kubernetes (Helm)",
+        href: "/self-hosting/deployment/kubernetes-helm",
+        tiers: {
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "AWS (Terraform)",
+        href: "/self-hosting/deployment/aws",
+        tiers: {
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Azure (Terraform)",
+        href: "/self-hosting/deployment/azure",
+        tiers: {
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "GCP (Terraform)",
+        href: "/self-hosting/deployment/gcp",
+        tiers: {
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
         },
       },
     ],
@@ -819,7 +893,7 @@ const sections: Section[] = [
         href: "/docs/ask-ai",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -827,7 +901,7 @@ const sections: Section[] = [
         href: "/support#community",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -835,11 +909,11 @@ const sections: Section[] = [
         href: "/support#in-app",
         tiers: {
           cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
-        name: "Private Slack channel",
+        name: "Private Slack / MS Teams channel",
         href: "/support#slack",
         tiers: {
           cloud: {
@@ -848,14 +922,14 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "Dedicated Support Engineer",
         href: "/support#onboarding",
+        description:
+          "Includes deployment and hosting guidance for your dedicated Langfuse environment.",
         tiers: {
           cloud: {
             Hobby: false,
@@ -863,12 +937,14 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "Onboarding & Architectural guidance",
         href: "/support#onboarding",
+        description:
+          "Deployment, hosting, and rollout guidance for production self-hosted environments.",
         tiers: {
           cloud: {
             Hobby: false,
@@ -876,8 +952,28 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Solutions architect support",
+        description:
+          "Pre-sales and rollout support for architecture planning and deployment readiness.",
+        tiers: {
           selfHosted: {
-            "Open Source": ENTERPRISE,
+            "Open Source": false,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Product team feedback channel",
+        description:
+          "Direct access to the Langfuse product team for roadmap and product feedback.",
+        tiers: {
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
           },
         },
       },
@@ -904,9 +1000,7 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -928,21 +1022,6 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Data masking",
-        href: "/docs/observability/features/masking",
-        tiers: {
-          cloud: {
-            Hobby: true,
-            Core: true,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-          },
-        },
-      },
-      {
         name: "Sign in with Google, AzureAD, GitHub",
         tiers: {
           cloud: {
@@ -951,9 +1030,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -966,9 +1043,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": true,
-          },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -980,7 +1055,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -992,7 +1067,33 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Client-side data masking",
+        href: "/docs/observability/features/masking",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Server-side data masking",
+        href: "/self-hosting/security/data-masking",
+        tiers: {
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+          },
         },
       },
       {
@@ -1005,7 +1106,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1018,9 +1119,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1033,21 +1132,21 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "Organization Creators",
         href: "/self-hosting/administration/organization-creators",
         tiers: {
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "UI Customization",
         href: "/self-hosting/administration/ui-customization",
         tiers: {
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1060,21 +1159,21 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "Admin API (project management, SCIM)",
         href: "/docs/administration/scim-and-org-api",
         tiers: {
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "Instance Management API",
         href: "/self-hosting/administration/instance-management-api",
         tiers: {
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -1091,9 +1190,7 @@ const sections: Section[] = [
             Pro: "Self-serve",
             Enterprise: "Self-serve, Contact sales for " + YEARLY_COMMITMENT,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1105,9 +1202,7 @@ const sections: Section[] = [
             Pro: "Credit card",
             Enterprise: "Credit card, Invoice",
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1119,9 +1214,7 @@ const sections: Section[] = [
             Pro: "Monthly",
             Enterprise: YEARLY_COMMITMENT,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1133,9 +1226,7 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: YEARLY_COMMITMENT,
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -1153,9 +1244,7 @@ const sections: Section[] = [
             Pro: "Standard T&Cs & DPA",
             Enterprise: "Talk to Sales",
           },
-          selfHosted: {
-            "Open Source": ENTERPRISE,
-          },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1163,7 +1252,6 @@ const sections: Section[] = [
         href: "/security/dpa",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-        
         },
       },
       {
@@ -1176,7 +1264,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1201,7 +1289,7 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: YEARLY_COMMITMENT,
           },
-          selfHosted: { "Open Source": ENTERPRISE },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -1281,17 +1369,6 @@ const FeatureCell = ({
             </HoverCardContent>
           </HoverCard>
         )}
-        {value === ENTERPRISE && (
-          <HoverCard>
-            <HoverCardTrigger>
-              <InfoIcon className="inline-block ml-1 size-3" />
-            </HoverCardTrigger>
-            <HoverCardContent className="w-60">
-              Available as part of the Enterprise add-on for self-hosted
-              deployments.
-            </HoverCardContent>
-          </HoverCard>
-        )}
       </div>
     );
   } else if (typeof value === "boolean") {
@@ -1321,172 +1398,178 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
         "mt-12",
         selectedTiers.length === 1
           ? "flex justify-center"
-          : "grid grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
+          : "grid grid-cols-1 gap-y-6 gap-x-6 md:grid-cols-2 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
         selectedTiers.length === 4 && "lg:grid-cols-4",
         selectedTiers.length === 3 && "lg:grid-cols-3",
         selectedTiers.length === 2 && "lg:grid-cols-2",
       )}
     >
-      {selectedTiers.map((tier) => (
-        <Card
-          key={tier.id}
-          className={cn(
-            tier.featured && "border-primary",
-            "relative h-full flex flex-col",
-            selectedTiers.length === 1 && "w-full max-w-lg",
-          )}
-        >
-          {/* Unlimited Users callout for Core and Pro */}
-          {variant === "cloud" &&
-            (tier.name === "Core" || tier.name === "Pro") && (
+      {selectedTiers.map((tier) => {
+        return (
+          <Card
+            key={tier.id}
+            className={cn(
+              tier.featured && "border-primary",
+              tier.cardClassName,
+              "relative h-full flex flex-col",
+              selectedTiers.length === 1 && "w-full max-w-lg",
+            )}
+          >
+            {tier.pill && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <div className="inline-block px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full bg-primary text-primary-foreground">
-                  Unlimited Users
+                <div
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full",
+                    tier.pillClassName ?? "bg-primary text-primary-foreground",
+                  )}
+                >
+                  {tier.pill}
                 </div>
               </div>
             )}
 
-          <CardHeader className="p-4 text-left lg:p-6">
-            <CardTitle className="text-lg font-semibold text-foreground">
-              {tier.name}
-            </CardTitle>
-            <CardDescription className="text-left max-w-[18ch]">
-              {tier.description}
-              {tier.learnMore && (
-                <>
-                  {" "}
-                  <Link href={tier.learnMore} className="underline">
-                    Learn more
-                  </Link>
-                  .
-                </>
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0 px-4 lg:px-6">
-            {/* Price information */}
-            <div className="h-[60px] flex items-baseline">
-              <span className="text-3xl font-bold">{tier.price}</span>
-              <span className="ml-1 text-sm leading-4">
-                {tier.price.includes("$")
-                  ? tier.priceUnit
-                    ? `/ ${tier.priceUnit}`
-                    : "/ month"
-                  : ""}
-              </span>
-            </div>
-
-            <div>
-              {tier.ctaCallout ? (
-                <div className="flex gap-2">
-                  <Button
-                    className="flex-1"
-                    variant={tier.featured ? "default" : "outline"}
-                    asChild
-                  >
-                    <Link href={tier.href}>{tier.cta}</Link>
-                  </Button>
-                  <Button className="flex-1" variant="secondary" asChild>
-                    <Link href={tier.ctaCallout.href}>
-                      {tier.ctaCallout.text}
+            <CardHeader className="p-4 text-left lg:p-6">
+              <CardTitle className="text-lg font-semibold text-foreground">
+                {tier.name}
+              </CardTitle>
+              <CardDescription className="text-left max-w-[24ch]">
+                {tier.description}
+                {tier.learnMore && (
+                  <>
+                    {" "}
+                    <Link href={tier.learnMore} className="underline">
+                      Learn more
                     </Link>
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <Button
-                    className="w-full"
-                    variant={tier.featured ? "default" : "outline"}
-                    asChild
-                  >
-                    <Link href={tier.href}>{tier.cta}</Link>
-                  </Button>
-                </>
-              )}
-            </div>
-
-            {/* Callouts for different tiers - always render container for alignment */}
-            <div className="p-6 h-[30px] flex items-center justify-center">
-              {tier.calloutLink ? (
-                <div className="text-xs text-center text-muted-foreground">
-                  <Link
-                    href={tier.calloutLink.href}
-                    className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
-                  >
-                    {tier.calloutLink.text}
-                  </Link>
-                </div>
-              ) : null}
-            </div>
-          </CardContent>
-
-          {/* Trusted by section for cloud tiers */}
-          {variant === "cloud" && (
-            <>
-              <div className="border-t"></div>
-              <TrustedBy customers={trustedByData.cloud[tier.name]} />
-            </>
-          )}
-          <div className="border-t"></div>
-          <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6">
-            <ul className="space-y-2.5 text-sm">
-              {tier.mainFeatures.map((feature, index) => (
-                <li key={index} className="flex space-x-2">
-                  <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                  <span className="text-muted-foreground">{feature}</span>
-                </li>
-              ))}
-            </ul>
-            {tier.addOn && (
-              <div className="relative p-3 pt-4 mt-3 w-full rounded border">
-                <div className="absolute top-0 left-1/2 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-card text-muted-foreground">
-                  + optional
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-bold text-primary">
-                    {tier.addOn.name}
-                  </span>
-                  {tier.addOn.price && (
-                    <span className="text-sm font-bold text-primary">
-                      {tier.addOn.price}
-                    </span>
-                  )}
-                </div>
-                <ul className="mt-1 space-y-1 text-sm">
-                  {tier.addOn.mainFeatures.map((feature) => (
-                    <li key={feature} className="flex space-x-2">
-                      <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                {tier.addOn.cta && (
-                  <Button
-                    className="mt-3 w-full"
-                    variant="secondary"
-                    size="sm"
-                    asChild
-                  >
-                    <Link href={tier.addOn.cta.href}>
-                      {tier.addOn.cta.text}
-                    </Link>
-                  </Button>
+                    .
+                  </>
                 )}
-                {tier.addOn.calloutLink && (
-                  <div className="mt-2 text-xs text-center text-muted-foreground">
-                    <Link
-                      href={tier.addOn.calloutLink.href}
-                      className="underline hover:text-primary"
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0 px-4 lg:px-6">
+              {/* Price information */}
+              <div className="h-[60px] flex items-baseline">
+                <span className="text-3xl font-bold">{tier.price}</span>
+                <span className="ml-1 text-sm leading-4">
+                  {tier.price.includes("$")
+                    ? tier.priceUnit
+                      ? `/ ${tier.priceUnit}`
+                      : "/ month"
+                    : ""}
+                </span>
+              </div>
+
+              <div>
+                {tier.ctaCallout ? (
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1"
+                      variant={tier.featured ? "default" : "outline"}
+                      asChild
                     >
-                      {tier.addOn.calloutLink.text}
+                      <Link href={tier.href}>{tier.cta}</Link>
+                    </Button>
+                    <Button className="flex-1" variant="secondary" asChild>
+                      <Link href={tier.ctaCallout.href}>
+                        {tier.ctaCallout.text}
+                      </Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Button
+                      className="w-full"
+                      variant={tier.featured ? "default" : "outline"}
+                      asChild
+                    >
+                      <Link href={tier.href}>{tier.cta}</Link>
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              {/* Callouts for different tiers - always render container for alignment */}
+              <div className="p-6 h-[30px] flex items-center justify-center">
+                {tier.calloutLink ? (
+                  <div className="text-xs text-center text-muted-foreground">
+                    <Link
+                      href={tier.calloutLink.href}
+                      className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
+                    >
+                      {tier.calloutLink.text}
                     </Link>
                   </div>
-                )}
+                ) : null}
               </div>
+            </CardContent>
+
+            {/* Trusted by section for cloud tiers */}
+            {variant === "cloud" && (
+              <>
+                <div className="border-t"></div>
+                <TrustedBy customers={trustedByData.cloud[tier.name]} />
+              </>
             )}
-          </CardFooter>
-        </Card>
-      ))}
+            <div className="border-t"></div>
+            <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6">
+              <ul className="space-y-2.5 text-sm">
+                {tier.mainFeatures.map((feature, index) => (
+                  <li key={index} className="flex space-x-2">
+                    <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                    <span className="text-muted-foreground">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              {tier.addOn && (
+                <div className="relative p-3 pt-4 mt-3 w-full rounded border">
+                  <div className="absolute top-0 left-1/2 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-card text-muted-foreground">
+                    + optional
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-bold text-primary">
+                      {tier.addOn.name}
+                    </span>
+                    {tier.addOn.price && (
+                      <span className="text-sm font-bold text-primary">
+                        {tier.addOn.price}
+                      </span>
+                    )}
+                  </div>
+                  <ul className="mt-1 space-y-1 text-sm">
+                    {tier.addOn.mainFeatures.map((feature) => (
+                      <li key={feature} className="flex space-x-2">
+                        <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                        <span className="text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {tier.addOn.cta && (
+                    <Button
+                      className="mt-3 w-full"
+                      variant="secondary"
+                      size="sm"
+                      asChild
+                    >
+                      <Link href={tier.addOn.cta.href}>
+                        {tier.addOn.cta.text}
+                      </Link>
+                    </Button>
+                  )}
+                  {tier.addOn.calloutLink && (
+                    <div className="mt-2 text-xs text-center text-muted-foreground">
+                      <Link
+                        href={tier.addOn.calloutLink.href}
+                        className="underline hover:text-primary"
+                      >
+                        {tier.addOn.calloutLink.text}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardFooter>
+          </Card>
+        );
+      })}
     </div>
   );
 }
@@ -1505,6 +1588,9 @@ export function PricingTable({
   const tableRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLTableSectionElement>(null);
   const selectedTiers = tiers[variant];
+  const visibleSections = sections.filter((section) =>
+    section.features.some((feature) => variant in feature.tiers),
+  );
 
   useEffect(() => {
     if (!isPricingPage) return;
@@ -1582,13 +1668,13 @@ export function PricingTable({
                 <h4 className="text-lg font-semibold text-foreground">
                   {tier.name}
                 </h4>
-                <p className="mt-2 text-sm text-muted-foreground max-w-[18ch]">
+                <p className="mt-2 text-sm text-muted-foreground max-w-[24ch]">
                   {tier.description}
                 </p>
               </div>
               <Table>
                 <TableBody>
-                  {sections.map((section) => (
+                  {visibleSections.map((section) => (
                     <React.Fragment key={section.name}>
                       <TableRow className="bg-muted hover:bg-muted">
                         <TableHead
@@ -1616,7 +1702,9 @@ export function PricingTable({
                             </TableHead>
                             <TableCell className="w-3/12 text-center">
                               <FeatureCell
-                                value={feature.tiers[variant][tier.name]}
+                                value={
+                                  feature.tiers[variant]?.[tier.name] ?? false
+                                }
                               />
                             </TableCell>
                           </TableRow>
@@ -1687,9 +1775,8 @@ export function PricingTable({
                 </table>
               </div>
             </div>
-          </div >
-        )
-        }
+          </div>
+        )}
 
         <div className="relative">
           <Table
@@ -1719,10 +1806,13 @@ export function PricingTable({
               </tr>
             </thead>
             <TableBody>
-              {sections.map((section) => (
+              {visibleSections.map((section) => (
                 <React.Fragment key={section.name}>
                   <TableRow className="bg-muted/50">
-                    <TableCell colSpan={5} className="font-medium">
+                    <TableCell
+                      colSpan={selectedTiers.length + 1}
+                      className="font-medium"
+                    >
                       {section.name}
                       <FeatureDetails
                         description={section.description}
@@ -1744,7 +1834,9 @@ export function PricingTable({
                         {selectedTiers.map((tier) => (
                           <TableCell key={tier.id}>
                             <FeatureCell
-                              value={feature.tiers[variant][tier.name]}
+                              value={
+                                feature.tiers[variant]?.[tier.name] ?? false
+                              }
                             />
                           </TableCell>
                         ))}
@@ -1755,7 +1847,7 @@ export function PricingTable({
             </TableBody>
           </Table>
         </div>
-      </section >
+      </section>
     </>
   );
 }
