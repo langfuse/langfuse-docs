@@ -3,14 +3,12 @@
 import { usePathname } from "next/navigation";
 import React, { useState, useEffect, forwardRef } from "react";
 import { allAuthors, Author, AuthorHoverCardContent } from "./Authors";
-import contributorsData from "../data/generated/contributors.json";
+import contributorsData from "@/data/generated/contributors.json";
 import Image from "next/image";
 import { HoverCard, HoverCardTrigger } from "@/components/ui/hover-card";
 import { ArrowUpRight } from "lucide-react";
-import IconGithub from "@/components/icons/github";
-import IconX from "@/components/icons/x";
-import InkeepChatButton from "@/components/inkeep/InkeepChatButton";
-import Link from "next/link";
+import TocCommunity from "@/components/TocCommunity";
+import { Text } from "@/components/ui/text";
 
 // ─── Utility functions ────────────────────────────────────────────────────────
 
@@ -78,7 +76,7 @@ const ContributorCardContent = forwardRef<
     href={contributor.profileUrl}
     target="_blank"
     rel="noopener noreferrer"
-    className="flex items-center gap-2.5 py-1 rounded-sm hover:opacity-80 transition-opacity"
+    className="flex items-center gap-2.5 py-1 rounded-sm text-text-tertiary hover:text-text-primary transition-opacity"
     {...props}
   >
     <Image
@@ -88,7 +86,7 @@ const ContributorCardContent = forwardRef<
       className="rounded-full shrink-0"
       alt={contributor.name}
     />
-    <span className="text-sm text-text-tertiary truncate">{contributor.name}</span>
+    <span className="text-sm truncate">{contributor.name}</span>
   </a>
 ));
 ContributorCardContent.displayName = "ContributorCardContent";
@@ -130,11 +128,11 @@ const processContributor = (username: string): ProcessedContributor => {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-type DocsContributorsProps = {
+type DocsTocFooterProps = {
   pageTitle?: string;
 };
 
-export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
+export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
   const pathname = usePathname() ?? "";
   const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
@@ -153,11 +151,11 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
   const remainingCount = Math.max(0, processedContributors.length - 3);
 
   return (
-    <div className="toc-footer flex flex-col border-t border-line-structure !p-0">
+    <div className="toc-footer flex flex-col mt-px ml-px !p-0">
       {/* Actions */}
       {(editUrl || feedbackUrl) && (
-        <div className="border-b border-line-structure px-4 pb-4 pt-3">
-          <p className="text-sm font-medium text-text-primary mb-3">Actions</p>
+        <div className="mb-px px-4 pb-4 pt-3 rounded-sm bg-surface-1">
+          <Text size="s" className="font-[580] text-left text-text-primary mb-3">Actions</Text>
           <div className="flex flex-col gap-1.5">
             {feedbackUrl && (
               <a
@@ -186,8 +184,8 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
 
       {/* Contributors */}
       {processedContributors.length > 0 && (
-        <div className="px-4 pb-4 pt-3 border-b border-line-structure">
-          <p className="text-sm font-medium text-text-primary mb-3">Contributors</p>
+        <div className="px-4 pb-4 pt-3 bg-surface-1 rounded-sm mb-px">
+          <Text size="s" className="font-[580] text-left text-text-primary mb-3">Contributors</Text>
           <div className="flex flex-col gap-1">
             {displayedContributors.map((contributor) => (
               <React.Fragment key={contributor.username}>
@@ -197,7 +195,7 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
             {remainingCount > 0 && !showAll && (
               <button
                 onClick={() => setShowAll(true)}
-                className="text-xs text-text-tertiary hover:text-text-tertiary transition-colors cursor-pointer text-left py-1"
+                className="text-xs text-text-tertiary hover:text-text-primary transition-colors cursor-pointer text-left py-1"
               >
                 +{remainingCount} more
               </button>
@@ -207,32 +205,7 @@ export const DocsContributors = ({ pageTitle }: DocsContributorsProps) => {
       )}
 
       {/* Community */}
-      <div className="px-4 pb-4 pt-3">
-        <p className="text-sm font-medium text-text-primary mb-3">Community</p>
-        <div className="flex items-center gap-3">
-          <Link
-            href="https://github.com/langfuse/langfuse"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-text-disabled hover:text-text-primary transition-colors"
-            aria-label="GitHub"
-          >
-            <IconGithub className="size-5" />
-          </Link>
-          <Link
-            href="https://x.com/langfuse"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-text-disabled hover:text-text-primary transition-colors mt-0.5"
-            aria-label="X / Twitter"
-          >
-            <IconX className="size-5" />
-          </Link>
-          <div className="ml-auto">
-            <InkeepChatButton />
-          </div>
-        </div>
-      </div>
+      <TocCommunity className="bg-surface-1 rounded-sm" />
     </div>
   );
 };

@@ -6,7 +6,6 @@ import IconDiscord from "@/components/icons/discord";
 import IconX from "@/components/icons/x";
 import IconYoutube from "@/components/icons/youtube";
 import IconLinkedin from "@/components/icons/linkedin";
-import InkeepChatButton from "@/components/inkeep/InkeepChatButton";
 import { cn } from "@/lib/utils";
 
 const socialLinks = [
@@ -154,7 +153,6 @@ export function Footer({ className }: { className?: string }) {
           </Link>
         </Text>
       </CornerBox>
-      <InkeepChatButton />
     </footer>
   );
 }

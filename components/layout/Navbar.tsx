@@ -12,7 +12,8 @@ import {
 } from "@/lib/source";
 import { serializePageTree, type SectionNavData } from "@/lib/nav-tree";
 import { cn } from "@/lib/utils";
-import { Logo } from "../Logo";
+import { Logo } from "@/components/Logo";
+import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 
 export const sectionNavData: SectionNavData[] = [
   { name: "Docs", href: "/docs", children: serializePageTree(source.getPageTree()) },
@@ -41,6 +42,7 @@ export function Navbar() {
         </div>
         <div className={cn(cornersStyle, 'hidden px-0 lg:flex')}>
           <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1'>
+            <InkeepSearchBar className="hidden" />
             <NavLinks sectionNavData={sectionNavData} />
           </div>
         </div>

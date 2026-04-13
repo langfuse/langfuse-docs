@@ -3,12 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { AnchorProvider, useActiveAnchors } from "fumadocs-core/toc";
-import InkeepChatButton from "@/components/inkeep/InkeepChatButton";
 import { Link } from "@/components/ui/link";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
-import IconGithub from "@/components/icons/github";
-import IconX from "@/components/icons/x";
+import TocCommunity from "@/components/TocCommunity";
+import { useAISearchContext } from "@/components/inkeep/search";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -71,8 +70,8 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex-1 min-h-0">
-      <Text size="s" className="block text-left font-[580] text-text-primary mb-3">
+    <div className="flex-1 min-h-0 px-4 py-4">
+      <Text size="s" className="block text-left font-[580] text-text-primary mb-3 -ml-1.5">
         On this page
       </Text>
 
@@ -125,61 +124,28 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
   );
 }
 
-// ─── Community section ────────────────────────────────────────────────────────
-
-function TocCommunity() {
-  return (
-    <div className="pt-4 border-t border-dashed border-line-divider-dash">
-      <Text size="s" className="block mb-3 font-medium text-left text-text-primary">
-        Community
-      </Text>
-      <div className="flex gap-3 items-center">
-        <Link
-          href="https://github.com/langfuse/langfuse"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-text-disabled hover:text-text-primary transition-colors"
-          aria-label="GitHub"
-        >
-          <IconGithub className="size-5" />
-        </Link>
-        <Link
-          href="https://x.com/langfuse"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-text-disabled hover:text-text-primary transition-colors mt-0.5"
-          aria-label="X / Twitter"
-        >
-          <IconX className="size-5" />
-        </Link>
-        <div className="ml-auto">
-          <InkeepChatButton />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Main aside ───────────────────────────────────────────────────────────────
 
 export function HomeAside() {
   const pathname = usePathname();
   const domItems = useDOMHeadings();
   const items = pathname === "/" ? HOME_SECTIONS : domItems;
+  const { open: aiOpen } = useAISearchContext();
 
   return (
     <aside
-      className="hidden wide:flex flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0"
+      data-ai-open={aiOpen || undefined}
+      className="hidden wide:flex wide:data-[ai-open]:hidden flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0"
       style={{
         top: "calc(var(--fd-banner-height, 0px) + 4rem)",
         height: "calc(100vh - var(--fd-banner-height, 0px) - 4rem)",
       }}
     >
-      <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 gap-4 px-4 py-4 rounded-sm bg-surface-1">
+      <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 gap-4 rounded-sm bg-surface-1">
         <AnchorProvider toc={items} single>
           <TocOnThisPage items={items} />
         </AnchorProvider>
-        <TocCommunity />
+        <TocCommunity className="border-t border-line-structure" />
       </nav>
     </aside>
   );

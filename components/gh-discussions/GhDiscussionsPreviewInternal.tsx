@@ -292,10 +292,7 @@ const GhDiscussionsPreviewInternal = ({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <DropdownButton
-                  icon={<IconSort className="w-4 h-4" />}
-                  iconPosition="end"
-                >
+                <DropdownButton icon={<IconSort className="w-4 h-4" />}>
                   <span className="min-w-12 text-center">{sortType.charAt(0).toUpperCase() + sortType.slice(1)}</span>
                 </DropdownButton>
               </DropdownMenuTrigger>

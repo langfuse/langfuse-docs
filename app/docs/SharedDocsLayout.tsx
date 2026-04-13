@@ -4,6 +4,7 @@ import { DocsLayoutWrapper } from "./DocsLayoutWrapper";
 import { NavbarDocs, DocsSecondaryNav, DocsSecondaryNavMobile } from "@/components/layout";
 import { DocsPatternTracker } from "@/components/layout/DocsContentArea";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AISearch, AISearchPanel, FloatingAskAIButton } from "@/components/inkeep/search";
 
 /**
  * Shared wrapper used by all sidebar-based section layouts
@@ -24,22 +25,26 @@ export function SharedDocsLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen docs-chrome">
-      <DocsPatternTracker />
-      <NavbarDocs />
-      <DocsSecondaryNav />
-      <DocsLayoutWrapper>
-        <DocsLayout
-          tree={tree}
-          githubUrl="https://github.com/langfuse/langfuse-docs"
-          nav={{ component: <DocsSecondaryNavMobile /> }}
-          sidebar={{ enabled: true, collapsible: false }}
-          searchToggle={{ enabled: false }}
-          themeSwitch={{ component: <div className="ms-auto"><ThemeToggle /></div> }}
-        >
-          {children}
-        </DocsLayout>
-      </DocsLayoutWrapper>
-    </div>
+    <AISearch>
+      <div className="docs-chrome flex min-h-screen flex-col">
+        <DocsPatternTracker />
+        <NavbarDocs />
+        <DocsSecondaryNav />
+        <DocsLayoutWrapper>
+          <DocsLayout
+            tree={tree}
+            githubUrl="https://github.com/langfuse/langfuse-docs"
+            nav={{ component: <DocsSecondaryNavMobile /> }}
+            sidebar={{ enabled: true, collapsible: false }}
+            searchToggle={{ enabled: false }}
+            themeSwitch={{ component: <div className="ms-auto"><ThemeToggle /></div> }}
+          >
+            <AISearchPanel />
+            {children}
+          </DocsLayout>
+        </DocsLayoutWrapper>
+      </div>
+      <FloatingAskAIButton />
+    </AISearch>
   );
 }

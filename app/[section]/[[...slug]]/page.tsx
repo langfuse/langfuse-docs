@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocsPage, DocsBody } from "fumadocs-ui/page";
 import type { TOCItemType } from "fumadocs-core/toc";
-import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, MARKETING_SECTIONS, DOCS_STYLE_APP_SECTIONS, POST_SECTIONS, CHANGELOG_SECTIONS } from "@/lib/source";
+import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, DOCS_STYLE_APP_SECTIONS, POST_SECTIONS, CHANGELOG_SECTIONS } from "@/lib/source";
 import type { SectionSlug } from "@/lib/source";
 import { MARKETING_SLUGS, usersSource, changelogSource } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
-import { DocsContributors } from "@/components/DocsContributors";
+import { DocsTocFooter } from "@/components/DocsTocFooter";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { getMDXComponents } from "@/mdx-components";
 import type { ComponentType } from "react";
@@ -15,7 +15,6 @@ import { formatTag } from "@/components/faq/FaqIndex";
 import { ChangelogFrontMatterProvider } from "@/components/changelog/ChangelogFrontMatterContext";
 import type { ChangelogFrontMatter } from "@/components/changelog/ChangelogFrontMatterContext";
 import { WrappedDataProvider } from "@/components/wrapped/WrappedDataContext";
-import { Footer } from "@/components/layout";
 import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
 
 type PageProps = {
@@ -140,7 +139,7 @@ export default async function SectionDocPage(props: PageProps) {
       }
       breadcrumb={{ includePage: !isPost }}
       footer={isPost ? { enabled: false } : { component: <DocsAndPageFooter /> }}
-      tableOfContent={isChangelog || isCollectionIndex ? { enabled: false } : { footer: <DocsContributors pageTitle={page.data.title} /> }}
+      tableOfContent={isChangelog || isCollectionIndex ? { enabled: false } : { footer: <DocsTocFooter pageTitle={page.data.title} /> }}
     >
       {bodyWithContext}
     </DocsPage>

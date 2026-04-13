@@ -3,7 +3,7 @@ import { guidesSource } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { DocsContributors } from "@/components/DocsContributors";
+import { DocsTocFooter } from "@/components/DocsTocFooter";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { getMDXComponents } from "@/mdx-components";
 import type { ComponentType } from "react";
@@ -27,7 +27,7 @@ export default async function GuidesPage(props: PageProps) {
     <DocsPage
       toc={toc}
       breadcrumb={{ includePage: true, includeRoot: true }}
-      tableOfContent={{ footer: <DocsContributors pageTitle={page.data.title} /> }}
+      tableOfContent={{ footer: <DocsTocFooter pageTitle={page.data.title} /> }}
       footer={{ component: <DocsAndPageFooter /> }}
     >
       <DocBodyChrome>

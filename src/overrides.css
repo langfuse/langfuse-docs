@@ -117,7 +117,7 @@
   --fd-sidebar-width: 240px;
   --fd-toc-width: 240px;
 }
-@media (max-width: 1279px) {
+@media (max-width: 1439px) {
   #nd-docs-layout {
     --fd-toc-width: 0px;
   }
@@ -156,6 +156,21 @@
 #nd-docs-layout #nd-sidebar::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
+
+#nd-docs-layout #nd-ai-input::-webkit-scrollbar {
+  width: 4px;
+}
+#nd-docs-layout #nd-ai-input::-webkit-scrollbar-track {
+  background: transparent;
+}
+#nd-docs-layout #nd-ai-input::-webkit-scrollbar-thumb {
+  background: var(--line-structure);
+  border-radius: 2px;
+}
+#nd-docs-layout #nd-ai-input::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
 #nd-docs-layout #nd-sidebar > div.flex-1 {
   flex: none;
   overflow: visible;
@@ -221,7 +236,6 @@
  * reveals it as a 1px strip matching the HomeAside separator. */
 
 #nd-docs-layout {
-  border-top: 1px solid var(--line-structure);
   background-color: var(
     --line-structure
   ); /* revealed at sidebar/toc margins as 1px separators */
@@ -259,7 +273,8 @@
 #nd-docs-layout #nd-toc {
   margin: 0 0 1px 1px;
   border-radius: calc(var(--radius) - 4px);
-  background-color: var(--surface-1) !important;
+  background-color: var(--line-structure) !important;
+  top: var(--fd-nav-height, 6.25rem);
 }
 
 /* Sidebar active link */
@@ -538,11 +553,15 @@
   --text-links: var(--line-cta);
   padding: 0;
   max-height: calc(100dvh - 102px);
+  border-bottom-width: 0;
+  border-radius: 0 !important;
 }
 
 #nd-toc > div {
   padding-left: 1rem;
   padding-right: 0.625rem;
+  box-shadow: none;
+  mask-image: none;
 }
 
 #nd-toc > div > div.ease-linear {
@@ -558,13 +577,17 @@
 /* "On this page" heading: bold, primary color, hide the icon */
 #toc-title {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--font-sans);
   color: var(--text-primary);
   margin-bottom: 0;
-  margin-top: 0.75rem;
+  background-color: var(--surface-1);
+  padding-top: 0.75rem;
   padding-left: 0.625rem;
   padding-right: 0.625rem;
+  margin-left: 1px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
 }
 #toc-title svg {
   display: none;
@@ -573,9 +596,17 @@
 /* Scroll area: flex-grow so it fills available height; dashed bottom border */
 #nd-toc > div.ms-px {
   flex: 1;
-  border-bottom: 1px solid var(--text-links);
   padding-bottom: 0.75rem;
+  margin-left: 1px;
   margin-bottom: 0;
+  background-color: var(--surface-1);
+  border-bottom-width: 0 !important;
+  border-bottom-left-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+}
+
+#nd-toc > div.ms-px a:hover {
+  color: var(--text-primary);
 }
 
 /* Items container: use line-structure color for the left border */
@@ -862,4 +893,29 @@ li:has(> .subseparator) {
     /* fd-steps padding-left 1.75rem + half circle 0.625rem */
     left: -2.375rem;
   }
+}
+
+/* AI Search Panel */
+@keyframes ask-ai-open {
+  from {
+    translate: 100% 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+@keyframes ask-ai-close {
+  from {
+    width: var(--ai-chat-width);
+  }
+  to {
+    width: 0px;
+  }
+}
+
+/* Inkeep override */
+inkeep-portal .inkeep-widget-vars {
+  --ikp-font-family-heading: var(--font-sans);
+  --ikp-font-family-body: var(--font-sans);
+  --ikp-font-family-mono: var(--font-mono);
 }

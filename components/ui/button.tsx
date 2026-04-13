@@ -49,12 +49,26 @@ const buttonBaseClasses =
 const labelTypographyClasses =
   "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] p-0";
 
-function isEditableTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  const tag = target.tagName;
+function isEditableElement(el: Element | null): boolean {
+  if (!el) return false;
+  const tag = el.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
-  if (target.isContentEditable) return true;
-  return Boolean(target.closest("[contenteditable='true']"));
+  if (el instanceof HTMLElement && (el.isContentEditable || el.closest("[contenteditable='true']"))) return true;
+  return false;
+}
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (target instanceof HTMLElement && isEditableElement(target)) return true;
+
+  // Traverse shadow DOM boundaries to find the deeply focused element,
+  // needed for third-party components (e.g. Inkeep) that use shadow DOM.
+  let active: Element | null = document.activeElement;
+  while (active?.shadowRoot?.activeElement) {
+    active = active.shadowRoot.activeElement;
+  }
+  if (active && isEditableElement(active)) return true;
+
+  return false;
 }
 
 function hasRenderableChildren(children: React.ReactNode): boolean {
@@ -83,6 +97,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   className?: string;
   asChild?: boolean;
   shortcutKey?: string;
+  showShortcutonMobile?: boolean;
   icon?: React.ReactNode;
   iconPosition?: "start" | "end";
   wrapperClassName?: string;
@@ -99,6 +114,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size,
       asChild = false,
       shortcutKey,
+      showShortcutonMobile = false,
       icon,
       iconPosition = "start",
       wrapperClassName,
@@ -176,7 +192,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
     const iconEl = icon ? (
       <span
-        className="button-icon-area flex shrink-0 items-center justify-center h-full aspect-square *:max-w-full rounded-[1.5px] border-[0.5px] border-[rgba(64,61,57,0.20)] bg-[rgba(64,61,57,0.10)] dark:bg-transparent p-[2px] text-button-icon"
+        className={cn(
+          "button-icon-area flex shrink-0 items-center justify-center h-full aspect-square *:max-w-full rounded-[1.5px] border-[0.5px] border-[rgba(64,61,57,0.20)] bg-[rgba(64,61,57,0.10)] dark:bg-transparent p-[2px] text-button-icon pointer-events-none",
+          variant === "secondary" ? "text-text-tertiary" : "text-surface-1"
+        )}
         aria-hidden
       >
         {icon}
@@ -185,7 +204,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const content = isIconOnly ? (
       <span
-        className="flex h-full w-full items-center justify-center text-button-icon *:max-w-full"
+        className={cn("flex h-full w-full items-center justify-center text-button-icon *:max-w-full pointer-events-none",
+          variant === "primary" ? "text-surface-bg" : "text-text-tertiary",
+        )}
         aria-hidden
       >
         {icon}
@@ -204,7 +225,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {iconPosition === "end" && iconEl}
         <kbd
           className={cn(
-            "hidden lg:flex justify-center items-center not-italic shrink-0 w-[20px] h-[20px] rounded-px",
+            "justify-center items-center not-italic shrink-0 w-[20px] h-[20px] rounded-px",
+            showShortcutonMobile ? "flex" : "hidden lg:flex",
             labelTypographyClasses,
             variantClasses[resolvedVariant].key
           )}
@@ -221,6 +243,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             "flex items-center min-w-0 truncate",
             labelTypographyClasses
           )}
+          aria-hidden
         >
           {children}
         </span>

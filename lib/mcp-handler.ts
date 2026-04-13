@@ -2,7 +2,7 @@ import { createMcpHandler } from "@vercel/mcp-adapter";
 import * as z from "zod/v3";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
-import { searchLangfuseDocsWithInkeep } from "@/lib/inkeep-search";
+import { searchLangfuseDocsWithInkeep } from "@/lib/inkeep-search-backend";
 
 const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
   ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {

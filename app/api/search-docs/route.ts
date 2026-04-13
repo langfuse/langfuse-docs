@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchLangfuseDocsWithInkeep, isNonEmptyString } from "@/lib/inkeep-search";
+import { searchLangfuseDocsWithInkeep, isNonEmptyString } from "@/lib/inkeep-search-backend";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
