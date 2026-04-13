@@ -108,7 +108,7 @@ export function Integrations() {
     <HomeSection id="integrations" className="pt-20">
       <div className="flex flex-col gap-4 items-start mb-10">
         <Heading className="text-left max-w-[16ch] sm:max-w-none">
-          <TextHighlight>Framework agnostic.</TextHighlight> Works with your stack.
+          Works with <TextHighlight>any stack.</TextHighlight>
         </Heading>
         <Text className="text-left">
           80+ integrations. OpenTelemetry native. No framework lock-in.

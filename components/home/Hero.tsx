@@ -14,7 +14,7 @@ export function Hero() {
       <CornerBox className="-mb-px">
         <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex gap-3 lg:gap-6 justify-center items-center px-4 py-[10px] min-w-max mx-auto">
-            <Text size="s" className="whitespace-nowrap shrink-0"><b className="text-primary">19</b> of Fortune 50</Text>
+            <Text size="s" className="whitespace-nowrap shrink-0">Used by <b className="text-primary">19</b> of Fortune 50</Text>
             <Dot />
             <Text size="s" className="whitespace-nowrap shrink-0"><b className="text-primary">10+ billion</b> observations/month</Text>
             <Dot />
@@ -40,9 +40,7 @@ export function Hero() {
         </Heading>
         <div className="flex flex-col gap-6">
           <Text className="max-w-xl">
-            Tracing, prompt management, evaluation, and experiments. Debug
-            production issues in minutes, not hours. Works with any model, any
-            framework, any stack.
+            Debug AI Applications and Agents in minutes. Spot issues before your users do. Collaborate with your team to continuously improve on cost, latency and quality. Any model, any framework. Based on OpenTelemetry.
           </Text>
           <div className="flex flex-wrap gap-3 justify-center items-center">
             <Button

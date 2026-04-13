@@ -74,7 +74,7 @@ export const RiveSection = () => {
     <HomeSection id="demo" className="pt-20">
       <div className="flex flex-col gap-4 items-start">
         <Heading>
-          Made for the <TextHighlight>entire</TextHighlight><TextHighlight className="sm:pl-1.5">development life-cycle.</TextHighlight>
+          <TextHighlight>Launch,</TextHighlight><TextHighlight className="pl-1.5">observe,</TextHighlight><TextHighlight className="min-[393px]:pl-1.5">improve</TextHighlight> — repeat.
         </Heading>
         <Text className="text-left max-w-[48ch]">
           Most teams build prompts locally, deploy them, then lose visibility.

@@ -398,42 +398,6 @@ export const FeatureTabs = ({
         )}
       </div>
 
-      {/* Tab List */}
-      <CornerBox
-        ref={tabListRef}
-        role="tablist"
-        aria-label="Feature navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
-        className="px-4 py-[2px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        onKeyDown={handleKeyDown}
-      >
-        <div
-          ref={tabListScrollRef}
-          className="flex flex-row items-center flex-nowrap overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-3 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {features.map((feature, index) => (
-            <Fragment key={feature.id}>
-              <TabButton
-                ref={(el) => (tabRefs.current[index] = el)}
-                feature={feature}
-                isActive={activeTab === feature.id}
-                onClick={() => handleTabChange(feature.id)}
-                onMouseEnter={() => {
-                  dispatch({ type: "SET_PREVIEW_TAB", payload: feature.id });
-                  dispatch({ type: "SET_HOVERED", payload: true });
-                }}
-                onMouseLeave={() => {
-                  dispatch({ type: "SET_PREVIEW_TAB", payload: null });
-                  dispatch({ type: "SET_HOVERED", payload: false });
-                }}
-                tabIndex={state.focusedIndex === index ? 0 : -1}
-                className="snap-center"
-              />
-              {index < features.length - 1 && <Dot />}
-            </Fragment>
-          ))}
-        </div>
-      </CornerBox>
-
       {/* Preload light images for previous/next tab only (current is in TabContent) */}
       <CornerBox
         aria-hidden="true"
@@ -463,7 +427,7 @@ export const FeatureTabs = ({
         })}
       </CornerBox>
 
-      <CornerBox className="p-4 -mt-px" withStripes>
+      <CornerBox className="p-4" withStripes>
         <div className="relative w-full min-h-[410px] overflow-hidden">
           <AnimatePresence mode="sync" initial={false}>
             {activeFeature ? (
@@ -479,6 +443,42 @@ export const FeatureTabs = ({
               </motion.div>
             ) : null}
           </AnimatePresence>
+        </div>
+      </CornerBox>
+
+      {/* Tab List */}
+      <CornerBox
+        ref={tabListRef}
+        role="tablist"
+        aria-label="Feature navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
+        className="px-4 py-[2px] -mt-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        onKeyDown={handleKeyDown}
+      >
+        <div
+          ref={tabListScrollRef}
+          className="flex flex-row items-center flex-nowrap overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-3 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {features.map((feature, index) => (
+            <Fragment key={feature.id}>
+              <TabButton
+                ref={(el) => (tabRefs.current[index] = el)}
+                feature={feature}
+                isActive={activeTab === feature.id}
+                onClick={() => handleTabChange(feature.id)}
+                onMouseEnter={() => {
+                  dispatch({ type: "SET_PREVIEW_TAB", payload: feature.id });
+                  dispatch({ type: "SET_HOVERED", payload: true });
+                }}
+                onMouseLeave={() => {
+                  dispatch({ type: "SET_PREVIEW_TAB", payload: null });
+                  dispatch({ type: "SET_HOVERED", payload: false });
+                }}
+                tabIndex={state.focusedIndex === index ? 0 : -1}
+                className="snap-center"
+              />
+              {index < features.length - 1 && <Dot />}
+            </Fragment>
+          ))}
         </div>
       </CornerBox>
     </div>
