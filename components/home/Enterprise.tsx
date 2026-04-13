@@ -31,7 +31,7 @@ const security = [
 
 export const Enterprise = () => {
   return (
-    <HomeSection id="enterprise" className="pt-20">
+    <HomeSection id="enterprise" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start mb-10">
         <Heading>
           Enterprise <TextHighlight>Scale and Security</TextHighlight>.

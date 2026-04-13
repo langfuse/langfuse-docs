@@ -101,18 +101,18 @@ function NavDropdownPanel({
 }) {
   return (
     <CornerBox className="flex p-0 min-w-max bg-surface-1">
-      <div className="flex flex-col gap-[6px] border-r border-line-structure min-w-[220px] p-3.5 overflow-hidden">
+      <div className="group/dropdown flex flex-col gap-[6px] border-r border-line-structure min-w-[220px] p-3.5 overflow-hidden">
         {links.map((link) => {
           const Icon = link.icon;
           return (
             <Link
               key={link.href}
               href={link.href}
-              className="flex relative gap-3 items-center p-1 no-underline transition-colors link-box group hover:bg-surface-bg"
+              className="flex relative gap-3 items-center p-1 no-underline transition-colors link-box group group/link hover:bg-surface-bg"
             >
               <HoverCorners />
-              <Icon className="size-[15px] shrink-0 text-text-tertiary group-hover:text-text-secondary transition-colors" />
-              <span className="font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] text-text-secondary group-hover:text-text-primary transition-colors">
+              <Icon className="size-[15px] shrink-0 text-text-tertiary transition-colors group-hover/dropdown:text-text-disabled group-hover/dropdown:group-hover/link:text-text-tertiary" />
+              <span className="font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] text-text-tertiary transition-colors group-hover/dropdown:text-text-disabled group-hover/dropdown:group-hover/link:text-text-tertiary">
                 {link.name}
               </span>
             </Link>

@@ -68,6 +68,11 @@ function AccordionIcon({ isOpen }: { isOpen: boolean }) {
           key={i}
           d={d}
           fill="#6B6B66"
+          initial={{
+            opacity: isOpen ? 0 : 1,
+            x: isOpen ? exitX : 0,
+            y: isOpen ? exitY : 0,
+          }}
           animate={{
             opacity: isOpen ? 0 : 1,
             x: isOpen ? exitX : 0,
@@ -89,6 +94,10 @@ function AccordionIcon({ isOpen }: { isOpen: boolean }) {
         y2="8"
         stroke="#6B6B66"
         strokeLinejoin="round"
+        initial={{
+          opacity: isOpen ? 1 : 0,
+          scaleX: isOpen ? 1 : 0,
+        }}
         animate={{
           opacity: isOpen ? 1 : 0,
           scaleX: isOpen ? 1 : 0,
@@ -108,7 +117,7 @@ export function FAQ() {
   const [openItem, setOpenItem] = useState<string>(faqs[0].question);
 
   return (
-    <HomeSection id="faq" className="pt-20">
+    <HomeSection id="faq" className="pt-[120px]">
       <div className="grid lg:grid-cols-[1fr_2fr] gap-16 items-start">
         <Heading as="h2" className="hidden top-8 text-left lg:block">
           FAQ
@@ -125,7 +134,7 @@ export function FAQ() {
             <AccordionPrimitive.Item
               key={faq.question}
               value={faq.question}
-              className="border-t border-line-structure last:border-b"
+              className="border-t border-line-structure first:border-t-0"
             >
               <AccordionPrimitive.Header className="flex">
                 <AccordionPrimitive.Trigger className="flex flex-1 gap-4 justify-between items-center py-5 text-left cursor-pointer text-text-primary">
