@@ -95,7 +95,7 @@ export function DocsSecondaryNav() {
                 className={cn(
                   "flex gap-2 items-center px-3 -mb-px text-sm whitespace-nowrap border-b-2 transition-colors h-[40px] shrink-0",
                   isActive
-                    ? "font-medium with-stripes-alt border-text-primary text-text-primary"
+                    ? "font-medium with-stripes-alt border-line-cta text-text-primary"
                     : "border-transparent text-text-tertiary hover:border-line-structure hover:text-text-secondary"
                 )}
               >

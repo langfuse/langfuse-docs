@@ -44,6 +44,9 @@ export default function InkeepSearchBar({ className }: InkeepSearchProps) {
               .ikp-ai-search-wrapper { background: var(--surface-bg); }
               .ikp-search-bar__button {
                 border-radius: 2px;
+                border-top-width: 0;
+                border-left-width: 0;
+                border-right-width: 0;
                 border-bottom: 1px solid var(--line-structure);
                 max-height: 26px;
                 min-height: 26px;

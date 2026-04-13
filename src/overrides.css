@@ -229,6 +229,10 @@
   background-color: var(--surface-1);
 }
 
+[data-toc-popover] {
+  z-index: 11;
+}
+
 /* ─── HomeSidebar/HomeAside corner effect for docs layout ────────────────────
  * HomeSidebar: outer aside has bg-line-structure + p-px pt-0; inner nav has rounded-sm bg-surface-1.
  * Docs sidebar: outer [data-sidebar-placeholder] = bg-line-structure; inner #nd-sidebar is absolute
@@ -505,6 +509,17 @@
   -webkit-mask-origin: padding-box;
   mask-origin: padding-box;
   transition: opacity 0.2s ease;
+}
+
+.dark #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a::after,
+.dark
+  #nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  button::after,
+.dark #nd-sidebar-mobile [data-radix-scroll-area-viewport] a::after,
+.dark #nd-sidebar-mobile [data-radix-scroll-area-viewport] button::after {
+  background-color: var(--line-cta);
 }
 
 #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a:hover::after,
@@ -923,6 +938,24 @@ li:has(> .subseparator) {
     font-size: 0.75rem;
     /* fd-steps padding-left 1.75rem + half circle 0.625rem */
     left: -2.375rem;
+  }
+
+  .fd-steps > h2::after,
+  .fd-steps > h3::after {
+    content: "";
+    position: absolute;
+    left: -2.375rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: hsl(var(--foreground) / 0.6);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3Cpath d='M8 28V27H3C1.89543 27 1 26.1046 1 25V20H0V28H8Z' fill='black'/%3E%3Cpath d='M20 28V27H25C26.1046 27 27 26.1046 27 25V20H28V28H20Z' fill='black'/%3E%3Cpath d='M20 0V1H25C26.1046 1 27 1.89543 27 3V8H28V0H20Z' fill='black'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3Cpath d='M8 28V27H3C1.89543 27 1 26.1046 1 25V20H0V28H8Z' fill='black'/%3E%3Cpath d='M20 28V27H25C26.1046 27 27 26.1046 27 25V20H28V28H20Z' fill='black'/%3E%3Cpath d='M20 0V1H25C26.1046 1 27 1.89543 27 3V8H28V0H20Z' fill='black'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
   }
 }
 

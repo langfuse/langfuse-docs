@@ -55,7 +55,7 @@ export function CalloutContainer({
     <CornerBox>
       <div
         className={cn(
-          'bg-stripe-pattern flex border p-4 gap-2 text-sm text-primary',
+          'bg-stripe-pattern callout-stripe-fade flex border p-4 gap-2 text-sm text-primary',
           className,
         )}
         style={
