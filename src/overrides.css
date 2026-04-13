@@ -31,9 +31,11 @@
 }
 
 .dark #nd-page {
-  background-image:
-    linear-gradient(to right, hsl(var(--border) / 0.45) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(var(--border) / 0.45) 1px, transparent 1px);
+  background-image: url("/images/patterns/pattern.png");
+  background-blend-mode: overlay;
+  background-size: 40px 40px;
+  background-position: center;
+  background-repeat: repeat;
 }
 
 /* Direct children: position: relative so they land in the same stacking
@@ -71,8 +73,8 @@
 .dark #nd-page::before {
   background: radial-gradient(
     circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
-    hsl(60deg 14.29% 95.88% / 0.22),
-    hsl(60deg 14.29% 95.88% / 0.94)
+    hsla(0, 0%, 22%, 0.1),
+    hsla(0, 2%, 8%, 0)
   );
 }
 

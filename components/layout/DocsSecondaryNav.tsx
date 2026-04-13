@@ -1,27 +1,27 @@
 "use client";
 
 import {
-  Server,
-  LibraryBig,
-  BookOpen,
-  FileCode,
-  Unplug,
   Menu,
   X,
   ChevronRight,
+  Unplug,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "fumadocs-ui/components/sidebar/base";
 import { useTreePath } from "fumadocs-ui/contexts/tree";
+import IconBook from "@/components/icons/book";
+import IconBookBookmark from "@/components/icons/book-bookmark";
+import IconDesktopTower from "@/components/icons/desktop-tower";
+import IconCompass from "@/components/icons/compass";
 
 const SECTIONS = [
-  { title: "Docs", path: "/docs", Icon: LibraryBig },
+  { title: "Docs", path: "/docs", Icon: IconBook },
   { title: "Integrations", path: "/integrations", Icon: Unplug },
-  { title: "Self Hosting", path: "/self-hosting", Icon: Server },
-  { title: "Guides", path: "/guides", Icon: FileCode },
-  { title: "AI Engineering Library", path: "/library", Icon: BookOpen },
+  { title: "Self Hosting", path: "/self-hosting", Icon: IconDesktopTower },
+  { title: "Guides", path: "/guides", Icon: IconCompass },
+  { title: "AI Engineering Library", path: "/library", Icon: IconBookBookmark },
 ] as const;
 
 /** Derive a human-readable page name from the last pathname segment. */
