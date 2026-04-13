@@ -770,6 +770,36 @@ li:has(> .subseparator) {
   color: var(--text-primary);
 }
 
+/* Sidebar underlines for the section titles. The indentation is calculated based on the number of div wrappers. */
+#nd-docs-layout #nd-sidebar div div div div div div div p,
+#nd-sidebar-mobile div div div div div div div p {
+  --sidebar-label-left: calc((var(--spacing, 0.25rem) * 8) - 6px);
+}
+
+#nd-docs-layout #nd-sidebar div div div div div p,
+#nd-sidebar-mobile div div div div div p {
+  --sidebar-label-left: calc((var(--spacing, 0.25rem) * 6) - 6px);
+}
+
+#nd-docs-layout #nd-sidebar div div div div div p,
+#nd-sidebar-mobile div div div div div p {
+  position: relative;
+  padding-bottom: 6px;
+  width: 100%;
+}
+
+#nd-docs-layout #nd-sidebar div div div div div p::after,
+#nd-sidebar-mobile div div div div div p::after {
+  content: "";
+  position: absolute;
+  left: var(--sidebar-label-left, 16px);
+  right: 8px;
+  bottom: 0;
+  height: 1px;
+  background-color: var(--line-structure);
+  pointer-events: none;
+}
+
 #nd-page > .prose {
   margin-top: 1rem;
 }

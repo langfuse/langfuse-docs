@@ -17,6 +17,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { SectionLayoutWrapper } from "./SectionLayoutWrapper";
 import { AISearch } from "@/components/inkeep/search-context";
 import { AISearchPanel } from "@/components/inkeep/search-panel";
+import { ForceLightMode } from "@/components/ForceLightMode";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -91,6 +92,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
             <AISearchPanel />
           </DocsLayout>
         </SectionLayoutWrapper>
+        <ForceLightMode />
       </Layout>
     </AISearch>
   );

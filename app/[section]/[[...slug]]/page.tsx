@@ -120,7 +120,7 @@ export default async function SectionDocPage(props: PageProps) {
 
   if (isMarketing) {
     return (
-      <div className="w-full max-w-4xl mx-auto px-4 py-10 md:py-16">
+      <div className="mx-auto w-full px-4 sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px] py-10 md:py-16">
         {bodyWithContext}
       </div>
     );

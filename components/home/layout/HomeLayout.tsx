@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Script from "next/script";
 import { Banner } from "../../layout/Banner";
 import { Navbar } from "../../layout/Navbar";
 import { Footer } from "../../layout/Footer";
@@ -6,6 +7,7 @@ import { HomeSidebar } from "./HomeSidebar";
 import { HomeAside } from "./HomeAside";
 import { HomeMainArea } from "./HomeMainArea";
 import { AISearch, AISearchPanel, FloatingAskAIButton } from "@/components/inkeep/search";
+import { ForceLightMode } from "@/components/ForceLightMode";
 
 type HomeLayoutProps = {
   children: ReactNode;
@@ -24,6 +26,12 @@ export function HomeLayout({
 }: HomeLayoutProps) {
   return (
     <AISearch>
+      {/* Strip dark class before paint to prevent FOUC for dark-mode users */}
+      <Script
+        id="force-light-home"
+        strategy="beforeInteractive"
+      >{`document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light'`}</Script>
+      <ForceLightMode />
       <Banner />
       <Navbar />
       <div id="home-layout" className="flex flex-1 mx-auto w-full min-h-0 max-w-360">
