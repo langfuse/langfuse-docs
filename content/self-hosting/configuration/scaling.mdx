@@ -25,6 +25,13 @@ This guide covers how you can operate your Langfuse deployment at scale and incl
 Langfuse is designed to handle a large amount and volume of ingested data.
 On very high loads, it may become necessary to apply additional settings that influence the throughput.
 
+### Upgrade to OTEL-native Langfuse SDKs
+
+Older Langfuse SDKs send multiple ingestion events per observation, while the [OTEL-native Langfuse SDKs](/integrations/native/opentelemetry) (e.g. the [Python SDK v3](/docs/sdk/python/sdk-v3)) send a single event per observation.
+Upgrading client applications to OTEL-native SDKs reduces the number of requests hitting the ingestion API and significantly decreases S3/blob storage write volume — often resulting in a noticeable drop in the S3 bill.
+
+If you cannot upgrade all clients immediately, prioritize the highest-volume integrations first.
+
 ### Scaling the worker containers
 
 For most environments, we recommend to scale the worker containers by their CPU load as this is a straightforward metric to measure.
