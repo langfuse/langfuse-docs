@@ -1,0 +1,36 @@
+---
+date: 2026-04-13
+title: "Compare Experiments Faster"
+description: Rebuilt experiment screens with faster loading, standalone access, and enhanced filtering for efficient analysis.
+# ogImage: /images/changelog/2026-04-13-experiments-rebuild/experiments-rebuild.png
+author: Marlies
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Experiments now load and filter faster, work as a standalone feature, and provide a more intuitive interface for comparing model versions. Run an A/B test between `sonnet-4` and `sonnet-4.5`, compare evaluation scores across prompt variants, or triage regressions before shipping—all with quicker feedback loops.
+
+<Callout type="info">
+  This feature is in open beta and currently available on Langfuse Cloud only. Enable Fast Preview in the bottom left to get started.
+</Callout>
+
+## What's new [#whats-new]
+
+**Faster loading and filtering.** Experiments now leverage our rebuilt observation-centric data model. Tables, and filters respond quickly even on large experiment runs.
+
+**Standalone experiments.** Experiments no longer require a linked dataset. Experiments run against local data via SDK are now visible in the UI alongside dataset-backed experiments.
+
+**Polished UI with extended filtering.** A cleaner interface with visual deltas on scores, cost, and latency. Set a baseline, compare candidates side-by-side, and filter by score thresholds to quickly surface regressions.
+
+For a complete walkthrough on running experiments and interpreting results systematically, see our guide on [Systematic Evaluation of AI Agents](/blog/2025-11-06-experiment-interpretation).
+
+## Learn more [#learn-more]
+
+import { FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Experiments via SDK" href="/docs/evaluation/experiments/experiments-via-sdk" icon={<FileCode />} arrow />
+  <Card title="Systematic Evaluation Guide" href="/blog/2025-11-06-experiment-interpretation" icon={<FileCode />} arrow />
+</Cards>
