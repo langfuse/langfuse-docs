@@ -16,15 +16,15 @@ type TocItem = { id: string; title: string; depth: number; url: string };
 // ─── Static section list for the homepage ────────────────────────────────────
 
 const HOME_SECTIONS: TocItem[] = [
-  { id: "features", title: "Features", depth: 2, url: "#features" },
-  { id: "demo", title: "Demo", depth: 2, url: "#demo" },
-  { id: "all-the-tools", title: "Platform", depth: 2, url: "#all-the-tools" },
+  { id: "overview", title: "Overview", depth: 2, url: "#overview" },
+  { id: "llm-engineering-loop", title: "LLM Engineering Loop", depth: 2, url: "#llm-engineering-loop" },
+  { id: "platform-features", title: "Platform Features", depth: 2, url: "#platform-features" },
   { id: "integrations", title: "Integrations", depth: 2, url: "#integrations" },
-  { id: "open-source", title: "Open Source", depth: 2, url: "#open-source" },
-  { id: "developer-tools", title: "Developer Tools", depth: 2, url: "#developer-tools" },
-  { id: "enterprise", title: "Security", depth: 2, url: "#enterprise" },
+  { id: "open-source", title: "Open Platform. Open Souce.", depth: 2, url: "#open-source" },
+  { id: "developers-agents", title: "Developers & Agents", depth: 2, url: "#developers-agents" },
+  { id: "scale-and-security", title: "Scale & Security", depth: 2, url: "#scale-and-security" },
   { id: "why-langfuse", title: "Why Langfuse", depth: 2, url: "#why-langfuse" },
-  { id: "quickstart", title: "Quickstart", depth: 2, url: "#quickstart" },
+  { id: "get-started", title: "Get Started", depth: 2, url: "#get-started" },
   { id: "faq", title: "FAQ", depth: 2, url: "#faq" },
 ];
 

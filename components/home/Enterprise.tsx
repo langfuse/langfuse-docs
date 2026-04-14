@@ -9,14 +9,14 @@ import { BulletList } from "./BulletList";
 import securityVisual from "./img/visuals/visual-security.svg";
 
 const architecture = [
-  { label: "Clickhouse OLAP database" },
-  { label: "Async ingestion via Redis queue" },
-  { label: "S3/Blob storage for large payloads" },
-  { label: "Edge-cached prompts" },
+  { label: "Clickhouse OLAP database", href: "/self-hosting/deployment/infrastructure/clickhouse" },
+  { label: "Async ingestion via Redis queue", href: "/self-hosting/deployment/infrastructure/cache" },
+  { label: "S3/Blob storage for large payloads", href: "/self-hosting/deployment/infrastructure/blobstorage" },
+  { label: "Edge-cached prompts", href: "/docs/prompt-management/features/caching" },
 ];
 
 const openApis = [
-  { label: "23M+ SDK installs/month" },
+  { label: "23M+ SDK installs/month", href: "/docs/observability/sdk/overview" },
   { label: "10+ billion observations processed per month" },
   { label: "2300+ customers" },
   { label: "99.9% uptime" },
@@ -32,7 +32,7 @@ const security = [
 
 export const Enterprise = () => {
   return (
-    <HomeSection id="enterprise" className="pt-[120px]">
+    <HomeSection id="scale-and-security" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start mb-10">
         <Heading>
           Enterprise <TextHighlight>Scale and Security</TextHighlight>.

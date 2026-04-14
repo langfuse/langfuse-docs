@@ -1,7 +1,6 @@
 "use client";
 
 import { HomeSection } from "@/components/home/HomeSection";
-import Image from "next/image";
 import {
   Button,
   CornerBox,
@@ -10,16 +9,14 @@ import {
   TextHighlight,
 } from "@/components/ui";
 import { Text } from "@/components/ui/text";
-import { cn } from "@/lib/utils";
-import cliVisual from "./img/visuals/visual-langfuse-cli.svg";
 
+const SKILL_HREF = "/docs/api-and-data-platform/features/agent-skill";
 const CLI_HREF = "/docs/api-and-data-platform/features/cli";
-const DOCS_MCP_HREF = "/docs/docs-mcp";
-const PLATFORM_MCP_HREF = "/docs/api-and-data-platform/features/mcp-server";
+const MCP_HREF = "/docs/api-and-data-platform/features/mcp-server";
 
 export const DeveloperTools = () => {
   return (
-    <HomeSection id="developer-tools" className="pt-[120px]">
+    <HomeSection id="developers-agents" className="pt-[120px]">
       <div className="flex relative flex-col gap-8 md:gap-10">
         <div className="flex max-w-[52ch] flex-col gap-4">
           <Heading className="text-left max-w-[16ch] sm:max-w-none">
@@ -38,7 +35,7 @@ export const DeveloperTools = () => {
           <CornerBox className="flex relative z-0 flex-col p-0 min-h-0 md:row-span-2">
             <div className="flex flex-col flex-1 gap-1 p-4">
               <Link
-                href={CLI_HREF}
+                href={SKILL_HREF}
                 className="text-left text-[15px] font-medium text-text-secondary"
               >
                 SKILL.md
@@ -54,16 +51,16 @@ export const DeveloperTools = () => {
             <div className="flex flex-col items-start p-4 -ml-1.25">
               <Button
                 variant="secondary"
-                href={CLI_HREF}
+                href={SKILL_HREF}
               >
-                Install CLI
+                Install Skill
               </Button>
             </div>
           </CornerBox>
 
           <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -ml-px">
             <Link
-              href={DOCS_MCP_HREF}
+              href={CLI_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
             >
               Langfuse CLI
@@ -77,14 +74,14 @@ export const DeveloperTools = () => {
                 variant="secondary"
                 href={CLI_HREF}
               >
-                Configure MCP
+                Configure CLI
               </Button>
             </div>
           </CornerBox>
 
           <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -mt-px -ml-px">
             <Link
-              href={PLATFORM_MCP_HREF}
+              href={MCP_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
             >
               Platform MCP Server
@@ -96,7 +93,7 @@ export const DeveloperTools = () => {
             <div className="flex flex-col items-start mt-4 -ml-1.25">
               <Button
                 variant="secondary"
-                href={CLI_HREF}
+                href={MCP_HREF}
               >
                 Configure MCP
               </Button>

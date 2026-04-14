@@ -39,25 +39,25 @@ const cards = [
   {
     title: "MIT License",
     bullets: [
-      "All product features MIT licensed",
-      "Scales to billions of monthly events",
-      "Fork, modify, contribute",
+      { label: "All product features MIT licensed", href: "/self-hosting" },
+      { label: "Scales to billions of monthly events", href: "/self-hosting/configuration/scaling" },
+      { label: "Fork, modify, contribute", href: "https://github.com/langfuse/langfuse" },
     ],
   },
   {
     title: "APIs & Exports",
     bullets: [
-      "REST API for everything",
-      "Query SDK",
-      "S3 blob storage Export",
+      { label: "REST APIs for everything", href: "/docs/api-and-data-platform/features/public-api" },
+      { label: "Query SDK", href: "/docs/api-and-data-platform/features/query-via-sdk" },
+      { label: "S3 blob storage Export", href: "/docs/api-and-data-platform/features/export-to-blob-storage" },
     ],
   },
   {
     title: "Active OSS Community",
     bullets: [
-      "22,000+ GitHub stars",
-      "5,000+ Discord members",
-      "Weekly releases and community hours",
+      { label: "22,000+ GitHub stars", href: "https://github.com/langfuse/langfuse" },
+      { label: "5,000+ Discord members", href: "https://langfuse.com/discord" },
+      { label: "Weekly releases and community hours", href: "/changelog" },
     ],
   },
 ];
@@ -98,7 +98,7 @@ export const OpenSource = () => {
                   ))}
                 </div>
               ) : (
-                <BulletList items={card.bullets.map((b) => ({ label: b }))} />
+                <BulletList items={card.bullets} />
               )}
             </CornerBox>
           );
