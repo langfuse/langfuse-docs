@@ -19,7 +19,7 @@ const wordmarkPath = path.join(
   "public/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.png"
 );
 const fontMonoPath = path.join(root, "public/fonts/GeistMono-Medium.ttf");
-const fontInterPath = path.join(root, "public/fonts/InterVariable.ttf");
+const fontInterPath = path.join(root, "public/fonts/Inter-Medium.ttf");
 const outPath = path.join(root, "public/og.png");
 
 const W = 1200;

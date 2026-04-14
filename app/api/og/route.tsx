@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     new URL("/fonts/GeistMono-Medium.ttf", base)
   ).then((res) => res.arrayBuffer());
   const fontInter = await fetch(
-    new URL("/fonts/InterVariable.ttf", base)
+    new URL("/fonts/Inter-Medium.ttf", base)
   ).then((res) => res.arrayBuffer());
 
   const { searchParams } = new URL(request.url);
