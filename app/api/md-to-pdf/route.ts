@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { marked } from "marked";
+import { stripMdxForPlainMarkdown } from "@/lib/stripMdxForPlainMarkdown.js";
 
 // Force Node.js runtime (required for Puppeteer/Chromium — not compatible with Edge runtime)
 export const runtime = "nodejs";
@@ -8,19 +9,27 @@ export const maxDuration = 60;
 
 const ALLOWED_HOSTNAMES = [
   "langfuse.com",
+  //"localhost",
+  //"127.0.0.1",
   "raw.githubusercontent.com",
   "github.com",
 ];
+
+async function runtimeImport(moduleName: string): Promise<any> {
+  const importAtRuntime = new Function("m", "return import(m)");
+  return importAtRuntime(moduleName);
+}
 
 function removeAnchorTags(content: string): string {
   return content.replace(/\s*\[#[\w-]+\]/g, "");
 }
 
 function processCallouts(content: string): string {
-  const calloutRegex =
-    /<Callout\s+type=["'](\w+)["']\s*>([\s\S]*?)<\/Callout>/g;
-  return content.replace(calloutRegex, (match, type, innerContent) => {
-    return `<div class="callout callout-${type}">${innerContent}</div>`;
+  const calloutRegex = /<Callout([^>]*)>([\s\S]*?)<\/Callout>/g;
+  return content.replace(calloutRegex, (match, attrs, innerContent) => {
+    const typeMatch = attrs.match(/\btype=["'](\w+)["']/);
+    const kind = typeMatch?.[1] ?? "info";
+    return `<div class="callout callout-${kind}">${innerContent}</div>`;
   });
 }
 
@@ -38,7 +47,9 @@ export async function GET(request: NextRequest) {
 
     let markdownUrl: URL;
     try {
-      markdownUrl = new URL(url);
+      markdownUrl = url.startsWith("/")
+        ? new URL(url, request.nextUrl.origin)
+        : new URL(url);
     } catch {
       return NextResponse.json(
         { error: "Invalid URL format" },
@@ -46,32 +57,57 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const allowedHostnames = new Set([
+      ...ALLOWED_HOSTNAMES,
+      request.nextUrl.hostname,
+    ]);
+    const firstPartyHostnames = new Set([
+      "langfuse.com",
+      request.nextUrl.hostname,
+    ]);
+
     if (
       process.env.NODE_ENV !== "development" &&
-      !ALLOWED_HOSTNAMES.includes(markdownUrl.hostname)
+      !allowedHostnames.has(markdownUrl.hostname)
     ) {
       return NextResponse.json(
         {
           error: `Fetching from ${markdownUrl.hostname} is not permitted.`,
-          allowed: ALLOWED_HOSTNAMES,
+          allowed: Array.from(allowedHostnames),
         },
         { status: 400 }
       );
     }
 
-    // For langfuse.com page URLs (not already ending in .md/.mdx), rewrite to
-    // the raw-markdown endpoint: /path → /path.md (served from public/md-src/).
-    const isLangfuseHost =
-      markdownUrl.hostname === "langfuse.com" ||
-      markdownUrl.hostname === "localhost" ||
-      markdownUrl.hostname === "127.0.0.1";
-    if (
-      isLangfuseHost &&
-      !markdownUrl.pathname.endsWith(".md") &&
-      !markdownUrl.pathname.endsWith(".mdx")
-    ) {
+    // For langfuse/local URLs, rewrite to the raw-markdown endpoint under
+    // /md-src so we can render from markdown sources directly.
+    // Examples:
+    //   /terms        -> /md-src/terms.md
+    //   /docs/foo     -> /md-src/docs/foo.md
+    //   /terms.md     -> /md-src/terms.md
+    
+    const isLangfuseHost = firstPartyHostnames.has(markdownUrl.hostname);
+
+    // In local dev, callers may still pass production URLs.
+    // Route those requests to the local dev server.
+    if (process.env.NODE_ENV === "development" && markdownUrl.hostname === "langfuse.com") {
       markdownUrl = new URL(markdownUrl.toString());
-      markdownUrl.pathname = markdownUrl.pathname.replace(/\/$/, "") + ".md";
+      markdownUrl.protocol = "http:";
+      markdownUrl.hostname = "127.0.0.1";
+      markdownUrl.port = "3333";
+    }
+
+    if (isLangfuseHost) {
+      markdownUrl = new URL(markdownUrl.toString());
+      const pathNoExt = markdownUrl.pathname
+        .replace(/\/$/, "")
+        .replace(/\.mdx?$/i, "");
+      const normalizedPath = pathNoExt === "" ? "/index" : pathNoExt;
+      if (!normalizedPath.startsWith("/md-src/")) {
+        markdownUrl.pathname = `/md-src${normalizedPath}.md`;
+      } else {
+        markdownUrl.pathname = `${normalizedPath}.md`;
+      }
     }
 
     const response = await fetch(markdownUrl.toString());
@@ -87,6 +123,9 @@ export async function GET(request: NextRequest) {
       /^---\r?\n[\s\S]*?\r?\n---\r?\n/,
       ""
     );
+    markdownContent = stripMdxForPlainMarkdown(markdownContent, {
+      unwrapCalloutsForPlainMd: false,
+    });
     markdownContent = removeAnchorTags(markdownContent);
     let htmlContent = await marked.parse(markdownContent);
     htmlContent = processCallouts(htmlContent);
@@ -126,17 +165,76 @@ export async function GET(request: NextRequest) {
     let browser;
 
     if (isDev) {
-      const puppeteer = await import("puppeteer");
-      browser = await puppeteer.default.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      });
+      try {
+        const puppeteer = await runtimeImport("puppeteer");
+        browser = await puppeteer.default.launch({
+          headless: true,
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
+      } catch (devPuppeteerError) {
+        // Fallback for installs that omit devDependencies (puppeteer).
+        try {
+          const puppeteerCore = await runtimeImport("puppeteer-core");
+          browser = await puppeteerCore.default.launch({
+            headless: true,
+            channel: "chrome",
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+          });
+        } catch (fallbackError) {
+          const details =
+            devPuppeteerError instanceof Error
+              ? devPuppeteerError.message
+              : String(devPuppeteerError);
+          console.error("Dev PDF launch failed", {
+            puppeteerError: details,
+            fallbackError:
+              fallbackError instanceof Error
+                ? fallbackError.message
+                : String(fallbackError),
+          });
+          return NextResponse.json(
+            {
+              error:
+                "PDF rendering is unavailable locally. Install dev dependencies (`pnpm install`) or ensure local Chrome is installed.",
+            },
+            { status: 500 }
+          );
+        }
+      }
     } else {
-      const puppeteerCore = await import("puppeteer-core");
-      const chromium = await import("@sparticuz/chromium");
+      const puppeteerCore = await runtimeImport("puppeteer-core");
+      const chromium = await runtimeImport("@sparticuz/chromium");
+      // Optional override: absolute path to the `bin` folder that holds *.br files
+      // (same directory Sparticuz expects when packaging omits it from the trace).
+      const brotliBinDir = process.env.SPARTICUZ_CHROMIUM_BIN_DIR?.trim();
+
+      let executablePath: string;
+      try {
+        executablePath = await chromium.default.executablePath(
+          brotliBinDir || undefined
+        );
+      } catch (resolveErr) {
+        const err =
+          resolveErr instanceof Error
+            ? resolveErr
+            : new Error(String(resolveErr));
+        console.error("[md-to-pdf] chromium.executablePath failed", {
+          message: err.message,
+          sparticuzBinDirOverride: Boolean(brotliBinDir),
+          vercel: Boolean(process.env.VERCEL),
+        });
+        throw err;
+      }
+
+      if (process.env.VERCEL) {
+        console.log("[md-to-pdf] chromium binary resolved", {
+          basename: executablePath.split(/[/\\]/).pop(),
+        });
+      }
+
       browser = await puppeteerCore.default.launch({
         args: chromium.default.args,
-        executablePath: await chromium.default.executablePath(),
+        executablePath,
         headless: true,
       });
     }
