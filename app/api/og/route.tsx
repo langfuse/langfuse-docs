@@ -3,10 +3,22 @@ import { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
+/** White wordmark PNG (2233×527); kept in sync from `public/langfuse-wordart-white.svg` via `scripts/sync-wordmark-png-for-og.mjs` (prebuild). */
+const WORDMARK_PATH =
+  "/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.png";
+const WORDMARK_ASPECT = 2233 / 527;
+
+function wordmarkSize(heightPx: number) {
+  return {
+    height: heightPx,
+    width: Math.round(heightPx * WORDMARK_ASPECT),
+  };
+}
+
 export async function GET(request: NextRequest) {
   const base = new URL("/", request.url).toString();
-  const imageData = (await fetch(
-    new URL("/icon256.png", base)
+  const wordmarkData = (await fetch(
+    new URL(WORDMARK_PATH, base)
   ).then((res) => res.arrayBuffer())) as string;
   const fontGeistMono = await fetch(
     new URL("/fonts/GeistMono-Medium.ttf", base)
@@ -28,6 +40,8 @@ export async function GET(request: NextRequest) {
 
   const section = searchParams.get("section") ?? undefined;
 
+  const headerWordmark = wordmarkSize(50);
+
   return new ImageResponse(
     (
       <div
@@ -44,27 +58,22 @@ export async function GET(request: NextRequest) {
           fontSize: 40,
         }}
       >
-        {title !== "Langfuse" ? (
-          <div
-            style={{
-              display: "flex",
-              gap: 20,
-              alignItems: "center",
-              padding: 40,
-              paddingLeft: 80,
-              paddingRight: 80,
-              borderBottom: "3px solid #aaa",
-            }}
-          >
-            <img width="50" height="50" src={imageData} />
-            <span style={{ fontWeight: 800 }}>
-              Langfuse
-              <span style={{ marginLeft: 10, fontWeight: 400 }}>
-                – Open Source LLM Engineering Platform
-              </span>
-            </span>
-          </div>
-        ) : null}
+        <div
+          style={{
+            display: "flex",
+            gap: 24,
+            alignItems: "center",
+            padding: 40,
+            paddingLeft: 80,
+            paddingRight: 80,
+            borderBottom: "3px solid #aaa",
+          }}
+        >
+          <img {...headerWordmark} src={wordmarkData} />
+          <span style={{ fontWeight: 400, fontSize: 28, color: "#ccc" }}>
+            Open Source LLM Engineering Platform
+          </span>
+        </div>
         <div
           style={{
             display: "flex",

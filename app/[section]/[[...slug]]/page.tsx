@@ -5,6 +5,7 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import { SECTION_CONFIG, SECTION_SLUGS, MARKETING_SECTION_SLUGS, DOCS_STYLE_APP_SECTIONS, POST_SECTIONS, CHANGELOG_SECTIONS } from "@/lib/source";
 import type { SectionSlug } from "@/lib/source";
 import { MARKETING_SLUGS, usersSource, changelogSource } from "@/lib/source";
+import { sortCustomerStoriesByMetaOrder } from "@/lib/sortCustomerStoriesByMeta";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import { DocsTocFooter } from "@/components/DocsTocFooter";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
@@ -98,12 +99,14 @@ export default async function SectionDocPage(props: PageProps) {
   ) : section === "wrapped" ? (
     <WrappedDataProvider
       data={{
-        usersPages: usersSource.getPages().map((p) => ({
-          route: p.url,
-          name: p.data.title,
-          title: p.data.title,
-          frontMatter: primitiveOnly(p.data as unknown as Record<string, unknown>),
-        })),
+        usersPages: sortCustomerStoriesByMetaOrder(
+          usersSource.getPages().map((p) => ({
+            route: p.url,
+            name: p.data.title,
+            title: p.data.title,
+            frontMatter: primitiveOnly(p.data as unknown as Record<string, unknown>),
+          })),
+        ),
         changelogPages: changelogSource.getPages().map((p) => ({
           route: p.url,
           name: p.data.title,

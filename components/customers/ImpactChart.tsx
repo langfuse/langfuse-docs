@@ -11,8 +11,8 @@ interface ImpactChartProps {
 
 export const ImpactChart = ({ items }: ImpactChartProps) => {
   return (
-    <div className="bg-card rounded-lg border border-border p-6 my-8">
-      <div className="space-y-4">
+    <div className="bg-card rounded-lg border border-border p-6 my-4">
+      <div className="space-y-2">
         {items.map((item, index) => (
           <div key={index}>
             <div className="flex items-baseline">
@@ -21,9 +21,9 @@ export const ImpactChart = ({ items }: ImpactChartProps) => {
                   {String(index + 1).padStart(2, "0")}
                 </span>
               </div>
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="md:col-span-1">
-                  <h3 className="font-semibold text-foreground my-0">{item.area}</h3>
+                  <h4 className="font-semibold text-foreground my-0">{item.area}</h4>
                 </div>
                 <div className="md:col-span-1">
                   <p className="leading-relaxed">{item.impact}</p>
@@ -48,7 +48,7 @@ export const ImpactChart = ({ items }: ImpactChartProps) => {
                 </div>
               </div>
             </div>
-            {index < items.length - 1 && <hr className="mt-4 border-border" />}
+            {index < items.length - 1 && <hr className="mt-2 border-border" />}
           </div>
         ))}
       </div>

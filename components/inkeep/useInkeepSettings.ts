@@ -103,7 +103,7 @@ const useInkeepSettings = (): InkeepSharedSettings => {
 
   const aiChatSettings: InkeepAIChatSettings = {
     chatSubjectName: "Langfuse",
-    aiAssistantAvatar: "/icon256.png",
+    aiAssistantAvatar: "/langfuse-icon.svg",
     introMessage:
       "Hi! I'm Langfuse's AI assistant trained on documentation, help articles, and other content. How can I help you today?",
     isCopyChatButtonVisible: true,

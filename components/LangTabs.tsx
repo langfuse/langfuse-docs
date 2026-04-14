@@ -64,7 +64,7 @@ export function LangTab({
   className,
   ...props
 }: React.ComponentProps<typeof FumadocsTab>) {
-  return <FumadocsTab className={cn("prose-no-margin bg-transparent bg-stripe-pattern pt-4 text-sm rounded-none", className)} {...props} />;
+  return <FumadocsTab className={cn("pt-4 text-sm bg-transparent rounded-none prose-no-margin bg-stripe-pattern", className)} {...props} />;
 }
 
 export function LangTabs(props: {
@@ -78,27 +78,39 @@ export function LangTabs(props: {
   const labels: (string | null)[] = useMemo(() => {
     return items.map((it) => {
       if (typeof it === "string") return it;
-      if (it && typeof it === "object" && "label" in it && typeof it.label === "string")
+      if (
+        it &&
+        typeof it === "object" &&
+        "label" in it &&
+        typeof it.label === "string"
+      )
         return it.label as string;
       return null;
     });
   }, [items]);
 
-  const values = useMemo(() => labels.map((l, i) => (l ? toValue(l) : String(i))), [labels]);
-
+  const values = useMemo(
+    () => labels.map((l, i) => (l ? toValue(l) : String(i))),
+    [labels],
+  );
   const storedLabel = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,
-    store.getSnapshot
+    store.getSnapshot,
   );
 
-  const initialLabel = useMemo(() => labels[defaultIndex] ?? null, [labels, defaultIndex]);
+  const initialLabel = useMemo(
+    () => labels[defaultIndex] ?? null,
+    [labels, defaultIndex],
+  );
 
   useEffect(() => {
     if (storedLabel == null && initialLabel) store.set(initialLabel);
   }, [storedLabel, initialLabel]);
 
-  const [internalValue, setInternalValue] = React.useState(values[defaultIndex] ?? values[0]);
+  const [internalValue, setInternalValue] = React.useState(
+    values[defaultIndex] ?? values[0],
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
   const pendingOffsetRef = useRef<number | null>(null);
@@ -107,7 +119,7 @@ export function LangTabs(props: {
     const target = storedLabel ?? initialLabel;
     if (target) {
       const idx = labels.findIndex(
-        (l) => typeof l === "string" && normalize(l) === normalize(target)
+        (l) => typeof l === "string" && normalize(l) === normalize(target),
       );
       if (idx !== -1) {
         setInternalValue(values[idx]);
@@ -160,17 +172,17 @@ export function LangTabs(props: {
         <FumadocsTabs
           key={internalValue}
           defaultValue={internalValue}
-          className="flex overflow-hidden flex-col my-0 border border-border rounded-none"
+          className="flex overflow-hidden flex-col my-0 rounded-none border border-border"
         >
           <FumadocsTabsList
-            className={"flex overflow-x-auto overflow-y-hidden flex-nowrap gap-2 sm:gap-4 pt-1 px-4 rounded-none border-b not-prose border-line-structure min-h-9 bg-surface-bg"}
+            className={"flex overflow-x-auto overflow-y-hidden flex-nowrap gap-2 px-4 pt-1 rounded-none border-b sm:gap-4 not-prose border-line-structure min-h-9 bg-surface-bg"}
           >
             {items.map((item, i) => (
               <FumadocsTabsTrigger
                 key={i}
                 value={values[i]}
                 onClick={() => handleValueChange(values[i])}
-                className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b-1 border-transparent pb-2 pt-1.5 text-xs text-text-tertiary transition-colors font-[430] hover:text-foreground cursor-pointer disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-line-cta data-[state=active]:text-text-primary data-[state=active]:font-medium"
+                className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b border-transparent pb-2 pt-1.5 text-xs text-text-tertiary transition-colors font-[430] hover:text-foreground cursor-pointer disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-line-cta data-[state=active]:text-text-primary data-[state=active]:font-medium"
               >
                 {typeof item === "string" ? item : item?.label ?? String(i)}
               </FumadocsTabsTrigger>

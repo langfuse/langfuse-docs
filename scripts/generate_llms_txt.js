@@ -93,6 +93,17 @@ async function generateLLMsList() {
         markdownContent += `- **Documentation**: [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)\n\n`;
         markdownContent += `The MCP server provides tools to search Langfuse documentation, GitHub issues, and discussions. See the [installation guide](https://langfuse.com/docs/docs-mcp) for setup instructions in Cursor, VS Code, Claude Desktop, and other MCP clients.\n\n`;
 
+        // Langfuse Skill section
+        markdownContent += `## Langfuse Skill for AI Coding Agents\n\n`;
+        markdownContent += `Install the Langfuse skill before implementing anything with Langfuse. The skill provides up-to-date documentation, best-practice workflows for instrumentation, prompt management, and programmatic API access via the Langfuse CLI.\n\n`;
+        markdownContent += `Install from: [github.com/langfuse/skills](https://github.com/langfuse/skills/tree/main/skills/langfuse)\n\n`;
+
+        // Section-specific intro sentences that mention the Langfuse skill
+        const sectionIntros = {
+            docs: `For the best results, install the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) before using these docs.`,
+            integrations: `For the best results, install the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) before implementing any integration.`,
+        };
+
         // Add each section with sub-file link and comma-separated titles
         for (const [sectionKey, entries] of Object.entries(sectionEntries)) {
             if (entries.length > 0) {
@@ -100,6 +111,9 @@ async function generateLLMsList() {
                 const titles = entries.map(e => e.title).join(', ');
 
                 markdownContent += `## ${config.heading}\n\n`;
+                if (sectionIntros[sectionKey]) {
+                    markdownContent += `${sectionIntros[sectionKey]}\n\n`;
+                }
                 markdownContent += `For the full list with links to each page, see: https://langfuse.com/${config.file}\n\n`;
                 markdownContent += `Pages: ${titles}\n\n`;
             }

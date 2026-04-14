@@ -1,6 +1,6 @@
 ---
 title: Integration Langchain
-description: Cookbook with examples of the Langfuse Integration for Langchain (Python).
+description: "Cookbook with examples of the Langfuse Integration for Langchain (Python)."
 category: Integrations
 ---
 

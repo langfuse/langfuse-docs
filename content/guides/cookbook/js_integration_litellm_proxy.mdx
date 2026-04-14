@@ -1,6 +1,6 @@
 ---
 source: ⚠️ Jupyter Notebook
-title: LiteLLM (Proxy) + Langfuse OpenAI Integration (JS/TS)
+title: Cookbook - LiteLLM (Proxy) + Langfuse OpenAI Integration (JS/TS)
 sidebarTitle: LiteLLM (Proxy) + Langfuse OpenAI Integration (JS/TS)
 description: The stack to use any of 100+ models in your JS/TS application without having to change your code and with full observability.
 category: Examples
@@ -21,7 +21,7 @@ This notebook demonstrates how to use the following stack to experiment with 100
 <Steps>
 ## Set Up Environment
 
-Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com/) or [self-hosting Langfuse](https://langfuse.com/self-hosting). You’ll also need your OpenAI API key.
+Get your Langfuse API keys by signing up for [Langfuse Cloud](https://langfuse.com/cloud) or [self-hosting Langfuse](https://langfuse.com/self-hosting). You’ll also need your OpenAI API key.
 
 > **Note**: This cookbook uses **Deno.js** for execution, which requires different syntax for importing packages and setting environment variables. For Node.js applications, the setup process is similar but uses standard `npm` packages and `process.env`.
 
@@ -116,7 +116,7 @@ Use the context manager of the Langfuse TypeScript SDK to group multiple LiteLLM
 
 
 ```typescript
-import { startActiveObservation, startObservation, propagateAttributes } from "npm:@langfuse/tracing";
+import { startActiveObservation, startObservation } from "npm:@langfuse/tracing";
 import { observeOpenAI } from "npm:@langfuse/openai";
 
 const client = observeOpenAI(new OpenAI({baseURL: PROXY_URL}));
@@ -148,20 +148,6 @@ await startActiveObservation("user-request", async (span) => {
       {role: "user", content: "2 + 3 = "}
     ],
   }); 
-
-  // Propagate trace attributes
-  await propagateAttributes({
-    traceName: "LLM Calculator",
-    tags: ["updated"],
-    metadata: {"env": "development"},
-    release: "v0.0.2",
-  }, async () => {});
-
-  // Set input on the root observation
-  span.update({
-    input: systemPrompt,
-  });
-
 });
 ```
 

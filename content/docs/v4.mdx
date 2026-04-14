@@ -1,15 +1,47 @@
 ---
-title: Faster Langfuse
-description: Langfuse now delivers faster product performance. Enable the preview and upgrade SDKs to get the new experience without delays.
+title: "Langfuse v4: Faster and Observations-First"
+description: Langfuse v4 delivers faster performance and introduces an observations-first data model. Enable the preview and upgrade SDKs to get started.
 ---
 
-import { BarChart3, Book, Github, Table, Zap } from "lucide-react";
+import { BarChart3, Book, Github, LayoutDashboard, Table, Zap } from "lucide-react";
 
 # Langfuse Cloud: Fast Preview (v4)
+
+## At a glance
+
+Langfuse is now observations-first. Queries that used to require expensive joins now run an order of magnitude faster. This change was necessary do allow Langfuse scale for agentic applications.
+
+**What changed:** We move from traces and observations as separate entities to observations only. A trace ID remains a correlating identifier for a group of observations. Trace attributes (`user_id`, `session_id`, etc.) must be set on _all_ observations for efficient queries and aggregations. Traces have no longer separate input and output.
+
+**How to adopt:**
+- **SDK:** Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace trace update calls with `propagate_attributes()`.
+- **OTEL:** Set the `x-langfuse-ingestion-version: 4` HTTP header on your span exporter. Propagate trace attributes to _all_ observations. [See setup guide](/integrations/native/opentelemetry)
+- **UI:** Enable the **Preview** toggle (bottom-left) to opt in. Filter observations directly in the new unified table and create saved views for productive defaults. [See saved views guide](/faq/all/explore-observations-in-v4)
+- **Evals:** Migrate evals to the observation level. [See evals migration guide](/faq/all/llm-as-a-judge-migration))
+
+---
+
+## Overview
 
 Langfuse now delivers faster product performance at scale. Chart loading is much shorter, and browsing traces, users, and sessions is faster. The new Observations API v2 and Metrics API v2 query faster at scale. Observation-level evaluations now execute in seconds without a ClickHouse query per evaluation.
 
 We will keep this page updated as we roll out additional related features and share OSS and self-hosted support updates.
+
+<Callout type="info">
+V4 introduces a **single unified observations table** where all inputs, outputs, and context attributes live directly on observations. See the [guide on working with the observation-centric data model in v4](/faq/all/explore-observations-in-v4) for before/after workflows and saved view setup.
+</Callout>
+
+## Why observations-first?
+
+As agentic applications grow more complex, a single trace can contain hundreds or thousands of operations — LLM calls, tool executions, retrieval steps, agent handoffs. The old traces table showed one row per request, which meant the operations engineers actually care about were hidden inside. With observations-first, you can directly query across all operations — start with the question ("which LLM calls are slow?") rather than the container ("which trace has a slow call somewhere inside it?").
+
+<Cards num={1}>
+  <Card
+    title="Guide: Working with Observations in v4"
+    href="/faq/all/explore-observations-in-v4"
+    icon={<Table />}
+  />
+</Cards>
 
 ## Get access to the preview
 
@@ -112,6 +144,11 @@ If you have questions about the rollout, migration steps, SDK upgrades, or anyth
     title="Metrics API v2"
     href="/docs/metrics/features/metrics-api#v2"
     icon={<BarChart3 />}
+  />
+  <Card
+    title="Dashboard Changes in v4"
+    href="/docs/metrics/v4-dashboard-changes"
+    icon={<LayoutDashboard />}
   />
   <Card
     title="Ask Questions on v4"
