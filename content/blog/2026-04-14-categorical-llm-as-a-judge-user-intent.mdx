@@ -1,10 +1,10 @@
 ---
 title: "Classifying User Intent with Categorical LLM-as-a-Judge"
-date: 2026/03/26
+date: 2026/04/14
 description: A guide on how to set up a categorical LLM-as-a-judge evaluator to classify user intent. Follow along with how we applied this to our demo application.
 tag: engineering
 author: Lotte
-ogImage: /images/blog/2026-03-26-categorical-llm-as-a-judge-user-intent/og.jpg
+ogImage: /images/blog/2026-04-14-categorical-llm-as-a-judge-user-intent/og.jpg
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
@@ -12,7 +12,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 <BlogHeader
   title="Classifying User Intent with Categorical LLM-as-a-Judge"
   description="A guide on how to set up a categorical LLM-as-a-judge evaluator to classify user intent. Follow along with how we applied this to our demo application."
-  date="March 26, 2026"
+  date="April 14, 2026"
   authors={["lotteverheyden"]}
 />
 
@@ -85,13 +85,13 @@ A few things worth noting about this prompt:
 After entering your prompt for the evaluator, select "Categorical" as the score type and define the category values.
 
 <Frame>
-  ![Score type selector showing Categorical selected](/images/blog/2026-03-26-categorical-llm-as-a-judge-user-intent/score-type-dropdown.png)
+  ![Score type selector showing Categorical selected](/images/blog/2026-04-14-categorical-llm-as-a-judge-user-intent/score-type-dropdown.png)
 </Frame>
 
 Then define the category values and enter the score reasoning and category selection prompts.
 
 <Frame>
-  ![Full evaluator configuration with categories and prompts](/images/blog/2026-03-26-categorical-llm-as-a-judge-user-intent/evaluator-config.png)
+  ![Full evaluator configuration with categories and prompts](/images/blog/2026-04-14-categorical-llm-as-a-judge-user-intent/evaluator-config.png)
 </Frame>
 
 > Make sure the category names you enter here match the category names used in the evaluator prompt exactly.
@@ -107,13 +107,13 @@ With the evaluator running, every new support chatbot trace gets an intent label
 To create this widget, select "Scores Categorical" as the view, set the metric to "Count", filter by score name `user-intent`, and break down by "String Value". We chose a pie chart to visualize the distribution.
 
 <Frame>
-  ![Widget configuration for user intent distribution](/images/blog/2026-03-26-categorical-llm-as-a-judge-user-intent/widget-configuration.png)
+  ![Widget configuration for user intent distribution](/images/blog/2026-04-14-categorical-llm-as-a-judge-user-intent/widget-configuration.png)
 </Frame>
 
 The resulting widget shows the distribution of user intent across conversations.
 
 <Frame>
-  ![Dashboard widget showing user intent distribution](/images/blog/2026-03-26-categorical-llm-as-a-judge-user-intent/dashboard-widget.png)
+  ![Dashboard widget showing user intent distribution](/images/blog/2026-04-14-categorical-llm-as-a-judge-user-intent/dashboard-widget.png)
 </Frame>
 
 The [dashboard is publicly accessible](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/dashboards/cmk3to8l7014fad07soxj1c1m) if you want to explore the data yourself.
