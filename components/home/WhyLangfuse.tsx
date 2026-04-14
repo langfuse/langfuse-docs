@@ -10,24 +10,24 @@ import { Text } from "@/components/ui/text";
 
 const reasons = [
   {
+    title: "The full cycle",
+    body: "Langfuse powers the entire development cycle from prototype to full scale production loads.",
+  },
+  {
     title: "Unified Platform",
-    body: "Langfuse is a single end-to-end platform combining tracing, prompts, evals and more.",
+    body: "All components of Langfuse work great standalone but excel when used together.",
   },
   {
     title: "Open Source (MIT)",
-    body: "Inspect the code. Self-host for free. No vendor lock-in.",
+    body: "Inspect the code. Self-host for free. We are the largest OSS community in our category.",
   },
   {
-    title: "OTEL native",
-    body: "Standard trace format. Works with existing OTEL instrumentation. Export anywhere.",
+    title: "OTel native",
+    body: "Standard trace format. Works with existing OpenTelemetry instrumentation.",
   },
   {
     title: "80+ integrations",
     body: "Works with any model, any framework, and stack.",
-  },
-  {
-    title: "Largest OSS community",
-    body: "Inspect the code. Self-host for free. We are the largest OSS community in our category.",
   },
   {
     title: "Built for Scale",
@@ -39,7 +39,7 @@ const reasons = [
   },
   {
     title: "Loved by Agents",
-    body: "CLI, MCP, accessible docs — Coding Agents love working with Langfuse.",
+    body: "CLI, MCP, accessible docs - Coding Agents love working with Langfuse.",
   },
   {
     title: "Production-proven",
@@ -125,9 +125,9 @@ export function WhyLangfuse() {
         <Heading as="h2" size="normal">
           Why choose <TextHighlight>Langfuse</TextHighlight>?
         </Heading>
-        <Text className="max-w-sm text-left">
-          Langfuse is the most widely adopted open-source LLM engineering
-          platform. Developers who value open-source trust Langfuse.
+        <Text className="max-w-[48ch] text-left">
+          Langfuse is the most widely adopted open-source LLM engineering platform.
+          Developers who value open-source and control over their data build production grade agents and LLM applications with Langfuse.
         </Text>
       </div>
 
@@ -156,7 +156,7 @@ export function WhyLangfuse() {
               </AccordionPrimitive.Trigger>
             </AccordionPrimitive.Header>
             <AccordionPrimitive.Content className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
-              <Text size="s" className="text-left pb-4 pr-8">
+              <Text size="s" className="pr-8 pb-4 text-left">
                 {item.body}
               </Text>
             </AccordionPrimitive.Content>
@@ -165,7 +165,7 @@ export function WhyLangfuse() {
       </AccordionPrimitive.Root>
 
       {/* Desktop: two-column list (lg and above) */}
-      <ul className="hidden lg:flex flex-col">
+      <ul className="hidden flex-col lg:flex">
         {reasons.map((item) => (
           <li
             key={item.title}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { BoxCorners, CornerBox } from "@/components/ui/corner-box";
@@ -35,10 +35,26 @@ const stories = [
 
 export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br: true } }: { corners?: BoxCorners }) {
   const [active, setActive] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
   const story = stories[active];
 
+  useEffect(() => {
+    if (isHovered) return;
+
+    const interval = window.setInterval(() => {
+      setActive((prev) => (prev + 1) % stories.length);
+    }, 2000);
+
+    return () => window.clearInterval(interval);
+  }, [isHovered]);
+
   return (
-    <CornerBox className="flex flex-col gap-3 p-4 -mt-px lg:flex-row lg:items-center lg:gap-6" corners={corners}>
+    <CornerBox
+      className="flex flex-col gap-3 p-4 -mt-px lg:flex-row lg:items-center lg:gap-6"
+      corners={corners}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Row 1 (mobile) / left side (desktop): logo switchers + button */}
       <div className="flex gap-6 items-center lg:contents">
         <div className="flex gap-1 shrink-0">
@@ -48,6 +64,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
               <button
                 key={s.name}
                 onClick={() => setActive(i)}
+                onMouseEnter={() => setActive(i)}
                 aria-label={s.name}
                 aria-pressed={isActive}
                 className="relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

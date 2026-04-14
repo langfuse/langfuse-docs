@@ -3,6 +3,7 @@
 import { HomeSection } from "@/components/home/HomeSection";
 import Image from "next/image";
 import {
+  Button,
   CornerBox,
   Heading,
   Link,
@@ -27,9 +28,9 @@ export const DeveloperTools = () => {
             <TextHighlight>agents</TextHighlight>.
           </Heading>
           <Text className="max-w-[48ch] text-left">
-            Langfuse works by default with your coding agents. Install our MCP
-            servers and CLI to develop at the speed of thought. Let Claude Code,
-            Cursor and Codex do the hard work.
+            Langfuse works by default with your coding agents.
+            Install our MCP servers and CLI to develop at the speed of thought.
+            Let Claude Code, Cursor and Codex do the hard work.
           </Text>
         </div>
 
@@ -40,15 +41,23 @@ export const DeveloperTools = () => {
                 href={CLI_HREF}
                 className="text-left text-[15px] font-medium text-text-secondary"
               >
-                Langfuse CLI
+                SKILL.md
               </Link>
               <Text size="s" className="text-left">
-                Full API access from the terminal. Let coding agents manage
-                Langfuse for you, or script your workflows in CI/CD.
+                A ready-made skill for your coding agent.
+                Manage prompts, traces, and evals through natural language — no manual API calls needed.
               </Text>
-            </div>
-            <div className="flex flex-1 justify-center items-center">
+              {/* <div className="flex flex-1 justify-center items-center">
               <Image src={cliVisual} alt="Langfuse CLI" width={100} height={100} className="object-contain w-full h-full" />
+            </div> */}
+            </div>
+            <div className="flex flex-col items-start p-4 -ml-1.25">
+              <Button
+                variant="secondary"
+                href={CLI_HREF}
+              >
+                Install CLI
+              </Button>
             </div>
           </CornerBox>
 
@@ -57,12 +66,20 @@ export const DeveloperTools = () => {
               href={DOCS_MCP_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
             >
-              Langfuse Docs MCP Server
+              Langfuse CLI
             </Link>
             <Text size="s" className="text-left">
-              Search Langfuse documentation, GitHub issues, and discussions
-              directly from Claude, Cursor, and other MCP-compatible tools.
+              Full API access from the terminal.
+              Let coding agents manage Langfuse for you, or script your workflows in CI/CD.
             </Text>
+            <div className="flex flex-col items-start mt-4 -ml-1.25">
+              <Button
+                variant="secondary"
+                href={CLI_HREF}
+              >
+                Configure MCP
+              </Button>
+            </div>
           </CornerBox>
 
           <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -mt-px -ml-px">
@@ -70,12 +87,20 @@ export const DeveloperTools = () => {
               href={PLATFORM_MCP_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
             >
-              Langfuse MCP Server
+              Platform MCP Server
             </Link>
             <Text size="s" className="text-left">
               Interact with your Langfuse data programmatically from your IDE.
               Manage prompts, query traces, and more.
             </Text>
+            <div className="flex flex-col items-start mt-4 -ml-1.25">
+              <Button
+                variant="secondary"
+                href={CLI_HREF}
+              >
+                Configure MCP
+              </Button>
+            </div>
           </CornerBox>
         </div>
       </div>

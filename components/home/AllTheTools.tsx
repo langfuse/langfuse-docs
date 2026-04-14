@@ -114,7 +114,7 @@ export function AllTheTools() {
                 className="flex flex-col items-stretch p-0 w-full min-w-0 h-full"
               >
                 <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden sm:max-h-[200px] sm:flex-row xl:max-h-[337px] xl:flex-col">
-                  <div className="flex shrink-0 flex-col gap-1 p-4 pb-2.5">
+                  <div className="flex flex-1 flex-col gap-1 p-4 pb-2.5">
                     <Text size="s" className="font-medium text-left text-text-secondary">
                       {tool.title}
                     </Text>
@@ -128,7 +128,7 @@ export function AllTheTools() {
                       alt={tool.title}
                       width={100}
                       height={100}
-                      className="object-contain w-full h-full sm:-translate-y-[40px] xl:translate-y-0"
+                      className="object-contain w-full h-full xl:translate-y-0"
                       quality={100}
                       unoptimized
                     />
@@ -145,7 +145,7 @@ export function AllTheTools() {
                 tooltip={tool.tooltip}
                 className="flex flex-col items-stretch p-0 w-full min-w-0 h-full"
               >
-                <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden lg:min-h-[277px] lg:max-h-[277px]">
+                <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden xl:min-h-[277px] lg:max-h-[277px]">
                   <div className="flex flex-col gap-1 p-2 pb-2.5 sm:p-4">
                     <Text size="s" className="font-medium text-left text-text-secondary">
                       {tool.title}

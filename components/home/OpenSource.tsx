@@ -1,39 +1,42 @@
 import { HomeSection } from "@/components/home/HomeSection";
 import { CornerBox, Heading, TextHighlight } from "@/components/ui";
+import { IntegrationLabel } from "@/components/ui/integration-label";
 import { Text } from "@/components/ui/text";
 import { BulletList } from "./BulletList";
 
 const cards = [
   {
+    title: "Self-host at Scale",
+    labels: [
+      "Docker Compose",
+      "Kubernetes (Helm)",
+      "AWS (Terraform)",
+      "GCP (Terraform)",
+      "Azure (Terraform)",
+    ],
+  },
+  {
     title: "MIT License",
     bullets: [
-      "Same code for cloud and self-hosted.",
-      "All product features licensed.",
-      "Fork, modify, contribute.",
+      "All product features MIT licensed",
+      "Scales to billions of monthly events",
+      "Fork, modify, contribute",
     ],
   },
   {
-    title: "Large OSS Community",
+    title: "APIs & Exports",
+    bullets: [
+      "REST API for everything",
+      "Query SDK",
+      "S3 blob storage Export",
+    ],
+  },
+  {
+    title: "Active OSS Community",
     bullets: [
       "22,000+ GitHub stars",
-      "400+ contributors",
       "5,000+ Discord members",
-    ],
-  },
-  {
-    title: "OpenTelemetry Native",
-    bullets: [
-      "SDKs built on OTEL.",
-      "Standard trace format.",
-      "Export anywhere, import from any OTEL library.",
-    ],
-  },
-  {
-    title: "Open APIs",
-    bullets: [
-      "REST API for everything.",
-      "Query SDK.",
-      "Export to S3, blob storage, BigQuery, Snowflake, etc.",
+      "Weekly releases and community hours",
     ],
   },
 ];
@@ -61,7 +64,19 @@ export const OpenSource = () => {
               <Text className="font-medium text-left text-text-secondary">
                 {card.title}
               </Text>
-              <BulletList items={card.bullets.map((b) => ({ label: b }))} />
+              {card.labels ? (
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {card.labels.map((label) => (
+                    <IntegrationLabel
+                      key={label}
+                      label={label}
+                      className="flex-1 justify-start"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <BulletList items={card.bullets.map((b) => ({ label: b }))} />
+              )}
             </CornerBox>
           );
         })}
