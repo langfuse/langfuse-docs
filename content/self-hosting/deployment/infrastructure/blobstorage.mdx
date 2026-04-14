@@ -14,7 +14,7 @@ This is a deep dive into the configuration of S3. Follow one of the [deployment 
 </Callout>
 
 Langfuse uses S3 or another S3-compatible blob storage (referred to as S3 going forward) to store raw events, multi-modal inputs, batch exports, and other files.
-In addition, we have dedicated implementations for [Azure Blob Storage](#azure-blob-storage) and [Google Cloud Storage](#google-cloud-storage).
+In addition, we have dedicated implementations for [Azure Blob Storage](#azure-blob-storage), [Google Cloud Storage](#google-cloud-storage), and [OCI Object Storage](#oci-object-storage).
 You can use a managed service on AWS, or CloudFlare, or host it yourself using MinIO.
 We use it as a scalable and durable storage solution for large files with strong read-after-write guarantees.
 This guide covers how to configure S3 within Langfuse and how to connect your own S3-compatible storage.
@@ -299,6 +299,46 @@ LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true
 LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
 ```
 
+### OCI Object Storage (Native) [#oci-object-storage]
+
+[OCI Object Storage](https://www.oracle.com/cloud/storage/object-storage/) is a globally available object storage by Oracle Cloud Infrastructure.
+Langfuse provides a native OCI Object Storage integration using the OCI SDK, which supports multiple IAM authentication methods suitable for different deployment environments.
+
+To enable the native OCI integration, set `LANGFUSE_USE_OCI_NATIVE_OBJECT_STORAGE=true` and choose an authentication method via `LANGFUSE_OCI_AUTH_TYPE`.
+
+| Variable                                 | Required / Default | Description                                                                                                                                     |
+| ---------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_USE_OCI_NATIVE_OBJECT_STORAGE` | `false`            | Set to `true` to enable the native OCI Object Storage integration.                                                                              |
+| `LANGFUSE_OCI_AUTH_TYPE`                  | Required           | Authentication method. One of: `workload_identity`, `instance_principal`, `resource_principal`, `oci_profile`, `session_token`.                  |
+| `LANGFUSE_OCI_CONFIG_FILE`               |                    | Path to the OCI config file. Required for `oci_profile` and `session_token` auth types.                                                         |
+| `LANGFUSE_OCI_CONFIG_PROFILE`            |                    | OCI config profile name. Used with `oci_profile` and `session_token` auth types.                                                                |
+
+The standard `LANGFUSE_S3_*` environment variables (bucket, region, endpoint, prefix, force path style) are reused for OCI Object Storage. Do not set `*_ACCESS_KEY_ID` / `*_SECRET_ACCESS_KEY` when using the native OCI auth methods.
+
+#### Authentication Methods
+
+| Auth Type            | Use Case                                                                                      |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| `instance_principal` | Running on OCI Compute with IAM dynamic group policies. Recommended for production on OCI.    |
+| `workload_identity`  | Running on OKE (Oracle Kubernetes Engine) with OCI Workload Identity configured.               |
+| `resource_principal` | Running inside an OCI managed service or runtime that injects Resource Principal environment variables. |
+| `oci_profile`        | Local development using an OCI config file with a named profile.                               |
+| `session_token`      | Short-lived user authentication via `oci session authenticate`. Suited for interactive/dev use. |
+
+#### Example Configuration (Instance Principal)
+
+For production deployments on OCI Compute with IAM dynamic group policies:
+
+```yaml
+LANGFUSE_USE_OCI_NATIVE_OBJECT_STORAGE=true
+LANGFUSE_OCI_AUTH_TYPE=instance_principal
+
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse-bucket
+LANGFUSE_S3_EVENT_UPLOAD_REGION=us-chicago-1
+LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://objectstorage.us-chicago-1.oraclecloud.com
+LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
+```
+
 ### Other Providers
 
 Langfuse supports any S3-compatible storage provider.
@@ -328,6 +368,7 @@ Configure a lifecycle expiration rule for your storage provider:
 - **Cloudflare R2** — Configure object lifecycle expiration rules via the R2 dashboard or API. See [Object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
 - **Azure Blob Storage** — Create a lifecycle management policy with a delete action. See [Configure a lifecycle management policy](https://learn.microsoft.com/en-us/azure/storage/blobs/lifecycle-management-policy-configure).
 - **Google Cloud Storage** — Use Object Lifecycle Management with a Delete action and an age condition. See [Object Lifecycle Management](https://cloud.google.com/storage/docs/lifecycle).
+- **OCI Object Storage** — Create a lifecycle policy rule with an object age-based delete action. See [Using Object Lifecycle Management](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usinglifecyclepolicies.htm).
 
 <Callout type="info">
 
