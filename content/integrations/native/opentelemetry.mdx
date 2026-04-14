@@ -17,6 +17,15 @@ As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attrib
 
 > **Using other OTEL-based tools?** If you're using Langfuse alongside other OpenTelemetry-based tools, you may run into conflicts. See [Using Langfuse with an Existing OpenTelemetry Setup](/faq/all/existing-otel-setup) for configuration guidance.
 
+<Callout type="info">
+  **Using Python or JS/TS?** Prefer the Langfuse SDKs instead of wiring raw
+  OpenTelemetry exporters directly. Start with the
+  [Python SDK v3](/docs/sdk/python/sdk-v3) or the
+  [JS/TS SDK](/docs/sdk/typescript/guide). This OpenTelemetry page is most
+  useful for existing OTEL setups, collector-based ingestion, and unsupported
+  languages.
+</Callout>
+
 <Callout type="warning">
   **Important:** If you want to filter and aggregate by `userId`, `sessionId`,
   `metadata`, `version`, `release`, or `tags`, you need to propagate these
