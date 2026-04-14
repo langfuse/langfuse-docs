@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { marked } from "marked";
+import puppeteerCore from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import { stripMdxForPlainMarkdown } from "@/lib/stripMdxForPlainMarkdown.js";
 
 // Force Node.js runtime (required for Puppeteer/Chromium — not compatible with Edge runtime)
@@ -48,50 +50,6 @@ function logPdfError(
   });
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-function errorPageResponse(
-  status: number,
-  title: string,
-  details: Record<string, unknown>
-) {
-  const html = `<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${escapeHtml(title)}</title>
-    <style>
-      body { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: #0f172a; color: #e2e8f0; margin: 0; padding: 24px; }
-      h1 { font-size: 20px; margin: 0 0 12px; }
-      p { margin: 0 0 16px; color: #94a3b8; }
-      pre { white-space: pre-wrap; word-break: break-word; background: #111827; border: 1px solid #334155; border-radius: 8px; padding: 16px; overflow: auto; }
-      code { font-family: inherit; }
-    </style>
-  </head>
-  <body>
-    <h1>${escapeHtml(title)}</h1>
-    <p>Full diagnostics from <code>/api/md-to-pdf</code>.</p>
-    <pre>${escapeHtml(JSON.stringify(details, null, 2))}</pre>
-  </body>
-</html>`;
-
-  return new NextResponse(html, {
-    status,
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "no-store",
-    },
-  });
-}
-
 async function runtimeImport(moduleName: string): Promise<any> {
   const importAtRuntime = new Function("m", "return import(m)");
   return importAtRuntime(moduleName);
@@ -117,10 +75,10 @@ export async function GET(request: NextRequest) {
     const disposition = request.nextUrl.searchParams.get("disposition");
 
     if (!url || typeof url !== "string") {
-      return errorPageResponse(400, "Missing or invalid url query parameter", {
-        requestUrl,
-        query: Object.fromEntries(request.nextUrl.searchParams.entries()),
-      });
+      return NextResponse.json(
+        { error: "Missing or invalid 'url' query parameter" },
+        { status: 400 }
+      );
     }
 
     let markdownUrl: URL;
@@ -129,10 +87,10 @@ export async function GET(request: NextRequest) {
         ? new URL(url, request.nextUrl.origin)
         : new URL(url);
     } catch {
-      return errorPageResponse(400, "Invalid URL format", {
-        requestUrl,
-        providedUrl: url,
-      });
+      return NextResponse.json(
+        { error: "Invalid URL format" },
+        { status: 400 }
+      );
     }
 
     const allowedHostnames = new Set([
@@ -148,14 +106,12 @@ export async function GET(request: NextRequest) {
       process.env.NODE_ENV !== "development" &&
       !allowedHostnames.has(markdownUrl.hostname)
     ) {
-      return errorPageResponse(
-        400,
-        `Fetching from ${markdownUrl.hostname} is not permitted`,
+      return NextResponse.json(
         {
-          requestUrl,
-          markdownUrl: markdownUrl.toString(),
-          allowedHostnames: Array.from(allowedHostnames),
-        }
+          error: `Fetching from ${markdownUrl.hostname} is not permitted.`,
+          allowed: Array.from(allowedHostnames),
+        },
+        { status: 400 }
       );
     }
 
@@ -192,15 +148,9 @@ export async function GET(request: NextRequest) {
 
     const response = await fetch(markdownUrl.toString());
     if (!response.ok) {
-      return errorPageResponse(
-        response.status,
-        "Failed to fetch markdown",
-        {
-          requestUrl,
-          markdownUrl: markdownUrl.toString(),
-          status: response.status,
-          statusText: response.statusText,
-        }
+      return NextResponse.json(
+        { error: `Failed to fetch markdown: ${response.statusText}` },
+        { status: response.status }
       );
     }
 
@@ -272,28 +222,23 @@ export async function GET(request: NextRequest) {
             markdownUrl: markdownUrl.toString(),
             puppeteerError: serializeError(devPuppeteerError),
           });
-          return errorPageResponse(
-            500,
-            "PDF rendering is unavailable locally",
+          return NextResponse.json(
             {
-              requestUrl,
-              markdownUrl: markdownUrl.toString(),
-              devPuppeteerError: serializeError(devPuppeteerError),
-              fallbackError: serializeError(fallbackError),
-            }
+              error:
+                "PDF rendering is unavailable locally. Install dev dependencies (`pnpm install`) or ensure local Chrome is installed.",
+            },
+            { status: 500 }
           );
         }
       }
     } else {
-      const puppeteerCore = await runtimeImport("puppeteer-core");
-      const chromium = await runtimeImport("@sparticuz/chromium");
       // Optional override: absolute path to the `bin` folder that holds *.br files
       // (same directory Sparticuz expects when packaging omits it from the trace).
       const brotliBinDir = process.env.SPARTICUZ_CHROMIUM_BIN_DIR?.trim();
 
       let executablePath: string;
       try {
-        executablePath = await chromium.default.executablePath(
+        executablePath = await chromium.executablePath(
           brotliBinDir || undefined
         );
       } catch (resolveErr) {
@@ -312,8 +257,8 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      browser = await puppeteerCore.default.launch({
-        args: chromium.default.args,
+      browser = await puppeteerCore.launch({
+        args: chromium.args,
         executablePath,
         headless: true,
       });
@@ -364,13 +309,12 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     logPdfError("request failed", error, { requestUrl });
-    return errorPageResponse(
-      500,
-      "Internal server error while generating PDF",
+    return NextResponse.json(
       {
-        requestUrl,
-        error: serializeError(error),
-      }
+        error: "Internal server error while generating PDF",
+        message: "An unexpected error occurred.",
+      },
+      { status: 500 }
     );
   }
 }
