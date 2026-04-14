@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { HomeSection } from "@/components/home/HomeSection";
 import { CornerBox, Heading, TextHighlight } from "@/components/ui";
 import { IntegrationLabel } from "@/components/ui/integration-label";
@@ -8,11 +9,11 @@ const cards = [
   {
     title: "Self-host at Scale",
     labels: [
-      "Docker Compose",
-      "Kubernetes (Helm)",
-      "AWS (Terraform)",
-      "GCP (Terraform)",
-      "Azure (Terraform)",
+      { label: "Docker Compose", icon: <Image src="/images/integrations/docker.svg" alt="" width={18} height={18} /> },
+      { label: "Kubernetes (Helm)", icon: <Image src="/images/integrations/kubernetes.svg" alt="" width={18} height={18} /> },
+      { label: "AWS (Terraform)", icon: <Image src="/images/integrations/aws.svg" alt="" width={18} height={18} /> },
+      { label: "GCP (Terraform)", icon: <Image src="/images/integrations/gcp.svg" alt="" width={18} height={18} /> },
+      { label: "Azure (Terraform)", icon: <Image src="/images/integrations/microsoft_icon.svg" alt="" width={18} height={18} /> },
     ],
   },
   {
@@ -65,12 +66,13 @@ export const OpenSource = () => {
                 {card.title}
               </Text>
               {card.labels ? (
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="grid grid-cols-2 gap-2 mt-1">
                   {card.labels.map((label) => (
                     <IntegrationLabel
-                      key={label}
-                      label={label}
-                      className="flex-1 justify-start"
+                      key={label.label}
+                      label={label.label}
+                      icon={label.icon}
+                      className="justify-start"
                     />
                   ))}
                 </div>

@@ -9,55 +9,68 @@ import { Text } from "@/components/ui/text";
 import { IntegrationLabel } from "@/components/ui/integration-label";
 import IconPython from "@/components/icons/python";
 import IconTypescript from "@/components/icons/typescript";
+import { cn } from "@/lib/utils";
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// ─── Data (paths per homepage integration spec) ─────────────────────────────
 
-const otelGroup = {
-  title: "Any Language via OpenTelemetry",
-  href: "/integrations",
-  mainItems: [
+const languagesGroup = {
+  title: "Languages",
+  items: [
     {
-      label: "Python (Native SDKs)",
+      label: "Python (Native SDK)",
+      href: "/docs/observability/sdk/overview",
       icon: <IconPython className="w-[18px] h-[18px]" />,
     },
     {
-      label: "TypeScript (Native SDKs)",
+      label: "TypeScript (Native SDK)",
+      href: "/docs/observability/sdk/overview",
       icon: <IconTypescript className="w-[18px] h-[18px]" />,
     },
+    { label: "Go", href: "/integrations/native/opentelemetry" },
+    { label: "Java", href: "/integrations/native/opentelemetry" },
+    { label: ".NET", href: "/integrations/native/opentelemetry" },
+    { label: "Ruby", href: "/integrations/native/opentelemetry" },
+    { label: "PHP", href: "/integrations/native/opentelemetry" },
+    { label: "Swift", href: "/integrations/native/opentelemetry" },
   ],
-  textItems: ["Go", "Java", ".NET", "Ruby", "PHP", "Swift"],
 };
 
 const agentFrameworksGroup = {
   title: "Agent Frameworks",
-  href: "/integrations/frameworks",
   items: [
     {
       label: "LangChain",
+      href: "/integrations/frameworks/langchain",
       icon: <Image src="/images/integrations/langchain_icon.png" alt="" width={18} height={18} />,
     },
     {
       label: "Vercel AI SDK",
+      href: "/integrations/frameworks/vercel-ai-sdk",
       icon: <Image src="/images/integrations/vercel_ai_sdk_icon.png" alt="" width={18} height={18} />,
     },
     {
       label: "LiteLLM",
+      href: "/integrations/frameworks/litellm-sdk",
       icon: <Image src="/images/integrations/litellm_icon.png" alt="" width={18} height={18} />,
     },
     {
       label: "Pydantic AI",
+      href: "/integrations/frameworks/pydantic-ai",
       icon: <Image src="/images/integrations/pydantic_ai_icon.svg" alt="" width={18} height={18} />,
     },
     {
       label: "Google ADK",
+      href: "/integrations/frameworks/google-adk",
       icon: <Image src="/images/integrations/google_adk_icon.png" alt="" width={18} height={18} />,
     },
     {
       label: "CrewAI",
+      href: "/integrations/frameworks/crewai",
       icon: <Image src="/images/integrations/crewai_icon.svg" alt="" width={18} height={18} />,
     },
     {
       label: "LiveKit",
+      href: "/integrations/frameworks/livekit",
       icon: <Image src="/images/integrations/livekit_icon.svg" alt="" width={18} height={18} />,
     },
   ],
@@ -65,102 +78,169 @@ const agentFrameworksGroup = {
 
 const modelProvidersGroup = {
   title: "Model Providers",
-  href: "/integrations/model-providers",
   items: [
     {
       label: "OpenAI",
+      href: "/integrations/model-providers/openai-py",
       icon: <Image src="/images/integrations/openai_icon.svg" alt="" width={18} height={18} />,
     },
     {
       label: "Anthropic",
+      href: "/integrations/model-providers/anthropic",
       icon: <Image src="/images/integrations/anthropic_icon.png" alt="" width={18} height={18} />,
     },
     {
       label: "Amazon Bedrock",
+      href: "/integrations/model-providers/amazon-bedrock",
       icon: <Image src="/images/integrations/bedrock_icon.png" alt="" width={18} height={18} />,
     },
     {
       label: "Azure OpenAI",
+      href: "/integrations/model-providers/azure-openai",
       icon: <Image src="/images/integrations/microsoft_icon.svg" alt="" width={18} height={18} />,
     },
     {
       label: "Mistral AI",
+      href: "/integrations/model-providers/mistral-sdk",
       icon: <Image src="/images/integrations/mistral_icon.svg" alt="" width={18} height={18} />,
     },
     {
       label: "Google Gemini",
+      href: "/integrations/model-providers/google-gemini",
       icon: <Image src="/images/integrations/google_gemini_icon.svg" alt="" width={18} height={18} />,
     },
     {
       label: "xAI",
+      href: "/integrations/model-providers/xai-grok",
       icon: <Image src="/images/integrations/xai_icon.svg" alt="" width={18} height={18} />,
     },
     {
       label: "vLLM",
+      href: "/integrations/model-providers/vllm",
       icon: <Image src="/images/integrations/vllm_icon.svg" alt="" width={18} height={18} />,
     },
     {
       label: "Groq",
+      href: "/integrations/model-providers/groq",
       icon: <Image src="/images/integrations/groq_icon.png" alt="" width={18} height={18} />,
     },
   ],
 };
 
-type MarqueeItem = { label: string; icon: string };
+type MarqueeItem = { label: string; href: string; icon: string };
 
+/** Other integration pages (ranked by views), split across two rows */
 const marqueeRow1: MarqueeItem[] = [
-  { label: "LlamaIndex", icon: "/images/integrations/llamaindex_icon.png" },
-  { label: "DSPy", icon: "/images/integrations/dspy_icon.png" },
-  { label: "Haystack", icon: "/images/integrations/haystack_icon.png" },
-  { label: "Flowise", icon: "/images/integrations/flowise_icon.svg" },
-  { label: "Langflow", icon: "/images/integrations/langflow_icon.svg" },
-  { label: "Instructor", icon: "/images/integrations/instructor_icon.svg" },
-  { label: "Cohere", icon: "/images/integrations/cohere_icon.svg" },
-  { label: "Ollama", icon: "/images/integrations/ollama_icon.svg" },
-  { label: "DeepSeek", icon: "/images/integrations/deepseek_icon.svg" },
-  { label: "OpenRouter", icon: "/images/integrations/openrouter_icon.svg" },
-  { label: "BeeAI", icon: "/images/integrations/beeai_icon.png" },
-  { label: "Mirascope", icon: "/images/integrations/mirascope_icon.svg" },
+  { label: "Claude Code", href: "/integrations/other/claude-code", icon: "/images/integrations/anthropic_icon.png" },
+  {
+    label: "LiteLLM (Proxy/Gateway)",
+    href: "/integrations/gateways/litellm",
+    icon: "/images/integrations/litellm_icon.png",
+  },
+  { label: "OpenClaw", href: "/integrations/other/openclaw", icon: "/images/integrations/openclaw_icon.svg" },
+  {
+    label: "Claude Agent SDK (Python)",
+    href: "/integrations/frameworks/claude-agent-sdk",
+    icon: "/images/integrations/claude_icon.png",
+  },
+  {
+    label: "LangChain DeepAgents",
+    href: "/integrations/frameworks/langchain-deepagents",
+    icon: "/images/integrations/langchain_icon.png",
+  },
+  { label: "OpenWebUI", href: "/integrations/no-code/openwebui", icon: "/images/integrations/openwebui_icon.png" },
+  { label: "Ollama", href: "/integrations/model-providers/ollama", icon: "/images/integrations/ollama_icon.svg" },
+  {
+    label: "OpenAI Agents SDK",
+    href: "/integrations/frameworks/openai-agents",
+    icon: "/images/integrations/openai_icon.svg",
+  },
+  { label: "Dify", href: "/integrations/no-code/dify", icon: "/images/integrations/dify_icon.svg" },
+  { label: "Langflow", href: "/integrations/no-code/langflow", icon: "/images/integrations/langflow_icon.svg" },
+  { label: "OpenRouter", href: "/integrations/gateways/openrouter", icon: "/images/integrations/openrouter_icon.svg" },
+  { label: "n8n", href: "/integrations/no-code/n8n", icon: "/images/integrations/n8n_icon.svg" },
+  { label: "Spring AI", href: "/integrations/frameworks/spring-ai", icon: "/images/integrations/spring_icon.svg" },
+  { label: "Cursor", href: "/integrations/other/cursor", icon: "/images/integrations/cursor_icon.png" },
+  { label: "PostHog", href: "/integrations/analytics/posthog", icon: "/images/integrations/posthog_icon.svg" },
 ];
 
 const marqueeRow2: MarqueeItem[] = [
-  { label: "Databricks", icon: "/images/integrations/databricks_icon.svg" },
-  { label: "Together AI", icon: "/images/integrations/togetherai_icon.svg" },
-  { label: "Fireworks AI", icon: "/images/integrations/fireworks_ai_icon.svg" },
-  { label: "n8n", icon: "/images/integrations/n8n_icon.svg" },
-  { label: "Dify", icon: "/images/integrations/dify_icon.svg" },
-  { label: "HuggingFace", icon: "/images/integrations/huggingface_icon.svg" },
-  { label: "Portkey", icon: "/images/integrations/portkey_icon.svg" },
-  { label: "Mastra", icon: "/images/integrations/mastra_icon.png" },
-  { label: "AutoGen", icon: "/images/integrations/autogen_icon.svg" },
-  { label: "Pipecat", icon: "/images/integrations/pipecat_icon.svg" },
-  { label: "Ragas", icon: "/images/integrations/ragas_icon.svg" },
-  { label: "PromptFoo", icon: "/images/integrations/promptfoo_icon.svg" },
+  { label: "DSPy", href: "/integrations/frameworks/dspy", icon: "/images/integrations/dspy_icon.png" },
+  {
+    label: "Amazon AgentCore",
+    href: "/integrations/frameworks/amazon-agentcore",
+    icon: "/images/integrations/bedrock_icon.png",
+  },
+  {
+    label: "Strands Agents",
+    href: "/integrations/frameworks/strands-agents",
+    icon: "/images/integrations/strands_agents_icon.svg",
+  },
+  {
+    label: "LlamaIndex",
+    href: "/integrations/frameworks/llamaindex",
+    icon: "/images/integrations/llamaindex_icon.png",
+  },
+  { label: "Agno Agents", href: "/integrations/frameworks/agno-agents", icon: "/images/integrations/agno_icon.jpg" },
+  { label: "Temporal", href: "/integrations/frameworks/temporal", icon: "/images/integrations/temporal.svg" },
+  {
+    label: "Agentic Data Stack",
+    href: "/integrations/agentic-data-stack",
+    icon: "/images/integrations/opentelemetry_icon.svg",
+  },
+  { label: "Mastra", href: "/integrations/frameworks/mastra", icon: "/images/integrations/mastra_icon.png" },
+  {
+    label: "Claude Agent SDK (JS)",
+    href: "/integrations/frameworks/claude-agent-sdk-js",
+    icon: "/images/integrations/anthropic_icon.png",
+  },
+  { label: "Promptfoo", href: "/integrations/other/promptfoo", icon: "/images/integrations/promptfoo_icon.svg" },
+  {
+    label: "Microsoft Agent Framework",
+    href: "/integrations/frameworks/microsoft-agent-framework",
+    icon: "/images/integrations/microsoft_icon.svg",
+  },
+  {
+    label: "Google Vertex AI",
+    href: "/integrations/model-providers/google-vertex-ai",
+    icon: "/images/integrations/vertexai_icon.png",
+  },
+  { label: "Ragas", href: "/integrations/frameworks/ragas", icon: "/images/integrations/ragas_icon.svg" },
+  { label: "AutoGen", href: "/integrations/frameworks/autogen", icon: "/images/integrations/autogen_icon.svg" },
+  { label: "RAGflow", href: "/integrations/no-code/ragflow", icon: "/images/integrations/ragflow_icon.svg" },
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function IntegrationGroup({
+function IntegrationGroupCard({
   title,
-  href,
   items,
+  className,
 }: {
   title: string;
-  href: string;
-  items: { label: string; icon: React.ReactNode }[];
+  items: { label: string; href: string; icon?: React.ReactNode }[];
+  className?: string;
 }) {
   return (
     <ChipCard
-      tooltip="See all"
-      href={href}
-      className="integration-group flex flex-col gap-3.5 items-start p-3 sm:p-4.5"
+      className={cn(
+        "integration-group flex flex-col gap-3.5 items-start p-3 sm:p-4.5",
+        className
+      )}
     >
-      <Text size="s" className="font-medium text-left text-text-secondary">
-        {title}
-      </Text>
+      <div className="flex flex-row flex-wrap gap-y-1 gap-x-3 justify-between items-baseline w-full">
+        <Text size="s" className="font-medium text-left text-text-secondary">
+          {title}
+        </Text>
+      </div>
       <div className="flex flex-wrap gap-2">
         {items.map((item) => (
-          <IntegrationLabel key={item.label} icon={item.icon} label={item.label} />
+          <IntegrationLabel
+            key={item.label}
+            href={item.href}
+            icon={item.icon}
+            label={item.label}
+          />
         ))}
       </div>
     </ChipCard>
@@ -189,6 +269,7 @@ function MarqueeRow({
         {doubled.map((item, i) => (
           <IntegrationLabel
             key={`${item.label}-${i}`}
+            href={item.href}
             icon={<Image src={item.icon} alt="" width={18} height={18} />}
             label={item.label}
           />
@@ -215,46 +296,27 @@ export function Integrations() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <ChipCard
-          tooltip="See all"
-          href={otelGroup.href}
-          className="integration-group sm:col-span-2 flex flex-col gap-3.5 items-start p-3 sm:p-4.5"
-        >
-          <Text size="s" className="font-medium text-left text-text-secondary">
-            {otelGroup.title}
-          </Text>
-          <div className="flex flex-wrap gap-2">
-            {otelGroup.mainItems.map((item) => (
-              <IntegrationLabel
-                key={item.label}
-                icon={item.icon}
-                label={item.label}
-              />
-            ))}
-            {otelGroup.textItems.map((label) => (
-              <IntegrationLabel key={label} label={label} />
-            ))}
-          </div>
-        </ChipCard>
+        <IntegrationGroupCard
+          className="sm:col-span-2"
+          title={languagesGroup.title}
+          items={languagesGroup.items}
+        />
 
-        <IntegrationGroup
+        <IntegrationGroupCard
           title={agentFrameworksGroup.title}
-          href={agentFrameworksGroup.href}
           items={agentFrameworksGroup.items}
         />
-        <IntegrationGroup
+        <IntegrationGroupCard
           title={modelProvidersGroup.title}
-          href={modelProvidersGroup.href}
           items={modelProvidersGroup.items}
         />
 
-        <ChipCard
-          href="/integrations"
-          className="integration-group sm:col-span-2 flex flex-col gap-4 items-start p-3 sm:p-4.5"
-        >
-          <Text size="s" className="font-medium text-left text-text-secondary">
-            80+ more integrations
-          </Text>
+        <ChipCard className="integration-group sm:col-span-2 flex flex-col gap-4 items-start p-3 sm:p-4.5">
+          <div className="flex flex-row flex-wrap gap-y-1 gap-x-3 justify-between items-baseline w-full">
+            <Text size="s" className="font-medium text-left text-text-secondary">
+              80+ more integrations
+            </Text>
+          </div>
           <div className="flex flex-col gap-2 w-full">
             <MarqueeRow items={marqueeRow1} direction="left" duration={40} />
             <MarqueeRow items={marqueeRow2} direction="right" duration={48} />
