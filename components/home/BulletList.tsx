@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { Text } from "@/components/ui/text";
 
 export interface BulletItem {
@@ -18,7 +18,7 @@ export function BulletList({ items }: { items: BulletItem[] }) {
           {item.href ? (
             <Link
               href={item.href}
-              className="text-[14px] leading-snug font-[430] tracking-[-0.26px] text-text-tertiary underline decoration-line-structure underline-offset-2 transition-colors group-hover:text-text-secondary"
+              variant="text"
             >
               {item.label}
             </Link>
