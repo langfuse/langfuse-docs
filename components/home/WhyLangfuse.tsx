@@ -123,7 +123,7 @@ export function WhyLangfuse() {
     <HomeSection id="why-langfuse" className="pt-[120px]">
       <div className="flex flex-col gap-3 mb-10">
         <Heading as="h2" size="normal">
-          Why choose <TextHighlight>Langfuse</TextHighlight>?
+          <TextHighlight>Why use</TextHighlight> Langfuse?
         </Heading>
         <Text className="max-w-[48ch] text-left">
           Langfuse is the most widely adopted open-source LLM engineering platform.
@@ -169,7 +169,7 @@ export function WhyLangfuse() {
         {reasons.map((item) => (
           <li
             key={item.title}
-            className="grid grid-cols-[1fr_2fr] gap-8 py-2.5 border-b border-line-structure last:border-b-0"
+            className="grid grid-cols-[1fr_3fr] gap-8 py-2.5 border-b border-line-structure last:border-b-0"
           >
             <Text className="font-medium text-left text-text-secondary">
               {item.title}
