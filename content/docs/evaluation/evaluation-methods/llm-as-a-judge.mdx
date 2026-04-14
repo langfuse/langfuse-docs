@@ -18,7 +18,7 @@ This approach has become one of the most popular methods for evaluating LLM appl
 
 ## How LLM-as-a-Judge Works
 
-The core idea is straightforward: present an LLM with the input, the application's output, and a scoring rubric, then ask it to evaluate the output. The judge model produces a [`score`](/docs/evaluation/core-concepts#scores) along with reasoning explaining its assessment.
+The core idea is straightforward: present an LLM with the input, the application's output, and a scoring rubric, then ask it to evaluate the output. The judge model produces a [`score`](/docs/evaluation/scores/overview) along with reasoning explaining its assessment.
 
 A typical LLM-as-a-Judge prompt includes:
 1. **Evaluation criteria** — a rubric defining what "good" looks like (e.g., "Score 1 if the answer is factually incorrect, 5 if fully accurate and well-sourced")
@@ -26,7 +26,7 @@ A typical LLM-as-a-Judge prompt includes:
 3. **Output to evaluate** — the application's response
 4. **Optional reference** — ground truth or expected output for comparison
 
-The judge model then returns a structured score and reasoning that can be tracked, aggregated, and analyzed over time. In Langfuse, that score can be numeric or categorical. Use numeric scores for continuous judgments like helpfulness from `0` to `1`. Use categorical scores when you want explicit labels such as `correct`, `partially_correct`, or `incorrect`.
+The judge model then returns a structured score and reasoning that can be tracked, aggregated, and analyzed over time. In Langfuse, that score can be numeric, categorical, or boolean. Use numeric scores for continuous judgments like helpfulness from `0` to `1`. Use categorical scores when you want explicit labels such as `correct`, `partially_correct`, or `incorrect`. Use boolean scores for binary decisions where the outcome is `true` or `false`, such as whether a user is disagreeing with the assistant, whether a request is out-of-scope, or whether an answer violates policy. For more production-monitoring examples, see [LLM-as-a-Judge for Production Monitoring](/blog/2026-04-01-llm-as-a-judge-production-monitoring).
 
 ## Why use LLM-as-a-Judge?
 
@@ -111,12 +111,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 ### Understanding Each Evaluation Target
 
-<Tabs items={["Live Production Data", "Offline Experiment Data"]} storageKey="eval-data-type">
+<Tabs items={["Live Production Data", "Offline Experiment Data"]}>
 <Tab>
 
 Evaluate live production traffic to monitor your LLM application performance in real-time.
 
-<Tabs items={["Observations (Recommended)", "Traces (Legacy)"]} storageKey="eval-live-target">
+<Tabs items={["Observations (Recommended)", "Traces (Legacy)"]}>
 <Tab>
 
 Run evaluators on individual observations within your traces—such as LLM calls, retrieval operations, embedding generations, or tool calls.
@@ -232,9 +232,9 @@ Langfuse ships a growing catalog of evaluators built and maintained by us and pa
 When the library doesn't fit your specific needs, add your own:
 
 1. Draft an evaluation prompt with `{{variables}}` placeholders (`input`, `output`, `ground_truth` ...).
-2. Choose a **score type**: use **Numeric** for gradients like helpfulness or faithfulness, or **Categorical** for discrete labels.
-3. If you choose **Categorical**, define the allowed categories. Optionally enable **Allow multiple matches** if more than one label can apply. Langfuse will create one score per selected category.
-4. Optional: Customize the **score reasoning** prompt and the numeric **score output** prompt or categorical **category selection** prompt.
+2. Choose a **score type**: use **Numeric** for gradients like helpfulness or faithfulness, **Categorical** for discrete labels, or **Boolean** for `true` / `false` decisions such as `User Disagreement`, `Out-of-Scope Request`, or `Insufficient Answer`.
+3. If you choose **Categorical**, define the allowed categories. Optionally enable **Allow multiple matches** if more than one label can apply. Langfuse will create one score per selected category. **Boolean** evaluators do not require a category list.
+4. Optional: Customize the **score reasoning** prompt and the output prompt for your selected score type.
 5. Optional: Pin a custom dedicated model for this evaluator. If no custom model is specified, it will use the default evaluation model (see Section 2).
 6. Save → the evaluator can now be reused across your project.
 
@@ -243,12 +243,12 @@ When the library doesn't fit your specific needs, add your own:
 
 ### Choose which Data to Evaluate
 
-With your evaluator and model selected, configure which data to run the evaluations on. See the [How it works](#how-it-works) section above to understand which option fits your use case.
+With your evaluator and model selected, configure which data to run the evaluations on. See the [Understanding Each Evaluation Target](#understanding-each-evaluation-target) section above to understand which option fits your use case.
 
-<Tabs items={["Live Production Data", "Offline Experiment Data"]} storageKey="eval-data-type">
+<Tabs items={["Live Production Data", "Offline Experiment Data"]}>
 <Tab>
 
-<Tabs items={["Observations (Recommended)", "Traces (Legacy)"]} storageKey="eval-live-target">
+<Tabs items={["Observations (Recommended)", "Traces (Legacy)"]}>
 <Tab>
 
 **Configuration Steps**
@@ -318,7 +318,7 @@ We recommend migrating to [observation-level evaluators](/faq/all/llm-as-a-judge
 
 You now need to teach Langfuse _which properties_ of your observation, trace, or experiment item represent the actual data to populate these variables for a sensible evaluation. For instance, you might map your system's logged observation input to the prompt's `{{input}}` variable, and the LLM response (observation output) to the prompt's `{{output}}` variable. This mapping is crucial for ensuring the evaluation is sensible and relevant.
 
-<Tabs items={["Live Production Data", "Offline Experiment Data"]} storageKey="eval-data-type">
+<Tabs items={["Live Production Data", "Offline Experiment Data"]}>
 <Tab>
 
 - **Prompt Preview**: As you configure the mapping, Langfuse shows a **live preview of the evaluation prompt populated with actual data**. This preview uses historical data from the last 24 hours that matched your filters. You can navigate through several examples to see how their respective data fills the prompt, helping you build confidence that the mapping is correct.

@@ -1,0 +1,148 @@
+---
+title: How to Answer Support Questions
+description: This internal guide outlines how the langfuse team handles support questions.
+---
+
+# How to Answer Support Questions
+
+This guide outlines how to handle common support questions in a consistent way. Use each question as a playbook: identify the issue, check the relevant systems, and reply with the next clear action for the user. Only assign a ticket to yourself if you are actively working on it.
+We strongly recommend any support engineer to study the Langfuse architecture and implementation in detail by self-hosting Langfuse, implementing Langfuse in private projects, using Langfuse integrations, and building practice projects.
+Generally, always create context around a question. Often, users come with questions but provide limited information. Be confident and ask about their setup and implementation.
+
+<Callout type="info">
+
+Tools you can use to provide better support:
+
+- Pylon
+- Metabase
+- PostHog
+- Stripe
+- Impersonation View
+- Google Forms
+
+</Callout>
+
+## I have higher costs than usual / I was charged unexpectedly
+
+1. Go to Stripe.
+2. Search for the user's account via domain/email and review the latest invoice, subscription, and billing history.
+3. Check whether the increase came from a plan change, usage increase, additional seats, or a one-off charge.
+4. Cross-check the account in Langfuse Impersonation View to confirm workspace usage and any recent changes that could explain the increase.
+5. Reply with the specific reason for the higher cost and link the relevant invoice or billing page if helpful.
+6. If the charge still looks wrong, escalate internally before confirming any refund or billing correction.
+7. **Important:** sometimes Langfuse previously logged unrelated events from OTEL which led to higher costs. [Read more](https://langfuse.com/faq/all/existing-otel-setup#unwanted-spans-in-langfuse)
+8. For refunds above USD 2,000, loop in the team.
+
+## Do you have a bug bounty program / Security Request
+
+1. If the person mentions a real security threat (as shown [here](https://langfuse.com/security/responsible-disclosure#bug-bounty-program)), instantly escalate to a member of the engineering team.
+2. If the person offers their services or minor feedback/recommendations, use the following message:
+
+```text
+Hello X,
+thank you very much for your feedback. At the current time, Langfuse doesn't offer a formal bug bounty program.
+Please have a look at [this page](https://langfuse.com/security/responsible-disclosure#bug-bounty-program) as it offers more information in this matter.
+I hope I was able to help you with your inquiry.
+Best,
+Y
+```
+
+## I am unable to see view X in Langfuse Cloud
+
+1. First verify that Fast Mode (Preview) is toggled on.
+
+```text
+Hello X,
+I am Y, a support engineer at Langfuse. Have you ensured that Fast Mode on the left sidebar is toggled on?
+Please let me know if this solves your issue?
+Best,
+Y
+```
+
+2. If the response shows that they have toggled the Preview on but the issue remains, try to find the root of the problem by yourself and correspond with another support engineer.
+3. If the issue persists, escalate to engineering and thank the customer for their input.
+
+```text
+Hello X,
+the support team has talked about this issue internally and has escalated the ticket to engineering to provide a fix.
+Thank you very much for your feedback.
+Best,
+Y
+```
+
+## Our ingestion is very slow for [X], is this an issue on our side?
+
+1. First check our status page: `status.langfuse.com`.
+2. If no issues is reported on the status page, check DataDog dashboards for any queue delays. 
+2. If there is a known issue with [X], answer in the following way:
+
+```text
+Hello X,
+we are aware of this issue and are working on it.
+We will provide an update on our status page as soon as we have it fixed.
+You can follow the progress on our status page: https://status.langfuse.com
+Best,
+Y
+```
+
+3. If this issue is not known, make sure that this is not reported by multiple customers at the same time. If other support tickets experience the same, escalate to engineering. If there are no other support tickets referencing this issue, keep the message in mind in case it is the first message of many.
+5. Ask the customer about their setup. Are they self-hosted or running on cloud?
+6. If they are self-hosted, ask them about their implementation and which version of Langfuse they are using.
+7. For cloud, try to find a solution internally.
+
+## A customer is leaving Langfuse
+
+1. If a customer decides to leave, reply with empathy and ask for concise feedback on what we can improve.
+2. Use the following message:
+
+```text
+Hi X,
+
+Thanks for reaching out and sorry to hear that Langfuse fell short for you. We are working hard to improve Langfuse and would be super grateful if you could share a few bullets about what we can improve.
+
+Thanks so much!
+```
+
+## I can't login to my account / Login not working
+
+1. If a customer cannot log in, check whether they may have signed up to the wrong data region.
+2. Ask them to try switching the region on the login page.
+3. Use the following message:
+
+```text
+Hi X,
+
+Sorry that you're experiencing this.
+
+Have you tried changing the region on the login page? Sometimes this happens when an account was created in a different data region than the one currently selected.
+
+Please let me know if that solves it.
+
+Best,
+Y
+```
+
+4. If this does not solve the issue, check if other users are experiencing the same issue. If so, escalate to engineering.
+
+## Can we get a 50% discount as a Startup
+
+1. Direct the customer to the startup program page: `https://langfuse.com/startups`.
+2. Ask them to fill out the application form here: `https://forms.gle/eJAYjRWeCZU1Mn6j8`.
+3. Do not promise approval or timeline beyond what is stated on the page or form.
+4. Use the following message:
+
+```text
+Hi X,
+
+Thanks for reaching out. You can find all details about our startup program here:
+https://langfuse.com/startups
+
+To apply, please fill out this form:
+https://forms.gle/eJAYjRWeCZU1Mn6j8
+
+Best,
+Y
+```
+
+
+

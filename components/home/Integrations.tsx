@@ -7,7 +7,7 @@ import { ArrowUpRightFromSquare, Code, MoreHorizontal } from "lucide-react";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import LlamaindexIcon from "./img/llamaindex_icon.png";
-import LangfuseIcon from "@/public/icon.svg";
+import LangfuseIcon from "@/public/langfuse-icon.svg";
 import LangchainIcon from "./img/langchain_icon.png";
 import HaystackIcon from "./img/haystack_icon.png";
 import LitellmIcon from "./img/litellm_icon.png";

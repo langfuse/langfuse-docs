@@ -46,7 +46,7 @@ export default function InkeepSearchBar() {
   };
 
   return (
-    <div className="overflow-hidden h-9">
+    <div className="h-9">
       <SearchBar {...searchBarProps} />
     </div>
   );
