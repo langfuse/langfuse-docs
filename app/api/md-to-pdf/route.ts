@@ -15,6 +15,83 @@ const ALLOWED_HOSTNAMES = [
   "github.com",
 ];
 
+function serializeError(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      cause:
+        error.cause instanceof Error
+          ? {
+              name: error.cause.name,
+              message: error.cause.message,
+              stack: error.cause.stack,
+            }
+          : error.cause,
+    };
+  }
+
+  return {
+    message: String(error),
+  };
+}
+
+function logPdfError(
+  stage: string,
+  error: unknown,
+  context: Record<string, unknown> = {}
+) {
+  console.error(`[md-to-pdf] ${stage}`, {
+    ...context,
+    error: serializeError(error),
+  });
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function errorPageResponse(
+  status: number,
+  title: string,
+  details: Record<string, unknown>
+) {
+  const html = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${escapeHtml(title)}</title>
+    <style>
+      body { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: #0f172a; color: #e2e8f0; margin: 0; padding: 24px; }
+      h1 { font-size: 20px; margin: 0 0 12px; }
+      p { margin: 0 0 16px; color: #94a3b8; }
+      pre { white-space: pre-wrap; word-break: break-word; background: #111827; border: 1px solid #334155; border-radius: 8px; padding: 16px; overflow: auto; }
+      code { font-family: inherit; }
+    </style>
+  </head>
+  <body>
+    <h1>${escapeHtml(title)}</h1>
+    <p>Full diagnostics from <code>/api/md-to-pdf</code>.</p>
+    <pre>${escapeHtml(JSON.stringify(details, null, 2))}</pre>
+  </body>
+</html>`;
+
+  return new NextResponse(html, {
+    status,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
 async function runtimeImport(moduleName: string): Promise<any> {
   const importAtRuntime = new Function("m", "return import(m)");
   return importAtRuntime(moduleName);
@@ -34,15 +111,16 @@ function processCallouts(content: string): string {
 }
 
 export async function GET(request: NextRequest) {
+  const requestUrl = request.nextUrl.toString();
   try {
     const url = request.nextUrl.searchParams.get("url");
     const disposition = request.nextUrl.searchParams.get("disposition");
 
     if (!url || typeof url !== "string") {
-      return NextResponse.json(
-        { error: "Missing or invalid 'url' query parameter" },
-        { status: 400 }
-      );
+      return errorPageResponse(400, "Missing or invalid url query parameter", {
+        requestUrl,
+        query: Object.fromEntries(request.nextUrl.searchParams.entries()),
+      });
     }
 
     let markdownUrl: URL;
@@ -51,10 +129,10 @@ export async function GET(request: NextRequest) {
         ? new URL(url, request.nextUrl.origin)
         : new URL(url);
     } catch {
-      return NextResponse.json(
-        { error: "Invalid URL format" },
-        { status: 400 }
-      );
+      return errorPageResponse(400, "Invalid URL format", {
+        requestUrl,
+        providedUrl: url,
+      });
     }
 
     const allowedHostnames = new Set([
@@ -70,12 +148,14 @@ export async function GET(request: NextRequest) {
       process.env.NODE_ENV !== "development" &&
       !allowedHostnames.has(markdownUrl.hostname)
     ) {
-      return NextResponse.json(
+      return errorPageResponse(
+        400,
+        `Fetching from ${markdownUrl.hostname} is not permitted`,
         {
-          error: `Fetching from ${markdownUrl.hostname} is not permitted.`,
-          allowed: Array.from(allowedHostnames),
-        },
-        { status: 400 }
+          requestUrl,
+          markdownUrl: markdownUrl.toString(),
+          allowedHostnames: Array.from(allowedHostnames),
+        }
       );
     }
 
@@ -112,9 +192,15 @@ export async function GET(request: NextRequest) {
 
     const response = await fetch(markdownUrl.toString());
     if (!response.ok) {
-      return NextResponse.json(
-        { error: `Failed to fetch markdown: ${response.statusText}` },
-        { status: response.status }
+      return errorPageResponse(
+        response.status,
+        "Failed to fetch markdown",
+        {
+          requestUrl,
+          markdownUrl: markdownUrl.toString(),
+          status: response.status,
+          statusText: response.statusText,
+        }
       );
     }
 
@@ -181,23 +267,20 @@ export async function GET(request: NextRequest) {
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
           });
         } catch (fallbackError) {
-          const details =
-            devPuppeteerError instanceof Error
-              ? devPuppeteerError.message
-              : String(devPuppeteerError);
-          console.error("Dev PDF launch failed", {
-            puppeteerError: details,
-            fallbackError:
-              fallbackError instanceof Error
-                ? fallbackError.message
-                : String(fallbackError),
+          logPdfError("dev browser launch failed", fallbackError, {
+            requestUrl,
+            markdownUrl: markdownUrl.toString(),
+            puppeteerError: serializeError(devPuppeteerError),
           });
-          return NextResponse.json(
+          return errorPageResponse(
+            500,
+            "PDF rendering is unavailable locally",
             {
-              error:
-                "PDF rendering is unavailable locally. Install dev dependencies (`pnpm install`) or ensure local Chrome is installed.",
-            },
-            { status: 500 }
+              requestUrl,
+              markdownUrl: markdownUrl.toString(),
+              devPuppeteerError: serializeError(devPuppeteerError),
+              fallbackError: serializeError(fallbackError),
+            }
           );
         }
       }
@@ -214,16 +297,13 @@ export async function GET(request: NextRequest) {
           brotliBinDir || undefined
         );
       } catch (resolveErr) {
-        const err =
-          resolveErr instanceof Error
-            ? resolveErr
-            : new Error(String(resolveErr));
-        console.error("[md-to-pdf] chromium.executablePath failed", {
-          message: err.message,
+        logPdfError("chromium.executablePath failed", resolveErr, {
+          requestUrl,
+          markdownUrl: markdownUrl.toString(),
           sparticuzBinDirOverride: Boolean(brotliBinDir),
           vercel: Boolean(process.env.VERCEL),
         });
-        throw err;
+        throw resolveErr;
       }
 
       if (process.env.VERCEL) {
@@ -241,6 +321,12 @@ export async function GET(request: NextRequest) {
 
     try {
       const page = await browser.newPage();
+      page.on("pageerror", (pageError) => {
+        logPdfError("page error", pageError, {
+          requestUrl,
+          markdownUrl: markdownUrl.toString(),
+        });
+      });
       await page.setContent(fullHtml, { waitUntil: "networkidle0" });
       const pdf = await page.pdf({
         format: "A4",
@@ -260,17 +346,31 @@ export async function GET(request: NextRequest) {
           "Cache-Control": "public, s-maxage=60, stale-while-revalidate=86400",
         },
       });
+    } catch (pdfError) {
+      logPdfError("pdf generation failed", pdfError, {
+        requestUrl,
+        markdownUrl: markdownUrl.toString(),
+      });
+      throw pdfError;
     } finally {
-      await browser.close();
+      try {
+        await browser.close();
+      } catch (closeError) {
+        logPdfError("browser close failed", closeError, {
+          requestUrl,
+          markdownUrl: markdownUrl.toString(),
+        });
+      }
     }
   } catch (error) {
-    console.error("Error generating PDF:", error);
-    return NextResponse.json(
+    logPdfError("request failed", error, { requestUrl });
+    return errorPageResponse(
+      500,
+      "Internal server error while generating PDF",
       {
-        error: "Internal server error while generating PDF",
-        message: "An unexpected error occurred.",
-      },
-      { status: 500 }
+        requestUrl,
+        error: serializeError(error),
+      }
     );
   }
 }
