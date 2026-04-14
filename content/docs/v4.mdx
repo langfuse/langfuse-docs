@@ -24,7 +24,7 @@ Langfuse is now observations-first. Queries that used to require expensive joins
 
 - **SDK:** Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace trace update calls with `propagate_attributes()`.
 - **OTEL:** Set the `x-langfuse-ingestion-version: 4` HTTP header on your span exporter. Propagate trace attributes to _all_ observations. [See setup guide](/integrations/native/opentelemetry)
-- **UI:** Enable the **Preview** toggle (bottom-left) to opt in. Filter observations directly in the new unified table and create saved views for productive defaults. [See saved views guide](/faq/all/explore-observations-in-v4)
+- **UI:** If your organization was created before April 14, 2026, 14:00 UTC (15:00 CET), enable the **Preview** toggle (bottom-left) to opt in. Organizations created on/after this cutoff are already on v4 and do not see the toggle. Filter observations directly in the new unified table and create saved views for productive defaults. [See saved views guide](/faq/all/explore-observations-in-v4)
 - **Evals:** Migrate evals to the observation level. [See evals migration guide](/faq/all/llm-as-a-judge-migration))
 
 ---
@@ -57,10 +57,10 @@ As agentic applications grow more complex, a single trace can contain hundreds o
 
 ## Preview access and rollout timeline
 
-| Organization creation date (Langfuse Cloud) | Fast Preview (v4) default | "Preview" toggle visibility     |
-| ------------------------------------------- | ------------------------- | ------------------------------- |
-| Before April 14, 2026, 10:00 CEST           | Optional                  | Visible (you can switch on/off) |
-| On/after April 14, 2026, 10:00 CEST         | Enabled by default        | Hidden (already on v4)          |
+| Organization creation date (Langfuse Cloud)    | Fast Preview (v4) default | "Preview" toggle visibility     |
+| ---------------------------------------------- | ------------------------- | ------------------------------- |
+| Before April 14, 2026, 14:00 UTC (15:00 CET)   | Optional                  | Visible (you can switch on/off) |
+| On/after April 14, 2026, 14:00 UTC (15:00 CET) | Enabled by default        | Hidden (already on v4)          |
 
 If you signed up recently and do not see the toggle, your organization is already on the new experience by default.
 For organizations created before the cutoff date, the "Preview" toggle is available in the bottom-left corner of the UI to opt in to v4.
