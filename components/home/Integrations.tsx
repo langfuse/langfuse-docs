@@ -105,7 +105,7 @@ function IntegrationGroup({
 
 export function Integrations() {
   return (
-    <HomeSection id="integrations" className="pt-20">
+    <HomeSection id="integrations" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start mb-10">
         <Heading className="text-left max-w-[16ch] sm:max-w-none">
           Works with <TextHighlight>any stack.</TextHighlight>

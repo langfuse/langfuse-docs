@@ -262,9 +262,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         : isSmallSize
           ? "pl-[8px]"
           : "pl-[10px]";
-    const rightPaddingClass =
-      isIconOnly
-        ? ""
+    // When the shortcut key chip is `hidden lg:flex`, mirror left padding below lg so the label stays visually centered.
+    const rightPaddingClass = isIconOnly
+      ? ""
+      : hasShortcut && !showShortcutonMobile
+        ? hasStartIcon
+          ? "pr-[3px] lg:pr-[3px]"
+          : isSmallSize
+            ? "pr-[8px] lg:pr-[3px]"
+            : "pr-[10px] lg:pr-[3px]"
         : hasEndIcon || hasShortcut
           ? "pr-1.5 lg:pr-[3px]"
           : isSmallSize

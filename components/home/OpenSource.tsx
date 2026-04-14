@@ -40,7 +40,7 @@ const cards = [
 
 export const OpenSource = () => {
   return (
-    <HomeSection id="open-source" className="pt-20">
+    <HomeSection id="open-source" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start mb-10">
         <Heading className="text-left max-w-[12ch] sm:max-w-none">
           <TextHighlight>Open Platform.</TextHighlight> Open Source.

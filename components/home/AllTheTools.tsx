@@ -1,23 +1,31 @@
 "use client";
 
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import { HomeSection } from "./HomeSection";
 import { Heading, TextHighlight, ChipCard } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import { FeaturedCustomers } from "./FeaturedCustomers";
-import observabilityVisual from "./img/tools/observability.svg";
-import promptManagementVisual from "./img/tools/prompt.svg";
-import evaluationVisual from "./img/tools/evaluation.svg";
-import playgroundVisual from "./img/tools/playground.svg";
-import experimentsVisual from "./img/tools/experiments.svg";
-import humanAnnotationVisual from "./img/tools/human.svg";
-import metricsAlertsVisual from "./img/tools/metrics.svg";
+import observabilityVisual from "./img/tools/observability.png";
+import promptManagementVisual from "./img/tools/prompt.png";
+import evaluationVisual from "./img/tools/evaluation.png";
+import playgroundVisual from "./img/tools/playground.png";
+import experimentsVisual from "./img/tools/experiments.png";
+import humanAnnotationVisual from "./img/tools/human.png";
+import metricsAlertsVisual from "./img/tools/metrics.png";
 
-/** Chip tool card body copy (Figma: 14 / 400 / 150% / -0.07px). */
 const toolDescriptionClassName =
   "text-left sm:text-[14px] font-normal not-italic leading-[150%] tracking-[-0.07px] text-text-tertiary";
 
-const tools = [
+type ToolEntry = {
+  title: string;
+  description: string;
+  href: string;
+  tooltip: string;
+  span: string;
+  visual: StaticImageData;
+};
+
+const tools: ToolEntry[] = [
   {
     title: "Observability",
     description:
@@ -25,7 +33,7 @@ const tools = [
     href: "/docs/tracing",
     tooltip: "Read more",
     span: "col-span-1",
-    visual: observabilityVisual,
+    visual: observabilityVisual as StaticImageData,
   },
   {
     title: "Evaluation",
@@ -43,16 +51,7 @@ const tools = [
     href: "/docs/prompts",
     tooltip: "Read more",
     span: "col-span-1",
-    visual: promptManagementVisual,
-  },
-  {
-    title: "Cost & Latency",
-    description:
-      "Monitor cost, latency, and quality using customizable dashboards and reports.",
-    href: "/docs/analytics",
-    tooltip: "Read more",
-    span: "col-span-1",
-    visual: metricsAlertsVisual,
+    visual: promptManagementVisual as StaticImageData,
   },
   {
     title: "Playground",
@@ -61,7 +60,7 @@ const tools = [
     href: "/docs/playground",
     tooltip: "Read more",
     span: "col-span-1",
-    visual: playgroundVisual,
+    visual: playgroundVisual as StaticImageData,
   },
   {
     title: "Experiments",
@@ -70,7 +69,7 @@ const tools = [
     href: "/docs/experimentation",
     tooltip: "Read more",
     span: "col-span-1",
-    visual: experimentsVisual,
+    visual: experimentsVisual as StaticImageData,
   },
   {
     title: "Human Annotation",
@@ -79,13 +78,22 @@ const tools = [
     href: "/docs/human-feedback",
     tooltip: "Read more",
     span: "col-span-1",
-    visual: humanAnnotationVisual,
+    visual: humanAnnotationVisual as StaticImageData,
+  },
+  {
+    title: "Cost & Latency",
+    description:
+      "Monitor cost, latency, and quality with dashboards and automated alerts.",
+    href: "/docs/analytics",
+    tooltip: "Read more",
+    span: "col-span-1",
+    visual: metricsAlertsVisual as StaticImageData,
   },
 ];
 
 export function AllTheTools() {
   return (
-    <HomeSection id="all-the-tools" className="pt-20">
+    <HomeSection id="all-the-tools" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start mb-10">
         <Heading>
           All the tools, <TextHighlight>one integrated platform.</TextHighlight>
@@ -98,15 +106,15 @@ export function AllTheTools() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-1 gap-2 xl:grid-cols-3">
-            {tools.slice(0, 3).map((tool, index) => (
+            {tools.slice(0, 3).map((tool) => (
               <ChipCard
                 key={tool.title}
                 href={tool.href}
                 tooltip={tool.tooltip}
-                className='p-0'
+                className="flex flex-col items-stretch p-0 w-full min-w-0 h-full"
               >
-                <div className="flex flex-col sm:flex-row xl:flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start min-h-0 overflow-hidden sm:max-h-[200px] xl:max-h-[337px] h-full">
-                  <div className="flex flex-col flex-1 gap-1 p-4 pb-2.5 min-h-0 shrink-0 h-full">
+                <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden sm:max-h-[200px] sm:flex-row xl:max-h-[337px] xl:flex-col">
+                  <div className="flex shrink-0 flex-col gap-1 p-4 pb-2.5">
                     <Text size="s" className="font-medium text-left text-text-secondary">
                       {tool.title}
                     </Text>
@@ -121,7 +129,9 @@ export function AllTheTools() {
                       width={100}
                       height={100}
                       className="object-contain w-full h-full sm:-translate-y-[40px] xl:translate-y-0"
-                      quality={100} />
+                      quality={100}
+                      unoptimized
+                    />
                   </div>
                 </div>
               </ChipCard>
@@ -133,10 +143,10 @@ export function AllTheTools() {
                 key={tool.title}
                 href={tool.href}
                 tooltip={tool.tooltip}
-                className="p-0"
+                className="flex flex-col items-stretch p-0 w-full min-w-0 h-full"
               >
-                <div className="flex flex-col gap-0 p-0 -mt-px -ml-px first:ml-0 items-start xl:min-h-[277px] xl:max-h-[277px] overflow-hidden h-full">
-                  <div className="flex flex-col gap-1 p-2 pb-2.5 sm:p-4 h-full">
+                <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden lg:min-h-[277px] lg:max-h-[277px]">
+                  <div className="flex flex-col gap-1 p-2 pb-2.5 sm:p-4">
                     <Text size="s" className="font-medium text-left text-text-secondary">
                       {tool.title}
                     </Text>
@@ -151,7 +161,9 @@ export function AllTheTools() {
                       width={100}
                       height={100}
                       className="object-contain w-full h-full -translate-y-[20px]"
-                      quality={100} />
+                      quality={100}
+                      unoptimized
+                    />
                   </div>
                 </div>
               </ChipCard>

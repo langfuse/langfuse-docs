@@ -137,10 +137,16 @@ export function Footer({ className }: { className?: string }) {
           </div>
         </div>
       </CornerBox>
-      <CornerBox className="flex justify-between items-center px-4 py-2.5 -mt-px bg-transparent">
-        <Text size="s" className="font-mono text-left text-text-disabled">
-          &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH / Finto Technologies Inc.
-        </Text>
+      <CornerBox className="flex flex-col gap-y-4 sm:flex-row justify-between sm:items-center px-4 py-2.5 -mt-px bg-transparent">
+        <div className="flex flex-col md:flex-row">
+          <Text size="s" className="font-mono text-left text-text-disabled">
+            &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH
+          </Text>
+          {' '}
+          <Text size="s" className="font-mono text-left text-text-disabled">
+            / Finto Technologies Inc.
+          </Text>
+        </div>
         <Text size="s" className="font-mono text-left text-text-disabled">
           Design by{" "}
           <Link

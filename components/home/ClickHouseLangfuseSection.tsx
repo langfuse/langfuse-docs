@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  */
 export function ClickHouseLangfuseSection() {
   return (
-    <HomeSection id="quickstart" className="pt-20">
+    <HomeSection id="quickstart" className="pt-[120px]">
       <div
         className={cn(
           "flex flex-col gap-2.5 items-center"

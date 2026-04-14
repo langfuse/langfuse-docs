@@ -83,9 +83,6 @@ function RiveInstance({
   useEffect(() => {
     if (!rive) return;
     if (process.env.NODE_ENV === "development") {
-      console.log("[Rive] activeArtboard:", rive.activeArtboard);
-      console.log("[Rive] state machines:", rive.stateMachineNames);
-      console.log("[Rive] animations:", rive.animationNames);
       // Diagnose why canvas listeners may be missing (internal runtime API).
       const internal = rive as unknown as {
         runtime?: { hasListeners?: (sm: unknown) => boolean };
@@ -94,7 +91,6 @@ function RiveInstance({
       const sms = internal.animator?.stateMachines ?? [];
       for (const sm of sms) {
         const hl = internal.runtime?.hasListeners?.(sm.instance);
-        console.log(`[Rive] SM "${sm.name}" playing=${sm.playing} hasListeners=${hl}`);
       }
     }
     onLoaded?.(rive.stateMachineNames ?? []);

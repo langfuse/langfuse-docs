@@ -73,6 +73,11 @@ function AccordionIcon({ isOpen }: { isOpen: boolean }) {
           key={i}
           d={d}
           fill="#6B6B66"
+          initial={{
+            opacity: isOpen ? 0 : 1,
+            x: isOpen ? exitX : 0,
+            y: isOpen ? exitY : 0,
+          }}
           animate={{
             opacity: isOpen ? 0 : 1,
             x: isOpen ? exitX : 0,
@@ -92,6 +97,10 @@ function AccordionIcon({ isOpen }: { isOpen: boolean }) {
         y2="8"
         stroke="#6B6B66"
         strokeLinejoin="round"
+        initial={{
+          opacity: isOpen ? 1 : 0,
+          scaleX: isOpen ? 1 : 0,
+        }}
         animate={{
           opacity: isOpen ? 1 : 0,
           scaleX: isOpen ? 1 : 0,
@@ -111,7 +120,7 @@ export function WhyLangfuse() {
   const [openItem, setOpenItem] = useState<string>("");
 
   return (
-    <HomeSection id="why-langfuse" className="pt-20">
+    <HomeSection id="why-langfuse" className="pt-[120px]">
       <div className="flex flex-col gap-3 mb-10">
         <Heading as="h2" size="normal">
           Why choose <TextHighlight>Langfuse</TextHighlight>?
