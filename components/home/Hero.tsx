@@ -14,7 +14,7 @@ export function Hero() {
       <CornerBox className="-mb-px">
         <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex gap-3 lg:gap-6 justify-center items-center px-4 py-[10px] min-w-max mx-auto">
-            <Text size="s" className="whitespace-nowrap shrink-0"><b className="text-primary">19</b> of Fortune 50</Text>
+            <Text size="s" className="whitespace-nowrap shrink-0">Used by <b className="text-primary">19</b> of Fortune 50</Text>
             <Dot />
             <Text size="s" className="whitespace-nowrap shrink-0"><b className="text-primary">10+ billion</b> observations/month</Text>
             <Dot />
@@ -27,7 +27,7 @@ export function Hero() {
           as="h1"
           size="big"
           className={cn(
-            "flex flex-col items-center gap-1.5 text-center font-medium leading-[105%]",
+            "hidden sm:flex flex-col items-center gap-1.5 text-center font-medium leading-[105%]",
             "[leading-trim:both] [text-edge:cap]"
           )}
         >
@@ -38,11 +38,27 @@ export function Hero() {
             Engineering Platform
           </TextHighlight>
         </Heading>
+        <Heading
+          as="h1"
+          size="big"
+          className={cn(
+            "flex sm:hidden flex-col items-center gap-1.5 text-center font-medium leading-[105%]",
+            "[leading-trim:both] [text-edge:cap]"
+          )}
+        >
+          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">
+            Open Source
+          </TextHighlight>
+          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">
+            LLM Engineering
+          </TextHighlight>
+          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">
+            Platform
+          </TextHighlight>
+        </Heading>
         <div className="flex flex-col gap-6">
           <Text className="max-w-xl">
-            Tracing, prompt management, evaluation, and experiments. Debug
-            production issues in minutes, not hours. Works with any model, any
-            framework, any stack.
+            Debug AI Applications and Agents in minutes. Spot issues before your users do. Collaborate with your team to continuously improve on cost, latency and quality. Any model, any framework. Based on OpenTelemetry.
           </Text>
           <div className="flex flex-wrap gap-3 justify-center items-center">
             <Button

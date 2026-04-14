@@ -36,22 +36,22 @@ const tools: ToolEntry[] = [
     visual: observabilityVisual as StaticImageData,
   },
   {
+    title: "Evaluation",
+    description:
+      "LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.",
+    href: "/docs/scores",
+    tooltip: "Read more",
+    span: "col-span-1",
+    visual: evaluationVisual,
+  },
+  {
     title: "Prompt Management",
     description:
-      "Version-controlled prompts with instant deployment. Update production prompts without code changes. One-click rollback.",
+      "Separate prompts from code with one-click deployments and rollbacks. Turn improving your production prompts a team sport.",
     href: "/docs/prompts",
     tooltip: "Read more",
     span: "col-span-1",
     visual: promptManagementVisual as StaticImageData,
-  },
-  {
-    title: "Evaluation",
-    description:
-      "LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production traces or datasets.",
-    href: "/docs/scores",
-    tooltip: "Read more",
-    span: "col-span-1",
-    visual: evaluationVisual as StaticImageData,
   },
   {
     title: "Playground",
@@ -65,7 +65,7 @@ const tools: ToolEntry[] = [
   {
     title: "Experiments",
     description:
-      "Run experiments on datasets, compare prompts and configs with statistics.",
+      "Define test cases and run experiments. Compare results side by side.",
     href: "/docs/experimentation",
     tooltip: "Read more",
     span: "col-span-1",
@@ -74,7 +74,7 @@ const tools: ToolEntry[] = [
   {
     title: "Human Annotation",
     description:
-      "Queue traces for review and turn feedback into labeled datasets.",
+      "Collaborative Human-in the-Loop workflows to review traces and create golden datasets.",
     href: "/docs/human-feedback",
     tooltip: "Read more",
     span: "col-span-1",
