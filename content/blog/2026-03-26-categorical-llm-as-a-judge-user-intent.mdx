@@ -22,7 +22,7 @@ import { Frame } from "@/components/Frame";
   ![Classifying User Intent with Categorical LLM-as-a-Judge](/images/blog/2026-03-26-categorical-llm-as-a-judge-user-intent/og.jpg)
 </Frame>
 
-We recently shipped [categorical LLM-as-a-judge scores](https://github.com/orgs/langfuse/discussions/4965), a highly requested feature. Instead of only returning numeric scores, evaluators can now return category labels. We wanted to put this to use right away, so we set it up on our own [support chatbot demo application](https://langfuse.com/demo) to classify the user's intent into a fixed set of categories.
+We recently shipped [categorical LLM-as-a-judge scores](https://github.com/orgs/langfuse/discussions/4965), a highly requested feature. Instead of only returning numeric scores, evaluators can now return category labels. To put this to use right away, we set it up on our own [support chatbot demo application](https://langfuse.com/demo) to classify the user's intent into a fixed set of categories.
 
 > New to LLM-as-a-judge? The [docs page](/docs/evaluation/evaluation-methods/llm-as-a-judge) covers the concept in detail.
 
@@ -71,6 +71,8 @@ You will be given the user's message. Classify it into exactly one of the follow
 **Output:** Respond with only the category name, nothing else.
 
 </details>
+
+---
 
 A few things worth noting about this prompt:
 
