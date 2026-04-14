@@ -272,7 +272,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ? "pr-[8px] lg:pr-[3px]"
             : "pr-[10px] lg:pr-[3px]"
         : hasEndIcon || hasShortcut
-          ? "pr-1.5 lg:pr-[3px]"
+          ? "pr-[3px]"
           : isSmallSize
             ? "pr-[8px]"
             : "pr-[10px]";
