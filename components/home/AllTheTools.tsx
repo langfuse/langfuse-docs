@@ -98,7 +98,7 @@ export function AllTheTools() {
         <Heading>
           All the tools, <TextHighlight>one integrated platform.</TextHighlight>
         </Heading>
-        <Text className="text-left max-w-[48ch]">
+        <Text className="text-left max-w-[46ch]">
           One integrated platform to trace, manage prompts, evaluate,
           and experiment from prototype to production scale.
         </Text>

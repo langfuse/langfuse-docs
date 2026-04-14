@@ -288,7 +288,7 @@ export function Integrations() {
         <Heading className="text-left max-w-[16ch] sm:max-w-none">
           Works with <TextHighlight>any stack.</TextHighlight>
         </Heading>
-        <Text className="text-left max-w-[60ch]">
+        <Text className="text-left max-w-[52ch]">
           Langfuse works with any language and framework supporting OTel
           instrumentation. Additionally, 80+ integrations make getting started
           even easier. No framework lock-in.

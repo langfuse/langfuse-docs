@@ -155,9 +155,8 @@ export const RiveSection = () => {
         <Heading>
           <TextHighlight>Launch,</TextHighlight><TextHighlight className="pl-1.5">observe,</TextHighlight><TextHighlight className="min-[393px]:pl-1.5">improve</TextHighlight> — repeat.
         </Heading>
-        <Text className="text-left max-w-[48ch]">
-          Most teams build prompts locally, deploy them, then lose visibility.
-          LLM Engineering Helps you ship AI Applications from prototype to production at scale.
+        <Text className="text-left max-w-[64ch]">
+          Langfuse helps you ship AI Agents/Products from prototype to production and beyond. Once in production we power your continous improvement loop using production data to make your agents and LLM applications ever more powerful.
         </Text>
       </div>
 

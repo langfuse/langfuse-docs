@@ -37,7 +37,7 @@ export const Enterprise = () => {
         <Heading>
           Enterprise <TextHighlight>Scale and Security</TextHighlight>.
         </Heading>
-        <Text className="text-left max-w-[48ch]">
+        <Text className="text-left max-w-[64ch]">
           Traditional observability handles many small spans. LLM systems run differently.
           Every step carries rich, verbose I/O that legacy platforms can't handle at scale.
           Langfuse ingests and queries LLM traces reliably at enterprise scale while following strict compliance frameworks.
