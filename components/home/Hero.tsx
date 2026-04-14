@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 export function Hero() {
   return (
-    <HomeSection className="pt-[40px]">
+    <HomeSection className="pt-[60px]">
       <CornerBox className="-mb-px">
         <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex gap-3 lg:gap-6 justify-center items-center px-4 py-[10px] min-w-max mx-auto">
