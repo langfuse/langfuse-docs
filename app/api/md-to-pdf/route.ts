@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { marked } from "marked";
+import puppeteerCore from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import { stripMdxForPlainMarkdown } from "@/lib/stripMdxForPlainMarkdown.js";
 
 // Force Node.js runtime (required for Puppeteer/Chromium — not compatible with Edge runtime)
@@ -14,6 +16,39 @@ const ALLOWED_HOSTNAMES = [
   "raw.githubusercontent.com",
   "github.com",
 ];
+
+function serializeError(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      cause:
+        error.cause instanceof Error
+          ? {
+              name: error.cause.name,
+              message: error.cause.message,
+              stack: error.cause.stack,
+            }
+          : error.cause,
+    };
+  }
+
+  return {
+    message: String(error),
+  };
+}
+
+function logPdfError(
+  stage: string,
+  error: unknown,
+  context: Record<string, unknown> = {}
+) {
+  console.error(`[md-to-pdf] ${stage}`, {
+    ...context,
+    error: serializeError(error),
+  });
+}
 
 async function runtimeImport(moduleName: string): Promise<any> {
   const importAtRuntime = new Function("m", "return import(m)");
@@ -34,6 +69,7 @@ function processCallouts(content: string): string {
 }
 
 export async function GET(request: NextRequest) {
+  const requestUrl = request.nextUrl.toString();
   try {
     const url = request.nextUrl.searchParams.get("url");
     const disposition = request.nextUrl.searchParams.get("disposition");
@@ -181,16 +217,10 @@ export async function GET(request: NextRequest) {
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
           });
         } catch (fallbackError) {
-          const details =
-            devPuppeteerError instanceof Error
-              ? devPuppeteerError.message
-              : String(devPuppeteerError);
-          console.error("Dev PDF launch failed", {
-            puppeteerError: details,
-            fallbackError:
-              fallbackError instanceof Error
-                ? fallbackError.message
-                : String(fallbackError),
+          logPdfError("dev browser launch failed", fallbackError, {
+            requestUrl,
+            markdownUrl: markdownUrl.toString(),
+            puppeteerError: serializeError(devPuppeteerError),
           });
           return NextResponse.json(
             {
@@ -202,28 +232,23 @@ export async function GET(request: NextRequest) {
         }
       }
     } else {
-      const puppeteerCore = await runtimeImport("puppeteer-core");
-      const chromium = await runtimeImport("@sparticuz/chromium");
       // Optional override: absolute path to the `bin` folder that holds *.br files
       // (same directory Sparticuz expects when packaging omits it from the trace).
       const brotliBinDir = process.env.SPARTICUZ_CHROMIUM_BIN_DIR?.trim();
 
       let executablePath: string;
       try {
-        executablePath = await chromium.default.executablePath(
+        executablePath = await chromium.executablePath(
           brotliBinDir || undefined
         );
       } catch (resolveErr) {
-        const err =
-          resolveErr instanceof Error
-            ? resolveErr
-            : new Error(String(resolveErr));
-        console.error("[md-to-pdf] chromium.executablePath failed", {
-          message: err.message,
+        logPdfError("chromium.executablePath failed", resolveErr, {
+          requestUrl,
+          markdownUrl: markdownUrl.toString(),
           sparticuzBinDirOverride: Boolean(brotliBinDir),
           vercel: Boolean(process.env.VERCEL),
         });
-        throw err;
+        throw resolveErr;
       }
 
       if (process.env.VERCEL) {
@@ -232,8 +257,8 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      browser = await puppeteerCore.default.launch({
-        args: chromium.default.args,
+      browser = await puppeteerCore.launch({
+        args: chromium.args,
         executablePath,
         headless: true,
       });
@@ -241,6 +266,12 @@ export async function GET(request: NextRequest) {
 
     try {
       const page = await browser.newPage();
+      page.on("pageerror", (pageError) => {
+        logPdfError("page error", pageError, {
+          requestUrl,
+          markdownUrl: markdownUrl.toString(),
+        });
+      });
       await page.setContent(fullHtml, { waitUntil: "networkidle0" });
       const pdf = await page.pdf({
         format: "A4",
@@ -260,11 +291,24 @@ export async function GET(request: NextRequest) {
           "Cache-Control": "public, s-maxage=60, stale-while-revalidate=86400",
         },
       });
+    } catch (pdfError) {
+      logPdfError("pdf generation failed", pdfError, {
+        requestUrl,
+        markdownUrl: markdownUrl.toString(),
+      });
+      throw pdfError;
     } finally {
-      await browser.close();
+      try {
+        await browser.close();
+      } catch (closeError) {
+        logPdfError("browser close failed", closeError, {
+          requestUrl,
+          markdownUrl: markdownUrl.toString(),
+        });
+      }
     }
   } catch (error) {
-    console.error("Error generating PDF:", error);
+    logPdfError("request failed", error, { requestUrl });
     return NextResponse.json(
       {
         error: "Internal server error while generating PDF",
