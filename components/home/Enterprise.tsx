@@ -23,10 +23,11 @@ const openApis = [
 ];
 
 const security = [
-  { label: "SOC 2 Type II", href: "/security" },
-  { label: "ISO 27001", href: "/security" },
-  { label: "GDPR", href: "/security" },
-  { label: "HIPAA", href: "/security" },
+  { label: "SOC 2 Type II", href: "/security/soc2" },
+  { label: "ISO 27001", href: "/security/iso27001" },
+  { label: "GDPR", href: "/security/gdpr" },
+  { label: "EU, US & Japan Data Regions", href: "/security/data-regions" },
+  { label: "HIPAA eligible", href: "/security/hipaa" },
 ];
 
 export const Enterprise = () => {

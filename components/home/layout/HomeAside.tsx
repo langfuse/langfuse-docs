@@ -70,7 +70,7 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex-1 min-h-0 px-4 py-4">
+    <div className="flex-1 px-4 py-4 min-h-0">
       <Text size="s" className="block text-left font-[580] text-text-primary mb-3 -ml-1.5">
         On this page
       </Text>
@@ -135,7 +135,7 @@ export function HomeAside() {
   return (
     <aside
       data-ai-open={aiOpen || undefined}
-      className="hidden wide:flex wide:data-[ai-open]:hidden flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0"
+      className="hidden wide:flex wide:data-ai-open:hidden flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0"
       style={{
         top: "calc(var(--fd-banner-height, 0px) + 4rem)",
         height: "calc(100vh - var(--fd-banner-height, 0px) - 4rem)",

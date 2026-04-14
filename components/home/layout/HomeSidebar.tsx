@@ -199,6 +199,9 @@ export function HomeSidebar() {
             </div>
           </div>
         </div>
+        <span className="flex px-px w-full bg-line-structure h-[3px]">
+          <span className="w-full h-full rounded-t-sm bg-surface-1" />
+        </span>
       </nav>
     </aside>
   );

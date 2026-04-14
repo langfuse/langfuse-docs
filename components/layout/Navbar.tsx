@@ -33,14 +33,16 @@ const contentStyle = cn('flex items-center w-full bg-surface-1 rounded-sm px-2.5
 
 export function Navbar() {
   return (
-    <header className="sticky z-50 h-16 border-b backdrop-blur-md bg-surface-1 border-line-structure" style={{ top: 'var(--fd-banner-height, 0px)' }}>
-      <nav className="flex mx-auto h-full max-w-360">
+    <header className="sticky z-50 h-16 backdrop-blur-md bg-surface-1" style={{ top: 'var(--fd-banner-height, 0px)' }}>
+      <nav className="flex mx-auto h-full border-b max-w-360 border-line-structure">
         <div className={cn(cornersStyle, 'pr-0 lg:max-w-[240px] lg:pr-px')}>
           <div className={cn(contentStyle, 'rounded-r-none lg:rounded-r-sm')}>
             <Logo />
           </div>
         </div>
-        <div className={cn(cornersStyle, 'hidden px-0 lg:flex')}>
+        <div className={cn(cornersStyle, 'hidden relative px-0 lg:flex')}>
+          <div className="absolute bottom-[-6px] left-0 w-[6px] h-[5px] bg-left-corner" />
+          <div className="absolute hidden wide:block bottom-[-6px] right-0 w-[6px] h-[5px] bg-right-corner" />
           <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1'>
             <InkeepSearchBar className="hidden" />
             <NavLinks sectionNavData={sectionNavData} />
