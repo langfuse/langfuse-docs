@@ -93,7 +93,7 @@ const tools: ToolEntry[] = [
 
 export function AllTheTools() {
   return (
-    <HomeSection id="all-the-tools" className="pt-[120px]">
+    <HomeSection id="platform-features" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start mb-10">
         <Heading>
           All the tools, <TextHighlight>one integrated platform.</TextHighlight>

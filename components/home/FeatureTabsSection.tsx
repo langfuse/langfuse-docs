@@ -4,7 +4,7 @@ import { FeatureTabs, featureTabsData } from "./feature-tabs";
 
 export function FeatureTabsSection() {
   return (
-    <HomeSection id="features" className="pt-[120px]">
+    <HomeSection id="overview" className="pt-[120px]">
       {/* Suspense required because FeatureTabs uses useSearchParams() */}
       <Suspense>
         <FeatureTabs features={featureTabsData} />

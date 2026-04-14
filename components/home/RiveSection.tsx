@@ -67,7 +67,7 @@ const MOBILE_TABS: Array<{ key: string; label: string } & RiveLabel> = [
   })),
 ];
 
-const noopSubscribe = () => () => {};
+const noopSubscribe = () => () => { };
 
 /** Radix Tabs uses React useId(); defer mounting until after hydration to avoid SSR/client ID drift. */
 function useTabsClientMounted() {
@@ -150,7 +150,7 @@ export const RiveSection = () => {
   const mobileTabsMounted = useTabsClientMounted();
 
   return (
-    <HomeSection id="demo" className="pt-[120px]">
+    <HomeSection id="llm-engineering-loop" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start">
         <Heading>
           <TextHighlight>Launch,</TextHighlight><TextHighlight className="pl-1.5">observe,</TextHighlight><TextHighlight className="min-[393px]:pl-1.5">improve</TextHighlight> — repeat.
