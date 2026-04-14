@@ -90,7 +90,7 @@ function MobileTabsShell() {
               className={cn(
                 "shrink-0 px-3 py-3 text-sm whitespace-nowrap",
                 tab.key === "overview"
-                  ? "border-b-[1.5px] border-text-primary -mb-px font-medium text-text-primary"
+                  ? "border-b-[1.5px] border-text-primary -mb-px font-bold text-text-primary"
                   : "text-text-tertiary"
               )}
             >
@@ -187,7 +187,7 @@ export const RiveSection = () => {
                       className={cn(
                         "shrink-0 px-3 py-3 text-sm text-text-tertiary whitespace-nowrap cursor-pointer",
                         "border-b-[1.5px] border-transparent -mb-px",
-                        "data-[state=active]:text-text-primary data-[state=active]:border-text-primary",
+                        "data-[state=active]:font-[580] data-[state=active]:text-text-primary data-[state=active]:border-text-primary",
                         "transition-colors duration-150 outline-none"
                       )}
                     >
