@@ -1,0 +1,59 @@
+---
+title: How do I work with observations in Langfuse v4?
+description: Guide for transitioning from the traces table to the unified observations table in Langfuse v4, with before/after workflow comparisons and SDK upgrade steps.
+tags: [observability, tracing, evaluation]
+---
+
+# How to Work with Observations in Langfuse v4
+
+In v4, the traces table is replaced by a single unified **observations table**. Trace-level metadata (user, session, tags) is propagated onto each observation at write-time, so everything is filterable from one place.
+
+<Callout type="info">
+  For the full background on this change, see the [changelog](/changelog/2026-03-10-simplify-for-scale) and [blog post](/blog/2026-03-10-simplify-langfuse-for-scale).
+</Callout>
+
+## What Changed
+
+After upgrading to Python SDK v4 / JS SDK v5, **trace-level input and output will no longer be populated**. Inputs and outputs now live on the observations themselves. Use **Parent Observation = None** to find root-level spans — the equivalent of what trace I/O used to show you.
+
+<Callout type="warning">
+  New ingestion will not populate trace input/output. To see what was previously shown as trace I/O, filter the observations table for **Parent Observation = None** and look at the root observation's input/output.
+</Callout>
+
+## Before → After: Common Workflows
+
+| I want to… | v3 (before) | v4 (after) | Key change |
+|---|---|---|---|
+| See all requests for a user | Traces table → User = "user-123" | Observations table → User = "user-123" + Parent Observation = None | Parent = None replaces the traces list |
+| View request input/output | Trace detail page → input/output fields | Observations table → root observation (Parent = None) → input/output | Trace I/O is gone; it's on the root observation now |
+| Find all LLM generations | Observations table → Type = Generation (couldn't filter by user/session) | Observations table → Type = Generation + any trace-level filter (user, session, tags) | No more switching between tables; user/session filters work directly |
+| Debug a specific trace | Traces table → click trace → tree view | Observations table → Trace ID = "xxx" or click any observation → peek view | Same tree, different entry point |
+| Check cost for a session | Traces table → Session = "abc" → sum across traces (slow join) | Observations table → Session = "abc" + Type = Generation → direct aggregation | No join needed — much faster |
+| Find failed tool calls | Traces → open each trace → scan the tree manually | Observations table → Name = "tool_call" + Status = Error | Filterable across all traces at once |
+| See evaluation scores | Trace-level scores | Observation-level scores (executes in seconds now) | Scores attach to observations, not traces |
+| Replicate the old traces list | Traces table (default) | Saved view: Parent Observation = None + columns for User, Session, Tags, Cost | Save this as your project default view |
+
+## Upgrade Checklist
+
+| Step | Detail |
+|---|---|
+| **Upgrade SDK** | Python SDK v4 (`langfuse>=4.0`) or JS/TS SDK v5 (`langfuse@latest`) or OTel with `x-langfuse-ingestion-version: 4` header |
+| **Propagate attributes** | Call `propagate_attributes()` (Python) / `propagateAttributes()` (JS/TS) so user/session/tags appear on every observation |
+| **Create saved views** | **Parent Observation = None** for a traces-like default; **Type = Generation** for cost monitoring; **Status = Error** for triage |
+| **Expect no trace I/O** | New ingestion won't populate trace input/output — find them on the root observation instead |
+
+## Compatibility Note
+
+If you are still using an older SDK version, your data will continue to appear in Langfuse but with a ~3–5 minute delay due to micro-batch backfill. Upgrading your SDK removes this delay.
+
+## Learn More
+
+- [Changelog: Simplify for Scale](/changelog/2026-03-10-simplify-for-scale)
+- [Blog: Simplify Langfuse for Scale](/blog/2026-03-10-simplify-langfuse-for-scale)
+- [Tracing data model](/docs/observability/data-model)
+- [Observation types reference](/docs/observability/features/observation-types)
+- [SDK upgrade paths](/docs/observability/sdk/upgrade-path)
+
+import GitHubStarCTA from "@/components-mdx/github-cta.mdx";
+
+<GitHubStarCTA />
