@@ -1,4 +1,4 @@
-import { Callout } from "@/components/docs";
+import { Callout } from "@/components/ui/callout";
 import { Link } from "@/components/ui/link";
 
 interface PropagationRestrictionsCalloutProps {
@@ -27,8 +27,7 @@ export function PropagationRestrictionsCallout({
   const isGeneric = !attributes || attributes.length === 0;
 
   return (
-    <Callout type="info">
-      <strong>Note on Attribute Propagation</strong>
+    <Callout type="info" title="Note on Attribute Propagation">
       {isGeneric ? (
         <div className="my-3">
           We use Attribute Propagation to propagate specific attributes (userId,

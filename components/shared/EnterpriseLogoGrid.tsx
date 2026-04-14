@@ -135,7 +135,7 @@ export const EnterpriseLogoGrid = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-8 auto-rows-fr",
+        "grid grid-cols-3 sm:grid-cols-4 auto-rows-fr",
         small && "grid-cols-4",
         className,
       )}

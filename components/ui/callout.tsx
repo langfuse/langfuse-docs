@@ -18,7 +18,7 @@ export function Callout({
   ...props
 }: { title?: ReactNode } & Omit<CalloutContainerProps, 'title'>) {
   return (
-    <CalloutContainer {...props}>
+    <CalloutContainer title={title} {...props}>
       {title && <CalloutTitle>{title}</CalloutTitle>}
       <CalloutDescription>{children}</CalloutDescription>
     </CalloutContainer>
@@ -26,6 +26,7 @@ export function Callout({
 }
 
 export interface CalloutContainerProps extends ComponentProps<'div'> {
+  title?: ReactNode;
   children?: ReactNode;
   type?: CalloutType;
   icon?: ReactNode;
@@ -43,6 +44,7 @@ export function CalloutContainer({
   type: inputType = 'info',
   icon,
   emoji,
+  title,
   children,
   className,
   style,
@@ -50,12 +52,14 @@ export function CalloutContainer({
 }: CalloutContainerProps) {
   const type = resolveAlias(inputType);
   const tone = `var(--callout-${type}, var(--color-fd-muted))`;
+  const iconClassName = cn(iconClass, !title && 'mt-0');
 
   return (
     <CornerBox>
       <div
         className={cn(
           'bg-stripe-pattern callout-stripe-fade flex border p-4 gap-2 text-sm text-primary',
+          !title && 'items-center',
           className,
         )}
         style={
@@ -69,11 +73,11 @@ export function CalloutContainer({
       >
         {icon ?? emoji ??
           {
-            info: <IconInfo className={iconClass} />,
-            warning: <IconWarning className={iconClass} />,
-            error: <IconError className={iconClass} />,
-            success: <IconSuccess className={iconClass} />,
-            idea: <IconIdea className={iconClass} />,
+            info: <IconInfo className={iconClassName} />,
+            warning: <IconWarning className={iconClassName} />,
+            error: <IconError className={iconClassName} />,
+            success: <IconSuccess className={iconClassName} />,
+            idea: <IconIdea className={iconClassName} />,
           }[type]}
         <div className="flex flex-col min-w-0 flex-1">{children}</div>
       </div>

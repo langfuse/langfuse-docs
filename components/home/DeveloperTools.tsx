@@ -16,22 +16,6 @@ const CLI_HREF = "/docs/api-and-data-platform/features/cli";
 const DOCS_MCP_HREF = "/docs/docs-mcp";
 const PLATFORM_MCP_HREF = "/docs/api-and-data-platform/features/mcp-server";
 
-/** @TODO - can we remove this? */
-function CardVisualSlot({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn("relative mt-auto w-full min-h-[104px] shrink-0", className)}
-      aria-hidden
-    >
-      <div className="flex absolute inset-x-0 bottom-0 top-3 justify-end items-end pointer-events-none">
-        <div
-          className="h-[88px] w-[min(100%,200px)] rounded-sm border border-dashed border-line-structure/60 bg-muted/10"
-        />
-      </div>
-    </div>
-  );
-}
-
 export const DeveloperTools = () => {
   return (
     <HomeSection id="developer-tools" className="pt-20">

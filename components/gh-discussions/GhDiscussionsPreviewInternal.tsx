@@ -334,7 +334,7 @@ const GhDiscussionsPreviewInternal = ({
           <TabsContent value="Ideas">{renderDiscussions("Ideas")}</TabsContent>
         </div>
       </Tabs>
-      <div className="mt-2 text-xs text-primary/70">
+      <div className="mt-2 text-xs text-text-tertiary">
         <span>
           Discussions last updated:{" "}
           {new Date(discussionsCached.updated_at).toLocaleString()} ({timeDiff})

@@ -59,7 +59,7 @@ export function PricingPage({
   const variant = isPricingPage ? initialVariant : localVariant;
 
   return (
-    <HomeSection id="pricing" className={cn(isPricingPage && "px-0 sm:px-0")}>
+    <HomeSection id="pricing" className={cn("not-prose", isPricingPage && "px-0 sm:px-0")}>
       <div className="isolate overflow-hidden">
         <div className="flow-root pb-16 lg:pb-0">
           <div className="mx-auto max-w-7xl">
@@ -107,7 +107,7 @@ export function PricingPage({
           <>
             <div className="relative">
               <div className={cn(
-                "mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8",
+                "mx-auto max-w-7xl px-3 py-12 sm:py-16 lg:px-4",
                 variant === "cloud" ? "mt-16" : "mt-0"
               )}>
                 {variant === "cloud" && <PricingCalculator />}

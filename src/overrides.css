@@ -24,9 +24,6 @@
   background-color: var(--surface-bg);
   --cursor-x: 50%;
   --cursor-y: 50%;
-  /* @TODO - probably not needed
-   position: relative;
-  isolation: isolate; */
   max-width: none;
 }
 
@@ -143,6 +140,7 @@
   min-width: 0;
   max-width: 100%;
   scrollbar-width: thin;
+  font-size: 13px;
 }
 #nd-docs-layout #nd-sidebar::-webkit-scrollbar {
   width: 2px;
@@ -571,6 +569,7 @@
   max-height: calc(100dvh - 102px);
   border-bottom-width: 0;
   border-radius: 0 !important;
+  z-index: 10;
 }
 
 #nd-toc > div {
@@ -723,6 +722,14 @@ ul[data-gh-discussions-list] {
   box-shadow: none;
 }
 
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  border: 1px solid var(--line-structure);
+  border-radius: 4px;
+  background: var(--surface-bg);
+  color: var(--text-tertiary);
+  font-variant-numeric: ordinal;
+}
+
 /* No dark background of videos */
 media-outlet {
   background-color: transparent !important;
@@ -813,6 +820,14 @@ li:has(> .subseparator) {
   height: 1px;
   background-color: var(--line-structure);
   pointer-events: none;
+}
+
+#nd-docs-layout #nd-sidebar > div > div > div > p,
+#nd-sidebar-mobile > div > div > div > p {
+  width: 100%;
+  border-top: 1px solid var(--line-structure);
+  padding-top: 12px;
+  margin-top: 8px;
 }
 
 #nd-page > .prose {

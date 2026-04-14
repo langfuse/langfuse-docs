@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/hover-card";
 import { Github, Linkedin, Twitter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Text } from "@/components/ui/text";
+import { CornerBox } from "./ui";
 
 export type Author = {
   firstName: string;
@@ -140,33 +142,33 @@ export const AuthorHoverCardContent = ({
   align?: "start" | "center" | "end";
 }) => {
   return (
-    <HoverCardContent className="w-56 p-0" side={side} align={align}>
-      <div className="flex flex-col text-left w-full">
-        <div className="flex items-center gap-3 justify-start p-2">
+    <HoverCardContent className="w-56 p-0 box-corners" side={side} align={align}>
+      <div className="flex flex-col text-left w-full relative z-51">
+        <div className="flex items-center gap-3 justify-start pt-3 pb-4 px-4">
           <Image
             src={author.image}
             width={36}
             height={36}
-            className="rounded-full border border-border"
+            className="rounded-full border border-line-structure"
             alt={`Picture ${author.name}`}
           />
-          <div className="space-y-0.5 text-left">
-            <h4 className="text-sm font-semibold">{author.name}</h4>
+          <div className="space-y-0.5">
+            <Text as="h4" size="s" className="font-[540] text-left text-text-primary">{author.name}</Text>
             {author.title && (
-              <span className="text-xs text-muted-foreground block">
+              <Text className="text-xs text-left text-text-tertiary block">
                 {author.title}
-              </span>
+              </Text>
             )}
           </div>
         </div>
         <Separator />
-        <div className="flex flex-col gap-0.5 w-full p-2">
+        <div className="flex flex-col gap-0.5 w-full py-3 px-4">
           {author.twitter && (
             <Link
               href={`https://twitter.com/${author.twitter}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+              className="flex items-center gap-2 text-text-tertiary hover:text-text-primary transition-colors p-1 -ml-1"
             >
               <Twitter className="h-4 w-4" />
               <span className="text-xs">@{author.twitter}</span>
@@ -177,7 +179,7 @@ export const AuthorHoverCardContent = ({
               href={`https://github.com/${author.github}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+              className="flex items-center gap-2 text-text-tertiary hover:text-text-primary transition-colors p-1 -ml-1"
             >
               <Github className="h-4 w-4" />
               <span className="text-xs">{author.github}</span>
@@ -188,7 +190,7 @@ export const AuthorHoverCardContent = ({
               href={`https://www.linkedin.com/in/${author.linkedin}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+              className="flex items-center gap-2 text-text-tertiary hover:text-text-primary transition-colors p-1 -ml-1"
             >
               <Linkedin className="h-4 w-4" />
               <span className="text-xs">LinkedIn</span>

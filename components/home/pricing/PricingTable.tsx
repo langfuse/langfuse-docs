@@ -1163,7 +1163,7 @@ const sections: Section[] = [
         href: "/security/dpa",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-        
+
         },
       },
       {
@@ -1346,7 +1346,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
               </div>
             )}
 
-          <CardHeader className="p-4 text-left lg:p-6">
+          <CardHeader className="p-3 text-left lg:p-4">
             <CardTitle className="text-lg font-semibold text-foreground">
               {tier.name}
             </CardTitle>
@@ -1363,7 +1363,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
               )}
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0 px-4 lg:px-6">
+          <CardContent className="p-0 px-3 lg:px-4">
             {/* Price information */}
             <div className="h-[60px] flex items-baseline">
               <span className="text-3xl font-bold">{tier.price}</span>
@@ -1406,7 +1406,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
             </div>
 
             {/* Callouts for different tiers - always render container for alignment */}
-            <div className="p-6 h-[30px] flex items-center justify-center">
+            <div className="px-3 lg:px-4 py-6 h-[30px] flex items-center justify-center">
               {tier.calloutLink ? (
                 <div className="text-xs text-center text-muted-foreground">
                   <Link
@@ -1428,7 +1428,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
             </>
           )}
           <div className="border-t"></div>
-          <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6">
+          <CardFooter className="flex-col gap-2 items-start p-3 lg:p-4">
             <ul className="space-y-2.5 text-sm">
               {tier.mainFeatures.map((feature, index) => (
                 <li key={index} className="flex space-x-2">

@@ -86,7 +86,7 @@ function WatchWalkthroughsInner({ className }: { className?: string }) {
                 <Button
                   asChild
                   variant="outline"
-                  className="justify-start w-full"
+                  className="justify-start"
                 >
                   <Link href={tab.docs.href}>
                     <BookOpen size={16} />

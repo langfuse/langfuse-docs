@@ -107,7 +107,7 @@ export function HomeSidebar() {
       <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 rounded-sm bg-surface-1">
         <div className="pb-px bg-line-structure">
           <div className="px-2 py-4 rounded-sm bg-surface-1">
-            <Text size="s" className="px-2 mb-3 font-[430] text-left text-text-primary">Community Stats</Text>
+            <Text size="s" className="px-2 mb-3 font-[430] text-left text-[13px] text-text-primary">Community Stats</Text>
             <div className="flex flex-col gap-[2px] mb-[2px]">
               {communityStats.map((stat) => (
                 <LinkBox
@@ -117,8 +117,8 @@ export function HomeSidebar() {
                   className="block px-2 w-full hover:bg-surface-bg"
                 >
                   <div className="flex gap-2 justify-between items-center w-full">
-                    <Text size="s" className="text-left group-hover:text-text-primary">{stat.label}</Text>
-                    <Text size="s" className="tabular-nums text-right shrink-0 group-hover:text-text-primary">
+                    <Text size="s" className="text-left group-hover:text-text-primary text-[13px]">{stat.label}</Text>
+                    <Text size="s" className="tabular-nums text-right shrink-0 text-[13px] group-hover:text-text-primary">
                       {stat.value}
                     </Text>
                   </div>
@@ -133,8 +133,8 @@ export function HomeSidebar() {
                 className="block px-2 w-full hover:bg-surface-bg"
               >
                 <div className="flex gap-2 justify-between items-center w-full">
-                  <Text size="s" className="text-left group-hover:text-text-primary">Latest OSS release</Text>
-                  <Text size="s" className="text-right shrink-0 group-hover:text-text-primary">
+                  <Text size="s" className="text-left text-[13px] group-hover:text-text-primary">Latest OSS release</Text>
+                  <Text size="s" className="text-right text-[13px] shrink-0 group-hover:text-text-primary">
                     {formatRelativeDate(latestReleaseDate)}
                   </Text>
                 </div>
@@ -147,7 +147,7 @@ export function HomeSidebar() {
         <div className="pb-px bg-line-structure">
           <div className="px-2 py-4 rounded-sm bg-surface-1">
             <div className="flex justify-between items-center px-2 mb-3">
-              <Text size="s" className="font-[430] text-left text-text-primary">
+              <Text size="s" className="font-[430] text-[13px] text-left text-text-primary">
                 Changelog
               </Text>
               <Link href="/changelog">
@@ -166,7 +166,7 @@ export function HomeSidebar() {
                   className="block px-2 w-full hover:bg-surface-bg"
                 >
                   <div className="flex flex-col gap-1.5">
-                    <Text size="s" className="leading-snug text-left group-hover:text-text-primary">
+                    <Text size="s" className="leading-snug text-left text-[13px] group-hover:text-text-primary">
                       {item.title}
                     </Text>
                     <Text size="xs" className="text-left no-underline group-hover:text-text-primary">
@@ -184,14 +184,14 @@ export function HomeSidebar() {
           <div className="px-2 py-4 rounded-sm bg-surface-1">
             <Text
               size="s"
-              className="block px-2 mb-2 font-[430] text-left text-text-primary"
+              className="block px-2 mb-2 font-[430] text-left text-[13px] text-text-primary"
             >
               Self Hosting Guides
             </Text>
             <div className="flex flex-col gap-[2px]">
               {selfHostingLinks.map((link) => (
                 <LinkBox key={link.href} href={link.href} className="block px-2 w-full hover:bg-surface-bg">
-                  <Text size="s" className="text-left text-text-tertiary group-hover:text-text-primary">
+                  <Text size="s" className="text-left text-text-tertiary text-[13px] group-hover:text-text-primary">
                     {link.label}
                   </Text>
                 </LinkBox>
