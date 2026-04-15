@@ -182,6 +182,14 @@ const nextConfig = {
           },
         ],
       },
+      // Agent Skills Discovery — CORS and caching
+      {
+        source: "/.well-known/agent-skills/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
+        ],
+      },
       // Mark markdown endpoints as noindex and ensure correct content type
       {
         source: "/:path*.md",
@@ -226,6 +234,16 @@ const nextConfig = {
       // Run BEFORE Next serves content/public files so it can override HTML routes
       // when the client explicitly asks for markdown.
       beforeFiles: [
+        // Agent Skills Discovery (RFC 8615 .well-known URI)
+        {
+          source: "/.well-known/agent-skills",
+          destination: "/well-known-agent-skills.json",
+        },
+        {
+          source: "/.well-known/agent-skills/index.json",
+          destination: "/well-known-agent-skills.json",
+        },
+
         // Optional: make "/" negotiable too (remove if you don't have md-src/index.md)
         {
           source: "/",
@@ -236,7 +254,7 @@ const nextConfig = {
         // Content negotiation: /docs or /docs/observability/overview -> /md-src/... .md
         // Excludes /api, /_next, md-src, .md files, and .txt files (served directly from public/).
         {
-          source: "/:path((?!api|_next|md-src)(?!.*\\.md$)(?!.*\\.txt$).*)",
+          source: "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.md$)(?!.*\\.txt$)(?!.*\\.json$).*)",
           has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
           destination: "/md-src/:path.md",
         },
