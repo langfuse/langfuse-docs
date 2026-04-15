@@ -1,3 +1,5 @@
+"use client";
+
 import { Suspense } from "react";
 import { HomeSection } from "./HomeSection";
 import { FeatureTabs, featureTabsData } from "./feature-tabs";

@@ -1,5 +1,3 @@
-"use client";
-
 import { Hero } from "./Hero";
 import { FeatureTabsSection } from "./FeatureTabsSection";
 import { RiveSection } from "./RiveSection";
