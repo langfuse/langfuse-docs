@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { guidesSource } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
+import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 import { DocsTocFooter } from "@/components/DocsTocFooter";
@@ -51,7 +52,13 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     ogImage?: string | null;
   };
   const pagePath = `/guides${slug.length > 0 ? `/${slug.join("/")}` : ""}`;
-  const canonicalUrl = pageData.canonical ?? buildPageUrl(pagePath);
+  const cookbookMapping = COOKBOOK_ROUTE_MAPPING.find(
+    (r) => r.path === pagePath && r.canonicalPath,
+  );
+  const canonicalUrl =
+    pageData.canonical ??
+    (cookbookMapping ? buildPageUrl(cookbookMapping.canonicalPath!) : null) ??
+    buildPageUrl(pagePath);
   const seoTitle = pageData.seoTitle || page.data.title;
   const ogImage = buildOgImageUrl({
     title: seoTitle,
