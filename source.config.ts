@@ -72,13 +72,20 @@ const customerFrontmatterSchema = baseFrontmatterSchema.extend({
 // remarkPlugins is applied globally in defineConfig; per-collection mdxOptions
 // are only needed for schema customization.
 
-export const docs = defineDocs({
-  dir: "content/docs",
-  docs: { schema: baseFrontmatterSchema },
+// Schema for collections whose sidebar labels can be overridden via frontmatter.
+// shortTitle takes precedence; sidebarTitle is the legacy alias.
+// Both are consumed by the shortTitleTransformer registered in lib/source.ts.
+const sidebarFrontmatterSchema = baseFrontmatterSchema.extend({
+  shortTitle: z.string().nullish(),
+  sidebarTitle: z.string().nullish(),
 });
 
-const selfHostingFrontmatterSchema = baseFrontmatterSchema.extend({
-  sidebarTitle: z.string().nullish(),
+export const docs = defineDocs({
+  dir: "content/docs",
+  docs: { schema: sidebarFrontmatterSchema },
+});
+
+const selfHostingFrontmatterSchema = sidebarFrontmatterSchema.extend({
   label: z.string().nullish(),
 });
 
@@ -103,7 +110,7 @@ export const changelog = defineDocs({
   },
 });
 
-const guidesFrontmatterSchema = baseFrontmatterSchema.extend({
+const guidesFrontmatterSchema = sidebarFrontmatterSchema.extend({
   category: z.string().nullish(),
 });
 
@@ -114,7 +121,7 @@ export const guides = defineDocs({
   },
 });
 
-const faqFrontmatterSchema = baseFrontmatterSchema.extend({
+const faqFrontmatterSchema = sidebarFrontmatterSchema.extend({
   tags: z.array(z.string()).optional(),
 });
 
@@ -125,8 +132,7 @@ export const faq = defineDocs({
   },
 });
 
-const integrationsFrontmatterSchema = baseFrontmatterSchema.extend({
-  sidebarTitle: z.string().nullish(),
+const integrationsFrontmatterSchema = sidebarFrontmatterSchema.extend({
   logo: z.string().nullish(),
 });
 
@@ -139,12 +145,12 @@ export const integrations = defineDocs({
 
 export const security = defineDocs({
   dir: "content/security",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: sidebarFrontmatterSchema },
 });
 
 export const library = defineDocs({
   dir: "content/library",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: sidebarFrontmatterSchema },
 });
 
 export const customers = defineDocs({
@@ -156,7 +162,7 @@ export const customers = defineDocs({
 
 export const handbook = defineDocs({
   dir: "content/handbook",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: sidebarFrontmatterSchema },
 });
 
 export const marketing = defineDocs({

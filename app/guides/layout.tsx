@@ -1,4 +1,4 @@
-import { guidesSource, getPageTreeWithShortTitles } from "@/lib/source";
+import { guidesSource } from "@/lib/source";
 import { SharedDocsLayout } from "@/app/docs/SharedDocsLayout";
 
 export default function GuidesLayout({
@@ -6,5 +6,5 @@ export default function GuidesLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={getPageTreeWithShortTitles(guidesSource, "/guides")}>{children}</SharedDocsLayout>;
+  return <SharedDocsLayout tree={guidesSource.getPageTree()}>{children}</SharedDocsLayout>;
 }

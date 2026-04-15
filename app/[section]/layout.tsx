@@ -10,8 +10,7 @@ import {
   MARKETING_SECTIONS,
   POST_SECTIONS,
   CHANGELOG_SECTIONS,
-  getPageTreeWithShortTitles,
-} from "@/lib/source";
+} from "@/lib/section-registry";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SectionLayoutWrapper } from "./SectionLayoutWrapper";
@@ -43,7 +42,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
   }
 
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
-  const tree = getPageTreeWithShortTitles(config.source, `/${section}`);
+  const tree = config.source.getPageTree();
 
   const isMarketing = MARKETING_SECTION_SLUGS.has(
     section as Parameters<typeof MARKETING_SECTION_SLUGS.has>[0]

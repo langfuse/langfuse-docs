@@ -15,56 +15,72 @@ import {
   marketing,
 } from "../.source/server";
 
+// Shared page-tree transformer that replaces a node's sidebar name with
+// shortTitle ?? sidebarTitle from frontmatter when either field is set.
+// Registered via pageTree.transformers in each loader so layouts call
+// .getPageTree() directly with no post-processing required.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const shortTitleTransformer: any = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  file(node: any, filePath?: string): any {
+    if (!filePath) return node;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const page = (this as any).storage.read(filePath) as
+      | { data?: { shortTitle?: string; sidebarTitle?: string } }
+      | undefined;
+    if (!page) return node;
+    const label = page.data?.shortTitle ?? page.data?.sidebarTitle;
+    return typeof label === "string" ? { ...node, name: label } : node;
+  },
+};
+
 export const source = loader({
   baseUrl: "/docs",
   source: docs.toFumadocsSource(),
-  pageTree: { idPrefix: "docs" },
+  pageTree: { idPrefix: "docs", transformers: [shortTitleTransformer] },
 });
 
 export const selfHostingSource = loader({
   baseUrl: "/self-hosting",
   source: selfHosting.toFumadocsSource(),
-  pageTree: { idPrefix: "self-hosting" },
+  pageTree: { idPrefix: "self-hosting", transformers: [shortTitleTransformer] },
 });
 
-const SELF_HOSTING_BASE = "/self-hosting";
-
-/** Display names for self-hosting sidebar links to main docs (avoid duplicate "Overview"). */
+/** Display names for self-hosting sidebar links that cross-reference main docs pages. */
 const SELF_HOSTING_DOC_LINK_NAMES: Record<string, string> = {
   "/docs/administration/rbac": "RBAC (main docs)",
   "/docs/administration/data-retention": "Data Retention (main docs)",
 };
 
-function mapSelfHostingTreeNodes(nodes: TreeNode[], baseUrl: string): TreeNode[] {
+type TreeNode = { type?: string; name?: string; url?: string; children?: TreeNode[]; [key: string]: unknown };
+
+function mapSelfHostingTreeNodes(nodes: TreeNode[]): TreeNode[] {
   return nodes.map((node) => {
     const mapped = { ...node };
     if (node.type === "page" && node.url) {
       const docLinkName = SELF_HOSTING_DOC_LINK_NAMES[node.url];
       if (typeof docLinkName === "string") {
         mapped.name = docLinkName;
-      } else {
-        const slug = slugFromUrl(node.url, baseUrl);
-        const page = selfHostingSource.getPage(slug) as { data?: ShortTitleData } | undefined;
-        const label = page?.data?.shortTitle ?? page?.data?.sidebarTitle;
-        if (typeof label === "string") {
-          mapped.name = label;
-        }
       }
     }
     if (Array.isArray(node.children) && node.children.length > 0) {
-      mapped.children = mapSelfHostingTreeNodes(node.children, baseUrl);
+      mapped.children = mapSelfHostingTreeNodes(node.children);
     }
     return mapped;
   });
 }
 
+/**
+ * Self-hosting page tree with cross-doc link names overridden.
+ * shortTitle / sidebarTitle overrides are handled by the loader transformer.
+ */
 export function getSelfHostingPageTree(): ReturnType<typeof selfHostingSource.getPageTree> {
   const root = selfHostingSource.getPageTree();
   const children = (root as { children?: unknown[] }).children;
   if (!Array.isArray(children)) return root;
   return {
     ...root,
-    children: mapSelfHostingTreeNodes(children as TreeNode[], SELF_HOSTING_BASE),
+    children: mapSelfHostingTreeNodes(children as TreeNode[]),
   } as ReturnType<typeof selfHostingSource.getPageTree>;
 }
 
@@ -81,119 +97,31 @@ export const changelogSource = loader({
 export const guidesSource = loader({
   baseUrl: "/guides",
   source: guides.toFumadocsSource(),
-  pageTree: { idPrefix: "guides" },
+  pageTree: { idPrefix: "guides", transformers: [shortTitleTransformer] },
 });
 
 export const faqSource = loader({
   baseUrl: "/faq",
   source: faq.toFumadocsSource(),
+  pageTree: { transformers: [shortTitleTransformer] },
 });
 
 export const integrationsSource = loader({
   baseUrl: "/integrations",
   source: integrations.toFumadocsSource(),
-  pageTree: { idPrefix: "integrations" },
+  pageTree: { idPrefix: "integrations", transformers: [shortTitleTransformer] },
 });
-
-const INTEGRATIONS_BASE = "/integrations";
-
-type TreeNode = { type?: string; name?: string; url?: string; children?: TreeNode[]; [key: string]: unknown };
-type ShortTitleData = { shortTitle?: string; sidebarTitle?: string };
-
-/** Slug from a page URL (e.g. "/integrations/other/claude-code" -> ["other", "claude-code"]). */
-function slugFromUrl(url: string, baseUrl: string): string[] {
-  const prefix = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
-  if (url === baseUrl || url === `${baseUrl}/`) return [];
-  if (!url.startsWith(prefix)) return [];
-  const rest = url.slice(prefix.length);
-  return rest ? rest.split("/").filter(Boolean) : [];
-}
-
-/**
- * Walk a page tree and replace each node's `name` with `shortTitle ?? sidebarTitle`
- * when either field is set in the page's frontmatter. Falls back to the existing name.
- */
-function applyShortTitles(
-  nodes: TreeNode[],
-  getPage: (slug: string[]) => { data?: ShortTitleData } | undefined,
-  baseUrl: string
-): TreeNode[] {
-  return nodes.map((node) => {
-    const mapped = { ...node };
-    if (node.type === "page" && node.url) {
-      const slug = slugFromUrl(node.url, baseUrl);
-      const page = getPage(slug);
-      const label = page?.data?.shortTitle ?? page?.data?.sidebarTitle;
-      if (typeof label === "string") {
-        mapped.name = label;
-      }
-    }
-    if (Array.isArray(node.children) && node.children.length > 0) {
-      mapped.children = applyShortTitles(node.children, getPage, baseUrl);
-    }
-    return mapped;
-  });
-}
-
-/**
- * Returns a wrapped getPageTree() for any loader source that applies
- * shortTitle / sidebarTitle overrides to sidebar node names.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getPageTreeWithShortTitles(src: { getPageTree: () => any; getPage: (slug: string[]) => any }, baseUrl: string) {
-  const root = src.getPageTree();
-  const children = (root as { children?: unknown[] }).children;
-  if (!Array.isArray(children)) return root;
-  return {
-    ...root,
-    children: applyShortTitles(children as TreeNode[], (slug) => src.getPage(slug), baseUrl),
-  };
-}
-
-function mapIntegrationsTreeNodes(nodes: TreeNode[], baseUrl: string): TreeNode[] {
-  return nodes.map((node) => {
-    const mapped = { ...node };
-    if (node.type === "page" && node.url) {
-      const slug = slugFromUrl(node.url, baseUrl);
-      if (slug.length > 0) {
-        const page = integrationsSource.getPage(slug) as { data?: ShortTitleData } | undefined;
-        const label = page?.data?.shortTitle ?? page?.data?.sidebarTitle;
-        if (typeof label === "string") {
-          mapped.name = label;
-        }
-      }
-    }
-    if (Array.isArray(node.children) && node.children.length > 0) {
-      mapped.children = mapIntegrationsTreeNodes(node.children, baseUrl);
-    }
-    return mapped;
-  });
-}
-
-/**
- * Integrations page tree with sidebar names replaced by frontmatter `sidebarTitle` when set,
- * so the sidebar shows short names (e.g. "Claude Code") instead of long titles.
- * Returns the same shape as integrationsSource.getPageTree() (Root with name + children).
- */
-export function getIntegrationsPageTree(): ReturnType<typeof integrationsSource.getPageTree> {
-  const root = integrationsSource.getPageTree();
-  const children = (root as { children?: unknown[] }).children;
-  if (!Array.isArray(children)) return root;
-  return {
-    ...root,
-    children: mapIntegrationsTreeNodes(children as TreeNode[], INTEGRATIONS_BASE),
-  } as ReturnType<typeof integrationsSource.getPageTree>;
-}
 
 export const securitySource = loader({
   baseUrl: "/security",
   source: security.toFumadocsSource(),
+  pageTree: { transformers: [shortTitleTransformer] },
 });
 
 export const librarySource = loader({
   baseUrl: "/library",
   source: library.toFumadocsSource(),
-  pageTree: { idPrefix: "library" },
+  pageTree: { idPrefix: "library", transformers: [shortTitleTransformer] },
 });
 
 export const usersSource = loader({
@@ -204,135 +132,10 @@ export const usersSource = loader({
 export const handbookSource = loader({
   baseUrl: "/handbook",
   source: handbook.toFumadocsSource(),
+  pageTree: { transformers: [shortTitleTransformer] },
 });
 
 export const marketingSource = loader({
   baseUrl: "",
   source: marketing.toFumadocsSource(),
 });
-
-/** Slugs that are single marketing pages (content/marketing/*.mdx) */
-export const MARKETING_SLUGS = [
-  "about",
-  "brand",
-  "careers",
-  "cn",
-  "community",
-  "cookie-policy",
-  "enterprise",
-  "find-us",
-  "imprint",
-  "jp",
-  "jp-cloud",
-  "kr",
-  "non-profit",
-  "oss-friends",
-  "press",
-  "pricing",
-  "pricing-self-host",
-  "privacy",
-  "research",
-  "startups",
-  "support",
-  "talk-to-us",
-  "terms",
-  "watch-demo",
-  "wrapped",
-] as const;
-
-// ---------------------------------------------------------------------------
-// Section routing config (formerly lib/sections.ts)
-// Single source of truth: every section is defined once here alongside its loader.
-// ---------------------------------------------------------------------------
-
-const DOC_SECTIONS = {
-  "self-hosting": {
-    source: selfHostingSource,
-    collection: "selfHosting",
-    title: "Self-hosting",
-  },
-  blog: {
-    source: blogSource,
-    collection: "blog",
-    title: "Blog",
-  },
-  changelog: {
-    source: changelogSource,
-    collection: "changelog",
-    title: "Changelog",
-  },
-  guides: {
-    source: guidesSource,
-    collection: "guides",
-    title: "Guides",
-  },
-  faq: {
-    source: faqSource,
-    collection: "faq",
-    title: "FAQ",
-  },
-  integrations: {
-    source: integrationsSource,
-    collection: "integrations",
-    title: "Integrations",
-  },
-  security: {
-    source: securitySource,
-    collection: "security",
-    title: "Security",
-  },
-  library: {
-    source: librarySource,
-    collection: "library",
-    title: "Library",
-  },
-  users: {
-    source: usersSource,
-    collection: "customers",
-    title: "User stories",
-  },
-  handbook: {
-    source: handbookSource,
-    collection: "handbook",
-    title: "Handbook",
-  },
-} as const;
-
-const marketingEntries = Object.fromEntries(
-  MARKETING_SLUGS.map((s) => [
-    s,
-    { source: marketingSource, collection: "marketing" as const, title: s },
-  ])
-);
-
-export const SECTION_CONFIG = { ...DOC_SECTIONS, ...marketingEntries } as const;
-export const SECTION_SLUGS = Object.keys(SECTION_CONFIG) as (keyof typeof SECTION_CONFIG)[];
-export type SectionSlug = (typeof SECTION_SLUGS)[number];
-export const MARKETING_SECTION_SLUGS = new Set(MARKETING_SLUGS);
-
-/** Sections that have their own app route (app/integrations, app/self-hosting, etc.). Exclude from [section]. */
-export const DOCS_STYLE_APP_SECTIONS = new Set([
-  "integrations",
-  "self-hosting",
-  "guides",
-  "library",
-]);
-
-/** Sections that are blog/changelog posts — no left sidebar */
-export const POST_SECTIONS = new Set(["blog", "changelog", "users"]);
-
-/** Changelog posts — no sidebars at all, centered narrow content */
-export const CHANGELOG_SECTIONS = new Set(["changelog"]);
-
-/** Sections served as standalone marketing pages under app/(home)/(marketing)/ */
-export const MARKETING_SECTION_SLUGS_STANDALONE = [
-  "pricing",
-  "pricing-self-host",
-  "talk-to-us",
-  "watch-demo",
-  "startups",
-] as const;
-export type MarketingSlug = (typeof MARKETING_SLUGS)[number];
-/** All marketing pages — use HomeLayout instead of DocsLayout */
-export const MARKETING_SECTIONS = new Set<string>(MARKETING_SLUGS);
-
