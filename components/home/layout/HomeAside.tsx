@@ -137,8 +137,8 @@ export function HomeAside() {
       data-ai-open={aiOpen || undefined}
       className="hidden wide:flex wide:data-ai-open:hidden flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0"
       style={{
-        top: "calc(var(--fd-banner-height, 0px) + 4rem)",
-        height: "calc(100vh - var(--fd-banner-height, 0px) - 4rem)",
+        top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
+        height: "calc(100vh - var(--fd-banner-height, 0px) - var(--lf-nav-primary-height))",
       }}
     >
       <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 gap-4 rounded-sm bg-surface-1">

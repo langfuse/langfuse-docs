@@ -11,7 +11,7 @@ type TocCommunityProps = {
 
 export default function TocCommunity({ className }: TocCommunityProps) {
   return (
-    <div className={cn("px-4 pb-4 pt-3", className)}>
+    <div className={cn("px-2 pb-4 pt-4", className)}>
       <Text size="s" className="font-[580] text-left text-text-primary mb-3">Community</Text>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

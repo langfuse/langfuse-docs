@@ -5,7 +5,6 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { HoverCorners } from "@/components/ui/corner-box";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -30,12 +29,12 @@ const DropdownMenuSubTrigger = React.forwardRef<
     className={cn(
       "link-box relative group flex cursor-default select-none items-center gap-3 px-2 py-2.5 outline-none transition-colors data-[state=open]:bg-surface-bg",
       "font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] text-text-secondary hover:text-text-primary focus:text-text-primary",
+      "box-corners--on-hover",
       inset && "pl-8",
       className
     )}
     {...props}
   >
-    <HoverCorners />
     {children}
     <ChevronRight className="ml-auto h-4 w-4" />
   </DropdownMenuPrimitive.SubTrigger>
@@ -117,7 +116,6 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     checked={checked}
     {...props}
   >
-    <HoverCorners />
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
         <Check className="h-4 w-4" />
@@ -144,7 +142,6 @@ const DropdownMenuRadioItem = React.forwardRef<
     value={value}
     {...props}
   >
-    <HoverCorners />
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
         <Circle className="h-2 w-2 fill-current" />

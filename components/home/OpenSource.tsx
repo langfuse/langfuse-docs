@@ -86,7 +86,7 @@ export const OpenSource = () => {
                 {card.title}
               </Text>
               {card.labels ? (
-                <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="flex flex-col flex-wrap gap-2 justify-start items-start mt-1 md:grid md:grid-cols-2">
                   {card.labels.map((item) => (
                     <IntegrationLabel
                       key={item.label}

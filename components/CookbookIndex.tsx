@@ -51,12 +51,12 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
                   key={page.url}
                   className="no-underline group"
                 >
-                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-border bg-transparent hover:bg-muted/40 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
-                    <FileCode className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm font-medium flex-1 no-underline">
+                  <div className="flex items-center gap-3 rounded-lg border border-border bg-surface-bg px-4 py-3 transition-all duration-200 hover:bg-muted/40 hover:border-border">
+                    <FileCode className="h-4 w-4 shrink-0 text-text-tertiary" />
+                    <span className="flex-1 text-sm font-medium text-text-primary no-underline">
                       {title}
                     </span>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowRight className="h-4 w-4 shrink-0 text-text-tertiary opacity-0 transition-opacity group-hover:opacity-100" />
                   </div>
                 </Link>
               );

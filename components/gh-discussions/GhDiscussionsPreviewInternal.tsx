@@ -277,7 +277,7 @@ const GhDiscussionsPreviewInternal = ({
             </TabsList>
           )}
           <div className="flex items-center space-x-2 w-full sm:w-auto">
-            <div className="relative w-36 h-9 sm:w-48">
+            <div className="relative w-36 h-[26px] sm:w-48">
               <Input
                 type="text"
                 placeholder="Search..."
@@ -292,7 +292,7 @@ const GhDiscussionsPreviewInternal = ({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <DropdownButton icon={<IconSort className="w-4 h-4" />}>
+                <DropdownButton size="small" icon={<IconSort className="w-4 h-4" />}>
                   <span className="min-w-12 text-center">{sortType.charAt(0).toUpperCase() + sortType.slice(1)}</span>
                 </DropdownButton>
               </DropdownMenuTrigger>
@@ -317,6 +317,7 @@ const GhDiscussionsPreviewInternal = ({
             </DropdownMenu>
             <Button
               variant="secondary"
+              size="small"
               href="https://github.com/orgs/langfuse/discussions/new/choose"
               target="_blank"
               rel="noopener noreferrer"

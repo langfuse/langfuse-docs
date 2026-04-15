@@ -55,7 +55,7 @@ export function CalloutContainer({
   const iconClassName = cn(iconClass, !title && 'mt-0');
 
   return (
-    <CornerBox>
+    <CornerBox className="callout">
       <div
         className={cn(
           'bg-stripe-pattern callout-stripe-fade flex border p-4 gap-2 text-sm text-primary',

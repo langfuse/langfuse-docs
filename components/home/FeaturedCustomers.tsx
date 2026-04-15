@@ -36,6 +36,8 @@ const stories = [
 export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br: true } }: { corners?: BoxCorners }) {
   const [active, setActive] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [hoveredLogo, setHoveredLogo] = useState<number | null>(null);
+  const [focusedLogo, setFocusedLogo] = useState<number | null>(null);
   const story = stories[active];
 
   useEffect(() => {
@@ -60,32 +62,55 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
         <div className="flex gap-1 shrink-0">
           {stories.map((s, i) => {
             const isActive = i === active;
+            const showLogoCorners =
+              isActive || hoveredLogo === i || focusedLogo === i;
+            const logoInner = (
+              <div
+                className={cn(
+                  "flex justify-center items-center w-full h-full transition-colors duration-150",
+                  isActive ? "bg-surface-code" : "bg-surface-2"
+                )}
+              >
+                <Image
+                  src={s.logo}
+                  alt={s.name}
+                  width={56}
+                  height={16}
+                  className={[
+                    "object-contain w-5 h-5",
+                    isActive ? "brightness-0 invert" : "",
+                  ].join(" ")}
+                />
+              </div>
+            );
+            const logoShellClass =
+              "flex justify-center items-center p-0.75 w-11 h-11 cursor-pointer";
             return (
               <button
                 key={s.name}
                 onClick={() => setActive(i)}
-                onMouseEnter={() => setActive(i)}
+                onMouseEnter={() => {
+                  setHoveredLogo(i);
+                  setActive(i);
+                }}
+                onMouseLeave={() => setHoveredLogo(null)}
+                onFocus={() => setFocusedLogo(i)}
+                onBlur={() => setFocusedLogo(null)}
                 aria-label={s.name}
                 aria-pressed={isActive}
                 className="relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <CornerBox
-                  className="flex justify-center items-center p-0.75 w-11 h-11 border-none cursor-pointer"
-                  corners={isActive ? undefined : { tl: false, tr: false, bl: false, br: false }}
-                >
-                  <div className={cn("flex justify-center items-center w-full h-full transition-colors duration-150", isActive ? "bg-surface-code" : "bg-surface-2")}>
-                    <Image
-                      src={s.logo}
-                      alt={s.name}
-                      width={56}
-                      height={16}
-                      className={[
-                        "object-contain w-5 h-5",
-                        isActive ? "brightness-0 invert" : "",
-                      ].join(" ")}
-                    />
-                  </div>
-                </CornerBox>
+                {/*
+                  Do not pass all-false `corners` to CornerBox: mask layers become
+                  `none` and the ::before fills with line-cta (solid dark overlay).
+                */}
+                {showLogoCorners ? (
+                  <CornerBox className={cn(logoShellClass, "border-none")}>
+                    {logoInner}
+                  </CornerBox>
+                ) : (
+                  <div className={cn("relative", logoShellClass)}>{logoInner}</div>
+                )}
               </button>
             );
           })}

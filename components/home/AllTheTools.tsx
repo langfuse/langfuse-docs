@@ -95,8 +95,8 @@ export function AllTheTools() {
   return (
     <HomeSection id="platform-features" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start mb-10">
-        <Heading>
-          All the tools, <TextHighlight>one integrated platform.</TextHighlight>
+        <Heading className="sm:max-w-none max-w-[24ch]">
+          All the tools, <TextHighlight className="sm:pr-1.5">one</TextHighlight><TextHighlight>integrated platform.</TextHighlight>
         </Heading>
         <Text className="text-left max-w-[46ch]">
           One integrated platform to trace, manage prompts, evaluate,
@@ -170,7 +170,7 @@ export function AllTheTools() {
             ))}
           </div>
         </div>
-        <FeaturedCustomers corners={{ tl: false, tr: false, bl: false, br: false }} />
+        <FeaturedCustomers />
       </div>
     </HomeSection>
   );

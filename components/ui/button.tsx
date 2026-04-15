@@ -31,8 +31,8 @@ const variantClasses: Record<ButtonVariant, { root: string; key: string }> = {
     key: "border border-[rgba(64,61,57,0.30)] bg-[rgba(64,61,57,0.40)]",
   },
   secondary: {
-    root: "border-line-structure group-hover:border-line-cta bg-surface-bg text-text-secondary",
-    key: "border border-[rgba(64,61,57,0.20)] grou bg-[rgba(64,61,57,0.10)]",
+    root: "border-line-structure dark:border-line-cta group-hover:border-line-cta bg-surface-bg text-text-secondary",
+    key: "border border-[rgba(64,61,57,0.20)] dark:border-[rgba(184,182,160,0.30)] bg-[rgba(64,61,57,0.10)] dark:bg-[rgba(184,182,160,0.12)]",
   },
   text: {
     root: "border-transparent bg-transparent text-text-secondary shadow-none [box-shadow:none] hover:bg-transparent hover:text-text-primary",
@@ -193,7 +193,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const iconEl = icon ? (
       <span
         className={cn(
-          "button-icon-area flex shrink-0 items-center justify-center h-full aspect-square *:max-w-full rounded-[1.5px] border-[0.5px] border-[rgba(64,61,57,0.20)] bg-[rgba(64,61,57,0.10)] dark:bg-transparent p-[2px] text-button-icon pointer-events-none",
+          "button-icon-area flex shrink-0 items-center justify-center h-full aspect-square *:max-w-full rounded-[1.5px] border-[0.5px] border-[rgba(64,61,57,0.20)] dark:border-[rgba(184,182,160,0.25)] bg-[rgba(64,61,57,0.10)] dark:bg-transparent p-[2px] text-button-icon pointer-events-none",
           variant === "secondary" ? "text-text-tertiary" : "text-surface-1"
         )}
         aria-hidden

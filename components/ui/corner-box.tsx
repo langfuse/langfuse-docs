@@ -23,7 +23,7 @@ export type BoxNeighbors = {
 
 /**
  * Corner bracket at each vertex: show only when both edges meeting there are
- * “outer” (no neighbor on that side). Prevents doubled 8×8 markers when cells
+ * "outer" (no neighbor on that side). Prevents doubled 8×8 markers when cells
  * sit in a grid or row.
  */
 export function cornersFromNeighbors(
@@ -60,96 +60,51 @@ function resolveCorners(corners?: BoxCorners): Record<BoxCornerKey, boolean> {
   };
 }
 
-/** Offset by −1px so brackets sit on the border stroke (absolute children align to the padding box, inside the border). */
-const cornerLayout: Record<
-  BoxCornerKey,
-  { className: string; rotateClass: string }
-> = {
-  tl: { className: "-top-px -left-px", rotateClass: "" },
-  tr: { className: "-top-px -right-px", rotateClass: "rotate-90" },
-  br: { className: "-bottom-px -right-px", rotateClass: "rotate-180" },
-  bl: { className: "-bottom-px -left-px", rotateClass: "-rotate-90" },
-};
-
-/** Flush to edges when there is no border (padding box matches content edge). */
-const cornerLayoutNoBorder: Record<
-  BoxCornerKey,
-  { className: string; rotateClass: string }
-> = {
-  tl: { className: "top-0 left-0", rotateClass: "" },
-  tr: { className: "top-0 right-0", rotateClass: "rotate-90" },
-  br: { className: "bottom-0 right-0", rotateClass: "rotate-180" },
-  bl: { className: "bottom-0 left-0", rotateClass: "-rotate-90" },
-};
-
-function CornerBracket({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="8"
-      height="8"
-      viewBox="0 0 8 8"
-      fill="none"
-      className={cn("size-2 shrink-0 text-line-cta", className)}
-      aria-hidden
-    >
-      <path
-        d="M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
 export interface CornerBoxProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Per-corner bracket visibility. Omitted keys default to true. */
   corners?: BoxCorners;
   withStripes?: boolean;
   /** Diagonal stripe background on hover (same tokens as `bg-stripe-pattern`). */
   hoverStripes?: boolean;
-  /** Omit border; corner brackets align flush (`top-0` / `left-0` etc.) instead of −1px inset for border stroke. */
+  /** Omit border; corner brackets align flush with element edge instead of −1px inset for border stroke. */
   noBorder?: boolean;
 }
 
 /**
  * Container with four optional 8×8 corner brackets (Figma-style).
- * For grouped layouts, pass `corners` from `cornersFromNeighbors` or hide
- * individual corners so shared vertices don’t stack two SVGs.
+ * Corners are rendered via a single CSS ::before pseudo-element using
+ * mask-image — no SVG DOM nodes. For grouped layouts, pass `corners` from
+ * `cornersFromNeighbors` or hide individual corners so shared vertices don't
+ * overlap.
  */
 const CornerBox = React.forwardRef<HTMLDivElement, CornerBoxProps>(
-  ({ className, corners, withStripes, hoverStripes, noBorder, children, ...props }, ref) => {
+  ({ className, corners, withStripes, hoverStripes, noBorder, style, children, ...props }, ref) => {
     const resolved = resolveCorners(corners);
-    const layout = noBorder ? cornerLayoutNoBorder : cornerLayout;
+
+    // Build per-corner CSS custom properties: hidden corners are set to "none"
+    // so that mask-image layer for that corner contributes nothing (mask-composite: add).
+    const cornerStyle: Record<string, string> = {};
+    if (!resolved.tl) cornerStyle["--cx-mask-tl"] = "none";
+    if (!resolved.bl) cornerStyle["--cx-mask-bl"] = "none";
+    if (!resolved.br) cornerStyle["--cx-mask-br"] = "none";
+    if (!resolved.tr) cornerStyle["--cx-mask-tr"] = "none";
+
+    const hasCustomCorners = Object.keys(cornerStyle).length > 0;
 
     return (
       <div
         ref={ref}
         className={cn(
           "relative bg-surface-bg",
-          !noBorder && "border border-line-structure",
+          noBorder ? "corner-box-corners-flush" : "border border-line-structure corner-box-corners",
           withStripes && "with-stripes",
           hoverStripes &&
             "group corner-box-hover-stripes transition-[background] duration-180 ease-out",
           className
         )}
+        style={hasCustomCorners ? { ...cornerStyle, ...style } : style}
         {...props}
       >
-        {(Object.keys(layout) as BoxCornerKey[]).map((cornerKey) => {
-          if (!resolved[cornerKey]) return null;
-          const { className: pos, rotateClass } = layout[cornerKey];
-          return (
-            <div
-              key={cornerKey}
-              className={cn(
-                "absolute z-10 origin-center pointer-events-none size-2",
-                pos,
-                rotateClass
-              )}
-            >
-              <CornerBracket />
-            </div>
-          );
-        })}
         {children}
       </div>
     );
@@ -158,32 +113,13 @@ const CornerBox = React.forwardRef<HTMLDivElement, CornerBoxProps>(
 CornerBox.displayName = "CornerBox";
 
 /**
- * Four corner brackets that appear on hover of the nearest `group` ancestor.
- * No props needed — drop inside any `relative group` container.
- * Uses <span> so it is valid inside <a> tags (LinkBox).
+ * Hover-only corner brackets for any `relative` container with a recognised
+ * hover-trigger class (`link-box`, `button-wrapper`, `card-hover-stripes`).
+ * Renders a single absolutely-positioned span whose ::before shows on parent
+ * hover — no SVG nodes. Valid inside <a> tags (uses <span>).
  */
 export function HoverCorners() {
-  return (
-    <>
-      {(Object.keys(cornerLayout) as BoxCornerKey[]).map((key) => {
-        const { className: pos, rotateClass } = cornerLayout[key];
-        return (
-          <span
-            key={key}
-            className={cn(
-              "absolute z-10 origin-center pointer-events-none size-2",
-              "opacity-0 transition-opacity group-hover:opacity-100 duration-120",
-              pos,
-              rotateClass
-            )}
-            aria-hidden
-          >
-            <CornerBracket />
-          </span>
-        );
-      })}
-    </>
-  );
+  return <span aria-hidden className="corner-box-hover-child" />;
 }
 
 export { CornerBox };

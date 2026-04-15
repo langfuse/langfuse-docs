@@ -141,6 +141,7 @@ function NavDropdown({
   const [left, setLeft] = useState(0);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const updateLeft = useCallback(() => {
     if (triggerRef.current) {
@@ -148,10 +149,28 @@ function NavDropdown({
     }
   }, []);
 
-  const toggle = () => {
+  const cancelScheduledClose = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleClose = useCallback(() => {
+    cancelScheduledClose();
+    closeTimerRef.current = setTimeout(() => {
+      setOpen(false);
+      closeTimerRef.current = null;
+    }, 160);
+  }, [cancelScheduledClose]);
+
+  const openDropdown = useCallback(() => {
+    cancelScheduledClose();
     updateLeft();
-    setOpen((v) => !v);
-  };
+    setOpen(true);
+  }, [cancelScheduledClose, updateLeft]);
+
+  useEffect(() => () => cancelScheduledClose(), [cancelScheduledClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -160,26 +179,62 @@ function NavDropdown({
         !triggerRef.current?.contains(e.target as Node) &&
         !panelRef.current?.contains(e.target as Node)
       ) {
+        cancelScheduledClose();
         setOpen(false);
       }
     }
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open]);
+  }, [open, cancelScheduledClose]);
 
   useEffect(() => {
     if (!open) return;
-    const onScroll = () => setOpen(false);
+    const onScroll = () => {
+      cancelScheduledClose();
+      setOpen(false);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [open]);
+  }, [open, cancelScheduledClose]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onResize = () => updateLeft();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [open, updateLeft]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        cancelScheduledClose();
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, cancelScheduledClose]);
 
   return (
-    <>
+    <div
+      className="relative"
+      onMouseEnter={openDropdown}
+      onMouseLeave={scheduleClose}
+      onFocusCapture={openDropdown}
+      onBlurCapture={(e) => {
+        const next = e.relatedTarget as Node | null;
+        if (!next || !e.currentTarget.contains(next)) {
+          scheduleClose();
+        }
+      }}
+    >
       <button
+        type="button"
         ref={triggerRef}
-        onClick={toggle}
         aria-expanded={open}
+        aria-haspopup="true"
         className={navTriggerClassName}
       >
         {label}
@@ -204,7 +259,7 @@ function NavDropdown({
       >
         <NavDropdownPanel links={links} featured={featured} />
       </div>
-    </>
+    </div>
   );
 }
 

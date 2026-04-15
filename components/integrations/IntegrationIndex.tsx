@@ -219,16 +219,14 @@ export const IntegrationIndex = () => {
                         href={page.route}
                         key={page.route}
                         title={page.title}
-                        className="flex flex-row items-center justify-start gap-2"
+                        className=""
                         icon={
                           (page as any).frontMatter?.logo ? (
-                            <div className="w-6 h-6 shrink-0 dark:bg-white rounded-sm p-1 flex items-center justify-center">
-                              <img
-                                src={(page as any).frontMatter.logo}
-                                alt=""
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
+                            <img
+                              src={(page as any).frontMatter.logo}
+                              alt=""
+                              className="w-5 h-5 object-contain"
+                            />
                           ) : (
                             config.icon
                           )
@@ -251,16 +249,14 @@ export const IntegrationIndex = () => {
                     href={page.route}
                     key={page.route}
                     title={page.title}
-                    className="flex flex-row items-center justify-start gap-2"
+                    className=""
                     icon={
                       page.frontMatter?.logo ? (
-                        <div className="w-6 h-6 shrink-0 dark:bg-white rounded-sm p-1 flex items-center justify-center">
-                          <img
-                            src={page.frontMatter.logo}
-                            alt=""
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
+                        <img
+                          src={page.frontMatter.logo}
+                          alt=""
+                          className="w-5 h-5 object-contain"
+                        />
                       ) : (
                         config.icon
                       )

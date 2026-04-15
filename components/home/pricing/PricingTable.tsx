@@ -1618,7 +1618,8 @@ export function PricingTable({
       if (!tableRef.current) return;
 
       const tableRect = tableRef.current.getBoundingClientRect();
-      const navbarHeight = 64; // Approximate height of the navbar
+      /** Keep aligned with `--lf-nav-primary-height` in `src/overrides.css`. */
+      const navbarHeight = 60;
 
       // Check if we're within the table's vertical bounds
       const isWithinTableBounds =
@@ -1735,7 +1736,7 @@ export function PricingTable({
           <div
             className="fixed right-0 left-0 z-40 border-b shadow-md bg-muted"
             style={{
-              top: "calc(var(--fd-banner-height, 0px) + 4rem)",
+              top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
             }}
           >
             <div className="flex justify-center items-center px-6 mx-auto max-w-7xl">

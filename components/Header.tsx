@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { Heading, type HeadingLevel } from "@/components/ui/heading";
 
 export const Header = ({
   title,
@@ -14,10 +15,9 @@ export const Header = ({
   title?: React.ReactNode;
   description?: React.ReactNode;
   buttons?: { href: string; text: string; target?: string }[];
-  h?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  h?: HeadingLevel;
   className?: string;
 }) => {
-  const TitleTag: React.ElementType = h;
   return (
     <div
       className={cn(
@@ -26,9 +26,9 @@ export const Header = ({
       )}
     >
       {title && (
-        <TitleTag className="mt-2 text-4xl font-bold tracking-tight sm:text-7xl text-balance font-mono text-foreground">
+        <Heading as={h} size="big" className="text-balance">
           {title}
-        </TitleTag>
+        </Heading>
       )}
       {description && (
         <p className="mt-6 text-2xl leading-8 font-medium tracking-wide text-primary/70">

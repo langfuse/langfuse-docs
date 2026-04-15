@@ -19,7 +19,7 @@ const sizeClasses: Record<HeadingSize, string> = {
   ),
   // 50px / line-height 110% (between big and normal)
   large: cn(
-    "text-[50px] leading-[110%]"
+    "text-[40px] leading-[100%] md:text-[50px]"
   ),
   // 32px / line-height 115%
   normal: cn(

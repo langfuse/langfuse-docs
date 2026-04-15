@@ -212,6 +212,8 @@
   }
 }
 
+/* Nav layout tokens (`--lf-nav-*`, `--fd-nav-height`) are defined in src/overrides.css */
+
 /* CSS custom properties for shadcn/ui color system */
 @layer base {
   :root {
@@ -219,7 +221,7 @@
     --foreground: 222.2 84% 4.9%;
 
     --muted: 214 32% 91%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: #7a7a74;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
@@ -787,6 +789,104 @@
   opacity: 1;
 }
 
+/* ── CornerBox CSS corners ──────────────────────────────────────────────────
+   Replaces the SVG-as-absolute-children approach with a single ::before
+   pseudo-element per container. Individual corners can be hidden by setting
+   the per-corner CSS custom property to "none" via inline style.
+   Order: TL, BL, BR, TR (matches mask-position list below). */
+
+.corner-box-corners,
+.corner-box-corners-flush {
+  --cx-mask-tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E");
+  --cx-mask-bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E");
+  --cx-mask-br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E");
+  --cx-mask-tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+}
+
+/* Bordered CornerBox: sit at −1px so brackets overlap the 1px border stroke */
+.corner-box-corners::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  right: -1px;
+  bottom: -1px;
+  pointer-events: none;
+  z-index: 10;
+  background-color: var(--color-line-cta);
+  -webkit-mask-image: var(--cx-mask-tl), var(--cx-mask-bl), var(--cx-mask-br), var(--cx-mask-tr);
+  mask-image: var(--cx-mask-tl), var(--cx-mask-bl), var(--cx-mask-br), var(--cx-mask-tr);
+  -webkit-mask-position: top left, bottom left, bottom right, top right;
+  mask-position: top left, bottom left, bottom right, top right;
+  -webkit-mask-size: 8px 8px;
+  mask-size: 8px 8px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* No-border CornerBox: flush with the element edge */
+.corner-box-corners-flush::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+  background-color: var(--color-line-cta);
+  -webkit-mask-image: var(--cx-mask-tl), var(--cx-mask-bl), var(--cx-mask-br), var(--cx-mask-tr);
+  mask-image: var(--cx-mask-tl), var(--cx-mask-bl), var(--cx-mask-br), var(--cx-mask-tr);
+  -webkit-mask-position: top left, bottom left, bottom right, top right;
+  mask-position: top left, bottom left, bottom right, top right;
+  -webkit-mask-size: 8px 8px;
+  mask-size: 8px 8px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* HoverCorners replacement: an absolute child span whose ::before shows on
+   parent hover. The span stretches to cover its nearest positioned ancestor
+   so the corners align with the container edge, not the span's own position. */
+.corner-box-hover-child {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.corner-box-hover-child::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-line-cta);
+  -webkit-mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-position: top left, bottom left, bottom right, top right;
+  mask-position: top left, bottom left, bottom right, top right;
+  -webkit-mask-size: 8px 8px;
+  mask-size: 8px 8px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+/* Show corners when specific parent containers are hovered */
+.link-box:hover > .corner-box-hover-child::before,
+.button-wrapper:hover > .corner-box-hover-child::before,
+.card-hover-stripes:hover .corner-box-hover-child::before {
+  opacity: 1;
+}
+
 .bg-left-corner {
   background-image: url("/images/patterns/left-corner.svg");
   background-position: top left;
@@ -794,9 +894,21 @@
   background-size: 3px;
 }
 
+.dark .bg-left-corner {
+  background-image: url("/images/patterns/left-corner-dark.svg");
+}
+
 .bg-right-corner {
   background-image: url("/images/patterns/right-corner.svg");
   background-position: top right;
   background-repeat: no-repeat;
   background-size: 3px;
+}
+
+.dark .bg-right-corner {
+  background-image: url("/images/patterns/right-corner-dark.svg");
+}
+
+.bgc-size-6 {
+  background-size: 6px;
 }

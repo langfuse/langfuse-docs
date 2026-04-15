@@ -26,11 +26,11 @@ export function HomeLayout({
 }: HomeLayoutProps) {
   return (
     <AISearch>
-      {/* Strip dark class before paint to prevent FOUC for dark-mode users */}
+      {/* Strip dark before paint (next-themes uses class on html; some code paths may touch body). */}
       <Script
         id="force-light-home"
         strategy="beforeInteractive"
-      >{`document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light'`}</Script>
+      >{`(function(){var h=document.documentElement,b=document.body;h.classList.remove('dark');b.classList.remove('dark');h.style.colorScheme='light';})()`}</Script>
       <ForceLightMode />
       <Banner />
       <Navbar />

@@ -172,7 +172,7 @@ export function LangTabs(props: {
         <FumadocsTabs
           key={internalValue}
           defaultValue={internalValue}
-          className="flex overflow-hidden flex-col my-0 rounded-none border border-border"
+          className="flex overflow-hidden flex-col my-0 rounded-none border-none"
         >
           <FumadocsTabsList
             className={"flex overflow-x-auto overflow-y-hidden flex-nowrap gap-2 px-4 pt-1 rounded-none border-b sm:gap-4 not-prose border-line-structure min-h-9 bg-surface-bg"}

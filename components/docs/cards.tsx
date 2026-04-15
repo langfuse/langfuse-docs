@@ -11,7 +11,7 @@ import {
 } from "fumadocs-ui/components/card";
 import { cn } from "@/lib/utils";
 import { Text } from "@/components/ui/text";
-import { HoverCorners } from "@/components/ui/corner-box";
+import { CornerBox } from "@/components/ui/corner-box";
 
 interface CardsProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Number of columns (1 | 2 | 3). Defaults to 2. */
@@ -34,19 +34,20 @@ export function Card({ icon, title = "", description = "", arrow: _arrow, childr
       data-card
       className={cn(
         'block @max-lg:col-span-full',
-        'group card-hover-stripes z-1',
         props.className,
       )}
     >
-      <div className="flex flex-row items-center p-2 sm:p-4 gap-2 border bg-surface-bg text-text-primary w-full h-full">
-        {props.href && <HoverCorners />}
+      <CornerBox
+        hoverStripes={!!props.href}
+        className="flex flex-row items-center p-2 sm:p-3 gap-2.5 text-text-primary w-full h-full"
+      >
         {icon ? (
-          <div className="not-prose mb-1 w-fit border border-line-structure rounded-xs bg-surface-button-grey p-1.5 [&_svg]:size-4">
+          <div className="not-prose shrink-0 [&_svg]:size-5 [&_img]:size-5">
             {icon}
           </div>
         ) : null}
-        <div className="flex flex-col gap-2">
-          <Text as="h3" size="s" className="not-prose mb-0.5 font-medium text-left text-text-secondary">
+        <div className="flex flex-col gap-1">
+          <Text as="h3" size="s" className="not-prose mb-0 font-medium text-left text-text-secondary">
             {title}
           </Text>
           {description ? <Text size="s" className="my-0! text-text-secondary">{description}</Text> : null}
@@ -54,7 +55,7 @@ export function Card({ icon, title = "", description = "", arrow: _arrow, childr
             {children}
           </div>
         </div>
-      </div>
+      </CornerBox>
     </E>
   );
 }

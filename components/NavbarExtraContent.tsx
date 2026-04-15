@@ -11,11 +11,15 @@ export function NavbarExtraContent({
 }) {
   return (
     <>
-      <InkeepSearchButton className="lg:hidden" />
-      <ToAppButton />
-      <Button href='/talk-to-us' className="hidden sm:flex" variant="secondary" size="small" shortcutKey="g">
-        Get Demo
-      </Button>
+      <div className="lg:hidden">
+        <InkeepSearchButton />
+      </div>
+      <div className="hidden justify-between items-center sm:flex">
+        <ToAppButton />
+        <Button href='/talk-to-us' wrapperClassName="flex-1" variant="secondary" size="small" shortcutKey="g">
+          Get Demo
+        </Button>
+      </div>
       <MobileMenu sectionNavData={sectionNavData} />
     </>
   );

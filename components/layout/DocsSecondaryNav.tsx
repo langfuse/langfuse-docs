@@ -57,7 +57,10 @@ export function DocsSecondaryNavMobile() {
   const isRoot = activeSection && pathname === activeSection.path;
 
   return (
-    <div className="flex items-center h-[40px] px-3 gap-2 md:hidden sticky z-41 bg-surface-1 border-b border-line-structure [grid-area:header]" style={{ top: "60px" }}>
+    <div
+      className="flex items-center px-3 gap-2 md:hidden sticky z-41 bg-surface-1 border-b border-line-structure [grid-area:header] h-[var(--lf-nav-docs-secondary-height)]"
+      style={{ top: "var(--lf-nav-primary-height)" }}
+    >
       <button
         aria-label={open ? "Close Sidebar" : "Open Sidebar"}
         onClick={() => setOpen((prev) => !prev)}
@@ -83,7 +86,10 @@ export function DocsSecondaryNavMobile() {
 export function DocsSecondaryNav() {
   const pathname = usePathname();
   return (
-    <div className="hidden overflow-x-auto overflow-y-hidden sticky z-40 md:block bg-surface-1" style={{ top: "60px" }}>
+    <div
+      className="hidden overflow-x-auto overflow-y-hidden sticky z-40 md:block bg-surface-1"
+      style={{ top: "var(--lf-nav-primary-height)" }}
+    >
       <nav className="px-px mx-auto border-b max-w-360 bg-line-structure border-line-structure">
         <div className="flex gap-0 items-stretch rounded-sm bg-surface-1">
           {SECTIONS.map((item) => {
@@ -93,7 +99,7 @@ export function DocsSecondaryNav() {
                 href={item.path}
                 key={item.path}
                 className={cn(
-                  "flex gap-2 items-center px-4 -mb-px text-sm whitespace-nowrap border-b-2 transition-colors h-[40px] shrink-0",
+                  "flex h-[var(--lf-nav-docs-secondary-height)] shrink-0 gap-2 items-center px-4 -mb-px text-sm whitespace-nowrap border-b-2 transition-colors",
                   isActive
                     ? "font-medium with-stripes-alt border-line-cta text-text-primary"
                     : "border-transparent text-text-tertiary hover:border-line-structure hover:text-text-secondary"

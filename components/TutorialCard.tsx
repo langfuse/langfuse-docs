@@ -22,20 +22,20 @@ export function TutorialCard({
     <Link href={href} className="block h-full no-underline">
       <Card
         className={cn(
-          "h-full transition-all duration-200 border bg-transparent hover:bg-muted/40 hover:border-gray-300 dark:hover:border-gray-600 group",
+          "group h-full border bg-surface-bg transition-all duration-200 hover:bg-muted/40 hover:border-border",
           className
         )}
       >
-        <CardContent className="p-4 flex flex-col h-full gap-3">
+        <CardContent className="flex h-full min-h-[140px] flex-col justify-center gap-3 p-4">
           <div className="flex items-center gap-2">
-            <div className="text-muted-foreground flex items-center justify-center shrink-0 w-5 h-5 group-hover:text-primary transition-colors [&>svg]:w-5 [&>svg]:h-5">
+            <div className="flex size-5 shrink-0 items-center justify-center text-text-tertiary transition-colors group-hover:text-text-primary [&>svg]:size-5">
               {icon}
             </div>
-            <h3 className="font-semibold text-base leading-none no-underline !m-0 !p-0 !border-0">
+            <h3 className="!m-0 !border-0 !p-0 text-base font-semibold leading-none text-text-primary no-underline">
               {title}
             </h3>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed no-underline">
+          <p className="text-sm leading-relaxed text-text-tertiary no-underline">
             {description}
           </p>
         </CardContent>

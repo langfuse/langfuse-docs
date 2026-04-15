@@ -7,15 +7,15 @@ const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className="overflow-auto w-full">
-    <CornerBox noBorder>
+  <CornerBox>
+    <div className="overflow-auto w-full">
       <table
         ref={ref}
-        className={cn("my-0! w-full h-full text-sm caption-bottom", className)}
+        className={cn("my-0! w-full h-full text-sm caption-bottom border-none", className)}
         {...props}
       />
-    </CornerBox>
-  </div>
+    </div>
+  </CornerBox>
 ));
 Table.displayName = "Table";
 

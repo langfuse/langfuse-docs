@@ -77,7 +77,7 @@ function useTabsClientMounted() {
 /** Same chrome as Radix tabs, default “Overview” — no useId, matches server + first client paint. */
 function MobileTabsShell() {
   return (
-    <CornerBox className="-mt-px">
+    <CornerBox className="-mt-px bg-surface-1">
       <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div
           className="flex px-4 min-w-max border-b border-line-structure"
@@ -99,9 +99,9 @@ function MobileTabsShell() {
           ))}
         </div>
       </div>
-      <div className="rive-text-enter flex flex-col gap-1.5 p-4 min-h-[72px] justify-center">
+      <div className="rive-text-enter flex w-full flex-col gap-1.5 p-4 min-h-[72px] justify-center">
         <Text className="font-medium text-left text-text-primary">{OVERVIEW.heading}</Text>
-        <Text size="s" className="text-left max-w-[74ch]">
+        <Text size="s" className="w-full max-w-none text-left">
           {OVERVIEW.body}
         </Text>
       </div>
@@ -176,7 +176,7 @@ export const RiveSection = () => {
 
         {mobileTabsMounted ? (
           <TabsPrimitive.Root defaultValue="overview" className="flex flex-col">
-            <CornerBox className="-mt-px">
+            <CornerBox className="-mt-px bg-surface-bg">
               <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <TabsPrimitive.List className="flex px-4 min-w-max border-b border-line-structure">
                   {MOBILE_TABS.map((tab) => (
@@ -198,11 +198,11 @@ export const RiveSection = () => {
 
               {MOBILE_TABS.map((tab) => (
                 <TabsPrimitive.Content key={tab.key} value={tab.key}>
-                  <div className="rive-text-enter flex flex-col gap-1.5 p-4 min-h-[72px] justify-center">
+                  <div className="rive-text-enter flex w-full flex-col gap-1.5 p-4 min-h-[72px] justify-center">
                     <Text className="font-medium text-left text-text-primary">
                       {tab.heading}
                     </Text>
-                    <Text size="s" className="text-left max-w-[74ch]">
+                    <Text size="s" className="w-full max-w-none text-left">
                       {tab.body}
                     </Text>
                   </div>
@@ -231,12 +231,17 @@ export const RiveSection = () => {
             onStateChange={handleStateChange}
           />
         </div>
-        <CornerBox className="p-2 sm:p-4 -mt-px min-h-[110px] bg-transparent flex flex-col justify-start">
-          <div key={label.heading} className="rive-text-enter flex flex-col gap-1.5">
+        <CornerBox className="flex min-h-[120px] w-full flex-col justify-start bg-surface-bg p-2 sm:p-4 -mt-px">
+          <div
+            key={label.heading}
+            className="rive-text-enter flex w-full flex-col gap-1.5"
+          >
             <Text className="font-medium text-left text-text-primary">
               {label.heading}
             </Text>
-            <Text size="s" className="text-left max-w-[60ch]">{label.body}</Text>
+            <Text size="s" className="w-full max-w-none text-left">
+              {label.body}
+            </Text>
           </div>
         </CornerBox>
       </div>

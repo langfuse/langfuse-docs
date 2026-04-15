@@ -1,16 +1,23 @@
-/* Custom docs nav height (used when nav.component is set in DocsLayout) */
+/*
+ * Nav stack heights — keep in sync with components/layout/Navbar*.tsx (60px)
+ * and components/layout/DocsSecondaryNav.tsx (40px row).
+ * --fd-nav-height is consumed by fumadocs (sidebar drawer, sticky rows, etc.).
+ */
 :root {
-  --fd-nav-height: 4rem;
+  --lf-nav-primary-height: 60px;
+  --lf-nav-docs-secondary-height: 40px;
+  /* Default: single primary bar only (non–docs-chrome / marketing). */
+  --fd-nav-height: var(--lf-nav-primary-height);
 }
 
 /*
- * Docs chrome (docs-chrome class on SharedDocsLayout wrapper):
- * NavbarDocs (60px) + DocsSecondaryNav (40px) = 100px = 6.25rem total.
- * Override --fd-nav-height so fumadocs calculates sidebar sticky-top and
- * mobile drawer offset correctly. No banner in docs pages so --fd-banner-height = 0px.
+ * Docs chrome (SharedDocsLayout .docs-chrome): primary navbar + section tabs.
+ * fumadocs uses --fd-nav-height for sidebar sticky-top, mobile drawer top/height, etc.
  */
 .docs-chrome {
-  --fd-nav-height: 6.25rem; /* 60px navbar + 40px secondary nav */
+  --fd-nav-height: calc(
+    var(--lf-nav-primary-height) + var(--lf-nav-docs-secondary-height)
+  );
   --fd-banner-height: 0px;
 }
 
@@ -82,11 +89,9 @@
 /* Mobile sidebar drawer: push below sticky navbar + optional banner.
    Slide from left instead of right; full width. */
 #nd-sidebar-mobile {
-  top: calc(
-    var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px)
-  ) !important;
+  top: calc(var(--fd-nav-height) + var(--fd-banner-height, 0px)) !important;
   height: calc(
-    100dvh - var(--fd-nav-height, 4rem) - var(--fd-banner-height, 0px)
+    100dvh - var(--fd-nav-height) - var(--fd-banner-height, 0px)
   ) !important;
   /* Override fumadocs defaults: left-aligned, full width */
   inset-inline-end: unset !important;
@@ -97,12 +102,12 @@
   --fd-sidebar-drawer-offset: -100%;
 }
 
-/* Sidebar/collapsed-trigger sticky top: custom navbar (4rem) + optional banner.
+/* Sidebar/collapsed-trigger sticky top: nav stack + optional banner.
    Overrides fumadocs' inline --fd-docs-row-1: var(--fd-banner-height, 0px)
    which only accounts for the banner, not our external custom navbar. */
 #nd-docs-layout {
   --fd-docs-row-1: calc(
-    var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px)
+    var(--fd-nav-height) + var(--fd-banner-height, 0px)
   ) !important;
 }
 
@@ -177,6 +182,11 @@
   min-width: 0;
   max-width: 100%;
 }
+
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] {
+  padding: 16px 8px;
+}
+
 /* Inner viewport: allow full height so the aside scrolls (Radix or first child of scroll area) */
 #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport],
 #nd-docs-layout #nd-sidebar > div.flex-1 > div:first-child,
@@ -264,7 +274,8 @@
 }
 #nd-docs-layout #nd-sidebar {
   border-inline-end: none !important;
-  border-radius: calc(var(--radius) - 4px);
+  border-top-left-radius: calc(var(--radius) - 4px);
+  border-top-right-radius: calc(var(--radius) - 4px);
   background-color: var(--surface-1) !important;
 }
 #nd-docs-layout #nd-sidebar[data-hovered="false"] {
@@ -277,7 +288,7 @@
   margin: 0 0 1px 1px;
   border-radius: calc(var(--radius) - 4px);
   background-color: var(--line-structure) !important;
-  top: var(--fd-nav-height, 6.25rem);
+  top: var(--fd-nav-height);
 }
 
 /* Sidebar active link */
@@ -347,10 +358,10 @@
   top: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  width: calc(100% + 12px) !important;
+  width: calc(100%) !important;
   height: auto !important;
   padding: 0 !important;
-  margin: 0 -6px;
+  margin: 0 auto;
   box-sizing: border-box;
   z-index: -1;
   opacity: 0;
@@ -473,8 +484,8 @@
   right: 0;
   bottom: 0;
   padding: 0 !important;
-  width: calc(100% + 12px);
-  margin: 0 -6px;
+  width: calc(100%);
+  margin: 0 auto;
   box-sizing: border-box;
   z-index: -1;
   opacity: 0;
@@ -566,15 +577,15 @@
 #nd-toc {
   --text-links: var(--line-cta);
   padding: 0;
-  max-height: calc(100dvh - 102px);
+  /* Full viewport minus docs header stack; 2px ≈ outer chrome / rounding */
+  max-height: calc(100dvh - var(--fd-nav-height) - 2px);
   border-bottom-width: 0;
   border-radius: 0 !important;
   z-index: 10;
+  margin-left: 0 !important;
 }
 
 #nd-toc > div {
-  padding-left: 1rem;
-  padding-right: 0.625rem;
   box-shadow: none;
   mask-image: none;
 }
@@ -583,6 +594,17 @@
   transition:
     top 0.2s cubic-bezier(0.4, 0, 0.2, 1),
     height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile TOC popover: match 16px / 8px inset (fumadocs uses px-4 / md:px-6). */
+[data-toc-popover-content] {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+
+[data-toc-popover-content] .ms-px {
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
 }
 
 #nd-toc .text-sm {
@@ -597,9 +619,9 @@
   color: var(--text-primary);
   margin-bottom: 0;
   background-color: var(--surface-1);
-  padding-top: 0.75rem;
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
+  padding-top: 1rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
   margin-left: 1px;
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
@@ -608,10 +630,10 @@
   display: none;
 }
 
-/* Scroll area: flex-grow so it fills available height; dashed bottom border */
+/* Scroll area: flex-grow; 16px vertical / 8px horizontal (matches docs left sidebar) */
 #nd-toc > div.ms-px {
   flex: 1;
-  padding-bottom: 0.75rem;
+  padding: 1rem 0.5rem !important;
   margin-left: 1px;
   margin-bottom: 0;
   background-color: var(--surface-1);
@@ -722,12 +744,52 @@ ul[data-gh-discussions-list] {
   box-shadow: none;
 }
 
+/* Fumadocs sets w-max (width: max-content) on <pre> which triggers a phantom
+   horizontal scrollbar even when content fits. Setting width: 100% keeps the
+   pre at container-width; genuinely wide lines still cause the outer
+   fd-scroll-container (overflow: auto) to scroll horizontally as expected. */
+.fd-scroll-container > pre {
+  width: 100%;
+}
+
 .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
   border: 1px solid var(--line-structure);
   border-radius: 4px;
-  background: var(--surface-bg);
-  color: var(--text-tertiary);
+  background: var(--surface-2);
+  color: var(--text-primary);
   font-variant-numeric: ordinal;
+}
+
+/* Links whose primary label is inline <code> (e.g. [`api()`](/ref)): underline
+   fights the chip border; keep link color on the code for affordance */
+.prose
+  :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)):has(
+    > code
+  ) {
+  text-decoration: none;
+}
+.prose
+  :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)):has(
+    > code
+  )
+  > :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  color: inherit;
+}
+
+.prose
+  :where(.callout):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.prose [role="tabpanel"].prose-no-margin > .callout:first-child {
+  margin-top: 0rem;
+}
+
+/* Prevent long URLs from overflowing the prose column */
+.prose :where(a) {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* No dark background of videos */
@@ -751,17 +813,32 @@ details + details {
   margin-top: 0.5rem !important;
 }
 
-/* Docs footer pagination: strip card styling, hide description */
+/* Docs footer pagination: style as secondary buttons */
 #nd-page > div:last-child > a {
-  border: none !important;
-  background: none !important;
-  padding: 0.25rem 0 !important;
-  border-radius: 0 !important;
-  gap: 0.125rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 26px !important;
+  padding: 0 8px !important;
+  border: 1px solid var(--color-line-structure) !important;
+  border-radius: 2px !important;
+  background-color: var(--color-surface-bg) !important;
+  color: var(--color-text-secondary) !important;
+  font-size: 12px !important;
+  font-weight: 450 !important;
+  gap: 6px !important;
+  box-shadow:
+    0 4px 8px 0 rgba(0, 0, 0, 0.05),
+    0 4px 4px 0 rgba(0, 0, 0, 0.03) !important;
+  text-decoration: none !important;
+  transition: border-color 0.15s !important;
+}
+.dark #nd-page > div:last-child > a {
+  border-color: var(--color-line-cta) !important;
 }
 #nd-page > div:last-child > a:hover {
-  background: none !important;
-  color: inherit !important;
+  border-color: var(--color-line-cta) !important;
+  background-color: var(--color-surface-bg) !important;
+  color: var(--color-text-secondary) !important;
 }
 #nd-page > div:last-child > a > p:last-child {
   display: none !important;
@@ -880,6 +957,7 @@ li:has(> .subseparator) {
 .fd-steps {
   margin-top: 4rem;
   margin-bottom: 4rem;
+  border-color: var(--line-structure);
 }
 
 .fd-steps > h2,

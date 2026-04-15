@@ -169,12 +169,12 @@ export function WhyLangfuse() {
         {reasons.map((item) => (
           <li
             key={item.title}
-            className="grid grid-cols-[1fr_3fr] gap-8 py-2.5 border-b border-line-structure last:border-b-0"
+            className="grid grid-cols-[1fr_3fr] gap-8 py-4 items-center border-b border-line-structure last:border-b-0"
           >
-            <Text className="font-medium text-left text-text-secondary">
+            <Text className="self-center font-medium text-left text-text-secondary">
               {item.title}
             </Text>
-            <Text size="s" className="text-left">
+            <Text size="s" className="self-center text-left">
               {item.body}
             </Text>
           </li>

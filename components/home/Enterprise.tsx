@@ -61,7 +61,7 @@ export const Enterprise = () => {
             <Text size="s" className="font-medium text-left text-text-secondary">Security & Compliance</Text>
             <BulletList items={security} />
           </div>
-          <div className="flex absolute bottom-0 flex-1 justify-center items-center">
+          <div className="flex absolute bottom-0 flex-1 justify-center items-center pointer-events-none">
             <Image src={securityVisual} alt="Security" width={100} height={100} className="object-contain w-full h-full" />
           </div>
         </CornerBox>

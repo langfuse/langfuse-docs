@@ -203,7 +203,7 @@ export const CopyMarkdownButton = () => {
       <HoverCorners />
       <div
         className={cn(
-          "inline-flex h-[32px] items-stretch overflow-hidden rounded-[1px] border border-line-structure bg-surface-bg text-text-secondary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
+          "inline-flex h-[26px] items-stretch overflow-hidden rounded-[1px] border border-line-structure dark:border-line-cta bg-surface-bg text-text-secondary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
           isDisabled || isError ? "opacity-70" : "",
           isError
             ? "border-destructive/50"
@@ -230,7 +230,7 @@ export const CopyMarkdownButton = () => {
               aria-label="Open copy options"
               disabled={isError}
               className={cn(
-                "inline-flex w-[32px] items-center justify-center border-l border-line-structure transition-colors",
+                "inline-flex w-[24px] items-center justify-center border-l border-line-structure transition-colors",
                 isError ? "cursor-not-allowed" : "cursor-pointer hover:bg-surface-1/80"
               )}
             >
@@ -463,7 +463,6 @@ export const DocsFeedback = () => {
           onClick={() => handleFeedbackSelection("negative")}
           disabled={submitting}
           icon={<ThumbsDown className="w-3.25 h-3.25" />}
-          className="pl-0.75 pr-1.5"
         >
           Bad
         </Button>

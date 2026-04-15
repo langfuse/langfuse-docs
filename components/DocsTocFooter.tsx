@@ -154,7 +154,7 @@ export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
     <div className="toc-footer flex flex-col mt-px ml-px !p-0">
       {/* Actions */}
       {(editUrl || feedbackUrl) && (
-        <div className="mb-px px-4 pb-4 pt-3 rounded-sm bg-surface-1">
+        <div className="px-2 pt-4 pb-4 mb-px rounded-sm bg-surface-1">
           <Text size="s" className="font-[580] text-left text-text-primary mb-3">Actions</Text>
           <div className="flex flex-col gap-1.5">
             {feedbackUrl && (
@@ -162,7 +162,7 @@ export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
                 href={feedbackUrl}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="flex items-center gap-1 text-sm text-text-tertiary hover:text-text-primary transition-colors"
+                className="flex gap-1 items-center text-sm transition-colors text-text-tertiary hover:text-text-primary"
               >
                 Give us feedback
                 <ArrowUpRight size={13} className="shrink-0" />
@@ -173,7 +173,7 @@ export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
                 href={editUrl}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="text-sm text-text-tertiary hover:text-text-primary transition-colors"
+                className="text-sm transition-colors text-text-tertiary hover:text-text-primary"
               >
                 Edit this page on GitHub
               </a>
@@ -184,7 +184,7 @@ export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
 
       {/* Contributors */}
       {processedContributors.length > 0 && (
-        <div className="px-4 pb-4 pt-3 bg-surface-1 rounded-sm mb-px">
+        <div className="px-2 pt-4 pb-4 mb-px rounded-sm bg-surface-1">
           <Text size="s" className="font-[580] text-left text-text-primary mb-3">Contributors</Text>
           <div className="flex flex-col gap-1">
             {displayedContributors.map((contributor) => (
@@ -195,7 +195,7 @@ export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
             {remainingCount > 0 && !showAll && (
               <button
                 onClick={() => setShowAll(true)}
-                className="text-xs text-text-tertiary hover:text-text-primary transition-colors cursor-pointer text-left py-1"
+                className="py-1 text-xs text-left transition-colors cursor-pointer text-text-tertiary hover:text-text-primary"
               >
                 +{remainingCount} more
               </button>
@@ -205,7 +205,7 @@ export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
       )}
 
       {/* Community */}
-      <TocCommunity className="bg-surface-1 rounded-sm" />
+      <TocCommunity className="rounded-t-sm bg-surface-1" />
     </div>
   );
 };

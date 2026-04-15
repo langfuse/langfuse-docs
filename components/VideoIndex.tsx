@@ -25,7 +25,7 @@ export const VideoIndex = () => {
           <Link
             href={page.url}
             key={page.url}
-            className="flex flex-col rounded-lg border overflow-hidden hover:border-primary transition-colors"
+            className="flex flex-col overflow-hidden rounded-lg border border-border bg-surface-bg transition-colors hover:border-primary"
           >
             <div className="relative aspect-video w-full shrink-0">
               <Image
@@ -37,9 +37,11 @@ export const VideoIndex = () => {
               />
             </div>
             <div className="flex items-start gap-2 p-4">
-              <Video className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
-              <span className="flex-1 font-semibold text-sm leading-snug">{title}</span>
-              <ArrowRight className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
+              <Video className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
+              <span className="flex-1 text-sm font-semibold leading-snug text-text-primary">
+                {title}
+              </span>
+              <ArrowRight className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
             </div>
           </Link>
         );

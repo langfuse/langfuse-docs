@@ -413,7 +413,7 @@ export const FeatureTabs = ({
             <div
               key={`preload-${feature.id}`}
               className="relative"
-              style={{ width: 800, height: 400 }}
+              style={{ width: 800, height: Math.round((800 * 1512) / 2646) }}
             >
               <Image
                 src={feature.image.light}
@@ -428,7 +428,7 @@ export const FeatureTabs = ({
       </CornerBox>
 
       <CornerBox className="p-4" withStripes>
-        <div className="relative w-full min-h-[410px] overflow-hidden">
+        <div className="relative w-full overflow-hidden aspect-2646/1512 sm:aspect-auto sm:min-h-[410px]">
           <AnimatePresence mode="sync" initial={false}>
             {activeFeature ? (
               <motion.div
