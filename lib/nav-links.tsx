@@ -11,12 +11,13 @@ import {
   Newspaper,
   ScrollText,
   Users,
+  type LucideIcon,
 } from "lucide-react";
 
 export type NavPanelLink = {
   name: string;
   href: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
 };
 
 export const productLinks: NavPanelLink[] = [
