@@ -14,29 +14,20 @@ import {
   handbook,
   marketing,
 } from "../.source/server";
-import { CONTENT_DIR_TO_URL_PREFIX } from "./content-dir-map.js";
-
-function baseUrl(contentDir: string): string {
-  const prefix = CONTENT_DIR_TO_URL_PREFIX[contentDir];
-  if (typeof prefix !== "string") {
-    throw new Error(`Missing content-dir-map entry for "${contentDir}"`);
-  }
-  return prefix === "" ? "" : `/${prefix}`;
-}
 
 export const source = loader({
-  baseUrl: baseUrl("docs"),
+  baseUrl: "/docs",
   source: docs.toFumadocsSource(),
   pageTree: { idPrefix: "docs" },
 });
 
 export const selfHostingSource = loader({
-  baseUrl: baseUrl("self-hosting"),
+  baseUrl: "/self-hosting",
   source: selfHosting.toFumadocsSource(),
   pageTree: { idPrefix: "self-hosting" },
 });
 
-const SELF_HOSTING_BASE = baseUrl("self-hosting");
+const SELF_HOSTING_BASE = "/self-hosting";
 
 /** Display names for self-hosting sidebar links to main docs (avoid duplicate "Overview"). */
 const SELF_HOSTING_DOC_LINK_NAMES: Record<string, string> = {
@@ -78,33 +69,33 @@ export function getSelfHostingPageTree(): ReturnType<typeof selfHostingSource.ge
 }
 
 export const blogSource = loader({
-  baseUrl: baseUrl("blog"),
+  baseUrl: "/blog",
   source: blog.toFumadocsSource(),
 });
 
 export const changelogSource = loader({
-  baseUrl: baseUrl("changelog"),
+  baseUrl: "/changelog",
   source: changelog.toFumadocsSource(),
 });
 
 export const guidesSource = loader({
-  baseUrl: baseUrl("guides"),
+  baseUrl: "/guides",
   source: guides.toFumadocsSource(),
   pageTree: { idPrefix: "guides" },
 });
 
 export const faqSource = loader({
-  baseUrl: baseUrl("faq"),
+  baseUrl: "/faq",
   source: faq.toFumadocsSource(),
 });
 
 export const integrationsSource = loader({
-  baseUrl: baseUrl("integrations"),
+  baseUrl: "/integrations",
   source: integrations.toFumadocsSource(),
   pageTree: { idPrefix: "integrations" },
 });
 
-const INTEGRATIONS_BASE = baseUrl("integrations");
+const INTEGRATIONS_BASE = "/integrations";
 
 type TreeNode = { type?: string; name?: string; url?: string; children?: TreeNode[]; [key: string]: unknown };
 type ShortTitleData = { shortTitle?: string; sidebarTitle?: string };
@@ -195,28 +186,28 @@ export function getIntegrationsPageTree(): ReturnType<typeof integrationsSource.
 }
 
 export const securitySource = loader({
-  baseUrl: baseUrl("security"),
+  baseUrl: "/security",
   source: security.toFumadocsSource(),
 });
 
 export const librarySource = loader({
-  baseUrl: baseUrl("library"),
+  baseUrl: "/library",
   source: library.toFumadocsSource(),
   pageTree: { idPrefix: "library" },
 });
 
 export const usersSource = loader({
-  baseUrl: baseUrl("customers"),
+  baseUrl: "/users",
   source: customers.toFumadocsSource(),
 });
 
 export const handbookSource = loader({
-  baseUrl: baseUrl("handbook"),
+  baseUrl: "/handbook",
   source: handbook.toFumadocsSource(),
 });
 
 export const marketingSource = loader({
-  baseUrl: baseUrl("marketing"),
+  baseUrl: "",
   source: marketing.toFumadocsSource(),
 });
 
@@ -225,6 +216,7 @@ export const MARKETING_SLUGS = [
   "about",
   "brand",
   "careers",
+  "china",
   "cn",
   "community",
   "cookie-policy",
