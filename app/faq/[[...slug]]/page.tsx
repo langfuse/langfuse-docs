@@ -131,7 +131,7 @@ export function generateStaticParams() {
 
   for (const tag of Array.from(allTags)) {
     if (!faqSource.getPage(["tag", tag])) {
-      params.push({ slug: ["tag", tag] });
+      params.push({ slug: ["tag", tag] } as (typeof params)[number]);
     }
   }
 
