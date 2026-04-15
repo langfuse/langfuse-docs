@@ -1,0 +1,196 @@
+---
+title: Building an LLM Certification Pipeline for Financial Services
+date: 2026/04/14
+description: How to use Langfuse datasets and experiments to systematically certify LLMs before deploying them in regulated financial environments.
+tag: guide
+author: Doneyli
+ogImage: /images/blog/2026-04-14-llm-certification-financial-services/og.png
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Building an LLM Certification Pipeline for Financial Services"
+  description="How to use Langfuse datasets and experiments to systematically certify LLMs before deploying them in regulated financial environments."
+  date="April 14, 2026"
+  authors={["doneylidej", "lotteverheyden"]}
+/>
+
+import { Frame } from "@/components/Frame";
+
+In regulated industries like banking and insurance, you can't swap in a new model and hope for the best. Model risk management teams need standardized, reproducible evidence that an LLM meets quality thresholds before it's approved for production ([Fed SR 11-7](https://www.federalreserve.gov/supervisionreg/srletters/sr1107.htm), [EU AI Act](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689)).
+
+In this post, we walk through a certification pipeline that runs a model against financial benchmarks derived from real SEC filings, scores the output with domain-specific evaluators, and produces a PASS/FAIL verdict. Here's what the output looks like after running Claude Sonnet against [FinanceBench](https://huggingface.co/datasets/PatronusAI/financebench), a dataset of 150 financial Q&A items grounded in 10-K and 10-Q filings:
+
+<Frame fullWidth>
+  ![Benchmark results: Claude Sonnet on FinanceBench](/images/blog/2026-04-14-llm-certification-financial-services/benchmark-results.png)
+</Frame>
+
+The pipeline is built with [Langfuse datasets and experiments](/docs/evaluation/experiments/datasets). The full code is available in [this repository](https://github.com/doneyli/clickhouse-llm-evals-finance).
+
+## Golden datasets [#golden-datasets]
+
+The pipeline uses two open-source financial benchmarks:
+
+| Dataset | Source | Items | What it tests |
+|---|---|---|---|
+| **FinanceBench** | [PatronusAI/financebench](https://huggingface.co/datasets/PatronusAI/financebench) | 150 | Financial Q&A from SEC filings: numerical extraction, reasoning, and justification |
+| **Financial PhraseBank** | [ChanceFocus/en-fpb](https://huggingface.co/datasets/ChanceFocus/en-fpb) | ~4,850 | Sentiment classification of financial news (positive, negative, neutral) |
+
+These are loaded into Langfuse as [datasets](/docs/evaluation/experiments/datasets), with each item containing an input (the question or text), an expected output (the correct answer or sentiment label), and metadata (source, sector, reasoning type).
+
+```python
+from langfuse import Langfuse
+from datasets import load_dataset
+
+langfuse = Langfuse()
+ds = load_dataset("PatronusAI/financebench", split="train")
+
+for item in ds:
+    langfuse.create_dataset_item(
+        dataset_name="certification/financebench-v1",
+        input={
+            "question": item["question"],
+            "company": item.get("company", ""),
+            "evidence": [ev.get("evidence_text", "") for ev in item.get("evidence", [])],
+        },
+        expected_output={
+            "answer": item["answer"],
+            "justification": item.get("justification", ""),
+        },
+        metadata={
+            "question_type": item.get("question_type", ""),
+            "source": "PatronusAI/financebench",
+        },
+    )
+```
+
+The setup script in the repository handles both datasets and supports a `--sample` flag for quick testing with 10 items.
+
+## Running the experiment [#running-the-experiment]
+
+Each dataset item gets sent to the model under test. For FinanceBench items that include evidence excerpts from SEC filings, the prompt includes the source documents as context, simulating a RAG pipeline:
+
+```python
+def create_certification_task(model, endpoint, api_key):
+    def task(*, item, **kwargs):
+        inp = item.input if hasattr(item, "input") else item.get("input", {})
+        question = inp.get("question", inp.get("text", ""))
+        evidence = inp.get("evidence", [])
+
+        if evidence and any(evidence):
+            context = "\n\n".join(
+                f"--- Source Document Excerpt {i} ---\n{ev}"
+                for i, ev in enumerate(evidence, 1) if ev
+            )
+            prompt = (
+                f"You are a financial analyst. Answer the question using ONLY the "
+                f"provided source document excerpts. Be precise with numbers.\n\n"
+                f"{context}\n\n--- Question ---\n{question}"
+            )
+        else:
+            prompt = question
+
+        return call_model(prompt, model, endpoint, api_key)
+
+    return task
+```
+
+This task function is passed to [`dataset.run_experiment()`](/docs/evaluation/experiments/experiments-via-sdk), which handles concurrency, tracing, and evaluation in one call:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+dataset = langfuse.get_dataset("certification/financebench-v1")
+
+result = dataset.run_experiment(
+    name="financebench-v1",
+    run_name="claude-sonnet-4-6-20260414",
+    task=create_certification_task(model, endpoint, api_key),
+    evaluators=[
+        numerical_accuracy_evaluator,
+        exact_match_evaluator,
+        regulatory_compliance_evaluator,
+        response_completeness_evaluator,
+    ],
+    run_evaluators=[
+        average_score_evaluator("numerical_accuracy"),
+        certification_gate("numerical_accuracy", threshold=0.85),
+    ],
+    max_concurrency=5,
+)
+```
+
+Every model call is traced in Langfuse and scored by the evaluators. Running the same dataset against multiple models produces a side-by-side comparison in the Langfuse UI.
+
+## Evaluators [#evaluators]
+
+The pipeline includes five item-level evaluators, each returning a Langfuse `Evaluation` with a name, score, and comment:
+
+1. **Numerical accuracy** compares extracted numbers against the expected answer with a configurable tolerance (default 5%), handling currency symbols, commas, percentages, and rounding differences.
+2. **Exact match** checks whether the expected answer appears verbatim in the model output.
+3. **Sentiment classification** compares the model's sentiment label against the ground truth from Financial PhraseBank.
+4. **Regulatory compliance** scans model outputs for prohibited phrases like "guaranteed returns" or "risk-free investment."
+5. **Response completeness** scores based on response length and structural formatting.
+
+Adding a custom evaluator follows the same pattern. Here's the numerical accuracy evaluator:
+
+```python
+from langfuse import Evaluation
+
+def numerical_accuracy_evaluator(*, output, expected_output, **kwargs):
+    expected_nums = extract_numbers(expected_output.get("answer", ""))
+    output_nums = extract_numbers(str(output))
+
+    if not expected_nums:
+        return Evaluation(name="numerical_accuracy", value=1.0, comment="No numbers to verify")
+
+    matched = sum(1 for exp in expected_nums if any(
+        abs(exp - out) / max(abs(exp), 1e-10) <= 0.05
+        for out in output_nums
+    ))
+    score = matched / len(expected_nums)
+
+    return Evaluation(
+        name="numerical_accuracy",
+        value=score,
+        comment=f"Matched {matched}/{len(expected_nums)} numbers (5% tolerance)"
+    )
+```
+
+## The certification gate [#the-certification-gate]
+
+On top of the item-level evaluators, a run-level `certification_gate` evaluator produces a binary PASS/FAIL verdict based on whether the average score meets the threshold:
+
+```python
+def certification_gate(score_name, threshold=0.85):
+    def evaluator(*, scores, **kwargs):
+        relevant = [s.value for s in scores if s.name == score_name and s.value is not None]
+        avg = sum(relevant) / len(relevant) if relevant else 0.0
+        passed = avg >= threshold
+
+        return Evaluation(
+            name="certification_result",
+            value=1.0 if passed else 0.0,
+            comment=f"{'PASSED' if passed else 'FAILED'}: avg {score_name}={avg:.2%} (threshold={threshold:.0%})"
+        )
+    return evaluator
+```
+
+The results can be exported as compliance-ready reports in Markdown, JSON, or CSV using the export script:
+
+```bash
+python setup_datasets.py --dataset financebench --sample
+python run_certification.py --dataset certification/financebench-sample --model claude-sonnet-4-6
+python export_results.py --dataset certification/financebench-sample --format markdown
+```
+
+## Adapting for your use case [#adapting-for-your-use-case]
+
+- **Custom datasets**: replace FinanceBench with your institution's own golden Q&A pairs. The setup script accepts any JSON file with input/expected_output/metadata fields.
+- **Domain-specific evaluators**: add evaluators that check for your institution's terminology, formatting requirements, or regulatory constraints.
+- **CI/CD integration**: the repo includes a pytest wrapper that fails your build if the certification gate doesn't pass, so model approvals can be part of your deployment pipeline.
+- **Multiple models in one run**: loop the certification script across models to produce a comparison matrix.
+
+The full code, including sample data for offline testing, is in the [clickhouse-llm-evals-finance](https://github.com/doneyli/clickhouse-llm-evals-finance) repository.
