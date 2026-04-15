@@ -10,6 +10,8 @@ import {
   MARKETING_SECTIONS,
   POST_SECTIONS,
   CHANGELOG_SECTIONS,
+} from "@/lib/section-registry";
+import {
   getPageTreeWithShortTitles,
 } from "@/lib/source";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
