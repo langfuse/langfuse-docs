@@ -63,14 +63,6 @@ const nextConfig = {
 
   webpack(config, { isServer, webpack }) {
     config.resolve = config.resolve ?? {};
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "nextra/context": path.resolve(__dirname, "lib/nextra-shim/context.tsx"),
-      "nextra/hooks": path.resolve(__dirname, "lib/nextra-shim/hooks.ts"),
-      nextra: path.resolve(__dirname, "lib/nextra-shim/nextra-types.ts"),
-      "nextra-theme-docs": path.resolve(__dirname, "lib/nextra-shim/theme-docs.tsx"),
-      "nextra/components": path.resolve(__dirname, "lib/nextra-shim/components.tsx"),
-    };
     // Prevent recharts (and its exclusive deps: redux toolkit, immer, etc.) from
     // being hoisted into a synchronous shared chunk that loads on every page.
     // Recharts is only used on the /wrapped page — keep it in async-only chunks
@@ -108,7 +100,7 @@ const nextConfig = {
       config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
           resource.request = resource.request.replace(/^node:/, "");
-        })
+        }),
       );
     }
     return config;

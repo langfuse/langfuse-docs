@@ -5,6 +5,8 @@ import type { UIMessage } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+export const maxDuration = 60;
+
 // Type assertions below work around pnpm resolving duplicate copies of
 // @ai-sdk/provider and zod, which makes structurally identical types
 // appear incompatible to TypeScript.
@@ -44,12 +46,18 @@ const inkeep = createOpenAICompatible({
 
 export async function POST(req: Request) {
   if (!process.env.INKEEP_API_KEY) {
-    return NextResponse.json({ error: "Chat is not configured." }, { status: 503 });
+    return NextResponse.json(
+      { error: "Chat is not configured." },
+      { status: 503 },
+    );
   }
 
   const ip = clientIp(req);
   if (!allowRequest(ip)) {
-    return NextResponse.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many requests. Try again in a minute." },
+      { status: 429 },
+    );
   }
 
   let json: unknown;
@@ -82,7 +90,10 @@ export async function POST(req: Request) {
       },
     });
   } catch {
-    return NextResponse.json({ error: "Could not read message history." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Could not read message history." },
+      { status: 400 },
+    );
   }
 
   try {
@@ -101,6 +112,9 @@ export async function POST(req: Request) {
 
     return result.toUIMessageStreamResponse();
   } catch {
-    return NextResponse.json({ error: "Failed to start the assistant." }, { status: 502 });
+    return NextResponse.json(
+      { error: "Failed to start the assistant." },
+      { status: 502 },
+    );
   }
 }

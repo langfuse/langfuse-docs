@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { RootProvider } from "fumadocs-ui/provider/next";
+import { GoogleTagManager } from '@next/third-parties/google';
 import localFont from "next/font/local";
+import { Inter } from 'next/font/google'
 import { DevAriaHiddenConsoleFilter } from "@/components/DevAriaHiddenConsoleFilter";
 import {
   buildDefaultSiteOgImageUrl,
@@ -9,15 +11,14 @@ import {
 } from "@/lib/og-url";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 
-const interVariable = localFont({
-  src: "../public/fonts/InterVariable.ttf",
+const interVariable = Inter({
+  subsets: ['latin'],
   variable: "--font-inter",
   display: "swap",
-  weight: "100 900",
 });
 
 const geistMono = localFont({
-  src: "../public/fonts/GeistMono-Medium.ttf",
+  src: "../public/fonts/GeistMono-Medium.woff2",
   variable: "--font-geist-mono",
   display: "swap",
   weight: "500",
@@ -76,6 +77,7 @@ export default function RootLayout({
         </PostHogProvider>
         {process.env.NODE_ENV === "production" && (
           <>
+            <GoogleTagManager gtmId="GTM-NGLK4TZX" />
             <Hubspot />
             <Script
               id="cookieyes"
