@@ -66,6 +66,7 @@ attributes include:
 - `version` (via `langfuse.version`)
 - `release` (via `langfuse.release`)
 - `tags` (via `langfuse.trace.tags`)
+- `trace_name` (via `langfuse.trace.name`)
 
 Langfuse filters and aggregations increasingly operate across individual
 observations rather than only at the trace level. If you want to reliably
@@ -356,9 +357,9 @@ Furthermore, Langfuse uses attributes within the `langfuse.*` namespace to map O
   not work as expected or does not parse the correct attributes.
 </Callout>
 
-Langfuse distinguishes between trace-level attributes and observation-level attributes. 
+Langfuse distinguishes between trace-level attributes and observation-level attributes.
 - [Trace-level attributes](#trace-level-attributes) represent shared context for an entire interaction. If Langfuse detects these attributes on a specific span, it will treat them as properties of the whole trace.
-- [Observation-level attributes](#observation-level-attributes) describe individual steps within a trace. Langfuse keeps them on the observation level. 
+- [Observation-level attributes](#observation-level-attributes) describe individual steps within a trace. Langfuse keeps them on the observation level.
 
 ### How Metadata Mapping Works [#metadata-mapping]
 
