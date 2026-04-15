@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense } from "react";
-import { Background } from "@/components/Background";
 import { Header } from "@/components/Header";
 import { ContactSalesForm } from "@/components/ContactSalesForm";
 import { CheckCircle2, ArrowRight } from "lucide-react";
@@ -11,7 +10,7 @@ import { SDK_INSTALLS_PER_MONTH, DOCKER_PULLS } from "@/components/home/Usage";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { WatchWalkthroughs } from "@/components/watchOrBookDemo/WatchWalkthroughs";
-import { HomeSection } from "@/components/home/components/HomeSection";
+import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 
 function SwitchToggle({
@@ -83,19 +82,19 @@ function TalkToUsContent() {
         </p>
         <ul className="flex flex-col gap-2 mt-2">
           <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <CheckCircle2 className="h-5 w-5 text-primary mt-1 shrink-0" />
             <span>Get a Demo</span>
           </li>
           <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <CheckCircle2 className="h-5 w-5 text-primary mt-1 shrink-0" />
             <span>Get Volume Pricing</span>
           </li>
           <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <CheckCircle2 className="h-5 w-5 text-primary mt-1 shrink-0" />
             <span>Pay by Invoice</span>
           </li>
           <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <CheckCircle2 className="h-5 w-5 text-primary mt-1 shrink-0" />
             <span>Ask questions about our Security & Compliance Policies</span>
           </li>
         </ul>
@@ -166,7 +165,7 @@ function DiscoverYourselfContent() {
         <ul className="flex flex-col gap-2 mt-2">
           {links.map((link) => (
             <li key={link.href} className="flex items-start gap-3">
-              <ArrowRight className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <ArrowRight className="h-5 w-5 text-primary mt-1 shrink-0" />
               <Link
                 href={link.href}
                 className="text-primary underline underline-offset-4 hover:text-primary/80 hover:underline-offset-2 transition-all font-medium"
@@ -237,13 +236,12 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
         }
       />
 
-      <div className="w-full max-w-6xl px-4">
-        <div className="flex flex-col md:flex-row gap-14">
+      <div className="w-full max-w-6xl px-4 not-prose">
+        <div className="flex flex-col md:flex-row gap-8">
           {/* Left Column: Content based on switch */}
           <div
-            className={`flex flex-col gap-4 ${
-              isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
-            }`}
+            className={`flex flex-col gap-8 ${isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
+              }`}
           >
             <SwitchToggle checked={isDiscoverOpen} page={page} />
             {!isDiscoverOpen ? (
@@ -259,8 +257,6 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
           </div>
         </div>
       </div>
-
-      <Background />
     </HomeSection>
   );
 }

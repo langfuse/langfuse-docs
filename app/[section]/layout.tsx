@@ -1,21 +1,23 @@
 import { use } from "react";
 import { notFound } from "next/navigation";
-import { Layout } from "@/components/layout";
+import { DocsSecondaryNav, HomeLayout, DocsSecondaryNavMobile, Layout } from "@/components/layout";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import {
   SECTION_CONFIG,
   SECTION_SLUGS,
   DOCS_STYLE_APP_SECTIONS,
   MARKETING_SECTION_SLUGS,
-  WIDE_SECTIONS,
+  MARKETING_SECTIONS,
   POST_SECTIONS,
   CHANGELOG_SECTIONS,
   getPageTreeWithShortTitles,
 } from "@/lib/source";
-import { MenuSwitcher } from "@/components/MenuSwitcher";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SectionLayoutWrapper } from "./SectionLayoutWrapper";
+import { AISearch } from "@/components/inkeep/search-context";
+import { AISearchPanel } from "@/components/inkeep/search-panel";
+import { ForceLightMode } from "@/components/ForceLightMode";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -36,8 +38,8 @@ export default function SectionLayout({ children, params }: LayoutProps) {
   if (DOCS_STYLE_APP_SECTIONS.has(section)) {
     notFound();
   }
-  if (WIDE_SECTIONS.has(section)) {
-    notFound(); /* wide sections are served by app/(wide)/<section>/page.tsx */
+  if (MARKETING_SECTIONS.has(section)) {
+    return <HomeLayout>{children}</HomeLayout>;
   }
 
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
@@ -53,41 +55,45 @@ export default function SectionLayout({ children, params }: LayoutProps) {
   // correctly propagates context to DocsPage in the page component.
   // SectionLayoutWrapper is a thin "use client" wrapper for SidebarProvider only.
   return (
-    <Layout>
-      <SectionLayoutWrapper>
-        <DocsLayout
-          tree={tree}
-          githubUrl="https://github.com/langfuse/langfuse-docs"
-          nav={{ enabled: false }}
-          sidebar={
-            isMarketing || isPost ? { enabled: false } : { banner: <MenuSwitcher /> }
-          }
-          themeSwitch={isMarketing || isPost ? { enabled: false } : { component: <div className="ms-auto"><ThemeToggle /></div> }}
-          searchToggle={{ enabled: false }}
-          containerProps={
-            isMarketing || isChangelog
-              ? // Force --fd-toc-width:0 so the docs grid doesn't reserve a phantom
+    <AISearch>
+      <Layout>
+        <SectionLayoutWrapper>
+          <DocsLayout
+            tree={tree}
+            githubUrl="https://github.com/langfuse/langfuse-docs"
+            nav={isMarketing || isPost ? { enabled: false } : { component: <DocsSecondaryNavMobile /> }}
+            sidebar={
+              isMarketing || isPost ? { enabled: false } : { banner: <DocsSecondaryNav /> }
+            }
+            themeSwitch={isMarketing || isPost ? { enabled: false } : { component: <div className="ms-auto"><ThemeToggle /></div> }}
+            searchToggle={{ enabled: false }}
+            containerProps={
+              isMarketing || isChangelog
+                ? // Force --fd-toc-width:0 so the docs grid doesn't reserve a phantom
                 // 268px TOC column (written to the grid by DocsPage's article via CSS :has()).
                 ({ style: { "--fd-toc-width": "0px" } } as React.ComponentProps<
                   typeof DocsLayout
                 >["containerProps"])
-              : undefined
-          }
-        >
-          {isMarketing || isChangelog ? (
-            <div className="w-full min-w-0 flex justify-center [grid-area:main]">
-              <div
-                className={`${contentWrapperClass} ${isChangelog ? "px-3 md:px-4" : ""}`}
-                data-changelog-content={isChangelog ? "" : undefined}
-              >
-                <MainContentWrapper>{children}</MainContentWrapper>
+                : undefined
+            }
+          >
+            {isMarketing || isChangelog ? (
+              <div className="w-full min-w-0 flex justify-center [grid-area:main]">
+                <div
+                  className={`${contentWrapperClass} ${isChangelog ? "px-3 md:px-4" : ""}`}
+                  data-changelog-content={isChangelog ? "" : undefined}
+                >
+                  <MainContentWrapper>{children}</MainContentWrapper>
+                </div>
               </div>
-            </div>
-          ) : (
-            children
-          )}
-        </DocsLayout>
-      </SectionLayoutWrapper>
-    </Layout>
+            ) : (
+              children
+            )}
+            <AISearchPanel />
+          </DocsLayout>
+        </SectionLayoutWrapper>
+        <ForceLightMode />
+      </Layout>
+    </AISearch>
   );
 }

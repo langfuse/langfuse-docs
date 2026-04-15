@@ -2,10 +2,12 @@
 import React, { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import {
   Tabs as FumadocsTabs,
+  Tab as FumadocsTab,
   TabsList as FumadocsTabsList,
   TabsTrigger as FumadocsTabsTrigger,
 } from "fumadocs-ui/components/tabs";
 import { cn } from "@/lib/utils";
+import { CornerBox } from "./ui";
 
 const KEY = "synced-tabs:language";
 const normalize = (s: string) => s.trim().toLowerCase();
@@ -34,7 +36,7 @@ const store: Store = {
     if (typeof window !== "undefined") {
       try {
         window.localStorage.setItem(KEY, label);
-      } catch {}
+      } catch { }
     }
   },
 };
@@ -43,7 +45,7 @@ if (typeof window !== "undefined") {
   try {
     const saved = window.localStorage.getItem(KEY);
     if (saved != null) storeEntry.value = saved;
-  } catch {}
+  } catch { }
   window.addEventListener("storage", (e: StorageEvent) => {
     if (e.key !== KEY) return;
     const next = e.newValue == null ? null : e.newValue;
@@ -56,6 +58,13 @@ if (typeof window !== "undefined") {
 
 function toValue(s: string): string {
   return s.toLowerCase().replace(/\s/g, "-");
+}
+
+export function LangTab({
+  className,
+  ...props
+}: React.ComponentProps<typeof FumadocsTab>) {
+  return <FumadocsTab className={cn("pt-4 text-sm bg-transparent rounded-none prose-no-margin bg-stripe-pattern", className)} {...props} />;
 }
 
 export function LangTabs(props: {
@@ -159,39 +168,36 @@ export function LangTabs(props: {
 
   return (
     <div ref={containerRef}>
-      <FumadocsTabs
-        key={internalValue}
-        defaultValue={internalValue}
-        className="flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4"
-      >
-        <FumadocsTabsList
-          className={cn(
-            "flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose",
-          )}
+      <CornerBox>
+        <FumadocsTabs
+          key={internalValue}
+          defaultValue={internalValue}
+          className="flex overflow-hidden flex-col my-0 rounded-none border border-border"
         >
-          {items.map((item, i) => (
-            <FumadocsTabsTrigger
-              key={i}
-              value={values[i]}
-              onClick={() => handleValueChange(values[i])}
-              className={cn(
-                "inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary",
-              )}
-            >
-              {typeof item === "string" ? item : (item?.label ?? String(i))}
-            </FumadocsTabsTrigger>
-          ))}
-        </FumadocsTabsList>
-        {React.Children.map(children, (child, i) => {
-          if (!React.isValidElement(child)) return child;
-          return React.cloneElement(
-            child as React.ReactElement<{ value: string }>,
-            {
+          <FumadocsTabsList
+            className={"flex overflow-x-auto overflow-y-hidden flex-nowrap gap-2 px-4 pt-1 rounded-none border-b sm:gap-4 not-prose border-line-structure min-h-9 bg-surface-bg"}
+          >
+            {items.map((item, i) => (
+              <FumadocsTabsTrigger
+                key={i}
+                value={values[i]}
+                onClick={() => handleValueChange(values[i])}
+                className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b border-transparent pb-2 pt-1.5 text-xs text-text-tertiary transition-colors font-[430] hover:text-foreground cursor-pointer disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-line-cta data-[state=active]:text-text-primary data-[state=active]:font-medium"
+              >
+                {typeof item === "string" ? item : item?.label ?? String(i)}
+              </FumadocsTabsTrigger>
+            ))}
+          </FumadocsTabsList>
+          {React.Children.map(children, (child, i) => {
+            if (!React.isValidElement(child)) return child;
+            return React.cloneElement(child as React.ReactElement<{ value: string }>, {
               value: values[i] ?? String(i),
-            },
-          );
-        })}
-      </FumadocsTabs>
+            });
+          })}
+        </FumadocsTabs>
+      </CornerBox>
     </div>
   );
 }
+
+export const LangTabsWithTab = Object.assign(LangTabs, { Tab: LangTab });

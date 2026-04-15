@@ -1,312 +1,238 @@
 "use client";
 
-import Link from "next/link";
-import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
-import { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Link } from "@/components/ui/link";
+import { ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { CornerBox, HoverCorners } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
-import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
-import type { NavTreeItem, SectionNavData } from "@/lib/nav-tree";
+import { productLinks, resourcesLinks, simpleLinks } from "@/lib/nav-links";
+import type { NavPanelLink } from "@/lib/nav-links";
+import type { SectionNavData } from "@/lib/nav-tree";
 
-const productLinks = [
-  { name: "Overview", href: "/docs" },
-  { name: "LLM Observability", href: "/docs/observability/overview" },
-  { name: "Prompt Management", href: "/docs/prompt-management/overview" },
-  { name: "Evaluation", href: "/docs/evaluation/overview" },
-  { name: "Metrics", href: "/docs/metrics/overview" },
-];
+// ── Nav trigger style ─────────────────────────────────────────────────────────
 
-const resourcesLinks = [
-  { name: "Blog", href: "/blog" },
-  { name: "Changelog", href: "/changelog" },
-  { name: "Roadmap", href: "/docs/roadmap" },
-  { name: "Users", href: "/users" },
-  { name: "Example Project", href: "/docs/demo" },
-  { name: "Walkthroughs", href: "/guides" },
-  { name: "Support", href: "/support" },
-];
+const navTriggerClassName =
+  "flex items-center gap-1 py-1.5 whitespace-nowrap ring-inset font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] [text-shadow:0_0_0_#B5AFEA] text-text-tertiary hover:text-text-secondary hover:bg-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-const simpleLinks = [
-  { name: "Docs", href: "/docs" },
-  { name: "Changelog", href: "/changelog", tabletHidden: true },
-  { name: "Pricing", href: "/pricing" },
-];
+// ── Featured card ─────────────────────────────────────────────────────────────
 
-export function NavLinks({
-  sectionNavData,
+type FeaturedItem = {
+  image: React.ReactNode;
+  title: string;
+  description: string;
+  cta: string;
+  href: string;
+};
+
+const productFeatured: FeaturedItem = {
+  image: (
+    <div className="flex justify-center items-center px-5 h-full">
+      <div className="px-4 py-3 w-full rounded border shadow-sm border-line-structure bg-surface-1">
+        <div className="mb-2 flex items-center gap-1.5">
+          <div className="rounded-full size-2 bg-line-structure" />
+          <span className="font-sans text-[10px] font-semibold text-text-tertiary tracking-tight">langfuse</span>
+        </div>
+        <p className="font-sans text-[11px] font-semibold text-text-primary leading-snug">
+          Get Started with Tracing
+        </p>
+        <p className="mt-1 font-sans text-[10px] text-text-tertiary leading-relaxed">
+          Step-by-step guide to ingesting your first trace using OpenAI, LangChain, or the SDKs.
+        </p>
+      </div>
+    </div>
+  ),
+  title: "Get Started with Tracing",
+  description: "This guide walks you through ingesting your first trace.",
+  cta: "Read docs",
+  href: "/docs/get-started",
+};
+
+const resourcesFeatured: FeaturedItem = {
+  image: (
+    <div className="flex flex-col gap-3 justify-center items-center px-6 h-full">
+      <div className="flex gap-0 items-center w-full">
+        <div className="flex flex-1 justify-center items-center py-3 rounded border border-line-structure bg-surface-1">
+          <span className="font-sans text-[11px] font-semibold text-text-secondary tracking-tight">langfuse</span>
+        </div>
+        <div className="w-4 border-t shrink-0 border-line-structure" />
+        <div className="flex flex-1 justify-center items-center py-3 rounded border border-line-structure bg-surface-1">
+          <span className="font-sans text-[11px] font-semibold text-text-secondary tracking-tight">ClickHouse</span>
+        </div>
+      </div>
+    </div>
+  ),
+  title: "Langfuse joins ClickHouse",
+  description: "Our goal continues to be building the best LLM engineering platform",
+  cta: "Read story",
+  href: "/blog/clickhouse",
+};
+
+// ── Featured card component ───────────────────────────────────────────────────
+
+function NavFeaturedCard({ featured }: { featured: FeaturedItem }) {
+  return (
+    <Link href={featured.href} className="flex flex-col h-full no-underline group/card">
+      <div className="relative w-full h-[140px] with-stripes border-b border-line-structure overflow-hidden shrink-0">
+        {featured.image}
+      </div>
+      <div className="flex flex-col flex-1 gap-2 p-4">
+        <p className="font-sans text-[13px] font-semibold leading-snug text-text-primary">
+          {featured.title}
+        </p>
+        <p className="font-sans text-[12px] leading-relaxed text-text-tertiary">
+          {featured.description}
+        </p>
+        <span className="mt-auto font-mono text-[11px] text-text-tertiary group-hover/card:text-text-secondary transition-colors">
+          {featured.cta}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+// ── Mega dropdown panel ────────────────────────────────────────────────────────
+
+function NavDropdownPanel({
+  links,
+  featured,
 }: {
-  sectionNavData: SectionNavData[];
+  links: NavPanelLink[];
+  featured: FeaturedItem;
 }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileProductOpen, setMobileProductOpen] = useState(true);
-  const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  return (
+    <CornerBox className="flex p-0 min-w-max bg-surface-1">
+      <div className="group/dropdown flex flex-col gap-[6px] border-r border-line-structure min-w-[220px] p-3.5 overflow-hidden">
+        {links.map((link) => {
+          const Icon = link.icon;
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="flex relative gap-3 items-center p-1 no-underline transition-colors link-box group group/link hover:bg-surface-bg"
+            >
+              <HoverCorners />
+              <Icon className="size-[15px] shrink-0 text-text-tertiary transition-colors group-hover/dropdown:text-text-disabled group-hover/dropdown:group-hover/link:text-text-tertiary" />
+              <span className="font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] text-text-tertiary transition-colors group-hover/dropdown:text-text-disabled group-hover/dropdown:group-hover/link:text-text-tertiary">
+                {link.name}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+      <div className="w-[260px] shrink-0 flex flex-col border-l border-line-structure -ml-px overflow-hidden">
+        <NavFeaturedCard featured={featured} />
+      </div>
+    </CornerBox>
+  );
+}
 
-  const toggleSection = (href: string) => {
-    setOpenSections((prev) => ({ ...prev, [href]: !prev[href] }));
+// ── Custom fixed-positioned dropdown ─────────────────────────────────────────
+
+function NavDropdown({
+  label,
+  links,
+  featured,
+}: {
+  label: string;
+  links: NavPanelLink[];
+  featured: FeaturedItem;
+}) {
+  const [open, setOpen] = useState(false);
+  const [left, setLeft] = useState(0);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const updateLeft = useCallback(() => {
+    if (triggerRef.current) {
+      setLeft(triggerRef.current.getBoundingClientRect().left);
+    }
+  }, []);
+
+  const toggle = () => {
+    updateLeft();
+    setOpen((v) => !v);
   };
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: PointerEvent) {
+      if (
+        !triggerRef.current?.contains(e.target as Node) &&
+        !panelRef.current?.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onScroll = () => setOpen(false);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [open]);
 
   return (
     <>
-      {/* Desktop nav */}
-      <div className="hidden overflow-x-auto gap-2 lg:gap-4 items-center md:flex">
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-1 py-1.5 text-sm whitespace-nowrap ring-inset text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            Product
-            <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            {productLinks.map((link) => (
-              <DropdownMenuItem key={link.name} asChild>
-                <Link href={link.href}>{link.name}</Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-1 px3- py-1.5 text-sm font-medium whitespace-nowrap ring-inset text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            Resources
-            <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            {resourcesLinks.map((link) => (
-              <DropdownMenuItem key={link.name} asChild>
-                <Link href={link.href}>{link.name}</Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {simpleLinks.map((link) => (
-          <Link
-            key={link.name}
-            href={link.href}
-            className={cn("py-1.5 text-sm font-normal whitespace-nowrap ring-inset text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring", link.tabletHidden && "hidden lg:block")}
-          >
-            {link.name}
-          </Link>
-        ))}
-      </div>
-
-      {/* Mobile hamburger button */}
       <button
-        className="md:hidden p-0.5 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-        onClick={() => setMobileOpen((v) => !v)}
-        aria-label="Toggle navigation menu"
+        ref={triggerRef}
+        onClick={toggle}
+        aria-expanded={open}
+        className={navTriggerClassName}
       >
-        {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        {label}
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 opacity-60 transition-transform duration-150",
+            open && "rotate-180"
+          )}
+        />
       </button>
 
-      {/* Mobile menu — backdrop-blur on header creates a CSS containing block,
-           so `top` is relative to the header itself. Use `4rem` (navbar height)
-           to sit flush at the navbar's bottom edge. */}
       <div
-        className={`md:hidden fixed left-0 right-0 z-50 bg-background border-b shadow-lg transition-all duration-300 ease-out overflow-hidden ${mobileOpen
-          ? "opacity-100 translate-y-0"
-          : "opacity-0 -translate-y-2 max-h-0 pointer-events-none"
-          }`}
+        ref={panelRef}
+        aria-hidden={!open}
+        className={cn(
+          "fixed z-50 transition-all duration-150 ease-out origin-top-left",
+          open ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-1 pointer-events-none"
+        )}
         style={{
-          top: "4rem",
-          maxHeight: mobileOpen
-            ? "calc(100vh - 4rem - var(--fd-banner-height, 0px))"
-            : undefined,
+          top: "66px",
         }}
-        aria-hidden={!mobileOpen}
       >
-        <div
-          className="overflow-y-auto"
-          style={{ maxHeight: "calc(100vh - 4rem - var(--fd-banner-height, 0px))" }}
-        >
-          <div className="px-4 py-4 flex flex-col gap-1">
-            {/* Search */}
-            <div className="mb-2">
-              <InkeepSearchBar />
-            </div>
-
-            {/* Product */}
-            <button
-              type="button"
-              className="flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-200"
-              onClick={() => setMobileProductOpen((v) => !v)}
-              aria-expanded={mobileProductOpen}
-            >
-              <span>Product</span>
-              <ChevronDown
-                className={`h-4 w-4 transition-transform ${mobileProductOpen ? "rotate-180" : "rotate-0"
-                  }`}
-              />
-            </button>
-            {mobileProductOpen && (
-              <div className="flex flex-col gap-1 pl-2">
-                {productLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-2 py-2 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            {/* Resources */}
-            <button
-              type="button"
-              className="mt-1 flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-200"
-              onClick={() => setMobileResourcesOpen((v) => !v)}
-              aria-expanded={mobileResourcesOpen}
-            >
-              <span>Resources</span>
-              <ChevronDown
-                className={`h-4 w-4 transition-transform ${mobileResourcesOpen ? "rotate-180" : "rotate-0"
-                  }`}
-              />
-            </button>
-            {mobileResourcesOpen && (
-              <div className="flex flex-col gap-1 pl-2">
-                {resourcesLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-2 py-2 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            {/* All sections */}
-            <div className="border-t mt-3 pt-3 flex flex-col gap-1">
-              {sectionNavData.map((section) =>
-                section.children.length > 0 ? (
-                  <div key={section.href}>
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-200"
-                      onClick={() => toggleSection(section.href)}
-                      aria-expanded={!!openSections[section.href]}
-                    >
-                      <span>{section.name}</span>
-                      <ChevronDown
-                        className={cn(
-                          "h-4 w-4 transition-transform",
-                          openSections[section.href]
-                            ? "rotate-180"
-                            : "rotate-0"
-                        )}
-                      />
-                    </button>
-                    {openSections[section.href] && (
-                      <div className="flex flex-col gap-0.5 pl-2">
-                        {section.children.map((item, i) => (
-                          <MobileNavTreeItem
-                            key={`${item.type}-${item.url || item.name || i}`}
-                            item={item}
-                            onNavigate={() => setMobileOpen(false)}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    key={section.href}
-                    href={section.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between px-2 py-2 text-sm font-medium text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
-                  >
-                    <span>{section.name}</span>
-                    <ChevronRight className="h-4 w-4 opacity-50" />
-                  </Link>
-                )
-              )}
-            </div>
-          </div>
-        </div>
+        <NavDropdownPanel links={links} featured={featured} />
       </div>
     </>
   );
 }
 
-function MobileNavTreeItem({
-  item,
-  onNavigate,
+// ── Desktop NavLinks (lg+) ────────────────────────────────────────────────────
+
+export function NavLinks({
+  sectionNavData: _sectionNavData,
 }: {
-  item: NavTreeItem;
-  onNavigate: () => void;
+  sectionNavData: SectionNavData[];
 }) {
-  if (item.type === "separator") {
-    if (!item.name) return null;
-    return (
-      <div className="px-2 pt-3 pb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-        {item.name}
-      </div>
-    );
-  }
-
-  if (item.type === "folder" && item.children && item.children.length > 0) {
-    return <MobileNavFolder item={item} onNavigate={onNavigate} />;
-  }
-
-  if (!item.url) return null;
-
   return (
-    <Link
-      href={item.url}
-      onClick={onNavigate}
-      className="block px-2 py-1.5 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
-    >
-      {item.name}
-    </Link>
-  );
-}
+    <div className="flex overflow-x-auto gap-2 items-center lg:gap-4">
+      <NavDropdown label="Product" links={productLinks} featured={productFeatured} />
+      <NavDropdown label="Resources" links={resourcesLinks} featured={resourcesFeatured} />
 
-function MobileNavFolder({
-  item,
-  onNavigate,
-}: {
-  item: NavTreeItem;
-  onNavigate: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div>
-      <button
-        type="button"
-        className="flex w-full items-center justify-between px-2 py-1.5 text-sm text-gray-700 hover:bg-accent rounded-md dark:text-gray-300"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-      >
-        <span>{item.name}</span>
-        <ChevronDown
+      {simpleLinks.map((link) => (
+        <Link
+          key={link.name}
+          href={link.href}
+          variant="nav"
           className={cn(
-            "h-3.5 w-3.5 opacity-60 transition-transform",
-            open ? "rotate-180" : "rotate-0"
+            "py-1.5 whitespace-nowrap ring-inset transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            link.tabletHidden && "hidden lg:block"
           )}
-        />
-      </button>
-      {open && (
-        <div className="flex flex-col gap-0.5 pl-3">
-          {item.children!.map((child, i) => (
-            <MobileNavTreeItem
-              key={`${child.type}-${child.url || child.name || i}`}
-              item={child}
-              onNavigate={onNavigate}
-            />
-          ))}
-        </div>
-      )}
+        >
+          {link.name}
+        </Link>
+      ))}
     </div>
   );
 }

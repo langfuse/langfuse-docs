@@ -3,12 +3,84 @@
   --fd-nav-height: 4rem;
 }
 
+/*
+ * Docs chrome (docs-chrome class on SharedDocsLayout wrapper):
+ * NavbarDocs (60px) + DocsSecondaryNav (40px) = 100px = 6.25rem total.
+ * Override --fd-nav-height so fumadocs calculates sidebar sticky-top and
+ * mobile drawer offset correctly. No banner in docs pages so --fd-banner-height = 0px.
+ */
+.docs-chrome {
+  --fd-nav-height: 6.25rem; /* 60px navbar + 40px secondary nav */
+  --fd-banner-height: 0px;
+}
+
+/* ─── Pattern-bg on docs main content area only ──────────────────────────── */
+/* Pattern-bg on docs main content area — identical to .pattern-bg on HomeMainArea */
+#nd-page {
+  background-image: url("/images/patterns/pattern.png");
+  background-size: 40px 40px;
+  background-position: center;
+  background-repeat: repeat;
+  background-color: var(--surface-bg);
+  --cursor-x: 50%;
+  --cursor-y: 50%;
+  max-width: none;
+}
+
+.dark #nd-page {
+  background-image: url("/images/patterns/pattern-docs-dark.png");
+  background-size: 40px 40px;
+  background-position: center;
+  background-repeat: repeat;
+}
+
+/* Direct children: position: relative so they land in the same stacking
+ * tier as ::before and paint on top (tree order puts them after ::before). */
+#nd-page > * {
+  position: relative;
+}
+
+/*
+ * Docs reading column (SharedDocsLayout / .docs-chrome only):
+ * Constrain each *direct* child of #nd-page to 680px — breadcrumb, .prose
+ * (DocBodyChrome), prev/next (DocsFooter). Nested MDX is not targeted.
+ * Site <footer> from DocsAndPageFooter stays full width.
+ */
+.docs-chrome #nd-page > *:not(footer) {
+  max-width: 42.5rem; /* 680px */
+  width: 100%;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+#nd-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
+    hsl(60deg 14.29% 95.88% / 0.15),
+    hsl(60deg 14.29% 95.88% / 0.85)
+  );
+}
+
+.dark #nd-page::before {
+  background: radial-gradient(
+    circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
+    hsla(60, 7%, 8%, 0.05),
+    hsla(60, 7%, 8%, 0.85)
+  );
+}
+
 /* Hide search button in the collapsed-sidebar trigger panel */
 [data-sidebar-panel] [data-search] {
   display: none;
 }
 
-/* Mobile sidebar drawer: push below sticky navbar + optional banner. */
+/* Mobile sidebar drawer: push below sticky navbar + optional banner.
+   Slide from left instead of right; full width. */
 #nd-sidebar-mobile {
   top: calc(
     var(--fd-nav-height, 4rem) + var(--fd-banner-height, 0px)
@@ -16,6 +88,13 @@
   height: calc(
     100dvh - var(--fd-nav-height, 4rem) - var(--fd-banner-height, 0px)
   ) !important;
+  /* Override fumadocs defaults: left-aligned, full width */
+  inset-inline-end: unset !important;
+  inset-inline-start: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  border-inline-start: none !important;
+  --fd-sidebar-drawer-offset: -100%;
 }
 
 /* Sidebar/collapsed-trigger sticky top: custom navbar (4rem) + optional banner.
@@ -27,9 +106,24 @@
   ) !important;
 }
 
-/* Docs left sidebar: max width 360px (Fumadocs default is 268px) */
-#nd-docs-layout [grid-area="sidebar"] {
-  --fd-sidebar-width: 360px;
+/* Sidebar + TOC width: 240px to match NavbarDocs grid-cols-[240px_1fr_240px].
+   [grid-area="sidebar"] is a Tailwind utility class not an HTML attr, so we target
+   #nd-docs-layout directly (--fd-sidebar-col: var(--fd-sidebar-width) is resolved here).
+   At smaller breakpoints the sidebar/TOC panels are hidden by fumadocs, so collapse
+   the grid column widths to 0px to reclaim space. */
+#nd-docs-layout {
+  --fd-sidebar-width: 240px;
+  --fd-toc-width: 240px;
+}
+@media (max-width: 1439px) {
+  #nd-docs-layout {
+    --fd-toc-width: 0px;
+  }
+}
+@media (max-width: 768px) {
+  #nd-docs-layout {
+    --fd-sidebar-width: 0px;
+  }
 }
 
 /* Sidebar/tree left alignment: let fumadocs' own p-4 (1rem) on the scroll container
@@ -40,11 +134,16 @@
    By default Fumadocs makes only the SidebarViewport (ScrollArea) scroll. We make the
    aside #nd-sidebar the scroll container and disable the inner ScrollArea. */
 #nd-docs-layout #nd-sidebar {
+  overflow-x: hidden;
+  overflow-x: clip;
   overflow-y: auto;
+  min-width: 0;
+  max-width: 100%;
   scrollbar-width: thin;
+  font-size: 13px;
 }
 #nd-docs-layout #nd-sidebar::-webkit-scrollbar {
-  width: 4px;
+  width: 2px;
 }
 #nd-docs-layout #nd-sidebar::-webkit-scrollbar-track {
   background: transparent;
@@ -56,10 +155,27 @@
 #nd-docs-layout #nd-sidebar::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
+
+#nd-docs-layout #nd-ai-input::-webkit-scrollbar {
+  width: 4px;
+}
+#nd-docs-layout #nd-ai-input::-webkit-scrollbar-track {
+  background: transparent;
+}
+#nd-docs-layout #nd-ai-input::-webkit-scrollbar-thumb {
+  background: var(--line-structure);
+  border-radius: 2px;
+}
+#nd-docs-layout #nd-ai-input::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
 #nd-docs-layout #nd-sidebar > div.flex-1 {
   flex: none;
   overflow: visible;
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
 }
 /* Inner viewport: allow full height so the aside scrolls (Radix or first child of scroll area) */
 #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport],
@@ -69,15 +185,21 @@
   overflow: visible !important;
   height: auto !important;
   max-height: none !important;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Same full-sidebar scroll for mobile docs drawer */
 #nd-sidebar-mobile {
+  overflow-x: hidden;
+  overflow-x: clip;
   overflow-y: auto;
+  min-width: 0;
+  max-width: 100%;
   scrollbar-width: thin;
 }
 #nd-sidebar-mobile::-webkit-scrollbar {
-  width: 4px;
+  width: 2px;
 }
 #nd-sidebar-mobile::-webkit-scrollbar-track {
   background: transparent;
@@ -93,26 +215,77 @@
   flex: none;
   overflow: visible;
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .layout-wrapper {
   max-width: 1440px;
   margin: 0 auto;
   position: relative;
-}
-#nd-docs-layout #nd-sidebar[data-hovered="false"] {
-  background-color: transparent;
+  border-right: 1px solid var(--line-structure);
+  background-color: var(--surface-1);
 }
 
-/* Sidebar active link: use blue (muted-blue) so blog/changelog and docs look the same. */
+[data-toc-popover] {
+  z-index: 11;
+}
+
+/* ─── HomeSidebar/HomeAside corner effect for docs layout ────────────────────
+ * HomeSidebar: outer aside has bg-line-structure + p-px pt-0; inner nav has rounded-sm bg-surface-1.
+ * Docs sidebar: outer [data-sidebar-placeholder] = bg-line-structure; inner #nd-sidebar is absolute
+ * so we use inset (not padding) to leave a 1px gap on right/bottom/left revealing the outer bg.
+ * TOC: #nd-toc IS the grid item; #nd-docs-layout gets bg-line-structure so margin on #nd-toc
+ * reveals it as a 1px strip matching the HomeAside separator. */
+
+#nd-docs-layout {
+  background-color: var(
+    --line-structure
+  ); /* revealed at sidebar/toc margins as 1px separators */
+}
+
+/* Sidebar outer: provides line-structure background visible at #nd-sidebar corners */
+#nd-docs-layout [data-sidebar-placeholder] {
+  background-color: var(--line-structure);
+  /* Grid/flex: allow column to shrink so deep trees don’t force horizontal overflow */
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+/* Sidebar inner (#nd-sidebar is position:absolute inside the placeholder):
+   inset 1px right/bottom/left (pt-0: top stays flush) to expose line-structure at edges.
+   Remove fumadocs' border-inline-end; add rounded-sm + surface-1 bg.
+   Only apply inset when expanded (data-collapsed="false") to not break collapse animation. */
+#nd-docs-layout #nd-sidebar[data-collapsed="false"] {
+  inset: 0 1px 1px 1px !important;
+  width: auto !important;
+}
+#nd-docs-layout #nd-sidebar {
+  border-inline-end: none !important;
+  border-radius: calc(var(--radius) - 4px);
+  background-color: var(--surface-1) !important;
+}
+#nd-docs-layout #nd-sidebar[data-hovered="false"] {
+  background-color: var(--surface-1) !important;
+}
+
+/* TOC: margin 1px on left/bottom (right handled by layout-wrapper border) to expose line-structure.
+   Add padding-inline-start to match HomeAside's px-2.5 */
+#nd-docs-layout #nd-toc {
+  margin: 0 0 1px 1px;
+  border-radius: calc(var(--radius) - 4px);
+  background-color: var(--line-structure) !important;
+  top: var(--fd-nav-height, 6.25rem);
+}
+
+/* Sidebar active link */
 #nd-docs-layout #nd-sidebar [data-active="true"],
 #nd-sidebar-mobile [data-active="true"] {
-  color: hsl(var(--muted-blue)) !important;
-  background-color: hsl(var(--muted-blue) / 0.1) !important;
-}
-#nd-docs-layout #nd-sidebar [data-active="true"]::before,
-#nd-sidebar-mobile [data-active="true"]::before {
-  background-color: hsl(var(--muted-blue)) !important;
+  color: hsl(var(--text-primary)) !important;
+  font-weight: 580 !important;
+  background-color: transparent !important;
 }
 
 /* Reduce height (less padding) of sidebar nav items */
@@ -123,7 +296,240 @@
   padding-top: 0.25rem !important;
   padding-bottom: 0.25rem !important;
   min-height: unset !important;
+  border-radius: 0;
+  position: relative;
 }
+
+#nd-docs-layout #nd-sidebar a:hover,
+#nd-docs-layout #nd-sidebar button:hover,
+#nd-sidebar-mobile a:hover,
+#nd-sidebar-mobile button:hover {
+  background: none !important;
+}
+
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a,
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] button,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  isolation: isolate;
+  z-index: 0;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/*
+ * Nested page-tree links sit inside Radix CollapsibleContent, which uses overflow-hidden
+ * for height animation. That clips row ::before/::after that extend with negative margins.
+ * Radix sets --radix-collapsible-content-height on that div; only open folders need visible overflow.
+ */
+#nd-docs-layout
+  #nd-sidebar
+  [style*="--radix-collapsible-content-height"][data-state="open"],
+#nd-sidebar-mobile
+  [style*="--radix-collapsible-content-height"][data-state="open"] {
+  overflow: visible !important;
+}
+
+/* Background tile overlay — uses ::before so it can extend beyond the element
+   via negative margins (matching the ::after corner brackets sizing).
+   Never padding: inherit — nested items use large paddingInlineStart (Fumadocs depth). */
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a::before,
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] button::before,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a::before,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: calc(100% + 12px) !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 -6px;
+  box-sizing: border-box;
+  z-index: -1;
+  opacity: 0;
+  --stripe-period: 6px;
+  --stripe-base: transparent;
+  --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.1));
+  background: repeating-linear-gradient(
+    315deg,
+    var(--stripe-base),
+    var(--stripe-base) 2px,
+    var(--stripe-line) 4px,
+    var(--stripe-base) 4px
+  );
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/*
+ * Nested tree rows: Fumadocs draws the vertical rail on SidebarFolderContent with
+ * before:start-2.5 (0.625rem). Start stripe + corner mask there so they line up with
+ * the guide instead of the text block (padding-inline-start is larger).
+ */
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  a::before,
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  a::after,
+#nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  a::before,
+#nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  a::after {
+  /* Match Fumadocs rail: before:start-2.5; logical props for RTL */
+  left: auto !important;
+  right: auto !important;
+  inset-inline-start: 0.625rem !important;
+  inset-inline-end: -6px !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::before,
+#nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::before {
+  opacity: 1;
+  background-color: hsl(0 0% 100% / 0.25);
+}
+
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a:hover::before,
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  button:hover::before,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a:hover::before,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button:hover::before {
+  opacity: 1;
+  background-color: hsl(0 0% 100% / 0.5);
+}
+
+.dark
+  #nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::before,
+.dark
+  #nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::before {
+  background-color: hsl(0 0% 0% / 0.25);
+}
+
+.dark
+  #nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  a:hover::before,
+.dark
+  #nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  button:hover::before,
+.dark #nd-sidebar-mobile [data-radix-scroll-area-viewport] a:hover::before,
+.dark
+  #nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  button:hover::before {
+  background-color: hsla(0, 0%, 0%, 0.35);
+}
+
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::after,
+#nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [data-active="true"]::after {
+  opacity: 1;
+}
+
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a::after,
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] button::after,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a::after,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 !important;
+  width: calc(100% + 12px);
+  margin: 0 -6px;
+  box-sizing: border-box;
+  z-index: -1;
+  opacity: 0;
+  background-color: hsl(var(--foreground) / 0.6);
+  -webkit-mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  -webkit-mask-size: 8px 8px;
+  mask-size: 8px 8px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  /* padding-box: full row incl. Fumadocs depth padding; content-box misaligned corners on nested items */
+  -webkit-mask-origin: padding-box;
+  mask-origin: padding-box;
+  transition: opacity 0.2s ease;
+}
+
+.dark #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a::after,
+.dark
+  #nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  button::after,
+.dark #nd-sidebar-mobile [data-radix-scroll-area-viewport] a::after,
+.dark #nd-sidebar-mobile [data-radix-scroll-area-viewport] button::after {
+  background-color: var(--line-cta);
+}
+
+#nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] a:hover::after,
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  button:hover::after,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] a:hover::after,
+#nd-sidebar-mobile [data-radix-scroll-area-viewport] button:hover::after {
+  opacity: 1;
+}
+
 #nd-docs-layout #nd-sidebar ul li,
 #nd-sidebar-mobile ul li {
   margin-top: 0 !important;
@@ -132,6 +538,11 @@
 #nd-docs-layout #nd-sidebar ul,
 #nd-sidebar-mobile ul {
   gap: 0 !important;
+}
+
+#nd-docs-layout #nd-sidebar > div:first-child,
+#nd-sidebar-mobile #nd-sidebar > div:first-child {
+  display: none !important;
 }
 
 /* External links in docs/section sidebars: show only the arrow after the text (label often has ↗).
@@ -147,6 +558,89 @@
   #nd-docs-layout [data-sidebar-panel] {
     left: calc((100vw - 1440px) / 2);
   }
+}
+
+/* ─── TOC (right sidebar) ─────────────────────────────────────────────────── */
+
+/* Reduce fumadocs' default pt-12 top padding */
+#nd-toc {
+  --text-links: var(--line-cta);
+  padding: 0;
+  max-height: calc(100dvh - 102px);
+  border-bottom-width: 0;
+  border-radius: 0 !important;
+  z-index: 10;
+}
+
+#nd-toc > div {
+  padding-left: 1rem;
+  padding-right: 0.625rem;
+  box-shadow: none;
+  mask-image: none;
+}
+
+#nd-toc > div > div.ease-linear {
+  transition:
+    top 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#nd-toc .text-sm {
+  font-size: 0.813rem;
+}
+
+/* "On this page" heading: bold, primary color, hide the icon */
+#toc-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  margin-bottom: 0;
+  background-color: var(--surface-1);
+  padding-top: 0.75rem;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  margin-left: 1px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+#toc-title svg {
+  display: none;
+}
+
+/* Scroll area: flex-grow so it fills available height; dashed bottom border */
+#nd-toc > div.ms-px {
+  flex: 1;
+  padding-bottom: 0.75rem;
+  margin-left: 1px;
+  margin-bottom: 0;
+  background-color: var(--surface-1);
+  border-bottom-width: 0 !important;
+  border-bottom-left-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+}
+
+#nd-toc > div.ms-px a:hover {
+  color: var(--text-primary);
+}
+
+/* Items container: use line-structure color for the left border */
+#nd-toc .border-s {
+  border-color: var(--line-structure);
+}
+
+/* TocThumb (moving bar): use text-links (indigo/purple) */
+#nd-toc .bg-fd-primary {
+  background-color: var(--text-links) !important;
+}
+
+/* TOC items: default state */
+#nd-toc a[data-active] {
+  color: var(--text-tertiary);
+}
+/* TOC items: active state */
+#nd-toc a[data-active="true"] {
+  color: var(--text-primary) !important;
 }
 
 /* Fix nested lists */
@@ -167,6 +661,73 @@ ul[data-gh-discussions-list] {
 .prose :where(img):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
   margin-top: 0;
   margin-bottom: 0;
+}
+
+/* Prose (Docs) font */
+.prose {
+  --tw-prose-body: var(--text-secondary);
+  font-size: 0.875rem;
+
+  :where(ul):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    list-style-type: square;
+  }
+
+  :where(table):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    border-radius: 0;
+    font-family: var(--font-sans);
+    background-color: var(--surface-1);
+    font-weight: 430;
+    font-size: 0.813rem;
+  }
+
+  :where(th):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    background-color: var(--surface-bg);
+  }
+
+  :where(h1, h2, h3, h4, h5, h6):not(
+    :where([class~="not-prose"], [class~="not-prose"] *)
+  ) {
+    font-weight: 500;
+  }
+}
+
+[role="tabpanel"].prose-no-margin figure:only-child {
+  margin: 0;
+}
+
+[role="tabpanel"].prose-no-margin > .fd-steps:first-child {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .prose :where(ul):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    list-style-type: square;
+    list-style-position: outside;
+    padding-inline-start: 32px;
+  }
+
+  .prose
+    :where(ul > li):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    margin-inline-start: 0;
+    padding-inline-start: 10px;
+  }
+}
+
+/* Code snippets styles */
+.prose .shiki {
+  border-radius: 2px;
+  background-color: var(--surface-1);
+  border: 1px solid var(--line-structure);
+  box-shadow: none;
+}
+
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  border: 1px solid var(--line-structure);
+  border-radius: 4px;
+  background: var(--surface-bg);
+  color: var(--text-tertiary);
+  font-variant-numeric: ordinal;
 }
 
 /* No dark background of videos */
@@ -227,7 +788,50 @@ li:has(> .subseparator) {
 #nd-sidebar-mobile p,
 #nd-docs-layout #nd-sidebar .subseparator,
 #nd-sidebar-mobile .subseparator {
-  font-weight: 700 !important;
+  font-weight: 580 !important;
+  color: var(--text-primary);
+}
+
+/* Sidebar underlines for the section titles. The indentation is calculated based on the number of div wrappers. */
+#nd-docs-layout #nd-sidebar div div div div div div div p,
+#nd-sidebar-mobile div div div div div div div p {
+  --sidebar-label-left: calc((var(--spacing, 0.25rem) * 8) - 6px);
+}
+
+#nd-docs-layout #nd-sidebar div div div div div p,
+#nd-sidebar-mobile div div div div div p {
+  --sidebar-label-left: calc((var(--spacing, 0.25rem) * 6) - 6px);
+}
+
+#nd-docs-layout #nd-sidebar div div div div div p,
+#nd-sidebar-mobile div div div div div p {
+  position: relative;
+  padding-bottom: 6px;
+  width: 100%;
+}
+
+#nd-docs-layout #nd-sidebar div div div div div p::after,
+#nd-sidebar-mobile div div div div div p::after {
+  content: "";
+  position: absolute;
+  left: var(--sidebar-label-left, 16px);
+  right: 8px;
+  bottom: 0;
+  height: 1px;
+  background-color: var(--line-structure);
+  pointer-events: none;
+}
+
+#nd-docs-layout #nd-sidebar > div > div > div > p,
+#nd-sidebar-mobile > div > div > div > p {
+  width: 100%;
+  border-top: 1px solid var(--line-structure);
+  padding-top: 12px;
+  margin-top: 8px;
+}
+
+#nd-page > .prose {
+  margin-top: 1rem;
 }
 
 /* Main content: horizontal padding on narrow viewports so content isn't flush to edges (RWD). */
@@ -270,9 +874,14 @@ li:has(> .subseparator) {
   }
 }
 
-/* Steps component: increment counter and render numbered circles centered on the left border line.
+/* Steps component: increment counter and render numbered squares centered on the left border line.
    .fd-steps (fumadocs) / .steps (legacy) has pl-8 (2rem) padding from its left border,
    so the circle (1.75rem wide) needs left: -(2rem + 0.875rem) = -2.875rem to sit centered. */
+.fd-steps {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+}
+
 .fd-steps > h2,
 .fd-steps > h3,
 .steps > h2,
@@ -300,11 +909,30 @@ li:has(> .subseparator) {
   justify-content: center;
   width: 1.75rem;
   height: 1.75rem;
-  border-radius: 9999px;
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
+  background-color: var(--surface-bg);
+  color: hsl(var(--text-primary));
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 400;
+  border: 1px solid var(--line-structure);
+}
+
+/* frame decoration */
+.fd-steps > h2::after,
+.fd-steps > h3::after {
+  content: "";
+  position: absolute;
+  left: -2.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.75rem;
+  height: 1.75rem;
+  background-color: hsl(var(--foreground) / 0.6);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3Cpath d='M8 28V27H3C1.89543 27 1 26.1046 1 25V20H0V28H8Z' fill='black'/%3E%3Cpath d='M20 28V27H25C26.1046 27 27 26.1046 27 25V20H28V28H20Z' fill='black'/%3E%3Cpath d='M20 0V1H25C26.1046 1 27 1.89543 27 3V8H28V0H20Z' fill='black'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3Cpath d='M8 28V27H3C1.89543 27 1 26.1046 1 25V20H0V28H8Z' fill='black'/%3E%3Cpath d='M20 28V27H25C26.1046 27 27 26.1046 27 25V20H28V28H20Z' fill='black'/%3E%3Cpath d='M20 0V1H25C26.1046 1 27 1.89543 27 3V8H28V0H20Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 /* Steps: compact layout on mobile so numbers/headlines don't dominate; more space for body text. */
@@ -326,4 +954,47 @@ li:has(> .subseparator) {
     /* fd-steps padding-left 1.75rem + half circle 0.625rem */
     left: -2.375rem;
   }
+
+  .fd-steps > h2::after,
+  .fd-steps > h3::after {
+    content: "";
+    position: absolute;
+    left: -2.375rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: hsl(var(--foreground) / 0.6);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3Cpath d='M8 28V27H3C1.89543 27 1 26.1046 1 25V20H0V28H8Z' fill='black'/%3E%3Cpath d='M20 28V27H25C26.1046 27 27 26.1046 27 25V20H28V28H20Z' fill='black'/%3E%3Cpath d='M20 0V1H25C26.1046 1 27 1.89543 27 3V8H28V0H20Z' fill='black'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3Cpath d='M8 28V27H3C1.89543 27 1 26.1046 1 25V20H0V28H8Z' fill='black'/%3E%3Cpath d='M20 28V27H25C26.1046 27 27 26.1046 27 25V20H28V28H20Z' fill='black'/%3E%3Cpath d='M20 0V1H25C26.1046 1 27 1.89543 27 3V8H28V0H20Z' fill='black'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+  }
+}
+
+/* AI Search Panel */
+@keyframes ask-ai-open {
+  from {
+    translate: 100% 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+@keyframes ask-ai-close {
+  from {
+    width: var(--ai-chat-width);
+  }
+  to {
+    width: 0px;
+  }
+}
+
+/* Inkeep override */
+inkeep-portal .inkeep-widget-vars {
+  --ikp-font-family-heading: var(--font-sans);
+  --ikp-font-family-body: var(--font-sans);
+  --ikp-font-family-mono: var(--font-mono);
 }

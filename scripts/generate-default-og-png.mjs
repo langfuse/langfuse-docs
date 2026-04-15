@@ -19,7 +19,7 @@ const wordmarkPath = path.join(
   "public/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.png"
 );
 const fontMonoPath = path.join(root, "public/fonts/GeistMono-Medium.ttf");
-const fontSansPath = path.join(root, "public/fonts/Geist-Regular.ttf");
+const fontInterPath = path.join(root, "public/fonts/Inter-Medium.ttf");
 const outPath = path.join(root, "public/og.png");
 
 const W = 1200;
@@ -33,7 +33,7 @@ function wordmarkSize(h) {
 const wordmarkBuf = fs.readFileSync(wordmarkPath);
 const wordmarkDataUri = `data:image/png;base64,${wordmarkBuf.toString("base64")}`;
 const fontMono = fs.readFileSync(fontMonoPath);
-const fontSans = fs.readFileSync(fontSansPath);
+const fontInter = fs.readFileSync(fontInterPath);
 
 const title = "Langfuse \u2013 Open Source LLM Engineering Platform";
 const description =
@@ -51,7 +51,7 @@ const svg = await satori(
         height: "100%",
         width: "100%",
         backgroundColor: "#000000",
-        fontFamily: "GeistSans",
+        fontFamily: "Inter",
         color: "#fff",
         padding: 0,
         fontWeight: 500,
@@ -132,7 +132,7 @@ const svg = await satori(
     height: H,
     fonts: [
       { name: "GeistMono", data: fontMono, style: "normal" },
-      { name: "GeistSans", data: fontSans, style: "normal" },
+      { name: "Inter", data: fontInter, style: "normal" },
     ],
   }
 );

@@ -1,4 +1,10 @@
 import { defineDocs, defineConfig, frontmatterSchema } from "fumadocs-mdx/config";
+import monokaiProLightRaw from "./lib/themes/monokai-pro-light.json";
+
+// JSON imports widen fontStyle to `string` instead of the required literal union.
+// Cast through unknown to satisfy Shiki's ThemeRegistrationAny at runtime.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const monokaiProLight = monokaiProLightRaw as unknown as any;
 import remarkGfm from "remark-gfm";
 import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
@@ -174,8 +180,16 @@ export default defineConfig({
       // StructureOptions type doesn't expose it directly
       stringify: { extensions: [mdxJsxToMarkdown()] },
     },
-    // @ts-ignore — { lazy: false } is valid at runtime; RehypeCodeOptions
-    // requires themes in its full type but fumadocs applies safe defaults
-    rehypeCodeOptions: { lazy: false },
+    // @ts-ignore — RehypeCodeOptions types themes as BundledTheme strings but
+    // Shiki's ThemeRegistrationAny (custom JSON object) is valid at runtime.
+    // fumadocs automatically sets defaultColor:false so --shiki-light / --shiki-dark
+    // CSS vars are generated and fumadocs-ui's CSS switches them per dark/light mode.
+    rehypeCodeOptions: {
+      lazy: false,
+      themes: {
+        light: monokaiProLight,
+        dark: "monokai",
+      },
+    },
   },
 });

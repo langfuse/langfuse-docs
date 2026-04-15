@@ -14,10 +14,10 @@ interface CTACardProps {
 
 export function CTACard({ title, description, children, className, showArrow = false }: CTACardProps) {
   return (
-    <Card className={cn("border bg-card mt-8", className)}>
+    <Card className={cn("mt-8 border bg-card", className)}>
       <CardContent>
-        <div className="flex flex-col md:flex-row md:items-center gap-6">
-          <div className="flex-1 md:flex-[2] space-y-2">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center">
+          <div className="flex-1 space-y-2 md:flex-2">
             <h3 className="text-xl font-semibold text-foreground">
               {title}
             </h3>
@@ -26,7 +26,7 @@ export function CTACard({ title, description, children, className, showArrow = f
             </p>
           </div>
           {children && (
-            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-end items-center md:flex-1">
+            <div className="flex flex-col gap-3 justify-center items-center sm:flex-row md:justify-end md:flex-1">
               {showArrow ? (
                 React.Children.map(children, (child) => {
                   if (React.isValidElement(child) && child.type === Button) {
@@ -36,9 +36,9 @@ export function CTACard({ title, description, children, className, showArrow = f
                       return React.cloneElement(child, {
                         children: React.cloneElement(linkChild, {
                           children: (
-                            <span className="flex items-center gap-2">
+                            <span className="flex gap-2 items-center">
                               {linkChild.props.children}
-                              <ArrowRight className="h-4 w-4" />
+                              <ArrowRight className="w-4 h-4" />
                             </span>
                           )
                         })
@@ -46,9 +46,9 @@ export function CTACard({ title, description, children, className, showArrow = f
                     }
                     return React.cloneElement(child, {
                       children: (
-                        <span className="flex items-center gap-2">
+                        <span className="flex gap-2 items-center">
                           {child.props.children}
-                          <ArrowRight className="h-4 w-4" />
+                          <ArrowRight className="w-4 h-4" />
                         </span>
                       )
                     } as any);

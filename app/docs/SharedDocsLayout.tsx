@@ -1,14 +1,21 @@
 import type { ComponentProps, ReactNode } from "react";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { DocsLayoutWrapper } from "./DocsLayoutWrapper";
-import { Layout } from "@/components/layout";
-import { MenuSwitcher } from "@/components/MenuSwitcher";
+import { NavbarDocs, DocsSecondaryNav, DocsSecondaryNavMobile } from "@/components/layout";
+import { DocsPatternTracker } from "@/components/layout/DocsContentArea";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AISearch, AISearchPanel, FloatingAskAIButton } from "@/components/inkeep/search";
 
 /**
  * Shared wrapper used by all sidebar-based section layouts
  * (docs, guides, integrations, self-hosting, library).
  * Each layout only needs to pass the correct page tree.
+ *
+ * Renders two sticky headers:
+ *  1. NavbarDocs    — h-14 (3.5rem) — logo + search + launch app
+ *  2. DocsSecondaryNav — h-11 (2.75rem) — section tabs
+ * Total header = 6.25rem → set as --fd-nav-height so fumadocs
+ * calculates sidebar sticky-top and mobile drawer offset correctly.
  */
 export function SharedDocsLayout({
   tree,
@@ -18,19 +25,26 @@ export function SharedDocsLayout({
   children: ReactNode;
 }) {
   return (
-    <Layout>
-      <DocsLayoutWrapper>
-        <DocsLayout
-          tree={tree}
-          githubUrl="https://github.com/langfuse/langfuse-docs"
-          nav={{ enabled: false }}
-          sidebar={{ banner: <MenuSwitcher /> }}
-          searchToggle={{ enabled: false }}
-          themeSwitch={{ component: <div className="ms-auto"><ThemeToggle /></div> }}
-        >
-          {children}
-        </DocsLayout>
-      </DocsLayoutWrapper>
-    </Layout>
+    <AISearch>
+      <div className="docs-chrome flex min-h-screen flex-col">
+        <DocsPatternTracker />
+        <NavbarDocs />
+        <DocsSecondaryNav />
+        <DocsLayoutWrapper>
+          <DocsLayout
+            tree={tree}
+            githubUrl="https://github.com/langfuse/langfuse-docs"
+            nav={{ component: <DocsSecondaryNavMobile /> }}
+            sidebar={{ enabled: true, collapsible: false }}
+            searchToggle={{ enabled: false }}
+            themeSwitch={{ component: <div className="ms-auto"><ThemeToggle /></div> }}
+          >
+            <AISearchPanel />
+            {children}
+          </DocsLayout>
+        </DocsLayoutWrapper>
+      </div>
+      <FloatingAskAIButton />
+    </AISearch>
   );
 }

@@ -1,7 +1,5 @@
-import { NavbarLogo } from "@/components/NavbarLogo";
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
 import { NavLinks } from "@/components/NavLinks";
-import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 import {
   source,
   getSelfHostingPageTree,
@@ -13,8 +11,11 @@ import {
   securitySource,
 } from "@/lib/source";
 import { serializePageTree, type SectionNavData } from "@/lib/nav-tree";
+import { cn } from "@/lib/utils";
+import { Logo } from "@/components/Logo";
+import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 
-const sectionNavData: SectionNavData[] = [
+export const sectionNavData: SectionNavData[] = [
   { name: "Docs", href: "/docs", children: serializePageTree(source.getPageTree()) },
   { name: "Self Hosting", href: "/self-hosting", children: serializePageTree(getSelfHostingPageTree()) },
   { name: "Guides", href: "/guides", children: serializePageTree(guidesSource.getPageTree()) },
@@ -27,20 +28,29 @@ const sectionNavData: SectionNavData[] = [
   { name: "Security & Compliance", href: "/security", children: serializePageTree(securitySource.getPageTree()) },
 ];
 
+const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px py-0')
+const contentStyle = cn('flex items-center w-full bg-surface-1 rounded-sm px-2.5 py-3')
+
 export function Navbar() {
   return (
-    <header className="sticky z-50 h-16 border-b backdrop-blur-md border-foreground/10 bg-background/50" style={{ top: 'var(--fd-banner-height, 0px)' }}>
-      <nav className="mx-auto flex h-full max-w-360 items-center justify-end gap-4 pl-[max(env(safe-area-inset-left),1.5rem)] pr-[max(env(safe-area-inset-right),1.5rem)]">
-        <div className="flex flex-1">
-          <NavbarLogo />
+    <header className="sticky z-50 h-16 backdrop-blur-md bg-surface-1" style={{ top: 'var(--fd-banner-height, 0px)' }}>
+      <nav className="flex mx-auto h-full border-b max-w-360 border-line-structure">
+        <div className={cn(cornersStyle, 'pr-0 lg:max-w-[240px] lg:pr-px')}>
+          <div className={cn(contentStyle, 'rounded-r-none lg:rounded-r-sm')}>
+            <Logo />
+          </div>
         </div>
-        <div className="flex flex-row-reverse md:flex-row flex-1 md:gap-4 gap-2">
-          <NavLinks sectionNavData={sectionNavData} />
-          <div className="flex gap-2 justify-end items-center lg:gap-4">
-            <div className="min-w-0 max-w-9 h-9 flex-1 block xl:max-w-[280px]">
-              <InkeepSearchBar />
-            </div>
-            <NavbarExtraContent />
+        <div className={cn(cornersStyle, 'hidden relative px-0 lg:flex')}>
+          <div className="absolute bottom-[-6px] left-0 w-[6px] h-[5px] bg-left-corner" />
+          <div className="absolute hidden wide:block bottom-[-6px] right-0 w-[6px] h-[5px] bg-right-corner" />
+          <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1'>
+            <InkeepSearchBar className="hidden" />
+            <NavLinks sectionNavData={sectionNavData} />
+          </div>
+        </div>
+        <div className={cn(cornersStyle, 'flex-1 justify-end pl-0 lg:justify-center lg:max-w-[240px] lg:pl-px')}>
+          <div className={cn(contentStyle, 'justify-end rounded-l-none lg:justify-center lg:rounded-l-sm')}>
+            <NavbarExtraContent sectionNavData={sectionNavData} />
           </div>
         </div>
       </nav>

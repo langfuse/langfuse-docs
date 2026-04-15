@@ -24,6 +24,7 @@ import IconSort from "../icons/sort";
 import IconSearch from "../icons/search";
 import { cn } from "@/lib/utils";
 import IconMessage from "../icons/message";
+import { DropdownButton } from "../ui/dropdown-button";
 
 type SortType = "upvotes" | "recent";
 
@@ -109,14 +110,13 @@ const GhDiscussionsPreviewInternal = ({
     return (
       <>
         <ul
-          className="list-none"
+          className="list-none not-prose"
           data-gh-discussions-list
-          style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}
         >
           {displayedDiscussions.map((discussion) => (
             <li
               key={discussion.number}
-              className="flex items-center px-1 pb-3 space-x-1 border-b last:border-none"
+              className="flex items-center p-4 border-b last:border-none"
             >
               <div className="flex flex-col items-center min-w-[60px] gap-0.5">
                 <span className="text-lg font-semibold leading-none">
@@ -191,38 +191,33 @@ const GhDiscussionsPreviewInternal = ({
     }
 
     return (
-      <Pagination className="py-1 border-t">
-        <PaginationContent className="gap-1 items-center">
+      <Pagination className="py-8 border-t">
+        <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
-              size="xs"
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              className="cursor-pointer select-none"
+              className="cursor-pointer select-none mt-0.5"
             />
           </PaginationItem>
-          <div className="hidden gap-1 items-center sm:flex">
-            {pageNumbers.map((pageNumber, index) =>
-              pageNumber === null ? (
-                <PaginationItem key={`ellipsis-${index}`}>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              ) : (
-                <PaginationItem key={pageNumber}>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(pageNumber)}
-                    isActive={currentPage === pageNumber}
-                    size="xs"
-                    className="cursor-pointer select-none"
-                  >
-                    {pageNumber}
-                  </PaginationLink>
-                </PaginationItem>
-              )
-            )}
-          </div>
+          {pageNumbers.map((pageNumber, index) =>
+            pageNumber === null ? (
+              <PaginationItem key={`ellipsis-${index}`}>
+                <PaginationEllipsis />
+              </PaginationItem>
+            ) : (
+              <PaginationItem key={pageNumber}>
+                <PaginationLink
+                  onClick={() => setCurrentPage(pageNumber)}
+                  isActive={currentPage === pageNumber}
+                  className="cursor-pointer select-none"
+                >
+                  {pageNumber}
+                </PaginationLink>
+              </PaginationItem>
+            )
+          )}
           <PaginationItem>
             <PaginationNext
-              size="xs"
               onClick={() =>
                 setCurrentPage((prev) => Math.min(totalPages, prev + 1))
               }
@@ -297,14 +292,9 @@ const GhDiscussionsPreviewInternal = ({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="whitespace-nowrap"
-                >
-                  <IconSort className="mr-2 w-4 h-4" />
-                  {sortType.charAt(0).toUpperCase() + sortType.slice(1)}
-                </Button>
+                <DropdownButton icon={<IconSort className="w-4 h-4" />}>
+                  <span className="min-w-12 text-center">{sortType.charAt(0).toUpperCase() + sortType.slice(1)}</span>
+                </DropdownButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
@@ -325,16 +315,15 @@ const GhDiscussionsPreviewInternal = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="secondary" asChild size="sm">
-              <Link
-                href="https://github.com/orgs/langfuse/discussions/new/choose"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="whitespace-nowrap"
-              >
-                <IconGithub className="mr-2" />
-                New
-              </Link>
+            <Button
+              variant="secondary"
+              href="https://github.com/orgs/langfuse/discussions/new/choose"
+              target="_blank"
+              rel="noopener noreferrer"
+              icon={<IconGithub className="w-5 h-5" />}
+              iconPosition="end"
+            >
+              <span className="min-w-12 text-center">New</span>
             </Button>
           </div>
         </div>
@@ -345,7 +334,7 @@ const GhDiscussionsPreviewInternal = ({
           <TabsContent value="Ideas">{renderDiscussions("Ideas")}</TabsContent>
         </div>
       </Tabs>
-      <div className="mt-2 text-xs text-primary/70">
+      <div className="mt-2 text-xs text-text-tertiary">
         <span>
           Discussions last updated:{" "}
           {new Date(discussionsCached.updated_at).toLocaleString()} ({timeDiff})

@@ -90,9 +90,8 @@ export const ChangelogIndex = ({
         <PaginationContent className="gap-1 items-center">
           <PaginationItem>
             <PaginationPrevious
-              size="sm"
               href={pageHref(currentPage - 1)}
-              className="cursor-pointer select-none"
+              className="cursor-pointer select-none mt-0.25"
             />
           </PaginationItem>
           <div className="hidden gap-1 items-center sm:flex">
@@ -106,7 +105,6 @@ export const ChangelogIndex = ({
                   <PaginationLink
                     href={pageHref(pageNumber)}
                     isActive={currentPage === pageNumber}
-                    size="sm"
                     className="cursor-pointer select-none"
                   >
                     {pageNumber}
@@ -117,7 +115,6 @@ export const ChangelogIndex = ({
           </div>
           <PaginationItem>
             <PaginationNext
-              size="sm"
               href={pageHref(currentPage + 1)}
               className="cursor-pointer select-none"
             />

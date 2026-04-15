@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import {
   cloudRegions,
   continentHostMapping,
@@ -18,9 +17,9 @@ import {
 import { useCloudRegionSignIn } from "@/lib/use-cloud-region-sign-in";
 
 const DEFAULT_BUTTON_TEXT = {
-  signedIn: "To App",
-  signUp: "Sign Up",
-  dropdown: "App",
+  signedIn: "Launch App",
+  signUp: "Launch App",
+  dropdown: "Launch App",
 } as const;
 
 interface ToAppButtonProps {
@@ -36,10 +35,6 @@ export const ToAppButton = ({
 }: ToAppButtonProps = {}) => {
   const signedInRegions = useCloudRegionSignIn();
   const [continentCode, setContinentCode] = useState<string | null>(null);
-  const isUsingDefaultText =
-    signedInText === DEFAULT_BUTTON_TEXT.signedIn &&
-    signUpText === DEFAULT_BUTTON_TEXT.signUp &&
-    dropdownText === DEFAULT_BUTTON_TEXT.dropdown;
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production") {
@@ -74,14 +69,12 @@ export const ToAppButton = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            size="xs"
-            className={cn(
-              "whitespace-nowrap",
-              isUsingDefaultText && "w-[45px] sm:w-[70px]"
-            )}
+            variant="primary"
+            size="small"
+            shortcutKey="L"
+            className="whitespace-nowrap"
           >
-            <span className="sm:hidden">{dropdownText}</span>
-            <span className="hidden sm:inline">{signedInText}</span>
+            {dropdownText}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
@@ -103,39 +96,27 @@ export const ToAppButton = ({
 
     return (
       <Button
-        size="xs"
-        asChild
-        className={cn(
-          "whitespace-nowrap",
-          isUsingDefaultText && "w-[45px] sm:w-[70px]"
-        )}
+        variant="primary"
+        size="small"
+        shortcutKey="L"
+        href={signedInRegion![1].url}
+        className="whitespace-nowrap"
       >
-        <Link href={signedInRegion![1].url}>
-          <span className="sm:hidden">{dropdownText}</span>
-          <span className="hidden sm:inline">{signedInText}</span>
-        </Link>
+        {signedInText}
       </Button>
     );
   } else {
     return (
       <Button
-        size="xs"
-        asChild
-        className={cn(
-          "whitespace-nowrap",
-          isUsingDefaultText && "w-[45px] sm:w-[70px]"
-        )}
+        variant="primary"
+        size="small"
+        shortcutKey="L"
+        href={
+          continentCode ? continentHostMapping[continentCode] : cloudRegions.eu.url
+        }
+        className="whitespace-nowrap"
       >
-        <Link
-          href={
-            continentCode
-              ? continentHostMapping[continentCode]
-              : cloudRegions.eu.url
-          }
-        >
-          <span className="sm:hidden">{dropdownText}</span>
-          <span className="hidden sm:inline">{signUpText}</span>
-        </Link>
+        {signUpText}
       </Button>
     );
   }

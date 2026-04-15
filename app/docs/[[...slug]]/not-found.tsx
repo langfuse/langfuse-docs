@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrokenLinkIssue } from "@/components/BrokenLinkIssue";
 
 export default function DocsNotFound() {
   return (
@@ -13,6 +14,7 @@ export default function DocsNotFound() {
       >
         Back to Documentation
       </Link>
+      <BrokenLinkIssue />
     </div>
   );
 }

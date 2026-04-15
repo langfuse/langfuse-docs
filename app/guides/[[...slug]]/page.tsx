@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { guidesSource } from "@/lib/source";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
+import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { DocsContributors } from "@/components/DocsContributors";
+import { DocsTocFooter } from "@/components/DocsTocFooter";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { getMDXComponents } from "@/mdx-components";
 import type { ComponentType } from "react";
+import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
@@ -26,7 +28,8 @@ export default async function GuidesPage(props: PageProps) {
     <DocsPage
       toc={toc}
       breadcrumb={{ includePage: true, includeRoot: true }}
-      tableOfContent={{ footer: <DocsContributors pageTitle={page.data.title} /> }}
+      tableOfContent={{ footer: <DocsTocFooter pageTitle={page.data.title} /> }}
+      footer={{ component: <DocsAndPageFooter /> }}
     >
       <DocBodyChrome>
         <MDX components={getMDXComponents()} />
@@ -49,7 +52,13 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     ogImage?: string | null;
   };
   const pagePath = `/guides${slug.length > 0 ? `/${slug.join("/")}` : ""}`;
-  const canonicalUrl = pageData.canonical ?? buildPageUrl(pagePath);
+  const cookbookMapping = COOKBOOK_ROUTE_MAPPING.find(
+    (r) => r.path === pagePath && r.canonicalPath,
+  );
+  const canonicalUrl =
+    pageData.canonical ??
+    (cookbookMapping ? buildPageUrl(cookbookMapping.canonicalPath!) : null) ??
+    buildPageUrl(pagePath);
   const seoTitle = pageData.seoTitle || page.data.title;
   const ogImage = buildOgImageUrl({
     title: seoTitle,

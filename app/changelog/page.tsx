@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { ChangelogIndex } from "@/components/changelog/ChangelogIndex";
 import type { ChangelogPageItem } from "@/components/changelog/ChangelogIndex";
 import { Header } from "@/components/Header";
-import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+import { ProductUpdateSignup } from "@/components/ProductUpdateSignup";
 import Link from "next/link";
 import { changelogSource } from "@/lib/source";
 
