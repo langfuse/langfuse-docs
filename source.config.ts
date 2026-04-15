@@ -74,7 +74,7 @@ const customerFrontmatterSchema = baseFrontmatterSchema.extend({
 
 // Schema for collections whose sidebar labels can be overridden via frontmatter.
 // shortTitle takes precedence; sidebarTitle is the legacy alias.
-// Both are read by getPageTreeWithShortTitles() in lib/source.ts.
+// Both are consumed by the shortTitleTransformer registered in lib/source.ts.
 const sidebarFrontmatterSchema = baseFrontmatterSchema.extend({
   shortTitle: z.string().nullish(),
   sidebarTitle: z.string().nullish(),
@@ -121,7 +121,7 @@ export const guides = defineDocs({
   },
 });
 
-const faqFrontmatterSchema = baseFrontmatterSchema.extend({
+const faqFrontmatterSchema = sidebarFrontmatterSchema.extend({
   tags: z.array(z.string()).optional(),
 });
 
@@ -145,7 +145,7 @@ export const integrations = defineDocs({
 
 export const security = defineDocs({
   dir: "content/security",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: sidebarFrontmatterSchema },
 });
 
 export const library = defineDocs({
@@ -162,7 +162,7 @@ export const customers = defineDocs({
 
 export const handbook = defineDocs({
   dir: "content/handbook",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: sidebarFrontmatterSchema },
 });
 
 export const marketing = defineDocs({

@@ -1,4 +1,4 @@
-import { getIntegrationsPageTree } from "@/lib/source";
+import { integrationsSource } from "@/lib/source";
 import { SharedDocsLayout } from "@/app/docs/SharedDocsLayout";
 
 export default function IntegrationsLayout({
@@ -6,5 +6,5 @@ export default function IntegrationsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={getIntegrationsPageTree()}>{children}</SharedDocsLayout>;
+  return <SharedDocsLayout tree={integrationsSource.getPageTree()}>{children}</SharedDocsLayout>;
 }

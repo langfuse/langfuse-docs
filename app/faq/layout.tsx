@@ -1,4 +1,4 @@
-import { faqSource, getPageTreeWithShortTitles } from "@/lib/source";
+import { faqSource } from "@/lib/source";
 import { SharedDocsLayout } from "@/app/docs/SharedDocsLayout";
 
 export default function FaqLayout({
@@ -6,5 +6,5 @@ export default function FaqLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={getPageTreeWithShortTitles(faqSource, "/faq")}>{children}</SharedDocsLayout>;
+  return <SharedDocsLayout tree={faqSource.getPageTree()}>{children}</SharedDocsLayout>;
 }
