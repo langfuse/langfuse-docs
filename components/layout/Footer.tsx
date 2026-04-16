@@ -126,10 +126,10 @@ export function Footer({ className }: { className?: string }) {
       <CornerBox className="flex flex-col -mt-px bg-transparent">
         {/* Bottom bar */}
         <div className="flex flex-wrap gap-y-2 gap-x-6 items-center px-4 py-2.5">
-          <div className="flex flex-wrap gap-y-1 gap-x-4">
+          <div className="flex flex-wrap gap-y-1 gap-x-4 max-[390px]:gap-x-3">
             {bottomLinks.map((link) => (
               <Link key={link.name} href={link.href} className={linkClassName}>
-                <Text size="s" className="text-left font-mono text-inherit transition-[color]">
+                <Text size="s" className="max-[390px]:text-[13px] text-left font-mono text-inherit transition-[color]">
                   {link.name}
                 </Text>
               </Link>
@@ -139,15 +139,15 @@ export function Footer({ className }: { className?: string }) {
       </CornerBox>
       <CornerBox className="flex flex-col gap-y-4 sm:flex-row justify-between sm:items-center px-4 py-2.5 -mt-px bg-transparent">
         <div className="flex flex-col md:flex-row">
-          <Text size="s" className="font-mono text-left text-text-disabled">
+          <Text size="s" className="font-mono max-[390px]:text-[13px] text-left text-text-disabled">
             &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH
           </Text>
           {' '}
-          <Text size="s" className="font-mono text-left text-text-disabled">
+          <Text size="s" className="font-mono max-[390px]:text-[13px] text-left text-text-disabled">
             / Finto Technologies Inc.
           </Text>
         </div>
-        <Text size="s" className="font-mono text-left text-text-disabled">
+        <Text size="s" className="font-mono max-[390px]:text-[13px] text-left text-text-disabled">
           Design by{" "}
           <Link
             href="https://altalogy.com"

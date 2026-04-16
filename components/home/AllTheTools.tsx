@@ -114,7 +114,7 @@ export function AllTheTools() {
                 className="flex flex-col items-stretch p-0 w-full min-w-0 h-full"
               >
                 <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden sm:max-h-[200px] sm:flex-row xl:max-h-[337px] xl:flex-col">
-                  <div className="flex flex-1 flex-col gap-1 p-4 pb-2.5">
+                  <div className="flex flex-1 flex-col gap-1 p-4 pb-1 sm:pb-2.5">
                     <Text size="s" className="font-medium text-left text-text-secondary">
                       {tool.title}
                     </Text>
