@@ -5,13 +5,11 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import {
   SECTION_CONFIG,
   SECTION_SLUGS,
-  MARKETING_SECTION_SLUGS,
+  MARKETING_SECTIONS,
   DOCS_STYLE_APP_SECTIONS,
   POST_SECTIONS,
   CHANGELOG_SECTIONS,
-  MARKETING_SLUGS,
 } from "@/lib/section-registry";
-import type { SectionSlug } from "@/lib/section-registry";
 import { usersSource, changelogSource } from "@/lib/source";
 import { sortCustomerStoriesByMetaOrder } from "@/lib/sortCustomerStoriesByMeta";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
@@ -32,22 +30,23 @@ export default async function SectionDocPage(props: PageProps) {
   const params = await props.params;
   const { section, slug: slugParam } = params;
   const slug = slugParam ?? [];
-  const isMarketing = MARKETING_SECTION_SLUGS.has(section as (typeof MARKETING_SLUGS)[number]);
+  const isMarketing = MARKETING_SECTIONS.has(section);
   const isPost = POST_SECTIONS.has(section);
   const isChangelog = CHANGELOG_SECTIONS.has(section);
   const isCollectionIndex = section === "users" && slug.length === 0;
   const effectiveSlug = isMarketing ? [section] : slug;
 
-  if (!SECTION_SLUGS.includes(section as SectionSlug)) {
+  if (!SECTION_SLUGS.includes(section)) {
     notFound();
   }
-  const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
+  const config = SECTION_CONFIG[section];
   const page = config.source.getPage(effectiveSlug);
 
   if (!page) notFound();
 
   const data = page.data as typeof page.data & {
     load?: () => Promise<{ body: unknown; toc: TOCItemType[] }>;
+    body?: unknown;
     toc?: TOCItemType[];
   };
   const loaded =
@@ -142,13 +141,13 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
   const { section, slug: slugParam } = params;
   const slug = slugParam ?? [];
-  const isMarketing = MARKETING_SECTION_SLUGS.has(section as (typeof MARKETING_SLUGS)[number]);
+  const isMarketing = MARKETING_SECTIONS.has(section);
   const effectiveSlug = isMarketing ? [section] : slug;
 
-  if (!SECTION_SLUGS.includes(section as SectionSlug)) {
+  if (!SECTION_SLUGS.includes(section)) {
     return { title: "Not Found" };
   }
-  const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
+  const config = SECTION_CONFIG[section];
   const page = config.source.getPage(effectiveSlug);
 
   if (!page) return { title: "Not Found" };
@@ -195,7 +194,7 @@ export function generateStaticParams() {
   for (const section of SECTION_SLUGS) {
     if (DOCS_STYLE_APP_SECTIONS.has(section)) continue;
     const config = SECTION_CONFIG[section];
-    const isMarketing = MARKETING_SECTION_SLUGS.has(section as (typeof MARKETING_SLUGS)[number]);
+    const isMarketing = MARKETING_SECTIONS.has(section);
     if (isMarketing) {
       params.push({ section });
     } else {

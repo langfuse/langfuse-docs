@@ -61,7 +61,9 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 ## Key config files
 
 - `next.config.mjs` — Next.js config and redirects.
-- `theme.config.tsx` — Nextra theme configuration.
+- `source.config.ts` — declares all Fumadocs content collections (docs, blog, changelog, integrations, marketing, …).
+- `lib/source.ts` — exports a `loader` for each collection.
+- `lib/section-registry.ts` — maps URL slugs to layout types; all derived routing sets live here. Do not hardcode slugs elsewhere.
 - `tailwind.config.js` — Tailwind setup.
 - `components.json` — shadcn/ui component config.
 

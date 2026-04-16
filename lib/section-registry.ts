@@ -1,9 +1,11 @@
 import "server-only";
+import type { loader } from "fumadocs-core/source";
 import {
   selfHostingSource,
   blogSource,
   changelogSource,
   guidesSource,
+  faqSource,
   integrationsSource,
   securitySource,
   librarySource,
@@ -12,118 +14,146 @@ import {
   marketingSource,
 } from "@/lib/source";
 
-/** Slugs that are single marketing pages (content/marketing/*.mdx) */
-export const MARKETING_SLUGS = [
-  "about",
-  "brand",
-  "careers",
-  "cn",
-  "community",
-  "cookie-policy",
-  "enterprise",
-  "find-us",
-  "imprint",
-  "jp",
-  "jp-cloud",
-  "kr",
-  "non-profit",
-  "oss-friends",
-  "press",
-  "pricing",
-  "pricing-self-host",
-  "privacy",
-  "research",
-  "startups",
-  "support",
-  "talk-to-us",
-  "terms",
-  "watch-demo",
-  "wrapped",
-] as const;
+// ---------------------------------------------------------------------------
+// Section registry — single source of truth for all section routing metadata.
+//
+// Layout types:
+//   "docs"      → full docs chrome (sidebar, breadcrumbs, TOC)
+//   "post"      → blog/changelog style (no sidebar)
+//   "changelog" → like post but also no TOC, centered narrow content
+//   "marketing" → HomeLayout wrapper, no docs chrome
+//
+// `hasOwnRoute` means the section has a dedicated app/ route (e.g.
+// app/integrations/) and should be excluded from the dynamic [section] route.
+// ---------------------------------------------------------------------------
 
-const DOC_SECTIONS = {
+export type SectionLayout = "docs" | "post" | "changelog" | "marketing";
+
+export interface SectionMeta {
+  source: ReturnType<typeof loader>;
+  collection: string;
+  title: string;
+  layout: SectionLayout;
+  hasOwnRoute?: boolean;
+}
+
+/** All non-marketing doc sections. The key is the URL slug. */
+export const docSections: Record<string, SectionMeta> = {
   "self-hosting": {
     source: selfHostingSource,
     collection: "selfHosting",
     title: "Self-hosting",
+    layout: "docs",
+    hasOwnRoute: true,
   },
   blog: {
     source: blogSource,
     collection: "blog",
     title: "Blog",
+    layout: "post",
   },
   changelog: {
     source: changelogSource,
     collection: "changelog",
     title: "Changelog",
+    layout: "changelog",
   },
   guides: {
     source: guidesSource,
     collection: "guides",
     title: "Guides",
+    layout: "docs",
+    hasOwnRoute: true,
+  },
+  faq: {
+    source: faqSource,
+    collection: "faq",
+    title: "FAQ",
+    layout: "docs",
+    hasOwnRoute: true,
   },
   integrations: {
     source: integrationsSource,
     collection: "integrations",
     title: "Integrations",
+    layout: "docs",
+    hasOwnRoute: true,
   },
   security: {
     source: securitySource,
     collection: "security",
     title: "Security",
+    layout: "docs",
   },
   library: {
     source: librarySource,
     collection: "library",
     title: "Library",
+    layout: "docs",
+    hasOwnRoute: true,
   },
   users: {
     source: usersSource,
     collection: "customers",
     title: "User stories",
+    layout: "post",
   },
   handbook: {
     source: handbookSource,
     collection: "handbook",
     title: "Handbook",
+    layout: "docs",
   },
-} as const;
+};
 
-const marketingEntries = Object.fromEntries(
+// ---------------------------------------------------------------------------
+// Derived section routing state — computed from the docSections registry
+// and marketingSource above.
+// ---------------------------------------------------------------------------
+
+/** Marketing slugs derived from the Fumadocs marketing collection pages. */
+export const MARKETING_SLUGS = marketingSource
+  .getPages()
+  .map((p) => p.url.replace(/^\//, ""))
+  .filter(Boolean) as string[];
+
+/** Build a unified config that includes both doc sections and marketing entries. */
+const marketingEntries: Record<string, SectionMeta> = Object.fromEntries(
   MARKETING_SLUGS.map((slug) => [
     slug,
-    { source: marketingSource, collection: "marketing" as const, title: slug },
+    {
+      source: marketingSource,
+      collection: "marketing" as const,
+      title: slug,
+      layout: "marketing" as const,
+    },
   ]),
 );
 
-export const SECTION_CONFIG = { ...DOC_SECTIONS, ...marketingEntries } as const;
-export const SECTION_SLUGS = Object.keys(SECTION_CONFIG) as (keyof typeof SECTION_CONFIG)[];
-export type SectionSlug = (typeof SECTION_SLUGS)[number];
-export const MARKETING_SECTION_SLUGS = new Set(MARKETING_SLUGS);
+export const SECTION_CONFIG: Record<string, SectionMeta> = {
+  ...docSections,
+  ...marketingEntries,
+};
 
-/** Sections that have their own app route (app/integrations, app/self-hosting, etc.). Exclude from [section]. */
-export const DOCS_STYLE_APP_SECTIONS = new Set([
-  "integrations",
-  "self-hosting",
-  "guides",
-  "library",
-]);
+export const SECTION_SLUGS = Object.keys(SECTION_CONFIG);
 
-/** Sections that are blog/changelog posts — no left sidebar */
-export const POST_SECTIONS = new Set(["blog", "changelog", "users"]);
-
-/** Changelog posts — no sidebars at all, centered narrow content */
-export const CHANGELOG_SECTIONS = new Set(["changelog"]);
-
-/** Sections served as standalone marketing pages under app/(home)/(marketing)/ */
-export const MARKETING_SECTION_SLUGS_STANDALONE = [
-  "pricing",
-  "pricing-self-host",
-  "talk-to-us",
-  "watch-demo",
-  "startups",
-] as const;
-
-export type MarketingSlug = (typeof MARKETING_SLUGS)[number];
-/** All marketing pages — use HomeLayout instead of DocsLayout */
+// Derived sets — computed from the layout annotation in each section's metadata.
 export const MARKETING_SECTIONS = new Set<string>(MARKETING_SLUGS);
+
+export const DOCS_STYLE_APP_SECTIONS = new Set(
+  Object.entries(docSections)
+    .filter(([, meta]) => meta.hasOwnRoute)
+    .map(([slug]) => slug),
+);
+
+export const POST_SECTIONS = new Set(
+  Object.entries(SECTION_CONFIG)
+    .filter(([, meta]) => meta.layout === "post" || meta.layout === "changelog")
+    .map(([slug]) => slug),
+);
+
+export const CHANGELOG_SECTIONS = new Set(
+  Object.entries(SECTION_CONFIG)
+    .filter(([, meta]) => meta.layout === "changelog")
+    .map(([slug]) => slug),
+);

@@ -15,10 +15,19 @@ import {
   marketing,
 } from "../.source/server";
 
-// Shared page-tree transformer that replaces a node's sidebar name with
-// shortTitle ?? sidebarTitle from frontmatter when either field is set.
-// Registered via pageTree.transformers in each loader so layouts call
-// .getPageTree() directly with no post-processing required.
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+/** Display names for self-hosting sidebar links that cross-reference main docs pages. */
+const SELF_HOSTING_DOC_LINK_NAMES: Record<string, string> = {
+  "/docs/administration/rbac": "RBAC (main docs)",
+  "/docs/administration/data-retention": "Data Retention (main docs)",
+};
+
+/** Shared page-tree transformer that replaces a node's sidebar name with
+shortTitle ?? sidebarTitle from frontmatter when either field is set.
+Registered via pageTree.transformers in each loader so layouts call
+.getPageTree() directly with no post-processing required. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const shortTitleTransformer: any = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,25 +43,13 @@ const shortTitleTransformer: any = {
   },
 };
 
-export const source = loader({
-  baseUrl: "/docs",
-  source: docs.toFumadocsSource(),
-  pageTree: { idPrefix: "docs", transformers: [shortTitleTransformer] },
-});
-
-export const selfHostingSource = loader({
-  baseUrl: "/self-hosting",
-  source: selfHosting.toFumadocsSource(),
-  pageTree: { idPrefix: "self-hosting", transformers: [shortTitleTransformer] },
-});
-
-/** Display names for self-hosting sidebar links that cross-reference main docs pages. */
-const SELF_HOSTING_DOC_LINK_NAMES: Record<string, string> = {
-  "/docs/administration/rbac": "RBAC (main docs)",
-  "/docs/administration/data-retention": "Data Retention (main docs)",
+type TreeNode = {
+  type?: string;
+  name?: string;
+  url?: string;
+  children?: TreeNode[];
+  [key: string]: unknown;
 };
-
-type TreeNode = { type?: string; name?: string; url?: string; children?: TreeNode[]; [key: string]: unknown };
 
 function mapSelfHostingTreeNodes(nodes: TreeNode[]): TreeNode[] {
   return nodes.map((node) => {
@@ -74,7 +71,9 @@ function mapSelfHostingTreeNodes(nodes: TreeNode[]): TreeNode[] {
  * Self-hosting page tree with cross-doc link names overridden.
  * shortTitle / sidebarTitle overrides are handled by the loader transformer.
  */
-export function getSelfHostingPageTree(): ReturnType<typeof selfHostingSource.getPageTree> {
+export function getSelfHostingPageTree(): ReturnType<
+  typeof selfHostingSource.getPageTree
+> {
   const root = selfHostingSource.getPageTree();
   const children = (root as { children?: unknown[] }).children;
   if (!Array.isArray(children)) return root;
@@ -83,6 +82,21 @@ export function getSelfHostingPageTree(): ReturnType<typeof selfHostingSource.ge
     children: mapSelfHostingTreeNodes(children as TreeNode[]),
   } as ReturnType<typeof selfHostingSource.getPageTree>;
 }
+
+// ---------------------------------------------------------------------------
+// Loaders
+// ---------------------------------------------------------------------------
+export const source = loader({
+  baseUrl: "/docs",
+  source: docs.toFumadocsSource(),
+  pageTree: { idPrefix: "docs", transformers: [shortTitleTransformer] },
+});
+
+export const selfHostingSource = loader({
+  baseUrl: "/self-hosting",
+  source: selfHosting.toFumadocsSource(),
+  pageTree: { idPrefix: "self-hosting", transformers: [shortTitleTransformer] },
+});
 
 export const blogSource = loader({
   baseUrl: "/blog",

@@ -6,7 +6,6 @@ import {
   SECTION_CONFIG,
   SECTION_SLUGS,
   DOCS_STYLE_APP_SECTIONS,
-  MARKETING_SECTION_SLUGS,
   MARKETING_SECTIONS,
   POST_SECTIONS,
   CHANGELOG_SECTIONS,
@@ -30,7 +29,7 @@ const contentWrapperClass = "mx-auto w-full max-w-4xl";
 export default function SectionLayout({ children, params }: LayoutProps) {
   const { section } = use(params);
 
-  if (!SECTION_SLUGS.includes(section as (typeof SECTION_SLUGS)[number])) {
+  if (!SECTION_SLUGS.includes(section)) {
     notFound();
   }
   if (DOCS_STYLE_APP_SECTIONS.has(section)) {
@@ -40,12 +39,9 @@ export default function SectionLayout({ children, params }: LayoutProps) {
     return <HomeLayout>{children}</HomeLayout>;
   }
 
-  const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
+  const config = SECTION_CONFIG[section];
   const tree = config.source.getPageTree();
 
-  const isMarketing = MARKETING_SECTION_SLUGS.has(
-    section as Parameters<typeof MARKETING_SECTION_SLUGS.has>[0]
-  );
   const isPost = POST_SECTIONS.has(section);
   const isChangelog = CHANGELOG_SECTIONS.has(section);
 
@@ -59,14 +55,14 @@ export default function SectionLayout({ children, params }: LayoutProps) {
           <DocsLayout
             tree={tree}
             githubUrl="https://github.com/langfuse/langfuse-docs"
-            nav={isMarketing || isPost ? { enabled: false } : { component: <DocsSecondaryNavMobile /> }}
+            nav={isPost ? { enabled: false } : { component: <DocsSecondaryNavMobile /> }}
             sidebar={
-              isMarketing || isPost ? { enabled: false } : { banner: <DocsSecondaryNav /> }
+              isPost ? { enabled: false } : { banner: <DocsSecondaryNav /> }
             }
-            themeSwitch={isMarketing || isPost ? { enabled: false } : { component: <div className="ms-auto"><ThemeToggle /></div> }}
+            themeSwitch={isPost ? { enabled: false } : { component: <div className="ms-auto"><ThemeToggle /></div> }}
             searchToggle={{ enabled: false }}
             containerProps={
-              isMarketing || isChangelog
+              isChangelog
                 ? // Force --fd-toc-width:0 so the docs grid doesn't reserve a phantom
                 // 268px TOC column (written to the grid by DocsPage's article via CSS :has()).
                 ({ style: { "--fd-toc-width": "0px" } } as React.ComponentProps<
@@ -75,7 +71,7 @@ export default function SectionLayout({ children, params }: LayoutProps) {
                 : undefined
             }
           >
-            {isMarketing || isChangelog ? (
+            {isChangelog ? (
               <div className="w-full min-w-0 flex justify-center [grid-area:main]">
                 <div
                   className={`${contentWrapperClass} ${isChangelog ? "px-3 md:px-4" : ""}`}
