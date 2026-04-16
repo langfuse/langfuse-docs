@@ -357,6 +357,10 @@ Furthermore, Langfuse uses attributes within the `langfuse.*` namespace to map O
   not work as expected or does not parse the correct attributes.
 </Callout>
 
+<Callout type="warning">
+  **Reserved attribute key segments:** Attribute keys that contain `__proto__`, `constructor`, or `prototype` as a path segment (e.g. `gen_ai.prompt.__proto__.foo`) are silently dropped during ingestion. This is a security measure to prevent prototype pollution. If you notice missing attributes, check that your keys do not include these reserved segments.
+</Callout>
+
 Langfuse distinguishes between trace-level attributes and observation-level attributes.
 - [Trace-level attributes](#trace-level-attributes) represent shared context for an entire interaction. If Langfuse detects these attributes on a specific span, it will treat them as properties of the whole trace.
 - [Observation-level attributes](#observation-level-attributes) describe individual steps within a trace. Langfuse keeps them on the observation level.
