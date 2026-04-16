@@ -129,6 +129,7 @@ const nextConfig = {
         pathname: "/**",
       },
     ],
+    qualities: [75, 100],
   },
   headers() {
     const headers = [
