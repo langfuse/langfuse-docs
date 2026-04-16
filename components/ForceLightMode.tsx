@@ -21,7 +21,9 @@ export function ForceLightMode() {
   const previousTheme = useRef<string | undefined>();
 
   useEffect(() => {
-    previousTheme.current = theme;
+    if (theme !== undefined) {
+      previousTheme.current = theme;
+    }
 
     stripDarkFromDocument();
     if (theme !== "light") {
