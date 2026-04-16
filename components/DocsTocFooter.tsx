@@ -205,7 +205,7 @@ export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
       )}
 
       {/* Community */}
-      <TocCommunity className="rounded-t-sm bg-surface-1" />
+      <TocCommunity className="rounded-sm bg-surface-1 mb-px" />
     </div>
   );
 };

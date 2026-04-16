@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 export function Hero() {
   return (
-    <HomeSection className="pt-[60px]">
+    <HomeSection className="pt-5 sm:pt-8 md:pt-[60px]">
       <CornerBox className="-mb-px">
         <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex gap-3 lg:gap-6 justify-center items-center px-4 py-[10px] min-w-max mx-auto">
@@ -22,21 +22,21 @@ export function Hero() {
           </div>
         </div>
       </CornerBox>
-      <CornerBox className="flex flex-col gap-10 items-center px-4 py-8 sm:px-8 sm:py-10">
+      <CornerBox className="flex flex-col gap-4 sm:gap-8 md:gap-10 items-center px-4 py-8 sm:px-8 sm:py-10">
         <Heading
           as="h1"
           size="big"
           className={cn(
-            "hidden sm:flex flex-col items-center gap-1.5 text-center font-medium leading-[105%]",
+            "flex-col items-center gap-0.5 sm:gap-1 md:gap-1.5 text-center font-medium leading-[105%] max-md:max-w-[500px]",
             "[leading-trim:both] [text-edge:cap]"
           )}
         >
-          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">
-            Open Source LLM
-          </TextHighlight>
-          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">
-            Engineering Platform
-          </TextHighlight>
+          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">Open Source<span className="inline max-[499px]:hidden">&nbsp;</span></TextHighlight>
+          <span className="flex min-[500px]:inline">
+            <TextHighlight highlightClassName="mix-blend-multiply" className="max-[499px]:pr-1.75">LLM</TextHighlight>
+            <TextHighlight highlightClassName="mix-blend-multiply" className="min-[500px]:pr-2">Engineering</TextHighlight>
+          </span>
+          <TextHighlight highlightClassName="mix-blend-multiply">Platform</TextHighlight>
         </Heading>
         <Heading
           as="h1"
@@ -46,15 +46,7 @@ export function Hero() {
             "[leading-trim:both] [text-edge:cap]"
           )}
         >
-          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">
-            Open Source
-          </TextHighlight>
-          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">
-            LLM Engineering
-          </TextHighlight>
-          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">
-            Platform
-          </TextHighlight>
+
         </Heading>
         <div className="flex flex-col gap-6">
           <Text className="max-w-xl">

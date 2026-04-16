@@ -17,18 +17,24 @@ function stripDarkFromDocument() {
  * Use only under {@link HomeLayout} (marketing / home — not SharedDocsLayout).
  */
 export function ForceLightMode() {
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   const previousTheme = useRef<string | undefined>();
 
   useEffect(() => {
-    if (theme !== undefined) {
-      previousTheme.current = theme;
+    // Capture the real preference ONCE, directly from localStorage, before
+    // setTheme("light") overwrites it. Reading it here (rather than from
+    // useTheme) is important because:
+    //  1. localStorage is the authoritative source next-themes reads on init.
+    //  2. On React Strict Mode's second effect invocation the useTheme value
+    //     may already reflect "light" (set during the first run), which would
+    //     incorrectly record "light" as the previous theme and prevent restore.
+    if (previousTheme.current === undefined) {
+      previousTheme.current =
+        localStorage.getItem("theme") ?? "system";
     }
 
     stripDarkFromDocument();
-    if (theme !== "light") {
-      setTheme("light");
-    }
+    setTheme("light");
 
     // next-themes may re-add "dark" asynchronously after setTheme resolves.
     // The observer immediately strips it whenever it reappears while mounted.
@@ -52,6 +58,10 @@ export function ForceLightMode() {
 
     return () => {
       observer.disconnect();
+      // Clear the inline colorScheme override immediately so next-themes can
+      // manage it without a gap where the value lingers as "light" while the
+      // React state has already been updated to the restored theme.
+      document.documentElement.style.colorScheme = "";
       if (previousTheme.current && previousTheme.current !== "light") {
         setTheme(previousTheme.current);
       }

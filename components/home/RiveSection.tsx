@@ -153,7 +153,7 @@ export const RiveSection = () => {
     <HomeSection id="llm-engineering-loop" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start">
         <Heading>
-          <TextHighlight>Launch,</TextHighlight><TextHighlight className="pl-1.5">observe,</TextHighlight><TextHighlight className="min-[393px]:pl-1.5">improve</TextHighlight> — repeat.
+          <TextHighlight className="whitespace-nowrap">Launch,&nbsp;</TextHighlight><TextHighlight className="whitespace-nowrap">observe,&nbsp;</TextHighlight><TextHighlight className="whitespace-nowrap">improve</TextHighlight> — repeat.
         </Heading>
         <Text className="text-left max-w-[64ch]">
           Langfuse helps you ship AI Agents/Products from prototype to production and beyond. Once in production we power your continous improvement loop using production data to make your agents and LLM applications ever more powerful.

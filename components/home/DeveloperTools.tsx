@@ -20,9 +20,9 @@ export const DeveloperTools = () => {
       <div className="flex relative flex-col gap-8 md:gap-10">
         <div className="flex max-w-[52ch] flex-col gap-4">
           <Heading className="text-left max-w-[16ch] sm:max-w-none">
-            Made for <TextHighlight>developers</TextHighlight>,
-            loved by{" "}
-            <TextHighlight>agents</TextHighlight>.
+            Made for <span className="whitespace-nowrap"><TextHighlight>developers</TextHighlight>,</span>
+            {" "}loved by{" "}
+            <span className="whitespace-nowrap"><TextHighlight>agents</TextHighlight>.</span>
           </Heading>
           <Text className="max-w-[48ch] text-left">
             Langfuse works by default with your coding agents.
