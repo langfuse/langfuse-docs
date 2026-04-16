@@ -4,20 +4,15 @@ import {
   useMemo,
   useEffect,
   useRef,
-  Fragment,
   useCallback,
   useReducer,
   useState,
 } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { TabButton } from "./TabButton";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
-import { Dot } from "@/components/ui/dot";
 import { CornerBox } from "@/components/ui/corner-box";
-
 /** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
 const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -34,23 +29,16 @@ export interface FeatureTabsProps {
 
 // State management with useReducer
 type TabState = {
-  previewTab: string | null;
   focusedIndex: number;
   isAutoAdvancePaused: boolean;
-  autoAdvanceProgress: number;
   isInViewport: boolean;
-  isHovered: boolean;
 };
 
 type TabAction =
-  | { type: "SET_PREVIEW_TAB"; payload: string | null }
   | { type: "SET_FOCUSED_INDEX"; payload: number }
   | { type: "PAUSE_AUTO_ADVANCE" }
   | { type: "RESUME_AUTO_ADVANCE" }
-  | { type: "SET_AUTO_ADVANCE_PROGRESS"; payload: number }
-  | { type: "SET_IN_VIEWPORT"; payload: boolean }
-  | { type: "SET_HOVERED"; payload: boolean }
-  | { type: "RESET_PROGRESS" };
+  | { type: "SET_IN_VIEWPORT"; payload: boolean };
 
 function assertNever(action: never): never {
   throw new Error(`Unexpected tab action: ${String(action)}`);
@@ -58,39 +46,28 @@ function assertNever(action: never): never {
 
 const tabStateReducer = (state: TabState, action: TabAction): TabState => {
   switch (action.type) {
-    case "SET_PREVIEW_TAB":
-      return { ...state, previewTab: action.payload };
     case "SET_FOCUSED_INDEX":
       return { ...state, focusedIndex: action.payload };
     case "PAUSE_AUTO_ADVANCE":
-      return { ...state, isAutoAdvancePaused: true, autoAdvanceProgress: 0 };
+      return { ...state, isAutoAdvancePaused: true };
     case "RESUME_AUTO_ADVANCE":
       return { ...state, isAutoAdvancePaused: false };
-    case "SET_AUTO_ADVANCE_PROGRESS":
-      return { ...state, autoAdvanceProgress: action.payload };
     case "SET_IN_VIEWPORT":
       return { ...state, isInViewport: action.payload };
-    case "SET_HOVERED":
-      return { ...state, isHovered: action.payload };
-    case "RESET_PROGRESS":
-      return { ...state, autoAdvanceProgress: 0 };
     default:
       return assertNever(action);
   }
 };
 
 const initialTabState: TabState = {
-  previewTab: null,
   focusedIndex: 0,
   isAutoAdvancePaused: false,
-  autoAdvanceProgress: 0,
   isInViewport: false,
-  isHovered: false,
 };
 
 const DEFAULT_AUTO_ADVANCE: AutoAdvanceConfig = {
   enabled: true,
-  intervalMs: 10000,
+  intervalMs: 5000,
 };
 
 export const FeatureTabs = ({
@@ -100,16 +77,9 @@ export const FeatureTabs = ({
 }: FeatureTabsProps) => {
   const defaultAutoAdvance = autoAdvance ?? DEFAULT_AUTO_ADVANCE;
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [state, dispatch] = useReducer(tabStateReducer, initialTabState);
 
-  const tab = searchParams.get("tab");
-  const activeTab =
-    tab && features.some((f) => f.id === tab) ? tab : defaultTab;
-
-  const tabListRef = useRef<HTMLDivElement>(null);
   const tabListScrollRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -121,15 +91,10 @@ export const FeatureTabs = ({
   const isMountedRef = useRef(true);
 
   const isAutoAdvancePausedRef = useRef(state.isAutoAdvancePaused);
-  const isHoveredRef = useRef(state.isHovered);
 
   useEffect(() => {
     isAutoAdvancePausedRef.current = state.isAutoAdvancePaused;
   }, [state.isAutoAdvancePaused]);
-
-  useEffect(() => {
-    isHoveredRef.current = state.isHovered;
-  }, [state.isHovered]);
 
   const setContainerNode = useCallback((node: HTMLDivElement | null) => {
     containerRef.current = node;
@@ -186,54 +151,22 @@ export const FeatureTabs = ({
 
     const currentIndex = features.findIndex((f) => f.id === activeTab);
     const nextIndex = (currentIndex + 1) % features.length;
-    const nextTab = features[nextIndex];
 
-    dispatch({ type: "RESET_PROGRESS" });
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", nextTab.id);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [
-    features,
-    activeTab,
-    defaultAutoAdvance.enabled,
-    router,
-    pathname,
-    searchParams,
-  ]);
+    setActiveTab(features[nextIndex].id);
+  }, [features, activeTab, defaultAutoAdvance.enabled]);
 
   const startAutoAdvance = useCallback(() => {
-    if (
-      !defaultAutoAdvance.enabled ||
-      isAutoAdvancePausedRef.current ||
-      isHoveredRef.current
-    ) {
+    if (!defaultAutoAdvance.enabled || isAutoAdvancePausedRef.current) {
       return;
     }
 
     clearAutoAdvanceTimer();
-    dispatch({ type: "RESET_PROGRESS" });
 
-    const startTime = Date.now();
-    const intervalMs = defaultAutoAdvance.intervalMs;
-
-    const updateProgress = () => {
-      if (isHoveredRef.current || isAutoAdvancePausedRef.current) {
-        return;
-      }
-
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min((elapsed / intervalMs) * 100, 100);
-      dispatch({ type: "SET_AUTO_ADVANCE_PROGRESS", payload: progress });
-
-      if (elapsed >= intervalMs) {
+    autoAdvanceTimerRef.current = setTimeout(() => {
+      if (!isAutoAdvancePausedRef.current) {
         advanceToNextTab();
-      } else {
-        autoAdvanceTimerRef.current = setTimeout(updateProgress, 100);
       }
-    };
-
-    autoAdvanceTimerRef.current = setTimeout(updateProgress, 100);
+    }, defaultAutoAdvance.intervalMs);
   }, [
     defaultAutoAdvance.enabled,
     defaultAutoAdvance.intervalMs,
@@ -241,19 +174,15 @@ export const FeatureTabs = ({
     clearAutoAdvanceTimer,
   ]);
 
-  // Handle tab change and update URL query param
   const handleTabChange = useCallback(
     (tabId: string) => {
       if (activeTab === tabId) return;
 
       dispatch({ type: "PAUSE_AUTO_ADVANCE" });
       clearAllTimers();
-
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("tab", tabId);
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      setActiveTab(tabId);
     },
-    [activeTab, clearAllTimers, searchParams, pathname, router],
+    [activeTab, clearAllTimers],
   );
 
   // Keyboard navigation
@@ -339,8 +268,7 @@ export const FeatureTabs = ({
     if (
       defaultAutoAdvance.enabled &&
       !state.isAutoAdvancePaused &&
-      state.isInViewport &&
-      !state.isHovered
+      state.isInViewport
     ) {
       startAutoAdvance();
     } else {
@@ -354,7 +282,6 @@ export const FeatureTabs = ({
     startAutoAdvance,
     state.isAutoAdvancePaused,
     state.isInViewport,
-    state.isHovered,
     clearAutoAdvanceTimer,
   ]);
 
@@ -366,9 +293,7 @@ export const FeatureTabs = ({
     };
   }, [clearAllTimers]);
 
-  const activeFeature =
-    features.find((f) => f.id === (state.previewTab || activeTab)) ??
-    features[0];
+  const activeFeature = features.find((f) => f.id === activeTab) ?? features[0];
 
   const activeIndex = features.findIndex((f) => f.id === activeTab);
   const n = features.length;
@@ -427,7 +352,75 @@ export const FeatureTabs = ({
         })}
       </CornerBox>
 
-      <CornerBox className="p-4" withStripes>
+      {/* Title bar with corner box */}
+      <CornerBox
+        role="tablist"
+        aria-label="Feature navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
+        className="px-4 py-2"
+        onKeyDown={handleKeyDown}
+      >
+        <div
+          ref={tabListScrollRef}
+          className="flex flex-row items-center"
+        >
+          {/* Title — left-aligned */}
+          <div className="relative overflow-hidden min-w-0 flex-1">
+            <div aria-hidden className="flex flex-col">
+              {features.map((f) => (
+                <span key={f.id} className="whitespace-nowrap text-xl font-analog font-medium invisible h-0 block">
+                  {f.title}
+                </span>
+              ))}
+            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              {activeFeature && (
+                <motion.h3
+                  key={activeFeature.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="block whitespace-nowrap text-xl font-analog font-medium text-primary"
+                >
+                  {activeFeature.title}
+                </motion.h3>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Dot indicators — right-aligned */}
+          <div className="flex flex-row items-center gap-1.5 ml-auto shrink-0">
+            {features.map((feature, index) => {
+              const isActive = activeTab === feature.id;
+
+              return (
+                <button
+                  key={feature.id}
+                  ref={(el) => { tabRefs.current[index] = el; }}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-label={feature.title}
+                  aria-controls={`tabpanel-${feature.id}`}
+                  id={`tab-${feature.id}`}
+                  tabIndex={state.focusedIndex === index ? 0 : -1}
+                  onClick={() => handleTabChange(feature.id)}
+                  className="group p-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
+                >
+                  <span
+                    className={`block w-3 h-1.5 rounded-sm transition-colors ${isActive
+                      ? "bg-primary"
+                      : "bg-text-disabled group-hover:bg-primary"
+                      }`}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </CornerBox>
+
+      {/* Image box */}
+      <CornerBox className="p-4 -mt-px" withStripes>
         <div className="relative w-full overflow-hidden aspect-2646/1512 sm:aspect-auto sm:min-h-[410px]">
           <AnimatePresence mode="sync" initial={false}>
             {activeFeature ? (
@@ -443,42 +436,6 @@ export const FeatureTabs = ({
               </motion.div>
             ) : null}
           </AnimatePresence>
-        </div>
-      </CornerBox>
-
-      {/* Tab List */}
-      <CornerBox
-        ref={tabListRef}
-        role="tablist"
-        aria-label="Feature navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
-        className="px-4 py-[2px] -mt-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        onKeyDown={handleKeyDown}
-      >
-        <div
-          ref={tabListScrollRef}
-          className="flex flex-row items-center flex-nowrap overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-3 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {features.map((feature, index) => (
-            <Fragment key={feature.id}>
-              <TabButton
-                ref={(el) => (tabRefs.current[index] = el)}
-                feature={feature}
-                isActive={activeTab === feature.id}
-                onClick={() => handleTabChange(feature.id)}
-                onMouseEnter={() => {
-                  dispatch({ type: "SET_PREVIEW_TAB", payload: feature.id });
-                  dispatch({ type: "SET_HOVERED", payload: true });
-                }}
-                onMouseLeave={() => {
-                  dispatch({ type: "SET_PREVIEW_TAB", payload: null });
-                  dispatch({ type: "SET_HOVERED", payload: false });
-                }}
-                tabIndex={state.focusedIndex === index ? 0 : -1}
-                className="snap-center"
-              />
-              {index < features.length - 1 && <Dot />}
-            </Fragment>
-          ))}
         </div>
       </CornerBox>
     </div>

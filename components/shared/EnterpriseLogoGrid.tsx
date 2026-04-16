@@ -25,6 +25,7 @@ type CompanyLogo = {
   name: string;
   logo: StaticImageData;
   customerStoryPath?: string;
+  hidden?: boolean;
 };
 
 const companies: CompanyLogo[] = [
@@ -62,10 +63,12 @@ const companies: CompanyLogo[] = [
   {
     name: "Circleback",
     logo: circlebackLogo,
+    hidden: true,
   },
   {
-    name: "Apple",
-    logo: appleLogo,
+    name: "Merck",
+    logo: merckLogo,
+    customerStoryPath: "/users/merckgroup",
   },
   {
     name: "Samsara",
@@ -74,11 +77,13 @@ const companies: CompanyLogo[] = [
   {
     name: "freee",
     logo: freeeLogo,
+    hidden: true,
   },
   {
     name: "Magic Patterns",
     logo: magicPatternsLogo,
     customerStoryPath: "/users/magic-patterns-ai-design-tools",
+    hidden: true,
   },
   {
     name: "Cisco",
@@ -89,13 +94,13 @@ const companies: CompanyLogo[] = [
     logo: expediaGroupLogo,
   },
   {
-    name: "Merck",
-    logo: merckLogo,
-    customerStoryPath: "/users/merckgroup",
+    name: "Apple",
+    logo: appleLogo,
   },
   {
     name: "Pigment",
     logo: pigmentLogo,
+    hidden: true,
   },
 ];
 
@@ -110,7 +115,7 @@ const LogoImage = ({
     <Image
       src={logo}
       alt={`${name} logo`}
-      className="object-cover max-w-full transition-[filter] duration-200 h-[40px] hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]"
+      className="object-cover max-w-full transition-[filter] duration-200 h-[56px] hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]"
       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
       priority={false}
     />
@@ -126,31 +131,28 @@ export const EnterpriseLogoGrid = ({
   className = "",
   small = false,
 }: EnterpriseLogoGridProps) => {
-  const baseCellClasses =
-    "-mr-px -mb-px flex items-center justify-center !p-0 min-h-[44px]";
-  const smallCellClasses = "px-3 md:px-4 py-3 md:py-4";
-
-  const cellClassName = cn(baseCellClasses, small && smallCellClasses);
-
   return (
     <div
       className={cn(
-        "grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-8 auto-rows-fr",
+        "grid grid-cols-3 sm:grid-cols-6 auto-rows-fr px-2 py-2",
         small && "grid-cols-4",
         className,
       )}
       role="grid"
       aria-label="Enterprise customers using Langfuse"
     >
-      {companies.map((company, index) => {
+      {companies.filter((c) => !c.hidden).map((company, index) => {
         const hasStory = Boolean(company.customerStoryPath);
         return (
           <LinkBox
             key={company.name}
             href={company.customerStoryPath}
-            tooltip={hasStory ? "Case study" : undefined}
+            tooltip={hasStory ? "Read story" : undefined}
             tooltipPlacement="bottom-center"
-            className={cn(cellClassName, index > 11 ? "hidden lg:flex" : index > 5 ? "hidden sm:flex" : "flex")}
+            className={cn(
+              "-mr-px -mb-px flex items-center justify-center !p-0",
+              index > 5 ? "hidden sm:flex" : "flex",
+            )}
             role="gridcell"
             aria-label={
               hasStory
