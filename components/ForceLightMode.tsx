@@ -21,15 +21,35 @@ export function ForceLightMode() {
   const previousTheme = useRef<string | undefined>();
 
   useEffect(() => {
-    if (previousTheme.current === undefined) {
-      previousTheme.current = theme;
-    }
+    previousTheme.current = theme;
+
     stripDarkFromDocument();
     if (theme !== "light") {
       setTheme("light");
     }
 
+    // next-themes may re-add "dark" asynchronously after setTheme resolves.
+    // The observer immediately strips it whenever it reappears while mounted.
+    const observer = new MutationObserver(() => {
+      if (
+        document.documentElement.classList.contains("dark") ||
+        document.body.classList.contains("dark")
+      ) {
+        stripDarkFromDocument();
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "style"],
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
     return () => {
+      observer.disconnect();
       if (previousTheme.current && previousTheme.current !== "light") {
         setTheme(previousTheme.current);
       }
