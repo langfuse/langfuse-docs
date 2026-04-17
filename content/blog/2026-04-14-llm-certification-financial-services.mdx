@@ -1,7 +1,7 @@
 ---
-title: Building an LLM Certification Pipeline for Financial Services
+title: Building an LLM Benchmarking Pipeline for Financial Services
 date: 2026/04/14
-description: How to use Langfuse datasets and experiments to systematically certify LLMs before deploying them in regulated financial environments.
+description: How to use Langfuse datasets and experiments to systematically benchmark LLMs before deploying them in regulated financial environments.
 tag: guide
 author: Doneyli
 ogImage: /images/blog/2026-04-14-llm-certification-financial-services/og.png
@@ -10,7 +10,7 @@ ogImage: /images/blog/2026-04-14-llm-certification-financial-services/og.png
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="Building an LLM Certification Pipeline for Financial Services"
+  title="Building an LLM Benchmarking Pipeline for Financial Services"
   description="How to use Langfuse datasets and experiments to systematically certify LLMs before deploying them in regulated financial environments."
   date="April 14, 2026"
   authors={["doneylidej", "lotteverheyden"]}
@@ -20,7 +20,7 @@ import { Frame } from "@/components/Frame";
 
 In regulated industries like banking and insurance, you can't swap in a new model and hope for the best. Model risk management teams need standardized, reproducible evidence that an LLM meets quality thresholds before it's approved for production ([Fed SR 11-7](https://www.federalreserve.gov/supervisionreg/srletters/sr1107.htm), [EU AI Act](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689)).
 
-In this post, we walk through a certification pipeline that runs a model against financial benchmarks derived from real SEC filings, scores the output with domain-specific evaluators, and produces a PASS/FAIL verdict. Here's what the output looks like after running Claude Sonnet against [FinanceBench](https://huggingface.co/datasets/PatronusAI/financebench), a dataset of 150 financial Q&A items grounded in 10-K and 10-Q filings:
+In this post, we walk through a benchmarking pipeline that runs a model against financial benchmarks derived from real SEC filings, scores the output with domain-specific evaluators, and produces a PASS/FAIL verdict. Here's what the output looks like after running Claude Sonnet against [FinanceBench](https://huggingface.co/datasets/PatronusAI/financebench), a dataset of 150 financial Q&A items grounded in 10-K and 10-Q filings:
 
 <Frame fullWidth>
   ![Benchmark results: Claude Sonnet on FinanceBench](/images/blog/2026-04-14-llm-certification-financial-services/benchmark-results.png)
@@ -159,7 +159,7 @@ def numerical_accuracy_evaluator(*, output, expected_output, **kwargs):
     )
 ```
 
-## The certification gate [#the-certification-gate]
+## The pass/fail gate [#the-pass-fail-gate]
 
 On top of the item-level evaluators, a run-level `certification_gate` evaluator produces a binary PASS/FAIL verdict based on whether the average score meets the threshold:
 
@@ -190,7 +190,7 @@ python export_results.py --dataset certification/financebench-sample --format ma
 
 - **Custom datasets**: replace FinanceBench with your institution's own golden Q&A pairs. The setup script accepts any JSON file with input/expected_output/metadata fields.
 - **Domain-specific evaluators**: add evaluators that check for your institution's terminology, formatting requirements, or regulatory constraints.
-- **CI/CD integration**: the repo includes a pytest wrapper that fails your build if the certification gate doesn't pass, so model approvals can be part of your deployment pipeline.
-- **Multiple models in one run**: loop the certification script across models to produce a comparison matrix.
+- **CI/CD integration**: the repo includes a pytest wrapper that fails your build if the benchmarking gate doesn't pass, so model approvals can be part of your deployment pipeline.
+- **Multiple models in one run**: loop the benchmarking script across models to produce a comparison matrix.
 
 The full code, including sample data for offline testing, is in the [clickhouse-llm-evals-finance](https://github.com/doneyli/clickhouse-llm-evals-finance) repository.
