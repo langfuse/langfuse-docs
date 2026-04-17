@@ -38,7 +38,6 @@ function pageNameFromPath(pathname: string | null): string | null {
 
 /**
  * Mobile breadcrumb bar with hamburger to open the Fumadocs sidebar drawer.
- * Must be rendered inside SidebarProvider (i.e. inside DocsLayoutWrapper).
  */
 export function DocsSecondaryNavMobile() {
   const pathname = usePathname();
