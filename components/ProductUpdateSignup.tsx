@@ -9,6 +9,7 @@ export function ProductUpdateSignup(props: {
   source?: string;
   className?: string;
   small?: boolean;
+  compact?: boolean;
 }) {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,25 +39,29 @@ export function ProductUpdateSignup(props: {
     }
   }
 
+  const sizeH = props.small ? "h-[26px]" : "h-[32px]";
+
   return (
     <form
       onSubmit={onSubmit}
-      className={cn("flex gap-y-2 w-full flex-row max-w-sm", props.className)}
+      className={cn("flex gap-y-2 w-full flex-row items-center max-w-sm", props.className)}
     >
       <Input
-        placeholder="Enter your email"
+        placeholder="email"
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className={cn("rounded-r-none mt-1 z-10", props.small && "h-8")}
+        className={cn("flex-1 min-w-0 rounded-r-none z-10", sizeH)}
       />
       <Button
         type="submit"
         variant="secondary"
         disabled={isSubmitting}
         size={props.small ? "small" : undefined}
+        wrapperClassName={cn("w-auto shrink-0", props.compact && "-ml-1")}
+        className="w-auto"
       >
-        {isSubmitting ? <>Submitting...</> : <>Get updates</>}
+        {isSubmitting ? <>Submitting...</> : <>Subscribe</>}
       </Button>
     </form>
   );

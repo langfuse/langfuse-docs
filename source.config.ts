@@ -40,6 +40,7 @@ const blogFrontmatterSchema = baseFrontmatterSchema.extend({
   tag: z.string().nullish(),
   author: z.string().nullish(),
   showInBlogIndex: z.boolean().nullish(),
+  highlight: z.boolean().nullish(),
 });
 
 // Extended schema for changelog pages — adds date, author, ogImage, ogVideo, badge

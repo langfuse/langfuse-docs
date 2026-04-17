@@ -51,12 +51,14 @@ export const docSections: Record<string, SectionMeta> = {
     collection: "blog",
     title: "Blog",
     layout: "post",
+    hasOwnRoute: true,
   },
   changelog: {
     source: changelogSource,
     collection: "changelog",
     title: "Changelog",
     layout: "changelog",
+    hasOwnRoute: true,
   },
   guides: {
     source: guidesSource,
@@ -97,6 +99,7 @@ export const docSections: Record<string, SectionMeta> = {
     collection: "customers",
     title: "User stories",
     layout: "post",
+    hasOwnRoute: true,
   },
   handbook: {
     source: handbookSource,
@@ -135,25 +138,14 @@ export const SECTION_CONFIG: Record<string, SectionMeta> = {
   ...marketingEntries,
 };
 
-export const SECTION_SLUGS = Object.keys(SECTION_CONFIG);
-
-// Derived sets — computed from the layout annotation in each section's metadata.
-export const MARKETING_SECTIONS = new Set<string>(MARKETING_SLUGS);
-
-export const DOCS_STYLE_APP_SECTIONS = new Set(
+export const DEDICATED_APP_SECTIONS = new Set(
   Object.entries(docSections)
     .filter(([, meta]) => meta.hasOwnRoute)
     .map(([slug]) => slug),
 );
 
-export const POST_SECTIONS = new Set(
-  Object.entries(SECTION_CONFIG)
-    .filter(([, meta]) => meta.layout === "post" || meta.layout === "changelog")
-    .map(([slug]) => slug),
-);
+/** All marketing pages — use HomeLayout */
+export const SECTION_SLUGS = Object.keys(SECTION_CONFIG);
 
-export const CHANGELOG_SECTIONS = new Set(
-  Object.entries(SECTION_CONFIG)
-    .filter(([, meta]) => meta.layout === "changelog")
-    .map(([slug]) => slug),
-);
+// Derived sets — computed from the layout annotation in each section's metadata.
+export const MARKETING_SECTIONS = new Set<string>(MARKETING_SLUGS);

@@ -1,9 +1,9 @@
-import { HomeLayout } from "@/components/layout";
+import { PageChrome } from "@/components/home/layout/PageChrome";
 
 export default function BlogLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <HomeLayout>{children}</HomeLayout>;
+  return <PageChrome>{children}</PageChrome>;
 }

@@ -77,6 +77,7 @@ function renderAnswerWithLinks(text: string) {
           key={i}
           href={href}
           variant="text"
+          className="text-[14px]"
           {...(isExternal
             ? { target: "_blank", rel: "noopener noreferrer" }
             : {})}

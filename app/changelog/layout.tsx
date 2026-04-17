@@ -1,9 +1,9 @@
-import { HomeLayout } from "@/components/layout";
+import { PageChrome } from "@/components/layout";
 
 export default function ChangelogLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <HomeLayout>{children}</HomeLayout>;
+  return <PageChrome>{children}</PageChrome>;
 }

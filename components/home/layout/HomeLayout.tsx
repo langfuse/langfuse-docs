@@ -1,49 +1,72 @@
 import type { ReactNode } from "react";
-import Script from "next/script";
-import { Banner } from "../../layout/Banner";
-import { Navbar } from "../../layout/Navbar";
 import { Footer } from "../../layout/Footer";
 import { HomeSidebar } from "./HomeSidebar";
 import { HomeAside } from "./HomeAside";
 import { HomeMainArea } from "./HomeMainArea";
-import { AISearch, AISearchPanel, FloatingAskAIButton } from "@/components/inkeep/search";
-import { ForceLightMode } from "@/components/ForceLightMode";
+import { AISearchPanel } from "@/components/inkeep/search";
+import { PageChrome } from "./PageChrome";
+import { cn } from "@/lib/utils";
 
-type HomeLayoutProps = {
+type ContentColumnsProps = {
   children: ReactNode;
-  /** Right TOC / utility column. Default: true. */
   showAside?: boolean;
+  leftSidebar?: ReactNode;
+  rightSidebar?: ReactNode;
+  className?: string;
+  footerClassName?: string;
 };
 
 /**
- * Layout for the homepage and all marketing/wide pages.
- * Three-column grid matching the docs layout structure:
- * [HomeSidebar 240px] | [content 1fr, pattern-bg] | [HomeAside 240px]
+ * Three-column layout: left sidebar | content | right sidebar.
+ * Used inside PageChrome (or any wrapper that provides the outer chrome).
+ * Pass `leftSidebar` / `rightSidebar` to swap the default sidebars.
+ */
+export function ContentColumns({
+  children,
+  showAside = true,
+  leftSidebar,
+  rightSidebar,
+  className,
+  footerClassName,
+}: ContentColumnsProps) {
+  return (
+    <div id="home-layout" className={cn("flex flex-1 mx-auto w-full min-h-0 max-w-360", className)}>
+      {leftSidebar ?? <HomeSidebar />}
+      <HomeMainArea>
+        {children}
+        <Footer className={footerClassName} />
+      </HomeMainArea>
+      {showAside ? (rightSidebar ?? <HomeAside />) : null}
+      <AISearchPanel />
+    </div>
+  );
+}
+
+type HomeLayoutProps = ContentColumnsProps;
+
+/**
+ * Full-page layout for the homepage and all marketing/wide pages.
+ * Wraps ContentColumns with PageChrome (banner, navbar, AI search).
  */
 export function HomeLayout({
   children,
   showAside = true,
+  leftSidebar,
+  rightSidebar,
+  className,
+  footerClassName,
 }: HomeLayoutProps) {
   return (
-    <AISearch>
-      {/* Strip dark before paint (next-themes uses class on html; some code paths may touch body). */}
-      <Script
-        id="force-light-home"
-        strategy="beforeInteractive"
-      >{`(function(){var h=document.documentElement,b=document.body;h.classList.remove('dark');b.classList.remove('dark');h.style.colorScheme='light';})()`}</Script>
-      <ForceLightMode />
-      <Banner />
-      <Navbar />
-      <div id="home-layout" className="flex flex-1 mx-auto w-full min-h-0 max-w-360">
-        <HomeSidebar />
-        <HomeMainArea>
-          {children}
-          <Footer />
-        </HomeMainArea>
-        {showAside ? <HomeAside /> : null}
-        <AISearchPanel />
-      </div>
-      <FloatingAskAIButton />
-    </AISearch>
+    <PageChrome>
+      <ContentColumns
+        showAside={showAside}
+        leftSidebar={leftSidebar}
+        rightSidebar={rightSidebar}
+        className={className}
+        footerClassName={footerClassName}
+      >
+        {children}
+      </ContentColumns>
+    </PageChrome>
   );
 }

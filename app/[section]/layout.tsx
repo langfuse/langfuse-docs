@@ -1,92 +1,31 @@
 import { use } from "react";
 import { notFound } from "next/navigation";
-import { DocsSecondaryNav, HomeLayout, DocsSecondaryNavMobile, Layout } from "@/components/layout";
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
+import { HomeLayout } from "@/components/layout";
 import {
-  SECTION_CONFIG,
   SECTION_SLUGS,
-  DOCS_STYLE_APP_SECTIONS,
-  MARKETING_SECTIONS,
-  POST_SECTIONS,
-  CHANGELOG_SECTIONS,
+  DEDICATED_APP_SECTIONS,
 } from "@/lib/section-registry";
-import { MainContentWrapper } from "@/components/MainContentWrapper";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { SectionLayoutWrapper } from "./SectionLayoutWrapper";
-import { AISearch } from "@/components/inkeep/search-context";
-import { AISearchPanel } from "@/components/inkeep/search-panel";
 
 type LayoutProps = {
   children: React.ReactNode;
   params: Promise<{ section: string }>;
 };
 
-const contentWrapperClass = "mx-auto w-full max-w-4xl";
-
-// Synchronous server component — keeps the same RSC context-propagation behaviour
-// as app/docs/layout.tsx (which is also sync). Using React.use() to unwrap the
-// Next.js 15 params Promise without making the component async.
+/**
+ * Catch-all section layout.
+ * Handles non-dedicated sections that still route through app/[section]
+ * (e.g. handbook + marketing MDX pages). Dedicated sections have their
+ * own app routes and are excluded here.
+ */
 export default function SectionLayout({ children, params }: LayoutProps) {
   const { section } = use(params);
 
   if (!SECTION_SLUGS.includes(section)) {
     notFound();
   }
-  if (DOCS_STYLE_APP_SECTIONS.has(section)) {
+  if (DEDICATED_APP_SECTIONS.has(section)) {
     notFound();
   }
-  if (MARKETING_SECTIONS.has(section)) {
-    return <HomeLayout>{children}</HomeLayout>;
-  }
 
-  const config = SECTION_CONFIG[section];
-  const tree = config.source.getPageTree();
-
-  const isPost = POST_SECTIONS.has(section);
-  const isChangelog = CHANGELOG_SECTIONS.has(section);
-
-  // Render DocsLayout from the server component so its LayoutContextProvider
-  // correctly propagates context to DocsPage in the page component.
-  // SectionLayoutWrapper is a thin "use client" wrapper for SidebarProvider only.
-  return (
-    <AISearch>
-      <Layout>
-        <SectionLayoutWrapper>
-          <DocsLayout
-            tree={tree}
-            githubUrl="https://github.com/langfuse/langfuse-docs"
-            nav={isPost ? { enabled: false } : { component: <DocsSecondaryNavMobile /> }}
-            sidebar={
-              isPost ? { enabled: false } : { banner: <DocsSecondaryNav /> }
-            }
-            themeSwitch={isPost ? { enabled: false } : { component: <div className="ms-auto"><ThemeToggle /></div> }}
-            searchToggle={{ enabled: false }}
-            containerProps={
-              isChangelog
-                ? // Force --fd-toc-width:0 so the docs grid doesn't reserve a phantom
-                // 268px TOC column (written to the grid by DocsPage's article via CSS :has()).
-                ({ style: { "--fd-toc-width": "0px" } } as React.ComponentProps<
-                  typeof DocsLayout
-                >["containerProps"])
-                : undefined
-            }
-          >
-            {isChangelog ? (
-              <div className="w-full min-w-0 flex justify-center [grid-area:main]">
-                <div
-                  className={`${contentWrapperClass} ${isChangelog ? "px-3 md:px-4" : ""}`}
-                  data-changelog-content={isChangelog ? "" : undefined}
-                >
-                  <MainContentWrapper>{children}</MainContentWrapper>
-                </div>
-              </div>
-            ) : (
-              children
-            )}
-            <AISearchPanel />
-          </DocsLayout>
-        </SectionLayoutWrapper>
-      </Layout>
-    </AISearch>
-  );
+  return <HomeLayout>{children}</HomeLayout>;
 }

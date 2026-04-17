@@ -19,6 +19,7 @@ export function BulletList({ items }: { items: BulletItem[] }) {
             <Link
               href={item.href}
               variant="text"
+              className="text-[14px]"
             >
               {item.label}
             </Link>

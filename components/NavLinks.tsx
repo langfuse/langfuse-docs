@@ -64,7 +64,7 @@ const resourcesFeatured: FeaturedItem = {
   title: "Langfuse joins ClickHouse",
   description: "Our goal continues to be building the best LLM engineering platform",
   cta: "Read story",
-  href: "/blog/clickhouse",
+  href: "/blog/joining-clickhouse",
 };
 
 // ── Featured card component ───────────────────────────────────────────────────
