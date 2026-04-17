@@ -38,7 +38,7 @@ This notebook shows how to integrate **Langfuse** with **<PARTNER>** to trace, d
 ```
 ## Step 2: Set Up Environment Variables
 
-Get your Langfuse keys from the project settings at https://cloud.langfuse.com or set up [self-hosting](https://langfuse.com/self-hosting).
+Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting).
 ```
 
 **Cell 5 — code**
@@ -46,11 +46,11 @@ Get your Langfuse keys from the project settings at https://cloud.langfuse.com o
 ```python
 import os
 
-# Get keys for your project from the project settings page: https://cloud.langfuse.com
+# Get keys for your project from the project settings page: https://langfuse.com/cloud
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region (API host)
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region (API host)
 
 # <PARTNER> API key
 os.environ["<PARTNER>_API_KEY"] = "..."
@@ -85,11 +85,11 @@ See `references/patterns.md` for the four patterns. Each pattern defines what go
 ```
 ## Step N: View Traces in Langfuse
 
-After running the example, open your [Langfuse dashboard](https://cloud.langfuse.com) to see the full trace including prompts, completions, tool calls, token usage, and latency.
+After running the example, open [Langfuse Cloud](https://langfuse.com/cloud) to see the full trace including prompts, completions, tool calls, token usage, and latency.
 
 ![Example <PARTNER> trace in Langfuse](https://langfuse.com/images/cookbook/integration-<partner>/<partner>-example-trace.png)
 
-[Example trace in Langfuse](<TODO: paste a public example trace URL from cloud.langfuse.com>)
+[Example trace in Langfuse](<TODO: paste a public example trace URL from your Langfuse Cloud project>)
 
 <!-- STEPS_END -->
 ```
