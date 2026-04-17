@@ -13,6 +13,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { CornerBox } from "@/components/ui/corner-box";
+import { Heading } from "@/components/ui/heading";
+import { TextHighlight } from "@/components/ui/text-highlight";
 /** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
 const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -23,6 +25,7 @@ const contentTransition = (reduceMotion: boolean) =>
 
 export interface FeatureTabsProps {
   features: FeatureTabData[];
+  mobileFeature: FeatureTabData;
   defaultTab?: string;
   autoAdvance?: AutoAdvanceConfig;
 }
@@ -72,6 +75,7 @@ const DEFAULT_AUTO_ADVANCE: AutoAdvanceConfig = {
 
 export const FeatureTabs = ({
   features,
+  mobileFeature,
   defaultTab = "observability",
   autoAdvance,
 }: FeatureTabsProps) => {
@@ -338,13 +342,13 @@ export const FeatureTabs = ({
             <div
               key={`preload-${feature.id}`}
               className="relative"
-              style={{ width: 800, height: Math.round((800 * 1512) / 2646) }}
+              style={{ width: 806, height: 410 }}
             >
               <Image
                 src={feature.image.light}
                 alt=""
                 fill
-                sizes="100vw"
+                quality={100}
                 loading={isNext ? "eager" : "lazy"}
               />
             </div>
@@ -356,7 +360,7 @@ export const FeatureTabs = ({
       <CornerBox
         role="tablist"
         aria-label="Feature navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
-        className="px-4 py-2"
+        className="px-4 py-2 hidden md:block"
         onKeyDown={handleKeyDown}
       >
         <div
@@ -419,8 +423,8 @@ export const FeatureTabs = ({
         </div>
       </CornerBox>
 
-      {/* Image box */}
-      <CornerBox className="p-4 -mt-px" withStripes>
+      {/* Image box - desktop */}
+      <CornerBox className="p-4 md:-mt-px hidden md:block" withStripes>
         <div className="relative w-full overflow-hidden aspect-2646/1512 sm:aspect-auto sm:min-h-[410px]">
           <AnimatePresence mode="sync" initial={false}>
             {activeFeature ? (
@@ -436,6 +440,22 @@ export const FeatureTabs = ({
               </motion.div>
             ) : null}
           </AnimatePresence>
+        </div>
+      </CornerBox>
+
+      {/* Image box - mobile */}
+      <CornerBox className="p-4 md:-mt-px block md:hidden" withStripes>
+        <div className="relative w-full overflow-hidden min-h-[410px]">
+          <Image
+            src={mobileFeature?.image.light}
+            alt={mobileFeature?.image.alt}
+            width={1223}
+            height={706}
+            quality={100}
+            className="absolute left-0 top-0 h-auto max-w-none w-[900px] sm:w-[1223px]"
+            sizes="100vw"
+            priority
+          />
         </div>
       </CornerBox>
     </div>

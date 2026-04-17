@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useRef, useCallback, useSyncExternalStore } from "react";
+import { useState, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { HomeSection } from "@/components/home/HomeSection";
 import { CornerBox, Heading, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import RiveMock from "@/components/home/img/rive-mock.png";
-import { cn } from "@/lib/utils";
 
 const RiveAnimation = dynamic(
   () => import("@/components/rive/RiveAnimation").then((m) => m.RiveAnimation),
@@ -58,67 +56,12 @@ const LABELS: Record<string, RiveLabel> = {
   },
 };
 
-const MOBILE_TABS: Array<{ key: string; label: string } & RiveLabel> = [
-  { key: "overview", label: "Overview", ...OVERVIEW },
-  ...Object.entries(LABELS).map(([key, val]) => ({
-    key,
-    label: val.heading,
-    ...val,
-  })),
-];
-
-const noopSubscribe = () => () => { };
-
-/** Radix Tabs uses React useId(); defer mounting until after hydration to avoid SSR/client ID drift. */
-function useTabsClientMounted() {
-  return useSyncExternalStore(noopSubscribe, () => true, () => false);
-}
-
-/** Same chrome as Radix tabs, default “Overview” — no useId, matches server + first client paint. */
-function MobileTabsShell() {
-  return (
-    <CornerBox className="-mt-px bg-surface-1">
-      <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div
-          className="flex px-4 min-w-max border-b border-line-structure"
-          role="tablist"
-          aria-label="Product areas"
-        >
-          {MOBILE_TABS.map((tab) => (
-            <span
-              key={tab.key}
-              className={cn(
-                "shrink-0 px-3 py-3 text-sm whitespace-nowrap",
-                tab.key === "overview"
-                  ? "border-b-[1.5px] border-text-primary -mb-px font-bold text-text-primary"
-                  : "text-text-tertiary"
-              )}
-            >
-              {tab.label}
-            </span>
-          ))}
-        </div>
-      </div>
-      <div className="rive-text-enter flex w-full flex-col gap-1.5 p-4 min-h-[72px] justify-center">
-        <Text className="font-medium text-left text-text-primary">{OVERVIEW.heading}</Text>
-        <Text size="s" className="w-full max-w-none text-left">
-          {OVERVIEW.body}
-        </Text>
-      </div>
-    </CornerBox>
-  );
-}
-
 export const RiveSection = () => {
   const [label, setLabel] = useState<RiveLabel>(OVERVIEW);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRevTimeRef = useRef<number>(0);
-  const logTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleStateChange = useCallback((states: string[]) => {
-    if (logTimerRef.current) clearTimeout(logTimerRef.current);
-    logTimerRef.current = setTimeout(() => console.log("[Rive]", states), 0);
-
     if (states.some((s) => s.includes("-rev"))) {
       lastRevTimeRef.current = Date.now();
       return;
@@ -147,8 +90,6 @@ export const RiveSection = () => {
     }
   }, []);
 
-  const mobileTabsMounted = useTabsClientMounted();
-
   return (
     <HomeSection id="llm-engineering-loop" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start">
@@ -161,7 +102,7 @@ export const RiveSection = () => {
       </div>
 
       {/* Mobile: static image + tabs (below lg) */}
-      <div className="flex flex-col -mt-px lg:hidden">
+      <div className="flex flex-col -mt-20 md:hidden pointer-events-none -z-1">
         <div className="overflow-hidden relative w-full aspect-4/3">
           <Image
             src={RiveMock}
@@ -173,50 +114,10 @@ export const RiveSection = () => {
             priority
           />
         </div>
-
-        {mobileTabsMounted ? (
-          <TabsPrimitive.Root defaultValue="overview" className="flex flex-col">
-            <CornerBox className="-mt-px bg-surface-bg">
-              <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <TabsPrimitive.List className="flex px-4 min-w-max border-b border-line-structure">
-                  {MOBILE_TABS.map((tab) => (
-                    <TabsPrimitive.Trigger
-                      key={tab.key}
-                      value={tab.key}
-                      className={cn(
-                        "shrink-0 px-3 py-3 text-sm text-text-tertiary whitespace-nowrap cursor-pointer",
-                        "border-b-[1.5px] border-transparent -mb-px",
-                        "data-[state=active]:font-[580] data-[state=active]:text-text-primary data-[state=active]:border-text-primary",
-                        "transition-colors duration-150 outline-none"
-                      )}
-                    >
-                      {tab.label}
-                    </TabsPrimitive.Trigger>
-                  ))}
-                </TabsPrimitive.List>
-              </div>
-
-              {MOBILE_TABS.map((tab) => (
-                <TabsPrimitive.Content key={tab.key} value={tab.key}>
-                  <div className="rive-text-enter flex w-full flex-col gap-1.5 p-4 min-h-[72px] justify-center">
-                    <Text className="font-medium text-left text-text-primary">
-                      {tab.heading}
-                    </Text>
-                    <Text size="s" className="w-full max-w-none text-left">
-                      {tab.body}
-                    </Text>
-                  </div>
-                </TabsPrimitive.Content>
-              ))}
-            </CornerBox>
-          </TabsPrimitive.Root>
-        ) : (
-          <MobileTabsShell />
-        )}
       </div>
 
       {/* Desktop: Rive animation + dynamic label (lg and above) */}
-      <div className="hidden lg:block">
+      <div className="hidden md:block">
         <div
           className="p-4 -mt-px h-[500px]"
           onPointerEnter={handlePointerEnter}

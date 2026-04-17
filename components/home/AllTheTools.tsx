@@ -114,7 +114,7 @@ export function AllTheTools() {
                 className="flex flex-col items-stretch p-0 w-full min-w-0 h-full"
               >
                 <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden sm:max-h-[200px] sm:flex-row xl:max-h-[337px] xl:flex-col">
-                  <div className="flex flex-1 flex-col gap-1 p-4 pb-1 sm:pb-2.5">
+                  <div className="flex flex-1 flex-col gap-1 p-4 pb-1 sm:pb-2.5 z-1">
                     <Text size="s" className="font-medium text-left text-text-secondary">
                       {tool.title}
                     </Text>
@@ -122,13 +122,13 @@ export function AllTheTools() {
                       {tool.description}
                     </Text>
                   </div>
-                  <div className="flex-1 w-full overflow-clip">
+                  <div className="flex-1 w-full overflow-clip -mt-[12%] sm:mt-0 pointer-events-none">
                     <Image
                       src={tool.visual}
                       alt={tool.title}
                       width={100}
                       height={100}
-                      className="object-contain w-full h-full xl:translate-y-0"
+                      className="object-contain w-full h-full"
                       quality={100}
                       unoptimized
                     />

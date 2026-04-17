@@ -5,22 +5,14 @@ import { Text } from "@/components/ui/text";
 import { TextHighlight } from "@/components/ui";
 import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
-import { Dot } from "@/components/ui/dot";
 import { cn } from "@/lib/utils";
+import { HeroStatsStrip } from "@/components/home/HeroStatsStrip";
 
 export function Hero() {
   return (
     <HomeSection className="pt-5 sm:pt-8 md:pt-[60px]">
       <CornerBox className="-mb-px">
-        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex gap-3 lg:gap-6 justify-center items-center px-4 py-[10px] min-w-max mx-auto">
-            <Text size="s" className="whitespace-nowrap shrink-0">Used by <b className="text-primary">19</b> of Fortune 50</Text>
-            <Dot />
-            <Text size="s" className="whitespace-nowrap shrink-0"><b className="text-primary">10+ billion</b> observations/month</Text>
-            <Dot />
-            <Text size="s" className="whitespace-nowrap shrink-0"><b className="text-primary">100,000+</b> engineers building on Langfuse</Text>
-          </div>
-        </div>
+        <HeroStatsStrip />
       </CornerBox>
       <CornerBox className="flex flex-col gap-4 sm:gap-8 md:gap-10 items-center px-4 py-8 sm:px-8 sm:py-10">
         <Heading
@@ -50,7 +42,7 @@ export function Hero() {
         </Heading>
         <div className="flex flex-col gap-6">
           <Text className="max-w-xl">
-            Debug AI Applications and Agents in minutes. Spot issues before your users do. Collaborate with your team to continuously improve on cost, latency and quality. Any model, any framework. Based on OpenTelemetry.
+            Debug AI Applications and Agents in minutes. Spot issues before your users do. Collaborate with your team to continuously improve on cost, latency and quality. <span className="hidden md:inline">Any model, any framework. Based on OpenTelemetry.</span>
           </Text>
           <div className="flex flex-wrap gap-3 justify-center items-center">
             <Button
