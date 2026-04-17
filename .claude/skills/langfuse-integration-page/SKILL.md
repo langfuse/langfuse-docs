@@ -108,7 +108,7 @@ Use `-U` to upgrade. For JS notebooks, use `npm install` in a shell cell (see th
 
 **Cell 4 — markdown. Env var setup prose.**
 
-One short paragraph mentioning that keys come from Langfuse project settings, linking to `https://cloud.langfuse.com` and `https://langfuse.com/self-hosting`.
+One short paragraph mentioning that keys come from Langfuse project settings, linking to [Langfuse Cloud](https://langfuse.com/cloud) and `https://langfuse.com/self-hosting`.
 
 **Cell 5 — code. Env vars.**
 
@@ -117,11 +117,11 @@ Always include the three Langfuse vars in this exact shape (both regions, US com
 ```python
 import os
 
-# Get keys for your project from the project settings page: https://cloud.langfuse.com
+# Get keys for your project from the project settings page: https://langfuse.com/cloud
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region (API host)
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region (API host)
 
 # <Partner> API key
 os.environ["<PARTNER>_API_KEY"] = "..."
@@ -148,7 +148,7 @@ else:
 ```markdown
 ## Step N: View Traces in Langfuse
 
-After running the example, open your [Langfuse dashboard](https://cloud.langfuse.com) to see the trace, including prompts, completions, tool calls, token usage, and latency.
+After running the example, open [Langfuse Cloud](https://langfuse.com/cloud) to see the trace, including prompts, completions, tool calls, token usage, and latency.
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-<slug>/<slug>-example-trace.png)
 

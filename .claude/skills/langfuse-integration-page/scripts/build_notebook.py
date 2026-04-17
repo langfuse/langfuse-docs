@@ -97,11 +97,11 @@ def _env_var_block(extras: list[dict[str, str]]) -> str:
     lines = [
         "import os",
         "",
-        "# Get keys for your project from the project settings page: https://cloud.langfuse.com",
+        "# Get keys for your project from the project settings page: https://langfuse.com/cloud",
         'os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."',
         'os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."',
-        'os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region',
-        '# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region',
+        'os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region (API host)',
+        '# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region (API host)',
     ]
     if extras:
         lines.append("")
@@ -133,12 +133,12 @@ def _client_init_cells() -> list[dict[str, Any]]:
 def _view_traces_cell(spec: dict[str, Any], step_n: int) -> dict[str, Any]:
     title_meta = spec["title_metadata"]
     img = spec.get("trace_image_path") or "https://langfuse.com/images/cookbook/integration-SLUG/trace.png"
-    url = spec.get("example_trace_url") or "TODO: paste a public example trace URL from cloud.langfuse.com"
+    url = spec.get("example_trace_url") or "TODO: paste a public example trace URL from your Langfuse Cloud project"
     partner_short = title_meta.get("sidebarTitle") or title_meta.get("sidebar_title") or "Partner"
     text = (
         f"## Step {step_n}: View Traces in Langfuse\n"
         "\n"
-        "After running the example, open your [Langfuse dashboard](https://cloud.langfuse.com) "
+        "After running the example, open [Langfuse Cloud](https://langfuse.com/cloud) "
         "to see the full trace including prompts, completions, tool calls, token usage, and latency.\n"
         "\n"
         f"![Example {partner_short} trace in Langfuse]({img})\n"
@@ -195,7 +195,7 @@ def build(spec: dict[str, Any]) -> dict[str, Any]:
         _md_cell(
             "## Step 2: Set Up Environment Variables\n"
             "\n"
-            "Get your Langfuse keys from the project settings at https://cloud.langfuse.com "
+            "Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) "
             "or set up [self-hosting](https://langfuse.com/self-hosting)."
         )
     )
