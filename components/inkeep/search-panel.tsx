@@ -292,7 +292,7 @@ export function AISearchPanel() {
       <Presence present={open}>
         <div
           className={cn(
-            'overflow-hidden z-50 bg-surface-1 text-text-primary [--ai-chat-width:400px] 2xl:[--ai-chat-width:460px] border-line-structure',
+            'overflow-hidden z-50 bg-surface-bg text-text-primary [--ai-chat-width:320px] 2xl:[--ai-chat-width:360px] border-line-structure',
             'max-wide:fixed max-wide:inset-x-4 max-wide:bottom-8 max-wide:top-[calc(var(--fd-banner-height,0px)+var(--lf-nav-primary-height)+1rem)] max-wide:border max-wide:border-line-structure max-wide:shadow-xl max-wide:max-w-[600px] max-wide:mx-auto',
             'wide:sticky wide:top-[var(--fd-nav-height)] wide:h-[calc(100dvh-var(--fd-nav-height)-2px)] wide:border-l wide:ms-auto',
             'wide:in-[#nd-docs-layout]:[grid-area:toc] wide:in-[#nd-notebook-layout]:row-span-full wide:in-[#nd-notebook-layout]:col-start-5',
@@ -305,7 +305,7 @@ export function AISearchPanel() {
           <div className="flex flex-col size-full wide:w-(--ai-chat-width)">
             <AISearchPanelHeader />
             <AISearchPanelList className="flex-1" />
-            <div className="border-t border-line-structure text-text-primary bg-surface-2">
+            <div className="border-t border-line-structure text-text-primary bg-surface-1">
               <AISearchInput />
               <div className="flex items-center gap-1 p-1 empty:hidden">
                 <AISearchInputActions />

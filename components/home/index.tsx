@@ -12,7 +12,7 @@ import { FAQ } from "./FAQ";
 
 export const Home = () => (
   <>
-    <main className="overflow-hidden relative w-full hero-bg">
+    <main className="overflow-hidden relative w-full hero-bg xl:px-5 2xl:px-10">
       <Hero />
       <FeatureTabsSection />
       <RiveSection />

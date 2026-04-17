@@ -2,7 +2,6 @@
 
 import type { ComponentProps } from 'react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Link } from '@/components/ui/link';
 import type { InkeepUIMessage, ProvideLinksData } from '@/lib/ai/inkeep-qa-schema';
@@ -89,26 +88,31 @@ type AIChatEmptyStateProps = {
 
 export function AIChatEmptyState({ onPickQuestion }: AIChatEmptyStateProps) {
   return (
-    <div className="size-full flex flex-col justify-center gap-4">
+    <div className="size-full flex flex-col justify-start gap-4">
       <div className="flex items-start gap-3">
-        <img src="/icon256.png" alt="Langfuse" className="size-6 rounded-full mt-0.5" />
-        <Text size="s" className="text-text-secondary text-left">
+        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-6" />
+        <Text size="s" className="text-text-primary text-left mb-2">
           Hi! I&apos;m Langfuse&apos;s AI assistant trained on documentation, help articles, and other
           content. How can I help you today?
         </Text>
       </div>
       <div className="flex flex-wrap gap-2">
         {AI_CHAT_EXAMPLE_QUESTIONS.map((question) => (
-          <Button
+          <button
             key={question}
             type="button"
-            size="small"
-            variant="secondary"
-            className="text-left inline-flex"
+            className={cn(
+              'relative inline-flex min-h-[26px] max-w-full items-center rounded-[2px] shadow-none',
+              'border border-line-structure dark:border-line-cta',
+              'with-stripes box-corners--on-hover',
+              'px-2 py-1 text-left font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]',
+              'text-text-secondary transition-colors hover:text-text-primary',
+              'cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            )}
             onClick={() => onPickQuestion(question)}
           >
-            {question}
-          </Button>
+            <span className="relative z-[1]">{question}</span>
+          </button>
         ))}
       </div>
     </div>
