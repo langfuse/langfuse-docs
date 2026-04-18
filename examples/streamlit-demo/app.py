@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from langfuse import get_client
-from openai import OpenAI
+from langfuse.openai import OpenAI
 import streamlit as st
 
 load_dotenv()
