@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from langfuse import get_client
+from langfuse import get_client, observe
 from langfuse.openai import OpenAI
 import streamlit as st
 
@@ -19,6 +19,16 @@ def init_langfuse():
 langfuse = init_langfuse()
 client = OpenAI()
 
+
+@observe()
+def generate_reply(messages):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+    )
+    return response.choices[0].message.content
+
+
 st.title("Streamlit × Langfuse Demo")
 
 if "messages" not in st.session_state:
@@ -34,10 +44,6 @@ if prompt := st.chat_input("Say something"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=st.session_state.messages,
-        )
-        reply = response.choices[0].message.content
+        reply = generate_reply(st.session_state.messages)
         st.markdown(reply)
         st.session_state.messages.append({"role": "assistant", "content": reply})
