@@ -151,7 +151,7 @@ export const DEDICATED_APP_SECTIONS = new Set<string>([
   ...Object.entries(docSections)
     .filter(([, meta]) => meta.hasOwnRoute)
     .map(([slug]) => slug),
-  ...DEDICATED_MARKETING_SLUGS,
+  ...Array.from(DEDICATED_MARKETING_SLUGS.values()),
 ]);
 
 /** All marketing pages — use HomeLayout */
