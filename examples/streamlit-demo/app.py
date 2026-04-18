@@ -89,3 +89,4 @@ if prompt := st.chat_input("Say something"):
         st.session_state.messages.append(
             {"role": "assistant", "content": reply, "trace_id": trace_id}
         )
+        st.rerun()
