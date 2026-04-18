@@ -1,9 +1,22 @@
 from dotenv import load_dotenv
+from langfuse import get_client
 from openai import OpenAI
 import streamlit as st
 
 load_dotenv()
 
+
+@st.cache_resource
+def init_langfuse():
+    client = get_client()
+    if client.auth_check():
+        print("Langfuse client authenticated")
+    else:
+        print("Langfuse authentication failed — check LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY / LANGFUSE_BASE_URL")
+    return client
+
+
+langfuse = init_langfuse()
 client = OpenAI()
 
 st.title("Streamlit × Langfuse Demo")
