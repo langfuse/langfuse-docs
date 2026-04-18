@@ -51,12 +51,12 @@ if "scored_traces" not in st.session_state:
     st.session_state.scored_traces = set()
 
 
-def score_trace(trace_id: str, value: int):
+def score_trace(trace_id: str, value: str):
     langfuse.create_score(
         trace_id=trace_id,
         name="user-feedback",
         value=value,
-        data_type="NUMERIC",
+        data_type="CATEGORICAL",
     )
     st.session_state.scored_traces.add(trace_id)
 
@@ -71,10 +71,10 @@ for idx, msg in enumerate(st.session_state.messages):
             else:
                 up, down, _ = st.columns([1, 1, 10])
                 if up.button("👍", key=f"up_{idx}"):
-                    score_trace(trace_id, 1)
+                    score_trace(trace_id, "positive")
                     st.rerun()
                 if down.button("👎", key=f"down_{idx}"):
-                    score_trace(trace_id, -1)
+                    score_trace(trace_id, "negative")
                     st.rerun()
 
 if prompt := st.chat_input("Say something"):
