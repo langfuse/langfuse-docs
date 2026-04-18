@@ -30,7 +30,7 @@ def generate_reply(messages):
         model="gpt-4o-mini",
         messages=messages,
     )
-    return response.choices[0].message.content
+    return response.choices[0].message.content, langfuse.get_current_trace_id()
 
 
 st.title("Streamlit × Langfuse Demo")
@@ -58,6 +58,8 @@ if prompt := st.chat_input("Say something"):
 
     with st.chat_message("assistant"):
         with propagate_attributes(session_id=st.session_state.session_id):
-            reply = generate_reply(st.session_state.messages)
+            reply, trace_id = generate_reply(st.session_state.messages)
         st.markdown(reply)
-        st.session_state.messages.append({"role": "assistant", "content": reply})
+        st.session_state.messages.append(
+            {"role": "assistant", "content": reply, "trace_id": trace_id}
+        )
