@@ -1,4 +1,5 @@
 import atexit
+import uuid
 
 from dotenv import load_dotenv
 from langfuse import get_client, observe
@@ -36,6 +37,9 @@ st.title("Streamlit × Langfuse Demo")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
