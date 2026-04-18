@@ -25,7 +25,8 @@ client = OpenAI()
 
 
 @observe()
-def generate_reply(messages):
+def generate_reply(messages, session_id):
+    langfuse.update_current_trace(session_id=session_id)
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages,
@@ -51,6 +52,6 @@ if prompt := st.chat_input("Say something"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        reply = generate_reply(st.session_state.messages)
+        reply = generate_reply(st.session_state.messages, st.session_state.session_id)
         st.markdown(reply)
         st.session_state.messages.append({"role": "assistant", "content": reply})
