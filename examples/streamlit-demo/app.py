@@ -25,12 +25,17 @@ client = OpenAI()
 
 
 @observe()
-def generate_reply(messages):
-    response = client.chat.completions.create(
+def stream_reply(messages, trace_holder):
+    trace_holder.append(langfuse.get_current_trace_id())
+    stream = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages,
+        stream=True,
     )
-    return response.choices[0].message.content, langfuse.get_current_trace_id()
+    for chunk in stream:
+        delta = chunk.choices[0].delta.content
+        if delta:
+            yield delta
 
 
 st.title("Streamlit × Langfuse Demo")
@@ -84,10 +89,12 @@ if prompt := st.chat_input("Say something"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
+        trace_holder = []
         with propagate_attributes(session_id=st.session_state.session_id):
-            reply, trace_id = generate_reply(st.session_state.messages)
-        st.markdown(reply)
+            reply = st.write_stream(
+                stream_reply(st.session_state.messages, trace_holder)
+            )
         st.session_state.messages.append(
-            {"role": "assistant", "content": reply, "trace_id": trace_id}
+            {"role": "assistant", "content": reply, "trace_id": trace_holder[0]}
         )
         st.rerun()
