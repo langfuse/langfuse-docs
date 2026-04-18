@@ -1,3 +1,5 @@
+import atexit
+
 from dotenv import load_dotenv
 from langfuse import get_client, observe
 from langfuse.openai import OpenAI
@@ -13,6 +15,7 @@ def init_langfuse():
         print("Langfuse client authenticated")
     else:
         print("Langfuse authentication failed — check LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY / LANGFUSE_BASE_URL")
+    atexit.register(client.flush)
     return client
 
 
