@@ -29,7 +29,7 @@ export const sectionNavData: SectionNavData[] = [
 ];
 
 const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px py-0')
-const contentStyle = cn('flex items-center w-full bg-surface-1 rounded-sm px-2.5 py-3')
+const contentStyle = cn('flex items-center w-full bg-surface-1 lg:rounded-sm pl-3 pr-2.5 py-3')
 
 export function Navbar() {
   return (

@@ -349,6 +349,7 @@ export const FeatureTabs = ({
                 alt=""
                 fill
                 quality={100}
+                sizes="806px"
                 loading={isNext ? "eager" : "lazy"}
               />
             </div>
@@ -453,7 +454,7 @@ export const FeatureTabs = ({
             height={706}
             quality={100}
             className="absolute left-0 top-0 h-auto max-w-none w-[900px] sm:w-[1223px]"
-            sizes="100vw"
+            sizes="(min-width: 640px) 1223px, 900px"
             priority
           />
         </div>

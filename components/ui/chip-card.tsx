@@ -4,7 +4,6 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { HoverCorners } from "./corner-box";
 import { tooltipContentClassName } from "./tooltip";
 
 const FOLLOW_OFFSET = 12;
@@ -43,12 +42,10 @@ const ChipCard = React.forwardRef<HTMLAnchorElement | HTMLDivElement, ChipCardPr
 
     const inner = children ? (
       <>
-        <HoverCorners />
         {children}
       </>
     ) : (
       <>
-        <HoverCorners />
         {icon && (
           <span className={cn(
             "flex justify-center items-center shrink-0",
@@ -99,7 +96,7 @@ const ChipCard = React.forwardRef<HTMLAnchorElement | HTMLDivElement, ChipCardPr
           <Link
             ref={ref as React.ForwardedRef<HTMLAnchorElement>}
             href={href}
-            className={baseClassName}
+            className={cn(baseClassName, "corner-box-corners--hover")}
             {...followHandlers}
           >
             {inner}

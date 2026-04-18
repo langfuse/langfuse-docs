@@ -795,7 +795,8 @@
    Order: TL, BL, BR, TR (matches mask-position list below). */
 
 .corner-box-corners,
-.corner-box-corners-flush {
+.corner-box-corners-flush,
+.corner-box-corners--hover {
   --cx-mask-tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E");
   --cx-mask-bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E");
   --cx-mask-br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E");
@@ -803,7 +804,8 @@
 }
 
 /* Bordered CornerBox: sit at −1px so brackets overlap the 1px border stroke */
-.corner-box-corners::before {
+.corner-box-corners::before,
+.corner-box-corners--hover::before {
   content: "";
   position: absolute;
   left: -1px;
@@ -833,6 +835,14 @@
   mask-repeat: no-repeat;
 }
 
+.corner-box-corners--hover::before {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.corner-box-corners--hover:hover::before {
+  opacity: 1;
+}
 /* No-border CornerBox: flush with the element edge */
 .corner-box-corners-flush::before {
   content: "";

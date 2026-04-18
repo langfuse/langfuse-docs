@@ -31,8 +31,8 @@ export const TabContent = ({
     []
   );
 
-  // Feature tab JPGs are 2646×1512. Below `sm`, parent keeps that aspect so
-  // `object-contain` shows the full desktop UI scaled down (no narrow crop).
+  const sizes = "(min-width: 1280px) 1616px, (min-width: 768px) 1616px, 100vw";
+
   return (
     <div className="relative h-full w-full sm:h-[410px] custom-card-shadow">
       {/* Light theme image */}
@@ -42,7 +42,7 @@ export const TabContent = ({
         fill
         quality={100}
         className="object-contain object-center sm:object-cover sm:object-top-left dark:hidden"
-        sizes="(min-width: 1024px) 33vw, 100vw"
+        sizes={sizes}
         priority={priority}
         onError={handleImageError}
       />
@@ -54,7 +54,7 @@ export const TabContent = ({
         fill
         quality={100}
         className="hidden object-contain object-center sm:object-cover sm:object-top-left dark:block"
-        sizes="(min-width: 1024px) 33vw, 100vw"
+        sizes={sizes}
         priority={priority}
         onError={handleImageError}
       />
