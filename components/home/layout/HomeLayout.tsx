@@ -36,7 +36,11 @@ export function ContentColumns({
         {children}
         <Footer className={footerClassName} />
       </HomeMainArea>
-      {showAside ? (rightSidebar ?? <HomeAside />) : null}
+      {showAside ? (
+        rightSidebar ?? <HomeAside />
+      ) : (
+        <div aria-hidden className="hidden lg:block w-px shrink-0 bg-line-structure" />
+      )}
       <AISearchPanel />
     </div>
   );

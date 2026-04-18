@@ -1,18 +1,13 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { CornerBox } from "./corner-box";
+import { CornerBox, type CornerBoxProps } from "./corner-box";
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <CornerBox
-    ref={ref}
-    className={className}
-    {...props}
-  />
-));
+const Card = React.forwardRef<HTMLDivElement, CornerBoxProps>(
+  ({ className, ...props }, ref) => (
+    <CornerBox ref={ref} className={className} {...props} />
+  )
+);
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<

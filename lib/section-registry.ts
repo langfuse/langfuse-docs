@@ -138,11 +138,21 @@ export const SECTION_CONFIG: Record<string, SectionMeta> = {
   ...marketingEntries,
 };
 
-export const DEDICATED_APP_SECTIONS = new Set(
-  Object.entries(docSections)
+/**
+ * Marketing pages that have a dedicated app route (e.g. app/pricing/)
+ * and should be excluded from the dynamic [section] catch-all.
+ */
+export const DEDICATED_MARKETING_SLUGS = new Set<string>([
+  "pricing",
+  "pricing-self-host",
+]);
+
+export const DEDICATED_APP_SECTIONS = new Set<string>([
+  ...Object.entries(docSections)
     .filter(([, meta]) => meta.hasOwnRoute)
     .map(([slug]) => slug),
-);
+  ...DEDICATED_MARKETING_SLUGS,
+]);
 
 /** All marketing pages — use HomeLayout */
 export const SECTION_SLUGS = Object.keys(SECTION_CONFIG);
