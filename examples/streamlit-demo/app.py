@@ -2,7 +2,7 @@ import atexit
 import uuid
 
 from dotenv import load_dotenv
-from langfuse import get_client, observe
+from langfuse import get_client, observe, propagate_attributes
 from langfuse.openai import OpenAI
 import streamlit as st
 
@@ -25,8 +25,7 @@ client = OpenAI()
 
 
 @observe()
-def generate_reply(messages, session_id):
-    langfuse.update_current_trace(session_id=session_id)
+def generate_reply(messages):
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages,
@@ -52,6 +51,7 @@ if prompt := st.chat_input("Say something"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        reply = generate_reply(st.session_state.messages, st.session_state.session_id)
+        with propagate_attributes(session_id=st.session_state.session_id):
+            reply = generate_reply(st.session_state.messages)
         st.markdown(reply)
         st.session_state.messages.append({"role": "assistant", "content": reply})
