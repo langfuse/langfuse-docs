@@ -47,9 +47,35 @@ with st.sidebar:
         st.session_state.session_id = str(uuid.uuid4())
         st.rerun()
 
-for msg in st.session_state.messages:
+if "scored_traces" not in st.session_state:
+    st.session_state.scored_traces = set()
+
+
+def score_trace(trace_id: str, value: int):
+    langfuse.create_score(
+        trace_id=trace_id,
+        name="user-feedback",
+        value=value,
+        data_type="NUMERIC",
+    )
+    st.session_state.scored_traces.add(trace_id)
+
+
+for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
+        if msg["role"] == "assistant" and msg.get("trace_id"):
+            trace_id = msg["trace_id"]
+            if trace_id in st.session_state.scored_traces:
+                st.caption("Thanks for the feedback!")
+            else:
+                up, down, _ = st.columns([1, 1, 10])
+                if up.button("👍", key=f"up_{idx}"):
+                    score_trace(trace_id, 1)
+                    st.rerun()
+                if down.button("👎", key=f"down_{idx}"):
+                    score_trace(trace_id, -1)
+                    st.rerun()
 
 if prompt := st.chat_input("Say something"):
     st.session_state.messages.append({"role": "user", "content": prompt})
