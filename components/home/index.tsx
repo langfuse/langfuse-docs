@@ -7,7 +7,7 @@ import { OpenSource } from "./OpenSource";
 import { DeveloperTools } from "./DeveloperTools";
 import { Enterprise } from "./Enterprise";
 import { WhyLangfuse } from "./WhyLangfuse";
-import { ClickHouseLangfuseSection } from "./ClickHouseLangfuseSection";
+import { GetStartedSection } from "./GetStartedSection";
 import { FAQ } from "./FAQ";
 
 export const Home = () => (
@@ -22,7 +22,7 @@ export const Home = () => (
       <DeveloperTools />
       <Enterprise />
       <WhyLangfuse />
-      <ClickHouseLangfuseSection />
+      <GetStartedSection />
       <FAQ />
     </main>
   </>
