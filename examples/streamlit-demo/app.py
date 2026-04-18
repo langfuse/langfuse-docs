@@ -58,6 +58,7 @@ def score_trace(trace_id: str, value: str):
         value=value,
         data_type="CATEGORICAL",
     )
+    langfuse.flush()
     st.session_state.scored_traces.add(trace_id)
 
 
