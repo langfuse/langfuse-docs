@@ -1,11 +1,15 @@
 # Streamlit × Langfuse Demo
 
-Minimal chat app that will be layered with [Langfuse](https://langfuse.com) observability across subsequent commits. This commit only ships the baseline: a plain OpenAI-backed chat interface.
+A minimal LLM chat app built with [Streamlit](https://streamlit.io/) and instrumented end-to-end with [Langfuse](https://langfuse.com). This is the runnable companion to the [Streamlit integration guide](https://langfuse.com/integrations/other/streamlit) — the guide walks through the code topic by topic, this folder lets you run it locally in one command.
 
-## Prerequisites
+## How it works
 
-- Python 3.10+
-- An [OpenAI API key](https://platform.openai.com/api-keys)
+- Streaming chat UI via `st.write_stream` and Streamlit's chat elements
+- Langfuse tracing for every reply through the `@observe` decorator and the `langfuse.openai` SDK wrapper
+- Anthropic calls are auto-instrumented via OpenTelemetry using `AnthropicInstrumentor`
+- [Sessions](https://langfuse.com/docs/tracing-features/sessions) scoped per browser tab, plus sidebar-driven [user identification](https://langfuse.com/docs/tracing-features/users)
+- Thumbs-up / thumbs-down [user-feedback scores](https://langfuse.com/docs/scores/user-feedback) attached to the trace id captured during streaming
+- Model switcher routing between OpenAI (`gpt-4o-mini`) and Anthropic (`claude-sonnet-4-6`), with the provider tagged on every trace
 
 ## Setup
 
@@ -17,7 +21,7 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Then open `.env` and fill in `OPENAI_API_KEY`. The Langfuse keys stay as placeholders until later commits wire up tracing.
+Fill in `.env` with your Langfuse project keys (from [Langfuse Cloud](https://cloud.langfuse.com) or a [self-hosted](https://langfuse.com/self-hosting) instance) and at least one provider key.
 
 ## Run
 
@@ -25,4 +29,4 @@ Then open `.env` and fill in `OPENAI_API_KEY`. The Langfuse keys stay as placeho
 streamlit run app.py
 ```
 
-The app starts at `http://localhost:8501`. Type a message and the assistant replies using `gpt-4o-mini`.
+Open `http://localhost:8501`, set a name in the sidebar, pick a model, and start chatting. Traces, sessions, users, and feedback scores populate in your Langfuse project immediately.
