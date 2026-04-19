@@ -1,6 +1,7 @@
 import atexit
 import uuid
 
+from anthropic import Anthropic
 from dotenv import load_dotenv
 from langfuse import get_client, observe, propagate_attributes
 from langfuse.openai import OpenAI
@@ -8,6 +9,11 @@ from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
 import streamlit as st
 
 load_dotenv()
+
+MODELS = {
+    "gpt-4o-mini": "openai",
+    "claude-sonnet-4-6": "anthropic",
+}
 
 
 @st.cache_resource
@@ -28,14 +34,13 @@ def init_anthropic_instrumentor():
 
 langfuse = init_langfuse()
 init_anthropic_instrumentor()
-client = OpenAI()
+openai_client = OpenAI()
+anthropic_client = Anthropic()
 
 
-@observe()
-def stream_reply(messages, trace_holder):
-    trace_holder.append(langfuse.get_current_trace_id())
-    stream = client.chat.completions.create(
-        model="gpt-4o-mini",
+def _stream_openai(messages, model):
+    stream = openai_client.chat.completions.create(
+        model=model,
         messages=messages,
         stream=True,
         stream_options={"include_usage": True},
@@ -46,6 +51,27 @@ def stream_reply(messages, trace_holder):
         delta = chunk.choices[0].delta.content
         if delta:
             yield delta
+
+
+def _stream_anthropic(messages, model):
+    stream = anthropic_client.messages.create(
+        model=model,
+        max_tokens=1024,
+        messages=messages,
+        stream=True,
+    )
+    for event in stream:
+        if event.type == "content_block_delta":
+            yield event.delta.text
+
+
+@observe()
+def stream_reply(messages, model, trace_holder):
+    trace_holder.append(langfuse.get_current_trace_id())
+    if MODELS[model] == "openai":
+        yield from _stream_openai(messages, model)
+    else:
+        yield from _stream_anthropic(messages, model)
 
 
 st.title("Streamlit × Langfuse Demo")
@@ -59,12 +85,21 @@ if "session_id" not in st.session_state:
 if "user_id" not in st.session_state:
     st.session_state.user_id = "anonymous"
 
+if "model" not in st.session_state:
+    st.session_state.model = "gpt-4o-mini"
+
 with st.sidebar:
     name = st.text_input(
         "Your name",
         value="" if st.session_state.user_id == "anonymous" else st.session_state.user_id,
     )
     st.session_state.user_id = name.strip() or "anonymous"
+
+    st.session_state.model = st.selectbox(
+        "Model",
+        list(MODELS.keys()),
+        index=list(MODELS.keys()).index(st.session_state.model),
+    )
 
     if st.button("New conversation"):
         st.session_state.messages = []
@@ -112,9 +147,14 @@ if prompt := st.chat_input("Say something"):
         with propagate_attributes(
             session_id=st.session_state.session_id,
             user_id=st.session_state.user_id,
+            tags=[MODELS[st.session_state.model]],
         ):
             reply = st.write_stream(
-                stream_reply(st.session_state.messages, trace_holder)
+                stream_reply(
+                    st.session_state.messages,
+                    st.session_state.model,
+                    trace_holder,
+                )
             )
         st.session_state.messages.append(
             {"role": "assistant", "content": reply, "trace_id": trace_holder[0]}
