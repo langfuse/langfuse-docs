@@ -102,7 +102,10 @@ if prompt := st.chat_input("Say something"):
 
     with st.chat_message("assistant"):
         trace_holder = []
-        with propagate_attributes(session_id=st.session_state.session_id):
+        with propagate_attributes(
+            session_id=st.session_state.session_id,
+            user_id=st.session_state.user_id,
+        ):
             reply = st.write_stream(
                 stream_reply(st.session_state.messages, trace_holder)
             )
