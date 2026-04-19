@@ -1,0 +1,159 @@
+---
+title: Debug Langfuse Traces with Rewind
+sidebarTitle: Rewind
+description: Import Langfuse traces into Rewind for time-travel debugging — fork at the failure, replay with the fix, and prove the fix works with LLM-as-judge scoring.
+category: Integrations
+---
+
+# Debug Langfuse Traces with Rewind
+
+[Rewind](https://github.com/agentoptics/rewind) is an open-source time-travel debugger for AI agents. It imports your Langfuse traces by ID, lets you fork at any step, replay from the failure point (without re-running or paying for steps that already succeeded), and prove the fix works with automated scoring.
+
+![Rewind demo — show, diff, eval, assert, share](https://raw.githubusercontent.com/agentoptics/rewind/master/assets/demo.gif)
+
+> **What is Rewind?** [Rewind](https://github.com/agentoptics/rewind) records every LLM call your agent makes and lets you inspect, fork, replay, and diff timelines. When your agent fails at step 15 of a 30-step run, you fix the prompt and replay from step 14 — steps 1–14 are served from cache (0 tokens, 0 cost). MIT licensed.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is the open-source LLM engineering platform for tracing, prompt management, and evaluation.
+
+## What This Integration Does
+
+- **Import traces** from Langfuse into Rewind by trace ID
+- **Fork at failure** — branch the timeline at the step that broke
+- **Replay from fork** — re-run only the broken steps with your fix (cached steps cost nothing)
+- **Score with LLM-as-judge** — compare the original and fixed timelines automatically
+- **Export back** — send the debugged trace back to Langfuse via OpenTelemetry
+
+## Get Started
+
+<Steps>
+
+### Step 1: Install Rewind
+
+```bash
+pip install rewind-agent
+```
+
+This installs both the Python SDK and the `rewind` CLI. No Rust toolchain required.
+
+### Step 2: Set Langfuse credentials
+
+```bash
+export LANGFUSE_PUBLIC_KEY=pk-lf-...
+export LANGFUSE_SECRET_KEY=sk-lf-...
+```
+
+You can find your API keys in your [Langfuse project settings](https://cloud.langfuse.com).
+
+### Step 3: Import a trace
+
+Find a failing trace in the Langfuse UI, copy its trace ID, and import it:
+
+```bash
+rewind import from-langfuse --trace <trace-id>
+```
+
+The trace is now a Rewind session — fully browsable, forkable, and replayable.
+
+### Step 4: Inspect the trace
+
+```bash
+rewind show latest
+```
+
+```
+⏪ Rewind — Session Trace
+
+  Session: my-agent-run
+  Steps: 20   Tokens: 8,450
+
+  ▼ ✗ 🤖 supervisor (agent)
+    ▼ ✓ 🤖 researcher (agent)
+      ├ ✓ 🧠 gpt-4o  320ms
+      ├ ✓ 🧠 gpt-4o  890ms
+      ▼ ✓ 🔧 web_search (tool)
+    ▼ ✗ 🤖 writer (agent)
+      └ ✗ 🧠 gpt-4o  1450ms
+      │   ERROR: Hallucination — used stale data as current fact
+```
+
+### Step 5: Fix the prompt and replay
+
+Fix the prompt or tool configuration in your code, then replay from just before the failure:
+
+```bash
+rewind replay latest --from 14
+# Steps 1-13: served from cache (0 tokens, $0.00)
+# Step 14+: live LLM calls with your fix
+```
+
+### Step 6: Prove the fix works
+
+Compare the original and fixed timelines with an evaluator:
+
+```bash
+rewind eval score latest -e correctness --compare-timelines
+```
+
+```
+⏪ Rewind — Timeline Scores
+
+  Timeline      correctness     avg
+  ────────────  ───────────  ──────
+  main                0.200   0.200
+  fixed               0.950   0.950
+
+  Delta (fixed vs main): +0.75 avg  ↑
+```
+
+### Step 7: Export back to Langfuse (optional)
+
+Send the debugged session back to Langfuse as an OpenTelemetry trace:
+
+```bash
+rewind export otel latest --endpoint https://cloud.langfuse.com
+```
+
+</Steps>
+
+## Python SDK
+
+You can also import traces programmatically:
+
+```python
+import rewind_agent
+
+session_id = rewind_agent.import_from_langfuse(
+    trace_id="abc123",
+    public_key="pk-lf-...",       # or LANGFUSE_PUBLIC_KEY env var
+    secret_key="sk-lf-...",       # or LANGFUSE_SECRET_KEY env var
+    host="https://cloud.langfuse.com",  # default
+    session_name="debug-issue-42",      # optional
+)
+```
+
+## How It Works
+
+1. **Fetch** — Calls the Langfuse REST API to retrieve the trace with all observations
+2. **Convert** — Maps Langfuse observations (generations, spans, tools) to OpenTelemetry spans
+3. **Ingest** — Imports via Rewind's OTel ingestion pipeline
+4. **Debug** — The imported session is fully browsable, forkable, and replayable
+
+Rewind calls the Langfuse API directly — the `langfuse` Python package is not required.
+
+## Self-hosted Langfuse
+
+Works with self-hosted Langfuse instances:
+
+```bash
+rewind import from-langfuse --trace <id> --host https://langfuse.internal.company.com
+```
+
+## Learn More
+
+- [Rewind on GitHub](https://github.com/agentoptics/rewind) — MIT licensed, single binary, no dependencies
+- [Langfuse Import docs](https://github.com/agentoptics/rewind/blob/master/docs/langfuse-import.md) — full field mapping and CLI reference
+- [agentoptics.dev](https://agentoptics.dev) — project homepage
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
