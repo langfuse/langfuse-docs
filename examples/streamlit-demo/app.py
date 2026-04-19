@@ -49,7 +49,16 @@ if "messages" not in st.session_state:
 if "session_id" not in st.session_state:
     st.session_state.session_id = str(uuid.uuid4())
 
+if "user_id" not in st.session_state:
+    st.session_state.user_id = "anonymous"
+
 with st.sidebar:
+    name = st.text_input(
+        "Your name",
+        value="" if st.session_state.user_id == "anonymous" else st.session_state.user_id,
+    )
+    st.session_state.user_id = name.strip() or "anonymous"
+
     if st.button("New conversation"):
         st.session_state.messages = []
         st.session_state.session_id = str(uuid.uuid4())
