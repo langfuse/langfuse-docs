@@ -31,8 +31,11 @@ def stream_reply(messages, trace_holder):
         model="gpt-4o-mini",
         messages=messages,
         stream=True,
+        stream_options={"include_usage": True},
     )
     for chunk in stream:
+        if not chunk.choices:
+            continue
         delta = chunk.choices[0].delta.content
         if delta:
             yield delta
