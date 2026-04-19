@@ -1,0 +1,746 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for Streamlit with Langfuse
+sidebarTitle: Streamlit
+logo: /images/integrations/streamlit_icon.svg
+description: Build an LLM chat UI with Streamlit and trace it with Langfuse.
+category: Integrations
+---
+
+# Build an LLM Chat UI with Streamlit and trace it with Langfuse
+
+This notebook walks through building a minimal LLM chat application with [Streamlit](https://streamlit.io/) and instrumenting it end-to-end with [Langfuse](https://langfuse.com) for tracing, session tracking, user identification, feedback scores, and multi-provider routing (OpenAI + Anthropic).
+
+> **What is Streamlit?** [Streamlit](https://streamlit.io/) is an open-source Python framework for quickly building interactive data and AI apps. It turns regular Python scripts into web UIs without requiring any frontend code.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that provides tracing, evaluation, prompt management, and analytics for LLM applications.
+
+## Get Started
+
+We'll build the chat UI step by step, layering Langfuse instrumentation on top.
+
+<Steps>
+## Step 1: Install Dependencies
+
+Install Streamlit, the Langfuse SDK, the OpenAI and Anthropic SDKs, the OpenTelemetry instrumentor for Anthropic, and `python-dotenv` for environment variable loading.
+
+
+```python
+%pip install streamlit "langfuse>=4.0.0" openai anthropic opentelemetry-instrumentation-anthropic python-dotenv
+```
+
+## Step 2: Configure the Langfuse SDK
+
+Set the Langfuse environment variables. Get your project keys from the [Langfuse Cloud project settings page](https://cloud.langfuse.com) or your self-hosted instance.
+
+
+```python
+import os
+
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com"  # 🇺🇸 US region
+
+os.environ["OPENAI_API_KEY"] = "sk-..."
+os.environ["ANTHROPIC_API_KEY"] = "sk-ant-..."
+```
+
+Initialize the Langfuse client and verify the connection. `get_client()` picks up the credentials from the environment variables set above.
+
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Langfuse authentication failed — check your keys and base URL.")
+```
+
+## Step 3: Build a Minimal Streamlit Chat
+
+Start with a baseline chat app — no Langfuse yet. Streamlit reruns the entire script on every interaction, so we keep the message history in `st.session_state`. Save the snippet below as `app.py` and run it with `streamlit run app.py`.
+
+
+```python
+from openai import OpenAI
+import streamlit as st
+
+client = OpenAI()
+
+st.title("Streamlit × Langfuse Demo")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+if prompt := st.chat_input("Say something"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=st.session_state.messages,
+    )
+    reply = response.choices[0].message.content
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+    with st.chat_message("assistant"):
+        st.markdown(reply)
+```
+
+## Step 4: Add Basic Tracing with `@observe`
+
+Two changes turn the baseline into a traced app:
+
+1. Replace `from openai import OpenAI` with `from langfuse.openai import OpenAI` — a drop-in wrapper that automatically captures every chat completion as a Langfuse generation.
+2. Wrap the chat handler in `@observe()` so each user turn becomes a single trace that groups the LLM call (and anything else you add later) under one parent span.
+
+**Streamlit rerun note:** Streamlit re-executes the entire script on every interaction. Wrap the Langfuse client init in `@st.cache_resource` so it runs only once per process, not on every keystroke. We also register `langfuse.flush` with `atexit` so any buffered traces are sent before the app shuts down.
+
+
+```python
+import atexit
+
+from langfuse import get_client, observe
+from langfuse.openai import OpenAI
+import streamlit as st
+
+
+@st.cache_resource
+def init_langfuse():
+    client = get_client()
+    if not client.auth_check():
+        print("Langfuse authentication failed — check your keys.")
+    atexit.register(client.flush)
+    return client
+
+
+langfuse = init_langfuse()
+client = OpenAI()
+
+
+@observe()
+def chat_completion(messages):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+    )
+    return response.choices[0].message.content
+
+
+st.title("Streamlit × Langfuse Demo")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+if prompt := st.chat_input("Say something"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    reply = chat_completion(st.session_state.messages)
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+    with st.chat_message("assistant"):
+        st.markdown(reply)
+```
+
+## Step 5: Group Traces into Sessions
+
+A Langfuse [session](https://langfuse.com/docs/observability/features/sessions) groups multiple traces that belong to the same conversation. Generate a `session_id` once when the app loads (persisted in `st.session_state`), then attach it to every trace via `propagate_attributes`. We also add a "New conversation" button that mints a fresh `session_id` and clears the message history.
+
+
+```python
+import atexit
+import uuid
+
+from langfuse import get_client, observe, propagate_attributes
+from langfuse.openai import OpenAI
+import streamlit as st
+
+
+@st.cache_resource
+def init_langfuse():
+    client = get_client()
+    if not client.auth_check():
+        print("Langfuse authentication failed — check your keys.")
+    atexit.register(client.flush)
+    return client
+
+
+langfuse = init_langfuse()
+client = OpenAI()
+
+
+@observe()
+def chat_completion(messages):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+    )
+    return response.choices[0].message.content
+
+
+st.title("Streamlit × Langfuse Demo")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+with st.sidebar:
+    if st.button("New conversation"):
+        st.session_state.messages = []
+        st.session_state.session_id = str(uuid.uuid4())
+        st.rerun()
+
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+if prompt := st.chat_input("Say something"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with propagate_attributes(session_id=st.session_state.session_id):
+        reply = chat_completion(st.session_state.messages)
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+    with st.chat_message("assistant"):
+        st.markdown(reply)
+```
+
+## Step 6: Capture User Feedback as Scores
+
+Add 👍 / 👎 buttons under every assistant message and persist the click as a Langfuse [score](https://langfuse.com/docs/evaluation/scores). To attach the score to the right trace later, capture `langfuse.get_current_trace_id()` while the `@observe`-wrapped handler is still running, return it alongside the reply, and stash it on the message in `st.session_state`. We track scored trace IDs in a small set so each message can only be scored once.
+
+
+```python
+import atexit
+import uuid
+
+from langfuse import get_client, observe, propagate_attributes
+from langfuse.openai import OpenAI
+import streamlit as st
+
+
+@st.cache_resource
+def init_langfuse():
+    client = get_client()
+    if not client.auth_check():
+        print("Langfuse authentication failed — check your keys.")
+    atexit.register(client.flush)
+    return client
+
+
+langfuse = init_langfuse()
+client = OpenAI()
+
+
+@observe()
+def chat_completion(messages):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+    )
+    return response.choices[0].message.content, langfuse.get_current_trace_id()
+
+
+def score_trace(trace_id: str, value: str):
+    langfuse.create_score(
+        trace_id=trace_id,
+        name="user-feedback",
+        value=value,
+        data_type="CATEGORICAL",
+    )
+    langfuse.flush()
+    st.session_state.scored_traces.add(trace_id)
+
+
+st.title("Streamlit × Langfuse Demo")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+if "scored_traces" not in st.session_state:
+    st.session_state.scored_traces = set()
+
+with st.sidebar:
+    if st.button("New conversation"):
+        st.session_state.messages = []
+        st.session_state.session_id = str(uuid.uuid4())
+        st.rerun()
+
+for idx, msg in enumerate(st.session_state.messages):
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if msg["role"] == "assistant" and msg.get("trace_id"):
+            trace_id = msg["trace_id"]
+            if trace_id in st.session_state.scored_traces:
+                st.caption("Thanks for the feedback!")
+            else:
+                up, down, _ = st.columns([1, 1, 10])
+                if up.button("👍", key=f"up_{idx}"):
+                    score_trace(trace_id, "positive")
+                    st.rerun()
+                if down.button("👎", key=f"down_{idx}"):
+                    score_trace(trace_id, "negative")
+                    st.rerun()
+
+if prompt := st.chat_input("Say something"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with propagate_attributes(session_id=st.session_state.session_id):
+        reply, trace_id = chat_completion(st.session_state.messages)
+    st.session_state.messages.append(
+        {"role": "assistant", "content": reply, "trace_id": trace_id}
+    )
+    st.rerun()
+```
+
+## Step 7: Stream Responses Token-by-Token
+
+Switch the handler to a generator that yields chunks as they arrive, and render them with [`st.write_stream`](https://docs.streamlit.io/develop/api-reference/write-magic/st.write_stream) so the user sees tokens appear live. Two details:
+
+- Pass `stream_options={"include_usage": True}` so OpenAI sends an authoritative usage payload at the end of the stream — without this, Langfuse would have to estimate token counts.
+- A streaming function returns a generator instead of a value, so the `(reply, trace_id)` tuple trick from Step 6 no longer works. Pass a small list (`trace_holder`) into the generator and have it append the trace ID before yielding the first chunk.
+
+
+```python
+import atexit
+import uuid
+
+from langfuse import get_client, observe, propagate_attributes
+from langfuse.openai import OpenAI
+import streamlit as st
+
+
+@st.cache_resource
+def init_langfuse():
+    client = get_client()
+    if not client.auth_check():
+        print("Langfuse authentication failed — check your keys.")
+    atexit.register(client.flush)
+    return client
+
+
+langfuse = init_langfuse()
+client = OpenAI()
+
+
+@observe()
+def stream_reply(messages, trace_holder):
+    trace_holder.append(langfuse.get_current_trace_id())
+    stream = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        stream=True,
+        stream_options={"include_usage": True},
+    )
+    for chunk in stream:
+        if not chunk.choices:
+            continue
+        delta = chunk.choices[0].delta.content
+        if delta:
+            yield delta
+
+
+def score_trace(trace_id: str, value: str):
+    langfuse.create_score(
+        trace_id=trace_id,
+        name="user-feedback",
+        value=value,
+        data_type="CATEGORICAL",
+    )
+    langfuse.flush()
+    st.session_state.scored_traces.add(trace_id)
+
+
+st.title("Streamlit × Langfuse Demo")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+if "scored_traces" not in st.session_state:
+    st.session_state.scored_traces = set()
+
+with st.sidebar:
+    if st.button("New conversation"):
+        st.session_state.messages = []
+        st.session_state.session_id = str(uuid.uuid4())
+        st.rerun()
+
+for idx, msg in enumerate(st.session_state.messages):
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if msg["role"] == "assistant" and msg.get("trace_id"):
+            trace_id = msg["trace_id"]
+            if trace_id in st.session_state.scored_traces:
+                st.caption("Thanks for the feedback!")
+            else:
+                up, down, _ = st.columns([1, 1, 10])
+                if up.button("👍", key=f"up_{idx}"):
+                    score_trace(trace_id, "positive")
+                    st.rerun()
+                if down.button("👎", key=f"down_{idx}"):
+                    score_trace(trace_id, "negative")
+                    st.rerun()
+
+if prompt := st.chat_input("Say something"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        trace_holder = []
+        with propagate_attributes(session_id=st.session_state.session_id):
+            reply = st.write_stream(
+                stream_reply(st.session_state.messages, trace_holder)
+            )
+        st.session_state.messages.append(
+            {"role": "assistant", "content": reply, "trace_id": trace_holder[0]}
+        )
+        st.rerun()
+```
+
+## Step 8: Identify the User
+
+Add a "Your name" text input in the sidebar so each chat turn can be attributed to a Langfuse [user](https://langfuse.com/docs/observability/features/users). Persist the value in `st.session_state.user_id`, default to `"anonymous"` when blank, and pass it into the same `propagate_attributes` block we use for sessions.
+
+
+```python
+import atexit
+import uuid
+
+from langfuse import get_client, observe, propagate_attributes
+from langfuse.openai import OpenAI
+import streamlit as st
+
+
+@st.cache_resource
+def init_langfuse():
+    client = get_client()
+    if not client.auth_check():
+        print("Langfuse authentication failed — check your keys.")
+    atexit.register(client.flush)
+    return client
+
+
+langfuse = init_langfuse()
+client = OpenAI()
+
+
+@observe()
+def stream_reply(messages, trace_holder):
+    trace_holder.append(langfuse.get_current_trace_id())
+    stream = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        stream=True,
+        stream_options={"include_usage": True},
+    )
+    for chunk in stream:
+        if not chunk.choices:
+            continue
+        delta = chunk.choices[0].delta.content
+        if delta:
+            yield delta
+
+
+def score_trace(trace_id: str, value: str):
+    langfuse.create_score(
+        trace_id=trace_id,
+        name="user-feedback",
+        value=value,
+        data_type="CATEGORICAL",
+    )
+    langfuse.flush()
+    st.session_state.scored_traces.add(trace_id)
+
+
+st.title("Streamlit × Langfuse Demo")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+if "user_id" not in st.session_state:
+    st.session_state.user_id = "anonymous"
+
+if "scored_traces" not in st.session_state:
+    st.session_state.scored_traces = set()
+
+with st.sidebar:
+    name = st.text_input(
+        "Your name",
+        value="" if st.session_state.user_id == "anonymous" else st.session_state.user_id,
+    )
+    st.session_state.user_id = name.strip() or "anonymous"
+
+    if st.button("New conversation"):
+        st.session_state.messages = []
+        st.session_state.session_id = str(uuid.uuid4())
+        st.rerun()
+
+for idx, msg in enumerate(st.session_state.messages):
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if msg["role"] == "assistant" and msg.get("trace_id"):
+            trace_id = msg["trace_id"]
+            if trace_id in st.session_state.scored_traces:
+                st.caption("Thanks for the feedback!")
+            else:
+                up, down, _ = st.columns([1, 1, 10])
+                if up.button("👍", key=f"up_{idx}"):
+                    score_trace(trace_id, "positive")
+                    st.rerun()
+                if down.button("👎", key=f"down_{idx}"):
+                    score_trace(trace_id, "negative")
+                    st.rerun()
+
+if prompt := st.chat_input("Say something"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        trace_holder = []
+        with propagate_attributes(
+            session_id=st.session_state.session_id,
+            user_id=st.session_state.user_id,
+        ):
+            reply = st.write_stream(
+                stream_reply(st.session_state.messages, trace_holder)
+            )
+        st.session_state.messages.append(
+            {"role": "assistant", "content": reply, "trace_id": trace_holder[0]}
+        )
+        st.rerun()
+```
+
+## Step 9: Add Multi-Provider Support (OpenAI + Anthropic)
+
+Let users switch between OpenAI and Anthropic from the sidebar, with both providers traced in Langfuse. OpenAI continues to flow through the `langfuse.openai` drop-in. For Anthropic we install [`opentelemetry-instrumentation-anthropic`](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) and call `AnthropicInstrumentor().instrument()` once at startup — Langfuse v4 picks up OpenTelemetry spans automatically, so the Anthropic call shows up under the same `@observe`-rooted trace as the OpenAI call would.
+
+We also tag each trace with the provider name (`"openai"` or `"anthropic"`) by passing `tags=[...]` to `propagate_attributes`, which makes it easy to filter and compare them later in the Langfuse UI.
+
+
+```python
+import atexit
+import uuid
+
+from anthropic import Anthropic
+from langfuse import get_client, observe, propagate_attributes
+from langfuse.openai import OpenAI
+from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
+import streamlit as st
+
+MODELS = {
+    "gpt-4o-mini": "openai",
+    "claude-sonnet-4-6": "anthropic",
+}
+
+
+@st.cache_resource
+def init_langfuse():
+    client = get_client()
+    if not client.auth_check():
+        print("Langfuse authentication failed — check your keys.")
+    atexit.register(client.flush)
+    return client
+
+
+@st.cache_resource
+def init_anthropic_instrumentor():
+    AnthropicInstrumentor().instrument()
+
+
+langfuse = init_langfuse()
+init_anthropic_instrumentor()
+openai_client = OpenAI()
+anthropic_client = Anthropic()
+
+
+def _stream_openai(messages, model):
+    stream = openai_client.chat.completions.create(
+        model=model,
+        messages=messages,
+        stream=True,
+        stream_options={"include_usage": True},
+    )
+    for chunk in stream:
+        if not chunk.choices:
+            continue
+        delta = chunk.choices[0].delta.content
+        if delta:
+            yield delta
+
+
+def _stream_anthropic(messages, model):
+    stream = anthropic_client.messages.create(
+        model=model,
+        max_tokens=1024,
+        messages=messages,
+        stream=True,
+    )
+    for event in stream:
+        if event.type == "content_block_delta":
+            yield event.delta.text
+
+
+@observe()
+def stream_reply(messages, model, trace_holder):
+    trace_holder.append(langfuse.get_current_trace_id())
+    clean = [{"role": m["role"], "content": m["content"]} for m in messages]
+    if MODELS[model] == "openai":
+        yield from _stream_openai(clean, model)
+    else:
+        yield from _stream_anthropic(clean, model)
+
+
+def score_trace(trace_id: str, value: str):
+    langfuse.create_score(
+        trace_id=trace_id,
+        name="user-feedback",
+        value=value,
+        data_type="CATEGORICAL",
+    )
+    langfuse.flush()
+    st.session_state.scored_traces.add(trace_id)
+
+
+st.title("Streamlit × Langfuse Demo")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+if "user_id" not in st.session_state:
+    st.session_state.user_id = "anonymous"
+
+if "model" not in st.session_state:
+    st.session_state.model = "gpt-4o-mini"
+
+if "scored_traces" not in st.session_state:
+    st.session_state.scored_traces = set()
+
+with st.sidebar:
+    name = st.text_input(
+        "Your name",
+        value="" if st.session_state.user_id == "anonymous" else st.session_state.user_id,
+    )
+    st.session_state.user_id = name.strip() or "anonymous"
+
+    st.session_state.model = st.selectbox(
+        "Model",
+        list(MODELS.keys()),
+        index=list(MODELS.keys()).index(st.session_state.model),
+    )
+
+    if st.button("New conversation"):
+        st.session_state.messages = []
+        st.session_state.session_id = str(uuid.uuid4())
+        st.rerun()
+
+for idx, msg in enumerate(st.session_state.messages):
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if msg["role"] == "assistant" and msg.get("trace_id"):
+            trace_id = msg["trace_id"]
+            if trace_id in st.session_state.scored_traces:
+                st.caption("Thanks for the feedback!")
+            else:
+                up, down, _ = st.columns([1, 1, 10])
+                if up.button("👍", key=f"up_{idx}"):
+                    score_trace(trace_id, "positive")
+                    st.rerun()
+                if down.button("👎", key=f"down_{idx}"):
+                    score_trace(trace_id, "negative")
+                    st.rerun()
+
+if prompt := st.chat_input("Say something"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        trace_holder = []
+        with propagate_attributes(
+            session_id=st.session_state.session_id,
+            user_id=st.session_state.user_id,
+            tags=[MODELS[st.session_state.model]],
+        ):
+            reply = st.write_stream(
+                stream_reply(
+                    st.session_state.messages,
+                    st.session_state.model,
+                    trace_holder,
+                )
+            )
+        st.session_state.messages.append(
+            {"role": "assistant", "content": reply, "trace_id": trace_holder[0]}
+        )
+        st.rerun()
+```
+
+## Step 10: View Traces in Langfuse
+
+Open your project in [Langfuse Cloud](https://cloud.langfuse.com) (or your self-hosted instance) and start chatting in the Streamlit app. Each user turn becomes a trace; here is what to look for.
+
+### Traces tab
+
+Every chat turn shows up as a trace with the OpenAI or Anthropic call nested inside, including the prompt, completion, model, latency, and authoritative token usage.
+
+![Streamlit trace in Langfuse](https://langfuse.com/images/cookbook/integration-streamlit/streamlit-trace.png)
+
+### Sessions tab
+
+Traces from the same conversation are grouped under a single `session_id`. Click into a session to see the full back-and-forth.
+
+![Streamlit session view](https://langfuse.com/images/cookbook/integration-streamlit/streamlit-session.png)
+
+### Users tab
+
+Each name typed into the sidebar appears here with a trace count, total tokens, and total cost. Click a user to filter traces down to that person.
+
+![Streamlit users view](https://langfuse.com/images/cookbook/integration-streamlit/streamlit-users.png)
+
+### Scores
+
+The 👍 / 👎 clicks land as `user-feedback` scores attached to the corresponding trace. Filter by score in the Traces tab to surface conversations where users were unhappy.
+
+### Tags
+
+Filter traces by the `openai` or `anthropic` tag (set in Step 9) to compare providers side by side — same prompts, different models.
+
+### Sharing a trace
+
+Open any trace and use the "Share" action to generate a public link you can paste into a bug report, a PR review, or a Slack thread without granting Langfuse access.
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
