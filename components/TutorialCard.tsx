@@ -2,6 +2,8 @@ import React from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { Heading } from "./ui/heading";
+import { Text } from "./ui/text";
 
 interface TutorialCardProps {
   title: string;
@@ -19,25 +21,25 @@ export function TutorialCard({
   className,
 }: TutorialCardProps) {
   return (
-    <Link href={href} className="block h-full no-underline">
+    <Link href={href} className="block h-full group no-underline not-prose">
       <Card
         className={cn(
-          "group h-full border bg-surface-bg transition-all duration-200 hover:bg-muted/40 hover:border-border",
+          "group h-full border bg-surface-bg corner-box-hover-stripes",
           className
         )}
       >
         <CardContent className="flex h-full min-h-[140px] flex-col justify-center gap-3 p-4">
           <div className="flex items-center gap-2">
-            <div className="flex size-5 shrink-0 items-center justify-center text-text-tertiary transition-colors group-hover:text-text-primary [&>svg]:size-5">
+            <div className="flex size-4 shrink-0 items-center justify-center text-text-tertiary transition-colors group-hover:text-text-secondary [&>svg]:size-5">
               {icon}
             </div>
-            <h3 className="!m-0 !border-0 !p-0 text-base font-semibold leading-none text-text-primary no-underline">
+            <Heading as="h3" size="small" className="not-prose">
               {title}
-            </h3>
+            </Heading>
           </div>
-          <p className="text-sm leading-relaxed text-text-tertiary no-underline">
+          <Text size="s" className="text-text-tertiary text-left group-hover:text-text-secondary transition-colors duration-220">
             {description}
-          </p>
+          </Text>
         </CardContent>
       </Card>
     </Link>

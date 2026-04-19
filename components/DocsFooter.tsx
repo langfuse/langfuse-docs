@@ -57,6 +57,7 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
         <Button
           href={previous.url}
           variant="secondary"
+          size="small"
           className="w-auto"
           wrapperClassName="justify-self-start"
           icon={<ArrowLeft className="h-3.5 w-3.5" />}
@@ -69,6 +70,7 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
         <Button
           href={next.url}
           variant="secondary"
+          size="small"
           className="w-auto"
           wrapperClassName="col-start-2 justify-self-end"
           icon={<ArrowRight className="h-3.5 w-3.5" />}

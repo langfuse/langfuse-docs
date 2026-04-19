@@ -1,6 +1,6 @@
 import { guidesSource } from "@/lib/source";
-import { Link } from "@/components/ui/link";
 import { FileCode, ArrowRight } from "lucide-react";
+import { Cards, Card } from "@/components/docs";
 
 type CookbookPage = ReturnType<typeof guidesSource.getPages>[number];
 
@@ -32,10 +32,10 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
       .filter(([category]) => !categories || categories.includes(category))
       .map(([category, pages]) => (
         <div key={category}>
-          <h3 className="font-semibold tracking-tight mt-8 text-2xl">
+          <h3 className="font-semibold tracking-tight mt-10 text-xl mb-4">
             {category}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+          <Cards num={2}>
             {pages.map((page) => {
               const title =
                 page.data.title ??
@@ -46,22 +46,22 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
                   )
                   .join(" ");
               return (
-                <Link
+                <Card
                   href={page.url}
                   key={page.url}
                   className="no-underline group"
+                  icon={<FileCode className="h-3 w-3" />}
                 >
-                  <div className="flex items-center gap-3 rounded-lg border border-border bg-surface-bg px-4 py-3 transition-all duration-200 hover:bg-muted/40 hover:border-border">
-                    <FileCode className="h-4 w-4 shrink-0 text-text-tertiary" />
-                    <span className="flex-1 text-sm font-medium text-text-primary no-underline">
+                  <div className="flex flex-1 items-center gap-3 w-full justify-between">
+                    <span className="flex-1 text-text-secondary group-hover:text-text-primary transition-colors duration-220">
                       {title}
                     </span>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-text-tertiary opacity-0 transition-opacity group-hover:opacity-100" />
+                    <ArrowRight className="h-3 w-3 shrink-0 text-text-tertiary opacity-0 transition-opacity group-hover:opacity-100" />
                   </div>
-                </Link>
+                </Card>
               );
             })}
-          </div>
+          </Cards>
         </div>
       ))}
   </>

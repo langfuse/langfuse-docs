@@ -22,11 +22,13 @@ interface CardsProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export type CardProps = Omit<FumadocsCardProps, "title"> & {
   title?: React.ReactNode;
+  contentClassName?: string;
+  contentWrapperClassName?: string;
   /** Legacy prop — ignored, fumadocs renders its own arrow. */
   arrow?: boolean;
 };
 
-export function Card({ icon, title = "", description = "", arrow: _arrow, children, ...props }: CardProps) {
+export function Card({ icon, title = "", description = "", arrow: _arrow, children, contentClassName, contentWrapperClassName, ...props }: CardProps) {
   const E = props.href ? Link : 'div';
   return (
     <E
@@ -39,14 +41,14 @@ export function Card({ icon, title = "", description = "", arrow: _arrow, childr
     >
       <CornerBox
         hoverStripes={!!props.href}
-        className="flex flex-row items-center p-2 sm:p-3 gap-2.5 text-text-primary w-full h-full"
+        className={cn("flex flex-row items-center p-2 sm:p-3 gap-2.5 text-text-primary w-full h-full", contentClassName)}
       >
         {icon ? (
           <div className="not-prose shrink-0 [&_svg]:size-5 [&_img]:size-5">
             {icon}
           </div>
         ) : null}
-        <div className="flex flex-col gap-1">
+        <div className={cn("flex flex-col gap-1", contentWrapperClassName)}>
           <Text as="h3" size="s" className="not-prose mb-0 font-medium text-left text-text-secondary">
             {title}
           </Text>

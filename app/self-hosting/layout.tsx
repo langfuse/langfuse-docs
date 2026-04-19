@@ -1,4 +1,4 @@
-import { getSelfHostingPageTree } from "@/lib/source";
+import { selfHostingSource } from "@/lib/source";
 import { SharedDocsLayout } from "@/app/docs/SharedDocsLayout";
 
 export default function SelfHostingLayout({
@@ -6,5 +6,5 @@ export default function SelfHostingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={getSelfHostingPageTree()}>{children}</SharedDocsLayout>;
+  return <SharedDocsLayout tree={selfHostingSource.getPageTree()}>{children}</SharedDocsLayout>;
 }

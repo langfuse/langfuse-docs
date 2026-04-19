@@ -3,7 +3,6 @@
 import { Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { WALKTHROUGH_TABS } from "./constants";
@@ -72,7 +71,7 @@ function WatchWalkthroughsInner({ className }: { className?: string }) {
             <TabsContent
               key={tab.id}
               value={tab.id}
-              className="p-4 mx-auto mt-2 max-w-2xl rounded border bg-card"
+              className="p-4 mx-auto mt-2 max-w-2xl rounded border bg-stripe-pattern"
             >
               <div className="mb-6">
                 <h3 className="mb-2 text-xl font-semibold">{tab.title}</h3>
@@ -82,17 +81,15 @@ function WatchWalkthroughsInner({ className }: { className?: string }) {
                 videoId={tab.videoId}
                 title={`Langfuse ${tab.label.toLowerCase()} video`}
               />
-              <div className="mt-4">
+              <div className="mt-4 flex justify-center">
                 <Button
-                  asChild
-                  variant="outline"
-                  className="justify-start"
+                  icon={<BookOpen size={16} />}
+                  href={tab.docs.href}
                 >
-                  <Link href={tab.docs.href}>
-                    <BookOpen size={16} />
+                  <span className="flex items-center gap-2">
                     {tab.docs.title}
-                    <ExternalLink size={14} className="ml-auto" />
-                  </Link>
+                    <ExternalLink size={12} className="ml-auto" />
+                  </span>
                 </Button>
               </div>
             </TabsContent>

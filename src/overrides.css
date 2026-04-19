@@ -184,7 +184,7 @@
 }
 
 #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] {
-  padding: 16px 8px;
+  padding: 16px 0px;
 }
 
 /* Inner viewport: allow full height so the aside scrolls (Radix or first child of scroll area) */
@@ -308,7 +308,6 @@
   padding-top: 0.25rem !important;
   padding-bottom: 0.25rem !important;
   min-height: unset !important;
-  border-radius: 0;
   position: relative;
 }
 
@@ -328,8 +327,6 @@
   isolation: isolate;
   z-index: 0;
   width: 100%;
-  min-width: 0;
-  max-width: 100%;
   box-sizing: border-box;
 }
 
@@ -402,12 +399,30 @@
 #nd-sidebar-mobile
   [data-radix-scroll-area-viewport]
   [style*="--radix-collapsible-content-height"][data-state="open"]
-  a::after {
+  a::after,
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  button::before,
+#nd-docs-layout
+  #nd-sidebar
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  button::after,
+#nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  button::before,
+#nd-sidebar-mobile
+  [data-radix-scroll-area-viewport]
+  [style*="--radix-collapsible-content-height"][data-state="open"]
+  button::after {
   /* Match Fumadocs rail: before:start-2.5; logical props for RTL */
   left: auto !important;
   right: auto !important;
-  inset-inline-start: 0.625rem !important;
-  inset-inline-end: -6px !important;
+  inset-inline-start: calc(var(--sidebar-label-left) - 6px) !important;
+  inset-inline-end: 0px !important;
   width: auto !important;
   margin: 0 !important;
 }
@@ -855,51 +870,7 @@ details > summary {
   font-weight: 700;
 }
 
-/* Remove margin from subseparator parent */
-li:has(> .subseparator) {
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Sidebar subheadings (separator labels e.g. "Working at Langfuse", "Chapters", "Resources") */
-#nd-docs-layout #nd-sidebar p,
-#nd-sidebar-mobile p,
-#nd-docs-layout #nd-sidebar .subseparator,
-#nd-sidebar-mobile .subseparator {
-  font-weight: 580 !important;
-  color: var(--text-primary);
-}
-
-/* Sidebar underlines for the section titles. The indentation is calculated based on the number of div wrappers. */
-#nd-docs-layout #nd-sidebar div div div div div div div p,
-#nd-sidebar-mobile div div div div div div div p {
-  --sidebar-label-left: calc((var(--spacing, 0.25rem) * 8) - 6px);
-}
-
-#nd-docs-layout #nd-sidebar div div div div div p,
-#nd-sidebar-mobile div div div div div p {
-  --sidebar-label-left: calc((var(--spacing, 0.25rem) * 6) - 6px);
-}
-
-#nd-docs-layout #nd-sidebar div div div div div p,
-#nd-sidebar-mobile div div div div div p {
-  position: relative;
-  padding-bottom: 6px;
-  width: 100%;
-}
-
-#nd-docs-layout #nd-sidebar div div div div div p::after,
-#nd-sidebar-mobile div div div div div p::after {
-  content: "";
-  position: absolute;
-  left: var(--sidebar-label-left, 16px);
-  right: 8px;
-  bottom: 0;
-  height: 1px;
-  background-color: var(--line-structure);
-  pointer-events: none;
-}
-
+/* Sidebar: first section label after the header block — DOM-path specific (see app/docs/SidebarSeparatorItem.tsx). */
 #nd-docs-layout #nd-sidebar > div > div > div > p,
 #nd-sidebar-mobile > div > div > div > p {
   width: 100%;

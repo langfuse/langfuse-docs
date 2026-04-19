@@ -52,14 +52,12 @@ export function CalloutContainer({
 }: CalloutContainerProps) {
   const type = resolveAlias(inputType);
   const tone = `var(--callout-${type}, var(--color-fd-muted))`;
-  const iconClassName = cn(iconClass, !title && 'mt-0');
 
   return (
     <CornerBox className="callout">
       <div
         className={cn(
           'bg-stripe-pattern callout-stripe-fade flex border p-4 gap-2 text-sm text-primary',
-          !title && 'items-center',
           className,
         )}
         style={
@@ -73,11 +71,11 @@ export function CalloutContainer({
       >
         {icon ?? emoji ??
           {
-            info: <IconInfo className={iconClassName} />,
-            warning: <IconWarning className={iconClassName} />,
-            error: <IconError className={iconClassName} />,
-            success: <IconSuccess className={iconClassName} />,
-            idea: <IconIdea className={iconClassName} />,
+            info: <IconInfo className={iconClass} />,
+            warning: <IconWarning className={iconClass} />,
+            error: <IconError className={iconClass} />,
+            success: <IconSuccess className={iconClass} />,
+            idea: <IconIdea className={iconClass} />,
           }[type]}
         <div className="flex flex-col min-w-0 flex-1">{children}</div>
       </div>

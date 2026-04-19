@@ -2,13 +2,13 @@ import { NavbarExtraContent } from "@/components/NavbarExtraContent";
 import { NavLinks } from "@/components/NavLinks";
 import {
   source,
-  getSelfHostingPageTree,
   guidesSource,
   integrationsSource,
   faqSource,
   handbookSource,
   librarySource,
   securitySource,
+  selfHostingSource,
 } from "@/lib/source";
 import { serializePageTree, type SectionNavData } from "@/lib/nav-tree";
 import { cn } from "@/lib/utils";
@@ -17,7 +17,7 @@ import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 
 export const sectionNavData: SectionNavData[] = [
   { name: "Docs", href: "/docs", children: serializePageTree(source.getPageTree()) },
-  { name: "Self Hosting", href: "/self-hosting", children: serializePageTree(getSelfHostingPageTree()) },
+  { name: "Self Hosting", href: "/self-hosting", children: serializePageTree(selfHostingSource.getPageTree()) },
   { name: "Guides", href: "/guides", children: serializePageTree(guidesSource.getPageTree()) },
   { name: "Integrations", href: "/integrations", children: serializePageTree(integrationsSource.getPageTree()) },
   { name: "FAQ", href: "/faq", children: serializePageTree(faqSource.getPageTree()) },
