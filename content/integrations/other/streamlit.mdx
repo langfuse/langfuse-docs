@@ -73,6 +73,8 @@ def init_langfuse():
     client = get_client()
     if client.auth_check():
         print("Langfuse client authenticated")
+    else:
+        print("Langfuse authentication failed — check LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY / LANGFUSE_BASE_URL")
     atexit.register(client.flush)
     return client
 
@@ -388,8 +390,9 @@ if prompt := st.chat_input("Say something"):
                     trace_holder,
                 )
             )
+        trace_id = trace_holder[0] if trace_holder else None
         st.session_state.messages.append(
-            {"role": "assistant", "content": reply, "trace_id": trace_holder[0]}
+            {"role": "assistant", "content": reply, "trace_id": trace_id}
         )
         st.rerun()
 ```

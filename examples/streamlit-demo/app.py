@@ -157,7 +157,8 @@ if prompt := st.chat_input("Say something"):
                     trace_holder,
                 )
             )
+        trace_id = trace_holder[0] if trace_holder else None
         st.session_state.messages.append(
-            {"role": "assistant", "content": reply, "trace_id": trace_holder[0]}
+            {"role": "assistant", "content": reply, "trace_id": trace_id}
         )
         st.rerun()
