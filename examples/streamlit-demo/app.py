@@ -4,6 +4,7 @@ import uuid
 from dotenv import load_dotenv
 from langfuse import get_client, observe, propagate_attributes
 from langfuse.openai import OpenAI
+from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
 import streamlit as st
 
 load_dotenv()
@@ -20,7 +21,13 @@ def init_langfuse():
     return client
 
 
+@st.cache_resource
+def init_anthropic_instrumentor():
+    AnthropicInstrumentor().instrument()
+
+
 langfuse = init_langfuse()
+init_anthropic_instrumentor()
 client = OpenAI()
 
 
