@@ -61,6 +61,18 @@ const nextConfig = {
   },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
 
+  // Sparticuz Chromium ships brotli-compressed binaries under `bin/`; Next's file tracer
+  // often omits them from the serverless bundle, breaking `executablePath()` on Vercel.
+  // Keys are matched with picomatch against normalized app routes (e.g. `/app/api/md-to-pdf`
+  // matches `/api/md-to-pdf` via `contains: true`).
+  outputFileTracingIncludes: {
+    "/api/md-to-pdf": [
+      "./lib/stripMdxForPlainMarkdown.js",
+      "./node_modules/@sparticuz/chromium/**",
+      "./node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/**",
+    ],
+  },
+
   webpack(config, { isServer, webpack }) {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
@@ -170,6 +182,14 @@ const nextConfig = {
           },
         ],
       },
+      // Agent Skills Discovery — CORS and caching
+      {
+        source: "/.well-known/agent-skills/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
+        ],
+      },
       // Mark markdown endpoints as noindex and ensure correct content type
       {
         source: "/:path*.md",
@@ -214,10 +234,14 @@ const nextConfig = {
       // Run BEFORE Next serves content/public files so it can override HTML routes
       // when the client explicitly asks for markdown.
       beforeFiles: [
-        // /support.md → raw markdown from the Support page (content/marketing/support.mdx → md-src/marketing/support.md)
+        // Agent Skills Discovery (RFC 8615 .well-known URI)
         {
-          source: "/support.md",
-          destination: "/md-src/marketing/support.md",
+          source: "/.well-known/agent-skills",
+          destination: "/well-known-agent-skills.json",
+        },
+        {
+          source: "/.well-known/agent-skills/index.json",
+          destination: "/well-known-agent-skills.json",
         },
 
         // Optional: make "/" negotiable too (remove if you don't have md-src/index.md)
@@ -230,7 +254,7 @@ const nextConfig = {
         // Content negotiation: /docs or /docs/observability/overview -> /md-src/... .md
         // Excludes /api, /_next, md-src, .md files, and .txt files (served directly from public/).
         {
-          source: "/:path((?!api|_next|md-src)(?!.*\\.md$)(?!.*\\.txt$).*)",
+          source: "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.md$)(?!.*\\.txt$)(?!.*\\.json$).*)",
           has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
           destination: "/md-src/:path.md",
         },
