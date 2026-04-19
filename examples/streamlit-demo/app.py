@@ -68,10 +68,11 @@ def _stream_anthropic(messages, model):
 @observe()
 def stream_reply(messages, model, trace_holder):
     trace_holder.append(langfuse.get_current_trace_id())
+    clean = [{"role": m["role"], "content": m["content"]} for m in messages]
     if MODELS[model] == "openai":
-        yield from _stream_openai(messages, model)
+        yield from _stream_openai(clean, model)
     else:
-        yield from _stream_anthropic(messages, model)
+        yield from _stream_anthropic(clean, model)
 
 
 st.title("Streamlit × Langfuse Demo")
