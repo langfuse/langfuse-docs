@@ -29,8 +29,8 @@ type RiveLabel = {
 };
 
 const OVERVIEW: RiveLabel = {
-  heading: "Langfuse covering the whole loop",
-  body: "General note about how Langfuse help you build LLM apps across the whole production cycle from development to production.",
+  heading: "The full LLM engineering loop",
+  body: "Langfuse brings observability, prompts, evals, experiments, and human annotation into one connected workflow — so you can move from prototype to production and keep improving with real usage data. Hover any part of the diagram to learn more.",
 };
 
 const LABELS: Record<string, RiveLabel> = {
