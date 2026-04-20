@@ -63,7 +63,7 @@ Initialize the Langfuse client and enable auto-instrumentation. `langfuse.openai
 import atexit
 import streamlit as st
 from anthropic import Anthropic
-from langfuse import get_client
+from langfuse import get_client, observe, propagate_attributes
 from langfuse.openai import OpenAI
 from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
 
@@ -128,13 +128,10 @@ with st.sidebar:
 
 We wrap the model call in the Langfuse [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) so each assistant reply becomes a trace. Inside the decorator we open a [`propagate_attributes`](https://langfuse.com/docs/tracing-features/sessions) context that attaches `session_id`, `user_id`, and a provider tag to every span produced by the SDK calls below it.
 
-We also capture the current `trace_id` into a caller-supplied list so the UI can reference it later when the user clicks 👍 or 👎.
+We also capture the current `trace_id` into a caller-supplied list so the UI can reference it later when the user clicks 👍 or 👎. (`observe` and `propagate_attributes` were imported in the Setup block above.)
 
 
 ```python
-from langfuse import observe, propagate_attributes
-
-
 def _stream_openai(messages, model):
     stream = openai_client.chat.completions.create(
         model=model,
