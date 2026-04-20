@@ -56,7 +56,7 @@ export const Enterprise = () => {
           </CornerBox>
         </div>
 
-        <CornerBox hoverStripes className="flex relative flex-col -mt-px -ml-px min-h-[350px]">
+        <CornerBox hoverStripes className="flex relative flex-col -mt-px md:-ml-px min-h-[350px]">
           <div className="flex flex-col gap-3 p-4">
             <Text size="s" className="font-medium text-left text-text-secondary">Security & Compliance</Text>
             <BulletList items={security} />

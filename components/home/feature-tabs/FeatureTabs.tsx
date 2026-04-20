@@ -17,10 +17,33 @@ import { CornerBox } from "@/components/ui/corner-box";
 /** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
 const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
 
-const contentTransition = (reduceMotion: boolean) =>
+/** Quick ease-in for exit so the incoming panel reads sooner. */
+const CONTENT_EXIT_EASE = [0.4, 0, 1, 1] as const;
+
+const tabImageVariants = (reduceMotion: boolean) =>
   reduceMotion
-    ? { duration: 0.12, ease: "easeOut" as const }
-    : { duration: 0.5, ease: CONTENT_EASE };
+    ? {
+        initial: { opacity: 0 },
+        animate: {
+          opacity: 1,
+          transition: { duration: 0.12, ease: "easeOut" as const },
+        },
+        exit: {
+          opacity: 0,
+          transition: { duration: 0.12, ease: "easeOut" as const },
+        },
+      }
+    : {
+        initial: { opacity: 0 },
+        animate: {
+          opacity: 1,
+          transition: { duration: 0.26, ease: CONTENT_EASE },
+        },
+        exit: {
+          opacity: 0,
+          transition: { duration: 0.14, ease: CONTENT_EXIT_EASE },
+        },
+      };
 
 export interface FeatureTabsProps {
   features: FeatureTabData[];
@@ -379,10 +402,10 @@ export const FeatureTabs = ({
               {activeFeature && (
                 <motion.h3
                   key={activeFeature.id}
-                  initial={{ opacity: 0, y: 6 }}
+                  initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.12, ease: "easeOut" }}
                   className="block whitespace-nowrap text-xl font-analog font-medium text-primary"
                 >
                   {activeFeature.title}
@@ -410,9 +433,9 @@ export const FeatureTabs = ({
                   className="group p-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
                 >
                   <span
-                    className={`block w-3 h-1.5 rounded-sm transition-colors ${isActive
+                    className={`block w-3 h-1.5 rounded-sm transition-colors duration-150 ease-out ${isActive
                       ? "bg-primary"
-                      : "bg-text-disabled group-hover:bg-primary"
+                      : "bg-line-structure group-hover:bg-primary"
                       }`}
                   />
                 </button>
@@ -429,10 +452,10 @@ export const FeatureTabs = ({
             {activeFeature ? (
               <motion.div
                 key={activeFeature.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={contentTransition(Boolean(reduceMotion))}
+                variants={tabImageVariants(Boolean(reduceMotion))}
+                initial="initial"
+                animate="animate"
+                exit="exit"
               >
                 <TabContent feature={activeFeature} priority />
               </motion.div>

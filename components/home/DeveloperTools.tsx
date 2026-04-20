@@ -58,7 +58,7 @@ export const DeveloperTools = () => {
             </div>
           </CornerBox>
 
-          <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -ml-px">
+          <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:mt-0 md:-ml-px">
             <Link
               href={CLI_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
@@ -79,7 +79,7 @@ export const DeveloperTools = () => {
             </div>
           </CornerBox>
 
-          <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -mt-px -ml-px">
+          <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:-ml-px">
             <Link
               href={MCP_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
