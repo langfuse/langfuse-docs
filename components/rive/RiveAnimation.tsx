@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRive, Layout, Fit, Alignment, EventType } from "@rive-app/react-webgl2";
+import {
+  useRive,
+  Layout,
+  Fit,
+  Alignment,
+  EventType,
+  StateMachineInputType,
+} from "@rive-app/react-webgl2";
 import type { Event, EventCallback, Rive } from "@rive-app/react-webgl2";
 
 type FitOption = "contain" | "cover" | "fill" | "fitWidth" | "fitHeight" | "none" | "scaleDown";
@@ -10,8 +17,8 @@ type RiveAnimationProps = {
   src: string;
   /** Artboard name from the Rive file. Defaults to the file's default artboard. */
   artboard?: string;
-  /** Exact state machine name, or `"auto"` to use the first available one. */
-  stateMachine?: string | "auto";
+  /** One or more state machine names, or `"auto"` to use the first available one. */
+  stateMachine?: string | string[] | "auto";
   animation?: string;
   fit?: FitOption;
   className?: string;
@@ -20,6 +27,22 @@ type RiveAnimationProps = {
   autoplay?: boolean;
   /** Called with the list of currently-active state names on every state machine transition. */
   onStateChange?: (states: string[]) => void;
+  /**
+   * Boolean state machine inputs to sync from React.
+   * Prefer a stable object (e.g. `useMemo`) so this does not re-run every parent render.
+   * When `stateMachine` is an array, set `stateMachineBooleanInputsOn` to the SM that owns these inputs.
+   */
+  stateMachineBooleanInputs?: Record<string, boolean>;
+  /**
+   * State machine name passed to `rive.stateMachineInputs(...)` for `stateMachineBooleanInputs`.
+   * Defaults to `stateMachine` when it is a single string; required when inputs live on a different SM than you want to default.
+   */
+  stateMachineBooleanInputsOn?: string;
+  /**
+   * View Model boolean paths (slash-separated, e.g. `NestedVm/isLoad`) on `rive.viewModelInstance`.
+   * Use this when the Rive editor shows the control under a View Model rather than State Machine inputs.
+   */
+  viewModelBooleanInputs?: Record<string, boolean>;
 };
 
 const FIT_MAP: Record<FitOption, Fit> = {
@@ -45,12 +68,22 @@ function RiveInstance({
   autoplay = true,
   onLoaded,
   onStateChange,
+  stateMachineBooleanInputs,
+  stateMachineBooleanInputsOn,
+  viewModelBooleanInputs,
 }: RiveAnimationProps & { onLoaded?: (smNames: string[]) => void }) {
+  const stateMachinesList =
+    !stateMachine || stateMachine === "auto"
+      ? undefined
+      : Array.isArray(stateMachine)
+        ? stateMachine
+        : [stateMachine];
+
   const { RiveComponent, rive } = useRive(
     {
       src,
       artboard,
-      stateMachines: stateMachine ? [stateMachine] : undefined,
+      stateMachines: stateMachinesList,
       animations: animation ? [animation] : undefined,
       automaticallyHandleEvents: true,
       layout: new Layout({
@@ -102,6 +135,31 @@ function RiveInstance({
     rive.setupRiveListeners();
   }, [rive, fit]);
 
+  useEffect(() => {
+    if (!rive || !stateMachineBooleanInputs) return;
+    const smForInputs =
+      stateMachineBooleanInputsOn ??
+      (typeof stateMachine === "string" ? stateMachine : undefined);
+    if (!smForInputs) return;
+    const inputs = rive.stateMachineInputs(smForInputs);
+    for (const [name, value] of Object.entries(stateMachineBooleanInputs)) {
+      const input = inputs.find((i) => i.name === name);
+      if (input?.type === StateMachineInputType.Boolean) {
+        input.value = value;
+      }
+    }
+  }, [rive, stateMachine, stateMachineBooleanInputs, stateMachineBooleanInputsOn]);
+
+  useEffect(() => {
+    if (!rive || !viewModelBooleanInputs) return;
+    const vmi = rive.viewModelInstance;
+    if (!vmi) return;
+    for (const [path, value] of Object.entries(viewModelBooleanInputs)) {
+      const prop = vmi.boolean(path);
+      if (prop) prop.value = value;
+    }
+  }, [rive, viewModelBooleanInputs]);
+
   // Use a ref to avoid re-subscribing the Rive listener on every parent render.
   const onStateChangeRef = useRef(onStateChange);
   useEffect(() => { onStateChangeRef.current = onStateChange; });
@@ -136,24 +194,49 @@ function RiveInstance({
 
 // ── Public component — handles "auto" state machine detection ─────────────────
 
-export function RiveAnimation({ stateMachine, ...props }: RiveAnimationProps) {
+export function RiveAnimation({
+  stateMachine,
+  stateMachineBooleanInputs,
+  stateMachineBooleanInputsOn,
+  viewModelBooleanInputs,
+  ...props
+}: RiveAnimationProps) {
   // null = not yet discovered, "" = no state machines in file
   const [autoSM, setAutoSM] = useState<string | null>(null);
 
   if (stateMachine === "auto") {
     if (autoSM !== null) {
       // Phase 2: render with discovered name (or no SM if file has none)
-      return <RiveInstance {...props} stateMachine={autoSM || undefined} />;
+      return (
+        <RiveInstance
+          {...props}
+          stateMachine={autoSM || undefined}
+          stateMachineBooleanInputs={stateMachineBooleanInputs}
+          stateMachineBooleanInputsOn={stateMachineBooleanInputsOn}
+          viewModelBooleanInputs={viewModelBooleanInputs}
+        />
+      );
     }
     // Phase 1: load without SM to discover available names, then re-render
     return (
       <RiveInstance
         {...props}
         stateMachine={undefined}
+        stateMachineBooleanInputs={stateMachineBooleanInputs}
+        stateMachineBooleanInputsOn={stateMachineBooleanInputsOn}
+        viewModelBooleanInputs={viewModelBooleanInputs}
         onLoaded={(names) => setAutoSM(names[0] ?? "")}
       />
     );
   }
 
-  return <RiveInstance {...props} stateMachine={stateMachine} />;
+  return (
+    <RiveInstance
+      {...props}
+      stateMachine={stateMachine}
+      stateMachineBooleanInputs={stateMachineBooleanInputs}
+      stateMachineBooleanInputsOn={stateMachineBooleanInputsOn}
+      viewModelBooleanInputs={viewModelBooleanInputs}
+    />
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { HomeSection } from "@/components/home/HomeSection";
@@ -14,6 +14,14 @@ const RiveAnimation = dynamic(
 );
 
 const RIVE_FILE = "/animations/langfuse_axonometric.riv";
+const RIVE_IN_VIEW_THRESHOLD = 0.45;
+const RIVE_IN_VIEW_ACTIVATION_DELAY_MS = 250;
+
+/**
+ * View Model boolean path for the load trigger (`VmMainScene` is the VM in the editor, not a state machine).
+ * If the animation does not run, try `"isLoad"` if the property sits on the default instance root.
+ */
+const RIVE_LOAD_VIEW_MODEL_PATH = "isLoad";
 
 type RiveLabel = {
   heading: string;
@@ -58,8 +66,44 @@ const LABELS: Record<string, RiveLabel> = {
 
 export const RiveSection = () => {
   const [label, setLabel] = useState<RiveLabel>(OVERVIEW);
+  const [riveSectionInView, setRiveSectionInView] = useState(false);
+  const riveViewportRef = useRef<HTMLDivElement>(null);
+  const inViewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRevTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    const el = riveViewportRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (inViewTimerRef.current) clearTimeout(inViewTimerRef.current);
+          inViewTimerRef.current = setTimeout(() => {
+            setRiveSectionInView(true);
+            inViewTimerRef.current = null;
+          }, RIVE_IN_VIEW_ACTIVATION_DELAY_MS);
+          return;
+        }
+        if (inViewTimerRef.current) {
+          clearTimeout(inViewTimerRef.current);
+          inViewTimerRef.current = null;
+        }
+        setRiveSectionInView(false);
+      },
+      { threshold: RIVE_IN_VIEW_THRESHOLD, rootMargin: "0px 0px -10% 0px" }
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      if (inViewTimerRef.current) clearTimeout(inViewTimerRef.current);
+    };
+  }, []);
+
+  const loadViewModelBooleans = useMemo(
+    () => ({ [RIVE_LOAD_VIEW_MODEL_PATH]: riveSectionInView }),
+    [riveSectionInView]
+  );
 
   const handleStateChange = useCallback((states: string[]) => {
     if (states.some((s) => s.includes("-rev"))) {
@@ -102,7 +146,7 @@ export const RiveSection = () => {
       </div>
 
       {/* Mobile: static image + tabs (below lg) */}
-      <div className="flex flex-col -mt-20 md:hidden pointer-events-none -z-1">
+      <div className="flex flex-col -mt-20 pointer-events-none md:hidden -z-1">
         <div className="overflow-hidden relative w-full aspect-4/3">
           <Image
             src={RiveMock}
@@ -119,6 +163,7 @@ export const RiveSection = () => {
       {/* Desktop: Rive animation + dynamic label (lg and above) */}
       <div className="hidden md:block">
         <div
+          ref={riveViewportRef}
           className="p-4 -mt-px h-[500px]"
           onPointerEnter={handlePointerEnter}
           onPointerLeave={handlePointerLeave}
@@ -130,6 +175,7 @@ export const RiveSection = () => {
             zoom={1.4}
             className="w-full h-full -translate-x-4 -translate-y-6"
             onStateChange={handleStateChange}
+            viewModelBooleanInputs={loadViewModelBooleans}
           />
         </div>
         <CornerBox className="flex min-h-[120px] w-full flex-col justify-start bg-surface-bg p-2 sm:p-4 -mt-px">
