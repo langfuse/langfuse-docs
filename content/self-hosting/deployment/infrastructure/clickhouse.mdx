@@ -500,3 +500,5 @@ All self-hosted deployments must include a ClickHouse instance.
 ### How do I manage ClickHouse storage growth?
 
 Langfuse has a built-in [Data Retention](/docs/administration/data-retention) feature that automatically deletes traces, observations, scores, and media assets older than a configured number of days. This runs nightly and handles cleanup across both ClickHouse and blob storage. You do not need to set ClickHouse TTLs manually.
+
+If ClickHouse disk usage keeps growing despite retention being configured, the cause is often system log tables (`trace_log`, `text_log`, `opentelemetry_span_log`, etc.) that ship without a TTL. See [Scaling › ClickHouse system log tables](/self-hosting/configuration/scaling#clickhouse-system-log-tables) for how to disable or cap them.
