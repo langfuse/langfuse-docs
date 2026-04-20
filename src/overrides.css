@@ -147,6 +147,9 @@
   scrollbar-width: thin;
   font-size: 13px;
 }
+#nd-sidebar {
+  --color-fd-border: var(--line-structure);
+}
 #nd-docs-layout #nd-sidebar::-webkit-scrollbar {
   width: 2px;
 }
@@ -271,7 +274,6 @@
 #nd-docs-layout #nd-sidebar[data-collapsed="false"] {
   inset: 0 1px 1px 1px !important;
   width: auto !important;
-  border-radius: 4px;
 }
 #nd-docs-layout #nd-sidebar {
   border-inline-end: none !important;
@@ -281,6 +283,65 @@
 }
 #nd-docs-layout #nd-sidebar[data-hovered="false"] {
   background-color: var(--surface-1) !important;
+}
+
+/* Desktop sidebar only (#nd-sidebar is hidden on <md; mobile uses #nd-sidebar-mobile):
+   Fumadocs wraps the theme toggle + sidebar.footer in a direct child with border-t.
+   Anti-rounded corner decorators above/below the 1px line — same geometry as
+   SidebarSeparatorItem (depth 0): two rows via ::before / ::after (full-width strips
+   with left+right SVG backgrounds; top row flipped on Y like -scale-y-100). */
+#nd-docs-layout #nd-sidebar > div.border-t {
+  position: relative;
+  z-index: 0;
+  border-top-color: var(--line-structure);
+  overflow: visible;
+}
+
+#nd-docs-layout #nd-sidebar > div.border-t::before,
+#nd-docs-layout #nd-sidebar > div.border-t::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-repeat: no-repeat;
+  background-size: 3px 3px;
+  z-index: 1;
+}
+
+/* Above the border line (matches span at top-[-3px] with -scale-y-100) */
+#nd-docs-layout #nd-sidebar > div.border-t::before {
+  top: -1px;
+  left: 2px;
+  right: 0;
+  background-image:
+    url("/images/patterns/left-corner.svg"),
+    url("/images/patterns/right-corner.svg");
+  background-position:
+    top left,
+    top right;
+  transform: scaleY(-1);
+  transform-origin: top center;
+}
+
+/* Below the border line (matches span at top-[1px]) */
+#nd-docs-layout #nd-sidebar > div.border-t::after {
+  top: 0;
+  left: 2px;
+  background-image:
+    url("/images/patterns/left-corner.svg"),
+    url("/images/patterns/right-corner.svg");
+  background-position:
+    top left,
+    top right;
+}
+
+.dark #nd-docs-layout #nd-sidebar > div.border-t::before,
+.dark #nd-docs-layout #nd-sidebar > div.border-t::after {
+  background-image:
+    url("/images/patterns/left-corner-dark.svg"),
+    url("/images/patterns/right-corner-dark.svg");
 }
 
 /* TOC: margin 1px on left/bottom (right handled by layout-wrapper border) to expose line-structure.
@@ -421,7 +482,7 @@
   /* Match Fumadocs rail: before:start-2.5; logical props for RTL */
   left: auto !important;
   right: auto !important;
-  inset-inline-start: calc(var(--sidebar-label-left) - 6px) !important;
+  inset-inline-start: 0 !important;
   inset-inline-end: 0px !important;
   width: auto !important;
   margin: 0 !important;

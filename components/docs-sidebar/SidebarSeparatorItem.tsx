@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 /** Matches `getItemOffset` in fumadocs-ui’s docs sidebar layout. */
 function getItemOffset(depth: number) {
-  return `calc(${3 * depth} * var(--spacing) + 6px)`;
+  return `calc(${2 * depth} * var(--spacing) + 14px)`;
 }
 
 /**
@@ -37,7 +37,7 @@ export function SidebarSeparatorItem({
         "pt-3 mt-2 after:top-0 after:left-0 after:bg-[var(--line-structure)]",
         // depth > 0: 1px underline beneath the label
         depth > 0 &&
-        "mt-3 text-text-tertiary after:bottom-0 after:left-[var(--sidebar-label-left)] after:bg-[var(--line-structure)]",
+        "mt-3 text-text-tertiary after:bottom-0 after:left-[calc(var(--sidebar-label-left)_+_2px)] after:bg-[var(--line-structure)]",
       )}
       style={
         {

@@ -124,7 +124,7 @@ function AISearchInput(props: ComponentProps<'form'>) {
         value={input}
         placeholder={isLoading ? 'AI is answering...' : 'Ask a question'}
         autoFocus
-        className="p-3 text-[14px]"
+        className="p-3 text-[16px] md:text-[14px]"
         disabled={isLoading}
         onChange={(e) => {
           setInput(e.target.value);
@@ -253,6 +253,53 @@ function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>
 
 // ─── Hotkey handler ────────────────────────────────────────────────────────────
 
+/** Matches Tailwind `max-wide` (see `--breakpoint-wide: 1440px` in style.css). */
+function useAiPanelNarrowLayout() {
+  const [narrow, setNarrow] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1439px)');
+    const apply = () => setNarrow(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+
+  return narrow;
+}
+
+/**
+ * Mobile keyboards shrink the visual viewport while `position: fixed` often stays tied to the
+ * layout viewport — the composer can sit under the keyboard. Approximate overlap and lift the panel.
+ */
+function useVisualViewportBottomOverlap(active: boolean) {
+  const [px, setPx] = useState(0);
+
+  useEffect(() => {
+    if (!active) {
+      setPx(0);
+      return;
+    }
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const update = () => {
+      setPx(Math.max(0, window.innerHeight - vv.height - vv.offsetTop));
+    };
+
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      setPx(0);
+    };
+  }, [active]);
+
+  return px;
+}
+
 function useHotKey() {
   const { open, setOpen } = useAISearchContext();
 
@@ -279,6 +326,8 @@ function useHotKey() {
 export function AISearchPanel() {
   const { open, setOpen } = useAISearchContext();
   useHotKey();
+  const narrowLayout = useAiPanelNarrowLayout();
+  const keyboardOverlapPx = useVisualViewportBottomOverlap(open && narrowLayout);
 
   return (
     <>
@@ -293,7 +342,7 @@ export function AISearchPanel() {
         <div
           className={cn(
             'overflow-hidden z-50 bg-surface-bg text-text-primary [--ai-chat-width:320px] 2xl:[--ai-chat-width:360px] border-line-structure',
-            'max-wide:fixed max-wide:inset-x-4 max-wide:bottom-8 max-wide:top-[calc(var(--fd-banner-height,0px)+var(--lf-nav-primary-height)+1rem)] max-wide:border max-wide:border-line-structure max-wide:shadow-xl max-wide:max-w-[600px] max-wide:mx-auto',
+            'max-wide:fixed max-wide:inset-x-4 max-md:bottom-4 max-md:top-4 max-wide:bottom-8 max-wide:top-8 max-wide:border max-wide:border-line-structure max-wide:shadow-xl max-wide:max-w-[600px] max-wide:mx-auto',
             'wide:sticky wide:top-[var(--fd-nav-height)] wide:h-[calc(100dvh-var(--fd-nav-height)-2px)] wide:border-l wide:ms-auto',
             'wide:in-[#nd-docs-layout]:[grid-area:toc] wide:in-[#nd-notebook-layout]:row-span-full wide:in-[#nd-notebook-layout]:col-start-5',
             'wide:in-[#home-layout]:top-[calc(var(--fd-banner-height,0px)+var(--lf-nav-primary-height))] wide:in-[#home-layout]:h-[calc(100dvh-var(--fd-banner-height,0px)-var(--lf-nav-primary-height))] wide:in-[#home-layout]:w-(--ai-chat-width) wide:in-[#home-layout]:shrink-0 wide:in-[#home-layout]:border-r',
@@ -301,10 +350,15 @@ export function AISearchPanel() {
               ? 'animate-fd-dialog-in wide:animate-[ask-ai-open_200ms]'
               : 'animate-fd-dialog-out wide:animate-[ask-ai-close_200ms]',
           )}
+          style={
+            narrowLayout && keyboardOverlapPx > 0
+              ? { bottom: `calc(2rem + ${keyboardOverlapPx}px)` }
+              : undefined
+          }
         >
-          <div className="flex flex-col size-full wide:w-(--ai-chat-width)">
+          <div className="flex flex-col size-full min-h-0 wide:w-(--ai-chat-width)">
             <AISearchPanelHeader />
-            <AISearchPanelList className="flex-1" />
+            <AISearchPanelList className="flex-1 min-h-0" />
             <div className="border-t border-line-structure text-text-primary bg-surface-1">
               <AISearchInput />
               <div className="flex items-center gap-1 p-1 empty:hidden">
