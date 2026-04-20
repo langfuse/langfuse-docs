@@ -1,21 +1,21 @@
 ---
-title: How do I work with observations in Langfuse v4?
-sidebarTitle: Explore Observations in V4
+title: How do I work with observations in Langfuse Fast Preview (Langfuse v4)?
+sidebarTitle: Explore Observations in Langfuse Fast Preview
 description: Guide for transitioning from the traces table to the unified observations table in Langfuse v4, with before/after workflow comparisons and SDK upgrade steps.
 tags: [observability, tracing, evaluation]
 ---
 
-# Explore Observations in Langfuse Cloud Fast Preview (v4)
+# Explore Observations in Langfuse Cloud Fast Preview
 
 ## How to think about the new model
 
-In v4, every operation your application performs — LLM calls, tool executions, retrievals, agent steps — is a first-class row in a single observations table. Think of it like a spreadsheet where each row is one operation, and you can slice by any column. The trace is just one column (`trace_id`) that groups related operations together, the same way `session_id` or `user_id` groups things.
+With this next major version of Langfuse (v4), every operation your application performs — LLM calls, tool executions, retrievals, agent steps — is a first-class row in a single observations table. Think of it like a spreadsheet where each row is one operation, and you can slice by any column. The trace is just one column (`trace_id`) that groups related operations together, the same way `session_id` or `user_id` groups things.
 
 As agentic applications grow more complex, a single trace can contain hundreds or thousands of operations. The old traces table showed one row per request — to find an expensive LLM call or a failed tool invocation, you had to open traces one by one and scan their children. With the observations table, you can query across all operations directly: find every GPT-4 call over $0.10, every retrieval that took more than 2 seconds, or every tool call that errored — without knowing which trace they belong to.
 
 You will notice more rows in the table than before — that's expected. Each row is now one operation, not one trace. The key is to use filters and [saved views](/changelog/2025-05-20-save-table-views) to focus on what matters. Filter by observation name, type, or model to surface the operations you care about, then save that as a view. The filter sidebar shows available values with counts, so you can discover which models, observation names, or error levels are most common before committing to a filter.
 
-For conceptual background, see the [observation-centric data model](/docs/observability/data-model#underlying-data-model). For broader release context, see the [Fast Preview (v4) docs](/docs/v4).
+For conceptual background, see the [observation-centric data model](/docs/observability/data-model#underlying-data-model). For broader release context, see the [Fast Preview docs](/docs/v4).
 
 ## Common views
 
@@ -42,7 +42,7 @@ We recommend setting up 2-3 saved views for your most common debugging workflows
 
 ## Upgrade checklist
 
-### Ingest with a v4-compatible setup
+### Ingest with a compatible setup
 
 Use one of these ingestion paths so your data appears in the unified table in real time:
 
@@ -76,7 +76,7 @@ If something feels confusing, missing, or slower than expected, share feedback v
 ### Why are observations delayed or missing in the unified table?
 
 The most common reason is that data is still being sent via older SDK versions or through a direct OpenTelemetry exporter without `x-langfuse-ingestion-version: 4`.
-In the new v4 experience, those setups can lead to multi-minute delays before traces show up in the unified table.
+In the new Fast Preview experience, those setups can lead to multi-minute delays before traces show up in the unified table.
 If this happens, upgrade to Python SDK v4 or JS/TS SDK v5, or add the ingestion version header to your OTEL exporter.
 
 ### How can I get a focused view of my most important operations?
@@ -89,5 +89,5 @@ This is the most common reaction when first switching to the observations table.
 
 ### Can I get the old experience back?
 
-Yes. For now, you can switch the v4 beta experience off in the UI and return to the previous tracing experience.
+Yes. For now, you can switch the Fast Preview experience off in the UI and return to the previous tracing experience.
 This is temporary, though: the unified table will become the standard experience, so it is worth setting up saved views and instrumentation for the new model.

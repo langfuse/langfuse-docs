@@ -14,6 +14,15 @@ import {
   handbook,
   marketing,
 } from "../.source/server";
+import { CONTENT_DIR_TO_URL_PREFIX } from "./content-dir-map.js";
+
+function baseUrl(contentDir: string): string {
+  const prefix = CONTENT_DIR_TO_URL_PREFIX[contentDir];
+  if (typeof prefix !== "string") {
+    throw new Error(`Missing content-dir-map entry for "${contentDir}"`);
+  }
+  return prefix === "" ? "" : `/${prefix}`;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -71,7 +80,7 @@ const shortcutLinkTransformer: any = {
 // Loaders
 // ---------------------------------------------------------------------------
 export const source = loader({
-  baseUrl: "/docs",
+  baseUrl: baseUrl("docs"),
   source: docs.toFumadocsSource(),
   pageTree: {
     idPrefix: "docs",
@@ -80,63 +89,63 @@ export const source = loader({
 });
 
 export const selfHostingSource = loader({
-  baseUrl: "/self-hosting",
+  baseUrl: baseUrl("self-hosting"),
   source: selfHosting.toFumadocsSource(),
   pageTree: { idPrefix: "self-hosting", transformers: [shortTitleTransformer] },
 });
 
 export const blogSource = loader({
-  baseUrl: "/blog",
+  baseUrl: baseUrl("blog"),
   source: blog.toFumadocsSource(),
 });
 
 export const changelogSource = loader({
-  baseUrl: "/changelog",
+  baseUrl: baseUrl("changelog"),
   source: changelog.toFumadocsSource(),
 });
 
 export const guidesSource = loader({
-  baseUrl: "/guides",
+  baseUrl: baseUrl("guides"),
   source: guides.toFumadocsSource(),
   pageTree: { idPrefix: "guides", transformers: [shortTitleTransformer] },
 });
 
 export const faqSource = loader({
-  baseUrl: "/faq",
+  baseUrl: baseUrl("faq"),
   source: faq.toFumadocsSource(),
   pageTree: { transformers: [shortTitleTransformer] },
 });
 
 export const integrationsSource = loader({
-  baseUrl: "/integrations",
+  baseUrl: baseUrl("integrations"),
   source: integrations.toFumadocsSource(),
   pageTree: { idPrefix: "integrations", transformers: [shortTitleTransformer] },
 });
 
 export const securitySource = loader({
-  baseUrl: "/security",
+  baseUrl: baseUrl("security"),
   source: security.toFumadocsSource(),
   pageTree: { transformers: [shortTitleTransformer] },
 });
 
 export const librarySource = loader({
-  baseUrl: "/library",
+  baseUrl: baseUrl("library"),
   source: library.toFumadocsSource(),
   pageTree: { idPrefix: "library", transformers: [shortTitleTransformer] },
 });
 
 export const usersSource = loader({
-  baseUrl: "/users",
+  baseUrl: baseUrl("customers"),
   source: customers.toFumadocsSource(),
 });
 
 export const handbookSource = loader({
-  baseUrl: "/handbook",
+  baseUrl: baseUrl("handbook"),
   source: handbook.toFumadocsSource(),
   pageTree: { transformers: [shortTitleTransformer] },
 });
 
 export const marketingSource = loader({
-  baseUrl: "",
+  baseUrl: baseUrl("marketing"),
   source: marketing.toFumadocsSource(),
 });
