@@ -229,7 +229,7 @@ function IntegrationGroupCard({
       )}
     >
       <div className="flex flex-row flex-wrap gap-y-1 gap-x-3 justify-between items-baseline w-full">
-        <Text size="s" className="font-medium text-left text-text-secondary">
+        <Text size="m" className="font-medium text-left text-text-secondary">
           {title}
         </Text>
       </div>
@@ -313,7 +313,7 @@ export function Integrations() {
 
         <ChipCard className="integration-group sm:col-span-2 flex flex-col gap-4 items-start p-3 sm:p-4.5">
           <div className="flex flex-row flex-wrap gap-y-1 gap-x-3 justify-between items-baseline w-full">
-            <Text size="s" className="font-medium text-left text-text-secondary">
+            <Text size="m" className="font-medium text-left text-text-secondary">
               80+ more integrations
             </Text>
           </div>

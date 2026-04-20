@@ -10,6 +10,8 @@ import {
 } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 
+const SKILL_VIDEO_SRC = "https://static.langfuse.com/docs-videos/skill.mp4";
+
 const SKILL_HREF = "/docs/api-and-data-platform/features/agent-skill";
 const CLI_HREF = "/docs/api-and-data-platform/features/cli";
 const MCP_HREF = "/docs/api-and-data-platform/features/mcp-server";
@@ -33,7 +35,7 @@ export const DeveloperTools = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2">
           <CornerBox className="flex relative z-0 flex-col p-0 min-h-0 md:row-span-2">
-            <div className="flex flex-col flex-1 gap-1 p-4">
+            <div className="flex flex-col gap-1 p-4">
               <Link
                 href={SKILL_HREF}
                 className="text-left text-[15px] font-medium text-text-secondary"
@@ -44,11 +46,19 @@ export const DeveloperTools = () => {
                 A ready-made skill for your coding agent.
                 Manage prompts, traces, and evals through natural language — no manual API calls needed.
               </Text>
-              {/* <div className="flex flex-1 justify-center items-center">
-              <Image src={cliVisual} alt="Langfuse CLI" width={100} height={100} className="object-contain w-full h-full" />
-            </div> */}
+              <div className="flex justify-center items-center mt-4">
+                <video
+                  src={SKILL_VIDEO_SRC}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  aria-label="Claude Code welcoming the user with the Langfuse skill installed"
+                  className="object-contain w-full h-auto rounded-md border border-border"
+                />
+              </div>
             </div>
-            <div className="flex flex-col items-start p-4 -ml-1.25">
+            <div className="flex flex-col items-start px-4 pb-4 -ml-1.25">
               <Button
                 variant="secondary"
                 href={SKILL_HREF}

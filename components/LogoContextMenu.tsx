@@ -35,22 +35,27 @@ const LogoContextMenu: React.FC<{
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger />
       <DropdownMenuPortal>
-        <DropdownMenuContent>
+        <DropdownMenuContent className="min-w-[180px]">
           <DropdownMenuItem
             onClick={(e) => handleAction(e, "/langfuse-icon.svg", true)}
+            className="cursor-pointer"
           >
-            <Download size={14} className="mr-2" />
+            <Download size={14} className="shrink-0" />
             Langfuse Icon
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={(e) => handleAction(e, "/langfuse-wordart.svg", true)}
+            className="cursor-pointer"
           >
-            <Download size={14} className="mr-2" />
+            <Download size={14} className="shrink-0" />
             Langfuse Wordmark
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={(e) => handleAction(e, "/brand", false)}>
-            <ExternalLink size={14} className="mr-2" />
+          <DropdownMenuItem
+            onClick={(e) => handleAction(e, "/brand", false)}
+            className="cursor-pointer"
+          >
+            <ExternalLink size={14} className="shrink-0" />
             Brand Assets & Guide
           </DropdownMenuItem>
         </DropdownMenuContent>

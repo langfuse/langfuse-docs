@@ -114,15 +114,15 @@ export function AllTheTools() {
                 className="flex flex-col items-stretch p-0 w-full min-w-0 h-full"
               >
                 <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden sm:max-h-[200px] sm:flex-row xl:max-h-[337px] xl:flex-col">
-                  <div className="flex flex-1 flex-col gap-1 p-4 pb-1 sm:pb-2.5 z-1">
-                    <Text size="s" className="font-medium text-left text-text-secondary">
+                  <div className="flex relative z-10 flex-1 flex-col gap-1 p-4 pb-1 sm:pb-2.5">
+                    <Text size="m" className="font-medium text-left text-text-secondary">
                       {tool.title}
                     </Text>
                     <Text size="s" className={toolDescriptionClassName}>
                       {tool.description}
                     </Text>
                   </div>
-                  <div className="flex-1 w-full overflow-clip -mt-[12%] sm:mt-0 pointer-events-none">
+                  <div className="flex-1 w-full overflow-clip -mt-[20%] sm:mt-0 xl:-mt-[20%] pointer-events-none">
                     <Image
                       src={tool.visual}
                       alt={tool.title}
@@ -146,21 +146,21 @@ export function AllTheTools() {
                 className="flex flex-col items-stretch p-0 w-full min-w-0 h-full"
               >
                 <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden xl:min-h-[277px] lg:max-h-[277px]">
-                  <div className="flex flex-col gap-1 p-2 pb-2.5 sm:p-4">
-                    <Text size="s" className="font-medium text-left text-text-secondary">
+                  <div className="flex relative z-10 flex-col gap-1 p-2 pb-2.5 sm:p-4">
+                    <Text size="m" className="font-medium text-left text-text-secondary">
                       {tool.title}
                     </Text>
                     <Text size="s" className={toolDescriptionClassName}>
                       {tool.description}
                     </Text>
                   </div>
-                  <div className="hidden flex-1 w-full overflow-clip xl:flex">
+                  <div className="hidden flex-1 -mt-[20%] w-full overflow-clip xl:flex">
                     <Image
                       src={tool.visual}
                       alt={tool.title}
                       width={100}
                       height={100}
-                      className="object-contain w-full h-full -translate-y-[20px]"
+                      className="object-contain w-full h-full"
                       quality={100}
                       unoptimized
                     />

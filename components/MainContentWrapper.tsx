@@ -237,16 +237,16 @@ export const CopyMarkdownButton = () => {
               <ChevronDown className="h-3 w-3" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[200px]">
+          <DropdownMenuContent align="end" className="min-w-[220px]">
             <DropdownMenuItem
               onClick={handleCopy}
               disabled={isDisabled}
-              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
+              className="cursor-pointer"
             >
-              <CopyIcon className="w-4 h-4 shrink-0" />
-              <div className="flex flex-col">
-                <span className="font-medium">Copy page</span>
-                <span className="text-xs text-muted-foreground">
+              <CopyIcon className="w-3.5 h-3.5 shrink-0" />
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="font-medium text-text-primary">Copy page</span>
+                <span className="text-[11px] text-text-tertiary leading-[1.3]">
                   Copy page as Markdown for LLMs
                 </span>
               </div>
@@ -257,18 +257,18 @@ export const CopyMarkdownButton = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleChatGPTClick}
-                className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
+                className="cursor-pointer no-underline"
               >
-                <IconChatGPT className="w-4 h-4 shrink-0" />
-                <div className="flex flex-col flex-1 min-w-0">
-                  <span className="flex gap-1 items-center font-medium">
+                <IconChatGPT className="w-3.5 h-3.5 shrink-0" />
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span className="flex gap-1 items-center font-medium text-text-primary">
                     Open in ChatGPT
                     <ExternalLink
                       className="h-[1em] w-[1em] shrink-0"
                       strokeWidth={1.7}
                     />
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[11px] text-text-tertiary leading-[1.3]">
                     Ask questions about this page
                   </span>
                 </div>
@@ -280,18 +280,18 @@ export const CopyMarkdownButton = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleClaudeClick}
-                className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
+                className="cursor-pointer no-underline"
               >
-                <IconClaude className="w-4 h-4 shrink-0" />
-                <div className="flex flex-col flex-1 min-w-0">
-                  <span className="flex gap-1 items-center font-medium">
+                <IconClaude className="w-3.5 h-3.5 shrink-0" />
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span className="flex gap-1 items-center font-medium text-text-primary">
                     Open in Claude
                     <ExternalLink
                       className="h-[1em] w-[1em] shrink-0"
                       strokeWidth={1.7}
                     />
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[11px] text-text-tertiary leading-[1.3]">
                     Ask questions about this page
                   </span>
                 </div>
@@ -304,18 +304,18 @@ export const CopyMarkdownButton = () => {
                   capture("copy_page", { type: "mcp" });
                 }}
                 target="_blank"
-                className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
+                className="cursor-pointer no-underline"
               >
-                <IconMCP className="w-4 h-4 shrink-0" />
-                <div className="flex flex-col flex-1 min-w-0">
-                  <span className="flex gap-1 items-center font-medium">
+                <IconMCP className="w-3.5 h-3.5 shrink-0" />
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span className="flex gap-1 items-center font-medium text-text-primary">
                     Install Docs MCP server
                     <ExternalLink
                       className="h-[1em] w-[1em] shrink-0"
                       strokeWidth={1.7}
                     />
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[11px] text-text-tertiary leading-[1.3]">
                     Add to Cursor, Claude Code, VS Code, etc
                   </span>
                 </div>

@@ -3,7 +3,7 @@
 import { Link } from "@/components/ui/link";
 import { ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { CornerBox, HoverCorners } from "@/components/ui/corner-box";
+import { HoverCorners } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 import { productLinks, resourcesLinks, simpleLinks } from "@/lib/nav-links";
 import type { NavPanelLink } from "@/lib/nav-links";
@@ -100,7 +100,7 @@ function NavDropdownPanel({
   featured: FeaturedItem;
 }) {
   return (
-    <CornerBox className="flex p-0 min-w-max bg-surface-1">
+    <div className="flex p-0 min-w-max border border-line-structure bg-surface-1 shadow-md">
       <div className="group/dropdown flex flex-col gap-[6px] border-r border-line-structure min-w-[220px] p-3.5 overflow-hidden">
         {links.map((link) => {
           const Icon = link.icon;
@@ -122,7 +122,7 @@ function NavDropdownPanel({
       <div className="w-[260px] shrink-0 flex flex-col border-l border-line-structure -ml-px overflow-hidden">
         <NavFeaturedCard featured={featured} />
       </div>
-    </CornerBox>
+    </div>
   );
 }
 
