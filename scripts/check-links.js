@@ -359,7 +359,9 @@ async function checkFileLinks(filePath) {
 }
 
 async function main() {
-    const pagesDir = path.join(process.cwd(), 'content');
+    const scanDirs = ['app', 'components', 'components-mdx', 'content', 'lib', 'scripts'].map((d) =>
+        path.join(process.cwd(), d)
+    );
     let hasErrors = false;
     const allBrokenLinks = []; // Collect all broken links for final report
 
@@ -367,6 +369,7 @@ async function main() {
         // Find all files to check
         const findFiles = (dir) => {
             let results = [];
+            if (!fs.existsSync(dir)) return results;
             const files = fs.readdirSync(dir);
 
             for (const file of files) {
@@ -383,7 +386,7 @@ async function main() {
             return results;
         };
 
-        const files = findFiles(pagesDir);
+        const files = scanDirs.flatMap((dir) => findFiles(dir));
         console.log(`Found ${files.length} files to check (.md, .mdx, .tsx, .ts)\n`);
         console.log(
             `Using ${CONFIG.maxFileConcurrency} files x ${CONFIG.maxLinkConcurrency} links, ` +
