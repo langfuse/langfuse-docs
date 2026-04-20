@@ -148,7 +148,7 @@ On the Bitnami ClickHouse Helm chart, you can ship the same block via `clickhous
         <engine>ENGINE = MergeTree PARTITION BY toYYYYMM(event_date) ORDER BY (event_date, event_time) TTL event_date + INTERVAL 7 DAY</engine>
     </trace_log>
     <opentelemetry_span_log>
-        <engine>ENGINE = MergeTree PARTITION BY toYYYYMM(finish_date) ORDER BY (finish_date, finish_time_unix_nano) TTL finish_date + INTERVAL 7 DAY</engine>
+        <engine>ENGINE = MergeTree PARTITION BY toYYYYMM(finish_date) ORDER BY (finish_date, finish_time_us) TTL finish_date + INTERVAL 7 DAY</engine>
     </opentelemetry_span_log>
     <query_log>
         <engine>ENGINE = MergeTree PARTITION BY toYYYYMM(event_date) ORDER BY (event_date, event_time) TTL event_date + INTERVAL 30 DAY</engine>
