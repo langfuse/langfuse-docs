@@ -13,7 +13,7 @@ import {
   customers,
   handbook,
   marketing,
-} from "../.source/server";
+} from "fumadocs-mdx:collections/server";
 import { CONTENT_DIR_TO_URL_PREFIX } from "./content-dir-map.js";
 
 function baseUrl(contentDir: string): string {

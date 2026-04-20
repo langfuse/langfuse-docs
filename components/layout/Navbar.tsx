@@ -1,31 +1,21 @@
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
 import { NavLinks } from "@/components/NavLinks";
-import {
-  source,
-  guidesSource,
-  integrationsSource,
-  faqSource,
-  handbookSource,
-  librarySource,
-  securitySource,
-  selfHostingSource,
-} from "@/lib/source";
-import { serializePageTree, type SectionNavData } from "@/lib/nav-tree";
+import { type SectionNavData } from "@/lib/nav-tree";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 
 export const sectionNavData: SectionNavData[] = [
-  { name: "Docs", href: "/docs", children: serializePageTree(source.getPageTree()) },
-  { name: "Self Hosting", href: "/self-hosting", children: serializePageTree(selfHostingSource.getPageTree()) },
-  { name: "Guides", href: "/guides", children: serializePageTree(guidesSource.getPageTree()) },
-  { name: "Integrations", href: "/integrations", children: serializePageTree(integrationsSource.getPageTree()) },
-  { name: "FAQ", href: "/faq", children: serializePageTree(faqSource.getPageTree()) },
-  { name: "Handbook", href: "/handbook", children: serializePageTree(handbookSource.getPageTree()) },
-  { name: "Changelog", href: "/changelog", children: [] },
-  { name: "Pricing", href: "/pricing", children: [] },
-  { name: "Library", href: "/library", children: serializePageTree(librarySource.getPageTree()) },
-  { name: "Security & Compliance", href: "/security", children: serializePageTree(securitySource.getPageTree()) },
+  { name: "Docs", href: "/docs" },
+  { name: "Self Hosting", href: "/self-hosting" },
+  { name: "Guides", href: "/guides" },
+  { name: "Integrations", href: "/integrations" },
+  { name: "FAQ", href: "/faq" },
+  { name: "Handbook", href: "/handbook" },
+  { name: "Changelog", href: "/changelog" },
+  { name: "Pricing", href: "/pricing" },
+  { name: "Library", href: "/library" },
+  { name: "Security & Compliance", href: "/security" },
 ];
 
 const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px py-0')

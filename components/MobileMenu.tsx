@@ -7,7 +7,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { productLinks, resourcesLinks } from "@/lib/nav-links";
-import type { NavTreeItem, SectionNavData } from "@/lib/nav-tree";
+import type { SectionNavData } from "@/lib/nav-tree";
 
 export function MobileMenu({
   sectionNavData,
@@ -17,14 +17,11 @@ export function MobileMenu({
   const [open, setOpen] = useState(false);
   const [productOpen, setProductOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
   const close = () => setOpen(false);
-  const toggleSection = (href: string) =>
-    setOpenSections((prev) => ({ ...prev, [href]: !prev[href] }));
 
   return (
     <>
@@ -118,32 +115,17 @@ export function MobileMenu({
 
                 {/* Sections from nav tree */}
                 {sectionNavData.map((section) =>
-                  section.children.length > 0 ? (
-                    <CollapsibleRow
-                      key={section.href}
-                      label={section.name}
-                      open={!!openSections[section.href]}
-                      onToggle={() => toggleSection(section.href)}
-                    >
-                      {section.children.map((item, i) => (
-                        <MobileNavTreeItem
-                          key={`${item.type}-${item.url || item.name || i}`}
-                          item={item}
-                          onNavigate={close}
-                        />
-                      ))}
-                    </CollapsibleRow>
-                  ) : (
-                    <Link
-                      key={section.href}
-                      href={section.href}
-                      onClick={close}
-                      className="flex items-center justify-between px-4 py-3.5 text-sm text-text-primary hover:text-text-secondary transition-colors"
-                    >
-                      <span>{section.name}</span>
-                      <ChevronRight className="w-4 h-4 text-text-tertiary" />
-                    </Link>
-                  )
+                (
+                  <Link
+                    key={section.href}
+                    href={section.href}
+                    onClick={close}
+                    className="flex items-center justify-between px-4 py-3.5 text-sm text-text-primary hover:text-text-secondary transition-colors"
+                  >
+                    <span>{section.name}</span>
+                    <ChevronRight className="w-4 h-4 text-text-tertiary" />
+                  </Link>
+                )
                 )}
 
                 {/* Social links */}
@@ -211,79 +193,6 @@ function CollapsibleRow({
       {open && (
         <div className="flex flex-col pb-2 pl-4 ml-4 border-l border-line-structure">
           {children}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function MobileNavTreeItem({
-  item,
-  onNavigate,
-}: {
-  item: NavTreeItem;
-  onNavigate: () => void;
-}) {
-  if (item.type === "separator") {
-    if (!item.name) return null;
-    return (
-      <div className="px-0 pt-3 pb-1 text-xs tracking-wider uppercase text-text-tertiary">
-        {item.name}
-      </div>
-    );
-  }
-
-  if (item.type === "folder" && item.children && item.children.length > 0) {
-    return <MobileNavFolder item={item} onNavigate={onNavigate} />;
-  }
-
-  if (!item.url) return null;
-
-  return (
-    <Link
-      href={item.url}
-      onClick={onNavigate}
-      className="block px-0 py-2.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
-    >
-      {item.name}
-    </Link>
-  );
-}
-
-function MobileNavFolder({
-  item,
-  onNavigate,
-}: {
-  item: NavTreeItem;
-  onNavigate: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between px-0 py-2.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
-      >
-        <span>{item.name}</span>
-        <ChevronDown
-          className={cn(
-            "h-3.5 w-3.5 text-text-tertiary transition-transform duration-200",
-            open && "rotate-180"
-          )}
-        />
-      </button>
-      {open && (
-        <div className="flex flex-col pl-4">
-          {item.children!.map((child, i) => (
-            <MobileNavTreeItem
-              key={`${child.type}-${child.url || child.name || i}`}
-              item={child}
-              onNavigate={onNavigate}
-            />
-          ))}
         </div>
       )}
     </div>

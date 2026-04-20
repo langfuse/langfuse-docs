@@ -6,6 +6,8 @@ export { HomeLayout, ContentColumns } from "../home/layout/HomeLayout";
 export { NavbarDocs } from "./NavbarDocs";
 export { DocsSecondaryNav, DocsSecondaryNavMobile } from "./DocsSecondaryNav";
 export { DocsPatternTracker } from "./DocsContentArea";
+export { DocsLayoutWrapper } from "./DocsLayoutWrapper";
+export { SharedDocsLayout } from "./SharedDocsLayout";
 export { HomeSidebar } from "../home/layout/HomeSidebar";
 export { HomeAside } from "../home/layout/HomeAside";
 export { HomeMainArea } from "../home/layout/HomeMainArea";

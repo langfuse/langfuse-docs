@@ -1,5 +1,5 @@
 import { source } from "@/lib/source";
-import { SharedDocsLayout } from "./SharedDocsLayout";
+import { SharedDocsLayout } from "@/components/layout";
 
 export default function DocsPageLayout({
   children,

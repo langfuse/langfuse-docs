@@ -26,8 +26,18 @@ export function NavbarDocs() {
           </div>
         </div>
         <div className={cn(cornersStyle, 'hidden relative px-0 lg:flex')}>
-          <div className="absolute bottom-[-50px] left-0 w-[10px] h-[10px] bg-left-corner bgc-size-6" />
-          <div className="absolute hidden wide:block bottom-[-50px] right-0 w-[10px] h-[10px] bg-right-corner bgc-size-6" />
+          <div
+            className="absolute left-0 w-[10px] h-[10px] bg-left-corner bgc-size-6"
+            style={{
+              bottom: `calc(-10px - var(--lf-nav-docs-secondary-height))`,
+            }}
+          />
+          <div
+            className="absolute hidden wide:block right-0 w-[10px] h-[10px] bg-right-corner bgc-size-6"
+            style={{
+              bottom: `calc(-10px - var(--lf-nav-docs-secondary-height))`,
+            }}
+          />
           <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 lg:rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1'>
             <InkeepSearchBar className="hidden lg:block" />
           </div>

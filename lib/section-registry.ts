@@ -86,6 +86,7 @@ export const docSections: Record<string, SectionMeta> = {
     collection: "security",
     title: "Security",
     layout: "docs",
+    hasOwnRoute: true,
   },
   library: {
     source: librarySource,
@@ -106,6 +107,7 @@ export const docSections: Record<string, SectionMeta> = {
     collection: "handbook",
     title: "Handbook",
     layout: "docs",
+    hasOwnRoute: true,
   },
 };
 
