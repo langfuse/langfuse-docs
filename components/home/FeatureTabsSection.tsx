@@ -5,6 +5,7 @@ import { HomeSection } from "./HomeSection";
 import { FeatureTabs, featureTabsData } from "./feature-tabs";
 import { Heading } from "../ui/heading";
 import { TextHighlight } from "../ui/text-highlight";
+import { mobileFeatureTabsData } from "./feature-tabs/data";
 
 export function FeatureTabsSection() {
   return (
@@ -16,7 +17,7 @@ export function FeatureTabsSection() {
       </div>
 
       <Suspense>
-        <FeatureTabs features={featureTabsData} mobileFeature={featureTabsData[0]} />
+        <FeatureTabs features={featureTabsData} mobileFeature={mobileFeatureTabsData} />
       </Suspense>
     </HomeSection>
   );

@@ -42,6 +42,11 @@ export async function loadPage(
 
 /**
  * Builds Next.js Metadata for a section page.
+ *
+ * `opts.canonicalFallback` is consulted *after* `pageData.canonical` but *before*
+ * the default `buildPageUrl(pagePath)` — i.e. a last-resort override. Use it for
+ * computed canonicals (e.g. guides → cookbook mapping) without trampling an
+ * explicit `canonical` field in frontmatter.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function buildSectionMetadata(
@@ -49,10 +54,12 @@ export function buildSectionMetadata(
   section: string,
   sectionTitle: string,
   slug: string[],
+  opts?: { canonicalFallback?: string | null },
 ): Metadata {
   const pageData = page.data;
   const pagePath = `/${section}${slug.length > 0 ? `/${slug.join("/")}` : ""}`;
-  const canonicalUrl = pageData.canonical ?? buildPageUrl(pagePath);
+  const canonicalUrl =
+    pageData.canonical ?? opts?.canonicalFallback ?? buildPageUrl(pagePath);
   const seoTitle = pageData.seoTitle || page.data.title;
   const ogImage = buildOgImageUrl({
     title: seoTitle,

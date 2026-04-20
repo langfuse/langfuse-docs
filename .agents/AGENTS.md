@@ -67,6 +67,15 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 - `tailwind.config.js` — Tailwind setup.
 - `components.json` — shadcn/ui component config.
 
+## Third-party integrations
+
+- **Inkeep** — powers both in-site search and the "Ask AI" chat. Two separate
+  embeds:
+  - **Search** — Inkeep's embedded search widget. Components live in
+    `components/inkeep/` (`InkeepSearchBar.tsx`, `search*.tsx`, `useInkeepSettings.ts`).
+  - **Chat** — Fumadocs' built-in Inkeep chat integration (`ai-chat-shared.tsx`,
+    `embedded-chat.tsx`, `ask-ai-button.tsx`).
+
 ## Writing guidelines
 
 ### Changelog entries

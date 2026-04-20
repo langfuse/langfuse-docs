@@ -31,10 +31,13 @@ export function SidebarSeparatorItem({
         "[&_svg]:size-4 [&_svg]:shrink-0",
         depth === 0 ? "w-full" : "max-w-[calc(100%-16px)] mx-auto",
         "relative w-full pb-1.5 font-[580] text-text-primary",
-        "after:pointer-events-none after:absolute after:bottom-0 after:right-0 after:h-px after:content-['']",
-        "after:left-[var(--sidebar-label-left)]",
-        depth > 0 && "after:bg-[var(--line-structure)]",
-        depth > 0 && "text-text-tertiary mt-3",
+        "after:pointer-events-none after:absolute after:right-0 after:h-px after:content-['']",
+        // depth 0: 1px line at the TOP of the separator
+        depth === 0 &&
+        "pt-3 mt-2 after:top-0 after:left-0 after:bg-[var(--line-structure)]",
+        // depth > 0: 1px underline beneath the label
+        depth > 0 &&
+        "mt-3 text-text-tertiary after:bottom-0 after:left-[var(--sidebar-label-left)] after:bg-[var(--line-structure)]",
       )}
       style={
         {
@@ -43,6 +46,29 @@ export function SidebarSeparatorItem({
         } as CSSProperties
       }
     >
+      {depth === 0 && (
+        <>
+          {/*
+           * Anti-rounded corner decorators framing the top 1px line at each of its 4 corners.
+           */}
+          <span
+            aria-hidden
+            className="hidden md:block pointer-events-none absolute left-0 top-[-3px] h-[3px] w-[3px] bg-left-corner -scale-y-100"
+          />
+          <span
+            aria-hidden
+            className="hidden md:block pointer-events-none absolute right-0 top-[-3px] h-[3px] w-[3px] bg-right-corner -scale-y-100"
+          />
+          <span
+            aria-hidden
+            className="hidden md:block pointer-events-none absolute left-0 top-[1px] h-[3px] w-[3px] bg-left-corner"
+          />
+          <span
+            aria-hidden
+            className="hidden md:block pointer-events-none absolute right-0 top-[1px] h-[3px] w-[3px] bg-right-corner"
+          />
+        </>
+      )}
       {item.icon}
       {item.name}
     </SidebarSeparatorBase>

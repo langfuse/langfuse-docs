@@ -13,8 +13,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { CornerBox } from "@/components/ui/corner-box";
-import { Heading } from "@/components/ui/heading";
-import { TextHighlight } from "@/components/ui/text-highlight";
+
 /** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
 const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -25,12 +24,11 @@ const contentTransition = (reduceMotion: boolean) =>
 
 export interface FeatureTabsProps {
   features: FeatureTabData[];
-  mobileFeature: FeatureTabData;
+  mobileFeature: Pick<FeatureTabData, 'image'>;
   defaultTab?: string;
   autoAdvance?: AutoAdvanceConfig;
-}
+};
 
-// State management with useReducer
 type TabState = {
   focusedIndex: number;
   isAutoAdvancePaused: boolean;
@@ -426,7 +424,7 @@ export const FeatureTabs = ({
 
       {/* Image box - desktop */}
       <CornerBox className="p-4 md:-mt-px hidden md:block" withStripes>
-        <div className="relative w-full overflow-hidden aspect-2646/1512 sm:aspect-auto sm:min-h-[410px]">
+        <div className="relative w-full overflow-hidden aspect-1468/860 sm:aspect-auto sm:min-h-[410px] custom-card-shadow">
           <AnimatePresence mode="sync" initial={false}>
             {activeFeature ? (
               <motion.div
@@ -445,16 +443,16 @@ export const FeatureTabs = ({
       </CornerBox>
 
       {/* Image box - mobile */}
-      <CornerBox className="p-4 md:-mt-px block md:hidden" withStripes>
+      <CornerBox className="pl-4 pt-4 block md:hidden" withStripes>
         <div className="relative w-full overflow-hidden min-h-[410px]">
           <Image
             src={mobileFeature?.image.light}
             alt={mobileFeature?.image.alt}
-            width={1223}
-            height={706}
+            width={1360}
+            height={1640}
             quality={100}
-            className="absolute left-0 top-0 h-auto max-w-none w-[900px] sm:w-[1223px]"
-            sizes="(min-width: 640px) 1223px, 900px"
+            className="absolute left-0 top-0 min-w-full min-h-full object-cover object-top-left"
+            sizes="(min-width: 640px) 1360px"
             priority
           />
         </div>

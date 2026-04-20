@@ -1,70 +1,28 @@
 import type { Metadata } from "next";
-import { selfHostingSource } from "@/lib/source";
-import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
-import { DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { DocsTocFooter } from "@/components/DocsTocFooter";
-import { DocBodyChrome } from "@/components/DocBodyChrome";
-import { getMDXComponents } from "@/mdx-components";
-import type { ComponentType } from "react";
-import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
+import { selfHostingSource } from "@/lib/source";
+import { DocsChromePage } from "@/components/DocsChromePage";
+import { buildSectionMetadata } from "@/lib/mdx-page";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
 
-export default async function SelfHostingPage(props: PageProps) {
-  const params = await props.params;
-  const slug = params.slug ?? [];
+export default async function SelfHostingPage({ params }: PageProps) {
+  const { slug = [] } = await params;
   const page = selfHostingSource.getPage(slug);
-
   if (!page) notFound();
-
-  const { toc } = page.data;
+  // Self-hosting pages may carry a `label` frontmatter field (e.g. "Version: v3")
+  // that the docs chrome renders next to the copy button.
   const versionLabel = (page.data as { label?: string }).label ?? null;
-  const MDX = page.data.body as ComponentType<{ components?: Record<string, ComponentType> }>;
-
-  return (
-    <DocsPage
-      toc={toc}
-      breadcrumb={{ includePage: true, includeRoot: true }}
-      tableOfContent={{ footer: <DocsTocFooter pageTitle={page.data.title} /> }}
-      footer={{ component: <DocsAndPageFooter /> }}
-    >
-      <DocBodyChrome versionLabel={versionLabel}>
-        <MDX components={getMDXComponents()} />
-      </DocBodyChrome>
-    </DocsPage>
-  );
+  return <DocsChromePage page={page} bodyChromeProps={{ versionLabel }} />;
 }
 
-export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  const params = await props.params;
-  const slug = params.slug ?? [];
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug = [] } = await params;
   const page = selfHostingSource.getPage(slug);
-  if (!page)
-    return {
-      title: "Not Found",
-    };
-  const pageData = page.data as typeof page.data & {
-    canonical?: string | null;
-    seoTitle?: string | null;
-  };
-  const pagePath = `/self-hosting${slug.length > 0 ? `/${slug.join("/")}` : ""}`;
-  const canonicalUrl = pageData.canonical ?? buildPageUrl(pagePath);
-  const seoTitle = pageData.seoTitle || page.data.title;
-  const ogImage = buildOgImageUrl({
-    title: seoTitle,
-    description: page.data.description,
-    section: "Self-hosting",
-  });
-  return {
-    title: seoTitle,
-    description: page.data.description ?? undefined,
-    alternates: { canonical: canonicalUrl },
-    openGraph: { images: [{ url: ogImage }], url: canonicalUrl },
-    twitter: { images: [{ url: ogImage }] },
-  };
+  if (!page) return { title: "Not Found" };
+  return buildSectionMetadata(page, "self-hosting", "Self-hosting", slug);
 }
 
 export function generateStaticParams() {

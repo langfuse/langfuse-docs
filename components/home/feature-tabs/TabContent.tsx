@@ -31,10 +31,10 @@ export const TabContent = ({
     []
   );
 
-  const sizes = "(min-width: 1280px) 1616px, (min-width: 768px) 1616px, 100vw";
+  const sizes = "(min-width: 1280px) 1468px, (min-width: 768px) 1468px, 100vw";
 
   return (
-    <div className="relative h-full w-full sm:h-[410px] custom-card-shadow">
+    <div className="relative h-full w-full sm:h-[410px]">
       {/* Light theme image */}
       <Image
         src={feature.image.light}

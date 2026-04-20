@@ -9,12 +9,21 @@ import {
 } from "lucide-react";
 import type { FeatureTabData } from "./types";
 
-import observabilityPng from "components/home/feature-tabs/img/observability.jpg";
-import metricsPng from "components/home/feature-tabs/img/cost.jpg";
-import PromptPng from "components/home/feature-tabs/img/prompts.jpg";
-import EvalsPng from "components/home/feature-tabs/img/evals.jpg";
-import PlaygroundPng from "components/home/feature-tabs/img/experiments.jpg";
-import AnnotationPng from "components/home/feature-tabs/img/annotation.jpg";
+import observabilityPng from "components/home/feature-tabs/img/observability-ui.png";
+import observabilityMobilePng from "components/home/feature-tabs/img/observability-mobile-ui.png";
+import metricsPng from "components/home/feature-tabs/img/cost-ui.png";
+import PromptPng from "components/home/feature-tabs/img/prompts-ui.png";
+import EvalsPng from "components/home/feature-tabs/img/evals-ui.png";
+import PlaygroundPng from "components/home/feature-tabs/img/playground-ui.png";
+import AnnotationPng from "components/home/feature-tabs/img/annotation-ui.png";
+
+export const mobileFeatureTabsData: Pick<FeatureTabData, "image"> = {
+  image: {
+    light: observabilityMobilePng,
+    dark: observabilityMobilePng,
+    alt: "Langfuse observability trace detail view showing nested observations with latency and cost",
+  },
+};
 
 export const featureTabsData: FeatureTabData[] = [
   {
