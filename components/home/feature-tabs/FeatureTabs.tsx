@@ -424,12 +424,11 @@ export const FeatureTabs = ({
 
       {/* Image box - desktop */}
       <CornerBox className="p-4 md:-mt-px hidden md:block" withStripes>
-        <div className="relative w-full overflow-hidden aspect-1468/860 sm:aspect-auto sm:min-h-[410px] custom-card-shadow">
+        <div className="relative w-full overflow-hidden aspect-[2205/1291] custom-card-shadow">
           <AnimatePresence mode="sync" initial={false}>
             {activeFeature ? (
               <motion.div
                 key={activeFeature.id}
-                className="absolute inset-0 w-full"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

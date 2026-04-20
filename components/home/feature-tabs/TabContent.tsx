@@ -31,10 +31,10 @@ export const TabContent = ({
     []
   );
 
-  const sizes = "(min-width: 1280px) 1468px, (min-width: 768px) 1468px, 100vw";
+  const sizes = "(min-width: 1280px) 2205px";
 
   return (
-    <div className="relative h-full w-full sm:h-[410px]">
+    <div className="relative w-full aspect-[2205/1291]">
       {/* Light theme image */}
       <Image
         src={feature.image.light}
