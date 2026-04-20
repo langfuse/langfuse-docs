@@ -40,12 +40,12 @@ function allowRequest(ip: string): boolean {
 
 const inkeep = createOpenAICompatible({
   name: "inkeep",
-  apiKey: process.env.INKEEP_API_KEY,
+  apiKey: process.env.INKEEP_BACKEND_API_KEY,
   baseURL: "https://api.inkeep.com/v1",
 });
 
 export async function POST(req: Request) {
-  if (!process.env.INKEEP_API_KEY) {
+  if (!process.env.INKEEP_BACKEND_API_KEY) {
     return NextResponse.json(
       { error: "Chat is not configured." },
       { status: 503 },
