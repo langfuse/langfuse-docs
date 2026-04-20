@@ -260,16 +260,16 @@ export function GetStartedSection() {
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <Heading className="text-primary text-left" size="large">
-            <TextHighlight highlightClassName="mix-blend-multiply" className="xl:pr-3">Start improving</TextHighlight><TextHighlight highlightClassName="mix-blend-multiply">your agents</TextHighlight>
+            <TextHighlight highlightClassName="mix-blend-multiply" className="max-sm:pr-1.5 xl:pr-3">Start improving</TextHighlight><TextHighlight highlightClassName="mix-blend-multiply">your agents</TextHighlight>
             <br />
             in under 5 minutes.
           </Heading>
-          <div className="flex sm:flex-col gap-0 items-stretch shrink-0 w-full sm:w-[150px]">
+          <div className="flex sm:flex-col gap-0 items-start shrink-0 w-full sm:w-[150px]">
             <Button
               variant="primary"
               shortcutKey="s"
               href="https://cloud.langfuse.com"
-              wrapperClassName="flex-1 sm:flex-none sm:w-full"
+              wrapperClassName="sm:flex-none sm:w-full"
             >
               Start free
             </Button>
@@ -277,7 +277,7 @@ export function GetStartedSection() {
               variant="secondary"
               shortcutKey="d"
               href="/docs"
-              wrapperClassName="flex-1 sm:flex-none sm:w-full"
+              wrapperClassName="sm:flex-none sm:w-full"
             >
               Documentation
             </Button>

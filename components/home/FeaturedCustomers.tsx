@@ -7,29 +7,35 @@ import { BoxCorners, CornerBox } from "@/components/ui/corner-box";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 
-import twilioLogo from "./img/twilio-signet.svg";
-import canvaLogo from "./img/canva-signet.svg";
-import sumupLogo from "./img/sumup-signet.svg";
+import canvaLogo from "./img/canva-tile.png";
+import khanAcademyLogo from "./img/khan-academy-tile.png";
+import sumupLogo from "./img/sumup-tile.png";
+import canvaMono from "./img/canva-mono.svg";
+import khanAcademyMono from "./img/khan-academy-mono.svg";
+import sumupMono from "./img/sumup-mono.svg";
 import { cn } from "@/lib/utils";
 
 const stories = [
   {
-    name: "Twilio",
-    logo: twilioLogo as StaticImageData,
-    description: "How Twilio uses Langfuse to monitor and evaluate LLM-powered customer engagement features at scale.",
-    href: "/customers/twilio",
-  },
-  {
     name: "Canva",
     logo: canvaLogo as StaticImageData,
+    logoMono: canvaMono as StaticImageData,
     description: "Canva's AI team relies on Langfuse to trace and debug their generative design features in production.",
-    href: "/customers/canva",
+    href: "/users/canva",
+  },
+  {
+    name: "Khan Academy",
+    logo: khanAcademyLogo as StaticImageData,
+    logoMono: khanAcademyMono as StaticImageData,
+    description: "Khan Academy builds Khanmigo, their AI tutor, on Langfuse to debug and improve student-facing LLM features.",
+    href: "/users/khan-academy",
   },
   {
     name: "SumUp",
     logo: sumupLogo as StaticImageData,
-    description: "Adobe uses Langfuse to evaluate prompt quality and track LLM usage across their creative cloud products.",
-    href: "/customers/adobe",
+    logoMono: sumupMono as StaticImageData,
+    description: "SumUp runs AI-powered support for 4 million merchants across 35+ markets on Langfuse.",
+    href: "/users/sumup",
   },
 ] as const;
 
@@ -65,30 +71,36 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
             const showLogoCorners =
               isActive || hoveredLogo === i || focusedLogo === i;
             const logoInner = (
-              <div
-                className={cn(
-                  "flex justify-center items-center w-full h-full transition-colors duration-150",
-                  isActive ? "bg-surface-code" : "bg-surface-2"
-                )}
-              >
+              <div className="relative flex justify-center items-center w-full h-full overflow-hidden bg-surface-2">
+                <Image
+                  src={s.logoMono}
+                  alt=""
+                  aria-hidden
+                  width={50}
+                  height={50}
+                  className={cn(
+                    "absolute inset-0 object-contain w-full h-full transition-opacity duration-150",
+                    isActive ? "opacity-0" : "opacity-100"
+                  )}
+                />
                 <Image
                   src={s.logo}
                   alt={s.name}
-                  width={56}
-                  height={16}
-                  className={[
-                    "object-contain w-5 h-5",
-                    isActive ? "brightness-0 invert" : "",
-                  ].join(" ")}
+                  width={100}
+                  height={100}
+                  className={cn(
+                    "relative object-cover w-full h-full transition-opacity duration-150",
+                    isActive ? "opacity-100" : "opacity-0"
+                  )}
                 />
               </div>
             );
             const logoShellClass =
               "flex justify-center items-center p-0.75 w-11 h-11 cursor-pointer";
             return (
-              <button
+              <a
                 key={s.name}
-                onClick={() => setActive(i)}
+                href={s.href}
                 onMouseEnter={() => {
                   setHoveredLogo(i);
                   setActive(i);
@@ -96,8 +108,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
                 onMouseLeave={() => setHoveredLogo(null)}
                 onFocus={() => setFocusedLogo(i)}
                 onBlur={() => setFocusedLogo(null)}
-                aria-label={s.name}
-                aria-pressed={isActive}
+                aria-label={`Read the ${s.name} customer story`}
                 className="relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {/*
@@ -111,7 +122,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
                 ) : (
                   <div className={cn("relative", logoShellClass)}>{logoInner}</div>
                 )}
-              </button>
+              </a>
             );
           })}
         </div>

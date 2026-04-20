@@ -47,18 +47,18 @@ export const Enterprise = () => {
       <div className="flex flex-col-reverse items-stretch sm:grid sm:grid-cols-2">
         <div className="flex flex-col flex-1">
           <CornerBox hoverStripes className="flex flex-col flex-1 gap-3 p-3 -mt-px sm:p-4">
-            <Text size="s" className="font-medium text-left text-text-secondary">Architecture</Text>
+            <Text size="m" className="font-medium text-left text-text-secondary">Architecture</Text>
             <BulletList items={architecture} />
           </CornerBox>
           <CornerBox hoverStripes className="flex flex-col flex-1 gap-3 p-3 -mt-px sm:p-4">
-            <Text size="s" className="font-medium text-left text-text-secondary">Reliability at Scale</Text>
+            <Text size="m" className="font-medium text-left text-text-secondary">Reliability at Scale</Text>
             <BulletList items={openApis} />
           </CornerBox>
         </div>
 
         <CornerBox hoverStripes className="flex relative flex-col -mt-px -ml-px min-h-[350px]">
           <div className="flex flex-col gap-3 p-4">
-            <Text size="s" className="font-medium text-left text-text-secondary">Security & Compliance</Text>
+            <Text size="m" className="font-medium text-left text-text-secondary">Security & Compliance</Text>
             <BulletList items={security} />
           </div>
           <div className="flex absolute bottom-0 flex-1 justify-center items-center pointer-events-none">
