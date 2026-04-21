@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, type MouseEvent } from "react";
+import { useCallback, useMemo, type MouseEvent, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { CornerBox } from "@/components/ui/corner-box";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
@@ -20,26 +20,26 @@ const regionCards: Record<
     title: string;
     awsRegion: string;
     awsLocation: string;
-    flag: string;
+    icon: ReactNode;
   }
 > = {
   us: {
     title: "US",
     awsRegion: "us-west-2",
     awsLocation: "Oregon",
-    flag: "\u{1F1FA}\u{1F1F8}",
+    icon: <span className="text-lg">{"\u{1F1FA}\u{1F1F8}"}</span>,
   },
   hipaa: {
     title: "US HIPAA",
     awsRegion: "us-west-2",
     awsLocation: "Oregon",
-    flag: "\u{1F6E1}\u{FE0F}",
+    icon: <ShieldCheck className="h-5 w-5 text-text-tertiary" />,
   },
   eu: {
     title: "Europe",
     awsRegion: "eu-west-1",
     awsLocation: "Ireland",
-    flag: "\u{1F1EA}\u{1F1FA}",
+    icon: <span className="text-lg">{"\u{1F1EA}\u{1F1FA}"}</span>,
   },
 };
 
@@ -158,8 +158,8 @@ export default function CloudRegionSelectorPage() {
                   onClick={(event) => handleRegionSelect(regionKey, event)}
                   className="group flex items-center gap-4 px-4 py-4 transition-colors hover:bg-surface-1 sm:px-5"
                 >
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border border-line-structure bg-surface-1 text-lg">
-                    {card.flag}
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border border-line-structure bg-surface-1">
+                    {card.icon}
                   </span>
 
                   <div className="min-w-0 flex-1">
