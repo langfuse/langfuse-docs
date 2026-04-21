@@ -17,7 +17,7 @@ export function Logo({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const images = (
-    <div className="flex gap-2 items-center -mr-4 cursor-pointer md:mr-0">
+    <div className="flex gap-2 items-center -mr-4 cursor-pointer md:mr-0 shrink-0">
       <Image
         src="/langfuse-wordart-white.svg"
         alt="Langfuse Logo"
@@ -56,7 +56,7 @@ export function Logo({
       href="https://clickhouse.com"
       target="_blank"
       rel="noopener noreferrer"
-      className="text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap"
+      className="text-[10px] sm:text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap shrink-0"
     >
       by ClickHouse
     </a>
@@ -64,10 +64,11 @@ export function Logo({
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden">
         {wrapInLink ? (
           <Link
             href="/"
+            className="shrink-0"
             onContextMenu={(e) => {
               e.preventDefault();
               setMenuOpen(true);
@@ -77,6 +78,7 @@ export function Logo({
           </Link>
         ) : (
           <div
+            className="shrink-0"
             onContextMenu={(e) => {
               e.preventDefault();
               setMenuOpen(true);
