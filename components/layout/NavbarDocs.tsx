@@ -17,22 +17,12 @@ export function NavbarDocs() {
       <nav className="flex mx-auto h-full border-b max-w-360 border-line-structure">
         <div className={cn(cornersStyle, 'pr-0 lg:max-w-[240px] lg:pr-px')}>
           <div className={cn(contentStyle, 'rounded-r-none lg:rounded-r-sm')}>
-            <div className="flex gap-1.5 sm:gap-2 items-center">
-              <Link href="/" className="flex gap-2 items-center shrink-0">
-                <Logo wrapInLink={false} />
-                <span className="hidden text-sm font-medium text-text-tertiary md:inline">
-                  Docs
-                </span>
-              </Link>
-              <a
-                href="https://clickhouse.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] sm:text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap"
-              >
-                by ClickHouse
-              </a>
-            </div>
+            <Link href="/" className="flex gap-2 items-center shrink-0">
+              <Logo wrapInLink={false} />
+              <span className="hidden text-sm font-medium text-text-tertiary md:inline">
+                Docs
+              </span>
+            </Link>
           </div>
         </div>
         <div className={cn(cornersStyle, 'hidden relative px-0 lg:flex')}>
