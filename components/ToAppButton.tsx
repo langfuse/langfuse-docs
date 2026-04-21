@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import {
@@ -57,6 +59,13 @@ export const ToAppButton = ({
                 </DropdownMenuItem>
               )
           )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/cloud" className="flex items-center gap-1.5 text-muted-foreground">
+              <Plus className="h-3.5 w-3.5" />
+              Add region
+            </Link>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -66,15 +75,30 @@ export const ToAppButton = ({
     );
 
     return (
-      <Button
-        variant="primary"
-        size="small"
-        shortcutKey="L"
-        href={signedInRegion![1].url}
-        className="whitespace-nowrap"
-      >
-        {signedInText}
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="primary"
+            size="small"
+            shortcutKey="L"
+            className="whitespace-nowrap"
+          >
+            {signedInText}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem asChild>
+            <Link href={signedInRegion![1].url}>{signedInRegion![1].label}</Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/cloud" className="flex items-center gap-1.5 text-muted-foreground">
+              <Plus className="h-3.5 w-3.5" />
+              Add region
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   } else {
     return (
