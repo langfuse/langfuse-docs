@@ -56,7 +56,7 @@ export function Logo({
       href="https://clickhouse.com"
       target="_blank"
       rel="noopener noreferrer"
-      className="hidden text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap sm:inline"
+      className="text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap"
     >
       by ClickHouse
     </a>
