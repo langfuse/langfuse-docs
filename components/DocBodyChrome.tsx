@@ -53,7 +53,7 @@ export function DocBodyChrome({
           className={
             isEnterprisePage
               ? "mb-4 flex w-full flex-wrap justify-end gap-2 items-center"
-              : "mb-4 flex flex-wrap gap-2 items-center sm:absolute right-0 top-[-62px]"
+              : "mb-4 flex flex-wrap gap-2 items-center sm:absolute sm:max-w-[15rem] sm:justify-end right-0 top-[-62px]"
           }
         >
           {versionLabel != null && versionLabel !== "" && (
