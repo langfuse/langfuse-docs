@@ -48,7 +48,7 @@ export function Hero() {
             <Button
               variant="primary"
               shortcutKey="s"
-              href="https://cloud.langfuse.com"
+              href="/cloud"
             >
               Start free
             </Button>
