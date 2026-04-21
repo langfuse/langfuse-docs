@@ -26,7 +26,7 @@ const security = [
   { label: "SOC 2 Type II", href: "/security/soc2" },
   { label: "ISO 27001", href: "/security/iso27001" },
   { label: "GDPR", href: "/security/gdpr" },
-  { label: "EU, US & Japan Data Regions", href: "/security/data-regions" },
+  { label: "EU & US Data Regions", href: "/security/data-regions" },
   { label: "HIPAA eligible", href: "/security/hipaa" },
 ];
 
