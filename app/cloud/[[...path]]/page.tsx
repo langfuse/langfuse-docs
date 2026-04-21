@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, type MouseEvent, type ReactNode } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { CornerBox } from "@/components/ui/corner-box";
@@ -19,26 +20,22 @@ const regionCards: Record<
   {
     title: string;
     awsRegion: string;
-    awsLocation: string;
     icon: ReactNode;
   }
 > = {
   us: {
     title: "US",
     awsRegion: "us-west-2",
-    awsLocation: "Oregon",
     icon: <span className="text-lg">{"\u{1F1FA}\u{1F1F8}"}</span>,
   },
   hipaa: {
     title: "US HIPAA",
     awsRegion: "us-west-2",
-    awsLocation: "Oregon",
     icon: <ShieldCheck className="h-5 w-5 text-text-tertiary" />,
   },
   eu: {
     title: "Europe",
     awsRegion: "eu-west-1",
-    awsLocation: "Ireland",
     icon: <span className="text-lg">{"\u{1F1EA}\u{1F1FA}"}</span>,
   },
 };
@@ -81,8 +78,8 @@ const buildCloudRedirectUrl = ({
 };
 
 const SignedInBadge = () => (
-  <span className="inline-flex items-center gap-1.5 rounded-[2px] border border-emerald-500/20 bg-emerald-500/5 px-2 py-0.5 text-[11px] font-medium text-emerald-700/90 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-400">
-    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500/90 dark:bg-emerald-400" />
+  <span className="inline-flex items-center gap-1.5 rounded-[2px] border border-muted-green/20 bg-muted-green/5 px-2 py-0.5 text-[11px] font-medium text-muted-green">
+    <span className="h-1.5 w-1.5 rounded-full bg-muted-green" />
     Signed in
   </span>
 );
@@ -180,7 +177,7 @@ export default function CloudRegionSelectorPage() {
                     </Text>
                   </div>
 
-                  <ArrowRight className="h-4 w-4 shrink-0 text-text-tertiary transition-transform group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                  <ArrowRight className="h-4 w-4 shrink-0 text-text-tertiary transition-[transform,color] group-hover:translate-x-0.5 group-hover:text-text-secondary" />
                 </a>
               );
             })}
@@ -188,12 +185,12 @@ export default function CloudRegionSelectorPage() {
         </CornerBox>
 
         <Text size="s">
-          <a
+          <Link
             href="/security/data-regions"
             className="text-text-secondary underline underline-offset-2 decoration-line-structure hover:decoration-text-tertiary hover:text-text-primary transition-colors"
           >
             Learn more about data regions
-          </a>
+          </Link>
         </Text>
       </div>
     </main>
