@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -66,30 +67,53 @@ export const ToAppButton = ({
     );
   } else if (signedInCount === 1 && signedInRegion) {
     return (
-      <Button
-        variant="primary"
-        size="small"
-        shortcutKey="L"
+      <NavigatingButton
         href={signedInRegion[1].url}
-        className="whitespace-nowrap"
-      >
-        {signedInText}
-      </Button>
+        label={signedInText}
+      />
     );
   } else {
     return (
-      <Button
-        variant="primary"
-        size="small"
-        shortcutKey="L"
+      <NavigatingButton
         href="/cloud"
-        className="whitespace-nowrap"
-      >
-        {signUpText}
-      </Button>
+        label={signUpText}
+      />
     );
   }
 };
+
+function NavigatingButton({ href, label }: { href: string; label: string }) {
+  const [navigating, setNavigating] = useState(false);
+  const router = useRouter();
+  const isExternal = href.startsWith("http");
+
+  const navigate = useCallback(() => {
+    setNavigating(true);
+    if (isExternal) {
+      window.location.href = href;
+    } else {
+      router.push(href);
+    }
+  }, [href, isExternal, router]);
+
+  return (
+    <Button
+      variant="primary"
+      size="small"
+      shortcutKey={navigating ? undefined : "L"}
+      icon={navigating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : undefined}
+      iconPosition="end"
+      href={href}
+      onClick={(e) => {
+        e.preventDefault();
+        navigate();
+      }}
+      className="whitespace-nowrap"
+    >
+      {label}
+    </Button>
+  );
+}
 
 function MultiRegionButton({
   signedInRegions,
@@ -106,10 +130,11 @@ function MultiRegionButton({
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key.toLowerCase() !== "l") return;
       if (isEditableTarget(e.target)) return;
+      if (open) return;
       e.preventDefault();
-      setOpen((prev) => !prev);
+      setOpen(true);
     },
-    []
+    [open]
   );
 
   useEffect(() => {
