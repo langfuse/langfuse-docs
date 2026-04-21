@@ -268,7 +268,7 @@ export function GetStartedSection() {
             <Button
               variant="primary"
               shortcutKey="s"
-              href="https://cloud.langfuse.com"
+              href="/cloud"
               wrapperClassName="sm:flex-none sm:w-full"
             >
               Start free
