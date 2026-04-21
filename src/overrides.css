@@ -69,6 +69,25 @@
   box-sizing: border-box;
 }
 
+/*
+ * Breadcrumb row (Fumadocs PageBreadcrumb): first direct child of #nd-page is a
+ * flex row whose items carry Tailwind `truncate`. Flex children default to
+ * min-width:auto, which defeats text-overflow:ellipsis. Force min-width:0 so
+ * long segment titles ellipsize. At ≥sm the "Copy page" button is absolutely
+ * positioned over the breadcrumb row's right edge — pad that side to avoid overlap.
+ */
+.docs-chrome #nd-page > div:first-child {
+  min-width: 0;
+}
+@media (min-width: 640px) {
+  .docs-chrome #nd-page > div:first-child {
+    padding-right: 10rem;
+  }
+}
+.docs-chrome #nd-page > div:first-child > * {
+  min-width: 0;
+}
+
 #nd-page::before {
   content: "";
   position: absolute;
