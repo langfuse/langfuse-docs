@@ -251,6 +251,22 @@ CLICKHOUSE_PASSWORD=clickhouse
 CLICKHOUSE_CLUSTER_ENABLED=false
 ```
 
+## Migrating to a New Instance
+
+You may want to move Langfuse to a different ClickHouse instance, e.g. when switching providers or moving from a single-node to a clustered setup.
+We recommend the following approach:
+
+1. Point Langfuse to the new ClickHouse instance so that incoming data is captured there.
+2. Create a backup of the existing instance to blob storage and restore it into the new instance.
+
+A zero-downtime switch where data is written to both instances concurrently is technically possible, but we have not tested it and it is not recommended by ClickHouse.
+Please reach out to Langfuse Support if you want to explore this option.
+
+Refer to the ClickHouse migration guides for backup and restore instructions:
+
+- [ClickHouse to ClickHouse via remoteSecure](https://clickhouse.com/docs/cloud/migration/clickhouse-to-cloud)
+- [ClickHouse to ClickHouse via backup and restore](https://clickhouse.com/docs/cloud/migration/oss-to-cloud-backup-restore)
+
 ## Encryption
 
 ClickHouse supports disk encryption for data at rest, providing an additional layer of security for sensitive data.
