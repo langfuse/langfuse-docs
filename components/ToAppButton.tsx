@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +10,6 @@ import {
 } from "./ui/dropdown-menu";
 import {
   cloudRegions,
-  continentHostMapping,
   type CloudRegionKey,
 } from "@/lib/cloud-regions";
 import { useCloudRegionSignIn } from "@/lib/use-cloud-region-sign-in";
@@ -34,33 +32,6 @@ export const ToAppButton = ({
   dropdownText = DEFAULT_BUTTON_TEXT.dropdown,
 }: ToAppButtonProps = {}) => {
   const signedInRegions = useCloudRegionSignIn();
-  const [continentCode, setContinentCode] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV === "production") {
-      const abortController = new AbortController();
-
-      fetch("/api/get-continent-code", {
-        signal: abortController.signal,
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.continentCode && continentHostMapping[data.continentCode]) {
-            setContinentCode(data.continentCode);
-          }
-        })
-        .catch((error) => {
-          // Only update state if the error is not from aborting
-          if (error.name !== "AbortError") {
-            setContinentCode(null);
-          }
-        });
-
-      return () => {
-        abortController.abort();
-      };
-    }
-  }, []);
 
   const signedInCount = Object.values(signedInRegions).filter(Boolean).length;
 
@@ -111,9 +82,7 @@ export const ToAppButton = ({
         variant="primary"
         size="small"
         shortcutKey="L"
-        href={
-          continentCode ? continentHostMapping[continentCode] : cloudRegions.eu.url
-        }
+        href="/cloud"
         className="whitespace-nowrap"
       >
         {signUpText}

@@ -152,7 +152,7 @@ function DiscoverYourselfContent() {
     { href: "/ask-ai", label: "Questions? Ask AI" },
     { href: "/support", label: "Contact Support" },
     {
-      href: "https://cloud.langfuse.com",
+      href: "/cloud",
       label: "Create a free account (no credit card required)",
     },
   ];

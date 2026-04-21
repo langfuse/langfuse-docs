@@ -96,7 +96,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Hobby",
       id: "tier-hobby",
-      href: "https://cloud.langfuse.com",
+      href: "/cloud",
       featured: false,
       description:
         "Get started, no credit card required. Great for hobby projects and POCs.",
@@ -113,7 +113,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Core",
       id: "tier-core",
-      href: "https://cloud.langfuse.com",
+      href: "/cloud",
       featured: true,
       pill: "Unlimited Users",
       description:
@@ -141,7 +141,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Pro",
       id: "tier-pro",
-      href: "https://cloud.langfuse.com",
+      href: "/cloud",
       featured: false,
       pill: "Unlimited Users",
       price: "$199",

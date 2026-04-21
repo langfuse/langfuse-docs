@@ -130,9 +130,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
         {/* Button: right of logos on mobile, far right on desktop */}
         <div className="ml-auto shrink-0 lg:ml-0 lg:order-last">
           <Button
-            href="https://cloud.langfuse.com"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/cloud"
             shortcutKey="s"
           >
             Start free
