@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useFooterItems } from "fumadocs-ui/utils/use-footer-items";
 import NextLink from "next/link";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,15 @@ function normalizePath(path: string): string {
     ? stripped.slice(0, -1)
     : stripped;
 }
+
+const linkClasses =
+  "inline-flex w-full min-w-0 max-w-full items-center no-underline gap-[6px] overflow-hidden py-0.75 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-[2px] border [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)] border-line-structure dark:border-line-cta group-hover:border-line-cta bg-surface-bg text-text-secondary";
+
+const labelClasses =
+  "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] p-0";
+
+const iconBoxClasses =
+  "button-icon-area flex shrink-0 items-center justify-center h-full aspect-square *:max-w-full rounded-[1.5px] border-[0.5px] border-[rgba(64,61,57,0.20)] dark:border-[rgba(184,182,160,0.25)] bg-[rgba(64,61,57,0.10)] dark:bg-transparent p-[2px] text-text-tertiary pointer-events-none";
 
 export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
   const footerItems = useFooterItems();
@@ -62,14 +71,18 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
           <HoverCorners />
           <NextLink
             href={previous.url}
-            className="flex flex-col gap-1 w-full rounded-[2px] border border-line-structure dark:border-line-cta group-hover:border-line-cta bg-surface-bg px-3 py-2 no-underline transition-colors"
+            className={cn(linkClasses, "pl-[3px] pr-[8px] h-auto py-1.5")}
           >
-            <span className="font-sans text-[13px] font-medium leading-[150%] text-text-primary truncate">
-              {previous.name}
+            <span className={iconBoxClasses} aria-hidden>
+              <ArrowLeft className="h-3.5 w-3.5" />
             </span>
-            <span className="flex items-center gap-0.5 font-sans text-[12px] text-text-tertiary">
-              <ChevronLeft className="h-3 w-3" />
-              Previous
+            <span className="flex flex-col min-w-0 gap-0.5">
+              <span className={cn(labelClasses, "min-w-0 truncate")}>
+                {previous.name}
+              </span>
+              <span className="font-sans text-[11px] leading-[150%] text-text-tertiary flex items-center gap-0.5">
+                Previous
+              </span>
             </span>
           </NextLink>
         </div>
@@ -78,18 +91,25 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
       )}
 
       {next ? (
-        <div className="relative flex items-center p-1 group button-wrapper flex-1 min-w-0">
+        <div className="relative flex items-center p-1 group button-wrapper flex-1 min-w-0 sm:justify-end">
           <HoverCorners />
           <NextLink
             href={next.url}
-            className="flex flex-col gap-1 w-full rounded-[2px] border border-line-structure dark:border-line-cta group-hover:border-line-cta bg-surface-bg px-3 py-2 no-underline transition-colors items-end text-right"
+            className={cn(
+              linkClasses,
+              "pr-[3px] pl-[8px] h-auto py-1.5 flex-row-reverse"
+            )}
           >
-            <span className="font-sans text-[13px] font-medium leading-[150%] text-text-primary truncate max-w-full">
-              {next.name}
+            <span className={iconBoxClasses} aria-hidden>
+              <ArrowRight className="h-3.5 w-3.5" />
             </span>
-            <span className="flex items-center gap-0.5 font-sans text-[12px] text-text-tertiary">
-              Next
-              <ChevronRight className="h-3 w-3" />
+            <span className="flex flex-col min-w-0 gap-0.5 items-end">
+              <span className={cn(labelClasses, "min-w-0 truncate max-w-full")}>
+                {next.name}
+              </span>
+              <span className="font-sans text-[11px] leading-[150%] text-text-tertiary flex items-center gap-0.5">
+                Next
+              </span>
             </span>
           </NextLink>
         </div>
