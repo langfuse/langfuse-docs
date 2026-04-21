@@ -1,4 +1,4 @@
-import { CornerBox, cornersFromNeighbors } from "@/components/ui/corner-box";
+import { CornerBox } from "@/components/ui/corner-box";
 import { Text } from "@/components/ui/text";
 
 interface ImpactItem {
@@ -19,10 +19,6 @@ export const ImpactChart = ({ items }: ImpactChartProps) => {
         <CornerBox
           key={index}
           hoverStripes
-          corners={cornersFromNeighbors({
-            top: index > 0,
-            bottom: index < items.length - 1,
-          })}
           className="flex items-baseline gap-3 p-4 -mt-px"
         >
           <span className="shrink-0 font-mono text-[12px] text-text-tertiary leading-[150%]">
