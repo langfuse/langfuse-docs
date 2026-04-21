@@ -51,9 +51,20 @@ export function Logo({
     </div>
   );
 
+  const byClickHouse = (
+    <a
+      href="https://clickhouse.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hidden text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap sm:inline"
+    >
+      by ClickHouse
+    </a>
+  );
+
   return (
     <>
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
         {wrapInLink ? (
           <Link
             href="/"
@@ -74,6 +85,7 @@ export function Logo({
             {images}
           </div>
         )}
+        {byClickHouse}
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
     </>
