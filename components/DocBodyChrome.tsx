@@ -77,7 +77,7 @@ export function DocBodyChrome({
             >
               <span className="text-sm font-medium">Was this page helpful?</span>
               <div className="flex items-center justify-between gap-2">
-                <DocsFeedback key={pathname} />
+                <DocsFeedback key={pathname} showLabel={false} />
                 <DocsSupport />
               </div>
             </div>
