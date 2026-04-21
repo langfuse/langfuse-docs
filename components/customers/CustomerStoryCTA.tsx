@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { CornerBox } from "@/components/ui/corner-box";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import Link from "next/link";
 
 export const CustomerStoryCTA = () => {
   return (
@@ -24,12 +25,12 @@ export const CustomerStoryCTA = () => {
         </div>
         <Text size="s">
           or{" "}
-          <a
+          <Link
             href="/talk-to-us"
             className="text-text-secondary underline underline-offset-4 decoration-line-structure hover:decoration-text-tertiary transition-colors"
           >
             Talk to an expert
-          </a>
+          </Link>
         </Text>
         <Text size="s">
           No credit card required · Free tier available · Self-hosting option
