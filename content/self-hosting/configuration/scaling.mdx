@@ -97,11 +97,6 @@ To automatically remove data within ClickHouse, you can use the [TTL](https://cl
 See the ClickHouse documentation for more details on how to configure it.
 This is applicable for the `traces`, `observations`, `scores`, and `event_log` table within ClickHouse.
 
-In addition, the `system.trace_log` and `system.text_log` tables within ClickHouse may grow large, even on smaller deployments.
-You can modify your ClickHouse settings to set a TTL on both tables.
-It is also safe to manually prune them from time to time.
-Check the [ClickHouse documentation](https://clickhouse.com/docs/operations/server-configuration-parameters/settings#trace_log) for details on how to configure a TTL on those tables.
-
 The following query helps to identify the largest tables in Clickhouse:
 
 ```sql
@@ -117,6 +112,63 @@ SELECT table, formatReadableSize(size) as size, rows FROM (
     ORDER BY size DESC
 )
 ```
+
+#### ClickHouse system log tables [#clickhouse-system-log-tables]
+
+On default ClickHouse configurations, the system log tables (`trace_log`, `text_log`, `opentelemetry_span_log`, `asynchronous_metric_log`, `metric_log`, `latency_log`) can dominate disk usage.
+They have no TTL by default, and the query profiler writes to `system.trace_log` continuously.
+Langfuse does not read from these tables, so you can safely reduce them. Two options:
+
+**Option 1 — Disable unused system log tables.** Mount a file into `/etc/clickhouse-server/config.d/` that opts out of the tables Langfuse never reads. This is the approach taken by default in the [Langfuse Terraform AWS module](https://github.com/langfuse/langfuse-terraform-aws/pull/26):
+
+```xml
+<clickhouse>
+    <trace_log remove="1"/>
+    <text_log remove="1"/>
+    <opentelemetry_span_log remove="1"/>
+    <asynchronous_metric_log remove="1"/>
+    <metric_log remove="1"/>
+    <latency_log remove="1"/>
+</clickhouse>
+```
+
+On the Bitnami ClickHouse Helm chart, you can ship the same block via `clickhouse.extraOverrides`. Keep `query_log`, `part_log`, and `error_log` enabled — they are useful for debugging and remain small.
+
+**Option 2 — Aggressive TTLs.** If you want to keep the tables around for debugging, attach short TTLs and disable the query profiler instead:
+
+```xml
+<clickhouse>
+    <profiles>
+        <default>
+            <query_profiler_real_time_period_ns>0</query_profiler_real_time_period_ns>
+            <query_profiler_cpu_time_period_ns>0</query_profiler_cpu_time_period_ns>
+        </default>
+    </profiles>
+    <trace_log>
+        <engine>ENGINE = MergeTree PARTITION BY toYYYYMM(event_date) ORDER BY (event_date, event_time) TTL event_date + INTERVAL 7 DAY</engine>
+    </trace_log>
+    <opentelemetry_span_log>
+        <engine>ENGINE = MergeTree PARTITION BY toYYYYMM(finish_date) ORDER BY (finish_date, finish_time_us) TTL finish_date + INTERVAL 7 DAY</engine>
+    </opentelemetry_span_log>
+    <query_log>
+        <engine>ENGINE = MergeTree PARTITION BY toYYYYMM(event_date) ORDER BY (event_date, event_time) TTL event_date + INTERVAL 30 DAY</engine>
+    </query_log>
+</clickhouse>
+```
+
+<Callout type="info">
+
+TTL directives only apply when the system table is first created. On an existing install, after deploying the config you also need to retrofit the tables — for example, for `system.trace_log`:
+
+```sql
+SET max_table_size_to_drop = 0;
+TRUNCATE TABLE system.trace_log;
+ALTER TABLE system.trace_log MODIFY TTL event_date + INTERVAL 7 DAY;
+```
+
+Repeat for each table you want to cap. See the upstream discussion in [langfuse/langfuse#13123](https://github.com/langfuse/langfuse/issues/13123).
+
+</Callout>
 
 ## High Redis CPU Load
 
