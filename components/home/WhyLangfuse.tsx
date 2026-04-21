@@ -43,7 +43,7 @@ const reasons = [
   },
   {
     title: "Production-proven",
-    body: "Billions of events processed per month. 23M installs/month. Fortune 50 deployments.",
+    body: "Billions of events processed per month. 50M+ SDK installs/month. Fortune 50 deployments.",
   },
   {
     title: "Shipping Velocity",
