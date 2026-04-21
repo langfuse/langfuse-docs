@@ -38,6 +38,7 @@ export function DocBodyChrome({
 }: Props) {
   const pathname = usePathname();
   const isEnterprisePage = pathname === "/enterprise";
+  const isCustomerStory = (pathname ?? "").startsWith("/users/");
   const cookbook = withProse
     ? COOKBOOK_ROUTE_MAPPING.find((c) => c.path === pathname)
     : undefined;
@@ -67,15 +68,19 @@ export function DocBodyChrome({
           <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
         )}
         {children}
-        <hr className="mt-12 mb-0 border-t dark:border-neutral-800" />
-        <div
-          className="flex flex-wrap gap-6 justify-between items-center py-6"
-          id="docs-feedback"
-        >
-          <DocsFeedback key={pathname} />
-          <DocsSupport />
-        </div>
-        <hr className="mt-0 mb-12 border-t dark:border-neutral-800" />
+        {!isCustomerStory && (
+          <>
+            <hr className="mt-12 mb-0 border-t border-line-structure" />
+            <div
+              className="flex flex-wrap gap-6 justify-between items-center py-6"
+              id="docs-feedback"
+            >
+              <DocsFeedback key={pathname} />
+              <DocsSupport />
+            </div>
+            <hr className="mt-0 mb-12 border-t border-line-structure" />
+          </>
+        )}
       </div>
     </DocsBody>
   );

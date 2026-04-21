@@ -19,7 +19,6 @@ import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import { cn } from "@/lib/utils";
 import { Image } from "./ui/image";
 import { Dialog, DialogContent } from "./ui/dialog";
-import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -352,8 +351,9 @@ export const MainContentWrapper = (props) => {
 
 
       {props.children}
-      {isCustomerStory(pathname ?? "") && <CustomerStoryCTA />}
-      <hr className="mx-4 my-4 border-t dark:border-neutral-800 md:mx-6 xl:mx-8" />
+      {!isCustomerStory(pathname ?? "") && (
+        <hr className="mx-4 my-4 border-t border-line-structure md:mx-6 xl:mx-8" />
+      )}
       {!pathsWithoutFooterWidgets.some(
         (path) =>
           pathname === path || (pathname ?? "").startsWith(path + "/")
