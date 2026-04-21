@@ -96,7 +96,7 @@ const modelProvidersGroup = {
     },
     {
       label: "Azure OpenAI",
-      href: "/integrations/model-providers/azure-openai",
+      href: "/integrations/model-providers/openai-py",
       icon: <Image src="/images/integrations/microsoft_icon.svg" alt="" width={18} height={18} />,
     },
     {

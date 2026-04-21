@@ -75,7 +75,7 @@ const tools: ToolEntry[] = [
     title: "Human Annotation",
     description:
       "Collaborative Human-in the-Loop workflows to review traces and create golden datasets.",
-    href: "/docs/human-feedback",
+    href: "/docs/evaluation/evaluation-methods/annotation-queues",
     tooltip: "Read more",
     span: "col-span-1",
     visual: humanAnnotationVisual as StaticImageData,
