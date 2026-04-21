@@ -56,7 +56,7 @@ export function Logo({
       href="https://clickhouse.com"
       target="_blank"
       rel="noopener noreferrer"
-      className="text-[10px] sm:text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap shrink-0"
+      className="text-[10px] sm:text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap"
     >
       by ClickHouse
     </a>
@@ -64,7 +64,7 @@ export function Logo({
 
   return (
     <>
-      <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         {wrapInLink ? (
           <Link
             href="/"
@@ -87,7 +87,7 @@ export function Logo({
             {images}
           </div>
         )}
-        {byClickHouse}
+        {wrapInLink && byClickHouse}
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
     </>
