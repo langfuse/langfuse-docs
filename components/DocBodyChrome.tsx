@@ -72,7 +72,7 @@ export function DocBodyChrome({
           <>
             <hr className="mt-12 mb-0 border-t border-line-structure" />
             <div
-              className="flex flex-wrap gap-6 justify-between items-center py-6"
+              className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 justify-between sm:items-center py-6"
               id="docs-feedback"
             >
               <DocsFeedback key={pathname} />
