@@ -215,7 +215,7 @@ export const CopyMarkdownButton = () => {
           disabled={isDisabled || isError}
           onClick={handleCopy}
           className={cn(
-            "inline-flex items-center px-[8px] py-0.75 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] transition-colors min-w-[80px]",
+            "inline-flex items-center px-[8px] py-0.75 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] transition-colors min-w-[80px] max-w-[160px] truncate",
             isDisabled || isError
               ? "cursor-not-allowed"
               : "cursor-pointer hover:bg-surface-1/80"
