@@ -61,7 +61,6 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
           href={previous.url}
           variant="secondary"
           size="small"
-          className="w-full sm:w-auto"
           wrapperClassName="flex-1 min-w-0 sm:max-w-[50%]"
           icon={<ArrowLeft className="h-3.5 w-3.5" />}
         >
@@ -76,7 +75,7 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
           href={next.url}
           variant="secondary"
           size="small"
-          className="w-full sm:w-auto"
+          className="!justify-end"
           wrapperClassName="flex-1 min-w-0 sm:max-w-[50%] sm:ml-auto"
           icon={<ArrowRight className="h-3.5 w-3.5" />}
           iconPosition="end"
