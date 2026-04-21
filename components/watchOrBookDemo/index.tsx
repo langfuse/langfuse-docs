@@ -108,7 +108,7 @@ function TalkToUsContent() {
         </strong>
         ,{" "}
         <strong className="font-[580]">
-          {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(1)}M+ SDK installs per
+          {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(0)}M+ SDK installs per
           month
         </strong>
         , and{" "}

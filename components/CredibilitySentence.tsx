@@ -31,7 +31,7 @@ export const CredibilitySentence = ({
           </li>
           <li>
             <Metric className={metricClassName}>
-              {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(1)}M+
+              {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(0)}M+
             </Metric>{" "}
             SDK installs per month
           </li>
@@ -59,7 +59,7 @@ export const CredibilitySentence = ({
       </Metric>
       ,{" "}
       <Metric className={metricClassName}>
-        {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(1)}M+ SDK installs per
+        {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(0)}M+ SDK installs per
         month
       </Metric>
       , and{" "}
