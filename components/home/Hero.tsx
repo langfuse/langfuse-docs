@@ -1,69 +1,66 @@
-import Link from "next/link";
-import { Button } from "../ui/button";
-import { HomeSection } from "./components/HomeSection";
-import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CornerBox } from "@/components/ui/corner-box";
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
+import { TextHighlight } from "@/components/ui";
+import { HomeSection } from "@/components/home/HomeSection";
+import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
+import { cn } from "@/lib/utils";
+import { HeroStatsStrip } from "@/components/home/HeroStatsStrip";
 
 export function Hero() {
   return (
-    <HomeSection className="py-0 pt-0 lg:py-0 lg:pt-0 pb-0 lg:pb-0 first:pt-4">
-      {/* HERO */}
-      <div className="flex flex-col items-center justify-center gap-5 md:min-h-[calc(min(calc(60vh-100px),60vw))] pb-10 pt-5 lg:pt-10 2xl:pt-20">
-        <Link
-          href="/blog/joining-clickhouse"
-          className="flex flex-row items-center gap-x-2 gap-y-1 rounded-full px-4 py-2 border transition-opacity hover:opacity-80"
-          style={{
-            backgroundColor: "rgb(250, 255, 105)",
-            borderColor: "rgb(250, 255, 105)",
-          }}
+    <HomeSection className="pt-5 sm:pt-8 md:pt-[60px]">
+      <CornerBox className="-mb-px">
+        <HeroStatsStrip />
+      </CornerBox>
+      <CornerBox className="flex flex-col gap-4 sm:gap-8 md:gap-10 items-center px-4 py-8 sm:px-8 sm:py-10">
+        <Heading
+          as="h1"
+          size="big"
+          className={cn(
+            "flex-col items-center gap-0.5 sm:gap-1 md:gap-1.5 text-center font-medium leading-[105%] max-md:max-w-[500px]",
+            "[leading-trim:both] [text-edge:cap]"
+          )}
         >
-          <div className="text-black text-sm font-semibold">
-            ClickHouse acquires Langfuse! 🎉
+          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">Open Source<span className="inline max-[499px]:hidden">&nbsp;</span></TextHighlight>
+          <span className="flex min-[500px]:inline">
+            <TextHighlight highlightClassName="mix-blend-multiply" className="max-[499px]:pr-1.75">LLM</TextHighlight>
+            <TextHighlight highlightClassName="mix-blend-multiply" className="min-[500px]:pr-2">Engineering</TextHighlight>
+          </span>
+          <TextHighlight highlightClassName="mix-blend-multiply">Platform</TextHighlight>
+        </Heading>
+        <Heading
+          as="h1"
+          size="big"
+          className={cn(
+            "flex sm:hidden flex-col items-center gap-1.5 text-center font-medium leading-[105%]",
+            "[leading-trim:both] [text-edge:cap]"
+          )}
+        >
+
+        </Heading>
+        <div className="flex flex-col gap-6">
+          <Text className="max-w-xl">
+            Debug AI Applications and Agents in minutes. Spot issues before your users do. Collaborate with your team to continuously improve on cost, latency and quality. <span className="hidden md:inline">Any model, any framework. Based on OpenTelemetry.</span>
+          </Text>
+          <div className="flex flex-wrap gap-3 justify-center items-center">
+            <Button
+              variant="primary"
+              shortcutKey="s"
+              href="https://cloud.langfuse.com"
+            >
+              Start free
+            </Button>
+            <Button variant="secondary" shortcutKey="d" href="/docs">
+              Documentation
+            </Button>
           </div>
-          <ArrowRight className="h-4 w-4 text-black" />
-        </Link>
-
-        <h1 className="mt-2 text-4xl sm:text-7xl lg:text-8xl font-bold font-mono text-center text-balance lg:text-wrap">
-          Open Source LLM&nbsp;Engineering Platform
-        </h1>
-        <span className="mt-2 text-primary/70 text-base sm:text-xl lg:text-3xl md:text-balance font-semibold max-w-screen-lg text-center px-4">
-          <Link href="/docs/observability/overview" className="underline">
-            Traces
-          </Link>
-          ,{" "}
-          <Link href="/docs/evaluation/overview" className="underline">
-            evals
-          </Link>
-          ,{" "}
-          <Link href="/docs/prompt-management/overview" className="underline">
-            prompt management
-          </Link>{" "}
-          and{" "}
-          <Link href="/docs/metrics/overview" className="underline">
-            metrics
-          </Link>{" "}
-          to debug and improve your LLM application.
-        </span>
-
-        <div className="flex gap-4 flex-wrap items-center justify-center my-4">
-          <Button variant="cta" size="lg" asChild>
-            <Link href="https://cloud.langfuse.com">Sign up</Link>
-          </Button>
-          <Button size="lg" variant="secondary" asChild>
-            <Link href="/watch-demo">Get Demo</Link>
-          </Button>
-          <Button variant="secondary" size="lg" asChild>
-            <Link href="/docs">View docs</Link>
-          </Button>
         </div>
-      </div>
-
-      {/* <div className="aspect-video bg-blue-200"></div>
-      <Video
-        src="https://static.langfuse.com/docs-videos/langfuse-10min-demo-4k-60fps.mp4"
-        aspectRatio={16 / 9}
-        title="Langfuse Walkthrough"
-        posterStartTime={86}
-      /> */}
+      </CornerBox>
+      <CornerBox className="pr-px pb-px -mt-px">
+        <EnterpriseLogoGrid />
+      </CornerBox>
     </HomeSection>
   );
 }

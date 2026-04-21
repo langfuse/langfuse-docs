@@ -37,6 +37,7 @@ export function DocBodyChrome({
   versionLabel,
 }: Props) {
   const pathname = usePathname();
+  const isEnterprisePage = pathname === "/enterprise";
   const cookbook = withProse
     ? COOKBOOK_ROUTE_MAPPING.find((c) => c.path === pathname)
     : undefined;
@@ -47,25 +48,34 @@ export function DocBodyChrome({
 
   return (
     <DocsBody className="flex-1">
-      <div className="mb-4 flex flex-wrap gap-2 items-center">
-        {versionLabel != null && versionLabel !== "" && (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
-            {versionLabel}
-          </span>
+      <div className="mx-auto w-full">
+        <div
+          className={
+            isEnterprisePage
+              ? "mb-4 flex w-full flex-wrap justify-end gap-2 items-center"
+              : "mb-4 flex flex-wrap gap-2 items-center sm:absolute right-0 top-[-62px]"
+          }
+        >
+          {versionLabel != null && versionLabel !== "" && (
+            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
+              {versionLabel}
+            </span>
+          )}
+          <CopyMarkdownButton key={pathname} />
+        </div>
+        {cookbook && (
+          <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
         )}
-        <CopyMarkdownButton key={pathname} />
-      </div>
-      {cookbook && (
-        <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
-      )}
-      {children}
-      <hr className="my-4 border-t dark:border-neutral-800" />
-      <div
-        className="flex flex-wrap gap-6 justify-between items-center py-6"
-        id="docs-feedback"
-      >
-        <DocsFeedback key={pathname} />
-        <DocsSupport />
+        {children}
+        <hr className="mt-12 mb-0 border-t dark:border-neutral-800" />
+        <div
+          className="flex flex-wrap gap-6 justify-between items-center py-6"
+          id="docs-feedback"
+        >
+          <DocsFeedback key={pathname} />
+          <DocsSupport />
+        </div>
+        <hr className="mt-0 mb-12 border-t dark:border-neutral-800" />
       </div>
     </DocsBody>
   );

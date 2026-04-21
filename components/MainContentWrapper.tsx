@@ -7,13 +7,11 @@ import { Button } from "./ui/button";
 import { Link } from "./ui/link";
 import {
   Copy as CopyIcon,
-  Check as CheckIcon,
   LifeBuoy,
   ThumbsDown,
   ThumbsUp,
   ChevronDown,
   ExternalLink,
-  Loader2,
 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { NotebookBanner } from "./NotebookBanner";
@@ -31,6 +29,7 @@ import {
 import IconChatGPT from "./icons/chatgpt";
 import IconClaude from "./icons/claude";
 import IconMCP from "./icons/mcp";
+import { HoverCorners } from "./ui/corner-box";
 
 /** Paths where the page already shows feedback (DocBodyChrome); skip duplicate here. */
 const pathsWithoutFooterWidgets = [
@@ -66,6 +65,7 @@ const pathsWithCopyAsMarkdownButton = [
   "/handbook",
   "/security",
   "/library",
+  "/enterprise",
 ];
 const isCustomerStory = (pathname: string) =>
   pathname.startsWith("/users/");
@@ -190,142 +190,140 @@ export const CopyMarkdownButton = () => {
   if (!shouldShow) return null;
 
   let buttonText = "Copy page";
-  let ButtonIcon = CopyIcon;
   if (copyState === "loading") {
     buttonText = "Copying...";
-    ButtonIcon = Loader2;
   } else if (copyState === "copied") {
     buttonText = "Copied!";
-    ButtonIcon = CheckIcon;
   } else if (copyState === "error") {
     buttonText = errorMessage;
   }
 
   return (
-    <div className="inline-flex overflow-hidden items-center rounded-md bg-secondary">
-      <button
-        type="button"
-        disabled={isDisabled || isError}
-        onClick={handleCopy}
+    <div className="group relative inline-flex items-center p-1 button-wrapper">
+      <HoverCorners />
+      <div
         className={cn(
-          "inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-secondary-foreground",
-          isDisabled || isError
-            ? "opacity-50 cursor-not-allowed"
-            : "cursor-pointer hover:bg-secondary/80",
+          "inline-flex h-[26px] items-stretch overflow-hidden rounded-[1px] border border-line-structure dark:border-line-cta bg-surface-bg text-text-secondary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
+          isDisabled || isError ? "opacity-70" : "",
           isError
-            ? "text-destructive-foreground bg-destructive hover:bg-destructive/80"
+            ? "border-destructive/50"
             : ""
         )}
       >
-        <ButtonIcon
-          className={cn("h-3 w-3", copyState === "loading" && "animate-spin")}
-        />
-        <span>{buttonText}</span>
-      </button>
-      <DropdownMenu modal={false}>
-        <DropdownMenuTrigger asChild>
-          <button
-            type="button"
-            disabled={isDisabled || isError}
-            className={cn(
-              "inline-flex items-center px-1 py-1 text-xs font-medium text-secondary-foreground border-l border-secondary-foreground/20",
-              isDisabled || isError
-                ? "opacity-50 cursor-not-allowed"
-                : "cursor-pointer hover:bg-secondary/80",
-              isError
-                ? "text-destructive-foreground bg-destructive hover:bg-destructive/80 border-destructive-foreground/20"
-                : ""
-            )}
-          >
-            <ChevronDown className="w-3 h-3" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[200px]">
-          <DropdownMenuItem
-            onClick={handleCopy}
-            disabled={isDisabled}
-            className="flex gap-3 items-center py-1.5 px-3 cursor-pointer"
-          >
-            <CopyIcon className="w-4 h-4 shrink-0" />
-            <div className="flex flex-col">
-              <span className="font-medium">Copy page</span>
-              <span className="text-xs text-muted-foreground">
-                Copy page as Markdown for LLMs
-              </span>
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <a
-              href={getChatGPTUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleChatGPTClick}
-              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
+        <button
+          type="button"
+          disabled={isDisabled || isError}
+          onClick={handleCopy}
+          className={cn(
+            "inline-flex items-center px-[8px] py-0.75 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] transition-colors min-w-[80px]",
+            isDisabled || isError
+              ? "cursor-not-allowed"
+              : "cursor-pointer hover:bg-surface-1/80"
+          )}
+        >
+          {buttonText}
+        </button>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Open copy options"
+              disabled={isError}
+              className={cn(
+                "inline-flex w-[24px] items-center justify-center border-l border-line-structure transition-colors",
+                isError ? "cursor-not-allowed" : "cursor-pointer hover:bg-surface-1/80"
+              )}
             >
-              <IconChatGPT className="w-4 h-4 shrink-0" />
-              <div className="flex flex-col flex-1 min-w-0">
-                <span className="flex gap-1 items-center font-medium">
-                  Open in ChatGPT
-                  <ExternalLink
-                    className="h-[1em] w-[1em] shrink-0"
-                    strokeWidth={1.7}
-                  />
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Ask questions about this page
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[220px]">
+            <DropdownMenuItem
+              onClick={handleCopy}
+              disabled={isDisabled}
+              className="cursor-pointer"
+            >
+              <CopyIcon className="w-3.5 h-3.5 shrink-0" />
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="font-medium text-text-primary">Copy page</span>
+                <span className="text-[11px] text-text-tertiary leading-[1.3]">
+                  Copy page as Markdown for LLMs
                 </span>
               </div>
-            </a>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <a
-              href={getClaudeUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleClaudeClick}
-              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
-            >
-              <IconClaude className="w-4 h-4 shrink-0" />
-              <div className="flex flex-col flex-1 min-w-0">
-                <span className="flex gap-1 items-center font-medium">
-                  Open in Claude
-                  <ExternalLink
-                    className="h-[1em] w-[1em] shrink-0"
-                    strokeWidth={1.7}
-                  />
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Ask questions about this page
-                </span>
-              </div>
-            </a>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link
-              href="/docs/docs-mcp"
-              onClick={() => {
-                capture("copy_page", { type: "mcp" });
-              }}
-              target="_blank"
-              className="flex gap-3 items-center py-1.5 px-3 cursor-pointer no-underline"
-            >
-              <IconMCP className="w-4 h-4 shrink-0" />
-              <div className="flex flex-col flex-1 min-w-0">
-                <span className="flex gap-1 items-center font-medium">
-                  Install Docs MCP server
-                  <ExternalLink
-                    className="h-[1em] w-[1em] shrink-0"
-                    strokeWidth={1.7}
-                  />
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Add to Cursor, Claude Code, VS Code, etc
-                </span>
-              </div>
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a
+                href={getChatGPTUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleChatGPTClick}
+                className="cursor-pointer no-underline"
+              >
+                <IconChatGPT className="w-3.5 h-3.5 shrink-0" />
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span className="flex gap-1 items-center font-medium text-text-primary">
+                    Open in ChatGPT
+                    <ExternalLink
+                      className="h-[1em] w-[1em] shrink-0"
+                      strokeWidth={1.7}
+                    />
+                  </span>
+                  <span className="text-[11px] text-text-tertiary leading-[1.3]">
+                    Ask questions about this page
+                  </span>
+                </div>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a
+                href={getClaudeUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleClaudeClick}
+                className="cursor-pointer no-underline"
+              >
+                <IconClaude className="w-3.5 h-3.5 shrink-0" />
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span className="flex gap-1 items-center font-medium text-text-primary">
+                    Open in Claude
+                    <ExternalLink
+                      className="h-[1em] w-[1em] shrink-0"
+                      strokeWidth={1.7}
+                    />
+                  </span>
+                  <span className="text-[11px] text-text-tertiary leading-[1.3]">
+                    Ask questions about this page
+                  </span>
+                </div>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                href="/docs/docs-mcp"
+                onClick={() => {
+                  capture("copy_page", { type: "mcp" });
+                }}
+                target="_blank"
+                className="cursor-pointer no-underline"
+              >
+                <IconMCP className="w-3.5 h-3.5 shrink-0" />
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span className="flex gap-1 items-center font-medium text-text-primary">
+                    Install Docs MCP server
+                    <ExternalLink
+                      className="h-[1em] w-[1em] shrink-0"
+                      strokeWidth={1.7}
+                    />
+                  </span>
+                  <span className="text-[11px] text-text-tertiary leading-[1.3]">
+                    Add to Cursor, Claude Code, VS Code, etc
+                  </span>
+                </div>
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 };
@@ -375,11 +373,13 @@ export const MainContentWrapper = (props) => {
 export const DocsSupport = () => {
   return (
     <div className="flex gap-3 items-center">
-      <Button variant="outline" size="sm" asChild>
-        <Link href="/support">
-          <span>Support</span>
-          <LifeBuoy className="ml-2 w-4 h-4" />
-        </Link>
+      <Button
+        variant="secondary"
+        size="small"
+        href="/support"
+        icon={<LifeBuoy className="w-3.25 h-3.25" />}
+      >
+        Support
       </Button>
     </div>
   );
@@ -449,22 +449,22 @@ export const DocsFeedback = () => {
       <span className="text-sm font-medium">Was this page helpful?</span>
       <div className="flex gap-2">
         <Button
-          variant="outline"
-          size="sm"
+          variant="secondary"
+          size="small"
           onClick={() => handleFeedbackSelection("positive")}
           disabled={submitting}
+          icon={<ThumbsUp className="w-3.25 h-3.25" />}
         >
-          <ThumbsUp className="w-4 h-4 text-green-600" />
-          <span className="sr-only">Yes</span>
+          Good
         </Button>
         <Button
-          variant="outline"
-          size="sm"
+          variant="secondary"
+          size="small"
           onClick={() => handleFeedbackSelection("negative")}
           disabled={submitting}
+          icon={<ThumbsDown className="w-3.25 h-3.25" />}
         >
-          <ThumbsDown className="w-4 h-4 text-red-600" />
-          <span className="sr-only">No</span>
+          Bad
         </Button>
       </div>
 

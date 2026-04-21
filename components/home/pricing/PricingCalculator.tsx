@@ -12,6 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { CornerBox } from "@/components/ui/corner-box";
+import { Heading } from "@/components/ui/heading";
 import {
   Select,
   SelectContent,
@@ -21,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 import { InfoIcon } from "lucide-react";
+import { Text } from "@/components/ui";
 
 // Graduated pricing tiers
 const pricingTiers = [
@@ -142,92 +145,94 @@ export function PricingCalculator({
   };
 
   return (
-    <div className="mx-auto max-w-4xl" id="pricing-calculator">
-      <h2 className="mb-2 text-2xl font-bold tracking-tight leading-10 text-primary">
+    <div id="pricing-calculator">
+      <Heading as="h2" size="normal" className="mb-4 text-left">
         Pricing Calculator
-      </h2>
-      <p className="mb-6 text-base text-muted-foreground">
+      </Heading>
+      <Text className="mb-4 text-left">
         Enter your monthly billable units to see the graduated pricing
         breakdown.
-
-
-      </p>
+      </Text>
       <Card>
-        <CardContent className="pt-6 space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="plan" className="block">
-                Plan
-              </Label>
-              <Select value={selectedPlan} onValueChange={handlePlanChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a plan" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PLAN_CONFIGS.map((plan) => (
-                    <SelectItem key={plan.name} value={plan.name}>
-                      {plan.name}{" "}
-                      {plan.baseFee > 0 ? `($${plan.baseFee}/month)` : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <div className="flex gap-1 items-center">
-                <Label htmlFor="events">Monthly Units</Label>
-                <Link
-                  href="/docs/administration/billable-units"
-                  target="_blank"
-                >
-                  <InfoIcon className="size-3" />
-                </Link>
+        <CardContent className="p-6 space-y-6">
+          <div className="grid gap-6 md:grid-cols-2 md:items-stretch">
+            <div className="flex flex-col gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="plan" className="block">
+                  Plan
+                </Label>
+                <Select value={selectedPlan} onValueChange={handlePlanChange}>
+                  <SelectTrigger id="plan">
+                    <SelectValue placeholder="Select a plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PLAN_CONFIGS.map((plan) => (
+                      <SelectItem key={plan.name} value={plan.name}>
+                        {plan.name}{" "}
+                        {plan.baseFee > 0 ? `($${plan.baseFee}/month)` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Input
-                id="events"
-                type="text"
-                value={monthlyEvents}
-                onChange={handleEventsChange}
-                placeholder="Enter number of units per month"
-              />
+              <div className="space-y-2">
+                <div className="flex gap-1 items-center">
+                  <Label htmlFor="events">Monthly Units</Label>
+                  <Link
+                    href="/docs/administration/billable-units"
+                    target="_blank"
+                  >
+                    <InfoIcon className="size-3" />
+                  </Link>
+                </div>
+                <Input
+                  id="events"
+                  type="text"
+                  value={monthlyEvents}
+                  onChange={handleEventsChange}
+                  placeholder="Enter number of units per month"
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="p-4 rounded-lg border bg-secondary sm:p-6">
-            {currentBaseFee > 0 ? (
-              <div className="text-center">
-                <div className="flex flex-col gap-2 justify-center items-center text-base font-medium sm:flex-row sm:gap-4 sm:text-lg">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-primary sm:text-2xl">
-                      {formatCurrency(currentBaseFee)}
+            <CornerBox className="p-4 bg-surface-1 sm:p-6 flex items-center justify-center">
+              {currentBaseFee > 0 ? (
+                <div className="w-full text-center">
+                  <div className="flex flex-col gap-3 justify-center items-center text-base font-medium sm:flex-row sm:gap-4 sm:text-lg">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-primary sm:text-2xl">
+                        {formatCurrency(currentBaseFee)}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {selectedPlan} Base
+                      </div>
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {selectedPlan} Base
+                    <div className="text-lg text-muted-foreground sm:text-xl">
+                      +
                     </div>
-                  </div>
-                  <div className="text-lg text-muted-foreground sm:text-xl">+</div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-primary sm:text-2xl">
-                      {formatCurrency(calculatedPrice)}
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-primary sm:text-2xl">
+                        {formatCurrency(calculatedPrice)}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        Usage
+                      </div>
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      Usage
+                    <div className="text-lg text-muted-foreground sm:text-xl">
+                      =
                     </div>
-                  </div>
-                  <div className="text-lg text-muted-foreground sm:text-xl">=</div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-primary sm:text-2xl">
-                      {formatCurrency(calculatedPrice + currentBaseFee)}
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      Total / Month
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-primary sm:text-2xl">
+                        {formatCurrency(calculatedPrice + currentBaseFee)}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        Total / Month
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center">
-                <div className="text-center">
+              ) : (
+                <div className="w-full text-center">
                   <div className="text-2xl font-bold sm:text-3xl text-primary">
                     {formatCurrency(calculatedPrice)}
                   </div>
@@ -235,74 +240,74 @@ export function PricingCalculator({
                     Total Usage Cost / Month
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </CornerBox>
           </div>
 
           {/* Breakdown */}
           <div className="space-y-3">
             <div className="font-medium">Pricing tiers breakdown:</div>
-            <div className="overflow-hidden rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-left">Tier</TableHead>
-                    <TableHead className="text-right">Rate</TableHead>
-                    <TableHead className="text-right">
-                      <div className="flex gap-1 justify-end items-center">
-                        Your Units
-                        <Link aria-label="Learn more about billable units"
-                          href="/docs/administration/billable-units"
-                          target="_blank"
-                        >
-                          <InfoIcon className="size-3" />
-                        </Link>
-                      </div>
-                    </TableHead>
-                    <TableHead className="text-right">Cost</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pricingBreakdown.map((breakdown, index) => {
-                    const { tier, eventsInTier, costForTier, tierRate } =
-                      breakdown;
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left">Tier</TableHead>
+                  <TableHead className="text-right">Rate</TableHead>
+                  <TableHead className="text-right">
+                    <div className="flex gap-1 justify-end items-center">
+                      Your Units
+                      <Link
+                        aria-label="Learn more about billable units"
+                        href="/docs/administration/billable-units"
+                        target="_blank"
+                      >
+                        <InfoIcon className="size-3" />
+                      </Link>
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-right">Cost</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pricingBreakdown.map((breakdown, index) => {
+                  const { tier, eventsInTier, costForTier, tierRate } =
+                    breakdown;
 
-                    return (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">
-                          {tier.description}
-                        </TableCell>
-                        <TableCell className="text-right">{tierRate}</TableCell>
-                        <TableCell className="text-right">
-                          {eventsInTier > 0 ? formatNumber(eventsInTier) : "—"}
-                        </TableCell>
-                        <TableCell className="font-medium text-right">
-                          {eventsInTier > 0 ? formatCurrency(costForTier) : "—"}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {/* Total row */}
-                  <TableRow className="border-t-2 bg-muted/30">
-                    <TableCell className="font-semibold">Total</TableCell>
-                    <TableCell className="font-semibold text-right">
-                      {(() => {
-                        const totalUnits = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
-                        if (totalUnits === 0) return "—";
-                        const avgRate = (calculatedPrice / totalUnits) * 100000;
-                        return formatCurrency(avgRate) + "/100k";
-                      })()}
-                    </TableCell>
-                    <TableCell className="font-semibold text-right">
-                      {monthlyEvents}
-                    </TableCell>
-                    <TableCell className="font-semibold text-right text-primary">
-                      {formatCurrency(calculatedPrice)}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
+                  return (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">
+                        {tier.description}
+                      </TableCell>
+                      <TableCell className="text-right">{tierRate}</TableCell>
+                      <TableCell className="text-right">
+                        {eventsInTier > 0 ? formatNumber(eventsInTier) : "—"}
+                      </TableCell>
+                      <TableCell className="font-medium text-right">
+                        {eventsInTier > 0 ? formatCurrency(costForTier) : "—"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {/* Total row */}
+                <TableRow className="border-t-2 bg-surface-1">
+                  <TableCell className="font-semibold">Total</TableCell>
+                  <TableCell className="font-semibold text-right">
+                    {(() => {
+                      const totalUnits =
+                        parseInt(monthlyEvents.replace(/,/g, "")) || 0;
+                      if (totalUnits === 0) return "—";
+                      const avgRate = (calculatedPrice / totalUnits) * 100000;
+                      return formatCurrency(avgRate) + "/100k";
+                    })()}
+                  </TableCell>
+                  <TableCell className="font-semibold text-right">
+                    {monthlyEvents}
+                  </TableCell>
+                  <TableCell className="font-semibold text-right text-primary">
+                    {formatCurrency(calculatedPrice)}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
