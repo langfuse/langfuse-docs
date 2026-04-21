@@ -21,16 +21,6 @@ export const cloudRegionSelectorOrder: CloudRegionKey[] = [
   "eu",
 ];
 
-export const continentHostMapping: Record<string, string> = {
-  AF: cloudRegions.eu.url, // Africa
-  AN: cloudRegions.eu.url, // Antarctica
-  AS: cloudRegions.eu.url, // Asia
-  EU: cloudRegions.eu.url, // Europe
-  NA: cloudRegions.us.url, // North America
-  OC: cloudRegions.eu.url, // Oceania
-  SA: cloudRegions.us.url, // South America
-};
-
 export const createInitialCloudRegionSignInState = () =>
   Object.fromEntries(
     Object.keys(cloudRegions).map((key) => [key, false])

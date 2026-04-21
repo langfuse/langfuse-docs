@@ -5,7 +5,7 @@ const faqs: FAQItem[] = [
   {
     question: "What is the easiest way to try Langfuse?",
     answer:
-      "You can view the [public example project](/demo) or sign up for a [free account](https://cloud.langfuse.com) to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.",
+      "You can view the [public example project](/demo) or sign up for a [free account](/cloud) to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.",
   },
   {
     question: "Can I self-host Langfuse for free?",
