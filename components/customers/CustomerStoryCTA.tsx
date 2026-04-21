@@ -6,7 +6,7 @@ import { Text } from "@/components/ui/text";
 export const CustomerStoryCTA = () => {
   return (
     <div className="mt-14 not-prose">
-      <CornerBox className="flex flex-col items-center gap-6 px-6 py-10 sm:px-10">
+      <CornerBox hoverStripes className="flex flex-col items-center gap-6 px-6 py-10 sm:px-10">
         <Heading as="h3" size="normal" className="text-center">
           Ready to get started with Langfuse?
         </Heading>

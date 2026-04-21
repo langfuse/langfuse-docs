@@ -1,7 +1,10 @@
+import { CornerBox, cornersFromNeighbors } from "@/components/ui/corner-box";
+import { Text } from "@/components/ui/text";
+
 interface ImpactItem {
   area: string;
   impact: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   learnMore?: { title: string; href: string }[];
 }
 
@@ -11,47 +14,50 @@ interface ImpactChartProps {
 
 export const ImpactChart = ({ items }: ImpactChartProps) => {
   return (
-    <div className="bg-card rounded-lg border border-border p-6 my-4">
-      <div className="space-y-2">
-        {items.map((item, index) => (
-          <div key={index}>
-            <div className="flex items-baseline">
-              <div className="flex-shrink-0 w-10">
-                <span className="font-mono text-sm text-muted-foreground">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </div>
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="md:col-span-1">
-                  <h4 className="font-semibold text-foreground my-0">{item.area}</h4>
+    <div className="not-prose my-8">
+      {items.map((item, index) => (
+        <CornerBox
+          key={index}
+          hoverStripes
+          corners={cornersFromNeighbors({
+            top: index > 0,
+            bottom: index < items.length - 1,
+          })}
+          className="flex items-baseline gap-3 p-4 -mt-px"
+        >
+          <span className="shrink-0 font-mono text-[12px] text-text-tertiary leading-[150%]">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
+            <Text
+              size="s"
+              className="text-left font-medium text-text-secondary"
+            >
+              {item.area}
+            </Text>
+            <div>
+              <Text size="s" className="text-left">
+                {item.impact}
+              </Text>
+              {item.learnMore && item.learnMore.length > 0 && (
+                <div className="flex flex-col gap-1 mt-2">
+                  {item.learnMore.map((link, linkIndex) => (
+                    <a
+                      key={linkIndex}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[12px] text-text-tertiary hover:text-text-secondary underline underline-offset-4 decoration-line-structure transition-colors"
+                    >
+                      {link.title}
+                    </a>
+                  ))}
                 </div>
-                <div className="md:col-span-1">
-                  <p className="leading-relaxed">{item.impact}</p>
-                  {item.learnMore && item.learnMore.length > 0 && (
-                    <div className="mt-3">
-                      <div className="w-12 border-t border-border mb-2"></div>
-                      <div className="flex flex-col gap-1">
-                        {item.learnMore.map((link, linkIndex) => (
-                          <a
-                            key={linkIndex}
-                            href={link.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
-                          >
-                            {link.title}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
-            {index < items.length - 1 && <hr className="mt-2 border-border" />}
           </div>
-        ))}
-      </div>
+        </CornerBox>
+      ))}
     </div>
   );
 };
