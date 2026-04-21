@@ -359,11 +359,14 @@ export const MainContentWrapper = (props) => {
           pathname === path || (pathname ?? "").startsWith(path + "/")
       ) ? (
         <div
-          className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 justify-between sm:items-center px-4 py-4 md:px-6 xl:px-8"
+          className="flex flex-col gap-2 px-4 py-4 md:px-6 xl:px-8"
           id="docs-feedback"
         >
-          <DocsFeedback key={pathname} />
-          <DocsSupport />
+          <span className="text-sm font-medium">Was this page helpful?</span>
+          <div className="flex items-center justify-between gap-2">
+            <DocsFeedback key={pathname} />
+            <DocsSupport />
+          </div>
         </div>
       ) : null}
     </>
@@ -445,8 +448,7 @@ export const DocsFeedback = () => {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:items-center">
-      <span className="text-sm font-medium">Was this page helpful?</span>
+    <div className="flex gap-2 items-center">
       <div className="flex gap-2">
         <Button
           variant="secondary"
