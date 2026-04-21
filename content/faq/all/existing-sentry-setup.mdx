@@ -72,7 +72,14 @@ For Python `sentry_sdk` v3+, which uses OTEL under the hood, use [Option B](#sha
 
 ### Option B: Shared TracerProvider [#shared-tracer-provider]
 
-If you need both Sentry's performance tracing **and** Langfuse, disable Sentry's automatic OTEL setup and configure a shared TracerProvider that includes both processors. This gives you distributed tracing across both tools.
+If you need both Sentry's performance tracing **and** Langfuse in the same distributed trace, disable Sentry's automatic OTEL setup and configure a shared TracerProvider that includes both processors.
+
+<Callout type="warning" title="Use Option B only when you want a shared distributed trace">
+  With Option B, Langfuse inherits the active OpenTelemetry context from
+  Sentry. Incoming `sentry-trace` headers can therefore change Langfuse trace
+  IDs and sampling decisions. If you want reliable standalone Langfuse traces
+  for each AI operation, prefer [Option C](#isolated-tracer-provider).
+</Callout>
 
 ```bash
 npm install @sentry/opentelemetry
@@ -126,6 +133,33 @@ Sentry.init({
 
 If you set this to `0.1`, only 10% of your LLM calls will appear in Langfuse. To send all traces to Langfuse while sampling for Sentry, use the [isolated TracerProvider](#isolated-tracer-provider) approach instead (Option C).
 
+#### Incoming `sentry-trace` Headers Also Affect Langfuse
+
+When `SentryPropagator` is enabled, backend requests continue the incoming
+Sentry distributed trace. Langfuse spans created in that context inherit both
+the upstream trace ID and the upstream sampling decision.
+
+- If the incoming trace is unsampled, the backend span can become non-recording and nothing will appear in Langfuse.
+- If multiple backend operations continue the same upstream trace, they can appear merged into a single Langfuse trace.
+
+If you want Langfuse to always create a separate trace for an AI workflow,
+prefer [Option C](#isolated-tracer-provider). If you need Option B for the rest
+of your app, you can detach a specific Langfuse-traced block by starting it in
+a fresh root context:
+
+```typescript
+import { context, ROOT_CONTEXT } from "@opentelemetry/api";
+import { startActiveObservation } from "@langfuse/tracing";
+
+await context.with(ROOT_CONTEXT, async () => {
+  await startActiveObservation("generateText", async () => {
+    // your Langfuse-traced AI call
+  });
+});
+```
+
+This deliberately breaks parentage to the incoming Sentry trace for that block.
+
 #### Filtering Langfuse Spans
 
 Langfuse already applies a default LLM-focused filter. In most Sentry setups, this means no extra filtering code is required.
@@ -161,7 +195,7 @@ If you omit any of these, Sentry's tracing may not work correctly.
 
 ### Option C: Isolated TracerProvider [#isolated-tracer-provider]
 
-If you don't need distributed tracing across Sentry and Langfuse spans, you can use a completely [isolated TracerProvider](/docs/observability/sdk/advanced-features#isolated-tracer-provider) for Langfuse. This is simpler to configure and avoids sampling conflicts.
+If you don't need distributed tracing across Sentry and Langfuse spans, you can use a completely [isolated TracerProvider](/docs/observability/sdk/advanced-features#isolated-tracer-provider) for Langfuse. This is the recommended setup for most AI applications because it keeps Langfuse traces independent from Sentry's sampling and propagation behavior.
 
 <LangTabs items={["JS/TS", "Python"]}>
 <Tab>
@@ -237,9 +271,21 @@ langfuse = Langfuse(tracer_provider=TracerProvider())
 
 #### Only some traces appear in Langfuse
 
-**Cause:** Sentry's `tracesSampleRate` is less than 1.0 and you're using Option B (shared provider).
+**Cause:** In Option B, Langfuse inherits Sentry's sampling decisions. This can come from Sentry's local `tracesSampleRate` or from an incoming `sentry-trace` header that was already unsampled upstream.
 
-**Solution:** Set `tracesSampleRate: 1.0` if you want all traces, or use Option C (isolated provider) to avoid the sampling issue.
+**Solution:** Set `tracesSampleRate: 1.0` if you want all traces and ensure upstream requests are sampled, or use Option C (isolated provider) to avoid the shared sampling issue entirely.
+
+#### No traces in Langfuse for requests coming from a Sentry-instrumented frontend
+
+**Cause:** In Option B, `SentryPropagator` continues the incoming `sentry-trace` header. If the upstream trace was unsampled, the backend span can be non-recording and Langfuse receives nothing.
+
+**Solution:** Prefer Option C if you want Langfuse to create its own traces. If you need Option B elsewhere, wrap the Langfuse-traced block in `context.with(ROOT_CONTEXT, ...)` to detach it from the incoming Sentry trace.
+
+#### Separate Langfuse traces appear merged into one trace
+
+**Cause:** In Option B, multiple backend operations can continue the same incoming `sentry-trace` header and therefore share the same trace ID.
+
+**Solution:** Prefer Option C for standalone Langfuse traces, or start the relevant Langfuse-traced block in a fresh `ROOT_CONTEXT` if you need to detach it from the incoming Sentry trace.
 
 ## AWS Lambda Considerations
 
