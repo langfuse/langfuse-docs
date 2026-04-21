@@ -150,7 +150,7 @@ export function Footer({ className }: { className?: string }) {
         <Text size="s" className="font-mono max-[390px]:text-[13px] text-left text-text-disabled">
           Design by{" "}
           <Link
-            href="https://altalogy.com"
+            href="https://altalogy.com/?ref=langfuse"
             target="_blank"
             rel="nofollow noreferrer"
             className={linkClassName}

@@ -128,20 +128,31 @@ function NavDropdownPanel({
 
 // ── Custom fixed-positioned dropdown ─────────────────────────────────────────
 
+type MegaMenuId = "product" | "resources";
+
 function NavDropdown({
+  id,
   label,
   links,
   featured,
+  openId,
+  setOpenId,
+  cancelScheduledClose,
+  scheduleClose,
 }: {
+  id: MegaMenuId;
   label: string;
   links: NavPanelLink[];
   featured: FeaturedItem;
+  openId: MegaMenuId | null;
+  setOpenId: React.Dispatch<React.SetStateAction<MegaMenuId | null>>;
+  cancelScheduledClose: () => void;
+  scheduleClose: () => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const open = openId === id;
   const [left, setLeft] = useState(0);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const updateLeft = useCallback(() => {
     if (triggerRef.current) {
@@ -149,28 +160,11 @@ function NavDropdown({
     }
   }, []);
 
-  const cancelScheduledClose = useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = null;
-    }
-  }, []);
-
-  const scheduleClose = useCallback(() => {
-    cancelScheduledClose();
-    closeTimerRef.current = setTimeout(() => {
-      setOpen(false);
-      closeTimerRef.current = null;
-    }, 160);
-  }, [cancelScheduledClose]);
-
   const openDropdown = useCallback(() => {
     cancelScheduledClose();
     updateLeft();
-    setOpen(true);
-  }, [cancelScheduledClose, updateLeft]);
-
-  useEffect(() => () => cancelScheduledClose(), [cancelScheduledClose]);
+    setOpenId(id);
+  }, [cancelScheduledClose, updateLeft, id, setOpenId]);
 
   useEffect(() => {
     if (!open) return;
@@ -180,22 +174,22 @@ function NavDropdown({
         !panelRef.current?.contains(e.target as Node)
       ) {
         cancelScheduledClose();
-        setOpen(false);
+        setOpenId(null);
       }
     }
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open, cancelScheduledClose]);
+  }, [open, cancelScheduledClose, setOpenId]);
 
   useEffect(() => {
     if (!open) return;
     const onScroll = () => {
       cancelScheduledClose();
-      setOpen(false);
+      setOpenId(null);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [open, cancelScheduledClose]);
+  }, [open, cancelScheduledClose, setOpenId]);
 
   useEffect(() => {
     if (!open) return;
@@ -209,19 +203,18 @@ function NavDropdown({
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         cancelScheduledClose();
-        setOpen(false);
+        setOpenId(null);
         triggerRef.current?.focus();
       }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, cancelScheduledClose]);
+  }, [open, cancelScheduledClose, setOpenId]);
 
   return (
     <div
       className="relative"
       onMouseEnter={openDropdown}
-      onMouseLeave={scheduleClose}
       onFocusCapture={openDropdown}
       onBlurCapture={(e) => {
         const next = e.relatedTarget as Node | null;
@@ -240,7 +233,7 @@ function NavDropdown({
         {label}
         <ChevronDown
           className={cn(
-            "h-3.5 w-3.5 opacity-60 transition-transform duration-150",
+            "h-3.5 w-3.5 opacity-60 transition-transform duration-150 ease-in-out",
             open && "rotate-180"
           )}
         />
@@ -250,11 +243,15 @@ function NavDropdown({
         ref={panelRef}
         aria-hidden={!open}
         className={cn(
-          "fixed z-50 transition-all duration-150 ease-out origin-top-left",
-          open ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-1 pointer-events-none"
+          "fixed z-50 ease-in-out will-change-[opacity,transform]",
+          // Instant hide avoids two mega menus fading over each other when switching tabs.
+          open
+            ? "pointer-events-auto opacity-100 translate-y-0 transition-[opacity,transform] duration-200"
+            : "pointer-events-none opacity-0 -translate-y-1 transition-[opacity,transform] duration-0"
         )}
         style={{
           top: "66px",
+          left,
         }}
       >
         <NavDropdownPanel links={links} featured={featured} />
@@ -270,10 +267,54 @@ export function NavLinks({
 }: {
   sectionNavData: SectionNavData[];
 }) {
+  const [openId, setOpenId] = useState<MegaMenuId | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelScheduledClose = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleClose = useCallback(() => {
+    cancelScheduledClose();
+    closeTimerRef.current = setTimeout(() => {
+      setOpenId(null);
+      closeTimerRef.current = null;
+    }, 140);
+  }, [cancelScheduledClose]);
+
+  useEffect(() => () => cancelScheduledClose(), [cancelScheduledClose]);
+
   return (
     <div className="flex overflow-x-auto gap-2 items-center lg:gap-4">
-      <NavDropdown label="Product" links={productLinks} featured={productFeatured} />
-      <NavDropdown label="Resources" links={resourcesLinks} featured={resourcesFeatured} />
+      <div
+        className="flex gap-2 items-center lg:gap-4"
+        onMouseEnter={cancelScheduledClose}
+        onMouseLeave={scheduleClose}
+      >
+        <NavDropdown
+          id="product"
+          label="Product"
+          links={productLinks}
+          featured={productFeatured}
+          openId={openId}
+          setOpenId={setOpenId}
+          cancelScheduledClose={cancelScheduledClose}
+          scheduleClose={scheduleClose}
+        />
+        <NavDropdown
+          id="resources"
+          label="Resources"
+          links={resourcesLinks}
+          featured={resourcesFeatured}
+          openId={openId}
+          setOpenId={setOpenId}
+          cancelScheduledClose={cancelScheduledClose}
+          scheduleClose={scheduleClose}
+        />
+      </div>
 
       {simpleLinks.map((link) => (
         <Link
