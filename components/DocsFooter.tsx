@@ -2,10 +2,11 @@
 
 import { useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useFooterItems } from "fumadocs-ui/utils/use-footer-items";
-import { Button } from "@/components/ui/button";
+import NextLink from "next/link";
 import { cn } from "@/lib/utils";
+import { HoverCorners } from "@/components/ui/corner-box";
 
 type FooterItem = {
   name: string;
@@ -52,32 +53,46 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
   if (!previous && !next) return null;
 
   return (
-    <div className={cn("grid grid-cols-2 gap-2", className)} {...props}>
+    <div
+      className={cn("flex flex-col sm:flex-row gap-2", className)}
+      {...props}
+    >
       {previous ? (
-        <Button
-          href={previous.url}
-          variant="secondary"
-          size="small"
-          className="w-auto"
-          wrapperClassName="justify-self-start"
-          icon={<ArrowLeft className="h-3.5 w-3.5" />}
-        >
-          {previous.name}
-        </Button>
-      ) : null}
+        <div className="relative flex items-center p-1 group button-wrapper flex-1 min-w-0">
+          <HoverCorners />
+          <NextLink
+            href={previous.url}
+            className="flex flex-col gap-1 w-full rounded-[2px] border border-line-structure dark:border-line-cta group-hover:border-line-cta bg-surface-bg px-3 py-2 no-underline transition-colors"
+          >
+            <span className="font-sans text-[13px] font-medium leading-[150%] text-text-primary truncate">
+              {previous.name}
+            </span>
+            <span className="flex items-center gap-0.5 font-sans text-[12px] text-text-tertiary">
+              <ChevronLeft className="h-3 w-3" />
+              Previous
+            </span>
+          </NextLink>
+        </div>
+      ) : (
+        <div className="hidden sm:block flex-1" />
+      )}
 
       {next ? (
-        <Button
-          href={next.url}
-          variant="secondary"
-          size="small"
-          className="w-auto"
-          wrapperClassName="col-start-2 justify-self-end"
-          icon={<ArrowRight className="h-3.5 w-3.5" />}
-          iconPosition="end"
-        >
-          {next.name}
-        </Button>
+        <div className="relative flex items-center p-1 group button-wrapper flex-1 min-w-0">
+          <HoverCorners />
+          <NextLink
+            href={next.url}
+            className="flex flex-col gap-1 w-full rounded-[2px] border border-line-structure dark:border-line-cta group-hover:border-line-cta bg-surface-bg px-3 py-2 no-underline transition-colors items-end text-right"
+          >
+            <span className="font-sans text-[13px] font-medium leading-[150%] text-text-primary truncate max-w-full">
+              {next.name}
+            </span>
+            <span className="flex items-center gap-0.5 font-sans text-[12px] text-text-tertiary">
+              Next
+              <ChevronRight className="h-3 w-3" />
+            </span>
+          </NextLink>
+        </div>
       ) : null}
     </div>
   );
