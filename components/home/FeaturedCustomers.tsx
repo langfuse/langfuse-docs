@@ -187,7 +187,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
                 />
               </svg>
             </a>
-            <Text size="s" className="text-left mt-0.5 line-clamp-2 min-h-[2lh] lg:line-clamp-1 lg:min-h-0 text-text-tertiary">
+            <Text size="s" className="text-left mt-0.5 line-clamp-2 min-h-[calc(2*1.5em)] lg:line-clamp-1 lg:min-h-0 text-text-tertiary">
               {story.description}
             </Text>
           </motion.div>
