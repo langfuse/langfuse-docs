@@ -19,7 +19,6 @@ import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import { cn } from "@/lib/utils";
 import { Image } from "./ui/image";
 import { Dialog, DialogContent } from "./ui/dialog";
-import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -215,13 +214,13 @@ export const CopyMarkdownButton = () => {
           disabled={isDisabled || isError}
           onClick={handleCopy}
           className={cn(
-            "inline-flex items-center px-[8px] py-0.75 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] transition-colors min-w-[80px]",
+            "inline-flex items-center px-[8px] py-0.75 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] transition-colors min-w-[80px] max-w-[160px] overflow-hidden",
             isDisabled || isError
               ? "cursor-not-allowed"
               : "cursor-pointer hover:bg-surface-1/80"
           )}
         >
-          {buttonText}
+          <span className="truncate">{buttonText}</span>
         </button>
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
@@ -352,8 +351,9 @@ export const MainContentWrapper = (props) => {
 
 
       {props.children}
-      {isCustomerStory(pathname ?? "") && <CustomerStoryCTA />}
-      <hr className="mx-4 my-4 border-t dark:border-neutral-800 md:mx-6 xl:mx-8" />
+      {!isCustomerStory(pathname ?? "") && (
+        <hr className="mx-4 my-4 border-t border-line-structure md:mx-6 xl:mx-8" />
+      )}
       {!pathsWithoutFooterWidgets.some(
         (path) =>
           pathname === path || (pathname ?? "").startsWith(path + "/")
