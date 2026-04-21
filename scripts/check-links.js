@@ -212,6 +212,16 @@ function extractNextJsLinks(content) {
 function extractObjectPropertyLinks(content) {
     const links = [];
 
+    // Strip fenced code blocks first. In MDX, authors frequently include
+    // illustrative JSON/TS snippets containing object literals like
+    //   { "url": "https://langfuse.com/docs/integrations/langgraph" }
+    // or
+    //   input: { path: "/api/process" }
+    // which are example content, not real links. Skipping them avoids noisy
+    // false positives. This strip is safe for .tsx/.ts sources (which don't
+    // use triple-backtick fences).
+    const scanContent = content.replace(/```[\s\S]*?```/g, '');
+
     // Keys that conventionally hold a URL/path in our codebase.
     // Keep this conservative so we don't pick up unrelated string properties.
     const patterns = [
@@ -222,7 +232,7 @@ function extractObjectPropertyLinks(content) {
     for (const regex of patterns) {
         let match;
         regex.lastIndex = 0;
-        while ((match = regex.exec(content)) !== null) {
+        while ((match = regex.exec(scanContent)) !== null) {
             const value = match[1].trim();
             if (!value || value.startsWith('#') || value.includes('${')) {
                 continue;
