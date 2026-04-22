@@ -252,11 +252,19 @@ def _self_close_void_tags(markdown: str) -> str:
     MDX requires all HTML tags to either have a matching close tag or be
     self-closing; Jupyter-generated content often contains bare `<br>`.
     Only operates outside fenced code blocks.
+
+    Handles bare (`<br>`), compact self-closing (`<br/>`), spaced
+    self-closing (`<br />`), and attributed (`<br class="foo">`) forms
+    idempotently without producing invalid `<br / />`.
     """
     lines = markdown.split("\n")
     fence_re = re.compile(r"^( {0,3})(`{3,}|~{3,})")
     fence_open: str | None = None
-    tag_re = re.compile(r"<(br|hr)(\s[^>]*)?>(?!\s*</\1>)", re.IGNORECASE)
+    # Match <br>, <br/>, <br />, and <br attrs...> (with optional trailing /)
+    # but skip `<br></br>` (already paired) via the negative lookahead.
+    tag_re = re.compile(
+        r"<(br|hr)((?:\s+[^>]*?)?)\s*/?\s*>(?!\s*</\1>)", re.IGNORECASE
+    )
     out: list[str] = []
     for line in lines:
         m = fence_re.match(line)
@@ -269,9 +277,36 @@ def _self_close_void_tags(markdown: str) -> str:
             out.append(line)
             continue
         if fence_open is None:
-            line = tag_re.sub(lambda mo: f"<{mo.group(1)}{mo.group(2) or ''} />", line)
+            line = tag_re.sub(
+                lambda mo: f"<{mo.group(1)}{(mo.group(2) or '').rstrip()} />",
+                line,
+            )
         out.append(line)
     return "\n".join(out)
+
+
+# Matches ANSI terminal color/style escape sequences. Two alternatives:
+#   1. With the ESC byte preserved (`\x1b[...m`) — strip even the reset `\x1b[m`.
+#   2. ESC-stripped remnant from nbconvert (`[...m`) — require at least one
+#      digit/semicolon so we never match plain markdown like `[msg]`, `[m.name]`,
+#      or link labels such as `[metadata](...)` / `[multi-modality docs](...)`.
+_ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*m|\[[0-9;]+m")
+
+
+def _strip_ansi_escapes(markdown: str) -> str:
+    """Remove ANSI terminal color/style escape sequences from cell outputs.
+
+    Some libraries (e.g. Traceloop, uptrain) emit ANSI-colored output to
+    stdout/stderr. nbconvert often drops the ESC byte (0x1b) but leaves the
+    bracket sequence like `[39m` or `[32m` intact, which then shows up as
+    literal noise in the rendered docs. Stripping these keeps generated
+    fenced code blocks clean and readable.
+
+    To avoid mangling markdown (e.g. link labels starting with `[m...]` or
+    list comprehensions like `[m for m in xs]`), the ESC-less branch of the
+    pattern requires at least one digit/semicolon between `[` and `m`.
+    """
+    return _ANSI_ESCAPE_RE.sub("", markdown)
 
 
 # Function to transform custom metadata, tabs, callouts, steps, and components
@@ -418,12 +453,15 @@ def transform_content_to_mdx(markdown_content, notebook_path: str = ""):
     content_for_processing = component_comment_pattern.sub(replace_component_comment, content_for_processing)
 
     # --- Stage 6: Normalize nbconvert output so MDX can parse it ---
-    # Strip pandas DataFrame `_repr_html_` blocks first — these contain CSS
+    # Strip ANSI color codes first so they don't end up inside the fenced
+    # output blocks as visible noise (e.g. `[39m`, `[32m`).
+    # Strip pandas DataFrame `_repr_html_` blocks next — these contain CSS
     # with `{ ... }` inside a `<style>` tag that MDX can't parse and would
     # otherwise confuse the indented-output detector below.
     # Then wrap 4-space-indented notebook cell outputs (which may contain
     # `{...}` or `<...>`) in explicit code fences, and self-close any bare
     # void HTML tags like `<br>` so acorn doesn't choke on them.
+    content_for_processing = _strip_ansi_escapes(content_for_processing)
     content_for_processing = _strip_pandas_html_outputs(content_for_processing)
     content_for_processing = _wrap_indented_outputs_in_fences(content_for_processing)
     content_for_processing = _escape_curly_in_blockquotes(content_for_processing)
