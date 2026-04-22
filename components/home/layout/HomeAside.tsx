@@ -142,7 +142,7 @@ export function HomeAside() {
       }}
     >
       <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 gap-4 rounded-sm bg-surface-1">
-        <AnchorProvider toc={items} single key={items.map((i) => i.id).join()}>
+        <AnchorProvider toc={items} single key={pathname}>
           <TocOnThisPage items={items} />
         </AnchorProvider>
         <TocCommunity className="border-t border-line-structure" />

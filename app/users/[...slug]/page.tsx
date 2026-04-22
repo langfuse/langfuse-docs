@@ -5,7 +5,7 @@ import { loadPage, buildSectionMetadata } from "@/lib/mdx-page";
 import { getMDXComponents } from "@/mdx-components";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
-import { HomeLayout } from "@/components/layout";
+import { ContentColumns } from "@/components/layout";
 
 type PageProps = {
   params: Promise<{ slug: string[] }>;
@@ -18,7 +18,7 @@ export default async function UserStoryPage(props: PageProps) {
   const { MDX } = result;
 
   return (
-    <HomeLayout footerClassName="xl:max-w-[680px]">
+    <ContentColumns footerClassName="xl:max-w-[680px]">
       <div className="mx-auto w-full max-w-[680px] px-4 py-6 md:px-0">
         <MainContentWrapper>
           <DocBodyChrome withProse>
@@ -26,7 +26,7 @@ export default async function UserStoryPage(props: PageProps) {
           </DocBodyChrome>
         </MainContentWrapper>
       </div>
-    </HomeLayout>
+    </ContentColumns>
   );
 }
 

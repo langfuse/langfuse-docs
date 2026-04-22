@@ -1,7 +1,9 @@
+import { PageChrome } from "@/components/layout";
+
 export default function UsersLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <PageChrome>{children}</PageChrome>;
 }

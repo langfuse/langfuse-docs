@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { usersSource } from "@/lib/source";
 import { loadPage, buildSectionMetadata } from "@/lib/mdx-page";
 import { getMDXComponents } from "@/mdx-components";
-import { HomeLayout } from "@/components/layout";
+import { ContentColumns } from "@/components/layout";
 
 export default async function UsersIndexPage() {
   const result = await loadPage(usersSource, []);
@@ -11,11 +11,11 @@ export default async function UsersIndexPage() {
   const { MDX } = result;
 
   return (
-    <HomeLayout footerClassName="md:max-w-none xl:max-w-none px-6 sm:px-6 md:px-6">
+    <ContentColumns footerClassName="md:max-w-none xl:max-w-none px-6 sm:px-6 md:px-6">
       <div className="mx-auto w-full px-6 py-8">
         <MDX components={getMDXComponents()} />
       </div>
-    </HomeLayout>
+    </ContentColumns>
   );
 }
 
