@@ -5,10 +5,10 @@ showInCustomerIndex: false
 ---
 
 import { CustomerHoverListWrapper } from "@/components/customers/CustomerHoverListWrapper";
-import { CustomerAdoptersList } from "@/components/customers/CustomerAdoptersList";
 import { TestimonialsGrid } from "@/components/home/TestimonialsGrid";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 import { TextHighlight } from "@/components/ui/text-highlight";
+import AdoptersTable from "@/components-mdx/adopters-table.mdx";
 
 <div>
   <div className="mb-8">
@@ -25,7 +25,10 @@ import { TextHighlight } from "@/components/ui/text-highlight";
     More coming soon! Thousands of teams are building on Langfuse – we are just getting started telling their stories.
   </div>
 
-  <CustomerAdoptersList />
+  <div className="mt-12 prose prose-sm max-w-none">
+    <h2 id="adopters" className="font-analog text-[18px] text-text-primary mb-2">Adopters</h2>
+    <AdoptersTable />
+  </div>
 
   {/* Not used right now; keeping this block for potential future reuse.
   <div className="mt-24">
