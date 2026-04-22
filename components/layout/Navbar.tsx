@@ -30,7 +30,7 @@ export function Navbar() {
       <nav className="flex mx-auto h-full border-b max-w-360 border-line-structure">
         <div className={cn(cornersStyle, 'pr-0 lg:max-w-[240px] lg:pr-px')}>
           <div className={cn(contentStyle, 'rounded-r-none lg:rounded-r-sm')}>
-            <Logo />
+            <Logo showAffiliation />
           </div>
         </div>
         <div className={cn(cornersStyle, 'hidden relative px-0 lg:flex')}>
