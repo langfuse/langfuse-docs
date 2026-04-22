@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-const REPO = "langfuse/langfuse.com";
+const REPO = "langfuse/langfuse-docs";
 
 export function BrokenLinkIssue() {
   const [href, setHref] = useState<string>(
