@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as z from "zod/v3";
+import { z } from "zod";
 
 export const runtime = "edge";
 

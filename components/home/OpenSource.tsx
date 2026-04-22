@@ -1,405 +1,109 @@
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import Changelog, { type ChangelogItem } from "./Changelog";
-import { HomeSection } from "./components/HomeSection";
-import { Header } from "../Header";
-import ShimmerButton from "../magicui/shimmer-button";
-import IconGithub from "../icons/github";
-import { StarCount } from "../GitHubBadge";
-import { Button } from "../ui/button";
+import Image from "next/image";
+import { HomeSection } from "@/components/home/HomeSection";
+import { CornerBox, Heading, TextHighlight } from "@/components/ui";
+import { IntegrationLabel } from "@/components/ui/integration-label";
+import { Text } from "@/components/ui/text";
+import { BulletList } from "./BulletList";
 
-import discussionsData from "../../src/langfuse_github_discussions.json";
-import IconAWS from "../icons/aws";
-import IconAzure from "../icons/azure";
-import IconGCP from "../icons/gcp";
-import IconDocker from "../icons/docker";
-import IconKubernetes from "../icons/kubernetes";
+const cards = [
+  {
+    title: "Self-host at Scale",
+    labels: [
+      {
+        label: "Docker Compose",
+        href: "/self-hosting/deployment/docker-compose",
+        icon: <Image src="/images/integrations/docker.svg" alt="" width={18} height={18} />,
+      },
+      {
+        label: "Kubernetes (Helm)",
+        href: "/self-hosting/deployment/kubernetes-helm",
+        icon: <Image src="/images/integrations/kubernetes.svg" alt="" width={18} height={18} />,
+      },
+      {
+        label: "AWS (Terraform)",
+        href: "/self-hosting/deployment/aws",
+        icon: <Image src="/images/integrations/aws.svg" alt="" width={18} height={18} />,
+      },
+      {
+        label: "GCP (Terraform)",
+        href: "/self-hosting/deployment/gcp",
+        icon: <Image src="/images/integrations/gcp.svg" alt="" width={18} height={18} />,
+      },
+      {
+        label: "Azure (Terraform)",
+        href: "/self-hosting/deployment/azure",
+        icon: <Image src="/images/integrations/microsoft_icon.svg" alt="" width={18} height={18} />,
+      },
+    ],
+  },
+  {
+    title: "MIT License",
+    bullets: [
+      { label: "All product features MIT licensed", href: "/self-hosting" },
+      { label: "Scales to billions of monthly events", href: "/self-hosting/configuration/scaling" },
+      { label: "Fork, modify, contribute", href: "https://github.com/langfuse/langfuse" },
+    ],
+  },
+  {
+    title: "APIs & Exports",
+    bullets: [
+      { label: "REST APIs for everything", href: "/docs/api-and-data-platform/features/public-api" },
+      { label: "Query SDK", href: "/docs/api-and-data-platform/features/query-via-sdk" },
+      { label: "S3 blob storage Export", href: "/docs/api-and-data-platform/features/export-to-blob-storage" },
+    ],
+  },
+  {
+    title: "Active OSS Community",
+    bullets: [
+      { label: "22,000+ GitHub stars", href: "https://github.com/langfuse/langfuse" },
+      { label: "5,000+ Discord members", href: "https://langfuse.com/discord" },
+      { label: "Weekly releases and community hours", href: "/changelog" },
+    ],
+  },
+];
 
-// Discussion item interface
-interface Discussion {
-  number: number;
-  title: string;
-  href: string;
-  created_at: string;
-  updated_at: string;
-  upvotes: number;
-  comment_count: number;
-  resolved: boolean;
-  labels: string[];
-  author: {
-    login: string;
-    html_url: string;
-  };
-  category: string;
-}
-
-// Individual discussion item component
-function DiscussionItem({ discussion }: { discussion: Discussion }) {
+export const OpenSource = () => {
   return (
-    <div className="flex flex-col space-y-1 p-3 border-b border-border/10 text-xs">
-      <div className="font-medium text-foreground/30 truncate leading-relaxed">
-        {discussion.title}
-      </div>
-      <div className="flex items-center justify-between text-foreground/20">
-        <span className="truncate max-w-[60%]">@{discussion.author.login}</span>
-        <div className="flex items-center space-x-2 text-[10px]">
-          {discussion.resolved && <span className="text-green-500/50">✓</span>}
-          <span>{discussion.upvotes}↑</span>
-          <span>{discussion.comment_count}💬</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Scrolling discussions background component
-function ScrollingDiscussions({
-  discussions,
-  speed = "30s",
-}: {
-  discussions: Discussion[];
-  speed?: string;
-}) {
-  return (
-    <div className="absolute inset-0 overflow-hidden opacity-50 pointer-events-none">
-      <div
-        className="space-y-0"
-        style={
-          {
-            "--gap": "0px",
-            animation: `marquee-vertical ${speed} linear infinite reverse`,
-          } as React.CSSProperties
-        }
-      >
-        {/* Duplicate discussions to create seamless loop */}
-        {[...discussions, ...discussions].map((discussion, index) => (
-          <DiscussionItem
-            key={`${discussion.number}-${index}`}
-            discussion={discussion}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// API response interface
-interface ReleaseData {
-  repo: string;
-  latestRelease?: string;
-  publishedAt?: string;
-  url?: string;
-}
-
-// Reusable StatBox component
-interface StatBoxProps {
-  title: string;
-  mainValue: string;
-  subtitle?: string;
-  linkHref: string;
-  linkText?: string;
-  isExternal?: boolean;
-  discussions?: Discussion[];
-}
-
-function StatBox({
-  title,
-  mainValue,
-  subtitle,
-  linkHref,
-  linkText = "View all →",
-  isExternal = false,
-  discussions,
-}: StatBoxProps) {
-  const linkProps = isExternal
-    ? { target: "_blank", rel: "noopener noreferrer" }
-    : {};
-
-  return (
-    <div className="rounded border bg-card overflow-hidden h-full flex flex-col">
-      {/* Title Section */}
-      <div className="px-5 py-2 text-center border-b text-xs sm:text-base font-medium">
-        <h3>{title}</h3>
+    <HomeSection id="open-source" className="pt-[120px]">
+      <div className="flex flex-col gap-4 items-start mb-10">
+        <Heading className="text-left max-w-[12ch] sm:max-w-none">
+          <TextHighlight>Open Platform.</TextHighlight> Open Source.
+        </Heading>
+        <Text className="text-left max-w-[48ch]">
+          We are huge fans of open standards and data portability. Langfuse won&apos;t lock in your data, ever.
+        </Text>
       </div>
 
-      {/* Main Content Section with Background Discussions */}
-      <div className="flex-1 relative">
-        {/* Background Discussions */}
-        {discussions && discussions.length > 0 && (
-          <ScrollingDiscussions discussions={discussions} />
-        )}
-
-        {/* Foreground Content */}
-        <div className="relative z-10 flex flex-col justify-center items-center space-y-1 px-2 py-4 h-full">
-          <div className="text-center px-3 py-2">
-            <div className="font-bold text-primary text-3xl sm:text-4xl">
-              {mainValue}
-            </div>
-            {subtitle && (
-              <div className="text-sm text-primary/70">{subtitle}</div>
-            )}
-          </div>
-          <Link
-            href={linkHref}
-            className="text-sm text-primary/70 hover:text-primary bg-background/30 backdrop-blur-[1px] px-2 py-1 rounded transition-all hover:bg-background/50"
-            {...linkProps}
-          >
-            {linkText}
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const supportDiscussions =
-  discussionsData.categories
-    .find((cat) => cat.category === "Support")
-    ?.discussions.sort(
-      (a, b) =>
-        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    ) || [];
-const supportDiscussionsTop50 = supportDiscussions.slice(0, 20);
-
-const ideasDiscussions =
-  discussionsData.categories
-    .find((cat) => cat.category === "Ideas")
-    ?.discussions.sort(
-      (a, b) =>
-        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    ) || [];
-
-const ideasDiscussionsTop50 = ideasDiscussions.slice(0, 20);
-
-// Calculate metrics
-const supportCount = supportDiscussions.length;
-const ideasCount = ideasDiscussions.length;
-
-export default function OpenSource({ changelogItems }: { changelogItems?: ChangelogItem[] }) {
-  const [releaseData, setReleaseData] = useState<ReleaseData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Fetch latest release data
-  useEffect(() => {
-    const fetchReleaseData = async () => {
-      try {
-        const response = await fetch("/api/latest-releases");
-        if (response.ok) {
-          const data: ReleaseData[] = await response.json();
-          const langfuseRelease = data.find(
-            (release) => release.repo === "langfuse/langfuse"
-          );
-          setReleaseData(langfuseRelease || null);
-        }
-      } catch (error) {
-        console.error("Failed to fetch release data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchReleaseData();
-  }, []);
-
-  // Format time difference
-  const formatTimeDiff = (date: Date | null) => {
-    if (!date) return "no activity";
-    const now = new Date();
-    const diffHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-    );
-    if (diffHours < 24) return `${diffHours} hours ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
-  };
-
-  return (
-    <HomeSection className="flex flex-col items-center">
-      <Header
-        title="Proudly Open Source"
-        description={
-          <span>
-            Langfuse is committed to open source. You can also run it{" "}
-            <Link
-              href="/self-hosting/deployment/docker-compose"
-              className="underline"
+      <div className="grid grid-cols-1 sm:grid-cols-2">
+        {cards.map((card) => {
+          return (
+            <CornerBox
+              key={card.title}
+              hoverStripes
+              className="flex flex-col gap-1 p-3 -mt-px -ml-px sm:p-4"
             >
-              locally
-            </Link>{" "}
-            or{" "}
-            <Link href="/self-hosting" className="underline">
-              self-hosted
-            </Link>
-            .
-          </span>
-        }
-        className="mb-0"
-      />
-
-      <Link href="https://github.com/langfuse/langfuse">
-        <ShimmerButton borderRadius="0.25rem" className="mt-11">
-          <div className="flex gap-4 items-center whitespace-pre-wrap bg-gradient-to-b from-white from-30% to-gray-300/70 bg-clip-text text-center text-md font-semibold leading-none tracking-tight text-transparent">
-            <IconGithub className="text-white h-9 w-9" />
-            <span>langfuse/langfuse:</span>
-            <StarCount />
-            <span>⭐️</span>
-          </div>
-        </ShimmerButton>
-      </Link>
-
-      <div className="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-3 w-full max-w-6xl mx-auto px-5">
-        <Changelog items={changelogItems ?? []} />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <StatBox
-            title="Latest Release"
-            mainValue={
-              isLoading ? "loading..." : releaseData?.latestRelease || "unknown"
-            }
-            subtitle={
-              isLoading
-                ? ""
-                : formatTimeDiff(
-                    releaseData?.publishedAt
-                      ? new Date(releaseData.publishedAt)
-                      : null
-                  )
-            }
-            linkHref={
-              releaseData?.url ||
-              "https://github.com/langfuse/langfuse/releases"
-            }
-            isExternal={true}
-            linkText="View on GitHub →"
-          />
-
-          {/* Self-Host Langfuse Card */}
-          <div className="rounded border bg-card overflow-hidden h-full flex flex-col">
-            {/* Title Section */}
-            <div className="px-5 py-2 text-center border-b text-xs sm:text-base font-medium">
-              <h3>Self-Host Langfuse</h3>
-            </div>
-
-            {/* Main Content Section */}
-            <div className="flex-1 relative">
-              {/* Background Pattern */}
-              <div className="absolute inset-0 opacity-10 pointer-events-none">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/10"></div>
-                <div className="absolute top-4 right-4 text-6xl opacity-20">
-                  🚀
+              <Text className="font-medium text-left text-text-secondary">
+                {card.title}
+              </Text>
+              {card.labels ? (
+                <div className="flex flex-col flex-wrap gap-2 justify-start items-start mt-1 md:grid md:grid-cols-2">
+                  {card.labels.map((item) => (
+                    <IntegrationLabel
+                      key={item.label}
+                      href={item.href}
+                      label={item.label}
+                      icon={item.icon}
+                      className="justify-start"
+                    />
+                  ))}
                 </div>
-                <div className="absolute bottom-4 left-4 text-4xl opacity-15">
-                  ⚡
-                </div>
-              </div>
-
-              {/* Foreground Content */}
-              <div className="relative z-10 flex flex-col justify-center items-center space-y-3 px-3 py-4 h-full">
-                {/* Deployment Options */}
-                <div className="space-y-2 w-full">
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start h-auto py-2"
-                  >
-                    <Link href="/self-hosting/deployment/docker-compose">
-                      <span className="flex items-center gap-2">
-                        <span>
-                          <IconDocker />
-                        </span>
-                        Docker Compose
-                      </span>
-                    </Link>
-                  </Button>
-
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start h-auto py-2"
-                  >
-                    <Link href="/self-hosting/deployment/kubernetes-helm">
-                      <span className="flex items-center gap-2">
-                        <span>
-                          <IconKubernetes />
-                        </span>
-                        Kubernetes (Helm)
-                      </span>
-                    </Link>
-                  </Button>
-
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start h-auto py-2"
-                  >
-                    <Link href="/self-hosting/deployment/aws">
-                      <span className="flex items-center gap-2">
-                        <span>
-                          <IconAWS />
-                        </span>
-                        AWS (Terraform)
-                      </span>
-                    </Link>
-                  </Button>
-
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start h-auto py-2"
-                  >
-                    <Link href="/self-hosting/deployment/gcp">
-                      <span className="flex items-center gap-2">
-                        <span>
-                          <IconGCP />
-                        </span>
-                        GCP (Terraform)
-                      </span>
-                    </Link>
-                  </Button>
-
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start h-auto py-2"
-                  >
-                    <Link href="/self-hosting/deployment/azure">
-                      <span className="flex items-center gap-2">
-                        <span>
-                          <IconAzure />
-                        </span>
-                        Azure (Terraform)
-                      </span>
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <StatBox
-            title="Community Q&A"
-            mainValue={supportCount.toLocaleString()}
-            subtitle="threads"
-            linkHref="/gh-support"
-            isExternal={true}
-            discussions={supportDiscussionsTop50}
-          />
-
-          <StatBox
-            title="Roadmap Discussions"
-            mainValue={ideasCount.toLocaleString()}
-            subtitle="threads"
-            linkHref="/ideas"
-            isExternal={true}
-            discussions={ideasDiscussionsTop50}
-          />
-        </div>
+              ) : (
+                <BulletList items={card.bullets} />
+              )}
+            </CornerBox>
+          );
+        })}
       </div>
     </HomeSection>
   );
-}
+};

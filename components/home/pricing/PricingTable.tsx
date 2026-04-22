@@ -10,9 +10,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Check, ExternalLink, InfoIcon } from "lucide-react";
+import { CornerBox } from "@/components/ui/corner-box";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   Table,
   TableBody,
@@ -51,7 +53,6 @@ type Tier = {
   id: string;
   href: string;
   featured: boolean;
-  cardClassName?: string;
   pillClassName?: string;
   description: string;
   pill?: React.ReactNode;
@@ -95,7 +96,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Hobby",
       id: "tier-hobby",
-      href: "https://cloud.langfuse.com",
+      href: "/cloud",
       featured: false,
       description:
         "Get started, no credit card required. Great for hobby projects and POCs.",
@@ -112,7 +113,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Core",
       id: "tier-core",
-      href: "https://cloud.langfuse.com",
+      href: "/cloud",
       featured: true,
       pill: "Unlimited Users",
       description:
@@ -140,7 +141,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Pro",
       id: "tier-pro",
-      href: "https://cloud.langfuse.com",
+      href: "/cloud",
       featured: false,
       pill: "Unlimited Users",
       price: "$199",
@@ -169,7 +170,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
           "Enterprise SSO (e.g. Okta)",
           "SSO enforcement",
           "Fine-grained RBAC",
-          "Support via Dedicated Slack Channel",
+          "Support via Dedicated Slack / MS Teams Channel",
         ],
       },
       cta: "Sign up",
@@ -235,8 +236,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-self-hosted-enterprise",
       href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
       featured: false,
-      cardClassName:
-        "border-[#FAFF6A] bg-[#FAFF6A12] dark:bg-[#FAFF6A14] dark:border-[#FAFF6A]",
       pillClassName: "bg-[#FAFF6A] text-[#1A1A1A]",
       description:
         "Dedicated Langfuse deployment with enterprise capabilities and support.",
@@ -913,7 +912,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Private Slack channel",
+        name: "Private Slack / MS Teams channel",
         href: "/support#slack",
         tiers: {
           cloud: {
@@ -1408,9 +1407,8 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
         return (
           <Card
             key={tier.id}
+            hoverStripes
             className={cn(
-              tier.featured && "border-primary",
-              tier.cardClassName,
               "relative h-full flex flex-col",
               selectedTiers.length === 1 && "w-full max-w-lg",
             )}
@@ -1462,35 +1460,45 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                 {tier.ctaCallout ? (
                   <div className="flex gap-2">
                     <Button
-                      className="flex-1"
-                      variant={tier.featured ? "default" : "outline"}
-                      asChild
+                      variant={tier.featured ? "primary" : "secondary"}
+                      href={tier.href}
+                      wrapperClassName="flex-1"
+                      className={cn(
+                        "justify-center!",
+                        !tier.featured &&
+                          "group-hover:border-line-structure hover:border-line-cta"
+                      )}
                     >
-                      <Link href={tier.href}>{tier.cta}</Link>
+                      {tier.cta}
                     </Button>
-                    <Button className="flex-1" variant="secondary" asChild>
-                      <Link href={tier.ctaCallout.href}>
-                        {tier.ctaCallout.text}
-                      </Link>
+                    <Button
+                      variant="secondary"
+                      href={tier.ctaCallout.href}
+                      wrapperClassName="flex-1"
+                      className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+                    >
+                      {tier.ctaCallout.text}
                     </Button>
                   </div>
                 ) : (
-                  <>
-                    <Button
-                      className="w-full"
-                      variant={tier.featured ? "default" : "outline"}
-                      asChild
-                    >
-                      <Link href={tier.href}>{tier.cta}</Link>
-                    </Button>
-                  </>
+                  <Button
+                    variant={tier.featured ? "primary" : "secondary"}
+                    href={tier.href}
+                    className={cn(
+                      "justify-center!",
+                      !tier.featured &&
+                        "group-hover:border-line-structure hover:border-line-cta"
+                    )}
+                  >
+                    {tier.cta}
+                  </Button>
                 )}
               </div>
 
               {/* Callouts for different tiers - always render container for alignment */}
-              <div className="p-6 h-[30px] flex items-center justify-center">
+              <div className="px-0 py-6 h-[30px] flex items-center justify-center">
                 {tier.calloutLink ? (
-                  <div className="text-xs text-center text-muted-foreground">
+                  <div className="text-xs text-center text-muted-foreground whitespace-nowrap">
                     <Link
                       href={tier.calloutLink.href}
                       className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
@@ -1505,11 +1513,11 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
             {/* Trusted by section for cloud tiers */}
             {variant === "cloud" && (
               <>
-                <div className="border-t"></div>
+                <div className="border-t border-line-structure"></div>
                 <TrustedBy customers={trustedByData.cloud[tier.name]} />
               </>
             )}
-            <div className="border-t"></div>
+            <div className="border-t border-line-structure"></div>
             <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6">
               <ul className="space-y-2.5 text-sm">
                 {tier.mainFeatures.map((feature, index) => (
@@ -1520,10 +1528,11 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                 ))}
               </ul>
               {tier.addOn && (
-                <div className="relative p-3 pt-4 mt-3 w-full rounded border">
-                  <div className="absolute top-0 left-1/2 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-card text-muted-foreground">
+                <div className="relative mt-3 w-full">
+                  <div className="absolute top-0 left-1/2 z-10 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-surface-bg text-muted-foreground">
                     + optional
                   </div>
+                  <CornerBox className="p-3 pt-4 w-full">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-bold text-primary">
                       {tier.addOn.name}
@@ -1544,14 +1553,13 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                   </ul>
                   {tier.addOn.cta && (
                     <Button
-                      className="mt-3 w-full"
                       variant="secondary"
-                      size="sm"
-                      asChild
+                      size="small"
+                      href={tier.addOn.cta.href}
+                      wrapperClassName="mt-3"
+                      className="justify-center! group-hover:border-line-structure hover:border-line-cta"
                     >
-                      <Link href={tier.addOn.cta.href}>
-                        {tier.addOn.cta.text}
-                      </Link>
+                      {tier.addOn.cta.text}
                     </Button>
                   )}
                   {tier.addOn.calloutLink && (
@@ -1564,6 +1572,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                       </Link>
                     </div>
                   )}
+                  </CornerBox>
                 </div>
               )}
             </CardFooter>
@@ -1584,9 +1593,17 @@ export function PricingTable({
 }) {
   const [isHeaderFixed, setIsHeaderFixed] = useState(false);
   const [headerWidth, setHeaderWidth] = useState<number>(0);
+  const [headerLeft, setHeaderLeft] = useState<number>(0);
+  const [containerLeft, setContainerLeft] = useState<number>(0);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
+  const [mounted, setMounted] = useState(false);
   const tableRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLTableSectionElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const selectedTiers = tiers[variant];
   const visibleSections = sections.filter((section) =>
     section.features.some((feature) => variant in feature.tiers),
@@ -1595,13 +1612,24 @@ export function PricingTable({
   useEffect(() => {
     if (!isPricingPage) return;
 
+    const getContainer = () =>
+      document.getElementById("home-main-area") ??
+      tableRef.current?.parentElement ??
+      null;
+
     const calculateWidths = () => {
       if (headerRef.current && tableRef.current) {
-        // Get the total width of the table
-        const tableWidth = tableRef.current.getBoundingClientRect().width;
-        setHeaderWidth(tableWidth);
+        const tableRect = tableRef.current.getBoundingClientRect();
+        setHeaderWidth(tableRect.width);
+        setHeaderLeft(tableRect.left);
 
-        // Get the widths of each column
+        const container = getContainer();
+        if (container) {
+          const containerRect = container.getBoundingClientRect();
+          setContainerLeft(containerRect.left);
+          setContainerWidth(containerRect.width);
+        }
+
         const headerCells = headerRef.current.querySelectorAll("th");
         const widths = Array.from(headerCells).map(
           (cell) => (cell as HTMLElement).getBoundingClientRect().width,
@@ -1618,9 +1646,21 @@ export function PricingTable({
       if (!tableRef.current) return;
 
       const tableRect = tableRef.current.getBoundingClientRect();
-      const navbarHeight = 64; // Approximate height of the navbar
+      /** Keep aligned with `--lf-nav-primary-height` in `src/overrides.css`. */
+      const navbarHeight = 60;
 
-      // Check if we're within the table's vertical bounds
+      // Keep the sticky header aligned with the table / container horizontal
+      // position (layout may shift if content above the table changes size).
+      setHeaderLeft(tableRect.left);
+      setHeaderWidth(tableRect.width);
+
+      const container = getContainer();
+      if (container) {
+        const containerRect = container.getBoundingClientRect();
+        setContainerLeft(containerRect.left);
+        setContainerWidth(containerRect.width);
+      }
+
       const isWithinTableBounds =
         tableRect.top < navbarHeight && tableRect.bottom > navbarHeight;
 
@@ -1660,10 +1700,7 @@ export function PricingTable({
           )}
         >
           {selectedTiers.map((tier) => (
-            <div
-              key={tier.id}
-              className="overflow-hidden p-4 mb-10 rounded-lg border bg-card"
-            >
+            <div key={tier.id}>
               <div className="mb-6">
                 <h4 className="text-lg font-semibold text-foreground">
                   {tier.name}
@@ -1676,7 +1713,7 @@ export function PricingTable({
                 <TableBody>
                   {visibleSections.map((section) => (
                     <React.Fragment key={section.name}>
-                      <TableRow className="bg-muted hover:bg-muted">
+                      <TableRow className="bg-surface-1 hover:bg-surface-1">
                         <TableHead
                           colSpan={2}
                           className="w-full font-bold text-primary"
@@ -1722,7 +1759,7 @@ export function PricingTable({
       <section
         aria-labelledby="comparison-heading"
         className={cn(
-          "hidden lg:block bg-card rounded-lg overflow-hidden border mt-20",
+          "hidden lg:block mt-20",
           selectedTiers.length === 1 && "max-w-4xl mx-auto",
         )}
         ref={tableRef}
@@ -1731,58 +1768,58 @@ export function PricingTable({
           Feature comparison
         </h2>
 
-        {isHeaderFixed && (
-          <div
-            className="fixed right-0 left-0 z-40 border-b shadow-md bg-muted"
-            style={{
-              top: "calc(var(--fd-banner-height, 0px) + 4rem)",
-            }}
-          >
-            <div className="flex justify-center items-center px-6 mx-auto max-w-7xl">
-              <div className="overflow-hidden pl-[16px]">
-                <table
-                  className="w-full bg-transparent border-none"
-                  style={{
-                    width: headerWidth,
-                    margin: 0,
-                  }}
-                >
-                  <thead>
-                    <tr>
-                      {columnWidths.length > 0 && (
-                        <>
-                          <th
-                            style={{ width: columnWidths[0] }}
-                            className="font-medium text-left bg-transparent border-none"
-                            scope="col"
-                          ></th>
-                          {selectedTiers.map((tier, index) => (
-                            <th
-                              key={tier.id}
-                              style={{
-                                width: columnWidths[index + 1],
-                              }}
-                              className="py-2 text-lg font-semibold text-center bg-transparent border-none text-foreground"
-                              scope="col"
-                            >
-                              {tier.name}
-                            </th>
-                          ))}
-                        </>
-                      )}
-                    </tr>
-                  </thead>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
+        {mounted &&
+          isHeaderFixed &&
+          columnWidths.length > 0 &&
+          createPortal(
+            <div
+              className="fixed z-40 border-b border-line-structure bg-surface-2"
+              style={{
+                top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
+                left: containerWidth > 0 ? containerLeft : headerLeft,
+                width: containerWidth > 0 ? containerWidth : headerWidth,
+              }}
+            >
+              <table
+                className="bg-transparent border-none"
+                style={{
+                  width: headerWidth,
+                  marginLeft:
+                    containerWidth > 0
+                      ? Math.max(0, headerLeft - containerLeft)
+                      : 0,
+                  marginRight: 0,
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th
+                      style={{ width: columnWidths[0] }}
+                      className="font-medium text-left bg-transparent border-none"
+                      scope="col"
+                    ></th>
+                    {selectedTiers.map((tier, index) => (
+                      <th
+                        key={tier.id}
+                        style={{ width: columnWidths[index + 1] }}
+                        className="py-2 text-lg font-semibold text-center bg-transparent border-none text-foreground"
+                        scope="col"
+                      >
+                        {tier.name}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+              </table>
+            </div>,
+            document.body,
+          )}
 
         <div className="relative">
           <Table
             className={cn(selectedTiers.length === 1 ? "w-full" : "w-full")}
           >
-            <thead ref={headerRef} className="bg-muted">
+            <thead ref={headerRef} className="bg-surface-2">
               <tr>
                 <th
                   className={cn(
@@ -1808,7 +1845,7 @@ export function PricingTable({
             <TableBody>
               {visibleSections.map((section) => (
                 <React.Fragment key={section.name}>
-                  <TableRow className="bg-muted/50">
+                  <TableRow className="bg-surface-1 hover:bg-surface-1">
                     <TableCell
                       colSpan={selectedTiers.length + 1}
                       className="font-medium"

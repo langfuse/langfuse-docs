@@ -1,193 +1,126 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import type { StaticImageData } from "next/image";
-import canvaLight from "../home/img/canva_light.png";
-import canvaDark from "../home/img/canva_dark.png";
-import intuitLightMode from "../home/img/intuit_light.svg";
-import intuitDarkMode from "../home/img/intuit_dark.svg";
-import samsaraLight from "../home/img/samsara_light.png";
-import samsaraDark from "../home/img/samsara_dark.png";
-import khanacademyLight from "../home/img/khanacademy_light.png";
-import khanacademyDark from "../home/img/khanacademy_dark.png";
-import twilioLight from "../home/img/twilio_light.svg";
-import twilioDark from "../home/img/twilio_dark.svg";
-import sumupLight from "../home/img/sumup_light.svg";
-import sumupDark from "../home/img/sumup_dark.svg";
-import telusLight from "../home/img/telus_light.png";
-import telusDark from "../home/img/telus_dark.png";
-import magicPatternsLight from "../home/img/magicpatterns_light.png";
-import magicPatternsDark from "../home/img/magicpatterns_dark.png";
-import merckLight from "../home/img/merck-dark.png";
-import merckDark from "../home/img/merck-light.png";
-import adobeLight from "../home/img/adobe_light.svg";
-import adobeDark from "../home/img/adobe_dark.svg";
-import pigmentLight from "../home/img/pigment_light.svg";
-import pigmentDark from "../home/img/pigment_dark.svg";
-import freeeLight from "../home/img/freee_light.png";
-import freeeDark from "../home/img/freee_dark.png";
-import circlebackLight from "../home/img/circleback_light.png";
-import circlebackDark from "../home/img/circleback_dark.png";
-import appleLight from "../home/img/apple_light.svg";
-import appleDark from "../home/img/apple_dark.svg";
-import ciscoLight from "../home/img/cisco_light.svg";
-import ciscoDark from "../home/img/cisco_dark.svg";
-import expediaGroupLight from "../home/img/expedia_group_light.svg";
-import expediaGroupDark from "../home/img/expedia_group_dark.svg";
+import adobeLogo from "../home/img/adobe.svg";
+import appleLogo from "../home/img/apple.svg";
+import canvaLogo from "../home/img/canva.svg";
+import circlebackLogo from "../home/img/circleback.svg";
+import ciscoLogo from "../home/img/cisco.svg";
+import expediaGroupLogo from "../home/img/expedia.svg";
+import freeeLogo from "../home/img/freee.svg";
+import intuitLogo from "../home/img/intuit.svg";
+import khanacademyLogo from "../home/img/khan.svg";
+import magicPatternsLogo from "../home/img/magic.svg";
+import merckLogo from "../home/img/merck.svg";
+import pigmentLogo from "../home/img/pigment.svg";
+import samsaraLogo from "../home/img/samsara.svg";
+import sumupLogo from "../home/img/sumup.svg";
+import telusLogo from "../home/img/telus.svg";
+import twilioLogo from "../home/img/twilio.svg";
 import { cn } from "@/lib/utils";
+import { LinkBox } from "@/components/ui/link-box";
 
 type CompanyLogo = {
   name: string;
-  darkModeImage: StaticImageData;
-  lightModeImage: StaticImageData;
+  logo: StaticImageData;
   customerStoryPath?: string;
+  hidden?: boolean;
 };
 
 const companies: CompanyLogo[] = [
   {
     name: "Canva",
-    darkModeImage: canvaLight,
-    lightModeImage: canvaDark,
+    logo: canvaLogo,
     customerStoryPath: "/users/canva",
   },
   {
     name: "Twilio",
-    darkModeImage: twilioLight,
-    lightModeImage: twilioDark,
+    logo: twilioLogo,
   },
   {
     name: "Adobe",
-    darkModeImage: adobeDark,
-    lightModeImage: adobeLight,
+    logo: adobeLogo,
   },
   {
     name: "Khan Academy",
-    darkModeImage: khanacademyLight,
-    lightModeImage: khanacademyDark,
+    logo: khanacademyLogo,
     customerStoryPath: "/users/khan-academy",
   },
   {
     name: "Telus",
-    darkModeImage: telusLight,
-    lightModeImage: telusDark,
+    logo: telusLogo,
   },
   {
     name: "Intuit",
-    darkModeImage: intuitDarkMode,
-    lightModeImage: intuitLightMode,
+    logo: intuitLogo,
   },
   {
     name: "SumUp",
-    darkModeImage: sumupLight,
-    lightModeImage: sumupDark,
+    logo: sumupLogo,
     customerStoryPath: "/users/sumup",
   },
   {
     name: "Circleback",
-    darkModeImage: circlebackLight,
-    lightModeImage: circlebackDark,
-  },
-  {
-    name: "Apple",
-    darkModeImage: appleDark,
-    lightModeImage: appleLight,
-  },
-  {
-    name: "Samsara",
-    darkModeImage: samsaraLight,
-    lightModeImage: samsaraDark,
-  },
-  {
-    name: "freee",
-    darkModeImage: freeeLight,
-    lightModeImage: freeeDark,
-  },
-  {
-    name: "Magic Patterns",
-    darkModeImage: magicPatternsLight,
-    lightModeImage: magicPatternsDark,
-    customerStoryPath: "/users/magic-patterns-ai-design-tools",
-  },
-  {
-    name: "Cisco",
-    darkModeImage: ciscoDark,
-    lightModeImage: ciscoLight,
-  },
-  {
-    name: "Expedia Group",
-    darkModeImage: expediaGroupDark,
-    lightModeImage: expediaGroupLight,
+    logo: circlebackLogo,
+    hidden: true,
   },
   {
     name: "Merck",
-    darkModeImage: merckLight,
-    lightModeImage: merckDark,
+    logo: merckLogo,
     customerStoryPath: "/users/merckgroup",
   },
   {
+    name: "Samsara",
+    logo: samsaraLogo,
+  },
+  {
+    name: "freee",
+    logo: freeeLogo,
+    hidden: true,
+  },
+  {
+    name: "Magic Patterns",
+    logo: magicPatternsLogo,
+    customerStoryPath: "/users/magic-patterns-ai-design-tools",
+    hidden: true,
+  },
+  {
+    name: "Cisco",
+    logo: ciscoLogo,
+  },
+  {
+    name: "Expedia Group",
+    logo: expediaGroupLogo,
+  },
+  {
+    name: "Apple",
+    logo: appleLogo,
+  },
+  {
     name: "Pigment",
-    darkModeImage: pigmentLight,
-    lightModeImage: pigmentDark,
+    logo: pigmentLogo,
+    hidden: true,
   },
 ];
 
-// Reusable component for company logos with light/dark theme support
 const LogoImage = ({
-  darkModeImage,
-  lightModeImage,
+  logo,
   name,
 }: {
-  darkModeImage: StaticImageData;
-  lightModeImage: StaticImageData;
+  logo: StaticImageData;
   name: string;
 }) => {
   return (
-    <>
-      <Image
-        src={darkModeImage}
-        alt={`${name} logo`}
-        className="object-contain max-h-8 max-w-full hidden dark:block"
-        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-        priority={false}
-      />
-      <Image
-        src={lightModeImage}
-        alt={`${name} logo`}
-        className="object-contain max-h-8 max-w-full dark:hidden"
-        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-        priority={false}
-      />
-    </>
+    <Image
+      src={logo}
+      alt={`${name} logo`}
+      className="object-cover max-w-full transition-[filter] duration-200 h-[56px] hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]"
+      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+      priority={false}
+    />
   );
 };
-
-// Customer story badge component
-const CustomerStoryBadge = ({ small }: { small?: boolean }) => (
-  <div
-    className={cn(
-      "absolute top-0 right-0 z-10 pointer-events-none",
-      !small && "md:top-2 md:right-2",
-    )}
-  >
-    <div
-      className={cn(
-        "inline-flex items-center justify-center text-blue-500  text-xs rounded-full  group-hover:w-auto group-hover:h-auto group-hover:px-3 group-hover:py-1 px-2 py-1 transition-all duration-200",
-        !small && "md:bg-blue-500 md:text-white md:px-0 md:py-0 md:w-6 md:h-6",
-      )}
-    >
-      {small ? (
-        <span className="whitespace-nowrap">Read Story</span>
-      ) : (
-        <>
-          <span className="md:hidden whitespace-nowrap">Read Story</span>
-          <span className="hidden md:group-hover:inline">Read User Story</span>
-          <span className="hidden md:block group-hover:hidden w-2 h-2 bg-white rounded-full"></span>
-        </>
-      )}
-    </div>
-  </div>
-);
 
 interface EnterpriseLogoGridProps {
   className?: string;
@@ -198,57 +131,40 @@ export const EnterpriseLogoGrid = ({
   className = "",
   small = false,
 }: EnterpriseLogoGridProps) => {
-  // Shared CSS classes for grid cells
-  const baseCellClasses =
-    "relative overflow-hidden h-16 md:h-14 transition-all duration-200 py-4 px-4 md:py-8 md:px-14 border border-gray-200 dark:border-gray-800 bg-card -mr-px -mb-px flex items-center justify-center";
-  const smallCellClasses = "px-3 md:px-4 py-3 md:py-4";
-  const clickableCellClasses = "group hover:opacity-80 cursor-pointer";
-
   return (
     <div
       className={cn(
-        "grid grid-cols-2 md:grid-cols-4 auto-rows-fr",
-        small && "grid-cols-4",
+        "grid grid-cols-3 sm:grid-cols-6 auto-rows-fr px-2 py-2",
+        small && "sm:grid-cols-3",
         className,
       )}
       role="grid"
       aria-label="Enterprise customers using Langfuse"
     >
-      {companies.map((company) => {
-        const cellContent = (
-          <>
-            <LogoImage
-              darkModeImage={company.darkModeImage}
-              lightModeImage={company.lightModeImage}
-              name={company.name}
-            />
-            {company.customerStoryPath && <CustomerStoryBadge small={small} />}
-          </>
-        );
-
-        return company.customerStoryPath ? (
-          <Link
+      {companies.filter((c) => !c.hidden).map((company, index) => {
+        const hasStory = Boolean(company.customerStoryPath);
+        return (
+          <LinkBox
             key={company.name}
             href={company.customerStoryPath}
+            tooltip={hasStory ? "Read story" : undefined}
+            tooltipPlacement="bottom-center"
             className={cn(
-              baseCellClasses,
-              clickableCellClasses,
-              small && smallCellClasses,
+              "-mr-px -mb-px flex items-center justify-center !p-0",
+              index > 5 ? "hidden sm:flex" : "flex",
             )}
-            aria-label={`Read ${company.name} user story`}
             role="gridcell"
+            aria-label={
+              hasStory
+                ? `Read ${company.name} user story`
+                : `${company.name} uses Langfuse`
+            }
           >
-            {cellContent}
-          </Link>
-        ) : (
-          <div
-            key={company.name}
-            className={cn(baseCellClasses, small && smallCellClasses)}
-            role="gridcell"
-            aria-label={`${company.name} uses Langfuse`}
-          >
-            {cellContent}
-          </div>
+            <LogoImage
+              logo={company.logo}
+              name={company.name}
+            />
+          </LinkBox>
         );
       })}
     </div>

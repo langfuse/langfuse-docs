@@ -1,7 +1,7 @@
 ---
 name: customer-story-setup
 description: >-
-  Converts draft customer-story Markdown into Langfuse website MDX (Nextra),
+  Converts draft customer-story Markdown into Langfuse website MDX (Fumadocs),
   collects missing metadata and assets, wires meta.json and authors. Use when
   adding or converting a customer case study, user story, or /users page, or
   when the user mentions customer story setup, cresta/canva-style posts, or

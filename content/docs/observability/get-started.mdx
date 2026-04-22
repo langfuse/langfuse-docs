@@ -13,45 +13,101 @@ import GetStartedOpenaiSdk from "@/components-mdx/get-started/openai-sdk.mdx";
 import GetStartedLangchain from "@/components-mdx/get-started/langchain.mdx";
 import GetStartedJsOpenaiSdk from "@/components-mdx/get-started/js-openai-sdk.mdx";
 import GetStartedJsLangchain from "@/components-mdx/get-started/js-langchain.mdx";
-import GetStartedAutoInstall from "@/components-mdx/get-started/auto-install.mdx";
 import GetStartedVercelAiSdk from "@/components-mdx/get-started/vercel-ai-sdk.mdx";
 import { BookOpen, Code } from "lucide-react";
 import { FaqPreview } from "@/components/faq/FaqPreview";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/components/ui/link";
+
+<div className="rounded-lg border bg-muted-blue/5 px-6 pb-6 [&>h2]:mt-6 [&>h2]:mb-4">
 
 ## Agentic installation [#agentic-installation]
-This guide helps you get started with Langfuse tracing using your coding agent / agentic IDE.
 
-<Steps>
-### Get API keys
+Install the [Langfuse AI Skill](https://github.com/langfuse/skills) to let your coding agent access all Langfuse features.
 
-1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
-2.  Create new API credentials in the project settings.
+<Tabs items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}>
 
-### Set up your AI agent
+<Tab>
 
-<GetStartedAutoInstall />
-
-### Instrument your codebase
-
-Start a new agent session, then prompt it to instrument your codebase:
+Ask your coding agent to install the skill by pointing to the [GitHub repository](https://github.com/langfuse/skills) and instruct it to get started with tracing.
 
 ```txt filename="Agent instruction"
-"Instrument this application with Langfuse tracing following best practices."
+Install the Langfuse AI skill from github.com/langfuse/skills
+and use it to add tracing to this application with Langfuse
+following best practices.
 ```
 
-### See your trace in Langfuse
+</Tab>
 
-After running your application, visit the Langfuse interface to view the trace you just created. _[(Example LangGraph trace in Langfuse)](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7d5f970573b8214d1ca891251e42282c)_
+<Tab>
 
-<Video
-  src="https://static.langfuse.com/docs-videos/trace-new-ui.mp4"
-  aspectRatio={16 / 9}
-  gifStyle
-/>
+Langfuse has a [Cursor Plugin](https://cursor.com/docs/plugins) that includes the skill automatically.
 
-_[What does a good trace look like?](/faq/all/what-does-a-good-trace-look-like)_
+<div className="flex gap-2 mt-3 mb-6">
+  <Button asChild>
+    <Link
+      href="https://cursor.com/marketplace/langfuse"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Install Plugin in Cursor
+    </Link>
+  </Button>
+</div>
 
-</Steps>
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Add tracing to this application with Langfuse following best practices.
+```
+
+</Tab>
+
+<Tab>
+
+Install via npm ([skills CLI](https://www.npmjs.com/package/skills)):
+
+```bash
+npx skills add langfuse/skills --skill "langfuse"
+```
+
+If you want to target a specific agent directly:
+
+```bash
+npx skills add langfuse/skills --skill "langfuse" --agent "<agent-id>"
+```
+
+<details>
+<summary>Alternatively you can manually clone the skill</summary>
+
+1. Clone repo somewhere stable
+```bash
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+```
+
+2. Make sure your agent's skills dir exists
+```bash
+mkdir -p /path/to/<agent-skill-root>/skills
+```
+
+3. Symlink the skill folder
+```bash
+ln -s /path/to/langfuse-skills/skills/langfuse /path/to/<agent-skill-root>/skills/langfuse
+```
+
+</details>
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Add tracing to this application with Langfuse following best practices.
+```
+
+</Tab>
+
+</Tabs>
+
+</div>
 
 ## Manual installation [#manual-installation]
 This guide helps you get started with Langfuse tracing manually.
@@ -64,9 +120,10 @@ This guide helps you get started with Langfuse tracing manually.
 
 ### Ingest your first trace
 
-Choose your framework or SDK to get started:
+Choose your framework, SDK, or OpenTelemetry setup to get started. If your
+application already emits OTEL spans, start with the OpenTelemetry guide.
 
-<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Vercel AI SDK", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "More integrations"]}>
+<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Vercel AI SDK", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "OpenTelemetry (OTEL)", "More integrations"]}>
 
 <Tab>
 {/* PYTHON - OPENAI*/}
@@ -247,11 +304,56 @@ Use the Langfuse JS/TS SDK to wrap any LLM or Agent
 </Tab>
 
 <Tab>
+{/* OTEL */}
+
+If your app, framework, or collector already emits OpenTelemetry (OTEL) spans,
+use the Langfuse OpenTelemetry integration to send OTLP traces to Langfuse.
+This is the right entry point for custom OTEL setups and languages beyond the
+Langfuse SDKs.
+
+<Cards num={2}>
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/opentelemetry_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="OpenTelemetry (OTEL) guide"
+    href="/integrations/native/opentelemetry"
+    arrow
+  />
+  <Card
+    icon={<BookOpen />}
+    title="Attribute propagation"
+    href="/integrations/native/opentelemetry#propagating-attributes"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
 {/* MORE INTEGRATIONS */}
 
 Explore all integrations and frameworks that Langfuse supports.
 
 <Cards num={2}>
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/opentelemetry_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="OpenTelemetry (OTEL)"
+    href="/integrations/native/opentelemetry"
+    arrow
+  />
   <Card
     icon={
       <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">

@@ -1,4 +1,3 @@
-export { Callout } from "./callout";
 export { Cards, Card } from "./cards";
 export { Steps, Step } from "./steps";
 export { Tabs, Tab, TabsContent, TabsList, TabsTrigger } from "./tabs";

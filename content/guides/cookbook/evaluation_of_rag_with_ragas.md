@@ -362,7 +362,7 @@ evaluation_batch = {
 }
 
 for t in traces_sample:
-    observations = [langfuse.api.legacy.observations_v1.get(o) for o in t.observations]
+    observations = [langfuse.api.observations.get(o) for o in t.observations]
     for o in observations:
         if o.name == 'retrieval':
             question = o.input['question']
