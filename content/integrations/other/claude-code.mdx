@@ -557,6 +557,8 @@ def main() -> int:
 
     # Fork to run in background - parent exits immediately, child does the work
     if BACKGROUND:
+    # Fork to run in background - parent exits immediately, child does the work
+    if BACKGROUND and hasattr(os, "fork"):
         pid = os.fork()
         if pid > 0:
             # Parent: exit immediately so Claude Code isn't blocked
