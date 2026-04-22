@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image, { type StaticImageData } from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { BoxCorners, CornerBox } from "@/components/ui/corner-box";
@@ -44,20 +44,35 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredLogo, setHoveredLogo] = useState<number | null>(null);
   const [focusedLogo, setFocusedLogo] = useState<number | null>(null);
+  const [isInViewport, setIsInViewport] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const story = stories[active];
 
   useEffect(() => {
-    if (isHovered) return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInViewport(entry.isIntersecting),
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (isHovered || !isInViewport) return;
 
     const interval = window.setInterval(() => {
       setActive((prev) => (prev + 1) % stories.length);
     }, 2000);
 
     return () => window.clearInterval(interval);
-  }, [isHovered]);
+  }, [isHovered, isInViewport]);
 
   return (
     <CornerBox
+      ref={containerRef}
       className="flex flex-col gap-3 p-4 -mt-px lg:flex-row lg:items-center lg:gap-6"
       corners={corners}
       onMouseEnter={() => setIsHovered(true)}
@@ -172,7 +187,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
                 />
               </svg>
             </a>
-            <Text size="s" className="text-left mt-0.5 lg:truncate text-text-tertiary">
+            <Text size="s" className="text-left mt-0.5 line-clamp-2 min-h-[calc(2*1.5em)] lg:line-clamp-1 lg:min-h-0 text-text-tertiary">
               {story.description}
             </Text>
           </motion.div>

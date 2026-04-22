@@ -46,14 +46,18 @@ export function DocsSecondaryNavMobile() {
 
   const activeSection = SECTIONS.find((s) => pathname?.startsWith(s.path));
 
+  const sectionTitle =
+    activeSection?.title ?? pageNameFromPath("/" + (pathname?.split("/")[1] ?? ""));
+
   // Prefer tree path for page name (gives the authored title), fall back to slug
   const treeNode = treePath.length > 0 ? treePath[treePath.length - 1] : null;
   const pageName =
     (treeNode && "name" in treeNode ? treeNode.name : null) ??
     pageNameFromPath(pathname);
 
-  // Don't show breadcrumb arrow if we're on the section root
-  const isRoot = activeSection && pathname === activeSection.path;
+  const isRoot =
+    (activeSection && pathname === activeSection.path) ||
+    (!activeSection && pathname?.split("/").filter(Boolean).length === 1);
 
   return (
     <div
@@ -67,8 +71,8 @@ export function DocsSecondaryNavMobile() {
       >
         {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
-      {activeSection && (
-        <span className="text-sm text-text-tertiary">{activeSection.title}</span>
+      {sectionTitle && (
+        <span className="text-sm text-text-tertiary">{sectionTitle}</span>
       )}
       {pageName && !isRoot && (
         <>

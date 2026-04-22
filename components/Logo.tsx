@@ -11,13 +11,16 @@ const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
 
 export function Logo({
   wrapInLink = true,
+  showAffiliation = false,
 }: {
   /** When false, render only the image block (use when already inside a link, e.g. NavbarLogo). */
   wrapInLink?: boolean;
+  /** When true, show the "by ClickHouse" affiliation link next to the logo. */
+  showAffiliation?: boolean;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const images = (
-    <div className="flex gap-2 items-center -mr-4 cursor-pointer md:mr-0">
+    <div className="logo-images flex gap-2 items-center cursor-pointer shrink-0">
       <Image
         src="/langfuse-wordart-white.svg"
         alt="Langfuse Logo"
@@ -33,7 +36,7 @@ export function Logo({
         className="block h-auto dark:hidden max-w-28 sm:max-w-none"
       />
       <style jsx>{`
-      div {
+      .logo-images {
         mask-image: linear-gradient(
           60deg,
           #bba0ff 25%,
@@ -43,7 +46,7 @@ export function Logo({
         mask-size: 400%;
         mask-position: 0%;
       }
-      div:hover {
+      .logo-images:hover {
         mask-position: 100%;
         transition: mask-position 1s ease, -webkit-mask-position 1s ease;
       }
@@ -51,12 +54,24 @@ export function Logo({
     </div>
   );
 
+  const byClickHouse = (
+    <a
+      href="https://clickhouse.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-[10px] sm:text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap"
+    >
+      by ClickHouse
+    </a>
+  );
+
   return (
     <>
-      <div className="flex items-center">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         {wrapInLink ? (
           <Link
             href="/"
+            className="shrink-0"
             onContextMenu={(e) => {
               e.preventDefault();
               setMenuOpen(true);
@@ -66,6 +81,7 @@ export function Logo({
           </Link>
         ) : (
           <div
+            className="shrink-0"
             onContextMenu={(e) => {
               e.preventDefault();
               setMenuOpen(true);
@@ -74,6 +90,7 @@ export function Logo({
             {images}
           </div>
         )}
+        {showAffiliation && byClickHouse}
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
     </>

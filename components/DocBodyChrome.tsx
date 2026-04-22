@@ -38,6 +38,7 @@ export function DocBodyChrome({
 }: Props) {
   const pathname = usePathname();
   const isEnterprisePage = pathname === "/enterprise";
+  const isCustomerStory = (pathname ?? "").startsWith("/users/");
   const cookbook = withProse
     ? COOKBOOK_ROUTE_MAPPING.find((c) => c.path === pathname)
     : undefined;
@@ -53,7 +54,7 @@ export function DocBodyChrome({
           className={
             isEnterprisePage
               ? "mb-4 flex w-full flex-wrap justify-end gap-2 items-center"
-              : "mb-4 flex flex-wrap gap-2 items-center sm:absolute right-0 top-[-62px]"
+              : "mb-4 flex flex-wrap gap-2 items-center sm:absolute sm:max-w-[15rem] sm:justify-end right-0 top-[-62px]"
           }
         >
           {versionLabel != null && versionLabel !== "" && (
@@ -67,15 +68,22 @@ export function DocBodyChrome({
           <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
         )}
         {children}
-        <hr className="mt-12 mb-0 border-t dark:border-neutral-800" />
-        <div
-          className="flex flex-wrap gap-6 justify-between items-center py-6"
-          id="docs-feedback"
-        >
-          <DocsFeedback key={pathname} />
-          <DocsSupport />
-        </div>
-        <hr className="mt-0 mb-12 border-t dark:border-neutral-800" />
+        {!isCustomerStory && (
+          <>
+            <hr className="mt-12 mb-0 border-t border-line-structure" />
+            <div
+              className="flex flex-col gap-2 py-6"
+              id="docs-feedback"
+            >
+              <span className="text-sm font-medium">Was this page helpful?</span>
+              <div className="flex items-center justify-between gap-2">
+                <DocsFeedback key={pathname} showLabel={false} />
+                <DocsSupport />
+              </div>
+            </div>
+            <hr className="mt-0 mb-4 border-t border-line-structure" />
+          </>
+        )}
       </div>
     </DocsBody>
   );
