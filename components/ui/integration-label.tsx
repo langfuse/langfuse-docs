@@ -1,20 +1,27 @@
+import type { ReactNode, MouseEventHandler } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const chipClassName =
   "integration-chip inline-flex items-center gap-2 px-1.5 py-1 border border-line-structure text-[13px] font-normal text-text-secondary leading-none whitespace-nowrap";
 
+interface IntegrationLabelProps {
+  icon?: ReactNode;
+  label: string;
+  href?: string;
+  className?: string;
+  onMouseEnter?: MouseEventHandler;
+  onMouseLeave?: MouseEventHandler;
+}
+
 export function IntegrationLabel({
   icon,
   label,
   href,
   className,
-}: {
-  icon?: React.ReactNode;
-  label: string;
-  href?: string;
-  className?: string;
-}) {
+  onMouseEnter,
+  onMouseLeave,
+}: IntegrationLabelProps) {
   const inner = (
     <>
       {icon ? (
@@ -28,11 +35,24 @@ export function IntegrationLabel({
 
   if (href) {
     return (
-      <Link href={href} className={cn(chipClassName, className)}>
+      <Link
+        href={href}
+        className={cn(chipClassName, className)}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
         {inner}
       </Link>
     );
   }
 
-  return <span className={cn(chipClassName, className)}>{inner}</span>;
+  return (
+    <span
+      className={cn(chipClassName, className)}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {inner}
+    </span>
+  );
 }
