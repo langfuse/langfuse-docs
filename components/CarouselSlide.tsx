@@ -29,7 +29,7 @@ export function CarouselSlide({
         src={src}
         alt={alt}
         fill
-        className="object-cover"
+        className="object-cover md:cursor-pointer"
         sizes="(max-width: 680px) 100vw, 680px"
       />
     </div>
