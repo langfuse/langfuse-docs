@@ -283,8 +283,8 @@ const GhDiscussionsPreviewInternal = ({
               ))}
             </TabsList>
           )}
-          <div className="flex items-center gap-1 w-full sm:w-auto">
-            <div className="relative p-1">
+          <div className="flex items-center w-full sm:w-auto">
+            <div className="relative flex items-center p-1 max-h-[34px]">
               <Input
                 type="text"
                 placeholder="Search..."
