@@ -54,10 +54,34 @@ Less critical factor:
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **High Availability**     | Multi‑AZ databases & load‑balanced stateless application layer on AWS.                                                                                          |
 | **Recovery Precision**    | RPO: 10 minutes (PITR for Postgres). RTO: 12 hours.                                                                                                            |
-| **Backup Layers**         | Postgres: 7d retention. Clickhouse: 6-hourly backups (4d retention). S3: 7d versioning retention.                                                              |
-| **Durability**            | Encrypted backups stored across multiple availability zones within a single region on AWS/Clickhouse Cloud; tested at least annually for restoration integrity. |
-| **Status Page**           | [https://status.langfuse.com](https://status.langfuse.com) with historical uptime and incidents.                                                               | 
+| **Backup Layers**         | Postgres: 7d retention. ClickHouse: 6-hourly backups (4d retention). S3: 7d versioning retention.                                                              |
+| **Durability**            | Encrypted backups stored across multiple availability zones within the primary region on AWS/ClickHouse Cloud; tested at least annually for restoration integrity. Postgres backups are additionally replicated to a secondary AWS region (see [Cross-Region Backup](#cross-region-backup) below). |
+| **Status Page**           | [https://status.langfuse.com](https://status.langfuse.com) with historical uptime and incidents.                                                               |
 
+### Cross-Region Backup [#cross-region-backup]
+
+To allow recovery from the permanent loss of an AWS region, a subset of data at rest is replicated to a secondary AWS region in the same legal jurisdiction.
+This is a disaster-recovery control and does not provide active-active failover; on a full regional outage, Langfuse would rebuild the application stack in the secondary region and restore from the replicated backups.
+The expected rebuild time is up to one business day.
+
+| Data store                    | Primary region                                                           | Secondary region                                        | Mechanism                                                         | Retention              |
+|-------------------------------|--------------------------------------------------------------------------|---------------------------------------------------------|-------------------------------------------------------------------|------------------------|
+| **Postgres**                  | EU: `eu-west-1` <br/> US / HIPAA: `us-west-2` <br/> JP: `ap-northeast-1` | `eu-central-1` <br/> `us-east-2` <br/> `ap-northeast-3` | AWS Backup daily snapshot copy, re-encrypted with a dedicated CMK | 14 days in each region |
+| **ClickHouse** (tracing data) | Same as the Cloud region above                                           | Not replicated                                          | —                                                                 | —                      |
+| **S3 media bucket**           | Same as the Cloud region above                                           | Not replicated                                          | —                                                                 | —                      |
+
+Postgres contains organization, project, user, API key, prompt, dataset, annotation, and score configuration data.
+Replicating it cross-region allows projects, credentials, and prompt management to be restored without customer intervention following a regional outage.
+
+ClickHouse stores historical traces, observations, and scores.
+ClickHouse Cloud does not currently offer managed cross-region backup, and Langfuse does not maintain an out-of-region copy.
+**On the permanent loss of the primary AWS region, historical tracing data is not recoverable from Langfuse, and a restored environment would begin ingesting fresh data.**
+Active tracing ingestion resumes once the replacement environment is live.
+
+S3 media buckets store uploaded media items referenced from traces. They are not replicated cross-region.
+**On the permanent loss of the primary AWS region, uploaded media items are not recoverable**, even where the referencing trace survives.
+
+All secondary regions are within the same legal jurisdiction as their primary region (EU ↔ EU, US ↔ US, Japan ↔ Japan), so cross-region replication does not change the data-residency or cross-border-transfer posture declared in the [DPA](/security/dpa) and [HIPAA BAA](/security/hipaa).
 
 ## Self-hosted Instances
 
