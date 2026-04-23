@@ -68,7 +68,10 @@ export default async function SectionDocPage(props: PageProps) {
   }
 
   return (
-    <div className={cn("mx-auto w-full py-10 md:py-16", contentWidthClasses[contentWidth])}>
+    <div
+      className={cn("mx-auto w-full py-10 md:py-16", contentWidthClasses[contentWidth])}
+      data-content-width={contentWidth}
+    >
       <DocBodyChrome withProse>{bodyClient}</DocBodyChrome>
     </div>
   );

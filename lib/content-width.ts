@@ -12,3 +12,10 @@ export const contentWidthClasses: Record<ContentWidthType, string> = {
   default: "px-4 sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]",
   full: "px-4 sm:px-6 md:px-8",
 };
+
+/** Footer overrides so the footer width matches the content width. */
+export const footerWidthClasses: Record<ContentWidthType, string> = {
+  docs: "xl:max-w-[680px]",
+  default: "",
+  full: "md:max-w-none xl:max-w-none px-4 sm:px-6 md:px-8",
+};
