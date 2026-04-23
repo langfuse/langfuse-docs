@@ -1,0 +1,33 @@
+---
+title: Why do observation lookups with the v3 SDK return 404?
+sidebarTitle: v3 SDK observation lookup 404s
+description: When mixing the v3 SDK with the Fast (v4) UI, some observation ids — in particular `t-<traceId>` ids stored in `source_observation_id` — can't be resolved by the v3 SDK. Explanation and workaround.
+tags: [observability, tracing, evaluation]
+---
+
+# Why do observation lookups with the v3 SDK return 404?
+
+## What's happening
+
+The v4 data model only has observations — traces don't exist as a separate entity, so a trace's metadata needs to be represented *as* an observation. Langfuse does this by dual-writing a synthetic observation with id `t-<traceId>` whenever a trace comes in through the v3 ingestion path. That synthetic row lives in the events table (v4), not in the classic observations table (v3).
+
+When you add the trace to a dataset from the Fast (v4) UI, it stamps that synthetic id into `source_observation_id`. Looking the id up later with the v3 SDK defaults to the v3 table, which doesn't have the synthetic row — so it 404s.
+
+## Solution
+
+Two options, pick whichever fits your situation:
+
+**1. Stay on v3 SDK, add a query parameter**
+
+Pass `useEventsTable=true` on the call so the server reads from the events table where the synthetic row lives:
+
+```python
+langfuse.api.observations.get(
+    observation_id,
+    request_options={"additional_query_parameters": {"useEventsTable": "true"}},
+)
+```
+
+**2. Migrate to a v4 SDKs**
+
+[Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) use the v4 data model natively — the `useEventsTable` flag is implicit and no workaround is needed.
