@@ -1,5 +1,6 @@
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
 import { NavLinks } from "@/components/NavLinks";
+import { HiringBadge } from "@/components/HiringBadge";
 import { type SectionNavData } from "@/lib/nav-tree";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
@@ -39,6 +40,7 @@ export function Navbar() {
           <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1'>
             <InkeepSearchBar className="hidden" />
             <NavLinks sectionNavData={sectionNavData} />
+            <HiringBadge />
           </div>
         </div>
         <div className={cn(cornersStyle, 'flex-1 justify-end pl-0 lg:justify-center lg:max-w-[240px] lg:pl-px')}>
