@@ -99,13 +99,13 @@ export function EmbeddedAIChat() {
   };
 
   return (
-    <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)] not-prose">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-line-structure bg-surface-2">
+    <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)]">
+      <div className="not-prose flex items-center gap-2 px-4 py-3 border-b border-line-structure bg-surface-1">
         <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5" />
-        <Text size="s" className="font-medium text-text-primary not-prose">
+        <Text size="s" className="font-medium text-text-primary">
           Langfuse Help Agent
         </Text>
-        <Text size="s" className="text-text-tertiary text-xs not-prose">
+        <Text size="s" className="text-text-tertiary text-xs">
           — Powered by{' '}
           <Link
             href="https://inkeep.com"
@@ -117,7 +117,7 @@ export function EmbeddedAIChat() {
         </Text>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 overscroll-contain bg-surface-1 prose-enabled">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 overscroll-contain bg-surface-1">
         {messages.length === 0 ? (
           <AIChatEmptyState
             onPickQuestion={(question) => {
@@ -134,7 +134,7 @@ export function EmbeddedAIChat() {
         )}
       </div>
 
-      <div className="border-t border-line-structure bg-surface-2">
+      <div className="not-prose border-t border-line-structure bg-surface-1">
         {messages.length > 0 && (
           <div className="flex items-center gap-1 px-2 pt-2">
             {!isStreaming && messages.at(-1)?.role === 'assistant' && (

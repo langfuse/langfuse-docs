@@ -384,7 +384,7 @@ export function AISearchPanel() {
       <Presence present={open}>
         <div
           className={cn(
-            'overflow-hidden z-50 bg-surface-bg text-text-primary [--ai-chat-width:320px] border-line-structure',
+            'overflow-hidden z-50 bg-surface-1 text-text-primary [--ai-chat-width:320px] border-line-structure',
             'max-wide:fixed max-wide:inset-x-4 max-md:bottom-4 max-md:top-4 max-wide:bottom-8 max-wide:top-8 max-wide:border max-wide:border-line-structure max-wide:shadow-xl max-wide:max-w-[600px] max-wide:mx-auto',
             'wide:sticky wide:top-[var(--fd-nav-height)] wide:h-[calc(100dvh-var(--fd-nav-height)-2px)] wide:border-l wide:ms-auto',
             'wide:in-[#nd-docs-layout]:[grid-area:toc] wide:in-[#nd-notebook-layout]:row-span-full wide:in-[#nd-notebook-layout]:col-start-5',
