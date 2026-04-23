@@ -62,7 +62,7 @@ export function BrandAssetCard({
         <img
           src={src}
           alt={alt}
-          className={cn("w-auto", tall ? "h-12" : "h-10")}
+          className={cn("max-w-full max-h-full w-auto object-contain", tall ? "h-12" : "h-10")}
         />
       </div>
       <div className="p-3 text-xs font-medium text-text-secondary">
