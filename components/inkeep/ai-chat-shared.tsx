@@ -47,10 +47,14 @@ export function ThinkingIndicator() {
   );
 }
 
-const roleName: Record<string, string> = {
-  user: 'you',
-  assistant: 'langfuse',
-};
+function AssistantLabel() {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <img src="/brand-assets/icon/color/langfuse-icon.png" alt="" className="size-4" />
+      <span>Langfuse Help Agent</span>
+    </span>
+  );
+}
 
 type AIChatMessageProps = {
   message: InkeepUIMessage;
@@ -99,7 +103,7 @@ export function AIChatMessage({
       )}>
         {!isUser && (
           <p className="mb-1 text-sm font-medium text-primary">
-            {roleName[message.role] ?? 'unknown'}
+            {message.role === 'assistant' ? <AssistantLabel /> : 'unknown'}
           </p>
         )}
         <div className={cn('prose text-sm', isUser && 'prose-p:my-0')}>

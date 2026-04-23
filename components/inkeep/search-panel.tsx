@@ -189,37 +189,50 @@ function TextareaAutoResize(props: ComponentProps<'textarea'>) {
   );
 }
 
-// ─── Scrollable message list ───────────────────────────────────────────────────
+// ─── Scrollable message list with sticky auto-scroll ─────────────────────────
 
-function ScrollList(props: Omit<ComponentProps<'div'>, 'dir'>) {
-  const containerRef = useRef<HTMLDivElement>(null);
+const SCROLL_THRESHOLD = 40;
+
+function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, messageCount: number) {
+  const isStuckRef = useRef(true);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
+    const el = containerRef.current;
+    if (!el) return;
 
-    function scrollToBottom() {
-      container.scrollTo({ top: container.scrollHeight, behavior: 'instant' });
+    function onScroll() {
+      if (!el) return;
+      const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      isStuckRef.current = distFromBottom <= SCROLL_THRESHOLD;
     }
 
-    const observer = new ResizeObserver(scrollToBottom);
-    scrollToBottom();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [containerRef]);
 
-    const child = container.firstElementChild;
-    if (child) observer.observe(child);
+  // Scroll to bottom when message count increases (user sent a message)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
+    isStuckRef.current = true;
+  }, [messageCount, containerRef]);
 
+  // Auto-scroll with streaming content via ResizeObserver
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const child = el.firstElementChild;
+    if (!child) return;
+
+    const observer = new ResizeObserver(() => {
+      if (isStuckRef.current) {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
+      }
+    });
+    observer.observe(child);
     return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={containerRef}
-      {...props}
-      className={cn('overflow-y-auto min-w-0 flex flex-col', props.className)}
-    >
-      {props.children}
-    </div>
-  );
+  }, [containerRef]);
 }
 
 // ─── Message list panel (empty state + messages) ───────────────────────────────
@@ -228,14 +241,18 @@ function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
   const isWaiting = chat.status === 'submitted';
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useAutoScroll(containerRef, messages.length);
 
   const sendExampleQuestion = (question: string) => {
     void chat.sendMessage(buildUserMessage(question));
   };
 
   return (
-    <ScrollList
-      className={cn('p-4 overscroll-contain', className)}
+    <div
+      ref={containerRef}
+      className={cn('overflow-y-auto min-w-0 flex flex-col p-4 overscroll-contain', className)}
       style={{
         maskImage:
           'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
@@ -253,7 +270,7 @@ function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>
           {isWaiting && <ThinkingIndicator />}
         </div>
       )}
-    </ScrollList>
+    </div>
   );
 }
 

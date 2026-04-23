@@ -35,6 +35,48 @@ function EmbeddedTextarea(props: ComponentProps<'textarea'>) {
   );
 }
 
+const SCROLL_THRESHOLD = 40;
+
+function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, messageCount: number) {
+  const isStuckRef = useRef(true);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    function onScroll() {
+      if (!el) return;
+      const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      isStuckRef.current = distFromBottom <= SCROLL_THRESHOLD;
+    }
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [containerRef]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
+    isStuckRef.current = true;
+  }, [messageCount, containerRef]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const child = el.firstElementChild;
+    if (!child) return;
+
+    const observer = new ResizeObserver(() => {
+      if (isStuckRef.current) {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
+      }
+    });
+    observer.observe(child);
+    return () => observer.disconnect();
+  }, [containerRef]);
+}
+
 export function EmbeddedAIChat() {
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
@@ -44,22 +86,7 @@ export function EmbeddedAIChat() {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!scrollRef.current) return;
-    const container = scrollRef.current;
-
-    function scrollToBottom() {
-      container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
-    }
-
-    const observer = new ResizeObserver(scrollToBottom);
-    scrollToBottom();
-
-    const child = container.firstElementChild;
-    if (child) observer.observe(child);
-
-    return () => observer.disconnect();
-  }, []);
+  useAutoScroll(scrollRef, messages.length);
 
   const onSubmit = (e?: SyntheticEvent) => {
     e?.preventDefault();
