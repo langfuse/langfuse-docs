@@ -39,9 +39,7 @@ export function ThinkingIndicator() {
       <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5 mt-0.5" />
       <p className="text-sm text-text-tertiary animate-pulse">
         {THINKING_PHRASES[index]}
-        <span className="inline-flex w-6">
-          <span className="animate-[ellipsis_1.4s_steps(4,end)_infinite]">...</span>
-        </span>
+        <span className="ellipsis-dots" aria-hidden="true" />
       </p>
     </div>
   );

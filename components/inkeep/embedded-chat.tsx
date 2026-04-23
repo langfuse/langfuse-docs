@@ -56,9 +56,8 @@ function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, mes
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || !isStuckRef.current) return;
     el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
-    isStuckRef.current = true;
   }, [messageCount, containerRef]);
 
   // Re-observe when messageCount changes (child element may have changed)
@@ -151,7 +150,7 @@ export function EmbeddedAIChat() {
               variant="secondary"
               size="small"
               icon={<Trash2 className="size-3" />}
-              onClick={() => chat.setMessages([])}
+              onClick={() => { chat.stop(); chat.setMessages([]); }}
             >
               Clear
             </Button>
