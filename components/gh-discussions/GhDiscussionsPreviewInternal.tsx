@@ -19,6 +19,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { HoverCorners } from "@/components/ui/corner-box";
 import IconGithub from "../icons/github";
 import IconSort from "../icons/sort";
 import IconSearch from "../icons/search";
@@ -102,7 +103,7 @@ const GhDiscussionsPreviewInternal = ({
     if (displayedDiscussions.length === 0) {
       return (
         <div className="py-8 text-center">
-          <p className="text-sm text-primary/70">No discussions found.</p>
+          <p className="text-sm text-text-tertiary">No discussions found.</p>
         </div>
       );
     }
@@ -113,60 +114,66 @@ const GhDiscussionsPreviewInternal = ({
           className="list-none not-prose"
           data-gh-discussions-list
         >
-          {displayedDiscussions.map((discussion) => (
+          {displayedDiscussions.map((discussion, idx) => (
             <li
               key={discussion.number}
-              className="flex items-center p-4 border-b last:border-none"
+              className={cn(
+                "relative hover:z-10",
+                idx > 0 && "border-t border-line-structure"
+              )}
             >
-              <div className="flex flex-col items-center min-w-[60px] gap-0.5">
-                <span className="text-lg font-semibold leading-none">
-                  {discussion.upvotes}
-                </span>
-                <span className="text-xs leading-none text-primary/70">
-                  votes
-                </span>
-              </div>
-              <div className="flex flex-col items-start">
-                <Link
-                  href={discussion.href}
-                  className="text-sm font-medium leading-none no-underline text-primary text-balance hover:no-underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {discussion.title}
-                </Link>
-                <div className="text-xs text-primary/70 mt-1.5 flex items-center flex-wrap gap-1">
-                  <span>{discussion.author.login}</span>
-                  <span>•</span>
-                  <span>
-                    {new Date(discussion.created_at).toLocaleDateString()}
+              <a
+                href={discussion.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-box group relative flex items-center px-4 py-3 no-underline cursor-pointer"
+              >
+                <HoverCorners />
+                <div className="flex flex-col items-center min-w-[60px] shrink-0 gap-0.5">
+                  <span className="text-lg font-semibold leading-none text-text-primary">
+                    {discussion.upvotes}
                   </span>
-
-                  <span>•</span>
-                  <div className="inline-flex gap-1 items-center">
-                    <span
-                      className={`h-4 inline-flex items-center gap-1 px-1.5 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-primary/70 dark:text-gray-200`}
-                    >
-                      <IconMessage className="h-3" />
-                      {discussion.comment_count}
+                  <span className="text-xs leading-none text-text-tertiary">
+                    votes
+                  </span>
+                </div>
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  <span className="text-sm font-medium leading-snug text-text-primary">
+                    {discussion.title}
+                  </span>
+                  <div className="text-xs text-text-tertiary mt-1.5 flex items-center flex-wrap gap-1">
+                    <span>{discussion.author.login}</span>
+                    <span>•</span>
+                    <span>
+                      {new Date(discussion.created_at).toLocaleDateString()}
                     </span>
 
-                    {category === "Ideas" &&
-                      discussion.labels.includes("✅ Done") && (
-                        <span className="h-4 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1.5 rounded-full text-xs">
-                          Done
+                    <span>•</span>
+                    <div className="inline-flex gap-1 items-center">
+                      <span
+                        className="h-4 inline-flex items-center gap-1 px-1.5 rounded-full text-xs bg-surface-1 text-text-tertiary"
+                      >
+                        <IconMessage className="h-3" />
+                        {discussion.comment_count}
+                      </span>
+
+                      {category === "Ideas" &&
+                        discussion.labels.includes("✅ Done") && (
+                          <span className="h-4 bg-muted-blue/10 text-muted-blue px-1.5 rounded-full text-xs">
+                            Done
+                          </span>
+                        )}
+                      {category === "Support" && discussion.resolved && (
+                        <span
+                          className="h-4 px-1.5 rounded-full text-xs bg-muted-green/10 text-muted-green"
+                        >
+                          Resolved
                         </span>
                       )}
-                    {category === "Support" && discussion.resolved && (
-                      <span
-                        className={`h-4 px-1.5 rounded-full text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200`}
-                      >
-                        Resolved
-                      </span>
-                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </a>
             </li>
           ))}
         </ul>
@@ -191,7 +198,7 @@ const GhDiscussionsPreviewInternal = ({
     }
 
     return (
-      <Pagination className="py-8 border-t">
+      <Pagination className="py-8 border-t border-line-structure">
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
@@ -276,8 +283,8 @@ const GhDiscussionsPreviewInternal = ({
               ))}
             </TabsList>
           )}
-          <div className="flex items-center space-x-2 w-full sm:w-auto">
-            <div className="relative w-36 h-[26px] sm:w-48">
+          <div className="flex items-center w-full sm:w-auto">
+            <div className="relative flex items-center p-1 max-h-[34px]">
               <Input
                 type="text"
                 placeholder="Search..."
@@ -286,9 +293,9 @@ const GhDiscussionsPreviewInternal = ({
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-8 w-full h-full"
+                className="pl-7 w-36 sm:w-48 h-[26px] rounded-[1px] shadow-none [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
               />
-              <IconSearch className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-primary/70" />
+              <IconSearch className="absolute left-3 top-1/2 w-4 h-4 transform -translate-y-1/2 text-text-tertiary" />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -328,11 +335,13 @@ const GhDiscussionsPreviewInternal = ({
             </Button>
           </div>
         </div>
-        <div className="rounded border">
-          <TabsContent value="Support">
+        <div className="border border-line-structure bg-surface-bg">
+          <TabsContent value="Support" className="pt-0 rounded-none bg-transparent">
             {renderDiscussions("Support")}
           </TabsContent>
-          <TabsContent value="Ideas">{renderDiscussions("Ideas")}</TabsContent>
+          <TabsContent value="Ideas" className="pt-0 rounded-none bg-transparent">
+            {renderDiscussions("Ideas")}
+          </TabsContent>
         </div>
       </Tabs>
       <div className="mt-2 text-xs text-text-tertiary">
