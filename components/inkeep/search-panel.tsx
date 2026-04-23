@@ -5,6 +5,7 @@ import {
   type SyntheticEvent,
   useEffect,
   useEffectEvent,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -334,12 +335,32 @@ export function AISearchPanel() {
   const narrowLayout = useAiPanelNarrowLayout();
   const keyboardOverlapPx = useVisualViewportBottomOverlap(open && narrowLayout);
 
+  // Skip the enter animation when the panel remounts while already open
+  // (e.g. navigating between layout groups).
+  const mountedOpenRef = useRef(open);
+  const [skipEnterAnimation, setSkipEnterAnimation] = useState(open);
+  useLayoutEffect(() => {
+    if (!mountedOpenRef.current) {
+      setSkipEnterAnimation(false);
+    }
+  }, []);
+
+  // Once the user closes the panel, never skip animation again for this mount.
+  useEffect(() => {
+    if (!open) setSkipEnterAnimation(false);
+  }, [open]);
+
   return (
     <>
       <Presence present={open}>
         <div
           data-state={open ? 'open' : 'closed'}
-          className="fixed inset-0 z-50 backdrop-blur-sm bg-[hsl(var(--primary)/0.3)] data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out wide:hidden"
+          className={cn(
+            'fixed inset-0 z-50 backdrop-blur-sm bg-[hsl(var(--primary)/0.3)] wide:hidden',
+            skipEnterAnimation
+              ? ''
+              : 'data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
+          )}
           onClick={() => setOpen(false)}
         />
       </Presence>
@@ -351,9 +372,11 @@ export function AISearchPanel() {
             'wide:sticky wide:top-[var(--fd-nav-height)] wide:h-[calc(100dvh-var(--fd-nav-height)-2px)] wide:border-l wide:ms-auto',
             'wide:in-[#nd-docs-layout]:[grid-area:toc] wide:in-[#nd-notebook-layout]:row-span-full wide:in-[#nd-notebook-layout]:col-start-5',
             'wide:in-[#home-layout]:top-[calc(var(--fd-banner-height,0px)+var(--lf-nav-primary-height))] wide:in-[#home-layout]:h-[calc(100dvh-var(--fd-banner-height,0px)-var(--lf-nav-primary-height))] wide:in-[#home-layout]:w-(--ai-chat-width) wide:in-[#home-layout]:shrink-0 wide:in-[#home-layout]:border-r',
-            open
-              ? 'animate-fd-dialog-in wide:animate-[ask-ai-open_200ms]'
-              : 'animate-fd-dialog-out wide:animate-[ask-ai-close_200ms]',
+            skipEnterAnimation
+              ? ''
+              : open
+                ? 'animate-fd-dialog-in wide:animate-[ask-ai-open_200ms]'
+                : 'animate-fd-dialog-out wide:animate-[ask-ai-close_200ms]',
           )}
           style={
             narrowLayout && keyboardOverlapPx > 0

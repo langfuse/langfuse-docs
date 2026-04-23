@@ -3,6 +3,7 @@ import { NotFoundAnimation } from "@/components/NotFoundAnimation";
 import { BrokenLinkIssue } from "@/components/BrokenLinkIssue";
 import { Navbar, Footer } from "@/components/layout";
 import { Button } from "@/components/ui";
+import { AISearchPanel, FloatingAskAIButton } from "@/components/inkeep/search";
 
 export default function NotFound() {
   return (
@@ -25,6 +26,8 @@ export default function NotFound() {
           </div>
         </div>
       </main>
+      <AISearchPanel />
+      <FloatingAskAIButton />
     </>
   );
 }

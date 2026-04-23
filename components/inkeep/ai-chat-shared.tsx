@@ -106,15 +106,15 @@ export function AIChatMessage({
           <Markdown text={markdown} />
         </div>
         {links && links.length > 0 && (
-          <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
+          <div className="mt-2 flex flex-col gap-1">
             {links.map((item, i) => (
               <Link
                 key={i}
                 href={item.url}
-                className="block text-xs border border-line-structure p-3 hover:bg-surface-2 text-text-secondary no-underline"
+                className="flex items-baseline gap-1.5 text-[11px] leading-tight border border-line-structure rounded-sm px-2 py-1.5 hover:bg-surface-2 text-text-secondary no-underline truncate"
               >
-                <p className="font-medium">{item.title}</p>
-                <p className="text-text-tertiary">Reference {item.label}</p>
+                <span className="text-text-tertiary shrink-0">[{item.label}]</span>
+                <span className="font-medium truncate">{item.title}</span>
               </Link>
             ))}
           </div>
