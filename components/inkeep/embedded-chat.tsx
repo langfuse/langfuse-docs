@@ -7,12 +7,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Loader2, RefreshCw, Send } from 'lucide-react';
+import { RefreshCw, Send, Square, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Link } from '@/components/ui/link';
-import { AIChatEmptyState, AIChatMessage } from './ai-chat-shared';
+import { AIChatEmptyState, AIChatMessage, ThinkingIndicator } from './ai-chat-shared';
 import { useChatContext, buildUserMessage } from './search-context';
 
 function EmbeddedTextarea(props: ComponentProps<'textarea'>) {
@@ -101,22 +101,49 @@ export function EmbeddedAIChat() {
             {messages.map((item) => (
               <AIChatMessage key={item.id} message={item} />
             ))}
+            {chat.status === 'submitted' && <ThinkingIndicator />}
           </div>
         )}
       </div>
 
       <div className="border-t border-line-structure bg-surface-2">
-        <form className="flex items-start pe-1" onSubmit={onSubmit}>
+        {messages.length > 0 && (
+          <div className="flex items-center gap-1 px-2 pt-2">
+            {!isStreaming && messages.at(-1)?.role === 'assistant' && (
+              <Button
+                variant="secondary"
+                size="small"
+                icon={<RefreshCw className="size-3" />}
+                onClick={() => chat.regenerate()}
+              >
+                Retry
+              </Button>
+            )}
+            <Button
+              variant="secondary"
+              size="small"
+              icon={<Trash2 className="size-3" />}
+              onClick={() => chat.setMessages([])}
+            >
+              Clear
+            </Button>
+          </div>
+        )}
+        <form className="flex items-end gap-1 p-2" onSubmit={onSubmit}>
           <EmbeddedTextarea
             value={input}
-            placeholder={isLoading ? 'AI is answering...' : 'Ask a question'}
+            placeholder="Ask a question"
             autoFocus={false}
-            className="p-3 text-[14px]"
-            disabled={isLoading}
+            className="px-3 py-2 text-[14px]"
+            disabled={false}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(event) => {
               if (!event.shiftKey && event.key === 'Enter') {
-                onSubmit(event);
+                if (isLoading) {
+                  event.preventDefault();
+                } else {
+                  onSubmit(event);
+                }
               }
             }}
           />
@@ -126,11 +153,9 @@ export function EmbeddedAIChat() {
               type="button"
               onClick={chat.stop}
               size="small"
-              icon={<Loader2 className="size-3 animate-spin" />}
-              wrapperClassName="mt-1"
-            >
-              Abort
-            </Button>
+              icon={<Square className="size-3 fill-current" />}
+              aria-label="Stop"
+            />
           ) : (
             <Button
               variant="primary"
@@ -138,31 +163,10 @@ export function EmbeddedAIChat() {
               disabled={input.length === 0}
               size="small"
               icon={<Send className="size-3.5" />}
-              wrapperClassName="mt-1"
+              aria-label="Send"
             />
           )}
         </form>
-        {messages.length > 0 && (
-          <div className="flex items-center gap-1 p-1">
-            {!isStreaming && messages.at(-1)?.role === 'assistant' && (
-              <Button
-                variant="secondary"
-                size="small"
-                icon={<RefreshCw className="size-3.5" />}
-                onClick={() => chat.regenerate()}
-              >
-                Retry
-              </Button>
-            )}
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => chat.setMessages([])}
-            >
-              Clear Chat
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

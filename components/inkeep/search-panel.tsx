@@ -8,12 +8,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Loader2, RefreshCw, Send, X } from 'lucide-react';
+import { RefreshCw, Send, Square, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Link } from '@/components/ui/link';
-import { AIChatEmptyState, AIChatMessage } from './ai-chat-shared';
+import { AIChatEmptyState, AIChatMessage, ThinkingIndicator } from './ai-chat-shared';
 import { Presence } from '@radix-ui/react-presence';
 import { useAISearchContext, useChatContext, buildUserMessage } from './search-context';
 
@@ -58,7 +58,7 @@ function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
   );
 }
 
-// ─── Input actions (retry / clear) ─────────────────────────────────────────────
+// ─── Input actions (retry / clear) — horizontal bar above input ────────────────
 
 function AISearchInputActions() {
   const { messages, status, setMessages, regenerate } = useChatContext();
@@ -67,12 +67,12 @@ function AISearchInputActions() {
   if (messages.length === 0) return null;
 
   return (
-    <>
+    <div className="flex items-center gap-1 px-2 pt-2">
       {!isLoading && messages.at(-1)?.role === 'assistant' && (
         <Button
           variant="secondary"
           size="small"
-          icon={<RefreshCw className="size-3.5" />}
+          icon={<RefreshCw className="size-3" />}
           onClick={() => regenerate()}
         >
           Retry
@@ -81,11 +81,12 @@ function AISearchInputActions() {
       <Button
         variant="secondary"
         size="small"
+        icon={<Trash2 className="size-3" />}
         onClick={() => setMessages([])}
       >
-        Clear Chat
+        Clear
       </Button>
-    </>
+    </div>
   );
 }
 
@@ -119,44 +120,46 @@ function AISearchInput(props: ComponentProps<'form'>) {
   };
 
   return (
-    <form {...props} className={cn('flex items-start pe-1', props.className)} onSubmit={onStart}>
+    <form {...props} className={cn('flex items-end gap-1 p-2', props.className)} onSubmit={onStart}>
       <TextareaAutoResize
         value={input}
-        placeholder={isLoading ? 'AI is answering...' : 'Ask a question'}
+        placeholder="Ask a question"
         autoFocus
-        className="p-3 text-[16px] md:text-[14px]"
-        disabled={isLoading}
+        className="px-3 py-2 text-[16px] md:text-[14px]"
+        disabled={false}
         onChange={(e) => {
           setInput(e.target.value);
           localStorage.setItem(StorageKeyInput, e.target.value);
         }}
         onKeyDown={(event) => {
           if (!event.shiftKey && event.key === 'Enter') {
-            onStart(event);
+            if (isLoading) {
+              event.preventDefault();
+            } else {
+              onStart(event);
+            }
           }
         }}
       />
       {isLoading ? (
         <Button
-          key="bn"
+          key="stop"
           variant="secondary"
           type="button"
           onClick={stop}
           size="small"
-          icon={<Loader2 className="size-3 animate-spin" />}
-          wrapperClassName="mt-1"
-        >
-          Abort
-        </Button>
+          icon={<Square className="size-3 fill-current" />}
+          aria-label="Stop"
+        />
       ) : (
         <Button
-          key="bn"
+          key="send"
           variant="primary"
           type="submit"
           disabled={input.length === 0}
           size="small"
           icon={<Send className="size-3.5" />}
-          wrapperClassName="mt-1"
+          aria-label="Send"
         />
       )}
     </form>
@@ -223,6 +226,7 @@ function ScrollList(props: Omit<ComponentProps<'div'>, 'dir'>) {
 function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>) {
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
+  const isWaiting = chat.status === 'submitted';
 
   const sendExampleQuestion = (question: string) => {
     void chat.sendMessage(buildUserMessage(question));
@@ -245,6 +249,7 @@ function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>
           {messages.map((item) => (
             <AIChatMessage key={item.id} message={item} captureClicks />
           ))}
+          {isWaiting && <ThinkingIndicator />}
         </div>
       )}
     </ScrollList>
@@ -360,10 +365,8 @@ export function AISearchPanel() {
             <AISearchPanelHeader />
             <AISearchPanelList className="flex-1 min-h-0" />
             <div className="border-t border-line-structure text-text-primary bg-surface-1">
+              <AISearchInputActions />
               <AISearchInput />
-              <div className="flex items-center gap-1 p-1 empty:hidden">
-                <AISearchInputActions />
-              </div>
             </div>
           </div>
         </div>

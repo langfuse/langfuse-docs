@@ -1,6 +1,6 @@
 'use client';
 
-import type { ComponentProps } from 'react';
+import { type ComponentProps, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Text } from '@/components/ui/text';
 import { Link } from '@/components/ui/link';
@@ -12,6 +12,40 @@ export const AI_CHAT_EXAMPLE_QUESTIONS = [
   'How to use the Python decorator for tracing?',
   'How to set up LLM-as-a-judge evals?',
 ] as const;
+
+const THINKING_PHRASES = [
+  'Pondering',
+  'Rummaging through docs',
+  'Consulting the traces',
+  'Evaluating options',
+  'Searching the knowledge base',
+  'Warming up neurons',
+  'Digging deeper',
+  'Almost there',
+] as const;
+
+export function ThinkingIndicator() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((i) => (i + 1) % THINKING_PHRASES.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-start gap-3">
+      <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5 mt-0.5" />
+      <p className="text-sm text-text-tertiary animate-pulse">
+        {THINKING_PHRASES[index]}
+        <span className="inline-flex w-6">
+          <span className="animate-[ellipsis_1.4s_steps(4,end)_infinite]">...</span>
+        </span>
+      </p>
+    </div>
+  );
+}
 
 const roleName: Record<string, string> = {
   user: 'you',
@@ -44,40 +78,48 @@ export function AIChatMessage({
     }
   }
 
+  const isUser = message.role === 'user';
+
   return (
     <div
       {...props}
-      className={cn(className)}
+      className={cn(
+        isUser ? 'flex justify-end' : 'flex justify-start',
+        className,
+      )}
       onClick={(e) => {
         if (captureClicks) e.stopPropagation();
         onClick?.(e);
       }}
     >
-      <p
-        className={cn(
-          'mb-1 text-sm font-medium text-text-tertiary',
-          message.role === 'assistant' && 'text-primary',
+      <div className={cn(
+        isUser
+          ? 'max-w-[85%] rounded-2xl rounded-br-sm border border-line-structure bg-surface-2 px-3 py-2'
+          : 'max-w-full',
+      )}>
+        {!isUser && (
+          <p className="mb-1 text-sm font-medium text-primary">
+            {roleName[message.role] ?? 'unknown'}
+          </p>
         )}
-      >
-        {roleName[message.role] ?? 'unknown'}
-      </p>
-      <div className="prose text-sm">
-        <Markdown text={markdown} />
-      </div>
-      {links && links.length > 0 && (
-        <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
-          {links.map((item, i) => (
-            <Link
-              key={i}
-              href={item.url}
-              className="block text-xs border border-line-structure p-3 hover:bg-surface-2 text-text-secondary no-underline"
-            >
-              <p className="font-medium">{item.title}</p>
-              <p className="text-text-tertiary">Reference {item.label}</p>
-            </Link>
-          ))}
+        <div className={cn('prose text-sm', isUser && 'prose-p:my-0')}>
+          <Markdown text={markdown} />
         </div>
-      )}
+        {links && links.length > 0 && (
+          <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
+            {links.map((item, i) => (
+              <Link
+                key={i}
+                href={item.url}
+                className="block text-xs border border-line-structure p-3 hover:bg-surface-2 text-text-secondary no-underline"
+              >
+                <p className="font-medium">{item.title}</p>
+                <p className="text-text-tertiary">Reference {item.label}</p>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

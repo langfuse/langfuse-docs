@@ -22,6 +22,13 @@ const Context = createContext<AISearchContextValue | null>(null);
 const transport = new DefaultChatTransport({ api: '/api/chat' });
 
 export function AISearch({ children }: { children: ReactNode }) {
+  const existing = use(Context);
+  if (existing) return <>{children}</>;
+
+  return <AISearchInner>{children}</AISearchInner>;
+}
+
+function AISearchInner({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const chat = useChat<InkeepUIMessage>({
     id: 'search',
