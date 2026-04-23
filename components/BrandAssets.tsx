@@ -1,13 +1,12 @@
 "use client";
 
 import { Download } from "lucide-react";
-import { CornerBox } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 export function BrandDownloadButton() {
   return (
-    <div className="mt-2">
+    <div className="mt-2 w-fit">
       <Button
         variant="secondary"
         size="small"
@@ -47,30 +46,28 @@ export function BrandAssetCard({
   tall,
 }: BrandAssetCardProps) {
   return (
-    <a download href={href} className="block no-underline">
-      <CornerBox
-        hoverStripes
-        className="overflow-hidden"
+    <a
+      download
+      href={href}
+      className="block no-underline relative group border border-line-structure bg-surface-bg rounded-[2px] corner-box-corners--hover corner-box-hover-stripes transition-[background] duration-180 ease-out overflow-hidden"
+    >
+      <div
+        className={cn(
+          "flex items-center justify-center border-b border-line-structure min-h-28 p-6",
+          variant === "dark"
+            ? "bg-text-primary dark:bg-surface-code"
+            : "bg-surface-bg"
+        )}
       >
-        <div
-          className={cn(
-            "flex items-center justify-center border-b border-line-structure",
-            tall ? "min-h-28 p-6" : "min-h-28 p-6",
-            variant === "dark"
-              ? "bg-surface-code"
-              : "bg-surface-bg"
-          )}
-        >
-          <img
-            src={src}
-            alt={alt}
-            className={cn("w-auto", tall ? "h-12" : "h-10")}
-          />
-        </div>
-        <div className="p-3 text-xs font-medium text-text-secondary">
-          {label}
-        </div>
-      </CornerBox>
+        <img
+          src={src}
+          alt={alt}
+          className={cn("w-auto", tall ? "h-12" : "h-10")}
+        />
+      </div>
+      <div className="p-3 text-xs font-medium text-text-secondary">
+        {label}
+      </div>
     </a>
   );
 }
