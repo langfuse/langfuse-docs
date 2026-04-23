@@ -13,14 +13,14 @@ interface IntegrationLabelProps {
   onMouseLeave?: React.MouseEventHandler;
 }
 
-export function IntegrationLabel({
+export const IntegrationLabel: React.FC<IntegrationLabelProps> = ({
   icon,
   label,
   href,
   className,
   onMouseEnter,
   onMouseLeave,
-}: IntegrationLabelProps) {
+}) => {
   const inner = (
     <>
       {icon ? (
@@ -54,4 +54,4 @@ export function IntegrationLabel({
       {inner}
     </span>
   );
-}
+};
