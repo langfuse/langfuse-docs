@@ -1114,6 +1114,75 @@ details > summary {
   }
 }
 
+/* Re-enable Tailwind Typography inside .not-prose containers.
+   .prose-enabled on a descendant of .not-prose isolates a new prose scope
+   so that headings, lists, code, etc. render correctly again. */
+.not-prose .prose-enabled .prose {
+  --tw-prose-body: var(--color-text-primary);
+  --tw-prose-headings: var(--color-text-primary);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-code: var(--color-text-primary);
+  color: var(--tw-prose-body);
+}
+.not-prose .prose-enabled .prose :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--tw-prose-headings);
+  font-weight: 500;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+.not-prose .prose-enabled .prose :where(h1) { font-size: 1.25em; }
+.not-prose .prose-enabled .prose :where(h2) { font-size: 1.15em; }
+.not-prose .prose-enabled .prose :where(h3) { font-size: 1.05em; }
+.not-prose .prose-enabled .prose :where(p) {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+.not-prose .prose-enabled .prose :where(ul, ol) {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding-inline-start: 1.5em;
+}
+.not-prose .prose-enabled .prose :where(ul) { list-style-type: disc; }
+.not-prose .prose-enabled .prose :where(ol) { list-style-type: decimal; }
+.not-prose .prose-enabled .prose :where(li) { margin-top: 0.25em; margin-bottom: 0.25em; }
+.not-prose .prose-enabled .prose :where(code) {
+  font-size: 0.85em;
+  font-family: var(--font-mono);
+  border: 1px solid var(--line-structure);
+  border-radius: 4px;
+  padding: 0.15em 0.35em;
+  background: var(--surface-1);
+}
+.not-prose .prose-enabled .prose :where(pre) {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  overflow-x: auto;
+}
+.not-prose .prose-enabled .prose :where(pre code) {
+  border: none;
+  padding: 0;
+  background: none;
+}
+.not-prose .prose-enabled .prose :where(a) {
+  color: var(--tw-prose-links);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.not-prose .prose-enabled .prose :where(strong) { font-weight: 600; }
+.not-prose .prose-enabled .prose :where(blockquote) {
+  border-inline-start: 3px solid var(--line-structure);
+  padding-inline-start: 1em;
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  color: var(--color-text-secondary);
+}
+.not-prose .prose-enabled .prose :where(hr) {
+  border-color: var(--line-structure);
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
 /* AI Search Panel */
 @keyframes ask-ai-open {
   from {

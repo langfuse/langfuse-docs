@@ -218,7 +218,7 @@ function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, mes
     isStuckRef.current = true;
   }, [messageCount, containerRef]);
 
-  // Auto-scroll with streaming content via ResizeObserver
+  // Re-observe when messageCount changes (child element may have changed)
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -232,7 +232,7 @@ function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, mes
     });
     observer.observe(child);
     return () => observer.disconnect();
-  }, [containerRef]);
+  }, [containerRef, messageCount]);
 }
 
 // ─── Message list panel (empty state + messages) ───────────────────────────────

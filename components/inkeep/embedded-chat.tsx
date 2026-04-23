@@ -61,6 +61,7 @@ function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, mes
     isStuckRef.current = true;
   }, [messageCount, containerRef]);
 
+  // Re-observe when messageCount changes (child element may have changed)
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -74,7 +75,7 @@ function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, mes
     });
     observer.observe(child);
     return () => observer.disconnect();
-  }, [containerRef]);
+  }, [containerRef, messageCount]);
 }
 
 export function EmbeddedAIChat() {
@@ -100,9 +101,9 @@ export function EmbeddedAIChat() {
   return (
     <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)] not-prose">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-line-structure bg-surface-2">
-        <img src="/icon256.png" alt="Langfuse" className="size-5 rounded-full" />
+        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5" />
         <Text size="s" className="font-medium text-text-primary not-prose">
-          Ask AI
+          Langfuse Help Agent
         </Text>
         <Text size="s" className="text-text-tertiary text-xs not-prose">
           — Powered by{' '}
@@ -116,7 +117,7 @@ export function EmbeddedAIChat() {
         </Text>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 overscroll-contain bg-surface-1">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 overscroll-contain bg-surface-1 prose-enabled">
         {messages.length === 0 ? (
           <AIChatEmptyState
             onPickQuestion={(question) => {
