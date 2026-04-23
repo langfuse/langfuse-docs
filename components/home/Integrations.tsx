@@ -347,7 +347,7 @@ export function Integrations() {
           <span className="text-[13px] text-text-secondary">
             Don&apos;t find your integration?{" "}
             <Link
-              href="/integrations"
+              href="/integrations#request-integration"
               className="text-text-secondary hover:text-text-primary underline underline-offset-2 decoration-line-structure hover:decoration-text-tertiary transition-colors"
             >
               Request it →
