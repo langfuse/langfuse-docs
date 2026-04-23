@@ -82,7 +82,7 @@ export function EmbeddedAIChat() {
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
   const isLoading = chat.status === 'streaming' || chat.status === 'submitted';
-  const isStreaming = chat.status === 'streaming';
+  const isStreaming = chat.status === 'streaming' || chat.status === 'submitted';
 
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
