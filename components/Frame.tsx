@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 // Image Zoom Modal Component
 const ImageZoomModal = ({
@@ -13,7 +14,11 @@ const ImageZoomModal = ({
   alt: string;
   onClose: () => void;
 }) => {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
@@ -29,9 +34,11 @@ const ImageZoomModal = ({
     };
   }, [onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-1000 flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={onClose}
     >
       <div className="relative max-h-[90vh] max-w-[90vw] bg-white rounded-lg shadow-2xl">
@@ -61,7 +68,8 @@ const ImageZoomModal = ({
           </svg>
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

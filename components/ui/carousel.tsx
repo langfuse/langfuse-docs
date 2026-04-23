@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
@@ -80,10 +81,16 @@ const ImageZoomModal = ({
   }, [onClose, onNavigate, currentIndex, images.length]);
 
   const currentImage = images[currentIndex];
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-1000 flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={onClose}
     >
       <div className="relative max-h-[90vh] max-w-[90vw] bg-white rounded-lg shadow-2xl">
@@ -133,7 +140,8 @@ const ImageZoomModal = ({
           ))}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
