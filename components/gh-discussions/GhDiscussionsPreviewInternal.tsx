@@ -110,63 +110,64 @@ const GhDiscussionsPreviewInternal = ({
     return (
       <>
         <ul
-          className="list-none not-prose"
+          className="list-none not-prose divide-y divide-line-structure"
           data-gh-discussions-list
         >
           {displayedDiscussions.map((discussion) => (
             <li
               key={discussion.number}
-              className="flex items-center p-4 border-b border-line-structure last:border-none"
             >
-              <div className="flex flex-col items-center min-w-[60px] gap-0.5">
-                <span className="text-lg font-semibold leading-none text-text-primary">
-                  {discussion.upvotes}
-                </span>
-                <span className="text-xs leading-none text-text-tertiary">
-                  votes
-                </span>
-              </div>
-              <div className="flex flex-col items-start">
-                <Link
-                  href={discussion.href}
-                  className="text-sm font-medium leading-none no-underline text-text-primary text-balance hover:no-underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {discussion.title}
-                </Link>
-                <div className="text-xs text-text-tertiary mt-1.5 flex items-center flex-wrap gap-1">
-                  <span>{discussion.author.login}</span>
-                  <span>•</span>
-                  <span>
-                    {new Date(discussion.created_at).toLocaleDateString()}
+              <a
+                href={discussion.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center p-4 no-underline transition-colors hover:bg-surface-1/60 cursor-pointer"
+              >
+                <div className="flex flex-col items-center min-w-[60px] shrink-0 gap-0.5">
+                  <span className="text-lg font-semibold leading-none text-text-primary">
+                    {discussion.upvotes}
                   </span>
-
-                  <span>•</span>
-                  <div className="inline-flex gap-1 items-center">
-                    <span
-                      className={`h-4 inline-flex items-center gap-1 px-1.5 rounded-full text-xs bg-surface-1 text-text-tertiary`}
-                    >
-                      <IconMessage className="h-3" />
-                      {discussion.comment_count}
+                  <span className="text-xs leading-none text-text-tertiary">
+                    votes
+                  </span>
+                </div>
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  <span className="text-sm font-medium leading-snug text-text-primary">
+                    {discussion.title}
+                  </span>
+                  <div className="text-xs text-text-tertiary mt-1.5 flex items-center flex-wrap gap-1">
+                    <span>{discussion.author.login}</span>
+                    <span>•</span>
+                    <span>
+                      {new Date(discussion.created_at).toLocaleDateString()}
                     </span>
 
-                    {category === "Ideas" &&
-                      discussion.labels.includes("✅ Done") && (
-                        <span className="h-4 bg-muted-blue/10 text-muted-blue px-1.5 rounded-full text-xs">
-                          Done
+                    <span>•</span>
+                    <div className="inline-flex gap-1 items-center">
+                      <span
+                        className="h-4 inline-flex items-center gap-1 px-1.5 rounded-full text-xs bg-surface-1 text-text-tertiary"
+                      >
+                        <IconMessage className="h-3" />
+                        {discussion.comment_count}
+                      </span>
+
+                      {category === "Ideas" &&
+                        discussion.labels.includes("✅ Done") && (
+                          <span className="h-4 bg-muted-blue/10 text-muted-blue px-1.5 rounded-full text-xs">
+                            Done
+                          </span>
+                        )}
+                      {category === "Support" && discussion.resolved && (
+                        <span
+                          className="h-4 px-1.5 rounded-full text-xs bg-muted-green/10 text-muted-green"
+                        >
+                          Resolved
                         </span>
                       )}
-                    {category === "Support" && discussion.resolved && (
-                      <span
-                        className={`h-4 px-1.5 rounded-full text-xs bg-muted-green/10 text-muted-green`}
-                      >
-                        Resolved
-                      </span>
-                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </a>
             </li>
           ))}
         </ul>
@@ -286,7 +287,7 @@ const GhDiscussionsPreviewInternal = ({
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-8 w-full h-full"
+                className="pl-8 w-full h-full rounded-[1px] shadow-none [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
               />
               <IconSearch className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-text-tertiary" />
             </div>
