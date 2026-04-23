@@ -227,7 +227,7 @@ function IntegrationGroupCard({
   return (
     <div
       className={cn(
-        "relative inline-flex items-center border border-line-structure bg-surface-bg rounded-[2px]",
+        "relative border border-line-structure bg-surface-bg rounded-[2px]",
         "integration-group flex flex-col gap-3.5 items-start p-3 sm:p-4.5",
         className
       )}
