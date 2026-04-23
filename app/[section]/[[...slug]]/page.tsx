@@ -14,7 +14,10 @@ import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { usersSource, changelogSource } from "@/lib/source";
 import { sortCustomerStoriesByMetaOrder } from "@/lib/sortCustomerStoriesByMeta";
 import { cn } from "@/lib/utils";
-import { contentWidthClasses, type ContentWidthType } from "@/lib/content-width";
+import {
+  resolveContentWidthClasses,
+  type ContentWidthType,
+} from "@/lib/content-width";
 
 type PageProps = {
   params: Promise<{ section: string; slug?: string[] }>;
@@ -36,9 +39,8 @@ export default async function SectionDocPage(props: PageProps) {
   if (!result) notFound();
   const { MDX, page } = result;
 
-  const contentWidth: ContentWidthType =
-    (page.data as Record<string, unknown>).contentWidth as ContentWidthType | undefined
-    ?? "default";
+  const contentWidth = (page.data as Record<string, unknown>)
+    .contentWidth as ContentWidthType | undefined;
 
   let bodyClient = <MDX components={getMDXComponents()} />;
 
@@ -69,7 +71,10 @@ export default async function SectionDocPage(props: PageProps) {
 
   return (
     <div
-      className={cn("mx-auto w-full py-10 md:py-16", contentWidthClasses[contentWidth])}
+      className={cn(
+        "mx-auto w-full py-10 md:py-16",
+        resolveContentWidthClasses(contentWidth)
+      )}
       data-content-width={contentWidth}
     >
       <DocBodyChrome withProse>{bodyClient}</DocBodyChrome>
