@@ -34,6 +34,8 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 | `CLICKHOUSE_DB`                               | `default`          | Name of the ClickHouse database to use.                                                                  |
 | `CLICKHOUSE_CLUSTER_ENABLED`                  | `true`             | Whether to run ClickHouse commands `ON CLUSTER`. Set to `false` for single-container setups.             |
 | `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED` | `false`            | Whether to disable automatic ClickHouse migrations.                                                      |
+| `CLICKHOUSE_READ_ONLY_URL`                    |                    | Optional read-only endpoint used for UI and public-API read queries on traces, observations, scores, and sessions. Falls back to `CLICKHOUSE_URL` when unset. Reuses `CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`, and `CLICKHOUSE_DB`. Only useful on [compute-compute separated](https://clickhouse.com/docs/cloud/reference/warehouses) clusters. See [Scaling](/self-hosting/configuration/scaling#clickhouse-read-only-url). |
+| `CLICKHOUSE_EVENTS_READ_ONLY_URL`             |                    | Optional read-only endpoint used for queries against the event tables. Falls back to `CLICKHOUSE_READ_ONLY_URL`, then `CLICKHOUSE_URL`. Reuses `CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`, and `CLICKHOUSE_DB`.                                                                              |
 
 Langfuse uses `default` as the cluster name if CLICKHOUSE_CLUSTER_ENABLED is set to `true`.
 You can overwrite this by setting `CLICKHOUSE_CLUSTER_NAME` to a different value.
@@ -103,6 +105,8 @@ CLICKHOUSE_USER=default
 CLICKHOUSE_PASSWORD=changeme
 CLICKHOUSE_MIGRATION_SSL=true
 ```
+
+If your ClickHouse Cloud service uses [compute-compute separation](https://clickhouse.com/docs/cloud/reference/warehouses) (multiple compute groups on a shared storage), you can additionally set `CLICKHOUSE_READ_ONLY_URL` (and optionally `CLICKHOUSE_EVENTS_READ_ONLY_URL`) to route UI and public-API reads to a dedicated read-only compute group while ingestion and migrations continue to use the primary. See [Scaling: Routing reads to a separate ClickHouse compute group](/self-hosting/configuration/scaling#clickhouse-read-only-url) for details. The same approach applies to [BYOC](https://clickhouse.com/cloud/bring-your-own-cloud) deployments.
 
 #### Troubleshooting
 
