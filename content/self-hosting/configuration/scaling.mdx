@@ -113,6 +113,17 @@ SELECT table, formatReadableSize(size) as size, rows FROM (
 )
 ```
 
+#### Slow or timing-out deletions [#clickhouse-deletion-timeouts]
+
+If data retention jobs or project/trace deletions fail with timeout errors, the client-side ClickHouse HTTP timeout for delete operations is likely exhausted.
+Increase `LANGFUSE_CLICKHOUSE_DELETION_TIMEOUT_MS` (default `600000`, i.e. 10 minutes) to give long-running deletes more headroom.
+This applies to both scheduled retention jobs and user-triggered deletes across traces, observations, scores, dataset run items, and events.
+
+On ClickHouse 25.7 and above, you can further reduce mutation pressure by opting into lightweight deletes and updates.
+Set `CLICKHOUSE_LIGHTWEIGHT_DELETE_MODE` from its default `alter_update` to `lightweight_update` (or `lightweight_update_force`) to resolve `DELETE` statements via lightweight deletes instead of `ALTER TABLE ... DELETE` mutations.
+Additionally, set `CLICKHOUSE_USE_LIGHTWEIGHT_UPDATE=true` to route tracing-table updates through native `UPDATE` statements instead of `ALTER TABLE ... UPDATE` mutations.
+Both reduce the amount of background merge work ClickHouse performs on deletion-heavy workloads.
+
 #### ClickHouse system log tables [#clickhouse-system-log-tables]
 
 On default ClickHouse configurations, the system log tables (`trace_log`, `text_log`, `opentelemetry_span_log`, `asynchronous_metric_log`, `metric_log`, `latency_log`) can dominate disk usage.
