@@ -4,7 +4,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { HomeSection } from "./HomeSection";
-import { Heading, TextHighlight, ChipCard } from "@/components/ui";
+import { Heading, TextHighlight } from "@/components/ui";
+import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { IntegrationLabel } from "@/components/ui/integration-label";
 import IconPython from "@/components/icons/python";
@@ -224,8 +225,9 @@ function IntegrationGroupCard({
   showMoreLabel?: boolean;
 }) {
   return (
-    <ChipCard
+    <div
       className={cn(
+        "relative inline-flex items-center border border-line-structure bg-surface-bg rounded-[2px]",
         "integration-group flex flex-col gap-3.5 items-start p-3 sm:p-4.5",
         className
       )}
@@ -250,7 +252,7 @@ function IntegrationGroupCard({
           </span>
         )}
       </div>
-    </ChipCard>
+    </div>
   );
 }
 
@@ -326,7 +328,7 @@ export function Integrations() {
           showMoreLabel
         />
 
-        <ChipCard className="integration-group sm:col-span-2 flex flex-col gap-4 items-start p-3 sm:p-4.5">
+        <div className="integration-group sm:col-span-2 flex flex-col gap-4 items-start p-3 sm:p-4.5 border border-line-structure bg-surface-bg rounded-[2px]">
           <div className="flex flex-row flex-wrap gap-y-1 gap-x-3 justify-between items-baseline w-full">
             <Text size="m" className="font-medium text-left text-text-secondary">
               80+ more integrations
@@ -336,16 +338,22 @@ export function Integrations() {
             <MarqueeRow items={marqueeRow1} direction="left" duration={40} />
             <MarqueeRow items={marqueeRow2} direction="right" duration={48} />
           </div>
-        </ChipCard>
-      </div>
-      <div className="mt-4">
-        <Link
-          href="/integrations"
-          className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
-          onClick={(e) => e.stopPropagation()}
-        >
-          Don&apos;t find your integration? Request it →
-        </Link>
+        </div>
+
+        <div className="sm:col-span-2 flex flex-row flex-wrap gap-y-2 gap-x-3 justify-between items-center p-3 sm:px-4.5 sm:py-3 border border-line-structure bg-surface-bg rounded-[2px]">
+          <Button variant="secondary" size="small" href="/integrations">
+            See all integrations
+          </Button>
+          <span className="text-[13px] text-text-secondary">
+            Don&apos;t find your integration?{" "}
+            <Link
+              href="/integrations"
+              className="text-text-secondary hover:text-text-primary underline underline-offset-2 decoration-line-structure hover:decoration-text-tertiary transition-colors"
+            >
+              Request it →
+            </Link>
+          </span>
+        </div>
       </div>
     </HomeSection>
   );
