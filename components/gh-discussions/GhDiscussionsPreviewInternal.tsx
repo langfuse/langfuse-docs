@@ -19,6 +19,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { CornerBox, HoverCorners } from "@/components/ui/corner-box";
 import IconGithub from "../icons/github";
 import IconSort from "../icons/sort";
 import IconSearch from "../icons/search";
@@ -110,19 +111,21 @@ const GhDiscussionsPreviewInternal = ({
     return (
       <>
         <ul
-          className="list-none not-prose divide-y divide-line-structure"
+          className="list-none not-prose"
           data-gh-discussions-list
         >
-          {displayedDiscussions.map((discussion) => (
+          {displayedDiscussions.map((discussion, idx) => (
             <li
               key={discussion.number}
+              className={idx > 0 ? "border-t border-line-structure" : ""}
             >
               <a
                 href={discussion.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center p-4 no-underline transition-colors hover:bg-surface-1/60 cursor-pointer"
+                className="link-box group relative flex items-center px-4 py-3 no-underline cursor-pointer"
               >
+                <HoverCorners />
                 <div className="flex flex-col items-center min-w-[60px] shrink-0 gap-0.5">
                   <span className="text-lg font-semibold leading-none text-text-primary">
                     {discussion.upvotes}
@@ -329,12 +332,14 @@ const GhDiscussionsPreviewInternal = ({
             </Button>
           </div>
         </div>
-        <div className="rounded-sm border border-line-structure">
-          <TabsContent value="Support">
+        <CornerBox>
+          <TabsContent value="Support" className="pt-0 rounded-none bg-transparent">
             {renderDiscussions("Support")}
           </TabsContent>
-          <TabsContent value="Ideas">{renderDiscussions("Ideas")}</TabsContent>
-        </div>
+          <TabsContent value="Ideas" className="pt-0 rounded-none bg-transparent">
+            {renderDiscussions("Ideas")}
+          </TabsContent>
+        </CornerBox>
       </Tabs>
       <div className="mt-2 text-xs text-text-tertiary">
         <span>
