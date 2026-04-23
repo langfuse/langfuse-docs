@@ -74,7 +74,7 @@ export function BrandAssetCard({
 
 export function BrandAssetGrid({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 not-prose">
+    <div className="grid gap-4 grid-cols-2 md:grid-cols-3 not-prose">
       {children}
     </div>
   );
