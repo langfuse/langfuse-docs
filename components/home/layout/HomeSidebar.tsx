@@ -4,6 +4,7 @@ import { LinkBox } from "@/components/ui/link-box";
 import { Text } from "@/components/ui/text";
 import discussionsData from "../../../src/langfuse_github_discussions.json";
 import { Link } from "@/components/ui/link";
+import { HiringBadge } from "@/components/HiringBadge";
 
 function formatCount(n: number): string {
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
@@ -199,6 +200,14 @@ export function HomeSidebar() {
             </div>
           </div>
         </div>
+
+        {/* ── Hiring Badge ─────────────────────────────────────────────── */}
+        <div className="pb-px bg-line-structure">
+          <div className="px-4 py-4 rounded-sm bg-surface-1">
+            <HiringBadge />
+          </div>
+        </div>
+
         <span className="flex px-px w-full bg-line-structure h-[3px]">
           <span className="w-full h-full rounded-t-sm bg-surface-1" />
         </span>

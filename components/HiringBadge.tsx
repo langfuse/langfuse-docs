@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import NextLink from "next/link";
 import { cn } from "@/lib/utils";
 
-export function HiringBadge() {
+export function HiringBadge({ className }: { className?: string }) {
   const [isHovered, setIsHovered] = useState(false);
   const [goats, setGoats] = useState<
     Array<{ id: number; x: number; y: number; duration: number }>
@@ -35,7 +35,7 @@ export function HiringBadge() {
   return (
     <div
       ref={containerRef}
-      className="hidden relative lg:block"
+      className={cn("relative", className)}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
@@ -46,18 +46,17 @@ export function HiringBadge() {
       <NextLink
         href="/careers"
         className={cn(
-          "inline-flex items-center gap-1.5 h-6 px-2.5",
+          "inline-flex items-center gap-1.5 w-full h-6 px-2.5",
           "rounded-[2px] border border-line-structure",
           "bg-surface-bg text-text-tertiary",
           "font-sans text-[11px] font-[450] leading-[150%] tracking-[-0.06px]",
           "no-underline transition-colors",
           "hover:border-line-cta hover:text-text-secondary"
         )}
-        style={{ width: "max-content" }}
       >
-        <span className="w-1.5 h-1.5 rounded-full bg-[#FBFF7A] shrink-0" />
-        <span className="relative">
-          <span className={cn("block", isHovered && "invisible")}>
+        <span className="text-xs shrink-0" aria-hidden>🐐</span>
+        <span className="relative min-w-0">
+          <span className={cn("block truncate", isHovered && "invisible")}>
             Hiring in Europe and SF
           </span>
           <span
@@ -73,7 +72,7 @@ export function HiringBadge() {
 
       {isHovered && (
         <div
-          className="overflow-visible fixed z-50 pointer-events-none"
+          className="overflow-visible fixed z-[100] pointer-events-none"
           style={{ top: 0, left: 0, width: "100vw", height: "100vh" }}
         >
           {goats.map((goat) => {
