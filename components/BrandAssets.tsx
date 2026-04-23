@@ -49,7 +49,7 @@ export function BrandAssetCard({
     <a
       download
       href={href}
-      className="block no-underline relative group border border-line-structure bg-surface-bg rounded-[2px] corner-box-corners--hover corner-box-hover-stripes transition-[background] duration-180 ease-out overflow-hidden"
+      className="block no-underline relative group border border-line-structure bg-surface-bg rounded-[2px] corner-box-corners--hover corner-box-hover-stripes transition-[background] duration-180 ease-out"
     >
       <div
         className={cn(
