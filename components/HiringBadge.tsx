@@ -77,7 +77,8 @@ export function HiringBadge({ className }: { className?: string }) {
 
       {isHovered && (
         <div
-          className="overflow-visible fixed z-100 pointer-events-none"
+          className="overflow-visible fixed z-[100] pointer-events-none"
+          aria-hidden="true"
           style={{ top: 0, left: 0, width: "100vw", height: "100vh" }}
         >
           {goats.map((goat) => {

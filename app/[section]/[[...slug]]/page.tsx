@@ -15,8 +15,9 @@ import { usersSource, changelogSource } from "@/lib/source";
 import { sortCustomerStoriesByMetaOrder } from "@/lib/sortCustomerStoriesByMeta";
 import { cn } from "@/lib/utils";
 import {
-  resolveContentWidthClasses,
+  contentWidthClasses,
   type ContentWidthType,
+  type ResolvedContentWidth,
 } from "@/lib/content-width";
 
 type PageProps = {
@@ -39,8 +40,9 @@ export default async function SectionDocPage(props: PageProps) {
   if (!result) notFound();
   const { MDX, page } = result;
 
-  const contentWidth = (page.data as Record<string, unknown>)
-    .contentWidth as ContentWidthType | undefined;
+  const contentWidth: ResolvedContentWidth =
+    (page.data as Record<string, unknown>).contentWidth as ContentWidthType | undefined
+    ?? "default";
 
   let bodyClient = <MDX components={getMDXComponents()} />;
 
@@ -73,7 +75,7 @@ export default async function SectionDocPage(props: PageProps) {
     <div
       className={cn(
         "mx-auto w-full py-10 md:py-16",
-        resolveContentWidthClasses(contentWidth)
+        contentWidthClasses[contentWidth]
       )}
       data-content-width={contentWidth}
     >

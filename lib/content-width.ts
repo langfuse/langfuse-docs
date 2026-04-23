@@ -7,25 +7,17 @@
  * When set in MDX (see `source.config.ts`):
  * - `"docs"` — same reading width as docs (680px), and footer aligns via CSS.
  * - `"full"` — no max-width on the content column.
+ *
+ * "default" is an internal-only fallback for pages that don't set
+ * contentWidth in frontmatter — it is NOT a valid frontmatter value.
  */
 export type ContentWidthType = "docs" | "full";
 
-/** Classes when `contentWidth` is not set in frontmatter. */
-const marketingContentWidthClasses =
-  "px-4 sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]";
+/** Internal type including the code-side fallback. */
+export type ResolvedContentWidth = ContentWidthType | "default";
 
-const contentWidthByFrontmatter: Record<ContentWidthType, string> = {
+export const contentWidthClasses: Record<ResolvedContentWidth, string> = {
   docs: "px-4 sm:px-8 md:px-0 md:max-w-[680px]",
+  default: "px-4 sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]",
   full: "px-4 sm:px-6 md:px-8",
 };
-
-/**
- * Tailwind classes for the section page main column. `undefined` / `null` means
- * no frontmatter override — use the standard marketing width.
- */
-export function resolveContentWidthClasses(
-  value: ContentWidthType | null | undefined
-): string {
-  if (value == null) return marketingContentWidthClasses;
-  return contentWidthByFrontmatter[value];
-}
