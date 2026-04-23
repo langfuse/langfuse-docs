@@ -9,11 +9,15 @@ export function IntegrationLabel({
   label,
   href,
   className,
+  onMouseEnter,
+  onMouseLeave,
 }: {
   icon?: React.ReactNode;
   label: string;
   href?: string;
   className?: string;
+  onMouseEnter?: React.MouseEventHandler;
+  onMouseLeave?: React.MouseEventHandler;
 }) {
   const inner = (
     <>
@@ -28,11 +32,24 @@ export function IntegrationLabel({
 
   if (href) {
     return (
-      <Link href={href} className={cn(chipClassName, className)}>
+      <Link
+        href={href}
+        className={cn(chipClassName, className)}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
         {inner}
       </Link>
     );
   }
 
-  return <span className={cn(chipClassName, className)}>{inner}</span>;
+  return (
+    <span
+      className={cn(chipClassName, className)}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {inner}
+    </span>
+  );
 }

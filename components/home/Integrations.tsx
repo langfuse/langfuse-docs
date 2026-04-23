@@ -1,8 +1,8 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { HomeSection } from "./HomeSection";
 import { Heading, TextHighlight, ChipCard } from "@/components/ui";
 import { Text } from "@/components/ui/text";
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 // ─── Data (paths per homepage integration spec) ─────────────────────────────
 
 const languagesGroup = {
-  title: "Languages",
+  title: "Languages (via OTel)",
   items: [
     {
       label: "Python (Native SDK)",
@@ -216,10 +216,12 @@ function IntegrationGroupCard({
   title,
   items,
   className,
+  showMoreLabel,
 }: {
   title: string;
   items: { label: string; href: string; icon?: React.ReactNode }[];
   className?: string;
+  showMoreLabel?: boolean;
 }) {
   return (
     <ChipCard
@@ -233,7 +235,7 @@ function IntegrationGroupCard({
           {title}
         </Text>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         {items.map((item) => (
           <IntegrationLabel
             key={item.label}
@@ -242,6 +244,11 @@ function IntegrationGroupCard({
             label={item.label}
           />
         ))}
+        {showMoreLabel && (
+          <span className="text-[13px] text-text-tertiary ml-1">
+            and many more…
+          </span>
+        )}
       </div>
     </ChipCard>
   );
@@ -256,15 +263,19 @@ function MarqueeRow({
   direction?: "left" | "right";
   duration?: number;
 }) {
+  const [paused, setPaused] = React.useState(false);
   const doubled = [...items, ...items];
   return (
     <div className="overflow-hidden w-full mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-      <motion.div
-        className="flex gap-2 w-max"
-        animate={{
-          x: direction === "left" ? ["0%", "-50%"] : ["-50%", "0%"],
+      <div
+        className={cn(
+          "flex gap-2 w-max",
+          direction === "left" ? "animate-marquee-left" : "animate-marquee-right"
+        )}
+        style={{
+          animationDuration: `${duration}s`,
+          animationPlayState: paused ? "paused" : "running",
         }}
-        transition={{ duration, repeat: Infinity, ease: "linear" }}
       >
         {doubled.map((item, i) => (
           <IntegrationLabel
@@ -272,9 +283,11 @@ function MarqueeRow({
             href={item.href}
             icon={<Image src={item.icon} alt="" width={18} height={18} />}
             label={item.label}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
           />
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -305,10 +318,12 @@ export function Integrations() {
         <IntegrationGroupCard
           title={agentFrameworksGroup.title}
           items={agentFrameworksGroup.items}
+          showMoreLabel
         />
         <IntegrationGroupCard
           title={modelProvidersGroup.title}
           items={modelProvidersGroup.items}
+          showMoreLabel
         />
 
         <ChipCard className="integration-group sm:col-span-2 flex flex-col gap-4 items-start p-3 sm:p-4.5">
