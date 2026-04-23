@@ -1,3 +1,4 @@
+import type { ReactNode, MouseEventHandler } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -5,22 +6,22 @@ const chipClassName =
   "integration-chip inline-flex items-center gap-2 px-1.5 py-1 border border-line-structure text-[13px] font-normal text-text-secondary leading-none whitespace-nowrap";
 
 interface IntegrationLabelProps {
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   label: string;
   href?: string;
   className?: string;
-  onMouseEnter?: React.MouseEventHandler;
-  onMouseLeave?: React.MouseEventHandler;
+  onMouseEnter?: MouseEventHandler;
+  onMouseLeave?: MouseEventHandler;
 }
 
-export const IntegrationLabel: React.FC<IntegrationLabelProps> = ({
+export function IntegrationLabel({
   icon,
   label,
   href,
   className,
   onMouseEnter,
   onMouseLeave,
-}) => {
+}: IntegrationLabelProps) {
   const inner = (
     <>
       {icon ? (
@@ -54,4 +55,4 @@ export const IntegrationLabel: React.FC<IntegrationLabelProps> = ({
       {inner}
     </span>
   );
-};
+}

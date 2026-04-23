@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { HomeSection } from "./HomeSection";
@@ -220,7 +220,7 @@ function IntegrationGroupCard({
   showMoreLabel,
 }: {
   title: string;
-  items: { label: string; href: string; icon?: React.ReactNode }[];
+  items: { label: string; href: string; icon?: ReactNode }[];
   className?: string;
   showMoreLabel?: boolean;
 }) {
@@ -265,7 +265,7 @@ function MarqueeRow({
   direction?: "left" | "right";
   duration?: number;
 }) {
-  const [paused, setPaused] = React.useState(false);
+  const [paused, setPaused] = useState(false);
   const doubled = [...items, ...items];
   return (
     <div className="overflow-hidden w-full mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
