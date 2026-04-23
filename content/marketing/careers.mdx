@@ -154,28 +154,13 @@ import TeamMembers from "@/components-mdx/team-members.mdx";
   </Button>
 </CTACard>
 
-## Read our Handbook
+## Our Handbook [#handbook]
 
-We publicly document our core principles and processes at Langfuse to align as a team, maintain transparency with our community, and help you determine if you'd enjoy working here.
-
-### Main Chapters
+We publicly document our core principles and processes. Read the handbook to understand how we work and decide if you'd enjoy working here.
 
 import { ChapterIndex } from "@/components/handbook/ChapterIndex";
 
 <ChapterIndex />
-
-### More Links
-
-The handbook contains many more resources that define how we do things. These might be interesting to you:
-
-- [How we work](/handbook/how-we-work/principles)
-- [Working remotely at Langfuse](/handbook/how-we-work/remote)
-- [How we hire](/handbook/how-we-hire)
-- [How we think about Pay and Perks](/handbook/perks-and-pay)
-
-## Open Source
-
-Almost everything we do is public. Get a glimpse of our work here:
 
 import {
   Github,
@@ -183,7 +168,22 @@ import {
   MonitorPlay,
   Joystick,
   ListOrdered,
+  Briefcase,
+  MapPin,
+  Banknote,
 } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="How we work" href="/handbook/how-we-work/principles" icon={<Briefcase />} />
+  <Card title="Working remotely at Langfuse" href="/handbook/how-we-work/remote" icon={<MapPin />} />
+  <Card title="How we hire" href="/handbook/how-we-hire" icon={<Users />} />
+  <Card title="Pay and Perks" href="/handbook/perks-and-pay" icon={<Banknote />} />
+</Cards>
+
+## Open Source [#open-source]
+
+Almost everything we do is public. Get a glimpse of our work:
+
 import Image from "next/image";
 
 <Cards num={3}>
@@ -207,9 +207,9 @@ import Image from "next/image";
   <Card title="Example project" href="/docs/demo" icon={<Joystick />} />
 </Cards>
 
-## Videos/Podcasts
+## Videos and Podcasts [#media]
 
-If you prefer watching videos or listening to podcasts to get an impression, here are some suggestions:
+Get a feel for the team and the product:
 
 <Cards num={2}>
   <Cards.Card
@@ -247,7 +247,7 @@ If you prefer watching videos or listening to podcasts to get an impression, her
   </Cards.Card>
   <Cards.Card
     href="https://open.spotify.com/episode/1FYsw0LkkSXw6kDwTvl0rB?si=wDmCVebxTHSWBRbSNaSInA"
-    title="Startup Insider Podcast (🇩🇪 only): our story, how we work, what's next"
+    title="Startup Insider Podcast: our story, how we work, what's next"
     arrow
     target="_blank"
     rel="noopener noreferrer"
@@ -264,7 +264,7 @@ If you prefer watching videos or listening to podcasts to get an impression, her
   </Cards.Card>
   <Cards.Card
     href="https://www.youtube.com/watch?v=NXYQ5odATrM"
-    title="Max (CTO) on Clickhouse data model optimizations to make Langfuse work"
+    title="Max (CTO) on ClickHouse data model optimizations"
     arrow
     target="_blank"
     rel="noopener noreferrer"
@@ -272,7 +272,7 @@ If you prefer watching videos or listening to podcasts to get an impression, her
     <div className="relative aspect-video">
       <Image
         src="/images/careers/max-openhouse.jpg"
-        alt="Max (CTO) on Clickhouse data model optimizations to make Langfuse work"
+        alt="Max (CTO) on ClickHouse data model optimizations"
         fill
         className="object-cover"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -281,19 +281,17 @@ If you prefer watching videos or listening to podcasts to get an impression, her
   </Cards.Card>
 </Cards>
 
-## Public Metrics
+## Public Metrics [#public-metrics]
 
 import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.mdx";
 
-<CredibilitySentence bold={false} />
-
 <PublicMetricsDashboard />
 
-## Work with us
+## Work with us [#apply]
 
 <CTACard
-  title="Curious to build with us?"
-  description="If you are excited about delivering exceptional open-source developer experiences alongside an insanely motivated team that ships, reach out!"
+  title="Interested? Let's talk."
+  description="Check out our open positions on Ashby. If none fit perfectly but you're excited about Langfuse, reach out anyway — we're always looking for exceptional people."
   showArrow={true}
 >
   <Button asChild variant="default" size="sm">
@@ -302,7 +300,7 @@ import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.md
       target="_blank"
       rel="noopener noreferrer"
     >
-      See open roles
+      View open positions
     </a>
   </Button>
 </CTACard>
