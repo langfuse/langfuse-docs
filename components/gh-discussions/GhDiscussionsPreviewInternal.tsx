@@ -19,7 +19,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { CornerBox, HoverCorners } from "@/components/ui/corner-box";
+import { HoverCorners } from "@/components/ui/corner-box";
 import IconGithub from "../icons/github";
 import IconSort from "../icons/sort";
 import IconSearch from "../icons/search";
@@ -117,7 +117,10 @@ const GhDiscussionsPreviewInternal = ({
           {displayedDiscussions.map((discussion, idx) => (
             <li
               key={discussion.number}
-              className={idx > 0 ? "border-t border-line-structure" : ""}
+              className={cn(
+                "relative hover:z-10",
+                idx > 0 && "border-t border-line-structure"
+              )}
             >
               <a
                 href={discussion.href}
@@ -280,8 +283,8 @@ const GhDiscussionsPreviewInternal = ({
               ))}
             </TabsList>
           )}
-          <div className="flex items-center space-x-2 w-full sm:w-auto">
-            <div className="relative w-36 h-[26px] sm:w-48">
+          <div className="flex items-center gap-1 w-full sm:w-auto">
+            <div className="relative p-1">
               <Input
                 type="text"
                 placeholder="Search..."
@@ -290,9 +293,9 @@ const GhDiscussionsPreviewInternal = ({
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-8 w-full h-full rounded-[1px] shadow-none [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
+                className="pl-7 w-36 sm:w-48 h-[26px] rounded-[1px] shadow-none [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
               />
-              <IconSearch className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-text-tertiary" />
+              <IconSearch className="absolute left-3 top-1/2 w-4 h-4 transform -translate-y-1/2 text-text-tertiary" />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -332,14 +335,14 @@ const GhDiscussionsPreviewInternal = ({
             </Button>
           </div>
         </div>
-        <CornerBox>
+        <div className="border border-line-structure bg-surface-bg">
           <TabsContent value="Support" className="pt-0 rounded-none bg-transparent">
             {renderDiscussions("Support")}
           </TabsContent>
           <TabsContent value="Ideas" className="pt-0 rounded-none bg-transparent">
             {renderDiscussions("Ideas")}
           </TabsContent>
-        </CornerBox>
+        </div>
       </Tabs>
       <div className="mt-2 text-xs text-text-tertiary">
         <span>
