@@ -5,8 +5,9 @@ description: "Join the Langfuse team to build the leading open-source LLM engine
 
 import { CTACard } from "@/components/CTACard";
 import { Button } from "@/components/ui/button";
-import { Header } from "@/components/Header";
-import { ImpactChart } from "@/components/customers/ImpactChart";
+import { Heading } from "@/components/ui/heading";
+import { TextHighlight } from "@/components/ui/text-highlight";
+import { Text } from "@/components/ui/text";
 import {
   Carousel,
   CarouselContent,
@@ -16,21 +17,14 @@ import {
 } from "@/components/ui/carousel";
 import { CredibilitySentence } from "@/components/CredibilitySentence";
 
-<div className="md:container">
-  <div className="flex flex-col items-center content-center text-center my-10 mb-20">
-    <Header
-      title="Building Langfuse"
-      description="Join the team building the leading open-source LLM engineering platform"
-      h="h1"
-    />
-    <Button asChild variant="default" size="lg">
-      <a
-        href="https://jobs.ashbyhq.com/langfuse"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View Open Positions →
-      </a>
+<div className="flex flex-col gap-4 mb-16 items-center text-center">
+  <Heading as="h1" size="large">
+    <TextHighlight>Building Langfuse</TextHighlight>
+  </Heading>
+  <Text>Join the team building the leading open-source LLM engineering platform</Text>
+  <div className="mt-2 inline-flex">
+    <Button href="https://jobs.ashbyhq.com/langfuse" target="_blank" rel="noopener noreferrer">
+      View Open Positions →
     </Button>
   </div>
 </div>
