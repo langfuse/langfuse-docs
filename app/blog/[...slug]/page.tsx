@@ -24,6 +24,7 @@ export default async function BlogPostPage(props: PageProps) {
   return (
     <ContentColumns
       leftSidebar={<BlogPostSidebar tags={tags} totalPosts={total} />}
+      footerClassName="xl:max-w-[680px]"
     >
       <div className="mx-auto w-full max-w-[680px] px-4 py-6 md:px-0">
         <MainContentWrapper>

@@ -359,11 +359,14 @@ export const MainContentWrapper = (props) => {
           pathname === path || (pathname ?? "").startsWith(path + "/")
       ) ? (
         <div
-          className="flex flex-wrap gap-6 justify-between items-center px-4 py-4 md:px-6 xl:px-8"
+          className="flex flex-col gap-2 px-4 py-4 md:px-6 xl:px-8"
           id="docs-feedback"
         >
-          <DocsFeedback key={pathname} />
-          <DocsSupport />
+          <span className="text-sm font-medium">Was this page helpful?</span>
+          <div className="flex items-center justify-between gap-2">
+            <DocsFeedback key={pathname} showLabel={false} />
+            <DocsSupport />
+          </div>
         </div>
       ) : null}
     </>
@@ -385,7 +388,7 @@ export const DocsSupport = () => {
   );
 };
 
-export const DocsFeedback = () => {
+export const DocsFeedback = ({ showLabel = true }: { showLabel?: boolean }) => {
   const pathname = usePathname();
   const [selected, setSelected] = useState<
     "positive" | "negative" | "submitted" | null
@@ -445,8 +448,10 @@ export const DocsFeedback = () => {
   };
 
   return (
-    <div className="flex gap-3 items-center">
-      <span className="text-sm font-medium">Was this page helpful?</span>
+    <div className="flex gap-2 items-center">
+      {showLabel && (
+        <span className="text-sm font-medium">Was this page helpful?</span>
+      )}
       <div className="flex gap-2">
         <Button
           variant="secondary"

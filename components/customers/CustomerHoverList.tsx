@@ -18,7 +18,7 @@ export function CustomerHoverList({
   return (
     <section className="rounded-[2px] border border-line-structure bg-surface-bg overflow-hidden">
       <div className="flex items-center px-4 py-3 border-b border-line-structure">
-        <h2 className="text-left font-analog font-medium text-[16px] text-text-primary shrink-0">
+        <h2 id="all-posts" className="text-left font-analog font-medium text-[16px] text-text-primary shrink-0">
           All posts
         </h2>
       </div>
