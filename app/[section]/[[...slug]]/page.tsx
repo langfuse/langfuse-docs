@@ -13,6 +13,8 @@ import { WrappedDataProvider } from "@/components/wrapped/WrappedDataContext";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { usersSource, changelogSource } from "@/lib/source";
 import { sortCustomerStoriesByMetaOrder } from "@/lib/sortCustomerStoriesByMeta";
+import { cn } from "@/lib/utils";
+import { contentWidthClasses, type ContentWidthType } from "@/lib/content-width";
 
 type PageProps = {
   params: Promise<{ section: string; slug?: string[] }>;
@@ -32,7 +34,11 @@ export default async function SectionDocPage(props: PageProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result = await loadPage(config.source, effectiveSlug);
   if (!result) notFound();
-  const { MDX } = result;
+  const { MDX, page } = result;
+
+  const contentWidth: ContentWidthType =
+    (page.data as Record<string, unknown>).contentWidth as ContentWidthType | undefined
+    ?? "default";
 
   let bodyClient = <MDX components={getMDXComponents()} />;
 
@@ -62,7 +68,7 @@ export default async function SectionDocPage(props: PageProps) {
   }
 
   return (
-    <div className="mx-auto w-full px-4 sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px] py-10 md:py-16">
+    <div className={cn("mx-auto w-full py-10 md:py-16", contentWidthClasses[contentWidth])}>
       <DocBodyChrome withProse>{bodyClient}</DocBodyChrome>
     </div>
   );
