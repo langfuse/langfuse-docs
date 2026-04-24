@@ -435,7 +435,7 @@ export const FeatureTabs = ({
                 >
                   <motion.span
                     layout
-                    transition={{ duration: 0.35, ease: CONTENT_EASE }}
+                    transition={reduceMotion ? { duration: 0 } : { duration: 0.35, ease: CONTENT_EASE }}
                     className={cn(
                       "block h-[5px] rounded-[1px] overflow-hidden",
                       isActive
