@@ -35,10 +35,8 @@ function toDataUrl(buffer: ArrayBuffer, mime: string): string {
   return `data:${mime};base64,${btoa(binary)}`;
 }
 
-
 /**
- * Background image with decorators (light beige, geometric corner elements).
- * Replace public/og.png with the exported Figma background asset to activate decorators.
+ * Background image with decorators (light beige, geometric corner elements)..
  */
 const OG_BG_PATH = "/og-bg.png";
 
@@ -50,7 +48,6 @@ const CONTENT_W = CANVAS_W - SIDE_MARGIN * 2; // 1030
 const TITLE_BOX_H = 200;
 const DESC_BOX_H = 140;
 const CONTENT_BOX_TOP = 150;
-const BORDER_COLOR = "#cfcfc9";
 const BG_COLOR = "#f6f6f3";
 
 export async function GET(request: NextRequest) {
@@ -74,10 +71,10 @@ export async function GET(request: NextRequest) {
     : undefined;
 
   // Scale down title font if long to stay within the box
-  const titleFontSize = title.length > 40 ? 58 : title.length > 28 ? 72 : 90;
+  const titleFontSize = title.length > 80 ? 42 : title.length > 40 ? 58 : title.length > 28 ? 72 : 90;
 
   // Split title into lines for per-line highlight rendering (GeistMono char width ≈ 0.585 × fontSize)
-  const charsPerLine = Math.floor((CONTENT_W - 64) / (titleFontSize * 0.585));
+  const charsPerLine = Math.floor((CONTENT_W - 48) / (titleFontSize * 0.585));
   const titleLines = wrapWords(title, charsPerLine);
 
   return new ImageResponse(
@@ -151,9 +148,9 @@ export async function GET(request: NextRequest) {
                       padding: "4px 10px",
                     }}
                   >
-                    <mark style={{ backgroundColor: "#fbff7a" }}>
+                    <span style={{ backgroundColor: "#fbff7a" }}>
                       {line}
-                    </mark>
+                    </span>
                   </div>
                 ))}
               </div>
@@ -191,7 +188,7 @@ export async function GET(request: NextRequest) {
             style={{
               display: "flex",
               position: "absolute",
-              bottom: 70,
+              bottom: 60,
               left: 0,
               right: 0,
               justifyContent: "center",
