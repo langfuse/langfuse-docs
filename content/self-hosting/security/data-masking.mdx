@@ -86,7 +86,12 @@ sequenceDiagram
 
 ### Configuration
 
-Configure the masking callback using the following environment variables on the Langfuse Worker container:
+Masking configuration is split across the Langfuse Web and Worker containers.
+The Web container extracts propagated headers from the incoming request; the
+Worker container makes the outbound callback request. Set each variable on the
+container listed below. Setting all variables on both containers is also safe.
+
+Configure the following environment variables on the **Langfuse Worker** container:
 
 | Variable                                          | Required / Default | Description                                                                                                                                                                                  |
 | ------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -94,7 +99,12 @@ Configure the masking callback using the following environment variables on the 
 | `LANGFUSE_INGESTION_MASKING_CALLBACK_TIMEOUT_MS`  | `500`              | Timeout in milliseconds for the callback request. If the callback does not respond within this time, the behavior is determined by the fail mode setting.                                    |
 | `LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED` | `false`             | When set to `true`, events are dropped if the callback fails or times out, and a warning is logged. When `false` (default, fail open), events are processed without masking if the callback fails. |
 | `LANGFUSE_INGESTION_MASKING_MAX_RETRIES`          | `1`                | Maximum number of retries for failed callback requests. If the callback fails after this many attempts, the behavior is determined by the fail mode setting.                                 |
-| `LANGFUSE_INGESTION_MASKING_PROPAGATED_HEADERS`   | `''`               | Comma-separated list of headers to propagate from the original request to the masking callback. These headers will be forwarded from the Web container and added to the header in the callback request. |
+
+Configure the following environment variable on the **Langfuse Web** container:
+
+| Variable                                          | Required / Default | Description                                                                                                                                                                                              |
+| ------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_INGESTION_MASKING_PROPAGATED_HEADERS`   | `''`               | Comma-separated list of header names to extract from the incoming OpenTelemetry ingestion request on the Web container and forward to the masking callback on the Worker container. Header names are case-insensitive. |
 
 ### Callback Interface
 
