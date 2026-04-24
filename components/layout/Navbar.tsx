@@ -4,19 +4,9 @@ import { type SectionNavData } from "@/lib/nav-tree";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
+import { NAV_SECTION_LINKS } from "@/lib/section-registry";
 
-export const sectionNavData: SectionNavData[] = [
-  { name: "Docs", href: "/docs" },
-  { name: "Self Hosting", href: "/self-hosting" },
-  { name: "Guides", href: "/guides" },
-  { name: "Integrations", href: "/integrations" },
-  { name: "FAQ", href: "/faq" },
-  { name: "Handbook", href: "/handbook" },
-  { name: "Changelog", href: "/changelog" },
-  { name: "Pricing", href: "/pricing" },
-  { name: "Library", href: "/library" },
-  { name: "Security & Compliance", href: "/security" },
-];
+export const sectionNavData: SectionNavData[] = NAV_SECTION_LINKS;
 
 const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px py-0')
 const contentStyle = cn('flex items-center w-full bg-surface-1 lg:rounded-sm pl-3 pr-2.5 py-3')

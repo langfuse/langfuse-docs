@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { DocsBody } from "fumadocs-ui/page";
+import { DocsBody } from "fumadocs-ui/layouts/docs/page";
 import {
   CopyMarkdownButton,
   DocsFeedback,
