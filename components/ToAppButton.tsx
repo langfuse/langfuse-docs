@@ -7,11 +7,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import {
   cloudRegions,
+  cloudRegionSelectorOrder,
   continentHostMapping,
   type CloudRegionKey,
 } from "@/lib/cloud-regions";
@@ -55,7 +58,6 @@ export const ToAppButton = ({
           }
         })
         .catch((error) => {
-          // Only update state if the error is not from aborting
           if (error.name !== "AbortError") {
             setContinentCode(null);
           }
@@ -69,7 +71,14 @@ export const ToAppButton = ({
 
   const signedInCount = Object.values(signedInRegions).filter(Boolean).length;
 
-  if (signedInCount > 1) {
+  if (signedInCount >= 1) {
+    const signedInRegionKeys = cloudRegionSelectorOrder.filter(
+      (key) => signedInRegions[key]
+    );
+    const otherRegionKeys = cloudRegionSelectorOrder.filter(
+      (key) => !signedInRegions[key]
+    );
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -84,59 +93,58 @@ export const ToAppButton = ({
             <span className="hidden sm:inline">{signedInText}</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {Object.entries(cloudRegions).map(
-            ([key, region]) =>
-              signedInRegions[key as CloudRegionKey] && (
-                <DropdownMenuItem asChild key={key}>
-                  <Link href={region.url}>{region.label}</Link>
-                </DropdownMenuItem>
-              )
+        <DropdownMenuContent align="end">
+          {signedInRegionKeys.length > 0 && (
+            <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+              Signed in
+            </DropdownMenuLabel>
           )}
+          {signedInRegionKeys.map((key) => (
+            <DropdownMenuItem asChild key={key}>
+              <Link href={cloudRegions[key].url}>
+                {cloudRegions[key].label}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+          {signedInRegionKeys.length > 0 && otherRegionKeys.length > 0 && (
+            <DropdownMenuSeparator />
+          )}
+          {otherRegionKeys.length > 0 && (
+            <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+              Other regions
+            </DropdownMenuLabel>
+          )}
+          {otherRegionKeys.map((key) => (
+            <DropdownMenuItem asChild key={key}>
+              <Link href={cloudRegions[key].url}>
+                {cloudRegions[key].label}
+              </Link>
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
     );
-  } else if (signedInCount === 1) {
-    const signedInRegion = Object.entries(cloudRegions).find(
-      ([key]) => signedInRegions[key as CloudRegionKey]
-    );
-
-    return (
-      <Button
-        size="xs"
-        asChild
-        className={cn(
-          "whitespace-nowrap",
-          isUsingDefaultText && "w-[45px] sm:w-[70px]"
-        )}
-      >
-        <Link href={signedInRegion![1].url}>
-          <span className="sm:hidden">{dropdownText}</span>
-          <span className="hidden sm:inline">{signedInText}</span>
-        </Link>
-      </Button>
-    );
-  } else {
-    return (
-      <Button
-        size="xs"
-        asChild
-        className={cn(
-          "whitespace-nowrap",
-          isUsingDefaultText && "w-[45px] sm:w-[70px]"
-        )}
-      >
-        <Link
-          href={
-            continentCode
-              ? continentHostMapping[continentCode]
-              : cloudRegions.eu.url
-          }
-        >
-          <span className="sm:hidden">{dropdownText}</span>
-          <span className="hidden sm:inline">{signUpText}</span>
-        </Link>
-      </Button>
-    );
   }
+
+  return (
+    <Button
+      size="xs"
+      asChild
+      className={cn(
+        "whitespace-nowrap",
+        isUsingDefaultText && "w-[45px] sm:w-[70px]"
+      )}
+    >
+      <Link
+        href={
+          continentCode
+            ? continentHostMapping[continentCode]
+            : cloudRegions.eu.url
+        }
+      >
+        <span className="sm:hidden">{dropdownText}</span>
+        <span className="hidden sm:inline">{signUpText}</span>
+      </Link>
+    </Button>
+  );
 };
