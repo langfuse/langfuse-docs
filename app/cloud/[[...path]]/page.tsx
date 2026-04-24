@@ -41,9 +41,7 @@ const regionCards: Record<
   jp: {
     title: "Japan",
     awsRegion: "ap-northeast-1",
-    awsLocation: "Tokyo",
-    icon: Globe,
-    flag: "🇯🇵",
+    icon: <span className="text-lg">{"\u{1F1EF}\u{1F1F5}"}</span>,
   },
 };
 
