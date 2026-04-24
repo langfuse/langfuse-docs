@@ -4,6 +4,7 @@ import {
   createContext,
   type ReactNode,
   use,
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -29,8 +30,19 @@ export function AISearch({ children }: { children: ReactNode }) {
   return <AISearchInner>{children}</AISearchInner>;
 }
 
+const OPEN_KEY = '__ai_search_open';
+
 function AISearchInner({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpenRaw] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem(OPEN_KEY) === '1';
+  });
+
+  const setOpen = useCallback((next: boolean) => {
+    setOpenRaw(next);
+    try { sessionStorage.setItem(OPEN_KEY, next ? '1' : '0'); } catch {}
+  }, []);
+
   const chat = useChat<InkeepUIMessage>({
     id: 'search',
     transport,
