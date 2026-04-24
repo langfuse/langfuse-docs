@@ -4,6 +4,7 @@ import {
   createContext,
   type ReactNode,
   use,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -34,6 +35,10 @@ function AISearchInner({ children }: { children: ReactNode }) {
     id: 'search',
     transport,
   });
+
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-ai-panel-open', open);
+  }, [open]);
 
   return (
     <Context value={useMemo(() => ({ chat, open, setOpen }), [chat, open])}>

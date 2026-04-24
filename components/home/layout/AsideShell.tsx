@@ -22,7 +22,8 @@ export function AsideShell({
     <aside
       data-ai-open={aiOpen || undefined}
       className={cn(
-        "hidden wide:flex wide:data-ai-open:hidden flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0",
+        "hidden wide:flex flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0",
+        "wide:data-ai-open:w-[320px] wide:data-ai-open:invisible wide:data-ai-open:p-0 wide:data-ai-open:bg-transparent",
         className,
       )}
       style={{

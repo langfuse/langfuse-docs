@@ -3,7 +3,6 @@ import { Footer } from "../../layout/Footer";
 import { HomeSidebar } from "./HomeSidebar";
 import { HomeAside } from "./HomeAside";
 import { HomeMainArea } from "./HomeMainArea";
-import { AISearchPanel } from "@/components/inkeep/search";
 import { PageChrome } from "./PageChrome";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +40,6 @@ export function ContentColumns({
       ) : (
         <div aria-hidden className="hidden lg:block w-px shrink-0 bg-line-structure" />
       )}
-      <AISearchPanel />
     </div>
   );
 }

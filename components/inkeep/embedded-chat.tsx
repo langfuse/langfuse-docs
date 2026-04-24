@@ -1,12 +1,15 @@
 'use client';
 
 import {
+  Suspense,
   type ComponentProps,
   type SyntheticEvent,
   useEffect,
   useRef,
   useState,
 } from 'react';
+import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { RefreshCw, Send, Square, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -14,6 +17,12 @@ import { Text } from '@/components/ui/text';
 import { Link } from '@/components/ui/link';
 import { AIChatEmptyState, AIChatMessage, ThinkingIndicator } from './ai-chat-shared';
 import { useChatContext, buildUserMessage } from './search-context';
+import useInkeepSettings from './useInkeepSettings';
+
+const InkeepEmbeddedChatLazy = dynamic(
+  () => import('@inkeep/cxkit-react').then((mod) => mod.InkeepEmbeddedChat),
+  { ssr: false },
+);
 
 function EmbeddedTextarea(props: ComponentProps<'textarea'>) {
   const shared = cn('col-start-1 row-start-1', props.className);
@@ -77,7 +86,34 @@ function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, mes
   }, [containerRef, messageCount]);
 }
 
+function InkeepSharedChat() {
+  const { baseSettings, aiChatSettings } = useInkeepSettings();
+  return (
+    <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)]">
+      <InkeepEmbeddedChatLazy
+        baseSettings={baseSettings}
+        aiChatSettings={aiChatSettings}
+      />
+    </div>
+  );
+}
+
+function EmbeddedAIChatRouter() {
+  const searchParams = useSearchParams();
+  const chatId = searchParams.get('chatId');
+  if (chatId) return <InkeepSharedChat />;
+  return <EmbeddedAIChatInner />;
+}
+
 export function EmbeddedAIChat() {
+  return (
+    <Suspense fallback={<div className="border border-line-structure h-[min(600px,70vh)]" />}>
+      <EmbeddedAIChatRouter />
+    </Suspense>
+  );
+}
+
+function EmbeddedAIChatInner() {
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
   const isLoading = chat.status === 'streaming' || chat.status === 'submitted';
@@ -99,7 +135,7 @@ export function EmbeddedAIChat() {
   return (
     <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)]">
       <div className="not-prose flex items-center gap-2 px-4 py-3 border-b border-line-structure bg-surface-1">
-        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5" />
+        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-4 shrink-0" />
         <Text size="s" className="font-medium text-text-primary">
           Langfuse Help Agent
         </Text>

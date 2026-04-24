@@ -343,15 +343,17 @@ function useHotKey() {
 
 // ─── Main panel ────────────────────────────────────────────────────────────────
 
+/**
+ * Rendered once in the root layout (`app/layout.tsx`). Uses fixed positioning
+ * so it is never unmounted during client-side navigations between layout
+ * groups, preventing flicker and preserving chat history.
+ */
 export function AISearchPanel() {
   const { open, setOpen } = useAISearchContext();
   useHotKey();
   const narrowLayout = useAiPanelNarrowLayout();
   const keyboardOverlapPx = useVisualViewportBottomOverlap(open && narrowLayout);
 
-  // Skip the enter animation when the panel remounts while already open
-  // (e.g. navigating between layout groups). useState(open) captures the
-  // initial open state; the effect below resets once the user closes.
   const [skipEnterAnimation, setSkipEnterAnimation] = useState(open);
 
   useEffect(() => {
@@ -376,9 +378,7 @@ export function AISearchPanel() {
           className={cn(
             'overflow-hidden z-50 bg-surface-1 text-text-primary [--ai-chat-width:320px] border-line-structure',
             'max-wide:fixed max-wide:inset-x-4 max-md:bottom-4 max-md:top-4 max-wide:bottom-8 max-wide:top-8 max-wide:border max-wide:border-line-structure max-wide:shadow-xl max-wide:max-w-[600px] max-wide:mx-auto',
-            'wide:sticky wide:top-[var(--fd-nav-height)] wide:h-[calc(100dvh-var(--fd-nav-height)-2px)] wide:border-l wide:ms-auto',
-            'wide:in-[#nd-docs-layout]:[grid-area:toc] wide:in-[#nd-notebook-layout]:row-span-full wide:in-[#nd-notebook-layout]:col-start-5',
-            'wide:in-[#home-layout]:top-[calc(var(--fd-banner-height,0px)+var(--lf-nav-primary-height))] wide:in-[#home-layout]:h-[calc(100dvh-var(--fd-banner-height,0px)-var(--lf-nav-primary-height))] wide:in-[#home-layout]:w-(--ai-chat-width) wide:in-[#home-layout]:shrink-0 wide:in-[#home-layout]:border-r',
+            'wide:fixed wide:top-[var(--ai-panel-top)] wide:h-[calc(100dvh-var(--ai-panel-top))] wide:w-(--ai-chat-width) wide:border-l wide:right-[max(0px,calc((100vw-var(--breakpoint-wide,1440px))/2))]',
             open
               ? (!skipEnterAnimation && 'animate-fd-dialog-in wide:animate-[ask-ai-open_200ms]')
               : 'animate-fd-dialog-out wide:animate-[ask-ai-close_200ms]',
@@ -402,3 +402,4 @@ export function AISearchPanel() {
     </>
   );
 }
+
