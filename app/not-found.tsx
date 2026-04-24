@@ -6,8 +6,8 @@ import { Button } from "@/components/ui";
 
 export default function NotFound() {
   return (
-    <HomeLayout showAside={false}>
-      <main className="flex flex-col items-center justify-center text-center sm:py-20 min-h-[calc(100vh-4rem)]">
+    <HomeLayout showAside={false} forceLight={false}>
+      <div className="flex flex-col items-center justify-center text-center sm:py-20 min-h-[calc(100vh-4rem)]">
         <NotFoundAnimation />
         <div className="flex flex-col gap-6 justify-center items-center">
           <div className="flex flex-col gap-2 justify-center items-center">
@@ -23,7 +23,7 @@ export default function NotFound() {
             <BrokenLinkIssue />
           </div>
         </div>
-      </main>
+      </div>
     </HomeLayout>
   );
 }
