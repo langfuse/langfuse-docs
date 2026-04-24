@@ -7,6 +7,10 @@ export const cloudRegions = {
     url: "https://us.cloud.langfuse.com",
     label: "US region",
   },
+  jp: {
+    url: "https://jp.cloud.langfuse.com",
+    label: "Japan region (beta)",
+  },
   hipaa: {
     url: "https://hipaa.cloud.langfuse.com",
     label: "HIPAA region",
@@ -19,6 +23,7 @@ export const cloudRegionSelectorOrder: CloudRegionKey[] = [
   "us",
   "hipaa",
   "eu",
+  "jp",
 ];
 
 export const continentHostMapping: Record<string, string> = {

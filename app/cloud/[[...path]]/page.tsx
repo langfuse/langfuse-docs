@@ -48,6 +48,13 @@ const regionCards: Record<
     icon: Globe,
     flag: "🇪🇺",
   },
+  jp: {
+    title: "Japan",
+    awsRegion: "ap-northeast-1",
+    awsLocation: "Tokyo",
+    icon: Globe,
+    flag: "🇯🇵",
+  },
 };
 
 const CLOUD_ROUTE_PREFIX = "/cloud";
