@@ -103,11 +103,11 @@ function AISearchInput({ autoFocus = true, ...props }: ComponentProps<'form'> & 
 
   const wasLoadingRef = useRef(false);
   useEffect(() => {
-    if (!isLoading && wasLoadingRef.current) {
+    if (autoFocus && !isLoading && wasLoadingRef.current) {
       document.getElementById('nd-ai-input')?.focus();
     }
     wasLoadingRef.current = isLoading;
-  }, [isLoading]);
+  }, [autoFocus, isLoading]);
 
   const onStart = (e?: SyntheticEvent) => {
     e?.preventDefault();
