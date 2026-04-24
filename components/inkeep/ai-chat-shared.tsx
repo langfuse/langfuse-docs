@@ -1,6 +1,6 @@
 'use client';
 
-import type { ComponentProps } from 'react';
+import { type ComponentProps, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Text } from '@/components/ui/text';
 import { Link } from '@/components/ui/link';
@@ -13,10 +13,46 @@ export const AI_CHAT_EXAMPLE_QUESTIONS = [
   'How to set up LLM-as-a-judge evals?',
 ] as const;
 
-const roleName: Record<string, string> = {
-  user: 'you',
-  assistant: 'langfuse',
-};
+const THINKING_PHRASES = [
+  'Pondering',
+  'Rummaging through docs',
+  'Consulting the traces',
+  'Evaluating options',
+  'Searching the knowledge base',
+  'Warming up neurons',
+  'Digging deeper',
+  'Almost there',
+] as const;
+
+export function ThinkingIndicator() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((i) => (i + 1) % THINKING_PHRASES.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="not-prose flex items-start gap-3" role="status" aria-label="AI is thinking">
+      <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5 mt-0.5 shrink-0" />
+      <p className="text-sm text-text-tertiary animate-pulse" aria-hidden="true">
+        {THINKING_PHRASES[index]}
+        <span className="ellipsis-dots" />
+      </p>
+    </div>
+  );
+}
+
+function AssistantLabel() {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <img src="/brand-assets/icon/color/langfuse-icon.png" alt="" className="size-4" />
+      <span>Langfuse Help Agent</span>
+    </span>
+  );
+}
 
 type AIChatMessageProps = {
   message: InkeepUIMessage;
@@ -44,40 +80,48 @@ export function AIChatMessage({
     }
   }
 
+  const isUser = message.role === 'user';
+
   return (
     <div
       {...props}
-      className={cn(className)}
+      className={cn(
+        isUser ? 'flex justify-end' : 'flex justify-start',
+        className,
+      )}
       onClick={(e) => {
         if (captureClicks) e.stopPropagation();
         onClick?.(e);
       }}
     >
-      <p
-        className={cn(
-          'mb-1 text-sm font-medium text-text-tertiary',
-          message.role === 'assistant' && 'text-primary',
+      <div className={cn(
+        isUser
+          ? 'max-w-[85%] rounded-2xl rounded-br-sm border border-line-structure bg-surface-2 px-3 py-2'
+          : 'max-w-full',
+      )}>
+        {!isUser && (
+          <p className="mb-1 text-sm font-medium text-primary">
+            {message.role === 'assistant' ? <AssistantLabel /> : 'unknown'}
+          </p>
         )}
-      >
-        {roleName[message.role] ?? 'unknown'}
-      </p>
-      <div className="prose text-sm">
-        <Markdown text={markdown} />
-      </div>
-      {links && links.length > 0 && (
-        <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
-          {links.map((item, i) => (
-            <Link
-              key={i}
-              href={item.url}
-              className="block text-xs border border-line-structure p-3 hover:bg-surface-2 text-text-secondary no-underline"
-            >
-              <p className="font-medium">{item.title}</p>
-              <p className="text-text-tertiary">Reference {item.label}</p>
-            </Link>
-          ))}
+        <div className={cn('prose text-sm', isUser && 'prose-p:my-0')}>
+          <Markdown text={markdown} />
         </div>
-      )}
+        {links && links.length > 0 && (
+          <div className="mt-2 flex flex-col gap-1">
+            {links.map((item, i) => (
+              <Link
+                key={i}
+                href={item.url}
+                className="flex items-baseline gap-1.5 text-[11px] leading-tight border border-line-structure rounded-sm px-2 py-1.5 hover:bg-surface-2 text-text-secondary no-underline"
+              >
+                <span className="text-text-tertiary shrink-0">[{item.label}]</span>
+                <span className="font-medium truncate min-w-0">{item.title}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -88,9 +132,9 @@ type AIChatEmptyStateProps = {
 
 export function AIChatEmptyState({ onPickQuestion }: AIChatEmptyStateProps) {
   return (
-    <div className="size-full flex flex-col justify-start gap-4">
+    <div className="size-full flex flex-col justify-start gap-4 not-prose">
       <div className="flex items-start gap-3">
-        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-6" />
+        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-6 shrink-0" />
         <Text size="s" className="text-text-primary text-left mb-2">
           Hi! I&apos;m Langfuse&apos;s AI assistant trained on documentation, help articles, and other
           content. How can I help you today?
