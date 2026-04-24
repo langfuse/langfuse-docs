@@ -12,6 +12,7 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
+import { cn } from "@/lib/utils";
 import { CornerBox } from "@/components/ui/corner-box";
 
 /** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
@@ -23,27 +24,27 @@ const CONTENT_EXIT_EASE = [0.4, 0, 1, 1] as const;
 const tabImageVariants = (reduceMotion: boolean) =>
   reduceMotion
     ? {
-        initial: { opacity: 0 },
-        animate: {
-          opacity: 1,
-          transition: { duration: 0.12, ease: "easeOut" as const },
-        },
-        exit: {
-          opacity: 0,
-          transition: { duration: 0.12, ease: "easeOut" as const },
-        },
-      }
+      initial: { opacity: 0 },
+      animate: {
+        opacity: 1,
+        transition: { duration: 0.12, ease: "easeOut" as const },
+      },
+      exit: {
+        opacity: 0,
+        transition: { duration: 0.12, ease: "easeOut" as const },
+      },
+    }
     : {
-        initial: { opacity: 0 },
-        animate: {
-          opacity: 1,
-          transition: { duration: 0.26, ease: CONTENT_EASE },
-        },
-        exit: {
-          opacity: 0,
-          transition: { duration: 0.14, ease: CONTENT_EXIT_EASE },
-        },
-      };
+      initial: { opacity: 0 },
+      animate: {
+        opacity: 1,
+        transition: { duration: 0.26, ease: CONTENT_EASE },
+      },
+      exit: {
+        opacity: 0,
+        transition: { duration: 0.14, ease: CONTENT_EXIT_EASE },
+      },
+    };
 
 export interface FeatureTabsProps {
   features: FeatureTabData[];
@@ -415,7 +416,7 @@ export const FeatureTabs = ({
           </div>
 
           {/* Dot indicators — right-aligned */}
-          <div className="flex flex-row items-center gap-1.5 ml-auto shrink-0">
+          <div className="flex flex-row items-center ml-auto shrink-0">
             {features.map((feature, index) => {
               const isActive = activeTab === feature.id;
 
@@ -430,13 +431,17 @@ export const FeatureTabs = ({
                   id={`tab-${feature.id}`}
                   tabIndex={state.focusedIndex === index ? 0 : -1}
                   onClick={() => handleTabChange(feature.id)}
-                  className="group p-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
+                  className="group p-1 cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
                 >
-                  <span
-                    className={`block w-3 h-1.5 rounded-sm transition-colors duration-150 ease-out ${isActive
-                      ? "bg-primary"
-                      : "bg-line-structure group-hover:bg-primary"
-                      }`}
+                  <motion.span
+                    layout
+                    transition={{ duration: 0.35, ease: CONTENT_EASE }}
+                    className={cn(
+                      "block h-[5px] rounded-[1px] overflow-hidden",
+                      isActive
+                        ? "w-10 with-stripes-alt"
+                        : "w-[5px] bg-line-structure group-hover:bg-primary/40"
+                    )}
                   />
                 </button>
               );
