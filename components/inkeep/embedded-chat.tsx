@@ -1,0 +1,169 @@
+'use client';
+
+import {
+  type ComponentProps,
+  type SyntheticEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { Loader2, RefreshCw, Send } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+import { Link } from '@/components/ui/link';
+import { AIChatEmptyState, AIChatMessage } from './ai-chat-shared';
+import { useChatContext, buildUserMessage } from './search-context';
+
+function EmbeddedTextarea(props: ComponentProps<'textarea'>) {
+  const shared = cn('col-start-1 row-start-1', props.className);
+
+  return (
+    <div className="grid flex-1">
+      <textarea
+        id="nd-embedded-ai-input"
+        {...props}
+        className={cn(
+          'resize-none bg-transparent placeholder:text-text-tertiary focus-visible:outline-none',
+          shared,
+        )}
+      />
+      <div className={cn(shared, 'break-all invisible')}>
+        {`${props.value?.toString() ?? ''}\n`}
+      </div>
+    </div>
+  );
+}
+
+export function EmbeddedAIChat() {
+  const chat = useChatContext();
+  const messages = chat.messages.filter((msg) => msg.role !== 'system');
+  const isLoading = chat.status === 'streaming' || chat.status === 'submitted';
+  const isStreaming = chat.status === 'streaming';
+
+  const [input, setInput] = useState('');
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+
+    function scrollToBottom() {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
+    }
+
+    const observer = new ResizeObserver(scrollToBottom);
+    scrollToBottom();
+
+    const child = container.firstElementChild;
+    if (child) observer.observe(child);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const onSubmit = (e?: SyntheticEvent) => {
+    e?.preventDefault();
+    const message = input.trim();
+    if (message.length === 0) return;
+
+    void chat.sendMessage(buildUserMessage(message));
+    setInput('');
+  };
+
+  return (
+    <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)] not-prose">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-line-structure bg-surface-2">
+        <img src="/icon256.png" alt="Langfuse" className="size-5 rounded-full" />
+        <Text size="s" className="font-medium text-text-primary not-prose">
+          Ask AI
+        </Text>
+        <Text size="s" className="text-text-tertiary text-xs not-prose">
+          — Powered by{' '}
+          <Link
+            href="https://inkeep.com"
+            className="text-text-tertiary decoration-line-structure underline-offset-2"
+            variant="underline"
+          >
+            Inkeep AI
+          </Link>
+        </Text>
+      </div>
+
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 overscroll-contain bg-surface-1">
+        {messages.length === 0 ? (
+          <AIChatEmptyState
+            onPickQuestion={(question) => {
+              void chat.sendMessage(buildUserMessage(question));
+            }}
+          />
+        ) : (
+          <div className="flex flex-col gap-4">
+            {messages.map((item) => (
+              <AIChatMessage key={item.id} message={item} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-line-structure bg-surface-2">
+        <form className="flex items-start pe-1" onSubmit={onSubmit}>
+          <EmbeddedTextarea
+            value={input}
+            placeholder={isLoading ? 'AI is answering...' : 'Ask a question'}
+            autoFocus={false}
+            className="p-3 text-[14px]"
+            disabled={isLoading}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(event) => {
+              if (!event.shiftKey && event.key === 'Enter') {
+                onSubmit(event);
+              }
+            }}
+          />
+          {isLoading ? (
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={chat.stop}
+              size="small"
+              icon={<Loader2 className="size-3 animate-spin" />}
+              wrapperClassName="mt-1"
+            >
+              Abort
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={input.length === 0}
+              size="small"
+              icon={<Send className="size-3.5" />}
+              wrapperClassName="mt-1"
+            />
+          )}
+        </form>
+        {messages.length > 0 && (
+          <div className="flex items-center gap-1 p-1">
+            {!isStreaming && messages.at(-1)?.role === 'assistant' && (
+              <Button
+                variant="secondary"
+                size="small"
+                icon={<RefreshCw className="size-3.5" />}
+                onClick={() => chat.regenerate()}
+              >
+                Retry
+              </Button>
+            )}
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => chat.setMessages([])}
+            >
+              Clear Chat
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

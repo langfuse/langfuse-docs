@@ -19,7 +19,7 @@ Get started, no credit card required. Great for hobby projects and POCs.
 - 2 users
 - Community support via GitHub
 
-[Sign up](https://cloud.langfuse.com)
+[Sign up](/cloud)
 
 ### Core ($29/month)
 
@@ -33,7 +33,7 @@ For production projects. Longer data access and unlimited users.
 
 Discounts available for [startups](/startups), [research/students](/research), and [open-source projects](/pricing#discounts).
 
-[Sign up](https://cloud.langfuse.com)
+[Sign up](/cloud)
 
 ### Pro ($199/month)
 
@@ -55,7 +55,7 @@ Optional **Teams Add-on** ($300/month):
 - Fine-grained RBAC
 - Support via dedicated Slack channel
 
-[Sign up](https://cloud.langfuse.com)
+[Sign up](/cloud)
 
 ### Enterprise ($2,499/month)
 
@@ -232,7 +232,7 @@ A billable unit in Langfuse is any tracing data point sent to the platform -- in
 ## Frequently Asked Questions
 
 **What is the easiest way to try Langfuse?**
-You can view the [public example project](/demo) or sign up for a [free account](https://cloud.langfuse.com) to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.
+You can view the [public example project](/demo) or sign up for a [free account](/cloud) to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.
 
 **Can I self-host Langfuse for free?**
 Yes, Langfuse is open source and you can self-host it for free. Use Docker Compose to run Langfuse locally, or use one of the templates to self-host in production on Kubernetes. See the [self-hosting documentation](/self-hosting) to learn more.

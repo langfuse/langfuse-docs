@@ -205,6 +205,54 @@ function extractNextJsLinks(content) {
     return links;
 }
 
+// Extract object/property-style links in TS/TSX, e.g.
+//   { href: "/docs/...", url: "https://..." }
+// These are commonly used for data-driven link lists (cards, nav items, tools)
+// and are invisible to the href="..." / <Link href="..."> regexes above.
+function extractObjectPropertyLinks(content) {
+    const links = [];
+
+    // Strip fenced code blocks first. In MDX, authors frequently include
+    // illustrative JSON/TS snippets containing object literals like
+    //   { "url": "https://langfuse.com/docs/integrations/langgraph" }
+    // or
+    //   input: { path: "/api/process" }
+    // which are example content, not real links. Skipping them avoids noisy
+    // false positives. This strip is safe for .tsx/.ts sources (which don't
+    // use triple-backtick fences).
+    const scanContent = content.replace(/```[\s\S]*?```/g, '');
+
+    // Keys that conventionally hold a URL/path in our codebase.
+    // Keep this conservative so we don't pick up unrelated string properties.
+    const patterns = [
+        /\b(?:href|url|link|to|path|pathname)\s*:\s*["']([^"']+)["']/g,
+        /\b(?:href|url|link|to|path|pathname)\s*:\s*`([^`]+)`/g,
+    ];
+
+    for (const regex of patterns) {
+        let match;
+        regex.lastIndex = 0;
+        while ((match = regex.exec(scanContent)) !== null) {
+            const value = match[1].trim();
+            if (!value || value.startsWith('#') || value.includes('${')) {
+                continue;
+            }
+            // Only include relative paths and langfuse.com absolute URLs to
+            // avoid false positives on arbitrary string props. processLinks()
+            // filters further, but keeping this tight reduces noise.
+            if (
+                value.startsWith('/') ||
+                value.startsWith('https://langfuse.com') ||
+                value.startsWith('http://langfuse.com')
+            ) {
+                links.push(value);
+            }
+        }
+    }
+
+    return links;
+}
+
 // Extract all types of links from content
 function extractAllLinks(content, filePath) {
     let allLinks = [];
@@ -216,6 +264,12 @@ function extractAllLinks(content, filePath) {
     if (filePath.endsWith('.mdx') || filePath.endsWith('.tsx') || filePath.endsWith('.ts')) {
         allLinks = allLinks.concat(extractHrefLinks(content));
         allLinks = allLinks.concat(extractNextJsLinks(content));
+    }
+
+    // Extract object-property style links (e.g. `href: "/docs/..."`) in TS/TSX.
+    // MDX can contain similar object literals in export blocks, so include it too.
+    if (filePath.endsWith('.mdx') || filePath.endsWith('.tsx') || filePath.endsWith('.ts')) {
+        allLinks = allLinks.concat(extractObjectPropertyLinks(content));
     }
 
     return allLinks;
@@ -359,7 +413,9 @@ async function checkFileLinks(filePath) {
 }
 
 async function main() {
-    const pagesDir = path.join(process.cwd(), 'content');
+    const scanDirs = ['app', 'components', 'components-mdx', 'content', 'lib', 'scripts'].map((d) =>
+        path.join(process.cwd(), d)
+    );
     let hasErrors = false;
     const allBrokenLinks = []; // Collect all broken links for final report
 
@@ -367,6 +423,7 @@ async function main() {
         // Find all files to check
         const findFiles = (dir) => {
             let results = [];
+            if (!fs.existsSync(dir)) return results;
             const files = fs.readdirSync(dir);
 
             for (const file of files) {
@@ -383,7 +440,7 @@ async function main() {
             return results;
         };
 
-        const files = findFiles(pagesDir);
+        const files = scanDirs.flatMap((dir) => findFiles(dir));
         console.log(`Found ${files.length} files to check (.md, .mdx, .tsx, .ts)\n`);
         console.log(
             `Using ${CONFIG.maxFileConcurrency} files x ${CONFIG.maxLinkConcurrency} links, ` +

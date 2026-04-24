@@ -1,16 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, type MouseEvent } from "react";
-import Image from "next/image";
+import { useCallback, useMemo, type MouseEvent, type ReactNode } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ArrowRight,
-  Globe,
-  Shield,
-  ShieldCheck,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, ShieldCheck } from "lucide-react";
+import { CornerBox } from "@/components/ui/corner-box";
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
+import { Logo } from "@/components/Logo";
 import {
   cloudRegionSelectorOrder,
   cloudRegions,
@@ -23,30 +20,23 @@ const regionCards: Record<
   {
     title: string;
     awsRegion: string;
-    awsLocation: string;
-    icon: typeof Shield;
-    flag?: string;
+    icon: ReactNode;
   }
 > = {
   us: {
     title: "US",
     awsRegion: "us-west-2",
-    awsLocation: "Oregon",
-    icon: Shield,
-    flag: "🇺🇸",
+    icon: <span className="text-lg">{"\u{1F1FA}\u{1F1F8}"}</span>,
   },
   hipaa: {
     title: "US HIPAA",
     awsRegion: "us-west-2",
-    awsLocation: "Oregon",
-    icon: ShieldCheck,
+    icon: <ShieldCheck className="h-5 w-5 text-text-tertiary" />,
   },
   eu: {
     title: "Europe",
     awsRegion: "eu-west-1",
-    awsLocation: "Ireland",
-    icon: Globe,
-    flag: "🇪🇺",
+    icon: <span className="text-lg">{"\u{1F1EA}\u{1F1FA}"}</span>,
   },
   jp: {
     title: "Japan",
@@ -88,13 +78,15 @@ const buildCloudRedirectUrl = ({
   hash: string;
 }) => {
   const baseUrl = cloudRegions[region].url.replace(/\/$/, "");
-  const targetPath = cloudSubpath.startsWith("/") ? cloudSubpath : `/${cloudSubpath}`;
+  const targetPath = cloudSubpath.startsWith("/")
+    ? cloudSubpath
+    : `/${cloudSubpath}`;
   return `${baseUrl}${targetPath}${search}${hash}`;
 };
 
-const SignedInHint = () => (
-  <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700/90 dark:text-emerald-400">
-    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500/90" />
+const SignedInBadge = () => (
+  <span className="inline-flex items-center gap-1.5 rounded-[2px] border border-muted-green/20 bg-muted-green/5 px-2 py-0.5 text-[11px] font-medium text-muted-green">
+    <span className="h-1.5 w-1.5 rounded-full bg-muted-green" />
     Signed in
   </span>
 );
@@ -120,7 +112,8 @@ export default function CloudRegionSelectorPage() {
         event.altKey;
       if (isModifiedClick) return;
       event.preventDefault();
-      const search = typeof window === "undefined" ? "" : window.location.search;
+      const search =
+        typeof window === "undefined" ? "" : window.location.search;
       const hash = typeof window === "undefined" ? "" : window.location.hash;
       const targetUrl = buildCloudRedirectUrl({
         region,
@@ -136,96 +129,76 @@ export default function CloudRegionSelectorPage() {
   );
 
   return (
-    <main className="flex min-h-screen items-center bg-background px-4 py-6 sm:min-h-full sm:justify-center sm:px-6 sm:py-10 lg:px-8">
-      <div className="w-full max-w-[480px]">
-        <div className="text-center sm:mx-auto sm:w-full">
-          <a href="/" aria-label="Langfuse Home" className="inline-flex">
-            <Image
-              src="/langfuse-wordart.svg"
-              alt="Langfuse"
-              width={152}
-              height={20}
-              priority
-              className="h-auto w-36 dark:hidden"
-            />
-            <Image
-              src="/langfuse-wordart-white.svg"
-              alt="Langfuse"
-              width={152}
-              height={20}
-              priority
-              className="hidden h-auto w-36 dark:block"
-            />
-          </a>
-          <h1 className="mt-7 text-2xl font-bold leading-9 tracking-tight text-primary">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-surface-bg px-4 py-10 sm:px-6 lg:px-8">
+      <div className="flex w-full max-w-[480px] flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-5">
+          <Logo />
+          <Heading as="h1" size="normal" className="text-center">
             Select your region
-          </h1>
+          </Heading>
+          <Text className="max-w-xs">
+            Choose a cloud region to continue.
+          </Text>
         </div>
 
-        <Card className="mt-8 overflow-hidden border shadow-sm">
-          <CardContent className="divide-y p-0">
+        <CornerBox className="w-full">
+          <div className="divide-y divide-line-structure">
             {cloudRegionSelectorOrder.map((regionKey) => {
               const region = cloudRegions[regionKey];
               const card = regionCards[regionKey];
-              const Icon = card.icon;
               const host = getCloudHost(region.url);
               const href = buildCloudRedirectUrl({
                 region: regionKey,
                 cloudSubpath,
-                search: typeof window === "undefined" ? "" : "",
-                hash: typeof window === "undefined" ? "" : "",
+                search: "",
+                hash: "",
               });
               const isSignedIn = signedInRegions[regionKey];
 
               return (
-                <div
+                <a
                   key={regionKey}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-5 sm:py-4"
+                  href={href}
+                  onClick={(event) => handleRegionSelect(regionKey, event)}
+                  className="group flex items-center gap-4 px-4 py-4 transition-colors hover:bg-surface-1 sm:px-5"
                 >
-                  <div className="flex min-w-0 items-start gap-3">
-                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border/80 bg-muted/25 text-lg">
-                      {card.flag ? (
-                        <span>{card.flag}</span>
-                      ) : (
-                        <Icon className="h-5 w-5 text-muted-foreground" />
-                      )}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="mb-1 text-base font-semibold">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border border-line-structure bg-surface-1">
+                    {card.icon}
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-analog text-[15px] font-medium text-text-primary">
                         {card.title}
-                      </p>
-                      <p className="mt-1.5 text-xs font-medium tracking-wide text-muted-foreground/80">
-                        AWS {card.awsRegion} • {card.awsLocation}
-                      </p>
-                      <code
-                        className="mt-1.5 block max-w-full truncate text-xs text-muted-foreground/90"
-                        title={host}
-                      >
-                        {host}
-                      </code>
+                      </span>
+                      {isSignedIn && <SignedInBadge />}
                     </div>
-                  </div>
-                  <div className="flex flex-col items-center gap-1.5">
-                    <Button
-                      asChild
-                      size="sm"
-                      className="whitespace-nowrap"
+                    <Text
+                      size="s"
+                      as="span"
+                      className="mt-0.5 block text-left text-text-tertiary"
                     >
-                      <a
-                        href={href}
-                        onClick={(event) => handleRegionSelect(regionKey, event)}
-                      >
-                        Continue
-                        <ArrowRight className="h-4 w-4" />
-                      </a>
-                    </Button>
-                    {isSignedIn && <SignedInHint />}
+                      {host}
+                      <span className="mx-1.5 text-text-disabled">&middot;</span>
+                      AWS {card.awsRegion}
+                    </Text>
                   </div>
-                </div>
+
+                  <ArrowRight className="h-4 w-4 shrink-0 text-text-tertiary transition-[transform,color] group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                </a>
               );
             })}
-          </CardContent>
-        </Card>
+          </div>
+        </CornerBox>
+
+        <Text size="s">
+          <Link
+            href="/security/data-regions"
+            className="text-text-secondary underline underline-offset-2 decoration-line-structure hover:decoration-text-tertiary hover:text-text-primary transition-colors"
+          >
+            Learn more about data regions
+          </Link>
+        </Text>
       </div>
     </main>
   );

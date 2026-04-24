@@ -75,14 +75,6 @@ const nextConfig = {
 
   webpack(config, { isServer, webpack }) {
     config.resolve = config.resolve ?? {};
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "nextra/context": path.resolve(__dirname, "lib/nextra-shim/context.tsx"),
-      "nextra/hooks": path.resolve(__dirname, "lib/nextra-shim/hooks.ts"),
-      nextra: path.resolve(__dirname, "lib/nextra-shim/nextra-types.ts"),
-      "nextra-theme-docs": path.resolve(__dirname, "lib/nextra-shim/theme-docs.tsx"),
-      "nextra/components": path.resolve(__dirname, "lib/nextra-shim/components.tsx"),
-    };
     // Prevent recharts (and its exclusive deps: redux toolkit, immer, etc.) from
     // being hoisted into a synchronous shared chunk that loads on every page.
     // Recharts is only used on the /wrapped page — keep it in async-only chunks
@@ -120,7 +112,7 @@ const nextConfig = {
       config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
           resource.request = resource.request.replace(/^node:/, "");
-        })
+        }),
       );
     }
     return config;
@@ -149,6 +141,7 @@ const nextConfig = {
         pathname: "/**",
       },
     ],
+    qualities: [75, 100],
   },
   headers() {
     const headers = [
@@ -180,6 +173,14 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: cspHeader.replace(/\n/g, ""),
           },
+        ],
+      },
+      // Agent Skills Discovery — CORS and caching
+      {
+        source: "/.well-known/agent-skills/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
         ],
       },
       // Mark markdown endpoints as noindex and ensure correct content type
@@ -226,6 +227,16 @@ const nextConfig = {
       // Run BEFORE Next serves content/public files so it can override HTML routes
       // when the client explicitly asks for markdown.
       beforeFiles: [
+        // Agent Skills Discovery (RFC 8615 .well-known URI)
+        {
+          source: "/.well-known/agent-skills",
+          destination: "/well-known-agent-skills.json",
+        },
+        {
+          source: "/.well-known/agent-skills/index.json",
+          destination: "/well-known-agent-skills.json",
+        },
+
         // Optional: make "/" negotiable too (remove if you don't have md-src/index.md)
         {
           source: "/",
@@ -236,7 +247,7 @@ const nextConfig = {
         // Content negotiation: /docs or /docs/observability/overview -> /md-src/... .md
         // Excludes /api, /_next, md-src, .md files, and .txt files (served directly from public/).
         {
-          source: "/:path((?!api|_next|md-src)(?!.*\\.md$)(?!.*\\.txt$).*)",
+          source: "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.md$)(?!.*\\.txt$)(?!.*\\.json$).*)",
           has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
           destination: "/md-src/:path.md",
         },

@@ -1,18 +1,21 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { CornerBox } from "./corner-box";
 
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className="overflow-auto w-full">
-    <table
-      ref={ref}
-      className={cn("my-0! w-full h-full text-sm caption-bottom", className)}
-      {...props}
-    />
-  </div>
+  <CornerBox>
+    <div className="overflow-auto w-full">
+      <table
+        ref={ref}
+        className={cn("my-0! w-full h-full text-sm caption-bottom border-none", className)}
+        {...props}
+      />
+    </div>
+  </CornerBox>
 ));
 Table.displayName = "Table";
 
@@ -20,7 +23,11 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+  <thead
+    ref={ref}
+    className={cn("[&_tr]:border-b [&_tr]:border-line-structure", className)}
+    {...props}
+  />
 ));
 TableHeader.displayName = "TableHeader";
 
@@ -55,7 +62,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors data-[state=selected]:bg-muted",
+      "border-b border-line-structure transition-colors data-[state=selected]:bg-muted",
       className
     )}
     {...props}

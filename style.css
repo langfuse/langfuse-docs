@@ -12,11 +12,12 @@
 /* Custom theme tokens */
 @theme {
   --font-sans:
-    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+    var(--font-inter), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono:
     var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-analog: var(--font-analog), serif;
 
   /* Semantic color tokens (resolved from CSS custom properties at runtime) */
   --color-border: hsl(var(--border));
@@ -50,10 +51,47 @@
   --color-muted-blue: hsl(var(--muted-blue));
   --color-muted-magenta: hsl(var(--muted-magenta));
 
+  --color-fd-border: var(--line-structure);
+
+  /* ── Figma design tokens ──────────────────────────────────────────────── */
+  /* line */
+  --color-line-structure: var(--line-structure);
+  --color-line-divider-dash: var(--line-divider-dash);
+  --color-line-cta: var(--line-cta);
+  --color-line-code-border: var(--line-code-border);
+
+  /* surface */
+  --color-surface-bg: var(--surface-bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-code: var(--surface-code);
+  --color-surface-cta-primary: var(--surface-cta-primary);
+  --color-surface-beige-accent: var(--surface-beige-accent);
+  --color-surface-button-grey: var(--surface-button-grey);
+  --color-surface-code-grey: var(--surface-code-grey);
+  --color-surface-code-button: var(--surface-code-button);
+
+  /* text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-code-secondary: var(--text-code-secondary);
+  --color-text-links: var(--text-links);
+  --color-text-code-orange: var(--text-code-orange);
+  --color-text-code-pink: var(--text-code-pink);
+  --color-text-code-blue: var(--text-code-blue);
+
+  /* button */
+  --color-button-icon: var(--button-icon-color);
+
   /* Border radius */
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  /* Custom breakpoint: 1440px for wide layouts (right sidebar) */
+  --breakpoint-wide: 1440px;
 
   /* Container: use Tailwind default so max-w-2xl stays 42rem (672px). Use max-w-[1400px] or a custom var for wide layout. */
   --container-2xl: 42rem;
@@ -174,6 +212,8 @@
   }
 }
 
+/* Nav layout tokens (`--lf-nav-*`, `--fd-nav-height`) are defined in src/overrides.css */
+
 /* CSS custom properties for shadcn/ui color system */
 @layer base {
   :root {
@@ -181,7 +221,7 @@
     --foreground: 222.2 84% 4.9%;
 
     --muted: 214 32% 91%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: #7a7a74;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
@@ -210,6 +250,44 @@
     --muted-green: 84 81% 44%;
     --muted-magenta: 330 90% 70%;
     --muted-blue: 239 84% 67%;
+
+    --callout-info: #b3abef;
+    --callout-warning: #e09d00;
+    --callout-error: #cc3314;
+    --callout-success: #538a2e;
+    --callout-idea: #119da4;
+
+    /* ── Figma design tokens — light ────────────────────────────────────── */
+    /* line */
+    --line-structure: #cfcfc9;
+    --line-divider-dash: #bebeb6;
+    --line-cta: #404039;
+    --line-code-border: #333333;
+
+    /* surface */
+    --surface-bg: #f6f6f3;
+    --surface-1: #edede8;
+    --surface-2: #e5e5e1;
+    --surface-code: #333333;
+    --surface-cta-primary: #fbff81;
+    --surface-beige-accent: #f1ede1;
+    --surface-button-grey: #403d391a; /* #403D39 at 10% */
+    --surface-code-grey: #3d3d3d;
+    --surface-code-button: #51504f;
+
+    /* text */
+    --text-primary: #222220;
+    --text-secondary: #3d3d38;
+    --text-tertiary: #6b6b66;
+    --text-disabled: #a7a7a0;
+    --text-code-secondary: #fffcf280; /* #FFFCF2 at 50% */
+    --text-links: #4f39f6;
+    --text-code-orange: #c17e2e;
+    --text-code-pink: #d05376;
+    --text-code-blue: #438aa5;
+
+    /* button */
+    --button-icon-color: var(--text-tertiary);
   }
 
   :root[class~="dark"] {
@@ -240,6 +318,38 @@
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 85.7% 97.3%;
+
+    /* ── Figma design tokens — dark ─────────────────────────────────────── */
+    /* line */
+    --line-structure: #2c2c29;
+    --line-divider-dash: #232320;
+    --line-cta: #b8b6a0;
+    --line-code-border: #3a3a38;
+
+    /* surface */
+    --surface-bg: #171714;
+    --surface-1: #1e1e1b;
+    --surface-2: #252522;
+    --surface-code: #0e0e0c;
+    --surface-cta-primary: #4c4d23;
+    --surface-beige-accent: #f1ede1;
+    --surface-button-grey: #ffffff1a; /* #FFFFFF at 10% */
+    --surface-code-grey: #2a2a2a;
+    --surface-code-button: #3a3937;
+
+    /* text */
+    --text-primary: #e8e8e4;
+    --text-secondary: #b4b4ae;
+    --text-tertiary: #7a7a74;
+    --text-disabled: #4a4a45;
+    --text-code-secondary: #e8e8dc80; /* #E8E8DC at 50% */
+    --text-links: #7b8ff8;
+    --text-code-orange: #e8935a;
+    --text-code-pink: #e86b9a;
+    --text-code-blue: #6ab8cc;
+
+    /* button */
+    --button-icon-color: var(--text-primary);
   }
 
   * {
@@ -247,39 +357,20 @@
   }
 
   body {
-    @apply bg-background! text-foreground!;
+    @apply bg-surface-1! text-foreground!;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
   }
 
-  footer {
-    @apply bg-background! text-foreground!;
-  }
-
-  h1 {
-    @apply tracking-tight font-mono;
-  }
-
-  h2 {
-    @apply tracking-tight;
-  }
-
-  /* Style headers in Markdown tables */
-  th {
-    @apply bg-muted text-left p-4 font-mono;
-  }
-}
-
-/* Body content area inside <details> — adds horizontal padding so text
-   doesn't run flush against the border. */
-@layer base {
-  details > *:not(summary) {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  details > *:last-child:not(summary) {
-    padding-bottom: 0.75rem;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-analog), serif;
+    font-weight: 500;
   }
 }
 
@@ -336,4 +427,526 @@
   .animate-grid {
     animation: grid 20s linear infinite;
   }
+}
+
+/* ─── Pattern background (40×40 grid with cursor-spotlight) ──────────────────
+ * Used in the docs content area between sidebar and TOC.
+ * @property declarations register --cursor-x/--cursor-y as typed percentages.
+ * Client code updates them via lib/patternSpotlight (rAF + smoothing).
+ * ─────────────────────────────────────────────────────────────────────────── */
+@property --cursor-x {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+@property --cursor-y {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+
+.pattern-bg {
+  background-image: url("/images/patterns/pattern.png");
+  background-size: 40px 40px;
+  background-position: top center;
+  background-repeat: repeat;
+  background-color: var(--surface-bg);
+  --cursor-x: 50%;
+  --cursor-y: 50%;
+  position: relative;
+  isolation: isolate;
+  /* Spotlight motion is smoothed in JS (lib/patternSpotlight.ts); avoid
+     transitioning @property here — it fights rapid mousemove and feels laggy. */
+}
+
+/* Dark: PNG grid is tuned for light surfaces — use subtle CSS grid + softer spotlight */
+.dark .pattern-bg {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.45) 1px, transparent 1px);
+}
+
+.pattern-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
+    hsl(60deg 14.29% 95.88% / 0.15),
+    hsl(60deg 14.29% 95.88% / 0.85)
+  );
+}
+
+.dark .pattern-bg::before {
+  background: radial-gradient(
+    circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
+    hsl(60deg 14.29% 95.88% / 0.22),
+    hsl(60deg 14.29% 95.88% / 0.94)
+  );
+}
+
+.dark #nd-sidebar .text-fd-muted-foreground {
+  --color-fd-muted-foreground: var(--text-tertiary);
+}
+
+/* Rive section text swap animation (Emil Kowalski style).
+   Children stagger: heading enters first, body follows 50ms later.
+   Exit is instant — React remounts via key change, no exit needed. */
+@keyframes rive-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rive-text-enter > * {
+  animation: rive-text-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rive-text-enter > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip-label[data-state="delayed-open"],
+.tooltip-label[data-state="instant-open"] {
+  animation: tooltip-in 0.12s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.tooltip-label[data-state="closed"] {
+  opacity: 0;
+}
+
+[data-radix-popper-content-wrapper]:has(.pointer-events-none) {
+  pointer-events: none;
+}
+
+.link-box {
+  position: relative;
+}
+
+/**
+ * Home / Integrations: chips use surface bg with individual hover darkening.
+ * (Figma: 2px radius, darken on hover — no corner details.)
+ */
+.integration-chip {
+  border-radius: 2px;
+  background-color: var(--surface-bg);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.integration-chip:hover {
+  background-color: var(--surface-1);
+  border-color: var(--color-line-cta);
+}
+
+/* Marquee animations for integrations carousel */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.animate-marquee-left {
+  animation: marquee-left linear infinite;
+}
+.animate-marquee-right {
+  animation: marquee-right linear infinite;
+}
+
+/**
+ * Diagonal stripe overlay on a solid base.
+ * Override `--stripe-color` on the element to change the line color.
+ * Knobs:
+ *   --stripe-period  default 6px  — tile size; visual period ≈ period × 0.707
+ *   --stripe-base    default var(--color-surface-bg) (solid layer under stripes)
+ */
+.bg-stripe-pattern,
+.with-stripes,
+.link-box:hover,
+.box-custom-hover:after,
+.card-hover-stripes:after,
+.corner-box-hover-stripes:hover {
+  --stripe-mix: 20%;
+  --stripe-base: var(--color-surface-bg);
+  --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.1));
+  background: repeating-linear-gradient(
+    315deg,
+    var(--stripe-base),
+    var(--stripe-base) 2px,
+    var(--stripe-line) 4px,
+    var(--stripe-base) 4px
+  );
+}
+
+.with-stripes-alt {
+  --stripe-base: var(--color-surface-2);
+  --stripe-mix: 20%;
+  --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.2));
+  background: repeating-linear-gradient(
+    315deg,
+    var(--stripe-base),
+    var(--stripe-base) 2px,
+    var(--stripe-line) 4px,
+    var(--stripe-base) 4px
+  );
+}
+
+/* Richer stripe tint from theme border + base (OK Lab); falls back to rgba above. */
+@supports (color: color-mix(in lab, red, red)) {
+  .bg-stripe-pattern,
+  .corner-box-hover-stripes:hover {
+    --stripe-line: color-mix(
+      in oklab,
+      var(--stripe-color, var(--color-fd-border)) var(--stripe-mix),
+      var(--stripe-base)
+    );
+  }
+}
+
+/* Dark-mode callout stripes: left-to-right gradient fade */
+.dark .callout-stripe-fade {
+  background:
+    linear-gradient(
+      to right,
+      var(--stripe-base) 0%,
+      rgba(0, 0, 0, 0.4) 10%,
+      rgba(0, 0, 0, 0.3) 85%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    repeating-linear-gradient(
+      315deg,
+      var(--stripe-base),
+      var(--stripe-base) 2px,
+      var(--stripe-line) 4px,
+      var(--stripe-base) 4px
+    );
+}
+
+.button-wrapper {
+  position: relative;
+}
+
+.box-custom-hover {
+  position: relative;
+}
+
+.box-custom-hover:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transition:
+    opacity 120ms ease,
+    inset 120ms ease;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.box-custom-hover:hover:after {
+  inset: -6px;
+  opacity: 1;
+}
+
+.card-hover-stripes {
+  position: relative;
+}
+
+.card-hover-stripes:after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  transition: opacity 220ms ease;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.card-hover-stripes:hover:after {
+  opacity: 1;
+}
+
+.dark .button-icon-area {
+  background-image: url("/images/buttons/button-icon-line-overlay.svg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.custom-card-shadow {
+  box-shadow:
+    -23px 51px 16px 0 rgba(0, 0, 0, 0),
+    -15px 33px 14px 0 rgba(0, 0, 0, 0.01),
+    -8px 18px 12px 0 rgba(0, 0, 0, 0.02),
+    -4px 8px 9px 0 rgba(0, 0, 0, 0.03),
+    -1px 2px 5px 0 rgba(0, 0, 0, 0.04);
+}
+
+.hero-bg {
+  background-image: url("/images/patterns/hero-bg.png");
+  background-position: top;
+  background-repeat: no-repeat;
+}
+
+.box-corners::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  padding: inherit;
+  box-sizing: content-box;
+  background-color: hsl(var(--foreground) / 0.6);
+  -webkit-mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-origin: content-box;
+  mask-origin: content-box;
+}
+
+.box-corners--on-hover::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  z-index: 0;
+  opacity: 0;
+  background-color: hsl(var(--foreground) / 0.6);
+  -webkit-mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  -webkit-mask-size: 8px 8px;
+  mask-size: 8px 8px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  /* padding-box: full row incl. Fumadocs depth padding; content-box misaligned corners on nested items */
+  -webkit-mask-origin: padding-box;
+  mask-origin: padding-box;
+  transition: opacity 0.2s ease;
+}
+
+.box-corners--on-hover:hover::before {
+  opacity: 1;
+}
+
+/* ── CornerBox CSS corners ──────────────────────────────────────────────────
+   Replaces the SVG-as-absolute-children approach with a single ::before
+   pseudo-element per container. Individual corners can be hidden by setting
+   the per-corner CSS custom property to "none" via inline style.
+   Order: TL, BL, BR, TR (matches mask-position list below). */
+
+.corner-box-corners,
+.corner-box-corners-flush,
+.corner-box-corners--hover {
+  --cx-mask-tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E");
+  --cx-mask-bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E");
+  --cx-mask-br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E");
+  --cx-mask-tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+}
+
+/* Bordered CornerBox: sit at −1px so brackets overlap the 1px border stroke */
+.corner-box-corners::before,
+.corner-box-corners--hover::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  right: -1px;
+  bottom: -1px;
+  pointer-events: none;
+  z-index: 10;
+  background-color: var(--color-line-cta);
+  -webkit-mask-image:
+    var(--cx-mask-tl), var(--cx-mask-bl), var(--cx-mask-br), var(--cx-mask-tr);
+  mask-image:
+    var(--cx-mask-tl), var(--cx-mask-bl), var(--cx-mask-br), var(--cx-mask-tr);
+  -webkit-mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  -webkit-mask-size: 8px 8px;
+  mask-size: 8px 8px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.corner-box-corners--hover::before {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.corner-box-corners--hover:hover::before {
+  opacity: 1;
+}
+/* No-border CornerBox: flush with the element edge */
+.corner-box-corners-flush::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+  background-color: var(--color-line-cta);
+  -webkit-mask-image:
+    var(--cx-mask-tl), var(--cx-mask-bl), var(--cx-mask-br), var(--cx-mask-tr);
+  mask-image:
+    var(--cx-mask-tl), var(--cx-mask-bl), var(--cx-mask-br), var(--cx-mask-tr);
+  -webkit-mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  -webkit-mask-size: 8px 8px;
+  mask-size: 8px 8px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* HoverCorners replacement: an absolute child span whose ::before shows on
+   parent hover. The span stretches to cover its nearest positioned ancestor
+   so the corners align with the container edge, not the span's own position. */
+.corner-box-hover-child {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.corner-box-hover-child::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-line-cta);
+  -webkit-mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  mask-position:
+    top left,
+    bottom left,
+    bottom right,
+    top right;
+  -webkit-mask-size: 8px 8px;
+  mask-size: 8px 8px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+/* Show corners when specific parent containers are hovered */
+.link-box:hover > .corner-box-hover-child::before,
+.button-wrapper:hover > .corner-box-hover-child::before,
+.card-hover-stripes:hover .corner-box-hover-child::before {
+  opacity: 1;
+}
+
+.bg-left-corner {
+  background-image: url("/images/patterns/left-corner.svg");
+  background-position: top left;
+  background-repeat: no-repeat;
+  background-size: 3px;
+}
+
+.dark .bg-left-corner {
+  background-image: url("/images/patterns/left-corner-dark.svg");
+}
+
+.bg-right-corner {
+  background-image: url("/images/patterns/right-corner.svg");
+  background-position: top right;
+  background-repeat: no-repeat;
+  background-size: 3px;
+}
+
+.dark .bg-right-corner {
+  background-image: url("/images/patterns/right-corner-dark.svg");
+}
+
+.bgc-size-6 {
+  background-size: 6px;
 }

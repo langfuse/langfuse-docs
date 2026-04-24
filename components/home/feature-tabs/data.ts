@@ -4,24 +4,33 @@ import {
   GitPullRequestArrow,
   ThumbsUp,
   FlaskConical,
-  Globe,
+  // Globe,
   MessageSquare,
 } from "lucide-react";
 import type { FeatureTabData } from "./types";
 
-import observabilityPng from "components/home/feature-tabs/img/observability-2.png";
-import metricsPng from "components/home/feature-tabs/img/metrics.png";
-import PromptPng from "components/home/feature-tabs/img/prompt.png";
-import EvalsPng from "components/home/feature-tabs/img/evals-wide.png";
-import PlaygroundPng from "components/home/feature-tabs/img/playground.png";
-import AnnotationPng from "components/home/feature-tabs/img/Annotation.png";
+import observabilityPng from "components/home/feature-tabs/img/observability-ui.png";
+import observabilityMobilePng from "components/home/feature-tabs/img/observability-mobile-ui.png";
+import metricsPng from "components/home/feature-tabs/img/cost-ui.png";
+import PromptPng from "components/home/feature-tabs/img/prompts-ui.png";
+import EvalsPng from "components/home/feature-tabs/img/evals-ui.png";
+import PlaygroundPng from "components/home/feature-tabs/img/playground-ui.png";
+import AnnotationPng from "components/home/feature-tabs/img/annotation-ui.png";
+
+export const mobileFeatureTabsData: Pick<FeatureTabData, "image"> = {
+  image: {
+    light: observabilityMobilePng,
+    dark: observabilityMobilePng,
+    alt: "Langfuse observability trace detail view showing nested observations with latency and cost",
+  },
+};
 
 export const featureTabsData: FeatureTabData[] = [
   {
     id: "observability",
     icon: TextQuote,
-    title: "Observability",
-    subtitle: "Trace every LLM call with cost & latency.",
+    title: "Gain deep visibility into your traces",
+    subtitle: "Trace every LLM call with cost and latency.",
     body: "Capture complete traces of your LLM applications/agents. Use traces to inspect failures and build eval datasets. Based on OpenTelemetry with support for all popular LLM/agent libraries.",
     docsHref: "/docs/observability/overview",
     videoHref: "/watch-demo?tab=observability",
@@ -76,7 +85,7 @@ export default observe(handleRequest);`,
   {
     id: "metrics",
     icon: LineChart,
-    title: "Metrics",
+    title: "Track model cost and latency",
     subtitle: "Track cost, latency, and quality.",
     body: "Monitor your LLM application's performance with comprehensive metrics dashboards and APIs. Track costs, latencies, token usage, and quality scores across models, users, and time periods.",
     docsHref: "/docs/metrics/overview",
@@ -137,7 +146,7 @@ const res = await langfuse.api.metrics.metrics({query});`,
   {
     id: "prompt-management",
     icon: GitPullRequestArrow,
-    title: "Prompt Management",
+    title: "Improve your prompts",
     subtitle: "Version and deploy prompts with low latency.",
     body: "Version-control prompts collaboratively, deploy/roll-back instantly to different environments, support for templates, variables, and A/B testing. Cached client-side for 0 latency/availability impact.",
     docsHref: "/docs/prompt-management/overview",
@@ -199,24 +208,9 @@ async function handleRequest(userInput: string) {
     quickstartHref: "/docs/prompt-management/get-started",
   },
   {
-    id: "playground",
-    icon: FlaskConical,
-    title: "Playground",
-    subtitle: "Test prompts and models interactively.",
-    body: "Experiment with different prompts, models, and parameters in an interactive playground. Compare outputs, iterate on prompts, and save successful configurations to prompt management.",
-    docsHref: "/docs/prompt-management/features/playground",
-    image: {
-      light: PlaygroundPng, // Placeholder - needs playground screenshot
-      dark: PlaygroundPng,
-      alt: "Langfuse playground interface for testing prompts and models",
-    },
-    displayMode: "image-only",
-    quickstartHref: "/docs/prompt-management/features/playground",
-  },
-  {
     id: "evaluation",
     icon: ThumbsUp,
-    title: "Evaluation",
+    title: "Evaluate model outputs automatically",
     subtitle: "Collect feedback and run evaluations.",
     body: "Run online/offline evals, via UI (experiment with prompts/models) and via SDKs (experiment with end-to-end application). Build datasets from traces to continuously improve your evals. View results in UI.",
     docsHref: "/docs/evaluation/overview",
@@ -285,7 +279,7 @@ const result = await langfuse.experiment.run({
   {
     id: "annotations",
     icon: MessageSquare,
-    title: "Annotations",
+    title: "Collaborate on human reviews",
     subtitle: "Add manual feedback and corrections.",
     body: "Create manual annotations to provide feedback, corrections, and improvements to your LLM outputs. Use annotations to build high-quality datasets and set a baseline for automated evals.",
     docsHref: "/docs/evaluation/evaluation-methods/annotation",
@@ -297,65 +291,80 @@ const result = await langfuse.experiment.run({
     displayMode: "image-only",
   },
   {
-    id: "public-api",
-    icon: Globe,
-    title: "Public API",
-    subtitle: "Full REST API access to all features.",
-    body: "Access all Langfuse features and data programmatically through our API. Integrate with your existing workflows, build custom interfaces and dashboards, and automate your workflows.",
-    docsHref: "/docs/api-and-data-platform/overview",
+    id: "playground",
+    icon: FlaskConical,
+    title: "Iterate with structured experiments",
+    subtitle: "Test prompts and models interactively.",
+    body: "Experiment with different prompts, models, and parameters in an interactive playground. Compare outputs, iterate on prompts, and save successful configurations to prompt management.",
+    docsHref: "/docs/prompt-management/features/playground",
     image: {
-      light: observabilityPng, // Placeholder - needs API documentation screenshot
-      dark: observabilityPng,
-      alt: "Langfuse API documentation and examples",
+      light: PlaygroundPng, // Placeholder - needs playground screenshot
+      dark: PlaygroundPng,
+      alt: "Langfuse playground interface for testing prompts and models",
     },
-    code: {
-      snippets: {
-        python: `from langfuse import get_client
-
-langfuse = get_client()
-
-# Get list of traces with optional filters & pagination
-traces = langfuse.api.trace.list(limit=100, user_id="user_123", tags=["production"])
-
-# Get a single trace by ID
-trace = langfuse.api.trace.get("traceId")
-
-# Get observations for a specific trace
-observations = langfuse.api.observations.get_many(trace_id="traceId", type="GENERATION", limit=50)
-
-# Get sessions and scores
-sessions = langfuse.api.sessions.list(limit=20)
-scores = langfuse.api.score_v_2.get(limit=20)
-
-# Get aggregated metrics (see other tab)
-metrics = langfuse.api.metrics.metrics(...)
-
-# Many more APIs are available
-# See the API reference or SDK docs for more details`,
-        javascript: `import { LangfuseClient } from "@langfuse/client";
-
-const langfuse = new LangfuseClient();
-
-// Get list of traces with optional filters & pagination
-const traces = await langfuse.api.trace.list({ limit: 100 });
-
-// Get a single trace by ID
-const trace = await langfuse.api.trace.get("traceId");
-
-// Get observations for a specific trace
-const observations = await langfuse.api.observations.getMany({traceId: "traceId", type: "GENERATION", limit: 50});
-
-// Get sessions and scores
-const sessions = await langfuse.api.sessions.list({ limit: 20 });
-const scores = await langfuse.api.scoreV2.get({ limit: 20 });
-
-// Get aggregated metrics (see other tab)
-const metrics = await langfuse.api.metrics.metrics({...});
-
-// Many more APIs are available
-// See the API reference or SDK docs for more details`,
-      },
-    },
-    displayMode: "code-only",
+    displayMode: "image-only",
+    quickstartHref: "/docs/prompt-management/features/playground",
   },
+  //   {
+  //     id: "public-api",
+  //     icon: Globe,
+  //     title: "Public API",
+  //     subtitle: "Full REST API access to all features.",
+  //     body: "Access all Langfuse features and data programmatically through our API. Integrate with your existing workflows, build custom interfaces and dashboards, and automate your workflows.",
+  //     docsHref: "/docs/api-and-data-platform/overview",
+  //     image: {
+  //       light: observabilityPng, // Placeholder - needs API documentation screenshot
+  //       dark: observabilityPng,
+  //       alt: "Langfuse API documentation and examples",
+  //     },
+  //     code: {
+  //       snippets: {
+  //         python: `from langfuse import get_client
+
+  // langfuse = get_client()
+
+  // # Get list of traces with optional filters & pagination
+  // traces = langfuse.api.trace.list(limit=100, user_id="user_123", tags=["production"])
+
+  // # Get a single trace by ID
+  // trace = langfuse.api.trace.get("traceId")
+
+  // # Get observations for a specific trace
+  // observations = langfuse.api.observations.get_many(trace_id="traceId", type="GENERATION", limit=50)
+
+  // # Get sessions and scores
+  // sessions = langfuse.api.sessions.list(limit=20)
+  // scores = langfuse.api.score_v_2.get(limit=20)
+
+  // # Get aggregated metrics (see other tab)
+  // metrics = langfuse.api.metrics.metrics(...)
+
+  // # Many more APIs are available
+  // # See the API reference or SDK docs for more details`,
+  //         javascript: `import { LangfuseClient } from "@langfuse/client";
+
+  // const langfuse = new LangfuseClient();
+
+  // // Get list of traces with optional filters & pagination
+  // const traces = await langfuse.api.trace.list({ limit: 100 });
+
+  // // Get a single trace by ID
+  // const trace = await langfuse.api.trace.get("traceId");
+
+  // // Get observations for a specific trace
+  // const observations = await langfuse.api.observations.getMany({traceId: "traceId", type: "GENERATION", limit: 50});
+
+  // // Get sessions and scores
+  // const sessions = await langfuse.api.sessions.list({ limit: 20 });
+  // const scores = await langfuse.api.scoreV2.get({ limit: 20 });
+
+  // // Get aggregated metrics (see other tab)
+  // const metrics = await langfuse.api.metrics.metrics({...});
+
+  // // Many more APIs are available
+  // // See the API reference or SDK docs for more details`,
+  //       },
+  //     },
+  //     displayMode: "code-only",
+  //   },
 ];

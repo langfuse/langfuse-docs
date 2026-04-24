@@ -66,6 +66,7 @@ attributes include:
 - `version` (via `langfuse.version`)
 - `release` (via `langfuse.release`)
 - `tags` (via `langfuse.trace.tags`)
+- `trace_name` (via `langfuse.trace.name`)
 
 Langfuse filters and aggregations increasingly operate across individual
 observations rather than only at the trace level. If you want to reliably
@@ -109,9 +110,9 @@ simpler interface and are the recommended approach when using Langfuse SDKs.
 
 ## Ingestion Options
 
-### OpenTelemetry native Langfuse SDK v3
+### OpenTelemetry native Langfuse SDK v4
 
-The quickest path to start tracing with Langfuse is the new **OTEL-native Langfuse SDK v3**. The SDK is a thin layer on top of the official OpenTelemetry client that automatically converts emitted spans into rich Langfuse observations (spans, generations, events, and [other observation types](/docs/observability/features/observation-types)) and adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring.
+The quickest path to start tracing with Langfuse is the new **OTEL-native Langfuse SDK v4**. The SDK is a thin layer on top of the official OpenTelemetry client that automatically converts emitted spans into rich Langfuse observations (spans, generations, events, and [other observation types](/docs/observability/features/observation-types)) and adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring.
 
 Because it lives in the shared OpenTelemetry context, spans from other OTEL-instrumented libraries can be exported to Langfuse too. By default, Langfuse focuses on LLM-relevant spans (Langfuse SDK spans, spans with `gen_ai.*` attributes, and known LLM instrumentors). To export everything, use a permissive custom filter as described in the [advanced SDK docs](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
 
@@ -142,7 +143,7 @@ For long API Keys on GNU systems, you may have to add `-w 0` at the end since `b
 
 <Callout type="info">
 
-If you want spans ingested directly via OpenTelemetry to appear in real time in Langfuse Cloud Fast Preview (v4), include the `x-langfuse-ingestion-version: 4` header. If your setup uses signal-specific header settings, add the same value to `OTEL_EXPORTER_OTLP_TRACES_HEADERS`.
+If you want spans ingested directly via OpenTelemetry to appear in real time in Langfuse Cloud Fast Preview, include the `x-langfuse-ingestion-version: 4` header. If your setup uses signal-specific header settings, add the same value to `OTEL_EXPORTER_OTLP_TRACES_HEADERS`.
 
 </Callout>
 
@@ -356,9 +357,13 @@ Furthermore, Langfuse uses attributes within the `langfuse.*` namespace to map O
   not work as expected or does not parse the correct attributes.
 </Callout>
 
-Langfuse distinguishes between trace-level attributes and observation-level attributes. 
+<Callout type="warning">
+  **Reserved attribute key segments:** Attribute keys that contain `__proto__`, `constructor`, or `prototype` as a path segment (e.g. `gen_ai.prompt.__proto__.foo`) are silently dropped during ingestion. This is a security measure to prevent prototype pollution. If you notice missing attributes, check that your keys do not include these reserved segments.
+</Callout>
+
+Langfuse distinguishes between trace-level attributes and observation-level attributes.
 - [Trace-level attributes](#trace-level-attributes) represent shared context for an entire interaction. If Langfuse detects these attributes on a specific span, it will treat them as properties of the whole trace.
-- [Observation-level attributes](#observation-level-attributes) describe individual steps within a trace. Langfuse keeps them on the observation level. 
+- [Observation-level attributes](#observation-level-attributes) describe individual steps within a trace. Langfuse keeps them on the observation level.
 
 ### How Metadata Mapping Works [#metadata-mapping]
 

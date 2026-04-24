@@ -34,6 +34,7 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 | `CLICKHOUSE_DB`                               | `default`          | Name of the ClickHouse database to use.                                                                  |
 | `CLICKHOUSE_CLUSTER_ENABLED`                  | `true`             | Whether to run ClickHouse commands `ON CLUSTER`. Set to `false` for single-container setups.             |
 | `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED` | `false`            | Whether to disable automatic ClickHouse migrations.                                                      |
+| `CLICKHOUSE_READ_ONLY_URL`                    |                    | Optional read-only endpoint used for UI and public-API read queries on traces, observations, scores, and sessions. Falls back to `CLICKHOUSE_URL` when unset. Reuses `CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`, and `CLICKHOUSE_DB`. Only useful on [compute-compute separated](https://clickhouse.com/docs/cloud/reference/warehouses) clusters. See [Scaling](/self-hosting/configuration/scaling#clickhouse-read-only-url). |
 
 Langfuse uses `default` as the cluster name if CLICKHOUSE_CLUSTER_ENABLED is set to `true`.
 You can overwrite this by setting `CLICKHOUSE_CLUSTER_NAME` to a different value.
@@ -250,6 +251,22 @@ CLICKHOUSE_USER=clickhouse
 CLICKHOUSE_PASSWORD=clickhouse
 CLICKHOUSE_CLUSTER_ENABLED=false
 ```
+
+## Migrating to a New Instance
+
+You may want to move Langfuse to a different ClickHouse instance, e.g. when switching providers or moving from a single-node to a clustered setup.
+We recommend the following approach:
+
+1. Point Langfuse to the new ClickHouse instance so that incoming data is captured there.
+2. Create a backup of the existing instance to blob storage and restore it into the new instance.
+
+A zero-downtime switch where data is written to both instances concurrently is technically possible, but we have not tested it and it is not recommended by ClickHouse.
+Please reach out to Langfuse Support if you want to explore this option.
+
+Refer to the ClickHouse migration guides for backup and restore instructions:
+
+- [ClickHouse to ClickHouse via remoteSecure](https://clickhouse.com/docs/cloud/migration/clickhouse-to-cloud)
+- [ClickHouse to ClickHouse via backup and restore](https://clickhouse.com/docs/cloud/migration/oss-to-cloud-backup-restore)
 
 ## Encryption
 
@@ -500,3 +517,5 @@ All self-hosted deployments must include a ClickHouse instance.
 ### How do I manage ClickHouse storage growth?
 
 Langfuse has a built-in [Data Retention](/docs/administration/data-retention) feature that automatically deletes traces, observations, scores, and media assets older than a configured number of days. This runs nightly and handles cleanup across both ClickHouse and blob storage. You do not need to set ClickHouse TTLs manually.
+
+If ClickHouse disk usage keeps growing despite retention being configured, the cause is often system log tables (`trace_log`, `text_log`, `opentelemetry_span_log`, etc.) that ship without a TTL. See [Scaling › ClickHouse system log tables](/self-hosting/configuration/scaling#clickhouse-system-log-tables) for how to disable or cap them.

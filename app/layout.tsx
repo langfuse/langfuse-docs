@@ -1,14 +1,35 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { RootProvider } from "fumadocs-ui/provider/next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import { GoogleTagManager } from '@next/third-parties/google';
+import localFont from "next/font/local";
+import { Inter } from 'next/font/google'
 import { DevAriaHiddenConsoleFilter } from "@/components/DevAriaHiddenConsoleFilter";
 import {
   buildDefaultSiteOgImageUrl,
   SITE_DEFAULT_OG_DESCRIPTION,
 } from "@/lib/og-url";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
+
+const interVariable = Inter({
+  subsets: ['latin'],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const geistMono = localFont({
+  src: "../public/fonts/GeistMono-Medium.woff2",
+  variable: "--font-geist-mono",
+  display: "swap",
+  weight: "500",
+});
+
+const f37Analog = localFont({
+  src: "../public/fonts/F37Analog-Medium.woff2",
+  variable: "--font-analog",
+  display: "swap",
+  weight: "500",
+});
 import { Hubspot } from "@/components/analytics/hubspot";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
@@ -47,7 +68,7 @@ export default function RootLayout({
       lang="en"
       dir="ltr"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${interVariable.variable} ${geistMono.variable} ${f37Analog.variable}`}
     >
       <body className="font-sans antialiased">
         {process.env.NODE_ENV === "development" && <DevAriaHiddenConsoleFilter />}
@@ -56,6 +77,7 @@ export default function RootLayout({
         </PostHogProvider>
         {process.env.NODE_ENV === "production" && (
           <>
+            <GoogleTagManager gtmId="GTM-NGLK4TZX" />
             <Hubspot />
             <Script
               id="cookieyes"
