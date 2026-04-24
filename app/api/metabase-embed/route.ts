@@ -1,23 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
+const METABASE_SITE_URL = "https://langfuse.metabaseapp.com";
+
 export async function GET(request: NextRequest) {
   try {
-    const METABASE_SITE_URL = "https://langfuse.metabaseapp.com";
-    const METABASE_SECRET_KEY = process.env.METABASE_SECRET_KEY;
+    const secretKeyRaw = process.env.METABASE_SECRET_KEY;
 
-    if (!METABASE_SECRET_KEY) {
-      console.error("Missing required environment variables: METABASE_SECRET_KEY");
+    if (!secretKeyRaw) {
+      console.error("Missing required environment variable: METABASE_SECRET_KEY");
       return NextResponse.json(
         { message: "Server configuration error" },
         { status: 500 }
       );
     }
 
+    const secretKey = secretKeyRaw.trim();
+
     const dashboardId = request.nextUrl.searchParams.get("dashboardId")
       ? parseInt(request.nextUrl.searchParams.get("dashboardId")!, 10)
       : 25;
-    const theme = request.nextUrl.searchParams.get("theme") === "day" ? "day" : "night";
+    const theme =
+      request.nextUrl.searchParams.get("theme") === "day" ? "day" : "night";
 
     const payload = {
       resource: { dashboard: dashboardId },
@@ -25,7 +29,7 @@ export async function GET(request: NextRequest) {
       exp: Math.round(Date.now() / 1000) + 10 * 60,
     };
 
-    const token = jwt.sign(payload, METABASE_SECRET_KEY);
+    const token = jwt.sign(payload, secretKey);
     const iframeUrl = `${METABASE_SITE_URL}/embed/dashboard/${token}#theme=${theme}&bordered=false&titled=false`;
 
     return NextResponse.json(
@@ -35,7 +39,7 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=300, max-age=0",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
         },
       }
     );
