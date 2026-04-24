@@ -1142,6 +1142,14 @@ details > summary {
   75% { content: '...'; }
 }
 
+/*
+ * content-width-type: docs — lock the sibling footer to 680px at xl,
+ * matching the narrower reading column so content and footer align.
+ */
+#home-main-area > div:has(> [data-content-width="docs"]) > footer {
+  max-width: 42.5rem; /* 680px */
+}
+
 /* Inkeep override */
 inkeep-portal .inkeep-widget-vars {
   --ikp-font-family-heading: var(--font-sans);
