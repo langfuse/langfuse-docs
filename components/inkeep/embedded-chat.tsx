@@ -81,7 +81,6 @@ export function EmbeddedAIChat() {
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
   const isLoading = chat.status === 'streaming' || chat.status === 'submitted';
-  const isStreaming = chat.status === 'streaming' || chat.status === 'submitted';
 
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -136,7 +135,7 @@ export function EmbeddedAIChat() {
       <div className="not-prose border-t border-line-structure bg-surface-1">
         {messages.length > 0 && (
           <div className="flex items-center gap-1 px-2 pt-2">
-            {!isStreaming && messages.at(-1)?.role === 'assistant' && (
+            {!isLoading && messages.at(-1)?.role === 'assistant' && (
               <Button
                 variant="secondary"
                 size="small"
