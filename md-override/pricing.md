@@ -144,7 +144,7 @@ Optional **Yearly Commitment**:
 | Response time SLO | n/a | 48h | 48h (Teams: 24h) | Custom |
 | [Support SLA](/enterprise#faq) | -- | -- | -- | Yes |
 | **Security** | | | | |
-| [Data region](/security/data-regions) | US or EU | US or EU | US or EU | US or EU |
+| [Data region](/security/data-regions) | US, EU, or Japan | US, EU, or Japan | US, EU, or Japan | US, EU, Japan, or HIPAA |
 | Sign in with Google, AzureAD, GitHub | Yes | Yes | Yes | Yes |
 | [Organization-level RBAC](/docs/administration/rbac) | Yes | Yes | Yes | Yes |
 | Enterprise SSO (e.g. Okta, EntraID) | -- | -- | Teams add-on | Yes |
@@ -259,4 +259,4 @@ Through the organization settings in Langfuse Cloud or the [Customer Portal](/bi
 Yes, customized contracts are available for Enterprise customers with a yearly commitment. Contact enterprise@langfuse.com. Default plans are self-serve on standard terms.
 
 **Where is the data stored?**
-Langfuse Cloud is hosted on AWS. Data is stored in the US or EU depending on your selection. See [security documentation](/security) for details.
+Langfuse Cloud is hosted on AWS. Data is stored in the US, EU, Japan, or the HIPAA-compliant US region depending on your selection. See [security documentation](/security) for details.
