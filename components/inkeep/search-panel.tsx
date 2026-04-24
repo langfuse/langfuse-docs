@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { RefreshCw, Send, Square, Trash2, X } from 'lucide-react';
+import { Check, ClipboardCopy, RefreshCw, Send, Square, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -60,6 +60,40 @@ function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
 
 // ─── Input actions (retry / clear) — horizontal bar above input ────────────────
 
+function CopyChatButton() {
+  const { messages } = useChatContext();
+  const [copied, setCopied] = useState(false);
+
+  const copyChat = () => {
+    const text = messages
+      .filter((m) => m.role !== 'system')
+      .map((m) => {
+        const label = m.role === 'user' ? 'You' : 'Langfuse AI';
+        const body = m.parts
+          ?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+          .map((p) => p.text)
+          .join('') ?? '';
+        return `${label}:\n${body}`;
+      })
+      .join('\n\n');
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <Button
+      variant="secondary"
+      size="small"
+      icon={copied ? <Check className="size-3" /> : <ClipboardCopy className="size-3" />}
+      onClick={copyChat}
+    >
+      {copied ? 'Copied' : 'Copy'}
+    </Button>
+  );
+}
+
 function AISearchInputActions() {
   const { messages, status, setMessages, stop, regenerate } = useChatContext();
   const isLoading = status === 'streaming' || status === 'submitted';
@@ -78,6 +112,7 @@ function AISearchInputActions() {
           Retry
         </Button>
       )}
+      <CopyChatButton />
       <Button
         variant="secondary"
         size="small"
@@ -120,7 +155,7 @@ function AISearchInput({ autoFocus = true, ...props }: ComponentProps<'form'> & 
   };
 
   return (
-    <form {...props} className={cn('flex items-end gap-1 p-2', props.className)} onSubmit={onStart}>
+    <form {...props} className={cn('flex flex-wrap items-end gap-1 p-2', props.className)} onSubmit={onStart}>
       <TextareaAutoResize
         value={input}
         placeholder="Ask a question"
@@ -141,27 +176,29 @@ function AISearchInput({ autoFocus = true, ...props }: ComponentProps<'form'> & 
           }
         }}
       />
-      {isLoading ? (
-        <Button
-          key="stop"
-          variant="secondary"
-          type="button"
-          onClick={stop}
-          size="small"
-          icon={<Square className="size-3 fill-current" />}
-          aria-label="Stop"
-        />
-      ) : (
-        <Button
-          key="send"
-          variant="primary"
-          type="submit"
-          disabled={input.length === 0}
-          size="small"
-          icon={<Send className="size-3.5" />}
-          aria-label="Send"
-        />
-      )}
+      <div className="flex items-center gap-1 ms-auto">
+        {isLoading ? (
+          <Button
+            key="stop"
+            variant="secondary"
+            type="button"
+            onClick={stop}
+            size="small"
+            icon={<Square className="size-3 fill-current" />}
+            aria-label="Stop"
+          />
+        ) : (
+          <Button
+            key="send"
+            variant="primary"
+            type="submit"
+            disabled={input.length === 0}
+            size="small"
+            icon={<Send className="size-3.5" />}
+            aria-label="Send"
+          />
+        )}
+      </div>
     </form>
   );
 }
@@ -172,7 +209,7 @@ function TextareaAutoResize(props: ComponentProps<'textarea'>) {
   const shared = cn('col-start-1 row-start-1', props.className);
 
   return (
-    <div className="grid flex-1">
+    <div className="grid min-w-0 flex-[1_1_0%]">
       <textarea
         id="nd-ai-input"
         {...props}

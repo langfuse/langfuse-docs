@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { RefreshCw, Send, Square, Trash2 } from 'lucide-react';
+import { Check, ClipboardCopy, RefreshCw, Send, Square, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -28,7 +28,7 @@ function EmbeddedTextarea(props: ComponentProps<'textarea'>) {
   const shared = cn('col-start-1 row-start-1', props.className);
 
   return (
-    <div className="grid flex-1">
+    <div className="grid min-w-0 flex-[1_1_0%]">
       <textarea
         id="nd-embedded-ai-input"
         {...props}
@@ -113,6 +113,40 @@ export function EmbeddedAIChat() {
   );
 }
 
+function EmbeddedCopyChatButton() {
+  const { messages } = useChatContext();
+  const [copied, setCopied] = useState(false);
+
+  const copyChat = () => {
+    const text = messages
+      .filter((m) => m.role !== 'system')
+      .map((m) => {
+        const label = m.role === 'user' ? 'You' : 'Langfuse AI';
+        const body = m.parts
+          ?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+          .map((p) => p.text)
+          .join('') ?? '';
+        return `${label}:\n${body}`;
+      })
+      .join('\n\n');
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <Button
+      variant="secondary"
+      size="small"
+      icon={copied ? <Check className="size-3" /> : <ClipboardCopy className="size-3" />}
+      onClick={copyChat}
+    >
+      {copied ? 'Copied' : 'Copy'}
+    </Button>
+  );
+}
+
 function EmbeddedAIChatInner() {
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
@@ -181,6 +215,7 @@ function EmbeddedAIChatInner() {
                 Retry
               </Button>
             )}
+            <EmbeddedCopyChatButton />
             <Button
               variant="secondary"
               size="small"
@@ -191,7 +226,7 @@ function EmbeddedAIChatInner() {
             </Button>
           </div>
         )}
-        <form className="flex items-end gap-1 p-2" onSubmit={onSubmit}>
+        <form className="flex flex-wrap items-end gap-1 p-2" onSubmit={onSubmit}>
           <EmbeddedTextarea
             value={input}
             placeholder="Ask a question"
@@ -209,25 +244,27 @@ function EmbeddedAIChatInner() {
               }
             }}
           />
-          {isLoading ? (
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={chat.stop}
-              size="small"
-              icon={<Square className="size-3 fill-current" />}
-              aria-label="Stop"
-            />
-          ) : (
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={input.length === 0}
-              size="small"
-              icon={<Send className="size-3.5" />}
-              aria-label="Send"
-            />
-          )}
+          <div className="flex items-center gap-1 ms-auto">
+            {isLoading ? (
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={chat.stop}
+                size="small"
+                icon={<Square className="size-3 fill-current" />}
+                aria-label="Stop"
+              />
+            ) : (
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={input.length === 0}
+                size="small"
+                icon={<Send className="size-3.5" />}
+                aria-label="Send"
+              />
+            )}
+          </div>
         </form>
       </div>
     </div>
