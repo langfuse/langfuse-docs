@@ -35,8 +35,8 @@ export function ThinkingIndicator() {
   }, []);
 
   return (
-    <div className="flex items-start gap-3">
-      <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5 mt-0.5" />
+    <div className="not-prose flex items-start gap-3">
+      <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5 mt-0.5 shrink-0" />
       <p className="text-sm text-text-tertiary animate-pulse">
         {THINKING_PHRASES[index]}
         <span className="ellipsis-dots" aria-hidden="true" />
@@ -132,9 +132,9 @@ type AIChatEmptyStateProps = {
 
 export function AIChatEmptyState({ onPickQuestion }: AIChatEmptyStateProps) {
   return (
-    <div className="size-full flex flex-col justify-start gap-4">
+    <div className="size-full flex flex-col justify-start gap-4 not-prose">
       <div className="flex items-start gap-3">
-        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-6" />
+        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-6 shrink-0" />
         <Text size="s" className="text-text-primary text-left mb-2">
           Hi! I&apos;m Langfuse&apos;s AI assistant trained on documentation, help articles, and other
           content. How can I help you today?
