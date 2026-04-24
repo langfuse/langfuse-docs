@@ -35,11 +35,11 @@ export function ThinkingIndicator() {
   }, []);
 
   return (
-    <div className="not-prose flex items-start gap-3">
+    <div className="not-prose flex items-start gap-3" role="status" aria-label="AI is thinking">
       <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5 mt-0.5 shrink-0" />
-      <p className="text-sm text-text-tertiary animate-pulse">
+      <p className="text-sm text-text-tertiary animate-pulse" aria-hidden="true">
         {THINKING_PHRASES[index]}
-        <span className="ellipsis-dots" aria-hidden="true" />
+        <span className="ellipsis-dots" />
       </p>
     </div>
   );
@@ -113,10 +113,10 @@ export function AIChatMessage({
               <Link
                 key={i}
                 href={item.url}
-                className="flex items-baseline gap-1.5 text-[11px] leading-tight border border-line-structure rounded-sm px-2 py-1.5 hover:bg-surface-2 text-text-secondary no-underline truncate"
+                className="flex items-baseline gap-1.5 text-[11px] leading-tight border border-line-structure rounded-sm px-2 py-1.5 hover:bg-surface-2 text-text-secondary no-underline"
               >
                 <span className="text-text-tertiary shrink-0">[{item.label}]</span>
-                <span className="font-medium truncate">{item.title}</span>
+                <span className="font-medium truncate min-w-0">{item.title}</span>
               </Link>
             ))}
           </div>

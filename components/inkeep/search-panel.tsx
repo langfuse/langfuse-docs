@@ -94,7 +94,7 @@ function AISearchInputActions() {
 
 const StorageKeyInput = '__ai_search_input';
 
-function AISearchInput(props: ComponentProps<'form'>) {
+function AISearchInput({ autoFocus = true, ...props }: ComponentProps<'form'> & { autoFocus?: boolean }) {
   const { status, sendMessage, stop } = useChatContext();
   const [input, setInput] = useState(() =>
     typeof window === 'undefined' ? '' : (localStorage.getItem(StorageKeyInput) ?? ''),
@@ -124,7 +124,7 @@ function AISearchInput(props: ComponentProps<'form'>) {
       <TextareaAutoResize
         value={input}
         placeholder="Ask a question"
-        autoFocus
+        autoFocus={autoFocus}
         className="px-3 py-2 text-[16px] md:text-[14px]"
         disabled={false}
         onChange={(e) => {
@@ -376,7 +376,7 @@ export function AISearchPanel() {
           className={cn(
             'overflow-hidden z-50 bg-surface-1 text-text-primary [--ai-chat-width:320px] border-line-structure',
             'max-wide:fixed max-wide:inset-x-4 max-md:bottom-4 max-md:top-4 max-wide:bottom-8 max-wide:top-8 max-wide:border max-wide:border-line-structure max-wide:shadow-xl max-wide:max-w-[600px] max-wide:mx-auto',
-            'wide:sticky wide:top-[var(--fd-nav-height)] wide:h-[calc(100dvh-var(--fd-nav-height)-2px)] wide:w-(--ai-chat-width) wide:shrink-0 wide:border-l wide:ms-auto',
+            'wide:sticky wide:top-[var(--fd-nav-height)] wide:h-[calc(100dvh-var(--fd-nav-height)-2px)] wide:border-l wide:ms-auto',
             'wide:in-[#nd-docs-layout]:[grid-area:toc] wide:in-[#nd-notebook-layout]:row-span-full wide:in-[#nd-notebook-layout]:col-start-5',
             'wide:in-[#home-layout]:top-[calc(var(--fd-banner-height,0px)+var(--lf-nav-primary-height))] wide:in-[#home-layout]:h-[calc(100dvh-var(--fd-banner-height,0px)-var(--lf-nav-primary-height))] wide:in-[#home-layout]:w-(--ai-chat-width) wide:in-[#home-layout]:shrink-0 wide:in-[#home-layout]:border-r',
             open
@@ -394,7 +394,7 @@ export function AISearchPanel() {
             <AISearchPanelList className="flex-1 min-h-0" />
             <div className="border-t border-line-structure text-text-primary bg-surface-1">
               <AISearchInputActions />
-              <AISearchInput />
+              <AISearchInput autoFocus={!skipEnterAnimation} />
             </div>
           </div>
         </div>

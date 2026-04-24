@@ -1,15 +1,13 @@
 import Link from "next/link";
 import { NotFoundAnimation } from "@/components/NotFoundAnimation";
 import { BrokenLinkIssue } from "@/components/BrokenLinkIssue";
-import { Navbar, Footer } from "@/components/layout";
+import { HomeLayout } from "@/components/layout";
 import { Button } from "@/components/ui";
-import { AISearchPanel, FloatingAskAIButton } from "@/components/inkeep/search";
 
 export default function NotFound() {
   return (
-    <>
-      <Navbar />
-      <main className="flex flex-col items-center max-w-360 mx-auto justify-center text-center sm:py-20 min-h-[calc(100vh-4rem)] border-x border-line-structure">
+    <HomeLayout showAside={false}>
+      <main className="flex flex-col items-center justify-center text-center sm:py-20 min-h-[calc(100vh-4rem)]">
         <NotFoundAnimation />
         <div className="flex flex-col gap-6 justify-center items-center">
           <div className="flex flex-col gap-2 justify-center items-center">
@@ -26,8 +24,6 @@ export default function NotFound() {
           </div>
         </div>
       </main>
-      <AISearchPanel />
-      <FloatingAskAIButton />
-    </>
+    </HomeLayout>
   );
 }
