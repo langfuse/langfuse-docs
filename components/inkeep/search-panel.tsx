@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Check, ClipboardCopy, RefreshCw, Send, Square, Trash2, X } from 'lucide-react';
+import { Check, Link2, RefreshCw, Send, Square, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -16,6 +16,7 @@ import { Link } from '@/components/ui/link';
 import { AIChatEmptyState, AIChatMessage, ThinkingIndicator } from './ai-chat-shared';
 import { Presence } from '@radix-ui/react-presence';
 import { useAISearchContext, useChatContext, buildUserMessage } from './search-context';
+import { encodeShareUrl, extractTextFromParts } from './chat-share';
 
 // ─── Header ────────────────────────────────────────────────────────────────────
 
@@ -60,23 +61,16 @@ function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
 
 // ─── Input actions (retry / clear) — horizontal bar above input ────────────────
 
-function CopyChatButton() {
+function ShareChatButton() {
   const { messages } = useChatContext();
   const [copied, setCopied] = useState(false);
 
-  const copyChat = () => {
-    const text = messages
-      .filter((m) => m.role !== 'system')
-      .map((m) => {
-        const label = m.role === 'user' ? 'You' : 'Langfuse AI';
-        const body = m.parts
-          ?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
-          .map((p) => p.text)
-          .join('') ?? '';
-        return `${label}:\n${body}`;
-      })
-      .join('\n\n');
-    navigator.clipboard.writeText(text).then(() => {
+  const shareChat = () => {
+    const shared = messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .map((m) => ({ role: m.role as 'user' | 'assistant', text: extractTextFromParts(m.parts ?? []) }));
+    const url = encodeShareUrl(shared);
+    navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -86,10 +80,10 @@ function CopyChatButton() {
     <Button
       variant="secondary"
       size="small"
-      icon={copied ? <Check className="size-3" /> : <ClipboardCopy className="size-3" />}
-      onClick={copyChat}
+      icon={copied ? <Check className="size-3" /> : <Link2 className="size-3" />}
+      onClick={shareChat}
     >
-      {copied ? 'Copied' : 'Copy'}
+      {copied ? 'Link copied' : 'Share'}
     </Button>
   );
 }
@@ -112,7 +106,7 @@ function AISearchInputActions() {
           Retry
         </Button>
       )}
-      <CopyChatButton />
+      <ShareChatButton />
       <Button
         variant="secondary"
         size="small"

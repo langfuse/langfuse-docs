@@ -10,13 +10,15 @@ import {
 } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Check, ClipboardCopy, RefreshCw, Send, Square, Trash2 } from 'lucide-react';
+import { Check, Link2, RefreshCw, Send, Square, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Link } from '@/components/ui/link';
 import { AIChatEmptyState, AIChatMessage, ThinkingIndicator } from './ai-chat-shared';
+import { Markdown } from './markdown';
 import { useChatContext, buildUserMessage } from './search-context';
+import { encodeShareUrl, extractTextFromParts, decodeShareHash } from './chat-share';
 import useInkeepSettings from './useInkeepSettings';
 
 const InkeepEmbeddedChatLazy = dynamic(
@@ -98,9 +100,60 @@ function InkeepSharedChat() {
   );
 }
 
+function SharedConversationView({ messages }: { messages: { role: 'user' | 'assistant'; text: string }[] }) {
+  return (
+    <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)]">
+      <div className="not-prose flex items-center gap-2 px-4 py-3 border-b border-line-structure bg-surface-1">
+        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-4 shrink-0" />
+        <Text size="s" className="font-medium text-text-primary">
+          Shared Conversation
+        </Text>
+      </div>
+      <div className="flex-1 overflow-y-auto p-4 overscroll-contain bg-surface-1">
+        <div className="flex flex-col gap-4">
+          {messages.map((msg, i) => {
+            const isUser = msg.role === 'user';
+            return (
+              <div key={i} className={isUser ? 'flex justify-end' : 'flex justify-start'}>
+                <div className={cn(
+                  isUser
+                    ? 'max-w-[85%] rounded-2xl rounded-br-sm border border-line-structure bg-surface-2 px-3 py-2'
+                    : 'max-w-full',
+                )}>
+                  {!isUser && (
+                    <p className="mb-1 text-sm font-medium text-primary">
+                      <span className="inline-flex items-center gap-2">
+                        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="" className="size-4" />
+                        <span>Langfuse Help Agent</span>
+                      </span>
+                    </p>
+                  )}
+                  <div className={cn('prose text-sm', isUser && 'prose-p:my-0')}>
+                    <Markdown text={msg.text} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EmbeddedAIChatRouter() {
   const searchParams = useSearchParams();
   const chatId = searchParams.get('chatId');
+  const [sharedMessages, setSharedMessages] = useState<{ role: 'user' | 'assistant'; text: string }[] | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const decoded = decodeShareHash(window.location.hash);
+      if (decoded && decoded.length > 0) setSharedMessages(decoded);
+    }
+  }, []);
+
+  if (sharedMessages) return <SharedConversationView messages={sharedMessages} />;
   if (chatId) return <InkeepSharedChat />;
   return <EmbeddedAIChatInner />;
 }
@@ -113,23 +166,16 @@ export function EmbeddedAIChat() {
   );
 }
 
-function EmbeddedCopyChatButton() {
+function EmbeddedShareChatButton() {
   const { messages } = useChatContext();
   const [copied, setCopied] = useState(false);
 
-  const copyChat = () => {
-    const text = messages
-      .filter((m) => m.role !== 'system')
-      .map((m) => {
-        const label = m.role === 'user' ? 'You' : 'Langfuse AI';
-        const body = m.parts
-          ?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
-          .map((p) => p.text)
-          .join('') ?? '';
-        return `${label}:\n${body}`;
-      })
-      .join('\n\n');
-    navigator.clipboard.writeText(text).then(() => {
+  const shareChat = () => {
+    const shared = messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .map((m) => ({ role: m.role as 'user' | 'assistant', text: extractTextFromParts(m.parts ?? []) }));
+    const url = encodeShareUrl(shared);
+    navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -139,10 +185,10 @@ function EmbeddedCopyChatButton() {
     <Button
       variant="secondary"
       size="small"
-      icon={copied ? <Check className="size-3" /> : <ClipboardCopy className="size-3" />}
-      onClick={copyChat}
+      icon={copied ? <Check className="size-3" /> : <Link2 className="size-3" />}
+      onClick={shareChat}
     >
-      {copied ? 'Copied' : 'Copy'}
+      {copied ? 'Link copied' : 'Share'}
     </Button>
   );
 }
@@ -215,7 +261,7 @@ function EmbeddedAIChatInner() {
                 Retry
               </Button>
             )}
-            <EmbeddedCopyChatButton />
+            <EmbeddedShareChatButton />
             <Button
               variant="secondary"
               size="small"
