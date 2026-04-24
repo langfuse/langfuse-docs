@@ -38,6 +38,17 @@ export default function SectionLayout({ children, params }: LayoutProps) {
   if (!SECTION_SLUGS.includes(section)) notFound();
   if (DEDICATED_APP_SECTIONS.has(section)) notFound();
 
-  const Wrapper = LAYOUT_WRAPPERS[SECTION_CONFIG[section].layout];
+  const meta = SECTION_CONFIG[section];
+  if (!meta) notFound();
+
+  // Non-marketing layouts should never reach here (all have hasOwnRoute: true).
+  // If this throws, a new section was misconfigured — it needs hasOwnRoute: true.
+  if (meta.layout !== "marketing") {
+    throw new Error(
+      `Section "${section}" has layout "${meta.layout}" but reached the marketing catch-all. Set hasOwnRoute: true in section-registry.`
+    );
+  }
+
+  const Wrapper = LAYOUT_WRAPPERS[meta.layout];
   return <Wrapper>{children}</Wrapper>;
 }
