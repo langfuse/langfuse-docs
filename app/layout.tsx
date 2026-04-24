@@ -10,7 +10,7 @@ import {
   SITE_DEFAULT_OG_DESCRIPTION,
 } from "@/lib/og-url";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
-import { AISearch, AISearchPanel } from "@/components/inkeep/search";
+import { AISearch } from "@/components/inkeep/search";
 
 const interVariable = Inter({
   subsets: ['latin'],
@@ -75,10 +75,7 @@ export default function RootLayout({
         {process.env.NODE_ENV === "development" && <DevAriaHiddenConsoleFilter />}
         <PostHogProvider>
           <RootProvider>
-            <AISearch>
-              {children}
-              <AISearchPanel />
-            </AISearch>
+            <AISearch>{children}</AISearch>
           </RootProvider>
         </PostHogProvider>
         {process.env.NODE_ENV === "production" && (

@@ -1114,26 +1114,7 @@ details > summary {
   }
 }
 
-/* AI Search Panel — the panel is fixed-positioned in the root layout.
-   --ai-panel-top tells it where the nav stack ends so it sits flush below.
-   Default: primary nav only (marketing / home).  docs-chrome: primary + tabs.
-   Compact docs-chrome (handbook, security): primary only on ≥md. */
-:root {
-  --ai-panel-top: var(--lf-nav-primary-height);
-}
-:root:has(.docs-chrome) {
-  --ai-panel-top: calc(var(--lf-nav-primary-height) + var(--lf-nav-docs-secondary-height, 40px));
-}
-:root:has(.docs-chrome.docs-chrome-compact) {
-  --ai-panel-top: calc(var(--lf-nav-primary-height) + var(--lf-nav-docs-secondary-height, 40px));
-}
-@media (min-width: 768px) {
-  :root:has(.docs-chrome.docs-chrome-compact) {
-    --ai-panel-top: var(--lf-nav-primary-height);
-  }
-}
-
-
+/* AI Search Panel */
 @keyframes ask-ai-open {
   from {
     translate: 100% 0;
