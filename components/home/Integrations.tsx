@@ -1,10 +1,11 @@
 "use client";
 
+import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { HomeSection } from "./HomeSection";
-import { Heading, TextHighlight, ChipCard } from "@/components/ui";
+import { Heading, TextHighlight } from "@/components/ui";
+import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { IntegrationLabel } from "@/components/ui/integration-label";
 import IconPython from "@/components/icons/python";
@@ -14,7 +15,7 @@ import { cn } from "@/lib/utils";
 // ─── Data (paths per homepage integration spec) ─────────────────────────────
 
 const languagesGroup = {
-  title: "Languages",
+  title: "Languages (via OTel)",
   items: [
     {
       label: "Python (Native SDK)",
@@ -216,14 +217,17 @@ function IntegrationGroupCard({
   title,
   items,
   className,
+  showMoreLabel,
 }: {
   title: string;
-  items: { label: string; href: string; icon?: React.ReactNode }[];
+  items: { label: string; href: string; icon?: ReactNode }[];
   className?: string;
+  showMoreLabel?: boolean;
 }) {
   return (
-    <ChipCard
+    <div
       className={cn(
+        "relative border border-line-structure bg-surface-bg rounded-[2px]",
         "integration-group flex flex-col gap-3.5 items-start p-3 sm:p-4.5",
         className
       )}
@@ -233,7 +237,7 @@ function IntegrationGroupCard({
           {title}
         </Text>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         {items.map((item) => (
           <IntegrationLabel
             key={item.label}
@@ -242,8 +246,13 @@ function IntegrationGroupCard({
             label={item.label}
           />
         ))}
+        {showMoreLabel && (
+          <span className="text-[13px] text-text-tertiary ml-1">
+            and many more…
+          </span>
+        )}
       </div>
-    </ChipCard>
+    </div>
   );
 }
 
@@ -256,15 +265,19 @@ function MarqueeRow({
   direction?: "left" | "right";
   duration?: number;
 }) {
+  const [paused, setPaused] = useState(false);
   const doubled = [...items, ...items];
   return (
     <div className="overflow-hidden w-full mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-      <motion.div
-        className="flex gap-2 w-max"
-        animate={{
-          x: direction === "left" ? ["0%", "-50%"] : ["-50%", "0%"],
+      <div
+        className={cn(
+          "flex gap-2 w-max",
+          direction === "left" ? "animate-marquee-left" : "animate-marquee-right"
+        )}
+        style={{
+          animationDuration: `${duration}s`,
+          animationPlayState: paused ? "paused" : "running",
         }}
-        transition={{ duration, repeat: Infinity, ease: "linear" }}
       >
         {doubled.map((item, i) => (
           <IntegrationLabel
@@ -272,9 +285,11 @@ function MarqueeRow({
             href={item.href}
             icon={<Image src={item.icon} alt="" width={18} height={18} />}
             label={item.label}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
           />
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -305,13 +320,15 @@ export function Integrations() {
         <IntegrationGroupCard
           title={agentFrameworksGroup.title}
           items={agentFrameworksGroup.items}
+          showMoreLabel
         />
         <IntegrationGroupCard
           title={modelProvidersGroup.title}
           items={modelProvidersGroup.items}
+          showMoreLabel
         />
 
-        <ChipCard className="integration-group sm:col-span-2 flex flex-col gap-4 items-start p-3 sm:p-4.5">
+        <div className="integration-group sm:col-span-2 flex flex-col gap-4 items-start p-3 sm:p-4.5 border border-line-structure bg-surface-bg rounded-[2px]">
           <div className="flex flex-row flex-wrap gap-y-1 gap-x-3 justify-between items-baseline w-full">
             <Text size="m" className="font-medium text-left text-text-secondary">
               80+ more integrations
@@ -321,16 +338,22 @@ export function Integrations() {
             <MarqueeRow items={marqueeRow1} direction="left" duration={40} />
             <MarqueeRow items={marqueeRow2} direction="right" duration={48} />
           </div>
-        </ChipCard>
-      </div>
-      <div className="mt-4">
-        <Link
-          href="/integrations"
-          className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
-          onClick={(e) => e.stopPropagation()}
-        >
-          Don&apos;t find your integration? Request it →
-        </Link>
+        </div>
+
+        <div className="sm:col-span-2 flex flex-row flex-wrap gap-y-2 gap-x-3 justify-between items-center p-3 sm:px-4.5 sm:py-3 border border-line-structure bg-surface-bg rounded-[2px]">
+          <Button variant="secondary" size="small" href="/integrations">
+            See all integrations
+          </Button>
+          <span className="text-[13px] text-text-secondary">
+            Don&apos;t find your integration?{" "}
+            <Link
+              href="/integrations#request-integration"
+              className="text-text-secondary hover:text-text-primary underline underline-offset-2 decoration-line-structure hover:decoration-text-tertiary transition-colors"
+            >
+              Request it →
+            </Link>
+          </span>
+        </div>
       </div>
     </HomeSection>
   );
