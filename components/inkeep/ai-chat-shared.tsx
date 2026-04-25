@@ -35,9 +35,9 @@ export function ThinkingIndicator() {
   }, []);
 
   return (
-    <div className="not-prose flex items-start gap-3" role="status" aria-label="AI is thinking">
-      <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5 mt-0.5 shrink-0" />
-      <p className="text-sm text-text-tertiary animate-pulse" aria-hidden="true">
+    <div className="not-prose flex items-center gap-2" role="status" aria-label="AI is thinking">
+      <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5 shrink-0" />
+      <p className="text-sm text-text-tertiary animate-pulse leading-5" aria-hidden="true">
         {THINKING_PHRASES[index]}
         <span className="ellipsis-dots" />
       </p>
@@ -47,7 +47,7 @@ export function ThinkingIndicator() {
 
 function AssistantLabel() {
   return (
-    <span className="inline-flex items-center gap-1.5">
+    <span className="inline-flex items-center gap-2">
       <img src="/brand-assets/icon/color/langfuse-icon.png" alt="" className="size-4" />
       <span>Langfuse Help Agent</span>
     </span>
@@ -133,8 +133,8 @@ type AIChatEmptyStateProps = {
 export function AIChatEmptyState({ onPickQuestion }: AIChatEmptyStateProps) {
   return (
     <div className="size-full flex flex-col justify-start gap-4 not-prose">
-      <div className="flex items-start gap-3">
-        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-6 shrink-0" />
+      <div className="flex items-start gap-2">
+        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5 mt-0.5 shrink-0" />
         <Text size="s" className="text-text-primary text-left mb-2">
           Hi! I&apos;m Langfuse&apos;s AI assistant trained on documentation, help articles, and other
           content. How can I help you today?
