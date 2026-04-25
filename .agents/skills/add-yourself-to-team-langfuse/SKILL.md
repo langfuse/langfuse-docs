@@ -1,6 +1,6 @@
 ---
 name: add-yourself-to-team-langfuse
-description: Add a new team member to all relevant Langfuse team pages. Use when onboarding a new employee who needs to appear on the team/press pages.
+description: Add a new team member to Langfuse's canonical team data and shared team table. Use when onboarding a new employee who needs to appear on the website team, press, about, careers, or handbook pages.
 allowed-tools: Read, Edit
 ---
 
@@ -13,9 +13,9 @@ Add a new team member to Langfuse. Ask the user for the following information be
 5. **X/Twitter handle** (e.g. from https://x.com/handle) — optional
 6. **Profile photo** — remind them to add it to `public/images/people/<key>.jpg`
 
-Once you have the information, update the following 3 files:
+Once you have the information, update the following source files:
 
---- 
+---
 
 ### 1. `data/authors.json`
 
@@ -37,22 +37,27 @@ Add a new entry at the end (before the closing `}`). Use a lowercase, no-special
 
 ### 2. `components-mdx/team-members.mdx`
 
-Append a new list item at the end:
+This is the canonical website team list. It is rendered by the press, about,
+careers, and handbook team pages. Append a new table row at the end:
 
 ```md
-- <Full Name>, [@<twitter>](https://x.com/<twitter>), [GitHub](https://github.com/<github>), [LinkedIn](https://www.linkedin.com/in/<linkedin>/)
+| **<Full Name>** | <Role> | [Twitter](https://x.com/<twitter>), [LinkedIn](https://www.linkedin.com/in/<linkedin>/), [GitHub](https://github.com/<github>) |
 ```
 
 Omit any social links that were not provided.
 
 ---
 
-### 3. `content/marketing/press.mdx`
+### 3. Confirm shared usage
 
-Append a new row to the team table (after the last `|` row):
+Do **not** add team rows directly to any other
+page. Those pages should import and render the canonical component:
 
-```md
-| **<Full Name>** | <Role> | [Twitter](https://x.com/<twitter>)<br/>[LinkedIn](https://www.linkedin.com/in/<linkedin>/)<br/>[GitHub](https://github.com/<github>) |
+```mdx
+import TeamMembers from "@/components-mdx/team-members.mdx";
+
+<TeamMembers />
 ```
 
-Omit any social links that were not provided.
+If a page has a hand-written team table or list, replace it with the shared
+`TeamMembers` import instead of adding another copy. Please do a quick search for some team members to confirm that there are no copies of this table.
