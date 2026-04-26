@@ -282,7 +282,7 @@ function WhyJapan() {
         {pillars.map((p) => (
           <div
             key={p.eyebrow}
-            className="japan-chip-card flex flex-col min-h-[460px]"
+            className="japan-chip-card flex flex-col min-h-[520px]"
           >
             <div className="px-5 pt-5 pb-3.5">
               <div className="flex items-baseline justify-between mb-2.5">
@@ -298,7 +298,7 @@ function WhyJapan() {
                 {p.body}
               </div>
             </div>
-            <div className="flex-1 relative border-t border-line-structure bg-surface-bg min-h-[200px]">
+            <div className="flex-1 relative border-t border-line-structure bg-surface-bg min-h-[260px]">
               <PillarVisual kind={p.visual} />
             </div>
           </div>
@@ -532,10 +532,11 @@ LANGFUSE_BASE_URL="https://jp.cloud.langfuse.com"`}
         </div>
 
         <div
-          className={`${cornerBoxBase} bg-[#222220] !border-[#3a3a35] p-0 overflow-hidden`}
+          className={`${cornerBoxBase} !border-[#3a3a35] p-0 overflow-hidden`}
+          style={{ background: "#222220" }}
         >
-          <div className="flex border-b border-[#3a3a35] bg-[#1b1b18]">
-            <div className="px-3.5 py-2.5 bg-[#222220] font-mono text-[11px] text-[#f6f6f3] border-r border-[#3a3a35]">
+          <div className="flex border-b border-[#3a3a35]" style={{ background: "#1b1b18" }}>
+            <div className="px-3.5 py-2.5 font-mono text-[11px] text-[#f6f6f3] border-r border-[#3a3a35]" style={{ background: "#222220" }}>
               prompt.txt
             </div>
             <div className="flex-1 border-r border-[#3a3a35]" />
@@ -543,14 +544,11 @@ LANGFUSE_BASE_URL="https://jp.cloud.langfuse.com"`}
               copy
             </button>
           </div>
-          <pre className="m-0 p-5 font-mono text-[12.5px] leading-[1.75] text-[#f6f6f3] whitespace-pre-wrap">
+          <pre className="m-0 p-5 font-mono text-[12.5px] leading-[1.75] whitespace-pre-wrap" style={{ color: "#ffffff" }}>
             <span style={{ color: "#8a877f" }}># そのままエージェントに貼る:</span>
             {"\n"}
-            <span style={{ color: "#ffffff", fontWeight: 500 }}>
-              Add Langfuse tracing to this app.
-            </span>
-            {"\n"}
-            <span style={{ color: "#ffffff", fontWeight: 500 }}>Use</span>{" "}
+            Add Langfuse tracing to this app.{"\n"}
+            Use{" "}
             <span style={{ color: "#9ac6ff" }}>LANGFUSE_BASE_URL</span>=
             <span style={{ color: "#e2b73b" }}>
               https://jp.cloud.langfuse.com
@@ -604,7 +602,7 @@ function Customers() {
               <img
                 src={c.logo}
                 alt={c.name}
-                className="max-h-9 max-w-[80%] w-auto object-contain opacity-80"
+                className={`w-auto object-contain opacity-80 ${c.name === "LayerX" ? "max-h-7 max-w-[65%]" : "max-h-9 max-w-[80%]"}`}
               />
             ) : (
               <span className="font-analog text-[18px] text-text-secondary tracking-[.01em] font-medium">
@@ -675,7 +673,7 @@ function Customers() {
 function Compliance() {
   return (
     <section className="japan-section pt-[120px] pb-10">
-      <div className="grid gap-4 md:grid-cols-[1fr_1.6fr] items-stretch">
+      <div className="grid gap-4 md:grid-cols-[1fr_2fr] items-stretch">
         <div
           className={`${cornerBoxBase} p-7 relative overflow-hidden flex flex-col gap-5`}
         >
