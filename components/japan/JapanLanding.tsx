@@ -548,15 +548,12 @@ function Customers() {
       >
         {(
           [
-            { name: "LayerX", logo: null },
-            { name: "freee", logo: null },
-            { name: "Canva", logo: "/images/customers/canva/Canva-black.png" },
-            {
-              name: "Khan Academy",
-              logo: "/images/customers/picing-logos/khanacademy.png",
-            },
-            { name: "SumUp", logo: "/images/customers/picing-logos/sumup.png" },
-            { name: "Twilio", logo: "/images/customers/picing-logos/twilio.png" },
+            { name: "LayerX", logo: "/images/japan-logos/layerx.svg" },
+            { name: "freee", logo: "/images/japan-logos/freee.svg" },
+            { name: "Canva", logo: "/images/japan-logos/canva.svg" },
+            { name: "Khan Academy", logo: "/images/japan-logos/khan.svg" },
+            { name: "SumUp", logo: "/images/japan-logos/sumup.svg" },
+            { name: "Twilio", logo: "/images/japan-logos/twilio.svg" },
           ] as const
         ).map((c, i) => (
           <div
