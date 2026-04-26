@@ -10,7 +10,7 @@ export function Banner() {
       <Link href="/japan">
         <span className="sm:hidden">Langfuse Cloud Japan is live →</span>
         <span className="hidden sm:inline">
-          Langfuse Cloud Japan is live – data stays in Tokyo →
+          Langfuse Cloud Japan is live →
         </span>
       </Link>
     </FumadocsBanner>
