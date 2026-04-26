@@ -64,8 +64,7 @@ export function buildSectionMetadata(
   const ogImage = buildOgImageUrl({
     title: seoTitle,
     description: page.data.description,
-    section: sectionTitle,
-    staticOgImage: pageData.ogImage,
+staticOgImage: pageData.ogImage,
   });
   const ogVideoUrl = pageData.ogVideo
     ? pageData.ogVideo.startsWith("http")
