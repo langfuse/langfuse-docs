@@ -4,13 +4,13 @@ import { Banner as FumadocsBanner } from "fumadocs-ui/components/banner";
 export function Banner() {
   return (
     <FumadocsBanner
-      id="fd-top-banner"
+      id="fd-top-banner-japan"
       className="bg-black text-white [&_a]:text-white [&_button]:text-white"
     >
-      <Link href="/docs/v4">
-        <span className="sm:hidden">Langfuse just got faster →</span>
+      <Link href="/japan">
+        <span className="sm:hidden">Langfuse Cloud Japan is live →</span>
         <span className="hidden sm:inline">
-          Langfuse just got faster – read about Fast Preview (v4) →
+          Langfuse Cloud Japan is live – data stays in Tokyo →
         </span>
       </Link>
     </FumadocsBanner>
