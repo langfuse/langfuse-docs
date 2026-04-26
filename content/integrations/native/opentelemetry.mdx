@@ -126,7 +126,7 @@ If you use a Collector that uses the OpenTelemetry SDK to export traces, you can
 
 ```bash
 OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
-# OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel" # 🇺🇸 US data region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel
 # OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:3000/api/public/otel" # 🏠 Local deployment (>= v3.22.0)
 
 OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
@@ -153,7 +153,7 @@ If your collector requires signal-specific environment variables, the trace endp
 
 ```bash
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v1/traces" # EU data region
-# OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel/v1/traces" # US data region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel
 ```
 
 </Callout>
@@ -292,7 +292,7 @@ processors:
 exporters:
   otlphttp/langfuse:
     endpoint: "https://cloud.langfuse.com/api/public/otel" # EU data region
-    # endpoint: "https://us.cloud.langfuse.com/api/public/otel" # US data region
+    # Other regions: US https://us.cloud.langfuse.com/api/public/otel, Japan https://jp.cloud.langfuse.com/api/public/otel, HIPAA https://hipaa.cloud.langfuse.com/api/public/otel
     headers:
       Authorization: "Basic ${AUTH_STRING}" # Previously encoded API keys
       x-langfuse-ingestion-version: "4"
@@ -333,7 +333,7 @@ processors:
 exporters:
   otlphttp/langfuse:
     endpoint: "https://cloud.langfuse.com/api/public/otel" # EU data region
-    # endpoint: "https://us.cloud.langfuse.com/api/public/otel" # US data region
+    # Other regions: US https://us.cloud.langfuse.com/api/public/otel, Japan https://jp.cloud.langfuse.com/api/public/otel, HIPAA https://hipaa.cloud.langfuse.com/api/public/otel
     headers:
       Authorization: "Basic ${AUTH_STRING}" # Previously encoded API keys
       x-langfuse-ingestion-version: "4"

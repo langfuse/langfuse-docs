@@ -41,7 +41,7 @@ import os
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Configure OpenTelemetry endpoint & headers
 os.environ["OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"] = "http/protobuf"
@@ -56,7 +56,7 @@ vLLM automatically exposes OpenTelemetry spans when configured. The Langfuse cli
 ```python
 from vllm import LLM, SamplingParams
 
-langfuse_host = "https://cloud.langfuse.com"  # or https://us.cloud.langfuse.com
+langfuse_host = "https://cloud.langfuse.com"  # Other regions: https://us.cloud.langfuse.com (US), https://jp.cloud.langfuse.com (Japan), https://hipaa.cloud.langfuse.com (HIPAA)
 otlp_traces_endpoint = f"{langfuse_host}/api/public/otel/v1/traces"
 
 # --- vLLM ---

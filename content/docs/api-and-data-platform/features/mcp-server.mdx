@@ -28,7 +28,7 @@ Alternatively you can also work with the [Langfuse Agent Skill](/docs/api-and-da
 
 The Langfuse MCP server uses a stateless architecture where each API key is scoped to a specific project. Use the following configuration to connect to the MCP server:
 
-<Tabs items={["Cloud EU", "Cloud US", "HIPAA US", "Self-Hosted"]}>
+<Tabs items={["Cloud EU", "Cloud US", "Cloud Japan", "HIPAA US", "Self-Hosted"]}>
 
 <Tab>
 
@@ -41,6 +41,14 @@ The Langfuse MCP server uses a stateless architecture where each API key is scop
 <Tab>
 
 - Endpoint: `https://us.cloud.langfuse.com/api/public/mcp`
+- Transport: `streamableHttp`
+- Authentication: Basic Auth via authorization header
+
+</Tab>
+
+<Tab>
+
+- Endpoint: `https://jp.cloud.langfuse.com/api/public/mcp`
 - Transport: `streamableHttp`
 - Authentication: Basic Auth via authorization header
 
@@ -138,6 +146,10 @@ The MCP server provides five tools for comprehensive prompt management.
    claude mcp add --transport http langfuse https://us.cloud.langfuse.com/api/public/mcp \
        --header "Authorization: Basic {your-base64-token}"
 
+   # Langfuse Cloud (Japan)
+   claude mcp add --transport http langfuse https://jp.cloud.langfuse.com/api/public/mcp \
+       --header "Authorization: Basic {your-base64-token}"
+
    # Langfuse Cloud (HIPAA)
    claude mcp add --transport http langfuse https://hipaa.cloud.langfuse.com/api/public/mcp \
        --header "Authorization: Basic {your-base64-token}"
@@ -162,7 +174,7 @@ The MCP server provides five tools for comprehensive prompt management.
 3. Click **"Add Custom MCP"**
 4. Add your Langfuse MCP server configuration, replace `{your-base64-token}` with your encoded credentials:
 
-<Tabs items={["Cloud EU", "Cloud US", "HIPAA US", "Self-Hosted"]}>
+<Tabs items={["Cloud EU", "Cloud US", "Cloud Japan", "HIPAA US", "Self-Hosted"]}>
 
 <Tab>
 
@@ -190,6 +202,24 @@ The MCP server provides five tools for comprehensive prompt management.
     "servers": {
       "langfuse": {
         "url": "https://us.cloud.langfuse.com/api/public/mcp",
+        "headers": {
+          "Authorization": "Basic {your-base64-token}"
+        }
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="mcp.json" /{your-base64-token}/
+{
+  "mcp": {
+    "servers": {
+      "langfuse": {
+        "url": "https://jp.cloud.langfuse.com/api/public/mcp",
         "headers": {
           "Authorization": "Basic {your-base64-token}"
         }
@@ -248,6 +278,7 @@ The MCP server provides five tools for comprehensive prompt management.
 - Endpoint: `/api/public/mcp`
   - EU: `https://cloud.langfuse.com/api/public/mcp`
   - US: `https://us.cloud.langfuse.com/api/public/mcp`
+  - Japan: `https://jp.cloud.langfuse.com/api/public/mcp`
   - HIPAA: `https://hipaa.cloud.langfuse.com/api/public/mcp`
   - Self-Hosted: `https://your-domain.com/api/public/mcp`
 - Transport: `streamableHttp`

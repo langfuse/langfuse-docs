@@ -1,0 +1,61 @@
+---
+title: "Langfuse Cloud 日本リージョンを開始しました"
+description: "Langfuse Cloud 日本リージョンを公開しました。LLM のトレースや評価データを日本国内に保管したいチーム向けの専用クラウドリージョンです。"
+date: 2026/04/27
+tag: announcement
+author: Marc, Clemens, Max
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { BlogLanguageSwitcher } from "@/components/blog/BlogLanguageSwitcher";
+
+<BlogLanguageSwitcher
+  current="ja"
+  languages={[
+    { code: "en", label: "English", href: "/blog/2026-04-27-langfuse-cloud-japan" },
+    { code: "ja", label: "日本語", href: "/blog/2026-04-27-langfuse-cloud-japan-jp" },
+  ]}
+/>
+
+<BlogHeader
+  title="Langfuse Cloud 日本リージョンを開始しました"
+  description="LLM のトレースや評価データを日本国内に保管したいチーム向けの専用クラウドリージョンです。"
+  date="2026年4月27日"
+  authors={["marcklingen", "clemensrawert", "maxdeichmann"]}
+/>
+
+オープンソースに国境はありません。日本は、Langfuse が最初に大きく広まった市場のひとつです（[X で "langfuse" を検索してみてください](https://x.com/search?q=langfuse&src=typed_query&f=live)）。こちらから本格的にマーケティングを始める前から、日本のチームは Langfuse を見つけ、セルフホストして開発を進めてくれていました。
+
+本日、**[Langfuse Cloud Japan](/japan)** を公開します。LLM の観測データを日本国内に保管したいチーム向けに、日本国内でホストする専用クラウドリージョンです。
+
+## なぜ日本リージョンなのか
+
+現在、日本には 100 社を大きく超えるお客様がいます。その多くは Langfuse Cloud の EU / US リージョン、またはセルフホストで運用しています。それで十分なチームもたくさんありますが、そうでないケースもあります。データレジデンシー要件、コンプライアンス、法的制約、あるいは「単純にセルフホストはしたくない」といった事情です。そしてもちろん、自分のリージョンで動かせるなら、そのほうが嬉しいですよね。
+
+Langfuse Cloud Japan はこれを解決します。トレース、評価、プロンプトがすべて日本国内に留まります。レイテンシーも重要です。ダブリンやオレゴンではなく東京を経由することで、日本や APAC 地域のアプリケーション・ユーザーのラウンドトリップ時間が大幅に短くなります。高スループットなトレーシング用途では、この差はすぐに効いてきます。なお、機能は一切削っていません。Langfuse プラットフォームのフル機能がそのまま使えます。
+
+日本のチームは以前から Langfuse の上でプロダクトを作ってくれています。LayerX は、バクラクのバックオフィス AI エージェントの評価とプロンプト実験に Langfuse を使っています。freee は会計・人事プロダクト全体で Langfuse を活用しています。Langfuse Cloud Japan によって、こうしたチームがデータを国内に留めたまま、プラットフォームの機能をすべて使い続けられるようになります。
+
+Langfuse の基盤となっているデータベースは ClickHouse です（[ClickHouse は今年 1 月に Langfuse を買収しました](/blog/joining-clickhouse)）。新しい日本リージョンは、`ap-northeast-1`（東京）の ClickHouse 上で稼働します。
+
+ただし、インフラはあくまで一部です。ClickHouse として、日本法人の設立、カントリーマネージャーとしての金古さんの着任、そして東京を拠点とする GTM とテクニカルチームの体制が整いました。日本市場への採用と投資も積極的に進めています。つまり Langfuse Cloud Japan は、現地メンバーを伴い、日本語で販売・オンボーディング・サポートできる体制とセットで提供されます。
+
+## Langfuse Japan を支えるコミュニティ
+
+先週金曜日には、5 回目の Langfuse Night（コミュニティミートアップ）を東京で開催しました。約 100 名が集まってくれました。本格参入前の市場としては、相当な人数です。正直、まだ実感がわかないほどです。日本のコミュニティは、こちらが提供できている以上のスピードで進んでくれていて、だからこそ私たちもこの市場にもっと投資したいと思っています。
+
+現地拠点がなかった時期にも、日本のコミュニティが自然に育ってきたのは本当にありがたいことでした。
+
+[ガオ株式会社](https://gao-ai.com)の Kamon Nobuchika さんには、過去 18 ヶ月にわたって日本で唯一のリセラーとして、顧客対応とコミュニティづくりを並行して進めていただきました。今ここに見えている景色の多くは、彼の仕事の上に成り立っています。
+
+## 使い始める
+
+- [Langfuse Cloud 日本リージョン](/japan)
+- [Getting Started（ドキュメント）](/docs)
+- [Langfuse Cloud Japan への移行](/guides/cookbook/example_data_migration-jp)
+- [コンプライアンスとデータレジデンシー](/security)
+- [日本向けメーリングリスト](https://langfuse.app.n8n.cloud/form/b6fd623f-0d23-43ba-9c69-077675fe9f62) — リリース情報、日本でのイベント、日本向けのお知らせをお届けします
+
+## これからの日本への取り組み
+
+日本のお客様とコミュニティに対しては、これからも投資を続けていきます。イベントの拡充、日本語サポートの強化、そして日本リージョンの継続的な改善です。EU / US リージョンをお使いで[移行](/guides/cookbook/example_data_migration-jp)を検討している方、あるいは日本での要件を踏まえてこれから Langfuse を評価する方は、ぜひ[お気軽にご連絡ください](/talk-to-us)。日本語で対応できます。セットアップのお手伝いを楽しみにしています。

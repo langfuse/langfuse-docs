@@ -8,7 +8,7 @@ description: All Langfuse data and features are available via the API. Follow th
 
 Langfuse is open and meant to be extended via custom workflows and integrations. All Langfuse data and features are available via the API.
 
-<Tabs items={["Path", "Cloud US", "Cloud EU", "HIPAA US"]}>
+<Tabs items={["Path", "Cloud US", "Cloud EU", "Cloud Japan", "HIPAA US"]}>
 
 <Tab>
 
@@ -28,6 +28,13 @@ https://us.cloud.langfuse.com/api/public
 
 ```
 https://cloud.langfuse.com/api/public
+```
+
+</Tab>
+<Tab>
+
+```
+https://jp.cloud.langfuse.com/api/public
 ```
 
 </Tab>
@@ -160,7 +167,10 @@ import com.langfuse.client.core.LangfuseClientApiException;
 
 LangfuseClient client = LangfuseClient.builder()
   .url("https://cloud.langfuse.com") // 🇪🇺 EU data region
-  // .url("https://us.cloud.langfuse.com") // 🇺🇸 US data region
+  // Other Langfuse data regions:
+  // .url("https://us.cloud.langfuse.com") // 🇺🇸 US
+  // .url("https://jp.cloud.langfuse.com") // 🇯🇵 Japan
+  // .url("https://hipaa.cloud.langfuse.com") // ⚕️ HIPAA
   // .url("http://localhost:3000") // 🏠 Local deployment
   .credentials("pk-lf-...", "sk-lf-...")
   .build();
