@@ -1131,6 +1131,16 @@ details > summary {
     width: 0px;
   }
 }
+.ellipsis-dots::after {
+  content: '';
+  animation: ellipsis 1.4s steps(4, end) infinite;
+}
+@keyframes ellipsis {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
 
 /*
  * content-width-type: docs — lock the sibling footer to 680px at xl,

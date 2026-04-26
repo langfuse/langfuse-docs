@@ -58,6 +58,7 @@ const menuItems: { heading: string; items: { name: string; href: string }[] }[] 
     items: [
       { name: "About Us", href: "/about" },
       { name: "Careers", href: "/careers" },
+      { name: "Handbook", href: "/handbook" },
       { name: "Press", href: "/press" },
       { name: "Security", href: "/security" },
       { name: "Support", href: "/support" },

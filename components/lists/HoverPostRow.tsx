@@ -28,7 +28,8 @@ export function HoverPostRow({
 }) {
   const [hovered, setHovered] = useState(false);
 
-  const showPreview = previewOnHover && !!previewImage && hovered;
+  const hasHoverPreview = previewOnHover && !!previewImage;
+  const showPreview = hasHoverPreview && hovered;
 
   return (
     <Link
@@ -44,7 +45,7 @@ export function HoverPostRow({
       <div
         className={cn(
           "flex-1 min-w-0 flex flex-col gap-1.5",
-          previewOnHover ? "md:group-hover:mr-[136px]" : null
+          hasHoverPreview ? "md:group-hover:mr-[136px]" : null
         )}
       >
         <Text
@@ -76,7 +77,7 @@ export function HoverPostRow({
         <div
           className={cn(
             "flex md:shrink-0 md:flex-col md:items-end gap-1 md:gap-0.5 pt-0.5",
-            previewOnHover ? "md:group-hover:invisible" : null
+            hasHoverPreview ? "md:group-hover:invisible" : null
           )}
         >
           {metaRight}
@@ -97,4 +98,3 @@ export function HoverPostRow({
     </Link>
   );
 }
-
