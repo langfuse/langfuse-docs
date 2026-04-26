@@ -543,16 +543,20 @@ LANGFUSE_BASE_URL="https://jp.cloud.langfuse.com"`}
               copy
             </button>
           </div>
-          <pre className="m-0 p-5 font-mono text-[12.5px] leading-[1.75] text-[#e2e2dc] whitespace-pre-wrap">
-            <span style={{ color: "#6a6a62" }}># そのままエージェントに貼る:</span>
+          <pre className="m-0 p-5 font-mono text-[12.5px] leading-[1.75] text-[#f6f6f3] whitespace-pre-wrap">
+            <span style={{ color: "#8a877f" }}># そのままエージェントに貼る:</span>
             {"\n"}
-            Add Langfuse tracing to this app.{"\n"}
-            Use <span style={{ color: "#9ac6ff" }}>LANGFUSE_BASE_URL</span>=
+            <span style={{ color: "#ffffff", fontWeight: 500 }}>
+              Add Langfuse tracing to this app.
+            </span>
+            {"\n"}
+            <span style={{ color: "#ffffff", fontWeight: 500 }}>Use</span>{" "}
+            <span style={{ color: "#9ac6ff" }}>LANGFUSE_BASE_URL</span>=
             <span style={{ color: "#e2b73b" }}>
               https://jp.cloud.langfuse.com
             </span>
             {"\n\n"}
-            <span style={{ color: "#6a6a62" }}># 参照コンテキスト:</span>
+            <span style={{ color: "#8a877f" }}># 参照コンテキスト:</span>
             {"\n"}
             <span style={{ color: "#c7a8ff" }}>https://langfuse.com/llms.txt</span>
             {"\n"}
@@ -579,7 +583,7 @@ function Customers() {
       </div>
 
       <div
-        className={`${cornerBoxBase} grid grid-cols-3 md:grid-cols-6 mb-4`}
+        className={`${cornerBoxBase} japan-logo-grid grid grid-cols-3 md:grid-cols-6 mb-4`}
       >
         {(
           [
@@ -590,18 +594,10 @@ function Customers() {
             { name: "Intuit", logo: "/images/japan-logos/intuit.svg" },
             { name: "Twilio", logo: "/images/japan-logos/twilio.svg" },
           ] as const
-        ).map((c, i) => (
+        ).map((c) => (
           <div
             key={c.name}
             className="px-4 py-9 flex items-center justify-center"
-            style={{
-              borderRight:
-                (i + 1) % 3 !== 0
-                  ? "1px solid var(--line-structure)"
-                  : "none",
-              borderTop:
-                i >= 3 ? "1px solid var(--line-structure)" : "none",
-            }}
           >
             {c.logo ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -679,7 +675,7 @@ function Customers() {
 function Compliance() {
   return (
     <section className="japan-section pt-[120px] pb-10">
-      <div className="grid gap-4 md:grid-cols-[1fr_1.2fr] items-stretch">
+      <div className="grid gap-4 md:grid-cols-[1fr_1.6fr] items-stretch">
         <div
           className={`${cornerBoxBase} p-7 relative overflow-hidden flex flex-col gap-5`}
         >
@@ -833,7 +829,7 @@ function Migration() {
           <div className="mt-4">
             <Link
               className="japan-btn japan-btn-primary japan-btn-small"
-              href="/guides/cookbook/example_data_migration"
+              href="/guides/cookbook/example_data_migration-jp"
             >
               <span>移行クックブック</span>
               <span className="japan-kbd">↗</span>
@@ -910,7 +906,7 @@ function FAQ() {
           日本リージョンにプロジェクトを作る → 元のプロジェクトからデータをエクスポート → インポート → アプリのbase URLを切り替える、の4ステップです。詳しい手順は{" "}
           <Link
             className="japan-link"
-            href="/guides/cookbook/example_data_migration"
+            href="/guides/cookbook/example_data_migration-jp"
           >
             移行クックブック
           </Link>{" "}

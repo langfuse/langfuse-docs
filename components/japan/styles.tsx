@@ -161,6 +161,23 @@ export function JapanStyles() {
       }
       .japan-page .jp-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--callout-success); box-shadow: 0 0 0 3px rgba(83,138,46,0.12); }
 
+      /* Logo grid borders — work for both 3-col (mobile) and 6-col (md+) layouts */
+      .japan-logo-grid > div {
+        border-right: 1px solid var(--line-structure);
+        border-bottom: 1px solid var(--line-structure);
+      }
+      .japan-logo-grid > div:nth-child(3n) { border-right: none; }
+      .japan-logo-grid > div:nth-last-child(-n+3) { border-bottom: none; }
+      @media (min-width: 768px) {
+        .japan-logo-grid > div {
+          border-bottom: none;
+          border-right: 1px solid var(--line-structure);
+        }
+        .japan-logo-grid > div:nth-child(3n) { border-right: 1px solid var(--line-structure); }
+        .japan-logo-grid > div:nth-child(6n) { border-right: none; }
+        .japan-logo-grid > div:last-child { border-right: none; }
+      }
+
       /* Chip card */
       .japan-chip-card {
         position: relative; background: var(--surface-1);
