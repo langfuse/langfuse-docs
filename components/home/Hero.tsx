@@ -20,7 +20,7 @@ export function Hero() {
           <span className="inline-flex items-center gap-1.5">
             <span className="font-mono text-[10px] uppercase tracking-[.08em] text-text-tertiary">New</span>
             <span className="w-px h-3 bg-line-structure" />
-            <span className="font-semibold">Langfuse Cloud Japan — 東京リージョン稼働中</span>
+            <span className="font-semibold">Langfuse Cloud Japan — 東京リージョン公開</span>
           </span>
           <span className="text-text-tertiary group-hover:text-text-secondary transition-colors">→</span>
         </Link>

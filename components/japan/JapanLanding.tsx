@@ -106,7 +106,7 @@ function Hero() {
             すべてをAWSとClickHouseの
             <b className="text-text-primary font-medium">東京リージョン</b>
             でホスト。
-            世界中のチームが使っているのと同じLangfuse Cloudを、データを日本に置いたまま使えます。
+            世界中で使われているLangfuse Cloudを、データを日本に置いたまま動かせます。
           </p>
           <p className="font-analog italic text-[15px] text-text-tertiary m-0 -tracking-[0.005em]">
             Langfuse Cloud Japan — LLM observability, hosted in Tokyo.
@@ -257,7 +257,7 @@ function WhyJapan() {
     {
       kanji: "信頼",
       eyebrow: "エンタープライズ対応",
-      title: "規制業界にもそのまま持ち込めます。",
+      title: "規制要件のあるチームでも、そのまま使えます。",
       body: "SOC 2 Type II、ISO 27001、GDPR準拠のコントロール。サインアップ時にDPAへ同意、サブプロセッサーも全件公開しています。",
       visual: "compliance" as const,
     },
@@ -653,7 +653,7 @@ function Customers() {
             GAO, Inc. <span className="text-text-tertiary text-[18px]">（ガオ）</span>
           </div>
           <p className="japan-body-sm m-0">
-            日本国内の公式リセラー兼導入パートナー。日本円での購買とJPYインボイス、日本語でのオンボーディングとサポートを提供します。
+            日本での公式リセラー / 導入パートナー。日本円・JPYインボイスでの購買、日本語でのオンボーディング・サポートに対応しています。
           </p>
           <div className="flex-1" />
           <div className="flex flex-wrap gap-1.5">
@@ -920,7 +920,7 @@ function FAQ() {
           <Link className="japan-link" href="https://gao-ai.com">
             GAO, Inc.
           </Link>{" "}
-          経由でご利用いただけます。
+          経由でも対応しています。
         </p>
       ),
     },

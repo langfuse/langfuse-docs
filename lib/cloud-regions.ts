@@ -9,7 +9,7 @@ export const cloudRegions = {
   },
   jp: {
     url: "https://jp.cloud.langfuse.com",
-    label: "Japan region (beta)",
+    label: "Japan region",
   },
   hipaa: {
     url: "https://hipaa.cloud.langfuse.com",

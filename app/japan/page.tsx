@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { JapanLanding } from "@/components/japan/JapanLanding";
 
 export const metadata: Metadata = {
-  title: "Langfuse Cloud Japan — 東京リージョンでホストされるLLMオブザーバビリティ",
+  title: "Langfuse Cloud Japan — 東京でホストされるLLMオブザーバビリティ",
   description:
     "Langfuse Cloud Japan — LLMのトレース、プロンプト管理、評価、メトリクスを、AWS ap-northeast-1（東京）とClickHouseで運用。",
   alternates: {

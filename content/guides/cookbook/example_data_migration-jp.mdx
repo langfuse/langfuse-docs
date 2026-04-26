@@ -1,15 +1,16 @@
 ---
 title: Langfuseプロジェクト間のデータ移行 (Python SDK v4)
 sidebarTitle: データ移行スクリプト
-description: Python SDK v4を使って、Langfuseプロジェクト間でオブザベーション、スコア、プロンプト、データセット、カスタムモデル、スコア設定、アノテーションキューを移行します。
+description: Python SDK v4を使って、Langfuseプロジェクト間でオブザベーション、スコア、プロンプト、データセット、カスタムモデル、スコア設定を移行します。
 ---
 
 # Langfuseプロジェクト間のデータ移行 (Python SDK v4)
 
 このノートブックでは、**Langfuse Python SDK v4** を使って、あるLangfuseプロジェクトから別のLangfuseプロジェクトへデータを移行します。
 
-> [!IMPORTANT]
-> データを移行先のLangfuseプロジェクトへ取り込むと、新しいインジェストイベントとして課金対象になります。つまり、移行するオブザベーション数に応じて Langfuse のインジェスト料金が発生します。
+<Callout type="warning">
+データを移行先のLangfuseプロジェクトへ取り込むと、新しいインジェストイベントとして課金対象になります。つまり、移行するオブザベーション数に応じて Langfuse のインジェスト料金が発生します。
+</Callout>
 
 よくあるユースケース:
 - クラウドリージョン間の移行 (US ↔ EU ↔ JP ↔ HIPAA)
@@ -42,7 +43,7 @@ import os
 # --- 移行元 (SOURCE) プロジェクトの認証情報 ---
 os.environ["LANGFUSE_SOURCE_PUBLIC_KEY"] = "pk-lf-.."
 os.environ["LANGFUSE_SOURCE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_SOURCE_HOST"] = "https://cloud.langfuse.com"  # 例: US クラウド
+os.environ["LANGFUSE_SOURCE_HOST"] = "https://cloud.langfuse.com"  # 例: EU クラウド
 
 # --- 移行先 (DESTINATION) プロジェクトの認証情報 ---
 os.environ["LANGFUSE_DEST_PUBLIC_KEY"] = "pk-lf-.."
@@ -205,7 +206,7 @@ print(f"時間フィルタ: from={FROM_TS}  to={TO_TS}")
 
 ## 1. スコア設定 (Score Configs)
 
-スコア設定は最初に移行しておく必要があります。こうすると、移行先で作成するスコアやアノテーションキューが ID で参照できるようになります。あとのセクションで参照をつなぎ直すために `config_id_map` を作っておきます。
+スコア設定は最初に移行しておく必要があります。こうすると、移行先で作成するスコアが ID で参照できるようになります。あとのセクションで参照をつなぎ直すために `config_id_map` を作っておきます。
 
 
 ```python
