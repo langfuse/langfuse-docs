@@ -625,7 +625,7 @@ function Customers() {
             </div>
             <div className="flex-1">
               <div className="text-[13.5px] text-text-primary font-medium">
-                LayerX — バクラク事業部 omori氏
+                LayerX バクラク事業部 AI-UXチーム / omori (@onsd_)
               </div>
               <div className="text-[12px] text-text-tertiary font-mono">
                 本番環境でLLMシステムを運用
