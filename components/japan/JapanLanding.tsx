@@ -1,8 +1,57 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { JapanStyles } from "./styles";
 
 const cornerBoxBase =
   "relative bg-surface-bg border border-line-structure japan-corners";
+
+function CodeBox({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
+  };
+  return (
+    <div className="rounded-[2px] font-mono text-[11px] leading-[1.65] bg-[#222220] border border-[#3a3a35] text-[#e2e2dc] overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#3a3a35] bg-[#1b1b18]">
+        <span className="font-mono text-[10px] text-[#8a877f] uppercase tracking-[.08em]">
+          .env
+        </span>
+        <button
+          type="button"
+          onClick={onCopy}
+          className="px-1.5 py-0.5 bg-transparent border-0 text-[#8a877f] hover:text-[#e2e2dc] font-mono text-[10px] cursor-pointer"
+        >
+          {copied ? "copied" : "copy"}
+        </button>
+      </div>
+      <div className="p-3 overflow-auto">
+        <div style={{ color: "#9ac6ff" }}>LANGFUSE_PUBLIC_KEY</div>
+        <div>
+          {"  = "}
+          <span style={{ color: "#c7e6b0" }}>"pk-lf-..."</span>
+        </div>
+        <div style={{ color: "#9ac6ff" }}>LANGFUSE_SECRET_KEY</div>
+        <div>
+          {"  = "}
+          <span style={{ color: "#c7e6b0" }}>"sk-lf-..."</span>
+        </div>
+        <div style={{ color: "#9ac6ff" }}>LANGFUSE_BASE_URL</div>
+        <div>
+          {"  = "}
+          <span style={{ color: "#e2b73b" }}>
+            "https://jp.cloud.langfuse.com"
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Hero() {
   return (
@@ -263,7 +312,7 @@ function PillarVisual({ kind }: { kind: "region" | "parity" | "compliance" }) {
   if (kind === "region") {
     const rows: [string, string, boolean][] = [
       ["ap-northeast-1", "東京", true],
-      ["us-east-1", "バージニア北部", false],
+      ["us-west-2", "オレゴン", false],
       ["eu-west-1", "アイルランド", false],
     ];
     return (
@@ -336,7 +385,7 @@ function PillarVisual({ kind }: { kind: "region" | "parity" | "compliance" }) {
     );
   }
   return (
-    <div className="absolute inset-0 p-5 flex flex-col gap-2">
+    <div className="absolute inset-0 px-5 py-6 flex flex-col gap-3">
       {[
         ["SOC 2 Type II", "年次監査"],
         ["ISO 27001", "認証取得済み"],
@@ -345,14 +394,14 @@ function PillarVisual({ kind }: { kind: "region" | "parity" | "compliance" }) {
       ].map(([title, sub]) => (
         <div
           key={title}
-          className="flex items-center gap-2.5 px-2.5 py-2 border border-line-structure rounded-[2px] bg-surface-1"
+          className="flex items-center gap-3 px-3 py-2.5 border border-line-structure rounded-[2px] bg-surface-1"
         >
           <Seal />
           <div className="flex-1">
-            <div className="text-[12px] text-text-primary font-medium">
+            <div className="text-[12px] text-text-primary font-medium leading-[1.4]">
               {title}
             </div>
-            <div className="text-[10.5px] text-text-tertiary font-mono">
+            <div className="text-[10.5px] text-text-tertiary font-mono leading-[1.5] mt-0.5">
               {sub}
             </div>
           </div>
@@ -453,25 +502,11 @@ function GetStarted() {
               </Link>
             )}
             {s.code && (
-              <div className="rounded-[2px] p-3 font-mono text-[11px] leading-[1.65] overflow-auto bg-[#222220] border border-[#3a3a35] text-[#e2e2dc]">
-                <div style={{ color: "#9ac6ff" }}>LANGFUSE_PUBLIC_KEY</div>
-                <div>
-                  {"  = "}
-                  <span style={{ color: "#c7e6b0" }}>"pk-lf-..."</span>
-                </div>
-                <div style={{ color: "#9ac6ff" }}>LANGFUSE_SECRET_KEY</div>
-                <div>
-                  {"  = "}
-                  <span style={{ color: "#c7e6b0" }}>"sk-lf-..."</span>
-                </div>
-                <div style={{ color: "#9ac6ff" }}>LANGFUSE_BASE_URL</div>
-                <div>
-                  {"  = "}
-                  <span style={{ color: "#e2b73b" }}>
-                    "https://jp.cloud.langfuse.com"
-                  </span>
-                </div>
-              </div>
+              <CodeBox
+                value={`LANGFUSE_PUBLIC_KEY="pk-lf-..."
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_BASE_URL="https://jp.cloud.langfuse.com"`}
+              />
             )}
           </div>
         ))}
@@ -537,7 +572,7 @@ function Customers() {
       <div className="flex flex-col items-start gap-3.5 mb-8">
         <div className="japan-eyebrow">お客様 · CUSTOMERS</div>
         <h2 className="japan-h2 max-w-[28ch]">
-          LLMアプリを本番で動かす日本のチームが
+          世界中のチームが本番のLLMアプリで
           <br />
           <span className="japan-highlight">使っています。</span>
         </h2>
@@ -552,7 +587,7 @@ function Customers() {
             { name: "freee", logo: "/images/japan-logos/freee.svg" },
             { name: "Canva", logo: "/images/japan-logos/canva.svg" },
             { name: "Khan Academy", logo: "/images/japan-logos/khan.svg" },
-            { name: "SumUp", logo: "/images/japan-logos/sumup.svg" },
+            { name: "Intuit", logo: "/images/japan-logos/intuit.svg" },
             { name: "Twilio", logo: "/images/japan-logos/twilio.svg" },
           ] as const
         ).map((c, i) => (
@@ -588,7 +623,7 @@ function Customers() {
         <div className="japan-chip-card flex flex-col gap-4 p-7 bg-surface-1">
           <div className="japan-eyebrow">導入事例</div>
           <div className="font-analog text-[24px] leading-[1.55] text-text-primary font-medium [text-wrap:balance]">
-            「Langfuseのおかげで、LLMシステムを本番に入れて、そのまま運用し続けるのに必要な可視性が手に入りました。」
+            「関数単位や処理単位で挙動をトレースする仕組みを導入することで、入力・出力の関係やプロンプトの影響が可視化され、直感的に把握できるようになります。」
           </div>
           <div className="flex items-center gap-3 pt-3 border-t border-line-structure">
             <div className="w-9 h-9 rounded-full bg-text-primary text-surface-bg flex items-center justify-center font-analog text-[16px]">
@@ -596,7 +631,7 @@ function Customers() {
             </div>
             <div className="flex-1">
               <div className="text-[13.5px] text-text-primary font-medium">
-                LayerX
+                LayerX — バクラク事業部 omori氏
               </div>
               <div className="text-[12px] text-text-tertiary font-mono">
                 本番環境でLLMシステムを運用
@@ -604,14 +639,21 @@ function Customers() {
             </div>
             <Link
               className="japan-btn japan-btn-secondary japan-btn-small !shadow-none"
-              href="/users"
+              href="https://tech.layerx.co.jp/entry/stable-ai-agent-dev-with-langfuse"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               導入事例を読む ↗
             </Link>
           </div>
         </div>
 
-        <div className="japan-chip-card flex flex-col gap-3 p-7">
+        <Link
+          href="https://gao-ai.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="japan-chip-card flex flex-col gap-3 p-7 no-underline"
+        >
           <div className="japan-eyebrow">パートナー · PARTNER</div>
           <div className="font-analog text-[24px] leading-[1.35] text-text-primary font-medium">
             GAO, Inc. <span className="text-text-tertiary text-[18px]">（ガオ）</span>
@@ -625,7 +667,10 @@ function Customers() {
             <span className="japan-code-inline">導入支援</span>
             <span className="japan-code-inline">日本語サポート</span>
           </div>
-        </div>
+          <div className="font-mono text-[11px] text-text-tertiary mt-1">
+            gao-ai.com ↗
+          </div>
+        </Link>
       </div>
     </section>
   );
@@ -723,53 +768,6 @@ function Compliance() {
             </table>
           </div>
 
-          <div className="japan-chip-card p-0 overflow-hidden">
-            <div className="px-4 py-3.5 flex items-baseline justify-between border-b border-line-structure">
-              <span className="font-analog text-[18px] text-text-primary font-medium">
-                その他のサブプロセッサー
-              </span>
-              <span className="japan-eyebrow">運用系 · EU</span>
-            </div>
-            <table className="japan-table">
-              <thead>
-                <tr>
-                  <th>サブプロセッサー</th>
-                  <th>用途</th>
-                  <th>データ所在地</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Datadog</td>
-                  <td>モニタリング</td>
-                  <td>
-                    <RegionPill where="EU" />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Sentry</td>
-                  <td>エラートラッキング</td>
-                  <td>
-                    <RegionPill where="EU" />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Google Cloud</td>
-                  <td>運用</td>
-                  <td>
-                    <RegionPill where="EU" />
-                  </td>
-                </tr>
-                <tr>
-                  <td>PostHog</td>
-                  <td>プロダクト分析</td>
-                  <td>
-                    <RegionPill where="EU" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
     </section>
@@ -878,18 +876,13 @@ function FAQ() {
     {
       q: "どのサブプロセッサーを使っていますか?",
       a: (
-        <>
-          <p>
-            主要サブプロセッサー（リージョン内）: <b>AWS</b> と <b>ClickHouse</b>。どちらも日本で稼働しています。
-          </p>
-          <p>
-            運用系サブプロセッサー（EU）: Datadog、Sentry、Google Cloud、PostHog — それぞれモニタリング、エラートラッキング、運用、プロダクト分析に使っています。最新の一覧は{" "}
-            <Link className="japan-link" href="/security/subprocessors">
-              langfuse.com/security/subprocessors
-            </Link>{" "}
-            にあります。
-          </p>
-        </>
+        <p>
+          主要サブプロセッサー（リージョン内）: <b>AWS</b> と <b>ClickHouse</b>。どちらも日本で稼働しています。最新の一覧は{" "}
+          <Link className="japan-link" href="/security/subprocessors">
+            langfuse.com/security/subprocessors
+          </Link>{" "}
+          にあります。
+        </p>
       ),
     },
     {
