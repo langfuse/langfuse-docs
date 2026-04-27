@@ -1,0 +1,69 @@
+---
+title: Experiments and their role
+description: How to use experiments to systematically improve your LLM application by isolating variables and comparing outputs.
+---
+
+# Experiments and their role
+
+To systematically understand and improve how your system behaves, you need a way to isolate cause and effect. That's what experiments give you. You pick one variable, run your dataset through two versions of your system, and compare what comes out. The result tells you whether a change actually helped, and by how much.
+
+Every part of your LLM system is a candidate to systematically vary: the model, the prompt, the context you inject, which tools are available, how your agent is structured. Experiments are how you navigate that space systematically. They help you tackle the generalization problem of your application. They help you go from "I think this is better" to "this is better on 80% of my dataset at half the cost."
+
+## The anatomy of an experiment
+
+Every experiment has four components.
+
+**A baseline.** The current version of your system — the control condition everything else gets measured against. Without a fixed baseline, you can't know if a change is an improvement or just a difference. The baseline is usually your current production prompt, model, or configuration, held constant while you vary one thing. A common mistake is comparing two new variants against each other without anchoring to current production behavior, you might pick the "better" one and still be shipping something worse than what you had.
+
+**A dataset.** The inputs you run both conditions against. Keep the same dataset across experiments so results are comparable over time. See Datasets for how to build one that represents your application well.
+
+**A variable.** The single thing you're changing. Common levers:
+
+- **Model.** The bluntest lever. Often the biggest quality jump, also the biggest cost jump. Easy to swap, easy to measure. Foundation model benchmarks give a rough sense of capability, but they don't predict behavior on your specific task — measure on your own data.
+- **Prompt.** The most common thing to iterate. Cheap to change, but effects can be subtle. Before running a prompt experiment, it's worth asking: is this failure because the prompt is ambiguous or incomplete, or because the model applies clear instructions inconsistently across different inputs? The first is a specification problem — just clarify the prompt. The second is a generalization problem and worth running an experiment to measure properly.
+- **Context.** What information you include in the prompt: retrieved documents, conversation history, user metadata. Changing what the model sees often matters as much as how you instruct it.
+- **Tool access.** Adding or removing tools changes what paths your system can take. Hard to evaluate without looking at traces.
+- **Agent architecture.** Single agent vs multi-agent, which framework, how tasks are decomposed. The biggest bets, the hardest to isolate. Change these when smaller levers have stopped moving the needle.
+
+**Everything else held constant.** If you change two things at once, you can't tell which one caused the difference. This sounds obvious and is regularly ignored.
+
+**Outputs to compare.** What your system produces under each condition. Comparing these is the actual work of running an experiment.
+
+## How is it used?
+
+The core loop: pick a variable, form a hypothesis, run both conditions against your dataset, compare outputs, learn something, repeat. Typical attempts can include:
+
+- There is a new model: Will it improve the performance of our system?
+- Does my prompt change improve the output quality of our system?
+- Is our new agent harness architecture creating better results than our multi-agent system?
+
+Comparing outputs starts qualitative. Open traces from the same input under both conditions side by side. Read them. Which one actually answered the question? Where did each one fail? This is how you build intuition for what your system is doing — and if you're not willing to read actual outputs on a regular cadence, your experiments will mislead you.
+
+The problem is you can't read 2000 traces. That's where evaluators come in. Once you've done enough manual comparisons to know what good looks like, you encode that judgment into an evaluator. Now you can run larger experiments and get a score distribution instead of a reading list. See Evaluate for how to build evaluators.
+
+<Callout>
+TODO: Ref. to error analysis
+</Callout>
+
+With scores, comparison gets concrete. You're looking at win rates ("condition B beats condition A on 68% of inputs"), score distributions (does B win consistently or just on a few inputs?), and cost-latency tradeoffs (B is better but 2x more expensive, is it worth it?).
+
+What you're optimizing for matters. Performance, cost, and latency pull in different directions. A better model costs more. A shorter prompt is faster but might miss edge cases. A more capable agent architecture adds latency. Experiments let you see those tradeoffs in your data rather than in theory.
+
+## Where to start
+
+<Callout>
+TODO: Vibe patch and error analyse before
+</Callout>
+
+Don't set up the full evaluation pipeline before running anything. A few examples side traces side by side will teach you more in the first hour than a week of infrastructure work.
+
+1. Get 20–30 real examples. Pull them from production traces. They don't need to cover everything, just a real slice of what your application handles.
+2. Change one thing and run both versions. Keep everything else identical.
+3. Read traces side by side. No evaluator needed yet. Just read. What's different? Which one is actually better and why? Pay attention to the type of failure — is the prompt unclear, or is the model applying clear instructions inconsistently? That distinction tells you what kind of fix to try next.
+4. Add an evaluator once you have intuition. After a few manual rounds you'll know what you're looking for. Encode it. Now you can scale.
+
+## Go deeper
+
+- Datasets: building a dataset that represents your application
+- Evaluate: adding structured evaluators so you can compare at scale
+- Tracing: using traces to understand what your system does under each condition

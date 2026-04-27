@@ -1,10 +1,10 @@
-import { academySource, getPageTreeWithShortTitles } from "@/lib/source";
-import { SharedDocsLayout } from "@/app/docs/SharedDocsLayout";
+import { academySource } from "@/lib/source";
+import { SharedDocsLayout } from "@/components/layout";
 
 export default function AcademyLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={getPageTreeWithShortTitles(academySource, "/academy")}>{children}</SharedDocsLayout>;
+  return <SharedDocsLayout tree={academySource.getPageTree()}>{children}</SharedDocsLayout>;
 }
