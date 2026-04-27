@@ -31,7 +31,7 @@ There are three ways to integrate LiteLLM with Langfuse:
 ## Features
 
 - Automatic trace collection for all LiteLLM requests
-- Support for Langfuse Cloud (EU and US regions)
+- Support for Langfuse Cloud (EU, US, Japan, and HIPAA regions)
 - Support for self-hosted Langfuse instances
 - Custom endpoint configuration
 - Secure authentication using Basic Auth
@@ -61,6 +61,8 @@ There are three ways to integrate LiteLLM with Langfuse:
 The integration automatically constructs the OTEL endpoint from `LANGFUSE_OTEL_HOST`
 - **Default (US)**: `https://us.cloud.langfuse.com/api/public/otel`
 - **EU Region**: `https://cloud.langfuse.com/api/public/otel`
+- **Japan Region**: `https://jp.cloud.langfuse.com/api/public/otel`
+- **HIPAA Region**: `https://hipaa.cloud.langfuse.com/api/public/otel`
 - **Self-hosted**: `{LANGFUSE_OTEL_HOST}/api/public/otel`
 
 ## Usage
@@ -118,7 +120,7 @@ import litellm
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_OTEL_HOST"] = "https://cloud.langfuse.com" # EU region
-# os.environ["LANGFUSE_OTEL_HOST"] = "https://us.cloud.langfuse.com" # US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 # os.environ["LANGFUSE_OTEL_HOST"] = "https://otel.my-langfuse.company.com" # custom OTEL endpoint
 
 LANGFUSE_AUTH = base64.b64encode(
@@ -142,6 +144,7 @@ Add the integration to your proxy configuration:
 export LANGFUSE_PUBLIC_KEY="pk-lf-..."
 export LANGFUSE_SECRET_KEY="sk-lf-..."
 export LANGFUSE_OTEL_HOST="https://us.cloud.langfuse.com"  # Default US region
+# Other Langfuse data regions: https://cloud.langfuse.com (EU), https://jp.cloud.langfuse.com (Japan), https://hipaa.cloud.langfuse.com (HIPAA)
 # export LANGFUSE_OTEL_HOST="https://otel.my-langfuse.company.com"  # custom OTEL endpoint
 ```
 

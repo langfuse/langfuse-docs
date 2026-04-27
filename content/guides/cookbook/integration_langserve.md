@@ -1,5 +1,5 @@
 ---
-title: Langserve
+title: Langserve Integration
 description: This guide shows how to natively integrate Langfuse with LangChain's Langserve for observability, metrics, evals, prompt management, playground, datasets.
 category: Integrations
 sidebarTitle: Langserve
@@ -35,7 +35,7 @@ import os
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = ""

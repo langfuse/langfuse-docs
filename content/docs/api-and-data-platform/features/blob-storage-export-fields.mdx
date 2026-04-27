@@ -1,0 +1,241 @@
+---
+title: Blob Storage Export Field Reference
+description: Complete reference of all fields exported by the Langfuse blob storage integration, organized by export table (enriched observations, scores, legacy traces, legacy observations).
+sidebarTitle: Export Field Reference
+---
+
+# Blob Storage Export Field Reference [#blob-storage-export-field-reference]
+
+This page lists every field exported by the Langfuse blob storage integration, organized by export table. For setup instructions and configuration, see [Export to Blob Storage](/docs/api-and-data-platform/features/export-to-blob-storage).
+
+Types are described as they appear in **JSON/JSONL** exports. Timestamps use `YYYY-MM-DD HH:MM:SS.ffffff` format (e.g. `2024-05-29 13:46:19.963000`) in UTC. See [Notes on CSV exports](#csv-exports) for how types map in CSV format.
+
+## Export sources [#export-sources]
+
+The blob storage integration supports three export source modes (configurable per project in **Project Settings > Integrations > Blob Storage**):
+
+| Mode | Blob paths written | Description |
+|---|---|---|
+| **Enriched observations (recommended)** | `observations_v2/`, `scores/` | Each observation row includes trace-level fields (`user_id`, `session_id`, `trace_name`, etc.) directly. No warehouse-side JOIN needed for trace context. |
+| **Traces and observations (legacy)** | `traces/`, `observations/`, `scores/` | Three separate files per time window. Observations do **not** include trace-level fields; join on `trace_id` in your warehouse. |
+| **Traces and observations (legacy) and enriched observations** | All of the above | Writes both sets of observation files plus traces and scores. |
+
+Scores are **always** exported regardless of mode.
+
+<Callout type="info">
+  We recommend **Enriched observations** for most use cases — it produces fewer files and avoids cross-file JOINs for trace context.
+</Callout>
+
+## Enriched observations (`observations_v2/`) [#enriched-observations]
+
+Exported in **Enriched observations** and **Traces and observations (legacy) and enriched observations** modes.
+
+Each row is a single observation with trace-level context included directly — no warehouse-side JOIN needed.
+
+| Field | Type | Description | Usage notes |
+|---|---|---|---|
+| `id` | string | Unique observation identifier. | Primary key. |
+| `trace_id` | string | Parent trace identifier. | Use to link with scores or group observations by trace. |
+| `project_id` | string | Langfuse project identifier. | All rows in one export belong to the same project. |
+| `environment` | string | Environment label. | Filter by environment. |
+| `type` | string | Observation type: `SPAN`, `GENERATION`, or `EVENT`. | Generations are LLM calls; spans are arbitrary operations; events are point-in-time markers. |
+| `parent_observation_id` | string | Parent observation ID (for nested observations). | Reconstruct the trace tree by walking parent pointers. Empty string for root-level observations. |
+| `start_time` | string (timestamp) | When the observation started. | Primary time axis for observations. |
+| `end_time` | string (timestamp) or null | When the observation ended. | Null for events and in-progress observations. |
+| `name` | string | User-defined observation name. | Group/filter by name (e.g. function name, model call label). |
+| `metadata` | object | User-supplied key-value metadata. | Arbitrary context. Extract keys relevant to your analytics. |
+| `level` | string | Log level: `DEBUG`, `DEFAULT`, `WARNING`, `ERROR`. | Filter for errors or warnings. |
+| `status_message` | string | Status or error message. | Inspect for debugging failed observations. |
+| `version` | string | User-provided version string set via the SDK. | Empty string when not set. |
+| `input` | string | Observation input payload. | For generations: the prompt/messages sent to the LLM. May be plain text or JSON; may be large. Empty string when not set. |
+| `output` | string | Observation output payload. | For generations: the LLM response. May be plain text or JSON; may be large. Empty string when not set. |
+| `provided_model_name` | string | Model name as provided by the user/SDK. | The raw model string (e.g. `gpt-4o`, `claude-sonnet-4-20250514`). This is what the API returns as `model`. Empty string for spans and events. |
+| `model_parameters` | string | Model call parameters as a JSON-encoded string (e.g. `"{\"temperature\":0.7}"`). | Parse as JSON. Useful for analyzing how model settings affect quality/cost. Empty string for spans and events. |
+| `usage_details` | object (string → integer) | Token usage breakdown by category. | Extract keys: `input` for input tokens, `output` for output tokens, `total` for total. May contain additional keys like `input_cached_tokens`, `reasoning_tokens`, etc. |
+| `cost_details` | object (string → number) | Cost breakdown by category (USD). | Extract keys: `input` for input cost, `output` for output cost. |
+| `completion_start_time` | string (timestamp) or null | When the first token was generated (for streaming). | Used to compute `time_to_first_token`. Null for non-streaming calls. |
+| `prompt_name` | string | Name of the Langfuse prompt used, if any. | Filter for observations using a specific prompt. |
+| `prompt_version` | integer or null | Version number of the Langfuse prompt used. | Track which prompt version was active. |
+| `total_cost` | number | Total computed cost for this observation (USD). | Observation-level cost. Sum across a trace for trace-level cost. |
+| `latency` | number or null | Duration in **seconds** (`end_time - start_time`). | Null when `end_time` is null. |
+| `time_to_first_token` | number or null | Time to first token in **seconds** (`completion_start_time - start_time`). | Null when `completion_start_time` is null. Measures streaming responsiveness. |
+| `model_id` | string | Langfuse model definition ID (resolved from `provided_model_name`). | Used to look up pricing. Empty string if no model definition matched. |
+| `created_at` | string (timestamp) | Row creation time. | System timestamp. |
+| `updated_at` | string (timestamp) | Last update time. | Incremental processing. |
+| `prompt_id` | string | Langfuse prompt definition ID. | Use with `prompt_name`/`prompt_version` for prompt analytics. |
+| `tool_calls` | array of strings | Raw tool/function call payloads from the LLM response. | Parse each element as JSON. Contains the full tool call objects. |
+| `tool_call_names` | array of strings | Names of tools/functions called. | Quick filter/group without parsing full `tool_calls`. |
+| `tool_definitions` | object | Tool/function schemas provided to the LLM. | May be an empty object `{}` when no tools were provided. |
+| `usage_pricing_tier_name` | string or null | Name of the pricing tier used for cost calculation. | User-defined tier name from the model definition. Null if no tiered pricing applies. |
+| `input_price` | string or null | Per-unit input price from the matched model definition. Decimal string. | Null if no model definition matched. Cast to numeric in your pipeline. |
+| `output_price` | string or null | Per-unit output price from the matched model definition. Decimal string. | Null if no model definition matched. Cast to numeric in your pipeline. |
+| `total_price` | string or null | Per-unit total price from the matched model definition. Decimal string. | Null if no model definition matched. Used for models with a flat per-call price. |
+| `user_id` | string | End-user identifier from the parent trace. | Directly available — no JOIN needed. |
+| `session_id` | string | Session identifier from the parent trace. | Directly available — no JOIN needed. |
+| `trace_name` | string | Name of the parent trace. | Group observations by their parent trace name. |
+| `tags` | array of strings | Tags from the parent trace. | Directly available — no JOIN needed. |
+| `release` | string | Release tag from the parent trace. | Directly available — no JOIN needed. |
+| `bookmarked` | boolean | Bookmark flag from the parent trace. | Directly available. |
+| `public` | boolean | Public flag from the parent trace. | Directly available. |
+
+<Callout type="info">
+  For integrations created on or after 2026-04-01, `latency` and `time_to_first_token` are in **seconds** (consistent with the `observations/` file). For integrations created before that date, these fields are in **milliseconds** for backward compatibility.
+</Callout>
+
+### Deriving trace-level aggregates from a single file [#deriving-trace-aggregates]
+
+With the **Enriched observations** export, you can compute trace-level metrics from the `observations_v2/` file alone — no cross-file JOIN needed. Group by `trace_id` and compute `SUM(total_cost)` for trace cost and `MAX(end_time) - MIN(start_time)` for trace latency.
+
+## Scores (`scores/`) [#scores]
+
+**Always exported** regardless of export source mode. Scores with data types `NUMERIC`, `BOOLEAN`, `CATEGORICAL`, and `TEXT` are included.
+
+| Field | Type | Description | Usage notes |
+|---|---|---|---|
+| `id` | string | Unique score identifier. | Primary key. |
+| `timestamp` | string (timestamp) | Score creation timestamp (event time). | Primary time axis for scores. |
+| `project_id` | string | Langfuse project identifier. | All rows in one export belong to the same project. |
+| `environment` | string | Environment label. | Filter by environment. |
+| `trace_id` | string or null | Associated trace identifier. | Null for standalone scores not linked to a trace. Join to get trace or observation context. |
+| `observation_id` | string or null | Associated observation identifier (optional). | Null if the score is trace-level. Non-null if the score targets a specific observation. |
+| `session_id` | string or null | Associated session identifier. | Null when not set. Direct access to session context without joining traces. |
+| `dataset_run_id` | string or null | Associated dataset run identifier (if score came from an evaluation run). | Links scores to experiment/evaluation runs. Null for ad-hoc or annotation scores. |
+| `name` | string | Score name (e.g. `accuracy`, `helpfulness`, `hallucination`). | Group/filter by score metric name. |
+| `value` | number | Numeric score value. | For `BOOLEAN`: 0 or 1. For `CATEGORICAL`: index of the category. For `NUMERIC`: the raw value. For `TEXT`: always 0 (not meaningful — use `string_value` instead). |
+| `source` | string | Score source: `API`, `ANNOTATION`, `EVAL`. | `API` = programmatic via SDK, `ANNOTATION` = human annotation in UI, `EVAL` = LLM-as-judge evaluator. |
+| `comment` | string or null | Optional human comment or evaluator reasoning. | Context for the score. Useful for annotation workflows. |
+| `data_type` | string | Score data type: `NUMERIC`, `BOOLEAN`, `CATEGORICAL`, or `TEXT`. | Determines how to interpret `value` and `string_value`. |
+| `string_value` | string or null | String representation for categorical and text scores. | For `CATEGORICAL`: the category label (e.g. `"positive"`, `"neutral"`). For `TEXT`: the free-text content (1–500 characters). Null for numeric scores. |
+| `created_at` | string (timestamp) | Row creation time. | System timestamp. |
+| `updated_at` | string (timestamp) | Last update time. | Incremental processing. |
+
+### Enriching scores with trace/observation context [#enriching-scores]
+
+Scores do **not** include trace-level fields inline. To enrich:
+
+| Export mode | How to get trace context |
+|---|---|
+| **Enriched observations** | Join scores to the `observations_v2/` file on `trace_id`. Since multiple observations share the same `trace_id`, deduplicate first (e.g. pick one row per `trace_id`) to avoid multiplying score rows. Each observation row already includes `user_id`, `session_id`, `trace_name`, `tags`, `release`, `environment`. |
+| **Traces and observations (legacy)** | Join scores to the `traces/` file on `trace_id` for `user_id`, `environment`, `name`, etc. |
+
+## Legacy export paths [#legacy-export-paths]
+
+The following sections cover the **Traces and observations (legacy)** export mode. If you are setting up a new integration, we recommend using **Enriched observations** instead.
+
+### Traces (`traces/`) [#traces]
+
+Exported in **Traces and observations (legacy)** and **Traces and observations (legacy) and enriched observations** modes only.
+
+| Field | Type | Description | Usage notes |
+|---|---|---|---|
+| `id` | string | Unique trace identifier. | Primary key. Use to join with observations and scores via `trace_id`. |
+| `timestamp` | string (timestamp) | Trace creation timestamp (event time). | Primary time axis for traces. Use for partitioning, filtering, and time-series analysis. |
+| `name` | string | User-defined trace name (e.g. the top-level operation). | Useful for grouping and filtering traces by operation type. |
+| `environment` | string | Environment label (e.g. `production`, `staging`). | Filter or partition by environment. |
+| `project_id` | string | Langfuse project identifier. | All rows in one export belong to the same project. |
+| `metadata` | object | User-supplied key-value metadata attached to the trace. | Arbitrary context. Extract keys relevant to your analytics. |
+| `user_id` | string or null | End-user identifier associated with the trace. | Null when not set. Group by user for per-user analytics. |
+| `session_id` | string or null | Session identifier grouping related traces. | Null when not set. Group traces into sessions for conversation-level analysis. |
+| `release` | string or null | Application release/version tag. | Null when not set. Filter or compare across releases. |
+| `version` | string or null | User-provided version string set via the SDK. | Null when not set. Track how changes to your application affect metrics over time. |
+| `public` | boolean | Whether the trace is publicly shareable. | Filter for public/private traces. |
+| `bookmarked` | boolean | Whether the trace is bookmarked in the Langfuse UI. | Filter for bookmarked items. |
+| `tags` | array of strings | User-defined tags on the trace. | Multi-value filtering and grouping. |
+| `input` | string or null | Trace input payload. | The top-level input to the traced operation. May be plain text or JSON; may be large. Null when not set. |
+| `output` | string or null | Trace output payload. | The top-level output. May be plain text or JSON; may be large. Null when not set. |
+| `created_at` | string (timestamp) | Row creation time. | System timestamp. Typically close to `timestamp` but may differ for late-arriving data. |
+| `updated_at` | string (timestamp) | Last update time. | Useful for incremental processing: re-process rows where `updated_at` > last sync. |
+
+#### Fields not in the trace export [#traces-derived-fields]
+
+These fields are not exported directly. Derive them in your warehouse:
+
+| Field | How to derive |
+|---|---|
+| `total_cost` | Sum observation-level `total_cost` grouped by `trace_id` from the observations file. |
+| `latency` | Compute `MAX(end_time) - MIN(start_time)` across observations per `trace_id`. |
+| `observations` | Join the observations file on `trace_id` for the full list. |
+| `scores` | Join the scores file on `trace_id` for the full list. |
+| `html_path` | Construct as `{langfuse_host}/project/{project_id}/traces/{id}`. |
+
+### Observations (`observations/`) [#observations]
+
+Exported in **Traces and observations (legacy)** and **Traces and observations (legacy) and enriched observations** modes.
+
+These rows contain **observation-level data only**. Trace-level fields like `user_id`, `session_id`, and `tags` are not included — join the `traces/` file on `trace_id` in your warehouse, or switch to the **Enriched observations** export mode.
+
+| Field | Type | Description | Usage notes |
+|---|---|---|---|
+| `id` | string | Unique observation identifier. | Primary key. |
+| `trace_id` | string | Parent trace identifier. | Join on this to get trace-level fields, or to link with scores. |
+| `project_id` | string | Langfuse project identifier. | All rows in one export belong to the same project. |
+| `environment` | string | Environment label. | Filter by environment. |
+| `type` | string | Observation type: `SPAN`, `GENERATION`, or `EVENT`. | Generations are LLM calls; spans are arbitrary operations; events are point-in-time markers. |
+| `parent_observation_id` | string or null | Parent observation ID (for nested observations). | Reconstruct the trace tree by walking parent pointers. Null for root-level observations. |
+| `start_time` | string (timestamp) | When the observation started. | Primary time axis for observations. |
+| `end_time` | string (timestamp) or null | When the observation ended. | Null for events and in-progress observations. |
+| `name` | string | User-defined observation name. | Group/filter by name (e.g. function name, model call label). |
+| `metadata` | object | User-supplied key-value metadata. | Arbitrary context. Extract keys relevant to your analytics. |
+| `level` | string | Log level: `DEBUG`, `DEFAULT`, `WARNING`, `ERROR`. | Filter for errors or warnings. |
+| `status_message` | string or null | Status or error message. | Null when not set. Inspect for debugging failed observations. |
+| `version` | string or null | User-provided version string set via the SDK. | Null when not set. |
+| `input` | string or null | Observation input payload. | For generations: the prompt/messages sent to the LLM. May be plain text or JSON; may be large. Null when not set. |
+| `output` | string or null | Observation output payload. | For generations: the LLM response. May be plain text or JSON; may be large. Null when not set. |
+| `provided_model_name` | string or null | Model name as provided by the user/SDK. | The raw model string (e.g. `gpt-4o`, `claude-sonnet-4-20250514`). This is what the API returns as `model`. Null for spans and events. |
+| `model_parameters` | string or null | Model call parameters as a JSON-encoded string (e.g. `"{\"temperature\":0.7}"`). | Parse as JSON. Useful for analyzing how model settings affect quality/cost. Null for spans and events. |
+| `usage_details` | object (string → integer) | Token usage breakdown by category. | Extract keys: `input` for input tokens, `output` for output tokens, `total` for total. May contain additional keys like `input_cached_tokens`, `reasoning_tokens`, etc. |
+| `cost_details` | object (string → number) | Cost breakdown by category (USD). | Extract keys: `input` for input cost, `output` for output cost. |
+| `completion_start_time` | string (timestamp) or null | When the first token was generated (for streaming). | Used to compute `time_to_first_token`. Null for non-streaming calls. |
+| `prompt_name` | string or null | Name of the Langfuse prompt used, if any. | Null when no prompt was used. Filter for observations using a specific prompt. |
+| `prompt_version` | integer or null | Version number of the Langfuse prompt used. | Track which prompt version was active. |
+| `total_cost` | number or null | Total computed cost for this observation (USD). | Null when cost could not be computed. Observation-level cost. Sum across a trace for trace-level cost. |
+| `latency` | number or null | Duration in **seconds** (`end_time - start_time`). | Null when `end_time` is null. |
+| `time_to_first_token` | number or null | Time to first token in **seconds** (`completion_start_time - start_time`). | Null when `completion_start_time` is null. Measures streaming responsiveness. |
+| `model_id` | string or null | Langfuse model definition ID (resolved from `provided_model_name`). | Used to look up pricing. Null if no model definition matched. |
+| `created_at` | string (timestamp) | Row creation time. | System timestamp. |
+| `updated_at` | string (timestamp) | Last update time. | Incremental processing. |
+| `prompt_id` | string or null | Langfuse prompt definition ID. | Null when no prompt was used. Use with `prompt_name`/`prompt_version` for prompt analytics. |
+| `tool_calls` | array of strings | Raw tool/function call payloads from the LLM response. | Parse each element as JSON. Contains the full tool call objects. |
+| `tool_call_names` | array of strings | Names of tools/functions called. | Quick filter/group without parsing full `tool_calls`. |
+| `tool_definitions` | object | Tool/function schemas provided to the LLM. | May be an empty object `{}` when no tools were provided. |
+| `usage_pricing_tier_name` | string or null | Name of the pricing tier used for cost calculation. | User-defined tier name from the model definition. Null if no tiered pricing applies. |
+| `input_price` | string or null | Per-unit input price from the matched model definition. Decimal string. | Null if no model definition matched. Cast to numeric in your pipeline. |
+| `output_price` | string or null | Per-unit output price from the matched model definition. Decimal string. | Null if no model definition matched. Cast to numeric in your pipeline. |
+| `total_price` | string or null | Per-unit total price from the matched model definition. Decimal string. | Null if no model definition matched. Used for models with a flat per-call price. |
+
+## Notes on CSV exports [#csv-exports]
+
+In CSV format all values are represented as text. Key differences from JSON/JSONL:
+
+| JSON type | CSV representation |
+|---|---|
+| string | Plain text value. |
+| number | Numeric text (e.g. `1.23`). Parse as float in your pipeline. |
+| integer | Numeric text without decimal point (e.g. `1024`). |
+| boolean | `true` or `false`. |
+| null | Empty field. |
+| array of strings | JSON-encoded string (e.g. `["tag1","tag2"]`). Parse the field as JSON. |
+| object | JSON-encoded string (e.g. `{"input":500,"output":120}`). Parse the field as JSON. |
+| string (timestamp) | `YYYY-MM-DD HH:MM:SS.ffffff` in UTC (e.g. `2024-05-29 13:46:19.963000`). Parse as timestamp in your pipeline. |
+
+<Callout type="info">
+  **Price fields:** `input_price`, `output_price`, and `total_price` are exported as **quoted strings** in JSON/JSONL (e.g. `"0.03"`) to preserve decimal precision. In CSV they appear as plain text. Cast these to a numeric or decimal type in your warehouse. Other cost fields (`total_cost`, `cost_details` values) are exported as JSON numbers.
+</Callout>
+
+When loading CSV into a warehouse, cast timestamp fields to your warehouse's timestamp type, numeric fields to float/decimal, and parse JSON-encoded fields (objects, arrays) into native map/array types if your warehouse supports them.
+
+## File organization in blob storage [#file-organization]
+
+```
+{project_id}/
+├── observations_v2/          # Enriched observations mode (recommended)
+│   └── {timestamp}.{json|jsonl|csv}[.gz]
+├── scores/                   # Always exported
+│   └── {timestamp}.{json|jsonl|csv}[.gz]
+├── traces/                   # Traces and observations (legacy) mode only
+│   └── {timestamp}.{json|jsonl|csv}[.gz]
+└── observations/             # Traces and observations (legacy) mode only
+    └── {timestamp}.{json|jsonl|csv}[.gz]
+```
+
+Files are partitioned by the configured export frequency (hourly, daily, or weekly). Each file covers one time window.

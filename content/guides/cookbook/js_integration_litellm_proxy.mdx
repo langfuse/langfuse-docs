@@ -1,6 +1,6 @@
 ---
 source: ⚠️ Jupyter Notebook
-title: LiteLLM (Proxy) + Langfuse OpenAI Integration (JS/TS)
+title: Cookbook - LiteLLM (Proxy) + Langfuse OpenAI Integration (JS/TS)
 sidebarTitle: LiteLLM (Proxy) + Langfuse OpenAI Integration (JS/TS)
 description: The stack to use any of 100+ models in your JS/TS application without having to change your code and with full observability.
 category: Examples
@@ -32,7 +32,7 @@ Deno.env.set("LANGFUSE_PUBLIC_KEY", "pk-lf-***");
 Deno.env.set("LANGFUSE_SECRET_KEY", "sk-lf-***");
 
 // Langfuse host configuration
-// For US data region, set this to "https://us.cloud.langfuse.com"
+// Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
 
 // Set environment variables using Deno-specific syntax
@@ -116,7 +116,7 @@ Use the context manager of the Langfuse TypeScript SDK to group multiple LiteLLM
 
 
 ```typescript
-import { startActiveObservation, startObservation, propagateAttributes } from "npm:@langfuse/tracing";
+import { startActiveObservation, startObservation } from "npm:@langfuse/tracing";
 import { observeOpenAI } from "npm:@langfuse/openai";
 
 const client = observeOpenAI(new OpenAI({baseURL: PROXY_URL}));
@@ -148,20 +148,6 @@ await startActiveObservation("user-request", async (span) => {
       {role: "user", content: "2 + 3 = "}
     ],
   }); 
-
-  // Propagate trace attributes
-  await propagateAttributes({
-    traceName: "LLM Calculator",
-    tags: ["updated"],
-    metadata: {"env": "development"},
-    release: "v0.0.2",
-  }, async () => {});
-
-  // Set input on the root observation
-  span.update({
-    input: systemPrompt,
-  });
-
 });
 ```
 

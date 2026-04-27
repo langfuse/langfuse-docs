@@ -1,0 +1,52 @@
+---
+title: Agent Skill
+sidebarTitle: Agent Skill
+description: Install the Langfuse agent skill to give your coding agent access to Langfuse tracing, prompt management, datasets, and documentation — right from the editor.
+---
+
+# Langfuse Agent Skill
+
+The Langfuse agent skill helps AI coding agents use Langfuse effectively. It follows the open [Agent Skills](https://github.com/anthropics/skills) standard and works with Claude Code, Cursor, Windsurf, and other compatible agents. The skill is open source on [GitHub](https://github.com/langfuse/skills).
+
+## Why use it [#why-use-it]
+
+Coding agents produce significantly better results with the skill installed, because they are conditioned to follow best practices. A coding agent with access to the skill has an opinionated view on what good looks like, based on Langfuse's knowledge.
+
+The skill is a self-contained folder with a `SKILL.md` entrypoint describing general rules and instructions on using documentation, plus reference docs for specific workflows that are filled with specific best practices:
+
+import { FileTree } from "@/components/docs";
+
+<div>
+  <FileTree>
+    <FileTree.File name="SKILL.md" />
+    <FileTree.Folder name="references" defaultOpen>
+      <FileTree.File name="cli.md" />
+      <FileTree.File name="instrumentation.md" />
+      <FileTree.File name="prompt-migration.md" />
+      <FileTree.File name="..." />
+    </FileTree.Folder>
+  </FileTree>
+</div>
+
+The skill uses a progressive disclosure model: the frontmatter is always loaded into the agent's context so it knows when the skill is relevant, but the full instructions and reference docs are only loaded on demand. This keeps context usage low while giving agents access to specialized knowledge.
+
+## Install [#install]
+
+import AutoInstall from "@/components-mdx/get-started/auto-install.mdx";
+
+<AutoInstall />
+
+Once installed, you can prompt your agent with what you want to do. A couple of examples:
+
+- _Show me the last 10 traces with a score below 0.5_
+- _Create a dataset called "edge-cases" and add these 3 items to it_
+- _Migrate the system prompt in src/agent.ts to Langfuse prompt management_
+
+## Resources [#resources]
+
+- [Langfuse Skills on GitHub](https://github.com/langfuse/skills)
+- [Langfuse CLI](/docs/api-and-data-platform/features/cli) — the CLI the skill uses under the hood
+- [MCP Server](/docs/api-and-data-platform/features/mcp-server) — alternative protocol-based approach for agents
+- [Making Agents fall in love with Langfuse](/blog/2026-02-13-will-you-be-my-cli) — the full story behind the skill, CLI, and agent platform
+- [Using Agent Skills to Improve your Prompts](/blog/2026-02-16-prompt-improvement-claude-skills)
+- [Evaluating AI Agent Skills](/blog/2026-02-26-evaluate-ai-agent-skills)

@@ -1,6 +1,3 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -10,27 +7,22 @@ interface OSSFriend {
   href: string;
 }
 
-/**
- * Fetches and renders OSS Friends from the Formbricks API at runtime.
- * Replaces the old Nextra getStaticProps/useData pattern.
- */
-export function OSSFriendsPage() {
-  const [friends, setFriends] = useState<OSSFriend[] | null>(null);
-  const [error, setError] = useState(false);
+async function getOSSFriends(): Promise<OSSFriend[]> {
+  const res = await fetch("https://formbricks.com/api/oss-friends", {
+    next: { revalidate: 3600 },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  return data.data as OSSFriend[];
+}
 
-  useEffect(() => {
-    fetch("https://formbricks.com/api/oss-friends")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => setFriends(data.data))
-      .catch(() => setError(true));
-  }, []);
-
-  if (error) return <p>Error loading OSS Friends.</p>;
-  if (!friends)
-    return <p className="text-sm text-muted-foreground">Loading…</p>;
+export async function OSSFriendsPage() {
+  let friends: OSSFriend[];
+  try {
+    friends = await getOSSFriends();
+  } catch {
+    return <p>Error loading OSS Friends.</p>;
+  }
 
   return (
     <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">

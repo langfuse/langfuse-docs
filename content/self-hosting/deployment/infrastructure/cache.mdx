@@ -71,6 +71,22 @@ OR
 | `REDIS_SENTINEL_USERNAME`    |                    | Username for Redis Sentinel authentication (optional).                                                                        |
 | `REDIS_SENTINEL_PASSWORD`    |                    | Password for Redis Sentinel authentication (optional).                                                                        |
 
+### Timeout Configuration
+
+Langfuse supports configurable Redis timeouts to enable fail-fast behavior during Redis outages. Without these, commands can hang indefinitely, causing cascading latency across the application.
+
+| Variable                          | Required / Default | Description                                                                                                                                                                                                    |
+| --------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `REDIS_COMMAND_TIMEOUT`           | `2000`             | Timeout in milliseconds for individual Redis commands. Commands that exceed this timeout will fail immediately. Applies to the singleton cache client and the rate limiter.                                     |
+| `REDIS_REQUEST_SOCKET_TIMEOUT_MS` | `5000`             | Socket timeout in milliseconds for request/response Redis connections (singleton cache client, rate limiter). Detects zombie connections by closing sockets that are idle beyond this duration.                  |
+| `REDIS_BLOCKING_SOCKET_TIMEOUT_MS`| `30000`            | Socket timeout in milliseconds for all Redis connections including BullMQ queue workers. Set higher than `REDIS_REQUEST_SOCKET_TIMEOUT_MS` to accommodate blocking operations like `BZPOPMIN` used by BullMQ.  |
+
+<Callout type="info">
+
+The default values are designed to work well for most deployments. Only adjust these if you are experiencing Redis connectivity issues or need to tune fail-fast behavior for your environment. The blocking socket timeout (30s) must be significantly larger than the BullMQ drain delay (~5s) to avoid premature socket closures on idle workers.
+
+</Callout>
+
 ## Deployment Options
 
 This section covers different deployment options and provides example environment variables.

@@ -24,7 +24,8 @@ const allPagesFile = path.join(__dirname, "../.sitemap-all-pages.json");
 let cookbookExcluded = new Set();
 try {
   const cookbookRoutes = require("../cookbook/_routes.json");
-  for (const { notebook, docsPath } of cookbookRoutes) {
+  for (const { notebook, docsPath, isGuide } of cookbookRoutes) {
+    if (isGuide === false) continue;
     if (docsPath) {
       cookbookExcluded.add(`/guides/cookbook/${notebook.replace(".ipynb", "")}`);
     }

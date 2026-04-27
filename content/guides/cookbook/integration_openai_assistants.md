@@ -1,5 +1,5 @@
 ---
-title: OpenAI Assistants API
+title: OSS Observability for OpenAI Assistants API
 sidebarTitle: OpenAI Assistants API
 description: Use of Langfuse decorator to trace calls made to openai assistants
 category: Integrations
@@ -42,7 +42,7 @@ import os
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = ""

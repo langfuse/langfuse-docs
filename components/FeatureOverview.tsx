@@ -4,6 +4,8 @@ import {
   ThumbsUp,
   Database,
 } from "lucide-react";
+import { CornerBox } from "./ui/corner-box";
+import { Text } from "./ui/text";
 
 const features = [
   {
@@ -47,48 +49,46 @@ const platformFeature = {
 
 export const FeatureOverview = () => {
   return (
-    <div className="not-prose flex flex-col my-8 p-2 lg:p-4 border rounded bg-card gap-2 lg:gap-4">
-      {/* Top 3 cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 lg:gap-4">
-        {features.map((feature) => (
-          <div
-            key={feature.title}
-            className="border rounded p-4 lg:p-6 bg-card"
-          >
+    <div className="grid grid-cols-1 md:grid-cols-3 items-stretch px-px not-prose">
+
+      {features.map((feature) => (
+        <div key={feature.title} className="-ml-px -mr-px">
+          <CornerBox className="flex relative z-1 flex-col p-0 min-h-0 h-full p-4">
             <div className="flex items-center gap-3 mb-4">
-              <feature.icon className="h-5 w-5 text-muted-foreground" />
-              <h3 className="text-lg font-semibold text-card-foreground">
+              <feature.icon className="h-3.5 w-3.5" />
+              <Text as="h3" size="m" className="mt-1 text-text-secondary">
                 {feature.title}
-              </h3>
+              </Text>
             </div>
-            <ul className="space-y-2">
+            <ul className="list-none flex flex-col gap-1.5">
               {feature.items.map((item, itemIndex) => (
-                <li key={itemIndex} className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0" />
-                  <span className="text-muted-foreground text-sm">{item}</span>
+                <li key={itemIndex} className="flex gap-2 items-start">
+                  <span className="w-0.75 h-0.75 shrink-0 bg-text-tertiary mt-2 lg:mt-1.5" aria-hidden />
+                  <Text size="s" className="text-left">{item}</Text>
                 </li>
               ))}
             </ul>
-          </div>
-        ))}
-      </div>
-
-      {/* Platform card - full width */}
-      <div className="border rounded p-4 lg:p-6 bg-card">
-        <div className="flex items-center gap-3 mb-4">
-          <platformFeature.icon className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-lg font-semibold text-card-foreground">
-            {platformFeature.title}
-          </h3>
+          </CornerBox>
         </div>
-        <ul className="space-y-2">
-          {platformFeature.items.map((item, itemIndex) => (
-            <li key={itemIndex} className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0" />
-              <span className="text-muted-foreground text-sm">{item}</span>
-            </li>
-          ))}
-        </ul>
+      ))}
+
+      <div className="md:col-span-3 -mt-px -ml-px -mr-px">
+        <CornerBox className="flex relative z-0 flex-col p-0 min-h-0 h-full p-4">
+          <div className="flex items-center gap-3 mb-4">
+            <platformFeature.icon className="h-3.5 w-3.5 text-muted-foreground" />
+            <Text as="h3" size="m" className="mt-1 text-text-primary">
+              {platformFeature.title}
+            </Text>
+          </div>
+          <ul className="list-none flex flex-col gap-1.5">
+            {platformFeature.items.map((item, itemIndex) => (
+              <li key={itemIndex} className="flex items-start gap-2">
+                <span className="w-0.75 h-0.75 shrink-0 bg-text-tertiary" aria-hidden />
+                <Text size="s">{item}</Text>
+              </li>
+            ))}
+          </ul>
+        </CornerBox>
       </div>
     </div>
   );

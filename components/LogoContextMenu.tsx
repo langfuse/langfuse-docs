@@ -35,49 +35,28 @@ const LogoContextMenu: React.FC<{
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger />
       <DropdownMenuPortal>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={(e) => handleAction(e, "/", false)}>
-            <ExternalLink size={14} className="mr-2" />
-            Open in new tab
+        <DropdownMenuContent className="min-w-[180px]">
+          <DropdownMenuItem
+            onClick={(e) => handleAction(e, "/langfuse-icon.svg", true)}
+            className="cursor-pointer"
+          >
+            <Download size={14} className="shrink-0" />
+            Langfuse Icon
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => handleAction(e, "/langfuse-wordart.svg", true)}
+            className="cursor-pointer"
+          >
+            <Download size={14} className="shrink-0" />
+            Langfuse Wordmark
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_logo.png", true)}
+            onClick={(e) => handleAction(e, "/brand", false)}
+            className="cursor-pointer"
           >
-            <Download size={14} className="mr-2" />
-            Logo (png)
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_logo.svg", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Logo (svg)
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_logo_white.png", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Logo white (png)
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_logo_white.svg", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Logo white (svg)
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_icon.png", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Icon (png)
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_icon.svg", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Icon (svg)
+            <ExternalLink size={14} className="shrink-0" />
+            Brand Assets & Guide
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenuPortal>

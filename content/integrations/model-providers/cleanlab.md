@@ -45,8 +45,8 @@ dotenv.load_dotenv()
 This guide requires a Cleanlab TLM API key. If you don't have one, you can sign up for a free trial [here](https://tlm.cleanlab.ai/).
 
 This guide requires four API keys:
-- [Langfuse Public Key](https://us.cloud.langfuse.com/)
-- [Langfuse Secret Key](https://us.cloud.langfuse.com/)
+- [Langfuse Public Key](https://cloud.langfuse.com/) (available in any Langfuse Cloud region: [EU](https://cloud.langfuse.com), [US](https://us.cloud.langfuse.com), [Japan](https://jp.cloud.langfuse.com), or [HIPAA](https://hipaa.cloud.langfuse.com))
+- Langfuse Secret Key (from the same project)
 - [OpenAI API Key](https://platform.openai.com/api-keys)
 - [Cleanlab TLM API Key](https://tlm.cleanlab.ai/)
 
@@ -58,7 +58,7 @@ This guide requires four API keys:
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 os.environ["OPENAI_API_KEY"] = "<openai_api_key>"
 

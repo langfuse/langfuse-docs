@@ -51,6 +51,13 @@ To embed a "gif", actually embed a video and use `gifMode` (`<Video src="" gifMo
 
 Interested in stack of Q&A docs chatbot? Checkout the [blog post](https://langfuse.com/blog/qa-chatbot-for-langfuse-docs) for implementation details (all open source)
 
+## Search & AI chat
+
+The docs site uses [Inkeep](https://inkeep.com/) for two separate embeds:
+
+- **Search** — Inkeep's embedded search widget.
+- **Ask AI chat** — Fumadocs' built-in Inkeep chat integration.
+
 ## LLM Features
 
 The docs site includes four interconnected features designed to make documentation accessible to LLMs and AI tools:

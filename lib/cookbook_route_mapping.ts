@@ -5,14 +5,15 @@ export const COOKBOOK_ROUTE_MAPPING: {
   ipynbPath: string;
   canonicalPath?: string;
 }[] = cookbookRoutes
-  .flatMap(({ docsPath, notebook }) => [
-    {
-      // default export to cookbook folder
-      path: `/guides/cookbook/${notebook.replace(".ipynb", "")}`,
-      ipynbPath: `/cookbook/${notebook}`,
-      // if also in docs, set cookbook as canonical path
-      canonicalPath: docsPath ? `/${docsPath}` : undefined,
-    },
+  .flatMap(({ docsPath, notebook, isGuide }) => [
+    // Only include a /guides/cookbook/ entry when isGuide is true (default)
+    isGuide !== false
+      ? {
+          path: `/guides/cookbook/${notebook.replace(".ipynb", "")}`,
+          ipynbPath: `/cookbook/${notebook}`,
+          canonicalPath: docsPath ? `/${docsPath}` : undefined,
+        }
+      : null,
     docsPath
       ? {
           path: `/${docsPath}`,

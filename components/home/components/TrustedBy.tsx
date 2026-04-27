@@ -42,7 +42,7 @@ export function TrustedBy({
         <div className="text-xs text-muted-foreground">Trusted by:</div>
         <div className="flex items-center pl-4">
           {customers && customers.length > 0 ? (
-            <TooltipProvider delayDuration={200}>
+            <TooltipProvider>
               <div className="flex items-center">
                 {customers.map((customer, index) => (
                   <Tooltip key={index}>

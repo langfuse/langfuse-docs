@@ -1,12 +1,14 @@
 ---
 title: Careers at Langfuse
 description: "Join the Langfuse team to build the leading open-source LLM engineering platform"
+contentWidth: docs
 ---
 
 import { CTACard } from "@/components/CTACard";
 import { Button } from "@/components/ui/button";
-import { Header } from "@/components/Header";
-import { ImpactChart } from "@/components/customers/ImpactChart";
+import { Heading } from "@/components/ui/heading";
+import { TextHighlight } from "@/components/ui/text-highlight";
+import { Text } from "@/components/ui/text";
 import {
   Carousel,
   CarouselContent,
@@ -14,23 +16,16 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
-import { CredibilitySentence } from "@/components/credibilitySentence";
+import { CredibilitySentence } from "@/components/CredibilitySentence";
 
-<div className="md:container">
-  <div className="flex flex-col items-center content-center text-center my-10 mb-20">
-    <Header
-      title="Building Langfuse"
-      description="Join the team building the leading open-source LLM engineering platform"
-      h="h1"
-    />
-    <Button asChild variant="default" size="lg">
-      <a
-        href="https://jobs.ashbyhq.com/langfuse"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View Open Positions →
-      </a>
+<div className="not-prose flex flex-col gap-4 mb-8 items-center text-center">
+  <Heading as="h1" size="large">
+    <TextHighlight>Building Langfuse</TextHighlight>
+  </Heading>
+  <Text>Join the team building the leading open-source LLM engineering platform</Text>
+  <div className="mt-2 inline-flex">
+    <Button href="https://jobs.ashbyhq.com/langfuse" target="_blank" rel="noopener noreferrer">
+      View Open Positions →
     </Button>
   </div>
 </div>
@@ -49,30 +44,32 @@ If complex technical problems & great developer experiences excite you, we'd lov
 
 ## Team
 
+import { CarouselSlide } from "@/components/CarouselSlide";
+
 <Carousel
   className="w-full"
   opts={{
     loop: true,
   }}
 >
-  <CarouselContent>
+  <CarouselContent className="items-stretch">
     <CarouselItem>
-      <Frame fullWidth>![Langfuse Team](/images/people/team.jpg)</Frame>
+      <CarouselSlide src="/images/people/team.jpg" alt="Langfuse Team" />
     </CarouselItem>
     <CarouselItem>
-      <Frame fullWidth>![Langfuse Office](/images/careers/office3.jpg)</Frame>
+      <CarouselSlide src="/images/careers/office3.jpg" alt="Langfuse Office" />
     </CarouselItem>
     <CarouselItem>
-      <Frame fullWidth>![Langfuse Team](/images/careers/team3.jpg)</Frame>
+      <CarouselSlide src="/images/careers/team3.jpg" alt="Langfuse Team" />
     </CarouselItem>
     <CarouselItem>
-      <Frame fullWidth>![Langfuse Team](/images/careers/team4.jpg)</Frame>
+      <CarouselSlide src="/images/careers/team4.jpg" alt="Langfuse Team" />
     </CarouselItem>
     <CarouselItem>
-      <Frame fullWidth>![Langfuse Team](/images/careers/team5.jpg)</Frame>
+      <CarouselSlide src="/images/careers/team5.jpg" alt="Langfuse Team" />
     </CarouselItem>
     <CarouselItem>
-      <Frame fullWidth>![Langfuse Team](/images/careers/team6.jpg)</Frame>
+      <CarouselSlide src="/images/careers/team6.jpg" alt="Langfuse Team" />
     </CarouselItem>
   </CarouselContent>
   <CarouselPrevious />
@@ -233,8 +230,6 @@ import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.md
 <CredibilitySentence bold={false} />
 
 <PublicMetricsDashboard />
-
-## Work with us
 
 <CTACard
   title="Curious to build with us?"

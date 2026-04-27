@@ -1,0 +1,88 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for Qwen with Langfuse
+sidebarTitle: Qwen
+logo: /images/integrations/qwen_icon.png
+description: Learn how to use Langfuse to monitor and trace your Qwen LLM applications using the OpenAI SDK integration.
+category: Integrations
+---
+
+# Observability for Qwen with Langfuse
+
+This notebook shows how to trace **Qwen** API calls with **Langfuse** using the OpenAI SDK drop-in replacement.
+
+> **What is Qwen?** [Qwen](https://qwen.ai) is a family of large language models developed by Alibaba Cloud, offering models like Qwen-Plus, Qwen-Max, and Qwen-Turbo through an OpenAI-compatible API.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications.
+
+<Steps>
+## Step 1: Install Dependencies
+
+
+```python
+%pip install openai langfuse
+```
+
+## Step 2: Set Up Environment Variables
+
+Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting).
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+os.environ["DASHSCOPE_API_KEY"] = "sk-..."  # Get your API key from https://qwen.ai/apiplatform
+```
+
+## Step 3: Use Langfuse OpenAI Drop-in Replacement
+
+Instead of importing `openai` directly, import it from `langfuse.openai`. All calls through this client are automatically traced in Langfuse.
+
+The Qwen API is OpenAI-compatible, so we just point the client at the [DashScope endpoint](https://help.aliyun.com/zh/model-studio/developer-reference/compatibility-of-openai-with-dashscope).
+
+
+```python
+import os
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+    api_key=os.environ.get("DASHSCOPE_API_KEY"),
+    base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+)
+```
+
+## Step 4: Run an Example
+
+Send a chat completion request to a Qwen model. The trace will appear in your Langfuse dashboard automatically.
+
+
+```python
+response = client.chat.completions.create(
+    model="qwen3.6-plus",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What makes open-source AI models important?"},
+    ],
+    name="Qwen-Trace",
+)
+print(response.choices[0].message.content)
+```
+
+## Step 5: View Traces in Langfuse
+
+After running the example, open your [Langfuse dashboard](https://cloud.langfuse.com) to see the full trace including prompts, completions, tool calls, token usage, and latency.
+
+![Example Qwen trace in Langfuse](https://langfuse.com/images/cookbook/integration-qwen/qwen-example-trace.png)
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d76897711559e73336d5257178f837b6?observation=b0dc6d1e7957f9fa&timestamp=2026-04-17T07:39:44.054Z&traceId=d76897711559e73336d5257178f837b6)
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />

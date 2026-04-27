@@ -6,7 +6,7 @@ sidebarTitle: Scores via API/SDK
 
 # Scores via API/SDK
 
-You can use the Langfuse SDKs or API to add scores to traces, observations, sessions and dataset runs. This is an evaluation method that allows to set up custom evaluation workflows and extend the scoring capabilities of Langfuse. See [Scores](/docs/evaluation/core-concepts#scores) for the data model.
+You can use the Langfuse SDKs or API to add [scores](/docs/evaluation/scores/overview) to traces, observations, sessions and dataset runs. This is an evaluation method that allows to set up custom evaluation workflows and extend the scoring capabilities of Langfuse. See the [data model](/docs/evaluation/scores/data-model#scores) for full details on the score object.
 
 ## Common Use Cases
 
@@ -31,7 +31,7 @@ See the [API reference](/docs/api) for full details on the POST and GET endpoint
 
 ### Trace or Observation-level Scores
 
-You can add scores via the Langfuse SDKs or API. Scores can take one of three data types: **Numeric**, **Categorical** or **Boolean**.
+You can add scores via the Langfuse SDKs or API. Scores can take one of four data types: **Numeric**, **Categorical**, **Boolean**, or **Text**. See [Score Types](/docs/evaluation/scores/overview#score-types) for details.
 
 If a score is ingested manually using a `trace_id` to link the score to a trace, it is not necessary to wait until the trace has been created. The score will show up in the scores table and will be linked to the trace once the trace with the same `trace_id` is created.
 
@@ -42,7 +42,7 @@ For trace and observation scores, `trace_id`/`traceId` is required and `observat
 <LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
 <Tab>
 
-<Tabs items={["Numeric", "Categorical", "Boolean"]}>
+<Tabs items={["Numeric", "Categorical", "Boolean", "Text"]}>
 <Tab>
 Numeric score values must be provided as float.
 
@@ -202,12 +202,65 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
 ```
 
 </Tab>
+<Tab>
+Text score values must be provided as strings between 1 and 500 characters.
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    name="reviewer_notes",
+    value="The response was helpful but could be more concise.",
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    data_type="TEXT", # optional, inferred if not provided
+    comment="Reviewed by QA team", # optional
+)
+
+# Method 2: Score current span/generation (within context)
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    # Score the current span
+    span.score(
+        name="reviewer_notes",
+        value="The response was helpful but could be more concise.",
+        data_type="TEXT",
+        comment="Reviewed by QA team"
+    )
+
+    # Score the trace
+    span.score_trace(
+        name="overall_notes",
+        value="Good quality overall, minor formatting issues.",
+        data_type="TEXT"
+    )
+
+# Method 3: Score via the current context
+with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
+    # Score the current span
+    langfuse.score_current_span(
+        name="reviewer_notes",
+        value="The response was helpful but could be more concise.",
+        data_type="TEXT",
+        comment="Reviewed by QA team"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_notes",
+        value="Good quality overall, minor formatting issues.",
+        data_type="TEXT"
+    )
+```
+
+</Tab>
 </Tabs>
 
 </Tab>
 <Tab>
 
-<Tabs items={["Numeric", "Categorical", "Boolean"]}>
+<Tabs items={["Numeric", "Categorical", "Boolean", "Text"]}>
 <Tab>
 Numeric score values must be provided as float.
 
@@ -277,6 +330,29 @@ await langfuse.flush();
 ```
 
 </Tab>
+<Tab>
+Text score values must be provided as strings between 1 and 500 characters.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "reviewer_notes",
+  value: "The response was helpful but could be more concise.",
+  dataType: "TEXT", // optional, inferred if not provided
+  comment: "Reviewed by QA team", // optional
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
 </Tabs>
 
 </Tab>
@@ -284,7 +360,7 @@ await langfuse.flush();
 
 You can also create scores directly via the [REST API](https://api.reference.langfuse.com/#tag/score/POST/api/public/scores). Authenticate using HTTP Basic Auth with your Langfuse Public Key as username and Secret Key as password.
 
-<Tabs items={["Numeric", "Categorical", "Boolean"]}>
+<Tabs items={["Numeric", "Categorical", "Boolean", "Text"]}>
 <Tab>
 Numeric score values must be provided as float.
 
@@ -335,6 +411,24 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
     "value": 0,
     "dataType": "BOOLEAN",
     "comment": "Incorrect answer"
+  }'
+```
+
+</Tab>
+<Tab>
+Text score values must be provided as strings between 1 and 500 characters.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "traceId": "trace_id_here",
+    "observationId": "observation_id_here",
+    "name": "reviewer_notes",
+    "value": "The response was helpful but could be more concise.",
+    "dataType": "TEXT",
+    "comment": "Reviewed by QA team"
   }'
 ```
 
@@ -410,7 +504,7 @@ By default, Langfuse allows for multiple scores of the same `name` on the same t
 
 In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and add this as an `id` (JS/TS) / `score_id` (Python) when creating the score, e.g. `<trace_id>-<score_name>`.
 
-Note that if you expect API calls for the same score to be 60+ days apart, you should also use the same timestamp. See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#updating-traces-observations-and-scores) for more details.
+Note that if you expect API calls for the same score to be 30+ days apart, you should also use the same timestamp. See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#updating-traces-observations-and-scores) for more details.
 
 ### Enforcing a Score Config
 
@@ -422,15 +516,16 @@ Whenever you provide a `ScoreConfig`, the score data will be validated against t
 
 - **Score Name**: Must equal the config's name
 - **Score Data Type**: When provided, must match the config's data type
-- **Score Value when Type is numeric**: Value must be within the min and max values defined in the config (if provided, min and max are optional and otherwise are assumed as -∞ and +∞ respectively)
-- **Score Value when Type is categorical**: Value must map to one of the categories defined in the config
-- **Score Value when Type is boolean**: Value must equal `0` or `1`
+- **Score Value when Type is `NUMERIC`**: Value must be within the min and max values defined in the config (if provided, min and max are optional and otherwise are assumed as -∞ and +∞ respectively)
+- **Score Value when Type is `CATEGORICAL`**: Value must map to one of the categories defined in the config
+- **Score Value when Type is `BOOLEAN`**: Value must equal `0` or `1`
+- **Score Value when Type is `TEXT`**: Value must be a non-empty string of at most 500 characters
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
 
 <Tab>
 
-<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
 <Tab>
 When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
 
@@ -525,12 +620,43 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation") 
 ```
 
 </Tab>
+<Tab>
+When ingesting text scores, provide the value as a string (1–500 characters). If you provide a configId, the score's name and config's name must match as well as their data types.
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    name="reviewer_notes",
+    value="The response was helpful but could be more concise.",
+    comment="Reviewed by QA team", # optional
+    score_id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
+    config_id="24680-6565-3453654-43543", # optional
+    data_type="TEXT" # optional, possibly inferred
+)
+
+# Method 2: Score within context
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    span.score(
+        name="reviewer_notes",
+        value="The response was helpful but could be more concise.",
+        comment="Reviewed by QA team",
+        config_id="24680-6565-3453654-43543",
+        data_type="TEXT"
+    )
+```
+
+</Tab>
 </Tabs>
 
 </Tab>
 <Tab>
 
-<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
 <Tab>
 When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
 
@@ -603,6 +729,30 @@ await langfuse.flush();
 ```
 
 </Tab>
+<Tab>
+When ingesting text scores, provide the value as a string (1–500 characters). If you provide a configId, the score's name and config's name must match as well as their data types.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "reviewer_notes",
+  value: "The response was helpful but could be more concise.",
+  comment: "Reviewed by QA team", // optional
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  configId: "24680-6565-3453654-43543", // optional
+  dataType: "TEXT", // optional, possibly inferred
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
 </Tabs>
 
 </Tab>
@@ -610,7 +760,7 @@ await langfuse.flush();
 
 You can also enforce score configs via the [REST API](https://api.reference.langfuse.com/#tag/score/POST/api/public/scores) by providing a `configId`.
 
-<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
 <Tab>
 When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range.
 
@@ -671,6 +821,26 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 ```
 
 </Tab>
+<Tab>
+When ingesting text scores, provide the value as a string (1–500 characters). If you provide a configId, the score's name and config's name must match as well as their data types.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "unique_id",
+    "traceId": "trace_id_here",
+    "observationId": "observation_id_here",
+    "name": "reviewer_notes",
+    "value": "The response was helpful but could be more concise.",
+    "dataType": "TEXT",
+    "configId": "24680-6565-3453654-43543",
+    "comment": "Reviewed by QA team"
+  }'
+```
+
+</Tab>
 </Tabs>
 
 </Tab>
@@ -690,7 +860,7 @@ Certain score properties might be inferred based on your input:
 
 Detailed Examples:
 
-<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
 <Tab>
 For example, let's assume you'd like to ingest a numeric score to measure **accuracy**. We have included a table of possible score ingestion scenarios below.
 
@@ -727,6 +897,19 @@ For example, let's assume you'd like to ingest a boolean score to measure **help
 | `3`     | `BOOLEAN` | `Null`    | Error: boolean data type expects `0` or `1` as input value  |                    |                               | No                               |
 | `0.9`   | `Null`    | `93547`   | Data type and value's string equivalent inferred            | `BOOLEAN`          | `True`                        | Conditional on config validation |
 | `depth` | `BOOLEAN` | `93547`   | Error: data type of value does not match provided data type |                    |                               | No                               |
+
+</Tab>
+<Tab>
+For example, let's assume you'd like to ingest a text score to capture **reviewer notes**. Text scores must be non-empty strings of at most 500 characters.
+
+| Value   | Data Type | Config Id | Description                                                 | Inferred Data Type | Valid                            |
+| ------- | --------- | --------- | ----------------------------------------------------------- | ------------------ | -------------------------------- |
+| `"Good response"` | `Null`    | `Null`    | Data type is inferred                              | `TEXT`             | Yes                              |
+| `"Good response"` | `TEXT`    | `Null`    | No properties inferred                             |                    | Yes                              |
+| `0.9`   | `TEXT`    | `Null`    | Error: data type of value does not match provided data type |                    | No                               |
+| `"Good response"` | `TEXT`    | `24680`   | No properties inferred                             |                    | Conditional on config validation |
+| `"Good response"` | `Null`    | `24680`   | Data type inferred                                 | `TEXT`             | Conditional on config validation |
+| `""`    | `TEXT`    | `Null`    | Error: text scores must be non-empty                        |                    | No                               |
 
 </Tab>
 </Tabs>

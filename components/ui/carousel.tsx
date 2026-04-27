@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
@@ -80,10 +81,16 @@ const ImageZoomModal = ({
   }, [onClose, onNavigate, currentIndex, images.length]);
 
   const currentImage = images[currentIndex];
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-1000 flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={onClose}
     >
       <div className="relative max-h-[90vh] max-w-[90vw] bg-white rounded-lg shadow-2xl">
@@ -112,7 +119,7 @@ const ImageZoomModal = ({
             />
           </svg>
         </button>
-        
+
         {/* Navigation indicators */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
           {images.map((_, index) => (
@@ -133,7 +140,8 @@ const ImageZoomModal = ({
           ))}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -201,7 +209,7 @@ const Carousel = React.forwardRef<
     // Extract images from the carousel
     const extractImages = useCallback(() => {
       const images: { src: string; alt: string }[] = [];
-      
+
       if (carouselContainerRef.current) {
         const imgElements = carouselContainerRef.current.querySelectorAll('img');
         imgElements.forEach((img) => {
@@ -211,14 +219,14 @@ const Carousel = React.forwardRef<
           });
         });
       }
-      
+
       return images;
     }, []);
 
     // Handle image clicks for zoom
     const handleImageClick = useCallback((e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      
+
       // Check if clicked on an image inside this carousel
       if (target.tagName === 'IMG' && carouselContainerRef.current?.contains(target)) {
         // Only handle clicks on desktop (screens wider than 500px)
@@ -228,11 +236,11 @@ const Carousel = React.forwardRef<
 
         e.preventDefault();
         e.stopPropagation();
-        
+
         const images = extractImages();
         const imgSrc = (target as HTMLImageElement).src;
         const currentIndex = images.findIndex(img => img.src === imgSrc);
-        
+
         if (currentIndex !== -1) {
           setZoomedImage({ images, currentIndex });
         }
@@ -277,7 +285,7 @@ const Carousel = React.forwardRef<
     // Set up image click listener
     React.useEffect(() => {
       document.addEventListener('click', handleImageClick, true);
-      
+
       return () => {
         document.removeEventListener('click', handleImageClick, true);
       };
@@ -318,7 +326,7 @@ const Carousel = React.forwardRef<
             {children}
           </div>
         </CarouselContext.Provider>
-        
+
         {zoomedImage && (
           <ImageZoomModal
             images={zoomedImage.images}
@@ -380,7 +388,7 @@ CarouselItem.displayName = "CarouselItem";
 const CarouselPrevious = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
->(({ className, variant = "outline", size = "icon", ...props }, ref) => {
+>(({ className, variant = "secondary", size = "icon", ...props }, ref) => {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel();
 
   return (
@@ -388,8 +396,8 @@ const CarouselPrevious = React.forwardRef<
       ref={ref}
       variant={variant}
       size={size}
-      className={cn(
-        "absolute  h-8 w-8 rounded-full",
+      wrapperClassName={cn(
+        "!absolute",
         orientation === "horizontal"
           ? "-left-12 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -397,11 +405,9 @@ const CarouselPrevious = React.forwardRef<
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
+      icon={<ArrowLeft className="h-3.5 w-3.5" />}
       {...props}
-    >
-      <ArrowLeft className="h-4 w-4" />
-      <span className="sr-only">Previous slide</span>
-    </Button>
+    />
   );
 });
 CarouselPrevious.displayName = "CarouselPrevious";
@@ -409,7 +415,7 @@ CarouselPrevious.displayName = "CarouselPrevious";
 const CarouselNext = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
->(({ className, variant = "outline", size = "icon", ...props }, ref) => {
+>(({ className, variant = "secondary", size = "icon", ...props }, ref) => {
   const { orientation, scrollNext, canScrollNext } = useCarousel();
 
   return (
@@ -417,8 +423,8 @@ const CarouselNext = React.forwardRef<
       ref={ref}
       variant={variant}
       size={size}
-      className={cn(
-        "absolute h-8 w-8 rounded-full",
+      wrapperClassName={cn(
+        "!absolute",
         orientation === "horizontal"
           ? "-right-12 top-1/2 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -426,11 +432,9 @@ const CarouselNext = React.forwardRef<
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}
+      icon={<ArrowRight className="h-3.5 w-3.5" />}
       {...props}
-    >
-      <ArrowRight className="h-4 w-4" />
-      <span className="sr-only">Next slide</span>
-    </Button>
+    />
   );
 });
 CarouselNext.displayName = "CarouselNext";

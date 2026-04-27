@@ -13,10 +13,10 @@ Processes matter in order to fix important bugs fast, and ship highly requested 
 For product engineering, we use:
 
 - Linear for internal ticketing and collaboration via comments / RFCs
-- Plain for managing support across all channels (in-app, GitHub Discussions Support, Shared Slack Channels, Shared Email inboxes)
+- Pylon for managing support across all channels (in-app, GitHub Discussions Support, Shared Slack Channels, Shared MS Teams Channels, Shared Email inboxes)
 - GitHub
   - Issues for bug reports and near term improvements -> use via Linear (no separate inbox)
-  - Discussions for feature requests -> use via Plain (no separate inbox)
+  - Discussions for feature requests -> use via Pylon (no separate inbox)
   - PR Reviews -> use via Linear PRs (no separate inbox)
 
 We do not use:
@@ -31,12 +31,13 @@ The following diagram shows how bug reports and feature requests are handled:
 graph LR
     A["GitHub Issues (Bug Reports)"] -->|Automatically added to triage via native integration. Respond/resolve/deduplicate from Linear| H[Linear Issues]
 
-    C[GitHub Ideas Discussions] --> D[Plain Tickets]
-    E[GitHub Support Discussions] --> D[Plain Tickets]
+    C[GitHub Ideas Discussions] --> D[Pylon Tickets]
+    E[GitHub Support Discussions] --> D[Pylon Tickets]
 
-    I[Slack Channels] --> D[Plain Tickets]
-    J[Group Email Inboxes] --> D[Plain Tickets]
-    K[In-app Support] --> D[Plain Tickets]
+    I[Slack Channels] --> D[Pylon Tickets]
+    L[MS Teams Channels] --> D[Pylon Tickets]
+    J[Group Email Inboxes] --> D[Pylon Tickets]
+    K[In-app Support] --> D[Pylon Tickets]
 
     D -->|"Link to Linear issue via Customer Request. Create Linear issue if none exists yet. Close the loop when done."| G[Linear Customer Requests]
 
@@ -50,11 +51,12 @@ graph LR
 
     subgraph "Private Support"
         I
+        L
         J
         K
     end
 
-    subgraph "Plain"
+    subgraph "Pylon"
         D
     end
 
