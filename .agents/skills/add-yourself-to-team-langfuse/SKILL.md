@@ -1,7 +1,6 @@
 ---
 name: add-yourself-to-team-langfuse
 description: Add a new team member to Langfuse's canonical team data and shared team table. Use when onboarding a new employee who needs to appear on the website team, press, about, careers, or handbook pages.
-allowed-tools: Read, Edit
 ---
 
 Add a new team member to Langfuse. Ask the user for the following information before proceeding:
