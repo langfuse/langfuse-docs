@@ -1,28 +1,29 @@
 ---
-title: What is tracing for?
+title: What is tracing and what is its role in the loop
 description: Understand what tracing is, how traces are structured, and why they are the foundation of LLM observability.
 ---
 
-# What is tracing for?
+# What is tracing and what is its role in the loop
 
-Traditional software is largely deterministic. Given the same input, you get the same output, and when something breaks, a stack trace or a log line points you to the problem. But for LLM applications that's not the case. You need something else to follow your agent's behavior: traces.
+Traditional software is largely deterministic. But for LLM applications that's not the case. You need something else to follow your agent's behavior: traces.
 
-A trace captures the full journey of a single request through your application. Each step is a distinct operation, parent-child relationships between steps are preserved, and the relevant data (inputs, outputs, token counts, etc.) is attached to each one.
+A trace is a structured record of what your application did for a single request: which steps it took, what data it saw, what it produced.
 
-With tracing, you can see:
+![The AI engineering loop](/images/academy/loop-overview.png)
 
-- **Which documents were retrieved** for a given query, and whether they were relevant
-- **What prompt was sent to the model**, after all template variables were filled in
-- **Why the agent chose that tool**, based on what was in the model's context at the time
-- **Where the time and money is going**: which steps consume the most tokens or take the longest, and why
+Tracing is central to the entire improvement loop. Every other step — reviewing, building datasets, running experiments, evaluating — operates on traces.
 
 ## The anatomy of a trace
 
-A trace can be as complex or as simple as your application requires, but all traces share the same basic structure.
+A trace can be as complex or as simple as your application requires, but all traces share the same basic structure. It's composed of a set of observations that map out the path your agent took.
+
+<Callout type="info">
+*An observation is a single step in the process. It has an input, an output, and metadata about what happened during that step.*
+</Callout>
 
 ### Hierarchy
 
-A trace is a tree. At the top is the trace itself, representing the entire operation. Nested inside it are spans, each representing a single step in the process. Spans can contain other spans, forming a parent-child structure that mirrors the actual execution of your code.
+A trace has a hierarchical tree structure. Nested inside are observations that can contain other observations, forming a parent-child structure that mirrors the actual execution of your code.
 
 ![Trace hierarchy example](/images/academy/trace-hierarchy.png)
 
@@ -30,55 +31,41 @@ You can see what happened in what order, and which steps were part of which larg
 
 ### Input and output
 
-Every span has an input and an output. For an LLM span, the input is the prompt (sometimes the full message history), and the output is the response. For a retrieval span, it can be as simple as a search query and the returned documents.
+Every observation has an input and an output. For an LLM observation, the input is the prompt (sometimes the full message history, tool call results, etc.), and the output is the response. For a retrieval observation, it can be as simple as a search query and the returned documents.
 
-### Span types
+### Observation types
 
-In order to make it easy to differentiate between operations, you'll see different types of spans. The most common ones are:
+In order to make it easy to differentiate between operations, you'll see different types of observations. The most common ones are. Each type of observation is used to capture different kinds of interactions of an agent.
 
-| Span type | Captures | Example |
-| --- | --- | --- |
-| Generation spans | A call to a language model | Full prompt or message history as input, the completion as output, plus metadata like the model name and token counts |
-| Retrieval spans | A step that fetches information from an external source | Query and the returned documents |
-| Tool call spans | An invocation of a tool or function by an agent | Which tool was called, the arguments, and the return value |
-| General/default spans | General processes | Highly dependent on the use case |
+| Action of an agent | Typical observation data |
+| --- | --- |
+| A call to a language model | Full prompt or message history as input, the completion as output, plus metadata like the model name and token counts |
+| A step that fetches information from an external source | Query and the returned documents |
+| An invocation of a tool or function by an agent | Which tool was called, the arguments, and the return value |
+| General processes | Highly dependent on the use case |
 
-Span types are a convenience, not a rigid schema. They make traces easier to read and filter. In a trace with twenty spans, being able to quickly spot the three LLM calls saves time.
+Observation types make it easier to read traces and to filter. In a trace with 20 observations, being able to quickly spot the LLM calls saves time.
 
 ### Cost, latency, token usage
 
-The most relevant span type here is the generation span. There are a few LLM-specific attributes you will always want to track:
+Beyond input and output, there are a few attributes on observations that are table stakes in any LLM application: cost, latency, and token usage. These are recorded per observation and aggregated at the trace level.
 
-- Token usage
-- Cost of the LLM call
-- Latency
+### The scope of a trace
 
-These metrics are recorded per span but aggregated at the trace level.
+Most of the time you would not see an entire agent's lifecycle execution in one trace. Traces can be grouped into sessions. But where do you draw the line between a trace and a session?
+
+A general rule of thumb is: one trace corresponds to one unit of work from the user's perspective. In most applications, that means one trace per request-response cycle.
 
 <Callout>
 TODO: show examples based on specific use cases with Langfuse screenshots using general terms:
 - Flight booking agent
 - Customer support chatbot
-</Callout>
-
-## The scope of a trace
-
-Spans can be grouped into traces, and traces can be grouped into sessions. But where do you draw the line between a trace and a session?
-
-A general rule of thumb is: one trace corresponds to one unit of work from the user's perspective. In most applications, that means one trace per request-response cycle.
-
-<Callout>
-TODO: show examples based on specific use cases, describing the scope of a trace vs session:
-- Chatbot
+- Describing the scope of a trace vs session
 - Ideally 1-2 sufficiently different use cases
 </Callout>
 
 ## Where to start
 
-<Callout>
-TODO:
-- Refer to how-to guide of setting up traces, make sure your traces adhere to the quality descriptions above
-- If they want to, they can go deeper into the topic (linking to sub-pages)
-- If they are happy, next loop step
-- Idea: add a small exercise showing incomplete traces, asking "what would you improve about this trace?" with expandable answers (missing cost, missing input/output, etc.)
-</Callout>
+Now that you know what a trace looks like and what it captures, make sure you set up tracing for your application well.
+
+Once you see traces, you can move on to the next step: monitoring. Monitoring is what connects traces to the loop of improving and iterating on your agent.
