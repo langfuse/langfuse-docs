@@ -369,7 +369,6 @@ export const FeatureTabs = ({
                 src={feature.image.light}
                 alt=""
                 fill
-                quality={100}
                 sizes="806px"
                 loading={isNext ? "eager" : "lazy"}
               />
@@ -472,7 +471,6 @@ export const FeatureTabs = ({
             alt={mobileFeature?.image.alt}
             width={1360}
             height={1640}
-            quality={100}
             className="absolute left-0 top-0 min-w-full min-h-full object-cover object-top-left"
             sizes="(min-width: 640px) 1360px"
             priority

@@ -126,11 +126,8 @@ export function AllTheTools() {
                     <Image
                       src={tool.visual}
                       alt={tool.title}
-                      width={100}
-                      height={100}
                       className="object-contain w-full h-full"
-                      quality={100}
-                      unoptimized
+                      sizes="(min-width: 1280px) 420px, (min-width: 640px) 50vw, 100vw"
                     />
                   </div>
                 </div>
@@ -158,11 +155,8 @@ export function AllTheTools() {
                     <Image
                       src={tool.visual}
                       alt={tool.title}
-                      width={100}
-                      height={100}
                       className="object-contain w-full h-full"
-                      quality={100}
-                      unoptimized
+                      sizes="(min-width: 1280px) 320px, 50vw"
                     />
                   </div>
                 </div>
