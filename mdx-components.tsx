@@ -10,7 +10,6 @@ import { FetchReadme } from "@/components/FetchReadme";
 import { Cards, Card, Steps, FileTree, FileTreeFile, FileTreeFolder, Playground } from "@/components/docs";
 import { AvailabilityBanner } from "@/components/Availability";
 import { Link as MdxLink, type LinkProps } from "@/components/ui/link";
-import { ImprovementLoop } from "@/components/academy/ImprovementLoop";
 import { Callout } from "@/components/ui/callout";
 import { Table } from "@/components/ui/table";
 
@@ -62,7 +61,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     AvailabilityBanner,
     Mermaid,
     Playground,
-    ImprovementLoop,
     ...components,
   };
 }
