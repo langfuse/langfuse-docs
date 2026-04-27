@@ -21,6 +21,31 @@ function wrapWords(text: string, maxChars: number): string[] {
   return lines.length ? lines : [""];
 }
 
+/**
+ * Split a string into "tokens" that can be laid out independently.
+ * Latin/space-delimited text stays as whole words; CJK characters become
+ * individual tokens so they can wrap at any character boundary.
+ */
+function tokenize(text: string): string[] {
+  const tokens: string[] = [];
+  let buf = "";
+  for (const ch of text) {
+    const cp = ch.codePointAt(0)!;
+    if (/\s/.test(ch)) {
+      if (buf) { tokens.push(buf); buf = ""; }
+      continue;
+    }
+    if (isCjkOrFullWidth(cp)) {
+      if (buf) { tokens.push(buf); buf = ""; }
+      tokens.push(ch);
+    } else {
+      buf += ch;
+    }
+  }
+  if (buf) tokens.push(buf);
+  return tokens;
+}
+
 /** ~average char width for F37 (panel / two-line checks). */
 const ANALOG_CHAR_EM = 0.48;
 /**
@@ -50,8 +75,49 @@ const TITLE_LONG_TITLE_FONT_SIZES = [120, 112, ...TITLE_FONT_SIZES];
 const DESC_FONT_SIZES = [26, 24, 22, 20, 18, 16, 14, 13, 12];
 const TITLE_MAX_REFINE_FS = 120;
 
+/**
+ * CJK and other full-width characters render at roughly 1em while Latin
+ * letters average around the given `em` fraction.  Count effective character
+ * units so width estimation works for mixed-script titles (e.g. Japanese).
+ */
+function effectiveCharCount(line: string, em: number): number {
+  let units = 0;
+  for (const ch of line) {
+    const cp = ch.codePointAt(0)!;
+    if (isCjkOrFullWidth(cp)) {
+      units += 1.0 / em;
+    } else {
+      units += 1;
+    }
+  }
+  return units;
+}
+
+function isCjkOrFullWidth(cp: number): boolean {
+  return (
+    (cp >= 0x2e80 && cp <= 0x9fff) ||  // CJK radicals, kangxi, ideographs
+    (cp >= 0xf900 && cp <= 0xfaff) ||  // CJK compatibility ideographs
+    (cp >= 0xfe30 && cp <= 0xfe4f) ||  // CJK compatibility forms
+    (cp >= 0xff01 && cp <= 0xff60) ||  // fullwidth Latin + halfwidth forms start
+    (cp >= 0xffe0 && cp <= 0xffe6) ||  // fullwidth signs
+    (cp >= 0x20000 && cp <= 0x2fa1f) || // CJK unified ext B–F, compat supplement
+    (cp >= 0x3000 && cp <= 0x303f) ||  // CJK symbols and punctuation
+    (cp >= 0x3040 && cp <= 0x309f) ||  // Hiragana
+    (cp >= 0x30a0 && cp <= 0x30ff) ||  // Katakana
+    (cp >= 0x31f0 && cp <= 0x31ff) ||  // Katakana phonetic extensions
+    (cp >= 0xac00 && cp <= 0xd7af)     // Hangul syllables
+  );
+}
+
+function hasCjk(text: string): boolean {
+  for (const ch of text) {
+    if (isCjkOrFullWidth(ch.codePointAt(0)!)) return true;
+  }
+  return false;
+}
+
 function approxLineWidthPx(line: string, fontSize: number, em: number): number {
-  return line.length * fontSize * em;
+  return effectiveCharCount(line, em) * fontSize * em;
 }
 
 /** Two lines using an approximate pixel budget (never wider than the panel). */
@@ -61,18 +127,25 @@ function splitTwoLinesByWidth(
   innerW: number
 ): string[] | null {
   const budget = innerW;
-  const words = title.trim().split(/\s+/).filter(Boolean);
+  const cjk = hasCjk(title);
+  const words = cjk
+    ? tokenize(title)
+    : title.trim().split(/\s+/).filter(Boolean);
   if (words.length <= 1) return null;
+  const join = cjk ? joinTokens : (t: string[]) => t.join(" ");
   let best: string[] | null = null;
   let bestImbalance = Infinity;
   for (let cut = 1; cut < words.length; cut++) {
-    const l1 = words.slice(0, cut).join(" ");
-    const l2 = words.slice(cut).join(" ");
+    const l1 = join(words.slice(0, cut));
+    const l2 = join(words.slice(cut));
     if (
       approxLineWidthPx(l1, fontSize, ANALOG_CHAR_EM) <= budget &&
       approxLineWidthPx(l2, fontSize, ANALOG_CHAR_EM) <= budget
     ) {
-      const imbalance = Math.abs(l1.length - l2.length);
+      const imbalance = Math.abs(
+        approxLineWidthPx(l1, fontSize, ANALOG_CHAR_EM) -
+        approxLineWidthPx(l2, fontSize, ANALOG_CHAR_EM)
+      );
       if (imbalance < bestImbalance) {
         bestImbalance = imbalance;
         best = [l1, l2];
@@ -83,13 +156,17 @@ function splitTwoLinesByWidth(
 }
 
 function splitTwoLines(title: string, maxCharsPerLine: number): string[] | null {
-  const words = title.trim().split(/\s+/).filter(Boolean);
+  const cjk = hasCjk(title);
+  const words = cjk
+    ? tokenize(title)
+    : title.trim().split(/\s+/).filter(Boolean);
   if (words.length <= 1) return null;
+  const join = cjk ? joinTokens : (t: string[]) => t.join(" ");
   let best: string[] | null = null;
   let bestImbalance = Infinity;
   for (let cut = 1; cut < words.length; cut++) {
-    const l1 = words.slice(0, cut).join(" ");
-    const l2 = words.slice(cut).join(" ");
+    const l1 = join(words.slice(0, cut));
+    const l2 = join(words.slice(cut));
     if (l1.length <= maxCharsPerLine && l2.length <= maxCharsPerLine) {
       const imbalance = Math.abs(l1.length - l2.length);
       if (imbalance < bestImbalance) {
@@ -125,25 +202,48 @@ function titleTextBudgetWidthPx(innerW: number): number {
 }
 
 /**
+ * Join tokens back into display text: CJK tokens are adjacent without spaces;
+ * Latin tokens are separated by spaces.
+ */
+function joinTokens(tokens: string[]): string {
+  if (tokens.length === 0) return "";
+  let result = tokens[0];
+  for (let i = 1; i < tokens.length; i++) {
+    const prevCjk = hasCjk(tokens[i - 1]);
+    const curCjk = hasCjk(tokens[i]);
+    if (prevCjk && curCjk) {
+      result += tokens[i];
+    } else {
+      result += " " + tokens[i];
+    }
+  }
+  return result;
+}
+
+/**
  * Pack words into rows: each row is the longest prefix that still fits the text budget.
  * This matches one yellow row = one visual line (no `wrapWords` char cap that then soft-wraps in Satori).
+ * Uses tokenize() for CJK-aware splitting so characters can wrap mid-"word".
  */
 function greedyWordsToTitleRows(
   title: string,
   fontSize: number,
   innerW: number
 ): string[] {
-  const words = title.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) {
+  const tokens = hasCjk(title)
+    ? tokenize(title)
+    : title.trim().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) {
     return [""];
   }
+  const join = hasCjk(title) ? joinTokens : (t: string[]) => t.join(" ");
   const budget = titleTextBudgetWidthPx(innerW);
   const rows: string[] = [];
   let start = 0;
-  while (start < words.length) {
+  while (start < tokens.length) {
     let end = start;
-    for (let j = start + 1; j <= words.length; j++) {
-      const candidate = words.slice(start, j).join(" ");
+    for (let j = start + 1; j <= tokens.length; j++) {
+      const candidate = join(tokens.slice(start, j));
       if (
         approxLineWidthPx(candidate, fontSize, TITLE_LONG_LINE_EM) *
           TITLE_RENDER_SAFETY <=
@@ -155,10 +255,10 @@ function greedyWordsToTitleRows(
       }
     }
     if (end === start) {
-      rows.push(words[start]);
+      rows.push(tokens[start]);
       start += 1;
     } else {
-      rows.push(words.slice(start, end).join(" "));
+      rows.push(join(tokens.slice(start, end)));
       start = end;
     }
   }
@@ -237,7 +337,11 @@ function splitTitleIntoBalancedLines(
   innerW: number,
   targetLines: number
 ): string[] | null {
-  const words = title.trim().split(/\s+/).filter(Boolean);
+  const cjk = hasCjk(title);
+  const words = cjk
+    ? tokenize(title)
+    : title.trim().split(/\s+/).filter(Boolean);
+  const join = cjk ? joinTokens : (t: string[]) => t.join(" ");
   const n = words.length;
   if (targetLines < 1 || targetLines > n) return null;
   const budget = titleTextBudgetWidthPx(innerW);
@@ -248,7 +352,7 @@ function splitTitleIntoBalancedLines(
   for (let i = 0; i < n; i++) {
     let line = "";
     for (let j = i; j < n; j++) {
-      line = line ? `${line} ${words[j]}` : words[j];
+      line = join(words.slice(i, j + 1));
       const w =
         approxLineWidthPx(line, fontSize, TITLE_LONG_LINE_EM) *
         TITLE_RENDER_SAFETY;
@@ -302,7 +406,7 @@ function splitTitleIntoBalancedLines(
   for (let k = targetLines; k >= 1; k--) {
     const start = prev[k][end];
     if (start < 0) return null;
-    out.push(words.slice(start, end).join(" "));
+    out.push(join(words.slice(start, end)));
     end = start;
   }
   out.reverse();
@@ -385,6 +489,7 @@ function fitTitleLayoutLongAtLineCount(
 function isLongTitle(title: string): boolean {
   const t = title.trim();
   if (t.length > 105) return true;
+  if (hasCjk(t) && effectiveCharCount(t, ANALOG_CHAR_EM) > 105 / ANALOG_CHAR_EM) return true;
   const words = t.split(/\s+/).filter(Boolean);
   return words.length > 14;
 }
@@ -393,6 +498,7 @@ function isLongTitle(title: string): boolean {
 function isShortTitle(title: string): boolean {
   const t = title.trim();
   if (!t) return false;
+  if (hasCjk(t)) return false;
   const words = t.split(/\s+/).filter(Boolean);
   return words.length <= 3 && t.length <= 36;
 }
