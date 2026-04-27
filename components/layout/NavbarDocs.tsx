@@ -4,7 +4,7 @@ import { HiringBadge } from "@/components/HiringBadge";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { sectionNavData } from "./Navbar";
+import { NAV_SECTION_LINKS as sectionNavData } from "@/lib/section-registry";
 
 const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px py-0')
 const contentStyle = cn('flex items-center w-full bg-surface-1 md:rounded-sm pl-3 pr-2.5 py-3')

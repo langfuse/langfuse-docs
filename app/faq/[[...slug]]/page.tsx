@@ -4,7 +4,7 @@ import { faqSource } from "@/lib/source";
 import { DocsChromePage } from "@/components/DocsChromePage";
 import { buildSectionMetadata } from "@/lib/mdx-page";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
-import { DocsPage } from "fumadocs-ui/page";
+import { DocsPage } from "fumadocs-ui/layouts/docs/page";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { FaqPreview } from "@/components/faq/FaqPreview";
 import { formatTag } from "@/components/faq/FaqIndex";

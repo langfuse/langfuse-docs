@@ -1,6 +1,6 @@
 import "server-only";
 import type { ComponentProps, ComponentType } from "react";
-import { DocsPage } from "fumadocs-ui/page";
+import { DocsPage } from "fumadocs-ui/layouts/docs/page";
 import type { TOCItemType } from "fumadocs-core/toc";
 
 import { DocsTocFooter } from "@/components/DocsTocFooter";

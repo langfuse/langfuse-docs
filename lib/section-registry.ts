@@ -162,3 +162,22 @@ export const SECTION_SLUGS = Object.keys(SECTION_CONFIG);
 
 // Derived sets — computed from the layout annotation in each section's metadata.
 export const MARKETING_SECTIONS = new Set<string>(MARKETING_SLUGS);
+
+/**
+ * Primary navigation links rendered in the top Navbar.
+ * Defined here so adding/renaming a section requires only this file.
+ * `/docs` is separate from the [section] registry because it has its own
+ * dedicated app/docs/ route, but it is part of the nav.
+ */
+export const NAV_SECTION_LINKS: { name: string; href: string }[] = [
+  { name: "Docs", href: "/docs" },
+  { name: "Self Hosting", href: "/self-hosting" },
+  { name: "Guides", href: "/guides" },
+  { name: "Integrations", href: "/integrations" },
+  { name: "FAQ", href: "/faq" },
+  { name: "Handbook", href: "/handbook" },
+  { name: "Changelog", href: "/changelog" },
+  { name: "Pricing", href: "/pricing" },
+  { name: "Library", href: "/library" },
+  { name: "Security & Compliance", href: "/security" },
+];
