@@ -133,6 +133,7 @@ function Arrow({
   active,
   dimmed,
 }: {
+  key?: string;
   fromId: string;
   toId: string;
   active: boolean;
