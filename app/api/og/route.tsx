@@ -222,9 +222,8 @@ function tryTwoLineLayout(
   innerH: number
 ): { fontSize: number; lines: string[] } | null {
   if (lines.length !== 2) return null;
-  if (lineExceedsPanelWidth(lines[0], fontSize, innerW)) return null;
-  if (lineExceedsPanelWidth(lines[1], fontSize, innerW)) return null;
-  if (titleStackHeight(2, fontSize, TITLE_LINE_GAP) > innerH) return null;
+  if (!titleLinesFitRenderConstraints(lines, fontSize, innerW, innerH))
+    return null;
   return { fontSize, lines };
 }
 
