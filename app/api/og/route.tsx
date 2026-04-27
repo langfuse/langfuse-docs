@@ -210,25 +210,7 @@ function normalizeTitleLines(
   return out.length ? out : [""];
 }
 
-/** Row + yellow highlight width: text width (same em as one-line checks) + span h-padding. */
-function titleLineHighlightWidthPx(
-  line: string,
-  fontSize: number,
-  maxW: number
-): number {
-  const est = Math.ceil(
-    approxLineWidthPx(line, fontSize, TITLE_LONG_LINE_EM) *
-      TITLE_RENDER_SAFETY +
-      32
-  );
-  return Math.min(maxW, Math.max(est, 48));
-}
-
-function titleRowWidthPx(
-  line: string,
-  fontSize: number,
-  innerW: number
-): number {
+function titleRowWidthPx(innerW: number): number {
   return innerW;
 }
 
@@ -713,7 +695,7 @@ export async function GET(request: NextRequest) {
   ]);
 
   const { searchParams } = new URL(request.url);
-  const title = searchParams.get("title") ?? "Langfuse";
+  const title = searchParams.get("title")?.trim() || "Langfuse";
 
   const rawDescription = searchParams.get("description") ?? undefined;
   const descriptionText =
@@ -723,13 +705,7 @@ export async function GET(request: NextRequest) {
   const titleInnerW = CONTENT_W - MIN_EDGE * 2;
   const titleInnerH = TITLE_BAND_H - TITLE_PAD_Y * 2;
   const titleFit = fitTitleLayout(title, titleInnerW, titleInnerH);
-  const titleLinesForRender = titleFit.lines.filter(
-    (l) => l.replace(/\s/g, "").length > 0
-  );
-  const titleLinesDisplay =
-    titleLinesForRender.length > 0
-      ? titleLinesForRender
-      : [title.trim() || "Langfuse"];
+  const titleLinesDisplay = titleFit.lines;
 
   const descInnerW = CONTENT_W - MIN_EDGE * 2;
   const descInnerH = DESC_BAND_H - MIN_EDGE * 2;
@@ -805,7 +781,7 @@ export async function GET(request: NextRequest) {
                   key={i}
                   style={{
                     display: "flex",
-                    width: titleRowWidthPx(line, titleFit.fontSize, titleInnerW),
+                    width: titleRowWidthPx(titleInnerW),
                     justifyContent: "flex-start",
                     alignItems: "flex-start",
                     ...(DEBUG_TITLE_ROW_BOUNDS
