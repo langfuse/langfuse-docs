@@ -404,8 +404,8 @@ function fitTitleLayoutSingleLine(
 ): { fontSize: number; lines: string[] } | null {
   const text = title.trim();
   for (const fontSize of TITLE_SINGLE_LINE_FONT_SIZES) {
-    if (lineExceedsPanelWidth(text, fontSize, innerW)) continue;
-    if (titleStackHeight(1, fontSize, TITLE_LINE_GAP) > innerH) continue;
+    if (!titleLinesFitRenderConstraints([text], fontSize, innerW, innerH))
+      continue;
     return { fontSize, lines: [text] };
   }
   return null;
