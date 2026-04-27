@@ -683,10 +683,6 @@ const BETWEEN_BANDS_H = 2;
 const MIN_EDGE = 28;
 /** Extra vertical padding inside the title band (horizontal still uses MIN_EDGE). */
 const TITLE_PAD_Y = 24;
-/** Temporary visual debug overlay for title text area bounds. */
-const DEBUG_TITLE_TEXT_AREA = false;
-/** Temporary visual debug overlay for each centered title row container. */
-const DEBUG_TITLE_ROW_BOUNDS = false;
 const BG_COLOR = "#f6f6f3";
 
 export async function GET(request: NextRequest) {
@@ -797,9 +793,6 @@ export async function GET(request: NextRequest) {
                 width: titleInnerW,
                 height: titleInnerH,
                 flexShrink: 0,
-                ...(DEBUG_TITLE_TEXT_AREA
-                  ? { backgroundColor: "rgba(255, 0, 0, 0.14)" }
-                  : {}),
               }}
             >
               {titleLinesDisplay.map((line, i) => (
@@ -810,9 +803,6 @@ export async function GET(request: NextRequest) {
                     width: titleRowWidthPx(titleInnerW),
                     justifyContent: "flex-start",
                     alignItems: "flex-start",
-                    ...(DEBUG_TITLE_ROW_BOUNDS
-                      ? { backgroundColor: "rgba(0, 102, 255, 0.18)" }
-                      : {}),
                   }}
                 >
                   <span
