@@ -105,8 +105,8 @@ function Hero() {
             LLMのトレース、プロンプト管理、評価、メトリクス。
             すべてをAWSとClickHouseの
             <b className="text-text-primary font-medium">東京リージョン</b>
-            でホスト。
-            世界中で使われているLangfuse Cloudを、データを国内に保管したまま動かせます。
+            でホスト。  
+            世界中のチームが使っているのと同じLangfuse Cloudを、データを国内に保管したまま使えます。
           </p>
           <p className="font-analog italic text-[15px] text-text-tertiary m-0 -tracking-[0.005em]">
             Langfuse Cloud Japan — LLM observability, hosted in Tokyo.
@@ -257,7 +257,7 @@ function WhyJapan() {
     {
       kanji: "信頼",
       eyebrow: "エンタープライズ対応",
-      title: "規制要件のあるチームでも、そのまま使えます。",
+      title: "規制業界にもそのまま持ち込めます。",
       body: "SOC 2 Type II、ISO 27001、GDPR準拠のコントロール。サインアップ時にDPAへ同意、サブプロセッサーも全件公開しています。",
       visual: "compliance" as const,
     },
@@ -446,7 +446,7 @@ function GetStarted() {
     {
       n: "01",
       title: "サインアップ",
-      body: "jp.cloud.langfuse.com にアクセスして、1分以内に組織・プロジェクトを作成し、APIキーを発行できます。",
+      body: "jp.cloud.langfuse.com にアクセスして、１分以内に組織・プロジェクトを作成し、APIキーを発行できます。",
       action: ["アカウントを作成", "https://jp.cloud.langfuse.com"],
     },
     {
@@ -625,7 +625,7 @@ function Customers() {
             </div>
             <div className="flex-1">
               <div className="text-[13.5px] text-text-primary font-medium">
-                LayerX バクラク事業部 AI-UXチーム / omori (@onsd_)
+                LayerX — バクラク事業部 omori氏
               </div>
               <div className="text-[12px] text-text-tertiary font-mono">
                 本番環境でLLMシステムを運用
@@ -653,7 +653,7 @@ function Customers() {
             GAO, Inc. <span className="text-text-tertiary text-[18px]">（ガオ）</span>
           </div>
           <p className="japan-body-sm m-0">
-            日本での公式リセラー / 導入パートナー。日本円・JPYインボイスでの購買、日本語でのオンボーディング・サポートに対応しています。
+            日本国内の公式リセラー兼導入パートナー。日本円での購買とJPYインボイス、日本語でのオンボーディングとサポートを提供します。
           </p>
           <div className="flex-1" />
           <div className="flex flex-wrap gap-1.5">
@@ -920,7 +920,7 @@ function FAQ() {
           <Link className="japan-link" href="https://gao-ai.com">
             GAO, Inc.
           </Link>{" "}
-          経由でも対応しています。
+          経由でご利用いただけます。
         </p>
       ),
     },
