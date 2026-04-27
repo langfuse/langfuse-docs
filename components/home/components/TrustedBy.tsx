@@ -13,11 +13,10 @@
 import React from "react";
 import Link from "next/link";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 type Customer = {
   name: string;
@@ -42,42 +41,38 @@ export function TrustedBy({
         <div className="text-xs text-muted-foreground">Trusted by:</div>
         <div className="flex items-center pl-4">
           {customers && customers.length > 0 ? (
-            <TooltipProvider>
-              <div className="flex items-center">
-                {customers.map((customer, index) => (
-                  <Tooltip key={index}>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-transform duration-200 hover:scale-125 hover:z-50 cursor-pointer shadow-md"
-                        style={{
-                          marginLeft: index > 0 ? "-10px" : "0",
-                          zIndex: customers.length - index,
-                        }}
+            <div className="flex items-center">
+              {customers.map((customer, index) => (
+                <HoverCard key={index} openDelay={100} closeDelay={150}>
+                  <HoverCardTrigger asChild>
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-transform duration-200 hover:scale-125 hover:z-50 cursor-pointer shadow-md"
+                      style={{
+                        marginLeft: index > 0 ? "-10px" : "0",
+                        zIndex: customers.length - index,
+                      }}
+                    >
+                      <img
+                        src={customer.logo}
+                        alt={customer.name}
+                        className="w-8 h-8 object-contain"
+                      />
+                    </div>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-auto min-w-[120px] p-3 text-center">
+                    <p className="text-sm font-medium">{customer.name}</p>
+                    {customer.caseStudyUrl && (
+                      <Link
+                        href={customer.caseStudyUrl}
+                        className="text-xs text-primary/80 hover:text-primary underline mt-1 block"
                       >
-                        <img
-                          src={customer.logo}
-                          alt={customer.name}
-                          className="w-8 h-8 object-contain"
-                        />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className="text-center">
-                        <p className="font-medium">{customer.name}</p>
-                        {customer.caseStudyUrl && (
-                          <Link
-                            href={customer.caseStudyUrl}
-                            className="text-xs text-blue-600 hover:text-blue-800 underline mt-0.5 block"
-                          >
-                            Read case study →
-                          </Link>
-                        )}
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-              </div>
-            </TooltipProvider>
+                        Read case study →
+                      </Link>
+                    )}
+                  </HoverCardContent>
+                </HoverCard>
+              ))}
+            </div>
           ) : (
             <div className="text-xs text-muted-foreground">{fallbackText}</div>
           )}
