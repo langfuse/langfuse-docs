@@ -1,96 +1,87 @@
 ---
-title: What is offline evaluation?
-description: How to judge whether experiment outputs are good, using manual review, code-based checks, and LLM-as-a-judge evaluators.
+title: Evaluate
+sidebarTitle: Overview
+description: Decide whether an experimental result is strong enough to ship.
 ---
 
-# What is offline evaluation?
+# Evaluate
 
-Offline evaluation is the step in the loop between running an experiment and shipping a change. You have a dataset, you have run your application against it, and now you need to judge whether the outputs are good.
+## What this is
 
-<Callout>
-TODO: loop diagram
-</Callout>
+Evaluation is the decision step of the loop. After you run an experiment, you need to decide whether the candidate system is actually better than the baseline and whether the evidence is strong enough to justify shipping it.
 
-## Three kinds of evaluation
+That is broader than scoring. A score is an input to evaluation. Evaluation is the act of interpreting evidence and making a decision.
 
-There are three main ways to evaluate: manually, with code, or with an LLM. Each is suited to different kinds of quality checks.
+## Why it matters
 
-### Manual evaluation
+Without a clear evaluation step, teams either ship too eagerly based on a handful of nice examples or become paralyzed because every tradeoff feels debatable. Evaluation is what turns experimental output into an explicit decision.
 
-Manual evaluation is the process of manually looking at outputs and scoring it/writing down your thoughts on its quality.
+It also forces you to confront the real tradeoffs. A change can improve answer quality while increasing cost. It can reduce latency while hurting edge-case coverage. Evaluation is where you decide which tradeoffs are acceptable.
 
-This is an important process, reading outputs builds an understanding of what your application actually does, where it struggles, and what "good" looks like for your specific use case. That understanding is what tells you which automated evaluators to build and how to define their criteria later on. Teams that skip this step and jump straight to automated evaluation often end up measuring things that don't matter.
+## When to use it
 
-Manual evaluation also produces human labels that serve as ground truth for validating automated evaluators later.
+Use the evaluate step when you have experiment results and need to answer questions like:
 
-### Code-based evaluation
+- Did the candidate actually win on the cases we care about?
+- Is the quality gain large enough to justify the cost or latency increase?
+- Is the result robust or driven by a few cherry-picked wins?
+- Are failures concentrated in a high-risk segment even if the average score improved?
+- Do we ship, iterate again, or gather more evidence?
 
-Code-based evaluators check properties that can be verified with deterministic logic. They are fast, cheap, and produce the same result every time.
+## Core mental model
 
-Some example checks where code-based evaluators are a natural fit:
+Evaluation compares evidence across multiple dimensions and ends with one of three outcomes:
 
-- The output is valid JSON or follows a required schema
-- The output contains (or does not contain) specific keywords or patterns
-- The output stays within a length limit
-- The generated SQL executes without errors
-
-Their limitation is that they cannot assess meaning. A code-based evaluator can check that an output contains the word "refund," but it cannot check whether the output correctly explains the refund policy.
-
-### LLM-as-a-judge
-
-An LLM-as-a-judge evaluator uses a language model to score outputs.
-
-This is the right method for qualities that require understanding language: whether a response is relevant to the question, whether the tone matches the intended audience, whether a summary captures the key points of the source material, etc.
-
-LLM judges are imperfect. This means:
-
-- They sometimes pass outputs that a human would fail, and vice versa
-- They need calibration against human labels to verify they are measuring what you think they are measuring
-- They can share blind spots with your application's LLM, especially when the same model family is used for both
-
-These limitations aren't reasons to avoid LLM judges. An LLM judge that has been calibrated against human labels and is backed by code-based checks is a reliable evaluator.
-
-## Reference-based vs reference-free evaluators
-
-Both code-based and LLM-as-a-judge evaluators can be either reference-based or reference-free.
-
-<Callout>
-TODO: link to section in datasets page about this
-</Callout>
-
-|  | Code-based | LLM-as-a-judge / manual |
-| --- | --- | --- |
-| Reference-based | Exact string match check | "Does the response correctly explain this specific policy?" |
-| Reference-free | Validate JSON structure | Tone-of-voice evaluation |
-
-## What should you evaluate?
-
-The best source for knowing what you should evaluate comes from identifying failure modes. You'll discover these from a combination of manually going through your traces, and looking at negative user feedback.
-
-<Callout>
-TODO: add very specific examples per use case
-</Callout>
-
-Generic qualities like "helpfulness" or "quality" are tempting starting points, but they rarely produce useful signal. An evaluator that checks a vague criterion will give vague results. The more precisely you can define what "good" or "bad" looks like for your application, the more useful your evaluators will be.
-
-## Combining evaluation methods
-
-Each quality you care about gets its own evaluator. For each evaluator, pick the method that fits:
-
-| When | Method |
+| Outcome | Meaning |
 | --- | --- |
-| The check can be expressed as a deterministic rule | Code-based evaluator |
-| The check requires understanding language | LLM-as-a-judge |
-| You can't clearly define what "good" looks like yet | Manual evaluation |
+| Ship | The candidate is better enough, with acceptable tradeoffs |
+| Iterate | The change is promising, but the result is mixed or incomplete |
+| Stop | The candidate is worse, too risky, or not worth the tradeoff |
 
-Most mature evaluation setups use all three.
+### A meaningful win has to be defined, not assumed
 
-One practical recommendation: prefer binary scores (pass/fail) over graded scales (1-5) when designing evaluators. Binary scores force a clear definition of what separates acceptable from unacceptable. Graded scales introduce ambiguity about what a 3 means versus a 4, which makes scores harder to interpret and less consistent across evaluators and over time.
+Before running the experiment, decide what would count as success. That might include:
 
-## Where to start
+- A minimum quality improvement on key cases
+- No regression on a defined high-risk slice
+- Cost or latency staying within a threshold
+- Fewer severe failures even if the average score changes only slightly
 
-If you are just setting things up, start by evaluating manually. It will give you a good idea of what it is you actually want, and what criteria you most care about structurally.
+### Mixed evidence is normal
 
-<Callout>
-TODO: Later, start defining evaluation criteria and set up corresponding automated evaluators. Be careful about doing this too early: link to specification vs generalization problem
-</Callout>
+Experiment results are rarely clean. You may see:
+
+- Better quality but higher cost
+- Better average scores but worse performance on one important segment
+- Faster latency but more brittle outputs
+- Strong manual preference but noisy automated metrics
+
+The job of evaluation is to interpret that evidence honestly instead of collapsing it into a single magic number.
+
+## What good looks like
+
+A good evaluation step usually has these properties:
+
+- Success criteria were defined before the comparison was run.
+- Quality, cost, latency, and risk are weighed explicitly instead of implicitly.
+- Important slices are reviewed separately instead of hidden inside one average.
+- Manual review is used to sanity-check automated scores on important cases.
+- Inconclusive outcomes are allowed instead of forced into a yes or no.
+
+## Common mistakes
+
+- Treating one score as the full truth.
+- Declaring a win without defining the decision rule in advance.
+- Ignoring regressions in a small but critical class of cases.
+- Shipping based on a few persuasive anecdotes.
+- Forcing an inconclusive result into a confident decision.
+
+## How it connects to the loop
+
+Experiments generate the evidence that evaluation consumes. Evaluation then decides whether the candidate should ship. Once a change goes live, monitoring tells you whether the expected improvement holds up in production.
+
+The evaluation methods themselves, such as manual review, code-based checks, and LLM-as-a-judge, are covered separately because they are used across multiple loop steps.
+
+## Next step
+
+After you decide to ship, the loop returns to [Monitoring](/academy/monitoring). If you need a deeper view of the techniques behind scoring and review, continue to [Evaluation Methods](/academy/methods/evaluation-methods).

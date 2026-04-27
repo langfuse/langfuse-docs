@@ -1,0 +1,69 @@
+---
+title: The LLM Observability Loop
+sidebarTitle: Start Here
+description: Learn the five-step operating loop teams use to improve LLM applications in production.
+---
+
+# The LLM Observability Loop
+
+LLM applications do not behave like traditional deterministic software. A request can succeed technically and still fail the user. The system may return a plausible but wrong answer, use the wrong tool, waste tokens, or degrade quietly over time. Because of that, teams need an operating loop, not just a dashboard.
+
+## Why this loop exists
+
+The loop gives you a way to move from raw production behavior to deliberate improvement. Each step produces something the next step needs:
+
+- Tracing produces evidence.
+- Monitoring produces prioritized signals.
+- Datasets produce reusable test cases.
+- Experiments produce comparable outputs.
+- Evaluate produces a ship, iterate, or stop decision.
+
+Without that chain, teams usually fall into one of two traps: they react to anecdotes, or they overinvest in measurement without learning anything useful.
+
+## The five steps
+
+![The AI engineering loop](/images/academy/loop-overview.png)
+
+### 1. Trace
+
+[Tracing](/academy/tracing) captures what actually happened during one unit of work. It is the record of prompts, retrieved context, tool calls, inputs, outputs, latency, token use, and cost. If the trace is incomplete, every later step becomes guesswork.
+
+### 2. Monitor
+
+[Monitoring](/academy/monitoring) turns raw traces into operational awareness. It tracks trends over time and surfaces specific cases worth attention. Monitoring tells you whether something is drifting, getting expensive, or producing suspicious outputs in production.
+
+### 3. Build Datasets
+
+[Datasets](/academy/datasets) turn recurring cases into reusable test inputs. This is how you stop rediscovering the same problem one trace at a time. A dataset is the bridge between live production behavior and repeatable testing.
+
+### 4. Experiment
+
+[Experiments](/academy/experiments) compare a baseline against a candidate change under controlled conditions. This is where you isolate one variable, run both versions on the same dataset, and look for meaningful differences.
+
+### 5. Evaluate
+
+[Evaluate](/academy/evaluate) is the decision step. You compare quality, cost, latency, and risk, then decide whether the change is a win, a loss, or inconclusive. Evaluation is not just scoring. It is deciding whether the available evidence justifies shipping.
+
+## What flows between the steps
+
+| Step | Produces | Enables the next step |
+| --- | --- | --- |
+| Trace | Rich execution evidence | Monitoring can identify patterns instead of isolated anecdotes |
+| Monitor | Prioritized signals and suspicious cases | Teams know which cases should become reusable tests |
+| Build Datasets | Structured, repeatable test cases | Experiments can compare changes on the same inputs |
+| Experiment | Comparable outputs and measurements | Evaluation can make a real decision |
+| Evaluate | Ship, iterate, or stop | The loop returns to monitoring after changes go live |
+
+## Common ways teams break the loop
+
+- They instrument too little, so later discussions are based on memory instead of evidence.
+- They monitor cost and latency but not response quality.
+- They build datasets from convenience samples instead of representative failure modes.
+- They change multiple variables at once and call it an experiment.
+- They treat one evaluation score as truth instead of interpreting evidence in context.
+
+## Where to start
+
+If your instrumentation is still thin, start with [Tracing](/academy/tracing). If you already have traces and need to prioritize what matters, start with [Monitoring](/academy/monitoring).
+
+The important thing is to use one loop consistently. Once each page teaches its own version of the process, the whole section stops functioning as an academy.

@@ -1,44 +1,54 @@
 ---
 title: Langfuse Academy
-description: Build a mental model for AI engineering. Learn the core disciplines teams rely on as LLM applications move from prototype to production.
+description: Learn the operating model teams use to trace, monitor, test, and improve LLM applications in production.
 ---
 
-# Welcome to Langfuse Academy
+# Langfuse Academy
 
-This is the place to build a mental model for AI engineering. We'll introduce the core disciplines teams rely on as LLM applications move from prototype to production.
+Langfuse Academy teaches the operating model behind LLM observability. The goal is not to walk through product screens or individual features. The goal is to help you reason about how teams capture evidence, learn from production behavior, test changes, and decide what to ship.
 
-Rather than focusing on individual product features, Academy is meant to help you understand the bigger picture, and how teams can work with that change in a systematic way.
+## What this academy teaches
 
-## Why LLM observability is different
+Traditional observability is still necessary for AI systems, but it is not enough. An LLM application can be technically healthy and still fail the user: the answer can be wrong, off-brand, unsafe, incomplete, or simply unhelpful. That is why LLM observability sits closer to product quality and iteration than classic infrastructure monitoring usually does.
 
-Traditional observability remains essential. Teams still need to know whether their systems are up, whether requests are slow, whether dependencies are failing, and whether costs are under control. Those questions do not disappear when an application starts using LLMs.
+This section teaches a repeatable loop for working on that problem. You will learn how to:
 
-But LLM applications introduce a different kind of challenge. Their behavior is probabilistic: the same input can produce different outputs, and a response can look plausible even when it is wrong, incomplete, off-brand, unsafe, or simply unhelpful. In other words, a request can succeed technically and still fail for the user.
+- Capture useful traces
+- Monitor live production behavior
+- Turn recurring cases into datasets
+- Run controlled experiments
+- Evaluate whether a change is actually better
 
-<Callout>
-TODO: insert a visual or an example here to break up the text
-</Callout>
+## Who this is for
 
-AI engineering is not only about reliability. It is also about quality. Teams need to understand whether the output was useful, grounded, safe, and worth the cost. Observability for LLM applications therefore sits closer to product quality and iteration than traditional application monitoring usually does.
+This academy is for practitioners building or operating LLM features, assistants, or agents in production. It is especially useful if you already have some telemetry and are now asking questions like:
 
-Modern observability platforms for LLM systems increasingly treat prompts, responses, token usage, quality signals, and model-specific behavior as first-class telemetry.
+- How do we know what the system actually did?
+- How do we tell noise from a real quality problem?
+- Which cases should become repeatable tests?
+- How do we compare changes without fooling ourselves?
+- When is a result strong enough to ship?
 
-## The AI engineering loop
+If you are looking for implementation steps, SDK details, or product workflows, treat the academy as the conceptual layer and the main docs as the how-to layer.
 
-Because of this, AI engineering is iterative. Teams do not build once, ship once, and assume the work is done. They observe behavior, learn from it, improve the system, and evaluate the result over time.
+## The loop at a glance
 
 ![The AI engineering loop](/images/academy/loop-overview.png)
 
-<Callout>
-TODO: replace with final loop visual; should we explain each step in 1-2 sentences? Keep it concise
-</Callout>
+The academy is organized around a five-step loop:
 
-## What comes next
+1. [Trace](/academy/tracing) what happened.
+2. [Monitor](/academy/monitoring) live behavior and prioritize what matters.
+3. [Build datasets](/academy/datasets) from recurring cases you want to test repeatedly.
+4. [Experiment](/academy/experiments) by changing one variable at a time.
+5. [Evaluate](/academy/evaluate) whether the result is good enough to ship.
 
-The rest of Langfuse Academy goes deeper into each step of the loop.
+## How to use this section
 
-Each section is designed to work on its own: it gives you an overview first, and then lets you go deeper if and when that makes sense for your use case. You can follow the full loop, or focus only on the parts that are most relevant for your team right now.
+Start with [The LLM Observability Loop](/academy/loop) if you want the full mental model first. Then read the loop step that matches the problem you are working on right now.
 
-You also do not need to adopt everything at once. Most teams improve their setup iteratively over time, adding new practices as they become useful. Doing part of this loop is already better than having no LLM engineering practices at all.
+The core loop pages focus on decisions, artifacts, and sequencing. The methods pages cover reusable techniques such as manual review, code-based evaluators, and LLM-as-a-judge.
 
-Let's dive in!
+You do not need to implement everything at once. But the pieces reinforce each other. Weak traces make monitoring vague. Weak datasets make experiments misleading. Weak evaluation makes shipping decisions political instead of empirical.
+
+The academy exists to make that loop explicit.

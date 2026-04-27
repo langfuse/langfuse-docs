@@ -1,84 +1,94 @@
 ---
-title: What is tracing for?
-description: Understand what tracing is, how traces are structured, and why they are the foundation of LLM observability.
+title: Tracing
+sidebarTitle: Overview
+description: Capture the evidence the rest of the LLM observability loop depends on.
 ---
 
-# What is tracing for?
+# Tracing
 
-Traditional software is largely deterministic. Given the same input, you get the same output, and when something breaks, a stack trace or a log line points you to the problem. But for LLM applications that's not the case. You need something else to follow your agent's behavior: traces.
+## What this is
 
-A trace captures the full journey of a single request through your application. Each step is a distinct operation, parent-child relationships between steps are preserved, and the relevant data (inputs, outputs, token counts, etc.) is attached to each one.
+Tracing is the practice of recording what happened during one unit of work in your application. A useful trace captures the path a request took through the system and the evidence needed to understand why it behaved that way.
 
-With tracing, you can see:
+In LLM systems, that usually includes prompts, retrieved context, tool calls, inputs, outputs, model metadata, latency, token usage, and cost.
 
-- **Which documents were retrieved** for a given query, and whether they were relevant
-- **What prompt was sent to the model**, after all template variables were filled in
-- **Why the agent chose that tool**, based on what was in the model's context at the time
-- **Where the time and money is going**: which steps consume the most tokens or take the longest, and why
+## Why it matters
 
-## The anatomy of a trace
+Tracing is the foundation of the whole loop. You cannot monitor what you did not capture. You cannot build a trustworthy dataset from a half-recorded failure. You cannot compare experiment outputs if you do not understand what each run actually did.
 
-A trace can be as complex or as simple as your application requires, but all traces share the same basic structure.
+Traditional logs or error reports are often not enough for LLM applications because technical success and user success are not the same thing. A model can return a valid response object and still fail the task.
 
-### Hierarchy
+## When to use it
 
-A trace is a tree. At the top is the trace itself, representing the entire operation. Nested inside it are spans, each representing a single step in the process. Spans can contain other spans, forming a parent-child structure that mirrors the actual execution of your code.
+Use tracing whenever you need to answer questions like:
+
+- What prompt did the model actually receive?
+- Which documents were retrieved for this answer?
+- Why did the agent call that tool?
+- Which step was slow or expensive?
+- Was this failure caused by the model, the context, the tool chain, or application logic?
+
+If your team is debating a production issue from memory, tracing is the missing layer.
+
+## Core mental model
+
+A trace is the record of one unit of work from the user's perspective. Inside it, spans record the individual steps that made that work happen.
+
+### Trace, span, and session
+
+- A **trace** is the end-to-end record of one task, request, or turn.
+- A **span** is one step inside that trace, such as retrieval, a model call, or a tool invocation.
+- A **session** groups related traces over a longer interaction, such as a full chat or workflow.
+
+Choosing the right boundaries matters. A trace that is too broad becomes hard to reason about. A trace that is too narrow loses the context that later steps need.
+
+### Traces are evidence, not just timing data
+
+Good traces are not only trees of operations. They are evidence bundles. Each important span should answer:
+
+- What was the input?
+- What was the output?
+- What metadata explains the behavior?
+- How much time and money did this step consume?
 
 ![Trace hierarchy example](/images/academy/trace-hierarchy.png)
 
-You can see what happened in what order, and which steps were part of which larger step.
-
-### Input and output
-
-Every span has an input and an output. For an LLM span, the input is the prompt (sometimes the full message history), and the output is the response. For a retrieval span, it can be as simple as a search query and the returned documents.
-
-### Span types
-
-In order to make it easy to differentiate between operations, you'll see different types of spans. The most common ones are:
+### Useful span types
 
 | Span type | Captures | Example |
 | --- | --- | --- |
-| Generation spans | A call to a language model | Full prompt or message history as input, the completion as output, plus metadata like the model name and token counts |
+| Generation spans | A call to a language model | Full prompt or message history as input, the completion as output, plus metadata like model name, latency, and token counts |
 | Retrieval spans | A step that fetches information from an external source | Query and the returned documents |
 | Tool call spans | An invocation of a tool or function by an agent | Which tool was called, the arguments, and the return value |
 | General/default spans | General processes | Highly dependent on the use case |
 
-Span types are a convenience, not a rigid schema. They make traces easier to read and filter. In a trace with twenty spans, being able to quickly spot the three LLM calls saves time.
+Span types are a reading aid. They make later monitoring and analysis faster because they let you filter for the steps that matter.
 
-### Cost, latency, token usage
+## What good looks like
 
-The most relevant span type here is the generation span. There are a few LLM-specific attributes you will always want to track:
+A good tracing setup usually has these properties:
 
-- Token usage
-- Cost of the LLM call
-- Latency
+- One trace corresponds to one user-visible unit of work.
+- Important steps are broken into spans with meaningful names.
+- Model calls record prompt or message input, output, model name, token usage, latency, and cost.
+- Retrieval and tool spans capture both the request and the returned result.
+- Session identifiers exist when multiple traces belong to the same longer interaction.
+- The trace is readable enough that another engineer can reconstruct what happened without opening application code.
 
-These metrics are recorded per span but aggregated at the trace level.
+## Common mistakes
 
-<Callout>
-TODO: show examples based on specific use cases with Langfuse screenshots using general terms:
-- Flight booking agent
-- Customer support chatbot
-</Callout>
+- Recording only the top-level request and none of the internal steps.
+- Capturing timing data but not the inputs, outputs, or retrieved context that explain behavior.
+- Using inconsistent trace boundaries, so similar requests are not comparable.
+- Recording every tiny function call, which creates noise without adding decision value.
+- Tracing only failures instead of tracing normal behavior too, which makes baselines impossible.
 
-## The scope of a trace
+## How it connects to the loop
 
-Spans can be grouped into traces, and traces can be grouped into sessions. But where do you draw the line between a trace and a session?
+Monitoring depends on traces to spot trends and surface suspicious cases. Datasets often start as production traces that represent recurring or high-risk scenarios. Experiments use traces to compare what the baseline and candidate system actually did.
 
-A general rule of thumb is: one trace corresponds to one unit of work from the user's perspective. In most applications, that means one trace per request-response cycle.
+If tracing is weak, every later step becomes more political and less empirical.
 
-<Callout>
-TODO: show examples based on specific use cases, describing the scope of a trace vs session:
-- Chatbot
-- Ideally 1-2 sufficiently different use cases
-</Callout>
+## Next step
 
-## Where to start
-
-<Callout>
-TODO:
-- Refer to how-to guide of setting up traces, make sure your traces adhere to the quality descriptions above
-- If they want to, they can go deeper into the topic (linking to sub-pages)
-- If they are happy, next loop step
-- Idea: add a small exercise showing incomplete traces, asking "what would you improve about this trace?" with expandable answers (missing cost, missing input/output, etc.)
-</Callout>
+Once you can reliably capture what happened, move to [Monitoring](/academy/monitoring). That is the step where raw traces become operational awareness.

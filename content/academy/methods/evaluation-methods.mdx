@@ -1,0 +1,101 @@
+---
+title: Evaluation Methods
+description: Learn the review and scoring methods used inside monitoring and evaluate.
+---
+
+# Evaluation Methods
+
+This page covers the main methods teams use to judge outputs in the academy loop. These methods are important, but they are not themselves the loop. They are tools used inside [Monitoring](/academy/monitoring) and [Evaluate](/academy/evaluate).
+
+## What this page is for
+
+Use this page when the question is not “where am I in the loop?” but “how should I judge outputs in this situation?”
+
+The main methods are:
+
+- Manual review
+- Code-based evaluation
+- LLM-as-a-judge
+
+Most mature setups use more than one of them because each sees different things and fails in different ways.
+
+## Manual review
+
+Manual review means reading outputs directly and judging them with human judgment. It is the best method when you are still learning what good and bad look like, when the failure mode is subtle, or when the cost of being wrong is high enough that you want a human in the loop.
+
+Manual review is especially useful for:
+
+- Early-stage applications where quality criteria are still fuzzy
+- High-risk outputs where nuance matters
+- Calibrating automated evaluators against human judgment
+- Reviewing surprising results from experiments or monitoring
+
+Its weakness is scale. Humans are expensive, slow, and inconsistent without a clear rubric.
+
+## Code-based evaluation
+
+Code-based evaluation uses deterministic logic to check whether an output satisfies a specific requirement. It is the right tool when the criterion can be stated precisely and checked reliably.
+
+Common examples include:
+
+- Valid JSON or schema compliance
+- Presence or absence of required fields
+- URL or citation formatting
+- SQL or code execution success
+- Length limits, keyword constraints, or policy patterns
+
+Its strength is speed, cost, and repeatability. Its weakness is that it cannot judge meaning well. A code-based evaluator can tell you whether a field exists. It cannot tell you whether the answer was actually useful.
+
+## LLM-as-a-judge
+
+LLM-as-a-judge uses a language model to assess another output against a rubric. It is useful for qualities that require understanding language, such as relevance, tone, factual grounding, completeness, or instruction following.
+
+It is a strong fit when:
+
+- The criterion depends on semantic understanding
+- Manual review does not scale
+- You have a clear rubric but no easy deterministic check
+
+Its weakness is that it is still a model. It can be noisy, share blind spots with the application model, and drift if the judge prompt or model changes. It works best when calibrated against human examples and paired with simpler deterministic checks where possible.
+
+## Reference-based and reference-free methods
+
+The same evaluation method can work with or without a reference answer.
+
+- **Reference-based** evaluation compares the output to a known answer, label, or gold example.
+- **Reference-free** evaluation judges the output on its own against a rubric or rule.
+
+Reference-based methods are strong when a good answer can be specified clearly. Reference-free methods are useful when the task allows many acceptable answers or when the judgment is about tone, safety, or structure rather than one exact response.
+
+## Choosing the right method
+
+| Situation | Best starting method |
+| --- | --- |
+| You do not yet know what “good” looks like | Manual review |
+| The criterion is precise and deterministic | Code-based evaluation |
+| The criterion requires language understanding | LLM-as-a-judge |
+| The result matters a lot and you need confidence | Combine methods |
+
+## Scoring design principles
+
+Whatever method you use, the scoring design matters as much as the mechanism.
+
+- Define the criterion precisely enough that two reviewers could explain what success means.
+- Prefer simple, interpretable outputs over ornate scoring schemes when possible.
+- Treat binary pass or fail checks as the default for crisp requirements.
+- Use graded scales only when the extra nuance is genuinely useful and can be applied consistently.
+- Recalibrate when models, prompts, or product behavior change.
+
+## Common mistakes
+
+- Using LLM-as-a-judge for a rule that should have been deterministic.
+- Using code-based checks for qualities that require semantic judgment.
+- Assuming a judge score is correct because it is automated.
+- Skipping manual review entirely and never checking what the system actually outputs.
+- Designing vague rubrics that produce vague scores.
+
+## How this connects to the loop
+
+Monitoring often uses lightweight evaluation methods to create live quality signals. Evaluate uses them again to interpret experiment results and make shipping decisions.
+
+The method is not the decision. The method produces evidence. The loop step decides what to do with it.
