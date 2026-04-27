@@ -1,5 +1,6 @@
 import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
+import { SITE_DEFAULT_OG_DESCRIPTION } from "@/lib/og-url";
 
 export const runtime = "edge";
 
@@ -700,7 +701,7 @@ export async function GET(request: NextRequest) {
   const rawDescription = searchParams.get("description") ?? undefined;
   const descriptionText =
     rawDescription?.trim() ||
-    "Open Source LLM Engineering Platform";
+    SITE_DEFAULT_OG_DESCRIPTION;
 
   const titleInnerW = CONTENT_W - MIN_EDGE * 2;
   const titleInnerH = TITLE_BAND_H - TITLE_PAD_Y * 2;
