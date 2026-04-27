@@ -66,28 +66,11 @@ A redesigned endpoint for high-performance observation retrieval:
 
 The v2 APIs are additive - v1 endpoints remain available and unchanged. When ready to migrate:
 
-1. Update your API calls to use the `/api/public/v2/` prefix.
-   - Observations: `/api/public/v2/observations`
-   - Metrics: `/api/public/v2/metrics`
-2. Replace page-based pagination with cursor-based pagination.
-   - Use the `cursor` returned in the response `meta` object to fetch the next page.
-3. Add selective field retrieval on Observations API requests.
-   - Use the `fields` query parameter to request only the data you need, for example `core`, `basic`, and `usage`.
-   - Example API request: `GET /api/public/v2/observations?fields=core,basic&limit=100`
-   - Example Python SDK call: `langfuse.api.observations.get_many(fields="core,basic,usage")`
-
-4. Review the new defaults and limits before rolling out.
-   - `parseIoAsJson` now defaults to `false` in v2.
-   - The Observations API default limit is `50` and the maximum limit is `1,000`.
-   - The v2 APIs are currently Cloud-only and, with current SDK versions, data may take around 5 minutes to appear.
-5. Check that your SDKs and server version are compatible before switching SDK namespaces.
-   - Use the latest SDKs if possible.
-   - At minimum, use Langfuse server `v3.133.0` for the Observations endpoint and `v3.137.0` for the Metrics endpoint.
-   - For SDK access, use at least JS/TS SDK `v4.5.1` or Python SDK `v3.11.1`.
-   - In Python SDK `v4+` and JS/TS SDK `v5+`, the v2 endpoints are the defaults under `langfuse.api.observations` and `langfuse.api.metrics`.
-   - In older compatible SDKs, use the transitional v2 namespaces (`langfuse.api.observations_v_2` / `langfuse.api.observationsV2` and `langfuse.api.metrics_v_2` / `langfuse.api.metricsV2`).
-   - If you are self-hosting Langfuse, continue using the legacy v1 namespaces for now (`langfuse.api.legacy.observations_v1` / `langfuse.api.legacy.observationsV1` and `langfuse.api.legacy.metrics_v1` / `langfuse.api.legacy.metricsV1`).
-   - Direct API calls do not depend on SDK version as long as you call the v2 endpoint directly.
+1. Switch to `/api/public/v2/observations`.
+2. Replace page-based pagination with the `cursor` returned in the response.
+3. Use `fields` to request only the data you need, for example `GET /api/public/v2/observations?fields=core,basic&limit=100` or `langfuse.api.observations.get_many(fields="core,basic,usage")`.
+4. Update your limits and parsing assumptions: default limit is `50`, max is `1,000`, and `parseIoAsJson` defaults to `false`.
+5. Check SDK compatibility before migrating. Prefer the latest SDKs, but use at least Langfuse server `v3.133.0` for Observations, JS/TS SDK `v4.5.1`, and Python SDK `v3.11.1`. In Python SDK `v4+` and JS/TS SDK `v5+`, v2 is the default under `langfuse.api.observations`. Self-hosted users should stay on the legacy v1 namespaces for now.
 
 **Using v1 `/api/public/traces`?** Consider v2 `/api/public/v2/observations` instead - it's significantly faster and covers most use cases.
 
