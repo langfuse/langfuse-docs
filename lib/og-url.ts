@@ -20,10 +20,12 @@ export function buildPageUrl(path: string): string {
 export function buildOgImageUrl({
   title,
   description,
+  section,
   staticOgImage,
 }: {
   title: string;
   description?: string | null;
+  section?: string | null;
   staticOgImage?: string | null;
 }): string {
   if (staticOgImage) {
@@ -31,5 +33,6 @@ export function buildOgImageUrl({
   }
   const params = new URLSearchParams({ title });
   if (description) params.set("description", description);
+  if (section?.trim()) params.set("section", section.trim());
   return `${BASE_URL}/api/og?${params.toString()}`;
 }

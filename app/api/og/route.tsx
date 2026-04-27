@@ -670,6 +670,11 @@ const CONTENT_INSET_X = 86;
 const CONTENT_W = CANVAS_W - CONTENT_INSET_X * 2; // 1028
 /** Top of the title band (below header + divider baked into the asset). */
 const CONTENT_TOP = 172;
+/** Vertical band where the baked logo + right-side tagline sit; section label aligns to this. */
+const HEADER_TOP = 102;
+const HEADER_HEIGHT = 40;
+/** Left offset of the section label relative to `CONTENT_INSET_X` (sits right of the logo). */
+const SECTION_LABEL_LEFT_OFFSET = 215;
 const TITLE_BAND_H = 238;
 const DESC_BAND_H = 138;
 /** Spacer so the middle divider in the PNG stays visible between title and description. */
@@ -696,6 +701,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const title = searchParams.get("title")?.trim() || "Langfuse";
+  const sectionLabel = searchParams.get("section")?.trim() || undefined;
 
   const rawDescription = searchParams.get("description") ?? undefined;
   const descriptionText =
@@ -734,6 +740,26 @@ export async function GET(request: NextRequest) {
               height: CANVAS_H,
             }}
           />
+        ) : null}
+
+        {sectionLabel ? (
+          <div
+            style={{
+              display: "flex",
+              position: "absolute",
+              left: CONTENT_INSET_X + SECTION_LABEL_LEFT_OFFSET,
+              top: HEADER_TOP,
+              height: HEADER_HEIGHT,
+              alignItems: "center",
+              fontFamily: "Inter",
+              fontWeight: 400,
+              fontSize: 24,
+              lineHeight: 1,
+              color: "#9b9b96",
+            }}
+          >
+            {sectionLabel}
+          </div>
         ) : null}
 
         {/* Content column */}
