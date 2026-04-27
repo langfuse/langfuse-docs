@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const title = `FAQ: ${formatTag(tag)}`;
     const description = `Frequently asked questions about ${formatTag(tag)}.`;
     const canonicalUrl = buildPageUrl(`/faq/tag/${slug[1]}`);
-    const ogImage = buildOgImageUrl({ title, description, section: "FAQ" });
+    const ogImage = buildOgImageUrl({ title, description });
     return {
       title,
       description,
