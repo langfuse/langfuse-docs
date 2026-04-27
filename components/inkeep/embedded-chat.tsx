@@ -7,12 +7,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Loader2, RefreshCw, Send } from 'lucide-react';
+import { RefreshCw, Send, Square, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Link } from '@/components/ui/link';
-import { AIChatEmptyState, AIChatMessage } from './ai-chat-shared';
+import { AIChatEmptyState, AIChatMessage, ThinkingIndicator } from './ai-chat-shared';
 import { useChatContext, buildUserMessage } from './search-context';
 
 function EmbeddedTextarea(props: ComponentProps<'textarea'>) {
@@ -35,31 +35,57 @@ function EmbeddedTextarea(props: ComponentProps<'textarea'>) {
   );
 }
 
+const SCROLL_THRESHOLD = 40;
+
+function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, messageCount: number) {
+  const isStuckRef = useRef(true);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    function onScroll() {
+      if (!el) return;
+      const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      isStuckRef.current = distFromBottom <= SCROLL_THRESHOLD;
+    }
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [containerRef]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !isStuckRef.current) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
+  }, [messageCount, containerRef]);
+
+  // Re-observe when messageCount changes (child element may have changed)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const child = el.firstElementChild;
+    if (!child) return;
+
+    const observer = new ResizeObserver(() => {
+      if (isStuckRef.current) {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
+      }
+    });
+    observer.observe(child);
+    return () => observer.disconnect();
+  }, [containerRef, messageCount]);
+}
+
 export function EmbeddedAIChat() {
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
   const isLoading = chat.status === 'streaming' || chat.status === 'submitted';
-  const isStreaming = chat.status === 'streaming';
 
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!scrollRef.current) return;
-    const container = scrollRef.current;
-
-    function scrollToBottom() {
-      container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
-    }
-
-    const observer = new ResizeObserver(scrollToBottom);
-    scrollToBottom();
-
-    const child = container.firstElementChild;
-    if (child) observer.observe(child);
-
-    return () => observer.disconnect();
-  }, []);
+  useAutoScroll(scrollRef, messages.length);
 
   const onSubmit = (e?: SyntheticEvent) => {
     e?.preventDefault();
@@ -71,13 +97,13 @@ export function EmbeddedAIChat() {
   };
 
   return (
-    <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)] not-prose">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-line-structure bg-surface-2">
-        <img src="/icon256.png" alt="Langfuse" className="size-5 rounded-full" />
-        <Text size="s" className="font-medium text-text-primary not-prose">
-          Ask AI
+    <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)]">
+      <div className="not-prose flex items-center gap-2 px-4 py-3 border-b border-line-structure bg-surface-1">
+        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-5" />
+        <Text size="s" className="font-medium text-text-primary">
+          Langfuse Help Agent
         </Text>
-        <Text size="s" className="text-text-tertiary text-xs not-prose">
+        <Text size="s" className="text-text-tertiary text-xs">
           — Powered by{' '}
           <Link
             href="https://inkeep.com"
@@ -101,22 +127,49 @@ export function EmbeddedAIChat() {
             {messages.map((item) => (
               <AIChatMessage key={item.id} message={item} />
             ))}
+            {chat.status === 'submitted' && <ThinkingIndicator />}
           </div>
         )}
       </div>
 
-      <div className="border-t border-line-structure bg-surface-2">
-        <form className="flex items-start pe-1" onSubmit={onSubmit}>
+      <div className="not-prose border-t border-line-structure bg-surface-1">
+        {messages.length > 0 && (
+          <div className="flex items-center gap-1 px-2 pt-2">
+            {!isLoading && messages.at(-1)?.role === 'assistant' && (
+              <Button
+                variant="secondary"
+                size="small"
+                icon={<RefreshCw className="size-3" />}
+                onClick={() => chat.regenerate()}
+              >
+                Retry
+              </Button>
+            )}
+            <Button
+              variant="secondary"
+              size="small"
+              icon={<Trash2 className="size-3" />}
+              onClick={() => { chat.stop(); chat.setMessages([]); }}
+            >
+              Clear
+            </Button>
+          </div>
+        )}
+        <form className="flex items-end gap-1 p-2" onSubmit={onSubmit}>
           <EmbeddedTextarea
             value={input}
-            placeholder={isLoading ? 'AI is answering...' : 'Ask a question'}
+            placeholder="Ask a question"
             autoFocus={false}
-            className="p-3 text-[14px]"
-            disabled={isLoading}
+            className="px-3 py-2 text-[14px]"
+            disabled={false}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(event) => {
               if (!event.shiftKey && event.key === 'Enter') {
-                onSubmit(event);
+                if (isLoading) {
+                  event.preventDefault();
+                } else {
+                  onSubmit(event);
+                }
               }
             }}
           />
@@ -126,11 +179,9 @@ export function EmbeddedAIChat() {
               type="button"
               onClick={chat.stop}
               size="small"
-              icon={<Loader2 className="size-3 animate-spin" />}
-              wrapperClassName="mt-1"
-            >
-              Abort
-            </Button>
+              icon={<Square className="size-3 fill-current" />}
+              aria-label="Stop"
+            />
           ) : (
             <Button
               variant="primary"
@@ -138,31 +189,10 @@ export function EmbeddedAIChat() {
               disabled={input.length === 0}
               size="small"
               icon={<Send className="size-3.5" />}
-              wrapperClassName="mt-1"
+              aria-label="Send"
             />
           )}
         </form>
-        {messages.length > 0 && (
-          <div className="flex items-center gap-1 p-1">
-            {!isStreaming && messages.at(-1)?.role === 'assistant' && (
-              <Button
-                variant="secondary"
-                size="small"
-                icon={<RefreshCw className="size-3.5" />}
-                onClick={() => chat.regenerate()}
-              >
-                Retry
-              </Button>
-            )}
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => chat.setMessages([])}
-            >
-              Clear Chat
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

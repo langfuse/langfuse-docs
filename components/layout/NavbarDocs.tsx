@@ -1,5 +1,6 @@
 import { Logo } from "@/components/Logo";
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
+import { HiringBadge } from "@/components/HiringBadge";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -38,7 +39,8 @@ export function NavbarDocs() {
               bottom: `calc(-10px - var(--lf-nav-docs-secondary-height))`,
             }}
           />
-          <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 lg:rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1'>
+          <div className='flex flex-1 gap-2 px-2.5 py-3 lg:rounded-sm items-center justify-between bg-surface-1'>
+            <HiringBadge className="hidden lg:block" />
             <InkeepSearchBar className="hidden lg:block" />
           </div>
         </div>

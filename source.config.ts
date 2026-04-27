@@ -166,9 +166,13 @@ export const handbook = defineDocs({
   docs: { schema: sidebarFrontmatterSchema },
 });
 
+const marketingFrontmatterSchema = baseFrontmatterSchema.extend({
+  contentWidth: z.enum(["docs", "full"]).nullish(),
+});
+
 export const marketing = defineDocs({
   dir: "content/marketing",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: marketingFrontmatterSchema },
 });
 
 export default defineConfig({

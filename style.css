@@ -542,33 +542,34 @@
 }
 
 /**
- * Home / Integrations: chips use surface bg; hovering the whole group lifts all chips.
- * (Figma: 40% white overlay on surface-bg, 2px radius.)
+ * Home / Integrations: chips use surface bg with individual hover darkening.
+ * (Figma: 2px radius, darken on hover — no corner details.)
  */
 .integration-chip {
   border-radius: 2px;
   background-color: var(--surface-bg);
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.integration-group:hover .integration-chip {
-  background:
-    linear-gradient(
-      0deg,
-      rgba(255, 255, 255, 0.4) 0%,
-      rgba(255, 255, 255, 0.4) 100%
-    ),
-    var(--surface-bg);
+.integration-chip:hover {
+  background-color: var(--surface-1);
+  border-color: var(--color-line-cta);
 }
 
-.dark .integration-group:hover .integration-chip {
-  background:
-    linear-gradient(
-      0deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.1) 100%
-    ),
-    var(--surface-bg);
+/* Marquee animations for integrations carousel */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.animate-marquee-left {
+  animation: marquee-left linear infinite;
+}
+.animate-marquee-right {
+  animation: marquee-right linear infinite;
 }
 
 /**

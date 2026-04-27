@@ -8,12 +8,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Loader2, RefreshCw, Send, X } from 'lucide-react';
+import { RefreshCw, Send, Square, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Link } from '@/components/ui/link';
-import { AIChatEmptyState, AIChatMessage } from './ai-chat-shared';
+import { AIChatEmptyState, AIChatMessage, ThinkingIndicator } from './ai-chat-shared';
 import { Presence } from '@radix-ui/react-presence';
 import { useAISearchContext, useChatContext, buildUserMessage } from './search-context';
 
@@ -58,21 +58,21 @@ function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
   );
 }
 
-// ─── Input actions (retry / clear) ─────────────────────────────────────────────
+// ─── Input actions (retry / clear) — horizontal bar above input ────────────────
 
 function AISearchInputActions() {
-  const { messages, status, setMessages, regenerate } = useChatContext();
-  const isLoading = status === 'streaming';
+  const { messages, status, setMessages, stop, regenerate } = useChatContext();
+  const isLoading = status === 'streaming' || status === 'submitted';
 
   if (messages.length === 0) return null;
 
   return (
-    <>
+    <div className="flex items-center gap-1 px-2 pt-2">
       {!isLoading && messages.at(-1)?.role === 'assistant' && (
         <Button
           variant="secondary"
           size="small"
-          icon={<RefreshCw className="size-3.5" />}
+          icon={<RefreshCw className="size-3" />}
           onClick={() => regenerate()}
         >
           Retry
@@ -81,11 +81,12 @@ function AISearchInputActions() {
       <Button
         variant="secondary"
         size="small"
-        onClick={() => setMessages([])}
+        icon={<Trash2 className="size-3" />}
+        onClick={() => { stop(); setMessages([]); }}
       >
-        Clear Chat
+        Clear
       </Button>
-    </>
+    </div>
   );
 }
 
@@ -93,7 +94,7 @@ function AISearchInputActions() {
 
 const StorageKeyInput = '__ai_search_input';
 
-function AISearchInput(props: ComponentProps<'form'>) {
+function AISearchInput({ autoFocus = true, ...props }: ComponentProps<'form'> & { autoFocus?: boolean }) {
   const { status, sendMessage, stop } = useChatContext();
   const [input, setInput] = useState(() =>
     typeof window === 'undefined' ? '' : (localStorage.getItem(StorageKeyInput) ?? ''),
@@ -102,11 +103,11 @@ function AISearchInput(props: ComponentProps<'form'>) {
 
   const wasLoadingRef = useRef(false);
   useEffect(() => {
-    if (!isLoading && wasLoadingRef.current) {
+    if (autoFocus && !isLoading && wasLoadingRef.current) {
       document.getElementById('nd-ai-input')?.focus();
     }
     wasLoadingRef.current = isLoading;
-  }, [isLoading]);
+  }, [autoFocus, isLoading]);
 
   const onStart = (e?: SyntheticEvent) => {
     e?.preventDefault();
@@ -119,44 +120,46 @@ function AISearchInput(props: ComponentProps<'form'>) {
   };
 
   return (
-    <form {...props} className={cn('flex items-start pe-1', props.className)} onSubmit={onStart}>
+    <form {...props} className={cn('flex items-end gap-1 p-2', props.className)} onSubmit={onStart}>
       <TextareaAutoResize
         value={input}
-        placeholder={isLoading ? 'AI is answering...' : 'Ask a question'}
-        autoFocus
-        className="p-3 text-[16px] md:text-[14px]"
-        disabled={isLoading}
+        placeholder="Ask a question"
+        autoFocus={autoFocus}
+        className="px-3 py-2 text-[16px] md:text-[14px]"
+        disabled={false}
         onChange={(e) => {
           setInput(e.target.value);
           localStorage.setItem(StorageKeyInput, e.target.value);
         }}
         onKeyDown={(event) => {
           if (!event.shiftKey && event.key === 'Enter') {
-            onStart(event);
+            if (isLoading) {
+              event.preventDefault();
+            } else {
+              onStart(event);
+            }
           }
         }}
       />
       {isLoading ? (
         <Button
-          key="bn"
+          key="stop"
           variant="secondary"
           type="button"
           onClick={stop}
           size="small"
-          icon={<Loader2 className="size-3 animate-spin" />}
-          wrapperClassName="mt-1"
-        >
-          Abort
-        </Button>
+          icon={<Square className="size-3 fill-current" />}
+          aria-label="Stop"
+        />
       ) : (
         <Button
-          key="bn"
+          key="send"
           variant="primary"
           type="submit"
           disabled={input.length === 0}
           size="small"
           icon={<Send className="size-3.5" />}
-          wrapperClassName="mt-1"
+          aria-label="Send"
         />
       )}
     </form>
@@ -185,37 +188,48 @@ function TextareaAutoResize(props: ComponentProps<'textarea'>) {
   );
 }
 
-// ─── Scrollable message list ───────────────────────────────────────────────────
+// ─── Scrollable message list with sticky auto-scroll ─────────────────────────
 
-function ScrollList(props: Omit<ComponentProps<'div'>, 'dir'>) {
-  const containerRef = useRef<HTMLDivElement>(null);
+const SCROLL_THRESHOLD = 40;
+
+function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, messageCount: number) {
+  const isStuckRef = useRef(true);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
+    const el = containerRef.current;
+    if (!el) return;
 
-    function scrollToBottom() {
-      container.scrollTo({ top: container.scrollHeight, behavior: 'instant' });
+    function onScroll() {
+      if (!el) return;
+      const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      isStuckRef.current = distFromBottom <= SCROLL_THRESHOLD;
     }
 
-    const observer = new ResizeObserver(scrollToBottom);
-    scrollToBottom();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [containerRef]);
 
-    const child = container.firstElementChild;
-    if (child) observer.observe(child);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !isStuckRef.current) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
+  }, [messageCount, containerRef]);
 
+  // Re-observe when messageCount changes (child element may have changed)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const child = el.firstElementChild;
+    if (!child) return;
+
+    const observer = new ResizeObserver(() => {
+      if (isStuckRef.current) {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
+      }
+    });
+    observer.observe(child);
     return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={containerRef}
-      {...props}
-      className={cn('overflow-y-auto min-w-0 flex flex-col', props.className)}
-    >
-      {props.children}
-    </div>
-  );
+  }, [containerRef, messageCount]);
 }
 
 // ─── Message list panel (empty state + messages) ───────────────────────────────
@@ -223,14 +237,19 @@ function ScrollList(props: Omit<ComponentProps<'div'>, 'dir'>) {
 function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>) {
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
+  const isWaiting = chat.status === 'submitted';
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useAutoScroll(containerRef, messages.length);
 
   const sendExampleQuestion = (question: string) => {
     void chat.sendMessage(buildUserMessage(question));
   };
 
   return (
-    <ScrollList
-      className={cn('p-4 overscroll-contain', className)}
+    <div
+      ref={containerRef}
+      className={cn('overflow-y-auto min-w-0 flex flex-col p-4 overscroll-contain', className)}
       style={{
         maskImage:
           'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
@@ -245,9 +264,10 @@ function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>
           {messages.map((item) => (
             <AIChatMessage key={item.id} message={item} captureClicks />
           ))}
+          {isWaiting && <ThinkingIndicator />}
         </div>
       )}
-    </ScrollList>
+    </div>
   );
 }
 
@@ -329,25 +349,38 @@ export function AISearchPanel() {
   const narrowLayout = useAiPanelNarrowLayout();
   const keyboardOverlapPx = useVisualViewportBottomOverlap(open && narrowLayout);
 
+  // Skip the enter animation when the panel remounts while already open
+  // (e.g. navigating between layout groups). useState(open) captures the
+  // initial open state; the effect below resets once the user closes.
+  const [skipEnterAnimation, setSkipEnterAnimation] = useState(open);
+
+  useEffect(() => {
+    if (!open) setSkipEnterAnimation(false);
+  }, [open]);
+
   return (
     <>
       <Presence present={open}>
         <div
           data-state={open ? 'open' : 'closed'}
-          className="fixed inset-0 z-50 backdrop-blur-sm bg-[hsl(var(--primary)/0.3)] data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out wide:hidden"
+          className={cn(
+            'fixed inset-0 z-50 backdrop-blur-sm bg-[hsl(var(--primary)/0.3)] wide:hidden',
+            'data-[state=closed]:animate-fd-fade-out',
+            !skipEnterAnimation && 'data-[state=open]:animate-fd-fade-in',
+          )}
           onClick={() => setOpen(false)}
         />
       </Presence>
       <Presence present={open}>
         <div
           className={cn(
-            'overflow-hidden z-50 bg-surface-bg text-text-primary [--ai-chat-width:320px] border-line-structure',
+            'overflow-hidden z-50 bg-surface-1 text-text-primary [--ai-chat-width:320px] border-line-structure',
             'max-wide:fixed max-wide:inset-x-4 max-md:bottom-4 max-md:top-4 max-wide:bottom-8 max-wide:top-8 max-wide:border max-wide:border-line-structure max-wide:shadow-xl max-wide:max-w-[600px] max-wide:mx-auto',
             'wide:sticky wide:top-[var(--fd-nav-height)] wide:h-[calc(100dvh-var(--fd-nav-height)-2px)] wide:border-l wide:ms-auto',
             'wide:in-[#nd-docs-layout]:[grid-area:toc] wide:in-[#nd-notebook-layout]:row-span-full wide:in-[#nd-notebook-layout]:col-start-5',
             'wide:in-[#home-layout]:top-[calc(var(--fd-banner-height,0px)+var(--lf-nav-primary-height))] wide:in-[#home-layout]:h-[calc(100dvh-var(--fd-banner-height,0px)-var(--lf-nav-primary-height))] wide:in-[#home-layout]:w-(--ai-chat-width) wide:in-[#home-layout]:shrink-0 wide:in-[#home-layout]:border-r',
             open
-              ? 'animate-fd-dialog-in wide:animate-[ask-ai-open_200ms]'
+              ? (!skipEnterAnimation && 'animate-fd-dialog-in wide:animate-[ask-ai-open_200ms]')
               : 'animate-fd-dialog-out wide:animate-[ask-ai-close_200ms]',
           )}
           style={
@@ -360,10 +393,8 @@ export function AISearchPanel() {
             <AISearchPanelHeader />
             <AISearchPanelList className="flex-1 min-h-0" />
             <div className="border-t border-line-structure text-text-primary bg-surface-1">
-              <AISearchInput />
-              <div className="flex items-center gap-1 p-1 empty:hidden">
-                <AISearchInputActions />
-              </div>
+              <AISearchInputActions />
+              <AISearchInput autoFocus={!skipEnterAnimation} />
             </div>
           </div>
         </div>

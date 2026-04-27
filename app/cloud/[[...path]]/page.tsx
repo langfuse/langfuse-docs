@@ -38,6 +38,11 @@ const regionCards: Record<
     awsRegion: "eu-west-1",
     icon: <span className="text-lg">{"\u{1F1EA}\u{1F1FA}"}</span>,
   },
+  jp: {
+    title: "Japan",
+    awsRegion: "ap-northeast-1",
+    icon: <span className="text-lg">{"\u{1F1EF}\u{1F1F5}"}</span>,
+  },
 };
 
 const CLOUD_ROUTE_PREFIX = "/cloud";

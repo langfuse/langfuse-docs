@@ -69,6 +69,16 @@ ClickHouse is designed to scale vertically, i.e. adding more memory to the insta
 You can check the [ClickHouse Docs](https://clickhouse.com/docs/operations/tips#using-less-than-16gb-of-ram) on which memory size to choose for your workloads.
 In general, we recommend at least 16 GiB of memory for larger deployments.
 
+### Routing reads to a separate ClickHouse compute group [#clickhouse-read-only-url]
+
+On deployments with [compute-compute separation](https://clickhouse.com/docs/cloud/reference/warehouses) — primarily [ClickHouse Cloud](https://clickhouse.com/cloud) and [BYOC](https://clickhouse.com/cloud/bring-your-own-cloud) — you can isolate heavy analytical reads from the write path by pointing Langfuse at a dedicated read-only compute group.
+This keeps dashboard and public-API read traffic from contending with ingestion inserts and background merges on the primary compute.
+
+Set `CLICKHOUSE_READ_ONLY_URL` and Langfuse will route UI and public-API read queries to the given endpoint while writes, migrations, and ingestion continue to use `CLICKHOUSE_URL`:
+
+Credentials (`CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`) and the database name are reused from the primary configuration, so the read-only compute group must accept the same user.
+Both variables are optional and unset by default; on a single-node ClickHouse or a non-compute-separated cluster they provide no benefit because the endpoint would be the same as the primary.
+
 ## Increasing Disk Usage
 
 LLM tracing data may contain large payloads due to inputs and outputs being tracked.
@@ -112,6 +122,17 @@ SELECT table, formatReadableSize(size) as size, rows FROM (
     ORDER BY size DESC
 )
 ```
+
+#### Slow or timing-out deletions [#clickhouse-deletion-timeouts]
+
+If data retention jobs or project/trace deletions fail with timeout errors, the client-side ClickHouse HTTP timeout for delete operations is likely exhausted.
+Increase `LANGFUSE_CLICKHOUSE_DELETION_TIMEOUT_MS` (default `600000`, i.e. 10 minutes) to give long-running deletes more headroom.
+This applies to both scheduled retention jobs and user-triggered deletes across traces, observations, scores, dataset run items, and events.
+
+On ClickHouse 25.7 and above, you can further reduce mutation pressure by opting into lightweight deletes and updates.
+Set `CLICKHOUSE_LIGHTWEIGHT_DELETE_MODE` from its default `alter_update` to `lightweight_update` (or `lightweight_update_force`) to resolve `DELETE` statements via lightweight deletes instead of `ALTER TABLE ... DELETE` mutations.
+Additionally, set `CLICKHOUSE_USE_LIGHTWEIGHT_UPDATE=true` to route tracing-table updates through native `UPDATE` statements instead of `ALTER TABLE ... UPDATE` mutations.
+Both reduce the amount of background merge work ClickHouse performs on deletion-heavy workloads.
 
 #### ClickHouse system log tables [#clickhouse-system-log-tables]
 

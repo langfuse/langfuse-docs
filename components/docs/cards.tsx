@@ -48,7 +48,12 @@ export function Card({ icon, title = "", description = "", arrow: _arrow, childr
             {icon}
           </div>
         ) : null}
-        <div className={cn("flex flex-col gap-1", contentWrapperClassName)}>
+        <div
+          className={cn(
+            "flex flex-1 min-w-0 flex-col gap-1",
+            contentWrapperClassName
+          )}
+        >
           <Text as="h3" size="s" className="not-prose mb-0 font-medium text-left text-text-secondary">
             {title}
           </Text>

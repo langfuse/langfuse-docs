@@ -46,7 +46,9 @@ export function ContentColumns({
   );
 }
 
-type HomeLayoutProps = ContentColumnsProps;
+type HomeLayoutProps = ContentColumnsProps & {
+  forceLight?: boolean;
+};
 
 /**
  * Full-page layout for the homepage and all marketing/wide pages.
@@ -59,9 +61,10 @@ export function HomeLayout({
   rightSidebar,
   className,
   footerClassName,
+  forceLight = true,
 }: HomeLayoutProps) {
   return (
-    <PageChrome>
+    <PageChrome forceLight={forceLight}>
       <ContentColumns
         showAside={showAside}
         leftSidebar={leftSidebar}

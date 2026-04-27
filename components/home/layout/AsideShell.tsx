@@ -30,7 +30,7 @@ export function AsideShell({
         height: "calc(100vh - var(--fd-banner-height, 0px) - var(--lf-nav-primary-height))",
       }}
     >
-      <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 gap-4 rounded-sm bg-surface-1">
+      <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 rounded-sm bg-surface-1">
         {children}
       </nav>
     </aside>

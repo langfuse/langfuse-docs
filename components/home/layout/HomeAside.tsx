@@ -6,8 +6,8 @@ import { AnchorProvider, useActiveAnchors } from "fumadocs-core/toc";
 import { Link } from "@/components/ui/link";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
-import TocCommunity from "@/components/TocCommunity";
 import { useAISearchContext } from "@/components/inkeep/search";
+import { RightSidebarHiringAndCommunity } from "@/components/home/layout/RightSidebarHiringAndCommunity";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -141,11 +141,15 @@ export function HomeAside() {
         height: "calc(100vh - var(--fd-banner-height, 0px) - var(--lf-nav-primary-height))",
       }}
     >
-      <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 gap-4 rounded-sm bg-surface-1">
-        <AnchorProvider toc={items} single key={pathname}>
-          <TocOnThisPage items={items} />
-        </AnchorProvider>
-        <TocCommunity className="border-t border-line-structure" />
+      <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 rounded-sm bg-surface-1">
+        <div className="flex flex-col flex-1 pb-px bg-line-structure">
+          <div className="flex flex-col flex-1 rounded-sm bg-surface-1">
+            <AnchorProvider toc={items} single key={pathname}>
+              <TocOnThisPage items={items} />
+            </AnchorProvider>
+          </div>
+        </div>
+        <RightSidebarHiringAndCommunity />
       </nav>
     </aside>
   );

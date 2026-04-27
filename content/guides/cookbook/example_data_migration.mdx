@@ -1,12 +1,16 @@
 ---
 title: Migrating Data Between Langfuse Projects (Python SDK v4)
 sidebarTitle: Data Migration Script
-description: Migrate observations, scores, prompts, datasets, custom models, score configs, and annotation queues between Langfuse projects using the Python SDK v4.
+description: Migrate observations, scores, prompts, datasets, custom models, and score configs between Langfuse projects using the Python SDK v4.
 ---
 
 # Migrating Data Between Langfuse Projects (Python SDK v4)
 
-This notebook migrates data from one Langfuse project to another using the **Langfuse Python SDK v4**. 
+This notebook migrates data from one Langfuse project to another using the **Langfuse Python SDK v4**.
+
+<Callout type="warning">
+Migrating data into a Langfuse project creates new ingestion events in the destination project. This migration therefore incurs Langfuse ingestion charges based on the number of observations transferred.
+</Callout>
 
 Common use cases:
 - Migrating between cloud regions (US ↔ EU ↔ JP ↔ HIPAA)
@@ -42,7 +46,7 @@ import os
 # --- SOURCE project credentials ---
 os.environ["LANGFUSE_SOURCE_PUBLIC_KEY"] = "pk-lf-.."
 os.environ["LANGFUSE_SOURCE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_SOURCE_HOST"] = "https://cloud.langfuse.com"  # e.g. US cloud
+os.environ["LANGFUSE_SOURCE_HOST"] = "https://cloud.langfuse.com"  # e.g. EU cloud
 
 # --- DESTINATION project credentials ---
 os.environ["LANGFUSE_DEST_PUBLIC_KEY"] = "pk-lf-.."
@@ -208,7 +212,7 @@ print(f"Time filter: from={FROM_TS}  to={TO_TS}")
 
 ## 1. Score Configs
 
-Score configs must be migrated first so that scores and annotation queues created in the destination can reference them by ID. We keep a `config_id_map` to remap references in later sections.
+Score configs must be migrated first so that scores created in the destination can reference them by ID. We keep a `config_id_map` to remap references in later sections.
 
 
 

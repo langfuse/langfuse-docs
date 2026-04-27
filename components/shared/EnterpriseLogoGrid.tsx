@@ -3,7 +3,6 @@
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import adobeLogo from "../home/img/adobe.svg";
-import appleLogo from "../home/img/apple.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
@@ -14,6 +13,7 @@ import khanacademyLogo from "../home/img/khan.svg";
 import magicPatternsLogo from "../home/img/magic.svg";
 import merckLogo from "../home/img/merck.svg";
 import pigmentLogo from "../home/img/pigment.svg";
+import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
 import telusLogo from "../home/img/telus.svg";
@@ -94,8 +94,8 @@ const companies: CompanyLogo[] = [
     logo: expediaGroupLogo,
   },
   {
-    name: "Apple",
-    logo: appleLogo,
+    name: "Rocket Money",
+    logo: rocketMoneyLogo,
   },
   {
     name: "Pigment",
