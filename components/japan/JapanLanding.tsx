@@ -105,8 +105,8 @@ function Hero() {
             LLMのトレース、プロンプト管理、評価、メトリクス。
             すべてをAWSとClickHouseの
             <b className="text-text-primary font-medium">東京リージョン</b>
-            でホスト。
-            世界中のチームが使っているのと同じLangfuse Cloudを、データを日本に置いたまま使えます。
+            でホスト。  
+            世界中のチームが使っているのと同じLangfuse Cloudを、データを国内に保管したまま使えます。
           </p>
           <p className="font-analog italic text-[15px] text-text-tertiary m-0 -tracking-[0.005em]">
             Langfuse Cloud Japan — LLM observability, hosted in Tokyo.
@@ -139,7 +139,7 @@ function Hero() {
         className={`${cornerBoxBase} no-tl no-tr grid grid-cols-2 md:grid-cols-4 [border-top:none]`}
       >
         {[
-          ["機能はグローバル版と同じ", "機能差分なし"],
+          ["機能はグローバル版と同じ", "機能差なし"],
           ["AWS + ClickHouse", "東京でホスト"],
           ["エンタープライズ対応", "SOC 2 · ISO 27001"],
           ["オープンソース", "MIT · いつでもセルフホスト"],
@@ -243,8 +243,8 @@ function WhyJapan() {
     {
       kanji: "所在",
       eyebrow: "データ所在地",
-      title: "データは日本に置いたまま。",
-      body: "トレース、プロンプト、評価はすべてAWS ap-northeast-1（東京）のClickHouseに保管されます。主要なアプリケーションデータがリージョンの外に出ることはありません。",
+      title: "データは国内に保管。",
+      body: "トレース、プロンプト、評価はすべてAWS ap-northeast-1（東京）のClickHouseに保管されます。主要なアプリケーションデータがリージョン外に出ることはありません。",
       visual: "region" as const,
     },
     {
@@ -268,7 +268,7 @@ function WhyJapan() {
       <div className="flex flex-col items-start gap-3.5 mb-10">
         <div className="japan-eyebrow">なぜLangfuse Cloud Japan?</div>
         <h2 className="japan-h2 max-w-[26ch]">
-          日本でLLMを動かすチームのための
+          日本でAIエージェントを開発しているチームのための
           <br />
           <span className="japan-highlight">プラットフォーム。</span>
         </h2>
@@ -446,19 +446,19 @@ function GetStarted() {
     {
       n: "01",
       title: "サインアップ",
-      body: "jp.cloud.langfuse.com にアクセスして、組織・プロジェクトを作成、APIキーを発行します。1分もかかりません。",
+      body: "jp.cloud.langfuse.com にアクセスして、１分以内に組織・プロジェクトを作成し、APIキーを発行できます。",
       action: ["アカウントを作成", "https://jp.cloud.langfuse.com"],
     },
     {
       n: "02",
       title: "アプリを設定",
-      body: "SDKのBase URLを日本リージョンに向けます。APIキーはさっき発行したものをそのまま使います。",
+      body: "SDKのBase URLを日本リージョンに向けます。APIキーは先ほど発行したものをそのまま使います。",
       code: true,
     },
     {
       n: "03",
       title: "トレースを追加",
-      body: "AIコーディングエージェントとLangfuseスキルを組み合わせれば、スタックに合わせてトレースを自動で入れてくれます。",
+      body: "AIコーディングエージェントとLangfuseスキルを組み合わせれば、コードベースに合わせてトレースを自動で組み込んでくれます。",
       action: ["Langfuse skillsを開く", "https://github.com/langfuse/skills"],
     },
   ];
@@ -819,7 +819,7 @@ function Migration() {
             className="japan-h2 max-w-[20ch] mb-3.5"
             style={{ fontSize: "clamp(28px, 3vw, 40px)" }}
           >
-            すでにLangfuseを使っている? 4ステップで移行できます。
+            すでにLangfuseをご利用ですか？ 4ステップで移行できます。
           </h2>
           <p className="japan-body-sm m-0 max-w-[44ch]">
             別リージョンからでも、セルフホストからでもOK。エクスポート → インポート → base URL切り替え、それだけです。クックブックで手順を最初から最後までカバーしています。
@@ -880,7 +880,7 @@ function FAQ() {
       ),
     },
     {
-      q: "日本リージョンを使っているか、どう確認すればいい?",
+      q: "日本リージョンを使っているか確認するには？",
       a: (
         <>
           <p>チェックするのは2点です:</p>
@@ -898,7 +898,7 @@ function FAQ() {
       ),
     },
     {
-      q: "移行はどう進めるの?",
+      q: "移行の手順は？",
       a: (
         <p>
           日本リージョンにプロジェクトを作る → 元のプロジェクトからデータをエクスポート → インポート → アプリのbase URLを切り替える、の4ステップです。詳しい手順は{" "}
