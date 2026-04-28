@@ -109,10 +109,10 @@ export function buildSectionMetadata(
   const pagePath = `/${section}${slug.length > 0 ? `/${slug.join("/")}` : ""}`;
   const canonicalUrl =
     pageData.canonical ?? opts?.canonicalFallback ?? buildPageUrl(pagePath);
-  const seoTitle = pageData.seoTitle || page.data.title;
-  const ogTitle = pageData.seoTitle ? seoTitle : enrichOgTitle(seoTitle, slug, sectionTitle);
+  const rawTitle = pageData.seoTitle || page.data.title;
+  const seoTitle = pageData.seoTitle ? rawTitle : enrichOgTitle(rawTitle, slug, sectionTitle);
   const ogImage = buildOgImageUrl({
-    title: ogTitle,
+    title: seoTitle,
     description: page.data.description,
     section: sectionTitle,
     staticOgImage: pageData.ogImage,
