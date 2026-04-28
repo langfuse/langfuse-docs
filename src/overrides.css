@@ -230,10 +230,12 @@
 
 /* Compact variant (handbook, security): on desktop there is no secondary nav row,
    so reduce top padding to close the gap between the primary navbar and the first
-   sidebar section heading. */
+   sidebar section heading. Also remove the top fade mask so the first item isn't
+   clipped (the sidebar sits flush against the navbar). */
 @media (min-width: 768px) {
   .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] {
     padding-top: 0;
+    mask-image: linear-gradient(to bottom, white, white calc(100% - 12px), transparent) !important;
   }
   /* Hide the top separator line and its corner decorators on the first section
      heading (it sits flush against the navbar in compact mode). */
