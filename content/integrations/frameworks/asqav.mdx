@@ -1,0 +1,118 @@
+---
+title: Use Asqav with Langfuse for Signed Agent Audit Trails
+sidebarTitle: Asqav
+description: Asqav adds cryptographic, tamper-evident audit records to agent actions. Use it alongside Langfuse so the trace you debug with and the record you hand to an auditor stay linked by trace_id.
+category: Integrations
+---
+
+# Use Asqav with Langfuse
+
+This page shows how to combine [Asqav](https://asqav.com) with Langfuse so the trace you use to debug an agent and the audit record you hand to a regulator stay linked by a shared `trace_id`.
+
+> **What is Asqav?** [Asqav](https://github.com/asqav/asqav-sdk) is an AI agent governance layer that produces signed, tamper-evident audit records for agent actions. Each call to `agent.sign(...)` returns a verification URL backed by an ML-DSA (post-quantum) signature. By default the SDK runs in hash-only mode, so prompts and tool inputs are hashed locally and only the digest plus metadata is sent to Asqav. The default deployment is GDPR-aware data minimization and is designed to support EU AI Act reporting obligations.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It captures traces, prompts, completions, evaluations, and scores so you can debug and improve your AI application.
+
+## When to use them together
+
+Langfuse and Asqav answer different questions about the same agent run:
+
+- **Langfuse** answers *"what did this run look like, and how good was it?"* It stores the prompt, completion, latency, cost, and any evals or scores you attach.
+- **Asqav** answers *"can I prove to an external auditor that this action happened, who initiated it, and that the record has not been altered?"* It stores a hash of the action, signed with the agent's key, plus a small set of metadata fields.
+
+They are not replacements for each other. A common pattern is to keep Langfuse as the day-to-day observability surface and use Asqav as the immutable audit log that an auditor or risk team can verify independently.
+
+## The pattern
+
+In your application code you call both tools in the same function and pass the same `trace_id` to each. Asqav exposes `asqav.generate_trace_id()` so you can mint a deterministic ID once and reuse it on the Langfuse span.
+
+<Steps>
+### Step 1: Install Dependencies
+
+```python
+%pip install langfuse asqav -q
+```
+
+### Step 2: Configure Credentials
+
+```python
+import os
+
+# Langfuse
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"
+
+# Asqav
+os.environ["ASQAV_API_KEY"] = "ak_..."
+```
+
+### Step 3: Initialize Both Clients
+
+```python
+import asqav
+from langfuse import get_client, observe
+
+asqav.init()  # picks up ASQAV_API_KEY from env
+agent = asqav.Agent.create(
+    "research-agent",
+    capabilities=["read:web", "summarize"],
+)
+
+langfuse = get_client()
+```
+
+### Step 4: Wrap a Function with Both
+
+```python
+@observe(name="answer-question")
+def answer_question(question: str) -> str:
+    trace_id = asqav.generate_trace_id()
+
+    # Tag the Langfuse trace so it can be cross-referenced.
+    langfuse.update_current_trace(metadata={"asqav_trace_id": trace_id})
+
+    # ... your LLM call here, e.g. via OpenAI, LangChain, etc. ...
+    answer = "42"
+
+    # Sign the action. By default only a hash of the context is sent.
+    receipt = agent.sign(
+        "answer:question",
+        context={"question": question, "answer": answer},
+        trace_id=trace_id,
+    )
+    return answer
+
+answer_question("What is the meaning of life?")
+langfuse.flush()
+```
+
+### Step 5: Verify Independently
+
+The `receipt` returned by `agent.sign(...)` includes a verification URL. An auditor or third party can hit that URL, recompute the hash from the canonical record, and check the signature against the agent's published public key without ever needing access to your Langfuse project.
+
+```python
+from asqav import verify_signature
+
+verify_signature(receipt)  # True if the record has not been altered
+```
+</Steps>
+
+## What gets stored where
+
+| Surface | Holds | Used by |
+| --- | --- | --- |
+| Langfuse | trace, prompt, completion, latency, cost, evals, scores | engineers debugging the agent |
+| Asqav | hash of the action, agent ID, action type, signature, timestamp, optional `trace_id` | auditors, risk and compliance teams |
+
+The `trace_id` you put on both sides is the join key. If a regulator asks for evidence of a specific signed action, you hand them the Asqav verification URL; if you need to look up the prompt and completion behind that action, you search Langfuse for the same `trace_id`.
+
+## Resources
+
+- [Asqav SDK on GitHub](https://github.com/asqav/asqav-sdk)
+- [Asqav on PyPI](https://pypi.org/project/asqav/)
+- [Asqav docs](https://asqav.com/docs)
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
