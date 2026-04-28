@@ -489,7 +489,7 @@ function fitTitleLayoutLongAtLineCount(
 function isLongTitle(title: string): boolean {
   const t = title.trim();
   if (t.length > 105) return true;
-  if (hasCjk(t) && effectiveCharCount(t, ANALOG_CHAR_EM) > 105 / ANALOG_CHAR_EM) return true;
+  if (hasCjk(t) && effectiveCharCount(t, ANALOG_CHAR_EM) > 105) return true;
   const words = t.split(/\s+/).filter(Boolean);
   return words.length > 14;
 }
