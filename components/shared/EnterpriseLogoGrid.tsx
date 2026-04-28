@@ -23,7 +23,7 @@ import twilioLogo from "../home/img/twilio.svg";
 import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
 
-const MARQUEE_DURATION_SEC = 30;
+const MARQUEE_DURATION_SEC = 40;
 
 type CompanyLogo = {
   name: string;
