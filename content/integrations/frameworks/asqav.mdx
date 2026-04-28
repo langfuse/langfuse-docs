@@ -9,7 +9,7 @@ category: Integrations
 
 This page shows how to combine [Asqav](https://asqav.com) with Langfuse so the trace you use to debug an agent and the audit record you hand to a regulator stay linked by a shared `trace_id`.
 
-> **What is Asqav?** [Asqav](https://github.com/asqav/asqav-sdk) is an AI agent governance layer that produces signed, tamper-evident audit records for agent actions. Each call to `agent.sign(...)` returns a verification URL backed by an ML-DSA (post-quantum) signature. By default the SDK runs in hash-only mode, so prompts and tool inputs are hashed locally and only the digest plus metadata is sent to Asqav. The default deployment is GDPR-aware data minimization and is designed to support EU AI Act reporting obligations.
+> **What is Asqav?** [Asqav](https://github.com/jagmarques/asqav-sdk) is an AI agent governance layer that produces signed, tamper-evident audit records for agent actions. Each call to `agent.sign(...)` returns a verification URL backed by an ML-DSA (post-quantum) signature. By default the SDK runs in hash-only mode, so prompts and tool inputs are hashed locally and only the digest plus metadata is sent to Asqav. The default deployment is GDPR-aware data minimization and is designed to support EU AI Act reporting obligations.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It captures traces, prompts, completions, evaluations, and scores so you can debug and improve your AI application.
 
@@ -109,7 +109,7 @@ The `trace_id` you put on both sides is the join key. If a regulator asks for ev
 
 ## Resources
 
-- [Asqav SDK on GitHub](https://github.com/asqav/asqav-sdk)
+- [Asqav SDK on GitHub](https://github.com/jagmarques/asqav-sdk)
 - [Asqav on PyPI](https://pypi.org/project/asqav/)
 - [Asqav docs](https://asqav.com/docs)
 
