@@ -123,7 +123,7 @@ const LogoImage = ({
       alt={`${name} logo`}
       className={cn(
         "object-cover max-w-full transition-[filter] duration-200 hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]",
-        compact ? "h-[40px]" : "h-[56px]",
+        compact ? "h-[48px]" : "h-[56px]",
       )}
       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
       priority={false}
@@ -144,7 +144,7 @@ function LogoMarqueeItems() {
             href={company.customerStoryPath}
             tooltip={hasStory ? "Read story" : undefined}
             tooltipPlacement="bottom-center"
-            className="shrink-0 flex items-center justify-center !p-0 px-1"
+            className="shrink-0 flex items-center justify-center !py-0 !px-1"
             aria-label={
               hasStory
                 ? `Read ${company.name} user story`
