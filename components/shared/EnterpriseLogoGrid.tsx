@@ -144,7 +144,7 @@ function LogoMarqueeItems() {
             href={company.customerStoryPath}
             tooltip={hasStory ? "Read story" : undefined}
             tooltipPlacement="bottom-center"
-            className="shrink-0 flex items-center justify-center !p-0 px-3"
+            className="shrink-0 flex items-center justify-center !p-0 px-1"
             aria-label={
               hasStory
                 ? `Read ${company.name} user story`
