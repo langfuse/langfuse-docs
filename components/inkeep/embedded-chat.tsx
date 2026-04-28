@@ -104,10 +104,12 @@ function SharedConversationView({ messages }: { messages: { role: 'user' | 'assi
   return (
     <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)]">
       <div className="not-prose flex items-center gap-2 px-4 py-3 border-b border-line-structure bg-surface-1">
-        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="Langfuse" className="size-4 shrink-0" />
         <Text size="s" className="font-medium text-text-primary">
           Shared Conversation
         </Text>
+      </div>
+      <div className="not-prose px-4 py-2 text-xs text-text-tertiary bg-surface-2 border-b border-line-structure">
+        This conversation was shared by another user. Responses may not reflect actual Langfuse AI answers.
       </div>
       <div className="flex-1 overflow-y-auto p-4 overscroll-contain bg-surface-1">
         <div className="flex flex-col gap-4">
@@ -121,11 +123,8 @@ function SharedConversationView({ messages }: { messages: { role: 'user' | 'assi
                     : 'max-w-full',
                 )}>
                   {!isUser && (
-                    <p className="mb-1 text-sm font-medium text-primary">
-                      <span className="inline-flex items-center gap-2">
-                        <img src="/brand-assets/icon/color/langfuse-icon.png" alt="" className="size-4" />
-                        <span>Langfuse Help Agent</span>
-                      </span>
+                    <p className="mb-1 text-xs text-text-tertiary">
+                      AI response (shared)
                     </p>
                   )}
                   <div className={cn('prose text-sm', isUser && 'prose-p:my-0')}>
@@ -168,27 +167,32 @@ export function EmbeddedAIChat() {
 
 function EmbeddedShareChatButton() {
   const { messages } = useChatContext();
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   const shareChat = () => {
     const shared = messages
       .filter((m) => m.role === 'user' || m.role === 'assistant')
       .map((m) => ({ role: m.role as 'user' | 'assistant', text: extractTextFromParts(m.parts ?? []) }));
     const url = encodeShareUrl(shared);
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        setState('copied');
+        setTimeout(() => setState('idle'), 2000);
+      })
+      .catch(() => {
+        setState('error');
+        setTimeout(() => setState('idle'), 2000);
+      });
   };
 
   return (
     <Button
       variant="secondary"
       size="small"
-      icon={copied ? <Check className="size-3" /> : <Link2 className="size-3" />}
+      icon={state === 'copied' ? <Check className="size-3" /> : <Link2 className="size-3" />}
       onClick={shareChat}
     >
-      {copied ? 'Link copied' : 'Share'}
+      {state === 'copied' ? 'Link copied' : state === 'error' ? 'Failed' : 'Share'}
     </Button>
   );
 }

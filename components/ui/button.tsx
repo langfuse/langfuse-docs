@@ -346,7 +346,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <div
         className={cn(
-          "relative flex items-center p-1 group button-wrapper cursor-pointer",
+          "relative flex items-center p-1 group button-wrapper cursor-pointer has-[:disabled]:cursor-not-allowed",
           wrapperClassName,
           size === "small" ? "max-h-[34px]" : "max-h-[40px]"
         )}

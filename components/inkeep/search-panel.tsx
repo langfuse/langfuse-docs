@@ -63,27 +63,32 @@ function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
 
 function ShareChatButton() {
   const { messages } = useChatContext();
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   const shareChat = () => {
     const shared = messages
       .filter((m) => m.role === 'user' || m.role === 'assistant')
       .map((m) => ({ role: m.role as 'user' | 'assistant', text: extractTextFromParts(m.parts ?? []) }));
     const url = encodeShareUrl(shared);
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        setState('copied');
+        setTimeout(() => setState('idle'), 2000);
+      })
+      .catch(() => {
+        setState('error');
+        setTimeout(() => setState('idle'), 2000);
+      });
   };
 
   return (
     <Button
       variant="secondary"
       size="small"
-      icon={copied ? <Check className="size-3" /> : <Link2 className="size-3" />}
+      icon={state === 'copied' ? <Check className="size-3" /> : <Link2 className="size-3" />}
       onClick={shareChat}
     >
-      {copied ? 'Link copied' : 'Share'}
+      {state === 'copied' ? 'Link copied' : state === 'error' ? 'Failed' : 'Share'}
     </Button>
   );
 }
