@@ -117,24 +117,29 @@ const LogoImage = ({
   name: string;
   compact?: boolean;
 }) => {
-  const img = (
+  if (compact) {
+    return (
+      <div className="overflow-hidden h-[32px]">
+        <Image
+          src={logo}
+          alt={`${name} logo`}
+          className="h-[56px] max-w-none -mx-[22px] -my-[12px] transition-[filter] duration-200 hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]"
+          sizes="(max-width: 768px) 30vw"
+          priority={false}
+        />
+      </div>
+    );
+  }
+
+  return (
     <Image
       src={logo}
       alt={`${name} logo`}
-      className={cn(
-        "transition-[filter] duration-200 hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]",
-        compact ? "h-[48px] max-w-none -mx-[20px]" : "h-[56px] object-cover max-w-full",
-      )}
-      sizes={compact ? "(max-width: 768px) 30vw" : "(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"}
+      className="h-[56px] object-cover max-w-full transition-[filter] duration-200 hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]"
+      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
       priority={false}
     />
   );
-
-  if (compact) {
-    return <div className="overflow-hidden">{img}</div>;
-  }
-
-  return img;
 };
 
 const visibleCompanies = companies.filter((c) => !c.hidden);
