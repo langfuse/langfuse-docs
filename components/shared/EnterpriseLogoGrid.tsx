@@ -119,11 +119,11 @@ const LogoImage = ({
 }) => {
   if (compact) {
     return (
-      <div className="overflow-hidden h-[32px]">
+      <div className="overflow-hidden h-[44px]">
         <Image
           src={logo}
           alt={`${name} logo`}
-          className="h-[56px] max-w-none -mx-[22px] -my-[12px] transition-[filter] duration-200 hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]"
+          className="h-[72px] max-w-none -mx-[28px] -my-[14px] transition-[filter] duration-200 hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]"
           sizes="(max-width: 768px) 30vw"
           priority={false}
         />
