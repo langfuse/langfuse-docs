@@ -228,6 +228,29 @@
   padding: 16px 0px;
 }
 
+/* Compact variant (handbook, security): on desktop there is no secondary nav row,
+   so reduce top padding to close the gap between the primary navbar and the first
+   sidebar section heading. Also remove the top fade mask so the first item isn't
+   clipped (the sidebar sits flush against the navbar). */
+@media (min-width: 768px) {
+  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] {
+    padding-top: 8px;
+    mask-image: linear-gradient(to bottom, white, white calc(100% - 12px), transparent) !important;
+  }
+  /* Hide the top separator line and its corner decorators on the first section
+     heading (it sits flush against the navbar in compact mode). */
+  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type {
+    margin-top: 0;
+    padding-top: 4px;
+  }
+  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type::after {
+    display: none;
+  }
+  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type > span[aria-hidden] {
+    display: none !important;
+  }
+}
+
 /* Inner viewport: allow full height so the aside scrolls (Radix or first child of scroll area) */
 #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport],
 #nd-docs-layout #nd-sidebar > div.flex-1 > div:first-child,
