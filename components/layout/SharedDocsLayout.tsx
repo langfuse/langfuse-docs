@@ -29,10 +29,12 @@ export function SharedDocsLayout({
   tree,
   children,
   showSecondaryNav = true,
+  sectionLabel,
 }: {
   tree: ComponentProps<typeof DocsLayout>["tree"];
   children: ReactNode;
   showSecondaryNav?: boolean;
+  sectionLabel?: string;
 }) {
   return (
     <AISearch>
@@ -49,7 +51,7 @@ export function SharedDocsLayout({
         }
       >
         <DocsPatternTracker />
-        <NavbarDocs />
+        <NavbarDocs sectionLabel={sectionLabel} />
         {showSecondaryNav && <DocsSecondaryNav />}
         <DocsLayoutWrapper>
           <DocsLayout
