@@ -117,18 +117,24 @@ const LogoImage = ({
   name: string;
   compact?: boolean;
 }) => {
-  return (
+  const img = (
     <Image
       src={logo}
       alt={`${name} logo`}
       className={cn(
-        "object-cover max-w-full transition-[filter] duration-200 hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]",
-        compact ? "h-[48px]" : "h-[56px]",
+        "transition-[filter] duration-200 hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]",
+        compact ? "h-[48px] max-w-none -mx-[20px]" : "h-[56px] object-cover max-w-full",
       )}
-      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+      sizes={compact ? "(max-width: 768px) 30vw" : "(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"}
       priority={false}
     />
   );
+
+  if (compact) {
+    return <div className="overflow-hidden">{img}</div>;
+  }
+
+  return img;
 };
 
 const visibleCompanies = companies.filter((c) => !c.hidden);
