@@ -119,7 +119,7 @@ const LogoImage = ({
 }) => {
   if (compact) {
     return (
-      <div className="overflow-hidden h-[44px] flex items-center">
+      <div className="overflow-hidden h-[40px] -mx-5 flex items-center">
         <Image
           src={logo}
           alt={`${name} logo`}
