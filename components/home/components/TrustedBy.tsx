@@ -63,7 +63,7 @@ export function TrustedBy({
                     </TooltipTrigger>
                     <TooltipContent
                       sideOffset={4}
-                      className="h-auto w-auto min-w-[120px] rounded-md border border-line-structure bg-surface-bg p-3 font-sans text-sm text-text-primary shadow-md"
+                      className="h-auto w-auto min-w-[120px] rounded-none border border-line-structure bg-surface-1 p-3 font-sans text-sm text-popover-foreground shadow-md"
                     >
                       <div className="text-center">
                         <p className="font-medium">{customer.name}</p>
