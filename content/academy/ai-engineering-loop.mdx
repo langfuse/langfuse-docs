@@ -1,0 +1,86 @@
+---
+title: AI Engineering Loop
+description: A high-level map of the AI engineering lifecycle, from tracing and monitoring to building datasets, experimenting, and evaluating.
+---
+
+import { Activity, BadgeCheck, Database, FlaskConical, Route } from "lucide-react";
+
+# The AI Engineering Loop
+
+The AI Engineering Loop is how teams approach the continuous evolution and improvement of their AI-powered systems. It connects what happens in production directly to the work of improving quality, cost, latency, and reliability during development.
+
+Many of the underlying concepts mirror traditional software engineering, but a key differentiator is the probabilistic nature of LLM outputs and the sheer number of paths a system can take. You cannot unit-test your way to confidence. You need a systematic way to observe, learn, and improve.
+
+![The AI engineering loop](/images/academy/loop-overview.png)
+
+The loop clusters into two areas of work.
+
+## 1. Understanding what's happening in production
+
+The first part is about visibility. What is your system actually doing in the real world? Which requests are going well, and which are failing in ways that matter?
+
+<Cards num={2} className="gap-6">
+  <Cards.Card
+    title="1. Tracing"
+    href="/academy/tracing"
+    icon={<Route className="w-5 h-5" />}
+    arrow
+  >
+    Capture the full path of a request, including prompts, retrieved context, tool calls, outputs, latency, and cost. Tracing is the raw record of what your system actually did.
+  </Cards.Card>
+  <Cards.Card
+    title="2. Monitoring"
+    href="/academy/monitoring"
+    icon={<Activity className="w-5 h-5" />}
+    arrow
+  >
+    Track how the system behaves over time and surface the traces that deserve attention. Monitoring turns a stream of raw data into an ongoing understanding of how the system evolves.
+  </Cards.Card>
+</Cards>
+
+## 2. Improving systematically during development
+
+The second part is about turning what you have observed into improvements you can trust — without degrading the parts of the system that are already working.
+
+<Cards num={3} className="gap-6">
+  <Cards.Card
+    title="3. Building datasets"
+    href="/academy/datasets"
+    icon={<Database className="w-5 h-5" />}
+    arrow
+  >
+    Turn real scenarios surfaced through monitoring into repeatable test cases. Instead of testing against a handful of hand-picked examples, you build a set that reflects how the system actually gets used.
+  </Cards.Card>
+  <Cards.Card
+    title="4. Experimenting"
+    href="/academy/experiments"
+    icon={<FlaskConical className="w-5 h-5" />}
+    arrow
+  >
+    Change one variable at a time — a prompt, a model, a retrieval strategy — and compare it against a stable baseline. That way you know what actually improved instead of guessing.
+  </Cards.Card>
+  <Cards.Card
+    title="5. Evaluating"
+    href="/academy/evaluate"
+    icon={<BadgeCheck className="w-5 h-5" />}
+    arrow
+  >
+    Decide whether results are good enough to ship using manual review, code-based checks, or LLM judges. Evaluation is how you turn a comparison into a decision.
+  </Cards.Card>
+</Cards>
+
+Once you ship a change, the cycle starts again. The updated system produces new traces, new monitoring signals, and new opportunities to improve.
+
+## You don't have to close the full loop on day one
+
+Most teams don't start with all five steps in place. That is fine.
+
+The value of the loop is cumulative. Each step you add gives you better signal, more systematic coverage, and more confidence in what you are shipping. The goal is not to implement everything at once — it is to understand where you are and take the next step toward closing the loop.
+
+{/* TODO: Link blog article about patterns of AI engineering lifecycle adoption once written */}
+
+## Start with tracing
+
+The natural place to begin is tracing. You cannot monitor what you cannot see, and you cannot improve what you cannot measure. Tracing is the foundation everything else builds on.
+
+[→ Start with Tracing](/academy/tracing)
