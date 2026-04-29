@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import adobeLogo from "../home/img/adobe.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
@@ -178,22 +178,27 @@ export const EnterpriseLogoGrid = ({
   className = "",
   small = false,
 }: EnterpriseLogoGridProps) => {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <>
       {/* Mobile: infinite scrolling marquee */}
       <div
         className={cn("sm:hidden overflow-hidden w-full mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]", className)}
-        role="marquee"
         aria-label="Enterprise customers using Langfuse"
       >
         <motion.div
           className="flex items-center w-max py-2"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{
-            duration: MARQUEE_DURATION_SEC,
-            repeat: Infinity,
-            ease: "linear",
-          }}
+          animate={shouldReduceMotion ? undefined : { x: ["0%", "-50%"] }}
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : {
+                  duration: MARQUEE_DURATION_SEC,
+                  repeat: Infinity,
+                  ease: "linear",
+                }
+          }
         >
           <LogoMarqueeItems />
           <div inert className="contents">
