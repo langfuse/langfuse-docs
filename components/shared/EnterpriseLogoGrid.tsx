@@ -1,6 +1,5 @@
 "use client";
 
-import { Fragment } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { motion } from "framer-motion";
@@ -197,7 +196,7 @@ export const EnterpriseLogoGrid = ({
           }}
         >
           <LogoMarqueeItems />
-          <div aria-hidden="true" className="contents">
+          <div inert className="contents">
             <LogoMarqueeItems />
           </div>
         </motion.div>
@@ -206,7 +205,7 @@ export const EnterpriseLogoGrid = ({
       {/* Desktop: grid layout */}
       <div
         className={cn(
-          "hidden sm:grid grid-cols-3 sm:grid-cols-6 auto-rows-fr px-2 py-2",
+          "hidden sm:grid sm:grid-cols-6 auto-rows-fr px-2 py-2",
           small && "sm:grid-cols-3",
           className,
         )}
