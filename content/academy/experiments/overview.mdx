@@ -1,6 +1,6 @@
 ---
 title: Experiments and their role
-sidebarTitle: Experiment
+sidebarTitle: Overview
 description: How to use experiments to systematically improve your LLM application by isolating variables and comparing outputs.
 ---
 
@@ -33,7 +33,7 @@ Change two things at once and you can't tell which caused the difference.
 
 ## How is it used?
 
-The core loop: pick a variable & form a hypothesis, run both conditions against your dataset, compare outputs, learn something & repeat. 
+The core flow: pick a variable & form a hypothesis, run both conditions against your dataset, compare outputs, learn something & repeat. 
 
 ![Experimentation loop](/images/academy/experimentation.png)
 
@@ -43,11 +43,9 @@ Typical attempts can include:
 - Does my prompt change improve the output quality of our system?
 - Is our new agent harness architecture creating better results than our multi-agent system?
 
-Comparing outputs starts qualitative. Open traces from the same input under both conditions side by side. Read them. Which one actually answered the question? Where did each one fail? This is how you build intuition for what your system is doing, and if you're not willing to read actual outputs on a regular cadence, your experiments will mislead you.
+Start qualitative: same input, both conditions, traces side by side. That is how you learn what "better" means for your app; without reading real outputs regularly, metrics are easy to misread.
 
-With scores, comparison gets concrete. You're looking at win rates ("condition B beats condition A on 68% of inputs"), score distributions (does B win consistently or just on a few inputs?), and cost-latency tradeoffs (B is better but 2x more expensive, is it worth it?).
-
-What you're optimizing for matters. Performance, cost, and latency pull in different directions. A better model costs more. A shorter prompt is faster but might miss edge cases. A more capable agent architecture adds latency. Experiments let you see those tradeoffs in your data rather than in theory.
+Scores then make comparison concrete—win rates, whether wins are spread across inputs or concentrated, and cost or latency tradeoffs. Quality, price, and speed rarely move together; experiments show those pulls in your data instead of in the abstract.
 
 ## Where to start
 
