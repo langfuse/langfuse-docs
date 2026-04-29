@@ -196,11 +196,10 @@ export const EnterpriseLogoGrid = ({
             ease: "linear",
           }}
         >
-          {[0, 1].map((i) => (
-            <Fragment key={i}>
-              <LogoMarqueeItems />
-            </Fragment>
-          ))}
+          <LogoMarqueeItems />
+          <div aria-hidden="true" className="contents">
+            <LogoMarqueeItems />
+          </div>
         </motion.div>
       </div>
 
