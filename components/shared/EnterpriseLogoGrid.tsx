@@ -143,7 +143,7 @@ const LogoImage = ({
 
 const visibleCompanies = companies.filter((c) => !c.hidden);
 
-function LogoMarqueeItems() {
+function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
   return (
     <>
       {visibleCompanies.map((company) => {
@@ -155,6 +155,8 @@ function LogoMarqueeItems() {
             tooltip={hasStory ? "Read story" : undefined}
             tooltipPlacement="bottom-center"
             className="shrink-0 flex items-center justify-center !p-0"
+            aria-hidden={duplicate || undefined}
+            tabIndex={duplicate ? -1 : undefined}
             aria-label={
               hasStory
                 ? `Read ${company.name} user story`
@@ -182,30 +184,35 @@ export const EnterpriseLogoGrid = ({
 
   return (
     <>
-      {/* Mobile: infinite scrolling marquee */}
-      <div
-        className={cn("sm:hidden overflow-hidden w-full mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]", className)}
-        aria-label="Enterprise customers using Langfuse"
-      >
-        <motion.div
-          className="flex items-center w-max py-2"
-          animate={shouldReduceMotion ? undefined : { x: ["0%", "-50%"] }}
-          transition={
-            shouldReduceMotion
-              ? undefined
-              : {
-                  duration: MARQUEE_DURATION_SEC,
-                  repeat: Infinity,
-                  ease: "linear",
-                }
-          }
+      {/* Mobile: scrolling marquee or static scroll fallback */}
+      {shouldReduceMotion ? (
+        <div
+          className={cn("sm:hidden overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", className)}
+          aria-label="Enterprise customers using Langfuse"
         >
-          <LogoMarqueeItems />
-          <div inert className="contents">
+          <div className="flex items-center w-max py-2">
             <LogoMarqueeItems />
           </div>
-        </motion.div>
-      </div>
+        </div>
+      ) : (
+        <div
+          className={cn("sm:hidden overflow-hidden w-full mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]", className)}
+          aria-label="Enterprise customers using Langfuse"
+        >
+          <motion.div
+            className="flex items-center w-max py-2"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{
+              duration: MARQUEE_DURATION_SEC,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          >
+            <LogoMarqueeItems />
+            <LogoMarqueeItems duplicate />
+          </motion.div>
+        </div>
+      )}
 
       {/* Desktop: grid layout */}
       <div
