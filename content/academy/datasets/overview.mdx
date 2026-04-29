@@ -1,19 +1,26 @@
 ---
 title: What are datasets for?
+sidebarTitle: Overview
 description: How to build and structure test datasets for evaluating LLM application changes.
 ---
 
 # What are datasets for?
 
-The improvement loop has three parts: observe what's happening, identify what's wrong, and test whether your fix works. Datasets serve that last step.
+So far, we've covered the first two steps of the [AI engineering loop](/academy/ai-engineering-loop): [tracing](/academy/tracing/overview) your application and [monitoring](/academy/monitoring/overview) its behavior live. Those give you visibility into what your system is actually doing and give you inspiration for improvement.
 
-A dataset is a collection of test cases that you run your application against each time you make a change. You get a repeatable, consistent check across everything you care about.
+Now the question becomes: when you spot something worth improving, how do you test a change before deploying it to production? The next three steps of the loop cover exactly this, and it starts with datasets.
 
-<Callout>
-TODO: loop visual
-</Callout>
+![The AI engineering loop](/images/academy/loop-overview-v4.png)
 
-Because LLM outputs aren't deterministic, running a dataset isn't always a pass/fail check like a traditional test suite. You can also evaluate outputs with scoring functions that measure qualities like correctness, tone, or completeness. The experiments section covers in more detail how this works in practice.
+A dataset is a collection of test cases that you run your application against each time you make a change. Instead of deploying and hoping for the best, you get a repeatable, consistent check across a set of inputs that represent real-world usage.
+
+## What makes a good dataset?
+
+**A good dataset mirrors what your system will encounter in production.** If passing the dataset gives you confidence before deploying, it's doing its job.
+
+**Focused in scope.** Most datasets test one specific part of your system. That can be end-to-end, but it can also target an individual step like retrieval or summarization. You'll likely end up with multiple datasets, each with a clear purpose.
+
+**Different datasets for different workflows.** Some datasets are small and fast enough to run on every push as part of your CI/CD pipeline. Others are larger and more comprehensive, and are useful to run periodically but too slow for every minor change.
 
 ## The dataset item
 
@@ -25,7 +32,7 @@ A dataset is made up of items, each item represents one test case: a situation y
 
 ### What should go where?
 
-![Dataset Fields — When They Are Used](/images/academy/dataset-fields.png)
+![Dataset Fields — When They Are Used](/images/academy/dataset-fields-v2.png)
 
 A good mental model is:
 
@@ -40,14 +47,17 @@ A good mental model is:
 Some evaluators check the output against a predefined expected output (reference-based). Others assess the output without needing a ground truth to compare against (reference-free). Whether you need an expected output, and what it looks like, depends on which type of evaluator you use.
 
 **Exact match**
+
 The expected output is the literal correct answer. For example:
 - A classification task where the correct label is "billing_inquiry"
 - An extraction task where the expected entities are ["Paris", "Thursday"]
 
 **Reference answer**
+
 The expected output is a gold-standard response that shows what a good output looks like. The evaluator can compare the test's output against this example, for instance by checking semantic similarity or whether the key points match.
 
 **Evaluation criteria**
+
 The expected output is a list of checks or requirements the output should satisfy. For example:
 - "must mention the refund policy"
 - "must include a link to the help center"
@@ -55,6 +65,7 @@ The expected output is a list of checks or requirements the output should satisf
 The evaluator checks whether the output meets these criteria.
 
 **Not needed**
+
 Sometimes no expected output is required at all. If you're just checking whether:
 - the tone is professional
 - the response is safe
@@ -62,36 +73,9 @@ Sometimes no expected output is required at all. If you're just checking whether
 
 Your dataset items don't need anything other than an input.
 
-## When should you split into separate datasets?
-
-When do you keep adding items to your dataset, and at what point do you decide to split them up?
-
-### Different tasks = different datasets
-
-Different agents always get separate datasets. You run one task/agent over the complete dataset.
-
-### You need different evaluators for different items
-
-When different items require fundamentally different evaluation logic, it becomes easier to separate them into datasets that each have a clear evaluation task.
-
-If you don't want to split up your dataset, you can work around this by encoding evaluator configuration in each item's expected output. This works at small scale, but as the dataset grows, expected outputs become a mix of different shapes and it gets hard to tell what each item is actually testing.
-
-### You need different run cadences
-
-A common pattern is having a smaller set of test cases that runs on every small change before it can be deployed to production, and a larger, comprehensive set that runs before major releases.
-
-If all of these live in one dataset, you need custom filtering logic to select the right subset for each run. Separate datasets make the boundaries explicit.
-
-### Your dataset is getting hard to navigate
-
-When your dataset is small, one dataset is easy to manage. Once it starts growing, covering different scenarios and failure modes, managing the set becomes more difficult. This becomes a clear sign splitting into focused datasets would make sense. It will make it easier to maintain and reason about coverage.
-
-<Callout>
-TODO: add some specific examples
-</Callout>
-
 ## Where to start
 
-<Callout>
-TODO: How-to guide on creating datasets from traces?
-</Callout>
+There are different approaches to creating dataset items. Common sources to start from are:
+- **Production traces** that you spotted and would like to improve
+- **Creating by hand** based on pre-defined requirements for your agent
+- **Generating synthetically**, with AI, based on your requirements and a couple of examples
