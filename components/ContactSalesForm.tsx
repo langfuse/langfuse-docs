@@ -266,7 +266,7 @@ export function ContactSalesForm() {
                   <span className="text-destructive">*</span>
                 )}
               </FormLabel>
-              <div className="space-y-2 rounded-md border border-input p-3">
+              <div className="space-y-2 rounded-[2px] border border-line-structure p-3">
                 {FORM_FIELDS.enterpriseRequirements.options.map((option) => (
                   <label
                     key={option.value}
@@ -276,7 +276,7 @@ export function ContactSalesForm() {
                       type="checkbox"
                       checked={selectedRequirements.includes(option.value)}
                       onChange={() => toggleRequirement(option.value)}
-                      className="h-4 w-4 rounded border-input"
+                      className="h-4 w-4 rounded-[2px] border-line-structure accent-line-cta"
                     />
                     {option.label}
                   </label>

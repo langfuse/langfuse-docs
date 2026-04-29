@@ -18,7 +18,7 @@ function VideoPlayer({ videoId, title }: VideoPlayerProps) {
   return (
     <iframe
       width="100%"
-      className="aspect-[16/9] rounded mt-3"
+      className="aspect-[16/9] rounded-[2px] mt-3"
       src={`https://www.youtube-nocookie.com/embed/${videoId}`}
       title={title}
       frameBorder="0"
@@ -71,7 +71,7 @@ function WatchWalkthroughsInner({ className }: { className?: string }) {
             <TabsContent
               key={tab.id}
               value={tab.id}
-              className="p-4 mx-auto mt-2 max-w-2xl rounded border bg-stripe-pattern"
+              className="relative overflow-visible p-4 mx-auto mt-2 max-w-2xl rounded-none border border-line-structure corner-box-corners bg-stripe-pattern"
             >
               <div className="mb-6">
                 <h3 className="mb-2 text-xl font-semibold">{tab.title}</h3>
