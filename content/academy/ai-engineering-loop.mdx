@@ -1,0 +1,71 @@
+---
+title: AI Engineering Loop
+description: A high-level map of the AI engineering lifecycle, from tracing and monitoring to building datasets, experimenting, and evaluating.
+---
+
+import { Activity, BadgeCheck, Database, FlaskConical, Route } from "lucide-react";
+
+# The AI Engineering Loop
+
+Building with LLMs is not a one-way delivery process. A system can be technically healthy and still fail on output quality, cost, latency, or consistency once it meets real users.
+
+That is why AI engineering needs a loop. Teams need a way to observe real behavior, identify failure modes, turn those findings into test cases, compare improvements, and decide what is actually worth shipping.
+
+![The AI engineering loop](/images/academy/loop-overview.png)
+
+The loop below is a practical way to think about that work. It connects production visibility with structured improvement, so teams can move from "something feels off" to "we know what changed, why it changed, and whether it is better."
+
+## Read it as a loop
+
+Start in production: tracing captures what happened, monitoring tells you what deserves attention, datasets turn recurring patterns into repeatable test cases, experiments isolate changes, and evaluation tells you whether the new version is actually better.
+
+Once you ship a change, the cycle starts again. The updated system creates new traces, new monitoring signals, and new opportunities to improve.
+
+## From production signals to better systems
+
+<Cards num={2} className="gap-6">
+  <Cards.Card
+    title="1. Tracing"
+    href="/academy/tracing"
+    icon={<Route className="w-5 h-5" />}
+    arrow
+  >
+    Capture the full path of a request, including prompts, retrieved context, tool calls, outputs, latency, and cost.
+  </Cards.Card>
+  <Cards.Card
+    title="2. Monitoring"
+    href="/academy/monitoring"
+    icon={<Activity className="w-5 h-5" />}
+    arrow
+  >
+    Track how the system behaves over time and surface the traces that deserve attention.
+  </Cards.Card>
+  <Cards.Card
+    title="3. Building datasets"
+    href="/academy/datasets"
+    icon={<Database className="w-5 h-5" />}
+    arrow
+  >
+    Turn real scenarios into repeatable test cases so you can measure whether a change helps across more than a few examples.
+  </Cards.Card>
+  <Cards.Card
+    title="4. Experimenting"
+    href="/academy/experiments"
+    icon={<FlaskConical className="w-5 h-5" />}
+    arrow
+  >
+    Change one variable at a time, compare it against a stable baseline, and learn what actually improved.
+  </Cards.Card>
+  <Cards.Card
+    title="5. Evaluating"
+    href="/academy/evaluate"
+    icon={<BadgeCheck className="w-5 h-5" />}
+    arrow
+  >
+    Decide whether results are good enough to ship using manual review, code-based checks, or LLM judges.
+  </Cards.Card>
+</Cards>
+
+## What teams are balancing
+
+Across the loop, teams are balancing output quality, latency, and cost. The goal is to make those tradeoffs explicit and grounded in evidence from your own application.
