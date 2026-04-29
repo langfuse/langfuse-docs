@@ -172,7 +172,7 @@ const marketingFrontmatterSchema = baseFrontmatterSchema.extend({
 
 export const academy = defineDocs({
   dir: "content/academy",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: sidebarFrontmatterSchema },
 });
 
 export const marketing = defineDocs({
