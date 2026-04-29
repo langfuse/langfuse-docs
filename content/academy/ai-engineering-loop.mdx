@@ -7,21 +7,17 @@ import { Activity, BadgeCheck, Database, FlaskConical, Route } from "lucide-reac
 
 # The AI Engineering Loop
 
-Building with LLMs is not a one-way delivery process. A system can be technically healthy and still fail on output quality, cost, latency, or consistency once it meets real users.
+The AI Engineering Loop is how teams approach the continuous evolution and improvement of their AI-powered systems. It connects what happens in production directly to the work of improving quality, cost, latency, and reliability during development.
 
-That is why AI engineering needs a loop. Teams need a way to observe real behavior, identify failure modes, turn those findings into test cases, compare improvements, and decide what is actually worth shipping.
+Many of the underlying concepts mirror traditional software engineering, but a key differentiator is the probabilistic nature of LLM outputs and the sheer number of paths a system can take. You cannot unit-test your way to confidence. You need a systematic way to observe, learn, and improve.
 
 ![The AI engineering loop](/images/academy/loop-overview.png)
 
-The loop below is a practical way to think about that work. It connects production visibility with structured improvement, so teams can move from "something feels off" to "we know what changed, why it changed, and whether it is better."
+The loop clusters into two areas of work.
 
-## Read it as a loop
+## 1. Understanding what's happening in production
 
-Start in production: tracing captures what happened, monitoring tells you what deserves attention, datasets turn recurring patterns into repeatable test cases, experiments isolate changes, and evaluation tells you whether the new version is actually better.
-
-Once you ship a change, the cycle starts again. The updated system creates new traces, new monitoring signals, and new opportunities to improve.
-
-## From production signals to better systems
+The first part is about visibility. What is your system actually doing in the real world? Which requests are going well, and which are failing in ways that matter?
 
 <Cards num={2} className="gap-6">
   <Cards.Card
@@ -30,7 +26,7 @@ Once you ship a change, the cycle starts again. The updated system creates new t
     icon={<Route className="w-5 h-5" />}
     arrow
   >
-    Capture the full path of a request, including prompts, retrieved context, tool calls, outputs, latency, and cost.
+    Capture the full path of a request, including prompts, retrieved context, tool calls, outputs, latency, and cost. Tracing is the raw record of what your system actually did.
   </Cards.Card>
   <Cards.Card
     title="2. Monitoring"
@@ -38,15 +34,22 @@ Once you ship a change, the cycle starts again. The updated system creates new t
     icon={<Activity className="w-5 h-5" />}
     arrow
   >
-    Track how the system behaves over time and surface the traces that deserve attention.
+    Track how the system behaves over time and surface the traces that deserve attention. Monitoring turns a stream of raw data into an ongoing understanding of how the system evolves.
   </Cards.Card>
+</Cards>
+
+## 2. Improving systematically during development
+
+The second part is about turning what you have observed into improvements you can trust — without degrading the parts of the system that are already working.
+
+<Cards num={3} className="gap-6">
   <Cards.Card
     title="3. Building datasets"
     href="/academy/datasets"
     icon={<Database className="w-5 h-5" />}
     arrow
   >
-    Turn real scenarios into repeatable test cases so you can measure whether a change helps across more than a few examples.
+    Turn real scenarios surfaced through monitoring into repeatable test cases. Instead of testing against a handful of hand-picked examples, you build a set that reflects how the system actually gets used.
   </Cards.Card>
   <Cards.Card
     title="4. Experimenting"
@@ -54,7 +57,7 @@ Once you ship a change, the cycle starts again. The updated system creates new t
     icon={<FlaskConical className="w-5 h-5" />}
     arrow
   >
-    Change one variable at a time, compare it against a stable baseline, and learn what actually improved.
+    Change one variable at a time — a prompt, a model, a retrieval strategy — and compare it against a stable baseline. That way you know what actually improved instead of guessing.
   </Cards.Card>
   <Cards.Card
     title="5. Evaluating"
@@ -62,10 +65,22 @@ Once you ship a change, the cycle starts again. The updated system creates new t
     icon={<BadgeCheck className="w-5 h-5" />}
     arrow
   >
-    Decide whether results are good enough to ship using manual review, code-based checks, or LLM judges.
+    Decide whether results are good enough to ship using manual review, code-based checks, or LLM judges. Evaluation is how you turn a comparison into a decision.
   </Cards.Card>
 </Cards>
 
-## What teams are balancing
+Once you ship a change, the cycle starts again. The updated system produces new traces, new monitoring signals, and new opportunities to improve.
 
-Across the loop, teams are balancing output quality, latency, and cost. The goal is to make those tradeoffs explicit and grounded in evidence from your own application.
+## You don't have to close the full loop on day one
+
+Most teams don't start with all five steps in place. That is fine.
+
+The value of the loop is cumulative. Each step you add gives you better signal, more systematic coverage, and more confidence in what you are shipping. The goal is not to implement everything at once — it is to understand where you are and take the next step toward closing the loop.
+
+{/* TODO: Link blog article about patterns of AI engineering lifecycle adoption once written */}
+
+## Start with tracing
+
+The natural place to begin is tracing. You cannot monitor what you cannot see, and you cannot improve what you cannot measure. Tracing is the foundation everything else builds on.
+
+[→ Start with Tracing](/academy/tracing)
