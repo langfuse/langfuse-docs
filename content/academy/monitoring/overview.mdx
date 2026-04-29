@@ -8,66 +8,43 @@ description: How to make sense of your traces through metrics tracking, signal d
 
 ## What role does monitoring play?
 
-Tracing gives you a complete record of what your LLM app is doing. Every request, every model call, every tool use — it's all there. But raw traces don't tell you much on their own. A thousand traces sitting in a log is data, not understanding.
+Tracing provides a complete record of what your LLM app is doing. Every request, every model call, every tool use is recorded. Monitoring is how you make sense of this data. 
+It gives you two things: a continuous view of how your system is performing over time, and a way to surface the specific traces worth looking at. Together, they shift you from having data to actually understanding your system as a foundation for evolving it over time.
 
-Monitoring is how you make sense of it. It gives you two things: a continuous view of how your system is performing over time, and a way to surface the specific traces worth looking at. Together, they shift you from having data to actually understanding your system.
+![The AI engineering loop](/images/academy/loop-overview.png)
 
 ## The two things monitoring does
 
 It helps to separate monitoring into two distinct activities, because they answer different questions.
 
-**Metrics tracking** tells you whether things are getting better or worse over time. Cost, latency, quality scores — these become trends you can watch and reason about. Did that prompt change last Tuesday improve anything? Is quality drifting as usage grows?
+**Aggregate Metrics tracking** tells you whether things are getting better or worse over time. Cost, latency, quality scores — these become trends you can watch and reason about. Did that prompt change last Tuesday improve anything? Is quality drifting as usage grows?
 
 **Signal detection** tells you where to look right now. It surfaces individual traces that are worth investigating — an error, a cluster of retries, a user abandoning mid-conversation. The signal is only useful because it's attached to the specific trace that triggered it. That trace is your starting point for understanding what went wrong.
 
-Traditional observability tools like Datadog or Grafana handle both of these well - for cost and latency. Those are just numbers. The gap is quality. There's no system counter for "did this response actually help the user." That's the gap that online evaluators fill.
 
-### There are two types of evaluators you can use
+## Where do metrics and signals come from?
 
-You can run an LLM-as-a-judge to score response quality, or code-based evaluators that check for specific criteria — whether the output is valid JSON, whether a required field is present, whether the response stayed within topic. Both produce scores you can track and alert on just like latency.
+Both aggregate metrics and signal detection depend on fields attached to observations. A lot of what you need is already there once you instrument properly: latency, token-derived cost, model and route metadata, tool outcomes, and errors typically flow from your client and provider APIs without extra wiring. 
 
-Code-based evals are cheap, fast, and reliable for anything you can define precisely. LLM-as-a-judge handles the things you can't easily write a rule for. In practice you want both running, covering different dimensions of quality.
+Anything beyond that, like quality scores, thumbs up or down, human annotation, or LLM-as-a-judge scores, you attach by annotating traces manually or running automated evaluators on them. That attached data can be aggregated into charts and baselines, or set as signals so individual traces surface when something crosses a line you care about.
 
-To learn more about setting up specific evaluators, check the Evaluate section of this academy.
+<Callout type="info">
+There are two types of automated evaluators to attach scores to traces: 
+- LLM-as-a-judge (for quality signals or behavioral patterns like user disagreement)
+- Code-based evaluators (for precise checks like whether the response contains a certain word or exceeds a length limit). 
 
-### Both activities split across two dimensions:
-
-| Category | Tracking | Detection |
-| --- | --- | --- |
-| Quality signals | LLM-as-a-judge scores over time, code-based eval results, user feedback, accuracy from human-in-the-loop corrections | Drops in judge scores, user disagreement, out-of-scope requests, rage patterns |
-| Cost and latency signals | Total cost, p50/p95/p99 latency, token spend per feature or model | Errors, tool call retries, timeouts |
-
-## How to actually do it
-
-There are three modes of monitoring, and you need all three.
-
-**Manual review.** Looking at traces directly, reading outputs, building intuition for what good and bad look like in your specific app. This is covered in depth in error analysis.
-
-**Condition-based filtering.** Pulling traces that meet criteria: everything with latency above 5s, everything where the judge score dropped below 0.6, everything with more than one tool call retry. This is how you explore.
-
-**Automated detection.** Setting up alerts so interesting events surface without you having to go looking. This is how you scale.
-
-### Decisions you'll have to make
-
-**Where to start.** Don't try to monitor everything at once. Start with cost and latency because they're easy to instrument, then add evaluators for your most important user-facing quality dimension. Expand from there.
-
-**How much to evaluate.** Running evaluators on every trace gets expensive fast — especially LLM-as-a-judge. Sample a representative subset instead. You'll get the trend signal at a fraction of the cost. Code-based evals are cheap enough to run on everything; LLM-as-a-judge is where you want to be selective. In Langfuse you can configure sampling rate directly on your evaluators.
-
-**What your baseline is.** You can't tell if a p95 latency of 4s is a problem until you know what's normal for your app. Instrument first, optimize second. Give it a week before drawing conclusions.
-
-**When signals disagree.** User feedback, judge scores, code-based evals, and HIL corrections won't always move together. User feedback is sparse and arrives late. Judge scores are dense but reflect whatever your judge prompt captures. Code-based evals are reliable but only cover what you thought to check for. HIL corrections are rare but highly reliable. Look for directional consistency: if most signals point the same way, trust that.
-
-**Keeping your setup honest.** Monitoring isn't a one-time setup. Models get updated, usage patterns shift, new edge cases emerge. A drop in judge scores might mean quality got worse, or it might mean the judge model itself was updated. Review your monitoring setup regularly, especially after model updates.
-
-## What monitoring is not
-
-Monitoring tells you where to look. Evaluation tells you whether your system is good enough — it uses curated datasets and structured test cases. Error analysis is what you do once monitoring points you somewhere. Think of monitoring as the alert system, error analysis as the investigation that follows.
-
-<Callout>
-IMPORTANT: We are solving the specification problem here. If we want the system to also generalize we need to build a representative dataset.
-
-Add more details on LLM-as-a-judge and code-based evals + cost/latency 'evals'
+More on both can be found in the [Evaluate](/academy/evaluate) section.
 </Callout>
+
+## How to get started
+
+1. **Start by looking at your data manually.** Read through traces and notice what kinds of things keep appearing. You can't set up useful monitoring before you know what you're looking for.
+
+2. **Use error analysis to surface what's worth tracking.** Error analysis gives you a structured way to find patterns across your traces, the kinds of recurring issues worth turning into automated evaluators you can run continuously (Learn more here: TODO insert link)
+
+3. **Think about how your specific application shows failure.** In a customer support use case, a user disagreeing with a response is a strong signal. In process automation, cases where a user had to correct what the LLM produced tell you something went wrong. Application-specific signals like these are often more actionable than generic quality scores.
+
+4. **Treat it as an iterative process.** A working monitoring setup isn't something you configure once and leave. Usage patterns shift, models get updated, new failure modes emerge. Keep refining your setup so you can cut through the noise and stay focused on what actually matters.
 
 ## What comes next
 
