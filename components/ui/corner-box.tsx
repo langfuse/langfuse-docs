@@ -99,7 +99,7 @@ const CornerBox = React.forwardRef<HTMLDivElement, CornerBoxProps>(
           noBorder ? "corner-box-corners-flush" : "border border-line-structure corner-box-corners",
           withStripes && "with-stripes",
           hoverStripes &&
-            "group corner-box-hover-stripes transition-[background] duration-180 ease-out",
+            "group/box corner-box-hover-stripes transition-[background] duration-180 ease-out",
           className
         )}
         style={hasCustomCorners ? { ...cornerStyle, ...style } : style}
