@@ -12,7 +12,7 @@ Now the question becomes: when you spot something worth improving, how do you te
 
 ![The AI engineering loop](/images/academy/loop-overview-v4.png)
 
-A dataset is a collection of test cases that you run your application against each time you make a change. Instead of deploying and hoping for the best, you get a repeatable, consistent check across a set of inputs that represent real-world usage.
+A dataset is a collection of test cases that you run your application against each time you make a change ("an experiment"). Instead of deploying and hoping for the best, you get a repeatable, consistent check across a set of inputs that represent real-world usage.
 
 ## What makes a good dataset?
 
@@ -20,7 +20,11 @@ A dataset is a collection of test cases that you run your application against ea
 
 **Focused in scope.** Most datasets test one specific part of your system. That can be end-to-end, but it can also target an individual step like retrieval or summarization. You'll likely end up with multiple datasets, each with a clear purpose.
 
+todo: this does not make sense; it is contradicting; i think we can say "clear in scope" but scope could be e2e but could also be a single step if that step is the issue; pro e2e that everything is an implementatin detail, pro more granular that it is faster/cheaper to run and easier to reason about
+
 **Different datasets for different workflows.** Some datasets are small and fast enough to run on every push as part of your CI/CD pipeline. Others are larger and more comprehensive, and are useful to run periodically but too slow for every minor change.
+
+todo: needs to have the right size; explores a single new issue (10 is fine), is a dataset to test the model capability boundary (10 really complex examples that are unsolved by the current system), used as checks in CI on larger changes (100-1000) that cover the full distribition of what's happening in production, penetration testing of guardrails (can be huge, every time you have a new case in prod you add it to the dataset).
 
 ## The dataset item
 
@@ -36,11 +40,11 @@ A dataset is made up of items, each item represents one test case: a situation y
 
 A good mental model is:
 
-| Field | Purpose |
-| --- | --- |
-| Input | Input needed for the task you're testing |
-| Metadata | Any additional context that's helpful when scoring the result |
-| Expected output | Defines what a correct or good response looks like |
+| Field           | Purpose                                                                                                    |
+| --------------- | ---------------------------------------------------------------------------------------------------------- |
+| Input           | Input needed for the task you're testing                                                                   |
+| Metadata        | Any additional context that's helpful when scoring the result, or associate the dataset item to a use case |
+| Expected output | Defines what a correct or good response looks like                                                         |
 
 ### Different ways to use the expected output field
 
@@ -49,6 +53,7 @@ Some evaluators check the output against a predefined expected output (reference
 **Exact match**
 
 The expected output is the literal correct answer. For example:
+
 - A classification task where the correct label is "billing_inquiry"
 - An extraction task where the expected entities are ["Paris", "Thursday"]
 
@@ -59,23 +64,32 @@ The expected output is a gold-standard response that shows what a good output lo
 **Evaluation criteria**
 
 The expected output is a list of checks or requirements the output should satisfy. For example:
+
 - "must mention the refund policy"
 - "must include a link to the help center"
 
 The evaluator checks whether the output meets these criteria.
 
+**Combination of the above**
+
+TODO: it is a json field, can be used to store multiple different options at the same time, e.g. a requirement for a tool that should have been called, a golden response, and a list of criteria; show a json example here as a code box as well
+
 **Not needed**
 
 Sometimes no expected output is required at all. If you're just checking whether:
+
 - the tone is professional
 - the response is safe
 - the output follows a required format
 
-Your dataset items don't need anything other than an input.
+Your dataset items don't need anything other than an input as you will use a reference-free evaluator.
+
+TODO: needs link to "reference-free evaluator" section
 
 ## Where to start
 
 There are different approaches to creating dataset items. Common sources to start from are:
-- **Production traces** that you spotted and would like to improve
+
+- **Production traces** that you spotted and would like to improve, as is or anonymized/transformed by AI
 - **Creating by hand** based on pre-defined requirements for your agent
-- **Generating synthetically**, with AI, based on your requirements and a couple of examples
+- **Generating synthetically**, with AI, based on your requirements and a couple of examples, usually by defining different axis on which examples need to be distributed

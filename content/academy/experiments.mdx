@@ -8,18 +8,20 @@ description: How to use experiments to systematically improve your LLM applicati
 
 To systematically understand and improve how your system behaves, you need a way to isolate cause and effect. That's what experiments give you. You pick one variable, run your dataset through two versions of your system, and compare what comes out. The result tells you whether a change actually helped, and by how much. To understand by how much, you also need to evaluate your experiment output (see evalaute TODO). This section covers the systematic experimentation part before evaluation.
 
+TODO: as mentioned on the index page, I dislike the idea here of forcing the isolidation of changes; i would highlight that AI applications/agemts have many things that can be changed, maybe good to add a section on what the variables are (model, reasoning effort, prompt, context, harness, ...)
+
 ![The AI engineering loop](/images/academy/loop-overview-v4.png)
 
 ## The anatomy of an experiment
 
 Every experiment has four components.
 
-| Component | What it is |
-|---|---|
-| **Baseline** | Your current production system — the control condition everything else gets measured against. Keep it fixed while you vary one thing. |
-| **Dataset** | The inputs you run both conditions against. Keep the same dataset across experiments so results are comparable over time. |
-| **Variable** | The single thing you're changing — model, prompt, context, tool access, or agent architecture. See [On variables](#on-variables) below. |
-| **Outputs to compare** | What your system produces under each condition. Comparing these is the actual work of running an experiment. |
+| Component              | What it is                                                                                                                              |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Baseline**           | Your current production system — the control condition everything else gets measured against. Keep it fixed while you vary one thing.   |
+| **Dataset**            | The inputs you run both conditions against. Keep the same dataset across experiments so results are comparable over time.               |
+| **Variable**           | The single thing you're changing — model, prompt, context, tool access, or agent architecture. See [On variables](#on-variables) below. |
+| **Outputs to compare** | What your system produces under each condition. Comparing these is the actual work of running an experiment.                            |
 
 Change two things at once and you can't tell which caused the difference.
 
@@ -33,7 +35,7 @@ Change two things at once and you can't tell which caused the difference.
 
 ## How is it used?
 
-The core flow: pick a variable & form a hypothesis, run both conditions against your dataset, compare outputs, learn something & repeat. 
+The core flow: pick a variable & form a hypothesis, run both conditions against your dataset, compare outputs, learn something & repeat.
 
 ![Experimentation loop](/images/academy/experimentation.png)
 
@@ -49,9 +51,7 @@ Scores then make comparison concrete—win rates, whether wins are spread across
 
 ## Where to start
 
-<Callout>
-TODO: Vibe patch and error analyse before
-</Callout>
+<Callout>TODO: Vibe patch and error analyse before</Callout>
 
 Don't set up the full evaluation pipeline before running anything. A few examples side traces side by side will teach you more in the first hour than a week of infrastructure work.
 

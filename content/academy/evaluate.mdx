@@ -22,6 +22,8 @@ This is an important process, reading outputs builds an understanding of what yo
 
 Manual evaluation also produces human labels that serve as ground truth for validating automated evaluators later.
 
+todo: most production applications will require continuous labeling by human experts, this is not a one-and-done
+
 ### Code-based evaluation
 
 Code-based evaluators check properties that can be verified with deterministic logic. They are fast, cheap, and produce the same result every time.
@@ -37,14 +39,14 @@ Their limitation is that they cannot assess meaning. A code-based evaluator can 
 
 ### LLM-as-a-judge
 
-An LLM-as-a-judge evaluator uses a language model to score outputs.
+An LLM-as-a-judge evaluator uses a language model to score outputs. It is required to overcome the core issue that quality of AI Applications/Agents depends on grading the quality of a text output.
 
 This is the right method for qualities that require understanding language: whether a response is relevant to the question, whether the tone matches the intended audience, whether a summary captures the key points of the source material, etc.
 
-LLM judges are imperfect. This means:
+LLM judges are imperfect and easy to get wrong. This means:
 
-- They sometimes pass outputs that a human would fail, and vice versa
-- They need calibration against human labels to verify they are measuring what you think they are measuring
+- A model does not automatically grade things as a human expert would as they do not have the context of the expert
+- They need calibration against human preferences to verify they are measuring what you think they are measuring
 - They can share blind spots with your application's LLM, especially when the same model family is used for both
 
 These limitations aren't reasons to avoid LLM judges. An LLM judge that has been calibrated against human labels and is backed by code-based checks is a reliable evaluator.
@@ -53,10 +55,12 @@ These limitations aren't reasons to avoid LLM judges. An LLM judge that has been
 
 Both code-based and LLM-as-a-judge evaluators can be either reference-based or reference-free. Whether you need a reference depends on the evaluator — see [different ways to use the expected output field](/academy/datasets#different-ways-to-use-the-expected-output-field) in the datasets section for more detail.
 
-|  | Code-based | LLM-as-a-judge / manual |
-| --- | --- | --- |
+todo: this is a circular refernce where both pages do not exp explain it; give list of examples here; share advantage of reference-free that it can be applied on unseen production data for monitoring and does not just work in offline experiments; example: same-language is reference-free, correctness is reference based
+
+|                 | Code-based               | LLM-as-a-judge / manual                                     |
+| --------------- | ------------------------ | ----------------------------------------------------------- |
 | Reference-based | Exact string match check | "Does the response correctly explain this specific policy?" |
-| Reference-free | Validate JSON structure | Tone-of-voice evaluation |
+| Reference-free  | Validate JSON structure  | Tone-of-voice evaluation                                    |
 
 ## What should you evaluate?
 
@@ -64,15 +68,19 @@ The best source for knowing what you should evaluate comes from identifying fail
 
 Generic qualities like "helpfulness" or "quality" are tempting starting points, but they rarely produce useful signal. An evaluator that checks a vague criterion will give vague results. The more precisely you can define what "good" or "bad" looks like for your application, the more useful your evaluators will be.
 
+todo: add link to error analyis blog here
+
 ## Combining evaluation methods
 
 Each quality you care about gets its own evaluator. For each evaluator, pick the method that fits:
 
-| When | Method |
-| --- | --- |
-| The check can be expressed as a deterministic rule | Code-based evaluator |
-| The check requires understanding language | LLM-as-a-judge |
-| You can't clearly define what "good" looks like yet | Manual evaluation |
+| When                                                | Method               |
+| --------------------------------------------------- | -------------------- |
+| The check can be expressed as a deterministic rule  | Code-based evaluator |
+| The check requires understanding language           | LLM-as-a-judge       |
+| You can't clearly define what "good" looks like yet | Manual evaluation    |
+
+todo: delete table, this is a repetition of the above, make this section about having evaluators that have a specific goal each, and then combining them to have a view on overall quality
 
 Most mature evaluation setups use all three.
 
@@ -83,3 +91,5 @@ One practical recommendation: prefer binary scores (pass/fail) over graded scale
 If you are just setting things up, start by evaluating manually. It will give you a good idea of what it is you actually want, and what criteria you most care about structurally.
 
 Later, start defining evaluation criteria and set up corresponding automated evaluators. Be careful about doing this too early: if you spot a problem that can be fixed with a simple prompt change, just update the prompt instead. Only start creating evaluators if you want to monitor for something specific over different inputs.
+
+todo: put this at the top which helps us explain the process once, currently we explain/mention error analysis 3 times on this page, I want this to be more concise by introducing it top-down

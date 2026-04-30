@@ -8,10 +8,14 @@ description: How to make sense of your traces through metrics tracking, signal d
 
 ## What role does monitoring play?
 
-Tracing provides a complete record of what your LLM app is doing. Every request, every model call, every tool use is recorded. Monitoring is how you make sense of this data. 
+Tracing provides a complete record of what your LLM app is doing. Every request, every model call, every tool use is recorded. Monitoring is how you make sense of this data.
 It gives you two things: a continuous view of how your system is performing over time, and a way to surface the specific traces worth looking at. Together, they shift you from having data to actually understanding your system as a foundation for evolving it over time.
 
+todo: tracing needs a link back to the previous page (tracing); monitoring should also surface what people do, what errors exist (error analysis)
+
 ![The AI engineering loop](/images/academy/loop-overview-v4.png)
+
+todo: read docs and make this page include more detail on explicit/implicit user feedback
 
 ## The two things monitoring does
 
@@ -21,19 +25,21 @@ It helps to separate monitoring into two distinct activities, because they answe
 
 **Signal detection** tells you where to look right now. It surfaces individual traces that are worth investigating — an error, a cluster of retries, a user abandoning mid-conversation. The signal is only useful because it's attached to the specific trace that triggered it. That trace is your starting point for understanding what went wrong.
 
-
 ## Where do metrics and signals come from?
 
-Both aggregate metrics and signal detection depend on fields attached to observations. A lot of what you need is already there once you instrument properly: latency, token-derived cost, model and route metadata, tool outcomes, and errors typically flow from your client and provider APIs without extra wiring. 
+Both aggregate metrics and signal detection depend on fields attached to observations. A lot of what you need is already there once you instrument properly: latency, token-derived cost, model and route metadata, tool outcomes, and errors typically flow from your client and provider APIs without extra wiring.
 
 Anything beyond that, like quality scores, thumbs up or down, human annotation, or LLM-as-a-judge scores, you attach by annotating traces manually or running automated evaluators on them. That attached data can be aggregated into charts and baselines, or set as signals so individual traces surface when something crosses a line you care about.
+
+todo: call it evaluation and not quality scores; call it user feedback (explicit/implicit) instead of thumbs up/down; the second paragraph here is generally weak, needs improvement
 
 <Callout type="info">
 There are two types of automated evaluators to attach scores to traces: 
 - LLM-as-a-judge (for quality signals or behavioral patterns like user disagreement)
-- Code-based evaluators (for precise checks like whether the response contains a certain word or exceeds a length limit). 
+- Code-based evaluators (for precise checks like whether the response contains a certain word or exceeds a length limit).
 
 More on both can be found in the [Evaluate](/academy/evaluate) section.
+
 </Callout>
 
 ## How to get started
@@ -44,6 +50,8 @@ More on both can be found in the [Evaluate](/academy/evaluate) section.
 
 3. **Think about how your specific application shows failure.** In a customer support use case, a user disagreeing with a response is a strong signal. In process automation, cases where a user had to correct what the LLM produced tell you something went wrong. Application-specific signals like these are often more actionable than generic quality scores.
 
+TODO: refer to this as implicit user feedback signals, helps to find issues without needing to manually lable all data
+
 4. **Treat it as an iterative process.** A working monitoring setup isn't something you configure once and leave. Usage patterns shift, models get updated, new failure modes emerge. Keep refining your setup so you can cut through the noise and stay focused on what actually matters.
 
 ## What comes next
@@ -53,3 +61,5 @@ When monitoring surfaces something worth investigating, you have a few options: 
 - [Error analysis](/academy/error-analysis): how to look at traces in detail
 - [Datasets](/academy/datasets): capturing production traces for evaluation
 - [Experiments](/academy/experiments): testing whether a fix actually worked
+
+todo: error analysis page does not exist in academy yet

@@ -6,7 +6,7 @@ description: Understand what tracing is, how traces are structured, and why they
 
 # What is tracing and what is its role in the loop
 
-Traditional software is largely deterministic, executions follow a pre-defined format. For LLM applications that's not the case. Agent executions can be messy, we are dealing with emergent behaviour with rich and unexpected inputs and outputs, and execution order.  You need something else to follow your agent's behavior: [traces](/docs/observability/overview).
+Traditional software is largely deterministic, executions follow a pre-defined format. For LLM applications that's not the case. Agent executions can be messy, we are dealing with emergent behaviour with rich and unexpected inputs and outputs, and execution order. You need something else to follow your agent's behavior: [traces](/docs/observability/overview).
 
 A trace is a structured record of what your application did for a single request: which steps it took, what data it saw, what it produced.
 
@@ -14,17 +14,24 @@ A trace is a structured record of what your application did for a single request
 
 Tracing is central to the entire improvement loop. Every other step — reviewing, building datasets, running experiments, evaluating — operates on traces.
 
+TODO: refer to traditional observability here; if you are not new to observability in general, you can totally skim this page as it will feel repetetive
+
+TODO: this does not introduce that a trace is a single execution of an application (e.g. api call) and that a conversation could be grouped in a session
+
 ## The anatomy of a trace
 
 A trace can be as complex or as simple as your application requires, but all traces share the same basic structure. It's composed of a set of [observations](/docs/observability/data-model) that map out the path your agent took.
 
 <Callout type="info">
-*An observation is a single step in the process. It has an input, an output, and metadata about what happened during that step.*
+  *An observation is a single step in the process. It has an input, an output,
+  start/end time, and metadata about what happened during that step.*
 </Callout>
+
+TODO: instead of being this detailed here (lots of text to read) I might just show some examples of different AI applications (e.g. demo project), screenshot and link to public trace; maybe both, examples plus text description
 
 ### Hierarchy
 
-A trace has a hierarchical tree structure. Nested inside are observations that can contain other observations, forming a parent-child structure that mirrors the actual execution of your code.
+A trace has a hierarchical tree structure. Nested inside are observations that can contain other observations, forming a parent-child structure that mirrors the actual execution of your AI application.
 
 ![Trace hierarchy example](/images/academy/trace-hierarchy-v2.png)
 
@@ -38,12 +45,14 @@ Every observation has an input and an output. For an LLM observation, the input 
 
 In order to make it easy to differentiate between operations, you'll see different [types of observations](/docs/observability/features/observation-types). The most common ones are. Each type of observation is used to capture different kinds of interactions of an agent.
 
-| Action of an agent | Typical observation data |
-| --- | --- |
-| A call to a language model | Full prompt or message history as input, the completion as output, plus metadata like the model name and token counts |
-| A step that fetches information from an external source | Query and the returned documents |
-| An invocation of a tool or function by an agent | Which tool was called, the arguments, and the return value |
-| General processes | Highly dependent on the use case |
+TODO: most common ones are ... (missing text)
+
+| Action of an agent                                      | Typical observation data                                                                                              |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| A call to a language model                              | Full prompt or message history as input, the completion as output, plus metadata like the model name and token counts |
+| A step that fetches information from an external source | Query and the returned documents                                                                                      |
+| An invocation of a tool or function by an agent         | Which tool was called, the arguments, and the return value                                                            |
+| General processes                                       | Highly dependent on the use case                                                                                      |
 
 Observation types make it easier to read traces and to filter. In a trace with 20 observations, being able to quickly spot the LLM calls saves time.
 
@@ -57,8 +66,12 @@ Most of the time you would not see an entire agent's lifecycle execution in one 
 
 A general rule of thumb is: one trace corresponds to one unit of work from the user's perspective. In most applications, that means one trace per request-response cycle.
 
+TODO: this rule here does not make sense, I would map it more cleanly to "one api call / invocation of the agent system" as this is more a technical cause for a trace creation than domain
+
 ## Where to start
 
 Now that you know what a trace looks like and what it captures, make sure you [set up tracing](/docs/observability/get-started) for your application well.
 
 Once you see traces, you can move on to the next step: [monitoring](/academy/monitoring). Monitoring is what connects traces to the loop of improving and iterating on your agent.
+
+TODO: already give error analysis a shoutout here?

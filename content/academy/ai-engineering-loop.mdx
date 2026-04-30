@@ -7,7 +7,7 @@ description: A high-level map of the AI engineering lifecycle, from tracing and 
 
 The AI Engineering Loop is how teams approach the continuous evolution and improvement of their AI-powered systems. It connects what happens in production directly to the work of improving quality, cost, latency, and reliability during development.
 
-Many of the underlying concepts mirror traditional software engineering, but a key differentiator is the probabilistic nature of LLM outputs and the sheer number of paths a system can take. You cannot unit-test your way to confidence. You need a systematic way to observe, learn, and improve.
+Many of the underlying concepts mirror traditional software engineering, but a key differentiator is the probabilistic nature of LLM outputs and the sheer number of paths a system can take. You cannot unit-test your way to confidence. You need a systematic way to observe, learn, and improve via experiments.
 
 ![The AI engineering loop](/images/academy/loop-overview-v4.png)
 
@@ -17,7 +17,13 @@ The loop clusters into two areas of work.
 
 The first part is about visibility. What is your system actually doing in the real world? Which requests are going well, and which are failing in ways that matter?
 
-<img src="/images/academy/loop-online-v2.png" alt="Online: Tracing and Monitoring" style={{maxHeight: "200px", width: "auto"}} />
+<img
+  src="/images/academy/loop-online-v2.png"
+  alt="Online: Tracing and Monitoring"
+  style={{ maxHeight: "200px", width: "auto" }}
+/>
+
+TODO: please use standard image embed via markdown image, thereby the resizing onclick works
 
 ### Trace [#trace]
 
@@ -27,19 +33,31 @@ Capture the full path of a request, including prompts, retrieved context, tool c
 
 Track how the system behaves over time and surface the traces that deserve attention. Monitoring turns a stream of raw data into an ongoing understanding of how the system evolves. [→ Read more](/academy/monitoring)
 
+TODO: I would mention here some details already: online evals, user feedback, cost/latency anomalies
+
 ## 2. Improving systematically during development
 
 The second part is about turning what you have observed into improvements you can trust — without degrading the parts of the system that are already working.
 
-<img src="/images/academy/loop-offline-v2.png" alt="Offline: Building datasets, Experimenting, and Evaluating" style={{maxHeight: "200px", width: "auto"}} />
+TODO: add note that we can also start here if application is not in prod but we need to systematically evaluate it before going to prod
+
+<img
+  src="/images/academy/loop-offline-v2.png"
+  alt="Offline: Building datasets, Experimenting, and Evaluating"
+  style={{ maxHeight: "200px", width: "auto" }}
+/>
 
 ### Build datasets [#build-datasets]
 
 Turn real scenarios surfaced through monitoring into repeatable test cases. Instead of testing against a handful of hand-picked examples, you build a set that reflects how the system actually gets used. [→ Read more](/academy/datasets)
 
+TODO: this will always be both, hypothetical/synthetic examples (especially when application is early) and examples derived from prod.
+
 ### Experiment [#experiment]
 
 Change one variable at a time — a prompt, a model, a retrieval strategy — and compare it against a stable baseline. That way you know what actually improved instead of guessing. [→ Read more](/academy/experiments)
+
+TODO: i'd not be overly specific that you can only change one thing as many interact with each other (e.g. models and prompts and harness and skills need to fit together); i'd just refer to making changes along some axis and then comparing these different experiments
 
 ### Evaluate [#evaluate]
 
@@ -47,16 +65,22 @@ Decide whether results are good enough to ship using manual review, code-based c
 
 Once you ship a change, the cycle starts again. The updated system produces new traces, new monitoring signals, and new opportunities to improve.
 
+TODO: always call it llm-as-a-judge (makes it easier to understand than LLM Judges)
+
 ## You don't have to close the full loop on day one
 
 Most teams don't start with all five steps in place. That is fine.
 
 The value of the loop is cumulative. Each step you add gives you better signal, more systematic coverage, and more confidence in what you are shipping. The goal is not to implement everything at once — it is to understand where you are and take the next step toward closing the loop.
 
-{/* TODO: Link blog article about patterns of AI engineering lifecycle adoption once written */}
+{/_ TODO: Link blog article about patterns of AI engineering lifecycle adoption once written _/}
+
+TODO: prod tracing is not always the start point, see note above
 
 ## Start with tracing
 
 The natural place to begin is tracing. You cannot monitor what you cannot see, and you cannot improve what you cannot measure. Tracing is the foundation everything else builds on.
 
 [→ Start with Tracing](/academy/tracing)
+
+TODO: add some hypothetical examples as discussed here; differnt applications would start differently (see our meeting notes)
