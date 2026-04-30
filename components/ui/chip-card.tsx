@@ -64,7 +64,7 @@ const ChipCard = React.forwardRef<HTMLAnchorElement | HTMLDivElement, ChipCardPr
     );
 
     const baseClassName = cn(
-      "box-custom-hover",
+      "corner-box-hover-stripes transition-[background] duration-180 ease-out",
       "relative group inline-flex items-center",
       "border border-line-structure bg-surface-bg rounded-[2px]",
       "transition-colors duration-120 cursor-pointer",

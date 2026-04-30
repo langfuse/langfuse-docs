@@ -73,6 +73,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
   return (
     <CornerBox
       ref={containerRef}
+      hoverStripes
       className="flex flex-col gap-3 p-4 -mt-px lg:flex-row lg:items-center lg:gap-6"
       corners={corners}
       onMouseEnter={() => setIsHovered(true)}
