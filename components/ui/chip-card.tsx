@@ -67,7 +67,7 @@ const ChipCard = React.forwardRef<HTMLAnchorElement | HTMLDivElement, ChipCardPr
       "corner-box-hover-stripes transition-[background] duration-180 ease-out",
       "relative group inline-flex items-center",
       "border border-line-structure bg-surface-bg rounded-[2px]",
-      "transition-colors duration-120 cursor-pointer",
+      "cursor-pointer",
       isMd ? "gap-3 px-4 py-3 min-w-[140px]" : "gap-2.5 px-3.5 py-2.5",
       className
     );

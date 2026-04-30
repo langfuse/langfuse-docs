@@ -166,9 +166,9 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
           >
             <a
               href={story.href}
-              className="inline-flex items-baseline gap-1.5 group"
+              className="inline-flex items-baseline gap-1.5 group/story-link"
             >
-              <span className="text-[15px] font-medium text-text-primary leading-snug group-hover:underline">
+              <span className="text-[15px] font-medium text-text-primary leading-snug group-hover/story-link:underline">
                 {story.name}
               </span>
               <svg
