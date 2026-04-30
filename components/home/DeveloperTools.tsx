@@ -61,6 +61,7 @@ export const DeveloperTools = () => {
             <div className="flex flex-col items-start px-4 pb-4 -ml-1.25">
               <Button
                 variant="secondary"
+                size="small"
                 href={SKILL_HREF}
               >
                 Install Skill
@@ -82,6 +83,7 @@ export const DeveloperTools = () => {
             <div className="flex flex-col items-start mt-4 -ml-1.25">
               <Button
                 variant="secondary"
+                size="small"
                 href={CLI_HREF}
               >
                 Configure CLI
@@ -103,6 +105,7 @@ export const DeveloperTools = () => {
             <div className="flex flex-col items-start mt-4 -ml-1.25">
               <Button
                 variant="secondary"
+                size="small"
                 href={MCP_HREF}
               >
                 Configure MCP

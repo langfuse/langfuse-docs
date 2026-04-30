@@ -147,6 +147,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
         <div className="ml-auto shrink-0 lg:ml-0 lg:order-last">
           <Button
             href="/cloud"
+            size="default"
             shortcutKey="s"
           >
             Start free

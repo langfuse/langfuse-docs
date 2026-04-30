@@ -77,7 +77,7 @@ function hasRenderableChildren(children: React.ReactNode): boolean {
   );
 }
 
-function buttonVariants({ variant = "primary", size = "default", className }: ButtonVariantOptions) {
+function buttonVariants({ variant = "primary", size = "small", className }: ButtonVariantOptions) {
   if (variant === "text") {
     return cn(
       textButtonBaseClasses,
@@ -133,7 +133,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         : variant === "text"
           ? "text"
           : "primary";
-    const resolvedSize: ButtonSize = size === "small" ? "small" : "default";
+    const resolvedSize: ButtonSize = size === "default" ? "default" : "small";
 
     const innerRef = React.useRef<HTMLElement | null>(null);
     const isLink = !asChild && Boolean(href);
