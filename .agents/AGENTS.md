@@ -61,10 +61,21 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 ## Key config files
 
 - `next.config.mjs` — Next.js config and redirects.
-- `theme.config.tsx` — Nextra theme configuration.
+- `source.config.ts` — declares all Fumadocs content collections (docs, blog, changelog, integrations, marketing, …).
+- `lib/source.ts` — exports a `loader` for each collection.
+- `lib/section-registry.ts` — maps URL slugs to layout types; all derived routing sets live here. Do not hardcode slugs elsewhere.
 - `tailwind.config.js` — Tailwind setup.
 - `components.json` — shadcn/ui component config.
 - `lib/content-dir-map.js` — single source of truth for mapping `content/` top-level directories to URL prefixes; keep this updated when adding/renaming content sections so `lib/source.ts` and `scripts/copy_md_sources.js` stay in sync.
+
+## Third-party integrations
+
+- **Inkeep** — powers both in-site search and the "Ask AI" chat. Two separate
+  embeds:
+  - **Search** — Inkeep's embedded search widget. Components live in
+    `components/inkeep/` (`InkeepSearchBar.tsx`, `search*.tsx`, `useInkeepSettings.ts`).
+  - **Chat** — Fumadocs' built-in Inkeep chat integration (`ai-chat-shared.tsx`,
+    `embedded-chat.tsx`, `ask-ai-button.tsx`).
 
 ## Writing guidelines
 

@@ -1,7 +1,7 @@
 import { handbookSource } from "@/lib/source";
 import { CHAPTER_ORDER } from "@/lib/handbook-meta";
-
-type HandbookPage = ReturnType<typeof handbookSource.getPages>[number];
+import { Cards, Card } from "@/components/docs";
+import { Text } from "@/components/ui/text";
 
 export const ChapterIndex = () => {
   const chapterPages = handbookSource
@@ -20,19 +20,19 @@ export const ChapterIndex = () => {
     });
 
   return (
-    <div className="my-6 flex flex-col gap-2 not-prose">
+    <Cards num={1} className="not-prose">
       {chapterPages.map((page, index) => (
-        <a
-          key={page.url}
-          href={page.url}
-          className="flex items-center gap-3 rounded-lg border p-4 hover:border-primary"
-        >
-          <span className="text-base font-medium font-mono shrink-0 text-muted-foreground">
-            {index + 1}
-          </span>
-          <span className="font-semibold">{page.data.title}</span>
-        </a>
+        <Card key={page.url} href={page.url}>
+          <div className="flex flex-row items-center gap-2.5 text-text-primary">
+            <Text size="s" className="font-medium font-mono shrink-0">
+              {index + 1}
+            </Text>
+            <Text as="h3" size="s" className="not-prose mb-0 text-left text-text-secondary">
+              {page.data.title}
+            </Text>
+          </div>
+        </Card>
       ))}
-    </div>
+    </Cards>
   );
 };

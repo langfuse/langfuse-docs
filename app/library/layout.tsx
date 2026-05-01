@@ -1,10 +1,10 @@
-import { librarySource, getPageTreeWithShortTitles } from "@/lib/source";
-import { SharedDocsLayout } from "@/app/docs/SharedDocsLayout";
+import { librarySource } from "@/lib/source";
+import { SharedDocsLayout } from "@/components/layout";
 
 export default function LibraryLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={getPageTreeWithShortTitles(librarySource, "/library")}>{children}</SharedDocsLayout>;
+  return <SharedDocsLayout tree={librarySource.getPageTree()}>{children}</SharedDocsLayout>;
 }

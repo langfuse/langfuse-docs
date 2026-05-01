@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchLangfuseDocsWithInkeep, isNonEmptyString } from "@/lib/inkeep-search";
+import { searchLangfuseDocsWithInkeep, isNonEmptyString } from "@/lib/inkeep-search-backend";
+import { PostHog } from "posthog-node";
+import { waitUntil } from "@vercel/functions";
+
+const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
+  ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
+      flushAt: 1,
+      flushInterval: 0,
+    })
+  : undefined;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,6 +30,25 @@ export async function GET(request: NextRequest) {
       { status: 400, headers: corsHeaders }
     );
   }
+
+  // Fire PostHog event immediately so it has time to flush
+  waitUntil(
+    (async () => {
+      try {
+        posthog?.capture({
+          distinctId: "docs-search-api",
+          event: "docs_search:query",
+          properties: {
+            query,
+            $process_person_profile: false,
+          },
+        });
+        await posthog?.flush();
+      } catch (error) {
+        console.error("Error tracking PostHog event:", error);
+      }
+    })()
+  );
 
   try {
     const inkeepResult = await searchLangfuseDocsWithInkeep(query);

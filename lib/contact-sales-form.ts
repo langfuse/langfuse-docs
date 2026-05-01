@@ -1,4 +1,4 @@
-import * as z from "zod/v3";
+import { z } from "zod";
 
 /**
  * Sanitizes a string for safe use in email headers by removing

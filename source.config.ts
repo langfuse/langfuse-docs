@@ -1,4 +1,10 @@
 import { defineDocs, defineConfig, frontmatterSchema } from "fumadocs-mdx/config";
+import monokaiProLightRaw from "./lib/themes/monokai-pro-light.json";
+
+// JSON imports widen fontStyle to `string` instead of the required literal union.
+// Cast through unknown to satisfy Shiki's ThemeRegistrationAny at runtime.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const monokaiProLight = monokaiProLightRaw as unknown as any;
 import remarkGfm from "remark-gfm";
 import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
@@ -34,6 +40,7 @@ const blogFrontmatterSchema = baseFrontmatterSchema.extend({
   tag: z.string().nullish(),
   author: z.string().nullish(),
   showInBlogIndex: z.boolean().nullish(),
+  highlight: z.boolean().nullish(),
 });
 
 // Extended schema for changelog pages — adds date, author, ogImage, ogVideo, badge
@@ -66,13 +73,20 @@ const customerFrontmatterSchema = baseFrontmatterSchema.extend({
 // remarkPlugins is applied globally in defineConfig; per-collection mdxOptions
 // are only needed for schema customization.
 
-export const docs = defineDocs({
-  dir: "content/docs",
-  docs: { schema: baseFrontmatterSchema },
+// Schema for collections whose sidebar labels can be overridden via frontmatter.
+// shortTitle takes precedence; sidebarTitle is the legacy alias.
+// Both are consumed by the shortTitleTransformer registered in lib/source.ts.
+const sidebarFrontmatterSchema = baseFrontmatterSchema.extend({
+  shortTitle: z.string().nullish(),
+  sidebarTitle: z.string().nullish(),
 });
 
-const selfHostingFrontmatterSchema = baseFrontmatterSchema.extend({
-  sidebarTitle: z.string().nullish(),
+export const docs = defineDocs({
+  dir: "content/docs",
+  docs: { schema: sidebarFrontmatterSchema },
+});
+
+const selfHostingFrontmatterSchema = sidebarFrontmatterSchema.extend({
   label: z.string().nullish(),
 });
 
@@ -97,7 +111,7 @@ export const changelog = defineDocs({
   },
 });
 
-const guidesFrontmatterSchema = baseFrontmatterSchema.extend({
+const guidesFrontmatterSchema = sidebarFrontmatterSchema.extend({
   category: z.string().nullish(),
 });
 
@@ -108,7 +122,7 @@ export const guides = defineDocs({
   },
 });
 
-const faqFrontmatterSchema = baseFrontmatterSchema.extend({
+const faqFrontmatterSchema = sidebarFrontmatterSchema.extend({
   tags: z.array(z.string()).optional(),
 });
 
@@ -119,8 +133,7 @@ export const faq = defineDocs({
   },
 });
 
-const integrationsFrontmatterSchema = baseFrontmatterSchema.extend({
-  sidebarTitle: z.string().nullish(),
+const integrationsFrontmatterSchema = sidebarFrontmatterSchema.extend({
   logo: z.string().nullish(),
 });
 
@@ -133,12 +146,12 @@ export const integrations = defineDocs({
 
 export const security = defineDocs({
   dir: "content/security",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: sidebarFrontmatterSchema },
 });
 
 export const library = defineDocs({
   dir: "content/library",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: sidebarFrontmatterSchema },
 });
 
 export const customers = defineDocs({
@@ -150,12 +163,16 @@ export const customers = defineDocs({
 
 export const handbook = defineDocs({
   dir: "content/handbook",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: sidebarFrontmatterSchema },
+});
+
+const marketingFrontmatterSchema = baseFrontmatterSchema.extend({
+  contentWidth: z.enum(["docs", "full"]).nullish(),
 });
 
 export const marketing = defineDocs({
   dir: "content/marketing",
-  docs: { schema: baseFrontmatterSchema },
+  docs: { schema: marketingFrontmatterSchema },
 });
 
 export default defineConfig({
@@ -174,8 +191,16 @@ export default defineConfig({
       // StructureOptions type doesn't expose it directly
       stringify: { extensions: [mdxJsxToMarkdown()] },
     },
-    // @ts-ignore — { lazy: false } is valid at runtime; RehypeCodeOptions
-    // requires themes in its full type but fumadocs applies safe defaults
-    rehypeCodeOptions: { lazy: false },
+    // @ts-ignore — RehypeCodeOptions types themes as BundledTheme strings but
+    // Shiki's ThemeRegistrationAny (custom JSON object) is valid at runtime.
+    // fumadocs automatically sets defaultColor:false so --shiki-light / --shiki-dark
+    // CSS vars are generated and fumadocs-ui's CSS switches them per dark/light mode.
+    rehypeCodeOptions: {
+      lazy: false,
+      themes: {
+        light: monokaiProLight,
+        dark: "monokai",
+      },
+    },
   },
 });

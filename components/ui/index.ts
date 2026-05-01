@@ -15,6 +15,31 @@ export { Image } from "./image";
 export { Button, buttonVariants } from "./button";
 export type { ButtonProps } from "./button";
 
+export {
+  CornerBox,
+  CornerBox as Box,
+  cornersFromNeighbors,
+  cornersForGridCell,
+} from "./corner-box";
+
+export { LinkBox } from "./link-box";
+export type { LinkBoxProps, LinkBoxTooltipPlacement } from "./link-box";
+
+export { ChipCard } from "./chip-card";
+export type { ChipCardProps } from "./chip-card";
+
+export { Text, textBodyMRegularClassName, textBodySRegularClassName } from "./text";
+export type { TextProps } from "./text";
+
+export { Heading } from "./heading";
+export type { HeadingProps, HeadingSize, HeadingLevel } from "./heading";
+
+export { TextHighlight } from "./text-highlight";
+export type { TextHighlightProps } from "./text-highlight";
+
+export { Dot } from "./dot";
+export type { DotProps } from "./dot";
+
 // Layout / composition
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
