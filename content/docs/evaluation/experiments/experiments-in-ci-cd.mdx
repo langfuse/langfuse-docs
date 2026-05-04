@@ -132,29 +132,9 @@ Each script must define an `experiment(context)` function that accepts a `contex
 
 Use `context.runExperiment` (JS/TS) or `context.run_experiment` (Python) to run the experiment with these defaults.
 
-<LangTabs items={["JS/TS", "Python"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
-{/* JS/TS */}
-
-```ts
-import type { ExperimentTaskParams, RunnerContext } from "@langfuse/client";
-
-// Define a task that calls your agent with each dataset item.
-async function myTask(item: ExperimentTaskParams) {
-  // ...
-}
-
-export async function experiment(context: RunnerContext) {
-  return await context.runExperiment({
-    name: "PR gate",
-    task: myTask,
-  });
-}
-```
-
-</Tab>
-<Tab>
-{/* Python */}
+{/* Python SDK */}
 
 ```python
 from langfuse import RunnerContext
@@ -174,6 +154,26 @@ def experiment(context: RunnerContext):
 ```
 
 </Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+import type { ExperimentTaskParams, RunnerContext } from "@langfuse/client";
+
+// Define a task that calls your agent with each dataset item.
+async function myTask(item: ExperimentTaskParams) {
+  // ...
+}
+
+export async function experiment(context: RunnerContext) {
+  return await context.runExperiment({
+    name: "PR gate",
+    task: myTask,
+  });
+}
+```
+
+</Tab>
 </LangTabs>
 
 Pass explicit values to `context.runExperiment` / `context.run_experiment` when you want to override action-provided defaults such as `data` or `metadata`.
@@ -182,9 +182,73 @@ Pass explicit values to `context.runExperiment` / `context.run_experiment` when 
 
 Raise `RegressionError` when a result should block the workflow. The example below fails when average exact-match accuracy is below the threshold.
 
-<LangTabs items={["JS/TS", "Python"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
-{/* JS/TS */}
+{/* Python SDK */}
+
+```python
+from langfuse import Evaluation, RegressionError, RunnerContext
+
+
+THRESHOLD = 0.95
+
+
+def experiment(context: RunnerContext):
+    result = context.run_experiment(
+        name="PR gate: support agent",
+        task=answer_support_question,
+        evaluators=[exact_match],
+        run_evaluators=[avg_accuracy],
+    )
+
+    accuracy = next(
+        (
+            evaluation.value
+            for evaluation in result.run_evaluations
+            if evaluation.name == "avg_accuracy"
+        ),
+        None,
+    )
+
+    if not isinstance(accuracy, (int, float)) or accuracy < THRESHOLD:
+        raise RegressionError(
+            # Attach the result so the action can include scores in the PR comment and `result_json` output.
+            result=result,
+            metric="avg_accuracy",
+            value=float(accuracy) if isinstance(accuracy, (int, float)) else 0.0,
+            threshold=THRESHOLD,
+        )
+
+    return result
+
+
+def answer_support_question(item, **kwargs):
+    # Replace this stub with your application logic.
+    return item.input["question"]
+
+
+def exact_match(*, output, expected_output, **kwargs):
+    passed = output.strip() == (expected_output or "").strip()
+    return Evaluation(
+        name="exact_match",
+        value=1.0 if passed else 0.0,
+        comment="match" if passed else "mismatch",
+    )
+
+
+def avg_accuracy(*, item_results, **kwargs):
+    scores = [
+        evaluation.value
+        for item in item_results
+        for evaluation in item.evaluations
+        if evaluation.name == "exact_match" and isinstance(evaluation.value, (int, float))
+    ]
+    return Evaluation(name="avg_accuracy", value=sum(scores) / len(scores) if scores else 0.0)
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
 
 ```ts
 import {
@@ -264,70 +328,6 @@ async function avgAccuracy({
 ```
 
 </Tab>
-<Tab>
-{/* Python */}
-
-```python
-from langfuse import Evaluation, RegressionError, RunnerContext
-
-
-THRESHOLD = 0.95
-
-
-def experiment(context: RunnerContext):
-    result = context.run_experiment(
-        name="PR gate: support agent",
-        task=answer_support_question,
-        evaluators=[exact_match],
-        run_evaluators=[avg_accuracy],
-    )
-
-    accuracy = next(
-        (
-            evaluation.value
-            for evaluation in result.run_evaluations
-            if evaluation.name == "avg_accuracy"
-        ),
-        None,
-    )
-
-    if not isinstance(accuracy, (int, float)) or accuracy < THRESHOLD:
-        raise RegressionError(
-            # Attach the result so the action can include scores in the PR comment and `result_json` output.
-            result=result,
-            metric="avg_accuracy",
-            value=float(accuracy) if isinstance(accuracy, (int, float)) else 0.0,
-            threshold=THRESHOLD,
-        )
-
-    return result
-
-
-def answer_support_question(item, **kwargs):
-    # Replace this stub with your application logic.
-    return item.input["question"]
-
-
-def exact_match(*, output, expected_output, **kwargs):
-    passed = output.strip() == (expected_output or "").strip()
-    return Evaluation(
-        name="exact_match",
-        value=1.0 if passed else 0.0,
-        comment="match" if passed else "mismatch",
-    )
-
-
-def avg_accuracy(*, item_results, **kwargs):
-    scores = [
-        evaluation.value
-        for item in item_results
-        for evaluation in item.evaluations
-        if evaluation.name == "exact_match" and isinstance(evaluation.value, (int, float))
-    ]
-    return Evaluation(name="avg_accuracy", value=sum(scores) / len(scores) if scores else 0.0)
-```
-
-</Tab>
 </LangTabs>
 
 ### Action output
@@ -349,6 +349,7 @@ The same normalized data is available as the `result_json` action output. Use th
     # ...
 
 - name: Store experiment result
+  if: always()
   env:
     RESULT_JSON: ${{ steps.experiment.outputs.result_json }}
   run: printf '%s' "$RESULT_JSON" > experiment-result.json
