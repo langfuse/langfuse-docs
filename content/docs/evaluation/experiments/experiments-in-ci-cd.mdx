@@ -415,12 +415,18 @@ def test_geography_accuracy_passes(langfuse_client):
 
     # Access the run evaluator result directly
     avg_accuracy = next(
-        evaluation.value for evaluation in result.run_evaluations
-        if evaluation.name == "avg_accuracy"
+        (
+            evaluation.value
+            for evaluation in result.run_evaluations
+            if evaluation.name == "avg_accuracy"
+        ),
+        None,
     )
 
     # Assert minimum accuracy threshold
-    assert avg_accuracy >= 0.8, f"Average accuracy {avg_accuracy:.2f} below threshold 0.8"
+    assert isinstance(avg_accuracy, (int, float)) and avg_accuracy >= 0.8, (
+        f"Average accuracy {avg_accuracy} below threshold 0.8"
+    )
 
 def test_geography_accuracy_fails(langfuse_client):
     """Example test that demonstrates failure conditions"""
@@ -439,13 +445,19 @@ def test_geography_accuracy_fails(langfuse_client):
 
     # Access the run evaluator result directly
     avg_accuracy = next(
-        evaluation.value for evaluation in result.run_evaluations
-        if evaluation.name == "avg_accuracy"
+        (
+            evaluation.value
+            for evaluation in result.run_evaluations
+            if evaluation.name == "avg_accuracy"
+        ),
+        None,
     )
 
     # This test will fail because the task gives wrong answers
     with pytest.raises(AssertionError):
-        assert avg_accuracy >= 0.8, f"Expected test to fail with low accuracy: {avg_accuracy:.2f}"
+        assert isinstance(avg_accuracy, (int, float)) and avg_accuracy >= 0.8, (
+            f"Expected test to fail with low accuracy: {avg_accuracy}"
+        )
 ```
 
 </Tab>
