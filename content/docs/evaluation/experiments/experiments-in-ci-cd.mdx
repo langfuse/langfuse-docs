@@ -9,22 +9,21 @@ Use Langfuse experiments in your CI/CD pipeline to catch quality regressions bef
 
 The workflow is:
 
-1. Store your test cases in a [Langfuse dataset](/docs/evaluation/experiments/datasets).
+1. Create a [Langfuse dataset](/docs/evaluation/experiments/datasets) with your test cases.
 2. Write an experiment with the [Python or JS/TS SDK](/docs/evaluation/experiments/experiments-via-sdk) that tests your application against the dataset.
-3. Add [evaluators](/docs/evaluation/experiments/experiments-via-sdk#evaluators) to score the experiment results.
+3. Add [evaluators](/docs/evaluation/experiments/experiments-via-sdk#evaluators) to score task outputs.
 4. Raise `RegressionError` when a score violates your threshold.
-5. Create a GitHub Actions workflow that runs the script with `langfuse/experiment-action`.
+5. Create a GitHub Actions workflow that runs the script with [langfuse/experiment-action](https://github.com/langfuse/experiment-action).
 
 ## GitHub Actions workflow
 
 Create a workflow with the [trigger](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow) you need, for example `pull_request` or `release`.
 Pin the action to a release from the [`langfuse/experiment-action` releases](https://github.com/langfuse/experiment-action/releases).
 
-The action installs the latest SDK version by default; set `python_sdk_version` or `js_sdk_version` only if you pin SDK versions.
+The action installs the latest SDK version by default; set `python_sdk_version` or `js_sdk_version` only if you want a specific SDK version.
 
 <Callout type="info">
-  The GitHub Action requires Langfuse Python SDK v4.6.0 or newer, or Langfuse JS
-  SDK v5.3.0 or newer.
+  The GitHub Action requires Langfuse Python SDK v4.6.0+ or JS SDK v5.3.0+.
 </Callout>
 
 ```yaml
@@ -50,12 +49,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # Required only if you run Python experiments
+      # Add this only if your experiments use the Python SDK
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
 
-      # Required only if you run TypeScript or JavaScript experiments
+      # Add this only if your experiments use the JS/TS SDK
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
@@ -72,35 +71,29 @@ jobs:
 
           # the dataset to run the experiment against
           dataset_name: support-agent-regression-set
-          dataset_version: "2026-04-27T00:00:00Z"
 
           # GitHub token so that the action can comment on PRs
           github_token: ${{ github.token }}
-
-          # additional metadata to store with the experiment and show in the Langfuse UI
-          experiment_metadata: |
-            gate=pr
-            suite=support-agent
 ```
 
 ### Action inputs and outputs
 
-| Input                          | Required | Description                                                                                                                                                                |
-| ------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `langfuse_public_key`          | Yes      | Langfuse public key used by the SDK client. Store it as a GitHub secret.                                                                                                   |
-| `langfuse_secret_key`          | Yes      | Langfuse secret key used by the SDK client. Store it as a GitHub secret.                                                                                                   |
-| `langfuse_base_url`            | No       | Langfuse host. Defaults to `https://cloud.langfuse.com`; change this for self-hosted Langfuse.                                                                             |
-| `experiment_path`              | Yes      | Path to an experiment script, directory, or glob pattern. Supports Python, TypeScript, and JavaScript.                                                                     |
-| `dataset_name`                 | No       | Langfuse dataset loaded by the action and provided to the SDK via `RunnerContext`. If omitted, the script must provide its own data.                                       |
-| `dataset_version`              | No       | Optional timestamp to pin the dataset version for reproducible CI runs. Defaults to the latest dataset version.                                                            |
-| `experiment_metadata`          | No       | Additional `key=value` metadata added to the experiment together with default GitHub metadata. This metadata is visible in the Langfuse UI.                                |
-| `should_fail_on_regression`    | No       | Fail the CI job when an experiment raises `RegressionError`. Defaults to `true`.                                                                                           |
-| `should_fail_on_script_error`  | No       | Fail the CI job when an experiment script crashes or raises a non-regression error. Defaults to `true`.                                                                    |
-| `should_comment_on_pr`         | No       | Post or update the experiment report as a pull request comment. Defaults to `true`.                                                                                        |
-| `python_sdk_version`           | No       | Langfuse Python SDK version installed by the action for `.py` experiments. Defaults to `latest`; use v4.6.0 or newer.                                                      |
-| `js_sdk_version`               | No       | `@langfuse/client` version installed by the action for TypeScript or JavaScript experiments. Defaults to `latest`; use v5.3.0 or newer.                                    |
-| `should_skip_sdk_installation` | No       | Skip SDK installation when you manage the Python or Node environment yourself before this action. For TypeScript experiments, provide `tsx` yourself. Defaults to `false`. |
-| `github_token`                 | No       | GitHub token used to post PR comments and resolve the current job URL. Leave blank to skip both.                                                                           |
+| Input                          | Required | Description                                                                                                                                                                                   |
+| ------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `langfuse_public_key`          | Yes      | Langfuse public key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                   |
+| `langfuse_secret_key`          | Yes      | Langfuse secret key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                   |
+| `langfuse_base_url`            | No       | Langfuse host. Defaults to `https://cloud.langfuse.com`; see [regions and self-hosted URLs](/docs/api-and-data-platform/features/public-api#public-api) if you use another Langfuse instance. |
+| `experiment_path`              | Yes      | Path to an experiment script, directory, or glob pattern. Supports Python, TypeScript, and JavaScript.                                                                                        |
+| `dataset_name`                 | No       | Langfuse dataset loaded by the action and provided to the SDK via `RunnerContext`. If omitted, the script must provide its own data.                                                          |
+| `dataset_version`              | No       | Optional timestamp to pin the dataset version for reproducible CI runs. Defaults to the latest dataset version.                                                                               |
+| `experiment_metadata`          | No       | Additional `key=value` metadata added to the experiment together with default GitHub metadata. This metadata is visible in the Langfuse UI.                                                   |
+| `should_fail_on_regression`    | No       | Fail the CI job when an experiment raises `RegressionError`. Defaults to `true`.                                                                                                              |
+| `should_fail_on_script_error`  | No       | Fail the CI job when an experiment script crashes or raises a non-regression error. Defaults to `true`.                                                                                       |
+| `should_comment_on_pr`         | No       | Post or update the experiment report as a pull request comment. Defaults to `true`.                                                                                                           |
+| `python_sdk_version`           | No       | Langfuse Python SDK version installed by the action for `.py` experiments. Defaults to `latest`; use v4.6.0 or newer.                                                                         |
+| `js_sdk_version`               | No       | `@langfuse/client` version installed by the action for TypeScript or JavaScript experiments. Defaults to `latest`; use v5.3.0 or newer.                                                       |
+| `should_skip_sdk_installation` | No       | Skip SDK installation when you manage the Python or Node environment yourself before this action. For TypeScript experiments, provide `tsx` yourself. Defaults to `false`.                    |
+| `github_token`                 | No       | GitHub token used to post PR comments and resolve the current job URL. Leave blank to skip both.                                                                                              |
 
 See the full input reference in the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#inputs).
 
@@ -144,12 +137,17 @@ Use `context.runExperiment` (JS/TS) or `context.run_experiment` (Python) to run 
 {/* JS/TS */}
 
 ```ts
-import type { RunnerContext } from "@langfuse/client";
+import type { ExperimentItem, RunnerContext } from "@langfuse/client";
+
+// Define a task that calls your agent with each dataset item.
+async function myTask(item: ExperimentItem) {
+  // ...
+}
 
 export async function experiment(context: RunnerContext) {
   return await context.runExperiment({
     name: "PR gate",
-    task: async (item) => item.input,
+    task: myTask,
   });
 }
 ```
@@ -160,12 +158,18 @@ export async function experiment(context: RunnerContext) {
 
 ```python
 from langfuse import RunnerContext
+from langfuse.api import DatasetItem
+
+
+# Define a task that calls your agent with each dataset item.
+def my_task(item: DatasetItem, **kwargs):
+    ...
 
 
 def experiment(context: RunnerContext):
     return context.run_experiment(
         name="PR gate",
-        task=lambda item, **_: item.input,
+        task=my_task,
     )
 ```
 
@@ -205,6 +209,7 @@ export async function experiment(context: RunnerContext) {
 
   if (typeof accuracy !== "number" || accuracy < THRESHOLD) {
     throw new RegressionError({
+      // Attach the result so the action can include scores in the PR comment and `result_json` output.
       result,
       metric: "avg_accuracy",
       value: typeof accuracy === "number" ? accuracy : 0,
@@ -287,6 +292,7 @@ def experiment(context: RunnerContext):
 
     if not isinstance(accuracy, (int, float)) or accuracy < THRESHOLD:
         raise RegressionError(
+            # Attach the result so the action can include scores in the PR comment and `result_json` output.
             result=result,
             metric="avg_accuracy",
             value=float(accuracy) if isinstance(accuracy, (int, float)) else 0.0,
