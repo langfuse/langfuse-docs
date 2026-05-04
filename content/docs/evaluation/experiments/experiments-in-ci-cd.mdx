@@ -23,7 +23,8 @@ Pin the action to a release from the [`langfuse/experiment-action` releases](htt
 The action installs the latest SDK version by default; set `python_sdk_version` or `js_sdk_version` only if you pin SDK versions.
 
 <Callout type="info">
-  `RunnerContext` requires Langfuse Python SDK v4.6.0 or newer, or Langfuse JS SDK v5.3.0 or newer.
+  The GitHub Action requires Langfuse Python SDK v4.6.0 or newer, or Langfuse JS
+  SDK v5.3.0 or newer.
 </Callout>
 
 ```yaml
@@ -84,22 +85,22 @@ jobs:
 
 ### Action inputs and outputs
 
-| Input                          | Required | Description                                                                                                                                 |
-| ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `langfuse_public_key`          | Yes      | Langfuse public key used by the SDK client. Store it as a GitHub secret.                                                                    |
-| `langfuse_secret_key`          | Yes      | Langfuse secret key used by the SDK client. Store it as a GitHub secret.                                                                    |
-| `langfuse_base_url`            | No       | Langfuse host. Defaults to `https://cloud.langfuse.com`; change this for self-hosted Langfuse.                                              |
-| `experiment_path`              | Yes      | Path to an experiment script, directory, or glob pattern. Supports Python, TypeScript, and JavaScript.                                      |
-| `dataset_name`                 | No       | Langfuse dataset loaded by the action and provided to the SDK via `RunnerContext`. If omitted, the script must provide its own data.        |
-| `dataset_version`              | No       | Optional timestamp to pin the dataset version for reproducible CI runs. Defaults to the latest dataset version.                             |
-| `experiment_metadata`          | No       | Additional `key=value` metadata added to the experiment together with default GitHub metadata. This metadata is visible in the Langfuse UI. |
-| `should_fail_on_regression`    | No       | Fail the CI job when an experiment raises `RegressionError`. Defaults to `true`.                                                            |
-| `should_fail_on_script_error`  | No       | Fail the CI job when an experiment script crashes or raises a non-regression error. Defaults to `true`.                                     |
-| `should_comment_on_pr`         | No       | Post or update the experiment report as a pull request comment. Defaults to `true`.                                                         |
-| `python_sdk_version`           | No       | Langfuse Python SDK version installed by the action for `.py` experiments. Defaults to `latest`; use v4.6.0 or newer.                       |
-| `js_sdk_version`               | No       | `@langfuse/client` version installed by the action for TypeScript or JavaScript experiments. Defaults to `latest`; use v5.3.0 or newer.     |
-| `should_skip_sdk_installation` | No       | Skip SDK installation when you manage the Python or Node environment yourself before this action. Defaults to `false`.                      |
-| `github_token`                 | No       | GitHub token used to post PR comments and resolve the current job URL. Leave blank to skip both.                                            |
+| Input                          | Required | Description                                                                                                                                                                |
+| ------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `langfuse_public_key`          | Yes      | Langfuse public key used by the SDK client. Store it as a GitHub secret.                                                                                                   |
+| `langfuse_secret_key`          | Yes      | Langfuse secret key used by the SDK client. Store it as a GitHub secret.                                                                                                   |
+| `langfuse_base_url`            | No       | Langfuse host. Defaults to `https://cloud.langfuse.com`; change this for self-hosted Langfuse.                                                                             |
+| `experiment_path`              | Yes      | Path to an experiment script, directory, or glob pattern. Supports Python, TypeScript, and JavaScript.                                                                     |
+| `dataset_name`                 | No       | Langfuse dataset loaded by the action and provided to the SDK via `RunnerContext`. If omitted, the script must provide its own data.                                       |
+| `dataset_version`              | No       | Optional timestamp to pin the dataset version for reproducible CI runs. Defaults to the latest dataset version.                                                            |
+| `experiment_metadata`          | No       | Additional `key=value` metadata added to the experiment together with default GitHub metadata. This metadata is visible in the Langfuse UI.                                |
+| `should_fail_on_regression`    | No       | Fail the CI job when an experiment raises `RegressionError`. Defaults to `true`.                                                                                           |
+| `should_fail_on_script_error`  | No       | Fail the CI job when an experiment script crashes or raises a non-regression error. Defaults to `true`.                                                                    |
+| `should_comment_on_pr`         | No       | Post or update the experiment report as a pull request comment. Defaults to `true`.                                                                                        |
+| `python_sdk_version`           | No       | Langfuse Python SDK version installed by the action for `.py` experiments. Defaults to `latest`; use v4.6.0 or newer.                                                      |
+| `js_sdk_version`               | No       | `@langfuse/client` version installed by the action for TypeScript or JavaScript experiments. Defaults to `latest`; use v5.3.0 or newer.                                    |
+| `should_skip_sdk_installation` | No       | Skip SDK installation when you manage the Python or Node environment yourself before this action. For TypeScript experiments, provide `tsx` yourself. Defaults to `false`. |
+| `github_token`                 | No       | GitHub token used to post PR comments and resolve the current job URL. Leave blank to skip both.                                                                           |
 
 See the full input reference in the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#inputs).
 
@@ -171,7 +172,7 @@ def experiment(context: RunnerContext):
 </Tab>
 </LangTabs>
 
-Pass explicit values to `context.runExperiment` / `context.run_experiment` when you want to override action-provided defaults such as metadata.
+Pass explicit values to `context.runExperiment` / `context.run_experiment` when you want to override action-provided defaults such as `data` or `metadata`.
 
 ### Failing on regressions
 
@@ -196,7 +197,6 @@ export async function experiment(context: RunnerContext) {
     task: answerSupportQuestion,
     evaluators: [exactMatch],
     runEvaluators: [avgAccuracy],
-    metadata: { suite: "support-agent" },
   });
 
   const accuracy = result.runEvaluations.find(
@@ -217,7 +217,12 @@ export async function experiment(context: RunnerContext) {
 
 async function answerSupportQuestion(item: { input?: unknown }) {
   const { question } = item.input as { question: string };
-  // Replace this stub with your application logic.
+
+  // Replace this with your application logic, for example calling your agent.
+  return await supportAgent(question);
+}
+
+async function supportAgent(question: string) {
   return question;
 }
 
@@ -229,12 +234,7 @@ async function exactMatch({
   expectedOutput?: string;
 }): Promise<Evaluation> {
   const passed = output.trim() === expectedOutput?.trim();
-
-  return {
-    name: "exact_match",
-    value: passed ? 1 : 0,
-    comment: passed ? "match" : "mismatch",
-  };
+  return { name: "exact_match", value: passed ? 1 : 0 };
 }
 
 async function avgAccuracy({
@@ -243,17 +243,17 @@ async function avgAccuracy({
   itemResults: Array<{ evaluations: Evaluation[] }>;
 }): Promise<Evaluation> {
   const scores = itemResults
-    .flatMap((item) =>
-      item.evaluations
-        .filter((evaluation) => evaluation.name === "exact_match")
-        .map((evaluation) => Number(evaluation.value)),
-    )
+    .flatMap((item) => item.evaluations)
+    .filter((evaluation) => evaluation.name === "exact_match")
+    .map((evaluation) => Number(evaluation.value))
     .filter((score) => Number.isFinite(score));
-  const value = scores.length
-    ? scores.reduce((sum, score) => sum + score, 0) / scores.length
-    : 0;
 
-  return { name: "avg_accuracy", value };
+  return {
+    name: "avg_accuracy",
+    value: scores.length
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+      : 0,
+  };
 }
 ```
 
@@ -274,7 +274,6 @@ def experiment(context: RunnerContext):
         task=answer_support_question,
         evaluators=[exact_match],
         run_evaluators=[avg_accuracy],
-        metadata={"suite": "support-agent"},
     )
 
     accuracy = next(
@@ -343,7 +342,9 @@ The same normalized data is available as the `result_json` action output. Use th
     # ...
 
 - name: Store experiment result
-  run: echo '${{ steps.experiment.outputs.result_json }}' > experiment-result.json
+  env:
+    RESULT_JSON: ${{ steps.experiment.outputs.result_json }}
+  run: printf '%s' "$RESULT_JSON" > experiment-result.json
 ```
 
 ## Other CI/CD systems [#other-cicd-systems]
@@ -386,8 +387,8 @@ def accuracy_evaluator(*, input, output, expected_output, **kwargs):
 def average_accuracy_evaluator(*, item_results, **kwargs):
     """Run evaluator that calculates average accuracy across all items"""
     accuracies = [
-        eval.value for result in item_results
-        for eval in result.evaluations if eval.name == "accuracy"
+        evaluation.value for result in item_results
+        for evaluation in result.evaluations if evaluation.name == "accuracy"
     ]
 
     if not accuracies:
@@ -414,8 +415,8 @@ def test_geography_accuracy_passes(langfuse_client):
 
     # Access the run evaluator result directly
     avg_accuracy = next(
-        eval.value for eval in result.run_evaluations
-        if eval.name == "avg_accuracy"
+        evaluation.value for evaluation in result.run_evaluations
+        if evaluation.name == "avg_accuracy"
     )
 
     # Assert minimum accuracy threshold
@@ -438,8 +439,8 @@ def test_geography_accuracy_fails(langfuse_client):
 
     # Access the run evaluator result directly
     avg_accuracy = next(
-        eval.value for eval in result.run_evaluations
-        if eval.name == "avg_accuracy"
+        evaluation.value for evaluation in result.run_evaluations
+        if evaluation.name == "avg_accuracy"
     )
 
     # This test will fail because the task gives wrong answers
@@ -535,7 +536,7 @@ describe("Geography Experiment Tests", () => {
 
     // Access the run evaluator result directly
     const avgAccuracy = result.runEvaluations.find(
-      (eval) => eval.name === "avg_accuracy",
+      (evaluation) => evaluation.name === "avg_accuracy",
     )?.value as number;
 
     // Assert minimum accuracy threshold
@@ -558,7 +559,7 @@ describe("Geography Experiment Tests", () => {
 
     // Access the run evaluator result directly
     const avgAccuracy = result.runEvaluations.find(
-      (eval) => eval.name === "avg_accuracy",
+      (evaluation) => evaluation.name === "avg_accuracy",
     )?.value as number;
 
     // This test will fail because the task gives wrong answers
