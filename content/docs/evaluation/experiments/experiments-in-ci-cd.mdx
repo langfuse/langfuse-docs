@@ -78,22 +78,22 @@ jobs:
 
 ### Action inputs and outputs
 
-| Input                          | Required | Description                                                                                                                                                                                   |
-| ------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `langfuse_public_key`          | Yes      | Langfuse public key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                   |
-| `langfuse_secret_key`          | Yes      | Langfuse secret key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                   |
-| `langfuse_base_url`            | No       | Langfuse host. Defaults to `https://cloud.langfuse.com`; see [regions and self-hosted URLs](/docs/api-and-data-platform/features/public-api#public-api) if you use another Langfuse instance. |
-| `experiment_path`              | Yes      | Path to an experiment script, directory, or glob pattern. Supports Python, TypeScript, and JavaScript.                                                                                        |
-| `dataset_name`                 | No       | Langfuse dataset loaded by the action and provided to the SDK via `RunnerContext`. If omitted, the script must provide its own data.                                                          |
-| `dataset_version`              | No       | Optional timestamp to pin the dataset version for reproducible CI runs. Defaults to the latest dataset version.                                                                               |
-| `experiment_metadata`          | No       | Additional `key=value` metadata added to the experiment together with default GitHub metadata. This metadata is visible in the Langfuse UI.                                                   |
-| `should_fail_on_regression`    | No       | Fail the CI job when an experiment raises `RegressionError`. Defaults to `true`.                                                                                                              |
-| `should_fail_on_script_error`  | No       | Fail the CI job when an experiment script crashes or raises a non-regression error. Defaults to `true`.                                                                                       |
-| `should_comment_on_pr`         | No       | Post or update the experiment report as a pull request comment. Defaults to `true`.                                                                                                           |
-| `python_sdk_version`           | No       | Langfuse Python SDK version installed by the action for `.py` experiments. Defaults to `latest`; use v4.6.0 or newer.                                                                         |
-| `js_sdk_version`               | No       | `@langfuse/client` version installed by the action for TypeScript or JavaScript experiments. Defaults to `latest`; use v5.3.0 or newer.                                                       |
-| `should_skip_sdk_installation` | No       | Skip SDK installation when you manage the Python or Node environment yourself before this action. For TypeScript experiments, provide `tsx` yourself. Defaults to `false`.                    |
-| `github_token`                 | No       | GitHub token used to post PR comments and resolve the current job URL. Leave blank to skip both.                                                                                              |
+| Input                          | Required | Description                                                                                                                                                                                                                                                          |
+| ------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `langfuse_public_key`          | Yes      | Langfuse public key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                                                                                          |
+| `langfuse_secret_key`          | Yes      | Langfuse secret key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                                                                                          |
+| `langfuse_base_url`            | No       | Langfuse host. Defaults to `https://cloud.langfuse.com`; see [regions and self-hosted URLs](/docs/api-and-data-platform/features/public-api#public-api) if you use another Langfuse instance.                                                                        |
+| `experiment_path`              | Yes      | Path to an experiment script, directory, or glob pattern. Supports Python, TypeScript, and JavaScript.                                                                                                                                                               |
+| `dataset_name`                 | No       | Langfuse dataset loaded by the action and provided to the SDK via `RunnerContext`. If omitted, the script must provide its own data.                                                                                                                                 |
+| `dataset_version`              | No       | Optional timestamp to pin the dataset version for reproducible CI runs. Defaults to the latest dataset version.                                                                                                                                                      |
+| `experiment_metadata`          | No       | Additional `key=value` metadata added to the experiment together with default GitHub metadata. This metadata is visible in the Langfuse UI.                                                                                                                          |
+| `should_fail_on_regression`    | No       | Fail the CI job when an experiment raises `RegressionError`. Defaults to `true`.                                                                                                                                                                                     |
+| `should_fail_on_script_error`  | No       | Fail the CI job when an experiment script crashes or raises a non-regression error. Defaults to `true`.                                                                                                                                                              |
+| `should_comment_on_pr`         | No       | Post or update the experiment report as a pull request comment. Defaults to `true`.                                                                                                                                                                                  |
+| `python_sdk_version`           | No       | Langfuse Python SDK version installed by the action for `.py` experiments. Defaults to `latest`; use v4.6.0 or newer.                                                                                                                                                |
+| `js_sdk_version`               | No       | `@langfuse/client` version installed by the action for TypeScript or JavaScript experiments. Defaults to `latest`; use v5.3.0 or newer.                                                                                                                              |
+| `should_skip_sdk_installation` | No       | Skip SDK installation when you manage the Python or Node environment yourself before this action. For TypeScript experiments, provide `@langfuse/client`, `@langfuse/tracing`, `@langfuse/otel`, `@opentelemetry/sdk-node`, and `tsx` yourself. Defaults to `false`. |
+| `github_token`                 | No       | GitHub token used to post PR comments and resolve the current job URL. Leave blank to skip both.                                                                                                                                                                     |
 
 See the full input reference in the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#inputs).
 
@@ -122,7 +122,7 @@ Your experiment can read these values from `os.environ[...]` in Python or `proce
 
 ### Experiment script definition
 
-Each script must define an `experiment(context)` function. The action creates a `RunnerContext` and passes it to this function.
+Each script must define an `experiment(context)` function that accepts a `context` parameter. The action creates a `RunnerContext` and passes it to this function.
 
 `RunnerContext` handles the CI-specific setup for you:
 
@@ -137,10 +137,10 @@ Use `context.runExperiment` (JS/TS) or `context.run_experiment` (Python) to run 
 {/* JS/TS */}
 
 ```ts
-import type { ExperimentItem, RunnerContext } from "@langfuse/client";
+import type { ExperimentTaskParams, RunnerContext } from "@langfuse/client";
 
 // Define a task that calls your agent with each dataset item.
-async function myTask(item: ExperimentItem) {
+async function myTask(item: ExperimentTaskParams) {
   // ...
 }
 
@@ -190,6 +190,7 @@ Raise `RegressionError` when a result should block the workflow. The example bel
 import {
   RegressionError,
   type Evaluation,
+  type ExperimentTaskParams,
   type RunnerContext,
 } from "@langfuse/client";
 
@@ -220,7 +221,7 @@ export async function experiment(context: RunnerContext) {
   return result;
 }
 
-async function answerSupportQuestion(item: { input?: unknown }) {
+async function answerSupportQuestion(item: ExperimentTaskParams) {
   const { question } = item.input as { question: string };
 
   // Replace this with your application logic, for example calling your agent.
