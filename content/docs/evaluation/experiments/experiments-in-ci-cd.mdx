@@ -20,7 +20,11 @@ The workflow is:
 Create a workflow with the [trigger](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow) you need, for example `pull_request` or `release`.
 Pin the action to a release from the [`langfuse/experiment-action` releases](https://github.com/langfuse/experiment-action/releases).
 
-`RunnerContext` requires Langfuse Python SDK v4.6.0 or newer, or Langfuse JS SDK v5.3.0 or newer. The action installs the latest SDK version by default; set `python_sdk_version` or `js_sdk_version` if you pin SDK versions.
+The action installs the latest SDK version by default; set `python_sdk_version` or `js_sdk_version` only if you pin SDK versions.
+
+<Callout type="info">
+  `RunnerContext` requires Langfuse Python SDK v4.6.0 or newer, or Langfuse JS SDK v5.3.0 or newer.
+</Callout>
 
 ```yaml
 name: Langfuse experiment gate
