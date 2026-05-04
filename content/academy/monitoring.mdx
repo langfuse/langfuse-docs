@@ -8,7 +8,7 @@ description: How to make sense of your traces through metrics tracking, signal d
 
 ## What role does monitoring play?
 
-Tracing provides a complete record of what your LLM app is doing. Every request, every model call, every tool use is recorded. Monitoring is how you make sense of this data.
+[Tracing](/academy/tracing) provides a complete record of what your LLM app is doing. Every request, every model call, every tool use is recorded. Monitoring is how you make sense of this data.
 It gives you two things: a continuous view of how your system is performing over time, and a way to surface the specific traces worth looking at. Together, they shift you from having data to actually understanding your system as a foundation for evolving it over time.
 
 todo: tracing needs a link back to the previous page (tracing); monitoring should also surface what people do, what errors exist (error analysis)
@@ -29,9 +29,7 @@ It helps to separate monitoring into two distinct activities, because they answe
 
 Both aggregate metrics and signal detection depend on fields attached to observations. A lot of what you need is already there once you instrument properly: latency, token-derived cost, model and route metadata, tool outcomes, and errors typically flow from your client and provider APIs without extra wiring.
 
-Anything beyond that, like quality scores, thumbs up or down, human annotation, or LLM-as-a-judge scores, you attach by annotating traces manually or running automated evaluators on them. That attached data can be aggregated into charts and baselines, or set as signals so individual traces surface when something crosses a line you care about.
-
-todo: call it evaluation and not quality scores; call it user feedback (explicit/implicit) instead of thumbs up/down; the second paragraph here is generally weak, needs improvement
+Beyond the built-in fields, you add evaluation - user feedback (explicit ratings or implicit signals like session abandonment), human annotation, and LLM-as-a-judge scores - by annotating traces manually or running automated evaluators. That data feeds into aggregate charts for tracking trends over time, and into signal rules so individual traces surface when something crosses a threshold you care about.
 
 <Callout type="info">
 There are two types of automated evaluators to attach scores to traces: 
@@ -48,9 +46,7 @@ More on both can be found in the [Evaluate](/academy/evaluate) section.
 
 2. **Use error analysis to surface what's worth tracking.** Error analysis gives you a structured way to find patterns across your traces, the kinds of recurring issues worth turning into automated evaluators you can run continuously (Learn more here: TODO insert link)
 
-3. **Think about how your specific application shows failure.** In a customer support use case, a user disagreeing with a response is a strong signal. In process automation, cases where a user had to correct what the LLM produced tell you something went wrong. Application-specific signals like these are often more actionable than generic quality scores.
-
-TODO: refer to this as implicit user feedback signals, helps to find issues without needing to manually lable all data
+3. **Think about how your specific application shows failure.** In a customer support use case, a user disagreeing with a response is a strong implicit user feedback signal. In process automation, cases where a user had to correct what the LLM produced tell you something went wrong. Application-specific implicit user feedback signals like these are often more actionable than generic quality scores. They help you find issues without having to manually label all data
 
 4. **Treat it as an iterative process.** A working monitoring setup isn't something you configure once and leave. Usage patterns shift, models get updated, new failure modes emerge. Keep refining your setup so you can cut through the noise and stay focused on what actually matters.
 
@@ -58,8 +54,6 @@ TODO: refer to this as implicit user feedback signals, helps to find issues with
 
 When monitoring surfaces something worth investigating, you have a few options: fix it directly if the cause is obvious, capture it in a dataset if it looks like a pattern, or run a structured evaluation if you suspect something systemic. Which path you take depends on how confident you are about the cause.
 
-- [Error analysis](/academy/error-analysis): how to look at traces in detail
 - [Datasets](/academy/datasets): capturing production traces for evaluation
 - [Experiments](/academy/experiments): testing whether a fix actually worked
 
-todo: error analysis page does not exist in academy yet
