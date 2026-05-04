@@ -25,23 +25,23 @@ Capture the full path of a request, including prompts, retrieved context, tool c
 
 ### Monitor [#monitor]
 
-Track how the system behaves over time and surface the traces that deserve attention. Monitoring turns a stream of raw data into an ongoing understanding of how the system evolves. Evaluation methods help you surface quality over time but also help draw attention to interesting events in your application. Implicit and explicit user feedback and cost latency anomalies help you surface interesting traces. [→ Read more](/academy/monitoring)
+Track how the system behaves over time and surface the traces that deserve attention. Monitoring turns a stream of raw data into an ongoing understanding of how the system evolves. Evaluation methods help you surface quality over time and draw attention to interesting events in your application. Implicit and explicit user feedback, along with cost or latency anomalies, help you surface interesting traces. [→ Read more](/academy/monitoring)
 
 
 ## 2. Improving systematically during development
 
-The second part is about turning what you have observed into improvements you can trust — without degrading the parts of the system that are already working. If your application is not in production, datasets, experiments and evaluations are great starting point to gain confidence in your system before deploying to production.
+The second part is about turning what you have observed into improvements you can trust — without degrading the parts of the system that are already working. If your application is not in production, datasets, experiments, and evaluation are a great starting point for gaining confidence in your system before deploying to production.
 
 
 <OfflineLoop />
 
 ### Build datasets [#build-datasets]
 
-Turn real scenarios surfaced through monitoring and expected scenarios you design during development into repeatable test cases. Instead of testing against a handful of hand-picked examples, you build a set that reflects how the system actually gets used. A dataset can contaoin examples from production as well as hypothetical examples to define the surface area your system will face. [→ Read more](/academy/datasets)
+Turn real scenarios surfaced through monitoring and expected scenarios you design during development into repeatable test cases. Instead of testing against a handful of hand-picked examples, you build a set that reflects how the system actually gets used. A dataset can contain examples from production as well as hypothetical examples that define the surface area your system will face. [→ Read more](/academy/datasets)
 
 ### Experiment [#experiment]
 
-Change variables sytsematically — a prompt, a model, a retrieval strategy — and compare it against a stable baseline or other experimental setups. That way you know what actually improved instead of guessing. [→ Read more](/academy/experiments)
+Change variables systematically — a prompt, a model, a retrieval strategy — and compare each change against a stable baseline or other experimental setups. That way you know what actually improved instead of guessing. [→ Read more](/academy/experiments)
 
 
 ### Evaluate [#evaluate]
@@ -55,9 +55,7 @@ Once you ship a change, the cycle starts again. The updated system produces new 
 
 Most teams don't start with all five steps in place. That is fine.
 
-The value of the loop is cumulative. Each step you add gives you better signal, more systematic coverage, and more confidence in what you are shipping. The goal is not to implement everything at once — it is to understand where you are and take the next step toward closing the loop. Many teams start with tracing or by building early datasets. 
-
-{/* TODO: Link blog article about patterns of AI engineering lifecycle adoption once written */}
+The value of the loop is cumulative. Each step you add gives you better signal, more systematic coverage, and more confidence in what you are shipping. The goal is not to implement everything at once — it is to understand where you are and take the next step toward closing the loop. Many teams start with tracing or by building early datasets.
 
 
 ### Start with tracing
@@ -71,4 +69,3 @@ One natural place to begin is tracing. You cannot monitor what you cannot see, a
 Some teams prefer to start with building datasets to scope the surface area they expect their system to deal with. While this is a great way to build up repeatable cases early on, teams benefit from adding tracing to these early executions to deeply understand how the system behaves. Let's assume you have been working on your system for some time but you want to gain confidence in the quality before shipping to production. Your customers might even require this because they are in regulated environments with high quality bars. Building datasets, experimenting and systematically evaluating the outcomes will help you build the necessary trust and confidence.
 
 [→ Start with Datasets](/academy/datasets)
-

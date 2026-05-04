@@ -6,7 +6,7 @@ description: How to use experiments to systematically improve your LLM applicati
 
 # Experiments and their role
 
-To systematically understand and improve how your system behaves, you need a way to isolate cause and effect. That's what experiments give you. You pick a variable or a set of variables, run your dataset through two versions of your system, and compare what comes out. The result tells you whether a change actually helped, and by how much. To understand by how much, you also need to evaluate your experiment output ([see Evaluate](/academy/evaluate)). This section covers the systematic experimentation part before evaluation.
+To systematically understand and improve how your system behaves, you need a way to isolate cause and effect. That's what experiments give you. You pick a variable or a set of variables, run your dataset through two versions of your system, and compare what comes out. The result tells you whether a change actually helped, and by how much. To understand by how much, you also need to evaluate your experiment outputs ([see Evaluate](/academy/evaluate)). This section covers the systematic experimentation part before evaluation.
 
 
 <LoopDiagram highlight="change" />
@@ -22,11 +22,11 @@ Every experiment has four components.
 | **Variable**           | The configuration you're changing — model, prompt, context, tool access, or agent architecture. See [On variables](#on-variables) below. |
 | **Outputs to compare** | What your system produces under each condition. Comparing these is the actual work of running an experiment.                            |
 
-It often helps to change only one variable at a time. However as variables are interacting some configurations require changing multiple variables at once.
+It often helps to change only one variable at a time. However, variables interact, and some configurations require changing multiple variables at once.
 
 ### On variables [#on-variables]
 
-- **Model.** The AI model you are using. There are thinking models, cheap models, fast models and all of them come with different tradeoffs is result quality and cost.
+- **Model.** The AI model you are using. There are reasoning-heavy models, cheap models, and fast models, and they all come with different tradeoffs in result quality, speed, and cost.
 - **Prompt.** The most common lever. Before running a prompt experiment, ask: is the failure a specification problem (ambiguous or incomplete prompt) or a generalization problem (model applies clear instructions inconsistently)? The latter is worth measuring.
 - **Context.** What information you include in the prompt: retrieved documents, conversation history, user metadata.
 - **Tool access.** Adding or removing tools changes what paths your system can take.
@@ -34,7 +34,7 @@ It often helps to change only one variable at a time. However as variables are i
 
 ## How is it used?
 
-The core flow: pick a variable & form a hypothesis, run both conditions against your dataset, compare outputs, learn something & repeat.
+The core flow: pick a variable and form a hypothesis, run both conditions against your dataset, compare outputs, learn something, and repeat.
 
 ![Experimentation loop](/images/academy/experimentation.png)
 
@@ -50,7 +50,7 @@ Scores then make comparison concrete—win rates, whether wins are spread across
 
 ## Where to start
 
-Don't set up the full evaluation pipeline before running anything. A few examples side traces side by side will teach you more in the first hour than a week of infrastructure work. Many of the early issues can be fixed by manually iterating back and forth based on traces the system produces for your inputs.
+Don't set up the full evaluation pipeline before running anything. A few examples with traces side by side will teach you more in the first hour than a week of infrastructure work. Many of the early issues can be fixed by manually iterating back and forth based on the traces your system produces for those inputs.
 
 1. Get 20–30 real examples. Pull them from production traces. They don't need to cover everything, just a real slice of what your application handles.
 2. Change your configuration and run both versions. Keep everything else identical.
