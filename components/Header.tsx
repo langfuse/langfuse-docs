@@ -38,7 +38,7 @@ export const Header = ({
       {buttons && (
         <div className="mt-6 flex flex-row gap-2 justify-center flex-wrap">
           {buttons.map((button) => (
-            <Button key={button.href} variant="ghost" asChild>
+            <Button key={button.href} variant="ghost" size="default" asChild>
               {button.target ? (
                 <a href={button.href} target={button.target} rel="noopener noreferrer">
                   {button.text} <ArrowRight size={14} className="ml-2" />

@@ -41,6 +41,55 @@ export async function loadPage(
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
+ * Titles that are too generic to stand alone in an OG image (no parent context).
+ * When one of these is the page title and there is a slug parent segment or
+ * section title available, we enrich it automatically for the OG card.
+ */
+const GENERIC_TITLES = new Set([
+  "overview",
+  "get started",
+  "concepts",
+  "core concepts",
+  "data model",
+  "troubleshooting and faq",
+  "troubleshooting & faq",
+  "mcp server",
+]);
+
+const SLUG_WORD_OVERRIDES: Record<string, string> = {
+  api: "API",
+  sdk: "SDK",
+  faq: "FAQ",
+  llm: "LLM",
+  mcp: "MCP",
+  ui: "UI",
+};
+
+function slugSegmentToTitle(segment: string): string {
+  return segment
+    .split("-")
+    .map((w) => SLUG_WORD_OVERRIDES[w.toLowerCase()] ?? w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function enrichOgTitle(title: string, slug: string[], sectionTitle: string): string {
+  const lower = title.toLowerCase().trim();
+  if (!GENERIC_TITLES.has(lower)) return title;
+
+  let context: string;
+  if (slug.length >= 2) {
+    context = slugSegmentToTitle(slug[slug.length - 2]);
+  } else if (slug.length === 0) {
+    context = "Langfuse";
+  } else {
+    context = sectionTitle;
+  }
+
+  if (lower === "get started") return `Get Started with ${context}`;
+  return `${context} ${title}`;
+}
+
+/**
  * Builds Next.js Metadata for a section page.
  *
  * `opts.canonicalFallback` is consulted *after* `pageData.canonical` but *before*
@@ -61,8 +110,9 @@ export function buildSectionMetadata(
   const canonicalUrl =
     pageData.canonical ?? opts?.canonicalFallback ?? buildPageUrl(pagePath);
   const seoTitle = pageData.seoTitle || page.data.title;
+  const ogTitle = pageData.seoTitle ? seoTitle : enrichOgTitle(seoTitle, slug, sectionTitle);
   const ogImage = buildOgImageUrl({
-    title: seoTitle,
+    title: ogTitle,
     description: page.data.description,
     section: sectionTitle,
     staticOgImage: pageData.ogImage,

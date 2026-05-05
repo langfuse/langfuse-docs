@@ -47,12 +47,13 @@ export function Hero() {
           <div className="flex flex-wrap gap-3 justify-center items-center">
             <Button
               variant="primary"
+              size="default"
               shortcutKey="s"
               href="/cloud"
             >
               Start free
             </Button>
-            <Button variant="secondary" shortcutKey="d" href="/docs">
+            <Button variant="secondary" size="default" shortcutKey="d" href="/docs">
               Documentation
             </Button>
           </div>

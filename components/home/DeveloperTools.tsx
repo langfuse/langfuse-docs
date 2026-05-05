@@ -34,7 +34,7 @@ export const DeveloperTools = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2">
-          <CornerBox className="flex relative z-0 flex-col p-0 min-h-0 md:row-span-2">
+          <CornerBox hoverStripes className="flex relative z-0 flex-col p-0 min-h-0 md:row-span-2">
             <div className="flex flex-col gap-1 p-4">
               <Link
                 href={SKILL_HREF}
@@ -61,6 +61,7 @@ export const DeveloperTools = () => {
             <div className="flex flex-col items-start px-4 pb-4 -ml-1.25">
               <Button
                 variant="secondary"
+                size="small"
                 href={SKILL_HREF}
               >
                 Install Skill
@@ -68,7 +69,7 @@ export const DeveloperTools = () => {
             </div>
           </CornerBox>
 
-          <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:mt-0 md:-ml-px">
+          <CornerBox hoverStripes className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:mt-0 md:-ml-px">
             <Link
               href={CLI_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
@@ -82,6 +83,7 @@ export const DeveloperTools = () => {
             <div className="flex flex-col items-start mt-4 -ml-1.25">
               <Button
                 variant="secondary"
+                size="small"
                 href={CLI_HREF}
               >
                 Configure CLI
@@ -89,7 +91,7 @@ export const DeveloperTools = () => {
             </div>
           </CornerBox>
 
-          <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:-ml-px">
+          <CornerBox hoverStripes className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:-ml-px">
             <Link
               href={MCP_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
@@ -103,6 +105,7 @@ export const DeveloperTools = () => {
             <div className="flex flex-col items-start mt-4 -ml-1.25">
               <Button
                 variant="secondary"
+                size="small"
                 href={MCP_HREF}
               >
                 Configure MCP

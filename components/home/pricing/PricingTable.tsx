@@ -1013,10 +1013,10 @@ const sections: Section[] = [
         href: "/security/data-regions",
         tiers: {
           cloud: {
-            Hobby: "US or EU",
-            Core: "US or EU",
-            Pro: "US or EU",
-            Enterprise: "US or EU",
+            Hobby: "US, EU, or JP",
+            Core: "US, EU, or JP",
+            Pro: "US, EU, or JP",
+            Enterprise: "US, EU, JP, or HIPAA",
           },
         },
       },
@@ -1461,6 +1461,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                   <div className="flex gap-2">
                     <Button
                       variant={tier.featured ? "primary" : "secondary"}
+                      size="default"
                       href={tier.href}
                       wrapperClassName="flex-1"
                       className={cn(
@@ -1473,6 +1474,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     </Button>
                     <Button
                       variant="secondary"
+                      size="default"
                       href={tier.ctaCallout.href}
                       wrapperClassName="flex-1"
                       className="justify-center! group-hover:border-line-structure hover:border-line-cta"
@@ -1483,6 +1485,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                 ) : (
                   <Button
                     variant={tier.featured ? "primary" : "secondary"}
+                    size="default"
                     href={tier.href}
                     className={cn(
                       "justify-center!",
