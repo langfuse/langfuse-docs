@@ -70,7 +70,8 @@ The v2 APIs are additive — v1 endpoints remain available and unchanged. When r
 2. Replace page-based pagination with the `cursor` returned in the response.
 3. Use `fields` to request only the data you need:
    - REST: `GET /api/public/v2/observations?fields=core,basic&limit=100`
-   - SDK: `langfuse.api.observations.get_many(fields="core,basic,usage")`
+   - SDK (v3.x): `langfuse.api.observations_v_2.get_many(fields="core,basic,usage")`
+   - SDK (v4+ Python / v5+ JS/TS): `langfuse.api.observations.get_many(fields="core,basic,usage")`
 4. Update your limits and parsing assumptions: default limit is `50`, max is `1,000`, and `parseIoAsJson` defaults to `false`.
 5. Check SDK compatibility: use at least Langfuse server `v3.133.0`, JS/TS SDK `v4.5.1`, and Python SDK `v3.11.1`. In Python SDK `v4+` and JS/TS SDK `v5+`, v2 is the default under `langfuse.api.observations`. Self-hosted users should stay on v1 for now.
 
