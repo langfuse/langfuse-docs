@@ -14,18 +14,6 @@ Now the question becomes: when you spot something worth improving, how do you te
 
 A dataset is a collection of test cases that you run your application against each time you make a change ("an experiment"). Instead of deploying and hoping for the best, you get a repeatable, consistent check across a set of inputs that represent real-world usage.
 
-## What makes a good dataset?
-
-**A good dataset mirrors what your system will encounter in production.** If passing the dataset gives you confidence before deploying, it's doing its job.
-
-**Focused in scope.** Most datasets test one specific part of your system. That can be end-to-end, but it can also target an individual step like retrieval or summarization. You'll likely end up with multiple datasets, each with a clear purpose.
-
-todo: this does not make sense; it is contradicting; i think we can say "clear in scope" but scope could be e2e but could also be a single step if that step is the issue; pro e2e that everything is an implementatin detail, pro more granular that it is faster/cheaper to run and easier to reason about
-
-**Different datasets for different workflows.** Some datasets are small and fast enough to run on every push as part of your CI/CD pipeline. Others are larger and more comprehensive, and are useful to run periodically but too slow for every minor change.
-
-todo: needs to have the right size; explores a single new issue (10 is fine), is a dataset to test the model capability boundary (10 really complex examples that are unsolved by the current system), used as checks in CI on larger changes (100-1000) that cover the full distribition of what's happening in production, penetration testing of guardrails (can be huge, every time you have a new case in prod you add it to the dataset).
-
 ## The dataset item
 
 A dataset is made up of items, each item represents one test case: a situation your application should be able to handle. Generally, an item has three fields:
@@ -48,7 +36,13 @@ A good mental model is:
 
 ### Different ways to use the expected output field
 
-Some evaluators check the output against a predefined expected output (reference-based). Others assess the output without needing a ground truth to compare against (reference-free). Whether you need an expected output, and what it looks like, depends on which type of evaluator you use.
+Whether you need an expected output, and what it looks like, depends on which type of evaluator you use.
+
+<Callout type="info" id="reference-based-vs-reference-free">
+**[Reference-based versus reference-free evaluators](/academy/evaluate#reference-based-vs-reference-free)**
+
+Some evaluators check the output against a predefined expected output (reference-based). Others assess the output without needing a ground truth to compare against (reference-free).
+</Callout>
 
 **Exact match**
 
@@ -70,11 +64,7 @@ The expected output is a list of checks or requirements the output should satisf
 
 The evaluator checks whether the output meets these criteria.
 
-**Combination of the above**
-
-TODO: it is a json field, can be used to store multiple different options at the same time, e.g. a requirement for a tool that should have been called, a golden response, and a list of criteria; show a json example here as a code box as well
-
-**Not needed**
+**Nothing**
 
 Sometimes no expected output is required at all. If you're just checking whether:
 
@@ -82,9 +72,30 @@ Sometimes no expected output is required at all. If you're just checking whether
 - the response is safe
 - the output follows a required format
 
-Your dataset items don't need anything other than an input as you will use a reference-free evaluator.
+Your dataset items don't need anything other than an input as you will use a [reference-free evaluator](/academy/evaluate#reference-based-vs-reference-free).
 
-TODO: needs link to "reference-free evaluator" section
+**Combination of the above**
+
+Because you can run a combination of different evaluators on a single dataset item, a dataset item's expected output field can also contain multiple types of reference data. The expected output is a JSON field, so you can store multiple types of reference data without a problem.
+
+## What makes a good dataset?
+
+**A good dataset mirrors what your system will encounter in production.** If passing the dataset gives you confidence before deploying, it's doing its job.
+
+**Clear in scope.** Each dataset should have a well-defined scope. That can be end-to-end if you treat internal steps as implementation details, or it can target an individual step like retrieval or summarization if that's the part you're trying to improve. You'll likely end up with multiple datasets, each with a clear purpose.
+
+| Granular datasets | End-to-end datasets |
+| --- | --- |
+| Faster and cheaper to run, easier to reason about | Catch issues that only surface when steps interact |
+
+**The right size for the workflow.** Some datasets are small and fast enough to run on every push as part of your CI/CD pipeline. Others are larger and more comprehensive, and are useful to run periodically but too slow for every minor change.
+
+| Purpose | Typical size |
+| --- | --- |
+| Exploring a single issue | ~10 items |
+| Testing model capability boundaries | ~10 complex unsolved examples |
+| CI checks on larger changes | 100–1000, covering production distribution |
+| Guardrail penetration testing | Large and growing, add cases as they surface in production |
 
 ## Where to start
 
@@ -93,3 +104,7 @@ There are different approaches to creating dataset items. Common sources to star
 - **Production traces** that you spotted and would like to improve, as is or anonymized/transformed by AI
 - **Creating by hand** based on pre-defined requirements for your agent
 - **Generating synthetically**, with AI, based on your requirements and a couple of examples, usually by defining different axis on which examples need to be distributed
+
+## What comes next
+
+Once you have a dataset, the next step is running your system against it to see how changes affect output quality. This is what [experiments](/academy/experiments) are for.

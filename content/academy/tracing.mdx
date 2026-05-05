@@ -14,9 +14,9 @@ A trace is a structured record of what your application did for a single request
 
 Tracing is central to the entire improvement loop. Every other step — reviewing, building datasets, running experiments, evaluating — operates on traces.
 
-TODO: refer to traditional observability here; if you are not new to observability in general, you can totally skim this page as it will feel repetetive
-
-TODO: this does not introduce that a trace is a single execution of an application (e.g. api call) and that a conversation could be grouped in a session
+<Callout type="info">
+If you're already familiar with traditional observability concepts, some of what follows may feel repetitive. Feel free to skim or skip ahead.
+</Callout>
 
 ## The anatomy of a trace
 
@@ -27,7 +27,6 @@ A trace can be as complex or as simple as your application requires, but all tra
   start/end time, and metadata about what happened during that step.*
 </Callout>
 
-TODO: instead of being this detailed here (lots of text to read) I might just show some examples of different AI applications (e.g. demo project), screenshot and link to public trace; maybe both, examples plus text description
 
 ### Hierarchy
 
@@ -37,22 +36,18 @@ A trace has a hierarchical tree structure. Nested inside are observations that c
 
 You can see what happened in what order, and which steps were part of which larger step.
 
-### Input and output
+### Observation data
 
-Every observation has an input and an output. For an LLM observation, the input is the prompt (sometimes the full message history, tool call results, etc.), and the output is the response. For a retrieval observation, it can be as simple as a search query and the returned documents.
+**Input and output.** Every observation can have an input and an output. Most of the time it will have both; in some specific cases it might only have one of the two. It's important for interpretability that you set an input and/or output that makes sense for the type of action happening in that observation.
 
-### Observation types
+**Observation types.** In order to make it easy to differentiate between operations, you'll see different [types of observations](/docs/observability/features/observation-types). Each type of observation is used to capture different kinds of interactions of an agent.
 
-In order to make it easy to differentiate between operations, you'll see different [types of observations](/docs/observability/features/observation-types). The most common ones are. Each type of observation is used to capture different kinds of interactions of an agent.
-
-TODO: most common ones are ... (missing text)
-
-| Action of an agent                                      | Typical observation data                                                                                              |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| A call to a language model                              | Full prompt or message history as input, the completion as output, plus metadata like the model name and token counts |
-| A step that fetches information from an external source | Query and the returned documents                                                                                      |
-| An invocation of a tool or function by an agent         | Which tool was called, the arguments, and the return value                                                            |
-| General processes                                       | Highly dependent on the use case                                                                                      |
+| Action of an agent | Observation type | Typical observation input/output |
+| --- | --- | --- |
+| A call to a language model | `generation` | Full prompt or message history as input, the completion as output, plus metadata like the model name and token counts |
+| A step that fetches information from an external source | `retriever` | Query and the returned documents |
+| An invocation of a tool or function by an agent | `tool` | Which tool was called, the arguments, and the return value |
+| General processes | `span` | Highly dependent on the use case |
 
 Observation types make it easier to read traces and to filter. In a trace with 20 observations, being able to quickly spot the LLM calls saves time.
 
@@ -60,18 +55,18 @@ Observation types make it easier to read traces and to filter. In a trace with 2
 
 Beyond input and output, there are a few attributes on observations that are table stakes in any LLM application: cost, latency, and [token usage](/docs/observability/features/token-and-cost-tracking). These are recorded per observation and aggregated at the trace level.
 
-### The scope of a trace
+## Traces vs sessions
 
 Most of the time you would not see an entire agent's lifecycle execution in one trace. Traces can be grouped into [sessions](/docs/observability/features/sessions). But where do you draw the line between a trace and a session?
 
-A general rule of thumb is: one trace corresponds to one unit of work from the user's perspective. In most applications, that means one trace per request-response cycle.
+![Traces vs sessions](/images/academy/traces-vs-sessions.png)
 
-TODO: this rule here does not make sense, I would map it more cleanly to "one api call / invocation of the agent system" as this is more a technical cause for a trace creation than domain
+A general rule of thumb is: **one trace corresponds to one invocation of your system**, typically one API call or one agent execution. A session then groups multiple traces together, for example all the turns in a multi-turn conversation.
 
 ## Where to start
 
 Now that you know what a trace looks like and what it captures, make sure you [set up tracing](/docs/observability/get-started) for your application well.
 
-Once you see traces, you can move on to the next step: [monitoring](/academy/monitoring). Monitoring is what connects traces to the loop of improving and iterating on your agent.
+## What comes next
 
-TODO: already give error analysis a shoutout here?
+Once you see traces, you can move on to the next step: [monitoring](/academy/monitoring). Monitoring is what connects traces to the loop of improving and iterating on your agent.
