@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const STATIONS = [
@@ -162,6 +163,17 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
               >
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-secondary)" />
               </marker>
+              <marker
+                id="lfd-arrow-dark"
+                viewBox="0 0 10 10"
+                refX="9"
+                refY="5"
+                markerWidth="7"
+                markerHeight="7"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-primary)" />
+              </marker>
             </defs>
 
             {/* Horizontal arrows between stations */}
@@ -194,7 +206,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
               strokeWidth="1.25"
               strokeLinecap="round"
               strokeLinejoin="round"
-              markerEnd="url(#lfd-arrow)"
+              markerEnd="url(#lfd-arrow-dark)"
             />
           </svg>
 
@@ -222,7 +234,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
 
           {/* Station cards */}
           {STATIONS.map((station, i) => (
-            <a
+            <Link
               key={station.id}
               href={station.href}
               className="corner-box-corners--hover"
@@ -323,7 +335,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
               >
                 {station.meta.join(" · ")}
             </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

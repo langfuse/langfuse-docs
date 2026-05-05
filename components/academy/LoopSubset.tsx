@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 
 const STATION_DATA = {
@@ -91,7 +92,7 @@ function StationRow({ ids }: { ids: StationId[] }) {
           const s = STATION_DATA[id];
           return (
             <Fragment key={id}>
-              <a
+              <Link
                 href={s.href}
                 className="corner-box-corners--hover"
                 style={{
@@ -186,7 +187,7 @@ function StationRow({ ids }: { ids: StationId[] }) {
                 >
                   {s.meta.join(" · ")}
                 </div>
-              </a>
+              </Link>
 
               {i < ids.length - 1 && <Arrow />}
             </Fragment>

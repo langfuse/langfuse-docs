@@ -1,10 +1,13 @@
 ---
-title: What is tracing and what is its role in the loop
-sidebarTitle: Trace
+title: Tracing
+sidebarTitle: Tracing
 description: Understand what tracing is, how traces are structured, and why they are the foundation of LLM observability.
 ---
 
-# What is tracing and what is its role in the loop
+# Tracing
+
+## How tracing fits into the loop
+
 
 Traditional software is largely deterministic, executions follow a pre-defined format. For LLM applications that's not the case. Agent executions can be messy, we are dealing with emergent behaviour with rich and unexpected inputs and outputs, and execution order. You need something else to follow your agent's behavior: [traces](/docs/observability/overview).
 
@@ -65,7 +68,11 @@ A general rule of thumb is: **one trace corresponds to one invocation of your sy
 
 ## Where to start
 
-Now that you know what a trace looks like and what it captures, make sure you [set up tracing](/docs/observability/get-started) for your application well.
+If you're just getting started, focus on instrumenting one real workflow end to end before trying to cover every possible path.
+
+1. [Set up tracing](/docs/observability/get-started) for one important request path in your application.
+2. Make sure each observation captures useful input, output, and metadata for the step it represents.
+3. Review a handful of real traces manually to confirm that the structure is easy to follow and useful for debugging.
 
 ## What comes next
 
