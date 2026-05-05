@@ -58,7 +58,7 @@ export const ChangelogHeader = () => {
         </div>
         <div className="flex flex-col gap-2 md:gap-6 md:flex-row justify-between md:items-center">
           <div>
-            <h1 className="text-2xl md:text-3xl text-pretty font-mono">
+            <h1 className="text-2xl md:text-3xl text-pretty font-medium">
               {title}
             </h1>
           </div>

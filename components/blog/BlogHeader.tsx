@@ -39,7 +39,7 @@ export const BlogHeader = ({
           />
         </div>
       )}
-      <h1 className="mt-3 font-bold leading-snug text-balance text-foreground">
+      <h1 className="mt-3 font-medium leading-snug text-balance text-foreground">
         {title}
       </h1>
       <p className="mt-2 text-primary/60 text-xl text-balance">{description}</p>

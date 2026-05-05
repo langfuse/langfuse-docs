@@ -120,9 +120,10 @@ This guide helps you get started with Langfuse tracing manually.
 
 ### Ingest your first trace
 
-Choose your framework or SDK to get started:
+Choose your framework, SDK, or OpenTelemetry setup to get started. If your
+application already emits OTEL spans, start with the OpenTelemetry guide.
 
-<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Vercel AI SDK", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "More integrations"]}>
+<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Vercel AI SDK", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "OpenTelemetry (OTEL)", "More integrations"]}>
 
 <Tab>
 {/* PYTHON - OPENAI*/}
@@ -303,11 +304,56 @@ Use the Langfuse JS/TS SDK to wrap any LLM or Agent
 </Tab>
 
 <Tab>
+{/* OTEL */}
+
+If your app, framework, or collector already emits OpenTelemetry (OTEL) spans,
+use the Langfuse OpenTelemetry integration to send OTLP traces to Langfuse.
+This is the right entry point for custom OTEL setups and languages beyond the
+Langfuse SDKs.
+
+<Cards num={2}>
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/opentelemetry_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="OpenTelemetry (OTEL) guide"
+    href="/integrations/native/opentelemetry"
+    arrow
+  />
+  <Card
+    icon={<BookOpen />}
+    title="Attribute propagation"
+    href="/integrations/native/opentelemetry#propagating-attributes"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
 {/* MORE INTEGRATIONS */}
 
 Explore all integrations and frameworks that Langfuse supports.
 
 <Cards num={2}>
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/opentelemetry_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="OpenTelemetry (OTEL)"
+    href="/integrations/native/opentelemetry"
+    arrow
+  />
   <Card
     icon={
       <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">

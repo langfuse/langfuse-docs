@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/hover-card";
 import { Github, Linkedin, Twitter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Text } from "@/components/ui/text";
+import { HoverCorners } from "@/components/ui/corner-box";
 
 export type Author = {
   firstName: string;
@@ -140,36 +142,37 @@ export const AuthorHoverCardContent = ({
   align?: "start" | "center" | "end";
 }) => {
   return (
-    <HoverCardContent className="w-56 p-0" side={side} align={align}>
-      <div className="flex flex-col text-left w-full">
-        <div className="flex items-center gap-3 justify-start p-2">
+    <HoverCardContent className="w-56 p-0 not-prose" side={side} align={align}>
+      <div className="flex flex-col text-left w-full relative z-51">
+        <div className="flex items-center gap-3 justify-start py-2.5 px-3">
           <Image
             src={author.image}
-            width={36}
-            height={36}
-            className="rounded-full border border-border"
+            width={32}
+            height={32}
+            className="rounded-full border border-line-structure shrink-0 my-0"
             alt={`Picture ${author.name}`}
           />
-          <div className="space-y-0.5 text-left">
-            <h4 className="text-sm font-semibold">{author.name}</h4>
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <Text as="span" size="s" className="font-[540] text-left text-text-primary my-0 leading-[1.2]">{author.name}</Text>
             {author.title && (
-              <span className="text-xs text-muted-foreground block">
+              <Text as="span" className="text-xs text-left text-text-tertiary block my-0 leading-[1.2]">
                 {author.title}
-              </span>
+              </Text>
             )}
           </div>
         </div>
-        <Separator />
-        <div className="flex flex-col gap-0.5 w-full p-2">
+        <Separator className="bg-line-structure" />
+        <div className="flex flex-col w-full py-1.5 px-2">
           {author.twitter && (
             <Link
               href={`https://twitter.com/${author.twitter}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+              className="link-box relative flex items-center gap-2 px-1 py-1 text-text-tertiary hover:text-text-primary no-underline hover:underline decoration-1 underline-offset-4 decoration-text-tertiary/40 transition-colors"
             >
-              <Twitter className="h-4 w-4" />
-              <span className="text-xs">@{author.twitter}</span>
+              <HoverCorners />
+              <Twitter className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-xs truncate">@{author.twitter}</span>
             </Link>
           )}
           {author.github && (
@@ -177,10 +180,11 @@ export const AuthorHoverCardContent = ({
               href={`https://github.com/${author.github}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+              className="link-box relative flex items-center gap-2 px-1 py-1 text-text-tertiary hover:text-text-primary no-underline hover:underline decoration-1 underline-offset-4 decoration-text-tertiary/40 transition-colors"
             >
-              <Github className="h-4 w-4" />
-              <span className="text-xs">{author.github}</span>
+              <HoverCorners />
+              <Github className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-xs truncate">{author.github}</span>
             </Link>
           )}
           {author.linkedin && (
@@ -188,10 +192,11 @@ export const AuthorHoverCardContent = ({
               href={`https://www.linkedin.com/in/${author.linkedin}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+              className="link-box relative flex items-center gap-2 px-1 py-1 text-text-tertiary hover:text-text-primary no-underline hover:underline decoration-1 underline-offset-4 decoration-text-tertiary/40 transition-colors"
             >
-              <Linkedin className="h-4 w-4" />
-              <span className="text-xs">LinkedIn</span>
+              <HoverCorners />
+              <Linkedin className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-xs truncate">LinkedIn</span>
             </Link>
           )}
         </div>

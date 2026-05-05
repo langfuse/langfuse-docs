@@ -1,0 +1,29 @@
+---
+title: How do I reduce ClickHouse disk size on self-hosted Langfuse?
+tags: [self-hosting]
+---
+
+# How do I reduce ClickHouse disk size on self-hosted Langfuse?
+
+On self-hosted Langfuse, disk usage is frequently dominated by ClickHouse's built-in system log tables rather than Langfuse's own tables. There are two levers, in order of recommendation:
+
+1. **Langfuse-owned data** — configure a [data retention policy](/docs/administration/data-retention) to drop old traces, observations, scores, and their blob-storage payloads. This is the primary lever for trimming application data.
+2. **ClickHouse system log tables** — by default, ClickHouse writes to `trace_log`, `text_log`, `opentelemetry_span_log`, `asynchronous_metric_log`, `metric_log`, and `latency_log` with no TTL, and runs the query profiler continuously. Langfuse does not read from these, so you can either opt out of the unused ones or attach aggressive TTLs. See [ClickHouse system log tables](/self-hosting/configuration/scaling#clickhouse-system-log-tables) in the scaling docs for concrete `config.d` snippets.
+
+Use this query inside ClickHouse to identify the largest tables:
+
+```sql
+SELECT table, formatReadableSize(size) as size, rows FROM (
+    SELECT
+        table,
+        database,
+        sum(bytes) AS size,
+        sum(rows) AS rows
+    FROM system.parts
+    WHERE active
+    GROUP BY table, database
+    ORDER BY size DESC
+)
+```
+
+Related: [langfuse/langfuse#13123](https://github.com/langfuse/langfuse/issues/13123), [langfuse-terraform-aws#26](https://github.com/langfuse/langfuse-terraform-aws/pull/26).

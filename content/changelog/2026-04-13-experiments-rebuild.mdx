@@ -1,8 +1,8 @@
 ---
 date: 2026-04-13
-title: "Compare Experiments Faster"
-description: Rebuilt experiment screens with faster loading, standalone access, and enhanced filtering for efficient analysis.
-# ogImage: /images/changelog/2026-04-13-experiments-rebuild/experiments-rebuild.png
+title: "Experiments as a First-Class Concept"
+description: Experiments now live alongside Datasets as their own top-level feature—run them with or without datasets, compare across runs, and track progress over time.
+ogImage: /images/changelog/2026-04-13-experiments-beta.png
 author: Marlies
 ---
 
@@ -10,21 +10,29 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-Experiments now load and filter faster, work as a standalone feature, and provide a more intuitive interface for comparing model versions. Run an A/B test between `sonnet-4` and `sonnet-4.5`, compare evaluation scores across prompt variants, or triage regressions before shipping—all with quicker feedback loops.
+Experiments are now a primary concept in Langfuse, sitting alongside Datasets rather than nested within them. This reflects what experiments actually are: immutable, comparable snapshots of your evaluation runs that let you track progress and catch regressions over time.
+
+While datasets are about **data**—curated collections of test cases you maintain and grow—experiments are about **execution**. They capture a specific run of your application against a set of inputs, freezing the results so you can compare them against past and future runs. Think of datasets as your reference material and experiments as the history of what you did with it.
 
 <Callout type="info">
-  This feature is in open beta and currently available on Langfuse Cloud only. Enable Fast Preview in the bottom left to get started.
+  This feature requires [Fast Preview mode](/docs/v4) to be enabled. Fast Preview is in open beta and currently available on Langfuse Cloud only—enable it in the bottom left of the UI to get started.
 </Callout>
 
-## What's new [#whats-new]
+## Why this matters [#why-this-matters]
 
-**Faster loading and filtering.** Experiments now leverage our rebuilt observation-centric data model. Tables, and filters respond quickly even on large experiment runs.
+Previously, experiments in Langfuse were tightly coupled to datasets. You had to navigate to a dataset first, then view experiments run against it. This made sense for dataset-backed evaluations, but obscured the broader role experiments play in the evaluation workflow.
 
-**Standalone experiments.** Experiments no longer require a linked dataset. Experiments run against local data via SDK are now visible in the UI alongside dataset-backed experiments.
+Now experiments have their own dedicated space. You can browse all experiments across your project, compare runs that used different data sources, and track how your application's performance evolves—regardless of whether those runs were against a curated dataset, sampled production traces, or data pushed directly from your evaluation scripts.
 
-**Polished UI with extended filtering.** A cleaner interface with visual deltas on scores, cost, and latency. Set a baseline, compare candidates side-by-side, and filter by score thresholds to quickly surface regressions.
+## What changed [#what-changed]
 
-For a complete walkthrough on running experiments and interpreting results systematically, see our guide on [Systematic Evaluation of AI Agents](/blog/2025-11-06-experiment-interpretation).
+**Experiments exist independently.** Create and run experiments without linking them to a dataset. All experiments—dataset-backed or standalone—appear in a unified list.
+
+**Flexible data sources.** Run experiments against dataset items, production traces, or data you generate locally via the SDK. Compare across sources in the same view.
+
+**Faster, cleaner UI.** The rebuilt interface loads quickly on large runs, shows visual deltas for scores, cost, and latency, and lets you filter by thresholds to surface regressions.
+
+For a walkthrough on running experiments and interpreting results, see our guide on [Systematic Evaluation of AI Agents](/blog/2025-11-06-experiment-interpretation).
 
 ## Learn more [#learn-more]
 

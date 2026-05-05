@@ -1,5 +1,4 @@
 import dynamic from "next/dynamic";
-import { Background } from "../Background";
 import { Hero } from "./Hero";
 import { Intro } from "./Intro";
 import { OSS } from "./OSS";
@@ -14,17 +13,14 @@ const Metrics = dynamic(() => import("./Metrics").then((m) => ({ default: m.Metr
 
 export function Wrapped() {
   return (
-    <>
-      <main className="relative overflow-hidden w-full">
-        <Hero />
-        <Intro />
-        <Metrics />
-        <OSS />
-        <Launches />
-        <Customers />
-        <Outro />
-      </main>
-      <Background />
-    </>
+    <main className="relative overflow-hidden w-full">
+      <Hero />
+      <Intro />
+      <Metrics />
+      <OSS />
+      <Launches />
+      <Customers />
+      <Outro />
+    </main>
   );
 }

@@ -5,9 +5,12 @@
 
 const fs = require('fs');
 const path = require('path');
+const { stripMdxForPlainMarkdown } = require('../lib/stripMdxForPlainMarkdown.js');
+const { CONTENT_DIR_TO_URL_PREFIX } = require('../lib/content-dir-map.js');
 
 const SOURCE_DIR = path.join(process.cwd(), 'content');
 const OUTPUT_DIR = path.join(process.cwd(), 'public', 'md-src');
+const OVERRIDE_DIR = path.join(process.cwd(), 'md-override');
 
 /**
  * Recursively walk a directory collecting file paths.
@@ -39,6 +42,7 @@ function ensureDir(dirPath) {
  * Determine if path within content/ should be copied and where.
  * - Accept .md and .mdx files only
  * - Exclude meta.json and non-markdown
+ * - Remap content directories to match URL structure (see CONTENT_DIR_TO_URL_PREFIX)
  * - Map content/foo/bar.mdx -> public/md-src/foo/bar.md
  * - Map content/foo/index.mdx -> public/md-src/foo.md
  */
@@ -52,9 +56,23 @@ function mapDestination(sourceFile) {
 
     const withoutExt = rel.slice(0, -ext.length);
     const parts = withoutExt.split(path.sep);
+
+    const topDir = parts[0];
+    const urlPrefix = CONTENT_DIR_TO_URL_PREFIX[topDir];
+    if (typeof urlPrefix !== "string") {
+        throw new Error(
+            `copy_md_sources: missing content-dir-map entry for "${topDir}" (add it to lib/content-dir-map.js, same as lib/source.ts baseUrl())`
+        );
+    }
+    if (urlPrefix === "") {
+        parts.splice(0, 1);
+    } else {
+        parts[0] = urlPrefix;
+    }
+
     let outParts = parts.slice();
-    if (parts[parts.length - 1] === 'index') {
-        outParts = parts.slice(0, -1);
+    if (outParts.length > 0 && outParts[outParts.length - 1] === 'index') {
+        outParts = outParts.slice(0, -1);
     }
     const outRel = outParts.length ? outParts.join('/') + '.md' : 'index.md';
     return path.join(OUTPUT_DIR, outRel);
@@ -73,7 +91,10 @@ function copyAll() {
         const dir = path.dirname(dest);
         ensureDir(dir);
         const originalContent = fs.readFileSync(file, 'utf8');
-        const processed = inlineComponentsMdx(originalContent, file);
+        const inlined = inlineComponentsMdx(originalContent, file);
+        const processed = stripMdxForPlainMarkdown(inlined, {
+            unwrapCalloutsForPlainMd: true,
+        });
         fs.writeFileSync(dest, processed, 'utf8');
         copied += 1;
     }
@@ -86,8 +107,30 @@ function cleanOutputDir() {
     }
 }
 
+/**
+ * Copy hand-authored .md files from md-override/ into public/md-src/,
+ * overwriting any auto-generated version for that path.
+ */
+function applyOverrides() {
+    if (!fs.existsSync(OVERRIDE_DIR)) return;
+    const files = walkDir(OVERRIDE_DIR);
+    let overridden = 0;
+    for (const file of files) {
+        if (path.extname(file).toLowerCase() !== '.md') continue;
+        const rel = path.relative(OVERRIDE_DIR, file);
+        const dest = path.join(OUTPUT_DIR, rel);
+        ensureDir(path.dirname(dest));
+        fs.copyFileSync(file, dest);
+        overridden += 1;
+    }
+    if (overridden > 0) {
+        console.log(`Applied ${overridden} markdown override(s) from md-override/`);
+    }
+}
+
 cleanOutputDir();
 copyAll();
+applyOverrides();
 
 /**
  * Inline imports of MDX components from the components-mdx directory.

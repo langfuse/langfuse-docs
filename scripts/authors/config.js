@@ -26,7 +26,7 @@ const CONFIG = {
     },
 
     // Contributors to exclude from the widget
-    excludedContributors: ['cursoragent', 'ArkuVonSymfon']
+    excludedContributors: ['cursoragent', 'ArkuVonSymfon', 'tomaszantas']
 };
 
 module.exports = { CONFIG };
