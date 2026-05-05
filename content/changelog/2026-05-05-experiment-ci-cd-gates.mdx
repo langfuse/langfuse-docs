@@ -1,0 +1,54 @@
+---
+date: 2026-05-05
+title: "Experiments CI/CD integration"
+description: Run Langfuse experiments in CI/CD with the GitHub Action, block regressions with RegressionError, and use normalized results in downstream workflow steps.
+author: Tobias Wochinger
+canonical: /docs/evaluation/experiments/experiments-in-ci-cd
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now run Langfuse experiments directly in CI/CD and gate changes before they ship. The new `langfuse/experiment-action` runs Python, TypeScript, or JavaScript experiment scripts in GitHub Actions, loads Langfuse datasets for reproducible runs, and reports results back to the pull request.
+
+Use it to block a PR when an agent's exact-match accuracy drops below a threshold, run a release gate against a versioned dataset, or upload experiment results as workflow artifacts for Slack notifications and reporting.
+
+## GitHub Actions [#github-actions]
+
+The action creates a `RunnerContext` for each experiment script. Your script defines `experiment(context)`, then calls `context.run_experiment(...)` in Python or `context.runExperiment(...)` in JS/TS. Langfuse credentials, dataset name, dataset version, GitHub metadata, and PR comment handling are configured in the workflow.
+
+```yaml
+- uses: langfuse/experiment-action@<release tag>
+  with:
+    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    langfuse_base_url: https://cloud.langfuse.com
+    experiment_path: experiments/support-agent-gate
+    dataset_name: support-agent-regression-set
+    dataset_version: "2026-04-27T00:00:00Z"
+    github_token: ${{ github.token }}
+```
+
+Raise `RegressionError` from the experiment script when a score should fail the workflow. The action can also expose `result_json` for later steps, for example to store an artifact or send a Slack notification.
+
+## Get started [#get-started]
+
+Follow the CI/CD integration guide to add the GitHub Action workflow, write an experiment script, and configure regression thresholds for your pipeline.
+
+import { FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="CI/CD Integration"
+    href="/docs/evaluation/experiments/experiments-in-ci-cd"
+    icon={<FileCode />}
+    arrow
+  />
+  <Card
+    title="GitHub Action"
+    href="https://github.com/langfuse/experiment-action"
+    icon={<FileCode />}
+    arrow
+  />
+</Cards>
