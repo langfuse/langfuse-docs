@@ -18,7 +18,7 @@ Most of the time, you start by **manually reviewing outputs** to build intuition
 
 ![How evaluation typically evolves](/images/academy/evaluation-evolves-v2.png)
 
-The rest of this page covers the different kinds of evaluation in detail. In practice, you'll likely end up combining all of them. But to get to a well-functioning automated evaluation setup, it almost always starts from manual review.
+The rest of this page covers the different kinds of evaluation in detail. In practice, you'll likely end up combining all of them. But the path to a well-functioning automated evaluation setup almost always starts from manual review.
 
 <Callout type="info">
 Manual evaluation is not a one-and-done step. Good production setups incorporate continuous review by human experts to catch new failure modes and keep automated evaluators calibrated.
@@ -70,7 +70,7 @@ Both code-based and LLM-as-a-judge evaluators can be either reference-based or r
 |                 | Code-based               | LLM-as-a-judge / manual                                     |
 | --------------- | ------------------------ | ----------------------------------------------------------- |
 | Reference-based | Exact string match check | "Does the response correctly explain this specific policy?" |
-| Reference-free  | Validate JSON structure  | Tone-of-voice evaluation, response is in English |
+| Reference-free  | Validate JSON structure  | Tone-of-voice evaluation; language detection |
 
 The advantage of reference-free evaluators is that they can be applied to unseen production data, while reference-based evaluators always need a pre-defined reference response.
 
