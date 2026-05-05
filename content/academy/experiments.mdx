@@ -1,10 +1,12 @@
 ---
-title: Experiments and their role
-sidebarTitle: Experiment
+title: Experiments
+sidebarTitle: Experiments
 description: How to use experiments to systematically improve your LLM application by isolating variables and comparing outputs.
 ---
 
-# Experiments and their role
+# Experiments
+
+## Role in the loop
 
 To systematically understand and improve how your system behaves, you need a way to isolate cause and effect. That's what experiments give you. You pick a variable or a set of variables, run your dataset through two versions of your system, and compare what comes out. The result tells you whether a change actually helped, and by how much. To understand by how much, you also need to evaluate your experiment outputs ([see Evaluate](/academy/evaluate)). This section covers the systematic experimentation part before evaluation.
 
@@ -24,7 +26,7 @@ Every experiment has four components.
 
 It often helps to change only one variable at a time. However, variables interact, and some configurations require changing multiple variables at once.
 
-### On variables [#on-variables]
+## Variables [#on-variables]
 
 - **Model.** The AI model you are using. There are reasoning-heavy models, cheap models, and fast models, and they all come with different tradeoffs in result quality, speed, and cost.
 - **Prompt.** The most common lever. Before running a prompt experiment, ask: is the failure a specification problem (ambiguous or incomplete prompt) or a generalization problem (model applies clear instructions inconsistently)? The latter is worth measuring.
@@ -32,7 +34,7 @@ It often helps to change only one variable at a time. However, variables interac
 - **Tool access.** Adding or removing tools changes what paths your system can take.
 - **Agent architecture.** Single agent vs. multi-agent, which framework, how tasks are decomposed. The biggest bets, the hardest to isolate.
 
-## How is it used?
+## How experiments are used
 
 The core flow: pick a variable and form a hypothesis, run both conditions against your dataset, compare outputs, learn something, and repeat.
 

@@ -1,16 +1,18 @@
 ---
-title: What is offline evaluation?
-sidebarTitle: Evaluate
+title: Evaluation
+sidebarTitle: Evaluation
 description: How to judge whether experiment outputs are good, using manual review, code-based checks, and LLM-as-a-judge evaluators.
 ---
 
-# What is offline evaluation?
+# Evaluation
+
+## Role in the loop
 
 Offline evaluation is the step in the loop between running an experiment and shipping a change. You have a dataset, you have run your application against it, and now you need to judge whether the outputs are good.
 
 <LoopDiagram highlight="eval" />
 
-### How evaluation typically evolves [#how-evaluation-typically-evolves]
+## How evaluation typically evolves [#how-evaluation-typically-evolves]
 
 Most of the time, you start by **manually reviewing outputs** to build intuition for what good and bad look like in your application. From there, you **identify specific failure modes** worth checking for. Once you can define them precisely, you **automate with dedicated evaluators**.
 
@@ -22,7 +24,7 @@ The rest of this page covers the different kinds of evaluation in detail. In pra
 Manual evaluation is not a one-and-done step. Good production setups incorporate continuous review by human experts to catch new failure modes and keep automated evaluators calibrated.
 </Callout>
 
-## Three kinds of evaluation [#three-kinds-of-evaluation]
+## Evaluation methods [#three-kinds-of-evaluation]
 
 There are three main ways to evaluate: manually, with code, or with an LLM. Each is suited to different kinds of quality checks.
 
