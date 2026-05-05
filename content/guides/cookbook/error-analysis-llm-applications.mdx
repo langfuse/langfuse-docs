@@ -5,6 +5,7 @@ description: Understand how your system fails before you build evaluators for it
 category: Evaluation
 ---
 
+
 # Error Analysis for LLM Applications
 
 Understand how your system fails before you build evaluators for it.
@@ -17,7 +18,7 @@ Copy the prompt below and paste it into your coding agent:
 
 ```
 I want to do a systematic error analysis of my LLM application to understand how it fails.
-Please install the langfuse skill and langfuse CLI and guide me step by step through this guide: https://langfuse.com/guides/cookbook/error-analysis-llm-applications
+Please install the langfuse skill and langfuse CLI and guide me step by step through error analysis.
 ```
 
 The skill runs every step alongside you: pulling traces, creating annotation queues, clustering your notes, and computing failure rates. You stay in control of the domain decisions.
@@ -70,7 +71,9 @@ Decide which unit to annotate before setting up the queue.
 
 **Check the observation level.** In OpenTelemetry-instrumented apps, trace-level input/output is often null. The actual content lives in a GENERATION observation — the span wrapping the LLM call. Expand the observation tree in any trace to confirm.
 
+<Frame>
 ![Trace detail view with GENERATION span highlighted](/images/cookbook/error-analysis-llm-applications/trace_detail_view_generation.png)
+</Frame>
 
 In the Dad Tech Support example:
 
