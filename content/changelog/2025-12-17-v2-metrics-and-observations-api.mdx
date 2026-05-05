@@ -64,15 +64,17 @@ A redesigned endpoint for high-performance observation retrieval:
 
 ## Migration Notes
 
-The v2 APIs are additive - v1 endpoints remain available and unchanged. When ready to migrate:
+The v2 APIs are additive — v1 endpoints remain available and unchanged. When ready to migrate:
 
 1. Switch to `/api/public/v2/observations`.
 2. Replace page-based pagination with the `cursor` returned in the response.
-3. Use `fields` to request only the data you need, for example `GET /api/public/v2/observations?fields=core,basic&limit=100` or `langfuse.api.observations.get_many(fields="core,basic,usage")`.
+3. Use `fields` to request only the data you need:
+   - REST: `GET /api/public/v2/observations?fields=core,basic&limit=100`
+   - SDK: `langfuse.api.observations.get_many(fields="core,basic,usage")`
 4. Update your limits and parsing assumptions: default limit is `50`, max is `1,000`, and `parseIoAsJson` defaults to `false`.
-5. Check SDK compatibility before migrating. Prefer the latest SDKs, but use at least Langfuse server `v3.133.0` for Observations, JS/TS SDK `v4.5.1`, and Python SDK `v3.11.1`. In Python SDK `v4+` and JS/TS SDK `v5+`, v2 is the default under `langfuse.api.observations`. Self-hosted users should stay on the legacy v1 namespaces for now.
+5. Check SDK compatibility: use at least Langfuse server `v3.133.0`, JS/TS SDK `v4.5.1`, and Python SDK `v3.11.1`. In Python SDK `v4+` and JS/TS SDK `v5+`, v2 is the default under `langfuse.api.observations`. Self-hosted users should stay on v1 for now.
 
-**Using v1 `/api/public/traces`?** Consider v2 `/api/public/v2/observations` instead - it's significantly faster and covers most use cases.
+**Using `/api/public/traces` (v1)?** Switch to `/api/public/v2/observations` — it's significantly faster and covers most use cases.
 
 ## Learn more
 
