@@ -6,7 +6,7 @@ description: How to judge whether experiment outputs are good, using manual revi
 
 # Evaluation
 
-## Role in the loop
+## How evaluation fits into the loop
 
 Offline evaluation is the step in the loop between running an experiment and shipping a change. You have a dataset, you have run your application against it, and now you need to judge whether the outputs are good.
 
@@ -98,4 +98,16 @@ Each quality you care about gets its own evaluator.
 
 ## Where to start
 
-[Start by evaluating manually](#how-evaluation-typically-evolves) to build intuition, and let that guide which evaluators to build first. Have you identified a clear failure mode you want to test you repeatedly across different inputs? This is the moment to set up an automated evaluator. 
+Start with manual review, then automate only the checks you need to run repeatedly.
+
+1. [Review outputs manually](#how-evaluation-typically-evolves) to build intuition for what good and bad look like in your application.
+2. Write down the specific failure modes you want to catch and define them as clearly as possible.
+3. Set up an automated evaluator only when you need to test that failure mode repeatedly across many inputs or over time.
+
+## What comes next
+
+If the results are good enough, you can ship the change. Once it is live, the loop starts again: the updated system produces new [traces](/academy/tracing), new [monitoring](/academy/monitoring) signals, and new opportunities to improve.
+
+Some evaluators should also move beyond offline experiments. Reference-free evaluators, user feedback signals, and other production-safe checks can be applied to live traffic to confirm that quality in production matches what you saw before deployment.
+
+If production behavior matches expectations, you can keep scaling with more confidence. If it does not, capture those cases in traces, turn them into [dataset](/academy/datasets) items, and run the next round of [experiments](/academy/experiments). That is how you close the loop.

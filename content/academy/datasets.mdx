@@ -6,7 +6,7 @@ description: How to build and structure test datasets for evaluating LLM applica
 
 # Datasets
 
-## Role in the loop
+## How datasets fit into the loop
 
 So far, we've covered the first two steps of the [AI engineering loop](/academy/ai-engineering-loop): [tracing](/academy/tracing) your application and [monitoring](/academy/monitoring) its behavior live. Those give you visibility into what your system is actually doing and give you inspiration for improvement.
 
@@ -24,7 +24,7 @@ A dataset is made up of items, each item represents one test case: a situation y
 - **Expected output** (optional)
 - **Metadata** (optional)
 
-### What should go where?
+### What goes in each field?
 
 ![Dataset Fields — When They Are Used](/images/academy/dataset-fields-v2.png)
 
@@ -101,11 +101,11 @@ Because you can run a combination of different evaluators on a single dataset it
 
 ## Where to start
 
-There are different approaches to creating dataset items. Common sources to start from are:
+Start with the most concrete examples you have, then expand coverage once you know what you are trying to test.
 
-- **Production traces** that you spotted and would like to improve, as is or anonymized/transformed by AI
-- **Creating by hand** based on pre-defined requirements for your agent
-- **Generating synthetically**, with AI, based on your requirements and a couple of examples, usually by defining different axis on which examples need to be distributed
+1. **Pull examples from production traces** that you spotted and would like to improve, either as-is or anonymized or transformed by AI.
+2. **Add hand-written cases** based on predefined requirements, edge cases, or behaviors your agent must handle reliably.
+3. **Generate synthetic examples** with AI once you know which dimensions you want to cover more broadly.
 
 ## What comes next
 
