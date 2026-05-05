@@ -381,20 +381,58 @@ Since OpenAI beta APIs are changing frequently across versions, we fully support
 
 #### Structured Output
 
-For **structured output parsing**, please use the `response_format` argument to `openai.chat.completions.create()` instead of the Beta API. This will allow you to set Langfuse attributes and metadata.
+For **structured output parsing**, you have two fully instrumented options depending on your `openai` Python SDK version:
 
-If you rely on parsing Pydantic defintions for your `response_format`, you may leverage the `type_to_response_format_param` utility function from the OpenAI Python SDK to convert the Pydantic definition to a `response_format` dictionary. This is the same function the OpenAI Beta API uses to convert Pydantic definitions to `response_format` dictionaries.
+- **`openai>=1.92.0` (recommended):** use `client.chat.completions.parse(...)`. OpenAI graduated `parse` and `stream` out of beta in [v1.92.0](https://github.com/openai/openai-python/releases/tag/v1.92.0), and Langfuse wraps the stable `openai.resources.chat.completions.Completions.parse` (and the async variant). You can pass a Pydantic model directly via `response_format` and still set Langfuse attributes such as `name`, `metadata`, `langfuse_session_id`, etc.
+- **`openai<1.92.0` (legacy):** the parse helper is only available under `client.beta.chat.completions.parse(...)`. Langfuse also wraps the beta path on these older versions, so attributes like `name` and `metadata` work there too.
+
+<Callout type="info">
+  On `openai>=1.92.0`, calls to `client.beta.chat.completions.parse(...)` are
+  re-routed to the stable `parse` method by the OpenAI SDK, so they remain
+  instrumented. Prefer `client.chat.completions.parse(...)` in new code.
+</Callout>
 
 ```python
 from langfuse import get_client
+from langfuse.openai import openai
+from pydantic import BaseModel
+
+class CalendarEvent(BaseModel):
+    name: str
+    date: str
+    participants: list[str]
+
+completion = openai.chat.completions.parse(
+    model="gpt-4o-2024-08-06",
+    messages=[
+        {"role": "system", "content": "Extract the event information."},
+        {
+            "role": "user",
+            "content": "Alice and Bob are going to a science fair on Friday.",
+        },
+    ],
+    response_format=CalendarEvent,
+    name="extract-calendar-event",
+    metadata={"langfuse_tags": ["structured-output"]},
+)
+
+print(completion.choices[0].message.parsed)
+
+# Flush via global client
+get_client().flush()
+```
+
+If you cannot upgrade the OpenAI SDK and want to stay on `chat.completions.create`, you can still pass a Pydantic model by converting it with `type_to_response_format_param` from the OpenAI SDK:
+
+```python
 from langfuse.openai import openai
 from openai.lib._parsing._completions import type_to_response_format_param
 from pydantic import BaseModel
 
 class CalendarEvent(BaseModel):
-  name: str
-  date: str
-  participants: list[str]
+    name: str
+    date: str
+    participants: list[str]
 
 completion = openai.chat.completions.create(
     model="gpt-4o-2024-08-06",
@@ -407,11 +445,6 @@ completion = openai.chat.completions.create(
     ],
     response_format=type_to_response_format_param(CalendarEvent),
 )
-
-print(completion)
-
-# Flush via global client
-get_client().flush()
 ```
 
 #### Assistants API

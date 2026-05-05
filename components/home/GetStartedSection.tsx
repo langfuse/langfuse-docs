@@ -267,6 +267,7 @@ export function GetStartedSection() {
           <div className="flex sm:flex-col gap-0 items-start shrink-0 w-full sm:w-[150px]">
             <Button
               variant="primary"
+              size="default"
               shortcutKey="s"
               href="/cloud"
               wrapperClassName="sm:flex-none sm:w-full"
@@ -275,6 +276,7 @@ export function GetStartedSection() {
             </Button>
             <Button
               variant="secondary"
+              size="default"
               shortcutKey="d"
               href="/docs"
               wrapperClassName="sm:flex-none sm:w-full"

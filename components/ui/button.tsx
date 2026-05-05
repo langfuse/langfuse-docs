@@ -41,10 +41,10 @@ const variantClasses: Record<ButtonVariant, { root: string; key: string }> = {
 };
 
 const textButtonBaseClasses =
-  "inline-flex w-full min-w-0 max-w-full items-center justify-center gap-[6px] overflow-hidden px-0 py-1 shadow-none border-0 rounded-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex w-full min-w-0 max-w-full items-center justify-center gap-[6px] overflow-hidden px-0 py-1 shadow-none border-0 rounded-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-pointer";
 
 const buttonBaseClasses =
-  "inline-flex w-full min-w-0 max-w-full items-center justify-center no-underline gap-[6px] overflow-hidden py-0.75 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex w-full min-w-0 max-w-full items-center justify-center no-underline gap-[6px] overflow-hidden py-0.75 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-pointer";
 
 const labelTypographyClasses =
   "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] p-0";
@@ -77,7 +77,7 @@ function hasRenderableChildren(children: React.ReactNode): boolean {
   );
 }
 
-function buttonVariants({ variant = "primary", size = "default", className }: ButtonVariantOptions) {
+function buttonVariants({ variant = "primary", size = "small", className }: ButtonVariantOptions) {
   if (variant === "text") {
     return cn(
       textButtonBaseClasses,
@@ -133,7 +133,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         : variant === "text"
           ? "text"
           : "primary";
-    const resolvedSize: ButtonSize = size === "small" ? "small" : "default";
+    const resolvedSize: ButtonSize = size === "default" ? "default" : "small";
 
     const innerRef = React.useRef<HTMLElement | null>(null);
     const isLink = !asChild && Boolean(href);
@@ -346,7 +346,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <div
         className={cn(
-          "relative flex items-center p-1 group button-wrapper",
+          "relative flex items-center p-1 group button-wrapper cursor-pointer has-[:disabled]:cursor-not-allowed",
           wrapperClassName,
           size === "small" ? "max-h-[34px]" : "max-h-[40px]"
         )}

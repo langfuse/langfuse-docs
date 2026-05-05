@@ -16,10 +16,10 @@ export default function NotFound() {
               The page you were looking for does not exist.
             </p>
           </div>
-          <Button href="/">
-            Go back home
-          </Button>
-          <div className="mt-4">
+          <div className="flex flex-row flex-wrap gap-3 justify-center items-center">
+            <Button size="default" href="/">
+              Go back home
+            </Button>
             <BrokenLinkIssue />
           </div>
         </div>

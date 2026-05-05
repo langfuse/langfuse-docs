@@ -24,6 +24,7 @@ export function BrokenLinkIssue() {
   return (
     <Button
       variant="secondary"
+      size="default"
       href={href}
       target="_blank"
       rel="noopener noreferrer"

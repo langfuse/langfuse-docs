@@ -7,7 +7,7 @@ export default function SecurityLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SharedDocsLayout tree={securitySource.getPageTree()} showSecondaryNav={false}>
+    <SharedDocsLayout tree={securitySource.getPageTree()} showSecondaryNav={false} sectionLabel="Security">
       {children}
     </SharedDocsLayout>
   );

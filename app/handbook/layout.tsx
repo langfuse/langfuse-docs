@@ -7,7 +7,7 @@ export default function HandbookLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SharedDocsLayout tree={handbookSource.getPageTree()} showSecondaryNav={false}>
+    <SharedDocsLayout tree={handbookSource.getPageTree()} showSecondaryNav={false} sectionLabel="Handbook">
       {children}
     </SharedDocsLayout>
   );

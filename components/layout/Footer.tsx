@@ -76,12 +76,31 @@ const bottomLinks = [
 
 const linkClassName =
   "text-text-tertiary transition-colors hover:text-text-primary";
+const footerTextClassName = "text-[13px] leading-[150%] lg:leading-[150%]";
+const footerMonoTextClassName = cn(footerTextClassName, "font-mono");
+const footerLinkTextClassName = cn(
+  footerTextClassName,
+  "text-left text-inherit transition-[color]"
+);
+const footerMonoLinkTextClassName = cn(
+  footerMonoTextClassName,
+  "text-left text-inherit transition-[color]"
+);
+const footerMutedTextClassName = cn(
+  footerMonoTextClassName,
+  "text-left text-text-disabled"
+);
 
 export function Footer({ className }: { className?: string }) {
   return (
-    <footer className={cn("px-4 pb-8 mx-auto mt-20 w-full sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]", className)}>
+    <footer
+      className={cn(
+        "px-4 pb-8 mx-auto mt-20 w-full sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]",
+        className
+      )}
+    >
       {/* Social icons row */}
-      <CornerBox className="flex gap-5 items-center p-4 -mb-px bg-transparent border-t-0!" corners={{ tl: false, tr: false }}>
+      <CornerBox className="flex gap-5 items-center p-4 -mb-px bg-transparent">
         {socialLinks.map((s) => {
           const Icon = s.icon;
           const isExternal = s.href.startsWith("http");
@@ -105,7 +124,7 @@ export function Footer({ className }: { className?: string }) {
             <div key={col.heading} className="flex flex-col gap-4">
               <Text
                 size="s"
-                className="font-mono text-left text-text-disabled"
+                className={footerMutedTextClassName}
               >
                 {col.heading}
               </Text>
@@ -113,7 +132,10 @@ export function Footer({ className }: { className?: string }) {
                 {col.items.map((item) => (
                   <li key={item.name}>
                     <Link href={item.href} className={linkClassName}>
-                      <Text size="m" className="text-left text-inherit transition-[color]">
+                      <Text
+                        size="s"
+                        className={footerLinkTextClassName}
+                      >
                         {item.name}
                       </Text>
                     </Link>
@@ -130,7 +152,10 @@ export function Footer({ className }: { className?: string }) {
           <div className="flex flex-wrap gap-y-1 gap-x-4 max-[390px]:gap-x-3">
             {bottomLinks.map((link) => (
               <Link key={link.name} href={link.href} className={linkClassName}>
-                <Text size="s" className="max-[390px]:text-[13px] text-left font-mono text-inherit transition-[color]">
+                <Text
+                  size="s"
+                  className={footerMonoLinkTextClassName}
+                >
                   {link.name}
                 </Text>
               </Link>
@@ -140,15 +165,21 @@ export function Footer({ className }: { className?: string }) {
       </CornerBox>
       <CornerBox className="flex flex-col gap-y-4 sm:flex-row justify-between sm:items-center px-4 py-2.5 -mt-px bg-transparent">
         <div className="flex flex-col md:flex-row">
-          <Text size="s" className="font-mono max-[390px]:text-[13px] text-left text-text-disabled">
+          <Text
+            size="s"
+            className={footerMutedTextClassName}
+          >
             &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH
           </Text>
           {' '}
-          <Text size="s" className="font-mono max-[390px]:text-[13px] text-left text-text-disabled">
+          <Text
+            size="s"
+            className={footerMutedTextClassName}
+          >
             / Finto Technologies Inc.
           </Text>
         </div>
-        <Text size="s" className="font-mono max-[390px]:text-[13px] text-left text-text-disabled">
+        <Text size="s" className={footerMutedTextClassName}>
           Design by{" "}
           <Link
             href="https://altalogy.com/?ref=langfuse"

@@ -15,25 +15,29 @@ export const BlogLanguageSwitcher = ({
   languages: Language[];
 }) => {
   return (
-    <div className="flex gap-1.5 items-center justify-center my-4 not-prose">
-      {languages.map((l) => {
-        const isActive = l.code === current;
-        return (
-          <Link
-            key={l.code}
-            href={l.href}
-            aria-current={isActive ? "page" : undefined}
-            className={cn(
-              "text-sm px-3 py-1 rounded-full border transition-colors no-underline",
-              isActive
-                ? "bg-secondary border-border text-foreground"
-                : "border-border/60 text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-            )}
-          >
-            {l.label}
-          </Link>
-        );
-      })}
+    <div
+      className="my-4 flex justify-center not-prose"
+      aria-label="Article language"
+    >
+      <div className="inline-flex w-fit items-center justify-center gap-0.5 rounded-[1px] border border-line-structure bg-surface-bg p-0.5">
+        {languages.map((l) => {
+          const isActive = l.code === current;
+          return (
+            <Link
+              key={l.code}
+              href={l.href}
+              aria-current={isActive ? "page" : undefined}
+              className={cn(
+                "inline-flex min-h-[26px] items-center justify-center gap-1.5 rounded-[1px] border border-transparent px-2 text-[12px] font-[450] leading-[150%] tracking-[-0.06px] text-text-secondary no-underline shadow-none whitespace-nowrap transition-colors hover:bg-[#403d3909] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                isActive &&
+                  "border-line-structure bg-[#403d391a] text-text-primary"
+              )}
+            >
+              {l.label}
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 };

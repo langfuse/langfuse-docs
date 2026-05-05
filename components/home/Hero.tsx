@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CornerBox } from "@/components/ui/corner-box";
 import { Heading } from "@/components/ui/heading";
@@ -12,19 +11,6 @@ import { HeroStatsStrip } from "@/components/home/HeroStatsStrip";
 export function Hero() {
   return (
     <HomeSection className="pt-5 sm:pt-8 md:pt-[60px]">
-      <CornerBox className="-mb-px flex items-center justify-center py-2.5 px-4">
-        <Link
-          href="/japan"
-          className="inline-flex items-center gap-2.5 text-sm text-text-secondary hover:text-text-primary transition-colors group"
-        >
-          <span className="inline-flex items-center gap-1.5">
-            <span className="font-mono text-[10px] uppercase tracking-[.08em] text-text-tertiary">New</span>
-            <span className="w-px h-3 bg-line-structure" />
-            <span className="font-semibold">Langfuse Cloud Japan — 東京リージョン公開</span>
-          </span>
-          <span className="text-text-tertiary group-hover:text-text-secondary transition-colors">→</span>
-        </Link>
-      </CornerBox>
       <CornerBox className="-mb-px -mt-px">
         <HeroStatsStrip />
       </CornerBox>
@@ -61,12 +47,13 @@ export function Hero() {
           <div className="flex flex-wrap gap-3 justify-center items-center">
             <Button
               variant="primary"
+              size="default"
               shortcutKey="s"
               href="/cloud"
             >
               Start free
             </Button>
-            <Button variant="secondary" shortcutKey="d" href="/docs">
+            <Button variant="secondary" size="default" shortcutKey="d" href="/docs">
               Documentation
             </Button>
           </div>
