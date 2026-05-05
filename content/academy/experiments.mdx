@@ -1,39 +1,42 @@
 ---
-title: Experiments and their role
-sidebarTitle: Experiment
+title: Experiments
+sidebarTitle: Experiments
 description: How to use experiments to systematically improve your LLM application by isolating variables and comparing outputs.
 ---
 
-# Experiments and their role
+# Experiments
 
-To systematically understand and improve how your system behaves, you need a way to isolate cause and effect. That's what experiments give you. You pick one variable, run your dataset through two versions of your system, and compare what comes out. The result tells you whether a change actually helped, and by how much. To understand by how much, you also need to evaluate your experiment output (see evalaute TODO). This section covers the systematic experimentation part before evaluation.
+## How experiments fit into the loop
 
-![The AI engineering loop](/images/academy/loop-overview-v4.png)
+To systematically understand and improve how your system behaves, you need a way to isolate cause and effect. That's what experiments give you. You pick a variable or a set of variables, run your dataset through two versions of your system, and compare what comes out. The result tells you whether a change actually helped, and by how much. To understand by how much, you also need to evaluate your experiment outputs ([see Evaluate](/academy/evaluate)). This section covers the systematic experimentation part before evaluation.
+
+
+<LoopDiagram highlight="change" />
 
 ## The anatomy of an experiment
 
 Every experiment has four components.
 
-| Component | What it is |
-|---|---|
-| **Baseline** | Your current production system — the control condition everything else gets measured against. Keep it fixed while you vary one thing. |
-| **Dataset** | The inputs you run both conditions against. Keep the same dataset across experiments so results are comparable over time. |
-| **Variable** | The single thing you're changing — model, prompt, context, tool access, or agent architecture. See [On variables](#on-variables) below. |
-| **Outputs to compare** | What your system produces under each condition. Comparing these is the actual work of running an experiment. |
+| Component              | What it is                                                                                                                              |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Baseline**           | Your current production system — the control condition everything else gets measured against. Keep it fixed while you vary one thing.   |
+| **Dataset**            | The inputs you run both conditions against. Keep the same dataset across experiments so results are comparable over time.               |
+| **Variable**           | The configuration you're changing — model, prompt, context, tool access, or agent architecture. See [Variables](#on-variables) below. |
+| **Outputs to compare** | What your system produces under each condition. Comparing these is the actual work of running an experiment.                            |
 
-Change two things at once and you can't tell which caused the difference.
+It often helps to change only one variable at a time. However, variables interact, and some configurations require changing multiple variables at once.
 
-### On variables [#on-variables]
+### Variables [#on-variables]
 
-- **Model.** The AI model you are using. There are thinking models, cheap models, fast models and all of them come with different tradeoffs is result quality and cost.
+- **Model.** The AI model you are using. There are reasoning-heavy models, cheap models, and fast models, and they all come with different tradeoffs in result quality, speed, and cost.
 - **Prompt.** The most common lever. Before running a prompt experiment, ask: is the failure a specification problem (ambiguous or incomplete prompt) or a generalization problem (model applies clear instructions inconsistently)? The latter is worth measuring.
 - **Context.** What information you include in the prompt: retrieved documents, conversation history, user metadata.
 - **Tool access.** Adding or removing tools changes what paths your system can take.
 - **Agent architecture.** Single agent vs. multi-agent, which framework, how tasks are decomposed. The biggest bets, the hardest to isolate.
 
-## How is it used?
+## How experiments are used
 
-The core flow: pick a variable & form a hypothesis, run both conditions against your dataset, compare outputs, learn something & repeat. 
+The core flow: pick a variable and form a hypothesis, run both conditions against your dataset, compare outputs, learn something, and repeat.
 
 ![Experimentation loop](/images/academy/experimentation.png)
 
@@ -49,17 +52,13 @@ Scores then make comparison concrete—win rates, whether wins are spread across
 
 ## Where to start
 
-<Callout>
-TODO: Vibe patch and error analyse before
-</Callout>
+Start with a small, manual comparison before building more infrastructure. A few examples with traces side by side will teach you more in the first hour than a week of setup work.
 
-Don't set up the full evaluation pipeline before running anything. A few examples side traces side by side will teach you more in the first hour than a week of infrastructure work.
-
-1. Get 20–30 real examples. Pull them from production traces. They don't need to cover everything, just a real slice of what your application handles.
-2. Change one thing and run both versions. Keep everything else identical.
+1. Get 20–30 real examples. Pull them from production traces or come up with realistic examples. They don't need to cover everything, just a real slice of what your application handles.
+2. Change your configuration and run both versions. Keep everything else identical.
 3. Read traces side by side. No evaluator needed yet. Just read. What's different? Which one is actually better and why? Pay attention to the type of failure — is the prompt unclear, or is the model applying clear instructions inconsistently? That distinction tells you what kind of fix to try next.
 4. Add an evaluator once you have intuition. After a few manual rounds you'll know what you're looking for. Encode it. Now you can scale.
 
 ## What comes next
 
-To see whether your experiment led to an improvement, you need to evaluate your results. Learn more about evaluation methods in the next section.
+To see whether your experiment led to an improvement, you need to evaluate your results. Learn more about [evaluation methods](/academy/evaluate) in the next section.
