@@ -1,0 +1,113 @@
+---
+title: Evaluation
+sidebarTitle: Evaluation
+description: How to judge whether experiment outputs are good, using manual review, code-based checks, and LLM-as-a-judge evaluators.
+---
+
+# Evaluation
+
+## How evaluation fits into the loop
+
+Offline evaluation is the step in the loop between running an experiment and shipping a change. You have a dataset, you have run your application against it, and now you need to judge whether the outputs are good.
+
+<LoopDiagram highlight="eval" />
+
+## How evaluation typically evolves [#how-evaluation-typically-evolves]
+
+Most of the time, you start by **manually reviewing outputs** to build intuition for what good and bad look like in your application. From there, you **identify specific failure modes** worth checking for. Once you can define them precisely, you **automate with dedicated evaluators**.
+
+![How evaluation typically evolves](/images/academy/evaluation-evolves-v2.png)
+
+The rest of this page covers the different kinds of evaluation in detail. In practice, you'll likely end up combining all of them. But the path to a well-functioning automated evaluation setup almost always starts from manual review.
+
+<Callout type="info">
+Manual evaluation is not a one-and-done step. Good production setups incorporate continuous review by human experts to catch new failure modes and keep automated evaluators calibrated.
+</Callout>
+
+## Evaluation methods [#three-kinds-of-evaluation]
+
+There are three main ways to evaluate: manually, with code, or with an LLM. Each is suited to different kinds of quality checks.
+
+### Manual evaluation
+
+Manual evaluation is the process of manually looking at outputs and scoring it/writing down your thoughts on its quality.
+
+This is an important process, reading outputs builds an understanding of what your application actually does, where it struggles, and what "good" looks like for your specific use case. That understanding is what tells you which automated evaluators to build and how to define their criteria later on. Teams that skip this step and jump straight to automated evaluation often end up measuring things that don't matter.
+
+Manual evaluation also produces human labels that serve as ground truth for validating automated evaluators later.
+
+### Code-based evaluation
+
+Code-based evaluators check properties that can be verified with deterministic logic. They are fast, cheap, and produce the same result every time.
+
+Some example checks where code-based evaluators are a natural fit:
+
+- The output is valid JSON or follows a required schema
+- The output contains (or does not contain) specific keywords or patterns
+- The output stays within a length limit
+- The generated SQL executes without errors
+
+Their limitation is that they cannot assess meaning. A code-based evaluator can check that an output contains the word "refund," but it cannot check whether the output correctly explains the refund policy.
+
+### LLM-as-a-judge
+
+An LLM-as-a-judge evaluator uses a language model to score outputs. It is required to overcome the core issue that quality of AI Applications/Agents depends on grading the quality of a text output.
+
+This is the right method for qualities that require understanding language: whether a response is relevant to the question, whether the tone matches the intended audience, whether a summary captures the key points of the source material, etc.
+
+LLM judges are imperfect and easy to get wrong. This means:
+
+- A model does not automatically grade things as a human expert would as they do not have the context of the expert
+- They need calibration against human preferences to verify they are measuring what you think they are measuring
+- They can share blind spots with your application's LLM, especially when the same model family is used for both
+
+These limitations aren't reasons to avoid LLM judges. An LLM judge that has been calibrated against human labels and is backed by code-based checks is a reliable evaluator.
+
+## Reference-based vs reference-free evaluators [#reference-based-vs-reference-free]
+
+Both code-based and LLM-as-a-judge evaluators can be either reference-based or reference-free. A reference-based evaluator compares the output against a predefined expected output, like a correct answer or a golden response. A reference-free evaluator assesses the output on its own, without needing a ground truth to compare against.
+
+|                 | Code-based               | LLM-as-a-judge / manual                                     |
+| --------------- | ------------------------ | ----------------------------------------------------------- |
+| Reference-based | Exact string match check | "Does the response correctly explain this specific policy?" |
+| Reference-free  | Validate JSON structure  | Tone-of-voice evaluation; language detection |
+
+The advantage of reference-free evaluators is that they can be applied to unseen production data, while reference-based evaluators always need a pre-defined reference response.
+
+## In practice
+
+### When to set up evaluators
+
+[As mentioned before](#how-evaluation-typically-evolves), you always start by manually reviewing. Once you have done that, the question then becomes: should you set up an automated evaluator for what you found?
+
+Ask yourself whether the issue is a **one-time fix** or a **generalization problem**. If a simple prompt change resolves it, just make the change, there's no need for an evaluator. But if you can clearly identify a failure mode that you want to test for repeatedly across different inputs, that's when setting up an evaluator makes sense.
+
+### What should you evaluate?
+
+Generic qualities like "helpfulness" or "quality" are tempting starting points, but they rarely produce useful signal. An evaluator that checks a vague criterion will give vague results. The more precisely you can define what "good" or "bad" looks like for your application, the more useful your evaluators will be.
+
+<Callout type="info">
+One practical recommendation: prefer binary scores (pass/fail) over graded scales (1-5) when designing evaluators. Binary scores force a clear definition of what separates acceptable from unacceptable. Graded scales introduce ambiguity about what a 3 means versus a 4, which makes scores harder to interpret and less consistent across evaluators and over time.
+</Callout>
+
+### Combining evaluation methods
+
+Each quality you care about gets its own evaluator.
+
+**Most mature evaluation setups use [all three evaluation methods](#three-kinds-of-evaluation).** Together, they give you a view on overall quality of your application.
+
+## Where to start
+
+Start with manual review, then automate only the checks you need to run repeatedly.
+
+1. [Review outputs manually](#how-evaluation-typically-evolves) to build intuition for what good and bad look like in your application.
+2. Write down the specific failure modes you want to catch and define them as clearly as possible.
+3. Set up an automated evaluator only when you need to test that failure mode repeatedly across many inputs or over time.
+
+## What comes next
+
+If the results are good enough, you can ship the change. Once it is live, the loop starts again: the updated system produces new [traces](/academy/tracing), new [monitoring](/academy/monitoring) signals, and new opportunities to improve.
+
+Some evaluators should also move beyond offline experiments. Reference-free evaluators, user feedback signals, and other production-safe checks can be applied to live traffic to confirm that quality in production matches what you saw before deployment.
+
+If production behavior matches expectations, you can keep scaling with more confidence. If it does not, capture those cases in traces, turn them into [dataset](/academy/datasets) items, and run the next round of [experiments](/academy/experiments). That is how you close the loop.

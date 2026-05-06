@@ -170,6 +170,11 @@ const marketingFrontmatterSchema = baseFrontmatterSchema.extend({
   contentWidth: z.enum(["docs", "full"]).nullish(),
 });
 
+export const academy = defineDocs({
+  dir: "content/academy",
+  docs: { schema: sidebarFrontmatterSchema },
+});
+
 export const marketing = defineDocs({
   dir: "content/marketing",
   docs: { schema: marketingFrontmatterSchema },

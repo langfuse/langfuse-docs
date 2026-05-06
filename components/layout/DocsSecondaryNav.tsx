@@ -4,6 +4,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  GraduationCap,
   Unplug,
 } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +22,7 @@ const SECTIONS = [
   { title: "Integrations", path: "/integrations", Icon: Unplug },
   { title: "Self Hosting", path: "/self-hosting", Icon: IconDesktopTower },
   { title: "Guides", path: "/guides", Icon: IconCompass },
+  { title: "Academy", path: "/academy", Icon: GraduationCap },
   { title: "AI Engineering Library", path: "/library", Icon: IconBookBookmark },
 ] as const;
 

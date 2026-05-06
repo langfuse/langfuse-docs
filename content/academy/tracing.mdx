@@ -1,0 +1,79 @@
+---
+title: Tracing
+sidebarTitle: Tracing
+description: Understand what tracing is, how traces are structured, and why they are the foundation of LLM observability.
+---
+
+# Tracing
+
+## How tracing fits into the loop
+
+
+Traditional software is largely deterministic, executions follow a pre-defined format. For LLM applications that's not the case. Agent executions can be messy, we are dealing with emergent behaviour with rich and unexpected inputs and outputs, and execution order. You need something else to follow your agent's behavior: [traces](/docs/observability/overview).
+
+A trace is a structured record of what your application did for a single request: which steps it took, what data it saw, what it produced.
+
+<LoopDiagram highlight="trace" />
+
+Tracing is central to the entire improvement loop. Every other step — reviewing, building datasets, running experiments, evaluating — operates on traces.
+
+<Callout type="info">
+If you're already familiar with traditional observability concepts, some of what follows may feel repetitive. Feel free to skim or skip ahead.
+</Callout>
+
+## The anatomy of a trace
+
+A trace can be as complex or as simple as your application requires, but all traces share the same basic structure. It's composed of a set of [observations](/docs/observability/data-model) that map out the path your agent took.
+
+<Callout type="info">
+  *An observation is a single step in the process. It has an input, an output,
+  start/end time, and metadata about what happened during that step.*
+</Callout>
+
+
+### Hierarchy
+
+A trace has a hierarchical tree structure. Nested inside are observations that can contain other observations, forming a parent-child structure that mirrors the actual execution of your AI application.
+
+![Trace hierarchy example](/images/academy/trace-hierarchy-v2.png)
+
+You can see what happened in what order, and which steps were part of which larger step.
+
+### Observation data
+
+**Input and output.** Every observation can have an input and an output. Most of the time it will have both; in some specific cases it might only have one of the two. It's important for interpretability that you set an input and/or output that makes sense for the type of action happening in that observation.
+
+**Observation types.** In order to make it easy to differentiate between operations, you'll see different [types of observations](/docs/observability/features/observation-types). Each type of observation is used to capture different kinds of interactions of an agent.
+
+| Action of an agent | Observation type | Typical observation input/output |
+| --- | --- | --- |
+| A call to a language model | `generation` | Full prompt or message history as input, the completion as output, plus metadata like the model name and token counts |
+| A step that fetches information from an external source | `retriever` | Query and the returned documents |
+| An invocation of a tool or function by an agent | `tool` | Which tool was called, the arguments, and the return value |
+| General processes | `span` | Highly dependent on the use case |
+
+Observation types make it easier to read traces and to filter. In a trace with 20 observations, being able to quickly spot the LLM calls saves time.
+
+### Cost, latency, token usage
+
+Beyond input and output, there are a few attributes on observations that are table stakes in any LLM application: cost, latency, and [token usage](/docs/observability/features/token-and-cost-tracking). These are recorded per observation and aggregated at the trace level.
+
+## Traces vs sessions
+
+Most of the time you would not see an entire agent's lifecycle execution in one trace. Traces can be grouped into [sessions](/docs/observability/features/sessions). But where do you draw the line between a trace and a session?
+
+![Traces vs sessions](/images/academy/traces-vs-sessions.png)
+
+A general rule of thumb is: **one trace corresponds to one invocation of your system**, typically one API call or one agent execution. A session then groups multiple traces together, for example all the turns in a multi-turn conversation.
+
+## Where to start
+
+If you're just getting started, focus on instrumenting one real workflow end to end before trying to cover every possible path.
+
+1. [Set up tracing](/docs/observability/get-started) for one important request path in your application.
+2. Make sure each observation captures useful input, output, and metadata for the step it represents.
+3. Review a handful of real traces manually to confirm that the structure is easy to follow and useful for debugging.
+
+## What comes next
+
+Once you see traces, you can move on to the next step: [monitoring](/academy/monitoring). Monitoring is what connects traces to the loop of improving and iterating on your agent.

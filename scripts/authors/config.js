@@ -8,7 +8,7 @@ const CONFIG = {
 
     // Documentation sections to analyze for contributor data
     // Each section is a top-level directory under content/ (App Router)
-    sections: ['docs', 'self-hosting', 'security', 'guides', 'integrations', 'faq', 'handbook'].map(section => ({
+    sections: ['docs', 'self-hosting', 'security', 'guides', 'integrations', 'faq', 'handbook', 'academy'].map(section => ({
         name: section.replace('-', ''),
         dirPath: path.join(__dirname, `../../content/${section}`),
         // Include both new (content/) and old (pages/) paths so the full
