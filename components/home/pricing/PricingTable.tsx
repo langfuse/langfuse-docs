@@ -1013,10 +1013,10 @@ const sections: Section[] = [
         href: "/security/data-regions",
         tiers: {
           cloud: {
-            Hobby: "US or EU",
-            Core: "US or EU",
-            Pro: "US or EU",
-            Enterprise: "US or EU",
+            Hobby: "US, EU, or JP",
+            Core: "US, EU, or JP",
+            Pro: "US, EU, or JP",
+            Enterprise: "US, EU, JP, or HIPAA",
           },
         },
       },
