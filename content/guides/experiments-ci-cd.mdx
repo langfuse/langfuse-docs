@@ -76,55 +76,13 @@ jobs:
           github_token: ${{ github.token }}
 ```
 
-### Action inputs and outputs
+### Experiment Definition
 
-| Input                          | Required | Description                                                                                                                                                                                                                                                          |
-| ------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `langfuse_public_key`          | Yes      | Langfuse public key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                                                                                          |
-| `langfuse_secret_key`          | Yes      | Langfuse secret key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                                                                                          |
-| `langfuse_base_url`            | No       | Langfuse host. Defaults to `https://cloud.langfuse.com`; see [regions and self-hosted URLs](/docs/api-and-data-platform/features/public-api#public-api) if you use another Langfuse instance.                                                                        |
-| `experiment_path`              | Yes      | Path to an experiment script, directory, or glob pattern. Supports Python, TypeScript, and JavaScript.                                                                                                                                                               |
-| `dataset_name`                 | No       | Langfuse dataset loaded by the action and provided to the SDK via `RunnerContext`. If omitted, the script must provide its own data.                                                                                                                                 |
-| `dataset_version`              | No       | Optional timestamp to pin the dataset version for reproducible CI runs. Defaults to the latest dataset version.                                                                                                                                                      |
-| `experiment_metadata`          | No       | Additional `key=value` metadata added to the experiment together with default GitHub metadata. This metadata is visible in the Langfuse UI.                                                                                                                          |
-| `should_fail_on_regression`    | No       | Fail the CI job when an experiment raises `RegressionError`. Defaults to `true`.                                                                                                                                                                                     |
-| `should_fail_on_script_error`  | No       | Fail the CI job when an experiment script crashes or raises a non-regression error. Defaults to `true`.                                                                                                                                                              |
-| `should_comment_on_pr`         | No       | Post or update the experiment report as a pull request comment. Defaults to `true`.                                                                                                                                                                                  |
-| `python_sdk_version`           | No       | Langfuse Python SDK version installed by the action for `.py` experiments. Defaults to `latest`; use v4.6.0 or newer.                                                                                                                                                |
-| `js_sdk_version`               | No       | `@langfuse/client` version installed by the action for TypeScript or JavaScript experiments. Defaults to `latest`; use v5.3.0 or newer.                                                                                                                              |
-| `should_skip_sdk_installation` | No       | Skip SDK installation when you manage the Python or Node environment yourself before this action. For TypeScript experiments, provide `@langfuse/client`, `@langfuse/tracing`, `@langfuse/otel`, `@opentelemetry/sdk-node`, and `tsx` yourself. Defaults to `false`. |
-| `github_token`                 | No       | GitHub token used to post PR comments and resolve the current job URL. Leave blank to skip both.                                                                                                                                                                     |
+The action runs your experiment code from the `experiment_path` configured in the workflow.
 
-See the full input reference in the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#inputs).
+Each script must define an `experiment(context)` function that accepts a `context` parameter.
 
-| Output        | Description                                                                        |
-| ------------- | ---------------------------------------------------------------------------------- |
-| `result_json` | Normalized JSON result for downstream workflow steps.                              |
-| `failed`      | `true` if any experiment script errored or raised a regression; otherwise `false`. |
-
-### Additional secrets
-
-If your experiment needs provider keys or other secrets, set them as environment variables on the action step. The experiment subprocess inherits the step environment.
-
-```yaml
-- uses: langfuse/experiment-action@<release tag>
-  env:
-    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-  with:
-    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
-    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
-    experiment_path: experiments/support-agent-gate
-    dataset_name: support-agent-regression-set
-```
-
-Your experiment can read these values from `os.environ[...]` in Python or `process.env...` in TypeScript and JavaScript. See the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#how-do-i-pass-extra-secrets-openai-keys-etc-to-my-experiment) for details.
-
-### Experiment script definition
-
-Each script must define an `experiment(context)` function that accepts a `context` parameter. The action creates a `RunnerContext` and passes it to this function.
-
-`RunnerContext` handles the CI-specific setup for you:
+This context is created by the GitHub Action and handles the CI-specific setup for you:
 
 - initializes the Langfuse SDK client from the action inputs
 - loads the dataset items from `dataset_name` and applies `dataset_version`
@@ -177,6 +135,50 @@ export async function experiment(context: RunnerContext) {
 </LangTabs>
 
 Pass explicit values to `context.runExperiment` / `context.run_experiment` when you want to override action-provided defaults such as `data` or `metadata`.
+
+### Action inputs and outputs
+
+| Input                          | Required | Description                                                                                                                                                                                                                                                          |
+| ------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `langfuse_public_key`          | Yes      | Langfuse public key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                                                                                          |
+| `langfuse_secret_key`          | Yes      | Langfuse secret key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                                                                                          |
+| `langfuse_base_url`            | No       | Langfuse host. Defaults to `https://cloud.langfuse.com`; see [regions and self-hosted URLs](/docs/api-and-data-platform/features/public-api#public-api) if you use another Langfuse instance.                                                                        |
+| `experiment_path`              | Yes      | Path to an experiment script file, a directory containing experiment scripts, or a glob pattern. Supports Python, TypeScript, and JavaScript.                                                                                                                         |
+| `dataset_name`                 | No       | Langfuse dataset loaded by the action and provided to the SDK via `RunnerContext`. If omitted, the script must provide its own data.                                                                                                                                 |
+| `dataset_version`              | No       | Optional timestamp to pin the dataset version for reproducible CI runs. Defaults to the latest dataset version.                                                                                                                                                      |
+| `experiment_metadata`          | No       | Additional `key=value` metadata added to the experiment together with default GitHub metadata. This metadata is visible in the Langfuse UI.                                                                                                                          |
+| `should_fail_on_regression`    | No       | Fail the CI job when an experiment raises `RegressionError`. Defaults to `true`.                                                                                                                                                                                     |
+| `should_fail_on_script_error`  | No       | Fail the CI job when an experiment script crashes or raises a non-regression error. Defaults to `true`.                                                                                                                                                              |
+| `should_comment_on_pr`         | No       | Post or update the experiment report as a pull request comment. Defaults to `true`.                                                                                                                                                                                  |
+| `python_sdk_version`           | No       | Langfuse Python SDK version installed by the action for `.py` experiments. Defaults to `latest`; use v4.6.0 or newer.                                                                                                                                                |
+| `js_sdk_version`               | No       | `@langfuse/client` version installed by the action for TypeScript or JavaScript experiments. Defaults to `latest`; use v5.3.0 or newer.                                                                                                                              |
+| `should_skip_sdk_installation` | No       | Skip SDK installation when you manage the Python or Node environment yourself before this action. For TypeScript experiments, provide `@langfuse/client`, `@langfuse/tracing`, `@langfuse/otel`, `@opentelemetry/sdk-node`, and `tsx` yourself. Defaults to `false`. |
+| `github_token`                 | No       | GitHub token used to post PR comments and resolve the current job URL. Leave blank to skip both.                                                                                                                                                                     |
+
+See the full input reference in the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#inputs).
+
+| Output        | Description                                                                        |
+| ------------- | ---------------------------------------------------------------------------------- |
+| `result_json` | Normalized JSON result for downstream workflow steps.                              |
+| `failed`      | `true` if any experiment script errored or raised a regression; otherwise `false`. |
+
+### Additional secrets
+
+If your experiment needs provider keys or other secrets, set them as environment variables on the action step. The experiment subprocess inherits the step environment.
+
+```yaml
+- uses: langfuse/experiment-action@<release tag>
+  env:
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  with:
+    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    experiment_path: experiments/support-agent-gate
+    dataset_name: support-agent-regression-set
+```
+
+Your experiment can read these values from `os.environ[...]` in Python or `process.env...` in TypeScript and JavaScript. See the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#how-do-i-pass-extra-secrets-openai-keys-etc-to-my-experiment) for details.
 
 ### Failing on regressions
 
