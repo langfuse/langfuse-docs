@@ -162,24 +162,6 @@ See the full input reference in the [`langfuse/experiment-action` README](https:
 | `result_json` | Normalized JSON result for downstream workflow steps.                              |
 | `failed`      | `true` if any experiment script errored or raised a regression; otherwise `false`. |
 
-### Additional secrets
-
-If your experiment needs provider keys or other secrets, set them as environment variables on the action step. The experiment subprocess inherits the step environment.
-
-```yaml
-- uses: langfuse/experiment-action@<release tag>
-  env:
-    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-  with:
-    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
-    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
-    experiment_path: experiments/support-agent-gate
-    dataset_name: support-agent-regression-set
-```
-
-Your experiment can read these values from `os.environ[...]` in Python or `process.env...` in TypeScript and JavaScript. See the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#how-do-i-pass-extra-secrets-openai-keys-etc-to-my-experiment) for details.
-
 ### Failing on regressions
 
 Raise `RegressionError` when a result should block the workflow. The example below fails when average exact-match accuracy is below the threshold.
@@ -356,6 +338,24 @@ The same normalized data is available as the `result_json` action output. Use th
     RESULT_JSON: ${{ steps.experiment.outputs.result_json }}
   run: printf '%s' "$RESULT_JSON" > experiment-result.json
 ```
+
+### Additional secrets
+
+If your experiment needs provider keys or other secrets, set them as environment variables on the action step. The experiment subprocess inherits the step environment.
+
+```yaml
+- uses: langfuse/experiment-action@<release tag>
+  env:
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  with:
+    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    experiment_path: experiments/support-agent-gate
+    dataset_name: support-agent-regression-set
+```
+
+Your experiment can read these values from `os.environ[...]` in Python or `process.env...` in TypeScript and JavaScript. See the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#how-do-i-pass-extra-secrets-openai-keys-etc-to-my-experiment) for details.
 
 ## Other CI/CD systems [#other-cicd-systems]
 
