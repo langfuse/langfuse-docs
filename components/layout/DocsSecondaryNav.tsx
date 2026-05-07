@@ -92,7 +92,7 @@ export function DocsSecondaryNav() {
   const pathname = usePathname();
   return (
     <div
-      className="hidden overflow-x-auto overflow-y-hidden sticky z-40 md:block bg-surface-1"
+      className="hidden overflow-x-auto overflow-y-hidden sticky z-50 md:block bg-surface-1"
       style={{ top: "var(--lf-nav-primary-height)" }}
     >
       <nav className="px-px mx-auto border-b max-w-360 bg-line-structure border-line-structure">
