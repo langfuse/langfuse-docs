@@ -29,7 +29,6 @@ export function BrandDownloadButton() {
 type BrandAssetVariant = "light" | "dark";
 
 interface BrandAssetCardProps {
-  href: string;
   src: string;
   alt: string;
   label: string;
@@ -38,7 +37,6 @@ interface BrandAssetCardProps {
 }
 
 export function BrandAssetCard({
-  href,
   src,
   alt,
   label,
@@ -48,7 +46,7 @@ export function BrandAssetCard({
   return (
     <a
       download
-      href={href}
+      href={src}
       className="block no-underline relative group border border-line-structure bg-surface-bg rounded-[2px] corner-box-corners--hover corner-box-hover-stripes transition-[background] duration-180 ease-out"
     >
       <div
