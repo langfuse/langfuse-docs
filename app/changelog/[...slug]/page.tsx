@@ -9,6 +9,7 @@ import { ChangelogFrontMatterProvider } from "@/components/changelog/ChangelogFr
 import type { ChangelogFrontMatter } from "@/components/changelog/ChangelogFrontMatterContext";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
 import { PageFooterNav } from "@/components/PageFooterNav";
+import { getPageFooterItems } from "@/lib/page-footer-nav";
 
 type PageProps = {
   params: Promise<{ slug: string[] }>;
@@ -23,31 +24,15 @@ export default async function ChangelogPostPage(props: PageProps) {
   const frontMatter = primitiveOnly(
     page.data as unknown as Record<string, unknown>
   ) as ChangelogFrontMatter;
-
-  const changelogPages = changelogSource
-    .getPages()
-    .filter((changelogPage) => changelogPage.url !== "/changelog")
-    .sort(
-      (a, b) =>
-        new Date((a.data.date as string) ?? 0).getTime() -
-        new Date((b.data.date as string) ?? 0).getTime(),
-    )
-    .map((changelogPage) => ({
-      name: changelogPage.data.title,
-      url: changelogPage.url,
-    }));
-
-  const currentIndex = changelogPages.findIndex(
-    (changelogPage) => changelogPage.url === page.url,
+  const footerItems = getPageFooterItems(
+    changelogSource.getPages().filter((page) => page.url !== "/changelog"),
+    page.url,
+    {
+      getDate: (page) => page.data.date as string | undefined,
+      getTitle: (page) => page.data.title,
+    },
   );
 
-  const footerItems =
-    currentIndex === -1
-      ? undefined
-      : {
-        previous: changelogPages[currentIndex - 1],
-        next: changelogPages[currentIndex + 1],
-      };
 
   return (
     <ContentColumns footerClassName="xl:max-w-[680px]">
