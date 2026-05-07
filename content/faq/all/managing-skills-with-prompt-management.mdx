@@ -54,9 +54,9 @@ def run_agent(user_input: str):
 
 You can also pass each skill prompt object to the corresponding generation or span so it shows up linked in the Langfuse UI. See [Link prompts with traces](/docs/prompts/get-started#link-with-langfuse-tracing-optional). This is useful when a single skill file maps directly to a model call. For agents that load many skills upfront, the metadata approach above tends to be more practical.
 
-## Things to be aware of
+## Limitations to be aware of
 
-- **No native "skill set" grouping yet.** Each skill is an independent prompt. If you want to manage a bundle of skills as a single unit, you currently need to handle that in your application code.
+- **No native folder-level grouping yet.** Each file is stored as an independent prompt. If you want to manage a skill folder (a `SKILL.md` plus reference files) or a bundle of skills as a single unit, you currently need to handle that in your application code.
 - **Playground and prompt experiments** are designed around a single prompt. They work for iterating on one skill file at a time, but not on a multi-skill agent setup as a whole.
 - **Variable detection** still uses Langfuse's `{{variable}}` syntax. If your skill files use a different templating style, see [Using external templating libraries](/faq/all/using-external-templating-libraries).
 
