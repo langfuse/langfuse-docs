@@ -23,36 +23,37 @@ Treat each skill file as its own Langfuse prompt. Use the prompt name to identif
 Because an agent execution often pulls in several skill files, you want to be able to reconstruct exactly which combination of skill versions produced a given trace. The simplest way to do this:
 
 1. When you fetch a skill file via `get_prompt()`, capture the returned version number.
-2. Write the resolved versions into the [trace metadata](/docs/observability/features/trace-ids-and-distributed-tracing) as a map of skill name to version.
+2. Write the resolved versions into the [trace metadata](/docs/observability/features/metadata) as a map of skill name to version.
 3. When debugging or evaluating a run later, you can read the metadata to know which exact skill files were active.
 
 A minimal example in Python:
 
 ```python
-from langfuse import Langfuse, observe, get_client
+from langfuse import observe, get_client, propagate_attributes
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 @observe()
 def run_agent(user_input: str):
     skills_to_load = ["skill/code-review", "skill/data-analysis"]
     skills = {name: langfuse.get_prompt(name) for name in skills_to_load}
 
-    # Record which skill versions were used in this run
-    get_client().update_current_trace(
-        metadata={
-            "skill_versions": {
-                name: prompt.version for name, prompt in skills.items()
-            }
-        }
-    )
+    # Record which skill versions were used in this run.
+    # Propagated metadata keys must be alphanumeric and values must be strings,
+    # so we flatten the prompt names into per-skill keys.
+    skill_version_metadata = {
+        f"skill_{name.replace('skill/', '').replace('-', '_')}_version": str(prompt.version)
+        for name, prompt in skills.items()
+    }
 
-    # ... use skills[name].prompt as the skill file contents in your agent ...
+    with propagate_attributes(metadata=skill_version_metadata):
+        # ... use skills[name].prompt as the skill file contents in your agent ...
+        pass
 ```
 
 ### Link skills to your traces
 
-You can also pass each skill prompt object to the corresponding generation or span so it shows up linked in the Langfuse UI. See [Link prompts with traces](/docs/prompts/get-started#link-with-langfuse-tracing-optional). This is useful when a single skill file maps directly to a model call. For agents that load many skills upfront, the metadata approach above tends to be more practical.
+You can also pass each skill prompt object to the corresponding generation or span so it shows up linked in the Langfuse UI. See [Link prompts with traces](/docs/prompt-management/features/link-to-traces). This is useful when a single skill file maps directly to a model call. For agents that load many skills upfront, the metadata approach above tends to be more practical.
 
 ## Limitations to be aware of
 
