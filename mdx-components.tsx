@@ -14,6 +14,10 @@ import { Callout } from "@/components/ui/callout";
 import { Table } from "@/components/ui/table";
 import { LoopDiagram } from "@/components/academy/LoopDiagram";
 import { OnlineLoop, OfflineLoop } from "@/components/academy/LoopSubset";
+import { EvaluationEvolutionDiagram } from "@/components/academy/EvaluationEvolutionDiagram";
+import { TracingHierarchyDiagram } from "@/components/academy/TracingHierarchyDiagram";
+import { RagTraceViewDiagram } from "@/components/academy/RagTraceViewDiagram";
+import { DatasetFieldsDiagram } from "@/components/academy/DatasetFieldsDiagram";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
 // It only downloads on pages that actually render a <Video> tag.
@@ -66,6 +70,10 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     LoopDiagram,
     OnlineLoop,
     OfflineLoop,
+    EvaluationEvolutionDiagram,
+    TracingHierarchyDiagram,
+    RagTraceViewDiagram,
+    DatasetFieldsDiagram,
     ...components,
   };
 }
