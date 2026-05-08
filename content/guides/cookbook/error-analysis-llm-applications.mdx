@@ -1,19 +1,19 @@
 ---
-title: Error Analysis for LLM Applications - A Step-by-Step Guide
+title: Error Analysis for LLM Applications
 sidebarTitle: Error Analysis
-description: A hands-on, step-by-step guide to error analysis — open coding, clustering failure categories, and deciding what to fix before you build evaluators.
+description: A hands-on, step-by-step guide to error analysis - open coding, clustering failure categories, and deciding what to fix before you build evaluators.
 category: Evaluation
 ---
 
-# Error Analysis for LLM Applications: A Step-by-Step Guide
+# Error Analysis for LLM Applications - Step by step guide
 
-A hands-on walkthrough for understanding how your system fails before you build evaluators for it.
+A walkthrough for understanding how your system fails before you build evaluators for it.
 
 ---
 
-## Want to be guided through this interactively?
+## Want to do this interactively?
 
-Copy the prompt below and paste it into your coding agent:
+Paste this into your coding agent:
 
 ```
 I want to do a systematic error analysis of my LLM application to understand how it fails.
@@ -22,16 +22,16 @@ and the Langfuse CLI (https://github.com/langfuse/langfuse-cli), then guide me s
 through error analysis.
 ```
 
-The skill runs every step alongside you: pulling traces, creating annotation queues, clustering your notes, and computing failure rates. You stay in control of the domain decisions.
+The skill runs every step alongside you: pulling traces, creating annotation queues, clustering your notes, and computing failure rates. You make the domain calls.
 
 <details>
-<summary>What to expect when you run this</summary>
+<summary>What to expect</summary>
 
-The agent plans the work as a TODO list mapped to the five steps, then walks through each one with you — pulling traces, setting up score configs and annotation queues, prompting you for observations, and proposing failure clusters you can refine.
+The agent maps the work to a TODO list across five steps, then walks through each one with you.
 
 ![Claude Code planning the error analysis steps as a TODO list](/images/cookbook/error-analysis-llm-applications/claude_code_interaction.png)
 
-At the clustering step it groups your annotations into a candidate failure taxonomy with definitions and counts, mapped against any prior categories so you can see where the distribution is shifting.
+At the clustering step it proposes a candidate failure taxonomy with definitions and counts, mapped against any prior categories so you can see where the distribution is shifting.
 
 ![Claude Code clustering annotations into a failure taxonomy](/images/cookbook/error-analysis-llm-applications/claude_clusters.png)
 
@@ -41,29 +41,27 @@ At the clustering step it groups your annotations into a candidate failure taxon
 
 ## What is error analysis?
 
-Read real traces, understand how your app fails, and build a taxonomy of failure categories from what you observe. Each category tells you what to fix and whether to build an evaluator for it. Run it before writing any evaluators — and again after prompt rewrites, model switches, or production incidents.
+Read real traces, understand how your app fails, build a taxonomy of failure categories. Each category tells you what to fix and whether to build an evaluator for it. Run it before writing any evaluators, and again after prompt rewrites, model switches, or production incidents.
 
-The process uses two concepts from qualitative research: **open coding** (read traces and write free-text observations, no pre-defined categories) and **axial coding** (group those observations into named, distinct failure categories with a shared root cause).
+The process uses two concepts from qualitative research: **open coding** (read traces, write free-text observations, no pre-defined categories) and **axial coding** (group those observations into named failure categories with a shared root cause).
 
-This guide is self-contained — you can follow it end-to-end without prior reading. For background on why error analysis matters, see the [Langfuse blog post](https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications).
+For background on why this matters, see the [Langfuse blog post](https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications).
 
 ---
 
 ## The example app: Dad Tech Support
 
-Throughout this guide we'll use a real example: a phone tech-support chatbot built for a parent who isn't comfortable with technology.
+Throughout this guide we use a real example: a phone tech-support chatbot built for a parent who isn't comfortable with technology.
 
-The app was built by an adult child to help their father (HUAWEI Y5p, Android 10, Vodafone) get phone help without calling every time something went wrong. The bot speaks as if it were the child: warm, patient, non-technical. It can search the web to look up current info about the phone and carrier.
+The app was built by an adult child to help their father (HUAWEI Y5p, Android 10, Vodafone) get phone help without calling every time something went wrong. The bot speaks as if it were the child: warm, patient, non-technical. It can search the web for current info about the phone and carrier.
 
 At the time of analysis: 505 traces across 478 sessions in Langfuse.
-
-![Dad Tech Support chatbot interface showing saved device profile and chat input](/images/cookbook/error-analysis-llm-applications/dad_support_sample_app.png)
 
 ---
 
 ## The process
 
-Five steps, with multiple sub-steps.
+Five steps.
 
 | | Step |
 |-|------|
@@ -71,21 +69,21 @@ Five steps, with multiple sub-steps.
 | **2. Open coding** | Create an annotation queue, review 30-50 traces, write free-text observations |
 | **3. Cluster into failure categories** | Group observations into named, distinct failure categories |
 | **4. Label and quantify** | Label all traces, compute failure rates, decide what to fix |
-| **5. Decide what to do about each category** | Choose which to fix in the prompt, which need evaluators, and which to monitor |
+| **5. Decide what to do** | Choose which to fix in the prompt, which need evaluators, which to monitor |
 
 ---
 
 ### Step 1: Gather a diverse dataset
 
-The goal is to assemble a set of traces that is representative of how your app actually behaves — including both successes and failures. A diverse dataset ensures your analysis surfaces all meaningful failure modes rather than just the ones that happen to be common.
+Assemble a set of traces that represents how your app actually behaves, including both successes and failures. A diverse dataset surfaces all meaningful failure modes, not just the common ones.
 
 ### Step 1.1: Choose what to annotate
 
 Decide which unit to annotate before setting up the queue.
 
-**If your app is conversational**, annotate the last turn per session — it has the full conversation history in context. **If your app is stateless**, annotate traces directly.
+**If your app is conversational**, annotate the last turn per session. It has the full conversation history in context. **If your app is stateless**, annotate traces directly.
 
-**Check the observation level.** In OpenTelemetry-instrumented apps, trace-level input/output is often null. The actual content lives in a GENERATION observation — the span wrapping the LLM call. Expand the observation tree in any trace to confirm.
+**Check the observation level.** In OpenTelemetry-instrumented apps, trace-level input/output is often null. The actual content lives in a GENERATION observation. Expand the observation tree in any trace to confirm.
 
 ![Trace detail view with GENERATION span highlighted](/images/cookbook/error-analysis-llm-applications/trace_detail_view_generation.png)
 
@@ -95,34 +93,30 @@ In the Dad Tech Support example:
 Trace: dad-chat-request
 ├── Root span
 ├── WebSearch (tool call, optional)
-└── dad-chat-request [GENERATION]  ← this is what to annotate
+└── dad-chat-request [GENERATION]  ← annotate this
     input: full conversation history + system prompt
     output: bot's reply
 ```
 
-Trace-level input and output were null. All readable content lived in the GENERATION observation. Annotating the trace would show annotators nothing.
-
-<Callout type="info">
-When adding items to an annotation queue, always target the GENERATION observation, not the trace.
-</Callout>
+Trace-level input and output were null. All readable content lived in the GENERATION observation. When adding items to an annotation queue, always target the GENERATION observation, not the trace.
 
 ---
 
 ### Step 1.2: Select a representative sample
 
-Target ~100 traces — enough variety to surface distinct failure modes. The goal is coverage, not randomness: over-represent edges and anything already flagged as problematic.
+Target ~100 traces. The goal is coverage, not randomness: over-represent edges and anything already flagged as problematic.
 
 **Signals to look for:**
 
 - **Tags:** If your app tags traces with `error` or `flagged`, include all of them.
-- **Existing scores:** If you have a judge or human feedback scores, prioritise low-scoring traces.
+- **Existing scores:** If you have a judge or human feedback scores, prioritize low-scoring traces.
 - **Latency:** High-latency traces often involve tool use or complex reasoning.
 - **Cost:** Very low-cost traces tend to be short refusals. Very high-cost ones tend to be verbose. Both worth including.
-- **Multi-turn sessions:** Sessions with many turns are closer to real usage than single-turn ones.
+- **Multi-turn sessions:** Sessions with many turns are closer to real usage.
 
 Browse and filter traces in Langfuse under **Traces** using the latency, cost, and tag filters.
 
-**No production data yet?** Run your app against representative synthetic inputs, capture the traces in Langfuse, and sample from those. The Langfuse [datasets overview](https://langfuse.com/docs/datasets/overview) shows how to manage test datasets.
+**No production data yet?** Run your app against representative synthetic inputs, capture the traces in Langfuse, and sample from those. See the Langfuse [datasets overview](https://langfuse.com/docs/datasets/overview).
 
 **The Dad Tech Support sample** (100 traces across 6 tiers):
 
@@ -135,7 +129,7 @@ Browse and filter traces in Langfuse under **Traces** using the latency, cost, a
 | High cost (top quartile) | Longer responses | 16 |
 | Mid cost (rest) | Typical interactions | 15 |
 
-One finding: of 478 sessions, only 11 were multi-turn. The rest were single-turn development interactions, possibly synthetic. Worth confirming scope before committing to a sample.
+One finding: of 478 sessions, only 11 were multi-turn. The rest were single-turn, possibly synthetic. Worth confirming scope before committing to a sample.
 
 ---
 
@@ -154,9 +148,7 @@ These two scores are fixed for every open-coding pass.
 
 ![Score config creation form](/images/cookbook/error-analysis-llm-applications/add_new_score_config.png)
 
-<Callout type="info">
 Always write a clear description for every score config. It appears next to the score field in the annotation UI. Without it, annotators guess.
-</Callout>
 
 **Create the annotation queue** (Annotations → Queues → Create):
 
@@ -164,11 +156,9 @@ Name it with the date and use case, e.g. `2026-04-16 Open Coding - Dad Tech Supp
 
 **Add your sample to the queue:**
 
-In the Traces view, navigate to each trace's GENERATION observation and add it to the queue. You can also multi-select observations in the table and add them to the queue in bulk. Target the observation, not the trace, so annotators see the conversation content.
+In the Traces view, navigate to each trace's GENERATION observation and add it to the queue. You can also multi-select observations and add them in bulk. Target the observation, not the trace.
 
 ![Multi-selecting observations to add to annotation queue](/images/cookbook/error-analysis-llm-applications/multi_select_generations.png)
-
-Share the direct queue link with whoever is annotating.
 
 ---
 
@@ -177,12 +167,12 @@ Share the direct queue link with whoever is annotating.
 Work through the annotation queue in Langfuse. For each trace:
 
 1. Read the full conversation in the observation view
-2. Write what you observe in the `open_coding` field, plain language, no diagnosis
+2. Write what you observe in `open_coding`, plain language, no diagnosis
 3. Set `pass_fail_assessment` to Pass or Fail
 
 **Rules for good notes:**
 
-- **Describe behaviour, don't diagnose.** Write *"bot said it couldn't look up printer manuals despite the system prompt allowing web search"*, not *"web search tool is probably broken."*
+- **Describe behaviour, don't diagnose.** Write "bot said it couldn't look up printer manuals despite the system prompt allowing web search", not "web search tool is probably broken."
 - **Focus on the first thing that went wrong.** Errors cascade. Fix the root cause, not the downstream symptom.
 - **Don't start with a list of expected failures.** A pre-defined list causes confirmation bias.
 
@@ -200,7 +190,7 @@ Work through the annotation queue in Langfuse. For each trace:
 | 006 | Icon did not exist that was mentioned by the agent | Fail |
 | 007 | (clean interaction) | Pass |
 
-The first long session (12 turns) surfaced a revealing failure immediately. The system prompt said: *"You are allowed to use WebSearch. Never say that you cannot look things up online."* But the bot said *"I can't look up printer manuals for you"* twice, then capitulated after the user pushed back a third time. A direct contradiction between prompt and behaviour. This kind of finding only comes from reading real traces.
+The first long session (12 turns) surfaced a revealing failure immediately. The system prompt said: "You are allowed to use WebSearch. Never say that you cannot look things up online." But the bot said "I can't look up printer manuals for you" twice, then capitulated after the user pushed back a third time. Direct contradiction between prompt and behaviour. This kind of finding only comes from reading real traces.
 
 **Stop reviewing when new traces stop revealing new kinds of failures.** Rule of thumb: no new category in the last 20 traces. Around 100 total works for most apps.
 
@@ -213,7 +203,7 @@ Once you have 30-50 notes, group them into categories. Goal: 5-10 distinct, name
 **How to cluster:**
 
 1. Read through all failure notes
-2. Group similar ones together
+2. Group similar ones
 3. Split notes that look alike but have different root causes
 4. Merge notes that share the same underlying problem
 5. Name each group and write a one-sentence definition
@@ -221,7 +211,7 @@ Once you have 30-50 notes, group them into categories. Goal: 5-10 distinct, name
 **Rules for good categories:**
 
 - **Split when root causes differ.** "Bot hallucinated a settings icon" and "bot refused to search the web" both look like information problems, but one is a missing device lookup and the other is a prompt contradiction. Different fixes.
-- **Group when root causes are the same.** Multiple notes about missing filters for different fields become one category: *Missing Query Constraints*.
+- **Group when root causes are the same.** Multiple notes about missing filters for different fields become one category: `missing_query_constraints`.
 - **Name after what broke.** `missing_device_lookup` beats `information_quality`. `identity_not_disclosed` beats `transparency`.
 
 **LLM-assisted clustering:**
@@ -243,7 +233,7 @@ Always review the proposed groupings yourself. LLMs cluster by surface similarit
 
 **The Dad Tech Support failure taxonomy:**
 
-The LLM's initial clustering merged passive identity failure (didn't disclose being a support agent) with active impersonation (acted as the real child). Both are identity problems but have different root causes. The passive case needs a disclosure instruction. The active case needs the persona instruction dialled back. User review caught this.
+The LLM's initial clustering merged passive identity failure (didn't disclose being a support agent) with active impersonation (acted as the real child). Both are identity problems, but they have different root causes. The passive case needs a disclosure instruction. The active case needs the persona instruction dialled back. User review caught this.
 
 After two rounds of refinement:
 
@@ -266,9 +256,9 @@ Create one boolean score config per failure category (Settings → Scores → Cr
 
 Write a clear description for each, one sentence explaining what `true` means:
 
-> *"True if the bot gave generic guidance without checking how this feature actually looks or works on the Huawei Y5p, including cases where it mentioned a settings path or icon that does not exist on this phone."*
+> "True if the bot gave generic guidance without checking how this feature actually looks or works on the Huawei Y5p, including cases where it mentioned a settings path or icon that does not exist on this phone."
 
-**Create a new annotation queue** (Annotations → Queues → Create) with all score configs: the original `open_coding` and `pass_fail_assessment` plus one boolean config per failure category. Langfuse annotation queues can't be modified after creation, but scores on observations are preserved — re-add the same 100 observations to the new queue and the previous notes and pass/fail scores will still be visible while annotators apply the category labels.
+**Create a new annotation queue** with all score configs: the original `open_coding` and `pass_fail_assessment` plus one boolean per failure category. Langfuse annotation queues can't be modified after creation, but scores on observations are preserved. Re-add the same 100 observations to the new queue and the previous notes and pass/fail scores will still be visible while annotators apply the category labels.
 
 ---
 
@@ -280,7 +270,7 @@ The failure rate for a category is the percentage of traces where that category 
 
 ![Failure rates per category in Langfuse dashboard](/images/cookbook/error-analysis-llm-applications/score_breakdown.png)
 
-**Dad Tech Support results** (illustrative — based on a partial run of 19 labeled traces; in your own analysis, complete all 100 before finalizing priorities):
+**Dad Tech Support results** (illustrative, based on 19 labeled traces; complete all 100 before finalizing priorities):
 
 ```
 impersonates_child                  58%  ████████████
@@ -317,7 +307,7 @@ Fix first. Don't build an evaluator for something you can resolve in the prompt.
 Not every remaining failure needs one:
 - Is the failure rate high enough to matter?
 - What's the business impact when it occurs?
-- Will someone actually iterate on this evaluator, or is it checkbox work?
+- Will someone actually iterate on this evaluator?
 
 **3. What kind of evaluator?**
 
@@ -346,10 +336,10 @@ Langfuse has a built-in [online evaluation](https://langfuse.com/docs/scores/mod
 
 ## What comes next
 
-After one round of error analysis you have a prioritised list of things to fix and a set of categories to monitor.
+After one round of error analysis you have a prioritized list of things to fix and a set of categories to monitor.
 
 1. **Apply the prompt fixes.** Use Langfuse [prompt management](https://langfuse.com/docs/prompts/get-started) to version and track changes.
-2. **Set up evaluators** for categories that warrant them, starting with the highest-impact failure that requires judgment.
+2. **Set up evaluators** for categories that warrant them, starting with the highest-impact failure requiring judgment.
 3. **Re-run after the next significant change.** Failure distributions shift. A prompt fix can resolve one category and reveal another. Run error analysis after prompt rewrites, model switches, new features, and production incidents.
 
 ---
@@ -363,4 +353,4 @@ After one round of error analysis you have a prioritised list of things to fix a
 | Annotating traces instead of observations | Annotators see nothing in OTel-instrumented apps | Target the GENERATION observation |
 | Building evaluators before fixing prompt gaps | Evaluator catches failures a prompt fix would have prevented | Fix obvious gaps first |
 | Treating this as a one-time activity | Failure distributions shift with every significant change | Re-run after prompt rewrites, model switches, and incidents |
-| Delegating the trace review to an LLM | You miss the muscle-building. Reading real traces teaches you what your users actually need and often reveals where your app's scope should expand. No LLM summary substitutes for this. | You review the first 30-50 traces yourself, always |
+| Delegating trace review to an LLM | You miss the muscle-building. Reading real traces teaches you what your users actually need. | You review the first 30-50 traces yourself, always |
