@@ -3,12 +3,14 @@ title: Clickhouse handling failed migrations in self-hosted Langfuse
 tags: [self-hosting]
 ---
 
+import { Details, Summary } from "@/components/Details";
+
 # Clickhouse handling failed migrations in self-hosted Langfuse
 
 If you encounter a migration error, the migration tool will prevent you from running additional migrations on the same database. You'll see an error message like "Dirty database version 1. Fix and force version" even after fixing the erred migration. This means your database has been marked as 'dirty'. You need to investigate whether the migration was partially applied or not applied at all. After determining the actual state, force your database to the version that accurately reflects its current state. Once you've forced the correct version and fixed the migration, your database will be 'clean' again, allowing you to proceed with subsequent migrations.
 
-<details>
-<summary>Code Example to fix failed migrations</summary>
+<Details>
+<Summary>Code Example to fix failed migrations</Summary>
 
 Let's assume your migration 16 failed. You have corrected the failed migration. If you try to migrate again, migrate will STILL refuse:
 
@@ -29,4 +31,4 @@ If you migrate again, the output will now be:
 16/u migration_name (12.718637ms)
 ```
 
-</details>
+</Details>

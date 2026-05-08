@@ -3,6 +3,8 @@ title: Queue management with BullMQ Admin API in self-hosted Langfuse
 tags: [self-hosting]
 ---
 
+import { Details, Summary } from "@/components/Details";
+
 # Queue management with BullMQ Admin API in self-hosted Langfuse
 
 Langfuse uses BullMQ for managing background job queues. The BullMQ admin endpoint allows you to monitor queue lengths, replay failed events, and remove unwanted events from the queue. This is particularly useful for troubleshooting event processing issues and managing queue backlogs.
@@ -85,8 +87,8 @@ Available status options: `completed`, `failed`, `active`, `delayed`, `prioritiz
 
 ## API Specification
 
-<details>
-  <summary>Complete BullMQ Admin API Specification</summary>
+<Details>
+  <Summary>Complete BullMQ Admin API Specification</Summary>
 
 ```yaml
 openapi: 3.0.1
@@ -177,4 +179,4 @@ paths:
                     type: string
 ```
 
-</details>
+</Details>
