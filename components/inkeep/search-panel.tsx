@@ -328,7 +328,7 @@ function useAiPanelNarrowLayout() {
  * Mobile keyboards shrink the visual viewport while `position: fixed` often stays tied to the
  * layout viewport — the composer can sit under the keyboard. Approximate overlap and lift the panel.
  */
-function useVisualViewportBottomOverlap(active: boolean) {
+export function useVisualViewportBottomOverlap(active: boolean) {
   const [px, setPx] = useState(0);
 
   useEffect(() => {

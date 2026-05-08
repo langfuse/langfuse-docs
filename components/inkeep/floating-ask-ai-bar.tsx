@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAISearchContext, useChatContext, buildUserMessage } from './search-context';
+import { useVisualViewportBottomOverlap } from './search-panel';
 import { FloatingAskAIButton } from './ask-ai-button';
 
 // Pages where we suppress the prominent bar and fall back to the legacy black pill.
@@ -53,10 +54,16 @@ export function FloatingAskAIBar() {
   const chat = useChatContext();
   const [input, setInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const openRef = useRef(open);
+  openRef.current = open;
+  const keyboardOverlapPx = useVisualViewportBottomOverlap(true);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      // While the panel is open, let the panel/AISearchTrigger handle the key —
+      // don't focus the (now-hidden) bar input.
+      if (openRef.current) return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.repeat) return;
       if (e.key.toLowerCase() !== 'a') return;
       const t = e.target;
       if (
@@ -65,11 +72,14 @@ export function FloatingAskAIBar() {
         t instanceof HTMLSelectElement
       ) return;
       if (t instanceof HTMLElement && t.isContentEditable) return;
+      // Suppress AISearchTrigger's bare-`a` shortcut so it doesn't open the
+      // panel underneath us. We register in capture phase so we run first.
+      e.stopImmediatePropagation();
       e.preventDefault();
       inputRef.current?.focus();
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener('keydown', handler, { capture: true });
+    return () => window.removeEventListener('keydown', handler, { capture: true });
   }, []);
 
   const submit = (e?: SyntheticEvent) => {
@@ -85,11 +95,21 @@ export function FloatingAskAIBar() {
 
   return (
     <div
+      // `inert` removes the subtree from focus order and the accessibility
+      // tree while the panel is open, so Tab navigation and screen readers
+      // don't land on the (visually hidden) input/submit button.
+      inert={open}
+      aria-hidden={open || undefined}
       className={cn(
         'fixed bottom-4 left-1/2 -translate-x-1/2 z-20 w-[min(427px,calc(100%-2rem))]',
         'transition-[translate,opacity] duration-200',
         open && 'translate-y-16 opacity-0 pointer-events-none',
       )}
+      style={
+        keyboardOverlapPx > 0
+          ? { bottom: `calc(1rem + ${keyboardOverlapPx}px)` }
+          : undefined
+      }
     >
       <form
         onSubmit={submit}
@@ -105,7 +125,7 @@ export function FloatingAskAIBar() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a question..."
+          placeholder="Ask a question"
           className={cn(
             'flex-1 min-w-0 bg-transparent border-0 outline-none',
             'font-sans text-[13px] font-[450] leading-[150%] tracking-[-0.06px]',
