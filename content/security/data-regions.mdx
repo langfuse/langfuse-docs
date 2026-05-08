@@ -85,6 +85,16 @@ S3 media buckets store uploaded media items referenced from traces. They are not
 
 All secondary regions are within the same legal jurisdiction as their primary region (EU ↔ EU, US ↔ US, Japan ↔ Japan), so cross-region replication does not change the data-residency or cross-border-transfer posture declared in the [DPA](/security/dpa) and [HIPAA BAA](/security/hipaa).
 
+<Callout type="info">
+  **Protecting tracing data against a regional outage:** Since ClickHouse
+  tracing data and S3 media buckets are not replicated cross-region, we
+  recommend using the [Blob Storage
+  integration](/docs/api-and-data-platform/features/export-to-blob-storage) to
+  continuously export traces and observations into your own bucket. If that
+  bucket resides outside of your Langfuse Cloud region, your tracing data is
+  protected against a regional failure.
+</Callout>
+
 ## Self-hosted Instances
 
 Alternatively, you can self-host Langfuse for full control over your data and infrastructure. For installation and configuration, see: [Self-hosting guide](/self-hosting)
