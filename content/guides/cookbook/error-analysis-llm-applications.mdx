@@ -1,14 +1,13 @@
 ---
-title: Error Analysis for LLM Applications
+title: "Error Analysis for LLM Applications: A Step-by-Step Guide"
 sidebarTitle: Error Analysis
-description: Understand how your system fails before you build evaluators for it. A step-by-step guide to open coding, clustering failure categories, and deciding what to fix.
+description: A hands-on, step-by-step guide to error analysis — open coding, clustering failure categories, and deciding what to fix before you build evaluators.
 category: Evaluation
 ---
 
+# Error Analysis for LLM Applications: A Step-by-Step Guide
 
-# Error Analysis for LLM Applications
-
-Understand how your system fails before you build evaluators for it.
+A hands-on walkthrough for understanding how your system fails before you build evaluators for it.
 
 ---
 
@@ -18,10 +17,25 @@ Copy the prompt below and paste it into your coding agent:
 
 ```
 I want to do a systematic error analysis of my LLM application to understand how it fails.
-Please install the langfuse skill and langfuse CLI and guide me step by step through error analysis.
+Please install the Langfuse skill (https://github.com/langfuse/skills/tree/main/skills/langfuse)
+and the Langfuse CLI (https://github.com/langfuse/langfuse-cli), then guide me step by step
+through error analysis.
 ```
 
 The skill runs every step alongside you: pulling traces, creating annotation queues, clustering your notes, and computing failure rates. You stay in control of the domain decisions.
+
+<details>
+<summary>What to expect when you run this</summary>
+
+The agent plans the work as a TODO list mapped to the five steps, then walks through each one with you — pulling traces, setting up score configs and annotation queues, prompting you for observations, and proposing failure clusters you can refine.
+
+![Claude Code planning the error analysis steps as a TODO list](/images/cookbook/error-analysis-llm-applications/claude_code_interaction.png)
+
+At the clustering step it groups your annotations into a candidate failure taxonomy with definitions and counts, mapped against any prior categories so you can see where the distribution is shifting.
+
+![Claude Code clustering annotations into a failure taxonomy](/images/cookbook/error-analysis-llm-applications/claude_clusters.png)
+
+</details>
 
 ---
 
@@ -31,7 +45,7 @@ Read real traces, understand how your app fails, and build a taxonomy of failure
 
 The process uses two concepts from qualitative research: **open coding** (read traces and write free-text observations, no pre-defined categories) and **axial coding** (group those observations into named, distinct failure categories with a shared root cause).
 
-For an introduction to the method, see the [Langfuse blog post](https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications).
+This guide is self-contained — you can follow it end-to-end without prior reading. For background on why error analysis matters, see the [Langfuse blog post](https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications).
 
 ---
 
@@ -71,9 +85,7 @@ Decide which unit to annotate before setting up the queue.
 
 **Check the observation level.** In OpenTelemetry-instrumented apps, trace-level input/output is often null. The actual content lives in a GENERATION observation — the span wrapping the LLM call. Expand the observation tree in any trace to confirm.
 
-<Frame>
 ![Trace detail view with GENERATION span highlighted](/images/cookbook/error-analysis-llm-applications/trace_detail_view_generation.png)
-</Frame>
 
 In the Dad Tech Support example:
 

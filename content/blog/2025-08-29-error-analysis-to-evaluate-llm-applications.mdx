@@ -40,6 +40,16 @@ This guide describes a four-step process to **identify, categorize, and quantify
 3. [Structure failure modes](#structure-failure-modes)
 4. [Label and quantify](#label-and-quantify)
 
+import { BookOpen } from "lucide-react";
+
+<Callout type="info">
+**Want the full step-by-step guide?** This post explains the framework. The companion cookbook walks through every step in Langfuse — score configs, queue setup, clustering, dashboards, and a worked example end-to-end.
+
+<Cards num={1}>
+  <Card title="Error Analysis: Step-by-Step Guide" href="/guides/cookbook/error-analysis-llm-applications" icon={<BookOpen />} arrow />
+</Cards>
+</Callout>
+
 ---
 
 I'll demonstrate this process using an [example chatbot in the Langfuse documentation](/docs/demo) that uses the Vercel AI SDK and has access to a RAG tool to retrieve documents from the Langfuse documentation. The example chat app logs traces into the Langfuse example project and has already answered 19k user queries in the past year.
@@ -79,13 +89,13 @@ The [Annotation Queue](/docs/evaluation/evaluation-methods/annotation#annotation
 
 In the next step, we open our Annotation Queue and carefully review every trace and its associated tool use. The objective is to apply raw, descriptive labels without forcing them into predefined categories.
 
-For each trace, assign two annotations:
+Set up two score configs in Langfuse (Settings → Scores → Create) and add both to your annotation queue:
 
-- A binary score: Pass or Fail. This forces a clear judgment call.
+- A categorical Pass / Fail score. This forces a clear judgment call.
 
-- A free-text comment: Describe the first point of failure you observe. This process is called [open coding](https://hamel.dev/blog/posts/evals-faq/#open-coding), as we are not forcing any categories on the data.
+- A free-text score (data type `TEXT`) describing the first point of failure you observe. This process is called [open coding](https://hamel.dev/blog/posts/evals-faq/#open-coding) — we are not forcing any categories on the data.
 
-If you have traces with multiple errors, focusing on the first failure is efficient. A single upstream error, like incorrect document retrieval, often causes multiple downstream issues. Fixing the root cause resolves them all. Your comment should be a raw observation, not a premature diagnosis.
+If you have traces with multiple errors, focusing on the first failure is efficient. A single upstream error, like incorrect document retrieval, often causes multiple downstream issues. Fixing the root cause resolves them all. Your free-text observation should be a raw description, not a premature diagnosis.
 
 Here are some examples from our example chat app:
 
@@ -129,9 +139,9 @@ import {
 
 ## 3. Structure Failure Modes [#structure-failure-modes]
 
-After annotating all traces, the next step is to structure your free-text comments into a coherent taxonomy.
+After annotating all traces, the next step is to structure your free-text observations into a coherent taxonomy.
 
-Export your comments from the Langfuse annotation job (you can [query your comments via the Langfuse API](https://colab.research.google.com/drive/1ErETZNWHyOjkG262bZHh-j3Vo9z83qUj)). You can use an LLM to perform an initial clustering of these notes into related themes. Review and manually refine the LLM's output to ensure the categories are distinct, comprehensive, and accurately reflect your application's specific issues.
+Export the values of your free-text score from the Langfuse annotation job (you can [query scores via the Langfuse API](https://langfuse.com/docs/api)). You can use an LLM to perform an initial clustering of these notes into related themes. Review and manually refine the LLM's output to ensure the categories are distinct, comprehensive, and accurately reflect your application's specific issues.
 
 For our docs chatbot, we used the following prompt on our exported annotations:
 
@@ -173,7 +183,7 @@ Here are the results after labeling our dataset:
 
 This error analysis produces a quantified, application-specific understanding of your primary issues. These insights provide a clear roadmap for targeted improvements, whether in your prompts, RAG pipeline, or model selection.
 
-The structured failure modes you defined serve as the foundation for building automated evaluators, which can scale this analysis across your application. However, before setting up automated evaluators, ensure you first address the obvious issues encountered during the error analysis. You can typically go through multiple rounds of this process before reaching a plateau.
+The structured failure modes you defined serve as the foundation for building automated evaluators. Not every category warrants one though: fix the obvious gaps directly (missing or contradicting prompt instructions, misconfigured tools, engineering bugs), and set up evaluators for what remains — code-based checks for objective criteria, LLM-as-judge for ones requiring judgment. You can typically go through multiple rounds of this process before reaching a plateau.
 
 In the next blog post, we will set up automated evaluators and use them to continuously improve our example chatbot:
 
@@ -182,3 +192,20 @@ import { FileCode } from "lucide-react";
 <Cards num={1}>
   <Card title="Automated Evaluations" href="/blog/2025-09-05-automated-evaluations" icon={<FileCode />} arrow />
 </Cards>
+
+## Dive Deeper
+
+For a hands-on, step-by-step walkthrough of the entire workflow — from selecting a representative sample to setting up score configs, clustering observations, and computing failure rates in a Langfuse dashboard — see the companion cookbook:
+
+<Cards num={1}>
+  <Card title="Error Analysis: Step-by-Step Guide" href="/guides/cookbook/error-analysis-llm-applications" icon={<BookOpen />} arrow />
+</Cards>
+
+Or let your coding agent guide you through it. Paste this prompt into Claude Code (or any coding agent) and the Langfuse skill will run every step alongside you:
+
+```
+I want to do a systematic error analysis of my LLM application to understand how it fails.
+Please install the Langfuse skill (https://github.com/langfuse/skills/tree/main/skills/langfuse)
+and the Langfuse CLI (https://github.com/langfuse/langfuse-cli), then guide me step by step
+through error analysis.
+```
