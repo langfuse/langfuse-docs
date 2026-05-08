@@ -21,8 +21,6 @@ Datasets are a collection of inputs and, optionally, expected outputs that can b
 
 `Dataset`s are a collection of `DatasetItem`s.
 
-<div className="border rounded p-2 my-4">
-
 ```mermaid
 classDiagram
 direction LR
@@ -45,8 +43,6 @@ direction LR
 
     Dataset "1" --> "n" DatasetItem
 ```
-
-</div>
 
 #### Dataset object [#dataset-object]
 
@@ -77,7 +73,6 @@ direction LR
 Dataset runs are used to run a dataset through your LLM application and optionally apply evaluation methods to the results. This is often referred to as Experiment run.
 
 <br />
-<div className="border rounded p-2">
 
 ```mermaid
 classDiagram
@@ -100,8 +95,6 @@ direction LR
         observationId
     }
 ```
-
-</div>
 
 #### DatasetRun object [#datasetrun-object]
 
@@ -135,8 +128,6 @@ An experiment can combine a few Langfuse objects:
 - Optionally `Score`s can be added to the `Trace`s to evaluate the output of the LLM application during the `DatasetRun`.
 
 <br />
-
-<div className="border rounded p-2">
 
 ```mermaid
 classDiagram
@@ -203,8 +194,6 @@ direction LR
     Observation "1" --> "n" Score
     Trace "1" --> "n" Score
 ```
-
-</div>
 
 See the [Concepts page](/docs/evaluation/core-concepts) for more information on how these objects work together conceptually.
 See the [observability core concepts page](/docs/observability/data-model) for more details on traces and observations.
