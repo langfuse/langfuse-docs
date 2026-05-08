@@ -16,16 +16,31 @@ Learn more about Langfuse's data security and privacy measures concerning the st
 
 ## How it works
 
-1. You define a custom masking function and pass it to the Langfuse client constructor.
-2. All event inputs, outputs, and metadata are processed through this function.
-3. The masked data is then sent to the Langfuse server.
+Langfuse supports two client-side masking hooks. Choose the hook based on where
+the data is created.
 
-This approach ensures that you have complete control over the event input, output, and metadata traced by your application.
+| Hook | SDK | Use for | Important behavior |
+| --- | --- | --- | --- |
+| `mask` | Python, JS/TS | Data written through Langfuse SDK APIs, such as observation `input`, `output`, and `metadata` | Runs when Langfuse SDK data is recorded. It is the simplest option for data you pass directly to Langfuse. |
+| `mask_otel_spans` | Python | Final OpenTelemetry span attributes before this Langfuse client exports them to Langfuse | Runs after span filtering and media handling. It is the right option for third-party OTEL instrumentation and final exported span attributes. |
+| `should_export_span` / `shouldExportSpan` | Python, JS/TS | Dropping or keeping whole spans | Use this for span-level filtering. Do not use masking callbacks to drop spans. |
+
+`mask_otel_spans` only changes the copy of the OpenTelemetry spans exported by
+the Langfuse Python SDK. It does not mutate the original OpenTelemetry span. If
+the same span is also exported to a third-party observability backend, such as
+Datadog, Honeycomb, Grafana Tempo, or an OpenTelemetry Collector, that exporter
+receives its own unmodified span copy.
+
+Use `mask` when you control the data written through Langfuse SDK methods. Use
+`mask_otel_spans` when sensitive data is emitted by third-party OpenTelemetry
+instrumentation or when you need to inspect the final OTEL attributes that will
+be sent to Langfuse.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "Langchain (JS/TS)"]}>
 <Tab>
 
-Define a masking function. The masking function will apply to all event inputs, outputs, and metadata regardless of the Langfuse-maintained integration you are using.
+Define a masking function. The `mask` function applies to event inputs, outputs,
+and metadata written through Langfuse SDK APIs.
 
 ```python
 def masking_function(data: any, **kwargs) -> any:
@@ -147,6 +162,98 @@ const handler = new CallbackHandler({
 </Tab>
 
 </LangTabs>
+
+## Mask OpenTelemetry span attributes in Python [#mask-otel-spans]
+
+Use `mask_otel_spans` when you need to redact OpenTelemetry spans before the
+Langfuse Python SDK sends them to Langfuse. This is especially useful for spans
+created by third-party instrumentations such as OpenInference, OpenLLMetry,
+OpenLIT, LiteLLM, or provider-specific OTEL libraries.
+
+The callback receives one OpenTelemetry export batch. A batch is not guaranteed
+to contain a complete trace or request. Return `None` to leave the batch
+unchanged, or return sparse patches for the spans you want to change.
+
+```python
+from typing import Optional
+
+from langfuse import Langfuse
+from langfuse.types import (
+    MaskOtelSpansParams,
+    MaskOtelSpansResult,
+    OtelSpanPatch,
+)
+
+SENSITIVE_ATTRIBUTE_PREFIXES = (
+    "gen_ai.prompt.",
+    "gen_ai.completion.",
+    "llm.input_messages.",
+    "llm.output_messages.",
+)
+SENSITIVE_ATTRIBUTE_KEYS = {
+    "gen_ai.prompt",
+    "gen_ai.completion",
+}
+
+
+def mask_otel_spans(
+    *, params: MaskOtelSpansParams
+) -> Optional[MaskOtelSpansResult]:
+    patches = {}
+
+    for identifier, span in params.spans.items():
+        sensitive_keys = tuple(
+            key
+            for key in span.attributes
+            if key in SENSITIVE_ATTRIBUTE_KEYS
+            or key.startswith(SENSITIVE_ATTRIBUTE_PREFIXES)
+        )
+
+        if not sensitive_keys:
+            continue
+
+        patches[identifier] = OtelSpanPatch(
+            delete_attributes=sensitive_keys,
+            set_attributes={"masking.applied": True},
+        )
+
+    return MaskOtelSpansResult(span_patches=patches)
+
+
+langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
+```
+
+`mask_otel_spans` runs after `should_export_span` accepts a span and after
+export-stage media handling converts supported media payloads into Langfuse
+media references. The callback can:
+
+- Read span IDs, parent span ID, name, instrumentation scope, attributes, and resource attributes.
+- Delete exact attribute keys.
+- Set or replace OpenTelemetry-compatible attribute values.
+
+The callback cannot change span IDs, span names, parent relationships, resource
+attributes, events, links, or instrumentation scope.
+
+<Callout type="warning" title="Failure Behavior">
+  If `mask_otel_spans` raises an exception or returns an invalid batch result,
+  Langfuse drops the whole export batch. If one returned span patch is invalid,
+  Langfuse drops only that span from the Langfuse export. Keep the function
+  deterministic and add explicit fallback behavior.
+</Callout>
+
+### Using external PII services
+
+If you use an IO-bound PII detection or redaction service, `mask_otel_spans` is
+usually the right place to call it for third-party OTEL span data. Normal batch
+exports run outside the main application path, so this avoids blocking the code
+that creates or ends spans.
+
+Keep the callback synchronous, bounded, and batch-oriented:
+
+- Batch candidate attributes from `params.spans` and call the PII service once per export batch where possible.
+- Use strict network timeouts.
+- Decide whether failures should drop the batch, delete sensitive attributes, or export the original values.
+- Avoid request-local state, the current active span, and async-only APIs. During `flush()` or shutdown, the callback may run on the caller thread.
 
 ## Examples
 

@@ -163,12 +163,19 @@ You can read more about using Langfuse with an existing OpenTelemetry setup [her
 
 ## Mask sensitive data
 
-If your trace data (inputs, outputs, metadata) might contain sensitive information (PII, secrets), you can provide a mask function during client initialization. This function will be applied to all relevant data before it’s sent to Langfuse.
+If your trace data might contain sensitive information (PII, secrets), you can
+provide a masking function before data is sent to Langfuse. Use the dedicated
+[masking guide](/docs/observability/features/masking) for the full decision
+tree across SDK-level masking, OpenTelemetry export-stage masking, and span
+filtering.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 
-The `mask` function should accept data as a keyword argument and return the masked data. The returned data must be JSON-serializable.
+The `mask` function should accept data as a keyword argument and return the
+masked data. The returned data must be JSON-serializable. Use this for data
+written through Langfuse SDK APIs such as observation `input`, `output`, and
+`metadata`.
 
 
 ```python
@@ -186,6 +193,12 @@ def pii_masker(data: any, **kwargs) -> any:
 
 langfuse = Langfuse(mask=pii_masker)
 ```
+
+For spans emitted by third-party OpenTelemetry instrumentation, use
+`mask_otel_spans` instead. It runs on the final span attributes exported by the
+Langfuse Python SDK, after span filtering and media handling, and only affects
+the spans sent to Langfuse. See
+[Mask OpenTelemetry span attributes in Python](/docs/observability/features/masking#mask-otel-spans).
 </Tab>
 <Tab title="JS/TS SDK">
 

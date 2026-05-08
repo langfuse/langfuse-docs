@@ -116,6 +116,15 @@ The quickest path to start tracing with Langfuse is the new **OTEL-native Langfu
 
 Because it lives in the shared OpenTelemetry context, spans from other OTEL-instrumented libraries can be exported to Langfuse too. By default, Langfuse focuses on LLM-relevant spans (Langfuse SDK spans, spans with `gen_ai.*` attributes, and known LLM instrumentors). To export everything, use a permissive custom filter as described in the [advanced SDK docs](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
 
+<Callout type="info" title="SDK export hooks">
+  Python SDK export hooks such as
+  [`mask_otel_spans`](/docs/observability/features/masking#mask-otel-spans)
+  and export-stage media handling run only when spans are exported through the
+  Langfuse Python SDK. Spans sent directly to `/api/public/otel` through a
+  collector or raw OTLP exporter do not run Langfuse SDK masking or media upload
+  logic.
+</Callout>
+
 Get started by following the dedicated guide for the Python implementation here: [/docs/observability/sdk/overview](/docs/observability/sdk/overview).
 
 ### OpenTelemetry endpoint
