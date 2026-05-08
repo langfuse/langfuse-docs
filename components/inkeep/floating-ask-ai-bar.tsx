@@ -117,7 +117,7 @@ export function FloatingAskAIBar() {
         <kbd
           className={cn(
             'hidden sm:flex justify-center items-center not-italic shrink-0',
-            'h-[20px] w-[20px] rounded-px',
+            'h-[26px] w-[26px] rounded-[2px]',
             'border border-[rgba(64,61,57,0.20)] dark:border-[rgba(184,182,160,0.30)]',
             'bg-[rgba(64,61,57,0.10)] dark:bg-[rgba(184,182,160,0.12)]',
             'font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]',
