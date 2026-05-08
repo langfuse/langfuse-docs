@@ -11,14 +11,24 @@ import { ForceLightMode } from "@/components/ForceLightMode";
  * and the floating AI button. Used by HomeLayout and standalone layouts
  * (e.g. blog) that manage their own content grid.
  */
-export function PageChrome({ children }: { children: ReactNode }) {
+export function PageChrome({
+  children,
+  forceLight = true,
+}: {
+  children: ReactNode;
+  forceLight?: boolean;
+}) {
   return (
     <AISearch>
-      <Script
-        id="force-light-home"
-        strategy="beforeInteractive"
-      >{`document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light'`}</Script>
-      <ForceLightMode />
+      {forceLight ? (
+        <>
+          <Script
+            id="force-light-home"
+            strategy="beforeInteractive"
+          >{`document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light'`}</Script>
+          <ForceLightMode />
+        </>
+      ) : null}
       <Banner />
       <Navbar />
       {children}

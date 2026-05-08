@@ -52,27 +52,31 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
   if (!previous && !next) return null;
 
   return (
-    <div className={cn("grid grid-cols-2 gap-2", className)} {...props}>
+    <div
+      className={cn("flex flex-col sm:flex-row gap-2", className)}
+      {...props}
+    >
       {previous ? (
         <Button
           href={previous.url}
           variant="secondary"
           size="small"
-          className="w-auto"
-          wrapperClassName="justify-self-start"
+          wrapperClassName="flex-1 min-w-0 sm:max-w-[50%]"
           icon={<ArrowLeft className="h-3.5 w-3.5" />}
         >
           {previous.name}
         </Button>
-      ) : null}
+      ) : (
+        <div className="hidden sm:block flex-1" />
+      )}
 
       {next ? (
         <Button
           href={next.url}
           variant="secondary"
           size="small"
-          className="w-auto"
-          wrapperClassName="col-start-2 justify-self-end"
+          className="!justify-end"
+          wrapperClassName="flex-1 min-w-0 sm:max-w-[50%] sm:ml-auto"
           icon={<ArrowRight className="h-3.5 w-3.5" />}
           iconPosition="end"
         >

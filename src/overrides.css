@@ -228,6 +228,29 @@
   padding: 16px 0px;
 }
 
+/* Compact variant (handbook, security): on desktop there is no secondary nav row,
+   so reduce top padding to close the gap between the primary navbar and the first
+   sidebar section heading. Also remove the top fade mask so the first item isn't
+   clipped (the sidebar sits flush against the navbar). */
+@media (min-width: 768px) {
+  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] {
+    padding-top: 8px;
+    mask-image: linear-gradient(to bottom, white, white calc(100% - 12px), transparent) !important;
+  }
+  /* Hide the top separator line and its corner decorators on the first section
+     heading (it sits flush against the navbar in compact mode). */
+  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type {
+    margin-top: 0;
+    padding-top: 4px;
+  }
+  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type::after {
+    display: none;
+  }
+  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type > span[aria-hidden] {
+    display: none !important;
+  }
+}
+
 /* Inner viewport: allow full height so the aside scrolls (Radix or first child of scroll area) */
 #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport],
 #nd-docs-layout #nd-sidebar > div.flex-1 > div:first-child,
@@ -812,13 +835,13 @@ ul[data-gh-discussions-list] {
   :where(table):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
     border-radius: 0;
     font-family: var(--font-sans);
-    background-color: var(--surface-1);
+    background-color: var(--surface-bg);
     font-weight: 430;
     font-size: 0.813rem;
   }
 
   :where(th):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
-    background-color: var(--surface-bg);
+    background-color: var(--surface-1);
   }
 
   :where(h1, h2, h3, h4, h5, h6):not(
@@ -1130,6 +1153,24 @@ details > summary {
   to {
     width: 0px;
   }
+}
+.ellipsis-dots::after {
+  content: '';
+  animation: ellipsis 1.4s steps(4, end) infinite;
+}
+@keyframes ellipsis {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+
+/*
+ * content-width-type: docs — lock the sibling footer to 680px at xl,
+ * matching the narrower reading column so content and footer align.
+ */
+#home-main-area > div:has(> [data-content-width="docs"]) > footer {
+  max-width: 42.5rem; /* 680px */
 }
 
 /* Inkeep override */

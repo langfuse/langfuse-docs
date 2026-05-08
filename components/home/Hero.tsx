@@ -11,7 +11,7 @@ import { HeroStatsStrip } from "@/components/home/HeroStatsStrip";
 export function Hero() {
   return (
     <HomeSection className="pt-5 sm:pt-8 md:pt-[60px]">
-      <CornerBox className="-mb-px">
+      <CornerBox className="-mb-px -mt-px">
         <HeroStatsStrip />
       </CornerBox>
       <CornerBox className="flex flex-col gap-4 sm:gap-8 md:gap-10 items-center px-4 py-8 sm:px-8 sm:py-10">
@@ -47,12 +47,13 @@ export function Hero() {
           <div className="flex flex-wrap gap-3 justify-center items-center">
             <Button
               variant="primary"
+              size="default"
               shortcutKey="s"
               href="/cloud"
             >
               Start free
             </Button>
-            <Button variant="secondary" shortcutKey="d" href="/docs">
+            <Button variant="secondary" size="default" shortcutKey="d" href="/docs">
               Documentation
             </Button>
           </div>

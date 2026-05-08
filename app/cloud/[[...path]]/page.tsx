@@ -38,6 +38,11 @@ const regionCards: Record<
     awsRegion: "eu-west-1",
     icon: <span className="text-lg">{"\u{1F1EA}\u{1F1FA}"}</span>,
   },
+  jp: {
+    title: "Japan",
+    awsRegion: "ap-northeast-1",
+    icon: <span className="text-lg">{"\u{1F1EF}\u{1F1F5}"}</span>,
+  },
 };
 
 const CLOUD_ROUTE_PREFIX = "/cloud";
@@ -122,7 +127,10 @@ export default function CloudRegionSelectorPage() {
   );
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-surface-bg px-4 py-10 sm:px-6 lg:px-8">
+    <main
+      translate="no"
+      className="flex min-h-screen flex-col items-center justify-center bg-surface-bg px-4 py-10 sm:px-6 lg:px-8 notranslate"
+    >
       <div className="flex w-full max-w-[480px] flex-col items-center gap-8">
         <div className="flex flex-col items-center gap-5">
           <Logo />

@@ -1,13 +1,15 @@
 "use client";
 
 import { AsideShell } from "@/components/home/layout/AsideShell";
-import TocCommunity from "@/components/TocCommunity";
+import { RightSidebarHiringAndCommunity } from "@/components/home/layout/RightSidebarHiringAndCommunity";
 
 export function BlogAside() {
   return (
     <AsideShell>
-      <div className="flex-1" />
-      <TocCommunity className="border-t border-line-structure mt-auto" />
+      <div className="min-h-0 flex-1 bg-surface-1" />
+      <div className="mt-auto w-full shrink-0">
+        <RightSidebarHiringAndCommunity withTopRule />
+      </div>
     </AsideShell>
   );
 }

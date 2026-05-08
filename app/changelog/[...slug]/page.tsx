@@ -24,7 +24,7 @@ export default async function ChangelogPostPage(props: PageProps) {
   ) as ChangelogFrontMatter;
 
   return (
-    <ContentColumns>
+    <ContentColumns footerClassName="xl:max-w-[680px]">
       <div className="mx-auto w-full max-w-[680px] px-4 py-6 md:px-0">
         <ChangelogFrontMatterProvider frontMatter={frontMatter}>
           <MainContentWrapper>

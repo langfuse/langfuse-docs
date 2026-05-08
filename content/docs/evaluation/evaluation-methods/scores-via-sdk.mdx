@@ -502,7 +502,7 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 By default, Langfuse allows for multiple scores of the same `name` on the same trace. This is useful if you'd like to track the evolution of a score over time or if e.g. you've received multiple user feedback scores on the same trace.
 
-In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and add this as an `id` (JS/TS) / `score_id` (Python) when creating the score, e.g. `<trace_id>-<score_name>`.
+In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and passing this as an `id` (JS/TS) / `score_id` (Python) when creating the score, for example `trace_id-score_name`.
 
 Note that if you expect API calls for the same score to be 30+ days apart, you should also use the same timestamp. See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#updating-traces-observations-and-scores) for more details.
 
@@ -902,14 +902,14 @@ For example, let's assume you'd like to ingest a boolean score to measure **help
 <Tab>
 For example, let's assume you'd like to ingest a text score to capture **reviewer notes**. Text scores must be non-empty strings of at most 500 characters.
 
-| Value   | Data Type | Config Id | Description                                                 | Inferred Data Type | Valid                            |
-| ------- | --------- | --------- | ----------------------------------------------------------- | ------------------ | -------------------------------- |
-| `"Good response"` | `Null`    | `Null`    | Data type is inferred                              | `TEXT`             | Yes                              |
-| `"Good response"` | `TEXT`    | `Null`    | No properties inferred                             |                    | Yes                              |
-| `0.9`   | `TEXT`    | `Null`    | Error: data type of value does not match provided data type |                    | No                               |
-| `"Good response"` | `TEXT`    | `24680`   | No properties inferred                             |                    | Conditional on config validation |
-| `"Good response"` | `Null`    | `24680`   | Data type inferred                                 | `TEXT`             | Conditional on config validation |
-| `""`    | `TEXT`    | `Null`    | Error: text scores must be non-empty                        |                    | No                               |
+| Value             | Data Type | Config Id | Description                                                 | Inferred Data Type | Valid                            |
+| ----------------- | --------- | --------- | ----------------------------------------------------------- | ------------------ | -------------------------------- |
+| `"Good response"` | `Null`    | `Null`    | Data type is inferred                                       | `TEXT`             | Yes                              |
+| `"Good response"` | `TEXT`    | `Null`    | No properties inferred                                      |                    | Yes                              |
+| `0.9`             | `TEXT`    | `Null`    | Error: data type of value does not match provided data type |                    | No                               |
+| `"Good response"` | `TEXT`    | `24680`   | No properties inferred                                      |                    | Conditional on config validation |
+| `"Good response"` | `Null`    | `24680`   | Data type inferred                                          | `TEXT`             | Conditional on config validation |
+| `""`              | `TEXT`    | `Null`    | Error: text scores must be non-empty                        |                    | No                               |
 
 </Tab>
 </Tabs>

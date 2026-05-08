@@ -73,6 +73,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
   return (
     <CornerBox
       ref={containerRef}
+      hoverStripes
       className="flex flex-col gap-3 p-4 -mt-px lg:flex-row lg:items-center lg:gap-6"
       corners={corners}
       onMouseEnter={() => setIsHovered(true)}
@@ -146,6 +147,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
         <div className="ml-auto shrink-0 lg:ml-0 lg:order-last">
           <Button
             href="/cloud"
+            size="default"
             shortcutKey="s"
           >
             Start free
@@ -165,9 +167,9 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
           >
             <a
               href={story.href}
-              className="inline-flex items-baseline gap-1.5 group"
+              className="inline-flex items-baseline gap-1.5 group/story-link"
             >
-              <span className="text-[15px] font-medium text-text-primary leading-snug group-hover:underline">
+              <span className="text-[15px] font-medium text-text-primary leading-snug group-hover/story-link:underline">
                 {story.name}
               </span>
               <svg

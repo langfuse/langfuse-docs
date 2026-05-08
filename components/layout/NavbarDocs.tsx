@@ -1,5 +1,6 @@
 import { Logo } from "@/components/Logo";
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
+import { HiringBadge } from "@/components/HiringBadge";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -8,7 +9,7 @@ import { sectionNavData } from "./Navbar";
 const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px py-0')
 const contentStyle = cn('flex items-center w-full bg-surface-1 md:rounded-sm pl-3 pr-2.5 py-3')
 
-export function NavbarDocs() {
+export function NavbarDocs({ sectionLabel = "Docs" }: { sectionLabel?: string }) {
   return (
     <header
       className="sticky z-50 h-[var(--lf-nav-primary-height)] bg-surface-1 backdrop-blur-md"
@@ -20,7 +21,7 @@ export function NavbarDocs() {
             <Link href="/" className="flex gap-2 items-center shrink-0">
               <Logo wrapInLink={false} />
               <span className="hidden text-sm font-medium text-text-tertiary md:inline">
-                Docs
+                {sectionLabel}
               </span>
             </Link>
           </div>
@@ -38,7 +39,8 @@ export function NavbarDocs() {
               bottom: `calc(-10px - var(--lf-nav-docs-secondary-height))`,
             }}
           />
-          <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 lg:rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1'>
+          <div className='flex flex-1 gap-2 px-2.5 py-3 lg:rounded-sm items-center justify-between bg-surface-1'>
+            <HiringBadge className="hidden lg:block" />
             <InkeepSearchBar className="hidden lg:block" />
           </div>
         </div>

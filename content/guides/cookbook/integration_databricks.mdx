@@ -43,7 +43,7 @@ Before you begin, install the necessary packages in your Python environment:
 Configure your **Langfuse** credentials and **Databricks** credentials as environment variables. Replace the dummy keys below with the real ones from your respective accounts.
 
  - `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY`: From your Langfuse Project Settings.
- - `LANGFUSE_BASE_URL`: `https://cloud.langfuse.com` (EU region) or `https://us.cloud.langfuse.com` (US region).
+ - `LANGFUSE_BASE_URL`: `https://cloud.langfuse.com` (EU), `https://us.cloud.langfuse.com` (US), `https://jp.cloud.langfuse.com` (Japan), or `https://hipaa.cloud.langfuse.com` (HIPAA).
  - `DATABRICKS_TOKEN`: Your Databricks personal access token.
  - `DATABRICKS_HOST`: Your Databricks workspace URL (e.g., `https://dbc-xxxxxxx.cloud.databricks.com`).
 
@@ -55,7 +55,7 @@ import os
 # Example environment variables (replace with your actual keys/tokens)
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."  # your public key
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."  # your secret key
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # or https://us.cloud.langfuse.com
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # Other regions: https://us.cloud.langfuse.com (US), https://jp.cloud.langfuse.com (Japan), https://hipaa.cloud.langfuse.com (HIPAA)
 
 os.environ["DATABRICKS_TOKEN"] = "dapi-..."  # Databricks personal access token
 os.environ["DATABRICKS_HOST"] = "https://dbc-XXXXX-XXXX.cloud.databricks.com"
@@ -134,7 +134,7 @@ import os
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 ```
 
@@ -210,7 +210,7 @@ from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
  
 langfuse = get_client()
 
