@@ -86,7 +86,7 @@ export function FloatingAskAIBar() {
   return (
     <div
       className={cn(
-        'fixed bottom-4 left-1/2 -translate-x-1/2 z-20 w-[min(640px,calc(100%-2rem))]',
+        'fixed bottom-4 left-1/2 -translate-x-1/2 z-20 w-[min(427px,calc(100%-2rem))]',
         'transition-[translate,opacity] duration-200',
         open && 'translate-y-16 opacity-0 pointer-events-none',
       )}
