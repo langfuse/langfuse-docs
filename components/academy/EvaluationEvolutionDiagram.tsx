@@ -13,10 +13,10 @@ function ManualReviewGlyph() {
   return (
     <svg viewBox="0 0 240 110" fill="none" aria-hidden="true">
       <g stroke="#6b5e2b" strokeWidth="1.25">
-        <rect x="24" y="18" width="168" height="14" rx="2" fill="#f6f6f3" />
-        <rect x="24" y="38" width="168" height="14" rx="2" fill="#f6f6f3" />
-        <rect x="24" y="58" width="168" height="14" rx="2" fill="#f6f6f3" />
-        <rect x="24" y="78" width="168" height="14" rx="2" fill="#f6f6f3" />
+        <rect x="24" y="18" width="168" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
+        <rect x="24" y="38" width="168" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
+        <rect x="24" y="58" width="168" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
+        <rect x="24" y="78" width="168" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
       </g>
       <g fill="#6b5e2b" opacity="0.55">
         <rect x="32" y="23" width="54" height="4" rx="1" />
@@ -25,9 +25,9 @@ function ManualReviewGlyph() {
         <rect x="32" y="83" width="72" height="4" rx="1" />
       </g>
       <g transform="translate(150 50)">
-        <circle cx="0" cy="0" r="22" fill="#f1ede1" stroke="#2c2c28" strokeWidth="2" />
+        <circle cx="0" cy="0" r="22" fill="var(--eval-glyph-warm-surface)" stroke="var(--eval-glyph-ink)" strokeWidth="2" />
         <circle cx="0" cy="0" r="22" fill="none" stroke="#fbff81" strokeWidth="4" opacity="0.5" />
-        <line x1="16" y1="16" x2="30" y2="30" stroke="#2c2c28" strokeWidth="3" strokeLinecap="round" />
+        <line x1="16" y1="16" x2="30" y2="30" stroke="var(--eval-glyph-ink)" strokeWidth="3" strokeLinecap="round" />
         <circle cx="-4" cy="-4" r="5" fill="#fff" opacity="0.55" />
       </g>
     </svg>
@@ -37,25 +37,25 @@ function ManualReviewGlyph() {
 function FailureModesGlyph() {
   return (
     <svg viewBox="0 0 240 110" fill="none" aria-hidden="true">
-      <g stroke="#2c2c28" strokeWidth="1.5">
-        <rect x="34" y="14" width="14" height="14" rx="2" fill="#f6f6f3" />
-        <rect x="34" y="38" width="14" height="14" rx="2" fill="#f6f6f3" />
-        <rect x="34" y="62" width="14" height="14" rx="2" fill="#f6f6f3" />
-        <rect x="34" y="86" width="14" height="14" rx="2" fill="#f6f6f3" />
+      <g stroke="var(--eval-glyph-ink)" strokeWidth="1.5">
+        <rect x="34" y="14" width="14" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
+        <rect x="34" y="38" width="14" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
+        <rect x="34" y="62" width="14" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
+        <rect x="34" y="86" width="14" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
       </g>
-      <g stroke="#2c2c28" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none">
+      <g stroke="var(--eval-glyph-ink)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none">
         <path d="M37.5 21.5 l3 3 l5 -6" />
         <path d="M37.5 45.5 l3 3 l5 -6" />
         <path d="M37.5 69.5 l3 3 l5 -6" />
       </g>
-      <g fill="#2c2c28" opacity="0.65">
+      <g fill="var(--eval-glyph-ink)" opacity="0.65">
         <rect x="58" y="19" width="118" height="4" rx="1" />
         <rect x="58" y="43" width="96" height="4" rx="1" />
         <rect x="58" y="67" width="134" height="4" rx="1" />
         <rect x="58" y="91" width="82" height="4" rx="1" opacity="0.45" />
       </g>
       <g transform="translate(150 92) rotate(-30)">
-        <path d="M0 0 L20 -4 L26 0 L20 4 Z" fill="#2c2c28" />
+        <path d="M0 0 L20 -4 L26 0 L20 4 Z" fill="var(--eval-glyph-ink)" />
         <path d="M-2 0 L4 -2 L4 2 Z" fill="#fbff81" />
       </g>
     </svg>
@@ -66,7 +66,7 @@ function AutomateGlyph() {
   return (
     <svg viewBox="0 0 240 110" fill="none" aria-hidden="true">
       <g>
-        <rect x="22" y="22" width="86" height="66" rx="2" fill="#222220" stroke="#222220" />
+        <rect x="22" y="22" width="86" height="66" rx="2" fill="var(--eval-glyph-panel)" stroke="var(--eval-glyph-panel)" />
         <circle cx="30" cy="30" r="2" fill="#cc3314" />
         <circle cx="38" cy="30" r="2" fill="#e09d00" />
         <circle cx="46" cy="30" r="2" fill="#538a2e" />
@@ -76,26 +76,26 @@ function AutomateGlyph() {
         <rect x="38" y="66" width="30" height="3" rx="1" fill="#fbff81" />
         <rect x="30" y="74" width="22" height="3" rx="1" fill="#f6f6f3" opacity="0.55" />
       </g>
-      <g stroke="#2c2c28" strokeWidth="1.25" fill="none" strokeLinecap="round">
+      <g stroke="var(--eval-glyph-ink)" strokeWidth="1.25" fill="none" strokeLinecap="round">
         <path d="M115 38 H132" />
         <path d="M115 56 H132" />
         <path d="M115 74 H132" />
       </g>
-      <g fill="#2c2c28">
+      <g fill="var(--eval-glyph-ink)">
         <path d="M134 38 l-4 -3 l0 6 z" />
         <path d="M134 56 l-4 -3 l0 6 z" />
         <path d="M134 74 l-4 -3 l0 6 z" />
       </g>
       <g>
-        <rect x="138" y="30" width="60" height="16" rx="2" fill="#f6f6f3" stroke="#2c2c28" strokeWidth="1.25" />
+        <rect x="138" y="30" width="60" height="16" rx="2" fill="var(--eval-glyph-light-surface)" stroke="var(--eval-glyph-ink)" strokeWidth="1.25" />
         <circle cx="148" cy="38" r="3" fill="#538a2e" />
-        <rect x="156" y="36" width="34" height="4" rx="1" fill="#2c2c28" opacity="0.55" />
-        <rect x="138" y="48" width="60" height="16" rx="2" fill="#fbff81" stroke="#2c2c28" strokeWidth="1.25" />
-        <circle cx="148" cy="56" r="3" fill="#2c2c28" />
-        <rect x="156" y="54" width="28" height="4" rx="1" fill="#2c2c28" opacity="0.7" />
-        <rect x="138" y="66" width="60" height="16" rx="2" fill="#f6f6f3" stroke="#2c2c28" strokeWidth="1.25" />
+        <rect x="156" y="36" width="34" height="4" rx="1" fill="var(--eval-glyph-ink)" opacity="0.55" />
+        <rect x="138" y="48" width="60" height="16" rx="2" fill="#fbff81" stroke="var(--eval-glyph-ink)" strokeWidth="1.25" />
+        <circle cx="148" cy="56" r="3" fill="var(--eval-glyph-ink)" />
+        <rect x="156" y="54" width="28" height="4" rx="1" fill="var(--eval-glyph-ink)" opacity="0.7" />
+        <rect x="138" y="66" width="60" height="16" rx="2" fill="var(--eval-glyph-light-surface)" stroke="var(--eval-glyph-ink)" strokeWidth="1.25" />
         <circle cx="148" cy="74" r="3" fill="#cc3314" />
-        <rect x="156" y="72" width="40" height="4" rx="1" fill="#2c2c28" opacity="0.55" />
+        <rect x="156" y="72" width="40" height="4" rx="1" fill="var(--eval-glyph-ink)" opacity="0.55" />
       </g>
     </svg>
   );
@@ -160,6 +160,10 @@ export function EvaluationEvolutionDiagram() {
           --eval-stage-three-tint: #f1ede1;
           --eval-stage-three-stroke: #d6cfb6;
           --eval-stage-three-ink: #6b5e2b;
+          --eval-glyph-ink: #2c2c28;
+          --eval-glyph-panel: #222220;
+          --eval-glyph-light-surface: #f6f6f3;
+          --eval-glyph-warm-surface: #f1ede1;
           container-type: inline-size;
           margin: 32px 0 80px;
           width: 100%;
@@ -170,9 +174,14 @@ export function EvaluationEvolutionDiagram() {
           --eval-stage-one-tint: var(--surface-bg);
           --eval-stage-one-stroke: var(--line-structure);
           --eval-stage-one-ink: var(--text-secondary);
+          --eval-stage-two-ink: var(--text-secondary);
           --eval-stage-three-tint: var(--surface-bg);
           --eval-stage-three-stroke: var(--line-structure);
           --eval-stage-three-ink: var(--text-secondary);
+          --eval-glyph-ink: var(--text-secondary);
+          --eval-glyph-panel: var(--surface-2);
+          --eval-glyph-light-surface: var(--surface-2);
+          --eval-glyph-warm-surface: var(--surface-2);
         }
 
         .evaluation-evolution__wrap {

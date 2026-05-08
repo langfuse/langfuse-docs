@@ -109,7 +109,7 @@ function Indents({ depth }: { depth: number }) {
 export function RagTraceViewDiagram() {
   return (
     <figure className="rag-trace-view not-prose" aria-label="RAG chat pipeline trace timeline">
-      <div className="rag-trace-view__card corner-box-corners">
+      <div className="rag-trace-view__card">
         <div className="rag-trace-view__columns">
           <div className="rag-trace-view__column-header rag-trace-view__column-header--left">
             <span>Name</span>
@@ -185,7 +185,24 @@ export function RagTraceViewDiagram() {
         }
 
         .rag-trace-view__card::before {
+          content: "";
+          position: absolute;
+          inset: -1px;
+          z-index: 2;
+          pointer-events: none;
           background-color: var(--line-cta);
+          --tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M8 0V1H3C1.89543 1 1 1.89543 1 3V8H0V0H8Z' fill='black'/%3E%3C/svg%3E");
+          --bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M8 8V7H3C1.89543 7 1 6.10457 1 5V0H0V8H8Z' fill='black'/%3E%3C/svg%3E");
+          --br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M0 8V7H5C6.10457 7 7 6.10457 7 5V0H8V8H0Z' fill='black'/%3E%3C/svg%3E");
+          --tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M0 0V1H5C6.10457 1 7 1.89543 7 3V8H8V0H0Z' fill='black'/%3E%3C/svg%3E");
+          -webkit-mask-image: var(--tl), var(--bl), var(--br), var(--tr);
+          mask-image: var(--tl), var(--bl), var(--br), var(--tr);
+          -webkit-mask-position: 0% 0%, 0% 100%, 100% 100%, 100% 0%;
+          mask-position: 0% 0%, 0% 100%, 100% 100%, 100% 0%;
+          -webkit-mask-size: 8px 8px;
+          mask-size: 8px 8px;
+          -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
         }
 
         .rag-trace-view__columns,
