@@ -164,7 +164,7 @@ export function RagTraceViewDiagram() {
             <span className="rag-trace-view__legend-item rag-trace-view__legend-item--gen"><span />generation</span>
             <span className="rag-trace-view__legend-item rag-trace-view__legend-item--event"><span />event</span>
           </div>
-          <span>9 observations - p95 1.82s</span>
+          <span>1 trace, 8 observations - p95 1.82s</span>
         </div>
       </div>
 

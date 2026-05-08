@@ -90,7 +90,7 @@ function AutomateGlyph() {
         <rect x="138" y="30" width="60" height="16" rx="2" fill="var(--eval-glyph-light-surface)" stroke="var(--eval-glyph-ink)" strokeWidth="1.25" />
         <circle cx="148" cy="38" r="3" fill="#538a2e" />
         <rect x="156" y="36" width="34" height="4" rx="1" fill="var(--eval-glyph-ink)" opacity="0.55" />
-        <rect x="138" y="48" width="60" height="16" rx="2" fill="#fbff81" stroke="var(--eval-glyph-ink)" strokeWidth="1.25" />
+        <rect x="138" y="48" width="60" height="16" rx="2" fill="var(--eval-glyph-highlight-bg)" stroke="var(--eval-glyph-ink)" strokeWidth="1.25" />
         <circle cx="148" cy="56" r="3" fill="var(--eval-glyph-ink)" />
         <rect x="156" y="54" width="28" height="4" rx="1" fill="var(--eval-glyph-ink)" opacity="0.7" />
         <rect x="138" y="66" width="60" height="16" rx="2" fill="var(--eval-glyph-light-surface)" stroke="var(--eval-glyph-ink)" strokeWidth="1.25" />
@@ -167,6 +167,7 @@ export function EvaluationEvolutionDiagram() {
           --eval-manual-ink: #6b5e2b;
           --eval-loop-line: #6c6760;
           --eval-loop-arrow: #404039;
+          --eval-glyph-highlight-bg: #fbff81;
           container-type: inline-size;
           margin: 32px 0 80px;
           width: 100%;
@@ -188,6 +189,7 @@ export function EvaluationEvolutionDiagram() {
           --eval-manual-ink: var(--text-secondary);
           --eval-loop-line: var(--text-tertiary);
           --eval-loop-arrow: var(--text-secondary);
+          --eval-glyph-highlight-bg: #5a5a1f;
         }
 
         .evaluation-evolution__wrap {
