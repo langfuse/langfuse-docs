@@ -68,7 +68,7 @@ The expected rebuild time is up to 12 hours.
 
 | Data store                    | Primary region                                                           | Secondary region                                        | Mechanism                                                         | Retention              |
 |-------------------------------|--------------------------------------------------------------------------|---------------------------------------------------------|-------------------------------------------------------------------|------------------------|
-| **Postgres**                  | EU: `eu-west-1` <br/> US / HIPAA: `us-west-2` <br/> JP: `ap-northeast-1` | `eu-central-1` <br/> `us-east-2` <br/> `ap-northeast-3` | AWS Backup daily snapshot copy, re-encrypted with a dedicated CMK | 14 days in each region |
+| **Postgres**                  | EU: `eu-west-1` <br/> US / HIPAA: `us-west-2` <br/> JP: `ap-northeast-1` | `eu-central-1` <br/> `us-east-2` <br/> `ap-northeast-3` | AWS Backup daily snapshot copy, re-encrypted with a dedicated CMK | 7 days in each region |
 | **ClickHouse** (tracing data) | Same as the Cloud region above                                           | Not replicated                                          | —                                                                 | —                      |
 | **S3 media bucket**           | Same as the Cloud region above                                           | Not replicated                                          | —                                                                 | —                      |
 
