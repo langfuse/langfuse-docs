@@ -1,0 +1,66 @@
+---
+title: Can I manage agent skills with Langfuse Prompt Management?
+description: Learn how to version and iterate on agent skill files using Langfuse Prompt Management today, and what we are working on for native skills support.
+tags: [prompt-management]
+---
+
+# Can I manage agent skills with Langfuse Prompt Management?
+
+Prompt Management was originally designed for single prompt files. The core primitives (versioning, labels, retrieval, linking to traces) map well to skills, but there are gaps around grouping multiple skill files together, navigating them as a set, and reasoning about which combination of skills was active for a given agent run. We are exploring more native support for these workflows.
+
+___If you are using (or want to use) Langfuse for skills management, please upvote, share your setup, pain points, and ideas on [this GitHub Discussion](https://github.com/orgs/langfuse/discussions/12290). We read these to shape what skills support should look like in Langfuse.___
+
+In the meantime, the recommendations below are what we have seen work best in practice.
+
+## Recommended pattern today
+
+### One prompt per skill file
+
+Treat each skill file as its own Langfuse prompt. Use the prompt name to identify the skill (for example, `skill/code-review`, `skill/data-analysis`) and store the full skill file contents as the prompt body. This gives you Langfuse's full versioning, labels (e.g. `production`, `staging`), and rollback capabilities per skill.
+
+### Track which skill versions were used in each trace
+
+Because an agent execution often pulls in several skill files, you want to be able to reconstruct exactly which combination of skill versions produced a given trace. The simplest way to do this:
+
+1. When you fetch a skill file via `get_prompt()`, capture the returned version number.
+2. Write the resolved versions into the [trace metadata](/docs/observability/features/metadata) as a map of skill name to version.
+3. When debugging or evaluating a run later, you can read the metadata to know which exact skill files were active.
+
+A minimal example in Python:
+
+```python
+from langfuse import observe, get_client, propagate_attributes
+
+langfuse = get_client()
+
+@observe()
+def run_agent(user_input: str):
+    skills_to_load = ["skill/code-review", "skill/data-analysis"]
+    skills = {name: langfuse.get_prompt(name) for name in skills_to_load}
+
+    # Record which skill versions were used in this run.
+    # Propagated metadata keys must be alphanumeric and values must be strings,
+    # so we flatten the prompt names into per-skill keys.
+    skill_version_metadata = {
+        f"skill_{name.replace('skill/', '').replace('-', '_')}_version": str(prompt.version)
+        for name, prompt in skills.items()
+    }
+
+    with propagate_attributes(metadata=skill_version_metadata):
+        # ... use skills[name].prompt as the skill file contents in your agent ...
+        pass
+```
+
+### Link skills to your traces
+
+You can also pass each skill prompt object to the corresponding generation or span so it shows up linked in the Langfuse UI. See [Link prompts with traces](/docs/prompt-management/features/link-to-traces). This is useful when a single skill file maps directly to a model call. For agents that load many skills upfront, the metadata approach above tends to be more practical.
+
+## Limitations to be aware of
+
+- **No native folder-level grouping yet.** Each file is stored as an independent prompt. If you want to manage a skill folder (a `SKILL.md` plus reference files) or a bundle of skills as a single unit, you currently need to handle that in your application code.
+- **Playground and prompt experiments** are designed around a single prompt. They work for iterating on one skill file at a time, but not on a multi-skill agent setup as a whole.
+- **Variable detection** still uses Langfuse's `{{variable}}` syntax. If your skill files use a different templating style, see [Using external templating libraries](/faq/all/using-external-templating-libraries).
+
+## Share your feedback
+
+If you are using Langfuse Prompt Management for skills, or considering it, please comment on [this GitHub Discussion](https://github.com/orgs/langfuse/discussions/12290) with what is working, what isn't, and what you would want from native skills support.
