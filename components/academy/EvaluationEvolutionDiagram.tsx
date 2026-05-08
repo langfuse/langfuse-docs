@@ -12,13 +12,13 @@ function Connector() {
 function ManualReviewGlyph() {
   return (
     <svg viewBox="0 0 240 110" fill="none" aria-hidden="true">
-      <g stroke="#6b5e2b" strokeWidth="1.25">
+      <g stroke="var(--eval-manual-ink)" strokeWidth="1.25">
         <rect x="24" y="18" width="168" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
         <rect x="24" y="38" width="168" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
         <rect x="24" y="58" width="168" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
         <rect x="24" y="78" width="168" height="14" rx="2" fill="var(--eval-glyph-light-surface)" />
       </g>
-      <g fill="#6b5e2b" opacity="0.55">
+      <g fill="var(--eval-manual-ink)" opacity="0.55">
         <rect x="32" y="23" width="54" height="4" rx="1" />
         <rect x="32" y="43" width="86" height="4" rx="1" />
         <rect x="32" y="63" width="40" height="4" rx="1" />
@@ -141,10 +141,10 @@ export function EvaluationEvolutionDiagram() {
 
         <div className="evaluation-evolution__loop" aria-hidden="true">
           <svg viewBox="0 0 1000 100" preserveAspectRatio="none">
-            <path d="M 852 0 V 47" stroke="#6c6760" strokeWidth="1" strokeDasharray="3 3" fill="none" />
-            <path d="M 852 47 H 148" stroke="#6c6760" strokeWidth="1" strokeDasharray="3 3" fill="none" />
-            <path d="M 148 47 V 0" stroke="#6c6760" strokeWidth="1" strokeDasharray="3 3" fill="none" />
-            <path d="M 148 0 l -5 7 l 10 0 z" fill="#404039" />
+            <path d="M 852 0 V 47" stroke="var(--eval-loop-line)" strokeWidth="1" strokeDasharray="3 3" fill="none" />
+            <path d="M 852 47 H 148" stroke="var(--eval-loop-line)" strokeWidth="1" strokeDasharray="3 3" fill="none" />
+            <path d="M 148 47 V 0" stroke="var(--eval-loop-line)" strokeWidth="1" strokeDasharray="3 3" fill="none" />
+            <path d="M 148 0 l -5 7 l 10 0 z" fill="var(--eval-loop-arrow)" />
           </svg>
         </div>
       </div>
@@ -164,6 +164,9 @@ export function EvaluationEvolutionDiagram() {
           --eval-glyph-panel: #222220;
           --eval-glyph-light-surface: #f6f6f3;
           --eval-glyph-warm-surface: #f1ede1;
+          --eval-manual-ink: #6b5e2b;
+          --eval-loop-line: #6c6760;
+          --eval-loop-arrow: #404039;
           container-type: inline-size;
           margin: 32px 0 80px;
           width: 100%;
@@ -182,6 +185,9 @@ export function EvaluationEvolutionDiagram() {
           --eval-glyph-panel: var(--surface-2);
           --eval-glyph-light-surface: var(--surface-2);
           --eval-glyph-warm-surface: var(--surface-2);
+          --eval-manual-ink: var(--text-secondary);
+          --eval-loop-line: var(--text-tertiary);
+          --eval-loop-arrow: var(--text-secondary);
         }
 
         .evaluation-evolution__wrap {
