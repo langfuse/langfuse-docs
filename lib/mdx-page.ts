@@ -4,7 +4,6 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import type { ComponentType } from "react";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 type AnySource = {
   getPage: (slug: string[]) => any;
   getPages: () => any[];
@@ -38,7 +37,6 @@ export async function loadPage(
 
   return { page, toc, MDX };
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * Titles that are too generic to stand alone in an OG image (no parent context).
@@ -97,7 +95,6 @@ function enrichOgTitle(title: string, slug: string[], sectionTitle: string): str
  * computed canonicals (e.g. guides → cookbook mapping) without trampling an
  * explicit `canonical` field in frontmatter.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function buildSectionMetadata(
   page: { data: any; url?: string },
   section: string,

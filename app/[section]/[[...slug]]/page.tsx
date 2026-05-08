@@ -35,7 +35,6 @@ export default async function SectionDocPage(props: PageProps) {
   if (DEDICATED_APP_SECTIONS.has(section)) notFound();
 
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result = await loadPage(config.source, effectiveSlug);
   if (!result) notFound();
   const { MDX, page } = result;

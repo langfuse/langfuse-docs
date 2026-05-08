@@ -123,7 +123,6 @@ export function OSS() {
                   className="inline-flex items-center gap-1 rounded-full border px-1 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-sm hover:bg-muted transition-colors"
                 >
                   {contributor.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={contributor.avatarUrl}
                       alt={contributor.login}
