@@ -64,7 +64,7 @@ export const DeveloperTools = () => {
                 size="small"
                 href={SKILL_HREF}
               >
-                Install Skill
+                Install skill
               </Button>
             </div>
           </CornerBox>

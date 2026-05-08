@@ -17,13 +17,13 @@ type TocItem = { id: string; title: string; depth: number; url: string };
 
 const HOME_SECTIONS: TocItem[] = [
   { id: "overview", title: "Overview", depth: 2, url: "#overview" },
-  { id: "llm-engineering-loop", title: "LLM Engineering Loop", depth: 2, url: "#llm-engineering-loop" },
-  { id: "platform-features", title: "Platform Features", depth: 2, url: "#platform-features" },
+  { id: "llm-engineering-loop", title: "LLM engineering loop", depth: 2, url: "#llm-engineering-loop" },
+  { id: "platform-features", title: "Platform features", depth: 2, url: "#platform-features" },
   { id: "integrations", title: "Integrations", depth: 2, url: "#integrations" },
-  { id: "open-source", title: "Open Platform. Open Souce.", depth: 2, url: "#open-source" },
-  { id: "developers-agents", title: "Developers & Agents", depth: 2, url: "#developers-agents" },
-  { id: "scale-and-security", title: "Scale & Security", depth: 2, url: "#scale-and-security" },
-  { id: "why-langfuse", title: "Why Langfuse", depth: 2, url: "#why-langfuse" },
+  { id: "open-source", title: "Open platform. Open source.", depth: 2, url: "#open-source" },
+  { id: "developers-agents", title: "Developers & agents", depth: 2, url: "#developers-agents" },
+  { id: "scale-and-security", title: "Scale & security", depth: 2, url: "#scale-and-security" },
+  { id: "why-langfuse", title: "Why Langfuse?", depth: 2, url: "#why-langfuse" },
   { id: "get-started", title: "Get Started", depth: 2, url: "#get-started" },
   { id: "faq", title: "FAQ", depth: 2, url: "#faq" },
 ];
