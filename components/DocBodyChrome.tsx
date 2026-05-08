@@ -64,7 +64,7 @@ export function DocBodyChrome({
           )}
           <CopyMarkdownButton key={pathname} />
         </div>
-        {cookbook && (
+        {cookbook && cookbook.showNotebookBanner !== false && (
           <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
         )}
         {children}
