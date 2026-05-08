@@ -345,7 +345,7 @@ export const MainContentWrapper = (props) => {
         </div>
       )}
 
-      {cookbook ? (
+      {cookbook && cookbook.showNotebookBanner !== false ? (
         <NotebookBanner src={cookbook.ipynbPath} className="mt-4 mb-4" />
       ) : null}
 
