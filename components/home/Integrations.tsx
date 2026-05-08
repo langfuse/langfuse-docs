@@ -228,6 +228,7 @@ function IntegrationGroupCard({
     <div
       className={cn(
         "relative border border-line-structure bg-surface-bg rounded-[2px]",
+        "corner-box-hover-stripes transition-[background] duration-180 ease-out",
         "integration-group flex flex-col gap-3.5 items-start p-3 sm:p-4.5",
         className
       )}
@@ -328,7 +329,7 @@ export function Integrations() {
           showMoreLabel
         />
 
-        <div className="integration-group sm:col-span-2 flex flex-col gap-4 items-start p-3 sm:p-4.5 border border-line-structure bg-surface-bg rounded-[2px]">
+        <div className="integration-group sm:col-span-2 flex flex-col gap-4 items-start p-3 sm:p-4.5 border border-line-structure bg-surface-bg rounded-[2px] corner-box-hover-stripes transition-[background] duration-180 ease-out">
           <div className="flex flex-row flex-wrap gap-y-1 gap-x-3 justify-between items-baseline w-full">
             <Text size="m" className="font-medium text-left text-text-secondary">
               80+ more integrations
@@ -340,7 +341,7 @@ export function Integrations() {
           </div>
         </div>
 
-        <div className="sm:col-span-2 flex flex-row flex-wrap gap-y-2 gap-x-3 justify-between items-center p-3 sm:px-4.5 sm:py-3 border border-line-structure bg-surface-bg rounded-[2px]">
+        <div className="sm:col-span-2 flex flex-row flex-wrap gap-y-2 gap-x-3 justify-between items-center p-3 sm:px-4.5 sm:py-3 border border-line-structure bg-surface-bg rounded-[2px] corner-box-hover-stripes transition-[background] duration-180 ease-out">
           <Button variant="secondary" size="small" href="/integrations">
             See all integrations
           </Button>

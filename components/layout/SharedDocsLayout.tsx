@@ -5,7 +5,7 @@ import { NavbarDocs } from "./NavbarDocs";
 import { DocsSecondaryNav, DocsSecondaryNavMobile } from "./DocsSecondaryNav";
 import { DocsPatternTracker } from "./DocsContentArea";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { AISearch, AISearchPanel, FloatingAskAIButton } from "@/components/inkeep/search";
+import { AISearch, AISearchPanel, FloatingAskAI } from "@/components/inkeep/search";
 import { SidebarFolderItem } from "@/components/docs-sidebar/SidebarFolderItem";
 import { SidebarItem } from "@/components/docs-sidebar/SidebarItem";
 import { SidebarSeparatorItem } from "@/components/docs-sidebar/SidebarSeparatorItem";
@@ -29,10 +29,12 @@ export function SharedDocsLayout({
   tree,
   children,
   showSecondaryNav = true,
+  sectionLabel,
 }: {
   tree: ComponentProps<typeof DocsLayout>["tree"];
   children: ReactNode;
   showSecondaryNav?: boolean;
+  sectionLabel?: string;
 }) {
   return (
     <AISearch>
@@ -49,7 +51,7 @@ export function SharedDocsLayout({
         }
       >
         <DocsPatternTracker />
-        <NavbarDocs />
+        <NavbarDocs sectionLabel={sectionLabel} />
         {showSecondaryNav && <DocsSecondaryNav />}
         <DocsLayoutWrapper>
           <DocsLayout
@@ -69,7 +71,7 @@ export function SharedDocsLayout({
           </DocsLayout>
         </DocsLayoutWrapper>
       </div>
-      <FloatingAskAIButton />
+      <FloatingAskAI />
     </AISearch>
   );
 }

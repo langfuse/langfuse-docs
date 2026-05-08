@@ -16,10 +16,10 @@ export const CustomerStoryCTA = () => {
           Langfuse&apos;s open-source observability platform.
         </Text>
         <div className="flex flex-wrap gap-3 justify-center items-center">
-          <Button variant="primary" href="/cloud">
+          <Button variant="primary" size="default" href="/cloud">
             Start free
           </Button>
-          <Button variant="secondary" href="/docs">
+          <Button variant="secondary" size="default" href="/docs">
             Documentation
           </Button>
         </div>

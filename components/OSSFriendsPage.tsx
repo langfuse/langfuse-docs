@@ -36,7 +36,7 @@ export async function OSSFriendsPage() {
           </Link>
           <p className="my-2">{friend.description}</p>
           <div className="mt-auto">
-            <Button target="_blank" variant="secondary" asChild>
+            <Button target="_blank" variant="secondary" size="default" asChild>
               <Link href={friend.href} rel="noopener">
                 Learn more
               </Link>

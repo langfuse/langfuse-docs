@@ -12,7 +12,7 @@ export function BulletList({ items }: { items: BulletItem[] }) {
       {items.map((item) => (
         <li key={item.label} className="flex gap-2 items-center">
           <span
-            className="w-0.75 h-0.75 rounded-full shrink-0 bg-text-tertiary transition-colors group-hover:bg-text-secondary"
+            className="w-0.75 h-0.75 rounded-full shrink-0 bg-text-tertiary transition-colors group-hover/box:bg-text-secondary"
             aria-hidden
           />
           {item.href ? (
@@ -26,7 +26,7 @@ export function BulletList({ items }: { items: BulletItem[] }) {
           ) : (
             <Text
               size="s"
-              className="text-left transition-colors text-text-tertiary group-hover:text-text-secondary"
+              className="text-left transition-colors text-text-tertiary group-hover/box:text-text-secondary"
             >
               {item.label}
             </Text>

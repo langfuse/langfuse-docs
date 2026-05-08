@@ -55,7 +55,7 @@ This setup is useful for applications where each step needs to be displayed sepa
 
 (Example taken from [OpenAI cookbook](https://cookbook.openai.com/examples/structured_outputs_intro))
 
-**Note:** While OpenAI also offer structured output parsing via its beta API (`client.beta.chat.completions.parse`), this approach currently does not allow setting Langfuse specific attributes such as `name`, `metadata`, `userId` etc. Please use the approach using `response_format` with the standard `client.chat.completions.create` as described below.
+**Note on `parse` vs `response_format`:** The Langfuse OpenAI integration instruments both the stable `client.chat.completions.parse(...)` (available in `openai>=1.92.0`) and the legacy `client.beta.chat.completions.parse(...)` (for older SDK versions, where `parse` is re-routed to the stable method on newer SDKs). Both paths support Langfuse-specific attributes such as `name`, `metadata`, `langfuse_session_id`, etc. The `response_format` approach with `client.chat.completions.create` shown below works on all SDK versions and is useful if you cannot upgrade `openai`. For an example using the `parse` helper with a Pydantic model, see the section further down.
 
 
 ```python
@@ -190,7 +190,7 @@ You can now see the trace and the JSON schema in Langfuse.
 
 ## Alternative: Using the SDK `parse` helper
 
-The new SDK version adds a `parse` helper, allowing you to use your own Pydantic model without defining a JSON schema.
+OpenAI also offers a `parse` helper that lets you pass a Pydantic model directly via `response_format`. As of [`openai-python` v1.92.0](https://github.com/openai/openai-python/releases/tag/v1.92.0), `parse` is part of the stable API at `client.chat.completions.parse(...)` (it previously lived under `client.beta.chat.completions.parse`). Langfuse instruments both paths, so you can set Langfuse attributes (`name`, `metadata`, `langfuse_session_id`, …) on either one. Prefer the stable path in new code:
 
 
 ```python
@@ -205,13 +205,15 @@ class MathReasoning(BaseModel):
     final_answer: str
 
 def get_math_solution(question: str):
-    response = client.beta.chat.completions.parse(
+    # Stable API on openai>=1.92.0. On older SDKs, use client.beta.chat.completions.parse instead.
+    response = client.chat.completions.parse(
         model=openai_model,
         messages=[
             {"role": "system", "content": math_tutor_prompt},
             {"role": "user", "content": question},
         ],
         response_format=MathReasoning,
+        name="math-tutor-parse",
     )
 
     return response.choices[0].message

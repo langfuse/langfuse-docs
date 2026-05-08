@@ -13,6 +13,7 @@ import {
   customers,
   handbook,
   marketing,
+  academy,
 } from "fumadocs-mdx:collections/server";
 import { CONTENT_DIR_TO_URL_PREFIX } from "./content-dir-map.js";
 
@@ -143,6 +144,12 @@ export const handbookSource = loader({
   baseUrl: baseUrl("handbook"),
   source: handbook.toFumadocsSource(),
   pageTree: { transformers: [shortTitleTransformer] },
+});
+
+export const academySource = loader({
+  baseUrl: baseUrl("academy"),
+  source: academy.toFumadocsSource(),
+  pageTree: { idPrefix: "academy", transformers: [shortTitleTransformer] },
 });
 
 export const marketingSource = loader({

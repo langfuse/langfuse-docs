@@ -1,0 +1,598 @@
+---
+title: Run Experiments in CI/CD
+description: Run Langfuse experiments in CI and gate changes before production.
+---
+
+# Run Experiments in CI/CD
+
+Use Langfuse experiments in your CI/CD pipeline to catch quality regressions before they ship.
+
+The workflow is:
+
+1. Create a [Langfuse dataset](/docs/evaluation/experiments/datasets) with your test cases.
+2. Write an experiment with the [Python or JS/TS SDK](/docs/evaluation/experiments/experiments-via-sdk) that tests your application against the dataset.
+3. Add [evaluators](/docs/evaluation/experiments/experiments-via-sdk#evaluators) to score task outputs.
+4. Raise `RegressionError` when a score violates your threshold.
+5. Create a GitHub Actions workflow that runs the script with [langfuse/experiment-action](https://github.com/langfuse/experiment-action).
+
+## GitHub Actions workflow
+
+Create a workflow with the [trigger](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow) you need, for example `pull_request` or `release`.
+Pin the action to a release from the [`langfuse/experiment-action` releases](https://github.com/langfuse/experiment-action/releases).
+
+The action installs the latest SDK version by default; set `python_sdk_version` or `js_sdk_version` only if you want a specific SDK version.
+
+<Callout type="info">
+  The GitHub Action requires Langfuse Python SDK v4.6.0+ or JS SDK v5.3.0+.
+</Callout>
+
+```yaml
+name: Langfuse experiment gate
+
+on:
+  # Run the gate for every pull request. Change this to `push`, `release`, or another
+  # trigger if you want to run experiments at a different point in your workflow.
+  pull_request:
+
+permissions:
+  # Required to check out the repository.
+  contents: read
+  # Required to post or update the experiment result comment on pull requests.
+  pull-requests: write
+  # Optional: lets the result link to this specific job's logs.
+  # Without this permission, the action falls back to the workflow-run URL.
+  actions: read
+
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # Add this only if your experiments use the Python SDK
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      # Add this only if your experiments use the JS/TS SDK
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - uses: langfuse/experiment-action@<release tag>
+        with:
+          # the credentials for Langfuse
+          langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          langfuse_base_url: https://cloud.langfuse.com
+
+          # the location of your experiment scripts
+          experiment_path: experiments/support-agent-gate
+
+          # the dataset to run the experiment against
+          dataset_name: support-agent-regression-set
+
+          # GitHub token so that the action can comment on PRs
+          github_token: ${{ github.token }}
+```
+
+### Experiment Definition
+
+The action runs your experiment code from the `experiment_path` configured in the workflow.
+
+Each script must define an `experiment(context)` function that accepts a `context` parameter.
+
+This context is created by the GitHub Action and handles the CI-specific setup for you:
+
+- initializes the Langfuse SDK client from the action inputs
+- loads the dataset items from `dataset_name` and applies `dataset_version`
+- adds default metadata under `langfuse.*`, such as commit SHA, branch, job URL, and actor. These values are visible in the Langfuse UI.
+
+Use `context.runExperiment` (JS/TS) or `context.run_experiment` (Python) to run the experiment with these defaults.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
+
+```python
+from langfuse import RunnerContext
+from langfuse.api import DatasetItem
+
+
+# Define a task that calls your agent with each dataset item.
+def my_task(item: DatasetItem, **kwargs):
+    ...
+
+
+def experiment(context: RunnerContext):
+    return context.run_experiment(
+        name="PR gate",
+        task=my_task,
+    )
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+import type { ExperimentTaskParams, RunnerContext } from "@langfuse/client";
+
+// Define a task that calls your agent with each dataset item.
+async function myTask(item: ExperimentTaskParams) {
+  // ...
+}
+
+export async function experiment(context: RunnerContext) {
+  return await context.runExperiment({
+    name: "PR gate",
+    task: myTask,
+  });
+}
+```
+
+</Tab>
+</LangTabs>
+
+Pass explicit values to `context.runExperiment` / `context.run_experiment` when you want to override action-provided defaults such as `data` or `metadata`.
+
+### Action inputs and outputs
+
+| Input                          | Required | Description                                                                                                                                                                                                                                                          |
+| ------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `langfuse_public_key`          | Yes      | Langfuse public key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                                                                                          |
+| `langfuse_secret_key`          | Yes      | Langfuse secret key used by the SDK client. Store it as a [GitHub secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).                                                                                          |
+| `langfuse_base_url`            | No       | Langfuse host. Defaults to `https://cloud.langfuse.com`; see [regions and self-hosted URLs](/docs/api-and-data-platform/features/public-api#public-api) if you use another Langfuse instance.                                                                        |
+| `experiment_path`              | Yes      | Path to an experiment script file, a directory containing experiment scripts, or a glob pattern. Supports Python, TypeScript, and JavaScript.                                                                                                                         |
+| `dataset_name`                 | No       | Langfuse dataset loaded by the action and provided to the SDK via `RunnerContext`. If omitted, the script must provide its own data.                                                                                                                                 |
+| `dataset_version`              | No       | Optional timestamp to pin the dataset version for reproducible CI runs. Defaults to the latest dataset version.                                                                                                                                                      |
+| `experiment_metadata`          | No       | Additional `key=value` metadata added to the experiment together with default GitHub metadata. This metadata is visible in the Langfuse UI.                                                                                                                          |
+| `should_fail_on_regression`    | No       | Fail the CI job when an experiment raises `RegressionError`. Defaults to `true`.                                                                                                                                                                                     |
+| `should_fail_on_script_error`  | No       | Fail the CI job when an experiment script crashes or raises a non-regression error. Defaults to `true`.                                                                                                                                                              |
+| `should_comment_on_pr`         | No       | Post or update the experiment report as a pull request comment. Defaults to `true`.                                                                                                                                                                                  |
+| `python_sdk_version`           | No       | Langfuse Python SDK version installed by the action for `.py` experiments. Defaults to `latest`; use v4.6.0 or newer.                                                                                                                                                |
+| `js_sdk_version`               | No       | `@langfuse/client` version installed by the action for TypeScript or JavaScript experiments. Defaults to `latest`; use v5.3.0 or newer.                                                                                                                              |
+| `should_skip_sdk_installation` | No       | Skip SDK installation when you manage the Python or Node environment yourself before this action. For TypeScript experiments, provide `@langfuse/client`, `@langfuse/tracing`, `@langfuse/otel`, `@opentelemetry/sdk-node`, and `tsx` yourself. Defaults to `false`. |
+| `github_token`                 | No       | GitHub token used to post PR comments and resolve the current job URL. Leave blank to skip both.                                                                                                                                                                     |
+
+See the full input reference in the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#inputs).
+
+| Output        | Description                                                                        |
+| ------------- | ---------------------------------------------------------------------------------- |
+| `result_json` | Normalized JSON result for downstream workflow steps.                              |
+| `failed`      | `true` if any experiment script errored or raised a regression; otherwise `false`. |
+
+### Failing on regressions
+
+Raise `RegressionError` when a result should block the workflow. The example below fails when average exact-match accuracy is below the threshold.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
+
+```python
+from langfuse import Evaluation, RegressionError, RunnerContext
+
+
+THRESHOLD = 0.95
+
+
+def experiment(context: RunnerContext):
+    result = context.run_experiment(
+        name="PR gate: support agent",
+        task=answer_support_question,
+        evaluators=[exact_match],
+        run_evaluators=[avg_accuracy],
+    )
+
+    accuracy = next(
+        (
+            evaluation.value
+            for evaluation in result.run_evaluations
+            if evaluation.name == "avg_accuracy"
+        ),
+        None,
+    )
+
+    if not isinstance(accuracy, (int, float)) or accuracy < THRESHOLD:
+        raise RegressionError(
+            # Attach the result so the action can include scores in the PR comment and `result_json` output.
+            result=result,
+            metric="avg_accuracy",
+            value=float(accuracy) if isinstance(accuracy, (int, float)) else 0.0,
+            threshold=THRESHOLD,
+        )
+
+    return result
+
+
+def answer_support_question(item, **kwargs):
+    # Replace this stub with your application logic.
+    return item.input["question"]
+
+
+def exact_match(*, output, expected_output, **kwargs):
+    passed = output.strip() == (expected_output or "").strip()
+    return Evaluation(
+        name="exact_match",
+        value=1.0 if passed else 0.0,
+        comment="match" if passed else "mismatch",
+    )
+
+
+def avg_accuracy(*, item_results, **kwargs):
+    scores = [
+        evaluation.value
+        for item in item_results
+        for evaluation in item.evaluations
+        if evaluation.name == "exact_match" and isinstance(evaluation.value, (int, float))
+    ]
+    return Evaluation(name="avg_accuracy", value=sum(scores) / len(scores) if scores else 0.0)
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+import {
+  RegressionError,
+  type Evaluation,
+  type ExperimentTaskParams,
+  type RunnerContext,
+} from "@langfuse/client";
+
+const THRESHOLD = 0.95;
+
+export async function experiment(context: RunnerContext) {
+  const result = await context.runExperiment({
+    name: "PR gate: support agent",
+    task: answerSupportQuestion,
+    evaluators: [exactMatch],
+    runEvaluators: [avgAccuracy],
+  });
+
+  const accuracy = result.runEvaluations.find(
+    (evaluation) => evaluation.name === "avg_accuracy",
+  )?.value;
+
+  if (typeof accuracy !== "number" || accuracy < THRESHOLD) {
+    throw new RegressionError({
+      // Attach the result so the action can include scores in the PR comment and `result_json` output.
+      result,
+      metric: "avg_accuracy",
+      value: typeof accuracy === "number" ? accuracy : 0,
+      threshold: THRESHOLD,
+    });
+  }
+
+  return result;
+}
+
+async function answerSupportQuestion(item: ExperimentTaskParams) {
+  const { question } = item.input as { question: string };
+
+  // Replace this with your application logic, for example calling your agent.
+  return await supportAgent(question);
+}
+
+async function supportAgent(question: string) {
+  return question;
+}
+
+async function exactMatch({
+  output,
+  expectedOutput,
+}: {
+  output: string;
+  expectedOutput?: string;
+}): Promise<Evaluation> {
+  const passed = output.trim() === expectedOutput?.trim();
+  return { name: "exact_match", value: passed ? 1 : 0 };
+}
+
+async function avgAccuracy({
+  itemResults,
+}: {
+  itemResults: Array<{ evaluations: Evaluation[] }>;
+}): Promise<Evaluation> {
+  const scores = itemResults
+    .flatMap((item) => item.evaluations)
+    .filter((evaluation) => evaluation.name === "exact_match")
+    .map((evaluation) => Number(evaluation.value))
+    .filter((score) => Number.isFinite(score));
+
+  return {
+    name: "avg_accuracy",
+    value: scores.length
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+      : 0,
+  };
+}
+```
+
+</Tab>
+</LangTabs>
+
+### Action output
+
+When `github_token` is provided and the workflow has `pull-requests: write`, the action posts or updates a pull request comment with:
+
+- pass, regression, or script-error status per experiment script
+- run-level scores such as `avg_accuracy`
+- a link to the GitHub Action run
+- a link to the Langfuse experiment comparison view for dataset-backed runs
+- a compact table of item outputs and item-level scores
+
+The same normalized data is available as the `result_json` action output. Use this when a later workflow step needs to upload the result as an artifact, send a Slack notification, or feed another reporting system. The output schema is available in the [`langfuse/experiment-action` repository](https://github.com/langfuse/experiment-action/blob/main/schemas/result-json.v1.schema.json).
+
+```yaml
+- uses: langfuse/experiment-action@<release tag>
+  id: experiment
+  with:
+    # ...
+
+- name: Store experiment result
+  if: always()
+  env:
+    RESULT_JSON: ${{ steps.experiment.outputs.result_json }}
+  run: printf '%s' "$RESULT_JSON" > experiment-result.json
+```
+
+### Additional secrets
+
+If your experiment needs provider keys or other secrets, set them as environment variables on the action step. The experiment subprocess inherits the step environment.
+
+```yaml
+- uses: langfuse/experiment-action@<release tag>
+  env:
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  with:
+    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    experiment_path: experiments/support-agent-gate
+    dataset_name: support-agent-regression-set
+```
+
+Your experiment can read these values from `os.environ[...]` in Python or `process.env...` in TypeScript and JavaScript. See the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#how-do-i-pass-extra-secrets-openai-keys-etc-to-my-experiment) for details.
+
+## Other CI/CD systems [#other-cicd-systems]
+
+Integrate the experiment runner with testing frameworks like Pytest and Vitest to run automated evaluations in your CI pipeline. Use evaluators to create assertions that fail tests based on experiment results.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+```python
+# test_geography_experiment.py
+import pytest
+from langfuse import get_client, Evaluation
+from langfuse.openai import OpenAI
+
+# Test data for European capitals
+test_data = [
+    {"input": "What is the capital of France?", "expected_output": "Paris"},
+    {"input": "What is the capital of Germany?", "expected_output": "Berlin"},
+    {"input": "What is the capital of Spain?", "expected_output": "Madrid"},
+]
+
+def geography_task(*, item, **kwargs):
+    """Task function that answers geography questions"""
+    question = item["input"]
+    response = OpenAI().chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": question}]
+    )
+    return response.choices[0].message.content
+
+def accuracy_evaluator(*, input, output, expected_output, **kwargs):
+    """Evaluator that checks if the expected answer is in the output"""
+    if expected_output and expected_output.lower() in output.lower():
+        return Evaluation(name="accuracy", value=1.0)
+
+    return Evaluation(name="accuracy", value=0.0)
+
+def average_accuracy_evaluator(*, item_results, **kwargs):
+    """Run evaluator that calculates average accuracy across all items"""
+    accuracies = [
+        evaluation.value for result in item_results
+        for evaluation in result.evaluations if evaluation.name == "accuracy"
+    ]
+
+    if not accuracies:
+        return Evaluation(name="avg_accuracy", value=None)
+
+    avg = sum(accuracies) / len(accuracies)
+
+    return Evaluation(name="avg_accuracy", value=avg, comment=f"Average accuracy: {avg:.2%}")
+
+@pytest.fixture
+def langfuse_client():
+    """Initialize Langfuse client for testing"""
+    return get_client()
+
+def test_geography_accuracy_passes(langfuse_client):
+    """Test that passes when accuracy is above threshold"""
+    result = langfuse_client.run_experiment(
+        name="Geography Test - Should Pass",
+        data=test_data,
+        task=geography_task,
+        evaluators=[accuracy_evaluator],
+        run_evaluators=[average_accuracy_evaluator]
+    )
+
+    # Access the run evaluator result directly
+    avg_accuracy = next(
+        (
+            evaluation.value
+            for evaluation in result.run_evaluations
+            if evaluation.name == "avg_accuracy"
+        ),
+        None,
+    )
+
+    # Assert minimum accuracy threshold
+    assert isinstance(avg_accuracy, (int, float)) and avg_accuracy >= 0.8, (
+        f"Average accuracy {avg_accuracy} below threshold 0.8"
+    )
+
+def test_geography_accuracy_fails(langfuse_client):
+    """Example test that demonstrates failure conditions"""
+    # Use a weaker model or harder questions to demonstrate test failure
+    def failing_task(*, item, **kwargs):
+        # Simulate a task that gives wrong answers
+        return "I don't know"
+
+    result = langfuse_client.run_experiment(
+        name="Geography Test - Should Fail",
+        data=test_data,
+        task=failing_task,
+        evaluators=[accuracy_evaluator],
+        run_evaluators=[average_accuracy_evaluator]
+    )
+
+    # Access the run evaluator result directly
+    avg_accuracy = next(
+        (
+            evaluation.value
+            for evaluation in result.run_evaluations
+            if evaluation.name == "avg_accuracy"
+        ),
+        None,
+    )
+
+    # This test will fail because the task gives wrong answers
+    with pytest.raises(AssertionError):
+        assert isinstance(avg_accuracy, (int, float)) and avg_accuracy >= 0.8, (
+            f"Expected test to fail with low accuracy: {avg_accuracy}"
+        )
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```typescript
+// test/geography-experiment.test.ts
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { OpenAI } from "openai";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseClient, ExperimentItem } from "@langfuse/client";
+import { observeOpenAI } from "@langfuse/openai";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Test data for European capitals
+const testData: ExperimentItem[] = [
+  { input: "What is the capital of France?", expectedOutput: "Paris" },
+  { input: "What is the capital of Germany?", expectedOutput: "Berlin" },
+  { input: "What is the capital of Spain?", expectedOutput: "Madrid" },
+];
+
+let otelSdk: NodeSDK;
+let langfuse: LangfuseClient;
+
+beforeAll(async () => {
+  // Initialize OpenTelemetry
+  otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+  otelSdk.start();
+
+  // Initialize Langfuse client
+  langfuse = new LangfuseClient();
+});
+
+afterAll(async () => {
+  // Clean shutdown
+  await otelSdk.shutdown();
+});
+
+const geographyTask = async (item: ExperimentItem) => {
+  const question = item.input;
+  const response = await observeOpenAI(new OpenAI()).chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: question }],
+  });
+
+  return response.choices[0].message.content;
+};
+
+const accuracyEvaluator = async ({ input, output, expectedOutput }) => {
+  if (
+    expectedOutput &&
+    output.toLowerCase().includes(expectedOutput.toLowerCase())
+  ) {
+    return { name: "accuracy", value: 1 };
+  }
+  return { name: "accuracy", value: 0 };
+};
+
+const averageAccuracyEvaluator = async ({ itemResults }) => {
+  // Calculate average accuracy across all items
+  const accuracies = itemResults
+    .flatMap((result) => result.evaluations)
+    .filter((evaluation) => evaluation.name === "accuracy")
+    .map((evaluation) => evaluation.value as number);
+
+  if (accuracies.length === 0) {
+    return { name: "avg_accuracy", value: null };
+  }
+
+  const avg = accuracies.reduce((sum, val) => sum + val, 0) / accuracies.length;
+  return {
+    name: "avg_accuracy",
+    value: avg,
+    comment: `Average accuracy: ${(avg * 100).toFixed(1)}%`,
+  };
+};
+
+describe("Geography Experiment Tests", () => {
+  it("should pass when accuracy is above threshold", async () => {
+    const result = await langfuse.experiment.run({
+      name: "Geography Test - Should Pass",
+      data: testData,
+      task: geographyTask,
+      evaluators: [accuracyEvaluator],
+      runEvaluators: [averageAccuracyEvaluator],
+    });
+
+    // Access the run evaluator result directly
+    const avgAccuracy = result.runEvaluations.find(
+      (evaluation) => evaluation.name === "avg_accuracy",
+    )?.value as number;
+
+    // Assert minimum accuracy threshold
+    expect(avgAccuracy).toBeGreaterThanOrEqual(0.8);
+  }, 30_000); // 30 second timeout for API calls
+
+  it("should fail when accuracy is below threshold", async () => {
+    // Task that gives wrong answers to demonstrate test failure
+    const failingTask = async (item: ExperimentItem) => {
+      return "I don't know";
+    };
+
+    const result = await langfuse.experiment.run({
+      name: "Geography Test - Should Fail",
+      data: testData,
+      task: failingTask,
+      evaluators: [accuracyEvaluator],
+      runEvaluators: [averageAccuracyEvaluator],
+    });
+
+    // Access the run evaluator result directly
+    const avgAccuracy = result.runEvaluations.find(
+      (evaluation) => evaluation.name === "avg_accuracy",
+    )?.value as number;
+
+    // This test will fail because the task gives wrong answers
+    expect(() => {
+      expect(avgAccuracy).toBeGreaterThanOrEqual(0.8);
+    }).toThrow();
+  }, 30_000);
+});
+```
+
+</Tab>
+</LangTabs>
+
+These examples show how to use the experiment runner's evaluation results to create meaningful test assertions in your CI pipeline. Tests can fail when accuracy drops below acceptable thresholds, ensuring model quality standards are maintained automatically.

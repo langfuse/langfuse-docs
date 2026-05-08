@@ -1,6 +1,7 @@
 import {
   Activity,
   BarChart2,
+  BookOpen,
   Bookmark,
   FlaskConical,
   GraduationCap,
@@ -29,6 +30,7 @@ export const productLinks: NavPanelLink[] = [
 ];
 
 export const resourcesLinks: NavPanelLink[] = [
+  { name: "Academy",         href: "/academy",      icon: BookOpen      },
   { name: "Blog",            href: "/blog",         icon: Newspaper     },
   { name: "Changelog",       href: "/changelog",    icon: ScrollText    },
   { name: "Roadmap",         href: "/docs/roadmap", icon: Map           },

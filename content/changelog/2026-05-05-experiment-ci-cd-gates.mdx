@@ -1,0 +1,55 @@
+---
+date: 2026-05-05
+title: "Experiments CI/CD integration"
+description: Run langfuse experiments in GitHub Actions to catch quality regressions before releasing changes to production.
+author: Tobias Wochinger
+ogImage: /images/changelog/2026-05-05-experiment-ci-cd.png
+canonical: /guides/experiments-ci-cd
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now run langfuse experiments in GitHub Actions and catch quality regressions before they ship. The new [langfuse/experiment-action](https://github.com/langfuse/experiment-action) tests your application against a langfuse dataset, reports the result directly on the pull request, and tracks the experiment run in langfuse.
+
+Use it to block a PR when an agent's accuracy drops below a threshold, run a release gate against a versioned dataset, or make experiment results part of your existing CI checks.
+
+## GitHub Actions [#github-actions]
+
+Add the action to your workflow, point it at an experiment script, and choose the dataset that should be used for the gate. The pull request shows whether the experiment passed, regressed, or failed to run.
+
+```yaml
+- uses: langfuse/experiment-action@v1.0.0
+  with:
+    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    langfuse_base_url: https://cloud.langfuse.com
+    experiment_path: experiments/support-agent-gate
+    dataset_name: support-agent-regression-set
+    dataset_version: "2026-04-27T00:00:00Z"
+    github_token: ${{ github.token }}
+```
+
+When an experiment score misses your threshold, the workflow fails so reviewers can see the regression before merging.
+
+## Get started [#get-started]
+
+Follow the CI/CD integration guide to add the workflow, write your experiment script, and configure the thresholds to protect your production use case.
+
+import { FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Run Experiments in CI/CD"
+    href="/guides/experiments-ci-cd"
+    icon={<FileCode />}
+    arrow
+  />
+  <Card
+    title="langfuse/experiment-action"
+    href="https://github.com/langfuse/experiment-action"
+    icon={<FileCode />}
+    arrow
+  />
+</Cards>

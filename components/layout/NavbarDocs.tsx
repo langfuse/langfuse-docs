@@ -9,7 +9,7 @@ import { sectionNavData } from "./Navbar";
 const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px py-0')
 const contentStyle = cn('flex items-center w-full bg-surface-1 md:rounded-sm pl-3 pr-2.5 py-3')
 
-export function NavbarDocs() {
+export function NavbarDocs({ sectionLabel = "Docs" }: { sectionLabel?: string }) {
   return (
     <header
       className="sticky z-50 h-[var(--lf-nav-primary-height)] bg-surface-1 backdrop-blur-md"
@@ -21,7 +21,7 @@ export function NavbarDocs() {
             <Link href="/" className="flex gap-2 items-center shrink-0">
               <Logo wrapInLink={false} />
               <span className="hidden text-sm font-medium text-text-tertiary md:inline">
-                Docs
+                {sectionLabel}
               </span>
             </Link>
           </div>
