@@ -96,7 +96,7 @@ export function FloatingAskAIBar() {
         className={cn(
           'flex items-center gap-2 pl-3 pr-1 py-1 rounded-[2px]',
           'bg-surface-1 border border-line-structure',
-          'shadow-[0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]',
+          'shadow-[0_8px_24px_-4px_rgba(0,0,0,0.12),0_4px_8px_-2px_rgba(0,0,0,0.06)]',
           'focus-within:border-line-cta transition-colors',
         )}
       >
