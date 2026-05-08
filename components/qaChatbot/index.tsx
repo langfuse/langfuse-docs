@@ -139,7 +139,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
   return (
     <div className={cn("h-[62vh]", className)} {...props}>
-      <div className="flex flex-col h-full border border-border/40 rounded-2xl bg-gradient-to-br from-background via-background/95 to-muted/20 backdrop-blur-md shadow-xl shadow-black/10 dark:shadow-black/30 p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-black/15 dark:hover:shadow-black/40 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:via-transparent before:to-transparent before:pointer-events-none">
+      <div className="flex flex-col h-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 relative overflow-hidden">
         <Conversation className="flex-1 overflow-y-hidden relative z-10">
           {!hasUserMessages && (
             <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
@@ -151,19 +151,19 @@ export const Chat = ({ className, ...props }: ChatProps) => {
               <div className="flex gap-3 items-center flex-wrap justify-center">
                 <button
                   onClick={() => handleExampleQuestion("What can I use Langfuse for?")}
-                  className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer border border-border rounded-md px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words"
+                  className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
                 >
                   What can I use Langfuse for?
                 </button>
                 <button
                   onClick={() => handleExampleQuestion("How do I link my prompts to my traces? My code is in python")}
-                  className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer border border-border rounded-md px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words"
+                  className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
                 >
                   How do I link my prompts to my traces? My code is in python
                 </button>
                 <button
                   onClick={() => handleExampleQuestion("How do I get started with tracing?")}
-                  className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer border border-border rounded-md px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words"
+                  className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
                 >
                   How do I get started with tracing?
                 </button>
@@ -206,7 +206,11 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                   className={message.role === "assistant" ? "[&>div]:max-w-full" : undefined}
                 >
                   <MessageContent
-                    className={message.role === "assistant" ? "!bg-transparent px-0 rounded-none" : undefined}
+                    className={
+                      message.role === "assistant"
+                        ? "!bg-transparent px-0 rounded-none"
+                        : "!bg-[#403d391a] dark:!bg-[#b8b6a01a] !text-text-primary border border-line-structure rounded-[2px] px-3 py-2"
+                    }
                   >
                     {message.parts.map((part, i) => {
                       if (part.type === "text") {
@@ -337,7 +341,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
         <PromptInput
           onSubmit={handleSubmit}
-          className="mt-4 border-border/40 shadow-lg transition-all duration-200 hover:shadow-xl hover:border-primary/20 relative z-10"
+          className="mt-4 rounded-[2px] border-line-structure bg-surface-bg shadow-sm relative z-10 focus-within:border-line-cta transition-colors"
         >
           <div className="flex items-end gap-2">
             <PromptInputTextarea
@@ -345,7 +349,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
               onChange={(e) => setInput(e.target.value)}
               value={input}
               placeholder="Ask a question about Langfuse..."
-              className="flex-1 pr-2 min-h-[40px] max-h-[300px] leading-5 pt-[10px] pb-[10px] overflow-y-auto"
+              className="flex-1 pr-2 min-h-[40px] max-h-[300px] leading-5 pt-[10px] pb-[10px] overflow-y-auto text-sm"
               style={{ height: "auto" }}
               minHeight={40}
               maxHeight={300}
