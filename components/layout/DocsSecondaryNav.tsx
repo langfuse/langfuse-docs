@@ -99,7 +99,7 @@ export function DocsSecondaryNav() {
         top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
       }}
     >
-      <nav className="px-px mx-auto border-b max-w-360 bg-line-structure border-line-structure">
+      <nav className="px-px mx-auto border-b max-w-380 bg-line-structure border-line-structure">
         <div className="flex gap-0 items-stretch rounded-sm bg-surface-1">
           {SECTIONS.map((item) => {
             const isActive = pathname?.startsWith(item.path);
