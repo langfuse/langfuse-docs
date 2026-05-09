@@ -150,28 +150,6 @@ There are different types of attributes you can add:
 | [Releases & Versions](/docs/observability/features/releases-and-versioning) | Track application versions and component changes |
 
 
-## Underlying data model
-
-<Callout type="info">
-This data model is live on Langfuse Cloud. For OSS deployments, this will be available as of our next major release (v4). See the [changelog post](/changelog/2026-03-10-simplify-for-scale) for more details.
-</Callout>
-
-To improve query performance at scale, Langfuse introduces an **observation-centric data model**. In this model, context attributes (`user_id`, `session_id`, `metadata`, `tags`) that previously lived only on the trace are propagated to every observation. This eliminates expensive joins between trace and observation tables, enabling single-table queries.
-
-<Frame fullWidth>
-  ![Observation-centric data model](/images/changelog/2026-03-10-v4-preview/data-model.png)
-</Frame>
-
-### What changes
-[Guide](/docs/v4) how to adopt the new data model.
-
-| | Classic model | Observation-centric model |
-|---|---|---|
-| **Storage** | Separate mutable Traces and Observations tables | Single immutable Observations table |
-| **Context attributes** | Stored on the trace, joined at query time | Propagated to every observation on SDK side. |
-| **Trace input/output** | Set directly on the trace | Removed, use observation IO instead. (For legacy LLM-as-a-judge evaluators that depend on trace input and output, users can use the deprecated `set_trace_io` methods in the SDKs.) |
-| **Mutability** | Traces and observations are mutable | Observations are immutable (written once) |
-
 ## How Langfuse Captures Data
 
 Now that you understand the data model, let's explore how Langfuse actually captures and processes your traces.
