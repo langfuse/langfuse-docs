@@ -119,7 +119,7 @@ The new [Observations API v2](/docs/api-and-data-platform/features/observations-
 
 [Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) execute in seconds as we do not need to query ClickHouse for each evaluation anymore.
 
-## Under the hood
+## Under the hood [#under-the-hood]
 
 <Frame fullWidth>
   ![Langfuse data model
@@ -127,6 +127,15 @@ The new [Observations API v2](/docs/api-and-data-platform/features/observations-
 </Frame>
 
 This preview is powered by a simplified observation-centric data model. Trace-level attributes such as `user_id`, `session_id`, and `metadata` now propagate automatically to observations, which helps remove expensive joins and keep the product fast at larger scale. Learn more in the [data model docs](/docs/observability/data-model) and [Explore Observations](/faq/all/explore-observations-in-v4).
+
+### What changes
+
+| | Classic model | Observation-centric model |
+|---|---|---|
+| **Storage** | Separate mutable Traces and Observations tables | Single immutable Observations table |
+| **Context attributes** | Stored on the trace, joined at query time | Propagated to every observation on SDK side. |
+| **Trace input/output** | Set directly on the trace | Removed, use observation IO instead. (For legacy LLM-as-a-judge evaluators that depend on trace input and output, users can use the deprecated `set_trace_io` methods in the SDKs.) |
+| **Mutability** | Traces and observations are mutable | Observations are immutable (written once) |
 
 ## OSS and self-hosting
 
