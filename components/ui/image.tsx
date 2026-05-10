@@ -30,7 +30,6 @@ export function Image(props: ImgHTMLAttributes<HTMLImageElement> & { fill?: bool
   // next/image remotePatterns errors (e.g. shields.io badges).
   if (!isOptimizable(src)) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
       <img src={src} alt={alt ?? ""} width={width} height={height} className={className} style={style} {...rest} />
     );
   }

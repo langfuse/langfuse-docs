@@ -3,7 +3,6 @@ import monokaiProLightRaw from "./lib/themes/monokai-pro-light.json";
 
 // JSON imports widen fontStyle to `string` instead of the required literal union.
 // Cast through unknown to satisfy Shiki's ThemeRegistrationAny at runtime.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const monokaiProLight = monokaiProLightRaw as unknown as any;
 import remarkGfm from "remark-gfm";
 import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";

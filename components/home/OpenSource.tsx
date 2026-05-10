@@ -7,7 +7,7 @@ import { BulletList } from "./BulletList";
 
 const cards = [
   {
-    title: "Self-host at Scale",
+    title: "Self-host at scale",
     labels: [
       {
         label: "Docker Compose",
@@ -37,7 +37,7 @@ const cards = [
     ],
   },
   {
-    title: "MIT License",
+    title: "MIT license",
     bullets: [
       { label: "All product features MIT licensed", href: "/self-hosting" },
       { label: "Scales to billions of monthly events", href: "/self-hosting/configuration/scaling" },
@@ -45,15 +45,15 @@ const cards = [
     ],
   },
   {
-    title: "APIs & Exports",
+    title: "APIs & exports",
     bullets: [
       { label: "REST APIs for everything", href: "/docs/api-and-data-platform/features/public-api" },
       { label: "Query SDK", href: "/docs/api-and-data-platform/features/query-via-sdk" },
-      { label: "S3 blob storage Export", href: "/docs/api-and-data-platform/features/export-to-blob-storage" },
+      { label: "S3 blob storage export", href: "/docs/api-and-data-platform/features/export-to-blob-storage" },
     ],
   },
   {
-    title: "Active OSS Community",
+    title: "Active OSS community",
     bullets: [
       { label: "22,000+ GitHub stars", href: "https://github.com/langfuse/langfuse" },
       { label: "5,000+ Discord members", href: "https://langfuse.com/discord" },
@@ -67,7 +67,7 @@ export const OpenSource = () => {
     <HomeSection id="open-source" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start mb-10">
         <Heading className="text-left max-w-[12ch] sm:max-w-none">
-          <TextHighlight>Open Platform.</TextHighlight> Open Source.
+          <TextHighlight>Open platform.</TextHighlight> Open source.
         </Heading>
         <Text className="text-left max-w-[48ch]">
           We are huge fans of open standards and data portability. Langfuse won&apos;t lock in your data, ever.

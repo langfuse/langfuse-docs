@@ -33,12 +33,9 @@ function baseUrl(contentDir: string): string {
 shortTitle ?? sidebarTitle from frontmatter when either field is set.
 Registered via pageTree.transformers in each loader so layouts call
 .getPageTree() directly with no post-processing required. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const shortTitleTransformer: any = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   file(node: any, filePath?: string): any {
     if (!filePath) return node;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const page = (this as any).storage.read(filePath) as
       | { data?: { shortTitle?: string; sidebarTitle?: string } }
       | undefined;
@@ -67,9 +64,7 @@ const shortTitleTransformer: any = {
  * Link shortcut nodes have no backing MDX file, so `filePath` is `undefined` in
  * the transformer — that is how they are distinguished from real content pages.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const shortcutLinkTransformer: any = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   file(node: any, filePath?: string): any {
     // Only link shortcuts have no backing file
     if (filePath) return node;

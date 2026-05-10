@@ -35,7 +35,7 @@ A trace can be as complex or as simple as your application requires, but all tra
 
 A trace has a hierarchical tree structure. Nested inside are observations that can contain other observations, forming a parent-child structure that mirrors the actual execution of your AI application.
 
-![Trace hierarchy example](/images/academy/trace-hierarchy-v2.png)
+<RagTraceViewDiagram />
 
 You can see what happened in what order, and which steps were part of which larger step.
 
@@ -62,7 +62,7 @@ Beyond input and output, there are a few attributes on observations that are tab
 
 Most of the time you would not see an entire agent's lifecycle execution in one trace. Traces can be grouped into [sessions](/docs/observability/features/sessions). But where do you draw the line between a trace and a session?
 
-![Traces vs sessions](/images/academy/traces-vs-sessions.png)
+<TracingHierarchyDiagram />
 
 A general rule of thumb is: **one trace corresponds to one invocation of your system**, typically one API call or one agent execution. A session then groups multiple traces together, for example all the turns in a multi-turn conversation.
 

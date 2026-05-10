@@ -79,6 +79,8 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 
 ## Writing guidelines
 
+- Use sentence case for user-facing headlines, section headings, and hero copy by default. Keep title case for short standalone navigation/UI labels where it reads more naturally (for example, paired nouns like "Questions & Answers" or conventional labels like "Get Started"). Always preserve proper nouns, acronyms, and official product names.
+
 ### Changelog entries
 
 Changelog entries live in `content/changelog/`.

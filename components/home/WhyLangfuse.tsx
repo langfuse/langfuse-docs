@@ -14,11 +14,11 @@ const reasons = [
     body: "Langfuse powers the entire development cycle from prototype to full scale production loads.",
   },
   {
-    title: "Unified Platform",
+    title: "Unified platform",
     body: "All components of Langfuse work great standalone but excel when used together.",
   },
   {
-    title: "Open Source (MIT)",
+    title: "Open source (MIT)",
     body: "Inspect the code. Self-host for free. We are the largest OSS community in our category.",
   },
   {
@@ -30,7 +30,7 @@ const reasons = [
     body: "Works with any model, any framework, and stack.",
   },
   {
-    title: "Built for Scale",
+    title: "Built for scale",
     body: "ClickHouse backend allows to query millions of traces in milliseconds.",
   },
   {
@@ -38,15 +38,15 @@ const reasons = [
     body: "Tracing never blocks your application. Background processing, automatic batching.",
   },
   {
-    title: "Loved by Agents",
-    body: "CLI, MCP, accessible docs - Coding Agents love working with Langfuse.",
+    title: "Loved by agents",
+    body: "CLI, MCP, accessible docs - coding agents love working with Langfuse.",
   },
   {
     title: "Production-proven",
     body: "Billions of events processed per month. 50M+ SDK installs/month. Fortune 50 deployments.",
   },
   {
-    title: "Shipping Velocity",
+    title: "Shipping velocity",
     body: "The AI space is changing fast. We understand what patterns matter and ship daily.",
   },
 ];
