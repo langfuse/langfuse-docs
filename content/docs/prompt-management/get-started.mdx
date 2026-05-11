@@ -8,6 +8,7 @@ description: Get started with Langfuse Prompt Management.
 
 This guide walks you through creating and using a prompt with Langfuse. If you're looking to understand what prompt management is and why it matters, check out the [Prompt Management Overview](/docs/prompt-management/overview) first. For details on how prompts are structured in Langfuse and how it works in the background, see [Core Concepts](/docs/prompt-management/data-model).
 
+import { Details, Summary } from "@/components/Details";
 import PromptCreate from "@/components-mdx/prompt-create.mdx";
 import PromptUse from "@/components-mdx/prompt-use.mdx";
 import { FaqPreview } from "@/components/faq/FaqPreview";
@@ -71,8 +72,8 @@ If you want to target a specific agent directly:
 npx skills add langfuse/skills --skill "langfuse" --agent "<agent-id>"
 ```
 
-<details>
-<summary>Alternatively you can manually clone the skill</summary>
+<Details>
+<Summary>Alternatively you can manually clone the skill</Summary>
 
 1. Clone repo somewhere stable
 ```bash
@@ -89,7 +90,7 @@ mkdir -p /path/to/<agent-skill-root>/skills
 ln -s /path/to/langfuse-skills/skills/langfuse /path/to/<agent-skill-root>/skills/langfuse
 ```
 
-</details>
+</Details>
 
 Then prompt your agent:
 

@@ -254,23 +254,26 @@ export function GetStartedSection() {
   return (
     <HomeSection id="get-started" className="pt-[120px]">
       <div className="flex flex-col gap-2.5">
-        <Text className="text-left">
+        <Text className="text-left hidden md:block">
           Get Started <span className="text-text-tertiary mx-1">—</span> <span className="text-text-tertiary">Free tier: <span className="text-primary">50k observations/month</span>. No credit card required.</span>
         </Text>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-6">
           <Heading className="text-primary text-left" size="large">
-            <TextHighlight highlightClassName="mix-blend-multiply" className="max-sm:pr-1.5 xl:pr-3">Start improving</TextHighlight><TextHighlight highlightClassName="mix-blend-multiply">your agents</TextHighlight>
+            <TextHighlight highlightClassName="mix-blend-multiply" className="max-md:pr-1.5 xl:pr-3">Start improving</TextHighlight><TextHighlight highlightClassName="mix-blend-multiply">your agents</TextHighlight>
             <br />
             in under 5 minutes.
           </Heading>
-          <div className="flex sm:flex-col gap-0 items-start shrink-0 w-full sm:w-[150px]">
+          <Text className="text-left md:hidden">
+            Get Started <span className="text-text-tertiary mx-1">—</span> <span className="text-text-tertiary">Free tier: <span className="text-primary">50k observations/month</span>. No credit card required.</span>
+          </Text>
+          <div className="flex md:flex-col gap-0 items-start shrink-0 w-full sm:w-[150px] mt-2">
             <Button
               variant="primary"
               size="default"
               shortcutKey="s"
               href="/cloud"
-              wrapperClassName="sm:flex-none sm:w-full"
+              wrapperClassName="md:flex-none md:w-full"
             >
               Start free
             </Button>
@@ -279,7 +282,7 @@ export function GetStartedSection() {
               size="default"
               shortcutKey="d"
               href="/docs"
-              wrapperClassName="sm:flex-none sm:w-full"
+              wrapperClassName="md:flex-none md:w-full"
             >
               Documentation
             </Button>
@@ -290,7 +293,7 @@ export function GetStartedSection() {
         <div className="flex flex-col sm:flex-row items-start gap-3 mt-10">
           {/* Tab buttons — outside the content box, right-aligned, equal width */}
           <div className="flex sm:flex-col sm:items-end sm:justify-between shrink-0 gap-2 self-stretch">
-            <div className="flex sm:flex-col sm:items-end gap-2">
+            <div className="flex sm:flex-col sm:items-end gap-1 md:gap-2">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (

@@ -1,5 +1,3 @@
-import { Check, X } from "lucide-react";
-
 const plans = [
   { id: "hobby", label: "Hobby" },
   { id: "core", label: "Core" },
@@ -11,26 +9,20 @@ const plans = [
 const availabilities: {
   id: string;
   label?: string;
-  shortLabel?: string;
-  Icon: any;
 }[] = [
-  {
-    id: "ee",
-    label: "Enterprise Edition",
-    shortLabel: "Enterprise",
-    Icon: Check,
-  },
-  {
-    id: "team-add-on",
-    label: "Teams Add-on required",
-    shortLabel: "Team",
-    Icon: Check,
-  },
-  { id: "full", Icon: Check },
-  { id: "private-beta", label: "Private Beta", Icon: Check },
-  { id: "public-beta", label: "Public Beta", Icon: Check },
-  { id: "not-available", label: "Not Available", Icon: X },
-];
+    {
+      id: "ee",
+      label: "Enterprise Edition",
+    },
+    {
+      id: "team-add-on",
+      label: "Teams Add-on required",
+    },
+    { id: "full", label: "Available" },
+    { id: "private-beta", label: "Private Beta" },
+    { id: "public-beta", label: "Public Beta" },
+    { id: "not-available", label: "Not Available" },
+  ];
 
 export function AvailabilityBanner(props: {
   availability: Record<
@@ -48,30 +40,20 @@ export function AvailabilityBanner(props: {
     }));
 
   return (
-    <div className="border-t border-b py-3 my-4">
-      <div className="font-semibold text-primary/60 mb-2">
+    <div className="my-4 border relative border-line-structure bg-surface-bg">
+      <div className="flex list-none items-center justify-between px-4 py-2 text-text-primary with-stripes border-b border-line-structure">
         Where is this feature available?
       </div>
-      <ul className="flex flex-row gap-3 w-full justify-between flex-wrap">
+      <ul className="grid justify-between px-0! my-0! divide-y md:divide-x md:divide-y-0 md:grid-cols-5 grid-cols-1 not-prose">
         {availablePlans.map((plan) => (
           <li
             key={plan.id}
-            className="flex flex-row gap-2 md:flex-col md:items-center"
+            className="grid grid-cols-2 md:grid-cols-1 relative px-4 py-2 md:py-4 not-prose items-center gap-y-1"
           >
-            <div className="font-medium">{plan.label}</div>
-            <div className="md:flex md:items-center">
-              <plan.availability.Icon className="w-4 h-4 inline-block mr-1 lg:mr-2" />
-              {plan.availability.label && (
-                <span className="hidden md:inline-block text-xs">
-                  ({plan.availability.label})
-                </span>
-              )}
-              {plan.availability.shortLabel && (
-                <span className="inline-block md:hidden text-xs">
-                  ({plan.availability.shortLabel})
-                </span>
-              )}
-            </div>
+            <div className="text-xs font-medium">{plan.label}</div>
+            <span className="text-xs">
+              {plan.availability.label}
+            </span>
           </li>
         ))}
       </ul>

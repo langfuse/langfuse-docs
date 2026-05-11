@@ -15,7 +15,7 @@ export function NavbarDocs({ sectionLabel = "Docs" }: { sectionLabel?: string })
       className="sticky z-50 h-[var(--lf-nav-primary-height)] bg-surface-1 backdrop-blur-md"
       style={{ top: "var(--fd-banner-height, 0px)" }}
     >
-      <nav className="flex mx-auto h-full border-b max-w-360 border-line-structure">
+      <nav className="flex mx-auto h-full border-b max-w-380 border-line-structure">
         <div className={cn(cornersStyle, 'pr-0 lg:max-w-[240px] lg:pr-px')}>
           <div className={cn(contentStyle, 'rounded-r-none lg:rounded-r-sm')}>
             <Link href="/" className="flex gap-2 items-center shrink-0">

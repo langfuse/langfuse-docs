@@ -8,6 +8,7 @@ author: Lotte
 highlight: true
 ---
 
+import { Details, Summary } from "@/components/Details";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Tweet } from "@/components/Tweet";
 import { Frame } from "@/components/Frame";
@@ -33,7 +34,7 @@ The result is hands-off iteration at machine speed. Karpathy reported ~12 experi
 
 ## The Setup for Autoresearching the Langfuse Skill
 
-The Langfuse skill is quite broad. It has instructions for general best practices, and detailed guidance for specific use cases. To contain the scope, we decided to focus specifically on the prompt migration use case. 
+The Langfuse skill is quite broad. It has instructions for general best practices, and detailed guidance for specific use cases. To contain the scope, we decided to focus specifically on the prompt migration use case.
 
 <div>
   <FileTree>
@@ -48,7 +49,7 @@ The Langfuse skill is quite broad. It has instructions for general best practice
   </FileTree>
 </div>
 
-The specific prompt migration instructions are in `references/prompt-migration.md`. 
+The specific prompt migration instructions are in `references/prompt-migration.md`.
 
 To make this approach work for an AI skill instead of code, we made a couple of adaptations to the autoresearch setup:
 
@@ -88,10 +89,10 @@ For each case we have an `expected.json` defining exactly what the evaluator che
 
 ## Before and After
 
-Here's what the skill looked like before and after 14 experiments. As you can see, the tone and degree of freedom for the agent is completely different. 
+Here's what the skill looked like before and after 14 experiments. As you can see, the tone and degree of freedom for the agent is completely different.
 
-<details>
-<summary>Original skill (before)</summary>
+<Details>
+<Summary>Original skill (before)</Summary>
 
 ```markdown
 # Langfuse Prompt Migration
@@ -218,10 +219,10 @@ Checklist:
 - Application behavior unchanged
 - Generations show linked prompt in UI (if tracing)
 ```
-</details>
+</Details>
 
-<details>
-<summary>Skill after autoresearch</summary>
+<Details>
+<Summary>Skill after autoresearch</Summary>
 
 ```markdown
 # Langfuse Prompt Migration
@@ -311,7 +312,7 @@ Key rules:
 2. All code uses get_prompt() with label="production" and .compile()
 3. Asset files are no longer read by the code
 ```
-</details>
+</Details>
 
 In summary, a couple of things changed:
 
@@ -345,15 +346,15 @@ The agent ran 14 experiments total. There were instances where autoresearch foun
 
 ### Where It Did Well
 
-**1. The double-brace CRITICAL warning** 
+**1. The double-brace CRITICAL warning**
 
-Across multiple experiments, the agent kept uploading prompts to Langfuse with `{var}` instead of `{{var}}`. Langfuse uses double curly braces for variable substitution — single braces get treated as literal text. 
+Across multiple experiments, the agent kept uploading prompts to Langfuse with `{var}` instead of `{{var}}`. Langfuse uses double curly braces for variable substitution — single braces get treated as literal text.
 
-The original skill mentioned this too, but it was tucked away in a table row. Autoresearch escalated it twice: first to inline instructions, then to a `**CRITICAL**` bold warning at the top of the prompt creation step. Each escalation improved the score. 
+The original skill mentioned this too, but it was tucked away in a table row. Autoresearch escalated it twice: first to inline instructions, then to a `**CRITICAL**` bold warning at the top of the prompt creation step. Each escalation improved the score.
 
-**2. The inventory step** 
+**2. The inventory step**
 
-On complex cases (12 prompts across 9 files), the agent would often start modifying code before it had a full picture of what needed to change, and then miss prompts or lose track. 
+On complex cases (12 prompts across 9 files), the agent would often start modifying code before it had a full picture of what needed to change, and then miss prompts or lose track.
 
 Autoresearch added an explicit step: "Before writing ANY code, make a complete list of every prompt you found" with 6 required fields (name, source file, code file to refactor, type, variables, prompt content). This forced the agent to plan before acting. Case `04` went from erratic results to consistently scoring above 0.88. Planning before acting is obvious advice for humans; turns out agents need it spelled out.
 
@@ -384,12 +385,12 @@ The original skill had full sections on identifying shared text across prompts (
 
 Autoresearch optimizes for exactly what you measure given the context you execute in. If your target function has gaps, it will find and exploit them. The [community around autoresearch](https://github.com/karpathy/autoresearch/pull/218) has been raising this same concern: it's Goodhart's Law at machine speed. Whatever metric you expose, the agent will exploit it relentlessly.
 
-Next to that, common criticism of autoresearch [in the broader community](https://news.ycombinator.com/item?id=47291123) is validation set overfitting. Run hundreds of experiments against a fixed set of test cases, and you end up optimizing for quirks of that specific data. 
+Next to that, common criticism of autoresearch [in the broader community](https://news.ycombinator.com/item?id=47291123) is validation set overfitting. Run hundreds of experiments against a fixed set of test cases, and you end up optimizing for quirks of that specific data.
 
 The problem is: **most people will not build a complete enough target function.** We didn't.
 
 **For a skill that does one narrow thing**, it's feasible to build a target function that covers the full surface area.
-And autoresearch will probably give you great results. For example, Shopify's Tobi Lutke [applied autoresearch to their Liquid templating engine](https://x.com/tobi/status/2032212531846971413) — a narrow, well-defined optimization target — and got 53% faster rendering and 61% fewer memory allocations from 93 automated commits. He still noted the overfitting though. 
+And autoresearch will probably give you great results. For example, Shopify's Tobi Lutke [applied autoresearch to their Liquid templating engine](https://x.com/tobi/status/2032212531846971413) — a narrow, well-defined optimization target — and got 53% faster rendering and 61% fewer memory allocations from 93 automated commits. He still noted the overfitting though.
 
 <Tweet id="2032212531846971413" />
 
@@ -411,4 +412,4 @@ It tested the skill far more than we ever would have manually: 14 experiments ac
 
 ## Using autoresearch for prompt optimization
 
-Beyond skills, the same pattern could apply to prompt optimization. We've [explored prompt improvement workflows before](/blog/2026-02-26-evaluate-ai-agent-skills), and automating that loop with autoresearch is a natural next step. Though the same caveats apply: if your evaluation dataset is too narrow or your target function too simple, you'll overfit just as efficiently. 
+Beyond skills, the same pattern could apply to prompt optimization. We've [explored prompt improvement workflows before](/blog/2026-02-26-evaluate-ai-agent-skills), and automating that loop with autoresearch is a natural next step. Though the same caveats apply: if your evaluation dataset is too narrow or your target function too simple, you'll overfit just as efficiently.

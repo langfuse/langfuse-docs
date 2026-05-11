@@ -4,6 +4,8 @@ description: This article explains why the input and output of a trace might be 
 tags: [observability, observability-get-started]
 ---
 
+import { Details, Summary } from "@/components/Details";
+
 # Why are the input and output of my trace empty?
 
 Having input and output on your traces affects several important features:
@@ -325,8 +327,8 @@ tracer.startActiveSpan("my-operation", (span) => {
 </Tab>
 </Tabs>
 
-<details>
-<summary>**Which attributes does my OTEL provider use?**</summary>
+<Details>
+<Summary>**Which attributes does my OTEL provider use?**</Summary>
 
 Different providers use different semantic conventions. Here's how to find out what your provider sends:
 
@@ -344,7 +346,7 @@ If your provider uses different attribute names, you have two options:
 1. Manually set the attributes Langfuse expects (as shown above)
 2. Open a [GitHub issue](https://github.com/langfuse/langfuse/issues) requesting support for your provider's conventions
 
-</details>
+</Details>
 
 Many OTEL-specific issues have been fixed in recent Langfuse versions. If you're self-hosting, make sure you're on the latest version.
 
