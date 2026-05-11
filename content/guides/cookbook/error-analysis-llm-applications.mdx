@@ -116,7 +116,7 @@ Target ~100 traces. The goal is coverage, not randomness: over-represent edges a
 
 Browse and filter traces in Langfuse under **Traces** using the latency, cost, and tag filters.
 
-**No production data yet?** Run your app against representative synthetic inputs, capture the traces in Langfuse, and sample from those. See the Langfuse [datasets overview](https://langfuse.com/docs/datasets/overview).
+**No production data yet?** Run your app against representative synthetic inputs, capture the traces in Langfuse, and sample from those. See the Langfuse [datasets overview](https://langfuse.com/docs/evaluation/dataset-runs/datasets).
 
 **The Dad Tech Support sample** (100 traces across 6 tiers):
 
@@ -317,7 +317,7 @@ Not every remaining failure needs one:
 | Requires judgment (tone, missed clarification, wrong persona) | LLM-as-judge |
 | Safety or compliance requirement | Evaluator as guardrail even after fixing the prompt |
 
-Langfuse has a built-in [online evaluation](https://langfuse.com/docs/scores/model-based-evals) feature that runs LLM judges automatically on new traces. Check this before writing anything custom.
+Langfuse has a built-in [online evaluation](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge) feature that runs LLM judges automatically on new traces. Check this before writing anything custom.
 
 **Dad Tech Support decisions:**
 
@@ -338,7 +338,7 @@ Langfuse has a built-in [online evaluation](https://langfuse.com/docs/scores/mod
 
 After one round of error analysis you have a prioritized list of things to fix and a set of categories to monitor.
 
-1. **Apply the prompt fixes.** Use Langfuse [prompt management](https://langfuse.com/docs/prompts/get-started) to version and track changes.
+1. **Apply the prompt fixes.** Use Langfuse [prompt management](https://langfuse.com/docs/prompt-management/get-started) to version and track changes.
 2. **Set up evaluators** for categories that warrant them, starting with the highest-impact failure requiring judgment.
 3. **Re-run after the next significant change.** Failure distributions shift. A prompt fix can resolve one category and reveal another. Run error analysis after prompt rewrites, model switches, new features, and production incidents.
 

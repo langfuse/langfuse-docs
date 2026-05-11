@@ -142,7 +142,7 @@ import {
 
 After annotating all traces, the next step is to structure your free-text observations into a coherent taxonomy.
 
-Export the values of your free-text score from the Langfuse annotation job (you can [query scores via the Langfuse API](https://langfuse.com/docs/api)). You can use an LLM to perform an initial clustering of these notes into related themes. Review and manually refine the LLM's output to ensure the categories are distinct, comprehensive, and accurately reflect your application's specific issues.
+Export the values of your free-text score from the Langfuse annotation job (you can [query scores via the Langfuse API](/docs/api)). You can use an LLM to perform an initial clustering of these notes into related themes. Review and manually refine the LLM's output to ensure the categories are distinct, comprehensive, and accurately reflect your application's specific issues.
 
 For our docs chatbot, we used the following prompt on our exported annotations:
 
@@ -176,17 +176,15 @@ Here are the results after labeling our dataset:
 
 ## 5. Decide What to Do [#decide-what-to-do]
 
-Error analysis without a decision is just documentation. For each failure category, work through three questions in order.
+Error analysis without a decision is just documentation. For each category, ask three questions in order.
 
-**Can you just fix it?** Some failures have obvious remedies that don't need an evaluator. Missing prompt instruction: add it. Contradicting instructions: resolve the conflict. Misconfigured or missing tool: fix the tool. Engineering bug: fix the code. Fix first. Don't build an evaluator for something a prompt change would have prevented.
+**Can you just fix it?** Missing prompt instruction, contradicting instructions, misconfigured tool, engineering bug: fix these directly. Don't build an evaluator for something a prompt change would have prevented.
 
-**Is an evaluator worth building?** Not every remaining failure justifies one. Ask: how often does it happen? What's the cost when it does? Will someone actually iterate on this metric? A failure at 3% with no business impact can wait.
+**Is an evaluator worth building?** Weigh frequency, business impact, and whether someone will actually iterate on the metric. A 3% failure with no impact can wait.
 
-**What kind of evaluator?** Objective failures (format, length, string presence) call for code-based checks. Failures requiring judgment (tone, relevance, missed follow-ups) call for LLM-as-judge. Safety or compliance requirements call for a guardrail, even after the underlying fix.
+**What kind?** Objective checks (format, length, string presence) call for code-based evaluators. Subjective ones (tone, relevance, missed follow-ups) call for LLM-as-judge. Safety or compliance needs a guardrail. Langfuse runs LLM judges automatically on new traces via [online evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge).
 
-Langfuse has a built-in [online evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge) feature that runs LLM judges automatically on new traces, worth checking before writing anything custom.
-
-Applied to the taxonomy from Step 3, our docs chatbot decisions look like this:
+Applied to our docs chatbot:
 
 | Category                               | Rate   | Decision                  | Rationale                                                                |
 | -------------------------------------- | ------ | ------------------------- | ------------------------------------------------------------------------ |
@@ -205,11 +203,9 @@ Applied to the taxonomy from Step 3, our docs chatbot decisions look like this:
 
 ## Next Steps
 
-This error analysis produces a quantified, application-specific understanding of your primary issues. These insights provide a clear roadmap for targeted improvements, whether in your prompts, RAG pipeline, or model selection.
+You now have a prioritized list of fixes, a set of categories to monitor, and a baseline to compare against once changes ship. Error analysis is iterative: prompt fixes resolve some categories and surface new ones, and failure distributions shift as your app evolves. Re-run after prompt rewrites, model switches, and production incidents.
 
-The structured failure modes you defined serve as the foundation for building automated evaluators. Not every category warrants one though: fix the obvious gaps directly (missing or contradicting prompt instructions, misconfigured tools, engineering bugs), and set up evaluators for what remains — code-based checks for objective criteria, LLM-as-judge for ones requiring judgment. You can typically go through multiple rounds of this process before reaching a plateau.
-
-In the next blog post, we will set up automated evaluators and use them to continuously improve our example chatbot:
+In the next blog post, we set up automated evaluators for the categories that warrant them and use them to continuously improve our example chatbot:
 
 import { FileCode } from "lucide-react";
 
