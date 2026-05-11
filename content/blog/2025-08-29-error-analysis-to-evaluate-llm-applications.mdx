@@ -33,12 +33,13 @@ _The framework in this guide is adapted from Hamel Husain's [Eval FAQ](https://h
 
 ---
 
-This guide describes a four-step process to **identify, categorize, and quantify your application's unique failure modes**. The result is a specific evaluation framework that is far more useful than generic metrics:
+This guide describes a five-step process to **identify, categorize, and quantify your application's unique failure modes**. The result is a specific evaluation framework that is far more useful than generic metrics:
 
 1. [Gather a diverse dataset of traces](#gather-dataset)
 2. [Open code to surface failure patterns](#open-coding)
 3. [Structure failure modes](#structure-failure-modes)
 4. [Label and quantify](#label-and-quantify)
+5. [Decide what to do](#decide-what-to-do)
 
 import { BookOpen } from "lucide-react";
 
@@ -172,6 +173,29 @@ Here are the results after labeling our dataset:
   ![Failure
   Modes](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/failure-modes.png)
 </Frame>
+
+## 5. Decide What to Do [#decide-what-to-do]
+
+Error analysis without a decision is just documentation. For each failure category, work through three questions in order.
+
+**Can you just fix it?** Some failures have obvious remedies that don't need an evaluator. Missing prompt instruction: add it. Contradicting instructions: resolve the conflict. Misconfigured or missing tool: fix the tool. Engineering bug: fix the code. Fix first. Don't build an evaluator for something a prompt change would have prevented.
+
+**Is an evaluator worth building?** Not every remaining failure justifies one. Ask: how often does it happen? What's the cost when it does? Will someone actually iterate on this metric? A failure at 3% with no business impact can wait.
+
+**What kind of evaluator?** Objective failures (format, length, string presence) call for code-based checks. Failures requiring judgment (tone, relevance, missed follow-ups) call for LLM-as-judge. Safety or compliance requirements call for a guardrail, even after the underlying fix.
+
+Langfuse has a built-in [online evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge) feature that runs LLM judges automatically on new traces, worth checking before writing anything custom.
+
+Applied to the taxonomy from Step 3, our docs chatbot decisions look like this:
+
+| Category                               | Rate   | Decision                  | Rationale                                                                |
+| -------------------------------------- | ------ | ------------------------- | ------------------------------------------------------------------------ |
+| Context Retrieval / RAG Issues         | high   | Fix retrieval pipeline    | Root cause is upstream. An evaluator catches symptoms, not the problem.  |
+| Hallucinations / Incorrect Information | medium | LLM-as-judge              | Requires judgment. High impact when it occurs.                           |
+| Generic or Unhelpful Responses         | medium | Prompt fix + LLM-as-judge | Some cases fixable with better instructions. Residual cases need monitoring. |
+| Formatting / Presentation Issues       | low    | Code-based check          | Objective and easy to automate.                                          |
+| Irrelevant / Off-Topic Responses       | low    | LLM-as-judge              | Rare but high impact.                                                    |
+| Interaction Style / Missing Follow-ups | low    | Monitor                   | Low rate. Watch before committing to an evaluator.                       |
 
 ## Common Pitfalls
 
