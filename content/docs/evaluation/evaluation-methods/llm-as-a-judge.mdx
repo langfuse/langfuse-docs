@@ -40,6 +40,7 @@ LLM-as-a-Judge evaluators can run on three types of data: **Observations** (indi
 
 ### Decision Tree
 
+import { Details, Summary } from "@/components/Details";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 <div className="flex flex-col items-center gap-6 py-8 my-6">
@@ -360,15 +361,15 @@ You can show the LLM-as-a-Judge execution traces by filtering for the environmen
   environment](/images/docs/evaluation/llm-as-a-judge-debug-traces.png)
 </Frame>
 
-<details>
-<summary>LLM-as-a-Judge Execution Status</summary>
+<Details>
+<Summary>LLM-as-a-Judge Execution Status</Summary>
 
 - **Completed**: Evaluation finished successfully.
 - **Error**: Evaluation failed (click execution trace ID for details).
 - **Delayed**: Evaluation hit rate limits by the LLM provider and is being retried with exponential backoff.
 - **Pending**: Evaluation is queued and waiting to run.
 
-</details>
+</Details>
 
 ## Advanced Topics
 
@@ -402,40 +403,40 @@ This backfill flow runs from the traces table, but the resulting scores are atta
 
 ## FAQ
 
-<details>
-<summary>What is LLM-as-a-Judge evaluation?</summary>
+<Details>
+<Summary>What is LLM-as-a-Judge evaluation?</Summary>
 
 LLM-as-a-Judge is an evaluation methodology where a large language model (the "judge") assesses the quality of outputs from another LLM application. The judge model is given the input, the application's output, and a scoring rubric, then produces a score with reasoning. It's one of the most popular approaches for evaluating LLM applications because it combines human-like nuance with automated scalability.
 
-</details>
+</Details>
 
-<details>
-<summary>How accurate is LLM-as-a-Judge compared to human evaluation?</summary>
+<Details>
+<Summary>How accurate is LLM-as-a-Judge compared to human evaluation?</Summary>
 
 Research shows that strong LLM judges (such as GPT-5 class models) achieve 80-90% agreement with human evaluators on many quality dimensions, which is comparable to inter-annotator agreement between humans. Accuracy improves significantly with well-designed rubrics and clear evaluation criteria. For best results, calibrate your LLM-as-a-Judge setup against a small set of human-annotated examples.
 
-</details>
+</Details>
 
-<details>
-<summary>What models work best as LLM judges?</summary>
+<Details>
+<Summary>What models work best as LLM judges?</Summary>
 
 The most capable models generally produce the best evaluations. Models with strong instruction-following and reasoning capabilities (such as GPT-4o, Claude Sonnet, or Gemini Pro) are commonly used. The judge model should support structured output so scores can be reliably parsed. In Langfuse, you configure the judge model via [LLM Connections](/docs/administration/llm-connection).
 
-</details>
+</Details>
 
-<details>
-<summary>How much does LLM-as-a-Judge cost?</summary>
+<Details>
+<Summary>How much does LLM-as-a-Judge cost?</Summary>
 
 Cost depends on the judge model and the size of the inputs being evaluated. A typical evaluation costs $0.01-0.10 per assessment. You can manage costs by: (1) using sampling to evaluate a percentage of traces, (2) targeting specific observations instead of full traces, and (3) choosing cost-effective judge models for simpler evaluations.
 
-</details>
+</Details>
 
-<details>
-<summary>Can I use LLM-as-a-Judge for RAG evaluation?</summary>
+<Details>
+<Summary>Can I use LLM-as-a-Judge for RAG evaluation?</Summary>
 
 Yes. LLM-as-a-Judge is particularly effective for RAG pipelines. You can evaluate faithfulness (is the answer grounded in the retrieved context?), relevance (does the answer address the question?), and completeness (does the answer cover all relevant information?). Langfuse also integrates with [RAGAS](/guides/cookbook/evaluation_of_rag_with_ragas) for specialized RAG evaluation metrics.
 
-</details>
+</Details>
 
 ## GitHub Discussions
 

@@ -7,6 +7,7 @@ description: Get started with LLM observability with Langfuse in minutes before 
 
 This guide walks you through ingesting your first trace into Langfuse. If you're looking to understand what tracing is and why it matters, check out the [Observability Overview](/docs/observability/overview) first. For details on how traces are structured in Langfuse and how it works in the background, see [Core Concepts](/docs/observability/data-model).
 
+import { Details, Summary } from "@/components/Details";
 import GetStartedPythonSdk from "@/components-mdx/get-started/python-sdk.mdx";
 import GetStartedJsSdk from "@/components-mdx/get-started/js-sdk.mdx";
 import GetStartedOpenaiSdk from "@/components-mdx/get-started/openai-sdk.mdx";
@@ -77,8 +78,8 @@ If you want to target a specific agent directly:
 npx skills add langfuse/skills --skill "langfuse" --agent "<agent-id>"
 ```
 
-<details>
-<summary>Alternatively you can manually clone the skill</summary>
+<Details>
+<Summary>Alternatively you can manually clone the skill</Summary>
 
 1. Clone repo somewhere stable
 ```bash
@@ -95,7 +96,7 @@ mkdir -p /path/to/<agent-skill-root>/skills
 ln -s /path/to/langfuse-skills/skills/langfuse /path/to/<agent-skill-root>/skills/langfuse
 ```
 
-</details>
+</Details>
 
 Then prompt your agent:
 

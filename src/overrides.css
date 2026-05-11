@@ -18,7 +18,6 @@
   --fd-nav-height: calc(
     var(--lf-nav-primary-height) + var(--lf-nav-docs-secondary-height)
   );
-  --fd-banner-height: 0px;
 }
 
 /*
@@ -294,7 +293,7 @@
 }
 
 .layout-wrapper {
-  max-width: 1440px;
+  max-width: 1520px;
   margin: 0 auto;
   position: relative;
   border-right: 1px solid var(--line-structure);
@@ -703,9 +702,9 @@
   display: none;
 }
 
-@media (min-width: 1440px) {
+@media (min-width: 1520px) {
   #nd-docs-layout [data-sidebar-panel] {
-    left: calc((100vw - 1440px) / 2);
+    left: calc((100vw - 1520px) / 2);
   }
 }
 
@@ -946,11 +945,6 @@ svg .edgeLabel {
   row-gap: 0.2rem;
 }
 
-/* Subsequent details should have less of a gap */
-details + details {
-  margin-top: 0.5rem !important;
-}
-
 /* Docs footer pagination: style as secondary buttons */
 #nd-page > div:last-child > a {
   display: inline-flex !important;
@@ -980,16 +974,6 @@ details + details {
 }
 #nd-page > div:last-child > a > p:last-child {
   display: none !important;
-}
-
-/* Fix detail padding */
-details > div {
-  padding: 0.25rem;
-}
-
-/* Details header should be bold */
-details > summary {
-  font-weight: 700;
 }
 
 #nd-page > .prose {

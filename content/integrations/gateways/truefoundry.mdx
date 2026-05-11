@@ -15,32 +15,32 @@ category: Integrations
 
 Truefoundry’s AI Gateway and Langfuse combine to give you enterprise-grade observability, governance, and cost control over every LLM request—set up in minutes.
 
-<details>
-<summary><strong>Unified OpenAI-Compatible Endpoint</strong></summary>
+<Details>
+<Summary><strong>Unified OpenAI-Compatible Endpoint</strong></Summary>
 
 Point the Langfuse OpenAI client at Truefoundry’s gateway URL. Truefoundry routes to any supported model (OpenAI, Anthropic, self-hosted, etc.), while Langfuse transparently captures each call—no code changes required.
-</details>
+</Details>
 
-<details>
-<summary><strong>End-to-End Tracing & Metrics</strong></summary>
+<Details>
+<Summary><strong>End-to-End Tracing & Metrics</strong></Summary>
 
 Langfuse delivers:
-- **Full request/response logs** (including system messages)  
-- **Token usage** (prompt, completion, total)  
-- **Latency breakdowns** per call  
-- **Cost analytics** by model and environment  
+- **Full request/response logs** (including system messages)
+- **Token usage** (prompt, completion, total)
+- **Latency breakdowns** per call
+- **Cost analytics** by model and environment
 Drill into any trace in seconds to optimize performance or debug regressions.
-</details>
+</Details>
 
-<details>
-<summary><strong>Production-Ready Controls</strong></summary>
+<Details>
+<Summary><strong>Production-Ready Controls</strong></Summary>
 
 Truefoundry augments your LLM stack with:
-- **Rate limiting & quotas** per team or user  
-- **Budget alerts & spend caps** to prevent overruns  
-- **Scoped API keys** with RBAC for dev, staging, prod  
-- **On-prem/VPC deployment** for full data sovereignty  
-</details>
+- **Rate limiting & quotas** per team or user
+- **Budget alerts & spend caps** to prevent overruns
+- **Scoped API keys** with RBAC for dev, staging, prod
+- **On-prem/VPC deployment** for full data sovereignty
+</Details>
 
 ## Prerequisites
 
@@ -168,7 +168,7 @@ def analyze_customer_query(query, customer_id):
         metadata={"gateway": "truefoundry"},
         version="1.0.0"
     ):
-    
+
         response = client.chat.completions.create(
             model="openai-main/gpt-4o",
             messages=[
@@ -177,7 +177,7 @@ def analyze_customer_query(query, customer_id):
             ],
             temperature=0.3
         )
-        
+
         result = response.choices[0].message.content
 
     # Set input and output on the current observation
@@ -185,7 +185,7 @@ def analyze_customer_query(query, customer_id):
         input={"query": query, "customer_id": customer_id},
         output={"response": result},
     )
-    
+
     return result
 
 # Usage
@@ -210,6 +210,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 
+import { Details, Summary } from "@/components/Details";
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
 <LearnMore />
