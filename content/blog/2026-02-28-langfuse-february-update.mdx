@@ -1,0 +1,72 @@
+---
+title: "Langfuse February Update"
+description: "Observation-centric data model, faster UI, Observations API v2 and Metrics API v2 out of beta, faster evaluation workflows"
+ogImage: /images/blog/2026-02-28-langfuse-february-update/observation-centric-model.png
+tag: update
+date: 2026/02/28
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse February Update"
+  description="Observation-centric data model, faster UI, Observations API v2 and Metrics API v2 out of beta, faster evaluation workflows"
+  authors={["marcklingen"]}
+  image="/images/blog/2026-02-28-langfuse-february-update/observation-centric-model.png"
+  date="February 28, 2026"
+/>
+
+We heard your feedback on performance and took it seriously: Langfuse just got a major speed and scalability upgrade — with faster UI, faster API workflows, and faster evaluation workflows.
+
+## Observation-centric data model
+
+After analyzing query patterns across billions of monthly events, we're introducing changes to scale with our customers. Historically, Langfuse was built around traces & observations as two distinct objects.
+
+Going forward the data model is focused on observations as the primary object. We have written extensively about the technical choice made [here](/blog/2026-03-10-simplify-langfuse-for-scale).
+
+<Frame>
+![Observation-centric data model](/images/blog/2026-02-28-langfuse-february-update/observation-centric-model.png)
+</Frame>
+
+The rebuild is based on three core principles that ultimately power simpler and faster database queries:
+
+- **Immutable observations:** Observations are written once and never modified, eliminating deduplication operations
+- **No joins:** Trace-level attributes propagate to observations in the SDK. Queries run on a single table without joins
+- **Observation-centric model:** Observations are the primary data source for APIs and UI
+
+## Impact
+
+<Frame>
+![Performance impact](/images/blog/2026-02-28-langfuse-february-update/impact-metrics.png)
+</Frame>
+
+**Faster UI**
+
+Chart loading times are now significantly shorter. You can now confidently load charts over longer time ranges. Browsing traces, users, and sessions is also much faster, and filters respond more quickly in large projects.
+
+**Faster API workflows**
+
+The new [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) are officially **out of beta** and ready for production use. They are designed for faster querying and aggregations at scale.
+
+**Faster evaluation workflows**
+
+Observation-level evaluations execute in seconds as they no longer require querying ClickHouse for each evaluation.
+
+## How to unlock new performance
+
+Depending on what performance improvements help you most, here are some steps you can take:
+
+**[1] Struggling with long load times in the UI tables and dashboards?** → flip the toggle in the UI
+
+<Frame>
+![UI toggle for new data model](/images/blog/2026-02-28-langfuse-february-update/ui-toggle.png)
+</Frame>
+
+**[2] Want real-time data on fast UI?** → [Upgrade SDK](/docs/v4#upgrade-sdks)
+
+**[3] Need more performance in LLM-as-a-Judge?** → [Migrate to observation level evaluators](/faq/all/llm-as-a-judge-migration)
+
+**[4] Retrieve data quickly and at scale?** → [Adopt new observations and metrics APIs](/docs/v4#optional-adopt-new-observations-and-metrics-api-endpoints)
+
+→ [Full migration guide](/docs/v4)
