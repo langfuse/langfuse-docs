@@ -1,9 +1,9 @@
 ---
-title: Run Experiments in CI/CD
+title: Experiments in CI/CD
 description: Run Langfuse experiments in CI and gate changes before production.
 ---
 
-# Run Experiments in CI/CD
+# Experiments in CI/CD
 
 Use Langfuse experiments in your CI/CD pipeline to catch quality regressions before they ship.
 
@@ -26,7 +26,7 @@ The action installs the latest SDK version by default; set `python_sdk_version` 
   The GitHub Action requires Langfuse Python SDK v4.6.0+ or JS SDK v5.3.0+.
 </Callout>
 
-```yaml
+```yaml title=".github/workflows/langfuse-experiment.yml"
 name: Langfuse experiment gate
 
 on:
@@ -76,7 +76,7 @@ jobs:
           github_token: ${{ github.token }}
 ```
 
-### Experiment Definition
+### Experiment definition
 
 The action runs your experiment code from the `experiment_path` configured in the workflow.
 
@@ -94,7 +94,7 @@ Use `context.runExperiment` (JS/TS) or `context.run_experiment` (Python) to run 
 <Tab>
 {/* Python SDK */}
 
-```python
+```python title="experiments/support-agent-gate.py"
 from langfuse import RunnerContext
 from langfuse.api import DatasetItem
 
@@ -115,7 +115,7 @@ def experiment(context: RunnerContext):
 <Tab>
 {/* JS/TS SDK */}
 
-```ts
+```ts title="experiments/support-agent-gate.ts"
 import type { ExperimentTaskParams, RunnerContext } from "@langfuse/client";
 
 // Define a task that calls your agent with each dataset item.
@@ -170,7 +170,7 @@ Raise `RegressionError` when a result should block the workflow. The example bel
 <Tab>
 {/* Python SDK */}
 
-```python
+```python title="experiments/support-agent-gate.py"
 from langfuse import Evaluation, RegressionError, RunnerContext
 
 
@@ -234,7 +234,7 @@ def avg_accuracy(*, item_results, **kwargs):
 <Tab>
 {/* JS/TS SDK */}
 
-```ts
+```ts title="experiments/support-agent-gate.ts"
 import {
   RegressionError,
   type Evaluation,
@@ -326,7 +326,7 @@ When `github_token` is provided and the workflow has `pull-requests: write`, the
 
 The same normalized data is available as the `result_json` action output. Use this when a later workflow step needs to upload the result as an artifact, send a Slack notification, or feed another reporting system. The output schema is available in the [`langfuse/experiment-action` repository](https://github.com/langfuse/experiment-action/blob/main/schemas/result-json.v1.schema.json).
 
-```yaml
+```yaml title=".github/workflows/langfuse-experiment.yml"
 - uses: langfuse/experiment-action@<release tag>
   id: experiment
   with:
@@ -343,7 +343,7 @@ The same normalized data is available as the `result_json` action output. Use th
 
 If your experiment needs provider keys or other secrets, set them as environment variables on the action step. The experiment subprocess inherits the step environment.
 
-```yaml
+```yaml title=".github/workflows/langfuse-experiment.yml"
 - uses: langfuse/experiment-action@<release tag>
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -365,8 +365,7 @@ Integrate the experiment runner with testing frameworks like Pytest and Vitest t
 <Tab>
 {/* PYTHON SDK */}
 
-```python
-# test_geography_experiment.py
+```python title="test_geography_experiment.py"
 import pytest
 from langfuse import get_client, Evaluation
 from langfuse.openai import OpenAI
@@ -474,8 +473,7 @@ def test_geography_accuracy_fails(langfuse_client):
 <Tab>
 {/* JS/TS SDK */}
 
-```typescript
-// test/geography-experiment.test.ts
+```typescript title="test/geography-experiment.test.ts"
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { OpenAI } from "openai";
 import { NodeSDK } from "@opentelemetry/sdk-node";
