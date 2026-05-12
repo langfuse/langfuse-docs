@@ -12,6 +12,18 @@ Tags allow you to categorize and filter observations and traces in Langfuse.
 
 Tags are strings (max 200 characters each) and an observation may have multiple tags. The full set of tags applied across all observations in a trace are automatically aggregated and added to the trace object in Langfuse. If a tag exceeds 200 characters, it will be dropped.
 
+## Managing tags in the Langfuse UI [#manage-in-ui]
+
+You can create, assign, and remove tags directly from the Traces view in the Langfuse UI:
+
+1. Open the **Tracing → Traces** page in your project.
+2. Click any trace row to open the side panel (or open the trace detail view).
+3. Click the **tag chips** below the trace title. This opens a popover with the existing tags and a search input.
+4. Start typing to filter existing tags, or type a new value and press **Enter** to create it. New tags become available for auto-complete on future traces in the same project.
+5. Click an existing tag in the popover to toggle it on or off for the trace.
+
+To filter the traces table by tag, use the **Tags** column filter at the top of the table. Tags assigned in the UI are persisted on the trace and are returned by the API and SDKs the same way as tags set programmatically.
+
 ## Propagating Tags to Observations
 
 Use `propagate_attributes()` to apply tags to a group of observations within a context.
