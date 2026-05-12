@@ -23,38 +23,6 @@ Available export formats:
   gifStyle
 />
 
-## Example output [#example-output]
-
-The export contains one row per item in the underlying table, with all columns included regardless of the column visibility configured in the UI.
-
-**JSON** — an array of objects. Below is an abbreviated example for an export of the Generations table. Field availability depends on the table you export from (traces, observations, scores, sessions, datasets, etc.).
-
-```json
-[
-  {
-    "id": "obs_01J9...",
-    "traceId": "trace_01J9...",
-    "name": "openai-chat",
-    "type": "GENERATION",
-    "model": "gpt-4o-mini",
-    "startTime": "2025-04-12T10:23:14.512Z",
-    "endTime": "2025-04-12T10:23:16.108Z",
-    "input": [
-      { "role": "system", "content": "You are a helpful assistant." },
-      { "role": "user", "content": "Summarize the email below." }
-    ],
-    "output": { "role": "assistant", "content": "The email asks ..." },
-    "usage": { "input": 412, "output": 87, "total": 499, "unit": "TOKENS" },
-    "totalCost": 0.000183,
-    "level": "DEFAULT",
-    "metadata": { "customer_tier": "pro" },
-    "tags": ["prod", "summarize"]
-  }
-]
-```
-
-**CSV** — the same fields are flattened to a single header row plus one row per item. Nested values such as `input`, `output`, `usage`, and `metadata` are serialized as JSON strings inside their respective columns, so you can re-parse them in your downstream tool.
-
 ## Alternatives
 
 You can also export data via:
