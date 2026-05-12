@@ -5,7 +5,7 @@ description: Sneak peek into upcoming new features and changes in Langfuse. This
 
 # Langfuse roadmap
 
-Langfuse is [open source](/open-source) and we want to be fully transparent what we're working on and what's next. This roadmap is a living document and we'll update it as we make progress.
+Langfuse is [open source](/open-source) and we want to be fully transparent what we're working on and what's next. This roadmap is a living document and we'll update it as we make progress. Please see [roadmap](#roadmap), [product vision](#vision), and [recent releases](#releases) for details below.
 
 <Callout type="info">
   **Your feedback is highly appreciated**. Feel like something is missing? Add
@@ -13,32 +13,9 @@ Langfuse is [open source](/open-source) and we want to be fully transparent what
   to contribute to Langfuse and help us understand what is important to you.
 </Callout>
 
-<details>
+## Roadmap [#roadmap]
 
-<summary>Vision and direction</summary>
-
-Langfuse should become the open data and evaluation layer that helps humans, and
-eventually agents, improve agents. We optimize for one product loop above all
-else: track, understand, evaluate, and improve agentic systems.
-
-The strategic choice is to stay neutral in the execution layer. Langfuse should
-not become an opinionated agent framework or runtime. Instead, Langfuse should
-own the improvement loop around agentic software: understand agent behavior,
-segment it into useful views, turn production failures into datasets, run
-experiments, and automate repeated workflows through APIs, the CLI, skills, and
-an in-product agent.
-
-The long-term direction is auto-optimizing agents: connect tracing and your code
-repository, and Langfuse can manage the agent improvement loop for you. Langfuse
-understands the instructions, prompts, evals, and skill files that define your
-system; manages versions; runs evaluations; proposes or triggers experiments;
-and keeps humans involved for the highest-leverage judgments.
-
-</details>
-
-## Active development
-
-The Q2 2026 focus is to make the existing foundation excellent and connect the
+The current focus is to make the existing foundation excellent and connect the
 pieces into a continuous improvement loop for agents.
 
 ### Agent observability and views
@@ -80,8 +57,6 @@ pieces into a continuous improvement loop for agents.
 - Finish the v4 rollout across Langfuse Cloud and self-hosted deployments.
 - Continue scaling ingestion for large agent workloads and make read paths
   faster through pre-aggregation where needed.
-- Fix event-loop and public API reliability issues, improve queue reliability,
-  and make SLOs actionable across core product areas.
 - Make system integration points such as blob exports, S3 exports, public APIs,
   metrics, observations access, and the CLI boringly reliable.
 
@@ -92,7 +67,7 @@ pieces into a continuous improvement loop for agents.
 - Explore webhooks and automations for observability and evaluation events.
 - Improve API-key scoping, move toward bearer keys, and expand admin controls
   for enterprise deployments.
-- Improve the self-hosted and Helm chart experience, and explore hybrid or BYOC
+- Improve the self-hosted and Helm chart experience, use the ClickHouse Operator, and explore hybrid or BYOC
   deployment models for customers that need stronger data isolation or direct
   ClickHouse access.
 
@@ -100,10 +75,25 @@ pieces into a continuous improvement loop for agents.
 
 - Close multimodal gaps so traces, playground, datasets, and evals feel like one
   consistent system.
-- Make the playground more stateful and collaborative so teams can invest in
-  reusable debugging and experimentation setups.
 
-## 12-month product direction
+## Product vision and direction [#vision]
+
+Langfuse should become the open data and evaluation layer that helps humans, and
+eventually agents, improve agents. We optimize for one product loop above all
+else: track, understand, evaluate, and improve agentic systems.
+
+The strategic choice is to stay neutral in the execution layer. Langfuse should
+not become an opinionated agent framework or runtime. Instead, Langfuse should
+own the improvement loop around agentic software: understand agent behavior,
+segment it into useful views, turn production failures into datasets, run
+experiments, and automate repeated workflows through APIs, the CLI, skills, and
+an in-product agent.
+
+The long-term direction is auto-optimizing agents: connect tracing and your code
+repository, and Langfuse can manage the agent improvement loop for you. Langfuse
+understands the instructions, prompts, evals, and skill files that define your
+system; manages versions; runs evaluations; proposes or triggers experiments;
+and keeps humans involved for the highest-leverage judgments.
 
 ### Views as the platform primitive
 
@@ -140,7 +130,7 @@ The end state is that Langfuse can monitor an agent system, propose or run
 experiments, refresh test sets from production, assign annotation work when
 human input is needed, and report how the system is improving over time.
 
-## 🚀 Recently released
+## 🚀 Recently released [#releases]
 
 import { changelogSource } from "@/lib/source";
 import { Link } from "@/components/ui/link";
