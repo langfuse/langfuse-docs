@@ -5,18 +5,22 @@ on:
     - cron: "0 */6 * * *" # Runs every 6 hours
   workflow_dispatch: # Allows manual triggering
 
+permissions:
+  discussions: read
+
 jobs:
   update-discussions:
     runs-on: ubuntu-latest
     environment: "main"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           token: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@38f3f104447c67c051c4a08e39b64a148898af3a # v4.2.0
         with:
           version: "latest"
 
@@ -30,4 +34,6 @@ jobs:
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
           git add src/langfuse_github_discussions.json public/github-discussions-sitemap.xml
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update GitHub discussions JSON and sitemap" && git push origin ${GITHUB_REF#refs/heads/})
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update GitHub discussions JSON and sitemap" && git push "https://x-access-token:${UPDATE_DOCS_MAIN_BRANCH_PAT}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_REF#refs/heads/}")
+        env:
+          UPDATE_DOCS_MAIN_BRANCH_PAT: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
