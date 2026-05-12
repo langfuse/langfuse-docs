@@ -43,6 +43,25 @@ function isBarHidden(pathname: string): boolean {
   return ASK_AI_BAR_HIDDEN_PATHS.some((p) => p.test(pathname));
 }
 
+function isEditableElement(el: Element | null): boolean {
+  if (!el) return false;
+  const tag = el.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  if (el instanceof HTMLElement && (el.isContentEditable || el.closest("[contenteditable='true']"))) return true;
+  return false;
+}
+
+// Detect whether focus is inside an editable element, traversing shadow DOM
+// boundaries so third-party widgets (e.g. Inkeep's search modal) are detected.
+function isEditableFocus(target: EventTarget | null): boolean {
+  if (target instanceof HTMLElement && isEditableElement(target)) return true;
+  let active: Element | null = document.activeElement;
+  while (active?.shadowRoot?.activeElement) {
+    active = active.shadowRoot.activeElement;
+  }
+  return !!active && isEditableElement(active);
+}
+
 export function FloatingAskAI() {
   const pathname = usePathname() ?? '';
   if (isBarHidden(pathname)) return <FloatingAskAIButton />;
@@ -65,13 +84,7 @@ export function FloatingAskAIBar() {
       if (openRef.current) return;
       if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.repeat) return;
       if (e.key.toLowerCase() !== 'a') return;
-      const t = e.target;
-      if (
-        t instanceof HTMLInputElement ||
-        t instanceof HTMLTextAreaElement ||
-        t instanceof HTMLSelectElement
-      ) return;
-      if (t instanceof HTMLElement && t.isContentEditable) return;
+      if (isEditableFocus(e.target)) return;
       // Suppress AISearchTrigger's bare-`a` shortcut so it doesn't open the
       // panel underneath us. We register in capture phase so we run first.
       e.stopImmediatePropagation();
