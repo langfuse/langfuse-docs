@@ -1,0 +1,90 @@
+---
+title: "Langfuse March Update"
+description: "Agent Skill, Langfuse CLI, boolean and categorical LLM-as-a-Judge scores, Kiro integration, and more"
+ogImage: /images/blog/2026-03-31-langfuse-march-update/agent-skill.png
+tag: update
+date: 2026/03/31
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse March Update"
+  description="Agent Skill, Langfuse CLI, boolean and categorical LLM-as-a-Judge scores, Kiro integration, and more"
+  authors={["marcklingen"]}
+  image="/images/blog/2026-03-31-langfuse-march-update/agent-skill.png"
+  date="March 31, 2026"
+/>
+
+The past months we have been shipping a lot to make Langfuse much easier to use for your coding agents. If you are not using Langfuse through your coding agent yet, we strongly recommend giving it a spin!
+
+## Agent Skill
+
+<Frame>
+![Agent Skill](/images/blog/2026-03-31-langfuse-march-update/agent-skill.png)
+</Frame>
+
+The [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) helps coding agents to use Langfuse effectively. It follows the open [Agent Skills](https://github.com/anthropics/skills) standard and works with Claude Code, Cursor, Codex, and others.
+
+Install it in one line:
+
+```
+npx skills add langfuse/skills --skill "langfuse"
+```
+
+Or just ask your coding agent to install it from `github.com/langfuse/skills`.
+
+Once installed, your agent can query traces, create datasets, update prompts, migrate hardcoded prompts to Langfuse Prompt Management, and set up observability — all without leaving your editor. Even if you are already successfully using Langfuse, the Skill can help you improve your workflows and instrumentation.
+
+## Langfuse CLI
+
+<Frame>
+![Langfuse CLI](/images/blog/2026-03-31-langfuse-march-update/langfuse-cli.png)
+</Frame>
+
+The skill uses the [Langfuse CLI](/docs/api-and-data-platform/features/cli) under the hood. It wraps the entire Langfuse API, auto-generated from our OpenAPI spec so it's always in sync. Every endpoint becomes a CLI command: traces, prompts, datasets, scores, sessions, metrics, and more.
+
+Built for agents, but useful for humans too. Script your workflows, automate batch-scoring, or sync prompts across environments in CI/CD.
+
+→ [npm](https://www.npmjs.com/package/langfuse-cli)
+
+## Further reading
+
+Here are some pointers for what to do with the Skill and CLI:
+
+- **Getting started with all Langfuse features.** Using the Skill it is incredibly easy to get started using more of the Langfuse platform. Just ask your agent that you would like to test a certain feature and it can propose useful first use cases and start implementing them.
+- **Automatic prompt improvement.** Annotate a few traces in Langfuse, then let an agent fetch your feedback, analyze patterns, and propose prompt changes. A fast loop from rough to robust. → [Read the guide](/blog/2026-02-16-prompt-improvement-claude-skills)
+
+We have also learned a lot about building efficient Skills:
+
+- **Evaluating skill quality.** We used Langfuse datasets, tracing, and the Claude Agent SDK to systematically test and improve the Skill itself. Small details matter: a single comment saying "optional" instead of "mandatory" caused consistent agent failures. → [Blog post](/blog/2026-02-26-evaluate-ai-agent-skills)
+- **Optimizing skills with Autoresearch.** We ran Karpathy's autoresearch on our prompt migration skill. Score went from 0.35 to 0.82. Not all changes were keepers, but the process surfaced failure modes we'd never have found manually. → [Blog post](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch)
+
+## Fixes & improvements
+
+- Feat: [Boolean Scores in LLM-as-a-Judge](/changelog/2026-04-08-boolean-llm-as-a-judge-scores)
+- Feat: [Categorical Scores in LLM-as-a-Judge](/changelog/2026-03-20-categorical-llm-as-a-judge-scores)
+- Feat: [Delete entire prompt folders](https://github.com/langfuse/langfuse/pull/11920)
+- Feat: [Add to dataset batch action from events table](https://github.com/langfuse/langfuse/pull/12144)
+- Feat: [Show evaluation prompt on hover in evals](https://github.com/langfuse/langfuse/pull/12208)
+- Feat: [Support Japanese characters in prompt variables](https://github.com/langfuse/langfuse/pull/11509)
+- Feat: [Position in trace filter](https://github.com/langfuse/langfuse/pull/12058)
+- UI: [Chart loading and failure hints](https://github.com/langfuse/langfuse/pull/12180)
+- UI: [Tooltip support for filter facets](https://github.com/langfuse/langfuse/pull/12168)
+- UX: [Prevent focus loss when typing unit name in price editor](https://github.com/langfuse/langfuse/pull/12344)
+- UX: [Mutual exclusion between temperature and top_p for Anthropic models](https://github.com/langfuse/langfuse/pull/12020)
+- UX: [Data shown in JSON beta viewer for sessions](https://github.com/langfuse/langfuse/pull/12343)
+- API: [Performance controls for `GET /api/public/traces`](https://github.com/langfuse/langfuse/pull/12062)
+- API: [Typed `ObservationsV2Response` data field](https://github.com/langfuse/langfuse/pull/12287)
+- Fix: [Usage/details summing now computes correctly](https://github.com/langfuse/langfuse/pull/12130)
+- Integration: [Kiro](/integrations/other/kiro) — AI-powered IDE by AWS
+- and many more!
+
+## Upcoming events
+
+- [AI Engineer Europe](https://www.ai.engineer/europe), London — April 8, 2026
+- [AI Demo Night in SF](https://luma.com/jyzlu78v) — April 9, 2026
+- Co-hosting a [Hackathon with OpenAI in Berlin](https://luma.com/m7263aao) — April 15, 2026
+- [Google Cloud Next in Vegas](https://www.googlecloudevents.com/next-vegas) — April 22–24, 2026
+- [Clickhouse Openhouse in SF](https://clickhouse.com/openhouse/san-francisco) — May 26–28, 2026

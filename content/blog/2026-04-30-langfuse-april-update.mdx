@@ -1,0 +1,105 @@
+---
+title: "Langfuse April Update"
+description: "Japan Cloud Region, new Experiments, Langfuse Academy, LLM-as-a-Judge API and more"
+ogImage: /images/blog/2026-04-30-langfuse-april-update/japan-cloud.png
+tag: update
+date: 2026/04/30
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse April Update"
+  description="Japan Cloud Region, new Experiments, Langfuse Academy, LLM-as-a-Judge API and more"
+  authors={["marcklingen"]}
+  image="/images/blog/2026-04-30-langfuse-april-update/japan-cloud.png"
+  date="April 30, 2026"
+/>
+
+April shipped a lot. Japan Cloud went live, langfuse.com got a new design and brand, Langfuse Academy launched, and Experiments is now a top-level feature you can run from CI.
+
+## Japan Cloud
+
+<Frame>
+  ![Japan Cloud](/images/blog/2026-04-30-langfuse-april-update/japan-cloud.png)
+</Frame>
+
+Langfuse Cloud is now live in a dedicated Japan region, hosted in Tokyo (`ap-northeast-1`). Traces, prompts, and evaluation data stay in Japan.
+
+→ Sign up at [jp.cloud.langfuse.com](https://jp.cloud.langfuse.com)
+
+## Experiments
+
+<Frame>
+  ![Experiments](/images/blog/2026-04-30-langfuse-april-update/experiments.png)
+</Frame>
+
+Experiments are now live alongside Datasets as their own top-level feature. You can run them with or without datasets, compare across runs, and track progress over time.
+
+Additionally, you can trigger experiments in CI with the new [Langfuse Experiments GitHub Action](/changelog/2026-05-05-experiment-ci-cd-gates). Gate PRs on regressions, post deltas as comments.
+
+→ [Read the docs](/changelog/2026-04-13-experiments-rebuild)
+
+## New Website
+
+<Frame>
+  ![New Website](/images/blog/2026-04-30-langfuse-april-update/new-website.png)
+</Frame>
+
+[langfuse.com](https://langfuse.com) has a new design. Cleaner nav, faster pages, updated logo (the knot stays! 🪢). Let us know how you like it.
+
+## Langfuse Academy
+
+<Frame>
+  ![Langfuse Academy](/images/blog/2026-04-30-langfuse-april-update/langfuse-academy.png)
+</Frame>
+
+[Langfuse Academy](/academy) (beta) is live. It includes short lessons on tracing, evaluations, prompt management, and the patterns teams use in production. Onboard a teammate, or sharpen up on a specific concept.
+
+Langfuse is open source, and we want to open source the conceptual side of AI engineering too. The Academy is our way of making the core ideas, vocabulary, and workflows behind LLM application development easier to access for everyone.
+
+→ [Academy](/academy)
+
+## LLM-as-a-Judge API
+
+<Frame>
+  ![LLM-as-a-Judge API](/images/blog/2026-04-30-langfuse-april-update/llm-as-a-judge-api.png)
+</Frame>
+
+The new [evaluators API](https://api.reference.langfuse.com/#tag/unstableevaluators) (unstable) lets you create, update, and version LLM-as-a-Judge evaluators in code. Hand it to a coding agent to set up evaluators across projects. Please note that this endpoint may evolve while the underlying evaluation data model is being redesigned.
+
+→ [API Reference](https://api.reference.langfuse.com/#tag/unstableevaluators)
+
+## Langfuse for agents
+
+If you missed these last time:
+
+- [Langfuse SKILL](/docs/api-and-data-platform/features/agent-skill) — Let code agents instrument your app and run evaluations.
+- [Langfuse CLI](/docs/api-and-data-platform/features/cli) — Query traces, manage prompts, run evals from the terminal.
+- [Langfuse MCP](/docs/api-and-data-platform/features/mcp-server) — Fetch and manage Langfuse prompts.
+
+## Fixes & improvements
+
+- Feat: [5- and 20-minute blob storage export frequencies](https://github.com/langfuse/langfuse/pull/13126)
+- Feat: [Trigger evals from experiment runs](https://github.com/langfuse/langfuse/pull/13240)
+- Feat: [`DELETE` endpoint for LLM connections](https://github.com/langfuse/langfuse/pull/13247)
+- Feat: [`source=ANNOTATION` allowed on `POST /api/public/scores`](https://github.com/langfuse/langfuse/pull/13286)
+- Feat: [AWS Bedrock API Keys for LLM connections](https://github.com/langfuse/langfuse/pull/13098)
+- Feat: [OCI Object Storage native SDK integration](https://github.com/langfuse/langfuse/pull/12379)
+- Feat: [Time-window filtering for prompt metrics](https://github.com/langfuse/langfuse/pull/13282)
+- Feat: [Slack prompt notifications show change author](https://github.com/langfuse/langfuse/pull/13149)
+- Feat: ["None" filter mode for tags in trace sidebar](https://github.com/langfuse/langfuse/pull/13339)
+- Feat: [GPT-5.5](https://github.com/langfuse/langfuse/pull/13354) and [Claude Opus 4.7](https://github.com/langfuse/langfuse/pull/13214) model pricing
+- Fix: [Managed Ragas faithfulness evaluator scoring and prompt details](https://github.com/langfuse/langfuse/pull/13226)
+- Fix: [LLM-as-a-Judge queue stall](https://github.com/langfuse/langfuse/pull/13037)
+- Fix: [Crash on invalid JSONPath in dataset mapping editor](https://github.com/langfuse/langfuse/pull/13253)
+- Fix: [Constant-time comparison for admin API key auth](https://github.com/langfuse/langfuse/pull/13208)
+- and many more!
+
+## Upcoming events
+
+- [ClickHouse Open House, SF](https://clickhouse.com/openhouse/san-francisco) — May 26–28, 2026, registrations open
+- [AWS Summit, Hamburg](https://aws.amazon.com/events/summits/hamburg/) — May 20, 2026
+- [AI Engineer](https://webdirections.org/ai-engineer/speakers/muhammad-ali.php), Melbourne — June 3–4, 2026
+- [AI Engineer World's Fair](https://www.ai.engineer/worldsfair), SF — June 29 – July 2, 2026

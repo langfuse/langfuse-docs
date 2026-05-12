@@ -8,6 +8,7 @@ author: Lotte
 highlight: true
 ---
 
+import { Details, Summary } from "@/components/Details";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Frame } from "@/components/Frame";
 import { FileTree } from "@/components/docs";
@@ -42,7 +43,7 @@ Last week the skill processed 481 support tickets, 53 open and 14 recently close
 
 ### Grouping Tickets into Attention Points
 
-The skill groups issues into topics and identifies the most important ones. 
+The skill groups issues into topics and identifies the most important ones.
 
 A support ticket may say "prompt caching not traced," a GitHub issue says "cache tokens double-counted.", same underlying bug. The skill merges them into a single digest entry:
 
@@ -58,8 +59,8 @@ Every item links directly to its source, so we can read the original tickets to 
 
 The first version of the digest wasn't great. The loop to improve it works like this: run the skill, open the trace in Langfuse, and leave comments directly on the parts of the output that are off ("this item is too vague," "these two should be merged," "this link is wrong"). Then point another agent at those comments and have it update `SKILL.md` accordingly. Each cycle takes about ten minutes. Nine iterations later, the digest was in a completely different place. (For a deeper look at this pattern, see our [post on using agent skills for prompt improvement](/blog/2026-02-16-prompt-improvement-claude-skills).)
 
-<details>
-<summary>First iteration output (excerpt)</summary>
+<Details>
+<Summary>First iteration output (excerpt)</Summary>
 
 **Top Topics This Week:**
 
@@ -83,10 +84,10 @@ The first version of the digest wasn't great. The loop to improve it works like 
 
 The full output had 10 categories like this, plus recurring themes and a "What to Watch" section, all at this same level of vagueness, all grouped by product area.
 
-</details>
+</Details>
 
-<details>
-<summary>Last iteration output (excerpt)</summary>
+<Details>
+<Summary>Last iteration output (excerpt)</Summary>
 
 **Top Topics This Week:**
 
@@ -109,7 +110,7 @@ Users who add metadata filters to custom dashboards get empty results, even when
 
 The full output had 5 more sections (Roadmap Input, Integration Issues, What to Watch), each with this level of specificity, categorized by what kind of decision the item requires rather than by product area.
 
-</details>
+</Details>
 
 Compare the two: the first version groups by product area with vague descriptions ("users are experiencing tracing issues"). The last groups by decision type (is the path forward clear, or does this need discussion?) with descriptions specific enough that you can understand the problem without clicking through. Issues are properly deduplicated across sources, and every item links directly to the ticket, issue, or meeting it came from.
 

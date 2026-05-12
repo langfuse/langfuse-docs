@@ -6,6 +6,8 @@ description: "Trace Claude Code AI coding assistant conversations, user inputs, 
 category: Integrations
 ---
 
+import { Details, Summary } from "@/components/Details";
+
 # Claude Code Tracing with Langfuse
 
 > **What is Claude Code?**: [Claude Code](https://claude.com/product/claude-code) is Anthropic's agentic coding tool that lives in your terminal. It can understand your codebase, help you write and edit code, execute commands, create and run tests, and help you accomplish complex coding tasks with natural language. Claude Code brings the power of Claude's AI capabilities directly into your development workflow.
@@ -59,8 +61,8 @@ Create the hook script at `~/.claude/hooks/langfuse_hook.py`:
 mkdir -p ~/.claude/hooks
 ```
 
-<details>
-<summary>View full langfuse_hook.py script</summary>
+<Details>
+<Summary>View full langfuse_hook.py script</Summary>
 
 ```python
 #!/usr/bin/env python3
@@ -615,7 +617,7 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-</details>
+</Details>
 
 ### Register the Hook
 

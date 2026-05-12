@@ -50,12 +50,12 @@ For security reasons, Langfuse does not support switching between social logins 
   }}
 />
 
-Langfuse supports **Enterprise SSO** (e.g. Okta, Authentik, OneLogin, Azure AD, Keycloak, WorkOS, JumpCloud etc.) via OIDC. Please reach out to [support](/support) to enable this feature.
+Langfuse supports **Enterprise SSO** (e.g. Okta, Authentik, OneLogin, Azure AD, Keycloak, WorkOS, JumpCloud etc.) via OIDC.
 
 <Callout type="info">
 
-  Langfuse supports multiple domains per customer organization, but each domain must be exclusively owned by your organization.
-  Shared domains (e.g., from subcontractors or consultancies) are not supported.
+Langfuse supports multiple domains per customer organization, but each domain must be exclusively owned by your organization.
+Shared domains (e.g., from subcontractors or consultancies) are not supported.
 
 </Callout>
 
@@ -71,7 +71,39 @@ Details:
 
 <Callout type="info">
 
-  Langfuse supports authentication via **OIDC only**. SAML is not supported.
+Langfuse supports authentication via **OIDC only**. SAML is not supported.
+
+</Callout>
+
+### Configure Enterprise SSO on Langfuse Cloud [#configure-enterprise-sso]
+
+Organization admins can configure Enterprise SSO directly in **Organization Settings > SSO**.
+
+#### 1) Verify Domain
+
+1. Navigate to **Organization Settings > SSO**.
+2. In the **Verify Domain** section, click **Add Domain** and enter the domain you want to verify.
+3. Copy the DNS TXT record provided by Langfuse into your DNS provider.
+4. Wait for DNS propagation, then click **Verify** to verify the domain.
+
+<Callout type="info">
+
+Domain verification is required before SSO can be configured. This ensures only organizations that control a domain can configure SSO for it.
+
+If verification fails, confirm the record name/value match exactly, remove surrounding quotes, and re-check after propagation. Many DNS providers take a few minutes, but it can take up to 24 hours.
+
+</Callout>
+
+#### 2) Configure SSO
+
+1. In the **SSO Configuration** section, click **Configure SSO** next to the verified domain you want to set up.
+2. Copy the callback URL provided by Langfuse and whitelist it in your IdP application's redirect/callback URL allowlist.
+3. Enter the issuer URL, client ID, and client secret from your IdP, then save the configuration.
+4. Test sign-in with a user from the verified domain.
+
+<Callout type="warning">
+
+GitHub and GitHub Enterprise do not expose a standard OIDC discovery endpoint. Langfuse cannot pre-validate these issuer URLs during setup. Double-check the issuer and callback URL allowlist in your IdP, then run a test login immediately after saving to catch mistakes before rollout.
 
 </Callout>
 
@@ -104,19 +136,23 @@ Details:
 1. On the application's **General** tab, copy the **Client ID** and **Client Secret**
 2. Note your Okta **Issuer URL** (e.g., `https://example.okta.com`)
 
-##### Step 4: Share Credentials with Langfuse
+##### Step 4: Verify Your Domain in Langfuse
 
-Share the following with Langfuse via [support](/support):
+1. In Langfuse, open **Organization Settings > SSO**
+2. In the **Verify Domain** section, click **Add Domain** and enter the domain that should use Okta
+3. Copy the DNS TXT record provided by Langfuse into your DNS provider
+4. Wait for DNS propagation, then click **Verify** in Langfuse
 
-- **Instance URL** (e.g., `https://cloud.langfuse.com`, `https://us.cloud.langfuse.com`, `https://jp.cloud.langfuse.com`, or `https://hipaa.cloud.langfuse.com`)
-- **Issuer URL** (e.g., `https://example.okta.com`)
-- **Client ID**
-- **Client Secret**
+##### Step 5: Configure SSO in Langfuse
 
-You can share the credentials with any secure method.
-Usually, sharing via password managers works best.
+1. In **Organization Settings > SSO**, find your verified domain in the **SSO Configuration** section
+2. Click **Configure SSO**
+3. Select **Okta** as provider
+4. Copy the callback URL shown by Langfuse and add it to Okta's **Sign-in redirect URIs** allowlist
+5. Enter the **Issuer URL**, **Client ID**, and **Client Secret**
+6. Save the configuration
 
-##### Step 5: Assign Users
+##### Step 6: Assign Users
 
 1. In Okta, go to your Langfuse application's **Assignments** tab
 2. Assign users or groups who should have access to Langfuse

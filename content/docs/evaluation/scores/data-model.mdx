@@ -18,7 +18,6 @@ For detailed reference please refer to
 Scores are the data object to store evaluation results. They are used to assign evaluation scores to traces, observations, sessions, or dataset runs. Scores can be added manually via annotations, programmatically via the SDK/API, or automatically via LLM-as-a-Judge evaluators.
 
 <br />
-<div className="border rounded p-2">
 
 ```mermaid
 classDiagram
@@ -39,8 +38,6 @@ direction LR
     Score --> Session: sessionId
     Score --> DatasetRun: datasetRunId
 ```
-
-</div>
 
 Scores have the following properties:
 - Each Score references **exactly one** of `Trace`, `Observation`, `Session`, or `DatasetRun`
@@ -79,14 +76,10 @@ Score configs are used to ensure that your scores follow a specific schema. Usin
 
 You can define a `ScoreConfig` in the Langfuse UI or via our API. Configs are immutable but can be archived (and restored anytime).
 
-<div className="border rounded p-2 my-4">
-
 ```mermaid
 classDiagram
   Score --> ScoreConfig: configId
 ```
-
-</div>
 
 A score config includes:
 - **Score name**

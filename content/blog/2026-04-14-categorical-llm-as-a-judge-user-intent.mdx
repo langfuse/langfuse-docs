@@ -7,6 +7,7 @@ author: Lotte
 ogImage: /images/blog/2026-04-14-categorical-llm-as-a-judge-user-intent/og.jpg
 ---
 
+import { Details, Summary } from "@/components/Details";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
@@ -41,8 +42,8 @@ We defined six intent categories that map to distinct user needs:
 | `ui-feedback` | The user gives feedback, reports a UI issue, or makes a product suggestion about the Langfuse application itself. |
 | `irrelevant-to-langfuse` | Greetings with no question, test messages, gibberish, or requests completely unrelated to Langfuse. |
 
-<details>
-<summary>Read the full evaluator prompt here.</summary>
+<Details>
+<Summary>Read the full evaluator prompt here.</Summary>
 
 You are a user intent classifier for a Langfuse support chatbot.
 You will be given the user's message. Classify it into exactly one of the following categories.
@@ -64,7 +65,7 @@ You will be given the user's message. Classify it into exactly one of the follow
 
 **Output:** Respond with only the category name, nothing else.
 
-</details>
+</Details>
 
 ---
 
