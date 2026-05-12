@@ -38,6 +38,33 @@ jobs:
       - name: Run H1 heading check
         run: node scripts/check-h1-headings.js
 
+  format:
+    needs:
+      - pre-job
+    if: needs.pre-job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v6.0.5
+        with:
+          version: 9.5.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+
+      - run: pnpm install
+
+      - name: Check Prettier formatting
+        run: pnpm run format:check
+
   # check-notebook-docs-sync:
   #   needs:
   #     - pre-job
@@ -179,6 +206,7 @@ jobs:
     needs: [
         pre-job,
         check_h1,
+        format,
         # check-notebook-docs-sync,
         build-and-check-links,
         check-sitemap-links,
