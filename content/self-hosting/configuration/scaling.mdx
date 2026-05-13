@@ -88,6 +88,12 @@ If you notice that your disk space is increasing significantly on S3/Blob Storag
 In general, the most effective way to free disk space is to configure a [data retention](/docs/data-retention) policy.
 If this is not available in your plan, consider the options below.
 
+<Callout type="info">
+
+For larger deployments where ClickHouse disk growth becomes an operational bottleneck, consider [ClickHouse Cloud or BYOC](/self-hosting/deployment/infrastructure/clickhouse#cloudbyoc). These deployments separate storage from compute, so storage can grow independently of the compute that serves Langfuse queries. This does not replace retention policies because retained tracing data still consumes storage, but it removes much of the manual disk planning, volume expansion, and single-shard capacity management required in self-managed OSS ClickHouse setups.
+
+</Callout>
+
 ### S3 / Blob Storage Disk Usage
 
 You can implement lifecycle rules to automatically remove old files from your blob storage.
