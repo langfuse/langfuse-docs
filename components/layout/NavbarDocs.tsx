@@ -12,7 +12,7 @@ const contentStyle = cn('flex items-center w-full bg-surface-1 md:rounded-sm pl-
 export function NavbarDocs({ sectionLabel = "Docs" }: { sectionLabel?: string }) {
   return (
     <header
-      className="sticky z-[60] h-[var(--lf-nav-primary-height)] bg-surface-1 backdrop-blur-md"
+      className="sticky z-50 h-[var(--lf-nav-primary-height)] bg-surface-1 backdrop-blur-md"
       style={{ top: "var(--fd-banner-height, 0px)" }}
     >
       <nav className="flex mx-auto h-full border-b max-w-380 border-line-structure">
