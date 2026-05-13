@@ -7,7 +7,7 @@ category: Evaluation
 
 # Error Analysis for LLM Applications - Step by step guide
 
-This is hands-on walkthrough through the [five-step error-analysis process](https://langfuse.com/academy/monitoring/error-analysis), applied end-to-end to a real example app: a phone tech-support chatbot. By the end you'll have a representative trace sample, an annotation queue with two passes of scoring, a clustered taxonomy of failure modes specific to the app, a chart of failure rates per category, and a decision for each — fix, measure with an evaluator, or just monitor.
+This is a hands-on walkthrough through the [five-step error-analysis process](https://langfuse.com/academy/monitoring/error-analysis), applied end-to-end to a real example app: a phone tech-support chatbot. By the end you'll have a representative trace sample, an annotation queue with two passes of scoring, a clustered taxonomy of failure modes specific to the app, a chart of failure rates per category, and a decision for each — fix, measure with an evaluator, or just monitor.
 
 If you want to learn more about error analysis first, you can check out our Academy page on [Error Analysis](https://langfuse.com/academy/monitoring/error-analysis)
 
@@ -101,7 +101,7 @@ Trace-level input and output were null. All readable content lived in the GENERA
 
 ### Step 1.2: Select a representative sample
 
-Target ~100 traces. The goal is coverage, not randomness: over-represent edges and anything already flagged as problematic. In the process of selecting traces there are certain signals worth looking for that qualify a trace to be part of the sampe.
+Target ~100 traces. The goal is coverage, not randomness: over-represent edges and anything already flagged as problematic. In the process of selecting traces there are certain signals worth looking for that qualify a trace to be part of the sample.
 
 **Signals to look for:**
 
@@ -161,7 +161,7 @@ In the Traces view, navigate to each trace's GENERATION observation and add it t
 
 ### Step 2: Open code your first 30-50 traces
 
-In the second step your review each trace in your example in detail. Work through the annotation queue in Langfuse. For each trace:
+In the second step you review each trace in your example in detail. Work through the annotation queue in Langfuse. For each trace:
 
 1. Read the full conversation in the observation view
 2. Write what you observe in `open_coding`, plain language, no diagnosis
