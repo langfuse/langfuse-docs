@@ -7,10 +7,10 @@ description: "Learn the recommended Langfuse evaluation workflow: instrument tra
 
 Langfuse evaluation follows a continuous improvement loop with four jobs:
 
-1. **Instrument** -> Collect representative traces with [Langfuse Observability](/docs/observability/get-started).
-2. **Annotate** -> Turn traces into evaluation assets with [human annotations](/docs/evaluation/evaluation-methods/scores-via-ui), [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [scores](/docs/evaluation/scores/overview), and [datasets](/docs/evaluation/experiments/datasets).
-3. **Deploy** -> Validate changes before shipping with [experiments](/docs/evaluation/experiments/experiments-via-sdk), benchmarking, and [CI/CD regression checks](/docs/evaluation/experiments/experiments-ci-cd).
-4. **Monitor** -> Score production behavior with automated [online evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), analyze results in [Score Analytics](/docs/evaluation/scores/score-analytics), and feed new failures back into annotation.
+1. **Instrument** -> Capture real behavior with [Observability](/docs/observability/get-started).
+2. **Annotate** -> Turn traces into reusable evaluation assets with [annotations](/docs/evaluation/evaluation-methods/scores-via-ui) and [datasets](/docs/evaluation/experiments/datasets).
+3. **Deploy** -> Validate changes with [experiments](/docs/evaluation/experiments/experiments-via-sdk) and [CI/CD checks](/docs/evaluation/experiments/experiments-ci-cd) before they ship.
+4. **Monitor** -> Track production quality with [online evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [Score Analytics](/docs/evaluation/scores/score-analytics).
 
 Work through the loop continuously: collect traces, turn them into failure modes, validate changes against those failure modes, and use production monitoring to find the next examples to annotate.
 
@@ -28,23 +28,21 @@ Collect the evidence you need to evaluate your application. Start with traces th
 
 ## Annotate
 
-Turn raw traces into reusable evaluation assets. Annotate representative examples, name the failure modes, and convert them into datasets and score definitions.
+Turn raw traces into reusable evaluation assets. Start with human review, name the failure modes, then convert the useful examples into datasets and score definitions.
 
-- Build an initial [dataset](/docs/evaluation/experiments/datasets) from representative traces or observations. Aim for roughly 100 diverse, high-quality examples when possible.
-- Use [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues), [manual scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui), and [`TEXT` scores](/docs/evaluation/scores/overview#score-types) for **open coding**: review traces and write short notes about the first thing that went wrong.
-- Group notes into failure modes (**axial coding**), then convert stable categories into [score types](/docs/evaluation/scores/overview#score-types) and [score configs](/faq/all/manage-score-configs).
+- Use [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues), [manual scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui), and [`TEXT` scores](/docs/evaluation/scores/overview#score-types) for collaborative **open coding**: review representative traces and note the first thing that went wrong.
+- Group notes into failure modes (**axial coding**), then turn stable error categories into [structured labels](/docs/evaluation/scores/overview#score-types) and [evaluation criteria](/faq/all/manage-score-configs) for LLM-as-a-Judge and custom evaluators.
+- Add the most important examples to a [dataset](/docs/evaluation/experiments/datasets). Aim for roughly 100 diverse, high-quality test cases when possible.
 
 For a detailed walkthrough, use the [error analysis guide](/guides/cookbook/error-analysis-llm-applications) to open-code traces, cluster failure categories, label examples, and decide which failures should become evaluators.
-
-When you find a failure, reduce it to a reusable test case. For conversational systems, add the minimal reproduction or the N-1 turns before the failure to a [dataset](/docs/evaluation/experiments/datasets). Over time, your dataset becomes a regression set built from real-world behavior.
 
 ## Deploy
 
 Ship tested changes with measurable impact. Use experiments to confirm that a prompt, model, retrieval configuration, agent implementation, or evaluator variant improves quality without introducing regressions.
 
-- Run [experiments via UI](/docs/evaluation/experiments/experiments-via-ui) for prompt and model iterations, or [experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for application and agent logic.
-- Use [datasets](/docs/evaluation/experiments/datasets) as stable test cases and score outputs with [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk), or [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui).
-- Use experiments for active iteration, benchmarking, and release regression checks. Run them manually during development or automatically in [CI/CD](/docs/evaluation/experiments/experiments-ci-cd) before merge or deploy.
+- **Active iteration:** Use [experiments via UI](/docs/evaluation/experiments/experiments-via-ui) for prompt and model changes, or [experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for application and agent logic.
+- **Benchmarking:** Compare candidates on the same [dataset](/docs/evaluation/experiments/datasets) and score outputs with [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk), or [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui).
+- **Releasing / deploying:** Run regression checks manually during development or automatically in [CI/CD](/docs/evaluation/experiments/experiments-ci-cd) before merge or deploy.
 
 Experiments are useful in three common deployment workflows:
 
@@ -59,7 +57,6 @@ Experiments are useful in three common deployment workflows:
 Monitor production with the failure modes you already annotated. Use online evaluators to score live behavior, catch quality issues after deployment, and discover the next examples to review.
 
 - Turn annotated failure modes into online evaluators with [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) or custom [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk).
-- Prefer observation-level evaluators when the failure can be judged on a specific model call, tool call, retrieval step, or final generation.
 - Use [Score Analytics](/docs/evaluation/scores/score-analytics) and [custom dashboards](/docs/metrics/features/custom-dashboards) to track distributions, trends, evaluator agreement, and regressions; when monitors reveal new patterns, send them back to annotation.
 
 Start with a small number of high-signal LLM-as-a-Judge or custom evaluators derived from known failure modes, then expand coverage as new failures appear.
@@ -72,7 +69,7 @@ Start with a small number of high-signal LLM-as-a-Judge or custom evaluators der
 | Segment traces for later review | [Tags](/docs/observability/features/tags), [metadata](/docs/observability/features/metadata), [users](/docs/observability/features/users), [sessions](/docs/observability/features/sessions), [environments](/docs/observability/features/environments), [releases](/docs/observability/features/releases-and-versioning) |
 | Review examples manually | [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues), [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui) |
 | Open Coding: capture open-ended notes | [`TEXT` scores](/docs/evaluation/scores/overview#score-types), [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues) |
-| Axial Coding: derive failure modes | [Score configs](/faq/all/manage-score-configs), [categorical/boolean scores](/docs/evaluation/scores/overview#score-types) |
+| Axial Coding: derive failure modes | [Stable error categories](/docs/evaluation/scores/overview#score-types), [evaluation criteria](/faq/all/manage-score-configs) |
 | Create reusable test cases | [Datasets](/docs/evaluation/experiments/datasets) |
 | Compare changes before shipping | [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui), [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) |
 | Gate pull requests or deploys | [CI/CD experiments](/docs/evaluation/experiments/experiments-ci-cd) |
