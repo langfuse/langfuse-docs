@@ -5,10 +5,11 @@ import { NavbarDocs } from "./NavbarDocs";
 import { DocsSecondaryNav, DocsSecondaryNavMobile } from "./DocsSecondaryNav";
 import { DocsPatternTracker } from "./DocsContentArea";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { AISearch, AISearchPanel, FloatingAskAIButton } from "@/components/inkeep/search";
+import { AISearch, AISearchPanel, FloatingAskAI } from "@/components/inkeep/search";
 import { SidebarFolderItem } from "@/components/docs-sidebar/SidebarFolderItem";
 import { SidebarItem } from "@/components/docs-sidebar/SidebarItem";
 import { SidebarSeparatorItem } from "@/components/docs-sidebar/SidebarSeparatorItem";
+import { Banner } from "./Banner";
 
 /**
  * Shared wrapper used by all sidebar-based section layouts
@@ -51,6 +52,7 @@ export function SharedDocsLayout({
         }
       >
         <DocsPatternTracker />
+        <Banner />
         <NavbarDocs sectionLabel={sectionLabel} />
         {showSecondaryNav && <DocsSecondaryNav />}
         <DocsLayoutWrapper>
@@ -71,7 +73,7 @@ export function SharedDocsLayout({
           </DocsLayout>
         </DocsLayoutWrapper>
       </div>
-      <FloatingAskAIButton />
+      <FloatingAskAI />
     </AISearch>
   );
 }

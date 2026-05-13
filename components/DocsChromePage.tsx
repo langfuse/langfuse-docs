@@ -10,9 +10,7 @@ import { getMDXComponents } from "@/mdx-components";
 
 type BodyChromeProps = Omit<ComponentProps<typeof DocBodyChrome>, "children">;
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 type LoadedPage = { data: any };
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * Shared `<DocsPage>` chrome for every sidebar-based section — resolves the

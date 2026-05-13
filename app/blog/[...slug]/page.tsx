@@ -8,6 +8,8 @@ import { ContentColumns } from "@/components/layout";
 import { BlogPostSidebar } from "@/components/blog/BlogPostSidebar";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
+import { PageFooterNav } from "@/components/PageFooterNav";
+import { getPageFooterItems } from "@/lib/page-footer-nav";
 
 type PageProps = {
   params: Promise<{ slug: string[] }>;
@@ -17,9 +19,23 @@ export default async function BlogPostPage(props: PageProps) {
   const { slug } = await props.params;
   const result = await loadPage(blogSource, slug);
   if (!result) notFound();
-  const { MDX } = result;
+  const { page, MDX } = result;
 
   const { tags, total } = getBlogTagCounts();
+
+  const footerItems = getPageFooterItems(
+    blogSource
+      .getPages()
+      .filter(
+        (page) => page.url !== "/blog" && page.data.showInBlogIndex !== false,
+      ),
+    page.url,
+    {
+      getDate: (page) => page.data.date as string | undefined,
+      getTitle: (page) => page.data.title,
+    },
+  );
+
 
   return (
     <ContentColumns
@@ -32,6 +48,7 @@ export default async function BlogPostPage(props: PageProps) {
             <MDX components={getMDXComponents()} />
           </DocBodyChrome>
         </MainContentWrapper>
+        <PageFooterNav items={footerItems} className="mt-10" />
       </div>
     </ContentColumns>
   );

@@ -37,7 +37,7 @@ const languagesGroup = {
 };
 
 const agentFrameworksGroup = {
-  title: "Agent Frameworks",
+  title: "Agent frameworks",
   items: [
     {
       label: "LangChain",
@@ -78,7 +78,7 @@ const agentFrameworksGroup = {
 };
 
 const modelProvidersGroup = {
-  title: "Model Providers",
+  title: "Model providers",
   items: [
     {
       label: "OpenAI",

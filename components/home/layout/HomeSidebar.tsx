@@ -1,5 +1,6 @@
 import { changelogSource } from "@/lib/source";
 import { getGitHubStars } from "@/lib/github-stars";
+import { getLatestGitHubReleaseDate } from "@/lib/github-releases";
 import { LinkBox } from "@/components/ui/link-box";
 import { Text } from "@/components/ui/text";
 import discussionsData from "../../../src/langfuse_github_discussions.json";
@@ -78,7 +79,7 @@ const selfHostingLinks = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function HomeSidebar() {
+export async function HomeSidebar() {
   const changelogItems = changelogSource
     .getPages()
     .filter((p) => p.data.title && p.data.date)
@@ -94,7 +95,8 @@ export function HomeSidebar() {
       date: new Date(p.data.date as string).toISOString(),
     }));
 
-  const latestReleaseDate = changelogItems[0]?.date;
+  const latestReleaseDate =
+    (await getLatestGitHubReleaseDate()) ?? changelogItems[0]?.date;
 
   return (
     <aside

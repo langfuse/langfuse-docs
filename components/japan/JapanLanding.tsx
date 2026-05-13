@@ -14,7 +14,7 @@ function CodeBox({ value }: { value: string }) {
       await navigator.clipboard.writeText(value);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch {}
+    } catch { }
   };
   return (
     <div className="rounded-[2px] font-mono text-[11px] leading-[1.65] bg-[#222220] border border-[#3a3a35] text-[#e2e2dc] overflow-hidden">
@@ -598,7 +598,6 @@ function Customers() {
             className="px-4 py-9 flex items-center justify-center"
           >
             {c.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={c.logo}
                 alt={c.name}

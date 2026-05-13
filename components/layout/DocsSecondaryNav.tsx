@@ -64,7 +64,9 @@ export function DocsSecondaryNavMobile() {
   return (
     <div
       className="flex items-center px-3 gap-2 md:hidden sticky z-41 bg-surface-1 border-b border-line-structure [grid-area:header] h-[var(--lf-nav-docs-secondary-height)]"
-      style={{ top: "var(--lf-nav-primary-height)" }}
+      style={{
+        top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
+      }}
     >
       <button
         aria-label={open ? "Close Sidebar" : "Open Sidebar"}
@@ -92,10 +94,12 @@ export function DocsSecondaryNav() {
   const pathname = usePathname();
   return (
     <div
-      className="hidden overflow-x-auto overflow-y-hidden sticky z-40 md:block bg-surface-1"
-      style={{ top: "var(--lf-nav-primary-height)" }}
+      className="hidden overflow-x-auto overflow-y-hidden sticky z-50 md:block bg-surface-1"
+      style={{
+        top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
+      }}
     >
-      <nav className="px-px mx-auto border-b max-w-360 bg-line-structure border-line-structure">
+      <nav className="px-px mx-auto border-b max-w-380 bg-line-structure border-line-structure">
         <div className="flex gap-0 items-stretch rounded-sm bg-surface-1">
           {SECTIONS.map((item) => {
             const isActive = pathname?.startsWith(item.path);

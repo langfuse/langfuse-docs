@@ -5,6 +5,7 @@ export function Banner() {
   return (
     <FumadocsBanner
       id="fd-top-banner-japan"
+      height="2rem"
       className="bg-black text-white [&_a]:text-white [&_button]:text-white"
     >
       <Link href="/japan">

@@ -110,10 +110,12 @@ const companies: CompanyLogo[] = [
 const LogoImage = ({
   logo,
   name,
+  hoverable = true,
   compact = false,
 }: {
   logo: StaticImageData;
   name: string;
+  hoverable?: boolean;
   compact?: boolean;
 }) => {
   if (compact) {
@@ -122,7 +124,7 @@ const LogoImage = ({
         <Image
           src={logo}
           alt={`${name} logo`}
-          className="h-[56px] w-auto scale-125 transition-[filter] duration-200 hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]"
+          className={cn("h-[56px] w-auto scale-125", hoverable ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200" : "")}
           sizes="(max-width: 768px) 30vw"
           priority={false}
         />
@@ -134,7 +136,7 @@ const LogoImage = ({
     <Image
       src={logo}
       alt={`${name} logo`}
-      className="h-[56px] object-cover max-w-full transition-[filter] duration-200 hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)]"
+      className={cn("h-[56px] object-cover max-w-full", hoverable ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200" : "")}
       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
       priority={false}
     />
@@ -149,22 +151,18 @@ function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
       {visibleCompanies.map((company) => {
         const hasStory = Boolean(company.customerStoryPath);
         return (
-          <LinkBox
+          <div
             key={company.name}
-            href={company.customerStoryPath}
-            tooltip={hasStory ? "Read story" : undefined}
-            tooltipPlacement="bottom-center"
             className="shrink-0 flex items-center justify-center !p-0"
             aria-hidden={duplicate || undefined}
-            tabIndex={duplicate ? -1 : undefined}
             aria-label={
               hasStory
                 ? `Read ${company.name} user story`
                 : `${company.name} uses Langfuse`
             }
           >
-            <LogoImage logo={company.logo} name={company.name} compact />
-          </LinkBox>
+            <LogoImage hoverable={false} logo={company.logo} name={company.name} compact />
+          </div>
         );
       })}
     </>
@@ -226,20 +224,30 @@ export const EnterpriseLogoGrid = ({
       >
         {visibleCompanies.map((company) => {
           const hasStory = Boolean(company.customerStoryPath);
+
           return (
             <LinkBox
               key={company.name}
               href={company.customerStoryPath}
-              tooltip={hasStory ? "Read story" : undefined}
-              tooltipPlacement="bottom-center"
               className="-mr-px -mb-px flex items-center justify-center !p-0"
-              role="gridcell"
               aria-label={
                 hasStory
                   ? `Read ${company.name} user story`
                   : `${company.name} uses Langfuse`
               }
+              role="gridcell"
             >
+              {hasStory && (
+                <div className="absolute w-full h-full flex items-end justify-center -mt-1 pointer-events-none">
+                  <div
+                    className={cn(
+                      "tooltip-label z-50 inline-flex h-[12px] items-center justify-center gap-[3px] overflow-hidden rounded-none border-0 bg-primary/10 px-1 py-0.5 font-mono text-[10px] leading-none text-primary-foreground shadow-none outline-hidden group-hover:bg-primary transition",
+                    )}
+                  >
+                    Read story
+                  </div>
+                </div>
+              )}
               <LogoImage logo={company.logo} name={company.name} />
             </LinkBox>
           );

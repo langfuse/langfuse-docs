@@ -35,7 +35,7 @@ export const Enterprise = () => {
     <HomeSection id="scale-and-security" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start mb-10">
         <Heading>
-          Enterprise <span className="min-[340px]:whitespace-nowrap"><TextHighlight>Scale<span className="hidden min-[340px]:inline">&nbsp;</span></TextHighlight><span className="whitespace-nowrap"><TextHighlight>and Security</TextHighlight>.</span></span>
+          Enterprise <span className="min-[340px]:whitespace-nowrap"><TextHighlight>scale<span className="hidden min-[340px]:inline">&nbsp;</span></TextHighlight><span className="whitespace-nowrap"><TextHighlight>and security</TextHighlight>.</span></span>
         </Heading>
         <Text className="text-left max-w-[64ch]">
           Traditional observability handles many small spans. LLM systems run differently.
@@ -51,14 +51,14 @@ export const Enterprise = () => {
             <BulletList items={architecture} />
           </CornerBox>
           <CornerBox hoverStripes className="flex flex-col flex-1 gap-3 p-3 -mt-px sm:p-4">
-            <Text size="m" className="font-medium text-left text-text-secondary">Reliability at Scale</Text>
+            <Text size="m" className="font-medium text-left text-text-secondary">Reliability at scale</Text>
             <BulletList items={openApis} />
           </CornerBox>
         </div>
 
         <CornerBox hoverStripes className="flex relative flex-col -mt-px md:-ml-px min-h-[350px]">
           <div className="flex flex-col gap-3 p-4">
-            <Text size="m" className="font-medium text-left text-text-secondary">Security & Compliance</Text>
+            <Text size="m" className="font-medium text-left text-text-secondary">Security & compliance</Text>
             <BulletList items={security} />
           </div>
           <div className="flex absolute bottom-0 flex-1 justify-center items-center pointer-events-none">

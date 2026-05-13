@@ -66,7 +66,6 @@ export function ForceLightMode() {
         setTheme(previousTheme.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null;

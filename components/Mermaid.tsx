@@ -1,72 +1,63 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-
-declare global {
-  interface Window {
-    mermaid?: {
-      initialize: (config: object) => void;
-      render: (id: string, text: string) => Promise<{ svg: string }>;
-    };
-  }
-}
+import { renderMermaidSVG } from "beautiful-mermaid";
+import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
 
 interface MermaidProps {
   chart: string;
 }
 
-let mermaidScriptPromise: Promise<void> | null = null;
+// beautiful-mermaid is stricter than mermaid.js, so normalize a couple of
+// legacy patterns that still exist in docs content before rendering.
+function normalizeMermaidInput(chart: string): string {
+  const lines = chart.split("\n");
 
-function loadMermaid(): Promise<void> {
-  if (window.mermaid) return Promise.resolve();
-  if (!mermaidScriptPromise) {
-    mermaidScriptPromise = new Promise<void>((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src =
-        "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
-      script.onload = () => resolve();
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
+  let startIndex = 0;
+  if (lines[0]?.trim() === "---") {
+    const closingIndex = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
+    if (closingIndex !== -1) {
+      startIndex = closingIndex + 1;
+    }
   }
-  return mermaidScriptPromise;
+
+  return lines
+    .slice(startIndex)
+    .map((line) => line.replace(/;\s*$/, ""))
+    .join("\n")
+    .trim();
 }
 
-let idCounter = 0;
+// The library inlines Google Fonts imports into the SVG. Strip those so
+// diagrams inherit the site's existing font setup instead of loading fonts.
+function normalizeMermaidSvgFonts(svg: string): string {
+  return svg.replace(/@import\s+url\('https:\/\/fonts\.googleapis\.com\/[^']+'\);\s*/g, "");
+}
 
 export function Mermaid({ chart }: MermaidProps) {
-  const ref = useRef<HTMLDivElement>(null);
+  try {
+    const svg = normalizeMermaidSvgFonts(renderMermaidSVG(normalizeMermaidInput(chart), {
+      bg: "var(--surface-1)",
+      fg: "var(--text-primary)",
+      line: "var(--line-cta)",
+      accent: "var(--line-cta)",
+      muted: "var(--text-tertiary)",
+      surface: "var(--surface-2)",
+      border: "var(--text-tertiary)",
+      interactive: false,
+      transparent: true,
+    }));
 
-  useEffect(() => {
-    if (!ref.current) return;
-    const el = ref.current;
-    const id = `mermaid-diagram-${++idCounter}`;
+    return (
+      <div
+        className="mermaid-diagram my-4 overflow-x-auto border p-4 not-prose rounded-none"
+        dangerouslySetInnerHTML={{ __html: svg }}
+      />
+    );
+  } catch (error) {
+    console.warn("Failed to render Mermaid diagram", error);
 
-    loadMermaid()
-      .then(() => {
-        window.mermaid!.initialize({
-          startOnLoad: false,
-          theme: document.documentElement.classList.contains("dark")
-            ? "dark"
-            : "default",
-          securityLevel: "loose",
-        });
-        return window.mermaid!.render(id, chart);
-      })
-      .then(({ svg }) => {
-        if (el) el.innerHTML = svg;
-      })
-      .catch(() => {
-        if (el) {
-          el.innerHTML = `<pre class="text-xs text-left overflow-x-auto">${chart}</pre>`;
-        }
-      });
-  }, [chart]);
-
-  return (
-    <div
-      ref={ref}
-      className="my-4 flex justify-center overflow-x-auto rounded-lg border bg-card p-4"
-    />
-  );
+    return (
+      <CodeBlock title="Mermaid">
+        <Pre>{normalizeMermaidInput(chart)}</Pre>
+      </CodeBlock>
+    );
+  }
 }
