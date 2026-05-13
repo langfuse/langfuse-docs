@@ -5,13 +5,9 @@ import Link from "next/link";
 export interface ManualGuideCalloutProps {
   /** Where the card links to (cookbook URL or similar). */
   href: string;
-  /** Ribbon label, default "Walk through manually". */
-  ribbon?: string;
-  /** Right side of the ribbon — e.g. "~30 min · 5 steps". */
-  meta?: string;
-  /** Title shown beneath the ribbon. */
-  title: string;
-  /** Lede paragraph beneath the title. */
+  /** Topic shown in the ribbon after the static "Guide:" prefix, e.g. "error analysis". */
+  topic: string;
+  /** Lede paragraph beneath the ribbon. */
   lede?: React.ReactNode;
   /** CTA button text, default "Open the guide". */
   cta?: string;
@@ -19,11 +15,9 @@ export interface ManualGuideCalloutProps {
 
 export function ManualGuideCallout({
   href,
-  ribbon = "Walk through manually",
-  meta,
-  title,
+  topic,
   lede,
-  cta = "Open the guide",
+  cta = "Open",
 }: ManualGuideCalloutProps) {
   const isExternal = /^https?:/i.test(href);
 
@@ -31,14 +25,14 @@ export function ManualGuideCallout({
     isExternal ? (
       <a
         href={href}
-        className="manual-guide not-prose"
+        className="manual-guide not-prose corner-box-corners"
         target="_blank"
         rel="noreferrer"
       >
         {children}
       </a>
     ) : (
-      <Link href={href} className="manual-guide not-prose">
+      <Link href={href} className="manual-guide not-prose corner-box-corners">
         {children}
       </Link>
     );
@@ -58,17 +52,11 @@ export function ManualGuideCallout({
                 />
               </svg>
             </span>
-            <span>{ribbon}</span>
+            <span>
+              <span className="manual-guide__ribbon-prefix">Guide:</span>{" "}
+              {topic}
+            </span>
           </div>
-          {meta && <span className="manual-guide__meta">{meta}</span>}
-        </header>
-
-        <div className="manual-guide__body">
-          <h3 className="manual-guide__title">{title}</h3>
-          {lede && <p className="manual-guide__lede">{lede}</p>}
-        </div>
-
-        <footer className="manual-guide__foot">
           <span className="manual-guide__cta">
             {cta}
             <svg
@@ -88,7 +76,13 @@ export function ManualGuideCallout({
               />
             </svg>
           </span>
-        </footer>
+        </header>
+
+        {lede && (
+          <div className="manual-guide__body">
+            <p className="manual-guide__lede">{lede}</p>
+          </div>
+        )}
       </Wrapper>
 
       <style>{`
@@ -98,22 +92,19 @@ export function ManualGuideCallout({
           margin: 32px 0;
           background: var(--surface-bg);
           color: var(--text-primary);
-          border: 1px solid var(--line-cta);
-          border-radius: 2px;
-          overflow: hidden;
+          border: 1px solid var(--line-structure);
+          border-radius: 0;
           font-family: var(--font-sans);
           text-decoration: none;
-          transition: transform 0.15s ease, box-shadow 0.2s ease;
+          transition: border-color 0.15s ease;
         }
 
         .manual-guide:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
+          border-color: var(--line-cta);
         }
 
         .manual-guide:hover .manual-guide__cta {
-          background: var(--text-primary);
-          color: var(--surface-bg);
+          color: var(--text-primary);
         }
 
         .manual-guide:hover .manual-guide__cta-arrow {
@@ -122,7 +113,7 @@ export function ManualGuideCallout({
 
         .manual-guide__ribbon {
           background: var(--surface-beige-accent);
-          border-bottom: 1px solid var(--line-cta);
+          border-bottom: 1px solid var(--line-structure);
           padding: 9px 20px;
           display: flex;
           align-items: center;
@@ -141,6 +132,10 @@ export function ManualGuideCallout({
           gap: 12px;
         }
 
+        .manual-guide__ribbon-prefix {
+          color: var(--text-secondary);
+        }
+
         .manual-guide__mark {
           width: 18px;
           height: 18px;
@@ -153,25 +148,26 @@ export function ManualGuideCallout({
           flex-shrink: 0;
         }
 
-        .manual-guide__meta {
-          font-size: 10px;
-          letter-spacing: 0.1em;
+        .manual-guide__cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-family: var(--font-mono);
+          font-size: 11px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          font-weight: 500;
           color: var(--text-secondary);
           white-space: nowrap;
+          transition: color 0.15s;
+        }
+
+        .manual-guide__cta-arrow {
+          transition: transform 0.15s;
         }
 
         .manual-guide__body {
-          padding: 18px 24px 14px;
-        }
-
-        .manual-guide__title {
-          font-family: var(--font-analog), serif;
-          font-weight: 500;
-          font-size: 22px;
-          line-height: 1.15;
-          letter-spacing: -0.005em;
-          color: var(--text-primary);
-          margin: 0 0 8px;
+          padding: 14px 24px 16px;
         }
 
         .manual-guide__lede {
@@ -183,49 +179,12 @@ export function ManualGuideCallout({
           max-width: 560px;
         }
 
-        .manual-guide__foot {
-          border-top: 1px solid var(--line-structure);
-          background: var(--surface-1);
-          display: flex;
-          align-items: stretch;
-          justify-content: stretch;
-        }
-
-        .manual-guide__cta {
-          flex: 1;
-          padding: 12px 24px;
-          background: var(--surface-bg);
-          display: inline-flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          font-family: var(--font-sans);
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: -0.005em;
-          color: var(--text-primary);
-          transition: background 0.15s, color 0.15s;
-        }
-
-        .manual-guide__cta-arrow {
-          transition: transform 0.15s;
-        }
-
         @media (max-width: 720px) {
           .manual-guide__body {
-            padding: 16px 18px 12px;
-          }
-
-          .manual-guide__title {
-            font-size: 19px;
-          }
-
-          .manual-guide__cta {
-            padding: 12px 18px;
+            padding: 12px 18px 14px;
           }
         }
       `}</style>
     </>
   );
 }
-
