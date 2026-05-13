@@ -53,9 +53,11 @@ export LANGFUSE_PUBLIC_KEY="pk-lf-..."
 export LANGFUSE_SECRET_KEY="sk-lf-..."
 
 # Langfuse host (optional, defaults to https://cloud.langfuse.com)
-# EU cloud:  https://cloud.langfuse.com
-# US cloud:  https://us.cloud.langfuse.com
-# Self-host: http://localhost:3000
+# 🇪🇺 EU cloud:  https://cloud.langfuse.com
+# 🇺🇸 US cloud:  https://us.cloud.langfuse.com
+# 🇯🇵 Japan:     https://jp.cloud.langfuse.com
+# ⚕️ HIPAA:     https://hipaa.cloud.langfuse.com
+# Self-host:    http://localhost:3000
 export LANGFUSE_HOST="https://cloud.langfuse.com"
 ```
 
@@ -153,13 +155,15 @@ trace->add_tag("beta");
 
 auto result = ai::langfuse::generate_text(client, std::move(options), *trace);
 
-trace->set_output(result.text);
+if (result) {
+  trace->set_output(result.text);
+} else {
+  trace->set_output(ai::JsonValue{{"error", result.error_message()}});
+}
 trace->end();  // idempotent, synchronous flush
 ```
 
 `Trace` methods are thread-safe, so callbacks fired from `generate_text`'s worker threads can record into the same trace concurrently.
-
-</Steps>
 
 ## Notes and limitations
 
