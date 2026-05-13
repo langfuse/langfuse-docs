@@ -27,26 +27,9 @@ export function ManualGuideCallout({
 }: ManualGuideCalloutProps) {
   const isExternal = /^https?:/i.test(href);
 
-  const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    isExternal ? (
-      <a
-        href={href}
-        className="manual-guide not-prose"
-        target="_blank"
-        rel="noreferrer"
-      >
-        {children}
-      </a>
-    ) : (
-      <Link href={href} className="manual-guide not-prose">
-        {children}
-      </Link>
-    );
-
-  return (
+  const inner = (
     <>
-      <Wrapper>
-        <header className="manual-guide__ribbon">
+      <header className="manual-guide__ribbon">
           <div className="manual-guide__ribbon-lead">
             <span className="manual-guide__mark" aria-hidden="true">
               <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
