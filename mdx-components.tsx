@@ -18,6 +18,9 @@ import { EvaluationEvolutionDiagram } from "@/components/academy/EvaluationEvolu
 import { TracingHierarchyDiagram } from "@/components/academy/TracingHierarchyDiagram";
 import { RagTraceViewDiagram } from "@/components/academy/RagTraceViewDiagram";
 import { DatasetFieldsDiagram } from "@/components/academy/DatasetFieldsDiagram";
+import { ErrorAnalysisProcessDiagram } from "@/components/academy/ErrorAnalysisProcessDiagram";
+import { AgentPromptCallout } from "@/components/academy/AgentPromptCallout";
+import { ManualGuideCallout } from "@/components/academy/ManualGuideCallout";
 import { Details, Summary } from "@/components/Details";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
@@ -75,6 +78,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     TracingHierarchyDiagram,
     RagTraceViewDiagram,
     DatasetFieldsDiagram,
+    ErrorAnalysisProcessDiagram,
+    AgentPromptCallout,
+    ManualGuideCallout,
     details: Details,
     summary: Summary,
     ...components,
