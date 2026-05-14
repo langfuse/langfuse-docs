@@ -67,7 +67,7 @@ def search_with_exa(query: str, num_results: int = 5):
     results = exa.search_and_contents(
         query,
         num_results=num_results,
-        text=True
+        highlights=True
     )
     return results
 
@@ -78,7 +78,9 @@ search_results = search_with_exa("What is Langfuse and how does it help with LLM
 for result in search_results.results:
     print(f"Title: {result.title}")
     print(f"URL: {result.url}")
-    print(f"Text: {result.text[:200]}...\n")
+    for hl in result.highlights:
+        print(f"Highlight: {hl}")
+    print()
 ```
 
 ## Example 2: Exa Search together with OpenAI
@@ -99,14 +101,14 @@ def search_and_summarize(query: str):
         results = exa.search_and_contents(
             query,
             num_results=num_results,
-            text=True
+            highlights=True
         )
         return results
 
     results = search_with_exa(query)
 
-    # 2. Build a short context
-    context = "\n".join([f"{r.title} ({r.url}): {r.text}" for r in results.results])
+    # 2. Build a short context from highlights
+    context = "\n".join([f"{r.title} ({r.url}): {' '.join(r.highlights)}" for r in results.results])
 
     # 3. Summarize with OpenAI
     client = OpenAI()
