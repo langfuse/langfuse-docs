@@ -35,6 +35,35 @@ User feedback is one of the richest sources of signal, but it comes in two forms
 
 **Implicit feedback** is derived from behavior: whether a user retried a query, disagreed with the system, copied a response, accepted a suggestion, or abandoned a conversation midway. It requires no user effort and generates high-volume data, but the signals are indirect and need interpretation. These can be surfaced using automated evaluators.
 
+To make this concrete, here are two example applications and how they balance explicit and implicit feedback:
+
+<Tabs items={["Customer support chatbot", "Document extraction tool"]}>
+<Tab>
+
+*A customer support chatbot embedded in a SaaS company's help center. Users can rate the conversation after it ends, and can request a human handoff at any point during the chat.*
+
+The feedback the team captures:
+
+```
+Explicit:  thumbs up / thumbs down at the end of a conversation
+Implicit:  user requests human handoff mid-conversation
+```
+
+</Tab>
+<Tab>
+
+*An invoice-processing tool that extracts structured fields (vendor, total, due date) from uploaded PDFs. Each extraction is reviewed by a human in a downstream approval step before being written to the accounting system.*
+
+The feedback the team captures:
+
+```
+Explicit:  none — there's no point in the workflow where a rating fits
+Implicit:  extracted field manually edited before approval
+```
+
+</Tab>
+</Tabs>
+
 Both register as scores, so they feed into the same dashboards, trend charts, and signal rules as your other evaluation data.
 
 <Callout type="info">
