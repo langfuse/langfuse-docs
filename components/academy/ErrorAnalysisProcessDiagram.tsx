@@ -3,63 +3,33 @@
 import { useLayoutEffect, useRef } from "react";
 
 const INNER_W = 1100;
-const INNER_H = 270;
+const INNER_H = 150;
 
 const STEPS = [
   {
     num: "01",
     label: "Collect",
     title: "Gather traces",
-    desc: (
-      <>
-        Production traffic, datasets, or experiment outputs. The{" "}
-        <strong>raw material</strong> of analysis.
-      </>
-    ),
   },
   {
     num: "02",
     label: "Note",
     title: "Open coding",
-    desc: (
-      <>
-        A free-text note per trace — the{" "}
-        <strong>first thing that went wrong</strong>. No taxonomy yet.
-      </>
-    ),
   },
   {
     num: "03",
     label: "Group",
     title: "Cluster into categories",
-    desc: (
-      <>
-        An <strong>LLM drafts</strong> the taxonomy from your notes. You refine
-        it — names matter.
-      </>
-    ),
   },
   {
     num: "04",
     label: "Quantify",
     title: "Label & measure",
-    desc: (
-      <>
-        Tag every trace · compute failure rates per category. Now you have a{" "}
-        <strong>chart</strong>.
-      </>
-    ),
   },
   {
     num: "05",
     label: "Act",
     title: "Decide & act",
-    desc: (
-      <>
-        Fix the bug · build an evaluator · or set up monitoring. The output of
-        analysis is a <span className="error-analysis-process__hl">decision</span>.
-      </>
-    ),
     accent: true,
   },
 ];
@@ -120,7 +90,7 @@ export function ErrorAnalysisProcessDiagram() {
           {STEPS.map((step, i) => (
             <div key={step.num} className="error-analysis-process__row-cell">
               <article
-                className={`error-analysis-process__step${
+                className={`error-analysis-process__step corner-box-corners${
                   step.accent ? " error-analysis-process__step--accent" : ""
                 }`}
               >
@@ -131,7 +101,6 @@ export function ErrorAnalysisProcessDiagram() {
                   </span>
                 </div>
                 <h3 className="error-analysis-process__title">{step.title}</h3>
-                <div className="error-analysis-process__desc">{step.desc}</div>
               </article>
               {i < STEPS.length - 1 && (
                 <div
@@ -192,19 +161,19 @@ export function ErrorAnalysisProcessDiagram() {
         }
 
         .error-analysis-process__step {
+          position: relative;
           flex: 1 1 0;
           min-width: 0;
-          padding: 22px 20px 22px;
+          padding: 18px 18px 20px;
           background: var(--surface-bg);
-          border: 1.5px solid var(--line-cta);
-          border-radius: 2px;
+          border: 1px solid var(--line-structure);
+          border-radius: 0;
           display: flex;
           flex-direction: column;
         }
 
         .error-analysis-process__step--accent {
           background: color-mix(in oklab, var(--surface-cta-primary) 28%, var(--surface-bg));
-          border-color: var(--line-cta);
         }
 
         .error-analysis-process__num {
@@ -216,7 +185,7 @@ export function ErrorAnalysisProcessDiagram() {
           letter-spacing: 0.1em;
           color: var(--text-disabled);
           text-transform: uppercase;
-          margin-bottom: 18px;
+          margin-bottom: 14px;
         }
 
         .error-analysis-process__num strong {
@@ -237,35 +206,11 @@ export function ErrorAnalysisProcessDiagram() {
         .error-analysis-process__title {
           font-family: var(--font-analog), serif;
           font-weight: 500;
-          font-size: 26px;
+          font-size: 24px;
           line-height: 1.08;
           letter-spacing: -0.005em;
           color: var(--text-primary);
-          margin: 0 0 14px;
-        }
-
-        .error-analysis-process__desc {
-          font-family: var(--font-sans);
-          font-size: 14px;
-          line-height: 1.5;
-          color: var(--text-tertiary);
-          flex: 1;
-        }
-
-        .error-analysis-process__desc strong {
-          color: var(--text-primary);
-          font-weight: 600;
-        }
-
-        .error-analysis-process__hl {
-          background-image: linear-gradient(
-            transparent 55%,
-            color-mix(in oklab, var(--surface-cta-primary) 85%, transparent) 55% 95%,
-            transparent 95%
-          );
-          padding: 0 3px;
-          color: var(--text-primary);
-          font-weight: 600;
+          margin: 0;
         }
 
         .error-analysis-process__connector {
