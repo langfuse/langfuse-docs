@@ -24,6 +24,12 @@ The rest of this page covers the different kinds of evaluation in detail. In pra
 Manual evaluation is not a one-and-done step. Good production setups incorporate continuous review by human experts to catch new failure modes and keep automated evaluators calibrated.
 </Callout>
 
+<ManualGuideCallout
+  href="/guides/cookbook/error-analysis-llm-applications"
+  topic="error analysis"
+  lede="Select your sample data, build an annotation queue, cluster failure categories, quantify failure rates, and decide what to do."
+/>
+
 ## Evaluation methods [#three-kinds-of-evaluation]
 
 There are three main ways to evaluate: manually, with code, or with an LLM. Each is suited to different kinds of quality checks.
@@ -149,3 +155,29 @@ If the results are good enough, you can ship the change. Once it is live, the lo
 Some evaluators should also move beyond offline experiments. Reference-free evaluators, user feedback signals, and other production-safe checks can be applied to live traffic to confirm that quality in production matches what you saw before deployment.
 
 If production behavior matches expectations, you can keep scaling with more confidence. If it does not, capture those cases in traces, turn them into [dataset](/academy/datasets) items, and run the next round of [experiments](/academy/experiments). That is how you close the loop.
+
+<ManualGuideList
+  title="More guides"
+  guides={[
+    {
+      href: "/guides/cookbook/evaluation_of_rag_with_ragas",
+      topic: "RAG evaluation with RAGAS",
+      lede: "Score retrieval and generation quality for a RAG application.",
+    },
+    {
+      href: "/guides/cookbook/example_external_evaluation_pipelines",
+      topic: "external evaluation pipelines",
+      lede: "Fetch production traces, evaluate them outside Langfuse, and post scores back via the API.",
+    },
+    {
+      href: "/guides/cookbook/example_evaluating_multi_turn_conversations",
+      topic: "evaluating multi-turn conversations",
+      lede: "Score quality across conversation turns in chat applications.",
+    },
+    {
+      href: "/guides/cookbook/example_simulated_multi_turn_conversations",
+      topic: "simulated multi-turn conversations",
+      lede: "Generate and evaluate simulated multi-turn scenarios.",
+    },
+  ]}
+/>
