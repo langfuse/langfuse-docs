@@ -1,0 +1,92 @@
+---
+title: "Langfuse January Update"
+description: "Langfuse joins ClickHouse, Claude Code integration, corrected outputs, Langfuse v4 Beta, and new integrations"
+ogImage: /images/blog/2026-01-31-langfuse-january-update/joining-clickhouse.png
+tag: update
+date: 2026/01/31
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse January Update"
+  description="Langfuse joins ClickHouse, Claude Code integration, corrected outputs, Langfuse v4 Beta, and new integrations"
+  authors={["marcklingen"]}
+  image="/images/blog/2026-01-31-langfuse-january-update/joining-clickhouse.png"
+  date="January 31, 2026"
+/>
+
+Big news this month: Langfuse has joined ClickHouse! On top of that, we shipped the Claude Code integration, corrected outputs for annotation workflows, and kicked off the Langfuse v4 Beta.
+
+## Langfuse joins ClickHouse
+
+Langfuse is joining ClickHouse. For you as a user, nothing changes — our roadmap stays the same, we continue to build the best LLM engineering platform together with our community, and we remain committed to open source and self-hosting.
+
+What *does* change is our ability to move faster. With ClickHouse behind us, we can invest more deeply into performance, reliability, and our roadmap that helps teams build and improve AI applications in production.
+
+<Frame>
+![Langfuse joins ClickHouse](/images/blog/2026-01-31-langfuse-january-update/joining-clickhouse.png)
+</Frame>
+
+→ [Read more](/blog/joining-clickhouse)
+
+## Claude Code integration
+
+By using the Langfuse Claude Code integration you can capture your Claude Code conversations and send them to Langfuse. You can monitor user inputs, assistant responses, tool invocations, tool inputs and outputs, and more.
+
+<Frame>
+![Claude Code integration](/images/blog/2026-01-31-langfuse-january-update/claude-code.png)
+</Frame>
+
+→ [Start tracing Claude Code](/integrations/other/claude-code)
+
+## Corrected outputs
+
+You can now add corrected outputs to traces and observations, making it easy for domain experts to capture what the model should have generated. View diffs between original and corrected outputs, and export corrections to build better datasets. This is available in all tracing views including Annotation Queues.
+
+<Frame>
+![Corrected outputs](/images/blog/2026-01-31-langfuse-january-update/corrected-outputs.png)
+</Frame>
+
+→ [Read more](/changelog/2026-01-14-corrected-outputs)
+
+## Langfuse v4 Beta
+
+Over the past weeks, we have been working on the next generation of our data model and infrastructure. We are aiming for major performance improvements to scale Langfuse for our largest users that track many billions of events. If you are running on Langfuse Cloud and performance is currently a bottleneck for you, we would love to consider you for early testing — reply to the newsletter to let us know!
+
+<Frame>
+![Langfuse v4 Beta](/images/blog/2026-01-31-langfuse-january-update/langfuse-v4-beta.png)
+</Frame>
+
+## New integrations
+
+- [Baseten](/integrations/model-providers/baseten)
+- [Cerebras](/integrations/model-providers/cerebras)
+- [Claude Agent SDK](/integrations/frameworks/claude-agent-sdk)
+- [Claude Code](/integrations/other/claude-code)
+- [LibreChat](/integrations/other/librechat)
+- [vLLM](/integrations/model-providers/vllm)
+
+## Fixes & improvements
+
+- Feat: [Inline comments on observation I/O](/changelog/2026-01-07-inline-comments-on-trace-io)
+- UI: Breadcrumb navigation for prompts and datasets in folders
+- UI: "Clear all" button to remove all active filters at once
+- UI: Refresh button for manual and periodic trace table updates
+- UI: Search in prompt version dropdown
+- UI: Score source type (Eval/Annotation/API) shown in chart legends
+- UI: Copy-to-clipboard on score table cells
+- UI: Corrections visible inline in session views and IO previews
+- UX: Fixed scrolling on Chrome 144+
+- UX: Preserved significant zeros in dashboard number widgets
+- Evals: Support adding filters in LLM-as-a-Judge evaluator config
+- API: Prompts filter options endpoint for building pickers programmatically
+- API: Selective metadata expansion on observations-v2 endpoints
+- API: Scores V2 field selection for leaner responses
+- API: Correction scores included in public scores API
+- API: High cardinality dimensions in metrics API with topN
+- Cost: Fixed usage/details summing (was concatenating strings)
+- Infra: Multiple default orgs/projects for automated user provisioning
+- Perf: Faster frontend with reduced re-renders and smaller bundle size
+- *and many more!*

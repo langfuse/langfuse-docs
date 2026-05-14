@@ -96,6 +96,44 @@ Each quality you care about gets its own evaluator.
 
 **Most mature evaluation setups use [all three evaluation methods](#three-kinds-of-evaluation).** Together, they give you a view on overall quality of your application.
 
+To make this concrete, here are three example applications and their evaluator stacks:
+
+<Tabs items={["SQL agent", "Tone-of-voice rewriter", "Document extraction tool"]}>
+<Tab>
+
+*A SQL agent that converts natural-language questions into SQL against a company's data warehouse. Users ask things like "what was our revenue by region last quarter?" and the agent generates and runs the query.*
+
+| Quality | Method |
+| --- | --- |
+| Query executes against the schema | Code-based |
+| Query answers the user's intent | LLM-as-a-judge |
+| Calibration on a continuous sample | Manual review |
+
+</Tab>
+<Tab>
+
+*A tone-of-voice rewriter that takes draft marketing copy and rewrites it to match the company's brand voice. The output is plain prose — no structure to check, no exact reference answer.*
+
+| Quality | Method |
+| --- | --- |
+| Tone matches the brand voice | LLM-as-a-judge |
+| Original message captured faithfully | LLM-as-a-judge |
+| Calibration on a continuous sample | Manual review |
+
+</Tab>
+<Tab>
+
+*An invoice-processing tool that extracts structured fields (vendor, total, due date) from uploaded PDFs. The dataset has exact-match labels for each field.*
+
+| Quality | Method |
+| --- | --- |
+| Extracted JSON matches the schema | Code-based |
+| Each field matches the expected value | Code-based (exact match against dataset labels) |
+| Edge cases and new vendor formats | Manual review (sample) |
+
+</Tab>
+</Tabs>
+
 ## Where to start
 
 Start with manual review, then automate only the checks you need to run repeatedly.

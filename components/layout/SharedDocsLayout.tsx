@@ -9,6 +9,7 @@ import { AISearch, AISearchPanel, FloatingAskAI } from "@/components/inkeep/sear
 import { SidebarFolderItem } from "@/components/docs-sidebar/SidebarFolderItem";
 import { SidebarItem } from "@/components/docs-sidebar/SidebarItem";
 import { SidebarSeparatorItem } from "@/components/docs-sidebar/SidebarSeparatorItem";
+import { Banner } from "./Banner";
 
 /**
  * Shared wrapper used by all sidebar-based section layouts
@@ -51,6 +52,7 @@ export function SharedDocsLayout({
         }
       >
         <DocsPatternTracker />
+        <Banner />
         <NavbarDocs sectionLabel={sectionLabel} />
         {showSecondaryNav && <DocsSecondaryNav />}
         <DocsLayoutWrapper>

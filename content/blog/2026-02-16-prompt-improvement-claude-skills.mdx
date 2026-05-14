@@ -7,6 +7,7 @@ author: Lotte
 ogImage: /images/blog/2026-02-16-prompt-improvement-claude-skills/og.jpg
 ---
 
+import { Details, Summary } from "@/components/Details";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
@@ -25,7 +26,7 @@ We'll walk through the full loop using an example: a chatbot that searches past 
 
 ## Prerequisites
 
-**An LLM application with Langfuse tracing set up**. If your application is not instrumented yet, you can take a look at the [tracing get started page](/docs/observability/get-started) to set it up. 
+**An LLM application with Langfuse tracing set up**. If your application is not instrumented yet, you can take a look at the [tracing get started page](/docs/observability/get-started) to set it up.
 
 **An AI agent with the Langfuse skill installed**. You can use any AI agent, we'll use Claude with the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) in this guide (which uses the [Langfuse CLI](https://github.com/langfuse/langfuse-cli) under the hood).
 
@@ -46,7 +47,7 @@ The workflow is a loop with three steps: you look at traces, annotate the ones t
 
 ### The Example Application
 
-We're using a chatbot that searches GitHub discussions in the [Langfuse repository](https://github.com/langfuse/langfuse/discussions) to help users find whether their bug or feature request has already been  in the past. 
+We're using a chatbot that searches GitHub discussions in the [Langfuse repository](https://github.com/langfuse/langfuse/discussions) to help users find whether their bug or feature request has already been  in the past.
 
 <Frame>
   <img src="/images/docs/guides/prompt-improvement-terminal-example.png" alt="Terminal output of the GitHub issue search chatbot" />
@@ -54,8 +55,8 @@ We're using a chatbot that searches GitHub discussions in the [Langfuse reposito
 
 It fetches its system prompt from Langfuse, searches Github multiple times with different queries, evaluates the results and responds with the issues that are relevant. Every interaction produces a trace in Langfuse. You can find the full example repository [here](https://github.com/langfuse/langfuse-examples/tree/main/applications/github-issue-search).
 
-<details>
-<summary>Example application code snippet</summary>
+<Details>
+<Summary>Example application code snippet</Summary>
 
 ```python
 from langfuse import Langfuse, get_client, observe
@@ -93,7 +94,7 @@ def main():
     # ... conversation loop
 ```
 
-</details>
+</Details>
 
 {/* TODO: link to the full example repository */}
 
@@ -182,7 +183,7 @@ Here's what the diff looks like in Langfuse:
 
 ### 4. Keep iterating
 
-You can keep doing iterations of this loop until you don't see any obvious issues. In my case, I did about 3 iterations, after which I was consistently getting good results on my small set of traces. 
+You can keep doing iterations of this loop until you don't see any obvious issues. In my case, I did about 3 iterations, after which I was consistently getting good results on my small set of traces.
 
 ## Variations
 
@@ -190,11 +191,11 @@ In this guide we manually annotated traces, but the same approach works with dif
 
 - **User feedback from production**: If your app collects [user feedback (thumbs up/down, ratings, comments)](/docs/observability/features/user-feedback), you can fetch those via the CLI and use them in the same way. Be selective though: not all user feedback is actionable, so you may want to filter for feedback you actually agree with before handing it to the agent.
 - **Annotation queues**: If your team reviews traces through [Langfuse annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), you can fetch scores from a specific queue to work with a curated set of annotations.
-- **Experiment results**: After running an [experiment](/docs/evaluation/experiments), you can fetch the scores and comments from that run. 
+- **Experiment results**: After running an [experiment](/docs/evaluation/experiments), you can fetch the scores and comments from that run.
 
 ## What's next
 
-At some point, it will make sense to do more structured evaluation, to make sure your prompt changes are not causing any regressions on earlier cases. 
+At some point, it will make sense to do more structured evaluation, to make sure your prompt changes are not causing any regressions on earlier cases.
 
 One natural next step is to [build a dataset](/docs/evaluation/experiments/datasets) out of the traces you annotated, so you can rerun your new prompts against this fixed set of cases. You can do this using the AI agent skill too, or you can use the Langfuse UI to create a dataset. Later, you can then:
 

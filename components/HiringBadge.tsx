@@ -1,18 +1,24 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import NextLink from "next/link";
 import { cn } from "@/lib/utils";
 import { HoverCorners } from "@/components/ui/corner-box";
 
 export function HiringBadge({ className }: { className?: string }) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [goats, setGoats] = useState<
     Array<{ id: number; x: number; y: number; duration: number }>
   >([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const goatIdRef = useRef(0);
   const lastSpawnTimeRef = useRef(0);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current || !isHovered) return;
@@ -32,6 +38,35 @@ export function HiringBadge({ className }: { className?: string }) {
       setGoats((prev) => prev.filter((g) => g.id !== newGoat.id));
     }, (newGoat.duration + 0.5) * 1000);
   };
+
+  const goatOverlay =
+    isMounted && isHovered
+      ? createPortal(
+          <div
+            className="pointer-events-none fixed inset-0 z-[60] overflow-visible"
+            aria-hidden="true"
+          >
+            {goats.map((goat) => {
+              if (!containerRef.current) return null;
+              const rect = containerRef.current.getBoundingClientRect();
+              return (
+                <span
+                  key={goat.id}
+                  className="absolute text-lg animate-fall"
+                  style={{
+                    left: `${rect.left + goat.x}px`,
+                    top: `${rect.top + goat.y}px`,
+                    animationDuration: `${goat.duration}s`,
+                  }}
+                >
+                  🐐
+                </span>
+              );
+            })}
+          </div>,
+          document.body
+        )
+      : null;
 
   return (
     <div
@@ -75,31 +110,7 @@ export function HiringBadge({ className }: { className?: string }) {
         </NextLink>
       </div>
 
-      {isHovered && (
-        <div
-          className="overflow-visible fixed z-[100] pointer-events-none"
-          aria-hidden="true"
-          style={{ top: 0, left: 0, width: "100vw", height: "100vh" }}
-        >
-          {goats.map((goat) => {
-            if (!containerRef.current) return null;
-            const rect = containerRef.current.getBoundingClientRect();
-            return (
-              <span
-                key={goat.id}
-                className="absolute text-lg animate-fall"
-                style={{
-                  left: `${rect.left + goat.x}px`,
-                  top: `${rect.top + goat.y}px`,
-                  animationDuration: `${goat.duration}s`,
-                }}
-              >
-                🐐
-              </span>
-            );
-          })}
-        </div>
-      )}
+      {goatOverlay}
     </div>
   );
 }

@@ -15,6 +15,7 @@ See also the [JS/TS SDK reference](https://js.reference.langfuse.com/classes/_la
 - Use custom scoring functions to evaluate the outputs of a single item and the full run
 - Run multiple experiments on the same dataset in parallel
 - Easy to integrate with your existing evaluation infrastructure
+- [Run your experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) to catch regressions before they ship
 
 ## Experiment runner SDK
 
@@ -550,56 +551,6 @@ console.log(await result.format());
 
 </Tab>
 </LangTabs>
-
-## Testing in CI Environments [#testing-in-ci-environments]
-
-Use Langfuse experiments in your CI/CD pipeline to catch quality regressions before they ship. A typical workflow creates a dataset with regression test cases, runs your application against the dataset with the SDK, scores the outputs with evaluators, and fails the workflow when a score violates your threshold.
-
-<Callout type="info">
-  Follow the [CI/CD guide](/guides/experiments-ci-cd) to add experiment checks
-  to your release process and block changes that reduce quality before they
-  reach production.
-</Callout>
-
-For GitHub Actions, use [`langfuse/experiment-action`](https://github.com/langfuse/experiment-action) to run an experiment script and report the result on the pull request.
-
-```yaml
-name: Langfuse experiment gate
-
-on:
-  pull_request:
-
-permissions:
-  # Required to check out the repository.
-  contents: read
-  # Required to post or update the experiment result comment on pull requests.
-  pull-requests: write
-
-jobs:
-  experiment:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      # Add this only if your experiments use the Python SDK.
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.14"
-
-      # Add this only if your experiments use the JS/TS SDK.
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-
-      - uses: langfuse/experiment-action@<release tag>
-        with:
-          langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
-          langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
-          langfuse_base_url: https://cloud.langfuse.com
-          experiment_path: experiments/support-agent-gate
-          dataset_name: support-agent-regression-set
-          github_token: ${{ github.token }}
-```
 
 ## Low-level SDK methods
 

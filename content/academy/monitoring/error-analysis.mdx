@@ -1,0 +1,59 @@
+---
+title: Error analysis
+sidebarTitle: Error analysis
+description: A structured way to identify how your LLM application fails by reading traces and grouping the failures into categories you can act on.
+---
+
+# Error analysis
+
+LLM app failures are usually domain-specific. A RAG system retrieves the wrong section of a document, a support bot misses a follow-up, an agent picks the wrong tool. The tone doesn't match what you expect in your specific context. While evaluator libraries can be a good starting point, you will find the deep insights into failure modes by reading actual traces of your system.
+
+## What error analysis is
+
+Error analysis is a structured way to do that reading. The mechanic is borrowed from qualitative research: you read first, name what's broken in your own words, and let failure categories emerge from those notes rather than checking each trace against a predefined list. The output is a failure taxonomy that fits your application, paired with failure rates that tell you which categories matter most.
+
+<ErrorAnalysisProcessDiagram />
+
+The process is five steps:
+
+1. **Gather traces.** Pull a representative sample from production traffic, a dataset, or experiment outputs.
+2. **Open coding.** Read each trace and write a free-text note about the first thing that went wrong. No predefined categories yet — let the failures define themselves.
+3. **Cluster.** Group similar observations into named failure categories. An LLM can draft a taxonomy from your notes; you refine the names and split anything that conflates two root causes.
+4. **Label and measure.** Tag every trace in the sample against the taxonomy and compute failure rates per category — qualitative reading turns into a chart.
+5. **Decide and act.** For each category, choose between a prompt or code fix, an evaluator that catches it on future traces, or monitoring for now.
+
+You walk away with a prioritized list of decisions tied to your actual data: what to change today, what to measure going forward, and what to keep watching.
+
+## When to run it
+
+- **Before designing evaluators** - so your traces define what's worth measuring, not generic criteria like "helpfulness."
+- **After a prompt rewrite, model swap, or new feature** - failure distributions shift, and new categories show up.
+- **When [monitoring](/academy/monitoring) surfaces a pattern** - a drop in scores, recurring complaints, an unusual cluster of low-confidence responses.
+- **While iterating locally** - a small dataset of representative inputs is enough; you don't need production traffic to start.
+- **As a recurring practice** - the first taxonomy is never the final one. Re-run each round as your app evolves.
+
+## What you get out of it
+
+**A taxonomy specific to your app.** Generic metrics rarely match what's actually failing. Categories you find by reading your own traces do.
+
+**A split between fix-once bugs and recurring patterns.** Some failures are obvious prompt issues you fix once and move on. Others need an evaluator to catch the next time they happen. Error analysis sorts each into the right bucket, so you don't build evaluators for problems a prompt change would have solved.
+
+**A measurable baseline.** Once traces are labeled, failure rates per category turn vague intuition ("the bot seems worse since the last prompt update") into something you can chart and watch shift as you ship changes.
+
+## How to run error analysis for your application
+
+<ManualGuideCallout
+  href="/guides/cookbook/error-analysis-llm-applications"
+  topic="error analysis"
+  lede="Select your sample data, build an annotation queue, cluster failure categories, quantify failure rates, and decide what to do."
+/>
+
+<AgentPromptCallout
+  prompt={`I want to do a systematic error analysis of my LLM application to understand how it fails.
+Please install the Langfuse skill (https://github.com/langfuse/skills/tree/main/skills/langfuse) and the Langfuse CLI (https://github.com/langfuse/langfuse-cli), then guide me step by step through error analysis.`}
+  lede="Paste this prompt into your coding agent. The Langfuse skill runs every step alongside you - pulling traces, clustering, computing failure rates. You make the domain calls."
+/>
+
+## What comes next
+
+Categories you can fix directly become prompt updates or bug fixes. The rest become evaluators: [datasets](/academy/datasets) hold the inputs you test against, and [evaluation](/academy/evaluate) is where you pick the method - code-based, LLM-as-a-judge, or human review - for each category.
