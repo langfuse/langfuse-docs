@@ -10,6 +10,10 @@ Langfuse supports multi-modal traces including **text, images, audio, and other 
 
 By default, **[base64 encoded data URIs](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data#syntax) are handled automatically by the Langfuse SDKs**. They are extracted from the payloads commonly used in multi-modal LLMs, uploaded to Langfuse's object storage, and linked to the trace.
 
+In the Python SDK, media handling also runs at export time for supported media
+shapes found in third-party OpenTelemetry span attributes that are exported
+through the Langfuse client.
+
 This also works if you:
 
 1. Reference media files via external URLs.
@@ -53,6 +57,22 @@ If you use base64 encoded images, audio, or other files in your LLM applications
 This works with standard Data URI ([MDN](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data#syntax)) formatted media (like those used by OpenAI and other LLMs).
 
 This [notebook](/guides/cookbook/example_multi_modal_traces) includes a couple of examples using the OpenAI SDK and LangChain.
+
+For Python SDK exports, Langfuse can also detect media in supported
+OpenTelemetry span attributes emitted by third-party instrumentation. Supported
+export-stage shapes include:
+
+- Direct base64 data URI strings, such as `data:image/png;base64,...`.
+- JSON string attributes that contain supported media hints.
+- String sequence attributes.
+- Anthropic-style objects with `type`, `media_type`, and `data`.
+- Vertex-style objects with `type`, `mime_type`, and `data`.
+- Google Gemini / Vertex `inline_data` and `inlineData` payloads.
+
+Export-stage media handling runs before
+[`mask_otel_spans`](/docs/observability/features/masking#mask-otel-spans). If a
+media payload is detected successfully, the masking callback sees the Langfuse
+media reference token instead of the original base64 content.
 
 ### External media (URLs)
 
@@ -112,7 +132,7 @@ from langfuse.media import LangfuseMedia
 # Create a LangfuseMedia object from a file
 
 with open("static/bitcoin.pdf", "rb") as pdf_file:
-pdf_bytes = pdf_file.read()
+    pdf_bytes = pdf_file.read()
 
 # Wrap media in LangfuseMedia class
 
@@ -153,7 +173,7 @@ with langfuse.start_as_current_observation(as_type="span", name="analyze-documen
         "original": pdf_media
     })
 
-````
+```
 
 </Tab>
 <Tab>
