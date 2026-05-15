@@ -312,6 +312,7 @@ These are additional configuration variables. Replace `<PROVIDER>` with the prov
 | `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING` | Set to `true` to allow merging accounts with the same email address. This is useful when users sign in with different providers or email/password but have the same email address. You need to be careful with this setting as it can lead to security issues if the emails are not verified. |
 | `AUTH_<PROVIDER>_CLIENT_AUTH_METHOD`    | Configure the token endpoint authentication method. Supported values: `client_secret_basic` (default), `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, `none`. Use `none` for PKCE flow.                                      |
 | `AUTH_<PROVIDER>_CHECKS`                | Configure the authentication checks. Supported values: `nonce`, `none`, `pkce`, `state`. Multiple values can be provided as comma-separated list.                                                                                                                                             |
+| `AUTH_<PROVIDER>_ID_TOKEN_SIGNED_RESPONSE_ALG` | Configure algorithm that is used to sign ID Token by provider. Supported values: `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`, `HS256`, `HS384`, `HS512`. This setting is ignored by providers: GitHub, WorkOS |
 
 ## Troubleshooting
 
