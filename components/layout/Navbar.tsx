@@ -1,22 +1,9 @@
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
 import { NavLinks } from "@/components/NavLinks";
-import { type SectionNavData } from "@/lib/nav-tree";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
-
-export const sectionNavData: SectionNavData[] = [
-  { name: "Docs", href: "/docs" },
-  { name: "Self Hosting", href: "/self-hosting" },
-  { name: "Guides", href: "/guides" },
-  { name: "Integrations", href: "/integrations" },
-  { name: "FAQ", href: "/faq" },
-  { name: "Handbook", href: "/handbook" },
-  { name: "Changelog", href: "/changelog" },
-  { name: "Pricing", href: "/pricing" },
-  { name: "Library", href: "/library" },
-  { name: "Security & Compliance", href: "/security" },
-];
+import { NAV_SECTION_LINKS } from "@/lib/section-registry";
 
 const cornersStyle = cn('flex items-stretch flex-1 bg-line-structure p-px py-0')
 const contentStyle = cn('flex items-center w-full bg-surface-1 lg:rounded-sm pl-3 pr-2.5 py-3')
@@ -38,12 +25,12 @@ export function Navbar() {
           <div className="absolute hidden wide:block bottom-[-6px] right-0 w-[6px] h-[5px] bg-right-corner" />
           <div className='flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1'>
             <InkeepSearchBar className="hidden" />
-            <NavLinks sectionNavData={sectionNavData} />
+            <NavLinks sectionNavData={NAV_SECTION_LINKS} />
           </div>
         </div>
         <div className={cn(cornersStyle, 'flex-1 justify-end pl-0 lg:justify-center lg:max-w-[240px] lg:pl-px')}>
           <div className={cn(contentStyle, 'justify-end rounded-l-none lg:justify-center lg:rounded-l-sm')}>
-            <NavbarExtraContent sectionNavData={sectionNavData} />
+            <NavbarExtraContent sectionNavData={NAV_SECTION_LINKS} />
           </div>
         </div>
       </nav>
