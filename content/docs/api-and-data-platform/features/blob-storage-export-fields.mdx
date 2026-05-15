@@ -32,6 +32,10 @@ Exported in **Enriched observations** and **Traces and observations (legacy) and
 
 Each row is a single observation with trace-level context included directly — no warehouse-side JOIN needed.
 
+<Callout type="info">
+  The columns below are grouped into eleven [field groups](/docs/api-and-data-platform/features/export-to-blob-storage#export-field-groups), ten of which are toggleable. New integrations export all groups by default. The `core` group is always included; the others can be deselected per integration to shrink files or omit sensitive columns. Field groups do not apply to the legacy `traces/` and `observations/` files.
+</Callout>
+
 | Field | Type | Description | Usage notes |
 |---|---|---|---|
 | `id` | string | Unique observation identifier. | Primary key. |
