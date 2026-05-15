@@ -1,12 +1,11 @@
 ---
 title: Roadmap
-description: Sneak peak into upcoming new features and changes in Langfuse. This page is updated regularly.
+description: Sneak peek into upcoming new features and changes in Langfuse. This page is updated regularly.
 ---
 
-# Langfuse Roadmap
+# Langfuse roadmap
 
-Langfuse is [open source](/open-source) and we want to be fully transparent what we're working on and what's next. This roadmap is a living document and we'll update it as we make progress.
-
+Langfuse is [open source](/open-source) and we want to be fully transparent what we're working on and what's next. This roadmap is a living document and we'll update it as we make progress. Please see [roadmap](#roadmap), [product vision](#vision), and [recent releases](#releases) for details below.
 
 <Callout type="info">
   **Your feedback is highly appreciated**. Feel like something is missing? Add
@@ -14,7 +13,124 @@ Langfuse is [open source](/open-source) and we want to be fully transparent what
   to contribute to Langfuse and help us understand what is important to you.
 </Callout>
 
-## 🚀 Released
+## Roadmap [#roadmap]
+
+The current focus is to make the existing foundation excellent and connect the
+pieces into a continuous improvement loop for agents.
+
+### Agent observability and views
+
+- Make the v4 observations table, filter sidebar, saved views, and default views
+  excellent for agent traces.
+- Build agent-level views for traces per agent, cost, latency, steps, tool
+  calls, and aggregate step/tool behavior.
+- Improve trace detail pages for long-running agent traces, including compact
+  representations, selected JSON paths, and better ways to move from charts to
+  the underlying spans.
+- Improve full-text search, metadata filtering, custom dimensions, and
+  dashboard-to-trace workflows so teams can slice observations with less noise.
+
+### Evals and experiments
+
+- Ship public APIs for experiments and evaluators.
+- Scale the evaluator data model and support new evaluator types.
+- Improve experiment charts, comparison flows, evaluator management, and the
+  evaluator template library.
+- Expand code-based evals, categorical and boolean judges, free-text scores,
+  multimodal datasets, and the trace-level eval deprecation path.
+
+### Workflow automation and agents
+
+- Build the first in-product Langfuse agent for reading Langfuse data, using
+  screen context, and helping with tasks such as comparing traces.
+- Use skills, guides, and academy content to automate AI engineering workflows
+  outside the product before packaging the best ones in-product.
+- Improve the Langfuse CLI, MCP surfaces, and skill management so external
+  agents can inspect data shape, query Langfuse efficiently, and execute common
+  workflows.
+- Prioritize repeatable workflows such as low-score analysis, failure
+  clustering, evaluator setup, production-to-dataset refreshes, synthetic data
+  generation, and experiment triggering.
+
+### Platform reliability and scale
+
+- Finish the v4 rollout across Langfuse Cloud and self-hosted deployments.
+- Continue scaling ingestion for large agent workloads and make read paths
+  faster through pre-aggregation where needed.
+- Make system integration points such as blob exports, S3 exports, public APIs,
+  metrics, observations access, and the CLI boringly reliable.
+
+### Alerts, workflows, and enterprise controls
+
+- Ship alerting for evals, metrics, and operational thresholds across delivery
+  channels such as Slack, PagerDuty, webhooks, and email.
+- Explore webhooks and automations for observability and evaluation events.
+- Improve API-key scoping, move toward bearer keys, and expand admin controls
+  for enterprise deployments.
+- Improve the self-hosted and Helm chart experience, use the ClickHouse Operator, and explore hybrid or BYOC
+  deployment models for customers that need stronger data isolation or direct
+  ClickHouse access.
+
+### Multimodal and playground
+
+- Close multimodal gaps so traces, playground, datasets, and evals feel like one
+  consistent system.
+
+## Product vision and direction [#vision]
+
+Langfuse should become the open data and evaluation layer that helps humans, and
+eventually agents, improve agents. We optimize for one product loop above all
+else: track, understand, evaluate, and improve agentic systems.
+
+The strategic choice is to stay neutral in the execution layer. Langfuse should
+not become an opinionated agent framework or runtime. Instead, Langfuse should
+own the improvement loop around agentic software: understand agent behavior,
+segment it into useful views, turn production failures into datasets, run
+experiments, and automate repeated workflows through APIs, the CLI, skills, and
+an in-product agent.
+
+The long-term direction is auto-optimizing agents: connect tracing and your code
+repository, and Langfuse can manage the agent improvement loop for you. Langfuse
+understands the instructions, prompts, evals, and skill files that define your
+system; manages versions; runs evaluations; proposes or triggers experiments;
+and keeps humans involved for the highest-leverage judgments.
+
+### Views as the platform primitive
+
+Views should become the primitive for slicing observations into useful product
+surfaces. A view defines which observations matter, how they are grouped, which
+attributes are shown, which metrics and scores matter, and which downstream
+actions are available. This unlocks agent overview dashboards, default templates,
+semantic clustering, evaluation distribution comparisons, and workflow triggers.
+
+### Preference layer
+
+Human judgment remains the ground truth for evaluating agents. Langfuse should
+make it easier to capture explicit feedback, derive implicit signals, align
+LLM-as-a-judge evaluators with human preferences, and route low-confidence cases
+back into human review.
+
+### Semantic grouping
+
+As agents move from routed sub-agent systems to broader dynamic agents, fixed
+labels are not enough. Langfuse should help teams discover meaningful
+interaction groups within a filtered view, compare scores across those groups,
+and turn recurring failures into datasets or experiments.
+
+### Experiments as the hill-climbing surface
+
+Experiments should become a flagship workflow for comparing prompt, model, and
+runtime changes. Langfuse should make baselines, run comparisons, annotations,
+metrics, and next actions easy enough that teams naturally use experiments as
+their agent improvement loop.
+
+### Managed improvement loop
+
+The end state is that Langfuse can monitor an agent system, propose or run
+experiments, refresh test sets from production, assign annotation work when
+human input is needed, and report how the system is improving over time.
+
+## 🚀 Recently released [#releases]
 
 import { changelogSource } from "@/lib/source";
 import { Link } from "@/components/ui/link";
@@ -26,7 +142,7 @@ export const ChangelogList = () => (
       .sort(
         (a, b) =>
           new Date(String(b.data.date || 0)).getTime() -
-          new Date(String(a.data.date || 0)).getTime()
+          new Date(String(a.data.date || 0)).getTime(),
       )
       .slice(0, 10)
       .map((page) => (
@@ -47,7 +163,7 @@ export const ChangelogList = () => (
                     month: "short",
                     day: "numeric",
                     timeZone: "UTC",
-                  }
+                  },
                 )})`
               : null}
           </span>
@@ -66,41 +182,9 @@ import { ProductUpdateSignup } from "@/components/ProductUpdateSignup";
 
 Subscribe to our mailing list to get occasional email updates about new features.
 
-<ProductUpdateSignup source="self-host guide" className="my-3 max-w-sm" />
+<ProductUpdateSignup source="roadmap" className="my-3 max-w-sm" />
 
 </Callout>
-
-## Active Development
-
-### Agent Observability
-
-- Improve Langfuse to dig into complex, long running agents more intuitively
-
-### Evals
-
-- Introduce experiments as a first class citizen, remove the dependency on datasets to allow for more bespoke unit-tests
-- Overhaul experiment (dataset run) comparison views to make it easier to work with experiment results
-- Dataset management: bulk add traces to datasets
-- Improve comments across the product to allow for more qualitative evaluation workflows and collaboration
-
-### Playground
-
-- Experiment with prompts/models in playground based on logged traces and datasets with reference inputs
-- Langfuse model input/output data schema to increase model interoperability for structured outputs and tool calls
-- Make Playground stateful and collaborative
-
-### UI/UX
-
-- Improve onboarding experience
-- Improve core screens, especially for new and non-technical users
-- Increase UI performance for extremely large traces and datasets
-
-### Infrastructure / Data Platform
-
-- We strongly increase ingestion throughput, response times, and error rates across APIs by simplifying the core data model.
-- Move to an observation-only and immutable data model as it better aligns with complex agents and allows us to scale our platform. Thereby, we remove traces as a first class citizen.
-- Improvements across our tracing UI to make it easier to find relevant spans for complex agents.
-- Webhooks for observability and evaluation events, useful for routing and alerting
 
 ## 🙏 Feature requests and bug reports
 
