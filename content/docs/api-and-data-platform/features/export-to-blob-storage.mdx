@@ -53,6 +53,10 @@ Available options:
   existing legacy jobs are strongly recommended to upgrade.
 </Callout>
 
+<Callout type="info">
+  **Cloud projects created on or after 2026-05-20** cannot select `Traces and observations (legacy)` or the combined legacy + enriched source. New Cloud projects must use `Enriched observations (recommended)`. The REST API rejects legacy values for these projects with `400 BAD_REQUEST`. Existing projects (Cloud and self-hosted) and all self-hosted deployments are unaffected.
+</Callout>
+
 ### Upgrade path for existing configurations
 
 Existing integrations continue to use `Traces and observations (legacy)` until changed.
@@ -68,6 +72,39 @@ For rollout details, see the [Simplify for Scale changelog](/changelog/2026-03-1
 ## Exported fields
 
 For a complete reference of all fields included in each export file (traces, observations, enriched observations, and scores), see the [Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields).
+
+## Choose which columns are exported [#export-field-groups]
+
+For the **Enriched observations (recommended)** and **Traces and observations (legacy) and enriched observations** sources, you can choose which column groups appear in each row of the enriched observations export. Eleven groups cover the full row; toggle them in **Project Settings → Integrations → Blob Storage** under **Export Field Groups**.
+
+| Group | Columns | Toggleable |
+|---|---|---|
+| `core` | `id`, `trace_id`, `start_time`, `end_time`, `project_id`, `parent_observation_id`, `type` | Required (always exported) |
+| `basic` | `name`, `level`, `status_message`, `version`, `environment`, `bookmarked`, `public`, `user_id`, `session_id` | Yes |
+| `time` | `completion_start_time`, `created_at`, `updated_at` | Yes |
+| `io` | `input`, `output` | Yes |
+| `metadata` | `metadata` | Yes |
+| `model` | `provided_model_name`, `model_id`, `model_parameters` | Yes |
+| `usage` | `usage_details`, `cost_details`, `total_cost`, `input_price`, `output_price`, `total_price`, `usage_pricing_tier_name` | Yes |
+| `prompt` | `prompt_id`, `prompt_name`, `prompt_version` | Yes |
+| `metrics` | `latency`, `time_to_first_token` | Yes |
+| `tools` | `tool_definitions`, `tool_calls`, `tool_call_names` | Yes |
+| `trace_context` | `tags`, `release`, `trace_name` | Yes |
+
+<Callout type="info">
+  Pricing fields (`input_price`, `output_price`, `total_price`, `usage_pricing_tier_name`) require the `usage` group. Deselecting `usage` skips the worker-side model pricing lookup entirely.
+</Callout>
+
+New integrations default to all eleven groups, so behavior matches earlier exports unless you narrow the selection. The **Traces and observations (legacy)** source uses a fixed column set and ignores field groups.
+
+### Configure via REST API [#field-groups-rest-api]
+
+`GET` and `PUT /api/public/integrations/blob-storage` accept and return:
+
+- `exportSource` — `LEGACY_TRACES_OBSERVATIONS`, `OBSERVATIONS_V2`, or `LEGACY_TRACES_AND_ENRICHED_OBSERVATIONS`.
+- `exportFieldGroups` — a list of group names. Must include `core` when provided. Must be omitted or `null` for `LEGACY_TRACES_OBSERVATIONS` (the REST contract returns `null` on read and rejects non-null on write for that source). When omitted on update, the existing value is preserved.
+
+See the [API reference](https://api.reference.langfuse.com/#tag/blob-storage-integrations) for the full schema.
 
 ## Alternatives
 
