@@ -439,7 +439,7 @@ export function LoopDiagram(
               color: "var(--text-primary)",
             }}
           >
-            {STATIONS[active].title.replace("\n", " ")}
+            {STATIONS[active].title.replace(/\n/g, " ")}
           </div>
           <div
             style={{
@@ -460,7 +460,7 @@ export function LoopDiagram(
               letterSpacing: "0.04em",
             }}
           >
-            Open {STATIONS[active].title.replace("\n", " ")} →
+            Open {STATIONS[active].title.replace(/\n/g, " ")} →
           </div>
         </Link>
       ) : null}
