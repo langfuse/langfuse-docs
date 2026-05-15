@@ -9,6 +9,10 @@ const STATIONS = [
     label: "Online",
     title: "Trace",
     meta: ["traces", "sessions", "agents", "prompts"],
+    outcome:
+      "Capture prompts, tool calls, outputs, cost, and latency for any request.",
+    insight:
+      "A trace is a structured record of what your application did for a single request: which steps it took, what data it saw, and what it produced.",
     href: "/academy/tracing",
   },
   {
@@ -16,6 +20,10 @@ const STATIONS = [
     label: "Online",
     title: "Monitor",
     meta: ["dashboards", "LLM-as-judge", "feedback"],
+    outcome:
+      "Surface the traces that are failing, drifting, or getting expensive.",
+    insight:
+      "Monitoring gives you a continuous view of how your system performs over time and a way to surface the traces worth investigating.",
     href: "/academy/monitoring",
   },
   {
@@ -23,6 +31,10 @@ const STATIONS = [
     label: "Offline",
     title: "Build\ndatasets",
     meta: ["datasets", "features-as-tests"],
+    outcome:
+      "Turn failures and edge cases into repeatable test cases before shipping.",
+    insight:
+      "Instead of deploying and hoping for the best, a dataset gives you a repeatable, consistent check across inputs that reflect real-world usage.",
     href: "/academy/datasets",
   },
   {
@@ -30,6 +42,10 @@ const STATIONS = [
     label: "Offline",
     title: "Experiment",
     meta: ["prompts", "models", "code variants"],
+    outcome:
+      "Compare changes against a baseline and see what actually improved.",
+    insight:
+      "Experiments let you isolate cause and effect by running two versions of your system against the same dataset and comparing what comes out.",
     href: "/academy/experiments",
   },
   {
@@ -37,18 +53,19 @@ const STATIONS = [
     label: "Offline",
     title: "Evaluate",
     meta: ["judges", "custom evals", "annotation"],
+    outcome:
+      "Judge whether a change is good enough to ship with manual review, code checks, and LLM judges.",
+    insight:
+      "Most teams start by manually reviewing outputs to learn what good looks like, then automate the specific failure modes they need to measure repeatedly.",
     href: "/academy/evaluate",
   },
 ];
 
-// Design geometry (px) — fixed 1080×380 canvas, scaled to fit
+// Design geometry (px) — fixed-width canvas, scaled to fit
 const LEFT_X = [0, 221, 442, 663, 884];
 const BOX_W = 196;
-const BOX_H = 200;
 const BOX_TOP = 40;
-const ARROW_Y = BOX_TOP + BOX_H / 2; // 140
 const INNER_W = 1080;
-const INNER_H = 380;
 
 // Synchronous estimate of the initial scale so the canvas is never shown at
 // native 1080px width before useLayoutEffect fires.
@@ -65,7 +82,18 @@ function estimateInitialScale(): number {
   return 0.56;
 }
 
-export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
+export function LoopDiagram(
+  {
+    highlight,
+    variant = "compact",
+  }: { highlight?: string; variant?: "compact" | "preview" } = {}
+) {
+  const isPreview = variant === "preview";
+  const boxHeight = isPreview ? 222 : 200;
+  const arrowY = BOX_TOP + boxHeight / 2;
+  const loopTop = BOX_TOP + boxHeight;
+  const loopBottom = loopTop + (isPreview ? 74 : 70);
+  const innerHeight = loopBottom + 70;
   const pinnedIndex = highlight
     ? STATIONS.findIndex((s) => s.id === highlight)
     : -1;
@@ -78,13 +106,13 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
 
   // Cycle active station only when not pinned to a specific one
   useEffect(() => {
-    if (pinnedIndex >= 0) return;
+    if (pinnedIndex >= 0 || isPreview) return;
     const id = setInterval(
       () => setActive((p) => (p + 1) % STATIONS.length),
       1800
     );
     return () => clearInterval(id);
-  }, [pinnedIndex]);
+  }, [isPreview, pinnedIndex]);
 
   // Correct scale to exact container width, before first paint
   useLayoutEffect(() => {
@@ -94,7 +122,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
     const fit = () => {
       const scale = Math.min(1, wrap.clientWidth / INNER_W);
       inner.style.transform = `scale(${scale})`;
-      wrap.style.height = `${INNER_H * scale}px`;
+      wrap.style.height = `${innerHeight * scale}px`;
     };
     fit();
     let rafId = 0;
@@ -112,7 +140,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
   return (
     <div className="not-prose my-8">
       {/* Initial height is set from the estimated scale so the wrapper never
-          starts at the full 380px natural height before useLayoutEffect runs. */}
+          starts at the full natural height before useLayoutEffect runs. */}
       <div
         ref={wrapRef}
         suppressHydrationWarning
@@ -120,7 +148,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
           position: "relative",
           width: "100%",
           overflow: "hidden",
-          height: `${INNER_H * estScale}px`,
+          height: `${innerHeight * estScale}px`,
         }}
       >
         {/* suppressHydrationWarning: SSR returns 0.56 (no window); client may
@@ -132,7 +160,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
           style={{
             position: "relative",
             width: INNER_W,
-            height: INNER_H,
+            height: innerHeight,
             transformOrigin: "top left",
             transform: `scale(${estScale})`,
           }}
@@ -147,7 +175,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
               overflow: "visible",
               pointerEvents: "none",
             }}
-            viewBox={`0 0 ${INNER_W} ${INNER_H}`}
+            viewBox={`0 0 ${INNER_W} ${innerHeight}`}
             preserveAspectRatio="none"
             aria-hidden
           >
@@ -180,7 +208,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
             {[0, 1, 2, 3].map((i) => (
               <path
                 key={i}
-                d={`M ${LEFT_X[i] + BOX_W} ${ARROW_Y} L ${LEFT_X[i + 1]} ${ARROW_Y}`}
+                d={`M ${LEFT_X[i] + BOX_W} ${arrowY} L ${LEFT_X[i + 1]} ${arrowY}`}
                 stroke="var(--text-secondary)"
                 strokeWidth="1.25"
                 fill="none"
@@ -191,7 +219,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
 
             {/* Yellow U-loop — highlighter band */}
             <path
-              d="M 982 240 L 982 310 L 98 310 L 98 240"
+              d={`M 982 ${loopTop} L 982 ${loopBottom} L 98 ${loopBottom} L 98 ${loopTop}`}
               fill="none"
               stroke="var(--surface-cta-primary)"
               strokeWidth="11"
@@ -200,7 +228,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
             />
             {/* Thin dark line drawn on top of the yellow band, with arrow into Trace */}
             <path
-              d="M 982 240 L 982 310 L 98 310 L 98 240"
+              d={`M 982 ${loopTop} L 982 ${loopBottom} L 98 ${loopBottom} L 98 ${loopTop}`}
               fill="none"
               stroke="var(--text-primary)"
               strokeWidth="1.25"
@@ -215,7 +243,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
             style={{
               position: "absolute",
               left: "50%",
-              top: 310,
+              top: loopBottom,
               transform: "translate(-50%, -50%)",
               background: "var(--surface-bg)",
               padding: "4px 12px",
@@ -243,7 +271,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
                 left: i === pinnedIndex ? LEFT_X[i] - 1 : LEFT_X[i],
                 top: i === pinnedIndex ? BOX_TOP - 1 : BOX_TOP,
                 width: i === pinnedIndex ? BOX_W + 2 : BOX_W,
-                height: i === pinnedIndex ? BOX_H + 2 : BOX_H,
+                height: i === pinnedIndex ? boxHeight + 2 : boxHeight,
                 background: "var(--surface-bg)",
                 border: i === pinnedIndex
                   ? "2px solid var(--text-primary)"
@@ -257,13 +285,17 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
                 transition: "border-color 0.2s ease",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.borderColor =
-                  i === pinnedIndex ? "var(--text-primary)" : "var(--line-cta)")
+                {
+                  setActive(i);
+                  e.currentTarget.style.borderColor =
+                    i === pinnedIndex ? "var(--text-primary)" : "var(--line-cta)";
+                }
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.borderColor =
                   i === pinnedIndex ? "var(--text-primary)" : "var(--line-structure)")
               }
+              onFocus={() => setActive(i)}
             >
               {/* Pulse indicator dot */}
               <span
@@ -304,41 +336,134 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
                 {station.label}
               </div>
 
-              {/* Station title */}
-              <div
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  marginTop: 6,
-                  fontFamily: "var(--font-analog)",
-                  fontWeight: 500,
-                  fontSize: station.id === "dataset" ? 22 : 26,
-                  lineHeight: 1.05,
-                  color: "var(--text-primary)",
-                  whiteSpace: "pre-line",
-                }}
-              >
-                {station.title}
-              </div>
+              {isPreview ? (
+                <>
+                  <div
+                    style={{
+                      marginTop: 10,
+                      fontFamily: "var(--font-analog)",
+                      fontWeight: 500,
+                      fontSize: station.id === "dataset" ? 22 : 26,
+                      lineHeight: 1.05,
+                      color: "var(--text-primary)",
+                      whiteSpace: "pre-line",
+                    }}
+                  >
+                    {station.title}
+                  </div>
 
-              {/* Meta tags */}
-              <div
-                style={{
-                  marginTop: 10,
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  color: "var(--text-tertiary)",
-                  letterSpacing: "0.02em",
-                  lineHeight: 1.5,
-                }}
-              >
-                {station.meta.join(" · ")}
-            </div>
+                  <div
+                    style={{
+                      marginTop: 12,
+                      fontSize: 11,
+                      lineHeight: 1.5,
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    {station.outcome}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Station title */}
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      marginTop: 6,
+                      fontFamily: "var(--font-analog)",
+                      fontWeight: 500,
+                      fontSize: station.id === "dataset" ? 22 : 26,
+                      lineHeight: 1.05,
+                      color: "var(--text-primary)",
+                      whiteSpace: "pre-line",
+                    }}
+                  >
+                    {station.title}
+                  </div>
+
+                  {/* Meta tags */}
+                  <div
+                    style={{
+                      marginTop: 10,
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10,
+                      color: "var(--text-tertiary)",
+                      letterSpacing: "0.02em",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {station.meta.join(" · ")}
+                  </div>
+                </>
+              )}
             </Link>
           ))}
         </div>
       </div>
+
+      {isPreview ? (
+        <Link
+          href={STATIONS[active].href}
+          className="corner-box-corners--hover"
+          style={{
+            display: "block",
+            marginTop: 16,
+            padding: "16px 18px",
+            border: "1px solid var(--line-structure)",
+            borderRadius: 2,
+            background:
+              "linear-gradient(180deg, color-mix(in oklab, var(--surface-cta-primary) 12%, var(--surface-bg)), var(--surface-bg))",
+            textDecoration: "none",
+            color: "inherit",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "var(--text-tertiary)",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+            }}
+          >
+            Preview
+          </div>
+          <div
+            style={{
+              marginTop: 8,
+              fontFamily: "var(--font-analog)",
+              fontSize: 24,
+              lineHeight: 1.05,
+              color: "var(--text-primary)",
+            }}
+          >
+            {STATIONS[active].title.replace(/\n/g, " ")}
+          </div>
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 14,
+              lineHeight: 1.65,
+              color: "var(--text-secondary)",
+            }}
+          >
+            {STATIONS[active].insight}
+          </div>
+          <div
+            style={{
+              marginTop: 12,
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              color: "var(--text-primary)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            Open {STATIONS[active].title.replace(/\n/g, " ")} →
+          </div>
+        </Link>
+      ) : null}
     </div>
   );
 }
