@@ -40,7 +40,6 @@ export const TabContent = ({
         src={feature.image.light}
         alt={feature.image.alt}
         fill
-        quality={100}
         className="object-contain object-center sm:object-cover sm:object-top-left dark:hidden"
         sizes={sizes}
         priority={priority}
@@ -52,7 +51,6 @@ export const TabContent = ({
         src={feature.image.dark}
         alt={feature.image.alt}
         fill
-        quality={100}
         className="hidden object-contain object-center sm:object-cover sm:object-top-left dark:block"
         sizes={sizes}
         priority={priority}
