@@ -7,22 +7,21 @@ category: Evaluation
 
 # Error Analysis for LLM Applications - Step by step guide
 
-A walkthrough for understanding how your system fails before you build evaluators for it.
+This is a hands-on walkthrough through the [five-step error-analysis process](https://langfuse.com/academy/monitoring/error-analysis), applied end-to-end to a real example app: a phone tech-support chatbot. By the end you'll have a representative trace sample, an annotation queue with two passes of scoring, a clustered taxonomy of failure modes specific to the app, a chart of failure rates per category, and a decision for each — fix, measure with an evaluator, or just monitor.
+
+If you want to learn more about error analysis first, you can check out our Academy page on [Error Analysis](https://langfuse.com/academy/monitoring/error-analysis)
+
+Two terms from qualitative research show up throughout: **open coding** (read traces, write free-text observations, no predefined categories) and **axial coding** (group those observations into named failure categories with a shared root cause).
 
 ---
 
 ## Want to do this interactively?
 
-Paste this into your coding agent:
-
-```
-I want to do a systematic error analysis of my LLM application to understand how it fails.
-Please install the Langfuse skill (https://github.com/langfuse/skills/tree/main/skills/langfuse)
-and the Langfuse CLI (https://github.com/langfuse/langfuse-cli), then guide me step by step
-through error analysis.
-```
-
-The skill runs every step alongside you: pulling traces, creating annotation queues, clustering your notes, and computing failure rates. You make the domain calls.
+<AgentPromptCallout
+  prompt={`I want to do a systematic error analysis of my LLM application to understand how it fails.
+Please install the Langfuse skill (https://github.com/langfuse/skills/tree/main/skills/langfuse) and the Langfuse CLI (https://github.com/langfuse/langfuse-cli), then guide me step by step through error analysis.`}
+  lede="Paste this prompt into your coding agent. The Langfuse skill runs every step alongside you — pulling traces, clustering, computing failure rates. You make the domain calls."
+/>
 
 <details>
 <summary>What to expect</summary>
@@ -39,16 +38,6 @@ At the clustering step it proposes a candidate failure taxonomy with definitions
 
 ---
 
-## What is error analysis?
-
-Read real traces, understand how your app fails, build a taxonomy of failure categories. Each category tells you what to fix and whether to build an evaluator for it. Run it before writing any evaluators, and again after prompt rewrites, model switches, or production incidents.
-
-The process uses two concepts from qualitative research: **open coding** (read traces, write free-text observations, no pre-defined categories) and **axial coding** (group those observations into named failure categories with a shared root cause).
-
-For background on why this matters, see the [Langfuse blog post](https://langfuse.com/blog/2025-08-29-error-analysis-to-evaluate-llm-applications).
-
----
-
 ## The example app: Dad Tech Support
 
 Throughout this guide we use a real example: a phone tech-support chatbot built for a parent who isn't comfortable with technology.
@@ -61,7 +50,7 @@ At the time of analysis: 505 traces across 478 sessions in Langfuse.
 
 ## The process
 
-Five steps.
+The process has five steps, each building on the previous one. Ideally there are already ~100 traces logged in Langfuse.
 
 | | Step |
 |-|------|
@@ -75,15 +64,15 @@ Five steps.
 
 ### Step 1: Gather a diverse dataset
 
-Assemble a set of traces that represents how your app actually behaves, including both successes and failures. A diverse dataset surfaces all meaningful failure modes, not just the common ones.
+In the first step you assemble a set of traces that represents how your app actually behaves, including both successes and failures. A diverse dataset surfaces all meaningful failure modes, not just the common ones.
 
 ### Step 1.1: Choose what to annotate
 
-Decide which unit to annotate before setting up the queue.
+Your traces are made of multiple observations. To target the correct one, you need to decide which unit to annotate before setting up the queue.
 
-**If your app is conversational**, annotate the last turn per session. It has the full conversation history in context. **If your app is stateless**, annotate traces directly.
+**If your app is conversational**, it often makes sense to annotate the last turn per session. It has the full conversation history in context. **If your app is not following a chat interaction**, you might want to select a specific observation that generates the final response of the agent.
 
-**Check the observation level.** In OpenTelemetry-instrumented apps, trace-level input/output is often null. The actual content lives in a GENERATION observation. Expand the observation tree in any trace to confirm.
+**Check the observation level.** In OpenTelemetry-instrumented apps, trace-level input/output can be null. The actual content often lives in a GENERATION observation. Expand the observation tree in any trace to confirm.
 
 ![Trace detail view with GENERATION span highlighted](/images/cookbook/error-analysis-llm-applications/trace_detail_view_generation.png)
 
@@ -98,17 +87,17 @@ Trace: dad-chat-request
     output: bot's reply
 ```
 
-Trace-level input and output were null. All readable content lived in the GENERATION observation. When adding items to an annotation queue, always target the GENERATION observation, not the trace.
+Trace-level input and output were null. All readable content lived in the GENERATION observation. When adding items to an annotation queue, it often helps to target the GENERATION observation, not the trace.
 
 ---
 
 ### Step 1.2: Select a representative sample
 
-Target ~100 traces. The goal is coverage, not randomness: over-represent edges and anything already flagged as problematic.
+Target ~100 traces. The goal is coverage, not randomness: over-represent edges and anything already flagged as problematic. In the process of selecting traces there are certain signals worth looking for that qualify a trace to be part of the sample.
 
 **Signals to look for:**
 
-- **Tags:** If your app tags traces with `error` or `flagged`, include all of them.
+- **Tags:** If your app tags traces with `error` or `flagged`, include them.
 - **Existing scores:** If you have a judge or human feedback scores, prioritize low-scoring traces.
 - **Latency:** High-latency traces often involve tool use or complex reasoning.
 - **Cost:** Very low-cost traces tend to be short refusals. Very high-cost ones tend to be verbose. Both worth including.
@@ -135,7 +124,7 @@ One finding: of 478 sessions, only 11 were multi-turn. The rest were single-turn
 
 ### Step 1.3: Create an annotation queue
 
-Set up the annotation queue in Langfuse before you start reviewing.
+To get ready for annotating your data you create an annotation queue in Langfuse. For this, we first need to create score configs, then the queue and then add the respective examples.
 
 **Create two score configs** (Settings → Scores → Create):
 
@@ -164,7 +153,7 @@ In the Traces view, navigate to each trace's GENERATION observation and add it t
 
 ### Step 2: Open code your first 30-50 traces
 
-Work through the annotation queue in Langfuse. For each trace:
+In the second step you review each trace in your example in detail. Work through the annotation queue in Langfuse. For each trace:
 
 1. Read the full conversation in the observation view
 2. Write what you observe in `open_coding`, plain language, no diagnosis
@@ -216,7 +205,7 @@ Once you have 30-50 notes, group them into categories. Goal: 5-10 distinct, name
 
 **LLM-assisted clustering:**
 
-Paste your notes into Claude with this prompt:
+LLMs can be a great help in coming up with the first version of your clustering. Paste your notes into your favorite coding agents with this prompt:
 
 ```
 Here are failure annotations from reviewing an LLM pipeline.
@@ -339,8 +328,8 @@ Langfuse has a built-in [online evaluation](https://langfuse.com/docs/evaluation
 After one round of error analysis you have a prioritized list of things to fix and a set of categories to monitor.
 
 1. **Apply the prompt fixes.** Use Langfuse [prompt management](https://langfuse.com/docs/prompt-management/get-started) to version and track changes.
-2. **Set up evaluators** for categories that warrant them, starting with the highest-impact failure requiring judgment.
-3. **Re-run after the next significant change.** Failure distributions shift. A prompt fix can resolve one category and reveal another. Run error analysis after prompt rewrites, model switches, new features, and production incidents.
+2. **Set up evaluators** for categories that warrant them, starting with the highest-impact failure requiring judgment. See info on running [LLM-as-a-judge](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge)
+3. **Re-run error analysis after the next significant change.** Failure distributions shift. A prompt fix can resolve one category and reveal another. Run error analysis after prompt rewrites, model switches, new features, and production incidents.
 
 ---
 

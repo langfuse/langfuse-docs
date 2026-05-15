@@ -79,6 +79,23 @@ Set `CLICKHOUSE_READ_ONLY_URL` and Langfuse will route UI and public-API read qu
 Credentials (`CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`) and the database name are reused from the primary configuration, so the read-only compute group must accept the same user.
 Both variables are optional and unset by default; on a single-node ClickHouse or a non-compute-separated cluster they provide no benefit because the endpoint would be the same as the primary.
 
+### Skipping the FINAL modifier for OTel projects [#skip-final-otel-projects]
+
+Langfuse stores observations in a ClickHouse `ReplacingMergeTree` and, by default, appends the `FINAL` modifier to public-API observations queries so that the latest version of each row wins at read time.
+This is required when ingestion produces multiple versions of the same observation (e.g. separate start, end, and update events from the legacy SDKs), but it adds query-time merge work and slows reads down.
+
+Projects that ingest **exclusively via OpenTelemetry** (the OTel SDKs or the `/api/public/otel` endpoint) write each observation as a single immutable row, so `FINAL` is unnecessary for them.
+Setting `LANGFUSE_SKIP_FINAL_FOR_OTEL_PROJECTS=true` enables per-project tracking: when a project ingests through the OTel endpoint, Langfuse marks it in Redis with a 24-hour TTL, and subsequent observations reads for that project (in `GET /api/public/observations` and the observations CTE in `GET /api/public/traces`) skip the `FINAL` modifier.
+The TTL refreshes on every OTel ingestion call, and the marker expires automatically if a project stops sending OTel traffic, so the behavior reverts safely if a project switches back to legacy ingestion.
+
+This is the recommended way to benefit from the optimization on mixed deployments where only some projects are on OTel.
+
+<Callout type="info">
+
+If you are certain that **every** project on the instance ingests via OTel only, you can instead set `LANGFUSE_API_CLICKHOUSE_DISABLE_OBSERVATIONS_FINAL=true` to drop the `FINAL` modifier globally, without the Redis lookup. This flag takes precedence over the per-project logic. Do not enable it if any project still uses the legacy ingestion path, as observations reads may otherwise return stale or duplicate rows.
+
+</Callout>
+
 ## Increasing Disk Usage
 
 LLM tracing data may contain large payloads due to inputs and outputs being tracked.
