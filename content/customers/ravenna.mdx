@@ -1,0 +1,116 @@
+---
+title: "How Ravenna Uses Langfuse to Build and Debug AI Agents for Enterprise Internal Support"
+date: March 27, 2026
+description: Learn how Ravenna uses Langfuse for end-to-end observability across their AI-native internal service desk, enabling engineers and CS teams to debug agentic workflows orders of magnitude faster.
+ogImage:
+tag: customer-story
+author: Felix
+customerLogo: "/images/customers/ravenna/ravenna-light.png"
+customerLogoDark: "/images/customers/ravenna/ravenna-dark.png"
+customerQuote: "You can't improve what you can't measure. Observability is foundational to how we build and evolve all of our AI capabilities."
+quoteAuthor: "Kevin Coleman"
+quoteRole: "Co-founder"
+quoteCompany: "Ravenna"
+quoteAuthorImage: "/images/customers/ravenna/kevin-coleman.jpg"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="How Ravenna Uses Langfuse to Build and Debug AI Agents for Enterprise Internal Support"
+  description="Learn how Ravenna uses Langfuse for end-to-end observability across their AI-native internal service desk, enabling engineers and CS teams to debug agentic workflows orders of magnitude faster."
+  customerLogo="/images/customers/ravenna/ravenna-light.png"
+  authors={["felixkrauth"]}
+  date="March 27, 2026"
+/>
+
+## About Ravenna
+
+[Ravenna](https://www.ravenna.ai/) builds an AI-native internal service desk where human agents and AI agents collaborate on employee support tickets. IT teams, HR, revenue operations - any team delivering internal services can use Ravenna to build agents that automate their work. The platform lives primarily in Slack and includes a full-stack ticketing system, an automation engine integrated with core business systems, and a reporting suite.
+
+Ravenna challenges incumbents like ServiceNow, Jira Service Management, and Freshservice. The difference: Ravenna built the entire platform from the ground up rather than bolting AI onto legacy software. Agents are first-class citizens of the architecture, not add-ons.
+
+<Frame fullWidth>
+  ![Ravenna AI-native internal service desk platform](/images/customers/ravenna/ravenna-overview.png)
+</Frame>
+
+<CustomerQuote
+  quote="You can't improve what you can't measure. Unless we have visibility into how this thing is performing, we're not going to be able to improve it. Observability is foundational to how we build and evolve all of our AI capabilities."
+  name="Kevin Coleman"
+  role="Co-founder"
+  company="Ravenna"
+  image="/images/customers/ravenna/kevin-coleman.jpg"
+/>
+
+## From RAG chatbot to agentic platform
+
+When Ravenna started in 2024, customer expectations were simple: hook into a knowledge base, answer questions in Slack - basically a chatbot.
+
+That changed fast. By 2026, customers had seen what Claude, Perplexity, and computer-use agents could do. They expected their internal support agents to keep pace: not just answer questions, but take actions. Provision access, troubleshoot devices, fill out forms conversationally, and integrate with any system on the fly.
+
+Ravenna now supports agents that search documentation, create tickets, manage software access requests across Okta, handle conversational form filling with disambiguation logic ("there are 52 Johns, which one?"), and even generate integrations from API docs on the fly through a tool called Foundry.
+
+This kind of complexity makes observability non-negotiable.
+
+## Why Langfuse was adopted from day one
+
+Taylor Dye, Ravenna's co-founder and CEO (previously Director of AI Engineering at Zapier), had a clear conviction going in: the core principles of good software engineering - test-driven development and observability - got somehow abandoned when AI arrived. Everyone was vibing their way to production.
+
+This wasn't a lesson learned the hard way. There was no "we tried building internal tools first" phase. Langfuse was chosen before the first agent shipped, because building Ravenna without LLM observability would have been impossible. When your agents handle sensitive enterprise workflows across IT, HR, and operations, you need to see exactly what they're doing and why.
+
+**Why Ravenna chose Langfuse specifically:**
+
+- **Open source with a path to [self-hosting](/self-hosting).** Ravenna handles sensitive enterprise data and hooks into customers' core business systems. While the team is running on Langfuse Cloud, the ability to eventually deploy Langfuse in customer VPCs was a key factor.
+- **Clean, well-built product.** No friction, no annoyances - just a tool that gets out of the way.
+- **Right price point.** Appropriately priced for a growing startup shipping fast.
+
+## How Ravenna uses Langfuse
+
+### Tracing is everything
+
+Every AI interaction in Ravenna links directly to a Langfuse [trace](/docs/observability/overview). The team built deep links into both the web app and Slack messages - one click from any agent response takes you straight to the full trace inside Langfuse.
+
+A typical trace spans multiple systems: a TypeScript API service makes requests to a Python AI stack, which interacts with Slack or the web app. Langfuse ties together the full lineage of an agentic request: reasoning steps, tool calls, prompt/response pairs, and [metadata](/docs/observability/features/metadata) about the user and context.
+
+Langfuse is used by all of Ravenna's AI engineers plus the forward-deployed customer success team. Everyone technical is in Langfuse daily.
+
+### A workflow of continuous iteration
+
+The team runs a tight loop:
+
+1. Build or update an agent
+2. Ship it
+3. Monitor production traces for odd behavior
+4. Pull the trace, file a ticket for engineering
+5. Iterate
+
+The CS team can triage and diagnose issues independently - they don't need to pull engineers in for every customer report. They spot the problem in the trace, document it, and hand it off with full context.
+
+## Impact
+
+**Engineering teams debug orders of magnitude faster.** Ravenna's agents span multiple services, interact with dozens of business systems, and handle non-deterministic workflows. Without a tool that ties together the full request lineage across TypeScript, Python, Slack, and the web app, debugging a single misbehaving agent interaction would consume dramatically more engineering time. With Langfuse, the trace is one click away.
+
+<CustomerQuote
+  quote="It's probably multiple orders of magnitude faster than it would be without a tool like this."
+  name="Kevin Coleman"
+  role="Co-founder"
+  company="Ravenna"
+  image="/images/customers/ravenna/kevin-coleman.jpg"
+/>
+
+**CS teams self-serve on diagnostics.** Because every agent interaction is traceable, the forward-deployed CS team handles issue triage without pulling engineers off their work. This keeps the engineering team focused on building rather than firefighting.
+
+**Mission-critical infrastructure.** For their business, Kevin puts Langfuse in the same category as CRM and Slack: foundational software you build your company around, not peripheral tooling you swap in and out.
+
+<CustomerQuote
+  quote="In an AI world, this class of tool is absolutely one of those core, foundational pieces of software. It's mission-critical. And of all the problems you have in a software company, Langfuse has never been one of them. It just works."
+  name="Kevin Coleman"
+  role="Co-founder"
+  company="Ravenna"
+  image="/images/customers/ravenna/kevin-coleman.jpg"
+/>
+
+<CustomerStoryCTA />
