@@ -38,11 +38,10 @@ LANGFUSE_HOST=https://us.cloud.langfuse.com
 
 ## Example 1: OpenAI via NoPII
 
-Point the OpenAI client at NoPII with `base_url`, then trace the call with Langfuse's `@observe()` decorator. The `traceparent` header connects your application trace to NoPII's server-side trace, producing a single end-to-end view in Langfuse.
+Point the OpenAI client at NoPII with `base_url`, then trace the call with Langfuse's `@observe()` decorator. Inside the generation, read Langfuse's active trace and observation IDs and forward them as a W3C `traceparent` header. NoPII attaches its server-side `sanitize` / `llm-call` / `desanitize` spans as children of that generation, so both sides appear together in a single Langfuse trace.
 
 ```python
 import os
-import uuid
 
 from dotenv import load_dotenv
 from langfuse import Langfuse, observe
@@ -68,7 +67,13 @@ PROMPT = (
 
 
 @observe(as_type="generation")
-def call_llm(prompt: str, traceparent: str) -> str:
+def call_llm(prompt: str) -> str:
+    # Reuse Langfuse's active trace/observation IDs so NoPII's server-side spans
+    # land under the same trace.
+    trace_id = langfuse.get_current_trace_id()
+    span_id = langfuse.get_current_observation_id()
+    traceparent = f"00-{trace_id}-{span_id}-01"
+
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
@@ -86,10 +91,7 @@ def call_llm(prompt: str, traceparent: str) -> str:
 
 @observe()
 def customer_lookup(prompt: str) -> str:
-    trace_id = uuid.uuid4().hex
-    span_id = uuid.uuid4().hex[:16]
-    traceparent = f"00-{trace_id}-{span_id}-01"
-    return call_llm(prompt, traceparent)
+    return call_llm(prompt)
 
 
 result = customer_lookup(PROMPT)
@@ -104,7 +106,6 @@ Same pattern with the Anthropic SDK. NoPII's Anthropic-compatible endpoint accep
 
 ```python
 import os
-import uuid
 
 import anthropic
 from dotenv import load_dotenv
@@ -130,7 +131,13 @@ PROMPT = (
 
 
 @observe(as_type="generation")
-def call_llm(prompt: str, traceparent: str) -> str:
+def call_llm(prompt: str) -> str:
+    # Reuse Langfuse's active trace/observation IDs so NoPII's server-side spans
+    # land under the same trace.
+    trace_id = langfuse.get_current_trace_id()
+    span_id = langfuse.get_current_observation_id()
+    traceparent = f"00-{trace_id}-{span_id}-01"
+
     response = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
@@ -149,10 +156,7 @@ def call_llm(prompt: str, traceparent: str) -> str:
 
 @observe()
 def patient_followup(prompt: str) -> str:
-    trace_id = uuid.uuid4().hex
-    span_id = uuid.uuid4().hex[:16]
-    traceparent = f"00-{trace_id}-{span_id}-01"
-    return call_llm(prompt, traceparent)
+    return call_llm(prompt)
 
 
 result = patient_followup(PROMPT)
