@@ -22,7 +22,7 @@ export function CarouselSlide({
       className={cn(
         "relative w-full overflow-hidden rounded border border-line-structure bg-surface-1",
         aspectRatio,
-        className
+        className,
       )}
     >
       <Image

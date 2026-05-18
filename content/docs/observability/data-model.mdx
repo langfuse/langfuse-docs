@@ -141,14 +141,13 @@ Once you've structured your data into traces and observations, you can enrich th
 
 There are different types of attributes you can add:
 
-| Attribute | Description |
-|-----------|-------------|
-| [Environments](/docs/observability/features/environments) | Separate data from different deployment contexts like `production`, `staging`, or `development` |
-| [Tags](/docs/observability/features/tags) | Flexible labels to categorize traces by feature, API endpoint, or workflow |
-| [User](/docs/observability/features/users) | Track which end-user triggered each trace |
-| [Metadata](/docs/observability/features/metadata) | Flexible key-value store for custom information |
-| [Releases & Versions](/docs/observability/features/releases-and-versioning) | Track application versions and component changes |
-
+| Attribute                                                                   | Description                                                                                     |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [Environments](/docs/observability/features/environments)                   | Separate data from different deployment contexts like `production`, `staging`, or `development` |
+| [Tags](/docs/observability/features/tags)                                   | Flexible labels to categorize traces by feature, API endpoint, or workflow                      |
+| [User](/docs/observability/features/users)                                  | Track which end-user triggered each trace                                                       |
+| [Metadata](/docs/observability/features/metadata)                           | Flexible key-value store for custom information                                                 |
+| [Releases & Versions](/docs/observability/features/releases-and-versioning) | Track application versions and component changes                                                |
 
 ## How Langfuse Captures Data
 
@@ -167,7 +166,6 @@ See the [OpenTelemetry integration guide](/integrations/native/opentelemetry) fo
 Instrumentation is the process of adding code to record its behavior. Once this recording is turned on, Langfuse (through OpenTelemetry) can automatically capture these events and structure them into traces and observations.
 
 The [Get Started guide](/docs/observability/get-started) walks you through the process of instrumenting a function in your application.
-
 
 ### Background Processing
 
@@ -206,8 +204,7 @@ The approach above works well for long-running applications (like web servers or
 
 For applications that start, execute something, and shut down quickly (short-lived applications), there's a risk that the application terminates while there are still unsent traces in the queue.
 
-To avoid losing data, short-lived applications __must explicitly call [`flush()`](/docs/observability/features/queuing-batching#manual-flushing) before exiting__. This forces the exporter to send all buffered traces immediately, so nothing is lost when the process terminates.
-
+To avoid losing data, short-lived applications **must explicitly call [`flush()`](/docs/observability/features/queuing-batching#manual-flushing) before exiting**. This forces the exporter to send all buffered traces immediately, so nothing is lost when the process terminates.
 
 ```mermaid
 sequenceDiagram

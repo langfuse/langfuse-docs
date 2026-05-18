@@ -15,7 +15,7 @@ export function BlogCategoryDropdown() {
 
   const currentLabel = selectedTag ?? "All";
   const currentCount = selectedTag
-    ? tags.find((t) => t.name === selectedTag)?.count ?? 0
+    ? (tags.find((t) => t.name === selectedTag)?.count ?? 0)
     : allPosts.length;
 
   return (
@@ -35,12 +35,20 @@ export function BlogCategoryDropdown() {
         >
           <DropdownMenuRadioItem value="" className="px-3 py-1.5 capitalize">
             <span className="flex-1">All</span>
-            <span className="tabular-nums ml-3 text-text-tertiary">{allPosts.length}</span>
+            <span className="tabular-nums ml-3 text-text-tertiary">
+              {allPosts.length}
+            </span>
           </DropdownMenuRadioItem>
           {tags.map((tag) => (
-            <DropdownMenuRadioItem key={tag.name} value={tag.name} className="px-3 py-1.5 capitalize">
+            <DropdownMenuRadioItem
+              key={tag.name}
+              value={tag.name}
+              className="px-3 py-1.5 capitalize"
+            >
               <span className="flex-1">{tag.name}</span>
-              <span className="tabular-nums ml-3 text-text-tertiary">{tag.count}</span>
+              <span className="tabular-nums ml-3 text-text-tertiary">
+                {tag.count}
+              </span>
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

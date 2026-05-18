@@ -15,7 +15,9 @@ export default async function LibraryPage({ params }: PageProps) {
   return <DocsChromePage page={page} />;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug = [] } = await params;
   const page = librarySource.getPage(slug);
   if (!page) return { title: "Not Found" };

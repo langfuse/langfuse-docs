@@ -10,9 +10,7 @@ export function Banner() {
     >
       <Link href="/changelog/2026-05-14-langfuse-academy">
         <span className="sm:hidden">The Langfuse Academy is here →</span>
-        <span className="hidden sm:inline">
-          The Langfuse Academy is here →
-        </span>
+        <span className="hidden sm:inline">The Langfuse Academy is here →</span>
       </Link>
     </FumadocsBanner>
   );

@@ -11,11 +11,11 @@ const Dot = React.forwardRef<HTMLSpanElement, DotProps>(
       aria-hidden
       className={cn(
         "inline-block size-[2px] shrink-0 bg-text-secondary",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  ),
 );
 Dot.displayName = "Dot";
 

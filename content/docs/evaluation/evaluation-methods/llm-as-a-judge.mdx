@@ -21,6 +21,7 @@ This approach has become one of the most popular methods for evaluating LLM appl
 The core idea is straightforward: present an LLM with the input, the application's output, and a scoring rubric, then ask it to evaluate the output. The judge model produces a [`score`](/docs/evaluation/scores/overview) along with reasoning explaining its assessment.
 
 A typical LLM-as-a-Judge prompt includes:
+
 1. **Evaluation criteria** — a rubric defining what "good" looks like (e.g., "Score 1 if the answer is factually incorrect, 5 if fully accurate and well-sourced")
 2. **Input context** — the original user query or prompt
 3. **Output to evaluate** — the application's response
@@ -56,6 +57,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 <div className="flex flex-col md:flex-row gap-12 w-full justify-center">
 
 {/* Live Production Branch */}
+
 <div className="flex flex-col items-center gap-4 flex-1 min-w-[280px]">
   <Card className="border-2 border-primary w-full">
     <CardHeader className="p-4">
@@ -80,10 +82,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
         <div className="text-xs text-muted-foreground mt-1">Complete workflow executions</div>
       </CardContent>
     </Card>
+
   </div>
 </div>
 
 {/* Offline Experiments Branch */}
+
 <div className="flex flex-col items-center gap-4 flex-1 min-w-[280px]">
   <Card className="border-2 border-primary w-full">
     <CardHeader className="p-4">
@@ -134,6 +138,7 @@ Run evaluators on individual observations within your traces—such as LLM calls
 At ingest time, each observation is evaluated against your filter criteria. Matching observations are added to an evaluation queue. Evaluation jobs are then processed asynchronously. Scores are attached to the specific observation, resulting in one score per observation per evaluator. Depending on your filter criteria, multiple observations may match the criteria and result in multiple scores per trace.
 
 **Example Use Cases**
+
 - Evaluate helpfulness of only the final chatbot response to users
 - Monitor toxicity scores on all customer-facing LLM generations
 - Track retrieval relevance for RAG systems by targeting document retrieval observations
@@ -158,6 +163,7 @@ Run evaluators on complete traces, evaluating entire workflow executions from st
 At ingest time, each trace is evaluated against your filter criteria. Matching traces are added to an evaluation queue and processed asynchronously. Scores are attached to the trace itself, resulting in one score per trace per evaluator.
 
 **Example Use Cases**
+
 - Score the accuracy of a multi-step agent workflow, if and only if evaluator needs full context spanning multiple operations (e.g., retrieval → reranking → generation → citation)
 
 </Tab>
@@ -190,8 +196,6 @@ Each experiment run generates traces that are automatically scored by your selec
 
 </Tab>
 </Tabs>
-
-
 
 ## Set up step-by-step
 
@@ -309,8 +313,6 @@ We recommend migrating to [observation-level evaluators](/faq/all/llm-as-a-judge
 
 - **Recommended**: Python >= 3.9.0 or JS/TS >= 4.4.0 with experiment runner functions ([`run_experiment()`](/docs/evaluation/experiments/experiments-via-sdk) / [`experiment.run()`](/docs/evaluation/experiments/experiments-via-sdk)). More performant architecture with built-in evaluator orchestration.
 - **Legacy support**: Older SDK versions supported. Upgrade recommended for better performance.
-
-
 
 </Tab>
 </Tabs>

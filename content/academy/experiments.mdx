@@ -10,20 +10,18 @@ description: How to use experiments to systematically improve your LLM applicati
 
 To systematically understand and improve how your system behaves, you need a way to isolate cause and effect. That's what experiments give you. You pick a variable or a set of variables, run your dataset through two versions of your system, and compare what comes out. The result tells you whether a change actually helped, and by how much. To understand by how much, you also need to evaluate your experiment outputs ([see Evaluate](/academy/evaluate)). This section covers the systematic experimentation part before evaluation.
 
-
-
 <LoopDiagram highlight="change" />
 
 ## The anatomy of an experiment
 
 Every experiment has four components.
 
-| Component              | What it is                                                                                                                              |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **Baseline**           | Your current production system — the control condition everything else gets measured against. Keep it fixed while you vary one thing.   |
-| **Dataset**            | The inputs you run both conditions against. Keep the same dataset across experiments so results are comparable over time.               |
+| Component              | What it is                                                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Baseline**           | Your current production system — the control condition everything else gets measured against. Keep it fixed while you vary one thing. |
+| **Dataset**            | The inputs you run both conditions against. Keep the same dataset across experiments so results are comparable over time.             |
 | **Variable**           | The configuration you're changing — model, prompt, context, tool access, or agent architecture. See [Variables](#on-variables) below. |
-| **Outputs to compare** | What your system produces under each condition. Comparing these is the actual work of running an experiment.                            |
+| **Outputs to compare** | What your system produces under each condition. Comparing these is the actual work of running an experiment.                          |
 
 It often helps to change only one variable at a time. However, variables interact, and some configurations require changing multiple variables at once.
 

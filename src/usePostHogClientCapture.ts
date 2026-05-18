@@ -16,7 +16,7 @@ export const usePostHogClientCapture = () => {
   function capture<E extends EventName>(
     eventName: E,
     properties: EventDefinitions[E],
-    options?: CaptureOptions
+    options?: CaptureOptions,
   ): CaptureResult | void {
     return posthog.capture(eventName, properties, options);
   }

@@ -201,9 +201,7 @@ function IntegrationCards({
       <div className={featured && featured.length > 0 ? "mt-8" : ""}>
         <Cards num={3}>
           {pages
-            .filter(
-              (p) => !(featured || []).some((f) => f.route === p.route)
-            )
+            .filter((p) => !(featured || []).some((f) => f.route === p.route))
             .map((page) => (
               <Cards.Card
                 href={page.route}
