@@ -76,7 +76,14 @@ export default function RootLayout({
           <DevAriaHiddenConsoleFilter />
         )}
         <PostHogProvider>
-          <RootProvider>
+          <RootProvider
+            i18n={{
+              locale: "en",
+              translations: {
+                lastUpdate: "Last edited",
+              },
+            }}
+          >
             <AISearch>{children}</AISearch>
           </RootProvider>
         </PostHogProvider>

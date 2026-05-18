@@ -3,6 +3,7 @@ import {
   defineConfig,
   frontmatterSchema,
 } from "fumadocs-mdx/config";
+import lastModified from "fumadocs-mdx/plugins/last-modified";
 import monokaiProLightRaw from "./lib/themes/monokai-pro-light.json";
 
 // JSON imports widen fontStyle to `string` instead of the required literal union.
@@ -181,6 +182,7 @@ export const marketing = defineDocs({
 });
 
 export default defineConfig({
+  plugins: [lastModified()],
   mdxOptions: {
     remarkPlugins: [remarkGfm, remarkMdxMermaid],
     providerImportSource: "@/mdx-components",

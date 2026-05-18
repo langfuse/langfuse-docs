@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import React, { useState, useEffect, forwardRef } from "react";
+import { useI18n } from "fumadocs-ui/contexts/i18n";
+import React, { useState, useEffect, useMemo, forwardRef } from "react";
 import { allAuthors, Author, AuthorHoverCardContent } from "./Authors";
 import contributorsData from "@/data/generated/contributors.json";
 import Image from "next/image";
@@ -68,6 +69,12 @@ type ProcessedContributor = {
   author?: Author;
 };
 
+const formatLocalDate = (date: Date): string => {
+  return new Intl.DateTimeFormat(navigator.languages, {
+    dateStyle: "medium",
+  }).format(date);
+};
+
 // ─── Contributor card ─────────────────────────────────────────────────────────
 
 const ContributorCardContent = forwardRef<
@@ -114,6 +121,28 @@ const ContributorCard = ({
   return <ContributorCardContent contributor={contributor} />;
 };
 
+const LocalizedLastUpdate = ({
+  date,
+  className,
+}: {
+  date: Date;
+  className?: string;
+}) => {
+  const { text } = useI18n();
+  const [formattedDate, setFormattedDate] = useState("");
+
+  useEffect(() => {
+    setFormattedDate(formatLocalDate(date));
+  }, [date]);
+
+  return (
+    <p className={className}>
+      {text.lastUpdate}
+      {formattedDate ? ` ${formattedDate}` : null}
+    </p>
+  );
+};
+
 const processContributor = (username: string): ProcessedContributor => {
   const author = Object.values(allAuthors).find((a) => a.github === username);
   if (author) {
@@ -139,14 +168,22 @@ const processContributor = (username: string): ProcessedContributor => {
 
 type DocsTocFooterProps = {
   pageTitle?: string;
+  lastModified?: string;
 };
 
-export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
+export const DocsTocFooter = ({
+  pageTitle,
+  lastModified,
+}: DocsTocFooterProps) => {
   const pathname = usePathname() ?? "";
   const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
   const editUrl = getGithubEditUrl(currentPath);
   const feedbackUrl = getFeedbackUrl(pageTitle);
+  const lastModifiedDate = useMemo(
+    () => (lastModified ? new Date(lastModified) : undefined),
+    [lastModified],
+  );
 
   useEffect(() => {
     setShowAll(false);
@@ -205,6 +242,12 @@ export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
           >
             Contributors
           </Text>
+          {lastModifiedDate && (
+            <LocalizedLastUpdate
+              date={lastModifiedDate}
+              className="mb-3 text-xs text-text-tertiary"
+            />
+          )}
           <div className="flex flex-col gap-1">
             {displayedContributors.map((contributor) => (
               <React.Fragment key={contributor.username}>
