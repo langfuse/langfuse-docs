@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { PageLastUpdate } from "fumadocs-ui/page";
+import { useI18n } from "fumadocs-ui/contexts/i18n";
 import React, { useState, useEffect, useMemo, forwardRef } from "react";
 import { allAuthors, Author, AuthorHoverCardContent } from "./Authors";
 import contributorsData from "@/data/generated/contributors.json";
@@ -67,6 +67,12 @@ type ProcessedContributor = {
   author?: Author;
 };
 
+const formatLocalDate = (date: Date): string => {
+  return new Intl.DateTimeFormat(navigator.languages, {
+    dateStyle: "medium",
+  }).format(date);
+};
+
 // ─── Contributor card ─────────────────────────────────────────────────────────
 
 const ContributorCardContent = forwardRef<
@@ -105,6 +111,28 @@ const ContributorCard = ({ contributor }: { contributor: ProcessedContributor })
     );
   }
   return <ContributorCardContent contributor={contributor} />;
+};
+
+const LocalizedLastUpdate = ({
+  date,
+  className,
+}: {
+  date: Date;
+  className?: string;
+}) => {
+  const { text } = useI18n();
+  const [formattedDate, setFormattedDate] = useState("");
+
+  useEffect(() => {
+    setFormattedDate(formatLocalDate(date));
+  }, [date]);
+
+  return (
+    <p className={className}>
+      {text.lastUpdate}
+      {formattedDate ? ` ${formattedDate}` : null}
+    </p>
+  );
 };
 
 const processContributor = (username: string): ProcessedContributor => {
@@ -194,7 +222,7 @@ export const DocsTocFooter = ({ pageTitle, lastModified }: DocsTocFooterProps) =
         <div className="px-2 pt-4 pb-4 mb-px rounded-sm bg-surface-1">
           <Text size="s" className="font-[580] text-left text-text-primary mb-3">Contributors</Text>
           {lastModifiedDate && (
-            <PageLastUpdate
+            <LocalizedLastUpdate
               date={lastModifiedDate}
               className="mb-3 text-xs text-text-tertiary"
             />
