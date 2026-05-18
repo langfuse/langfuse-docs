@@ -24,7 +24,7 @@ export async function generateMetadata({
   const all = getChangelogIndexItems();
   const totalPages = Math.max(
     1,
-    Math.ceil(all.length / CHANGELOG_ITEMS_PER_PAGE)
+    Math.ceil(all.length / CHANGELOG_ITEMS_PER_PAGE),
   );
   const currentPage = parseChangelogPageParam(sp.page, totalPages);
   const canonical = changelogPageHref(currentPage, totalPages) ?? "/changelog";
@@ -49,13 +49,13 @@ export default async function ChangelogIndexPage({ searchParams }: PageProps) {
   const allPages = getChangelogIndexItems();
   const totalPages = Math.max(
     1,
-    Math.ceil(allPages.length / CHANGELOG_ITEMS_PER_PAGE)
+    Math.ceil(allPages.length / CHANGELOG_ITEMS_PER_PAGE),
   );
   const currentPage = parseChangelogPageParam(sp.page, totalPages);
   const sliceStart = (currentPage - 1) * CHANGELOG_ITEMS_PER_PAGE;
   const pages = allPages.slice(
     sliceStart,
-    sliceStart + CHANGELOG_ITEMS_PER_PAGE
+    sliceStart + CHANGELOG_ITEMS_PER_PAGE,
   );
 
   return (

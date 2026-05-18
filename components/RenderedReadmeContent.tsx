@@ -29,10 +29,7 @@ const readmeComponents: Components = {
     </h1>
   ),
   h2: ({ children, ...props }) => (
-    <h2
-      className="mt-6 mb-2 text-lg font-semibold text-foreground"
-      {...props}
-    >
+    <h2 className="mt-6 mb-2 text-lg font-semibold text-foreground" {...props}>
       {children}
     </h2>
   ),
@@ -96,7 +93,7 @@ const readmeComponents: Components = {
     return (
       <code
         className={cn(
-          "rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground"
+          "rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground",
         )}
         {...props}
       >

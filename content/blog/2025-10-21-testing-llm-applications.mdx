@@ -38,11 +38,13 @@ This variability doesn't mean we can't test LLM applications—it means we need 
 Hamel Husain calls this approach "Level 1: Unit Tests" in his framework, and we'll use similar terminology. However, it's worth noting that these aren't traditional unit tests:
 
 **Traditional unit tests**:
+
 - Test isolated code units
 - Deterministic (same input = same output)
 - Fast, no external dependencies
 
 **LLM application tests**:
+
 - Test application behavior
 - Non-deterministic (same input can produce different outputs)
 - Slower execution
@@ -167,6 +169,7 @@ def test_geography_accuracy_passes(langfuse_client: Langfuse):
     # Relaxed threshold for experimental features
     assert avg_accuracy >= 0.70, "Experimental feature needs improvement"
     ```
+
 </Callout>
 
 You can run the test with:
@@ -185,7 +188,6 @@ You can integrate these tests into your continuous integration pipeline.
 First, setup the environment variables in your Github Actions secrets:
 
 ![Github Actions secrets](/images/blog/2025-10-21-testing-llm-applications/github-actions-secrets.png)
-
 
 ```yaml
 name: LLM Application Tests

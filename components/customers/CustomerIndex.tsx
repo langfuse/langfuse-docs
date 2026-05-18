@@ -73,7 +73,9 @@ export const CustomerIndex = ({
           <div className="flex-1" />
 
           {/* Author Information */}
-          {(story.frontMatter.quoteAuthor || story.frontMatter.quoteRole || story.frontMatter.quoteCompany) && (
+          {(story.frontMatter.quoteAuthor ||
+            story.frontMatter.quoteRole ||
+            story.frontMatter.quoteCompany) && (
             <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
               <div>
                 {story.frontMatter.quoteAuthor && (
@@ -81,14 +83,14 @@ export const CustomerIndex = ({
                     {story.frontMatter.quoteAuthor as string}
                   </div>
                 )}
-                {(story.frontMatter.quoteRole || story.frontMatter.quoteCompany) && (
+                {(story.frontMatter.quoteRole ||
+                  story.frontMatter.quoteCompany) && (
                   <div>
                     {story.frontMatter.quoteRole && (
                       <span>{story.frontMatter.quoteRole as string}</span>
                     )}
-                    {story.frontMatter.quoteRole && story.frontMatter.quoteCompany && (
-                      <span> at </span>
-                    )}
+                    {story.frontMatter.quoteRole &&
+                      story.frontMatter.quoteCompany && <span> at </span>}
                     {story.frontMatter.quoteCompany && (
                       <span>{story.frontMatter.quoteCompany as string}</span>
                     )}

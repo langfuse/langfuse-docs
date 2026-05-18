@@ -25,13 +25,13 @@ const TextHighlight = React.forwardRef<HTMLSpanElement, TextHighlightProps>(
         className={cn(
           "absolute inset-x-0 top-1/2 h-[0.76em] -translate-y-[52%]",
           "bg-[#FBFF7A]",
-          highlightClassName
+          highlightClassName,
         )}
         aria-hidden
       />
       <span className="relative">{children}</span>
     </span>
-  )
+  ),
 );
 TextHighlight.displayName = "TextHighlight";
 

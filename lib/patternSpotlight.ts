@@ -28,7 +28,7 @@ export function updatePatternSpotlightTarget(
   getEl: () => HTMLElement | null,
   state: PatternSpotlightState,
   xPct: number,
-  yPct: number
+  yPct: number,
 ) {
   state.tx = xPct;
   state.ty = yPct;

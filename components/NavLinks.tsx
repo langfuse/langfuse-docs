@@ -30,13 +30,16 @@ const productFeatured: FeaturedItem = {
       <div className="px-4 py-3 w-full rounded border shadow-sm border-line-structure bg-surface-1">
         <div className="mb-2 flex items-center gap-1.5">
           <div className="rounded-full size-2 bg-line-structure" />
-          <span className="font-sans text-[10px] font-semibold text-text-tertiary tracking-tight">langfuse</span>
+          <span className="font-sans text-[10px] font-semibold text-text-tertiary tracking-tight">
+            langfuse
+          </span>
         </div>
         <p className="font-sans text-[11px] font-semibold text-text-primary leading-snug">
           Get Started with Tracing
         </p>
         <p className="mt-1 font-sans text-[10px] text-text-tertiary leading-relaxed">
-          Step-by-step guide to ingesting your first trace using OpenAI, LangChain, or the SDKs.
+          Step-by-step guide to ingesting your first trace using OpenAI,
+          LangChain, or the SDKs.
         </p>
       </div>
     </div>
@@ -52,17 +55,22 @@ const resourcesFeatured: FeaturedItem = {
     <div className="flex flex-col gap-3 justify-center items-center px-6 h-full">
       <div className="flex gap-0 items-center w-full">
         <div className="flex flex-1 justify-center items-center py-3 rounded border border-line-structure bg-surface-1">
-          <span className="font-sans text-[11px] font-semibold text-text-secondary tracking-tight">langfuse</span>
+          <span className="font-sans text-[11px] font-semibold text-text-secondary tracking-tight">
+            langfuse
+          </span>
         </div>
         <div className="w-4 border-t shrink-0 border-line-structure" />
         <div className="flex flex-1 justify-center items-center py-3 rounded border border-line-structure bg-surface-1">
-          <span className="font-sans text-[11px] font-semibold text-text-secondary tracking-tight">ClickHouse</span>
+          <span className="font-sans text-[11px] font-semibold text-text-secondary tracking-tight">
+            ClickHouse
+          </span>
         </div>
       </div>
     </div>
   ),
   title: "Langfuse joins ClickHouse",
-  description: "Our goal continues to be building the best LLM engineering platform",
+  description:
+    "Our goal continues to be building the best LLM engineering platform",
   cta: "Read story",
   href: "/blog/joining-clickhouse",
 };
@@ -71,7 +79,10 @@ const resourcesFeatured: FeaturedItem = {
 
 function NavFeaturedCard({ featured }: { featured: FeaturedItem }) {
   return (
-    <Link href={featured.href} className="flex flex-col h-full no-underline group/card">
+    <Link
+      href={featured.href}
+      className="flex flex-col h-full no-underline group/card"
+    >
       <div className="relative w-full h-[140px] with-stripes border-b border-line-structure overflow-hidden shrink-0">
         {featured.image}
       </div>
@@ -234,7 +245,7 @@ function NavDropdown({
         <ChevronDown
           className={cn(
             "h-3.5 w-3.5 opacity-60 transition-transform duration-150 ease-in-out",
-            open && "rotate-180"
+            open && "rotate-180",
           )}
         />
       </button>
@@ -247,7 +258,7 @@ function NavDropdown({
           // Instant hide avoids two mega menus fading over each other when switching tabs.
           open
             ? "pointer-events-auto opacity-100 translate-y-0 transition-[opacity,transform] duration-200"
-            : "pointer-events-none opacity-0 -translate-y-1 transition-[opacity,transform] duration-0"
+            : "pointer-events-none opacity-0 -translate-y-1 transition-[opacity,transform] duration-0",
         )}
         style={{
           top: "66px",
@@ -323,7 +334,7 @@ export function NavLinks({
           variant="nav"
           className={cn(
             "py-1.5 whitespace-nowrap ring-inset transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            link.tabletHidden && "hidden lg:block"
+            link.tabletHidden && "hidden lg:block",
           )}
         >
           {link.name}

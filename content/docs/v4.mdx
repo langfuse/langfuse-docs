@@ -56,10 +56,10 @@ As agentic applications grow more complex, a single trace can contain hundreds o
 
 ## Preview access and rollout timeline
 
-| Organization creation date (Langfuse Cloud)    | Fast Preview default | "Preview" toggle visibility            |
-| ---------------------------------------------- | -------------------- | -------------------------------------- |
-| Before April 14, 2026, 14:00 UTC (15:00 CET)   | Optional             | Visible (you can switch on/off)        |
-| On/after April 14, 2026, 14:00 UTC (15:00 CET) | Enabled by default   | Hidden (already on Fast Preview)       |
+| Organization creation date (Langfuse Cloud)    | Fast Preview default | "Preview" toggle visibility      |
+| ---------------------------------------------- | -------------------- | -------------------------------- |
+| Before April 14, 2026, 14:00 UTC (15:00 CET)   | Optional             | Visible (you can switch on/off)  |
+| On/after April 14, 2026, 14:00 UTC (15:00 CET) | Enabled by default   | Hidden (already on Fast Preview) |
 
 If you signed up recently and do not see the toggle, your organization is already on the new experience by default.
 For organizations created before the cutoff date, the "Preview" toggle is available in the bottom-left corner of the UI to opt in to "Fast Preview".
@@ -130,12 +130,12 @@ This preview is powered by a simplified observation-centric data model. Trace-le
 
 ### What changes
 
-| | Classic model | Observation-centric model |
-|---|---|---|
-| **Storage** | Separate mutable Traces and Observations tables | Single immutable Observations table |
-| **Context attributes** | Stored on the trace, joined at query time | Propagated to every observation on SDK side. |
-| **Trace input/output** | Set directly on the trace | Removed, use observation IO instead. (For legacy LLM-as-a-judge evaluators that depend on trace input and output, users can use the deprecated `set_trace_io` methods in the SDKs.) |
-| **Mutability** | Traces and observations are mutable | Observations are immutable (written once) |
+|                        | Classic model                                   | Observation-centric model                                                                                                                                                           |
+| ---------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Storage**            | Separate mutable Traces and Observations tables | Single immutable Observations table                                                                                                                                                 |
+| **Context attributes** | Stored on the trace, joined at query time       | Propagated to every observation on SDK side.                                                                                                                                        |
+| **Trace input/output** | Set directly on the trace                       | Removed, use observation IO instead. (For legacy LLM-as-a-judge evaluators that depend on trace input and output, users can use the deprecated `set_trace_io` methods in the SDKs.) |
+| **Mutability**         | Traces and observations are mutable             | Observations are immutable (written once)                                                                                                                                           |
 
 ## OSS and self-hosting
 

@@ -25,7 +25,7 @@ export function TutorialCard({
       <Card
         className={cn(
           "group h-full border bg-surface-bg corner-box-hover-stripes",
-          className
+          className,
         )}
       >
         <CardContent className="flex h-full min-h-[140px] flex-col justify-center gap-3 p-4">
@@ -37,7 +37,10 @@ export function TutorialCard({
               {title}
             </Heading>
           </div>
-          <Text size="s" className="text-text-tertiary text-left group-hover:text-text-secondary transition-colors duration-220">
+          <Text
+            size="s"
+            className="text-text-tertiary text-left group-hover:text-text-secondary transition-colors duration-220"
+          >
             {description}
           </Text>
         </CardContent>

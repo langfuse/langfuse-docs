@@ -19,7 +19,6 @@ const sizeClasses: Record<DropdownButtonSize, { root: string }> = {
 const buttonBaseClasses =
   "inline-flex w-full min-w-0 max-w-full items-center justify-center no-underline overflow-hidden shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
 
-
 export interface DropdownButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: DropdownButtonSize;
   className?: string;
@@ -29,18 +28,11 @@ export interface DropdownButtonProps extends React.ButtonHTMLAttributes<HTMLButt
 
 const DropdownButton = React.forwardRef<HTMLButtonElement, DropdownButtonProps>(
   (
-    {
-      className,
-      size,
-      wrapperClassName,
-      children,
-      icon,
-      disabled,
-      ...props
-    },
-    ref
+    { className, size, wrapperClassName, children, icon, disabled, ...props },
+    ref,
   ) => {
-    const resolvedSize: DropdownButtonSize = size === "small" ? "small" : "default";
+    const resolvedSize: DropdownButtonSize =
+      size === "small" ? "small" : "default";
 
     const innerRef = React.useRef<HTMLElement | null>(null);
 
@@ -53,7 +45,7 @@ const DropdownButton = React.forwardRef<HTMLButtonElement, DropdownButtonProps>(
           ref.current = node;
         }
       },
-      [ref]
+      [ref],
     );
 
     const iconEl = icon ?? <ChevronDownIcon className="h-3 w-3" />;
@@ -68,7 +60,7 @@ const DropdownButton = React.forwardRef<HTMLButtonElement, DropdownButtonProps>(
       sizeClasses[resolvedSize].root,
       "inline-flex items-stretch rounded-[1px] border border-line-structure bg-surface-bg text-text-secondary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
       disabled ? "cursor-not-allowed" : "cursor-pointer hover:bg-surface-1/80",
-      className
+      className,
     );
 
     const buttonEl = (
@@ -82,7 +74,7 @@ const DropdownButton = React.forwardRef<HTMLButtonElement, DropdownButtonProps>(
           className={cn(
             "inline-flex items-center py-0.75 font-sans font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] transition-colors",
             leftSegmentClass,
-            disabled ? "cursor-not-allowed" : "cursor-pointer"
+            disabled ? "cursor-not-allowed" : "cursor-pointer",
           )}
         >
           <span className="min-w-0 truncate w-full">{children}</span>
@@ -91,7 +83,7 @@ const DropdownButton = React.forwardRef<HTMLButtonElement, DropdownButtonProps>(
           aria-hidden
           className={cn(
             "inline-flex w-[32px] items-center justify-center border-l border-line-structure transition-colors",
-            disabled ? "cursor-not-allowed" : "cursor-pointer"
+            disabled ? "cursor-not-allowed" : "cursor-pointer",
           )}
         >
           {iconEl}
@@ -99,14 +91,15 @@ const DropdownButton = React.forwardRef<HTMLButtonElement, DropdownButtonProps>(
       </button>
     );
 
-
     return (
-      <div className={cn("relative p-1 group button-wrapper", wrapperClassName)}>
+      <div
+        className={cn("relative p-1 group button-wrapper", wrapperClassName)}
+      >
         <HoverCorners />
         {buttonEl}
       </div>
     );
-  }
+  },
 );
 DropdownButton.displayName = "DropdownButton";
 

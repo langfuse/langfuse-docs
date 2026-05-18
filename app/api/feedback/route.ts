@@ -27,13 +27,13 @@ export async function POST(request: NextRequest) {
     console.error(webhookResponse);
     return NextResponse.json(
       {},
-      { status: 500, statusText: "Internal Server Error" }
+      { status: 500, statusText: "Internal Server Error" },
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
       {},
-      { status: 500, statusText: "Internal Server Error" }
+      { status: 500, statusText: "Internal Server Error" },
     );
   }
 }

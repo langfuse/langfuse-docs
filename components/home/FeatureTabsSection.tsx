@@ -12,12 +12,19 @@ export function FeatureTabsSection() {
     <HomeSection id="overview" className="pt-[120px]">
       <div className="flex items-start mb-6 md:hidden">
         <Heading className="text-left">
-          Gain <TextHighlight className="whitespace-nowrap">deep visibility</TextHighlight> into your traces
+          Gain{" "}
+          <TextHighlight className="whitespace-nowrap">
+            deep visibility
+          </TextHighlight>{" "}
+          into your traces
         </Heading>
       </div>
 
       <Suspense>
-        <FeatureTabs features={featureTabsData} mobileFeature={mobileFeatureTabsData} />
+        <FeatureTabs
+          features={featureTabsData}
+          mobileFeature={mobileFeatureTabsData}
+        />
       </Suspense>
     </HomeSection>
   );

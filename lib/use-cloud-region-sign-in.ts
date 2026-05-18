@@ -7,7 +7,7 @@ import {
 } from "@/lib/cloud-regions";
 
 export const useCloudRegionSignIn = (
-  enabled = process.env.NODE_ENV === "production"
+  enabled = process.env.NODE_ENV === "production",
 ) => {
   const [signedInRegions, setSignedInRegions] = useState<
     Record<CloudRegionKey, boolean>

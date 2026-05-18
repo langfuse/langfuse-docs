@@ -39,7 +39,7 @@ const linkVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export type LinkVariants = VariantProps<typeof linkVariants>;
@@ -95,7 +95,13 @@ export function Link({
 
   // Internal URL — use Next.js Link for client-side navigation
   return (
-    <NextLink href={href} target={target} rel={rel} className={classes} {...props}>
+    <NextLink
+      href={href}
+      target={target}
+      rel={rel}
+      className={classes}
+      {...props}
+    >
       {children}
     </NextLink>
   );
