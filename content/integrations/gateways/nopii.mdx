@@ -1,0 +1,171 @@
+---
+title: "NoPII Integration"
+sidebarTitle: NoPII
+logo: /images/integrations/nopii_icon.svg
+description: "Trace NoPII privacy-proxied LLM calls in Langfuse. Server-side spans from NoPII and client-side application traces appear together in a single trace view via W3C traceparent."
+---
+
+# NoPII Integration
+
+In this guide, we'll show you how to use [Langfuse](/) to trace [NoPII](https://nopii.co) privacy-proxied LLM calls and connect them to your application traces end-to-end.
+
+> **What is NoPII?** [NoPII](https://nopii.co) is a hosted privacy proxy that exposes OpenAI- and Anthropic-compatible endpoints. PII in outbound prompts is replaced with deterministic vault tokens before requests reach the underlying LLM, and the original values are restored in the response. The LLM provider only ever sees tokenized placeholders, never raw PII.
+
+> **What is Langfuse?** [Langfuse](/) is an open source LLM engineering platform that helps teams trace LLM calls, monitor performance, and debug issues in their AI applications.
+
+NoPII has built-in Langfuse support. When enabled in the [NoPII admin console](https://app.nopii.co), every proxied request emits server-side spans (sanitize, llm-call, desanitize) directly to your Langfuse project. PII never appears in those spans, only tokenized content. Combined with W3C `traceparent` propagation, your application's traces and NoPII's server-side traces appear together as a single trace in Langfuse.
+
+## Get started
+
+1. Enable Langfuse in the NoPII admin console at [app.nopii.co](https://app.nopii.co) (NoPII pushes its own traces to your Langfuse project).
+2. Install the dependencies:
+
+```bash
+pip install langfuse openai anthropic python-dotenv
+```
+
+3. Set environment variables. NoPII identifies your tenant from the underlying provider key (via a one-way hash), so no separate NoPII credential is required:
+
+```txt filename=".env"
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_HOST=https://us.cloud.langfuse.com
+# Other Langfuse data regions: 🇪🇺 EU https://cloud.langfuse.com, 🇯🇵 Japan https://jp.cloud.langfuse.com, ⚕️ HIPAA https://hipaa.cloud.langfuse.com
+```
+
+## Example 1: OpenAI via NoPII
+
+Point the OpenAI client at NoPII with `base_url`, then trace the call with Langfuse's `@observe()` decorator. The `traceparent` header connects your application trace to NoPII's server-side trace, producing a single end-to-end view in Langfuse.
+
+```python
+import os
+import uuid
+
+from dotenv import load_dotenv
+from langfuse import Langfuse, observe
+from openai import OpenAI
+
+load_dotenv()
+
+client = OpenAI(
+    api_key=os.environ["OPENAI_API_KEY"],
+    base_url="https://api.nopii.co",
+)
+
+langfuse = Langfuse(
+    public_key=os.environ["LANGFUSE_PUBLIC_KEY"],
+    secret_key=os.environ["LANGFUSE_SECRET_KEY"],
+    host=os.environ.get("LANGFUSE_HOST", "https://us.cloud.langfuse.com"),
+)
+
+PROMPT = (
+    "Summarize the customer record for John Smith. "
+    "His SSN is 234-56-7891 and his email is john.smith@acme.com."
+)
+
+
+@observe(as_type="generation")
+def call_llm(prompt: str, traceparent: str) -> str:
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        extra_headers={"traceparent": traceparent},
+    )
+    langfuse.update_current_generation(
+        model="gpt-4o",
+        usage_details={
+            "input": response.usage.prompt_tokens,
+            "output": response.usage.completion_tokens,
+        },
+    )
+    return response.choices[0].message.content
+
+
+@observe()
+def customer_lookup(prompt: str) -> str:
+    trace_id = uuid.uuid4().hex
+    span_id = uuid.uuid4().hex[:16]
+    traceparent = f"00-{trace_id}-{span_id}-01"
+    return call_llm(prompt, traceparent)
+
+
+result = customer_lookup(PROMPT)
+print(result)
+
+langfuse.flush()
+```
+
+## Example 2: Anthropic via NoPII
+
+Same pattern with the Anthropic SDK. NoPII's Anthropic-compatible endpoint accepts the same `base_url` override; the bare Anthropic SDK appends `/v1/messages` for you.
+
+```python
+import os
+import uuid
+
+import anthropic
+from dotenv import load_dotenv
+from langfuse import Langfuse, observe
+
+load_dotenv()
+
+client = anthropic.Anthropic(
+    api_key=os.environ["ANTHROPIC_API_KEY"],
+    base_url="https://api.nopii.co",
+)
+
+langfuse = Langfuse(
+    public_key=os.environ["LANGFUSE_PUBLIC_KEY"],
+    secret_key=os.environ["LANGFUSE_SECRET_KEY"],
+    host=os.environ.get("LANGFUSE_HOST", "https://us.cloud.langfuse.com"),
+)
+
+PROMPT = (
+    "Draft a follow-up note for patient Maria Garcia (DOB: 03/15/1985). "
+    "Her SSN is 321-54-9876 and her email is maria.garcia@gmail.com."
+)
+
+
+@observe(as_type="generation")
+def call_llm(prompt: str, traceparent: str) -> str:
+    response = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": prompt}],
+        extra_headers={"traceparent": traceparent},
+    )
+    langfuse.update_current_generation(
+        model="claude-sonnet-4-20250514",
+        usage_details={
+            "input": response.usage.input_tokens,
+            "output": response.usage.output_tokens,
+        },
+    )
+    return response.content[0].text
+
+
+@observe()
+def patient_followup(prompt: str) -> str:
+    trace_id = uuid.uuid4().hex
+    span_id = uuid.uuid4().hex[:16]
+    traceparent = f"00-{trace_id}-{span_id}-01"
+    return call_llm(prompt, traceparent)
+
+
+result = patient_followup(PROMPT)
+print(result)
+
+langfuse.flush()
+```
+
+In both examples, the LLM only ever sees tokenized placeholders, but the response your application receives contains the restored original PII. In Langfuse, NoPII's server-side spans show the sanitized content; your application's spans show what your code actually saw.
+
+## Learn more
+
+- [NoPII website](https://nopii.co)
+- [NoPII documentation](https://docs.nopii.co/quickstart)
+- [NoPII admin console](https://app.nopii.co)
+- [NoPII examples on GitHub](https://github.com/Enigma-Vault/NoPII/tree/main/examples)
