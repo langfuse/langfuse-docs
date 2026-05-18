@@ -6,7 +6,7 @@ description: Overview of Single Sign-On (SSO) methods in Langfuse
 
 # Authentication & SSO
 
-By default, Langfuse supports email/password and social logins (Sign in with Google, GitHub, Microsoft).
+By default, Langfuse supports email/password, social logins (Sign in with Google, GitHub, Microsoft), and authentication via ClickHouse Cloud.
 
 For increased security, you can also configure Enterprise SSO (e.g. Okta, Authentik, GitHub Enterprise, OneLogin, Azure AD, Keycloak, JumpCloud etc.) via OIDC.
 
@@ -37,6 +37,15 @@ For simplified access, users can sign in using their existing social accounts:
 - Azure AD (Entra ID)
 
 For security reasons, Langfuse does not support switching between social logins or signing up with a social login after signing up with email/password.
+
+## ClickHouse Cloud authentication [#clickhouse-cloud]
+
+Users can sign in to Langfuse Cloud with their [ClickHouse Cloud](https://clickhouse.com/cloud) account. The provider is available on all Langfuse Cloud regions and appears alongside the other sign-in options on the login page.
+
+Details:
+
+- **Account linking:** Unlike the other social logins, signing in with ClickHouse Cloud using an email that already has a Langfuse account links the two. Existing projects, memberships, and API keys carry over, so users can switch from email/password or another social login to ClickHouse Cloud without creating a new account.
+- **Signing in:** On the login page, click **Sign in with ClickHouse Cloud** and authenticate with your ClickHouse Cloud account.
 
 ## Enterprise SSO & SSO Enforcement [#sso]
 
