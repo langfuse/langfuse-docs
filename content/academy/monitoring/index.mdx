@@ -35,7 +35,36 @@ User feedback is one of the richest sources of signal, but it comes in two forms
 
 **Implicit feedback** is derived from behavior: whether a user retried a query, disagreed with the system, copied a response, accepted a suggestion, or abandoned a conversation midway. It requires no user effort and generates high-volume data, but the signals are indirect and need interpretation. These can be surfaced using automated evaluators.
 
-Both register as scores, so they feed into the same dashboards, trend charts, and signal rules as your other evaluation data.
+To make this concrete, here are two example applications and how they balance explicit and implicit feedback:
+
+<Tabs items={["Customer support chatbot", "Document extraction tool"]}>
+<Tab>
+
+*A customer support chatbot embedded in a SaaS company's help center. Users can rate the conversation after it ends, and can request a human handoff at any point during the chat.*
+
+The feedback the team captures:
+
+```
+Explicit:  thumbs up / thumbs down at the end of a conversation
+Implicit:  user requests human handoff mid-conversation
+```
+
+</Tab>
+<Tab>
+
+*An invoice-processing tool that extracts structured fields (vendor, total, due date) from uploaded PDFs. Each extraction is reviewed by a human in a downstream approval step before being written to the accounting system.*
+
+The feedback the team captures:
+
+```
+Explicit:  none — there's no point in the workflow where a rating fits
+Implicit:  extracted field manually edited before approval
+```
+
+</Tab>
+</Tabs>
+
+Both register as scores, so they feed into the same dashboards, trend charts, and signal rules as your other evaluation data. To figure out which feedback signals are worth turning into automated evaluators in the first place, see our deeper dive into [Error analysis](/academy/monitoring/error-analysis).
 
 <Callout type="info">
 There are two types of automated evaluators to attach scores to traces: 
@@ -52,7 +81,7 @@ Start small and build your monitoring setup from real traces rather than abstrac
 
 1. **Start by looking at your data manually.** Read through traces and notice what kinds of things keep appearing. You can't set up useful monitoring before you know what you're looking for.
 
-2. **Use error analysis to surface what's worth tracking.** Error analysis gives you a structured way to find patterns across your traces, the kinds of recurring issues worth turning into automated evaluators you can run continuously. A step-by-step guide can be found [here](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications).
+2. **Use [error analysis](/academy/monitoring/error-analysis) to surface what's worth tracking.** Error analysis gives you a structured way to find patterns across your traces, the kinds of recurring issues worth turning into automated evaluators you can run continuously.
 
 3. **Think about how your specific application shows failure.** Application-specific implicit signals — a user disagreeing in a support chat, a correction in a process automation flow — are often more actionable than generic scores, and they surface issues without manual labeling.
 
