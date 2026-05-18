@@ -431,7 +431,7 @@
   margin: 0 0 1px 1px;
   border-radius: calc(var(--radius) - 4px);
   background-color: var(--line-structure) !important;
-  top: var(--fd-nav-height);
+  top: calc(var(--fd-nav-height) + var(--fd-banner-height, 0px));
 }
 
 /* Sidebar active link */
@@ -735,8 +735,10 @@
 #nd-toc {
   --text-links: var(--line-cta);
   padding: 0;
-  /* Full viewport minus docs header stack; 2px ≈ outer chrome / rounding */
-  max-height: calc(100dvh - var(--fd-nav-height) - 1px);
+  /* Full viewport minus docs header stack + optional banner; 1px ≈ outer chrome / rounding */
+  max-height: calc(
+    100dvh - var(--fd-nav-height) - var(--fd-banner-height, 0px) - 1px
+  );
   border-bottom-width: 0;
   border-radius: 0 !important;
   z-index: 10;
