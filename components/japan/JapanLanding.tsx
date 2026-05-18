@@ -250,7 +250,7 @@ function WhyJapan() {
     {
       kanji: "同等",
       eyebrow: "フル機能",
-      title: "機能の妥協はありません。",
+      title: "機能制限はありません。",
       body: "グローバル版と同じLangfuse Cloudです。オブザーバビリティ、プロンプト管理、評価、Playground、実験、データセット — すべて日本リージョンで使えます。",
       visual: "parity" as const,
     },
@@ -273,7 +273,7 @@ function WhyJapan() {
           <span className="japan-highlight">プラットフォーム。</span>
         </h2>
         <p className="japan-body max-w-[58ch]">
-          Langfuseは、本番のLLMアプリケーションをデバッグ・分析・改善するためのオープンソースLLMエンジニアリングプラットフォームです。
+          Langfuseは、本番環境のLLMアプリケーションをデバッグ・分析・改善するためのオープンソースLLMエンジニアリングプラットフォームです。
           Langfuse Cloud Japanなら、そのプラットフォームをデータを日本に置いたまま使えます。
         </p>
       </div>
@@ -446,7 +446,7 @@ function GetStarted() {
     {
       n: "01",
       title: "サインアップ",
-      body: "jp.cloud.langfuse.com にアクセスして、1分以内に組織・プロジェクトを作成し、APIキーを発行できます。",
+      body: "jp.cloud.langfuse.com にアクセスして、わずか１分でプロジェクトを作成し、APIキーを発行できます。",
       action: ["アカウントを作成", "https://jp.cloud.langfuse.com"],
     },
     {
@@ -652,7 +652,7 @@ function Customers() {
             GAO, Inc. <span className="text-text-tertiary text-[18px]">（ガオ）</span>
           </div>
           <p className="japan-body-sm m-0">
-            日本での公式リセラー / 導入パートナー。日本円・JPYインボイスでの購買、日本語でのオンボーディング・サポートに対応しています。
+            日本での公式リセラー / 導入パートナー。日本円での決済や請求書払いに対応しており、日本語でのオンボーディング・サポートに対応しています。
           </p>
           <div className="flex-1" />
           <div className="flex flex-wrap gap-1.5">
@@ -912,7 +912,7 @@ function FAQ() {
       ),
     },
     {
-      q: "請求まわりは?",
+      q: "お支払い方法は?",
       a: (
         <p>
           通貨は <b>USD</b>、クレジットカード決済です。エンタープライズの請求書払いはセールス経由で対応します。日本円での購買は{" "}
@@ -924,7 +924,7 @@ function FAQ() {
       ),
     },
     {
-      q: "セルフホストでもいい?",
+      q: "セルフホストは可能ですか?",
       a: (
         <p>
           もちろん。LangfuseはMITのオープンソースです。同じバイナリが自社VPCでそのまま動きます。詳しくは{" "}
@@ -945,10 +945,10 @@ function FAQ() {
             className="japan-h2 max-w-[16ch]"
             style={{ fontSize: "clamp(28px, 3vw, 44px)" }}
           >
-            聞かれる前に、答えを。
+            よくあるご質問と回答。
           </h2>
           <p className="japan-body-sm mt-3.5">
-            載っていないことがあれば、
+            記載されていないことがあれば、
             <Link className="japan-link" href="/ask-ai">
               AIに質問
             </Link>
@@ -990,14 +990,14 @@ function Community() {
         <CommunityCard
           eyebrow="ミートアップ"
           title="Langfuse on connpass"
-          body="東京でのオフラインミートアップとオンラインセッション。次回のRSVPはこちらから。"
+          body="東京でのオフラインミートアップとオンラインセッション。次回の参加登録はこちらから。"
           cta={["connpassを開く", "https://langfuse.connpass.com/"]}
           glyph="会"
         />
         <CommunityCard
           eyebrow="リソース"
           title="Docs · 日本語対応"
-          body="英語が一次情報のドキュメントですが、AI翻訳でも読みやすく構成されています。skillsやllms.txtも公開しています。"
+          body="公式ドキュメントは英語ですが、AI翻訳でも読みやすく構成されています。skillsやllms.txtも公開しています。"
           cta={["Docsを見る", "/docs"]}
           glyph="文"
         />
