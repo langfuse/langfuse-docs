@@ -171,7 +171,10 @@ type DocsTocFooterProps = {
   lastModified?: string;
 };
 
-export const DocsTocFooter = ({ pageTitle, lastModified }: DocsTocFooterProps) => {
+export const DocsTocFooter = ({
+  pageTitle,
+  lastModified,
+}: DocsTocFooterProps) => {
   const pathname = usePathname() ?? "";
   const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
