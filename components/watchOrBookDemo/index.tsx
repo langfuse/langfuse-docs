@@ -85,19 +85,27 @@ function TalkToUsContent() {
         <ul className="flex flex-col gap-2 my-4">
           <li className="flex items-start gap-3">
             <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">Get a Demo</Text>
+            <Text size="s" className="text-left text-text-secondary">
+              Get a Demo
+            </Text>
           </li>
           <li className="flex items-start gap-3">
             <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">Get Volume Pricing</Text>
+            <Text size="s" className="text-left text-text-secondary">
+              Get Volume Pricing
+            </Text>
           </li>
           <li className="flex items-start gap-3">
             <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">Pay by Invoice</Text>
+            <Text size="s" className="text-left text-text-secondary">
+              Pay by Invoice
+            </Text>
           </li>
           <li className="flex items-start gap-3">
             <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">Ask questions about our Security & Compliance Policies</Text>
+            <Text size="s" className="text-left text-text-secondary">
+              Ask questions about our Security & Compliance Policies
+            </Text>
           </li>
         </ul>
       </div>
@@ -117,11 +125,15 @@ function TalkToUsContent() {
         </strong>
         .
       </Text>
-      <Text className="text-left not-prose">Selected customers who built great LLM applications with Langfuse:</Text>
+      <Text className="text-left not-prose">
+        Selected customers who built great LLM applications with Langfuse:
+      </Text>
       <EnterpriseLogoGrid small />
 
       <div className="mt-2">
-        <Text className="text-left not-prose">We are looking forward to talk to you,</Text>
+        <Text className="text-left not-prose">
+          We are looking forward to talk to you,
+        </Text>
         <div className="flex flex-col gap-6 mt-4">
           <TeamMemberCard
             imageSrc="/images/people/akionuernberger.jpg"
@@ -159,9 +171,7 @@ function DiscoverYourselfContent() {
 
   return (
     <>
-      <Heading as="h2">
-        Self-serve resources
-      </Heading>
+      <Heading as="h2">Self-serve resources</Heading>
       <div>
         <Text className="text-left">Everything you need to get started:</Text>
         <ul className="flex flex-col gap-2 mt-2">
@@ -233,8 +243,9 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Left Column: Content based on switch */}
           <div
-            className={`flex flex-col gap-8 ${isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
-              }`}
+            className={`flex flex-col gap-8 ${
+              isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
+            }`}
           >
             <SwitchToggle checked={isDiscoverOpen} page={page} />
             {!isDiscoverOpen ? (
@@ -246,7 +257,13 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
 
           {/* Right Column: Calendar or Walkthroughs */}
           <div className={isDiscoverOpen ? "flex-1 md:flex-[0.6]" : "flex-1"}>
-            {!isDiscoverOpen ? <ContactFormSection /> : <Suspense><WatchWalkthroughs /></Suspense>}
+            {!isDiscoverOpen ? (
+              <ContactFormSection />
+            ) : (
+              <Suspense>
+                <WatchWalkthroughs />
+              </Suspense>
+            )}
           </div>
         </div>
       </div>

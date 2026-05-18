@@ -6,5 +6,9 @@ export default function AcademyLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={academySource.getPageTree()}>{children}</SharedDocsLayout>;
+  return (
+    <SharedDocsLayout tree={academySource.getPageTree()}>
+      {children}
+    </SharedDocsLayout>
+  );
 }

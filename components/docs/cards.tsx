@@ -4,7 +4,7 @@
  * and makes `title` optional on Card (defaults to empty string).
  */
 import * as React from "react";
-import Link from 'fumadocs-core/link';
+import Link from "fumadocs-core/link";
 import {
   Cards as FumadocsCards,
   type CardProps as FumadocsCardProps,
@@ -28,20 +28,29 @@ export type CardProps = Omit<FumadocsCardProps, "title"> & {
   arrow?: boolean;
 };
 
-export function Card({ icon, title = "", description = "", arrow: _arrow, children, contentClassName, contentWrapperClassName, ...props }: CardProps) {
-  const E = props.href ? Link : 'div';
+export function Card({
+  icon,
+  title = "",
+  description = "",
+  arrow: _arrow,
+  children,
+  contentClassName,
+  contentWrapperClassName,
+  ...props
+}: CardProps) {
+  const E = props.href ? Link : "div";
   return (
     <E
       {...props}
       data-card
-      className={cn(
-        'block @max-lg:col-span-full',
-        props.className,
-      )}
+      className={cn("block @max-lg:col-span-full", props.className)}
     >
       <CornerBox
         hoverStripes={!!props.href}
-        className={cn("flex flex-row items-center p-2 sm:p-3 gap-2.5 text-text-primary w-full h-full", contentClassName)}
+        className={cn(
+          "flex flex-row items-center p-2 sm:p-3 gap-2.5 text-text-primary w-full h-full",
+          contentClassName,
+        )}
       >
         {icon ? (
           <div className="not-prose shrink-0 [&_svg]:size-5 [&_img]:size-5">
@@ -51,13 +60,21 @@ export function Card({ icon, title = "", description = "", arrow: _arrow, childr
         <div
           className={cn(
             "flex flex-1 min-w-0 flex-col gap-1",
-            contentWrapperClassName
+            contentWrapperClassName,
           )}
         >
-          <Text as="h3" size="s" className="not-prose mb-0 font-medium text-left text-text-secondary">
+          <Text
+            as="h3"
+            size="s"
+            className="not-prose mb-0 font-medium text-left text-text-secondary"
+          >
             {title}
           </Text>
-          {description ? <Text size="s" className="my-0! text-text-secondary">{description}</Text> : null}
+          {description ? (
+            <Text size="s" className="my-0! text-text-secondary">
+              {description}
+            </Text>
+          ) : null}
           <div className="text-sm text-text-primary prose-no-margin empty:hidden">
             {children}
           </div>

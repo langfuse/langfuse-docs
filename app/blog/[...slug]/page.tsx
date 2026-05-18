@@ -36,7 +36,6 @@ export default async function BlogPostPage(props: PageProps) {
     },
   );
 
-
   return (
     <ContentColumns
       leftSidebar={<BlogPostSidebar tags={tags} totalPosts={total} />}

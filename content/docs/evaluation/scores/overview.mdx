@@ -27,12 +27,12 @@ Scores become useful when you want to go beyond observing what your application 
 
 Langfuse supports four score data types:
 
-| Type | Value | Use when |
-| --- | --- | --- |
-| `NUMERIC` | Float (e.g. `0.9`) | Continuous judgments like accuracy, relevance, or similarity scores |
-| `CATEGORICAL` | String from predefined categories (e.g. `"correct"`, `"partially correct"`) | Discrete classifications where the set of possible values is known upfront |
-| `BOOLEAN` | `0` or `1` | Pass/fail checks like hallucination detection or format validation |
-| `TEXT` | Free-form string (1-500 characters) | Open-ended annotations like reviewer notes or qualitative feedback. Often used for [open coding](https://en.wikipedia.org/wiki/Open_coding) before formalizing into quantifiable scores via [axial coding](https://en.wikipedia.org/wiki/Axial_coding). |
+| Type          | Value                                                                       | Use when                                                                                                                                                                                                                                                |
+| ------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NUMERIC`     | Float (e.g. `0.9`)                                                          | Continuous judgments like accuracy, relevance, or similarity scores                                                                                                                                                                                     |
+| `CATEGORICAL` | String from predefined categories (e.g. `"correct"`, `"partially correct"`) | Discrete classifications where the set of possible values is known upfront                                                                                                                                                                              |
+| `BOOLEAN`     | `0` or `1`                                                                  | Pass/fail checks like hallucination detection or format validation                                                                                                                                                                                      |
+| `TEXT`        | Free-form string (1-500 characters)                                         | Open-ended annotations like reviewer notes or qualitative feedback. Often used for [open coding](https://en.wikipedia.org/wiki/Open_coding) before formalizing into quantifiable scores via [axial coding](https://en.wikipedia.org/wiki/Axial_coding). |
 
 <Callout type="info">
 Text scores are designed for qualitative, open-ended scoring. Because free-form text cannot be meaningfully aggregated or compared, text scores are not supported in [experiments](/docs/evaluation/core-concepts#experiments), [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), or [score analytics](/docs/evaluation/scores/score-analytics).
@@ -49,12 +49,12 @@ There are four ways to add scores:
 
 ## Should I Use Scores or Tags? [#scores-vs-tags]
 
-| | Scores | Tags |
-|---|---|---|
-| **Purpose** | Measure _how good_ something is | Describe _what_ something is |
-| **Data** | Numeric, categorical, boolean, or text value | Simple string label |
+|                | Scores                                                               | Tags                                                |
+| -------------- | -------------------------------------------------------------------- | --------------------------------------------------- |
+| **Purpose**    | Measure _how good_ something is                                      | Describe _what_ something is                        |
+| **Data**       | Numeric, categorical, boolean, or text value                         | Simple string label                                 |
 | **When added** | Can be added at any time, including long after the trace was created | Set during tracing and cannot be changed afterwards |
-| **Used for** | Quality measurement, analytics, experiments | Filtering, segmentation, organizing |
+| **Used for**   | Quality measurement, analytics, experiments                          | Filtering, segmentation, organizing                 |
 
 As a rule of thumb: if you already know the category at tracing time (e.g. which feature or API endpoint triggered the trace), use a [tag](/docs/observability/features/tags). If you need to classify or evaluate traces later, use a score.
 

@@ -7,6 +7,7 @@ description: The prompt config in Langfuse is an optional JSON object attached t
 # Prompt Config
 
 The prompt `config` in Langfuse is an **optional arbitrary JSON object** attached to each prompt, that can be used by code executing the LLM call. Common use cases include:
+
 - [storing model parameters](#using-the-config) (`model`, `temperature`, `max_tokens`)
 - [storing structured output schemas](#structured-outputs) (`response_format`)
 - [storing function/tool definitions](#function-calling) (`tools`, `tool_choice`)
@@ -52,20 +53,20 @@ langfuse = get_client()
 config = {
     "model": "gpt-4o",
     "temperature": 0
-} 
+}
 
 langfuse.create_prompt(
-  name="invoice-extractor", 
-  type="chat", 
+  name="invoice-extractor",
+  type="chat",
   prompt=[
     {
-      "role": "system", 
+      "role": "system",
       "content": "Extract structured data from invoices."
       }
-  ], 
+  ],
   config=config
 )
-                    
+
 ```
 
 </Tab>
@@ -101,11 +102,9 @@ You can test your prompt with its config directly in the [Playground](/docs/prom
 
 ## Using the config [#using-the-config]
 
-The example below retrieves the AI model and temperature from the prompt config. 
-
+The example below retrieves the AI model and temperature from the prompt config.
 
 After fetching a prompt, access the config via the `config` property and pass the values to your LLM call.
-
 
 <Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -132,8 +131,8 @@ temperature = cfg.get("temperature")
 
 # Use in your LLM call
 client.chat.completions.create(
-  model=model, 
-  temperature=temperature, 
+  model=model,
+  temperature=temperature,
   messages=prompt.prompt
 )
 ```

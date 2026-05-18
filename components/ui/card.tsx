@@ -6,7 +6,7 @@ import { CornerBox, type CornerBoxProps } from "./corner-box";
 const Card = React.forwardRef<HTMLDivElement, CornerBoxProps>(
   ({ className, ...props }, ref) => (
     <CornerBox ref={ref} className={className} {...props} />
-  )
+  ),
 );
 Card.displayName = "Card";
 
@@ -30,7 +30,7 @@ const CardTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-2xl font-semibold tracking-tight leading-none",
-      className
+      className,
     )}
     {...props}
   />

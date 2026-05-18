@@ -116,7 +116,7 @@ export function PricingCalculator({
   const [monthlyEvents, setMonthlyEvents] = useState<string>("200,000");
   const [selectedPlan, setSelectedPlan] = useState<string>(initialPlan);
   const [currentBaseFee, setCurrentBaseFee] = useState<number>(
-    PLAN_CONFIGS.find((p) => p.name === initialPlan)?.baseFee || 0
+    PLAN_CONFIGS.find((p) => p.name === initialPlan)?.baseFee || 0,
   );
 
   // Calculate pricing breakdown (single source of truth)
@@ -129,7 +129,7 @@ export function PricingCalculator({
   const calculatedPrice = useMemo(() => {
     const total = pricingBreakdown.reduce(
       (sum, item) => sum + item.costForTier,
-      0
+      0,
     );
     return Math.round(total * 100) / 100;
   }, [pricingBreakdown]);
