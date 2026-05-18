@@ -14,7 +14,7 @@ function CodeBox({ value }: { value: string }) {
       await navigator.clipboard.writeText(value);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch { }
+    } catch {}
   };
   return (
     <div className="rounded-[2px] font-mono text-[11px] leading-[1.65] bg-[#222220] border border-[#3a3a35] text-[#e2e2dc] overflow-hidden">
@@ -65,7 +65,9 @@ function Hero() {
         <span className="japan-dot" />
         <span className="whitespace-nowrap">
           データは
-          <b className="text-text-primary font-medium">東京（ap-northeast-1）</b>
+          <b className="text-text-primary font-medium">
+            東京（ap-northeast-1）
+          </b>
           に保管
         </span>
         <span className="japan-dot" />
@@ -105,8 +107,8 @@ function Hero() {
             LLMのトレース、プロンプト管理、評価、メトリクス。
             すべてをAWSとClickHouseの
             <b className="text-text-primary font-medium">東京リージョン</b>
-            でホスト。
-            世界中で使われているLangfuse Cloudを、データを国内に保管したまま動かせます。
+            でホスト。 世界中で使われているLangfuse
+            Cloudを、データを国内に保管したまま動かせます。
           </p>
           <p className="font-analog italic text-[15px] text-text-tertiary m-0 -tracking-[0.005em]">
             Langfuse Cloud Japan — LLM observability, hosted in Tokyo.
@@ -148,8 +150,7 @@ function Hero() {
             key={top}
             className="flex flex-col gap-1 px-5 py-[22px]"
             style={{
-              borderRight:
-                i < 3 ? "1px solid var(--line-structure)" : "none",
+              borderRight: i < 3 ? "1px solid var(--line-structure)" : "none",
               borderTop: "1px solid var(--line-structure)",
             }}
           >
@@ -167,7 +168,14 @@ function Hero() {
 }
 
 function HeroArt() {
-  const cards: { emoji: string; label: string; rot: number; x: number; y: number; z: number }[] = [
+  const cards: {
+    emoji: string;
+    label: string;
+    rot: number;
+    x: number;
+    y: number;
+    z: number;
+  }[] = [
     { emoji: "🗾", label: "ap-northeast-1", rot: -9, x: 0, y: 32, z: 1 },
     { emoji: "⛩️", label: "Tokyo", rot: 8, x: 150, y: 10, z: 3 },
     { emoji: "🌸", label: "In region", rot: -4, x: 210, y: 170, z: 2 },
@@ -274,7 +282,8 @@ function WhyJapan() {
         </h2>
         <p className="japan-body max-w-[58ch]">
           Langfuseは、本番のLLMアプリケーションをデバッグ・分析・改善するためのオープンソースLLMエンジニアリングプラットフォームです。
-          Langfuse Cloud Japanなら、そのプラットフォームをデータを日本に置いたまま使えます。
+          Langfuse Cloud
+          Japanなら、そのプラットフォームをデータを日本に置いたまま使えます。
         </p>
       </div>
 
@@ -323,7 +332,9 @@ function PillarVisual({ kind }: { kind: "region" | "parity" | "compliance" }) {
               key={region}
               className="flex items-center gap-2.5 px-2.5 py-2 rounded-[2px]"
               style={{
-                background: active ? "var(--surface-cta-primary)" : "transparent",
+                background: active
+                  ? "var(--surface-cta-primary)"
+                  : "transparent",
                 border: `1px solid ${active ? "var(--text-primary)" : "var(--line-structure)"}`,
                 mixBlendMode: active ? "multiply" : "normal",
               }}
@@ -519,10 +530,14 @@ LANGFUSE_BASE_URL="https://jp.cloud.langfuse.com"`}
             コーディングエージェントに丸投げ。
           </div>
           <p className="japan-body-sm m-0">
-            Langfuse skillとllms.txtコンテキストを公開しています。Claude Code、Cursor、Copilotといったエージェントが、一発で正しくトレースを組み込んでくれます。
+            Langfuse skillとllms.txtコンテキストを公開しています。Claude
+            Code、Cursor、Copilotといったエージェントが、一発で正しくトレースを組み込んでくれます。
           </p>
           <div className="flex flex-wrap gap-1.5 mt-3.5">
-            <Link className="japan-code-inline" href="https://github.com/langfuse/skills">
+            <Link
+              className="japan-code-inline"
+              href="https://github.com/langfuse/skills"
+            >
               github.com/langfuse/skills
             </Link>
             <Link className="japan-code-inline" href="/llms.txt">
@@ -535,8 +550,14 @@ LANGFUSE_BASE_URL="https://jp.cloud.langfuse.com"`}
           className={`${cornerBoxBase} !border-[#3a3a35] p-0 overflow-hidden`}
           style={{ background: "#222220" }}
         >
-          <div className="flex border-b border-[#3a3a35]" style={{ background: "#1b1b18" }}>
-            <div className="px-3.5 py-2.5 font-mono text-[11px] text-[#f6f6f3] border-r border-[#3a3a35]" style={{ background: "#222220" }}>
+          <div
+            className="flex border-b border-[#3a3a35]"
+            style={{ background: "#1b1b18" }}
+          >
+            <div
+              className="px-3.5 py-2.5 font-mono text-[11px] text-[#f6f6f3] border-r border-[#3a3a35]"
+              style={{ background: "#222220" }}
+            >
               prompt.txt
             </div>
             <div className="flex-1 border-r border-[#3a3a35]" />
@@ -544,19 +565,25 @@ LANGFUSE_BASE_URL="https://jp.cloud.langfuse.com"`}
               copy
             </button>
           </div>
-          <pre className="m-0 p-5 font-mono text-[12.5px] leading-[1.75] whitespace-pre-wrap" style={{ color: "#ffffff" }}>
-            <span style={{ color: "#8a877f" }}># そのままエージェントに貼る:</span>
+          <pre
+            className="m-0 p-5 font-mono text-[12.5px] leading-[1.75] whitespace-pre-wrap"
+            style={{ color: "#ffffff" }}
+          >
+            <span style={{ color: "#8a877f" }}>
+              # そのままエージェントに貼る:
+            </span>
             {"\n"}
             Add Langfuse tracing to this app.{"\n"}
-            Use{" "}
-            <span style={{ color: "#9ac6ff" }}>LANGFUSE_BASE_URL</span>=
+            Use <span style={{ color: "#9ac6ff" }}>LANGFUSE_BASE_URL</span>=
             <span style={{ color: "#e2b73b" }}>
               https://jp.cloud.langfuse.com
             </span>
             {"\n\n"}
             <span style={{ color: "#8a877f" }}># 参照コンテキスト:</span>
             {"\n"}
-            <span style={{ color: "#c7a8ff" }}>https://langfuse.com/llms.txt</span>
+            <span style={{ color: "#c7a8ff" }}>
+              https://langfuse.com/llms.txt
+            </span>
             {"\n"}
             <span style={{ color: "#c7a8ff" }}>
               https://github.com/langfuse/skills
@@ -649,10 +676,12 @@ function Customers() {
         >
           <div className="japan-eyebrow">パートナー · PARTNER</div>
           <div className="font-analog text-[24px] leading-[1.35] text-text-primary font-medium">
-            GAO, Inc. <span className="text-text-tertiary text-[18px]">（ガオ）</span>
+            GAO, Inc.{" "}
+            <span className="text-text-tertiary text-[18px]">（ガオ）</span>
           </div>
           <p className="japan-body-sm m-0">
-            日本での公式リセラー / 導入パートナー。日本円・JPYインボイスでの購買、日本語でのオンボーディング・サポートに対応しています。
+            日本での公式リセラー /
+            導入パートナー。日本円・JPYインボイスでの購買、日本語でのオンボーディング・サポートに対応しています。
           </p>
           <div className="flex-1" />
           <div className="flex flex-wrap gap-1.5">
@@ -680,8 +709,7 @@ function Compliance() {
             aria-hidden
             className="japan-grid-bg absolute inset-0 opacity-60 pointer-events-none"
             style={{
-              maskImage:
-                "linear-gradient(to bottom, black, transparent 70%)",
+              maskImage: "linear-gradient(to bottom, black, transparent 70%)",
               WebkitMaskImage:
                 "linear-gradient(to bottom, black, transparent 70%)",
             }}
@@ -695,7 +723,8 @@ function Compliance() {
               あなたのデータは、日本に。
             </h2>
             <p className="japan-body-sm max-w-[40ch]">
-              主要なアプリケーションデータ — トレース、プロンプト、評価 — は、AWSとClickHouseの日本リージョンに保管されます。
+              主要なアプリケーションデータ — トレース、プロンプト、評価 —
+              は、AWSとClickHouseの日本リージョンに保管されます。
             </p>
           </div>
           <div className="relative grid grid-cols-2 gap-2">
@@ -760,7 +789,6 @@ function Compliance() {
               </tbody>
             </table>
           </div>
-
         </div>
       </div>
     </section>
@@ -790,9 +818,7 @@ function RegionPill({ where, good }: { where: string; good?: boolean }) {
       <span
         className="w-1.5 h-1.5 rounded-full"
         style={{
-          background: good
-            ? "var(--callout-success)"
-            : "var(--text-disabled)",
+          background: good ? "var(--callout-success)" : "var(--text-disabled)",
         }}
       />
       {where}
@@ -821,7 +847,9 @@ function Migration() {
             すでにLangfuseをご利用ですか？ 4ステップで移行できます。
           </h2>
           <p className="japan-body-sm m-0 max-w-[44ch]">
-            別リージョンからでも、セルフホストからでもOK。エクスポート → インポート → base URL切り替え、それだけです。クックブックで手順を最初から最後までカバーしています。
+            別リージョンからでも、セルフホストからでもOK。エクスポート →
+            インポート → base
+            URL切り替え、それだけです。クックブックで手順を最初から最後までカバーしています。
           </p>
           <div className="mt-4">
             <Link
@@ -861,8 +889,10 @@ function FAQ() {
       q: "データはどこに保管されますか?",
       a: (
         <p>
-          主要なアプリケーションデータ — トレース、プロンプト、評価 — は、日本のAWS{" "}
-          <span className="japan-code-inline">ap-northeast-1</span>（東京）のClickHouseに保管されます。
+          主要なアプリケーションデータ — トレース、プロンプト、評価 —
+          は、日本のAWS{" "}
+          <span className="japan-code-inline">ap-northeast-1</span>
+          （東京）のClickHouseに保管されます。
         </p>
       ),
     },
@@ -870,7 +900,8 @@ function FAQ() {
       q: "どのサブプロセッサーを使っていますか?",
       a: (
         <p>
-          主要サブプロセッサー（リージョン内）: <b>AWS</b> と <b>ClickHouse</b>。どちらも日本で稼働しています。最新の一覧は{" "}
+          主要サブプロセッサー（リージョン内）: <b>AWS</b> と <b>ClickHouse</b>
+          。どちらも日本で稼働しています。最新の一覧は{" "}
           <Link className="japan-link" href="/security/subprocessors">
             langfuse.com/security/subprocessors
           </Link>{" "}
@@ -884,7 +915,9 @@ function FAQ() {
         <>
           <p>チェックするのは2点です:</p>
           <p>
-            1. ブラウザが <span className="japan-code-inline">jp.cloud.langfuse.com</span> を開いている。
+            1. ブラウザが{" "}
+            <span className="japan-code-inline">jp.cloud.langfuse.com</span>{" "}
+            を開いている。
           </p>
           <p>
             2. SDKに{" "}
@@ -900,7 +933,9 @@ function FAQ() {
       q: "移行の手順は？",
       a: (
         <p>
-          日本リージョンにプロジェクトを作る → 元のプロジェクトからデータをエクスポート → インポート → アプリのbase URLを切り替える、の4ステップです。詳しい手順は{" "}
+          日本リージョンにプロジェクトを作る →
+          元のプロジェクトからデータをエクスポート → インポート → アプリのbase
+          URLを切り替える、の4ステップです。詳しい手順は{" "}
           <Link
             className="japan-link"
             href="/guides/cookbook/example_data_migration-jp"
@@ -915,7 +950,8 @@ function FAQ() {
       q: "請求まわりは?",
       a: (
         <p>
-          通貨は <b>USD</b>、クレジットカード決済です。エンタープライズの請求書払いはセールス経由で対応します。日本円での購買は{" "}
+          通貨は <b>USD</b>
+          、クレジットカード決済です。エンタープライズの請求書払いはセールス経由で対応します。日本円での購買は{" "}
           <Link className="japan-link" href="https://gao-ai.com">
             GAO, Inc.
           </Link>{" "}

@@ -1,4 +1,8 @@
-import { defineDocs, defineConfig, frontmatterSchema } from "fumadocs-mdx/config";
+import {
+  defineDocs,
+  defineConfig,
+  frontmatterSchema,
+} from "fumadocs-mdx/config";
 import lastModified from "fumadocs-mdx/plugins/last-modified";
 import monokaiProLightRaw from "./lib/themes/monokai-pro-light.json";
 
@@ -14,10 +18,7 @@ import { z } from "zod";
 // Use this helper so both string dates and Date objects are accepted and
 // normalised to an ISO date string (YYYY-MM-DD).
 const yamlDateField = z
-  .union([
-    z.string(),
-    z.date().transform((d) => d.toISOString().split("T")[0]),
-  ])
+  .union([z.string(), z.date().transform((d) => d.toISOString().split("T")[0])])
   .nullish();
 
 // Base schema that adds canonical and noindex to the default frontmatter schema.

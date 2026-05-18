@@ -15,10 +15,15 @@ import {
   tooltipContentClassName,
 } from "./tooltip";
 
-export type LinkBoxTooltipPlacement = "follow" | "bottom-center" | "bottom-right";
+export type LinkBoxTooltipPlacement =
+  | "follow"
+  | "bottom-center"
+  | "bottom-right";
 
-export interface LinkBoxProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "href"> {
+export interface LinkBoxProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  "href"
+> {
   href?: React.ComponentProps<typeof Link>["href"];
   prefetch?: React.ComponentProps<typeof Link>["prefetch"];
   replace?: React.ComponentProps<typeof Link>["replace"];
@@ -31,7 +36,10 @@ export interface LinkBoxProps
 
 const FOLLOW_OFFSET = 12;
 
-const LinkBox = React.forwardRef<HTMLAnchorElement | HTMLDivElement, LinkBoxProps>(
+const LinkBox = React.forwardRef<
+  HTMLAnchorElement | HTMLDivElement,
+  LinkBoxProps
+>(
   (
     {
       className,
@@ -49,7 +57,7 @@ const LinkBox = React.forwardRef<HTMLAnchorElement | HTMLDivElement, LinkBoxProp
       onPointerMove,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [mounted, setMounted] = React.useState(false);
     React.useEffect(() => setMounted(true), []);
@@ -94,19 +102,21 @@ const LinkBox = React.forwardRef<HTMLAnchorElement | HTMLDivElement, LinkBoxProp
     if (tooltipPlacement === "follow") {
       const followHandlers = {
         "aria-describedby": followOpen ? tooltipId : undefined,
-        onPointerEnter: (e: React.PointerEvent<HTMLAnchorElement | HTMLDivElement>) => {
+        onPointerEnter: (
+          e: React.PointerEvent<HTMLAnchorElement | HTMLDivElement>,
+        ) => {
           onPointerEnter?.(e as React.PointerEvent<HTMLDivElement>);
           setFollowOpen(true);
           setFollowPos({ x: e.clientX, y: e.clientY });
         },
         onPointerLeave: (
-          e: React.PointerEvent<HTMLAnchorElement | HTMLDivElement>
+          e: React.PointerEvent<HTMLAnchorElement | HTMLDivElement>,
         ) => {
           onPointerLeave?.(e as React.PointerEvent<HTMLDivElement>);
           setFollowOpen(false);
         },
         onPointerMove: (
-          e: React.PointerEvent<HTMLAnchorElement | HTMLDivElement>
+          e: React.PointerEvent<HTMLAnchorElement | HTMLDivElement>,
         ) => {
           onPointerMove?.(e as React.PointerEvent<HTMLDivElement>);
           setFollowPos({ x: e.clientX, y: e.clientY });
@@ -145,7 +155,7 @@ const LinkBox = React.forwardRef<HTMLAnchorElement | HTMLDivElement, LinkBoxProp
                 role="tooltip"
                 className={cn(
                   tooltipContentClassName,
-                  "fixed pointer-events-none"
+                  "fixed pointer-events-none",
                 )}
                 style={{
                   left: followPos.x + FOLLOW_OFFSET,
@@ -154,7 +164,7 @@ const LinkBox = React.forwardRef<HTMLAnchorElement | HTMLDivElement, LinkBoxProp
               >
                 {tooltip}
               </div>,
-              document.body
+              document.body,
             )}
         </>
       );
@@ -198,7 +208,7 @@ const LinkBox = React.forwardRef<HTMLAnchorElement | HTMLDivElement, LinkBoxProp
         </Tooltip>
       </TooltipProvider>
     );
-  }
+  },
 );
 LinkBox.displayName = "LinkBox";
 

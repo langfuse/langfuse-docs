@@ -50,7 +50,9 @@ const getContributors = (path: string): string[] => {
     path.endsWith("/index") ? path.slice(0, -6) : `${path}/index`,
   ];
   for (const variant of variants) {
-    const contributors = (contributorsData as Record<string, string[]>)[variant];
+    const contributors = (contributorsData as Record<string, string[]>)[
+      variant
+    ];
     if (contributors?.length > 0) return contributors;
   }
   return [];
@@ -77,7 +79,9 @@ const formatLocalDate = (date: Date): string => {
 
 const ContributorCardContent = forwardRef<
   HTMLAnchorElement,
-  { contributor: ProcessedContributor } & React.AnchorHTMLAttributes<HTMLAnchorElement>
+  {
+    contributor: ProcessedContributor;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>
 >(({ contributor, ...props }, ref) => (
   <a
     ref={ref}
@@ -99,7 +103,11 @@ const ContributorCardContent = forwardRef<
 ));
 ContributorCardContent.displayName = "ContributorCardContent";
 
-const ContributorCard = ({ contributor }: { contributor: ProcessedContributor }) => {
+const ContributorCard = ({
+  contributor,
+}: {
+  contributor: ProcessedContributor;
+}) => {
   if (contributor.author) {
     return (
       <HoverCard openDelay={50} closeDelay={50}>
@@ -190,7 +198,12 @@ export const DocsTocFooter = ({ pageTitle, lastModified }: DocsTocFooterProps) =
       {/* Actions */}
       {(editUrl || feedbackUrl) && (
         <div className="px-2 pt-4 pb-4 mb-px rounded-sm bg-surface-1">
-          <Text size="s" className="font-[580] text-left text-text-primary mb-3">Actions</Text>
+          <Text
+            size="s"
+            className="font-[580] text-left text-text-primary mb-3"
+          >
+            Actions
+          </Text>
           <div className="flex flex-col gap-1.5">
             {feedbackUrl && (
               <a
@@ -220,7 +233,12 @@ export const DocsTocFooter = ({ pageTitle, lastModified }: DocsTocFooterProps) =
       {/* Contributors */}
       {processedContributors.length > 0 && (
         <div className="px-2 pt-4 pb-4 mb-px rounded-sm bg-surface-1">
-          <Text size="s" className="font-[580] text-left text-text-primary mb-3">Contributors</Text>
+          <Text
+            size="s"
+            className="font-[580] text-left text-text-primary mb-3"
+          >
+            Contributors
+          </Text>
           {lastModifiedDate && (
             <LocalizedLastUpdate
               date={lastModifiedDate}

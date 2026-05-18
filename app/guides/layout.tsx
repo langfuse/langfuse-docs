@@ -6,5 +6,9 @@ export default function GuidesLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={guidesSource.getPageTree()}>{children}</SharedDocsLayout>;
+  return (
+    <SharedDocsLayout tree={guidesSource.getPageTree()}>
+      {children}
+    </SharedDocsLayout>
+  );
 }

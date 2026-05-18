@@ -3,11 +3,7 @@ import { sortCustomerStoriesByMetaOrder } from "@/lib/sortCustomerStoriesByMeta"
 import { CustomerHoverList } from "./CustomerHoverList";
 import type { CustomerStory } from "./CustomerCarousel";
 
-export function CustomerHoverListWrapper({
-  maxItems,
-}: {
-  maxItems?: number;
-}) {
+export function CustomerHoverListWrapper({ maxItems }: { maxItems?: number }) {
   const stories: CustomerStory[] = sortCustomerStoriesByMetaOrder(
     usersSource.getPages().map((page) => ({
       route: page.url,
@@ -28,4 +24,3 @@ export function CustomerHoverListWrapper({
 
   return <CustomerHoverList stories={stories} maxItems={maxItems} />;
 }
-

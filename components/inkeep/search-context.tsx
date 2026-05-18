@@ -1,15 +1,9 @@
-'use client';
+"use client";
 
-import {
-  createContext,
-  type ReactNode,
-  use,
-  useMemo,
-  useState,
-} from 'react';
-import { useChat, type UseChatHelpers } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
-import type { InkeepUIMessage } from '@/lib/ai/inkeep-qa-schema';
+import { createContext, type ReactNode, use, useMemo, useState } from "react";
+import { useChat, type UseChatHelpers } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+import type { InkeepUIMessage } from "@/lib/ai/inkeep-qa-schema";
 
 type AISearchContextValue = {
   open: boolean;
@@ -19,7 +13,7 @@ type AISearchContextValue = {
 
 const Context = createContext<AISearchContextValue | null>(null);
 
-const transport = new DefaultChatTransport({ api: '/api/chat' });
+const transport = new DefaultChatTransport({ api: "/api/chat" });
 
 export function AISearch({ children }: { children: ReactNode }) {
   const existing = use(Context);
@@ -31,7 +25,7 @@ export function AISearch({ children }: { children: ReactNode }) {
 function AISearchInner({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const chat = useChat<InkeepUIMessage>({
-    id: 'search',
+    id: "search",
     transport,
   });
 
@@ -44,7 +38,8 @@ function AISearchInner({ children }: { children: ReactNode }) {
 
 export function useAISearchContext() {
   const ctx = use(Context);
-  if (!ctx) throw new Error('useAISearchContext must be used within <AISearch>');
+  if (!ctx)
+    throw new Error("useAISearchContext must be used within <AISearch>");
   return ctx;
 }
 
@@ -54,14 +49,14 @@ export function useChatContext() {
 
 export function buildUserMessage(text: string) {
   return {
-    role: 'user' as const,
+    role: "user" as const,
     parts: [
       {
-        type: 'data-client' as const,
+        type: "data-client" as const,
         data: { location: location.href },
       },
       {
-        type: 'text' as const,
+        type: "text" as const,
         text,
       },
     ],

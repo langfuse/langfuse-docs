@@ -27,7 +27,11 @@ export const ChapterIndex = () => {
             <Text size="s" className="font-medium font-mono shrink-0">
               {index + 1}
             </Text>
-            <Text as="h3" size="s" className="not-prose mb-0 text-left text-text-secondary">
+            <Text
+              as="h3"
+              size="s"
+              className="not-prose mb-0 text-left text-text-secondary"
+            >
               {page.data.title}
             </Text>
           </div>

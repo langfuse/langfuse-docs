@@ -1,12 +1,16 @@
-'use client';
+"use client";
 
-import { type SyntheticEvent, useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { ArrowUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAISearchContext, useChatContext, buildUserMessage } from './search-context';
-import { useVisualViewportBottomOverlap } from './search-panel';
-import { FloatingAskAIButton } from './ask-ai-button';
+import { type SyntheticEvent, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { ArrowUp } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  useAISearchContext,
+  useChatContext,
+  buildUserMessage,
+} from "./search-context";
+import { useVisualViewportBottomOverlap } from "./search-panel";
+import { FloatingAskAIButton } from "./ask-ai-button";
 
 // Pages where we suppress the prominent bar and fall back to the legacy black pill.
 // Reasons:
@@ -46,8 +50,12 @@ function isBarHidden(pathname: string): boolean {
 function isEditableElement(el: Element | null): boolean {
   if (!el) return false;
   const tag = el.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
-  if (el instanceof HTMLElement && (el.isContentEditable || el.closest("[contenteditable='true']"))) return true;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
+  if (
+    el instanceof HTMLElement &&
+    (el.isContentEditable || el.closest("[contenteditable='true']"))
+  )
+    return true;
   return false;
 }
 
@@ -63,7 +71,7 @@ function isEditableFocus(target: EventTarget | null): boolean {
 }
 
 export function FloatingAskAI() {
-  const pathname = usePathname() ?? '';
+  const pathname = usePathname() ?? "";
   if (isBarHidden(pathname)) return <FloatingAskAIButton />;
   return <FloatingAskAIBar />;
 }
@@ -71,7 +79,7 @@ export function FloatingAskAI() {
 export function FloatingAskAIBar() {
   const { open, setOpen } = useAISearchContext();
   const chat = useChatContext();
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const openRef = useRef(open);
   openRef.current = open;
@@ -83,7 +91,7 @@ export function FloatingAskAIBar() {
       // don't focus the (now-hidden) bar input.
       if (openRef.current) return;
       if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.repeat) return;
-      if (e.key.toLowerCase() !== 'a') return;
+      if (e.key.toLowerCase() !== "a") return;
       if (isEditableFocus(e.target)) return;
       // Suppress AISearchTrigger's bare-`a` shortcut so it doesn't open the
       // panel underneath us. We register in capture phase so we run first.
@@ -91,8 +99,9 @@ export function FloatingAskAIBar() {
       e.preventDefault();
       inputRef.current?.focus();
     };
-    window.addEventListener('keydown', handler, { capture: true });
-    return () => window.removeEventListener('keydown', handler, { capture: true });
+    window.addEventListener("keydown", handler, { capture: true });
+    return () =>
+      window.removeEventListener("keydown", handler, { capture: true });
   }, []);
 
   const submit = (e?: SyntheticEvent) => {
@@ -101,7 +110,7 @@ export function FloatingAskAIBar() {
     setOpen(true);
     if (message.length === 0) return;
     void chat.sendMessage(buildUserMessage(message));
-    setInput('');
+    setInput("");
   };
 
   const hasInput = input.trim().length > 0;
@@ -114,9 +123,9 @@ export function FloatingAskAIBar() {
       inert={open}
       aria-hidden={open || undefined}
       className={cn(
-        'fixed bottom-4 left-1/2 -translate-x-1/2 z-20 w-[min(427px,calc(100%-2rem))]',
-        'transition-[translate,opacity] duration-200',
-        open && 'translate-y-16 opacity-0 pointer-events-none',
+        "fixed bottom-4 left-1/2 -translate-x-1/2 z-20 w-[min(427px,calc(100%-2rem))]",
+        "transition-[translate,opacity] duration-200",
+        open && "translate-y-16 opacity-0 pointer-events-none",
       )}
       style={
         keyboardOverlapPx > 0
@@ -127,10 +136,10 @@ export function FloatingAskAIBar() {
       <form
         onSubmit={submit}
         className={cn(
-          'flex items-center gap-2 pl-3 pr-1 py-1 rounded-[2px]',
-          'bg-surface-1 border border-line-structure',
-          'shadow-[0_8px_24px_-4px_rgba(0,0,0,0.12),0_4px_8px_-2px_rgba(0,0,0,0.06)]',
-          'focus-within:border-line-cta transition-colors',
+          "flex items-center gap-2 pl-3 pr-1 py-1 rounded-[2px]",
+          "bg-surface-1 border border-line-structure",
+          "shadow-[0_8px_24px_-4px_rgba(0,0,0,0.12),0_4px_8px_-2px_rgba(0,0,0,0.06)]",
+          "focus-within:border-line-cta transition-colors",
         )}
       >
         <input
@@ -140,21 +149,21 @@ export function FloatingAskAIBar() {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask a question"
           className={cn(
-            'flex-1 min-w-0 bg-transparent border-0 outline-none',
-            'font-sans text-[13px] font-[450] leading-[150%] tracking-[-0.06px]',
-            'text-text-primary placeholder:text-text-tertiary',
-            'focus-visible:outline-none',
+            "flex-1 min-w-0 bg-transparent border-0 outline-none",
+            "font-sans text-[13px] font-[450] leading-[150%] tracking-[-0.06px]",
+            "text-text-primary placeholder:text-text-tertiary",
+            "focus-visible:outline-none",
           )}
           aria-label="Ask AI a question"
         />
         <kbd
           className={cn(
-            'hidden sm:flex justify-center items-center not-italic shrink-0',
-            'h-[26px] w-[26px] rounded-[2px]',
-            'border border-[rgba(64,61,57,0.20)] dark:border-[rgba(184,182,160,0.30)]',
-            'bg-[rgba(64,61,57,0.10)] dark:bg-[rgba(184,182,160,0.12)]',
-            'font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]',
-            'text-text-tertiary',
+            "hidden sm:flex justify-center items-center not-italic shrink-0",
+            "h-[26px] w-[26px] rounded-[2px]",
+            "border border-[rgba(64,61,57,0.20)] dark:border-[rgba(184,182,160,0.30)]",
+            "bg-[rgba(64,61,57,0.10)] dark:bg-[rgba(184,182,160,0.12)]",
+            "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]",
+            "text-text-tertiary",
           )}
           aria-hidden
         >
@@ -162,14 +171,14 @@ export function FloatingAskAIBar() {
         </kbd>
         <button
           type="submit"
-          aria-label={hasInput ? 'Send question' : 'Open AI chat'}
+          aria-label={hasInput ? "Send question" : "Open AI chat"}
           className={cn(
-            'shrink-0 inline-flex items-center justify-center',
-            'h-[26px] w-[26px] rounded-[2px]',
-            'border border-text-secondary bg-text-primary text-surface-bg',
-            'shadow-[0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]',
-            'transition-opacity hover:opacity-90',
-            !hasInput && 'opacity-60',
+            "shrink-0 inline-flex items-center justify-center",
+            "h-[26px] w-[26px] rounded-[2px]",
+            "border border-text-secondary bg-text-primary text-surface-bg",
+            "shadow-[0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
+            "transition-opacity hover:opacity-90",
+            !hasInput && "opacity-60",
           )}
         >
           <ArrowUp className="size-3.5" />

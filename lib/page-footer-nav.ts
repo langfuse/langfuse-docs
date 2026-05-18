@@ -7,10 +7,12 @@ export function getPageFooterItems<TPage extends { url: string }>(
     getDate: (page: TPage) => string | undefined;
     getTitle: (page: TPage) => string | undefined;
   },
-): {
-  previous?: PageFooterNavItem;
-  next?: PageFooterNavItem;
-} | undefined {
+):
+  | {
+      previous?: PageFooterNavItem;
+      next?: PageFooterNavItem;
+    }
+  | undefined {
   const footerPages = [...pages]
     .sort(
       (a, b) =>

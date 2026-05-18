@@ -20,12 +20,13 @@ type TooltipProviderProps = Omit<
   disableHoverableContent?: boolean;
 };
 
-const TooltipPrimitiveProvider = TooltipPrimitive.Provider as React.ComponentType<
-  Omit<
-    React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Provider>,
-    "children"
-  > & { children?: React.ReactNode }
->;
+const TooltipPrimitiveProvider =
+  TooltipPrimitive.Provider as React.ComponentType<
+    Omit<
+      React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Provider>,
+      "children"
+    > & { children?: React.ReactNode }
+  >;
 
 const TooltipProvider: React.ComponentType<TooltipProviderProps> = ({
   delayDuration = 0,
@@ -51,7 +52,7 @@ const Tooltip = TooltipPrimitive.Root as React.ComponentType<
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
 export const tooltipContentClassName = cn(
-  "tooltip-label z-50 inline-flex h-[15px] items-center justify-center gap-[3px] overflow-hidden rounded-none border-0 bg-primary px-1 py-0.5 font-mono text-[10px] leading-none text-white shadow-none outline-hidden"
+  "tooltip-label z-50 inline-flex h-[15px] items-center justify-center gap-[3px] overflow-hidden rounded-none border-0 bg-primary px-1 py-0.5 font-mono text-[10px] leading-none text-white shadow-none outline-hidden",
 );
 
 const TooltipContent = React.forwardRef<

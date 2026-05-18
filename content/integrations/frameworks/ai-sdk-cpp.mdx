@@ -129,16 +129,16 @@ The wrapper hooks into the existing `on_tool_call_start` / `on_tool_call_finish`
 
 `ai::langfuse::Config` accepts the following options:
 
-| Field                    | Description                                                                                  |
-| ------------------------ | -------------------------------------------------------------------------------------------- |
-| `host`                   | Base URL of your Langfuse instance. Defaults to `https://cloud.langfuse.com`.                |
-| `public_key`             | Public API key (`pk-lf-...`).                                                                |
-| `secret_key`             | Secret API key (`sk-lf-...`).                                                                |
-| `release`                | Optional release identifier attached to all traces (e.g. a commit SHA).                      |
-| `environment`            | Environment tag attached to all traces. Defaults to `default`.                               |
-| `connection_timeout_sec` | HTTP connection timeout for the ingestion request. Defaults to 10 seconds.                   |
-| `read_timeout_sec`       | HTTP read timeout for the ingestion request. Defaults to 30 seconds.                         |
-| `error_policy`           | `kStrict` surfaces HTTP/JSON failures via `Trace::end()`; `kBestEffort` swallows them.       |
+| Field                    | Description                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `host`                   | Base URL of your Langfuse instance. Defaults to `https://cloud.langfuse.com`.          |
+| `public_key`             | Public API key (`pk-lf-...`).                                                          |
+| `secret_key`             | Secret API key (`sk-lf-...`).                                                          |
+| `release`                | Optional release identifier attached to all traces (e.g. a commit SHA).                |
+| `environment`            | Environment tag attached to all traces. Defaults to `default`.                         |
+| `connection_timeout_sec` | HTTP connection timeout for the ingestion request. Defaults to 10 seconds.             |
+| `read_timeout_sec`       | HTTP read timeout for the ingestion request. Defaults to 30 seconds.                   |
+| `error_policy`           | `kStrict` surfaces HTTP/JSON failures via `Trace::end()`; `kBestEffort` swallows them. |
 
 ## Trace API
 
