@@ -70,9 +70,13 @@ The Langfuse MCP server uses a stateless architecture where each API key is scop
 
 </Tabs>
 
-## Available Tools
+## MCP Reference
 
-The MCP server provides five tools for comprehensive prompt management.
+<Callout type="info">
+
+The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source for current Langfuse MCP servers, setup snippets, tools, input schemas, and generated request examples.
+
+</Callout>
 
 <Callout type="warning">
   **Both read and write tools are available by default.** If you only want to
@@ -81,36 +85,7 @@ The MCP server provides five tools for comprehensive prompt management.
   `updatePromptLabels`).
 </Callout>
 
-### Read Operations
-
-- **`getPrompt`** - Fetch a specific prompt by name with optional label or version
-  - Supports filtering by production/staging labels
-  - Returns compiled prompt with metadata
-  - Read-only operation (auto-approved by clients)
-
-- **`listPrompts`** - List all prompts in the project
-  - Optional filtering by name, tag, or label
-  - Cursor-based pagination support
-  - Returns prompt metadata and available versions
-
-### Write Operations
-
-- **`createTextPrompt`** - Create a new text prompt version
-  - Supports template variables with `{{variable}}` syntax
-  - Optional labels, config, tags, and commit message
-  - Automatic version incrementing
-
-- **`createChatPrompt`** - Create a new chat prompt version
-  - OpenAI-style message format (role + content)
-  - Supports system, user, and assistant roles
-  - Template variables in message content
-
-- **`updatePromptLabels`** - Manage labels across prompt versions
-  - Add or move labels between versions
-  - Labels are unique (auto-removed from other versions)
-  - Cannot modify the auto-managed `latest` label
-
-## Set up
+## Set up [#set-up]
 
 <Steps>
 
@@ -300,6 +275,7 @@ We'd love to hear about your experience with the Langfuse MCP server. Share your
 
 ## Related Documentation
 
+- [MCP Reference](https://mcp.reference.langfuse.com) - Reference for MCP servers, setup snippets, tools, schemas, and requests
 - [Prompt Management with MCP](/docs/prompt-management/features/mcp-server) - Prompt-specific workflows and examples
 - [Prompt Management Overview](/docs/prompt-management/overview) - Learn about Langfuse prompt management
 - [Public API](/docs/api-and-data-platform/features/public-api) - REST API for programmatic access

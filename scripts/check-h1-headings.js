@@ -2,7 +2,13 @@ const fs = require("fs").promises;
 const path = require("path");
 const process = require("process");
 
-const EXCLUDE_DIRS = new Set(["node_modules", ".git", ".next", "dist"]);
+const EXCLUDE_DIRS = new Set([
+  "node_modules",
+  ".git",
+  ".next",
+  ".venv",
+  "dist",
+]);
 
 async function findMarkdownFiles(dir) {
   let results = [];
