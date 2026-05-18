@@ -27,6 +27,24 @@ Or just ask your coding agent to do it for you:
 please install langfuse-cli
 ```
 
+## Authentication [#authentication]
+
+The CLI authenticates with the same project API key pair you use for the Langfuse SDKs and public API. Create a key pair under **Project settings → API Keys** in the Langfuse UI, then expose the credentials as environment variables before running CLI commands:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+
+# Region-specific host. Defaults to https://cloud.langfuse.com (EU).
+# US:    https://us.cloud.langfuse.com
+# Japan: https://jp.cloud.langfuse.com
+# HIPAA: https://hipaa.cloud.langfuse.com
+# Self-hosted: your own deployment URL.
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+```
+
+The CLI picks these up automatically — there is no separate `login` step. Keys are scoped to a single project, so use a different pair per project you want to interact with.
+
 ## What it can do
 
 The CLI can do anything the [Langfuse API](/docs/api-and-data-platform/features/public-api) can do. 

@@ -80,7 +80,7 @@ Replace `'user'` with your actual ClickHouse username and adjust the database na
 
 This section covers different deployment options and provides example environment variables.
 
-### ClickHouse Cloud
+### Cloud/BYOC (recommended) [#cloudbyoc]
 
 ClickHouse Cloud is a scalable and fully managed deployment option for ClickHouse.
 You can provision it directly from [ClickHouse](https://clickhouse.cloud/) or through one of the cloud provider marketplaces:
@@ -89,7 +89,11 @@ You can provision it directly from [ClickHouse](https://clickhouse.cloud/) or th
 - [Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/clickhouse-public/clickhouse-cloud)
 - [Azure Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/clickhouse.clickhouse_cloud?tab=Overview)
 
-ClickHouse Cloud clusters will be provisioned outside your cloud environment and your VPC, but Clickhouse offers [private links](https://clickhouse.com/docs/en/cloud/security/private-link-overview) for AWS, GCP, and Azure.
+ClickHouse Cloud clusters will be provisioned outside your cloud environment and your VPC, but ClickHouse offers [private links](https://clickhouse.com/docs/en/cloud/security/private-link-overview) for AWS, GCP, and Azure.
+
+If you need the operational model of ClickHouse Cloud while keeping the ClickHouse data plane in your own cloud account, consider [ClickHouse BYOC](https://clickhouse.com/cloud/bring-your-own-cloud). BYOC is a fully managed ClickHouse Cloud deployment on infrastructure in your cloud account and is designed for large-scale deployments with strict data residency, compliance, or VPC-boundary requirements.
+
+We recommend ClickHouse Cloud or BYOC for larger Langfuse deployments because they provide cloud-native scaling primitives that are not available in the self-managed OSS ClickHouse setup used by Langfuse. ClickHouse Cloud and BYOC separate storage from compute through [SharedMergeTree](https://clickhouse.com/docs/cloud/reference/shared-merge-tree), which helps scale compute independently of stored data, reduces replica storage overhead, and avoids manual shard planning for growth. They also support compute-compute separation through [warehouses](https://clickhouse.com/docs/cloud/reference/warehouses), so you can isolate ingestion writes, UI reads, analytical queries, or ad-hoc workloads on separate compute groups that share the same data but do not compete for the same CPU and memory. Langfuse can use this pattern via `CLICKHOUSE_READ_ONLY_URL` for read-heavy UI and public-API traffic.
 
 If you need assistance or want to talk to the ClickHouse team, you can reach out to them [here](https://clickhouse.com/company/contact).
 
@@ -118,7 +122,7 @@ See [Langfuse on Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) fo
 
 #### Example Configuration
 
-For a minimum production setup, we recommend to use the following values.yaml overwrites when deploying the Clickhouse Helm chart:
+For a minimum production setup, we recommend using the following values.yaml overrides when deploying the ClickHouse Helm chart:
 
 ```yaml
 clickhouse:
@@ -127,13 +131,13 @@ clickhouse:
   replicaCount: 3
   resourcesPreset: large # or more
   persistence:
-    size: 100Gi # Start with a large volume to prevent early resizing. Alternatively, consider a blob storage backed disked.
+    size: 100Gi # Start with a large volume to prevent early resizing. Alternatively, consider a blob storage-backed disk.
   auth:
     username: default
     password: changeme
 ```
 
-- **shards**: Shards are used for horizontally scaling ClickHouse. A single ClickHouse shard can handle multiple Terabytes of data. Today, Langfuse does not support a multi-shard cluster, i.e. this value _must_ be set to 1. Please get in touch with us if you hit scaling limits of a single shard cluster.
+- **shards**: Shards are used for horizontally scaling ClickHouse. A single ClickHouse shard can handle multiple Terabytes of data. Today, Langfuse does not support a multi-shard cluster, i.e. this value _must_ be set to 1. Please get in touch with us if you hit scaling limits of a single shard cluster or consider ClickHouse Cloud/BYOC.
 - **replicaCount**: The number of replicas for each shard. ClickHouse counts the all instances towards the number of replicas, i.e. a replica count of 1 means no redundancy at all. We recommend a minimum of 3 replicas for production setups. The number of replicas cannot be increased at runtime without manual intervention or downtime.
 - **resourcesPreset**: ClickHouse is CPU and memory intensive for analytical and highly concurrent requests. We recommend at least the `large` resourcesPreset and more for larger deployments.
 - **auth**: The username and password for the ClickHouse database. Overwrite those values according to your preferences, or mount them from a secret.

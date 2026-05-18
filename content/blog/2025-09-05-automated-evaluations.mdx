@@ -44,7 +44,7 @@ Here's the chat interface (you can find the example chat app [here](/docs/demo))
 
 ## What to Measure [#what-to-measure]
 
-In the [previous blog post](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications), we showed how to perform **error analysis** and identify failure modes in your application. Now we will focus on building automated evaluators to measure these failure modes.
+In the [Error Analysis Academy page](/academy/monitoring/error-analysis), we cover how to perform **error analysis** and identify failure modes in your application. Now we will focus on building automated evaluators to measure these failure modes.
 
 Before building an evaluator, it's important to differentiate between two types of failures to prioritize your efforts:
 
@@ -52,7 +52,7 @@ Before building an evaluator, it's important to differentiate between two types 
 
 **Model Limitations:** The second type occur when the LLM fails to perform correctly despite receiving clear and precise instructions. These are the ideal candidates for automated evaluation because they represent the model's inherent limitations, not a misunderstanding of your intent.
 
-Let's apply this to the [Langfuse Example App](/docs/demo). First, we fix some obvious issues by clarifying the prompt: "use a maximum of three bullet points" and "ask for more context when the user's query is ambiguous." With those fixed, we can focus on measuring the more complex model limitation failures we identified in the [previous blog post](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications):
+Let's apply this to the [Langfuse Example App](/docs/demo). First, we fix some obvious issues by clarifying the prompt: "use a maximum of three bullet points" and "ask for more context when the user's query is ambiguous." With those fixed, we can focus on measuring the more complex model limitation failures we identified during [error analysis](/academy/monitoring/error-analysis):
 
 * **Out of Scope**: The agent answers a question not related to Langfuse or the LLM/AI space.
 * **Generic Responses**: The answer is technically correct but doesn't resolve the user's issue. The metric is to assess if the agent's final answer is helpful and directly addresses the user's question.

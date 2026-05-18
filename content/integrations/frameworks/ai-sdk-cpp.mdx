@@ -1,0 +1,178 @@
+---
+title: Trace AI SDK C++ with Langfuse
+sidebarTitle: AI SDK C++
+logo: /images/integrations/clickhouse_icon.svg
+description: Learn how to instrument AI SDK C++ applications with Langfuse to trace LLM calls, tool invocations, and multi-step agent runs.
+category: Integrations
+---
+
+# Tracing AI SDK C++ with Langfuse
+
+This guide shows how to use the built-in **Langfuse tracing module** in [AI SDK C++](https://github.com/ClickHouse/ai-sdk-cpp) to capture traces for `ai::Client::generate_text` calls, including the LLM round-trip and every tool invocation.
+
+> **What is AI SDK C++?** [AI SDK C++](https://github.com/ClickHouse/ai-sdk-cpp) is a modern C++20 toolkit, maintained by [ClickHouse](https://github.com/ClickHouse), for building AI-powered applications with providers like OpenAI and Anthropic. It exposes a unified `ai::Client` API for text generation, streaming, tools, and multi-step agent loops.
+
+> **What is Langfuse?** [Langfuse](/) is an open-source LLM engineering platform that provides tracing, evaluation, prompt management, and metrics to debug and improve LLM applications.
+
+## Trace shape
+
+The `ai::langfuse` component emits one trace per logical operation with the following structure:
+
+- **1 trace** – caller sets the input, output, metadata, and tags.
+- **1 `generation` observation** – model, model parameters, input messages, output text, aggregated usage, and finish reason.
+- **1 `span` per tool call** – parented to the generation, with tool arguments as input and the result (or error) as output.
+
+<Steps>
+
+## Install AI SDK C++ with the Langfuse component
+
+Add AI SDK C++ to your CMake project and link against the `ai::langfuse` target. The Langfuse component is built alongside the core, OpenAI, and Anthropic targets:
+
+```cmake
+find_package(ai-sdk-cpp CONFIG REQUIRED)
+
+target_link_libraries(my_app
+  PRIVATE
+    ai::sdk        # umbrella target (core + providers + langfuse)
+    ai::langfuse   # or link this directly if you prefer fine-grained deps
+)
+```
+
+The build defines `AI_SDK_HAS_LANGFUSE=1` so you can guard tracing code behind a compile-time check if needed. See the [AI SDK C++ README](https://github.com/ClickHouse/ai-sdk-cpp#readme) for full installation instructions.
+
+## Configure Langfuse credentials
+
+Set the Langfuse credentials for the example. You can obtain these keys from your [Langfuse Cloud](/) project settings or from a [self-hosted Langfuse](/self-hosting) instance.
+
+```bash
+# LLM provider (required by the example)
+export OPENAI_API_KEY="sk-..."
+
+# Langfuse credentials
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+
+# Langfuse host (optional, defaults to https://cloud.langfuse.com)
+# 🇪🇺 EU cloud:  https://cloud.langfuse.com
+# 🇺🇸 US cloud:  https://us.cloud.langfuse.com
+# 🇯🇵 Japan:     https://jp.cloud.langfuse.com
+# ⚕️ HIPAA:     https://hipaa.cloud.langfuse.com
+# Self-host:    http://localhost:3000
+export LANGFUSE_HOST="https://cloud.langfuse.com"
+```
+
+## Instrument a generate_text call
+
+Construct a `Tracer` once per process and call `tracer.start_trace(...)` for each logical operation. Pass the trace to `ai::langfuse::generate_text`, which wraps `ai::Client::generate_text` and records the LLM call and tool invocations automatically.
+
+```cpp
+#include <ai/langfuse.h>
+#include <ai/openai.h>
+#include <ai/tools.h>
+
+#include <cstdlib>
+#include <iostream>
+
+int main() {
+  // 1. Create a Tracer once and reuse it for all traces.
+  ai::langfuse::Tracer tracer({
+      .host = std::getenv("LANGFUSE_HOST")
+                ? std::getenv("LANGFUSE_HOST")
+                : "https://cloud.langfuse.com",
+      .public_key = std::getenv("LANGFUSE_PUBLIC_KEY"),
+      .secret_key = std::getenv("LANGFUSE_SECRET_KEY"),
+      .environment = "ai-sdk-cpp-example",
+  });
+  if (!tracer.is_valid()) {
+    std::cerr << "Langfuse tracer not configured.\n";
+    return 1;
+  }
+
+  // 2. Configure the LLM client and tools as usual.
+  auto client = ai::openai::create_client();
+
+  ai::GenerateOptions options;
+  options.model = ai::openai::models::kGpt4oMini;
+  options.system =
+      "You are a concise assistant. Use the available tools when helpful.";
+  options.prompt = "Look up alice and tell me the weather where she lives.";
+  options.max_steps = 4;
+  options.temperature = 0.0;
+  // options.tools = ... ;  // register your ai::ToolSet here
+
+  // 3. Start a trace and attach input/metadata.
+  auto trace = tracer.start_trace("langfuse_tracing_example");
+  trace->set_input(options.prompt);
+  trace->set_metadata({{"example", "langfuse_tracing"}, {"sdk", "ai-sdk-cpp"}});
+
+  // 4. Run generate_text via the Langfuse wrapper.
+  auto result = ai::langfuse::generate_text(client, std::move(options), *trace);
+
+  if (result) {
+    std::cout << "Output: " << result.text << "\n";
+    trace->set_output(result.text);
+  } else {
+    trace->set_output(ai::JsonValue{{"error", result.error_message()}});
+  }
+
+  // 5. Flush the batch synchronously to Langfuse.
+  trace->end();
+  return result ? 0 : 2;
+}
+```
+
+The wrapper hooks into the existing `on_tool_call_start` / `on_tool_call_finish` callbacks on `GenerateOptions` and chains any callbacks you have already installed, so tracing composes cleanly with your own instrumentation.
+
+</Steps>
+
+## Tracer configuration
+
+`ai::langfuse::Config` accepts the following options:
+
+| Field                    | Description                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| `host`                   | Base URL of your Langfuse instance. Defaults to `https://cloud.langfuse.com`.                |
+| `public_key`             | Public API key (`pk-lf-...`).                                                                |
+| `secret_key`             | Secret API key (`sk-lf-...`).                                                                |
+| `release`                | Optional release identifier attached to all traces (e.g. a commit SHA).                      |
+| `environment`            | Environment tag attached to all traces. Defaults to `default`.                               |
+| `connection_timeout_sec` | HTTP connection timeout for the ingestion request. Defaults to 10 seconds.                   |
+| `read_timeout_sec`       | HTTP read timeout for the ingestion request. Defaults to 30 seconds.                         |
+| `error_policy`           | `kStrict` surfaces HTTP/JSON failures via `Trace::end()`; `kBestEffort` swallows them.       |
+
+## Trace API
+
+A `Trace` accumulates events in memory and POSTs them to `/api/public/ingestion` when `end()` is called.
+
+```cpp
+auto trace = tracer.start_trace("sql-generation");
+
+trace->set_input(user_prompt);
+trace->set_user_id("user-123");
+trace->set_session_id("session-abc");
+trace->set_metadata({{"feature", "sql-assistant"}});
+trace->add_tag("beta");
+
+auto result = ai::langfuse::generate_text(client, std::move(options), *trace);
+
+if (result) {
+  trace->set_output(result.text);
+} else {
+  trace->set_output(ai::JsonValue{{"error", result.error_message()}});
+}
+trace->end();  // idempotent, synchronous flush
+```
+
+`Trace` methods are thread-safe, so callbacks fired from `generate_text`'s worker threads can record into the same trace concurrently.
+
+## Notes and limitations
+
+- `Trace::end()` flushes synchronously; there is no background worker thread (yet).
+- Intermediate `on_step_finish` events are not emitted as separate generations — step text and usage roll up into the single parent generation observation.
+- The integration ships with AI SDK C++ as an optional CMake target. If you do not link `ai::langfuse`, your binary stays free of the additional HTTP and JSON code paths.
+
+## Learn more
+
+- [AI SDK C++ on GitHub](https://github.com/ClickHouse/ai-sdk-cpp)
+- [Langfuse tracing module PR](https://github.com/ClickHouse/ai-sdk-cpp/pull/42)
+- [Langfuse tracing concepts](/docs/observability/get-started)

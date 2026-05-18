@@ -58,7 +58,7 @@ export function DocBodyChrome({
           }
         >
           {versionLabel != null && versionLabel !== "" && (
-            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
+            <span className="inline-flex items-center px-2 py-1 text-xs font-medium border bg-stripe-pattern text-text-secondary">
               {versionLabel}
             </span>
           )}
