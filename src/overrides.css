@@ -910,6 +910,16 @@ ul[data-gh-discussions-list] {
   width: 100%;
 }
 
+.shiki .fd-scroll-container > pre:not(:has(.line)) {
+  padding-left: var(--padding-left, calc(var(--spacing) * 4));
+  padding-right: var(--padding-right, calc(var(--spacing) * 4));
+}
+
+.shiki .fd-scroll-container > pre:not(:has(.line)) > code,
+.shiki .fd-scroll-container > pre > code.language-env {
+  display: block;
+}
+
 .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
   border: 1px solid var(--line-structure);
   border-radius: 4px;
