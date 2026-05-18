@@ -99,8 +99,8 @@ export const DeveloperTools = () => {
               Platform MCP Server
             </Link>
             <Text size="s" className="text-left">
-              Interact with your Langfuse data programmatically from your IDE.
-              Manage prompts, query traces, and more.
+              Manage prompts from your IDE with a hosted, authenticated MCP
+              server. Manage prompts, query traces, and more.
             </Text>
             <div className="flex flex-col items-start mt-4 -ml-1.25">
               <Button
