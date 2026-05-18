@@ -52,6 +52,7 @@ export async function DocsChromePage({
   return (
     <DocsPage
       toc={toc}
+      lastUpdate={lastModified}
       breadcrumb={{ includePage: true, includeRoot: true }}
       tableOfContent={{
         footer: (
