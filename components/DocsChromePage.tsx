@@ -12,6 +12,13 @@ type BodyChromeProps = Omit<ComponentProps<typeof DocBodyChrome>, "children">;
 
 type LoadedPage = { data: any };
 
+const getIsoDate = (value: unknown): string | undefined => {
+  if (value == null) return undefined;
+
+  const date = new Date(value as string | number | Date);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+};
+
 /**
  * Shared `<DocsPage>` chrome for every sidebar-based section — resolves the
  * page body (supporting Fumadocs' async MDX `data.load()` path as well as the
@@ -37,6 +44,7 @@ export async function DocsChromePage({
       : { body: data.body, toc: data.toc ?? [] };
 
   const toc: TOCItemType[] = loaded.toc ?? [];
+  const lastModified = getIsoDate(data.lastModified);
   const MDX = loaded.body as ComponentType<{
     components?: Record<string, ComponentType>;
   }>;
@@ -45,7 +53,15 @@ export async function DocsChromePage({
     <DocsPage
       toc={toc}
       breadcrumb={{ includePage: true, includeRoot: true }}
-      tableOfContent={{ footer: <DocsTocFooter pageTitle={data.title} /> }}
+      lastUpdate={lastModified}
+      tableOfContent={{
+        footer: (
+          <DocsTocFooter
+            pageTitle={data.title}
+            lastModified={lastModified}
+          />
+        ),
+      }}
       footer={{ component: <DocsAndPageFooter /> }}
     >
       <DocBodyChrome {...bodyChromeProps}>

@@ -74,7 +74,14 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         {process.env.NODE_ENV === "development" && <DevAriaHiddenConsoleFilter />}
         <PostHogProvider>
-          <RootProvider>
+          <RootProvider
+            i18n={{
+              locale: "en",
+              translations: {
+                lastUpdate: "Last edited",
+              },
+            }}
+          >
             <AISearch>{children}</AISearch>
           </RootProvider>
         </PostHogProvider>

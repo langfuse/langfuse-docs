@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import React, { useState, useEffect, forwardRef } from "react";
+import { PageLastUpdate } from "fumadocs-ui/page";
+import React, { useState, useEffect, useMemo, forwardRef } from "react";
 import { allAuthors, Author, AuthorHoverCardContent } from "./Authors";
 import contributorsData from "@/data/generated/contributors.json";
 import Image from "next/image";
@@ -131,14 +132,19 @@ const processContributor = (username: string): ProcessedContributor => {
 
 type DocsTocFooterProps = {
   pageTitle?: string;
+  lastModified?: string;
 };
 
-export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
+export const DocsTocFooter = ({ pageTitle, lastModified }: DocsTocFooterProps) => {
   const pathname = usePathname() ?? "";
   const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
   const editUrl = getGithubEditUrl(currentPath);
   const feedbackUrl = getFeedbackUrl(pageTitle);
+  const lastModifiedDate = useMemo(
+    () => (lastModified ? new Date(lastModified) : undefined),
+    [lastModified],
+  );
 
   useEffect(() => {
     setShowAll(false);
@@ -187,6 +193,12 @@ export const DocsTocFooter = ({ pageTitle }: DocsTocFooterProps) => {
       {processedContributors.length > 0 && (
         <div className="px-2 pt-4 pb-4 mb-px rounded-sm bg-surface-1">
           <Text size="s" className="font-[580] text-left text-text-primary mb-3">Contributors</Text>
+          {lastModifiedDate && (
+            <PageLastUpdate
+              date={lastModifiedDate}
+              className="mb-3 text-xs text-text-tertiary"
+            />
+          )}
           <div className="flex flex-col gap-1">
             {displayedContributors.map((contributor) => (
               <React.Fragment key={contributor.username}>
