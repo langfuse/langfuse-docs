@@ -27,7 +27,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   allowFullScreen
 ></iframe>
 
-This article walks through a complete workflow for evaluating RAG applications, from setting up tracing to running experiments that help you make data-driven decisions. We'll use a sample application that answers questions about Langfuse documentation by retrieving relevant chunks and generating responses with an LLM. 
+This article walks through a complete workflow for evaluating RAG applications, from setting up tracing to running experiments that help you make data-driven decisions. We'll use a sample application that answers questions about Langfuse documentation by retrieving relevant chunks and generating responses with an LLM.
 
 By the end, you'll understand how to trace your RAG pipeline, evaluate individual components like your retrieval strategy, and measure the quality of your final answers. The code examples are available in the [Langfuse Examples repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/rag).
 
@@ -37,7 +37,7 @@ Setting up tracing with Langfuse takes just a few lines of code. After installin
 
 ![Tracing RAG Applications](/images/blog/2025-10-28-rag-observability-and-evals/rag-trace.png)
 
-Here's the core of our sample RAG application with tracing enabled. The `@observe()` decorator on the main function creates a trace for each question. Inside, we explicitly wrap the retrieval step with `start_as_current_observation` to capture what documents were retrieved: 
+Here's the core of our sample RAG application with tracing enabled. The `@observe()` decorator on the main function creates a trace for each question. Inside, we explicitly wrap the retrieval step with `start_as_current_observation` to capture what documents were retrieved:
 
 ```python {7, 11-18}
 from langfuse import get_client, observe
@@ -49,16 +49,16 @@ langfuse_handler = CallbackHandler()
 @observe()  # Trace the RAG application
 def rag_bot(question: str) -> RagBotResponse:
   retriever = get_retriever(urls, chunk_size=256, chunk_overlap=0)
-  
+
   # Trace the document retrieval
   with langfuse.start_as_current_observation(
     as_type="retriever",
-    name="retrieve_documents", 
-    input=question, 
+    name="retrieve_documents",
+    input=question,
   ) as span:
     docs = retriever.invoke(question)
     span.update(output=docs)
-  
+
   # Generate answer with LLM
   ai_msg = bot.invoke(
     [
@@ -67,7 +67,7 @@ def rag_bot(question: str) -> RagBotResponse:
     ],
     config={"callbacks": [langfuse_handler]}
   )
-  
+
   return {"answer": ai_msg.content, "documents": docs}
 ```
 
@@ -83,7 +83,7 @@ To start, you need a dataset of questions and expected answers. You create this 
 
 ![Creating a Dataset](/images/blog/2025-10-28-rag-observability-and-evals/rag-dataset.png)
 
-With your dataset ready, you can run experiments with [Langfuse's Experiment Runner](/docs/evaluation/experiments/experiments-via-sdk) testing different chunk configurations. You can make a combination of chunk size and chunk overlap to test different strategies. For example: 
+With your dataset ready, you can run experiments with [Langfuse's Experiment Runner](/docs/evaluation/experiments/experiments-via-sdk) testing different chunk configurations. You can make a combination of chunk size and chunk overlap to test different strategies. For example:
 
 | Chunk Size | Chunk Overlap |
 | :--------- | :------------ |
@@ -111,16 +111,16 @@ for chunk_size in chunk_sizes:
 Now we need to evaluate whether the retrieved chunks are actually relevant to the question. We use an LLM-as-a-Judge approach where an LLM scores each retrieved chunk's relevance and provides an average relevance score:
 
 ```python {1-12, 30}
-retrieval_relevance_instructions = """You are evaluating the relevance of a set of 
-chunks to a question. You will be given a QUESTION, an EXPECTED OUTPUT, and a set 
+retrieval_relevance_instructions = """You are evaluating the relevance of a set of
+chunks to a question. You will be given a QUESTION, an EXPECTED OUTPUT, and a set
 of DOCUMENTS retrieved from the retriever.
 
 Here is the grade criteria to follow:
 (1) Your goal is to identify DOCUMENTS that are completely unrelated to the QUESTION
-(2) It is OK if the facts have SOME information that is unrelated as long as 
+(2) It is OK if the facts have SOME information that is unrelated as long as
 it is close to the EXPECTED OUTPUT
 
-You should return a list of numbers, one for each chunk, indicating the relevance 
+You should return a list of numbers, one for each chunk, indicating the relevance
 of the chunk to the question.
 """
 
@@ -143,13 +143,13 @@ def relevant_chunks_evaluator(*, input, output, expected_output, metadata, **kwa
   avg_score = sum(relevance_scores) / len(relevance_scores) if relevance_scores else 0
 
   return Evaluation(
-    name="retrieval_relevance", 
-    value=avg_score, 
+    name="retrieval_relevance",
+    value=avg_score,
     comment=retrieval_relevance_result.get("explanation", "")
   )
 ```
 
-Each experiment runs your retriever against every question in the dataset, evaluates the results, and stores the scores in Langfuse. You can then view all experiments side by side in the UI, comparing average relevance scores to see which configuration performs best. 
+Each experiment runs your retriever against every question in the dataset, evaluates the results, and stores the scores in Langfuse. You can then view all experiments side by side in the UI, comparing average relevance scores to see which configuration performs best.
 
 In this case, the combination of chunk size 256 and chunk overlap 0 had the highest average relevance score. However, please note that we used only 2 dataset items in this example and you should expect other results depending on your use case.
 
@@ -164,16 +164,16 @@ We use the same dataset but now run the complete RAG pipeline for each question.
 ```python
 def answer_correctness_evaluator(*, input, output, expected_output, **kwargs):
   result = answer_correctness_llm.invoke(
-    "You are evaluating the correctness of an answer to a question with a score of 0 or 1." 
+    "You are evaluating the correctness of an answer to a question with a score of 0 or 1."
     + "You will be given a QUESTION, an ANSWER, and an EXPECTED OUTPUT."
     + "\n\nQUESTION: " + input["question"]
     + "\n\nANSWER: " + output["answer"]
     + "\n\nEXPECTED OUTPUT: " + expected_output["answer"]
-  )  
+  )
   return Evaluation(name="answer_correctness", value=result["score"])
 ```
 
-You can apply additional evaluators to the complete RAG pipeline depending on what matters for your use case. Common evaluations include faithfulness (checking if the answer is supported by the retrieved documents), groundedness (verifying claims can be traced back to sources), or relevance (measuring if the answer addresses what was actually asked). The key is measuring the aspects of quality that matter most to your users. Results can also be seen in the Langfuse UI: 
+You can apply additional evaluators to the complete RAG pipeline depending on what matters for your use case. Common evaluations include faithfulness (checking if the answer is supported by the retrieved documents), groundedness (verifying claims can be traced back to sources), or relevance (measuring if the answer addresses what was actually asked). The key is measuring the aspects of quality that matter most to your users. Results can also be seen in the Langfuse UI:
 
 ![Complete RAG Pipeline Evaluation](/images/blog/2025-10-28-rag-observability-and-evals/relevance-result.png)
 

@@ -246,7 +246,7 @@ async function analyzeText(text: string) {
 
         // Update trace with output
         trace.update({ output: result });
-        
+
         return result;
     } catch (error) {
         trace.update({ output: { error: error instanceof Error ? error.message : String(error) } });
@@ -259,7 +259,7 @@ async function summarizeText(text: string, trace: any) {
         generationName: "summarize-text",
         parent: trace
     });
-    
+
     return await client.chat.completions.create({
         model: "openai/gpt-3.5-turbo",
         messages: [
@@ -274,7 +274,7 @@ async function analyzeSentiment(summary: string, trace: any) {
         generationName: "analyze-sentiment",
         parent: trace
     });
-    
+
     return await client.chat.completions.create({
         model: "openai/gpt-3.5-turbo",
         messages: [

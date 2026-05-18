@@ -7,17 +7,20 @@ export async function GET(request: NextRequest) {
     const METABASE_SECRET_KEY = process.env.METABASE_SECRET_KEY;
 
     if (!METABASE_SECRET_KEY) {
-      console.error("Missing required environment variables: METABASE_SECRET_KEY");
+      console.error(
+        "Missing required environment variables: METABASE_SECRET_KEY",
+      );
       return NextResponse.json(
         { message: "Server configuration error" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const dashboardId = request.nextUrl.searchParams.get("dashboardId")
       ? parseInt(request.nextUrl.searchParams.get("dashboardId")!, 10)
       : 25;
-    const theme = request.nextUrl.searchParams.get("theme") === "day" ? "day" : "night";
+    const theme =
+      request.nextUrl.searchParams.get("theme") === "day" ? "day" : "night";
 
     const payload = {
       resource: { dashboard: dashboardId },
@@ -37,13 +40,13 @@ export async function GET(request: NextRequest) {
         headers: {
           "Cache-Control": "public, s-maxage=300, max-age=0",
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Error generating Metabase embed URL:", error);
     return NextResponse.json(
       { message: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

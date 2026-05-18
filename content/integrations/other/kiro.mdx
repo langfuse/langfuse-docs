@@ -16,18 +16,18 @@ category: Integrations
 
 Using [Kiro Hooks](https://kiro.dev/docs/hooks/), this integration automatically captures AI agent activity and sends traces to Langfuse. All 10 Kiro hook types are supported:
 
-| Kiro Hook Type | What It Traces |
-|---|---|
-| Prompt Submit | User prompts and queries |
-| Agent Stop | Agent completion with status scores |
-| Pre Tool Use | Tool invocations before execution |
-| Post Tool Use | Tool results and duration |
-| File Create | New file creation |
-| File Save | File modifications |
-| File Delete | File deletions |
-| Pre Task Execution | Spec task start |
-| Post Task Execution | Spec task completion |
-| Manual Trigger | On-demand trace events |
+| Kiro Hook Type      | What It Traces                      |
+| ------------------- | ----------------------------------- |
+| Prompt Submit       | User prompts and queries            |
+| Agent Stop          | Agent completion with status scores |
+| Pre Tool Use        | Tool invocations before execution   |
+| Post Tool Use       | Tool results and duration           |
+| File Create         | New file creation                   |
+| File Save           | File modifications                  |
+| File Delete         | File deletions                      |
+| Pre Task Execution  | Spec task start                     |
+| Post Task Execution | Spec task completion                |
+| Manual Trigger      | On-demand trace events              |
 
 Key observability features include:
 
@@ -87,6 +87,7 @@ cp -r langfuse-examples/applications/kiro-langfuse/hooks/ your-project/hooks/
 ```
 
 This adds:
+
 - `.kiro/hooks/` — Kiro hook definition files (one per hook type)
 - `hooks/` — The Node.js handler code and Langfuse client
 
@@ -111,15 +112,16 @@ LANGFUSE_PUBLIC_KEY=pk-lf-...
 
 **Environment Variables:**
 
-| Variable | Description | Required |
-|---|---|---|
-| `LANGFUSE_PUBLIC_KEY` | Your Langfuse public key | Yes |
-| `LANGFUSE_SECRET_KEY` | Your Langfuse secret key | Yes |
-| `LANGFUSE_BASE_URL` | Langfuse base URL. EU: `https://cloud.langfuse.com`, US: `https://us.cloud.langfuse.com`, Japan: `https://jp.cloud.langfuse.com`, HIPAA: `https://hipaa.cloud.langfuse.com` | No (defaults to EU) |
+| Variable              | Description                                                                                                                                                                 | Required            |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `LANGFUSE_PUBLIC_KEY` | Your Langfuse public key                                                                                                                                                    | Yes                 |
+| `LANGFUSE_SECRET_KEY` | Your Langfuse secret key                                                                                                                                                    | Yes                 |
+| `LANGFUSE_BASE_URL`   | Langfuse base URL. EU: `https://cloud.langfuse.com`, US: `https://us.cloud.langfuse.com`, Japan: `https://jp.cloud.langfuse.com`, HIPAA: `https://hipaa.cloud.langfuse.com` | No (defaults to EU) |
 
 ### Enable Hooks in Kiro
 
 Open the Hook UI in Kiro:
+
 - **Mac**: `Cmd + Shift + P` → "Kiro: Open Kiro Hook UI"
 - **Windows/Linux**: `Ctrl + Shift + P` → "Kiro: Open Kiro Hook UI"
 

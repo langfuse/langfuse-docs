@@ -28,7 +28,7 @@ export const cloudRegionSelectorOrder: CloudRegionKey[] = [
 
 export const createInitialCloudRegionSignInState = () =>
   Object.fromEntries(
-    Object.keys(cloudRegions).map((key) => [key, false])
+    Object.keys(cloudRegions).map((key) => [key, false]),
   ) as Record<CloudRegionKey, boolean>;
 
 export const isSignedInSession = (session: unknown) => {

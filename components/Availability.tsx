@@ -10,19 +10,19 @@ const availabilities: {
   id: string;
   label?: string;
 }[] = [
-    {
-      id: "ee",
-      label: "Enterprise Edition",
-    },
-    {
-      id: "team-add-on",
-      label: "Teams Add-on required",
-    },
-    { id: "full", label: "Available" },
-    { id: "private-beta", label: "Private Beta" },
-    { id: "public-beta", label: "Public Beta" },
-    { id: "not-available", label: "Not Available" },
-  ];
+  {
+    id: "ee",
+    label: "Enterprise Edition",
+  },
+  {
+    id: "team-add-on",
+    label: "Teams Add-on required",
+  },
+  { id: "full", label: "Available" },
+  { id: "private-beta", label: "Private Beta" },
+  { id: "public-beta", label: "Public Beta" },
+  { id: "not-available", label: "Not Available" },
+];
 
 export function AvailabilityBanner(props: {
   availability: Record<
@@ -35,7 +35,7 @@ export function AvailabilityBanner(props: {
     .map((plan) => ({
       ...plan,
       availability: availabilities.find(
-        (availability) => availability.id === props.availability[plan.id]
+        (availability) => availability.id === props.availability[plan.id],
       ),
     }));
 
@@ -51,9 +51,7 @@ export function AvailabilityBanner(props: {
             className="grid grid-cols-2 md:grid-cols-1 relative px-4 py-2 md:py-4 not-prose items-center gap-y-1"
           >
             <div className="text-xs font-medium">{plan.label}</div>
-            <span className="text-xs">
-              {plan.availability.label}
-            </span>
+            <span className="text-xs">{plan.availability.label}</span>
           </li>
         ))}
       </ul>

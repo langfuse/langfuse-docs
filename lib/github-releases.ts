@@ -16,7 +16,7 @@ export async function getLatestGitHubReleaseDate(): Promise<string | null> {
 
     if (!response.ok) {
       console.error(
-        `Failed to fetch latest GitHub release: ${response.status} ${response.statusText}`
+        `Failed to fetch latest GitHub release: ${response.status} ${response.statusText}`,
       );
       return null;
     }

@@ -49,12 +49,12 @@ In this new version, Langfuse uses a single unified observations table as the ma
 
 You will notice more rows than before. Each row is now one operation, not one trace. Use filters and [saved views](/changelog/2025-05-20-save-table-views) to focus on what matters. Most users start with one of these common views:
 
-| View | How to set it up |
-|---|---|
-| Key operations | Filter by observation `name` or `type` matching your most important operations |
-| Expensive LLM calls | Filter `type = generation`, sort by `total_cost` descending |
-| Errors for a specific user | Filter `user_id`, `level = ERROR` |
-| Slow observations in a session | Filter `session_id`, sort by `latency` descending |
+| View                           | How to set it up                                                               |
+| ------------------------------ | ------------------------------------------------------------------------------ |
+| Key operations                 | Filter by observation `name` or `type` matching your most important operations |
+| Expensive LLM calls            | Filter `type = generation`, sort by `total_cost` descending                    |
+| Errors for a specific user     | Filter `user_id`, `level = ERROR`                                              |
+| Slow observations in a session | Filter `session_id`, sort by `latency` descending                              |
 
 See the [full guide on working with the observation-centric data model](/faq/all/explore-observations-in-v4) for detailed before/after workflows, saved view setup, and upgrade steps.
 

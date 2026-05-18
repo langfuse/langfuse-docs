@@ -13,7 +13,7 @@ export function CursorLangfuseReadme() {
 
   useEffect(() => {
     fetch(
-      "https://raw.githubusercontent.com/naoufalelh/cursor-langfuse/refs/heads/main/README.md"
+      "https://raw.githubusercontent.com/naoufalelh/cursor-langfuse/refs/heads/main/README.md",
     )
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -25,9 +25,7 @@ export function CursorLangfuseReadme() {
 
   if (error) return <p>Error loading README content.</p>;
   if (!content)
-    return (
-      <p className="text-sm text-muted-foreground">Loading README…</p>
-    );
+    return <p className="text-sm text-muted-foreground">Loading README…</p>;
 
   return <RenderedReadmeContent content={content} />;
 }

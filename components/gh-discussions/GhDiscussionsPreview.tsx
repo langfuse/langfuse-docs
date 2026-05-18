@@ -6,5 +6,5 @@ export const GhDiscussionsPreview = dynamic(
   () => import("./GhDiscussionsPreviewInternal"),
   {
     ssr: false,
-  }
+  },
 );

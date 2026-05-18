@@ -28,7 +28,7 @@ export function AgentPromptCallout({
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       },
-      () => {}
+      () => {},
     );
   };
 

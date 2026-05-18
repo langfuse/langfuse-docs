@@ -1467,7 +1467,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                       className={cn(
                         "justify-center!",
                         !tier.featured &&
-                          "group-hover:border-line-structure hover:border-line-cta"
+                          "group-hover:border-line-structure hover:border-line-cta",
                       )}
                     >
                       {tier.cta}
@@ -1490,7 +1490,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     className={cn(
                       "justify-center!",
                       !tier.featured &&
-                        "group-hover:border-line-structure hover:border-line-cta"
+                        "group-hover:border-line-structure hover:border-line-cta",
                     )}
                   >
                     {tier.cta}
@@ -1536,45 +1536,47 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     + optional
                   </div>
                   <CornerBox className="p-3 pt-4 w-full">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-bold text-primary">
-                      {tier.addOn.name}
-                    </span>
-                    {tier.addOn.price && (
+                    <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-bold text-primary">
-                        {tier.addOn.price}
+                        {tier.addOn.name}
                       </span>
-                    )}
-                  </div>
-                  <ul className="mt-1 space-y-1 text-sm">
-                    {tier.addOn.mainFeatures.map((feature) => (
-                      <li key={feature} className="flex space-x-2">
-                        <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {tier.addOn.cta && (
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      href={tier.addOn.cta.href}
-                      wrapperClassName="mt-3"
-                      className="justify-center! group-hover:border-line-structure hover:border-line-cta"
-                    >
-                      {tier.addOn.cta.text}
-                    </Button>
-                  )}
-                  {tier.addOn.calloutLink && (
-                    <div className="mt-2 text-xs text-center text-muted-foreground">
-                      <Link
-                        href={tier.addOn.calloutLink.href}
-                        className="underline hover:text-primary"
-                      >
-                        {tier.addOn.calloutLink.text}
-                      </Link>
+                      {tier.addOn.price && (
+                        <span className="text-sm font-bold text-primary">
+                          {tier.addOn.price}
+                        </span>
+                      )}
                     </div>
-                  )}
+                    <ul className="mt-1 space-y-1 text-sm">
+                      {tier.addOn.mainFeatures.map((feature) => (
+                        <li key={feature} className="flex space-x-2">
+                          <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                          <span className="text-muted-foreground">
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    {tier.addOn.cta && (
+                      <Button
+                        variant="secondary"
+                        size="small"
+                        href={tier.addOn.cta.href}
+                        wrapperClassName="mt-3"
+                        className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+                      >
+                        {tier.addOn.cta.text}
+                      </Button>
+                    )}
+                    {tier.addOn.calloutLink && (
+                      <div className="mt-2 text-xs text-center text-muted-foreground">
+                        <Link
+                          href={tier.addOn.calloutLink.href}
+                          className="underline hover:text-primary"
+                        >
+                          {tier.addOn.calloutLink.text}
+                        </Link>
+                      </div>
+                    )}
                   </CornerBox>
                 </div>
               )}

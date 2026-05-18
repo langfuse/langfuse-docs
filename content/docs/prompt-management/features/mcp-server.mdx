@@ -24,7 +24,6 @@ The Langfuse MCP Server provides five tools for comprehensive prompt management 
 ### Read Operations
 
 - **`getPrompt`** - Fetch a specific prompt by name
-
   - Optional `label` parameter (e.g., "production", "staging") - defaults to "production"
   - Optional `version` parameter to get a specific version number
   - Returns compiled prompt with metadata and configuration
@@ -37,7 +36,6 @@ The Langfuse MCP Server provides five tools for comprehensive prompt management 
 ### Write Operations
 
 - **`createTextPrompt`** - Create a new text prompt version
-
   - Simple string content with `{{variable}}` template syntax
   - Optional labels (e.g., `["production", "staging"]`)
   - Optional config object for model settings
@@ -46,7 +44,6 @@ The Langfuse MCP Server provides five tools for comprehensive prompt management 
   - Automatically increments version number
 
 - **`createChatPrompt`** - Create a new chat prompt version
-
   - OpenAI-style message format with role and content
   - Supports system, user, and assistant message roles
   - Template variables work in message content

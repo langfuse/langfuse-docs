@@ -28,11 +28,11 @@ Users directly rate responses through thumbs up/down, star ratings, or comments.
 
 Derived from user behavior like time spent reading, copying output, accepting suggestions, or retrying queries.
 
-| Pros | Cons |
-|------|------|
-| High volume on every interaction | Harder to implement |
-| No user effort required | Ambiguous signals |
-| Reflects actual usage | Requires interpretation |
+| Pros                             | Cons                    |
+| -------------------------------- | ----------------------- |
+| High volume on every interaction | Harder to implement     |
+| No user effort required          | Ambiguous signals       |
+| Reflects actual usage            | Requires interpretation |
 
 Both work as [scores](/docs/evaluation/core-concepts) in Langfuse. Filter traces by score, build [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), or use feedback as ground truth for automated evaluations.
 
@@ -131,6 +131,7 @@ See [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-methods/llm-as-a-jud
 ## Example App
 
 The [user-feedback example](https://github.com/langfuse/langfuse-examples/tree/main/applications/user-feedback) shows a complete Next.js implementation with:
+
 - OpenTelemetry tracing
 - Thumbs up/down with optional comments
 - Session tracking across conversations

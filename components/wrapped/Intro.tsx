@@ -37,54 +37,58 @@ export function Intro() {
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
       const containerTop = container.offsetTop;
-      
+
       // Track scroll direction
-      const currentDirection = scrollTop > lastScrollTop.current ? "down" : "up";
+      const currentDirection =
+        scrollTop > lastScrollTop.current ? "down" : "up";
       if (scrollTop !== lastScrollTop.current) {
         setScrollDirection(currentDirection);
       }
       lastScrollTop.current = scrollTop;
-      
+
       // Account for Hero taking the first viewport (100vh)
       // Intro messages start after Hero has disappeared (with gap)
       const heroEnd = containerTop - windowHeight; // Hero ends at 100vh
       const introStart = heroEnd + windowHeight * 0.8; // Start 0.8 viewports after Hero ends
-      
+
       // Find Metrics component position (it comes after Intro)
       // Intro spacer is messages.length * 75vh + 50vh extra gap, so Metrics starts after that
-      const introEnd = containerTop + (messages.length * windowHeight * 0.75) + (windowHeight * 0.5);
+      const introEnd =
+        containerTop +
+        messages.length * windowHeight * 0.75 +
+        windowHeight * 0.5;
       const metricsStart = introEnd;
-      
+
       // Only show messages when we've scrolled past the Hero fade-out point
       if (scrollTop >= introStart) {
         const scrollProgress = (scrollTop - introStart) / windowHeight;
-        
+
         // Calculate which message should be active based on scroll position
         // Each message gets 0.6 viewport height with a gap between transitions
         // This creates a fade-out, gap, then fade-in effect
         const messageDuration = 0.6; // Each message visible for 0.6 viewports
         const gapDuration = 0.15; // Gap between messages (0.15 viewports)
         const totalDuration = messageDuration + gapDuration; // 0.75 viewports per message cycle
-        
+
         const messageCycle = scrollProgress / totalDuration;
         const cyclePosition = (scrollProgress % totalDuration) / totalDuration;
-        
+
         // During the gap (last 25% of cycle), hide the message
-        const isInGap = cyclePosition > (messageDuration / totalDuration);
-        
-        const newIndex = isInGap 
+        const isInGap = cyclePosition > messageDuration / totalDuration;
+
+        const newIndex = isInGap
           ? -1 // Hide during gap
           : Math.min(
               Math.max(0, Math.floor(messageCycle)),
-              messages.length - 1
+              messages.length - 1,
             );
-        
+
         // Fade out the last message before Metrics starts appearing
         // Start fading when we're 0.8 viewports before Metrics appears
         // Hide completely when we're 0.5 viewports before Metrics appears
         const metricsFadeStart = metricsStart - windowHeight * 0.8;
         const metricsHideStart = metricsStart - windowHeight * 0.5;
-        
+
         if (newIndex === messages.length - 1) {
           // When scrolling back up from Metrics, show the last message
           if (scrollTop >= metricsHideStart && scrollDirection === "up") {
@@ -150,7 +154,7 @@ export function Intro() {
         {/* Spacer to enable scrolling - add extra space after last message */}
         {/* Each message gets 0.75 viewport height (0.6 visible + 0.15 gap), plus 50vh extra gap */}
         <div style={{ height: `${messages.length * 75 + 50}vh` }} />
-        
+
         {/* Fixed position messages */}
         {activeIndex >= 0 && (
           <div className="fixed inset-0 flex items-center justify-center pointer-events-none">
@@ -163,7 +167,10 @@ export function Intro() {
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                 className="absolute inset-0 flex items-center justify-center w-full"
               >
-                <p className="text-2xl sm:text-4xl lg:text-5xl font-semibold text-center text-balance max-w-4xl px-4 mx-auto" style={{ lineHeight: '1.5' }}>
+                <p
+                  className="text-2xl sm:text-4xl lg:text-5xl font-semibold text-center text-balance max-w-4xl px-4 mx-auto"
+                  style={{ lineHeight: "1.5" }}
+                >
                   {messages[activeIndex]}
                 </p>
               </motion.div>
@@ -174,4 +181,3 @@ export function Intro() {
     </WrappedSection>
   );
 }
-
