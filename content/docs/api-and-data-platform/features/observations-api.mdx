@@ -12,9 +12,9 @@ If you need aggregated metrics (e.g., total cost, token counts, or trace volumes
 
 For general information about API authentication, base URLs, and SDK access, see the [Public API documentation](/docs/api-and-data-platform/features/public-api).
 
-<Callout type="warning">
+<Callout type="info">
 
-The legacy read endpoints `GET /api/public/traces`, `GET /api/public/traces/{traceId}`, `GET /api/public/observations`, and `GET /api/public/observations/{observationId}` are deprecated. Use Observations API v2 for row-level data extraction. See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis) for migration examples.
+The older read endpoints `GET /api/public/traces`, `GET /api/public/traces/{traceId}`, `GET /api/public/observations`, and `GET /api/public/observations/{observationId}` remain available, but are not recommended as the default for new data extraction workflows because they are less performant at scale. Use Observations API v2 for row-level data extraction. See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis) for migration examples.
 
 </Callout>
 
@@ -34,13 +34,13 @@ GET /api/public/v2/observations
 
 The v2 Observations API is a redesigned endpoint optimized for high-performance data retrieval. It addresses the performance bottlenecks of the v1 API by minimizing the work Langfuse has to perform per query.
 
-### Upgrade from deprecated trace and observation reads
+### Upgrade from older trace and observation reads
 
-| Deprecated usage | Recommended replacement |
-| --- | --- |
-| List traces with `GET /api/public/traces` | Use `GET /api/public/v2/observations` and group rows by `traceId` |
-| Fetch one trace with `GET /api/public/traces/{traceId}` | Use `GET /api/public/v2/observations?traceId=<traceId>` |
-| List observations with `GET /api/public/observations` | Use `GET /api/public/v2/observations` |
+| Existing usage                                                            | Recommended replacement                                                     |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| List traces with `GET /api/public/traces`                                 | Use `GET /api/public/v2/observations` and group rows by `traceId`           |
+| Fetch one trace with `GET /api/public/traces/{traceId}`                   | Use `GET /api/public/v2/observations?traceId=<traceId>`                     |
+| List observations with `GET /api/public/observations`                     | Use `GET /api/public/v2/observations`                                       |
 | Fetch one observation with `GET /api/public/observations/{observationId}` | Use `GET /api/public/v2/observations` with a filter on the observation `id` |
 
 Use `fields` to request only the field groups you need, and use `cursor` pagination for large result sets.
@@ -171,63 +171,63 @@ With all fields included
 
 ```json
 {
-    "data": [
-        {
-            "id": "support-chat-7-950dc53a-gen",
-            "traceId": "support-chat-7-950dc53a",
-            "startTime": "2025-12-17T16:09:00.875Z",
-            "projectId": "7a88fb47-b4e2-43b8-a06c-a5ce950dc53a",
-            "parentObservationId": null,
-            "type": "GENERATION",
-            "endTime": "2025-12-17T16:09:01.456Z",
-            "name": "llm-generation",
-            "level": "DEFAULT",
-            "statusMessage": "",
-            "version": "",
-            "environment": "default",
-            "completionStartTime": "2025-12-17T16:09:00.995Z",
-            "createdAt": "2025-12-17T16:09:00.875Z",
-            "updatedAt": "2025-12-17T16:09:01.456Z",
-            "input": "{\"messages\":[{\"role\":\"user\",\"content\":\"Perfect.\"}]}",
-            "output": "{\"role\":\"assistant\",\"content\":\"You're all set. Have a great day!\"}",
-            "metadata": {},
-            "model": "gpt-4o",
-            "internalModelId": "",
-            "modelParameters": {
-                "temperature": 0.2
-            },
-            "usageDetails": {
-                "input": 98,
-                "output": 68,
-                "total": 166
-            },
-            "inputUsage": 98,
-            "outputUsage": 68,
-            "totalUsage": 166,
-            "costDetails": {
-                "input": 0.000196,
-                "output": 0.000204,
-                "total": 0.00083
-            },
-            "inputCost": 0.000196,
-            "outputCost": 0.000204,
-            "totalCost": 0.00083,
-            "promptId": "",
-            "promptName": "",
-            "promptVersion": null,
-            "latency": 0.581,
-            "timeToFirstToken": 0.12,
-            "userId": "",
-            "sessionId": "support-chat-session",
-            "modelId": null,
-            "inputPrice": null,
-            "outputPrice": null,
-            "totalPrice": null
-        }
-    ],
-    "meta": {
-        "cursor": "eyJsYXN0U3RhcnRUaW1lVG8iOiIyMDI1LTEyLTE3VDE2OjA5OjAwLjg3NVoiLCJsYXN0VHJhY2VJZCI6InN1cHBvcnQtY2hhdC03LTk1MGRjNTNhIiwibGFzdElkIjoic3VwcG9ydC1jaGF0LTctOTUwZGM1M2EtZ2VuIn0="
+  "data": [
+    {
+      "id": "support-chat-7-950dc53a-gen",
+      "traceId": "support-chat-7-950dc53a",
+      "startTime": "2025-12-17T16:09:00.875Z",
+      "projectId": "7a88fb47-b4e2-43b8-a06c-a5ce950dc53a",
+      "parentObservationId": null,
+      "type": "GENERATION",
+      "endTime": "2025-12-17T16:09:01.456Z",
+      "name": "llm-generation",
+      "level": "DEFAULT",
+      "statusMessage": "",
+      "version": "",
+      "environment": "default",
+      "completionStartTime": "2025-12-17T16:09:00.995Z",
+      "createdAt": "2025-12-17T16:09:00.875Z",
+      "updatedAt": "2025-12-17T16:09:01.456Z",
+      "input": "{\"messages\":[{\"role\":\"user\",\"content\":\"Perfect.\"}]}",
+      "output": "{\"role\":\"assistant\",\"content\":\"You're all set. Have a great day!\"}",
+      "metadata": {},
+      "model": "gpt-4o",
+      "internalModelId": "",
+      "modelParameters": {
+        "temperature": 0.2
+      },
+      "usageDetails": {
+        "input": 98,
+        "output": 68,
+        "total": 166
+      },
+      "inputUsage": 98,
+      "outputUsage": 68,
+      "totalUsage": 166,
+      "costDetails": {
+        "input": 0.000196,
+        "output": 0.000204,
+        "total": 0.00083
+      },
+      "inputCost": 0.000196,
+      "outputCost": 0.000204,
+      "totalCost": 0.00083,
+      "promptId": "",
+      "promptName": "",
+      "promptVersion": null,
+      "latency": 0.581,
+      "timeToFirstToken": 0.12,
+      "userId": "",
+      "sessionId": "support-chat-session",
+      "modelId": null,
+      "inputPrice": null,
+      "outputPrice": null,
+      "totalPrice": null
     }
+  ],
+  "meta": {
+    "cursor": "eyJsYXN0U3RhcnRUaW1lVG8iOiIyMDI1LTEyLTE3VDE2OjA5OjAwLjg3NVoiLCJsYXN0VHJhY2VJZCI6InN1cHBvcnQtY2hhdC03LTk1MGRjNTNhIiwibGFzdElkIjoic3VwcG9ydC1jaGF0LTctOTUwZGM1M2EtZ2VuIn0="
+  }
 }
 ```
 
@@ -237,15 +237,15 @@ With all fields included
 
 </Callout>
 
-## Deprecated APIs [#deprecated]
+## Older read APIs [#older-read-apis]
 
-The following read endpoints are deprecated and retained only for backward compatibility:
+The following read endpoints remain available, but are not recommended as the default for new data extraction workflows because they are less performant at scale:
 
-| Deprecated endpoint | Replacement |
-| --- | --- |
-| `GET /api/public/traces` | `GET /api/public/v2/observations` or `GET /api/public/v2/metrics` |
-| `GET /api/public/traces/{traceId}` | `GET /api/public/v2/observations?traceId=<traceId>` |
-| `GET /api/public/observations` | `GET /api/public/v2/observations` |
-| `GET /api/public/observations/{observationId}` | `GET /api/public/v2/observations` with an `id` filter |
+| Existing endpoint                              | Recommended replacement                                           |
+| ---------------------------------------------- | ----------------------------------------------------------------- |
+| `GET /api/public/traces`                       | `GET /api/public/v2/observations` or `GET /api/public/v2/metrics` |
+| `GET /api/public/traces/{traceId}`             | `GET /api/public/v2/observations?traceId=<traceId>`               |
+| `GET /api/public/observations`                 | `GET /api/public/v2/observations`                                 |
+| `GET /api/public/observations/{observationId}` | `GET /api/public/v2/observations` with an `id` filter             |
 
 See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis) for examples.

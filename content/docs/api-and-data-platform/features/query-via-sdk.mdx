@@ -40,7 +40,7 @@ langfuse = get_client()  # uses environment variables to authenticate
 
 The `api` namespace is auto-generated from the Public API (OpenAPI). Method names mirror REST resources and support filters and pagination.
 
-<Callout type="warning">
+<Callout type="info">
 
 From Python SDK v4 and JS/TS SDK v5 onward, the high-performance v2 data APIs
 are the defaults:
@@ -49,8 +49,9 @@ are the defaults:
 - `api.scores` (formerly `api.score_v_2` / `api.scoreV2`)
 - `api.metrics` (formerly `api.metrics_v_2` / `api.metricsV2`)
 
-The legacy trace, observation, and metrics read APIs are deprecated for data
-extraction workflows. See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis)
+The older trace, observation, and metrics read APIs remain available, but they
+are not recommended as the default for new data extraction workflows because
+they are less performant at scale. See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis)
 for migration examples.
 
 </Callout>
@@ -155,7 +156,7 @@ const observations = await langfuse.api.observations.getMany({
   traceId: "abcdef1234",
   type: "GENERATION",
   limit: 100,
-  fields: "core,basic,usage"
+  fields: "core,basic,usage",
 });
 
 // Retrieve aggregates via Metrics API v2
@@ -166,8 +167,8 @@ const metrics = await langfuse.api.metrics.get({
     dimensions: [{ field: "providedModelName" }],
     filters: [],
     fromTimestamp: "2025-05-01T00:00:00Z",
-    toTimestamp: "2025-05-13T00:00:00Z"
-  })
+    toTimestamp: "2025-05-13T00:00:00Z",
+  }),
 });
 
 // Fetch sessions and scores
@@ -184,6 +185,6 @@ Use `traceId` to retrieve the observations that belong to a single trace. Use `p
 
 ## Related Resources
 
-- To migrate deprecated trace, observation, or metrics read calls, see [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis).
+- To move existing trace, observation, or metrics read calls to v2, see [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis).
 - For large-scale data exports (e.g., all traces for fine-tuning or analytics), consider using the [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to automatically sync data to S3, GCS, or Azure on a schedule instead of paginating through the API.
 - To manually export filtered data from the Langfuse UI, see [Export from UI](/docs/api-and-data-platform/features/export-from-ui).
