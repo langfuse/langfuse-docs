@@ -1,0 +1,165 @@
+---
+title: Web callbacks
+description: Trigger a browser-side HTTP callback from a trace or observation in Langfuse.
+sidebarTitle: Web Callbacks
+---
+
+# Web callbacks
+
+Web callbacks let project members trigger an HTTP `POST` request from a trace or observation in Langfuse. Use them to connect trace debugging to your own tools, for example opening an internal investigation workflow, notifying an external system, or sending a selected trace ID to a local helper service.
+
+Unlike [prompt webhooks](/docs/prompt-management/features/webhooks-slack-integrations), web callbacks are not event-driven automations. A project member manually triggers them from the trace detail menu.
+
+<Callout type="info">
+  Web callbacks send only identifiers. Trace input, output, metadata, scores,
+  and user data are not included in the callback payload.
+</Callout>
+
+## Configure a web callback
+
+1. Open your project in Langfuse.
+2. Go to `Project Settings` > `Integrations` > `Web Callbacks`.
+3. Create or edit the callback endpoint.
+4. Configure the endpoint name, URL, toast message, request timeout, and optional browser-visible headers.
+5. Save the endpoint and make sure it is enabled.
+
+Only one web callback endpoint can be enabled per project.
+
+## Trigger a callback
+
+Open a trace or observation and click the three-dot actions menu in the detail header. If an enabled endpoint exists, the menu shows `Call <callback name>`.
+
+When you click the action, Langfuse immediately shows the configured toast message and sends the request from your browser to the configured endpoint.
+
+## Request payload
+
+Langfuse sends a JSON `POST` request with the following payload:
+
+```json filename="web-callback-payload.json"
+{
+  "version": 1,
+  "items": [
+    {
+      "projectId": "project-id",
+      "traceId": "trace-id",
+      "observationId": null
+    }
+  ]
+}
+```
+
+Payload fields:
+
+- `version`: Payload contract version. The current version is `1`.
+- `items`: List of selected objects. V1 sends one item.
+- `projectId`: Langfuse project ID.
+- `traceId`: Trace ID for the selected trace or observation.
+- `observationId`: `null` for trace-level callbacks, or the selected observation ID for observation-level callbacks.
+
+If your receiver needs the full trace, observation, session, or score data, use the IDs from the payload to query the [Langfuse API](/docs/api-and-data-platform/features/public-api) from your own backend.
+
+## Endpoint requirements
+
+Your endpoint must:
+
+- Accept `POST` requests with a JSON body.
+- Return any HTTP `2xx` status for success.
+- Respond before the configured timeout.
+- Allow browser requests from your Langfuse origin via CORS.
+- Respond to CORS preflight `OPTIONS` requests if you configure custom headers.
+
+Langfuse treats non-2xx responses, timeouts, network errors, and CORS failures as failed callbacks and shows an error toast.
+
+## Browser-side delivery
+
+Web callbacks are delivered directly from the user's browser with `fetch`.
+
+This has a few practical consequences:
+
+- The receiver sees the user's browser as the client, not Langfuse servers.
+- The receiver must allow CORS from the Langfuse origin.
+- Custom headers are visible in browser developer tools.
+- Headers are not suitable for secrets or private API keys.
+- Langfuse does not retry failed callback requests in the background.
+
+<Callout type="warn">
+  Do not put secrets into web callback headers. If the receiver needs privileged
+  access to Langfuse data, let the receiver call the Langfuse API with credentials
+  stored on the receiver side.
+</Callout>
+
+## Minimal receiver
+
+The receiver can be any HTTP server. This example validates the payload shape and acknowledges the callback:
+
+```ts filename="server.ts"
+import http from "node:http";
+
+type WebCallbackPayload = {
+  version: 1;
+  items: Array<{
+    projectId: string;
+    traceId: string;
+    observationId: string | null;
+  }>;
+};
+
+const server = http.createServer((req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "https://cloud.langfuse.com");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "content-type");
+
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  if (req.method !== "POST") {
+    res.writeHead(405);
+    res.end("Method not allowed");
+    return;
+  }
+
+  let body = "";
+
+  req.on("data", (chunk: Buffer) => {
+    body += chunk.toString("utf8");
+  });
+
+  req.on("end", () => {
+    const payload = JSON.parse(body) as WebCallbackPayload;
+
+    console.log("Received Langfuse web callback", payload);
+
+    res.writeHead(202, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ ok: true }));
+  });
+});
+
+server.listen(4047, "127.0.0.1", () => {
+  console.log("Listening on http://127.0.0.1:4047");
+});
+```
+
+For production, set `Access-Control-Allow-Origin` to your Langfuse deployment URL, validate the request body, and keep any Langfuse API credentials on the server.
+
+## Troubleshooting
+
+### Callback endpoint returned HTTP 404
+
+The request reached your endpoint, but the path does not exist. Check the configured URL path and make sure the receiver handles `POST` requests at that route.
+
+### CORS error
+
+Because the request is sent from the browser, the receiver must allow the Langfuse origin. If you use custom headers, the browser may send an `OPTIONS` preflight request before the `POST`; your server must handle that request too.
+
+### Callback request timed out
+
+Increase the timeout in the endpoint settings or make the receiver return a `2xx` response faster. For longer jobs, acknowledge the callback quickly and process the work asynchronously.
+
+## Related
+
+- [Trace URLs](/docs/observability/features/url)
+- [Sessions](/docs/observability/features/sessions)
+- [Prompt webhooks](/docs/prompt-management/features/webhooks-slack-integrations)
