@@ -15,7 +15,7 @@ This endpoint allows you to specify dimensions, metrics, filters, and time granu
 
 <Callout type="info">
 
-The older `GET /api/public/metrics` endpoint remains available, but is not recommended as the default for new aggregate data extraction workflows because it is less performant at scale. Use Metrics API v2 for new reporting, billing, dashboard, and monitoring workflows. See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis) for migration examples.
+The older Metrics API remains available, but is not recommended as the default for new aggregate data extraction workflows because it is less performant at scale. Use Metrics API v2 for new reporting, billing, dashboard, and monitoring workflows.
 
 </Callout>
 
@@ -79,9 +79,15 @@ curl \
 
 </Callout>
 
-## Metrics API v1 [#v1]
+## Upgrade from Metrics API v1 [#v1]
 
 The v1 `GET /api/public/metrics` endpoint remains available, but is not recommended as the default for new aggregate data extraction workflows because it is less performant at scale. Use [Metrics API v2](#v2) for new reporting, billing, dashboard, and monitoring workflows.
+
+When moving existing queries to v2:
+
+- Replace `GET /api/public/metrics` with `GET /api/public/v2/metrics`.
+- Replace `view: "traces"` with `view: "observations"` and trace-level dimensions such as `traceName`, `userId`, `sessionId`, `traceRelease`, or `traceVersion`.
+- Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) instead if you need row-level spans, generations, or events.
 
 The v1 Metrics API supports querying across different views (traces, observations, scores) and allows you to:
 

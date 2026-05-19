@@ -14,7 +14,7 @@ For general information about API authentication, base URLs, and SDK access, see
 
 <Callout type="info">
 
-The older read endpoints `GET /api/public/traces`, `GET /api/public/traces/{traceId}`, `GET /api/public/observations`, and `GET /api/public/observations/{observationId}` remain available, but are not recommended as the default for new data extraction workflows because they are less performant at scale. Use Observations API v2 for row-level data extraction. See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis) for migration examples.
+Older trace and observation read APIs remain available, but are not recommended as the default for new data extraction workflows because they are less performant at scale. Use Observations API v2 for row-level data extraction.
 
 </Callout>
 
@@ -34,7 +34,7 @@ GET /api/public/v2/observations
 
 The v2 Observations API is a redesigned endpoint optimized for high-performance data retrieval. It addresses the performance bottlenecks of the v1 API by minimizing the work Langfuse has to perform per query.
 
-### Upgrade from older trace and observation reads
+### Upgrade from older trace and observation reads [#upgrade-from-older-reads]
 
 | Existing usage                                                            | Recommended replacement                                                                                                 |
 | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -44,6 +44,7 @@ The v2 Observations API is a redesigned endpoint optimized for high-performance 
 | Fetch one observation with `GET /api/public/observations/{observationId}` | Use `GET /api/public/v2/observations?filter=[{"type":"string","column":"id","operator":"=","value":"<observationId>"}]` |
 
 Use `fields` to request only the field groups you need, and use `cursor` pagination for large result sets.
+Use [Metrics API v2](/docs/metrics/features/metrics-api#v2) instead when you need aggregate cost, usage, latency, volume, or score queries.
 
 ### Key Improvements
 
@@ -236,16 +237,3 @@ With all fields included
 **API Reference:** See the full [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for all available parameters, response schemas, and interactive examples.
 
 </Callout>
-
-## Older read APIs [#older-read-apis]
-
-The following read endpoints remain available, but are not recommended as the default for new data extraction workflows because they are less performant at scale:
-
-| Existing endpoint                              | Recommended replacement                                                                                             |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `GET /api/public/traces`                       | `GET /api/public/v2/observations` or `GET /api/public/v2/metrics`                                                   |
-| `GET /api/public/traces/{traceId}`             | `GET /api/public/v2/observations?traceId=<traceId>`                                                                 |
-| `GET /api/public/observations`                 | `GET /api/public/v2/observations`                                                                                   |
-| `GET /api/public/observations/{observationId}` | `GET /api/public/v2/observations?filter=[{"type":"string","column":"id","operator":"=","value":"<observationId>"}]` |
-
-See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis) for examples.
