@@ -87,14 +87,14 @@ For the **Enriched observations (recommended)** and **Traces and observations (l
 | `io`            | `input`, `output`                                                                                            | Yes                        |
 | `metadata`      | `metadata`                                                                                                   | Yes                        |
 | `model`         | `provided_model_name`, `model_id`, `model_parameters`, `input_price`, `output_price`, `total_price`          | Yes                        |
-| `usage`         | `usage_details`, `cost_details`, `total_cost`, `usage_pricing_tier_name`                                     | Yes                        |
+| `usage`         | `usage_details`, `cost_details`, `total_cost`, `usage_pricing_tier_id`, `usage_pricing_tier_name`            | Yes                        |
 | `prompt`        | `prompt_id`, `prompt_name`, `prompt_version`                                                                 | Yes                        |
 | `metrics`       | `latency`, `time_to_first_token`                                                                             | Yes                        |
 | `tools`         | `tool_definitions`, `tool_calls`, `tool_call_names`                                                          | Yes                        |
 | `trace_context` | `tags`, `release`, `trace_name`                                                                              | Yes                        |
 
 <Callout type="info">
-  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_name` field stays in the `usage` group.
+  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group.
 </Callout>
 
 New integrations default to all eleven groups, so behavior matches earlier exports unless you narrow the selection. The **Traces and observations (legacy)** source uses a fixed column set and ignores field groups.
