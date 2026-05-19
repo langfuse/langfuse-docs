@@ -28,7 +28,7 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
 
     const currentPath = normalizePath(pathname ?? "");
     const currentIndex = footerItems.findIndex(
-      (item) => normalizePath(item.url) === currentPath
+      (item) => normalizePath(item.url) === currentPath,
     );
 
     if (currentIndex === -1) return {};
@@ -40,10 +40,6 @@ export function DocsFooter({ items, className, ...props }: DocsFooterProps) {
   }, [footerItems, items, pathname]);
 
   return (
-    <PageFooterNav
-      items={resolvedItems}
-      className={className}
-      {...props}
-    />
+    <PageFooterNav items={resolvedItems} className={className} {...props} />
   );
 }

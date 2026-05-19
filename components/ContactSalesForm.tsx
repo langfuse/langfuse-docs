@@ -47,7 +47,7 @@ export function ContactSalesForm() {
       form.setValue(
         "enterpriseRequirements",
         current.filter((v) => v !== value),
-        { shouldValidate: true }
+        { shouldValidate: true },
       );
     } else {
       form.setValue("enterpriseRequirements", [...current, value], {
@@ -315,7 +315,12 @@ export function ContactSalesForm() {
           </div>
         )}
 
-        <Button type="submit" size="default" className="w-full" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          size="default"
+          className="w-full"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
       </form>

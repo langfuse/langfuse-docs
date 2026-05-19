@@ -18,9 +18,9 @@ The [`@observe()` decorator](/docs/observability/sdk/instrumentation#custom-inst
 
 ```python
 from langfuse import observe, propagate_attributes, get_client
- 
+
 langfuse = get_client()
- 
+
 @observe()
 def my_llm_pipeline(input):
     # Add additional attributes (user_id, session_id, metadata, version, tags) to all spans created within this execution scope

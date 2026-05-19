@@ -364,6 +364,7 @@ Furthermore, Langfuse uses attributes within the `langfuse.*` namespace to map O
 </Callout>
 
 Langfuse distinguishes between trace-level attributes and observation-level attributes.
+
 - [Trace-level attributes](#trace-level-attributes) represent shared context for an entire interaction. If Langfuse detects these attributes on a specific span, it will treat them as properties of the whole trace.
 - [Observation-level attributes](#observation-level-attributes) describe individual steps within a trace. Langfuse keeps them on the observation level.
 
@@ -371,36 +372,37 @@ Langfuse distinguishes between trace-level attributes and observation-level attr
 
 OpenTelemetry spans can carry arbitrary attributes. Langfuse handles these attributes differently depending on how they are named:
 
-| Attribute Type | Where it Appears in Langfuse | Example |
-|----------------|------------------------------|---------|
-| **Explicit metadata mapping** | First-level key in `metadata` (filterable) | `langfuse.trace.metadata.customer_tier` → `metadata.customer_tier` |
-| **Unmapped OTel attributes** | Nested under `metadata.attributes` (catch-all) | `http.method` → `metadata.attributes.http.method` |
-| **Resource attributes** | Nested under `metadata.resourceAttributes` | `service.name` → `metadata.resourceAttributes.service.name` |
+| Attribute Type                | Where it Appears in Langfuse                   | Example                                                            |
+| ----------------------------- | ---------------------------------------------- | ------------------------------------------------------------------ |
+| **Explicit metadata mapping** | First-level key in `metadata` (filterable)     | `langfuse.trace.metadata.customer_tier` → `metadata.customer_tier` |
+| **Unmapped OTel attributes**  | Nested under `metadata.attributes` (catch-all) | `http.method` → `metadata.attributes.http.method`                  |
+| **Resource attributes**       | Nested under `metadata.resourceAttributes`     | `service.name` → `metadata.resourceAttributes.service.name`        |
 
 <Callout type="info">
 **Langfuse SDKs vs. standard OpenTelemetry SDKs**
 
 - **Langfuse SDKs** provide utility functions (like `update()` with a `metadata` parameter) that automatically set the `langfuse.*.metadata.*` prefixed attributes. This means custom metadata appears at the first level and is filterable.
 - **Standard OpenTelemetry SDKs** set attributes directly on spans. Unless you explicitly use the `langfuse.trace.metadata.*` or `langfuse.observation.metadata.*` prefix, these attributes end up in the `metadata.attributes` catch-all and are not directly filterable in Langfuse.
+
 </Callout>
 
 ### Trace-Level Attributes
 
 These attributes are applied to the trace record in Langfuse. They may be set on any span in the trace.
 
-| Langfuse Field | Description | Mapped from OTel Attribute |
-|-------|-------------|------------------------|
-| <a id="name"></a>`name` | The name of the trace. | • `langfuse.trace.name`: `string`<br/>• Span name of the root span |
-| <a id="userId"></a>`userId` | The unique identifier for the end-user. | • `langfuse.user.id`: `string`<br/>• `user.id`: `string` |
-| <a id="sessionId"></a>`sessionId` | The unique identifier for the user session. | • `langfuse.session.id`: `string`<br/>• `session.id`: `string` |
-| <a id="release"></a>`release` | The release version of your application. | • `langfuse.release`: `string` |
-| <a id="public"></a>`public` | A boolean flag to mark a trace as public, allowing it to be shared via a URL. | • `langfuse.trace.public`: `boolean` |
-| <a id="tags"></a>`tags` | An array of strings to categorize or label the trace. | • `langfuse.trace.tags`: `string[]` |
-| <a id="metadata"></a>`metadata` | A flexible object for storing any additional, unstructured data on the trace. See note below. | • `langfuse.trace.metadata.*`: `string`<br/>• Root span's observation metadata |
-| <a id="input"></a>`input` | The initial input for the entire trace. | • `langfuse.trace.input`: `string`<br/>• Root span's observation input |
-| <a id="output"></a>`output` | The final output for the entire trace. | • `langfuse.trace.output`: `string`<br/>• Root span's observation output |
-| <a id="version"></a>`version` | The [version](/docs/observability/features/releases-and-versioning) of the trace, useful for tracking changes to your application logic. | • Root span's attributes mapped to `version` |
-| <a id="environment"></a>`environment` | The deployment [environment](/docs/observability/features/environments) where the trace was generated. | • Root span's attributes mapped to `environment` |
+| Langfuse Field                        | Description                                                                                                                              | Mapped from OTel Attribute                                                     |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| <a id="name"></a>`name`               | The name of the trace.                                                                                                                   | • `langfuse.trace.name`: `string`<br/>• Span name of the root span             |
+| <a id="userId"></a>`userId`           | The unique identifier for the end-user.                                                                                                  | • `langfuse.user.id`: `string`<br/>• `user.id`: `string`                       |
+| <a id="sessionId"></a>`sessionId`     | The unique identifier for the user session.                                                                                              | • `langfuse.session.id`: `string`<br/>• `session.id`: `string`                 |
+| <a id="release"></a>`release`         | The release version of your application.                                                                                                 | • `langfuse.release`: `string`                                                 |
+| <a id="public"></a>`public`           | A boolean flag to mark a trace as public, allowing it to be shared via a URL.                                                            | • `langfuse.trace.public`: `boolean`                                           |
+| <a id="tags"></a>`tags`               | An array of strings to categorize or label the trace.                                                                                    | • `langfuse.trace.tags`: `string[]`                                            |
+| <a id="metadata"></a>`metadata`       | A flexible object for storing any additional, unstructured data on the trace. See note below.                                            | • `langfuse.trace.metadata.*`: `string`<br/>• Root span's observation metadata |
+| <a id="input"></a>`input`             | The initial input for the entire trace.                                                                                                  | • `langfuse.trace.input`: `string`<br/>• Root span's observation input         |
+| <a id="output"></a>`output`           | The final output for the entire trace.                                                                                                   | • `langfuse.trace.output`: `string`<br/>• Root span's observation output       |
+| <a id="version"></a>`version`         | The [version](/docs/observability/features/releases-and-versioning) of the trace, useful for tracking changes to your application logic. | • Root span's attributes mapped to `version`                                   |
+| <a id="environment"></a>`environment` | The deployment [environment](/docs/observability/features/environments) where the trace was generated.                                   | • Root span's attributes mapped to `environment`                               |
 
 <Callout type="info">
 **Filtering by metadata key in Langfuse**
@@ -423,22 +425,22 @@ with tracer.start_as_current_span("Langfuse Attributes") as span:
 
 These attributes are applied to individual observations (spans) within a trace ([data model](/docs/observability/data-model)).
 
-| Langfuse Field | Description | Mapped from OTel Attribute |
-|-------|-------------|------------------------|
-| <a id="type"></a>`type` | The [type of observation](/docs/observability/features/observation-types). Any span with a `model` attribute is tracked as a `generation`. | • `langfuse.observation.type`: `"span" \| "generation" \| "event"`, default: `"span"` |
-| <a id="level"></a>`level` | The [severity level](/docs/observability/features/log-levels) of the observation. | • `langfuse.observation.level`: `"DEBUG" \| "DEFAULT" \| "WARNING" \| "ERROR"`, default: `"DEFAULT"`<br/>• Inferred from `span.status.code` |
-| <a id="statusMessage"></a>`statusMessage` | A message describing the status of the observation, often used for errors. | • `langfuse.observation.status_message`: `string`<br/>• Inferred from `span.status.message` |
-| <a id="obs-metadata"></a>`metadata` | A flexible object for storing additional unstructured data. See note below. | • `langfuse.observation.metadata.*`: `string` |
-| <a id="obs-input"></a>`input` | The input data for this specific observation. | • `langfuse.observation.input`: `(JSON) string`<br/>• `gen_ai.prompt`<br/>• `input.value` (OpenInference)<br/>• `mlflow.spanInputs` (MLFlow) |
-| <a id="obs-output"></a>`output` | The output data from this specific observation. | • `langfuse.observation.output`: `(JSON) string`<br/>• `gen_ai.completion`<br/>• `output.value` (OpenInference)<br/>• `mlflow.spanOutputs` (MLFlow) |
-| <a id="model"></a>`model` | The name of the generative model used. *Generation only.* | • `langfuse.observation.model.name`<br/>• `gen_ai.request.model`<br/>• `gen_ai.response.model`<br/>• `llm.model_name`<br/>• `model` |
-| <a id="modelParameters"></a>`modelParameters` | Key-value pairs for model invocation settings. *Generation only.* | • `langfuse.observation.model.parameters`: `JSON string`<br/>• `gen_ai.request.*`<br/>• `llm.invocation_parameters.*` |
-| <a id="usage"></a>`usage` | Token counts for the generation. *Generation only.* | • `langfuse.observation.usage_details`: `JSON string`<br/>• `gen_ai.usage.*`<br/>• `llm.token_count.*` |
-| <a id="cost"></a>`cost` | The calculated cost in USD. *Generation only.* | • `langfuse.observation.cost_details`: `JSON string`<br/>• `gen_ai.usage.cost` (set as `total` key) |
-| <a id="prompt"></a>`prompt` | The name of a versioned prompt managed in Langfuse. *Generation only.* | • `langfuse.observation.prompt.name`: `string`<br/>• `langfuse.observation.prompt.version`: `integer` |
-| <a id="completionStartTime"></a>`completionStartTime` | Timestamp for when the model began generating. *Generation only.* | • `langfuse.observation.completion_start_time`: `ISO 8601 date string` |
-| <a id="obs-version"></a>`version` | The [version](/docs/observability/features/releases-and-versioning) of the observation. | • `langfuse.version`: `string` |
-| <a id="obs-environment"></a>`environment` | The deployment [environment](/docs/observability/features/environments) where the observation was generated. | • `langfuse.environment`<br/>• `deployment.environment`<br/>• `deployment.environment.name` |
+| Langfuse Field                                        | Description                                                                                                                                | Mapped from OTel Attribute                                                                                                                          |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <a id="type"></a>`type`                               | The [type of observation](/docs/observability/features/observation-types). Any span with a `model` attribute is tracked as a `generation`. | • `langfuse.observation.type`: `"span" \| "generation" \| "event"`, default: `"span"`                                                               |
+| <a id="level"></a>`level`                             | The [severity level](/docs/observability/features/log-levels) of the observation.                                                          | • `langfuse.observation.level`: `"DEBUG" \| "DEFAULT" \| "WARNING" \| "ERROR"`, default: `"DEFAULT"`<br/>• Inferred from `span.status.code`         |
+| <a id="statusMessage"></a>`statusMessage`             | A message describing the status of the observation, often used for errors.                                                                 | • `langfuse.observation.status_message`: `string`<br/>• Inferred from `span.status.message`                                                         |
+| <a id="obs-metadata"></a>`metadata`                   | A flexible object for storing additional unstructured data. See note below.                                                                | • `langfuse.observation.metadata.*`: `string`                                                                                                       |
+| <a id="obs-input"></a>`input`                         | The input data for this specific observation.                                                                                              | • `langfuse.observation.input`: `(JSON) string`<br/>• `gen_ai.prompt`<br/>• `input.value` (OpenInference)<br/>• `mlflow.spanInputs` (MLFlow)        |
+| <a id="obs-output"></a>`output`                       | The output data from this specific observation.                                                                                            | • `langfuse.observation.output`: `(JSON) string`<br/>• `gen_ai.completion`<br/>• `output.value` (OpenInference)<br/>• `mlflow.spanOutputs` (MLFlow) |
+| <a id="model"></a>`model`                             | The name of the generative model used. _Generation only._                                                                                  | • `langfuse.observation.model.name`<br/>• `gen_ai.request.model`<br/>• `gen_ai.response.model`<br/>• `llm.model_name`<br/>• `model`                 |
+| <a id="modelParameters"></a>`modelParameters`         | Key-value pairs for model invocation settings. _Generation only._                                                                          | • `langfuse.observation.model.parameters`: `JSON string`<br/>• `gen_ai.request.*`<br/>• `llm.invocation_parameters.*`                               |
+| <a id="usage"></a>`usage`                             | Token counts for the generation. _Generation only._                                                                                        | • `langfuse.observation.usage_details`: `JSON string`<br/>• `gen_ai.usage.*`<br/>• `llm.token_count.*`                                              |
+| <a id="cost"></a>`cost`                               | The calculated cost in USD. _Generation only._                                                                                             | • `langfuse.observation.cost_details`: `JSON string`<br/>• `gen_ai.usage.cost` (set as `total` key)                                                 |
+| <a id="prompt"></a>`prompt`                           | The name of a versioned prompt managed in Langfuse. _Generation only._                                                                     | • `langfuse.observation.prompt.name`: `string`<br/>• `langfuse.observation.prompt.version`: `integer`                                               |
+| <a id="completionStartTime"></a>`completionStartTime` | Timestamp for when the model began generating. _Generation only._                                                                          | • `langfuse.observation.completion_start_time`: `ISO 8601 date string`                                                                              |
+| <a id="obs-version"></a>`version`                     | The [version](/docs/observability/features/releases-and-versioning) of the observation.                                                    | • `langfuse.version`: `string`                                                                                                                      |
+| <a id="obs-environment"></a>`environment`             | The deployment [environment](/docs/observability/features/environments) where the observation was generated.                               | • `langfuse.environment`<br/>• `deployment.environment`<br/>• `deployment.environment.name`                                                         |
 
 <Callout type="info">
 **Filtering by metadata key in Langfuse**

@@ -26,7 +26,6 @@ Both aggregate metrics and signal detection depend on fields attached to observa
 
 Beyond the built-in fields, you add evaluation — user feedback (explicit ratings or implicit signals like session abandonment), human annotation, and LLM-as-a-judge scores — by annotating traces manually or running automated evaluators. That data feeds into aggregate charts for tracking trends over time, and into signal rules so individual traces surface when something crosses a threshold you care about.
 
-
 ### Explicit and implicit user feedback [#user-feedback]
 
 User feedback is one of the richest sources of signal, but it comes in two forms with different tradeoffs.
@@ -40,7 +39,7 @@ To make this concrete, here are two example applications and how they balance ex
 <Tabs items={["Customer support chatbot", "Document extraction tool"]}>
 <Tab>
 
-*A customer support chatbot embedded in a SaaS company's help center. Users can rate the conversation after it ends, and can request a human handoff at any point during the chat.*
+_A customer support chatbot embedded in a SaaS company's help center. Users can rate the conversation after it ends, and can request a human handoff at any point during the chat._
 
 The feedback the team captures:
 
@@ -52,7 +51,7 @@ Implicit:  user requests human handoff mid-conversation
 </Tab>
 <Tab>
 
-*An invoice-processing tool that extracts structured fields (vendor, total, due date) from uploaded PDFs. Each extraction is reviewed by a human in a downstream approval step before being written to the accounting system.*
+_An invoice-processing tool that extracts structured fields (vendor, total, due date) from uploaded PDFs. Each extraction is reviewed by a human in a downstream approval step before being written to the accounting system._
 
 The feedback the team captures:
 

@@ -1,11 +1,11 @@
-import * as React from "react"
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
-import Link from "next/link"
+import * as React from "react";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 const paginationIconAreaClassName =
-  "inline-flex h-full aspect-square shrink-0 items-center justify-center rounded-[1px] border-[0.5px] border-[rgba(64,61,57,0.20)] bg-[rgba(64,61,57,0.10)] p-[1px] text-button-icon dark:bg-transparent"
+  "inline-flex h-full aspect-square shrink-0 items-center justify-center rounded-[1px] border-[0.5px] border-[rgba(64,61,57,0.20)] bg-[rgba(64,61,57,0.10)] p-[1px] text-button-icon dark:bg-transparent";
 
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
@@ -14,8 +14,8 @@ const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
     className={cn("mx-auto flex w-full justify-center", className)}
     {...props}
   />
-)
-Pagination.displayName = "Pagination"
+);
+Pagination.displayName = "Pagination";
 
 const PaginationContent = React.forwardRef<
   HTMLUListElement,
@@ -23,24 +23,27 @@ const PaginationContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("flex flex-row list-none h-[26px] not-prose items-center gap-1.5", className)}
+    className={cn(
+      "flex flex-row list-none h-[26px] not-prose items-center gap-1.5",
+      className,
+    )}
     {...props}
   />
-))
-PaginationContent.displayName = "PaginationContent"
+));
+PaginationContent.displayName = "PaginationContent";
 
 const PaginationItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
 >(({ className, ...props }, ref) => (
   <li ref={ref} className={cn("list-none h-[26px]", className)} {...props} />
-))
-PaginationItem.displayName = "PaginationItem"
+));
+PaginationItem.displayName = "PaginationItem";
 
 type PaginationLinkProps = {
-  isActive?: boolean
-  size?: "default" | "small"
-} & React.ComponentProps<"a">
+  isActive?: boolean;
+  size?: "default" | "small";
+} & React.ComponentProps<"a">;
 
 const PaginationLink = ({
   className,
@@ -52,10 +55,12 @@ const PaginationLink = ({
 }: PaginationLinkProps) => {
   const sharedClassName = cn(
     "inline-flex items-center justify-center gap-1 rounded-[1px] border border-line-structure bg-surface-bg text-[12px] font-[450] leading-[150%] tracking-[-0.06px] text-text-secondary no-underline shadow-none transition-colors hover:bg-surface-1 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
-    size === "small" ? "h-[26px] min-w-[26px] px-2" : "h-[32px] min-w-[32px] px-2",
+    size === "small"
+      ? "h-[26px] min-w-[26px] px-2"
+      : "h-[32px] min-w-[32px] px-2",
     isActive && "bg-primary text-surface-bg",
-    className
-  )
+    className,
+  );
 
   if (href) {
     return (
@@ -67,7 +72,7 @@ const PaginationLink = ({
       >
         {children}
       </Link>
-    )
+    );
   }
 
   return (
@@ -79,9 +84,9 @@ const PaginationLink = ({
     >
       {children}
     </button>
-  )
-}
-PaginationLink.displayName = "PaginationLink"
+  );
+};
+PaginationLink.displayName = "PaginationLink";
 
 const PaginationPrevious = ({
   className,
@@ -97,8 +102,8 @@ const PaginationPrevious = ({
     </span>
     Previous
   </PaginationLink>
-)
-PaginationPrevious.displayName = "PaginationPrevious"
+);
+PaginationPrevious.displayName = "PaginationPrevious";
 
 const PaginationNext = ({
   className,
@@ -114,8 +119,8 @@ const PaginationNext = ({
       <ChevronRight className="h-3 w-3 inline-flex" />
     </span>
   </PaginationLink>
-)
-PaginationNext.displayName = "PaginationNext"
+);
+PaginationNext.displayName = "PaginationNext";
 
 const PaginationEllipsis = ({
   className,
@@ -125,7 +130,7 @@ const PaginationEllipsis = ({
     aria-hidden
     className={cn(
       "inline-flex h-[26px] min-w-[26px] items-end justify-center pb-0.5",
-      className
+      className,
     )}
     {...props}
   >
@@ -134,8 +139,8 @@ const PaginationEllipsis = ({
     </span>
     <span className="sr-only">More pages</span>
   </span>
-)
-PaginationEllipsis.displayName = "PaginationEllipsis"
+);
+PaginationEllipsis.displayName = "PaginationEllipsis";
 
 export {
   Pagination,
@@ -145,4 +150,4 @@ export {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-}
+};

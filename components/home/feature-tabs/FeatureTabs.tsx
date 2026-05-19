@@ -47,10 +47,10 @@ const tabImageVariants = (reduceMotion: boolean) =>
 
 export interface FeatureTabsProps {
   features: FeatureTabData[];
-  mobileFeature: Pick<FeatureTabData, 'image'>;
+  mobileFeature: Pick<FeatureTabData, "image">;
   defaultTab?: string;
   autoAdvance?: AutoAdvanceConfig;
-};
+}
 
 type TabState = {
   focusedIndex: number;
@@ -340,9 +340,8 @@ export const FeatureTabs = ({
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {defaultAutoAdvance.enabled && (
           <span>
-            Auto-advance is{" "}
-            {state.isAutoAdvancePaused ? "paused" : "active"}. Press Escape
-            to {state.isAutoAdvancePaused ? "resume" : "pause"}{" "}
+            Auto-advance is {state.isAutoAdvancePaused ? "paused" : "active"}.
+            Press Escape to {state.isAutoAdvancePaused ? "resume" : "pause"}{" "}
             auto-advance.
           </span>
         )}
@@ -385,15 +384,15 @@ export const FeatureTabs = ({
         className="px-4 py-2 hidden md:block"
         onKeyDown={handleKeyDown}
       >
-        <div
-          ref={tabListScrollRef}
-          className="flex flex-row items-center"
-        >
+        <div ref={tabListScrollRef} className="flex flex-row items-center">
           {/* Title — left-aligned */}
           <div className="relative overflow-hidden min-w-0 flex-1">
             <div aria-hidden className="flex flex-col">
               {features.map((f) => (
-                <span key={f.id} className="whitespace-nowrap text-xl font-analog font-medium invisible h-0 block">
+                <span
+                  key={f.id}
+                  className="whitespace-nowrap text-xl font-analog font-medium invisible h-0 block"
+                >
                   {f.title}
                 </span>
               ))}
@@ -422,7 +421,9 @@ export const FeatureTabs = ({
               return (
                 <button
                   key={feature.id}
-                  ref={(el) => { tabRefs.current[index] = el; }}
+                  ref={(el) => {
+                    tabRefs.current[index] = el;
+                  }}
                   role="tab"
                   aria-selected={isActive}
                   aria-label={feature.title}
@@ -433,10 +434,11 @@ export const FeatureTabs = ({
                   className="group p-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
                 >
                   <span
-                    className={`block w-3 h-1.5 rounded-sm transition-colors duration-150 ease-out ${isActive
-                      ? "bg-primary"
-                      : "bg-line-structure group-hover:bg-primary"
-                      }`}
+                    className={`block w-3 h-1.5 rounded-sm transition-colors duration-150 ease-out ${
+                      isActive
+                        ? "bg-primary"
+                        : "bg-line-structure group-hover:bg-primary"
+                    }`}
                   />
                 </button>
               );

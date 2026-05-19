@@ -11,24 +11,24 @@ export interface TabContentProps {
   priority?: boolean;
 }
 
-export const TabContent = ({
-  feature,
-  priority = true,
-}: TabContentProps) => {
+export const TabContent = ({ feature, priority = true }: TabContentProps) => {
   const handleImageError = useCallback(
     (e: SyntheticEvent<HTMLImageElement>) => {
       const img = e.currentTarget;
       const retryCount = Number(img.dataset.retryCount || "0");
       if (retryCount < 3) {
         img.dataset.retryCount = String(retryCount + 1);
-        setTimeout(() => {
-          const currentSrc = img.src;
-          img.src = "";
-          img.src = currentSrc;
-        }, 1000 * (retryCount + 1));
+        setTimeout(
+          () => {
+            const currentSrc = img.src;
+            img.src = "";
+            img.src = currentSrc;
+          },
+          1000 * (retryCount + 1),
+        );
       }
     },
-    []
+    [],
   );
 
   const sizes = "(min-width: 1280px) 2205px";

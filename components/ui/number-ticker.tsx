@@ -29,7 +29,7 @@ export default function NumberTicker({
     isInView &&
       setTimeout(() => {
         motionValue.set(
-          direction === "down" ? Math.floor(value * 0.75) : value
+          direction === "down" ? Math.floor(value * 0.75) : value,
         );
       }, delay * 1000);
   }, [motionValue, isInView, delay, value, direction]);
@@ -39,11 +39,11 @@ export default function NumberTicker({
       springValue.on("change", (latest) => {
         if (ref.current) {
           ref.current.textContent = Intl.NumberFormat("en-US").format(
-            Number(latest.toFixed(0))
+            Number(latest.toFixed(0)),
           );
         }
       }),
-    [springValue]
+    [springValue],
   );
 
   return (

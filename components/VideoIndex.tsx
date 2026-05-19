@@ -10,16 +10,18 @@ export const VideoIndex = () => {
     .filter(
       (page) =>
         page.url.startsWith("/guides/videos/") &&
-        !!(page.data.ogImage as string | undefined)
+        !!(page.data.ogImage as string | undefined),
     );
 
   return (
     <Cards num={3}>
       {pages.map((page) => {
-        const title = page.data.title ?? page.slugs[page.slugs.length - 1]
-          .split("_")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
+        const title =
+          page.data.title ??
+          page.slugs[page.slugs.length - 1]
+            .split("_")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
         const ogImage = page.data.ogImage as string;
 
         return (
@@ -43,7 +45,10 @@ export const VideoIndex = () => {
               </div>
             </div>
             <div className="flex items-start py-2 gap-2 not-prose p-2">
-              <Text size="s" className="flex-1 text-left inline-flex py-0 text-text-secondary font-[480] group-hover:text-text-primary transition-colors duration-220">
+              <Text
+                size="s"
+                className="flex-1 text-left inline-flex py-0 text-text-secondary font-[480] group-hover:text-text-primary transition-colors duration-220"
+              >
                 {title}
               </Text>
               <ArrowRight className="size-3 shrink-0 text-text-tertiary" />

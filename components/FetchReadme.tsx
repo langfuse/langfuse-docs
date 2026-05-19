@@ -9,9 +9,13 @@ export function FetchReadme({ url }: { url: string }) {
 
   useEffect(() => {
     fetch(url)
-      .then((res) => (res.ok ? res.text() : Promise.reject(new Error(res.statusText))))
+      .then((res) =>
+        res.ok ? res.text() : Promise.reject(new Error(res.statusText)),
+      )
       .then(setContent)
-      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load"));
+      .catch((e) =>
+        setError(e instanceof Error ? e.message : "Failed to load"),
+      );
   }, [url]);
 
   if (error) return <p>Error loading content: {error}</p>;

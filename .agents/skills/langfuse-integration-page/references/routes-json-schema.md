@@ -8,11 +8,11 @@ Forgetting to add a routes entry is the #1 way a new integration notebook fails 
 
 The file is a JSON array. Each entry is an object with these fields:
 
-| Field | Type | Required | Purpose |
-|-------|------|----------|---------|
-| `notebook` | string | yes | Filename of the notebook in `cookbook/`, including `.ipynb` extension. |
-| `docsPath` | string \| null | yes | Relative path under `content/` where the final MDX lands (no extension). `null` means "don't publish as a dedicated page." |
-| `isGuide` | boolean | yes | If `true`, also publish a copy to `content/guides/cookbook/<notebook-basename>.mdx` for the general cookbook index. |
+| Field      | Type           | Required | Purpose                                                                                                                    |
+| ---------- | -------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `notebook` | string         | yes      | Filename of the notebook in `cookbook/`, including `.ipynb` extension.                                                     |
+| `docsPath` | string \| null | yes      | Relative path under `content/` where the final MDX lands (no extension). `null` means "don't publish as a dedicated page." |
+| `isGuide`  | boolean        | yes      | If `true`, also publish a copy to `content/guides/cookbook/<notebook-basename>.mdx` for the general cookbook index.        |
 
 ## Examples
 

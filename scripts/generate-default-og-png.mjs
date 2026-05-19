@@ -95,7 +95,8 @@ function titleLinesFit(lines, fontSize, innerW, innerH) {
       return false;
     }
     if (
-      approxLineWidthPx(line, fontSize, TITLE_LONG_LINE_EM) * TITLE_RENDER_SAFETY >
+      approxLineWidthPx(line, fontSize, TITLE_LONG_LINE_EM) *
+        TITLE_RENDER_SAFETY >
       textBudget
     ) {
       return false;
@@ -111,25 +112,29 @@ function splitTitleIntoBalancedLines(titleText, fontSize, innerW, targetLines) {
   const budget = titleTextBudgetWidthPx(innerW);
 
   const width = Array.from({ length: n }, () =>
-    Array.from({ length: n }, () => Number.POSITIVE_INFINITY)
+    Array.from({ length: n }, () => Number.POSITIVE_INFINITY),
   );
   for (let i = 0; i < n; i++) {
     let line = "";
     for (let j = i; j < n; j++) {
       line = line ? `${line} ${words[j]}` : words[j];
       const w =
-        approxLineWidthPx(line, fontSize, TITLE_LONG_LINE_EM) * TITLE_RENDER_SAFETY;
+        approxLineWidthPx(line, fontSize, TITLE_LONG_LINE_EM) *
+        TITLE_RENDER_SAFETY;
       if (w > budget) break;
       width[i][j] = w;
     }
   }
 
-  const INF = { maxSlack: Number.POSITIVE_INFINITY, totalSlack: Number.POSITIVE_INFINITY };
+  const INF = {
+    maxSlack: Number.POSITIVE_INFINITY,
+    totalSlack: Number.POSITIVE_INFINITY,
+  };
   const dp = Array.from({ length: targetLines + 1 }, () =>
-    Array.from({ length: n + 1 }, () => ({ ...INF }))
+    Array.from({ length: n + 1 }, () => ({ ...INF })),
   );
   const prev = Array.from({ length: targetLines + 1 }, () =>
-    Array.from({ length: n + 1 }, () => -1)
+    Array.from({ length: n + 1 }, () => -1),
   );
   dp[0][0] = { maxSlack: 0, totalSlack: 0 };
   const better = (a, b) =>
@@ -172,7 +177,12 @@ function splitTitleIntoBalancedLines(titleText, fontSize, innerW, targetLines) {
 function pickTitleLayout(titleText, innerW, innerH) {
   for (const targetLines of [2, 3]) {
     for (const fontSize of TITLE_FONT_SIZES) {
-      const lines = splitTitleIntoBalancedLines(titleText, fontSize, innerW, targetLines);
+      const lines = splitTitleIntoBalancedLines(
+        titleText,
+        fontSize,
+        innerW,
+        targetLines,
+      );
       if (!lines) continue;
       if (titleLinesFit(lines, fontSize, innerW, innerH)) {
         return { fontSize, lines };
@@ -193,7 +203,12 @@ function pickDescLayout(text, innerW, innerH) {
   for (const fontSize of DESC_FONT_SIZES) {
     const mc = Math.max(10, Math.floor(innerW / (fontSize * INTER_CHAR_EM)));
     const lines = wrapWords(text, mc);
-    const h = descStackHeight(lines.length, fontSize, lineHeight, DESC_LINE_GAP);
+    const h = descStackHeight(
+      lines.length,
+      fontSize,
+      lineHeight,
+      DESC_LINE_GAP,
+    );
     if (h <= innerH) return { fontSize, lines };
   }
   const fs = DESC_FONT_SIZES[DESC_FONT_SIZES.length - 1];
@@ -305,7 +320,11 @@ const svg = await satori(
               {
                 type: "div",
                 props: {
-                  style: { height: BETWEEN_BANDS_H, width: CONTENT_W, flexShrink: 0 },
+                  style: {
+                    height: BETWEEN_BANDS_H,
+                    width: CONTENT_W,
+                    flexShrink: 0,
+                  },
                 },
               },
               {
@@ -362,7 +381,7 @@ const svg = await satori(
       { name: "F37Analog", data: fontAnalog, style: "normal", weight: 500 },
       { name: "Inter", data: fontInter, style: "normal", weight: 400 },
     ],
-  }
+  },
 );
 
 await sharp(Buffer.from(svg)).png().toFile(outPath);
