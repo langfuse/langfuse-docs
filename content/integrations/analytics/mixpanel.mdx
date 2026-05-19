@@ -78,11 +78,17 @@ Available options:
 - `Traces and observations (legacy) and enriched observations`
 - `Enriched observations (recommended)`
 
+<Callout type="info">
+**Cloud projects created on or after 2026-05-20** will not see the Export Source selector — new Cloud projects use `Enriched observations (recommended)` automatically. Pre-cutoff Cloud projects and all self-hosted deployments keep the full choice.
+</Callout>
+
 <Callout type="warning">
 `Traces and observations (legacy)` sources may be deprecated in the future. All new export jobs should use `Enriched observations (recommended)`, and existing legacy jobs are strongly recommended to upgrade.
 </Callout>
 
 ### Upgrade path for existing configurations
+
+This migration path applies to **pre-cutoff Cloud projects and self-hosted deployments**. Post-cutoff Cloud projects already use `Enriched observations (recommended)` and cannot select legacy sources.
 
 Existing integrations continue to use `Traces and observations (legacy)` until changed.
 
