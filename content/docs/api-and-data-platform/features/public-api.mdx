@@ -87,7 +87,9 @@ You can use your editor's Intellisense to explore the API methods and their para
 
 In Python SDK v4 and JS/TS SDK v5, the high-performance resources are the
 defaults: `api.observations`, `api.scores`, and `api.metrics`. Legacy v1
-resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`).
+resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). See
+[Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis)
+for the migration path from deprecated trace, observation, and metrics reads.
 
 </Callout>
 
@@ -100,18 +102,31 @@ When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `g
 <LangTabs items={["Python SDK", "JS/TS SDK", "Java SDK"]}>
 <Tab>
 
-When using the [Python SDK](/docs/sdk/python/sdk-v3):
+When using the [Python SDK](/docs/sdk/python/decorators):
 
 ```python
 from langfuse import get_client
 
 langfuse = get_client()
-...
-# fetch a trace
-langfuse.api.trace.get(trace_id)
 
-# async client via asyncio
-await langfuse.async_api.trace(trace_id)
+# Retrieve row-level observations via Observations API v2
+observations = langfuse.api.observations.get_many(
+    trace_id="trace-id",
+    fields="core,basic,usage",
+    limit=100,
+)
+
+# Retrieve aggregates via Metrics API v2
+metrics = langfuse.api.metrics.get(query="""
+{
+  "view": "observations",
+  "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+  "dimensions": [{"field": "providedModelName"}],
+  "filters": [],
+  "fromTimestamp": "2025-05-01T00:00:00Z",
+  "toTimestamp": "2025-05-13T00:00:00Z"
+}
+""")
 
 # explore more endpoints via Intellisense
 langfuse.api.*
@@ -126,9 +141,25 @@ await langfuse.async_api.*
 import { LangfuseClient } from '@langfuse/client';
 
 const langfuse = new LangfuseClient();
-...
-// fetch a trace
-await langfuse.api.trace.get(traceId);
+
+// Retrieve row-level observations via Observations API v2
+const observations = await langfuse.api.observations.getMany({
+  traceId: "trace-id",
+  fields: "core,basic,usage",
+  limit: 100,
+});
+
+// Retrieve aggregates via Metrics API v2
+const metrics = await langfuse.api.metrics.get({
+  query: JSON.stringify({
+    view: "observations",
+    metrics: [{ measure: "totalCost", aggregation: "sum" }],
+    dimensions: [{ field: "providedModelName" }],
+    filters: [],
+    fromTimestamp: "2025-05-01T00:00:00Z",
+    toTimestamp: "2025-05-13T00:00:00Z"
+  })
+});
 
 // explore more endpoints via Intellisense
 langfuse.api.*
@@ -197,8 +228,16 @@ try {
 
 ## Retrieve Data via the API
 
-- [Observations API](/docs/api-and-data-platform/features/observations-api) - Retrieve observation data (spans, generations, events) from Langfuse for use in custom workflows, evaluation pipelines, and analytics. The v2 API offers high-performance data retrieval with cursor-based pagination and selective field retrieval.
-- [Metrics API](/docs/metrics/features/metrics-api) - Retrieve aggregated analytics and metrics from your Langfuse data. Query across different views (observations, scores) with customizable dimensions, metrics, filters, and time granularity for powerful custom reports and dashboards.
+For new data extraction workflows, use the v2 data APIs:
+
+- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) - Retrieve observation data (spans, generations, events) from Langfuse for custom workflows, evaluation pipelines, and analytics.
+- [Metrics API v2](/docs/metrics/features/metrics-api#v2) - Retrieve aggregated analytics and metrics from your Langfuse data.
+
+<Callout type="warning">
+
+The legacy data retrieval endpoints `GET /api/public/traces`, `GET /api/public/traces/{traceId}`, `GET /api/public/observations`, `GET /api/public/observations/{observationId}`, and `GET /api/public/metrics` are deprecated. See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis) for migration examples.
+
+</Callout>
 
 ## Alternatives
 

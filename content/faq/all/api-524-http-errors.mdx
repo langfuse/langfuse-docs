@@ -7,26 +7,31 @@ tags: [platform]
 
 The 524 error class on Langfuse Cloud indicates that your request timed out because ClickHouse ran out of resources or out of time while processing your query.
 This typically occurs when queries scan too much data due to overly broad filter conditions.
-The main patch for those errors is adding narrow time-frame conditions to reduce the amount of data to be scanned.
+For deprecated data retrieval endpoints, the recommended fix is to migrate to the v2 data APIs instead of tuning the old query.
 
 ## General Approaches
 
 To prevent 524 errors across all API endpoints:
 
-1. **Always use timestamp filters**: Add `fromTimestamp` and `toTimestamp` parameters to limit the time range
-2. **Add specific filters**: Use `userId`, `sessionId`, `name`, `tags`, or other filters to narrow your query
+1. **Use v2 data APIs for extraction**: Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) for row-level data and [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
+2. **Always use timestamp filters**: Add `fromTimestamp` and `toTimestamp` parameters to limit the time range
+3. **Add specific filters**: Use `userId`, `sessionId`, `name`, `tags`, or other filters to narrow your query
 
-## Optimizations for GET /api/public/traces
+## Deprecated trace reads
 
-The [`GET /api/public/traces`](https://api.reference.langfuse.com/#tag/trace/get/api/public/traces) endpoint is particularly susceptible to 524 errors.
-Follow these best practices:
+The `GET /api/public/traces` and `GET /api/public/traces/{traceId}` endpoints are deprecated and particularly susceptible to 524 errors on large projects.
 
-- **Add timestamp filters**: E.g. run `GET /api/public/traces?page=1&limit=10&fromTimestamp=2025-10-16T00:00:00.000Z&toTimestamp=2025-10-17T00:00:00.000Z`.
-- **Use the `fields` parameter**: Request only the data you need to avoid expensive joins (e.g. `GET /api/public/traces?fields=core,io`).
+Recommended replacements:
+
+- Use `GET /api/public/v2/observations` for row-level spans, generations, and events.
+- Use `GET /api/public/v2/observations?traceId=<traceId>` when you need the observations that belong to a single trace.
+- Use `GET /api/public/v2/metrics` for aggregate cost, usage, latency, volume, and score queries.
+
+See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis) for examples.
 
 ### Additional Self-Host Options
 
-Self-hosters can configure server-side defaults and restrictions for the `GET /api/public/traces` endpoint via environment variables.
+For self-hosted deployments that still need compatibility access to deprecated trace reads, you can configure server-side defaults and restrictions for the `GET /api/public/traces` endpoint via environment variables.
 Enforcement order: rejection → default date range → default fields.
 
 | Variable                                      | Type                                      | Description                                                                                                                                                                                                                                                   |

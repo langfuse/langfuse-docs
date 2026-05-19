@@ -15,13 +15,33 @@ Example use cases:
 - Fine-tuning based on raw exports of traces
 - Correlation of LLM Evals with observed user behavior in Data Warehouse
 
+## Start here
+
+Choose the data access path based on what you want to build:
+
+| Goal | Recommended path |
+| --- | --- |
+| Query aggregate cost, usage, latency, volume, or score metrics | [Metrics API v2](/docs/metrics/features/metrics-api#v2) |
+| Retrieve row-level spans, generations, or events | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) |
+| Use the API from Python or JS/TS | [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) |
+| Export large volumes on a schedule | [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) |
+| Download a filtered one-off export | [Export from UI](/docs/api-and-data-platform/features/export-from-ui) |
+| Manage prompts, datasets, projects, and other resources | [Public API](/docs/api-and-data-platform/features/public-api) |
+
+<Callout type="warning">
+
+The legacy data retrieval endpoints `GET /api/public/traces`, `GET /api/public/traces/{traceId}`, `GET /api/public/observations`, `GET /api/public/observations/{observationId}`, and `GET /api/public/metrics` are deprecated. New data extraction workflows should use Observations API v2 or Metrics API v2.
+
+</Callout>
+
 ```mermaid
 graph LR
     LF["Langfuse<br/><br/>• Traces<br/>• Prompts<br/>• Scores"]
 
-    LF --> API["Public API"]
+    LF --> API["Public API<br/>(resource management)"]
     LF --> Dash["In-app Dashboards"]
-    LF --> Metrics["Metrics API"]
+    LF --> Metrics["Metrics API v2"]
+    LF --> Observations["Observations API v2"]
     LF --> Export["Exports to S3 / DWH"]
 ```
 
@@ -36,6 +56,8 @@ import {
   Cloud,
   Blocks,
   BarChart3,
+  RefreshCcw,
+  ListTree,
 } from "lucide-react";
 
 <Cards num={3}>
@@ -58,9 +80,21 @@ import {
     arrow
   />
   <Card
+    title="Observations API"
+    href="/docs/api-and-data-platform/features/observations-api"
+    icon={<ListTree />}
+    arrow
+  />
+  <Card
     title="Metrics API"
     href="/docs/metrics/features/metrics-api"
     icon={<BarChart3 />}
+    arrow
+  />
+  <Card
+    title="Upgrade from deprecated APIs"
+    href="/docs/api-and-data-platform/features/migrate-to-v2-data-apis"
+    icon={<RefreshCcw />}
     arrow
   />
   <Card

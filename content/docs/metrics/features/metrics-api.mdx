@@ -7,11 +7,17 @@ description: Retrieve custom metrics from Langfuse for flexible analytics and re
 # Metrics API
 
 ```
-GET /api/public/metrics
+GET /api/public/v2/metrics
 ```
 
 The **Metrics API** enables you to retrieve customized analytics from your Langfuse data.
 This endpoint allows you to specify dimensions, metrics, filters, and time granularity to build powerful custom reports and dashboards for your LLM applications.
+
+<Callout type="warning">
+
+The legacy `GET /api/public/metrics` endpoint is deprecated. Use Metrics API v2 for new aggregate data extraction workflows. See [Upgrade to v2 data APIs](/docs/api-and-data-platform/features/migrate-to-v2-data-apis) for migration examples.
+
+</Callout>
 
 ## Metrics API v2 [#v2]
 
@@ -19,7 +25,7 @@ This endpoint allows you to specify dimensions, metrics, filters, and time granu
 
 **Cloud-only:** The v2 Metrics API is only available on Langfuse Cloud. We are working on a robust migration path for self-hosted deployments.
 
-**Data availability note:** When using current SDK versions, data may take approximately 5 minutes to appear on v2 endpoints. We will be releasing updated SDK versions soon that will make data available immediately.
+**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed on v2 endpoints. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
 
 </Callout>
 
@@ -73,9 +79,11 @@ curl \
 
 </Callout>
 
-## Metrics API v1 [#v1]
+## Deprecated Metrics API v1 [#v1]
 
-The Metrics API supports querying across different views (traces, observations, scores) and allows you to:
+The v1 `GET /api/public/metrics` endpoint is deprecated and retained only for backward compatibility. Use [Metrics API v2](#v2) for new reporting, billing, dashboard, and monitoring workflows.
+
+The deprecated v1 Metrics API supports querying across different views (traces, observations, scores) and allows you to:
 
 - Select specific dimensions to group your data
 - Apply multiple metrics with different aggregation methods
@@ -328,7 +336,7 @@ Categorical scores have an additional dimension:
 
 <Callout type="warning">
 
-This endpoint is legacy and is no longer listed in the [public API reference](https://api.reference.langfuse.com/). It remains available for backwards compatibility, but for new use cases please use the [Metrics API v2](#v2) above — it has higher rate limits and offers more flexibility.
+This endpoint is legacy and is no longer listed in the [public API reference](https://api.reference.langfuse.com/). It remains available for backward compatibility, but for new use cases please use the [Metrics API v2](#v2) above. It has higher rate limits and offers more flexibility.
 
 </Callout>
 
