@@ -68,7 +68,8 @@ curl \
     "filters": [],
     "fromTimestamp": "2025-12-01T00:00:00Z",
     "toTimestamp": "2025-12-16T00:00:00Z",
-    "orderBy": [{"field": "totalCost_sum", "direction": "desc"}]
+    "orderBy": [{"field": "totalCost_sum", "direction": "desc"}],
+    "rowLimit": 1000
   }' \
   https://cloud.langfuse.com/api/public/v2/metrics
 ```
@@ -88,6 +89,7 @@ When moving existing queries to v2:
 - Replace `GET /api/public/metrics` with `GET /api/public/v2/metrics`.
 - Replace `view: "traces"` with `view: "observations"` and use trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion` where supported. `userId` and `sessionId` remain available as filters, but cannot be used for grouping in v2.
 - Review your `metrics` array when migrating trace-view queries. In the v2 `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows. Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and group by `traceId` client-side when you need trace-level counts or trace durations.
+- Set `rowLimit` explicitly when migrating queries that should return more than the default 100 rows.
 - Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) instead if you need row-level spans, generations, or events.
 
 The rest of this section documents the legacy v1 endpoint for existing integrations.

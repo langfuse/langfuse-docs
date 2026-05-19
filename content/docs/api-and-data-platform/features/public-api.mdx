@@ -79,7 +79,7 @@ curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
 
 ## Access via SDKs
 
-Both the Langfuse [Python SDK](/docs/sdk/python/decorators) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
+Both the Langfuse [Python SDK](/docs/sdk/python/sdk-v3) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
 
 You can use your editor's Intellisense to explore the API methods and their parameters.
 
@@ -89,6 +89,9 @@ In Python SDK v4 and JS/TS SDK v5, the high-performance resources are the
 defaults: `api.observations`, `api.scores`, and `api.metrics`. Legacy v1
 resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). See
 [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) for SDK examples.
+
+Observations API v2 and Metrics API v2 are currently Cloud-only. For self-hosted
+deployments, use the endpoints available in your Langfuse version.
 
 </Callout>
 
@@ -101,7 +104,7 @@ When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `g
 <LangTabs items={["Python SDK", "JS/TS SDK", "Java SDK"]}>
 <Tab>
 
-When using the [Python SDK](/docs/sdk/python/decorators):
+When using the [Python SDK](/docs/sdk/python/sdk-v3):
 
 ```python
 from langfuse import get_client
