@@ -13,21 +13,15 @@ For older data retrieval endpoints, the recommended fix is to move to the v2 dat
 
 To prevent 524 errors across all API endpoints:
 
-1. **Use v2 data APIs for extraction**: Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) for row-level data and [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
+1. **Use v2 data APIs for extraction**: Follow the [Observations API v2 upgrade guidance](/docs/api-and-data-platform/features/observations-api#upgrade-from-older-reads) for row-level data and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
 2. **Always use timestamp filters**: Add `fromTimestamp` and `toTimestamp` parameters to limit the time range
 3. **Add specific filters**: Use `userId`, `sessionId`, `name`, `tags`, or other filters to narrow your query
 
 ## Older trace reads
 
-The `GET /api/public/traces` and `GET /api/public/traces/{traceId}` endpoints remain available, but are not recommended as the default for new data extraction workflows. They are particularly susceptible to 524 errors on large projects.
+The older trace read endpoints remain available, but are not recommended as the default for new data extraction workflows. They are particularly susceptible to 524 errors on large projects.
 
-Recommended replacements:
-
-- Use `GET /api/public/v2/observations` for row-level spans, generations, and events.
-- Use `GET /api/public/v2/observations?traceId=<traceId>` when you need the observations that belong to a single trace.
-- Use `GET /api/public/v2/metrics` for aggregate cost, usage, latency, volume, and score queries.
-
-See [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) for examples.
+Follow the [Observations API v2 upgrade guidance](/docs/api-and-data-platform/features/observations-api#upgrade-from-older-reads) to move trace and observation extraction workflows to the v2 API. For aggregate reporting, use [Metrics API v2](/docs/metrics/features/metrics-api#v2).
 
 ### Additional Self-Host Options
 
