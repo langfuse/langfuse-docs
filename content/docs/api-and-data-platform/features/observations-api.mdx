@@ -72,7 +72,7 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 | `metrics`       | latency, timeToFirstToken                                                               |
 | `trace_context` | tags, release, traceName                                                                |
 
-If `fields` is not specified, `core` and `basic` field groups are returned by default.
+If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response — not `null`. Check for key presence rather than null-checks when parsing partial responses.
 
 **2. Cursor-Based Pagination**
 
