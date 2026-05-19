@@ -147,37 +147,70 @@ npm install @langfuse/client
 import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
+```
 
-// Retrieve row-level observations via Observations API v2
+### Observations
+
+```ts
 const observations = await langfuse.api.observations.getMany({
   traceId: "abcdef1234",
   type: "GENERATION",
   limit: 100,
   fields: "core,basic,usage",
 });
-
-// Retrieve aggregates via Metrics API v2
-const metrics = await langfuse.api.metrics.get({
-  query: JSON.stringify({
-    view: "observations",
-    metrics: [{ measure: "totalCost", aggregation: "sum" }],
-    dimensions: [{ field: "providedModelName" }],
-    filters: [],
-    fromTimestamp: "2025-05-01T00:00:00Z",
-    toTimestamp: "2025-05-13T00:00:00Z",
-  }),
-});
-
-// Fetch sessions and scores
-const sessions = await langfuse.api.sessions.list();
-const scores = await langfuse.api.scores.getMany();
-
-// Explore more entities via Intellisense
 ```
 
 Use `traceId` to retrieve the observations that belong to a single trace. Use `parentObservationId` in the response to reconstruct an observation tree when needed.
 
-For the full metrics query schema, supported dimensions, filters, and examples, see the [Metrics API v2 documentation](/docs/metrics/features/metrics-api#v2).
+For row-level observation filters, field selection, and cursor pagination, see the [Observations API v2 documentation](/docs/api-and-data-platform/features/observations-api#v2).
+
+### Metrics
+
+For the full query schema, supported dimensions, filters, and examples, see the [Metrics API v2 documentation](/docs/metrics/features/metrics-api#v2).
+
+```ts
+const query = {
+  view: "observations",
+  metrics: [{ measure: "totalCost", aggregation: "sum" }],
+  dimensions: [{ field: "providedModelName" }],
+  filters: [],
+  fromTimestamp: "2025-05-01T00:00:00Z",
+  toTimestamp: "2025-05-13T00:00:00Z",
+};
+
+const metrics = await langfuse.api.metrics.get({
+  query: JSON.stringify(query),
+});
+```
+
+### Other resources
+
+Sessions:
+
+```ts
+const sessions = await langfuse.api.sessions.list({ limit: 50 });
+```
+
+Scores:
+
+```ts
+const scores = await langfuse.api.scores.getMany();
+```
+
+Prompts:
+
+Please refer to the [prompt management documentation](/docs/prompt-management/get-started) on fetching prompts.
+
+Datasets:
+
+```ts
+// Namespaces:
+// - langfuse.api.datasets.*
+// - langfuse.api.datasetItems.*
+// - langfuse.api.datasetRunItems.*
+```
+
+Explore more entities via Intellisense on `langfuse.api`.
 
 </Tab>
 </LangTabs>
