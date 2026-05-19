@@ -1,7 +1,7 @@
 ---
 date: 2026-05-20
-title: "Enriched observations is the default for new blob storage exports"
-description: New Langfuse Cloud projects export blob storage data as enriched observations. The legacy traces/observations sources stay available on existing projects and self-hosted deployments.
+title: "Enriched observations is the default for new Cloud projects"
+description: New Langfuse Cloud projects use enriched observations for blob storage, PostHog, and Mixpanel exports. The legacy traces/observations sources stay available on existing projects and self-hosted deployments.
 author: Niklas
 ---
 
@@ -9,13 +9,15 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-Blob storage integrations on Cloud projects created on or after **2026-05-20** use the **Enriched observations (recommended)** source. The **Traces and observations (legacy)** and **Traces and observations (legacy) and enriched observations** sources are hidden from the UI for these projects; the REST API rejects them with `400 BAD_REQUEST`.
+Blob storage, PostHog, and Mixpanel integrations on Cloud projects created on or after **2026-05-20** use the **Enriched observations (recommended)** source. The **Traces and observations (legacy)** and **Traces and observations (legacy) and enriched observations** sources are hidden from the UI for these projects.
+
+For blob storage, the REST API also rejects legacy values for post-cutoff projects with `400 BAD_REQUEST`. PostHog and Mixpanel have no public REST surface.
 
 What this means in practice:
 
 - **One row per observation, with trace context inlined** — `user_id`, `session_id`, `tags`, `release`, `trace_name`, and `environment` ride along on the same row. No warehouse-side join needed.
-- **Per-column control** — pair the source with [field groups](/docs/api-and-data-platform/features/export-to-blob-storage#export-field-groups) to keep just the columns your pipeline needs.
-- **Fewer files per window** — only `observations_v2/` and `scores/`, instead of `traces/`, `observations/`, and `scores/`.
+- **Per-column control** (blob storage) — pair the source with [field groups](/docs/api-and-data-platform/features/export-to-blob-storage#export-field-groups) to keep just the columns your pipeline needs.
+- **Fewer files per window** (blob storage) — only `observations_v2/` and `scores/`, instead of `traces/`, `observations/`, and `scores/`.
 
 Nothing changes for **existing projects** (Cloud or self-hosted) or **self-hosted deployments**: all three sources remain available. The legacy sources are still supported there for backwards compatibility, but the recommendation is the same — switch to Enriched observations when you're ready.
 
