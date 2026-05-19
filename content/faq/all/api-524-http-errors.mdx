@@ -11,10 +11,10 @@ For older data retrieval endpoints, the recommended fix is to move to the v2 dat
 
 ## General Approaches
 
-To prevent 524 errors across all API endpoints:
+To prevent 524 errors across API endpoints:
 
 1. **Use v2 data APIs for extraction**: Follow the [Observations API v2 upgrade guidance](/docs/api-and-data-platform/features/observations-api#upgrade-from-older-reads) for row-level data and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
-2. **Always use timestamp filters**: Add `fromTimestamp` and `toTimestamp` parameters to limit the time range
+2. **Always use the endpoint's timestamp filters**: v2 Observations uses `fromStartTime` and `toStartTime`; Metrics API v2 uses `fromTimestamp` and `toTimestamp` inside the JSON `query`; older trace reads use `fromTimestamp` and `toTimestamp` URL parameters.
 3. **Add specific filters**: Use `userId`, `sessionId`, `name`, `tags`, or other filters to narrow your query
 
 ## Older trace reads

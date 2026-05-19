@@ -38,12 +38,12 @@ The v2 Observations API is a redesigned endpoint optimized for high-performance 
 
 | Existing usage                                                            | Recommended replacement                                                                                 |
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| List traces with `GET /api/public/traces`                                 | Use `GET /api/public/v2/observations?fromTimestamp=<from>&toTimestamp=<to>` and group rows by `traceId` |
-| Fetch one trace with `GET /api/public/traces/{traceId}`                   | Use `GET /api/public/v2/observations?traceId=<traceId>&fromTimestamp=<from>&toTimestamp=<to>`           |
-| List observations with `GET /api/public/observations`                     | Use `GET /api/public/v2/observations?fromTimestamp=<from>&toTimestamp=<to>`                             |
-| Fetch one observation with `GET /api/public/observations/{observationId}` | Use `GET /api/public/v2/observations?filter=<id filter>&fromTimestamp=<from>&toTimestamp=<to>`          |
+| List traces with `GET /api/public/traces`                                 | Use `GET /api/public/v2/observations?fromStartTime=<from>&toStartTime=<to>` and group rows by `traceId` |
+| Fetch one trace with `GET /api/public/traces/{traceId}`                   | Use `GET /api/public/v2/observations?traceId=<traceId>&fromStartTime=<from>&toStartTime=<to>`           |
+| List observations with `GET /api/public/observations`                     | Use `GET /api/public/v2/observations?fromStartTime=<from>&toStartTime=<to>`                             |
+| Fetch one observation with `GET /api/public/observations/{observationId}` | Use `GET /api/public/v2/observations?filter=<id filter>&fromStartTime=<from>&toStartTime=<to>`          |
 
-Always include `fromTimestamp` and `toTimestamp` to keep each request bounded.
+Always include `fromStartTime` and `toStartTime` to keep each request bounded.
 
 ### Key Improvements
 
