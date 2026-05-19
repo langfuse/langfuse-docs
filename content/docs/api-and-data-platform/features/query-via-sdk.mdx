@@ -26,18 +26,6 @@ New data is typically available for querying within 15-30 seconds of ingestion, 
 
 Via the [SDKs](/docs/sdk/overview) for Python and JS/TS you can easily query the API without having to write the HTTP requests yourself.
 
-<LangTabs items={["Python SDK", "JS/TS SDK"]}>
-<Tab title="Python SDK">
-
-```bash
-pip install langfuse
-```
-
-```python
-from langfuse import get_client
-langfuse = get_client()  # uses environment variables to authenticate
-```
-
 The `api` namespace is auto-generated from the Public API (OpenAPI). Method names mirror REST resources and support filters and pagination.
 
 <Callout type="info">
@@ -56,6 +44,18 @@ for row-level data and [Metrics API v2](/docs/metrics/features/metrics-api#v2)
 for aggregates.
 
 </Callout>
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
+
+```bash
+pip install langfuse
+```
+
+```python
+from langfuse import get_client
+langfuse = get_client()  # uses environment variables to authenticate
+```
 
 ### Observations
 
