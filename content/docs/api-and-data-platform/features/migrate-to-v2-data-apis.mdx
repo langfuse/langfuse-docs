@@ -19,30 +19,32 @@ The older data retrieval APIs remain available, but are not recommended as the d
 
 ## Choose the replacement
 
-| Existing usage                                                            | Recommended replacement                                                                                                 |
-| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| List traces with `GET /api/public/traces`                                 | Query row-level data with `GET /api/public/v2/observations`, or query aggregates with `GET /api/public/v2/metrics`      |
-| Fetch one trace with `GET /api/public/traces/{traceId}`                   | Query its observations with `GET /api/public/v2/observations?traceId=<traceId>`                                         |
-| List observations with `GET /api/public/observations`                     | Use `GET /api/public/v2/observations`                                                                                   |
-| Fetch one observation with `GET /api/public/observations/{observationId}` | Use `GET /api/public/v2/observations?filter=[{"type":"string","column":"id","operator":"=","value":"<observationId>"}]` |
-| Query aggregates with `GET /api/public/metrics`                           | Use `GET /api/public/v2/metrics`                                                                                        |
-
-If you are extracting large volumes for downstream analytics on a schedule, use [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through an API.
-
-## Upgrade SDK usage
-
 Python SDK v4 and JS/TS SDK v5 use v2 data APIs by default.
 
-| SDK    | Existing or transitional usage                           | Recommended usage                                                            |
-| ------ | -------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Python | `langfuse.api.trace.list(...)` for bulk extraction       | `langfuse.api.observations.get_many(...)` or `langfuse.api.metrics.get(...)` |
-| Python | `langfuse.api.trace.get("trace-id")` for data extraction | `langfuse.api.observations.get_many(trace_id="trace-id", ...)`               |
-| Python | `langfuse.api.observations_v_2`                          | `langfuse.api.observations`                                                  |
-| Python | `langfuse.api.metrics_v_2`                               | `langfuse.api.metrics`                                                       |
-| JS/TS  | `langfuse.api.trace.list(...)` for bulk extraction       | `langfuse.api.observations.getMany(...)` or `langfuse.api.metrics.get(...)`  |
-| JS/TS  | `langfuse.api.trace.get("trace-id")` for data extraction | `langfuse.api.observations.getMany({ traceId: "trace-id", ... })`            |
-| JS/TS  | `langfuse.api.observationsV2`                            | `langfuse.api.observations`                                                  |
-| JS/TS  | `langfuse.api.metricsV2`                                 | `langfuse.api.metrics`                                                       |
+| Existing usage                                                            | REST API replacement                                                                                         | Python SDK replacement                                                       | JS/TS SDK replacement                                                        |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| List traces with `GET /api/public/traces`                                 | Query row-level data with `GET /api/public/v2/observations`, or aggregates with `GET /api/public/v2/metrics` | `langfuse.api.observations.get_many(...)` or `langfuse.api.metrics.get(...)` | `langfuse.api.observations.getMany(...)` or `langfuse.api.metrics.get(...)`  |
+| Fetch one trace with `GET /api/public/traces/{traceId}`                   | Query its observations with `GET /api/public/v2/observations?traceId=<traceId>`                              | `langfuse.api.observations.get_many(trace_id="trace-id", ...)`               | `langfuse.api.observations.getMany({ traceId: "trace-id", ... })`            |
+| List observations with `GET /api/public/observations`                     | Use `GET /api/public/v2/observations`                                                                        | `langfuse.api.observations.get_many(...)`                                    | `langfuse.api.observations.getMany(...)`                                     |
+| Fetch one observation with `GET /api/public/observations/{observationId}` | Use `GET /api/public/v2/observations?filter=<id filter>`                                                     | `langfuse.api.observations.get_many(filter="<id filter>")`                   | `langfuse.api.observations.getMany({ filter: JSON.stringify(<id filter>) })` |
+| Query aggregates with `GET /api/public/metrics`                           | Use `GET /api/public/v2/metrics`                                                                             | `langfuse.api.metrics.get(...)`                                              | `langfuse.api.metrics.get(...)`                                              |
+
+For observation lookups, use this `<id filter>`:
+
+```json
+[
+  {
+    "type": "string",
+    "column": "id",
+    "operator": "=",
+    "value": "<observationId>"
+  }
+]
+```
+
+If you use transitional SDK namespaces, replace Python `langfuse.api.observations_v_2` / `langfuse.api.metrics_v_2` with `langfuse.api.observations` / `langfuse.api.metrics`, and replace JS/TS `langfuse.api.observationsV2` / `langfuse.api.metricsV2` with `langfuse.api.observations` / `langfuse.api.metrics`.
+
+If you are extracting large volumes for downstream analytics on a schedule, use [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through an API.
 
 Legacy namespaces remain available when you need the older API behavior:
 
