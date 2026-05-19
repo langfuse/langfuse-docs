@@ -79,22 +79,22 @@ For a complete reference of all fields included in each export file (traces, obs
 
 For the **Enriched observations (recommended)** and **Traces and observations (legacy) and enriched observations** sources, you can choose which column groups appear in each row of the enriched observations export. Eleven groups cover the full row, ten of which are toggleable; toggle them in **Project Settings → Integrations → Blob Storage** under **Export Field Groups**.
 
-| Group           | Columns                                                                                                                | Toggleable                 |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `core`          | `id`, `trace_id`, `start_time`, `end_time`, `project_id`, `parent_observation_id`, `type`                              | Required (always exported) |
-| `basic`         | `name`, `level`, `status_message`, `version`, `environment`, `bookmarked`, `public`, `user_id`, `session_id`           | Yes                        |
-| `time`          | `completion_start_time`, `created_at`, `updated_at`                                                                    | Yes                        |
-| `io`            | `input`, `output`                                                                                                      | Yes                        |
-| `metadata`      | `metadata`                                                                                                             | Yes                        |
-| `model`         | `provided_model_name`, `model_id`, `model_parameters`                                                                  | Yes                        |
-| `usage`         | `usage_details`, `cost_details`, `total_cost`, `input_price`, `output_price`, `total_price`, `usage_pricing_tier_name` | Yes                        |
-| `prompt`        | `prompt_id`, `prompt_name`, `prompt_version`                                                                           | Yes                        |
-| `metrics`       | `latency`, `time_to_first_token`                                                                                       | Yes                        |
-| `tools`         | `tool_definitions`, `tool_calls`, `tool_call_names`                                                                    | Yes                        |
-| `trace_context` | `tags`, `release`, `trace_name`                                                                                        | Yes                        |
+| Group           | Columns                                                                                                      | Toggleable                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| `core`          | `id`, `trace_id`, `start_time`, `end_time`, `project_id`, `parent_observation_id`, `type`                    | Required (always exported) |
+| `basic`         | `name`, `level`, `status_message`, `version`, `environment`, `bookmarked`, `public`, `user_id`, `session_id` | Yes                        |
+| `time`          | `completion_start_time`, `created_at`, `updated_at`                                                          | Yes                        |
+| `io`            | `input`, `output`                                                                                            | Yes                        |
+| `metadata`      | `metadata`                                                                                                   | Yes                        |
+| `model`         | `provided_model_name`, `model_id`, `model_parameters`, `input_price`, `output_price`, `total_price`          | Yes                        |
+| `usage`         | `usage_details`, `cost_details`, `total_cost`, `usage_pricing_tier_name`                                     | Yes                        |
+| `prompt`        | `prompt_id`, `prompt_name`, `prompt_version`                                                                 | Yes                        |
+| `metrics`       | `latency`, `time_to_first_token`                                                                             | Yes                        |
+| `tools`         | `tool_definitions`, `tool_calls`, `tool_call_names`                                                          | Yes                        |
+| `trace_context` | `tags`, `release`, `trace_name`                                                                              | Yes                        |
 
 <Callout type="info">
-  Pricing fields (`input_price`, `output_price`, `total_price`, `usage_pricing_tier_name`) require the `usage` group. Deselecting `usage` skips the worker-side model pricing lookup entirely.
+  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_name` field stays in the `usage` group.
 </Callout>
 
 New integrations default to all eleven groups, so behavior matches earlier exports unless you narrow the selection. The **Traces and observations (legacy)** source uses a fixed column set and ignores field groups.
