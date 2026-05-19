@@ -21,7 +21,7 @@ The `core` group (`id`, `trace_id`, `start_time`, `end_time`, `project_id`, `par
 
 Pricing enrichment (`input_price`, `output_price`, `total_price`, `usage_pricing_tier_name`) is gated on the `usage` group, so deselecting `usage` also skips the worker-side model lookup.
 
-Field groups apply to the **Enriched observations** export source (and the enriched portion of the combined legacy + enriched source). The legacy **Traces and observations** source still uses its fixed column set.
+Field groups apply to the **Enriched observations (recommended)** export source (and the enriched portion of **Traces and observations (legacy) and enriched observations**). The **Traces and observations (legacy)** source still uses its fixed column set.
 
 The same controls are available on the REST API via `exportSource` and `exportFieldGroups` on `GET`/`PUT /api/public/integrations/blob-storage`.
 
