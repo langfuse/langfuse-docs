@@ -28,7 +28,7 @@ Via the [SDKs](/docs/sdk/overview) for Python and JS/TS you can easily query the
 
 The `api` namespace is auto-generated from the Public API (OpenAPI). Method names mirror REST resources and support filters and pagination.
 
-<Callout type="info">
+<Callout type="warning">
 
 From Python SDK v4 and JS/TS SDK v5 onward, the high-performance v2 data APIs
 are the defaults:
@@ -36,6 +36,8 @@ are the defaults:
 - `api.observations` (formerly `api.observations_v_2` / `api.observationsV2`)
 - `api.scores` (formerly `api.score_v_2` / `api.scoreV2`)
 - `api.metrics` (formerly `api.metrics_v_2` / `api.metricsV2`)
+
+The old v2 aliases were removed in Python SDK v4 and JS/TS SDK v5.
 
 The older trace, observation, and metrics read APIs remain available, but they
 are not recommended as the default for new data extraction workflows because

@@ -45,6 +45,8 @@ The v2 Observations API is a redesigned endpoint optimized for high-performance 
 
 Always include `fromStartTime` and `toStartTime` to keep each request bounded.
 
+The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. For single-observation lookups, pass a URL-encoded `filter` condition on the `id` column; see the [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for the filter schema.
+
 ### Key Improvements
 
 **1. Selective Field Retrieval**

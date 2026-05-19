@@ -25,7 +25,7 @@ The older Metrics API remains available, but is not recommended as the default f
 
 **Cloud-only:** The v2 Metrics API is only available on Langfuse Cloud. We are working on a robust migration path for self-hosted deployments.
 
-**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed on v2 endpoints. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
+**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
 
 </Callout>
 
@@ -86,7 +86,8 @@ The v1 `GET /api/public/metrics` endpoint remains available, but is not recommen
 When moving existing queries to v2:
 
 - Replace `GET /api/public/metrics` with `GET /api/public/v2/metrics`.
-- Replace `view: "traces"` with `view: "observations"` and trace-level dimensions such as `traceName`, `userId`, `sessionId`, `traceRelease`, or `traceVersion`.
+- Replace `view: "traces"` with `view: "observations"` and use trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion` where supported. `userId` and `sessionId` remain available as filters, but cannot be used for grouping in v2.
+- Review your `metrics` array when migrating trace-view queries. In the v2 `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows. Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and group by `traceId` client-side when you need trace-level counts or trace durations.
 - Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) instead if you need row-level spans, generations, or events.
 
 The rest of this section documents the legacy v1 endpoint for existing integrations.
