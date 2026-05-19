@@ -36,13 +36,14 @@ The v2 Observations API is a redesigned endpoint optimized for high-performance 
 
 ### Upgrade from older trace and observation reads [#upgrade-from-older-reads]
 
-| Existing usage                                                            | Recommended replacement                                           |
-| ------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| List traces with `GET /api/public/traces`                                 | Use `GET /api/public/v2/observations` and group rows by `traceId` |
-| Fetch one trace with `GET /api/public/traces/{traceId}`                   | Use `GET /api/public/v2/observations?traceId=<traceId>`           |
-| List observations with `GET /api/public/observations`                     | Use `GET /api/public/v2/observations`                             |
-| Fetch one observation with `GET /api/public/observations/{observationId}` | Use `GET /api/public/v2/observations?filter=<id filter>`          |
+| Existing usage                                                            | Recommended replacement                                                                                 |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| List traces with `GET /api/public/traces`                                 | Use `GET /api/public/v2/observations?fromTimestamp=<from>&toTimestamp=<to>` and group rows by `traceId` |
+| Fetch one trace with `GET /api/public/traces/{traceId}`                   | Use `GET /api/public/v2/observations?traceId=<traceId>&fromTimestamp=<from>&toTimestamp=<to>`           |
+| List observations with `GET /api/public/observations`                     | Use `GET /api/public/v2/observations?fromTimestamp=<from>&toTimestamp=<to>`                             |
+| Fetch one observation with `GET /api/public/observations/{observationId}` | Use `GET /api/public/v2/observations?filter=<id filter>&fromTimestamp=<from>&toTimestamp=<to>`          |
 
+Always include `fromTimestamp` and `toTimestamp` to keep each request bounded.
 Use `fields` to request only the field groups you need, and use `cursor` pagination for large result sets.
 Use [Metrics API v2](/docs/metrics/features/metrics-api#v2) instead when you need aggregate cost, usage, latency, volume, or score queries.
 
