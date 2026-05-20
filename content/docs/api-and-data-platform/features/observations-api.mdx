@@ -59,18 +59,18 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 
 #### Available Field Groups
 
-| Group           | Fields                                                                                   |
-| --------------- | ---------------------------------------------------------------------------------------- |
-| `core`          | Always included: id, traceId, startTime, endTime, projectId, parentObservationId, type   |
-| `basic`         | name, level, statusMessage, version, environment, bookmarked, public, userId, sessionId  |
-| `time`          | completionStartTime, createdAt, updatedAt                                                |
-| `io`            | input, output                                                                            |
-| `metadata`      | metadata                                                                                 |
-| `model`         | providedModelName, internalModelId, modelParameters, inputPrice, outputPrice, totalPrice |
-| `usage`         | usageDetails, inputUsage, outputUsage, totalUsage, costDetails, usagePricingTierName     |
-| `prompt`        | promptId, promptName, promptVersion                                                      |
-| `metrics`       | latency, timeToFirstToken                                                                |
-| `trace_context` | tags, release, traceName                                                                 |
+| Group           | Fields                                                                                                                 |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `core`          | Always included: id, traceId, startTime, endTime, projectId, parentObservationId, type                                 |
+| `basic`         | name, level, statusMessage, version, environment, bookmarked, public, userId, sessionId                                |
+| `time`          | completionStartTime, createdAt, updatedAt                                                                              |
+| `io`            | input, output                                                                                                          |
+| `metadata`      | metadata                                                                                                               |
+| `model`         | providedModelName, internalModelId, modelParameters, inputPrice, outputPrice, totalPrice                               |
+| `usage`         | usageDetails, inputUsage, outputUsage, totalUsage, costDetails, inputCost, outputCost, totalCost, usagePricingTierName |
+| `prompt`        | promptId, promptName, promptVersion                                                                                    |
+| `metrics`       | latency, timeToFirstToken                                                                                              |
+| `trace_context` | tags, release, traceName                                                                                               |
 
 If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response — not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`.
 
