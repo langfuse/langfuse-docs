@@ -58,7 +58,8 @@ export function Logo({
     <a
       href="https://clickhouse.com"
       target="_blank"
-      rel="noopener noreferrer"
+      // Explicitly omit `noreferrer` to pass on referrer to ClickHouse
+      rel="noopener"
       className="text-[10px] sm:text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap"
     >
       by ClickHouse
