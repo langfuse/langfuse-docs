@@ -1,42 +1,43 @@
 ---
 date: 2026-05-26
-title: Langfuse Agent Skill
+title: Langfuse agent skill
 description: Your agent's playbook for production-ready LLM apps
-author: Marlies, Annabell
+author: Lotte, Marlies
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Terminal, BookOpen, Sparkles } from "lucide-react";
+import AutoInstall from "@/components-mdx/get-started/auto-install.mdx";
 
 <ChangelogHeader />
 
-We're releasing our first langfuse skill to give AI coding agents expertise how to leverage langfuse for setting up robust agent observability and evaluation workflows. It follows the open [Agent Skills](https://github.com/anthropics/skills) standard and works with Claude Code, Cursor, Codex, and others.
+We're releasing our first Langfuse skill to give AI coding agents the expertise to leverage Langfuse for robust observability and evaluation workflows. It follows the open [Agent Skills](https://github.com/anthropics/skills) standard and works with Claude Code, Cursor, Codex, and others.
 
-# What are skills and why do they work? 
+## What are skills and why do they work?
 
-Skills are folders of instructions, scripts, and resources that coding agents load dynamically to improve performance on specialized tasks. These instructions define best practices in core observability and evaluation workflows. Leveraging skills improves performance, speed and consistency of agent workflows on most tasks. They are loaded through progressive disclosure, meaning only when relevant to the current task. This keeps the context window from bloating while maintaining access to deep domain expertise.
+Skills are focused bundles of instructions, scripts, and resources that agents load only when relevant. They encode proven practices for observability and evaluation while keeping context lean.
 
-## Why use skills? 
+## Why use skills?
 
-Skills turn Langfuse into a headless platform you control through natural language. You describe the job—the agent has the research-backed playbook. All without leaving your editor. Ask your agent to:
+Skills turn Langfuse into a headless platform you control through natural language. You describe the job, and your agent follows a research-backed playbook in your editor. Ask your agent to:
 
 - Show me the last 10 traces with a score below 0.5. Create a dataset called "edge-cases" and add these traces to it.
-- Migrate the system prompt in src/agent.ts to Langfuse prompt management
-- Is my LLM as a judge "toxicity" actually approximating what my human annotators would have said? Set up a calibration workflow and ensure I have some graphs to look at.
-- My human annotators identified 5 error cases that I keep running into. Can you help me set up an evaluator for each of them?
+- Migrate the system prompt in src/agent.ts to Langfuse prompt management.
+- My human annotators identified five recurring error cases. Help me set up an evaluator for each.
+- Is my LLM-as-a-judge "toxicity" evaluator approximating what my human annotators would have said? Set up a calibration workflow and add graphs I can review.
 
-{/* TODO: Add skill impact measurements using Langfuse evals - compare eval scores (as %) for Claude Code with vs without skills enabled */}
+Walkthrough placeholder: this section will either be (a) a short jobs-to-be-done walkthrough showing how to use the calibration skill end to end, or (b) a concise summary that links out to the calibration blog post.
+{/* TODO(@marlies): Decide whether to publish option (a) the short jobs-to-be-done walkthrough or option (b) the summary linking to the calibration blog post. */}
 
-# Installation 
+{/* TODO(@lotte): Add skill impact measurements using Langfuse evals by comparing eval scores (%) for Claude Code with and without skills enabled. */}
 
-import AutoInstall from "@/components-mdx/get-started/auto-install.mdx";
+## Installation
 
 <AutoInstall />
 
-{/* Q: Should we mention that langfuse/skills is open source and everyone can contribute? */}
+The `langfuse/skills` repository is open source, and contributions are welcome.
 
 ## Learn more
-
-import { Terminal, BookOpen, Sparkles } from "lucide-react";
 
 <Cards num={2}>
   <Card
@@ -47,7 +48,7 @@ import { Terminal, BookOpen, Sparkles } from "lucide-react";
     arrow
   />
   <Card
-    title="Making Agents fall in love with Langfuse"
+    title="Making agents fall in love with Langfuse"
     description="The full story behind the skill, CLI, and agent platform"
     href="/blog/2026-02-13-will-you-be-my-cli"
     icon={<BookOpen />}
