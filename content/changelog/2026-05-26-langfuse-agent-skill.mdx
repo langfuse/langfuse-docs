@@ -11,7 +11,7 @@ import AutoInstall from "@/components-mdx/get-started/auto-install.mdx";
 
 <ChangelogHeader />
 
-We're releasing our first Langfuse skill to give AI coding agents the expertise to leverage Langfuse for robust observability and evaluation workflows. It follows the open [Agent Skills](https://github.com/anthropics/skills) standard and works with Claude Code, Cursor, Codex, and others.
+We're releasing our [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) to give AI coding agents the expertise to leverage Langfuse for robust observability and evaluation workflows. It follows the open [Agent Skills](https://github.com/anthropics/skills) standard and works with Claude Code, Cursor, Codex, and others.
 
 ## What are skills and why do they work?
 
@@ -30,7 +30,15 @@ Skills turn Langfuse into a headless platform you control through natural langua
 Skill example showcase: Judge Calibration. This section will either be (a) a short walkthrough showing how to use the calibration skill end to end, or (b) a concise summary that links out to the calibration blog post.
 - User problem: Is my LLM-as-a-judge "toxicity" evaluator approximating what my human annotators would have said?  */}
 
-{/* TODO(@lotte): Add skill impact measurements using Langfuse evals by comparing eval scores (%) for Claude Code with and without skills enabled. */}
+The skill makes coding agents more effective at working with Langfuse. To illustrate this, here is an example of how an agent instruments the same application without vs. with the skill:
+
+<div className="grid grid-cols-2 mt-4 gap-4">
+
+![Trace produced without the Langfuse skill](/images/changelog/2026-05-26-langfuse-agent-skill/trace-without-skill.png)
+
+![Trace produced with the Langfuse skill](/images/changelog/2026-05-26-langfuse-agent-skill/trace-with-skill.png)
+
+</div>
 
 ## Installation
 
