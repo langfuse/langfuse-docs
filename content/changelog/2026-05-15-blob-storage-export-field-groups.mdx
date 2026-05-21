@@ -25,6 +25,14 @@ Field groups apply to the **Enriched observations (recommended)** export source 
 
 The same controls are available on the REST API via `exportSource` and `exportFieldGroups` on `GET`/`PUT /api/public/integrations/blob-storage`.
 
+## Gzip compression
+
+Exported files are now compressed with **gzip** by default. Files land in your bucket as `.csv.gz`, `.json.gz`, or `.jsonl.gz` and can be read directly by most data warehouses and pipeline tools without a manual decompression step.
+
+To disable compression, toggle **Gzip Compression** off in **Project Settings → Integrations → Blob Storage**, or pass `"compressed": false` on `PUT /api/public/integrations/blob-storage`.
+
+**Existing integrations are unaffected** — they were backfilled as uncompressed so nothing breaks for current consumers. Compression is on by default only for integrations created after this release.
+
 ## Learn more
 
 import { FileCode } from "lucide-react";
