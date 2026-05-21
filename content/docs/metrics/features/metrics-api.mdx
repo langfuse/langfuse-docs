@@ -7,11 +7,17 @@ description: Retrieve custom metrics from Langfuse for flexible analytics and re
 # Metrics API
 
 ```
-GET /api/public/metrics
+GET /api/public/v2/metrics
 ```
 
 The **Metrics API** enables you to retrieve customized analytics from your Langfuse data.
 This endpoint allows you to specify dimensions, metrics, filters, and time granularity to build powerful custom reports and dashboards for your LLM applications.
+
+<Callout type="info">
+
+The older Metrics API remains available, but is not recommended as the default for new aggregate data extraction workflows because it is less performant at scale. Use Metrics API v2 for new reporting, billing, dashboard, and monitoring workflows.
+
+</Callout>
 
 ## Metrics API v2 [#v2]
 
@@ -19,7 +25,7 @@ This endpoint allows you to specify dimensions, metrics, filters, and time granu
 
 **Cloud-only:** The v2 Metrics API is only available on Langfuse Cloud. We are working on a robust migration path for self-hosted deployments.
 
-**Data availability note:** When using current SDK versions, data may take approximately 5 minutes to appear on v2 endpoints. We will be releasing updated SDK versions soon that will make data available immediately.
+**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
 
 </Callout>
 
@@ -62,7 +68,8 @@ curl \
     "filters": [],
     "fromTimestamp": "2025-12-01T00:00:00Z",
     "toTimestamp": "2025-12-16T00:00:00Z",
-    "orderBy": [{"field": "totalCost_sum", "direction": "desc"}]
+    "orderBy": [{"field": "totalCost_sum", "direction": "desc"}],
+    "rowLimit": 1000
   }' \
   https://cloud.langfuse.com/api/public/v2/metrics
 ```
@@ -73,9 +80,21 @@ curl \
 
 </Callout>
 
-## Metrics API v1 [#v1]
+## Legacy Metrics API v1 [#v1]
 
-The Metrics API supports querying across different views (traces, observations, scores) and allows you to:
+The v1 `GET /api/public/metrics` endpoint remains available, but is not recommended as the default for new aggregate data extraction workflows because it is less performant at scale. Use [Metrics API v2](#v2) for new reporting, billing, dashboard, and monitoring workflows.
+
+When moving existing queries to v2:
+
+- Replace `GET /api/public/metrics` with `GET /api/public/v2/metrics`.
+- Replace `view: "traces"` with `view: "observations"` and use trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion` where supported. `userId` and `sessionId` remain available as filters, but cannot be used for grouping in v2.
+- Review your `metrics` array when migrating trace-view queries. In the v2 `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows. Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and group by `traceId` client-side when you need trace-level counts or trace durations.
+- Set `rowLimit` explicitly when migrating queries that should return more than the default 100 rows.
+- Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) instead if you need row-level spans, generations, or events.
+
+The rest of this section documents the legacy v1 endpoint for existing integrations.
+
+The v1 Metrics API supports querying across different views (traces, observations, scores) and allows you to:
 
 - Select specific dimensions to group your data
 - Apply multiple metrics with different aggregation methods
@@ -83,15 +102,15 @@ The Metrics API supports querying across different views (traces, observations, 
 - Analyze data across time with customizable granularity
 - Order results according to your needs
 
-## Query Parameters
+### Query Parameters
 
-The API accepts a JSON query object passed as a URL-encoded parameter:
+The v1 API accepts a JSON query object passed as a URL-encoded parameter:
 
 | Parameter | Type        | Description                                                |
 | --------- | ----------- | ---------------------------------------------------------- |
 | `query`   | JSON string | The encoded query object defining what metrics to retrieve |
 
-### Query Object Structure
+#### Query Object Structure
 
 | Field           | Type   | Required | Description                                                                                                                                                              |
 | --------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -104,13 +123,13 @@ The API accepts a JSON query object passed as a URL-encoded parameter:
 | `toTimestamp`   | string | Yes      | ISO timestamp for the end of the query period                                                                                                                            |
 | `orderBy`       | array  | No       | Specification for result ordering, e.g. `[{ "field": "name", "direction": "asc" }]`                                                                                      |
 
-### Dimension Object Structure
+#### Dimension Object Structure
 
 ```json
 { "field": "name" }
 ```
 
-### Metric Object Structure
+#### Metric Object Structure
 
 ```json
 { "measure": "count", "aggregation": "count" }
@@ -134,7 +153,7 @@ Aggregation types include:
 - `p95` - 95th percentile
 - `p99` - 99th percentile
 
-### Filter Object Structure
+#### Filter Object Structure
 
 ```json
 {
@@ -146,7 +165,7 @@ Aggregation types include:
 }
 ```
 
-### Time Dimension Object
+#### Time Dimension Object
 
 ```json
 {
@@ -156,7 +175,7 @@ Aggregation types include:
 
 Supported granularities include: `hour`, `day`, `week`, `month`, and `auto`.
 
-## Example
+### Example
 
 Here's an example of querying the number of traces grouped by name:
 
@@ -211,11 +230,11 @@ Response:
 }
 ```
 
-## Data Model
+### Data Model
 
-The Metrics API provides access to several data views, each with its own set of dimensions and metrics you can query. This section outlines the available options for each view.
+The v1 Metrics API provides access to several data views, each with its own set of dimensions and metrics you can query. This section outlines the available options for each view.
 
-### Available Views
+#### Available Views
 
 | View                 | Description                         |
 | -------------------- | ----------------------------------- |
@@ -224,7 +243,7 @@ The Metrics API provides access to several data views, each with its own set of 
 | `scores-numeric`     | Query numeric and boolean scores    |
 | `scores-categorical` | Query categorical (string) scores   |
 
-### Trace Dimensions
+#### Trace Dimensions
 
 | Dimension         | Type     | Description                             |
 | ----------------- | -------- | --------------------------------------- |
@@ -239,7 +258,7 @@ The Metrics API provides access to several data views, each with its own set of 
 | `observationName` | string   | Name of related observations            |
 | `scoreName`       | string   | Name of related scores                  |
 
-### Trace Metrics
+#### Trace Metrics
 
 | Metric              | Description                         |
 | ------------------- | ----------------------------------- |
@@ -250,7 +269,7 @@ The Metrics API provides access to several data views, each with its own set of 
 | `totalTokens`       | Total tokens used in the trace      |
 | `totalCost`         | Total cost of the trace             |
 
-### Observation Dimensions
+#### Observation Dimensions
 
 | Dimension             | Type   | Description                             |
 | --------------------- | ------ | --------------------------------------- |
@@ -272,7 +291,7 @@ The Metrics API provides access to several data views, each with its own set of 
 | `traceVersion`        | string | Version from parent trace               |
 | `scoreName`           | string | Related score name                      |
 
-### Observation Metrics
+#### Observation Metrics
 
 | Metric             | Description                          |
 | ------------------ | ------------------------------------ |
@@ -283,7 +302,7 @@ The Metrics API provides access to several data views, each with its own set of 
 | `timeToFirstToken` | Time to first token in milliseconds  |
 | `countScores`      | Count of related scores              |
 
-### Score Dimensions (Common)
+#### Score Dimensions (Common)
 
 | Dimension                  | Type   | Description                                |
 | -------------------------- | ------ | ------------------------------------------ |
@@ -303,16 +322,16 @@ The Metrics API provides access to several data views, each with its own set of 
 | `observationPromptVersion` | string | Prompt version used in related observation |
 | `configId`                 | string | Configuration ID                           |
 
-### Score Metrics
+#### Score Metrics
 
-#### Numeric Scores
+##### Numeric Scores
 
 | Metric  | Description         |
 | ------- | ------------------- |
 | `count` | Count of scores     |
 | `value` | Numeric score value |
 
-#### Categorical Scores
+##### Categorical Scores
 
 | Metric  | Description     |
 | ------- | --------------- |
@@ -328,7 +347,7 @@ Categorical scores have an additional dimension:
 
 <Callout type="warning">
 
-This endpoint is legacy and is no longer listed in the [public API reference](https://api.reference.langfuse.com/). It remains available for backwards compatibility, but for new use cases please use the [Metrics API v2](#v2) above — it has higher rate limits and offers more flexibility.
+This endpoint is legacy and is no longer listed in the [public API reference](https://api.reference.langfuse.com/). It remains available for backward compatibility, but for new use cases please use the [Metrics API v2](#v2) above. It has higher rate limits and offers more flexibility.
 
 </Callout>
 
