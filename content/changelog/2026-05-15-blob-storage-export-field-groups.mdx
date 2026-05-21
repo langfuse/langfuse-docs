@@ -17,6 +17,10 @@ Two new controls let you reduce the size of your scheduled blob storage exports:
 - **Drop `io` to shrink files.** Inputs and outputs are usually the largest columns; deselecting them produces dramatically smaller exports for cost or latency analytics.
 - **Drop `tools` and `prompt`** when your downstream consumer only needs traces, timings, and cost.
 
+<Frame fullWidth>
+  ![Blob storage export field group settings](/images/changelog/2026-05-15-blob-storage-export-field-groups/blob_exporter_settings_field_groups.png)
+</Frame>
+
 The `core` group (`id`, `trace_id`, `start_time`, `end_time`, `project_id`, `parent_observation_id`, `type`) is required and always exported. The other ten groups — `basic`, `time`, `io`, `metadata`, `model`, `usage`, `prompt`, `metrics`, `tools`, `trace_context` — are individually toggleable. Existing integrations continue to export all groups; no action needed unless you want to narrow the schema.
 
 Field groups are only available with the new enriched observations export, which is based on the [denormalized v4 data model](/docs/v4). The legacy export source uses a fixed column set and is unaffected.
