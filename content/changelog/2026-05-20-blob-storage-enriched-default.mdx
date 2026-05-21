@@ -9,16 +9,10 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-Blob storage, PostHog, and Mixpanel integrations on Cloud projects created on or after **2026-05-20** use the **Enriched observations (recommended)** source. The **Traces and observations (legacy)** and **Traces and observations (legacy) and enriched observations** sources are hidden from the UI for these projects.
+Blob storage, PostHog, and Mixpanel integrations on Cloud projects created on or after **2026-05-20** use the **Enriched observations (recommended)** source. The **Traces and observations (legacy)** and **Traces and observations (legacy) and enriched observations** sources are hidden from the UI for these projects. For blob storage, the REST API also rejects legacy values for post-cutoff projects with `400 BAD_REQUEST`.
 
-For blob storage, the REST API also rejects legacy values for post-cutoff projects with `400 BAD_REQUEST`. PostHog and Mixpanel have no public REST surface.
+Nothing changes for **existing Cloud projects** or **self-hosted deployments**: all three sources remain available and the legacy sources are fully supported. Existing Cloud projects can switch to Enriched observations at any time.
 
-What this means in practice:
-
-- **One row per observation, with trace context inlined** — `user_id`, `session_id`, `tags`, `release`, `trace_name`, and `environment` ride along on the same row. No warehouse-side join needed.
-- **Per-column control** (blob storage) — pair the source with [field groups](/docs/api-and-data-platform/features/export-to-blob-storage#export-field-groups) to keep just the columns your pipeline needs.
-- **Fewer files per window** (blob storage) — only `observations_v2/` and `scores/`, instead of `traces/`, `observations/`, and `scores/`.
-
-Nothing changes for **existing projects** (Cloud or self-hosted) or **self-hosted deployments**: all three sources remain available. The legacy sources are still supported there for backwards compatibility, but the recommendation is the same — switch to Enriched observations when you're ready.
+Enriched observations are part of the [Langfuse v4 data model](/docs/v4), which introduced a single denormalized observation row as the canonical export shape across all integrations.
 
 If a downstream consumer expects the legacy `traces/` and `observations/` file shapes, see the [Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields) for the column map between the two layouts.

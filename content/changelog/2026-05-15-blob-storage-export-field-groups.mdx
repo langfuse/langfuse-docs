@@ -1,7 +1,7 @@
 ---
 date: 2026-05-15
-title: "Choose columns for blob storage exports"
-description: Pick which field groups (input/output, metadata, usage, tools, …) are written to each row in scheduled S3, GCS, and Azure exports. Shrink files and drop fields you don't want to land in your warehouse.
+title: "Choose columns and compress blob storage exports"
+description: Pick which field groups are written to each row and enable gzip compression in scheduled S3, GCS, and Azure exports. Shrink files and drop fields you don't want to land in your warehouse.
 author: Niklas
 ---
 
@@ -9,9 +9,9 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-You can now select which column groups land in your scheduled blob storage exports. Eleven groups cover the enriched observations row — toggle off the ones you don't need on a per-integration basis in **Project Settings → Integrations → Blob Storage**.
+Two new controls let you reduce the size of your scheduled blob storage exports: column selection and gzip compression. Both are configurable per integration in **Project Settings → Integrations → Blob Storage**.
 
-Concrete cases this unlocks:
+**Column selection.** Eleven groups cover the enriched observations row — toggle off the ones you don't need:
 
 - **Drop `metadata` for privacy.** Keep user data out of your warehouse without filtering downstream.
 - **Drop `io` to shrink files.** Inputs and outputs are usually the largest columns; deselecting them produces dramatically smaller exports for cost or latency analytics.
@@ -19,19 +19,11 @@ Concrete cases this unlocks:
 
 The `core` group (`id`, `trace_id`, `start_time`, `end_time`, `project_id`, `parent_observation_id`, `type`) is required and always exported. The other ten groups — `basic`, `time`, `io`, `metadata`, `model`, `usage`, `prompt`, `metrics`, `tools`, `trace_context` — are individually toggleable. Existing integrations continue to export all groups; no action needed unless you want to narrow the schema.
 
-Pricing enrichment (`input_price`, `output_price`, `total_price`, `usage_pricing_tier_name`) is gated on the `usage` group, so deselecting `usage` also skips the worker-side model lookup.
+Field groups are only available with the new enriched observations export, which is based on the [denormalized v4 data model](/docs/v4). The legacy export source uses a fixed column set and is unaffected.
 
-Field groups apply to the **Enriched observations (recommended)** export source (and the enriched portion of **Traces and observations (legacy) and enriched observations**). The **Traces and observations (legacy)** source still uses its fixed column set.
+**Gzip compression.** New integrations compress exported files with gzip by default, producing `.csv.gz`, `.json.gz`, or `.jsonl.gz` files readable by most data warehouses and pipeline tools without a manual decompression step. Toggle **Gzip Compression** off if your consumer expects plain files. Existing integrations are unaffected — they were backfilled as uncompressed so nothing breaks for current consumers.
 
-The same controls are available on the REST API via `exportSource` and `exportFieldGroups` on `GET`/`PUT /api/public/integrations/blob-storage`.
-
-## Gzip compression
-
-Exported files are now compressed with **gzip** by default. Files land in your bucket as `.csv.gz`, `.json.gz`, or `.jsonl.gz` and can be read directly by most data warehouses and pipeline tools without a manual decompression step.
-
-To disable compression, toggle **Gzip Compression** off in **Project Settings → Integrations → Blob Storage**, or pass `"compressed": false` on `PUT /api/public/integrations/blob-storage`.
-
-**Existing integrations are unaffected** — they were backfilled as uncompressed so nothing breaks for current consumers. Compression is on by default only for integrations created after this release.
+Both controls are available on the REST API: `exportFieldGroups` and `compressed` on [`GET`/`PUT /api/public/integrations/blob-storage`](https://api.reference.langfuse.com/#tag/blobstorageintegrations).
 
 ## Learn more
 
