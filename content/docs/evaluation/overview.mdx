@@ -4,11 +4,21 @@ seoTitle: "Evaluation of LLM Applications"
 description: With Langfuse you can capture all your LLM evaluations in one place. You can combine a variety of different evaluation metrics like model-based evaluations (LLM-as-a-Judge), human annotations or fully custom evaluation workflows via API/SDKs. This allows you to measure quality, tonality, factual accuracy, completeness, and other dimensions of your LLM application.
 ---
 
+import { LoopDiagram } from "@/components/academy/LoopDiagram";
+
 # Evaluation Overview
 
 Evals give you a repeatable check of your LLM application's behavior. You **replace guesswork with data**.
 
-They also help you **catch regressions before you ship a change**. You tweak a prompt to handle an edge case, run your eval, and immediately see if it affected the behavior of your application in unintended ways.
+LLM evaluation is part of the [AI engineering loop](/academy/ai-engineering-loop):
+
+1. **Trace** -> Capture real behavior with [Observability](/docs/observability/get-started).
+2. **Monitor** -> Track production quality with online evaluators and [Score Analytics](/docs/evaluation/scores/score-analytics).
+3. **Build datasets** -> Turn traces into reusable evaluation assets with annotations and datasets.
+4. **Experiment** -> Validate changes with experiments and [CI/CD checks](/docs/evaluation/experiments/experiments-ci-cd) before they ship.
+5. **Evaluate** -> Decide what is good enough to ship.
+
+<LoopDiagram highlight="eval" />
 
 <Callout type="info" emoji="🎥">
 
@@ -16,19 +26,53 @@ They also help you **catch regressions before you ship a change**. You tweak a p
 
 </Callout>
 
+## Trace
 
+Capture what users asked, what your system did, and where the output came from with [traces and observations](/docs/observability/get-started). Trace data enables the rest of the loop: monitoring, datasets, and regression checks. For the broader pattern, see [tracing](/academy/tracing).
 
-## Getting Started
+## Monitor
 
-If you're new to LLM evaluation, start by exploring the [Concepts](/docs/evaluation/core-concepts) page. There's a lot to uncover, and going through the concepts before diving in will speed up your learning curve.
+Use production signals to find the traces worth reviewing. [Monitoring](/academy/monitoring) helps you spot data drift, flag quality issues automatically, and discover examples for your evaluation set.
 
-Once you know what you want to do, you can:
+- Track trends, data drift, and regressions in [Score Analytics](/docs/evaluation/scores/score-analytics) and [custom dashboards](/docs/metrics/features/custom-dashboards).
+- Score live behavior with [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), custom [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk), or user feedback.
 
-- [Create a dataset](/docs/evaluation/experiments/datasets) to measure your LLM application's performance consistently
-- [Run an experiment](/docs/evaluation/core-concepts#experiments) get an overview of how your application is doing
-- [Set up a live evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) to monitor your live traces
+## Build datasets
 
-Looking for something specific? Take a look under _Evaluation Methods_ and _Experiments_ for guides on specific topics.
+Turn raw traces into reusable evaluation assets. Start with human review, name the failure modes, then convert useful examples into datasets and score definitions. Start with [datasets](/academy/datasets) and [error analysis](/academy/monitoring/error-analysis).
+
+- Use [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues), [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui), and [`TEXT` scores](/docs/evaluation/scores/overview#score-types) for **open coding**.
+- Group notes into failure modes (**axial coding**), then turn stable categories into [structured labels](/docs/evaluation/scores/overview#score-types) and [evaluation criteria](/faq/all/manage-score-configs).
+
+## Experiment
+
+Use [experiments](/academy/experiments) to confirm that a prompt, model, retrieval setup, agent implementation, or evaluator variant improves quality without regressions.
+
+- Compare candidates on the same [dataset](/docs/evaluation/experiments/datasets) and scoring criteria with [experiments via UI](/docs/evaluation/experiments/experiments-via-ui) for prompt and model changes, or [experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for application logic.
+- Run regression checks manually or in [CI/CD](/docs/evaluation/experiments/experiments-ci-cd) before you ship to production.
+
+## Evaluate
+
+Judge experiment outputs before shipping. Start with manual review to understand quality and failure modes, then automate dedicated evaluators where they add repeatable signal. The tradeoffs are covered in [evaluation methods](/academy/evaluate).
+
+- Use [manual evaluation](/docs/evaluation/evaluation-methods/scores-via-ui) to build intuition and calibrate automated evaluators.
+- Use [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) for custom evaluation pipelines, guardrails, runtime checks, user feedback, and internal review workflows.
+- Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for qualities that require language understanding, such as relevance, tone, completeness, or factuality.
+
+## Which Langfuse feature should I use?
+
+| If you want to...                     | Use this Langfuse feature                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Capture application behavior          | [Observability](/docs/observability/get-started), [traces and observations](/docs/observability/data-model)                                                                                                                                                                                                               |
+| Segment traces for later review       | [Tags](/docs/observability/features/tags), [metadata](/docs/observability/features/metadata), [users](/docs/observability/features/users), [sessions](/docs/observability/features/sessions), [environments](/docs/observability/features/environments), [releases](/docs/observability/features/releases-and-versioning) |
+| Review examples manually              | [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues), [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui)                                                                                                                                                                            |
+| Open Coding: capture open-ended notes | [`TEXT` scores](/docs/evaluation/scores/overview#score-types), [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues)                                                                                                                                                                                 |
+| Axial Coding: derive failure modes    | [Stable error categories](/docs/evaluation/scores/overview#score-types), [evaluation criteria](/faq/all/manage-score-configs)                                                                                                                                                                                             |
+| Create reusable test cases            | [Datasets](/docs/evaluation/experiments/datasets)                                                                                                                                                                                                                                                                         |
+| Compare changes before shipping       | [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui), [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)                                                                                                                                                                            |
+| Gate pull requests or deploys         | [CI/CD experiments](/docs/evaluation/experiments/experiments-ci-cd)                                                                                                                                                                                                                                                       |
+| Monitor production quality            | [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)                                                                                                                                                                            |
+| Analyze evaluator results             | [Score Analytics](/docs/evaluation/scores/score-analytics), [custom dashboards](/docs/metrics/features/custom-dashboards)                                                                                                                                                                                                 |
 
 ## GitHub Discussions
 
