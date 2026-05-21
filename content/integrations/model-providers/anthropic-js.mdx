@@ -15,11 +15,11 @@ Anthropic provides advanced language models like Claude, known for their safety,
 
 This notebook demonstrates how to use the [`AnthropicInstrumentation`](https://github.com/Arize-ai/openinference/tree/main/js/packages/openinference-instrumentation-anthropic) library from [OpenInference](https://github.com/Arize-ai/openinference) to automatically instrument Anthropic SDK calls and send OpenTelemetry spans to Langfuse.
 
-> **What is Anthropic?**  
-Anthropic is an AI safety company that develops Claude, a family of large language models designed to be helpful, harmless, and honest. Claude models excel at complex reasoning, analysis, and creative tasks.
+> **What is Anthropic?**\
+> Anthropic is an AI safety company that develops Claude, a family of large language models designed to be helpful, harmless, and honest. Claude models excel at complex reasoning, analysis, and creative tasks.
 
-> **What is Langfuse?**  
-[Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
+> **What is Langfuse?**\
+> [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
 
 <Steps>
 ## Step 1: Install Dependencies
@@ -35,7 +35,6 @@ npm install @anthropic-ai/sdk @arizeai/openinference-instrumentation-anthropic @
 ## Step 2: Configure Environment
 
 Set up your Langfuse and Anthropic API keys. You can get Langfuse keys by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). Get your Anthropic API key from the [Anthropic Console](https://console.anthropic.com/).
-
 
 ```typescript
 // Set environment variables using Deno-specific syntax
@@ -53,7 +52,6 @@ Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); // 🇪🇺 EU 
 ## Step 3: Initialize OpenTelemetry with Langfuse
 
 Set up the OpenTelemetry SDK with the `LangfuseSpanProcessor` and the [`AnthropicInstrumentation`](https://github.com/Arize-ai/openinference/tree/main/js/packages/openinference-instrumentation-anthropic) from OpenInference. The instrumentation automatically captures Anthropic SDK calls and sends them as OpenTelemetry spans to Langfuse.
-
 
 ```typescript
 import { NodeSDK } from "npm:@opentelemetry/sdk-node";
@@ -79,7 +77,6 @@ sdk.start();
 
 Now use the Anthropic SDK as you normally would. All calls are automatically traced and sent to Langfuse.
 
-
 ```typescript
 const anthropic = new Anthropic();
 
@@ -101,6 +98,7 @@ After running the application, navigate to your Langfuse Trace Table. You will f
 ![Langfuse Trace](https://langfuse.com/images/cookbook/integration_anthropic/anthropic-example-trace-js.png)
 
 [Example trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/561e86ac4ec484282b7ca46737a64ca4?observation=0c936de60ccf69b9&timestamp=2026-02-11T10:31:58.406Z)
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more-js.mdx";

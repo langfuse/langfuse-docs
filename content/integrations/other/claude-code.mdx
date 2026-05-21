@@ -663,13 +663,13 @@ Tracing is opt-in per project. The hook runs globally but immediately exits if `
 
 **Environment Variables:**
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `TRACE_TO_LANGFUSE` | Set to `"true"` to enable tracing | Yes |
-| `LANGFUSE_PUBLIC_KEY` | Your Langfuse public key | Yes |
-| `LANGFUSE_SECRET_KEY` | Your Langfuse secret key | Yes |
-| `LANGFUSE_BASE_URL` | Langfuse base URL. EU: `https://cloud.langfuse.com`, US: `https://us.cloud.langfuse.com`, Japan: `https://jp.cloud.langfuse.com`, HIPAA: `https://hipaa.cloud.langfuse.com` | No (defaults to EU) |
-| `CC_LANGFUSE_DEBUG` | Set to `"true"` for verbose debug logging | No |
+| Variable              | Description                                                                                                                                                                 | Required            |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `TRACE_TO_LANGFUSE`   | Set to `"true"` to enable tracing                                                                                                                                           | Yes                 |
+| `LANGFUSE_PUBLIC_KEY` | Your Langfuse public key                                                                                                                                                    | Yes                 |
+| `LANGFUSE_SECRET_KEY` | Your Langfuse secret key                                                                                                                                                    | Yes                 |
+| `LANGFUSE_BASE_URL`   | Langfuse base URL. EU: `https://cloud.langfuse.com`, US: `https://us.cloud.langfuse.com`, Japan: `https://jp.cloud.langfuse.com`, HIPAA: `https://hipaa.cloud.langfuse.com` | No (defaults to EU) |
+| `CC_LANGFUSE_DEBUG`   | Set to `"true"` for verbose debug logging                                                                                                                                   | No                  |
 
 ### Start Using Claude Code
 
@@ -701,7 +701,7 @@ Open your Langfuse project to see the captured traces. You'll see:
 tail -f ~/.claude/state/langfuse_hook.log
 ```
 
-   You should see log entries after each Claude response.
+You should see log entries after each Claude response.
 
 2. **Verify environment variables** are set in your project's `.claude/settings.local.json`:
    - Check that `TRACE_TO_LANGFUSE` is set to `"true"`

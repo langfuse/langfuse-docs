@@ -1,4 +1,5 @@
-const INKEEP_CHAT_COMPLETIONS_URL = "https://api.inkeep.com/v1/chat/completions";
+const INKEEP_CHAT_COMPLETIONS_URL =
+  "https://api.inkeep.com/v1/chat/completions";
 const INKEEP_MODEL = "inkeep-rag";
 
 export type InkeepSearchResponse = {
@@ -7,7 +8,7 @@ export type InkeepSearchResponse = {
 };
 
 export const searchLangfuseDocsWithInkeep = async (
-  query: string
+  query: string,
 ): Promise<InkeepSearchResponse> => {
   if (!process.env.INKEEP_BACKEND_API_KEY) {
     throw new Error("Missing INKEEP_BACKEND_API_KEY environment variable");

@@ -54,18 +54,19 @@ export function BrandAssetCard({
           "flex items-center justify-center border-b border-line-structure min-h-28 p-6",
           variant === "dark"
             ? "bg-text-primary dark:bg-surface-code"
-            : "bg-surface-bg"
+            : "bg-surface-bg",
         )}
       >
         <img
           src={src}
           alt={alt}
-          className={cn("max-w-full max-h-full w-auto object-contain", tall ? "h-12" : "h-10")}
+          className={cn(
+            "max-w-full max-h-full w-auto object-contain",
+            tall ? "h-12" : "h-10",
+          )}
         />
       </div>
-      <div className="p-3 text-xs font-medium text-text-secondary">
-        {label}
-      </div>
+      <div className="p-3 text-xs font-medium text-text-secondary">{label}</div>
     </a>
   );
 }

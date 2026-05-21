@@ -7,7 +7,15 @@ import { Image } from "@/components/ui/image";
 import { Frame } from "@/components/Frame";
 import { LangTab, LangTabs, LangTabsWithTab } from "@/components/LangTabs";
 import { FetchReadme } from "@/components/FetchReadme";
-import { Cards, Card, Steps, FileTree, FileTreeFile, FileTreeFolder, Playground } from "@/components/docs";
+import {
+  Cards,
+  Card,
+  Steps,
+  FileTree,
+  FileTreeFile,
+  FileTreeFolder,
+  Playground,
+} from "@/components/docs";
 import { AvailabilityBanner } from "@/components/Availability";
 import { Link as MdxLink, type LinkProps } from "@/components/ui/link";
 import { Callout } from "@/components/ui/callout";
@@ -18,25 +26,43 @@ import { EvaluationEvolutionDiagram } from "@/components/academy/EvaluationEvolu
 import { TracingHierarchyDiagram } from "@/components/academy/TracingHierarchyDiagram";
 import { RagTraceViewDiagram } from "@/components/academy/RagTraceViewDiagram";
 import { DatasetFieldsDiagram } from "@/components/academy/DatasetFieldsDiagram";
+import { ErrorAnalysisProcessDiagram } from "@/components/academy/ErrorAnalysisProcessDiagram";
+import { AgentPromptCallout } from "@/components/academy/AgentPromptCallout";
+import { ManualGuideCallout } from "@/components/academy/ManualGuideCallout";
+import { ManualGuideList } from "@/components/academy/ManualGuideList";
 import { Details, Summary } from "@/components/Details";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
 // It only downloads on pages that actually render a <Video> tag.
-const Video = dynamic(() => import("@/components/Video").then((m) => ({ default: m.Video })));
+const Video = dynamic(() =>
+  import("@/components/Video").then((m) => ({ default: m.Video })),
+);
 
 const BLOCK_TAGS = new Set([
-  "div", "details", "summary", "figure", "pre", "table",
-  "ul", "ol", "blockquote", "section", "article",
+  "div",
+  "details",
+  "summary",
+  "figure",
+  "pre",
+  "table",
+  "ul",
+  "ol",
+  "blockquote",
+  "section",
+  "article",
 ]);
 
-function MdxParagraph({ children, ...props }: React.HTMLAttributes<HTMLElement>) {
+function MdxParagraph({
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLElement>) {
   const childrenArray = React.Children.toArray(children);
 
   const hasBlock = childrenArray.some(
     (child) =>
       React.isValidElement(child) &&
       typeof child.type === "string" &&
-      BLOCK_TAGS.has(child.type)
+      BLOCK_TAGS.has(child.type),
   );
   if (hasBlock) {
     return <div {...props}>{children}</div>;
@@ -75,6 +101,10 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     TracingHierarchyDiagram,
     RagTraceViewDiagram,
     DatasetFieldsDiagram,
+    ErrorAnalysisProcessDiagram,
+    AgentPromptCallout,
+    ManualGuideCallout,
+    ManualGuideList,
     details: Details,
     summary: Summary,
     ...components,

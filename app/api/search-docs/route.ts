@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchLangfuseDocsWithInkeep, isNonEmptyString } from "@/lib/inkeep-search-backend";
+import {
+  searchLangfuseDocsWithInkeep,
+  isNonEmptyString,
+} from "@/lib/inkeep-search-backend";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
 
@@ -27,7 +30,7 @@ export async function GET(request: NextRequest) {
   if (!isNonEmptyString(query)) {
     return NextResponse.json(
       { error: "Missing or invalid 'query' parameter" },
-      { status: 400, headers: corsHeaders }
+      { status: 400, headers: corsHeaders },
     );
   }
 
@@ -47,14 +50,14 @@ export async function GET(request: NextRequest) {
       } catch (error) {
         console.error("Error tracking PostHog event:", error);
       }
-    })()
+    })(),
   );
 
   try {
     const inkeepResult = await searchLangfuseDocsWithInkeep(query);
     return NextResponse.json(
       { query, answer: inkeepResult.answer, metadata: inkeepResult.metadata },
-      { headers: corsHeaders }
+      { headers: corsHeaders },
     );
   } catch (error) {
     return NextResponse.json(
@@ -63,7 +66,7 @@ export async function GET(request: NextRequest) {
         message: error instanceof Error ? error.message : "Unknown error",
         query,
       },
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: corsHeaders },
     );
   }
 }

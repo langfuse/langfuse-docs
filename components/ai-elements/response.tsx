@@ -206,7 +206,7 @@ const components: Options["components"] = {
     <a
       className={cn(
         "text-text-links decoration-text-links underline decoration-1 underline-offset-2 hover:text-primary hover:decoration-primary font-normal",
-        className
+        className,
       )}
       rel="noreferrer"
       target="_blank"
@@ -296,7 +296,7 @@ const components: Options["components"] = {
     <blockquote
       className={cn(
         "my-4 border-l-4 border-muted-foreground/30 pl-4 italic text-muted-foreground",
-        className
+        className,
       )}
       {...props}
     >
@@ -314,7 +314,7 @@ const components: Options["components"] = {
       <code
         className={cn(
           "rounded-[2px] bg-muted text-foreground px-1.5 py-0.5 font-mono text-[0.85em]",
-          className
+          className,
         )}
         {...props}
       />
@@ -375,7 +375,7 @@ export const Response = memo(
       <div
         className={cn(
           "size-full text-sm text-text-secondary [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
-          className
+          className,
         )}
         {...props}
       >
@@ -393,7 +393,7 @@ export const Response = memo(
       </div>
     );
   },
-  (prevProps, nextProps) => prevProps.children === nextProps.children
+  (prevProps, nextProps) => prevProps.children === nextProps.children,
 );
 
 Response.displayName = "Response";

@@ -20,7 +20,9 @@ export type ChangelogFrontMatter = {
   badge?: string;
 };
 
-const ChangelogFrontMatterContext = createContext<ChangelogFrontMatter | null>(null);
+const ChangelogFrontMatterContext = createContext<ChangelogFrontMatter | null>(
+  null,
+);
 
 export function ChangelogFrontMatterProvider({
   frontMatter,

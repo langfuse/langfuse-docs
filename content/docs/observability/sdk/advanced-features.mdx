@@ -170,7 +170,6 @@ If your trace data (inputs, outputs, metadata) might contain sensitive informati
 
 The `mask` function should accept data as a keyword argument and return the masked data. The returned data must be JSON-serializable.
 
-
 ```python
 from langfuse import Langfuse
 import re
@@ -186,6 +185,7 @@ def pii_masker(data: any, **kwargs) -> any:
 
 langfuse = Langfuse(mask=pii_masker)
 ```
+
 </Tab>
 <Tab title="JS/TS SDK">
 
@@ -206,6 +206,7 @@ const sdk = new NodeSDK({ spanProcessors: [spanProcessor] });
 
 sdk.start();
 ```
+
 </Tab>
 </LangTabs>
 
@@ -296,7 +297,6 @@ You can also set the sample rate using the `LANGFUSE_SAMPLE_RATE` environment va
 export LANGFUSE_SAMPLE_RATE="0.2"
 ```
 
-
 </Tab>
 <Tab title="JS/TS SDK">
 
@@ -346,8 +346,8 @@ While TracerProviders are isolated, they share the same OpenTelemetry context fo
 - Trace hierarchies may be incomplete or confusing
 
 Plan your instrumentation carefully to avoid confusing trace structures.
-</Callout>
 
+</Callout>
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
@@ -439,7 +439,7 @@ For all integrations in multi-project setups, you must specify the `public_key` 
 
 **Observe Decorator:**
 
-Pass `langfuse_public_key` as a keyword argument to the *top-most* observed function (not the decorator). From Python SDK >= 3.2.2, nested decorated functions will automatically pick up the public key from the execution context they are currently into. Also, calls to `get_client` will be also aware of the current `langfuse_public_key` in the decorated function execution context, so passing the `langfuse_public_key` here again is not necessary.
+Pass `langfuse_public_key` as a keyword argument to the _top-most_ observed function (not the decorator). From Python SDK >= 3.2.2, nested decorated functions will automatically pick up the public key from the execution context they are currently into. Also, calls to `get_client` will be also aware of the current `langfuse_public_key` in the decorated function execution context, so passing the `langfuse_public_key` here again is not necessary.
 
 ```python
 from langfuse import observe
@@ -544,7 +544,6 @@ response_b = chain.invoke(
 
 </Tab>
 
-
 <Tab title="JS/TS SDK">
 
 You can configure the SDK to send traces to multiple Langfuse projects. This is useful for multi-tenant applications or for sending traces to different environments. Simply register multiple `LangfuseSpanProcessor` instances, each with its own credentials.
@@ -570,7 +569,6 @@ sdk.start();
 ```
 
 This configuration sends every span accepted by each processor's filter to both projects. You can configure a custom `shouldExportSpan` filter for each processor to control which traces go to which project.
-
 
 </Tab>
 </LangTabs>

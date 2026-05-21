@@ -6,7 +6,7 @@ export const POST = async (req: Request) => {
   if (!success) {
     return new Response(
       JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
-      { status: 429, headers: { "Content-Type": "application/json" } }
+      { status: 429, headers: { "Content-Type": "application/json" } },
     );
   }
 
@@ -17,9 +17,10 @@ export const POST = async (req: Request) => {
   if (!livekitUrl || !apiKey || !apiSecret) {
     return new Response(
       JSON.stringify({
-        error: "Voice agent is not configured. LiveKit credentials are missing.",
+        error:
+          "Voice agent is not configured. LiveKit credentials are missing.",
       }),
-      { status: 503, headers: { "Content-Type": "application/json" } }
+      { status: 503, headers: { "Content-Type": "application/json" } },
     );
   }
 
@@ -48,7 +49,7 @@ export const POST = async (req: Request) => {
       url: livekitUrl,
       roomName,
     }),
-    { status: 200, headers: { "Content-Type": "application/json" } }
+    { status: 200, headers: { "Content-Type": "application/json" } },
   );
 };
 

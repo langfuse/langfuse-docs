@@ -33,7 +33,9 @@ export async function loadPage(
       ? await data.load()
       : { body: data.body, toc: data.toc ?? [] };
   const toc: TOCItemType[] = loaded.toc ?? [];
-  const MDX = loaded.body as ComponentType<{ components?: Record<string, ComponentType> }>;
+  const MDX = loaded.body as ComponentType<{
+    components?: Record<string, ComponentType>;
+  }>;
 
   return { page, toc, MDX };
 }
@@ -66,11 +68,19 @@ const SLUG_WORD_OVERRIDES: Record<string, string> = {
 function slugSegmentToTitle(segment: string): string {
   return segment
     .split("-")
-    .map((w) => SLUG_WORD_OVERRIDES[w.toLowerCase()] ?? w.charAt(0).toUpperCase() + w.slice(1))
+    .map(
+      (w) =>
+        SLUG_WORD_OVERRIDES[w.toLowerCase()] ??
+        w.charAt(0).toUpperCase() + w.slice(1),
+    )
     .join(" ");
 }
 
-function enrichOgTitle(title: string, slug: string[], sectionTitle: string): string {
+function enrichOgTitle(
+  title: string,
+  slug: string[],
+  sectionTitle: string,
+): string {
   const lower = title.toLowerCase().trim();
   if (!GENERIC_TITLES.has(lower)) return title;
 
@@ -107,7 +117,9 @@ export function buildSectionMetadata(
   const canonicalUrl =
     pageData.canonical ?? opts?.canonicalFallback ?? buildPageUrl(pagePath);
   const seoTitle = pageData.seoTitle || page.data.title;
-  const ogTitle = pageData.seoTitle ? seoTitle : enrichOgTitle(seoTitle, slug, sectionTitle);
+  const ogTitle = pageData.seoTitle
+    ? seoTitle
+    : enrichOgTitle(seoTitle, slug, sectionTitle);
   const ogImage = buildOgImageUrl({
     title: ogTitle,
     description: page.data.description,
@@ -137,14 +149,17 @@ export function buildSectionMetadata(
 /**
  * Strip non-serializable values from page data for client context providers.
  */
-export function primitiveOnly(obj: Record<string, unknown>): Record<string, unknown> {
+export function primitiveOnly(
+  obj: Record<string, unknown>,
+): Record<string, unknown> {
   return Object.fromEntries(
-    Object.entries(obj).filter(([, v]) =>
-      v === null ||
-      typeof v === "string" ||
-      typeof v === "number" ||
-      typeof v === "boolean" ||
-      (Array.isArray(v) && v.every((item) => typeof item !== "function"))
-    )
+    Object.entries(obj).filter(
+      ([, v]) =>
+        v === null ||
+        typeof v === "string" ||
+        typeof v === "number" ||
+        typeof v === "boolean" ||
+        (Array.isArray(v) && v.every((item) => typeof item !== "function")),
+    ),
   );
 }

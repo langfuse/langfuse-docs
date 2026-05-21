@@ -37,5 +37,7 @@ export function WrappedDataProvider({
 }
 
 export function useWrappedData(): WrappedData {
-  return useContext(WrappedDataContext) ?? { usersPages: [], changelogPages: [] };
+  return (
+    useContext(WrappedDataContext) ?? { usersPages: [], changelogPages: [] }
+  );
 }

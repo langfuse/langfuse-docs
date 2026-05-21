@@ -22,26 +22,34 @@ export type NavPanelLink = {
 };
 
 export const productLinks: NavPanelLink[] = [
-  { name: "Overview",          href: "/docs",                            icon: LayoutGrid    },
-  { name: "LLM Observability", href: "/docs/observability/overview",     icon: Activity      },
-  { name: "Prompt Management", href: "/docs/prompt-management/overview", icon: MessageSquare },
-  { name: "Evaluation",        href: "/docs/evaluation/overview",        icon: FlaskConical  },
-  { name: "Metrics",           href: "/docs/metrics/overview",           icon: BarChart2     },
+  { name: "Overview", href: "/docs", icon: LayoutGrid },
+  {
+    name: "LLM Observability",
+    href: "/docs/observability/overview",
+    icon: Activity,
+  },
+  {
+    name: "Prompt Management",
+    href: "/docs/prompt-management/overview",
+    icon: MessageSquare,
+  },
+  { name: "Evaluation", href: "/docs/evaluation/overview", icon: FlaskConical },
+  { name: "Metrics", href: "/docs/metrics/overview", icon: BarChart2 },
 ];
 
 export const resourcesLinks: NavPanelLink[] = [
-  { name: "Academy",         href: "/academy",      icon: BookOpen      },
-  { name: "Blog",            href: "/blog",         icon: Newspaper     },
-  { name: "Changelog",       href: "/changelog",    icon: ScrollText    },
-  { name: "Roadmap",         href: "/docs/roadmap", icon: Map           },
-  { name: "Users",           href: "/users",        icon: Users         },
-  { name: "Example Project", href: "/docs/demo",    icon: Bookmark      },
-  { name: "Walkthroughs",    href: "/guides",       icon: GraduationCap },
-  { name: "Support",         href: "/support",      icon: HelpCircle    },
+  { name: "Academy", href: "/academy", icon: BookOpen },
+  { name: "Blog", href: "/blog", icon: Newspaper },
+  { name: "Changelog", href: "/changelog", icon: ScrollText },
+  { name: "Roadmap", href: "/docs/roadmap", icon: Map },
+  { name: "Users", href: "/users", icon: Users },
+  { name: "Example Project", href: "/docs/demo", icon: Bookmark },
+  { name: "Walkthroughs", href: "/guides", icon: GraduationCap },
+  { name: "Support", href: "/support", icon: HelpCircle },
 ];
 
 export const simpleLinks = [
-  { name: "Docs",      href: "/docs"      },
+  { name: "Docs", href: "/docs" },
   { name: "Changelog", href: "/changelog", tabletHidden: true },
-  { name: "Pricing",   href: "/pricing"   },
+  { name: "Pricing", href: "/pricing" },
 ];

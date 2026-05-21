@@ -49,6 +49,7 @@ A support ticket may say "prompt caching not traced," a GitHub issue says "cache
 
 > **Anthropic cache tokens double-counted, inflating costs ~2x**
 > When using Anthropic prompt caching via pydantic-ai/OTel, Langfuse adds cache_read + cache_write tokens on top of the already-inclusive `input_tokens` count, resulting in ~2x inflated token counts and costs.
+>
 > - Sources:
 > - [GitHub #12306](https://github.com/langfuse/langfuse/issues/12306) - 1 thumbs up, 0 comments - no engineer response
 > - [Plain: Prompt caching not traced] - User reporting prompt caching not showing up in traces
@@ -64,19 +65,22 @@ The first version of the digest wasn't great. The loop to improve it works like 
 
 **Top Topics This Week:**
 
-**1. Tracing Reliability & Data Loss** *(Severity: High)*
+**1. Tracing Reliability & Data Loss** _(Severity: High)_
+
 - **What users are experiencing**: Missing traces, broken nesting after SDK updates, empty traces in production, and traces intermittently disappearing from list view.
 - **Evidence**: ~65 Plain tickets + GitHub #12434, #12576, #12541 + multiple reports of data loss in production environments
 - **Who's affected**: Production users across all tiers, directly eroding trust
 - **Category**: Bug / Reliability
 
-**3. Token Count & Cost Calculation Errors** *(Severity: High)*
+**3. Token Count & Cost Calculation Errors** _(Severity: High)_
+
 - **What users are experiencing**: Duplicate token counts in Strands-Agent traces, Anthropic cache tokens double-counted, dataset run costs overcounted, and missing prices for Gemini 2.5/3 and Claude 4.5 Sonnet.
 - **Evidence**: GitHub #7549 (4 thumbs up, 18 comments), #12306, #12489, #12531 + Plain tickets on Gemini thinking tokens
 - **Who's affected**: Users relying on cost tracking for budgeting
 - **Category**: Bug
 
-**7. SDK Upgrade Path Pain** *(Severity: Medium)*
+**7. SDK Upgrade Path Pain** _(Severity: Medium)_
+
 - **What users are experiencing**: Breaking changes across v2 to v3 to v4 to v5, stale version numbers in bundles (`@langfuse/core@5.0.0` reports as 4.6.1), Python 3.14 incompatibility due to Pydantic v1.
 - **Evidence**: ~21 Plain tickets (10 still snoozed) + GitHub #9618 (48 thumbs up, highest signal issue this week, now closed)
 - **Who's affected**: All SDK users upgrading
@@ -93,6 +97,7 @@ The full output had 10 categories like this, plus recurring themes and a "What t
 
 **Fast Preview toggle causes traces to disappear or queries to slow down**
 Multiple users reported that enabling the new Fast Preview experience caused traces to stop appearing entirely or dashboard queries to take longer. One user had to switch back to the legacy implementation to get traces flowing again.
+
 - Sources:
   - [Plain ticket: Re: Product Update](#) - "I deactivated the fast trace feature, and my traces reappeared. So, I switched back to the legacy implementation for now."
   - [Plain ticket: Re: Product Update](#) - "I used the 'Fast Preview' toggle and now my queries were taking longer time"
@@ -104,6 +109,7 @@ Multiple users reported that enabling the new Fast Preview experience caused tra
 
 **Dashboard metadata filtering returns no results**
 Users who add metadata filters to custom dashboards get empty results, even when the traces clearly have the matching metadata. A community PR (#12528) has been proposed.
+
 - Sources:
   - [GitHub #11942](https://github.com/langfuse/langfuse/issues/11942) - 1 thumbs up, 6 comments - confirmed bug, community fix proposed
   - [Plain ticket: Filter dashboard groups](#) - User asking about filtering dashboard groups
@@ -125,16 +131,16 @@ We set up [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as
 Here are the scores across all nine runs (earliest at the top):
 
 | Run | actionability | cites-sources | categories |
-|-----|--------------|---------------|------------|
-| 1   | 0.70         | 0             | 0          |
-| 2   | 0.75         | 0             | 11         |
-| 3   | 0.92         | 0             | 13         |
-| 4   | 0.90         | 0             | 10         |
-| 5   | 0.95         | 1             | 3          |
-| 6   | 0.90         | 1             | 4          |
-| 7   | 0.05         | 1             | 0          |
-| 8   | 0.90         | 1             | 5          |
-| 9   | 0.85         | 1             | 4          |
+| --- | ------------- | ------------- | ---------- |
+| 1   | 0.70          | 0             | 0          |
+| 2   | 0.75          | 0             | 11         |
+| 3   | 0.92          | 0             | 13         |
+| 4   | 0.90          | 0             | 10         |
+| 5   | 0.95          | 1             | 3          |
+| 6   | 0.90          | 1             | 4          |
+| 7   | 0.05          | 1             | 0          |
+| 8   | 0.90          | 1             | 5          |
+| 9   | 0.85          | 1             | 4          |
 
 The early runs cited no sources and produced too many category counts (12-13). After run 4, source attribution hit 1.0 and categories stabilized around 3-5. Run 7 shows a regression where a prompt change accidentally made the descriptions too vague. The evaluator caught it, and we fixed it in the next iteration.
 
@@ -150,8 +156,8 @@ The skill produced Circleback links that pointed to the generic app URL instead 
 
 ### "Recent activity" doesn't mean "relevant this week"
 
-The second version flagged a six-month-old GitHub issue as a current bug because it had a recent comment. The comment was just someone confirming a workaround. For any agent working with time-scoped data: don't just check *when* something was updated, check *what* the update actually says.
+The second version flagged a six-month-old GitHub issue as a current bug because it had a recent comment. The comment was just someone confirming a workaround. For any agent working with time-scoped data: don't just check _when_ something was updated, check _what_ the update actually says.
 
 ### Category names carry implicit assumptions
 
-The third version introduced a "Quick Fixes" category, but AI doesn't know how quick a fix will be. We renamed it to reflect what we *do* know: whether the path forward is clear or needs discussion. Watch for labels that embed assumptions the model can't verify.
+The third version introduced a "Quick Fixes" category, but AI doesn't know how quick a fix will be. We renamed it to reflect what we _do_ know: whether the path forward is clear or needs discussion. Watch for labels that embed assumptions the model can't verify.

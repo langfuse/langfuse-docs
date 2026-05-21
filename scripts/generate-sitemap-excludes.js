@@ -27,7 +27,9 @@ try {
   for (const { notebook, docsPath, isGuide } of cookbookRoutes) {
     if (isGuide === false) continue;
     if (docsPath) {
-      cookbookExcluded.add(`/guides/cookbook/${notebook.replace(".ipynb", "")}`);
+      cookbookExcluded.add(
+        `/guides/cookbook/${notebook.replace(".ipynb", "")}`,
+      );
     }
   }
 } catch {
@@ -52,9 +54,7 @@ function readFrontmatter(src) {
 
 /** Map a content-directory file path to its public URL path. */
 function contentPathToRoute(filePath) {
-  const rel = path
-    .relative(contentDir, filePath)
-    .replace(/\\/g, "/"); // Windows compat
+  const rel = path.relative(contentDir, filePath).replace(/\\/g, "/"); // Windows compat
   const noExt = rel.replace(/\.(mdx|md)$/, "");
   const parts = noExt.split("/");
 
@@ -135,12 +135,15 @@ for (const filePath of walkDir(contentDir)) {
   }
 }
 
-fs.writeFileSync(excludesFile, JSON.stringify([...excludePaths].sort(), null, 2));
+fs.writeFileSync(
+  excludesFile,
+  JSON.stringify([...excludePaths].sort(), null, 2),
+);
 console.log(
-  `[generate-sitemap-excludes] Wrote ${excludePaths.size} excluded path(s) to .sitemap-excludes.json`
+  `[generate-sitemap-excludes] Wrote ${excludePaths.size} excluded path(s) to .sitemap-excludes.json`,
 );
 
 fs.writeFileSync(allPagesFile, JSON.stringify([...allRoutes].sort(), null, 2));
 console.log(
-  `[generate-sitemap-excludes] Wrote ${allRoutes.size} page path(s) to .sitemap-all-pages.json`
+  `[generate-sitemap-excludes] Wrote ${allRoutes.size} page path(s) to .sitemap-all-pages.json`,
 );

@@ -20,29 +20,49 @@ export function Hero() {
           size="big"
           className={cn(
             "flex-col items-center gap-0.5 sm:gap-1 md:gap-1.5 text-center font-medium leading-[105%] max-md:max-w-[500px]",
-            "[leading-trim:both] [text-edge:cap]"
+            "[leading-trim:both] [text-edge:cap]",
           )}
         >
-          <TextHighlight highlightClassName="mix-blend-multiply" className="whitespace-nowrap">Open Source<span className="inline max-[499px]:hidden">&nbsp;</span></TextHighlight>
+          <TextHighlight
+            highlightClassName="mix-blend-multiply"
+            className="whitespace-nowrap"
+          >
+            Open Source<span className="inline max-[499px]:hidden">&nbsp;</span>
+          </TextHighlight>
           <span className="flex min-[500px]:inline">
-            <TextHighlight highlightClassName="mix-blend-multiply" className="max-[499px]:pr-1.75">LLM</TextHighlight>
-            <TextHighlight highlightClassName="mix-blend-multiply" className="min-[500px]:pr-2">Engineering</TextHighlight>
+            <TextHighlight
+              highlightClassName="mix-blend-multiply"
+              className="max-[499px]:pr-1.75"
+            >
+              LLM
+            </TextHighlight>
+            <TextHighlight
+              highlightClassName="mix-blend-multiply"
+              className="min-[500px]:pr-2"
+            >
+              Engineering
+            </TextHighlight>
           </span>
-          <TextHighlight highlightClassName="mix-blend-multiply">Platform</TextHighlight>
+          <TextHighlight highlightClassName="mix-blend-multiply">
+            Platform
+          </TextHighlight>
         </Heading>
         <Heading
           as="h1"
           size="big"
           className={cn(
             "flex sm:hidden flex-col items-center gap-1.5 text-center font-medium leading-[105%]",
-            "[leading-trim:both] [text-edge:cap]"
+            "[leading-trim:both] [text-edge:cap]",
           )}
-        >
-
-        </Heading>
+        ></Heading>
         <div className="flex flex-col gap-6">
           <Text className="max-w-xl">
-            Debug AI applications and agents in minutes. Spot issues before your users do. Collaborate with your team to continuously improve on cost, latency and quality. <span className="hidden md:inline">Any model, any framework. Based on OpenTelemetry.</span>
+            Debug AI applications and agents in minutes. Spot issues before your
+            users do. Collaborate with your team to continuously improve on
+            cost, latency and quality.{" "}
+            <span className="hidden md:inline">
+              Any model, any framework. Based on OpenTelemetry.
+            </span>
           </Text>
           <div className="flex flex-wrap gap-3 justify-center items-center">
             <Button
@@ -53,7 +73,12 @@ export function Hero() {
             >
               Start free
             </Button>
-            <Button variant="secondary" size="default" shortcutKey="d" href="/docs">
+            <Button
+              variant="secondary"
+              size="default"
+              shortcutKey="d"
+              href="/docs"
+            >
               Documentation
             </Button>
           </div>
