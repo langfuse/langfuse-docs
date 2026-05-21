@@ -72,7 +72,7 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 | `metrics`       | latency, timeToFirstToken                                                                                              |
 | `trace_context` | tags, release, traceName                                                                                               |
 
-If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response — not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`.
+If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response — not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`. Note that `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision — cast them to a numeric type in your pipeline.
 
 **2. Cursor-Based Pagination**
 
