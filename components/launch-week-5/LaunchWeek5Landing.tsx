@@ -89,7 +89,7 @@ function Hero() {
           </h1>
           <p className="lw5-body" style={{ fontSize: 17, maxWidth: "48ch" }}>
             Five days. Five drops. New building blocks for taking AI
-            applications from prototype to production — unveiled live at{" "}
+            applications from prototype to production. Unveiled live at{" "}
             <Link
               href="https://clickhouse.com/openhouse"
               target="_blank"
@@ -119,17 +119,6 @@ function Hero() {
               >
                 <span>Follow @langfuse on X</span>
                 <span className="lw5-kbd">↗</span>
-              </Link>
-            </span>
-            <span className="lw5-btn-wrap">
-              <Link
-                className="lw5-btn lw5-btn-secondary"
-                href="https://github.com/langfuse/langfuse"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>Star on GitHub</span>
-                <span className="lw5-kbd">★</span>
               </Link>
             </span>
             <span className="lw5-btn-wrap">
@@ -180,11 +169,39 @@ function Hero() {
 }
 
 function HeroArt() {
+  // Cards arranged clockwise on a circle starting from the top (Day 01).
+  // Coordinates are in the same SVG viewBox space (400×400) as the ring and
+  // arrows so the layout stays aligned at any container width.
+  const CENTER = 200;
+  const CARD_RADIUS = 105;
+  const ARROW_RADIUS = 150;
+  const CARD_SIZE = 110;
+  const CARD_HEIGHT = 132;
+  const tilts = [-8, 6, -4, 8, -6];
+  const cards = [0, 1, 2, 3, 4].map((i) => {
+    const angle = (i * 72 * Math.PI) / 180;
+    return {
+      label: String(i + 1).padStart(2, "0"),
+      cx: CENTER + CARD_RADIUS * Math.sin(angle),
+      cy: CENTER - CARD_RADIUS * Math.cos(angle),
+      rot: tilts[i],
+    };
+  });
+  const arrows = [0, 1, 2, 3, 4].map((i) => {
+    const angleDeg = i * 72 + 36;
+    const angle = (angleDeg * Math.PI) / 180;
+    return {
+      x: CENTER + ARROW_RADIUS * Math.sin(angle),
+      y: CENTER - ARROW_RADIUS * Math.cos(angle),
+      rotation: angleDeg + 90,
+    };
+  });
+
   return (
-    <div className="relative h-[340px] w-full hidden md:block">
+    <div className="relative aspect-square w-full max-w-[440px] mx-auto hidden md:block">
       <svg
         viewBox="0 0 400 400"
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 w-full h-full pointer-events-none"
       >
         <defs>
           <pattern
@@ -200,75 +217,116 @@ function HeroArt() {
         </defs>
         <rect width="400" height="400" fill="url(#lw5-dots)" />
 
-        {/* loop / pipeline ring */}
+        {/* loop ring */}
         <circle
-          cx="200"
-          cy="200"
-          r="160"
+          cx={CENTER}
+          cy={CENTER}
+          r={ARROW_RADIUS}
           fill="none"
           stroke="var(--line-cta)"
           strokeDasharray="3 6"
           opacity="0.5"
         />
-        {/* arrow heads at compass points */}
-        {[0, 72, 144, 216, 288].map((deg, i) => {
-          const rad = (deg * Math.PI) / 180;
-          const x = 200 + Math.cos(rad) * 160;
-          const y = 200 + Math.sin(rad) * 160;
+
+        {/* arrow heads between consecutive cards, pointing clockwise */}
+        {arrows.map((a, i) => (
+          <g
+            key={i}
+            transform={`translate(${a.x}, ${a.y}) rotate(${a.rotation})`}
+          >
+            <polygon points="0,-7 7,7 -7,7" fill="var(--line-cta)" />
+          </g>
+        ))}
+
+        {/* Day cards — pure SVG so they scale with the viewBox */}
+        {cards.map((c) => {
+          const left = c.cx - CARD_SIZE / 2;
+          const top = c.cy - CARD_HEIGHT / 2;
           return (
-            <g key={i} transform={`translate(${x},${y}) rotate(${deg + 90})`}>
-              <polygon points="0,-6 6,6 -6,6" fill="var(--line-cta)" />
+            <g
+              key={c.label}
+              transform={`rotate(${c.rot} ${c.cx} ${c.cy})`}
+              filter="url(#lw5-card-shadow)"
+            >
+              <rect
+                x={left}
+                y={top}
+                width={CARD_SIZE}
+                height={CARD_HEIGHT}
+                fill="white"
+                stroke="var(--line-structure)"
+              />
+              <rect
+                x={left}
+                y={top}
+                width={CARD_SIZE}
+                height={CARD_SIZE}
+                fill="var(--surface-1)"
+              />
+              <text
+                x={c.cx}
+                y={top + 58}
+                textAnchor="middle"
+                fontFamily="var(--font-analog), serif"
+                fontWeight="500"
+                fontSize="40"
+                fill="var(--text-disabled)"
+              >
+                {c.label}
+              </text>
+              {/* lock icon */}
+              <g
+                transform={`translate(${c.cx - 6}, ${top + 75})`}
+                fill="none"
+                stroke="var(--text-tertiary)"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect
+                  x="-2"
+                  y="5"
+                  width="16"
+                  height="10"
+                  rx="1.5"
+                  fill="var(--surface-2)"
+                />
+                <path d="M2 5 V3 a4 4 0 0 1 8 0 V5" />
+              </g>
+              {/* caption */}
+              <text
+                x={c.cx}
+                y={top + CARD_HEIGHT - 7}
+                textAnchor="middle"
+                fontFamily="var(--font-mono), monospace"
+                fontSize="8"
+                letterSpacing="0.8"
+                fill="var(--text-tertiary)"
+              >
+                DAY {c.label}
+              </text>
             </g>
           );
         })}
-        <text
-          x="200"
-          y="204"
-          textAnchor="middle"
-          fontFamily="var(--font-mono)"
-          fontSize="10"
-          fill="var(--text-tertiary)"
-          letterSpacing="2"
-        >
-          LAUNCH WEEK 5
-        </text>
-      </svg>
 
-      {/* Stacked launch cards */}
-      {[
-        { label: "01", rot: -10, x: 18, y: 26, z: 1 },
-        { label: "02", rot: 7, x: 145, y: 8, z: 3 },
-        { label: "03", rot: -3, x: 222, y: 152, z: 2 },
-        { label: "04", rot: 9, x: 60, y: 196, z: 2 },
-        { label: "05", rot: -8, x: 195, y: 250, z: 1 },
-      ].map((c) => (
-        <div
-          key={c.label}
-          className="absolute w-[110px] bg-white border border-line-structure"
-          style={{
-            left: c.x,
-            top: c.y,
-            zIndex: c.z,
-            transform: `rotate(${c.rot}deg)`,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-          }}
-        >
-          <div className="aspect-square flex flex-col items-center justify-center gap-1.5 bg-surface-1">
-            <div
-              className="font-analog text-[44px] font-medium leading-none"
-              style={{ color: "var(--text-disabled)" }}
-            >
-              {c.label}
-            </div>
-            <span className="lw5-lock">
-              <LockIcon />
-            </span>
-          </div>
-          <div className="px-2 py-1 font-mono text-[9px] uppercase tracking-[.06em] text-text-tertiary text-center border-t border-line-structure bg-white">
-            DAY {c.label}
-          </div>
-        </div>
-      ))}
+        <defs>
+          <filter
+            id="lw5-card-shadow"
+            x="-20%"
+            y="-20%"
+            width="140%"
+            height="140%"
+          >
+            <feDropShadow
+              dx="0"
+              dy="3"
+              stdDeviation="3"
+              floodColor="#000"
+              floodOpacity="0.08"
+            />
+          </filter>
+        </defs>
+      </svg>
     </div>
   );
 }
@@ -325,21 +383,6 @@ function Schedule() {
   );
 }
 
-function Closing() {
-  return (
-    <section className="lw5-section pt-[100px] pb-16">
-      <div className="flex flex-col items-start gap-3.5">
-        <div className="lw5-eyebrow">The Theme · WHAT THIS WEEK IS ABOUT</div>
-        <h2 className="lw5-h2 max-w-[28ch]">
-          The dev loop for AI engineers,
-          <br />
-          <span className="lw5-highlight">closed end to end.</span>
-        </h2>
-      </div>
-    </section>
-  );
-}
-
 export function LaunchWeek5Landing() {
   return (
     <div className="lw5-page">
@@ -347,7 +390,6 @@ export function LaunchWeek5Landing() {
       <div className="max-w-[1440px] mx-auto">
         <Hero />
         <Schedule />
-        <Closing />
       </div>
     </div>
   );
