@@ -154,7 +154,7 @@ langfuse = get_client()
 langfuse_prompt = langfuse.get_prompt("movie-critic-chat")
 
 # Using langchain, you can obtain a MessagesPlaceholder object for unresolved placeholders
-langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt())
+langchain_prompt = ChatPromptTemplate.from_messages(langfuse_prompt.get_langchain_prompt())
 
 # -> langchain_prompt = [
 #   SystemMessage(content="You are an expert movie critic"),
@@ -179,7 +179,7 @@ const langfusePrompt = await langfuse.prompt.get("movie-critic-chat", {
 });
 
 // Using langchain, you can obtain a ChatPromptTemplate with MessagesPlaceholder objects for unresolved placeholders
-const langchainPrompt = ChatPromptTemplate.fromTemplate(
+const langchainPrompt = ChatPromptTemplate.fromMessages(
   langfusePrompt.getLangchainPrompt()
 );
 
