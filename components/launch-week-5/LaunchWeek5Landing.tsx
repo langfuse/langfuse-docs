@@ -83,13 +83,9 @@ function Hero() {
         />
 
         <div className="relative flex flex-col gap-6">
-          <div className="lw5-eyebrow">
-            Langfuse · Launch Week 5 · May 25–29, 2026
-          </div>
+          <div className="lw5-eyebrow">Langfuse · May 25–29, 2026</div>
           <h1 className="lw5-h1">
-            Engineering
-            <br />
-            the <span className="lw5-highlight">AI Loop.</span>
+            Launch Week <span className="lw5-highlight">#5</span>
           </h1>
           <p className="lw5-body" style={{ fontSize: 17, maxWidth: "48ch" }}>
             Five days. Five drops. New building blocks for taking AI
@@ -160,7 +156,7 @@ function Hero() {
           ["5 days", "5 feature drops"],
           ["Live demos", "ClickHouse OpenHouse"],
           ["Open source", "MIT · self-host anytime"],
-          ["Every day", "8:00 AM PT · M–F"],
+          ["Monday → Friday", "May 25–29, 2026"],
         ].map(([top, bot], i) => (
           <div
             key={top}
@@ -234,7 +230,7 @@ function HeroArt() {
           fill="var(--text-tertiary)"
           letterSpacing="2"
         >
-          THE AI LOOP
+          LAUNCH WEEK 5
         </text>
       </svg>
 
@@ -291,9 +287,9 @@ function Schedule() {
           <span className="lw5-highlight">Monday through Friday.</span>
         </h2>
         <p className="lw5-body">
-          Every day at 8:00 AM Pacific, we unwrap a new feature. We'll update
-          this page as each one ships. Subscribe to the newsletter or follow us
-          to make sure you don't miss a drop.
+          We'll unwrap a new feature each day and update this page as each one
+          ships. Subscribe to the newsletter or follow us so you don't miss a
+          drop.
         </p>
       </div>
 
@@ -314,7 +310,7 @@ function Schedule() {
                 {day.weekday}
               </div>
               <div className="font-mono text-[11px] text-text-tertiary">
-                {day.date}, 2026 · 8:00 AM PT
+                {day.date}, 2026
               </div>
             </div>
             <div className="border-t border-line-structure pt-3 mt-1">
@@ -329,339 +325,16 @@ function Schedule() {
   );
 }
 
-function ThemePillars() {
-  const pillars = [
-    {
-      n: "I",
-      title: "Production-grade by default",
-      body: "Treat your AI like real software. Bring engineering rigor to evaluation, deployment, and operations.",
-    },
-    {
-      n: "II",
-      title: "Built for agents",
-      body: "From multi-step traces to the surfaces and protocols agents speak natively. Tooling that meets agents where they live.",
-    },
-    {
-      n: "III",
-      title: "Closer to the data",
-      body: "A deeper partnership with ClickHouse — faster queries, tighter integration, and a single sign-on between the two products you already use.",
-    },
-  ];
-
+function Closing() {
   return (
-    <section className="lw5-section pt-[100px] pb-10">
-      <div className="flex flex-col items-start gap-3.5 mb-10">
+    <section className="lw5-section pt-[100px] pb-16">
+      <div className="flex flex-col items-start gap-3.5">
         <div className="lw5-eyebrow">The Theme · WHAT THIS WEEK IS ABOUT</div>
         <h2 className="lw5-h2 max-w-[28ch]">
           The dev loop for AI engineers,
           <br />
           <span className="lw5-highlight">closed end to end.</span>
         </h2>
-        <p className="lw5-body">
-          Launch Week 5 is about the parts of the AI loop that get serious in
-          production: the testing pipeline, the alerts when something drifts,
-          the way you actually find a needle in a million traces, and the
-          building blocks for the agents you're shipping. We can't tell you
-          what's coming yet — but here's the shape of it.
-        </p>
-      </div>
-
-      <div className="grid gap-2 md:grid-cols-3">
-        {pillars.map((p) => (
-          <div key={p.n} className="lw5-pillar">
-            <span className="lw5-pillar-num">Pillar {p.n}</span>
-            <div className="font-analog text-[22px] leading-[1.3] text-text-primary font-medium mb-1 [text-wrap:balance]">
-              {p.title}
-            </div>
-            <p className="lw5-body-sm m-0">{p.body}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function OpenHouseCallout() {
-  return (
-    <section className="lw5-section pt-[100px] pb-10">
-      <div
-        className={`${cornerBoxBase} grid gap-8 md:grid-cols-[1.5fr_1fr] items-stretch overflow-hidden`}
-      >
-        <div className="relative px-7 py-9 md:px-10 md:py-12 flex flex-col gap-5">
-          <div
-            aria-hidden
-            className="lw5-grid-bg absolute inset-0 opacity-60 pointer-events-none"
-            style={{
-              maskImage: "linear-gradient(to right, black, transparent 80%)",
-              WebkitMaskImage:
-                "linear-gradient(to right, black, transparent 80%)",
-            }}
-          />
-          <div className="relative flex flex-col gap-4">
-            <div className="lw5-eyebrow">In Person · ClickHouse OpenHouse</div>
-            <h2
-              className="lw5-h2 max-w-[20ch]"
-              style={{ fontSize: "clamp(28px, 3.4vw, 48px)" }}
-            >
-              See every drop live, on stage.
-            </h2>
-            <p className="lw5-body max-w-[52ch]">
-              Launch Week 5 happens alongside{" "}
-              <b className="text-text-primary font-medium">
-                ClickHouse OpenHouse
-              </b>
-              , the ClickHouse conference. The Langfuse team will be there in
-              person, demoing each launch as it ships — and answering anything
-              you want to ask about the roadmap, AI engineering, or how we use
-              ClickHouse under the hood.
-            </p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <span className="lw5-btn-wrap">
-                <Link
-                  className="lw5-btn lw5-btn-primary"
-                  href="https://clickhouse.com/openhouse"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span>Visit ClickHouse OpenHouse</span>
-                  <span className="lw5-kbd">↗</span>
-                </Link>
-              </span>
-              <span className="lw5-btn-wrap">
-                <Link
-                  className="lw5-btn lw5-btn-secondary"
-                  href="/blog/joining-clickhouse"
-                >
-                  <span>Langfuse + ClickHouse</span>
-                </Link>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative bg-surface-1 border-l border-line-structure flex flex-col">
-          <div className="lw5-stripes-bg absolute inset-0 opacity-70 pointer-events-none" />
-          <div className="relative flex-1 flex flex-col justify-center gap-4 px-7 py-9">
-            <div className="flex items-baseline justify-between">
-              <span className="lw5-eyebrow">Schedule</span>
-              <span className="font-mono text-[10px] text-text-tertiary">
-                LIVE
-              </span>
-            </div>
-            <div className="flex flex-col gap-2.5">
-              {[
-                ["Mon", "Day 1 demo"],
-                ["Tue", "Day 2 demo"],
-                ["Wed", "Day 3 demo"],
-                ["Thu", "Day 4 demo"],
-                ["Fri", "Day 5 demo"],
-              ].map(([d, label]) => (
-                <div
-                  key={d}
-                  className="flex items-center gap-3 px-3 py-2 border border-line-structure bg-surface-bg rounded-[2px]"
-                >
-                  <span className="font-mono text-[11px] uppercase tracking-[.06em] text-text-tertiary w-8">
-                    {d}
-                  </span>
-                  <span className="text-[13px] text-text-primary flex-1">
-                    {label}
-                  </span>
-                  <span className="lw5-lock">
-                    <LockIcon />
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-[.08em] mt-auto">
-              clickhouse.com/openhouse ↗
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Subscribe() {
-  return (
-    <section
-      id="subscribe"
-      className="lw5-section pt-[100px] pb-10 scroll-mt-24"
-    >
-      <div
-        className={`${cornerBoxBase} lw5-stripes-bg grid gap-10 items-center px-8 py-12 md:px-12 md:py-16 md:grid-cols-[1.2fr_1fr]`}
-      >
-        <div className="flex flex-col gap-5">
-          <div className="lw5-eyebrow">Stay in the loop</div>
-          <h2 className="lw5-h2 max-w-[22ch]">
-            Five emails. One per drop.{" "}
-            <span className="lw5-highlight">No filler.</span>
-          </h2>
-          <p className="lw5-body max-w-[52ch]">
-            Drop your email and we'll send you a short note each morning of
-            Launch Week with what's new, why we built it, and how to try it.
-            Unsubscribe anytime.
-          </p>
-          <ProductUpdateSignup
-            source="Launch Week 5 subscribe section"
-            className="lw5-subscribe max-w-md"
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <div className="lw5-eyebrow mb-1.5">Or follow us live</div>
-          {[
-            ["X · @langfuse", "https://x.com/langfuse", "𝕏"],
-            ["LinkedIn", "https://www.linkedin.com/company/langfuse/", "in"],
-            ["GitHub · ★ Star", "https://github.com/langfuse/langfuse", "★"],
-            ["Discord", "/discord", "◇"],
-            ["YouTube", "https://www.youtube.com/@langfuse", "▶"],
-          ].map(([label, href, glyph]) => (
-            <Link
-              key={label}
-              href={href}
-              target={href.startsWith("http") ? "_blank" : undefined}
-              rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-              className="flex items-center gap-3 px-4 py-3 border border-line-structure bg-surface-bg rounded-[2px] hover:border-line-cta transition-colors"
-            >
-              <span className="font-analog text-[18px] text-text-primary w-6 text-center">
-                {glyph}
-              </span>
-              <span className="flex-1 text-[13.5px] text-text-primary font-medium">
-                {label}
-              </span>
-              <span className="font-mono text-[11px] text-text-tertiary">
-                ↗
-              </span>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PastLaunchWeeks() {
-  const weeks = [
-    {
-      n: "01",
-      date: "April 2024",
-      title: "Langfuse 2.0",
-      body: "Our first launch week — the LLM Playground, decorators, Datasets v2, and model-based evaluations.",
-      href: "/blog/launch-week-1",
-    },
-    {
-      n: "02",
-      date: "November 2024",
-      title: "Next-gen models",
-      body: "Prompt experiments, LLM-as-a-judge, multi-modal traces, and tighter integration into the dev loop.",
-      href: "/blog/2024-11-17-launch-week-2",
-    },
-    {
-      n: "03",
-      date: "May 2025",
-      title: "Open and customizable",
-      body: "Customizable dashboards, a new SDK generation, and the steps that opened up Langfuse to a wider stack.",
-      href: "/blog/2025-05-19-launch-week-3",
-    },
-    {
-      n: "04",
-      date: "November 2025",
-      title: "Built for agents",
-      body: "Agent graphs, trace log views, score analytics, dataset folders — a week focused on debugging modern agents.",
-      href: "/blog/2025-10-29-launch-week-4",
-    },
-  ];
-
-  return (
-    <section className="lw5-section pt-[100px] pb-10">
-      <div className="flex flex-col items-start gap-3.5 mb-8">
-        <div className="lw5-eyebrow">Previously · Launch Weeks 1 → 4</div>
-        <h2 className="lw5-h2 max-w-[28ch]">A track record of shipping.</h2>
-        <p className="lw5-body">
-          We've shipped a launch week every six months since 2024. Each one adds
-          a chapter to how Langfuse fits into modern AI engineering.
-        </p>
-      </div>
-
-      <div
-        className={`${cornerBoxBase} lw5-past-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4`}
-      >
-        {weeks.map((w) => (
-          <Link
-            key={w.n}
-            href={w.href}
-            className="block px-6 py-7 hover:bg-surface-1 transition-colors no-underline"
-          >
-            <div className="flex items-baseline justify-between mb-5">
-              <span
-                className="font-analog text-[36px] font-medium leading-none"
-                style={{ color: "var(--text-disabled)" }}
-              >
-                {w.n}
-              </span>
-              <span className="font-mono text-[10px] uppercase tracking-[.08em] text-text-tertiary">
-                {w.date}
-              </span>
-            </div>
-            <div className="font-analog text-[18px] leading-[1.35] text-text-primary font-medium mb-2">
-              {w.title}
-            </div>
-            <p className="lw5-body-sm m-0">{w.body}</p>
-            <div className="font-mono text-[11px] text-text-tertiary mt-4">
-              Read the recap ↗
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function FinalCTA() {
-  return (
-    <section className="lw5-section pt-[80px] pb-16">
-      <div
-        className={`${cornerBoxBase} lw5-stripes-bg px-8 py-[72px] text-center flex flex-col items-center gap-[22px]`}
-      >
-        <div className="lw5-eyebrow">Launch Week 5 · May 25–29, 2026</div>
-        <h2 className="lw5-h2 max-w-[26ch]">
-          Don't blink.{" "}
-          <span className="lw5-highlight">Five drops, coming fast.</span>
-        </h2>
-        <p className="lw5-body text-center">
-          Subscribe, follow, or just come back every morning at 8 AM PT.
-        </p>
-        <div className="lw5-subscribe w-full flex justify-center">
-          <ProductUpdateSignup
-            source="Launch Week 5 final CTA"
-            className="max-w-md"
-          />
-        </div>
-        <div className="flex flex-wrap justify-center gap-2 mt-2">
-          <span className="lw5-btn-wrap">
-            <Link
-              className="lw5-btn lw5-btn-primary"
-              href="https://x.com/langfuse"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>Follow @langfuse</span>
-              <span className="lw5-kbd">↗</span>
-            </Link>
-          </span>
-          <span className="lw5-btn-wrap">
-            <Link
-              className="lw5-btn lw5-btn-secondary"
-              href="https://clickhouse.com/openhouse"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>See us at OpenHouse</span>
-              <span className="lw5-kbd">↗</span>
-            </Link>
-          </span>
-        </div>
       </div>
     </section>
   );
@@ -674,11 +347,7 @@ export function LaunchWeek5Landing() {
       <div className="max-w-[1440px] mx-auto">
         <Hero />
         <Schedule />
-        <ThemePillars />
-        <OpenHouseCallout />
-        <Subscribe />
-        <PastLaunchWeeks />
-        <FinalCTA />
+        <Closing />
       </div>
     </div>
   );
