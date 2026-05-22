@@ -708,7 +708,7 @@ def emit_turn(langfuse: Langfuse, session_id: str, turn_num: int, turn: Turn, tr
                     },
                 )
                 tool_span.update(output=out_trunc)
-                tool_span.end(end_time=_to_ns(tr_ts))
+                tool_span.end(end_time=_to_ns(tr_ts or am_ts))
 
                 batch_tool_results.append({
                     "tool_use_id": tid,
@@ -719,7 +719,7 @@ def emit_turn(langfuse: Langfuse, session_id: str, turn_num: int, turn: Turn, tr
             # End the generation AFTER its tools so the timeline cleanly contains them.
             # If there were tool calls, gen ends with the last result; otherwise at am_ts.
             gen_end_ts = max(batch_result_ts) if batch_result_ts else am_ts
-            gen_span.end(end_time=_to_ns(gen_end_ts))
+            gen_span.end(end_time=_to_ns(gen_end_ts or am_ts or prev_ts))
 
             # Carry this batch's results into the next generation's input.
             prev_tool_results = batch_tool_results
@@ -731,14 +731,14 @@ def emit_turn(langfuse: Langfuse, session_id: str, turn_num: int, turn: Turn, tr
                 prev_ts = am_ts
 
         trace_span.update(output={"role": "assistant", "content": final_assistant_text})
-        trace_span.end(end_time=_to_ns(turn_end_ts))
+        trace_span.end(end_time=_to_ns(turn_end_ts or last_assistant_ts or user_ts))
 
 # ----------------- Main -----------------
 def main() -> int:
     start = time.time()
     debug("Hook started")
 
-    if os.environ.get("TRACE_TO_LANGFUSE", "").lower() != "true":
+    if os.environ.get("TRACE_TO_LANGFUSE", "") != "true":
         return 0
 
     public_key = os.environ.get("CC_LANGFUSE_PUBLIC_KEY") or os.environ.get("LANGFUSE_PUBLIC_KEY")
@@ -919,7 +919,7 @@ Most issues come down to one of four things:
 tail -f ~/.claude/state/langfuse_hook.log
 ```
 
-If the file is empty after a Claude Code session, the hook isn't registered. Re-check `~/.claude/settings.json` and make sure the Stop hook entry is present.
+If the file is empty after a Claude Code session, one possibility is that the hook isn't registered — re-check `~/.claude/settings.json` and make sure the Stop hook entry is present. With the default (non-debug) log level, an empty file is also consistent with the hook running but exiting early (e.g. `TRACE_TO_LANGFUSE` unset, missing keys, or Langfuse init failure), so if the Stop hook is present, jump to step 3 to enable debug logging.
 
 2. **`TRACE_TO_LANGFUSE` isn't the exact string `"true"`.** In `.claude/settings.local.json` it must be the JSON string `"true"` (lowercase, quoted), not a boolean and not `"True"`. The hook checks for this exact value and exits silently otherwise. Also verify the public key starts with `pk-lf-`.
 
