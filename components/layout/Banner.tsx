@@ -9,7 +9,9 @@ export function Banner() {
       className="bg-black text-white [&_a]:text-white [&_button]:text-white"
     >
       <Link href="/launch">
-        <span className="sm:hidden">Langfuse Launch Week #5, a week of new features →</span>
+        <span className="sm:hidden">
+          Langfuse Launch Week #5, a week of new features →
+        </span>
         <span className="hidden sm:inline">Langfuse Launch Week #5 →</span>
       </Link>
     </FumadocsBanner>
