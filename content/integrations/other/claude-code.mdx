@@ -34,7 +34,7 @@ Claude Code provides a [hooks system](https://code.claude.com/docs/en/hooks-guid
 3. Messages are converted into Langfuse traces and sent to your Langfuse project
 4. All turns from the same session are grouped using a shared `session_id`
 
-Tracing is **opt-in per project** using environment variables in your project's `.claude/settings.local.json`.
+Tracing is **opt-in per project** using environment variables in your project's `.claude/settings.json`.
 
 ## Quick Start
 
@@ -888,7 +888,7 @@ This registers the hook globally so it runs for all Claude Code sessions.
 
 ### Enable Tracing Per-Project [#enable-tracing-per-project]
 
-Add your Langfuse credentials to Claude Code's per-project settings file at `.claude/settings.local.json` in the project root. This file is gitignored and managed by Claude Code, so your keys stay local. Add an `env` block:
+Add your Langfuse credentials to Claude Code's per-project settings file at `.claude/settings.json` in the project root. Make sure this file is listed in your project's `.gitignore` so your secret keys aren't committed. Add an `env` block:
 
 ```json
 {
@@ -957,7 +957,7 @@ tail -f ~/.claude/state/langfuse_hook.log
 
 If the file is empty after a Claude Code session, one possibility is that the hook isn't registered — re-check `~/.claude/settings.json` and make sure the Stop hook entry is present. With the default (non-debug) log level, an empty file is also consistent with the hook running but exiting early (e.g. `TRACE_TO_LANGFUSE` unset, missing keys, or Langfuse init failure), so if the Stop hook is present, jump to step 3 to enable debug logging.
 
-2. **`TRACE_TO_LANGFUSE` isn't the exact string `"true"`.** In `.claude/settings.local.json` it must be the JSON string `"true"` (lowercase, quoted), not a boolean and not `"True"`. The hook checks for this exact value and exits silently otherwise. Also verify the public key starts with `pk-lf-`.
+2. **`TRACE_TO_LANGFUSE` isn't the exact string `"true"`.** In `.claude/settings.json` it must be the JSON string `"true"` (lowercase, quoted), not a boolean and not `"True"`. The hook checks for this exact value and exits silently otherwise. Also verify the public key starts with `pk-lf-`.
 
 3. **Enable debug mode for verbose logs.** This is usually the fastest way to find the actual cause:
 
@@ -969,7 +969,7 @@ If the file is empty after a Claude Code session, one possibility is that the ho
 }
 ```
 
-4. **Wrong Python, wrong directory, or missing SDK.** Confirm `python3` resolves to a recent Python (3.9+), that `pip show langfuse` returns a result for that interpreter, and that you ran `claude` from inside the project directory whose `.claude/settings.local.json` has the env vars set.
+4. **Wrong Python, wrong directory, or missing SDK.** Confirm `python3` resolves to a recent Python (3.9+), that `pip show langfuse` returns a result for that interpreter, and that you ran `claude` from inside the project directory whose `.claude/settings.json` has the env vars set.
 
 ### Permission errors
 
