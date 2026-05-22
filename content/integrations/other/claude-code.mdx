@@ -54,8 +54,12 @@ Tracing is **opt-in per project** using environment variables in your project's 
 Install the Langfuse Python SDK:
 
 ```bash
-pip install langfuse
+pip install "langfuse>=4.0,<5"
 ```
+
+<Callout type="info">
+The hook script reaches into Langfuse SDK 4.x internals (`_otel_tracer`, `_create_observation_from_otel_span`) to backdate observations to historical timestamps. These attributes are implementation details — pinning the SDK to `>=4.0,<5` prevents a future minor-version rename from silently breaking the hook. If you want to upgrade past `4.x`, update the script first.
+</Callout>
 
 ### Create the Hook Script
 
@@ -549,7 +553,22 @@ def _start_backdated(langfuse: Langfuse, *, name: str, as_type: str,
     Bypasses langfuse.start_observation() (which has no start_time kwarg in
     SDK 4.x) by talking to the underlying OTel tracer directly and then
     wrapping the resulting span with the Langfuse observation type.
+
+    Depends on SDK 4.x internals: langfuse._otel_tracer and
+    langfuse._create_observation_from_otel_span. If a future SDK version
+    renames or removes these, raise a clear error instead of letting an
+    AttributeError get swallowed by the broad emit_turn handler.
     """
+    if not hasattr(langfuse, "_otel_tracer") or not hasattr(langfuse, "_create_observation_from_otel_span"):
+        try:
+            sdk_version = getattr(__import__("langfuse"), "__version__", "unknown")
+        except Exception:
+            sdk_version = "unknown"
+        raise RuntimeError(
+            f"Langfuse SDK {sdk_version} is missing _otel_tracer or "
+            f"_create_observation_from_otel_span. This hook targets SDK 4.x; "
+            f"pin with `pip install \"langfuse>=4.0,<5\"` or update the hook script."
+        )
     start_ns = _to_ns(start_time)
     if parent_otel_span is not None:
         with otel_trace_api.use_span(parent_otel_span, end_on_exit=False):
@@ -792,7 +811,9 @@ def main() -> int:
                 try:
                     emit_turn(langfuse, session_id, turn_num, t, transcript_path)
                 except Exception as e:
-                    debug(f"emit_turn failed: {e}")
+                    # Log at INFO so SDK incompatibilities (and other emit failures)
+                    # are visible without needing CC_LANGFUSE_DEBUG=true.
+                    info(f"emit_turn failed: {type(e).__name__}: {e}")
                     # continue emitting other turns
 
             ss.turn_count += emitted
@@ -965,6 +986,22 @@ Check the log file for errors:
 ```bash
 cat ~/.claude/state/langfuse_hook.log
 ```
+
+### Langfuse SDK version mismatch
+
+The hook script targets Langfuse Python SDK `4.x` and uses internal attributes (`_otel_tracer`, `_create_observation_from_otel_span`) to backdate observations to historical timestamps. If `~/.claude/state/langfuse_hook.log` shows:
+
+```
+emit_turn failed: RuntimeError: Langfuse SDK X.Y.Z is missing _otel_tracer ...
+```
+
+reinstall a compatible version:
+
+```bash
+pip install "langfuse>=4.0,<5"
+```
+
+If you intentionally upgraded past `4.x`, you will need to update `_start_backdated` in the hook script to match the new SDK surface.
 
 ### Authentication errors
 
