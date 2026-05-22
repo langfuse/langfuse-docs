@@ -46,10 +46,27 @@ export function LaunchWeek5Styles() {
         -webkit-mask-repeat: no-repeat;
         mask-repeat: no-repeat;
       }
+      /*
+       * The four singleton .no-* rules each rewrite the entire mask-position
+       * shorthand (CSS has no per-image position long-hand), so stacking two
+       * or more modifiers on the same element makes them conflict at the
+       * same specificity — the cascade keeps only whichever rule appears
+       * last in source order. Compound selectors with higher specificity
+       * cover the combinations the hero actually uses.
+       */
       .lw5-corners.no-tl::before { -webkit-mask-position: 50% 150%, bottom left, bottom right, top right; mask-position: 50% 150%, bottom left, bottom right, top right; }
       .lw5-corners.no-tr::before { -webkit-mask-position: top left, bottom left, bottom right, 50% 150%; mask-position: top left, bottom left, bottom right, 50% 150%; }
       .lw5-corners.no-bl::before { -webkit-mask-position: top left, 50% 150%, bottom right, top right; mask-position: top left, 50% 150%, bottom right, top right; }
       .lw5-corners.no-br::before { -webkit-mask-position: top left, bottom left, 50% 150%, top right; mask-position: top left, bottom left, 50% 150%, top right; }
+      .lw5-corners.no-tl.no-tr::before { -webkit-mask-position: 50% 150%, bottom left, bottom right, 50% 150%; mask-position: 50% 150%, bottom left, bottom right, 50% 150%; }
+      .lw5-corners.no-bl.no-br::before { -webkit-mask-position: top left, 50% 150%, 50% 150%, top right; mask-position: top left, 50% 150%, 50% 150%, top right; }
+      .lw5-corners.no-tl.no-bl::before { -webkit-mask-position: 50% 150%, 50% 150%, bottom right, top right; mask-position: 50% 150%, 50% 150%, bottom right, top right; }
+      .lw5-corners.no-tr.no-br::before { -webkit-mask-position: top left, bottom left, 50% 150%, 50% 150%; mask-position: top left, bottom left, 50% 150%, 50% 150%; }
+      .lw5-corners.no-tl.no-tr.no-bl::before { -webkit-mask-position: 50% 150%, 50% 150%, bottom right, 50% 150%; mask-position: 50% 150%, 50% 150%, bottom right, 50% 150%; }
+      .lw5-corners.no-tl.no-tr.no-br::before { -webkit-mask-position: 50% 150%, bottom left, 50% 150%, 50% 150%; mask-position: 50% 150%, bottom left, 50% 150%, 50% 150%; }
+      .lw5-corners.no-tl.no-bl.no-br::before { -webkit-mask-position: 50% 150%, 50% 150%, 50% 150%, top right; mask-position: 50% 150%, 50% 150%, 50% 150%, top right; }
+      .lw5-corners.no-tr.no-bl.no-br::before { -webkit-mask-position: top left, 50% 150%, 50% 150%, 50% 150%; mask-position: top left, 50% 150%, 50% 150%, 50% 150%; }
+      .lw5-corners.no-tl.no-tr.no-bl.no-br::before { -webkit-mask-position: 50% 150%, 50% 150%, 50% 150%, 50% 150%; mask-position: 50% 150%, 50% 150%, 50% 150%, 50% 150%; }
 
       /* Backgrounds */
       .lw5-grid-bg {
