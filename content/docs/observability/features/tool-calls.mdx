@@ -1,0 +1,61 @@
+---
+description: Langfuse automatically renders tool definitions and tool calls from your agent traces, making it easy to debug function calling.
+sidebarTitle: Tool Calls
+---
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+# Tool Call Visualization
+
+Tool calls are the heartbeat of agents. Langfuse automatically renders all tools available to an LLM at the top of each generation, allowing you to instantly see if the LLM selected the right one.
+
+<Frame fullWidth>
+  ![Tool call visualization](/images/changelog/2025-11-05-langfuse-for-agents/lw4-d3-tools.png)
+</Frame>
+
+## What's Displayed
+
+**Tool Definitions**: All tools available to the LLM during that interaction:
+
+- Tool name and call status
+- Call count badge ("called", "called 2x", "not called")
+- Expandable description and parameter schema
+- Toggle between formatted and JSON views
+
+**Tool Calls in Chat**: Called tools appear with their arguments and call IDs. Numbering matches the available tools list for easy validation.
+
+**Automatic Sorting**: Called tools appear first, followed by unused tools.
+
+## Supported Frameworks
+
+Tool visualization works automatically with:
+
+- OpenAI (Chat Completions & Responses API)
+- Google Gemini / Vertex AI
+- Vercel AI SDK
+- LangGraph / LangChain
+- Pydantic AI
+- Microsoft Agent Framework
+
+No changes to your instrumentation code required. If you're using tools with a supported framework, visualization appears automatically.
+
+## How Tools Are Detected
+
+Langfuse detects **available tools** from supported framework and OpenTelemetry metadata, normalizes them into the generation input, and renders them at the top of each generation. Langfuse detects **called tools** from the model output and renders them inline in the chat view with their arguments and call IDs.
+
+For the exact OpenTelemetry and framework metadata shapes that are remapped into `input.tools`, `tool_definitions`, `tool_calls`, and `tool_call_names`, see [Tool definitions and tool calls](/integrations/native/opentelemetry#tool-definitions-and-tool-calls) in the OpenTelemetry mapping docs.
+
+## Why This Matters
+
+1. **Faster debugging**: Instantly see if the right tools were available and called
+2. **Better prompt engineering**: Understand which tool descriptions lead to actual usage
+3. **Cost optimization**: Identify unused tools to reduce token usage
+
+## Related
+
+- [Agent Graphs](/docs/observability/features/agent-graphs)
+- [Observation Types](/docs/observability/features/observation-types)
+
+## GitHub Discussions
+
+<GhDiscussionsPreview labels={["feat-tool-calls"]} />
