@@ -1,0 +1,100 @@
+---
+title: Monitor Auxen with Langfuse
+sidebarTitle: Auxen
+logo: /images/integrations/auxen_icon.svg
+description: Learn how to integrate Auxen with Langfuse using the OpenAI drop-in replacement.
+category: Integrations
+---
+
+# Observability for Auxen with Langfuse
+
+This guide shows you how to integrate [Auxen](https://auxen.ai) with Langfuse. Auxen provisions private AI model endpoints on dedicated GPUs (Llama, Qwen, Mistral, Gemma, Phi-3, Mixtral, Command-R). Each instance is OpenAI-compatible, so we use the Langfuse OpenAI drop-in replacement to trace all calls.
+
+> **What is Auxen?** [Auxen](https://auxen.ai) provisions per-customer dedicated GPU instances behind a stable OpenAI-compatible endpoint. Pay per minute of GPU runtime — no subscriptions, no per-token fees, no shared inference. Built for developers who want private models without managing infrastructure.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
+
+<Steps>
+
+## Step 1: Install Dependencies
+
+```python
+%pip install openai langfuse
+```
+
+## Step 2: Set Up Environment Variables
+
+Provision an instance at [auxen.ai/dashboard](https://auxen.ai/dashboard). Copy the per-instance endpoint URL and API key.
+
+```python
+import os
+
+# Langfuse — get keys from your project settings:
+# https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
+# Other regions: 🇺🇸 US https://us.cloud.langfuse.com,
+#                🇯🇵 JP https://jp.cloud.langfuse.com,
+#                ⚕️  HIPAA https://hipaa.cloud.langfuse.com
+
+# Auxen — per-instance URL + key from the Auxen dashboard:
+os.environ["AUXEN_BASE_URL"] = "https://api.auxen.ai/v1/inst_xxx"
+os.environ["AUXEN_API_KEY"] = "auxk_..."
+```
+
+## Step 3: Langfuse OpenAI Drop-in Replacement
+
+Import the wrapped OpenAI client from Langfuse and point it at your Auxen instance. The base URL needs to end at `/v1` (Auxen instances expose the OpenAI-compatible endpoint there).
+
+```python
+# instead of `import openai`:
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+    api_key=os.environ.get("AUXEN_API_KEY"),
+    base_url=f"{os.environ.get('AUXEN_BASE_URL').rstrip('/')}/v1",
+)
+```
+
+The OpenAI drop-in replacement is fully compatible with the [Low-Level Langfuse Python SDK](https://langfuse.com/docs/sdk/python/low-level-sdk) and the [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace all parts of your application.
+
+## Step 4: Run An Example
+
+```python
+response = client.chat.completions.create(
+    model="llama-3.1-8b",  # whatever model your Auxen instance is provisioned with
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello"},
+    ],
+)
+print(response.choices[0].message.content)
+```
+
+All API calls are automatically traced by Langfuse — open your Langfuse project to see token counts, latency, and full request/response bodies. Note that Auxen bills per minute of GPU runtime (not per token), so Langfuse's token-based cost estimates are approximations — check your Auxen dashboard for authoritative billing.
+
+## Step 5: Streaming + Tool Calling + Async
+
+Auxen is fully OpenAI-compatible at the wire level, so streaming, tool calling, async, structured outputs, and JSON mode all work as-is through the Langfuse drop-in client. See the [OpenAI integration docs](https://langfuse.com/integrations/model-providers/openai-py) for the full feature surface.
+
+</Steps>
+
+## Pricing
+
+Auxen bills per minute of GPU runtime at the following 1× capacity rates:
+
+| Tier | Models | Rate |
+|---|---|---|
+| Small (≤7B) | gemma2-2b, mistral-7b, llama3.2-3b, phi3-mini | $0.10/hr |
+| Medium (8–14B) | llama3.1-8b, qwen2.5-14b, mistral-nemo-12b | $0.20/hr |
+| Large (24–32B) | mistral-small-24b, qwen2.5-32b, command-r | $0.65/hr |
+| XL (70B+) | llama3.1-70b, qwen2.5-72b, mixtral-8x22b | $1.50/hr |
+
+## Related Resources
+
+- [Auxen homepage](https://auxen.ai)
+- [Auxen docs](https://auxen.ai/docs)
+- [`auxen` Python SDK](https://github.com/auxen-ai/auxen-python) — `pip install auxen`
+- [`@auxen-ai/ai-sdk-provider`](https://github.com/auxen-ai/ai-sdk-provider) — Vercel AI SDK provider
+- [Auxen MCP server](https://github.com/auxen-ai/mcp-server) — provision/manage instances via natural language
