@@ -180,7 +180,7 @@ const langfusePrompt = await langfuse.prompt.get("movie-critic-chat", {
 
 // Using langchain, you can obtain a ChatPromptTemplate with MessagesPlaceholder objects for unresolved placeholders
 const langchainPrompt = ChatPromptTemplate.fromMessages(
-  langfusePrompt.getLangchainPrompt()
+  langfusePrompt.getLangchainPrompt().map((m) => [m.role, m.content])
 );
 
 // -> langchainPrompt = [
