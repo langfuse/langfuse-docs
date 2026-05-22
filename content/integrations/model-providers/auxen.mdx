@@ -1,0 +1,126 @@
+---
+title: Observability for Auxen with Langfuse
+sidebarTitle: Auxen
+logo: /images/integrations/openai_icon.svg
+description: Use Langfuse to trace and monitor calls to Auxen — per-customer dedicated, OpenAI-compatible LLM endpoints (Llama, Qwen, Mistral, Gemma, Mixtral, Phi, Command R).
+category: Integrations
+---
+
+# Trace Auxen LLM Calls with Langfuse
+
+[Auxen](https://auxen.ai) hosts per-customer **dedicated** LLM endpoints (Llama 3.1/3.2, Qwen 2.5, Mistral, Gemma 2, Mixtral, Phi-3, Command R) on stable HTTPS URLs with an OpenAI-compatible `/v1/chat/completions` API. Each instance is a dedicated GPU billed per-minute of runtime.
+
+Because Auxen instances are OpenAI-wire-compatible, this guide uses Langfuse's drop-in OpenAI SDK wrapper to automatically trace all calls to your Auxen instance — no Auxen-specific Langfuse SDK is required.
+
+<Callout type="info" emoji="ℹ️">
+**Note:** *Langfuse is also natively integrated with [LangChain](https://langfuse.com/integrations/frameworks/langchain), [LlamaIndex](https://langfuse.com/integrations/frameworks/llamaindex), [LiteLLM](https://langfuse.com/integrations/gateways/litellm), and [other frameworks](https://langfuse.com/integrations). Each of these frameworks can call an Auxen instance via its OpenAI-compatible base URL — see the corresponding Langfuse integration page.*
+</Callout>
+
+## Setup
+
+### Provision an Auxen instance
+
+Sign in at [auxen.ai](https://auxen.ai) and provision an LLM instance. You will be issued:
+
+- A per-instance **base URL** of the form `https://api.auxen.ai/v1/inst_xxx/v1`
+- A per-instance **API key** prefixed `auxk_`
+
+### Install Required Packages
+
+```python
+%pip install langfuse openai --upgrade
+```
+
+### Set Environment Variables
+
+```python
+import os
+
+# Langfuse project keys from https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
+# Other regions: US: https://us.cloud.langfuse.com, Japan: https://jp.cloud.langfuse.com, HIPAA: https://hipaa.cloud.langfuse.com
+
+# Your Auxen instance credentials from https://auxen.ai
+os.environ["AUXEN_API_BASE"] = "https://api.auxen.ai/v1/inst_xxx/v1"
+os.environ["AUXEN_API_KEY"] = "auxk_..."
+```
+
+### Initialize the Langfuse-wrapped OpenAI Client
+
+Instead of importing `openai` directly, import it from `langfuse.openai`. Point the client at your Auxen instance:
+
+```python
+# Drop-in replacement: tracing is automatic
+from langfuse.openai import OpenAI
+from langfuse import observe
+
+client = OpenAI(
+    base_url=os.environ["AUXEN_API_BASE"],
+    api_key=os.environ["AUXEN_API_KEY"],
+)
+```
+
+## Examples
+
+### Chat Completion Request
+
+```python
+completion = client.chat.completions.create(
+    model="llama-3.1-8b",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Why dedicated GPUs for LLMs? Answer in 20 words."},
+    ],
+)
+print(completion.choices[0].message.content)
+```
+
+Every call made through this `client` is automatically captured as a Langfuse trace with prompt, completion, token usage, and latency.
+
+### Group Calls into a Single Trace with `@observe()`
+
+```python
+from langfuse import observe
+from langfuse.openai import OpenAI
+
+client = OpenAI(
+    base_url=os.environ["AUXEN_API_BASE"],
+    api_key=os.environ["AUXEN_API_KEY"],
+)
+
+@observe()
+def translate(text: str, target_language: str) -> str:
+    return client.chat.completions.create(
+        model="llama-3.1-8b",
+        messages=[
+            {"role": "system", "content": f"Translate the text to {target_language}."},
+            {"role": "user", "content": text},
+        ],
+    ).choices[0].message.content
+
+print(translate("Hello, world!", "French"))
+```
+
+### Streaming
+
+Streaming calls are traced the same way:
+
+```python
+stream = client.chat.completions.create(
+    model="llama-3.1-8b",
+    messages=[{"role": "user", "content": "Count from 1 to 5."}],
+    stream=True,
+)
+for chunk in stream:
+    delta = chunk.choices[0].delta.content
+    if delta:
+        print(delta, end="", flush=True)
+```
+
+## About Auxen
+
+Auxen-hosted models include: `llama-3.1-8b`, `llama-3.1-70b`, `llama-3.2-3b`, `qwen2.5-7b`, `qwen2.5-14b`, `qwen2.5-32b`, `mistral-7b`, `mistral-nemo-12b`, `mixtral-8x7b`, `gemma2-9b`, `phi-3-mini`, `command-r-7b`.
+
+Pricing is per-minute of dedicated GPU runtime, not per-token. See [auxen.ai/pricing](https://auxen.ai/pricing).
