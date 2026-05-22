@@ -173,17 +173,26 @@ class FileLock:
             # No fcntl available (e.g. Windows) — proceed without lock.
             return self
         deadline = time.time() + self.timeout_s
-        while True:
+        try:
+            while True:
+                try:
+                    fcntl.flock(self._fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    self.acquired = True
+                    return self
+                except BlockingIOError:
+                    if time.time() > deadline:
+                        raise TimeoutError(
+                            f"could not acquire {self.path} within {self.timeout_s}s"
+                        )
+                    time.sleep(0.05)
+        except BaseException:
+            # __exit__ is not called when __enter__ raises — close the fh
+            # we just opened so it doesn't leak.
             try:
-                fcntl.flock(self._fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                self.acquired = True
-                return self
-            except BlockingIOError:
-                if time.time() > deadline:
-                    raise TimeoutError(
-                        f"could not acquire {self.path} within {self.timeout_s}s"
-                    )
-                time.sleep(0.05)
+                self._fh.close()
+            except Exception:
+                pass
+            raise
 
     def __exit__(self, exc_type, exc, tb):
         try:
