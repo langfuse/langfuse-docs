@@ -39,14 +39,14 @@ Use production signals to find the traces worth reviewing. [Monitoring](/academy
 
 ## Build datasets
 
-Turn raw traces into reusable evaluation assets. Start with human review, name the failure modes, then convert useful examples into datasets and score definitions. Start with [datasets](/academy/datasets) and [error analysis](/academy/monitoring/error-analysis).
+Turn production traces, hand-written cases, and synthetic examples into reusable evaluation assets. Start with human review, name the failure modes, then convert useful examples into datasets and score definitions. Start with [datasets](/academy/datasets) and [error analysis](/academy/monitoring/error-analysis).
 
 - Use [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues), [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui), and [`TEXT` scores](/docs/evaluation/scores/overview#score-types) for open coding.
-- Group notes into failure modes (axial coding), then turn stable categories into [structured labels](/docs/evaluation/scores/overview#score-types) and [evaluation criteria](/faq/all/manage-score-configs).
+- Group notes into failure modes (axial coding), then use [score configs](/faq/all/manage-score-configs) and [scores](/docs/evaluation/scores/overview) to track stable categories.
 
 ## Experiment
 
-Use [experiments](/academy/experiments) to confirm that a prompt, model, retrieval setup, agent implementation, or evaluator variant improves quality without regressions.
+Use [experiments](/academy/experiments) to confirm that a prompt, model, retrieval setup, or agent implementation improves quality without regressions.
 
 - Compare candidates on the same [dataset](/docs/evaluation/experiments/datasets) and scoring criteria with [experiments via UI](/docs/evaluation/experiments/experiments-via-ui) for prompt and model changes, or [experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for application logic.
 - Run regression checks manually or in [CI/CD](/docs/evaluation/experiments/experiments-ci-cd) before you ship to production.
@@ -56,6 +56,7 @@ Use [experiments](/academy/experiments) to confirm that a prompt, model, retriev
 Judge experiment outputs before shipping. Start with manual review to understand quality and failure modes, then automate dedicated evaluators where they add repeatable signal. The tradeoffs are covered in [evaluation methods](/academy/evaluate).
 
 - Use [manual evaluation](/docs/evaluation/evaluation-methods/scores-via-ui) to build intuition and calibrate automated evaluators.
+- Use [Score Analytics](/docs/evaluation/scores/score-analytics#validate-llm-judge-reliability) to compare evaluator changes against human labels before you rely on them for release decisions or production monitoring.
 - Use [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) for custom evaluation pipelines, guardrails, runtime checks, user feedback, and internal review workflows.
 - Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for qualities that require language understanding, such as relevance, tone, completeness, or factuality.
 
