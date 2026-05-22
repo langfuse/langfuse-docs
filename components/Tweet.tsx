@@ -1,32 +1,13 @@
-import { Suspense } from "react";
-import { EmbeddedTweet, TweetNotFound, TweetSkeleton } from "react-tweet";
-import { fetchTweet } from "react-tweet/api";
 import { cn } from "@/lib/utils";
 
-// react-tweet@3.2.2's fetchTweet crashes with
-//   "Cannot read properties of undefined (reading 'error')"
-// when the Twitter syndication API returns a non-JSON error body.
-// That blows up Next.js static prerender for any page embedding a tweet
-// (e.g. /blog/launch-week-1). Wrap it ourselves so a failed fetch degrades
-// to TweetNotFound instead.
-async function TweetContent({ id }: { id: string }) {
-  try {
-    const result = await fetchTweet(id);
-    if (
-      !result ||
-      "notFound" in result ||
-      "tombstone" in result ||
-      !result.data
-    ) {
-      return <TweetNotFound />;
-    }
-    return <EmbeddedTweet tweet={result.data} />;
-  } catch (err) {
-    console.warn(`[Tweet] Failed to fetch tweet ${id}:`, err);
-    return <TweetNotFound />;
-  }
-}
-
+// Render embedded tweets as a simple link to x.com instead of fetching from
+// Twitter's syndication API. The previous react-tweet-based embed broke
+// Vercel's static prerender ("TypeError: c is not iterable") because the
+// syndication endpoint now returns non-JSON error bodies that crash
+// fetchTweet — and that failure isn't reliably caught during streaming
+// SSR even with a wrapper try/catch. A static link keeps the build
+// deterministic and offline-safe; the embed's visual richness is lost
+// but the content (and crucially the build) stays usable.
 export const Tweet = ({
   id,
   className,
@@ -35,8 +16,22 @@ export const Tweet = ({
   className?: string;
 }) => (
   <div className={cn("mt-2", className)}>
-    <Suspense fallback={<TweetSkeleton />}>
-      <TweetContent id={id} />
-    </Suspense>
+    <a
+      href={`https://x.com/i/status/${id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-md hover:bg-muted"
+    >
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </svg>
+      View tweet on X
+    </a>
   </div>
 );
