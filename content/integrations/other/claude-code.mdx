@@ -919,7 +919,7 @@ Most issues come down to one of four things:
 tail -f ~/.claude/state/langfuse_hook.log
 ```
 
-   If the file is empty after a Claude Code session, the hook isn't registered. Re-check `~/.claude/settings.json` and make sure the Stop hook entry is present.
+If the file is empty after a Claude Code session, the hook isn't registered. Re-check `~/.claude/settings.json` and make sure the Stop hook entry is present.
 
 2. **`TRACE_TO_LANGFUSE` isn't the exact string `"true"`.** In `.claude/settings.local.json` it must be the JSON string `"true"` (lowercase, quoted), not a boolean and not `"True"`. The hook checks for this exact value and exits silently otherwise. Also verify the public key starts with `pk-lf-`.
 
