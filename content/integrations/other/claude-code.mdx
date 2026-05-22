@@ -812,10 +812,16 @@ def main() -> int:
         return 0
 
     finally:
-        # Cap shutdown at 5s so a slow/unreachable Langfuse can't stall Claude Code.
+        # Cap flush+shutdown at 5s so a slow/unreachable Langfuse can't stall Claude Code.
         if langfuse is not None:
             try:
-                t = threading.Thread(target=langfuse.shutdown, daemon=True)
+                def _flush_and_shutdown():
+                    try:
+                        langfuse.flush()
+                    except Exception:
+                        pass
+                    langfuse.shutdown()
+                t = threading.Thread(target=_flush_and_shutdown, daemon=True)
                 t.start()
                 t.join(5.0)
             except Exception:
