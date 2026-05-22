@@ -23,7 +23,7 @@ Unlike [prompt webhooks](/docs/prompt-management/features/webhooks-slack-integra
 4. Configure the endpoint name, URL, toast message, request timeout, and optional browser-visible headers.
 5. Save the endpoint and make sure it is enabled.
 
-Only one web callback endpoint can be enabled per project.
+Only one web callback endpoint can be configured per project.
 
 ## Trigger a callback
 
@@ -90,7 +90,7 @@ This has a few practical consequences:
 
 ## Minimal receiver
 
-The receiver can be any HTTP server. This example validates the payload shape and acknowledges the callback:
+The receiver can be any HTTP server. This example logs the payload and acknowledges the callback:
 
 ```ts filename="server.ts"
 import http from "node:http";
