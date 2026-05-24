@@ -12,6 +12,8 @@ import { TextHighlight } from "@/components/ui/text-highlight";
 import { Link } from "@/components/ui/link";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import { Rss } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type PageProps = {
   searchParams: Promise<{ page?: string }>;
@@ -65,7 +67,7 @@ export default async function ChangelogIndexPage({ searchParams }: PageProps) {
           <Heading as="h1" size="large">
             <TextHighlight>Changelog</TextHighlight>
           </Heading>
-<Text className="text-left">
+          <Text className="text-left">
             Latest release updates from the Langfuse team. Check out our{" "}
             <Link href="/docs/roadmap" variant="text">
               Roadmap
@@ -73,9 +75,12 @@ export default async function ChangelogIndexPage({ searchParams }: PageProps) {
             to see what&apos;s next.
           </Text>
           <div>
-            <Link href="/api/changelog-rss.xml" variant="text">
-              RSS Feed
-            </Link>
+            <Button asChild variant="outline" size="lg" className="flex items-center gap-2">
+              <Link href="/api/changelog-rss.xml" target="_blank">
+                <Rss className="w-4 h-4" />
+                <span>OpenRSS</span>
+              </Link>
+            </Button>
           </div>
         </div>
         <div className="mb-8">
