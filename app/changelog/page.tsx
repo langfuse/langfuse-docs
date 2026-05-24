@@ -65,13 +65,18 @@ export default async function ChangelogIndexPage({ searchParams }: PageProps) {
           <Heading as="h1" size="large">
             <TextHighlight>Changelog</TextHighlight>
           </Heading>
-          <Text className="text-left">
+<Text className="text-left">
             Latest release updates from the Langfuse team. Check out our{" "}
             <Link href="/docs/roadmap" variant="text">
               Roadmap
             </Link>{" "}
             to see what&apos;s next.
           </Text>
+          <div>
+            <Link href="/api/changelog-rss.xml" variant="text">
+              RSS Feed
+            </Link>
+          </div>
         </div>
         <div className="mb-8">
           <ProductUpdateSignup source="changelog" />
