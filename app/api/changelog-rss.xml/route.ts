@@ -3,6 +3,8 @@ import { getChangelogIndexItems } from "@/lib/changelog-index";
 export async function GET() {
   try {
     const items = getChangelogIndexItems();
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL ?? "https://langfuse.com";
 
     const rssItems = items
       .map((item) => {
@@ -11,7 +13,7 @@ export async function GET() {
         const date = item.frontMatter?.date
           ? new Date(item.frontMatter.date).toUTCString()
           : new Date().toUTCString();
-        const url = `https://langfuse.com${item.route}`;
+        const url = `${baseUrl}${item.route}`;
 
         return `
     <item>
@@ -28,8 +30,8 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Langfuse Changelog</title>
-    <link>https://langfuse.com/changelog</link>
-    <atom:link href="https://langfuse.com/api/changelog-rss.xml" rel="self" type="application/rss+xml"/>
+    <link>${baseUrl}/changelog</link>
+    <atom:link href="${baseUrl}/api/changelog-rss.xml" rel="self" type="application/rss+xml"/>
     <description>Latest updates from Langfuse</description>
     <language>en-us</language>
     ${rssItems}
@@ -44,9 +46,12 @@ export async function GET() {
     });
   } catch (err) {
     console.error("RSS generation failed:", err);
-    return new Response(JSON.stringify({ error: "Failed to generate RSS feed" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "Failed to generate RSS feed" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }
