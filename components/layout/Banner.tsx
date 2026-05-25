@@ -8,9 +8,11 @@ export function Banner() {
       height="2rem"
       className="bg-black text-white [&_a]:text-white [&_button]:text-white"
     >
-      <Link href="/changelog/2026-05-14-langfuse-academy">
-        <span className="sm:hidden">The Langfuse Academy is here →</span>
-        <span className="hidden sm:inline">The Langfuse Academy is here →</span>
+      <Link href="/launch">
+        <span className="sm:hidden">
+          Langfuse Launch Week #5, a week of new features →
+        </span>
+        <span className="hidden sm:inline">Langfuse Launch Week #5 →</span>
       </Link>
     </FumadocsBanner>
   );
