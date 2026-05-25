@@ -25,7 +25,13 @@ const DAYS: DayCard[] = [
     title: "Experiments in CI/CD",
     href: "/changelog/2026-05-25-experiment-ci-cd-gates",
   },
-  { n: "02", weekday: "Tuesday", date: "May 26", hint: "Built for agents" },
+  {
+    n: "02",
+    weekday: "Tuesday",
+    date: "May 26",
+    title: "Langfuse agent skill",
+    href: "/changelog/2026-05-26-langfuse-agent-skill",
+  },
   { n: "03", weekday: "Wednesday", date: "May 27", hint: "Find anything" },
   { n: "04", weekday: "Thursday", date: "May 28", hint: "Evals as code" },
   { n: "05", weekday: "Friday", date: "May 29", hint: "Never miss a thing" },
@@ -400,6 +406,84 @@ function Day1Unveiling() {
   );
 }
 
+function Day2Unveiling() {
+  return (
+    <section id="day-2" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 02 · Tuesday, May 26, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Langfuse agent skill.</span>
+        </h2>
+        <p className="lw5-body">
+          Hand your AI coding agent a playbook for working with Langfuse. The
+          skill teaches Claude Code, Cursor, Codex, and any other agent that
+          speaks the open Agent Skills format how to instrument an app, query
+          traces, manage prompts, and set up evaluators. Drop it into your
+          editor, then describe the job in plain language and the agent runs
+          with it.
+        </p>
+      </div>
+
+      <div
+        className={`${cornerBoxBase} relative w-full max-w-[920px] aspect-video bg-surface-1 flex items-center justify-center overflow-hidden mb-8`}
+      >
+        <div
+          aria-hidden
+          className="lw5-grid-bg absolute inset-0 opacity-50 pointer-events-none"
+        />
+        <div className="relative flex flex-col items-center gap-3 text-text-tertiary">
+          <svg
+            width="44"
+            height="44"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polygon points="10,8 16,12 10,16" fill="currentColor" />
+          </svg>
+          <div className="font-mono text-[11px] uppercase tracking-[.1em]">
+            Walkthrough video coming soon
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-26-langfuse-agent-skill"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/api-and-data-platform/features/agent-skill"
+          >
+            <span>Get started in docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="https://github.com/langfuse/skills"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>View skills on GitHub</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
 function DayCard({ day }: { day: DayCard }) {
   const live = Boolean(day.href);
   const content = (
@@ -484,6 +568,7 @@ export function LaunchWeek5Landing() {
       <div className="max-w-[1440px] mx-auto">
         <Hero />
         <Schedule />
+        <Day2Unveiling />
         <Day1Unveiling />
       </div>
     </div>
