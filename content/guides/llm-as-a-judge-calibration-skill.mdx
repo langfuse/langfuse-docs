@@ -28,7 +28,12 @@ The answer is **judge calibration**. You can do this manually, but the [Langfuse
 
 ## The setup at a high level
 
-___TODO: add a high-level diagram of the calibration setup here (dataset of ground-truth labels + judge prompt in Prompt Management → Langfuse experiment → comparison of judge output vs. expected output → calibration report).___
+<Frame fullWidth>
+  <img
+    src="/images/docs/guides/judge-calibration-setup-diagram.png"
+    alt="Calibration flow: the judge prompt and the dataset come from Langfuse; the agent runs the prompt on each dataset input on your machine; predicted labels are compared against ground-truth labels to produce a match rate."
+  />
+</Frame>
 
 You create a dataset of scenarios for your LLM-as-a-judge to evaluate, your ground truth labels. The judge prompt you want to test sits in [Langfuse Prompt Management](/docs/prompt-management/get-started). 
 
