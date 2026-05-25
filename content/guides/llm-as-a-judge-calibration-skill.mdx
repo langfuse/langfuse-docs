@@ -35,8 +35,7 @@ The answer is **judge calibration**. You can do this manually, but the [Langfuse
   />
 </Frame>
 
-You create a dataset of scenarios for your LLM-as-a-judge to evaluate, your ground truth labels. The judge prompt you want to test sits in [Langfuse Prompt Management](/docs/prompt-management/get-started). 
-
+You create a dataset of scenarios for your LLM-as-a-judge to evaluate, your ground truth labels. The judge prompt you want to test sits in [Langfuse Prompt Management](/docs/prompt-management/get-started).
 
 The calibration run is a [Langfuse experiment](/docs/evaluation/experiments) that executes the judge prompt against every dataset item. For each item, you end up with two labels: the score the judge produced and the expected output you defined. The agent compares the two and reports how often they agree. The higher the agreement rate, the more closely the judge is aligned with your judgment.
 
@@ -52,10 +51,10 @@ Create a [Langfuse dataset](/docs/evaluation/experiments/datasets). As an exampl
 
 Two example items from the dataset:
 
-| Inputs | Expected outputs |
-| --- | --- |
-| User: My subscription was charged twice this month.<br/>Agent: I can see the duplicate charge. I've issued a refund for the duplicate — it should appear in 3-5 business days.<br/>User: Perfect, thanks! | `not_escalated` |
-| User: I can't log in.<br/>Agent: Can you try resetting your password at the link I just sent?<br/>User: This is the third time I'm trying. Just get me a human, please. | `escalated` |
+| Inputs                                                                                                                                                                                                    | Expected outputs |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| User: My subscription was charged twice this month.<br/>Agent: I can see the duplicate charge. I've issued a refund for the duplicate — it should appear in 3-5 business days.<br/>User: Perfect, thanks! | `not_escalated`  |
+| User: I can't log in.<br/>Agent: Can you try resetting your password at the link I just sent?<br/>User: This is the third time I'm trying. Just get me a human, please.                                   | `escalated`      |
 
 ### Add the judge prompt to Prompt Management
 
@@ -106,19 +105,19 @@ The agent compares the experiment outputs with the expected outputs from the dat
 **Confusion matrix**
 
 |                       | Pred: escalated | Pred: not_escalated |
-| ---                   | ---             | ---                 |
+| --------------------- | --------------- | ------------------- |
 | Actual: escalated     | TP = 13         | FN = 1              |
 | Actual: not_escalated | FP = 0          | TN = 21             |
 
 **Metrics**
 
-| Metric        | Value |
-| ---           | ---   |
-| Accuracy      | 0.971 |
-| Precision     | 1.000 |
-| Recall / TPR  | 0.929 |
-| TNR           | 1.000 |
-| F1            | 0.963 |
+| Metric       | Value |
+| ------------ | ----- |
+| Accuracy     | 0.971 |
+| Precision    | 1.000 |
+| Recall / TPR | 0.929 |
+| TNR          | 1.000 |
+| F1           | 0.963 |
 
 **Failure direction:** one false negative — the judge missed an escalation, never falsely flagged one. Both TPR (0.929) and TNR (1.000) clear the 0.90 threshold from the skill's advanced quality gates.
 
@@ -145,4 +144,3 @@ If the report shows the judge agrees with your labels often enough to trust it, 
 - **Ask your AI assistant** to change the prompt based on the results. The skill uses the [Langfuse CLI](https://github.com/langfuse/langfuse-cli) under the hood already, so the agent can update the prompt for you directly.
 
 </Steps>
-
