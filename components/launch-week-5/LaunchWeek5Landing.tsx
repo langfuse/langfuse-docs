@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { LaunchWeek5Styles } from "./styles";
 import { ProductUpdateSignup } from "@/components/ProductUpdateSignup";
+import { Video } from "@/components/Video";
 
 const cornerBoxBase =
   "relative bg-surface-bg border border-line-structure lw5-corners";
@@ -12,10 +13,18 @@ type DayCard = {
   weekday: string;
   date: string;
   hint?: string;
+  title?: string;
+  href?: string;
 };
 
 const DAYS: DayCard[] = [
-  { n: "01", weekday: "Monday", date: "May 25", hint: "Ship faster" },
+  {
+    n: "01",
+    weekday: "Monday",
+    date: "May 25",
+    title: "Experiments in CI/CD",
+    href: "/changelog/2026-05-25-experiment-ci-cd-gates",
+  },
   { n: "02", weekday: "Tuesday", date: "May 26", hint: "Built for agents" },
   { n: "03", weekday: "Wednesday", date: "May 27", hint: "Find anything" },
   { n: "04", weekday: "Thursday", date: "May 28", hint: "Evals as code" },
@@ -331,6 +340,114 @@ function HeroArt() {
   );
 }
 
+function Day1Unveiling() {
+  return (
+    <section id="day-1" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 01 · Monday, May 25, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Experiments in CI/CD.</span>
+        </h2>
+        <p className="lw5-body">
+          Run your Langfuse experiments inside GitHub Actions. The new action
+          tests every pull request against a Langfuse dataset, fails the
+          workflow when scores drop below the threshold you set, and posts the
+          result back to the PR as a comment. Every run is tracked in Langfuse
+          so you can dig into regressions later.
+        </p>
+      </div>
+
+      <div className="w-full max-w-[920px] mb-8">
+        <Video
+          src="https://static.langfuse.com/docs-videos/ci-experiment.mp4"
+          aspectRatio={16 / 9}
+          className="rounded border border-line-structure"
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-25-experiment-ci-cd-gates"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/evaluation/experiments/experiments-ci-cd"
+          >
+            <span>Get started in docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="https://github.com/langfuse/experiment-action"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>View the action on GitHub</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
+function DayCard({ day }: { day: DayCard }) {
+  const live = Boolean(day.href);
+  const content = (
+    <div className="lw5-day-card h-full" data-state={live ? "live" : "locked"}>
+      <div className="flex items-start justify-between">
+        <span className="font-mono text-[11px] uppercase tracking-[.08em] text-text-tertiary">
+          Day {day.n}
+        </span>
+        {live ? (
+          <span className="lw5-pill lw5-pill-live">
+            <span className="lw5-pulse" />
+            Live
+          </span>
+        ) : (
+          <span className="lw5-lock">
+            <LockIcon />
+          </span>
+        )}
+      </div>
+      <div className="lw5-day-num">{day.n}</div>
+      <div className="flex flex-col gap-0.5 mt-auto">
+        <div className="text-[14px] text-text-primary font-medium">
+          {day.weekday}
+        </div>
+        <div className="font-mono text-[11px] text-text-tertiary">
+          {day.date}, 2026
+        </div>
+      </div>
+      <div className="border-t border-line-structure pt-3 mt-1">
+        <div
+          className={`font-mono text-[11px] uppercase tracking-[.06em] ${live ? "text-text-primary" : "text-text-tertiary"}`}
+        >
+          {day.title ?? day.hint ?? "Stay tuned"}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (live && day.href) {
+    return (
+      <Link href={day.href} className="no-underline">
+        {content}
+      </Link>
+    );
+  }
+  return content;
+}
+
 function Schedule() {
   return (
     <section
@@ -353,30 +470,7 @@ function Schedule() {
 
       <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
         {DAYS.map((day) => (
-          <div key={day.n} className="lw5-day-card" data-state="locked">
-            <div className="flex items-start justify-between">
-              <span className="font-mono text-[11px] uppercase tracking-[.08em] text-text-tertiary">
-                Day {day.n}
-              </span>
-              <span className="lw5-lock">
-                <LockIcon />
-              </span>
-            </div>
-            <div className="lw5-day-num">{day.n}</div>
-            <div className="flex flex-col gap-0.5 mt-auto">
-              <div className="text-[14px] text-text-primary font-medium">
-                {day.weekday}
-              </div>
-              <div className="font-mono text-[11px] text-text-tertiary">
-                {day.date}, 2026
-              </div>
-            </div>
-            <div className="border-t border-line-structure pt-3 mt-1">
-              <div className="font-mono text-[11px] uppercase tracking-[.06em] text-text-tertiary">
-                {day.hint ?? "Stay tuned"}
-              </div>
-            </div>
-          </div>
+          <DayCard key={day.n} day={day} />
         ))}
       </div>
     </section>
@@ -390,6 +484,7 @@ export function LaunchWeek5Landing() {
       <div className="max-w-[1440px] mx-auto">
         <Hero />
         <Schedule />
+        <Day1Unveiling />
       </div>
     </div>
   );
