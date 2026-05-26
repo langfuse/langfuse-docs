@@ -15,6 +15,8 @@ This notebook shows how to integrate **Langfuse** with **Hermes Agent** to trace
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications.
 
+The steps below follow Hermes' [official Langfuse plugin docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/built-in-plugins#observabilitylangfuse) — refer to them for the latest details.
+
 <Steps>
 ## Step 1: Install Dependencies
 
@@ -27,6 +29,19 @@ This notebook shows how to integrate **Langfuse** with **Hermes Agent** to trace
 
 Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting).
 
+Hermes reads credentials from `~/.hermes/.env` (the canonical location per the [Hermes docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/built-in-plugins#observabilitylangfuse)). Create the file with:
+
+```bash
+# ~/.hermes/.env
+HERMES_LANGFUSE_PUBLIC_KEY=pk-lf-...
+HERMES_LANGFUSE_SECRET_KEY=sk-lf-...
+HERMES_LANGFUSE_BASE_URL=https://cloud.langfuse.com   # or your self-hosted URL
+```
+
+The plugin also accepts the standard SDK env vars (`LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`); the `HERMES_LANGFUSE_*` variants win when both are set.
+
+The cell below sets the same credentials inside this Python kernel so we can quickly verify them with the Langfuse SDK. **Note:** these `os.environ` values are scoped to the notebook process and will not be visible to a `hermes chat` command run in a separate terminal — use `~/.hermes/.env` for that.
+
 
 ```python
 import os
@@ -37,12 +52,12 @@ os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
-# The Hermes Langfuse plugin reads HERMES_LANGFUSE_PUBLIC_KEY / HERMES_LANGFUSE_SECRET_KEY /
-# HERMES_LANGFUSE_BASE_URL and falls back to the standard LANGFUSE_* vars above.
-# For production use, set these in ~/.hermes/.env or via `hermes tools`.
+# Reminder: for the Hermes CLI itself, place the same credentials in ~/.hermes/.env
+# (as HERMES_LANGFUSE_PUBLIC_KEY / HERMES_LANGFUSE_SECRET_KEY / HERMES_LANGFUSE_BASE_URL).
+# The plugin also accepts the standard LANGFUSE_* variables above.
 ```
 
-With the environment variables set, initialize the Langfuse client. `get_client()` picks up the env vars above and returns a client bound to your project.
+With the environment variables set, initialize the Langfuse client to confirm your credentials work. Hermes uses its own internal client, so this step is purely a sanity check that your keys are valid.
 
 
 
@@ -60,17 +75,28 @@ else:
 
 ## Step 3: Enable the Langfuse Plugin
 
-Hermes ships a bundled Langfuse observability plugin under `plugins/observability/langfuse`. It is **opt-in** — enable it via the CLI or by editing your config file.
+Hermes ships a bundled Langfuse observability plugin under `plugins/observability/langfuse`. Bundled plugins are discovered automatically but **opt-in** — they don't load until you explicitly enable them.
 
-The plugin hooks into Hermes lifecycle events (`pre_api_request`, `post_api_request`, `pre_tool_call`, `post_tool_call`) to automatically capture traces for every conversation turn.
+The plugin hooks into Hermes lifecycle events (`pre_api_request` / `post_api_request`, `pre_tool_call` / `post_tool_call`) to automatically capture:
+
+- One root span per conversation turn (`"Hermes turn"`)
+- One generation observation per LLM API call
+- One tool observation per tool call
+
+Session grouping uses the Hermes session ID (or task ID for sub-agents), so every turn within a `hermes chat` session lives under one Langfuse session. The plugin is also **fail-open**: missing SDK, missing credentials, or a transient Langfuse error all turn into a silent no-op — the agent loop is never impacted.
 
 
 ```python
 # Enable the Langfuse plugin (run this in your terminal, not in a notebook)
 # hermes plugins enable observability/langfuse
 
-# Or use the interactive tool configurator:
-# hermes tools  # → select "Langfuse Observability"
+# Or check the box in the interactive plugin manager:
+# hermes plugins
+
+# Or add it to ~/.hermes/config.yaml:
+# plugins:
+#   enabled:
+#     - observability/langfuse
 
 # Verify it is enabled:
 # hermes plugins list  # observability/langfuse should show "enabled"
@@ -89,11 +115,11 @@ You can start a conversation from the CLI:
 
 
 ```python
-# Start an interactive conversation (traces are sent automatically)
-# hermes chat -q "What is the weather in San Francisco?"
+# Send a one-off message (traces are sent automatically):
+# hermes chat -q "hello"
 
 # Or start a full interactive session:
-# hermes
+# hermes chat
 ```
 
 ### Optional: Tune Tracing Behavior
@@ -115,6 +141,12 @@ Set these in `~/.hermes/.env` or export them in your shell before starting Herme
 After running the example, open [Langfuse Cloud](https://langfuse.com/cloud) to see the full trace including prompts, completions, tool calls, token usage, and latency.
 
 </Steps>
+
+## Further Reading
+
+- [Hermes Langfuse plugin documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/built-in-plugins#observabilitylangfuse) — source of truth for plugin behavior, hooks, env vars, and configuration.
+- [Hermes Agent repository](https://github.com/NousResearch/hermes-agent)
+- [Hermes plugin system](https://hermes-agent.nousresearch.com/docs/user-guide/features/plugins)
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
