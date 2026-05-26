@@ -1013,10 +1013,10 @@ const sections: Section[] = [
         href: "/security/data-regions",
         tiers: {
           cloud: {
-            Hobby: "US or EU",
-            Core: "US or EU",
-            Pro: "US or EU",
-            Enterprise: "US or EU",
+            Hobby: "US, EU, or JP",
+            Core: "US, EU, or JP",
+            Pro: "US, EU, or JP",
+            Enterprise: "US, EU, JP, or HIPAA",
           },
         },
       },
@@ -1461,18 +1461,20 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                   <div className="flex gap-2">
                     <Button
                       variant={tier.featured ? "primary" : "secondary"}
+                      size="default"
                       href={tier.href}
                       wrapperClassName="flex-1"
                       className={cn(
                         "justify-center!",
                         !tier.featured &&
-                          "group-hover:border-line-structure hover:border-line-cta"
+                          "group-hover:border-line-structure hover:border-line-cta",
                       )}
                     >
                       {tier.cta}
                     </Button>
                     <Button
                       variant="secondary"
+                      size="default"
                       href={tier.ctaCallout.href}
                       wrapperClassName="flex-1"
                       className="justify-center! group-hover:border-line-structure hover:border-line-cta"
@@ -1483,11 +1485,12 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                 ) : (
                   <Button
                     variant={tier.featured ? "primary" : "secondary"}
+                    size="default"
                     href={tier.href}
                     className={cn(
                       "justify-center!",
                       !tier.featured &&
-                        "group-hover:border-line-structure hover:border-line-cta"
+                        "group-hover:border-line-structure hover:border-line-cta",
                     )}
                   >
                     {tier.cta}
@@ -1533,45 +1536,47 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     + optional
                   </div>
                   <CornerBox className="p-3 pt-4 w-full">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-bold text-primary">
-                      {tier.addOn.name}
-                    </span>
-                    {tier.addOn.price && (
+                    <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-bold text-primary">
-                        {tier.addOn.price}
+                        {tier.addOn.name}
                       </span>
-                    )}
-                  </div>
-                  <ul className="mt-1 space-y-1 text-sm">
-                    {tier.addOn.mainFeatures.map((feature) => (
-                      <li key={feature} className="flex space-x-2">
-                        <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {tier.addOn.cta && (
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      href={tier.addOn.cta.href}
-                      wrapperClassName="mt-3"
-                      className="justify-center! group-hover:border-line-structure hover:border-line-cta"
-                    >
-                      {tier.addOn.cta.text}
-                    </Button>
-                  )}
-                  {tier.addOn.calloutLink && (
-                    <div className="mt-2 text-xs text-center text-muted-foreground">
-                      <Link
-                        href={tier.addOn.calloutLink.href}
-                        className="underline hover:text-primary"
-                      >
-                        {tier.addOn.calloutLink.text}
-                      </Link>
+                      {tier.addOn.price && (
+                        <span className="text-sm font-bold text-primary">
+                          {tier.addOn.price}
+                        </span>
+                      )}
                     </div>
-                  )}
+                    <ul className="mt-1 space-y-1 text-sm">
+                      {tier.addOn.mainFeatures.map((feature) => (
+                        <li key={feature} className="flex space-x-2">
+                          <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                          <span className="text-muted-foreground">
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    {tier.addOn.cta && (
+                      <Button
+                        variant="secondary"
+                        size="small"
+                        href={tier.addOn.cta.href}
+                        wrapperClassName="mt-3"
+                        className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+                      >
+                        {tier.addOn.cta.text}
+                      </Button>
+                    )}
+                    {tier.addOn.calloutLink && (
+                      <div className="mt-2 text-xs text-center text-muted-foreground">
+                        <Link
+                          href={tier.addOn.calloutLink.href}
+                          className="underline hover:text-primary"
+                        >
+                          {tier.addOn.calloutLink.text}
+                        </Link>
+                      </div>
+                    )}
                   </CornerBox>
                 </div>
               )}

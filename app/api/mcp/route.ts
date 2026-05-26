@@ -8,10 +8,10 @@ export async function GET(request: NextRequest) {
     return await mcpHandler(request);
   } catch (error) {
     console.error("MCP Handler Error:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
 
@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
     return await mcpHandler(request);
   } catch (error) {
     console.error("MCP Handler Error:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

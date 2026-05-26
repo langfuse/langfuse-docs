@@ -4,6 +4,7 @@ description: Fully typed SDKs for Python and JavaScript/TypeScript with unified 
 category: SDKs
 ---
 
+import { Details, Summary } from "@/components/Details";
 import GetStartedPythonSdk from "@/components-mdx/get-started/python-sdk.mdx";
 import EnvJS from "@/components-mdx/env-js.mdx";
 import JSSDKPackages from "@/components-mdx/js-sdk-packages.mdx";
@@ -17,7 +18,7 @@ Langfuse offers two SDKs:
 - **JS/TS SDK v5** <a href="https://github.com/langfuse/langfuse-js"><img className="inline" alt="GitHub repository langfuse/langfuse-js" src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=GitHub" /></a> <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm+@langfuse/tracing" alt="NPM @langfuse/tracing" /></a>
 - [**Other Languages**](#other-languages) via OpenTelemetry
 
-The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features. 
+The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features.
 
 **Key benefits**
 
@@ -33,25 +34,24 @@ The Langfuse SDKs are the recommended way to create [custom observations and tra
 This section documents tracing related features of the Langfuse SDK. To use the Langfuse SDK for [prompt management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview), visit their respective documentation.
 </Callout>
 
-<details>
-<summary>Requirements for self-hosted Langfuse</summary>
+<Details>
+<Summary>Requirements for self-hosted Langfuse</Summary>
 
 <Callout type="info">
 If you are self-hosting Langfuse, the Python SDK v3 requires [**Langfuse platform version ≥ 3.125.0**](https://github.com/langfuse/langfuse/releases/tag/v3.125.0) and the TypeScript SDK v4 requires [**Langfuse platform version ≥ 3.95.0**](https://github.com/langfuse/langfuse/releases/tag/v3.95.0) for all features to work correctly.
 </Callout>
 
-</details>
+</Details>
 
-
-<details>
-<summary>Legacy documentation</summary>
+<Details>
+<Summary>Legacy documentation</Summary>
 
 This documentation is for the latest versions of the Langfuse SDKs.
 
 - Documentation for the legacy Python SDK v3 can be found [here](https://python-sdk-v3.docs-snapshot.langfuse.com/docs/observability/sdk/overview/).
 - Documentation for the legacy TypeScript SDK v4 can be found [here](https://js-sdk-v4-docs-snapshot.langfuse.com/docs/observability/sdk/overview/).
 
-</details>
+</Details>
 
 ## Quickstart
 
@@ -112,6 +112,7 @@ async function main() {
 // Shutdown flushes events and is required for short-lived applications
 main().finally(() => sdk.shutdown());
 ```
+
 _[When do I need to use `shutdown()`?](/docs/observability/data-model#background-processing)_
 
 **5. Run your application and see the trace in Langfuse:**
@@ -126,13 +127,12 @@ npx tsx index.ts
 
 See the [trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ef10df7b3f9e4a8adc834c18934bace0?timestamp=2025-12-03T14%3A44%3A10.907Z&observation=c71b480595bbe18c).
 
-
 </Tab>
 </LangTabs>
 
 ## Setup
 
-This section covers all detail of setting up the Langfuse SDKs. Follow the [Quickstart](#quickstart) guide to create your first trace. 
+This section covers all detail of setting up the Langfuse SDKs. Follow the [Quickstart](#quickstart) guide to create your first trace.
 
 <Steps>
 
@@ -146,6 +146,7 @@ Pip install the [Langfuse Python SDK](https://pypi.org/project/langfuse/).
 ```bash
 pip install langfuse
 ```
+
 </Tab>
 <Tab title="JS/TS SDK">
 
@@ -213,7 +214,6 @@ If you are using Next.js, please use the OpenTelemetry setup via the `NodeSDK` d
 </Tab>
 </LangTabs>
 
-
 ### Client Setup [#client-setup]
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
@@ -235,8 +235,8 @@ else:
 
 The Langfuse client is a singleton. It can be accessed anywhere in your application using the [`get_client()`](https://python.reference.langfuse.com/langfuse#get_client) function.
 
-<details>
-<summary>Alternative: Configure via constructor</summary>
+<Details>
+<Summary>Alternative: Configure via constructor</Summary>
 
 Optionally, you can initialize the client via [`Langfuse()`](https://python.reference.langfuse.com/langfuse#Langfuse) to pass in configuration options (see below). Otherwise, it is created automatically when you call [`get_client()`](https://python.reference.langfuse.com/langfuse#get_client) based on environment variables.
 
@@ -251,13 +251,13 @@ langfuse = Langfuse(
   public_key="your-public-key",
   secret_key="your-secret-key",
   base_url="https://cloud.langfuse.com", # 🇪🇺 EU region
-  # base_url="https://us.cloud.langfuse.com", # 🇺🇸 US region
+  # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 )
 ```
 
 All key configuration options are listed in the [Python SDK reference](https://python.reference.langfuse.com/langfuse#Langfuse).
 
-</details>
+</Details>
 
 </Tab>
 <Tab title="JS/TS SDK">
@@ -270,8 +270,8 @@ import { LangfuseClient } from "@langfuse/client";
 const langfuse = new LangfuseClient();
 ```
 
-<details>
-<summary>Alternative: Configure via constructor</summary>
+<Details>
+<Summary>Alternative: Configure via constructor</Summary>
 
 You can also pass the Langfuse credentials directly to the constructor:
 
@@ -285,15 +285,14 @@ const langfuse = new LangfuseClient({
 });
 ```
 
-</details>
-
+</Details>
 
 </Tab>
 </LangTabs>
 
 ### Use the SDK
 
-With the SDK set up, you can: 
+With the SDK set up, you can:
 
 - [Instrument your application](/docs/observability/sdk/instrumentation#custom-observations)
 - Use [Langfuse Prompt Management](/docs/prompt-management/get-started)
@@ -301,7 +300,6 @@ With the SDK set up, you can:
 - [Query data](/docs/api-and-data-platform/features/query-via-sdk)
 
 </Steps>
-
 
 ## OpenTelemetry foundation
 

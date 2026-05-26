@@ -24,25 +24,25 @@ We'll guide you through a simple example of using Strands agents and integrating
 
 <Callout type="info" emoji="ℹ️">
 To enable OTEL exporting, install Strands Agents with otel extra dependencies: pip install 'strands-agents[otel]'
-</Callout>
 
+</Callout>
 
 ```python
 %pip install "strands-agents[otel]" strands-agents-tools langfuse
 ```
 
 ### Step 2: Set Environment Variables
-Next, we need to configure the environment variables for Langfuse and AWS (for Bedrock models).
 
+Next, we need to configure the environment variables for Langfuse and AWS (for Bedrock models).
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -50,12 +50,11 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -64,8 +63,8 @@ else:
 ```
 
 ### Step 3: Initialize the Strands Agent
-With the environment set up, we can now initialize the Strands agent. This involves defining the agent's behavior, configuring the underlying LLM, and setting up tracing attributes for Langfuse.
 
+With the environment set up, we can now initialize the Strands agent. This involves defining the agent's behavior, configuring the underlying LLM, and setting up tracing attributes for Langfuse.
 
 ```python
 from strands import Agent
@@ -85,19 +84,21 @@ agent = Agent(
 ```
 
 ### Step 4: Run the Agent
-Now it's time to run the initialized agent with a sample query. The agent will process the input, and Langfuse will automatically trace its execution via the OpenTelemetry integration configured earlier.
 
+Now it's time to run the initialized agent with a sample query. The agent will process the input, and Langfuse will automatically trace its execution via the OpenTelemetry integration configured earlier.
 
 ```python
 results = agent("Hi, where can I eat in San Francisco?")
 ```
 
 ### Step 5: View Traces in Langfuse
+
 After running the agent, you can navigate to your Langfuse project to view the detailed traces. These traces provide a step-by-step breakdown of the agent's execution, including LLM calls, tool usage (if any), inputs, outputs, latencies, costs.
 
 ![Example trace of a Strands agent interaction in Langfuse](https://langfuse.com/images/cookbook/integration_aws_strands_agents/strands-agents-trace.png)
 
 [Public Example Strands Agent Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/0ae7922f829ca2f4562f89b3de8c395d?observation=c25fa54dfca06243&timestamp=2026-03-11T09:25:37.373Z&traceId=0ae7922f829ca2f4562f89b3de8c395d)
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

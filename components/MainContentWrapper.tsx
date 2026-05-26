@@ -47,7 +47,7 @@ const pathsWithoutFooterWidgets = [
   "/community",
   "/cookie-policy",
   "/find-us",
-  "/jp",
+  "/japan",
   "/kr",
   "/oss-friends",
   "/privacy",
@@ -66,8 +66,7 @@ const pathsWithCopyAsMarkdownButton = [
   "/library",
   "/enterprise",
 ];
-const isCustomerStory = (pathname: string) =>
-  pathname.startsWith("/users/");
+const isCustomerStory = (pathname: string) => pathname.startsWith("/users/");
 
 export const CopyMarkdownButton = () => {
   const pathname = usePathname();
@@ -184,7 +183,7 @@ export const CopyMarkdownButton = () => {
   // Self-guard: only render on pages that should have the copy button.
   // All hooks are above so this conditional return is safe.
   const shouldShow = pathsWithCopyAsMarkdownButton.some((prefix) =>
-    (pathname ?? "").startsWith(prefix)
+    (pathname ?? "").startsWith(prefix),
   );
   if (!shouldShow) return null;
 
@@ -204,9 +203,7 @@ export const CopyMarkdownButton = () => {
         className={cn(
           "inline-flex h-[26px] items-stretch overflow-hidden rounded-[1px] border border-line-structure dark:border-line-cta bg-surface-bg text-text-secondary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
           isDisabled || isError ? "opacity-70" : "",
-          isError
-            ? "border-destructive/50"
-            : ""
+          isError ? "border-destructive/50" : "",
         )}
       >
         <button
@@ -217,7 +214,7 @@ export const CopyMarkdownButton = () => {
             "inline-flex items-center px-[8px] py-0.75 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] transition-colors min-w-[80px] max-w-[160px] overflow-hidden",
             isDisabled || isError
               ? "cursor-not-allowed"
-              : "cursor-pointer hover:bg-surface-1/80"
+              : "cursor-pointer hover:bg-surface-1/80",
           )}
         >
           <span className="truncate">{buttonText}</span>
@@ -230,7 +227,9 @@ export const CopyMarkdownButton = () => {
               disabled={isError}
               className={cn(
                 "inline-flex w-[24px] items-center justify-center border-l border-line-structure transition-colors",
-                isError ? "cursor-not-allowed" : "cursor-pointer hover:bg-surface-1/80"
+                isError
+                  ? "cursor-not-allowed"
+                  : "cursor-pointer hover:bg-surface-1/80",
               )}
             >
               <ChevronDown className="h-3 w-3" />
@@ -330,11 +329,11 @@ export const CopyMarkdownButton = () => {
 export const MainContentWrapper = (props) => {
   const pathname = usePathname();
   const cookbook = COOKBOOK_ROUTE_MAPPING.find(
-    (cookbook) => cookbook.path === pathname
+    (cookbook) => cookbook.path === pathname,
   );
 
   const shouldShowCopyButton = pathsWithCopyAsMarkdownButton.some((prefix) =>
-    (pathname ?? "").startsWith(prefix)
+    (pathname ?? "").startsWith(prefix),
   );
 
   return (
@@ -349,14 +348,9 @@ export const MainContentWrapper = (props) => {
         <NotebookBanner src={cookbook.ipynbPath} className="mt-4 mb-4" />
       ) : null}
 
-
       {props.children}
-      {!isCustomerStory(pathname ?? "") && (
-        <hr className="mx-4 my-4 border-t border-line-structure md:mx-6 xl:mx-8" />
-      )}
       {!pathsWithoutFooterWidgets.some(
-        (path) =>
-          pathname === path || (pathname ?? "").startsWith(path + "/")
+        (path) => pathname === path || (pathname ?? "").startsWith(path + "/"),
       ) ? (
         <div
           className="flex flex-col gap-2 px-4 py-4 md:px-6 xl:px-8"

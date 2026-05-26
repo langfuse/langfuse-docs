@@ -29,7 +29,6 @@ export function BrandDownloadButton() {
 type BrandAssetVariant = "light" | "dark";
 
 interface BrandAssetCardProps {
-  href: string;
   src: string;
   alt: string;
   label: string;
@@ -38,7 +37,6 @@ interface BrandAssetCardProps {
 }
 
 export function BrandAssetCard({
-  href,
   src,
   alt,
   label,
@@ -48,7 +46,7 @@ export function BrandAssetCard({
   return (
     <a
       download
-      href={href}
+      href={src}
       className="block no-underline relative group border border-line-structure bg-surface-bg rounded-[2px] corner-box-corners--hover corner-box-hover-stripes transition-[background] duration-180 ease-out"
     >
       <div
@@ -56,18 +54,19 @@ export function BrandAssetCard({
           "flex items-center justify-center border-b border-line-structure min-h-28 p-6",
           variant === "dark"
             ? "bg-text-primary dark:bg-surface-code"
-            : "bg-surface-bg"
+            : "bg-surface-bg",
         )}
       >
         <img
           src={src}
           alt={alt}
-          className={cn("max-w-full max-h-full w-auto object-contain", tall ? "h-12" : "h-10")}
+          className={cn(
+            "max-w-full max-h-full w-auto object-contain",
+            tall ? "h-12" : "h-10",
+          )}
         />
       </div>
-      <div className="p-3 text-xs font-medium text-text-secondary">
-        {label}
-      </div>
+      <div className="p-3 text-xs font-medium text-text-secondary">{label}</div>
     </a>
   );
 }

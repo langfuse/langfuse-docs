@@ -40,6 +40,22 @@ To disable email/password authentication, set `AUTH_DISABLE_USERNAME_PASSWORD=tr
 
 If you decide to switch from email/password to SSO on a running instance, you can enable `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING=true` on the SSO provider. This will automatically merge accounts with the same email address.
 
+### Email verification on signup [#email-verification-on-signup]
+
+Set `AUTH_EMAIL_VERIFICATION_REQUIRED=true` to require new users to verify their email address via a one-time password (OTP) before they can set their password during email/password signup. This requires [transactional emails](/self-hosting/configuration/transactional-emails) to be configured.
+
+When enabled, the signup flow becomes:
+
+1.  User enters their email and name on the sign-up page.
+2.  User receives an OTP via email and enters it to verify the address.
+3.  User sets a password on `/auth/setup-password` and is signed in.
+
+Notes:
+
+- SSO sign-in is unaffected by this setting.
+- When this flag is on, direct calls to `POST /api/auth/signup` return `403`; signups must go through the OTP flow.
+- If a user abandons the flow after verification, signing up again re-sends the OTP, and they can also complete the flow via the password reset page.
+
 ### Creation of default user
 
 If you want to programmatically create a default user, check out the [Headless Initialization](/self-hosting/administration/headless-initialization) documentation. This is useful if you want to initialize the instance without using the UI, e.g. when running Langfuse in a CI/CD pipeline or programmatically deploying Langfuse into many environments.
@@ -68,11 +84,11 @@ Provider: `AUTH0`
 
 [NextAuth Authentik Provider Docs](https://next-auth.js.org/providers/authentik)
 
-| Configuration      | Value                                                                                     |
-| ------------------ | ----------------------------------------------------------------------------------------- |
-| Required Variables | `AUTH_AUTHENTIK_CLIENT_ID`<br/>`AUTH_AUTHENTIK_CLIENT_SECRET`<br/>`AUTH_AUTHENTIK_ISSUER` |
+| Configuration      | Value                                                                                                                |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_AUTHENTIK_CLIENT_ID`<br/>`AUTH_AUTHENTIK_CLIENT_SECRET`<br/>`AUTH_AUTHENTIK_ISSUER`                            |
 | Optional Variables | `AUTH_AUTHENTIK_AUTHORIZATION_URL`<br/><br/>See [additional configuration](#additional-configuration) section below. |
-| OAuth Redirect URL | `/api/auth/callback/authentik`                                                            |
+| OAuth Redirect URL | `/api/auth/callback/authentik`                                                                                       |
 
 Provider: `AUTHENTIK`
 
@@ -286,15 +302,16 @@ https://<YOUR_LANGFUSE_URL>/auth/sso-initiate?provider=<PROVIDER>
 
 These are additional configuration variables. Replace `<PROVIDER>` with the provider name (e.g., `GOOGLE`, `GITHUB`, `AZURE_AD`, etc., see other variables of provider above).
 
-| Variable                                | Description                                                                                                                                                                                                                                                                                   |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT`     | Comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`                                                                                                                              |
-| `AUTH_DISABLE_SIGNUP`                   | Set to `true` to disable sign up for new users. Only existing users can sign in. This affects all new users that try to sign up, also those who received an invite to a project and have no account yet.                                                                                      |
-| `AUTH_SESSION_MAX_AGE`                  | Set the maximum age of the session (JWT) in minutes. The default is 30 days (`43200`). The value must be greater than 5 minutes, as the front-end application refreshes its session every 5 minutes.                                                                                          |
-| `AUTH_IGNORE_ACCOUNT_FIELDS`            | Comma-separated list of fields to ignore from the SSO IDP account when creating an account. Use this to correct errors with custom IDP providers.                                                                                                                                             |
-| `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING` | Set to `true` to allow merging accounts with the same email address. This is useful when users sign in with different providers or email/password but have the same email address. You need to be careful with this setting as it can lead to security issues if the emails are not verified. |
-| `AUTH_<PROVIDER>_CLIENT_AUTH_METHOD`    | Configure the token endpoint authentication method. Supported values: `client_secret_basic` (default), `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, `none`. Use `none` for PKCE flow.                                      |
-| `AUTH_<PROVIDER>_CHECKS`                | Configure the authentication checks. Supported values: `nonce`, `none`, `pkce`, `state`. Multiple values can be provided as comma-separated list.                                                                                                                                             |
+| Variable                                | Description                                                                                                                                                                                                                                                                                                                                              |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT`     | Comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`                                                                                                                                                                                         |
+| `AUTH_DISABLE_SIGNUP`                   | Set to `true` to disable sign up for new users. Only existing users can sign in. This affects all new users that try to sign up, also those who received an invite to a project and have no account yet.                                                                                                                                                 |
+| `AUTH_EMAIL_VERIFICATION_REQUIRED`      | Set to `true` to require new users to verify their email address via a one-time password (OTP) before setting a password during email/password signup. Requires [transactional emails](/self-hosting/configuration/transactional-emails) to be configured. SSO sign-in is unaffected. See [Email verification on signup](#email-verification-on-signup). |
+| `AUTH_SESSION_MAX_AGE`                  | Set the maximum age of the session (JWT) in minutes. The default is 30 days (`43200`). The value must be greater than 5 minutes, as the front-end application refreshes its session every 5 minutes.                                                                                                                                                     |
+| `AUTH_IGNORE_ACCOUNT_FIELDS`            | Comma-separated list of fields to ignore from the SSO IDP account when creating an account. Use this to correct errors with custom IDP providers.                                                                                                                                                                                                        |
+| `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING` | Set to `true` to allow merging accounts with the same email address. This is useful when users sign in with different providers or email/password but have the same email address. You need to be careful with this setting as it can lead to security issues if the emails are not verified.                                                            |
+| `AUTH_<PROVIDER>_CLIENT_AUTH_METHOD`    | Configure the token endpoint authentication method. Supported values: `client_secret_basic` (default), `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, `none`. Use `none` for PKCE flow.                                                                                                 |
+| `AUTH_<PROVIDER>_CHECKS`                | Configure the authentication checks. Supported values: `nonce`, `none`, `pkce`, `state`. Multiple values can be provided as comma-separated list.                                                                                                                                                                                                        |
 
 ## Troubleshooting
 

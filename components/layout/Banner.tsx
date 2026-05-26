@@ -4,13 +4,16 @@ import { Banner as FumadocsBanner } from "fumadocs-ui/components/banner";
 export function Banner() {
   return (
     <FumadocsBanner
-      id="fd-top-banner"
+      id="fd-top-banner-launch-week-5-day-2"
+      height="2rem"
       className="bg-black text-white [&_a]:text-white [&_button]:text-white"
     >
-      <Link href="/docs/v4">
-        <span className="sm:hidden">Langfuse just got faster →</span>
+      <Link href="/launch">
+        <span className="sm:hidden">
+          Launch Week 5 · Day 2: Langfuse agent skill →
+        </span>
         <span className="hidden sm:inline">
-          Langfuse just got faster – read about Fast Preview (v4) →
+          Langfuse Launch Week 5 · Day 2: Langfuse agent skill →
         </span>
       </Link>
     </FumadocsBanner>

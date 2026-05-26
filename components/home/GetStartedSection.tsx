@@ -42,7 +42,8 @@ response = openai.chat.completions.create(
 )`,
   },
   javascript: {
-    install: "npm install @langfuse/openai @langfuse/otel @opentelemetry/sdk-node",
+    install:
+      "npm install @langfuse/openai @langfuse/otel @opentelemetry/sdk-node",
     code: `import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] }).start();
@@ -110,8 +111,12 @@ function PromptRow({ label, prompt }: { label: string; prompt: string }) {
           {copyIcon}
         </span>
       </div>
-      <Text size="s" className="text-text-tertiary flex-1 text-left min-w-0 w-full">
-        <span className="text-text-secondary font-medium">Prompt:</span>{" "}{prompt}
+      <Text
+        size="s"
+        className="text-text-tertiary flex-1 text-left min-w-0 w-full"
+      >
+        <span className="text-text-secondary font-medium">Prompt:</span>{" "}
+        {prompt}
       </Text>
       <span className="hidden sm:flex shrink-0 text-text-tertiary items-center gap-1">
         {copyIcon}
@@ -134,9 +139,7 @@ function AgentTab() {
                 height={16}
                 className="shrink-0"
               />
-              <span className="text-text-secondary">
-                {agent.name}
-              </span>
+              <span className="text-text-secondary">{agent.name}</span>
             </span>
           ))}
         </div>
@@ -198,7 +201,7 @@ function ManualTab() {
               "inline-flex items-center whitespace-nowrap rounded-none border-b pb-2 pt-1.5 text-xs transition-colors font-[430] cursor-pointer",
               lang === tab.id
                 ? "border-line-cta text-text-primary font-medium"
-                : "border-transparent text-text-tertiary hover:text-foreground"
+                : "border-transparent text-text-tertiary hover:text-foreground",
             )}
           >
             {tab.label}
@@ -254,30 +257,53 @@ export function GetStartedSection() {
   return (
     <HomeSection id="get-started" className="pt-[120px]">
       <div className="flex flex-col gap-2.5">
-        <Text className="text-left">
-          Get Started <span className="text-text-tertiary mx-1">—</span> <span className="text-text-tertiary">Free tier: <span className="text-primary">50k observations/month</span>. No credit card required.</span>
+        <Text className="text-left hidden md:block">
+          Get Started <span className="text-text-tertiary mx-1">—</span>{" "}
+          <span className="text-text-tertiary">
+            Free tier:{" "}
+            <span className="text-primary">50k observations/month</span>. No
+            credit card required.
+          </span>
         </Text>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-6">
           <Heading className="text-primary text-left" size="large">
-            <TextHighlight highlightClassName="mix-blend-multiply" className="max-sm:pr-1.5 xl:pr-3">Start improving</TextHighlight><TextHighlight highlightClassName="mix-blend-multiply">your agents</TextHighlight>
+            <TextHighlight
+              highlightClassName="mix-blend-multiply"
+              className="max-md:pr-1.5 xl:pr-3"
+            >
+              Start improving
+            </TextHighlight>
+            <TextHighlight highlightClassName="mix-blend-multiply">
+              your agents
+            </TextHighlight>
             <br />
             in under 5 minutes.
           </Heading>
-          <div className="flex sm:flex-col gap-0 items-start shrink-0 w-full sm:w-[150px]">
+          <Text className="text-left md:hidden">
+            Get Started <span className="text-text-tertiary mx-1">—</span>{" "}
+            <span className="text-text-tertiary">
+              Free tier:{" "}
+              <span className="text-primary">50k observations/month</span>. No
+              credit card required.
+            </span>
+          </Text>
+          <div className="flex md:flex-col gap-0 items-start shrink-0 w-full sm:w-[150px] mt-2">
             <Button
               variant="primary"
+              size="default"
               shortcutKey="s"
               href="/cloud"
-              wrapperClassName="sm:flex-none sm:w-full"
+              wrapperClassName="md:flex-none md:w-full"
             >
               Start free
             </Button>
             <Button
               variant="secondary"
+              size="default"
               shortcutKey="d"
               href="/docs"
-              wrapperClassName="sm:flex-none sm:w-full"
+              wrapperClassName="md:flex-none md:w-full"
             >
               Documentation
             </Button>
@@ -288,7 +314,7 @@ export function GetStartedSection() {
         <div className="flex flex-col sm:flex-row items-start gap-3 mt-10">
           {/* Tab buttons — outside the content box, right-aligned, equal width */}
           <div className="flex sm:flex-col sm:items-end sm:justify-between shrink-0 gap-2 self-stretch">
-            <div className="flex sm:flex-col sm:items-end gap-2">
+            <div className="flex sm:flex-col sm:items-end gap-1 md:gap-2">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
@@ -304,7 +330,7 @@ export function GetStartedSection() {
                         "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]",
                         isActive
                           ? "border-line-structure bg-surface-bg text-text-primary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
-                          : "border-transparent bg-transparent text-text-tertiary hover:text-text-primary hover:bg-surface-bg hover:border-line-structure hover:[box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
+                          : "border-transparent bg-transparent text-text-tertiary hover:text-text-primary hover:bg-surface-bg hover:border-line-structure hover:[box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
                       )}
                     >
                       {tab.label}
@@ -320,7 +346,6 @@ export function GetStartedSection() {
             {activeTab === "agent" ? <AgentTab /> : <ManualTab />}
           </CornerBox>
         </div>
-
       </div>
     </HomeSection>
   );

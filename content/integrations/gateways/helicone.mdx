@@ -23,110 +23,116 @@ Since Helicone is OpenAI-compatible, we can utilize Langfuse's native integratio
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 
-  <Tab>
-  1) In your terminal, install the following packages if you haven't already:
+<Tab>
 
-  ```bash
-  pip install langfuse openai python-dotenv
-  ```
+1. In your terminal, install the following packages if you haven't already:
 
-  2) Then, create a `.env` file in your project and add your environment variables:
+```bash
+pip install langfuse openai python-dotenv
+```
 
-  ```env
-  HELICONE_API_KEY=sk-helicone-... # Get it from your Helicone dashboard
+2. Then, create a `.env` file in your project and add your environment variables:
 
-  LANGFUSE_SECRET_KEY=sk-lf-...
-  LANGFUSE_PUBLIC_KEY=pk-lf-...
-  LANGFUSE_BASE_URL=https://cloud.langfuse.com # 🇪🇺 EU region
-  # LANGFUSE_BASE_URL=https://us.cloud.langfuse.com 🇺🇸 US region
-  ```
-  </Tab>
+```txt filename=".env"
+HELICONE_API_KEY=sk-helicone-... # Get it from your Helicone dashboard
 
-  <Tab>
-  1) In your terminal, install the following packages if you haven't already:
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_BASE_URL=https://cloud.langfuse.com # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+```
 
-  ```bash
-  npm install langfuse openai
-  ```
+</Tab>
 
-  2) Create a `.env` file in your project and add your environment variables:
+<Tab>
 
-  ```env
-  HELICONE_API_KEY=sk-helicone-... # Get it from your Helicone dashboard
+1. In your terminal, install the following packages if you haven't already:
 
-  LANGFUSE_SECRET_KEY=sk-lf-...
-  LANGFUSE_PUBLIC_KEY=pk-lf-...
-  LANGFUSE_BASE_URL=https://cloud.langfuse.com # 🇪🇺 EU region
-  # LANGFUSE_BASE_URL=https://us.cloud.langfuse.com 🇺🇸 US region
-  ```
-  </Tab>
+```bash
+npm install langfuse openai
+```
+
+2. Create a `.env` file in your project and add your environment variables:
+
+```txt filename=".env"
+HELICONE_API_KEY=sk-helicone-... # Get it from your Helicone dashboard
+
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_BASE_URL=https://cloud.langfuse.com # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+```
+
+</Tab>
 </LangTabs>
 
 ## Example 1: Simple LLM Call
 
 We use Langfuse's OpenAI SDK wrapper to automatically log Helicone calls as generations in Langfuse.
+
 - The `base_url` is set to Helicone's AI Gateway endpoint.
 - You can replace `"gpt-4o"` with any model available in [Helicone's model registry](https://helicone.ai/models).
 - The `api_key` uses your Helicone API key to handle authentication with model providers.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
-  <Tab>
+<Tab>
 
-  ```python
-  from langfuse.openai import openai
-  import os
-  from dotenv import load_dotenv
+```python
+from langfuse.openai import openai
+import os
+from dotenv import load_dotenv
 
-  load_dotenv()
+load_dotenv()
 
-  # Create an OpenAI client with Helicone's gateway endpoint
-  client = openai.OpenAI(
-      api_key=os.getenv("HELICONE_API_KEY"),
-      base_url="https://ai-gateway.helicone.ai/"
-  )
+# Create an OpenAI client with Helicone's gateway endpoint
+client = openai.OpenAI(
+    api_key=os.getenv("HELICONE_API_KEY"),
+    base_url="https://ai-gateway.helicone.ai/"
+)
 
-  # Make a chat completion request
-  response = client.chat.completions.create(
-      model="gpt-4o", # Or any other 100+ models
-      messages=[
-          {"role": "system", "content": "You are a helpful assistant."},
-          {"role": "user", "content": "Tell me a fun fact about space."}
-      ],
-      name="fun-fact-request"  # Optional: Name of the generation in Langfuse
-  )
+# Make a chat completion request
+response = client.chat.completions.create(
+    model="gpt-4o", # Or any other 100+ models
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a fun fact about space."}
+    ],
+    name="fun-fact-request"  # Optional: Name of the generation in Langfuse
+)
 
-  print(response.choices[0].message.content)
-  ```
+print(response.choices[0].message.content)
+```
 
-  </Tab>
-  <Tab>
+</Tab>
+<Tab>
 
-  ```typescript
-  import { observeOpenAI } from "langfuse";
-  import OpenAI from "openai";
+```typescript
+import { observeOpenAI } from "langfuse";
+import OpenAI from "openai";
 
-  const openaiClient = new OpenAI({
-      apiKey: process.env.HELICONE_API_KEY,
-      baseURL: "https://ai-gateway.helicone.ai/"
-  });
+const openaiClient = new OpenAI({
+    apiKey: process.env.HELICONE_API_KEY,
+    baseURL: "https://ai-gateway.helicone.ai/"
+});
 
-  // Create an observed client with Langfuse options
-  const client = observeOpenAI(openaiClient, {
-      generationName: "fun-fact-request"  // Optional: Name of the generation in Langfuse
-  });
+// Create an observed client with Langfuse options
+const client = observeOpenAI(openaiClient, {
+    generationName: "fun-fact-request"  // Optional: Name of the generation in Langfuse
+});
 
-  // Make a chat completion request
-  const response = await client.chat.completions.create({
-      model: "gpt-4o", // Or any other 100+ models
-      messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: "Tell me a fun fact about space." }
-      ]
-  });
+// Make a chat completion request
+const response = await client.chat.completions.create({
+    model: "gpt-4o", // Or any other 100+ models
+    messages: [
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: "Tell me a fun fact about space." }
+    ]
+});
 
-  console.log(response.choices[0].message.content);
-  ```
-  </Tab>
+console.log(response.choices[0].message.content);
+```
+
+</Tab>
 </LangTabs>
 
 ## Example 2: Nested LLM Calls
@@ -139,193 +145,197 @@ By using the `@observe()` decorator, we capture execution details of any Python 
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 
-  <Tab>
-  By using the `@observe()` decorator, we can capture execution details of any Python function.
-  The `@observe()` decorator captures inputs, outputs, and execution details of the functions.
+<Tab>
 
-  ```python
-  from langfuse import observe
-  from langfuse.openai import openai
-  import os
-  from dotenv import load_dotenv
+By using the `@observe()` decorator, we can capture execution details of any Python function.
+The `@observe()` decorator captures inputs, outputs, and execution details of the functions.
 
-  load_dotenv()
+```python
+from langfuse import observe
+from langfuse.openai import openai
+import os
+from dotenv import load_dotenv
 
-  # Create an OpenAI client with Helicone's base URL
-  client = openai.OpenAI(
-      base_url="https://ai-gateway.helicone.ai/",
-      api_key=os.getenv("HELICONE_API_KEY")
-  )
+load_dotenv()
 
-  @observe()  # This decorator enables tracing of the function
-  def analyze_text(text: str):
-      # First LLM call: Summarize the text
-      summary_response = summarize_text(text)
-      summary = summary_response.choices[0].message.content
+# Create an OpenAI client with Helicone's base URL
+client = openai.OpenAI(
+    base_url="https://ai-gateway.helicone.ai/",
+    api_key=os.getenv("HELICONE_API_KEY")
+)
 
-      # Second LLM call: Analyze the sentiment of the summary
-      sentiment_response = analyze_sentiment(summary)
-      sentiment = sentiment_response.choices[0].message.content
+@observe()  # This decorator enables tracing of the function
+def analyze_text(text: str):
+    # First LLM call: Summarize the text
+    summary_response = summarize_text(text)
+    summary = summary_response.choices[0].message.content
 
-      return {
-          "summary": summary,
-          "sentiment": sentiment
-      }
+    # Second LLM call: Analyze the sentiment of the summary
+    sentiment_response = analyze_sentiment(summary)
+    sentiment = sentiment_response.choices[0].message.content
 
-  @observe()  # Nested function to be traced
-  def summarize_text(text: str):
-      return client.chat.completions.create(
-          model="gpt-4o",
-          messages=[
-              {"role": "system", "content": "You summarize texts in a concise manner."},
-              {"role": "user", "content": f"Summarize the following text:\n{text}"}
-          ],
-          name="summarize-text"
-      )
+    return {
+        "summary": summary,
+        "sentiment": sentiment
+    }
 
-  @observe()  # Nested function to be traced
-  def analyze_sentiment(summary: str):
-      return client.chat.completions.create(
-          model="gpt-4o",
-          messages=[
-              {"role": "system", "content": "You analyze the sentiment of texts."},
-              {"role": "user", "content": f"Analyze the sentiment of the following summary:\n{summary}"}
-          ],
-          name="analyze-sentiment"
-      )
+@observe()  # Nested function to be traced
+def summarize_text(text: str):
+    return client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You summarize texts in a concise manner."},
+            {"role": "user", "content": f"Summarize the following text:\n{text}"}
+        ],
+        name="summarize-text"
+    )
 
-  # Example usage
-  text_to_analyze = "OpenAI's GPT-4 model has significantly advanced the field of AI, setting new standards for language generation."
-  analyze_text(text_to_analyze)
-  ```
+@observe()  # Nested function to be traced
+def analyze_sentiment(summary: str):
+    return client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You analyze the sentiment of texts."},
+            {"role": "user", "content": f"Analyze the sentiment of the following summary:\n{summary}"}
+        ],
+        name="analyze-sentiment"
+    )
 
-  </Tab>
-  <Tab>
+# Example usage
+text_to_analyze = "OpenAI's GPT-4 model has significantly advanced the field of AI, setting new standards for language generation."
+analyze_text(text_to_analyze)
+```
 
-  By using the Langfuse SDK, we can manually create traces and generations to capture nested LLM calls.
+</Tab>
+<Tab>
 
-  ```typescript
-  import { Langfuse } from "langfuse";
-  import { observeOpenAI } from "langfuse";
-  import OpenAI from "openai";
+By using the Langfuse SDK, we can manually create traces and generations to capture nested LLM calls.
 
-  const langfuse = new Langfuse();
+```typescript
+import { Langfuse } from "langfuse";
+import { observeOpenAI } from "langfuse";
+import OpenAI from "openai";
 
-  const openaiClient = new OpenAI({
-      baseURL: "https://ai-gateway.helicone.ai/",
-      apiKey: process.env.HELICONE_API_KEY
-  });
+const langfuse = new Langfuse();
 
-  async function analyzeText(text: string) {
-      // Create a trace for the entire analysis
-      const trace = langfuse.trace({
-          name: "analyze-text",
-          input: { text }
-      });
+const openaiClient = new OpenAI({
+    baseURL: "https://ai-gateway.helicone.ai/",
+    apiKey: process.env.HELICONE_API_KEY
+});
 
-      try {
-          // First LLM call: Summarize the text
-          const summaryResponse = await summarizeText(text, trace);
-          const summary = summaryResponse.choices[0].message.content;
+async function analyzeText(text: string) {
+    // Create a trace for the entire analysis
+    const trace = langfuse.trace({
+        name: "analyze-text",
+        input: { text }
+    });
 
-          // Second LLM call: Analyze the sentiment of the summary
-          const sentimentResponse = await analyzeSentiment(summary!, trace);
-          const sentiment = sentimentResponse.choices[0].message.content;
+    try {
+        // First LLM call: Summarize the text
+        const summaryResponse = await summarizeText(text, trace);
+        const summary = summaryResponse.choices[0].message.content;
 
-          const result = {
-              summary,
-              sentiment
-          };
+        // Second LLM call: Analyze the sentiment of the summary
+        const sentimentResponse = await analyzeSentiment(summary!, trace);
+        const sentiment = sentimentResponse.choices[0].message.content;
 
-          // Update trace with output
-          trace.update({ output: result });
+        const result = {
+            summary,
+            sentiment
+        };
 
-          return result;
-      } catch (error) {
-          trace.update({ output: { error: error instanceof Error ? error.message : String(error) } });
-          throw error;
-      }
-  }
+        // Update trace with output
+        trace.update({ output: result });
 
-  async function summarizeText(text: string, trace: any) {
-      const client = observeOpenAI(openaiClient, {
-          generationName: "summarize-text",
-          parent: trace
-      });
+        return result;
+    } catch (error) {
+        trace.update({ output: { error: error instanceof Error ? error.message : String(error) } });
+        throw error;
+    }
+}
 
-      return await client.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-              { role: "system", content: "You summarize texts in a concise manner." },
-              { role: "user", content: `Summarize the following text:\n${text}` }
-          ]
-      });
-  }
+async function summarizeText(text: string, trace: any) {
+    const client = observeOpenAI(openaiClient, {
+        generationName: "summarize-text",
+        parent: trace
+    });
 
-  async function analyzeSentiment(summary: string, trace: any) {
-      const client = observeOpenAI(openaiClient, {
-          generationName: "analyze-sentiment",
-          parent: trace
-      });
+    return await client.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+            { role: "system", content: "You summarize texts in a concise manner." },
+            { role: "user", content: `Summarize the following text:\n${text}` }
+        ]
+    });
+}
 
-      return await client.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-              { role: "system", content: "You analyze the sentiment of texts." },
-              { role: "user", content: `Analyze the sentiment of the following summary:\n${summary}` }
-          ]
-      });
-  }
+async function analyzeSentiment(summary: string, trace: any) {
+    const client = observeOpenAI(openaiClient, {
+        generationName: "analyze-sentiment",
+        parent: trace
+    });
 
-  // Example usage
-  const textToAnalyze = "OpenAI's GPT-4 model has significantly advanced the field of AI, setting new standards for language generation.";
-  analyzeText(textToAnalyze);
-  ```
-  </Tab>
+    return await client.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+            { role: "system", content: "You analyze the sentiment of texts." },
+            { role: "user", content: `Analyze the sentiment of the following summary:\n${summary}` }
+        ]
+    });
+}
+
+// Example usage
+const textToAnalyze = "OpenAI's GPT-4 model has significantly advanced the field of AI, setting new standards for language generation.";
+analyzeText(textToAnalyze);
+```
+
+</Tab>
 </LangTabs>
 
 ## Example 3: Streaming Responses
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
-  <Tab>
+<Tab>
 
-  ```python
-  stream = client.chat.completions.create(
-      model="gpt-4o",
-      messages=[
-          {"role": "user", "content": "Write a haiku about a robot."}
-      ],
-      stream=True,
-      name="streaming-story"
-  )
+```python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "user", "content": "Write a haiku about a robot."}
+    ],
+    stream=True,
+    name="streaming-story"
+)
 
-  print("🤖 Assistant (streaming):")
-  for chunk in stream:
-      if chunk.choices[0].delta.content is not None:
-          print(chunk.choices[0].delta.content, end="", flush=True)
-  print("\n")
-  ```
+print("🤖 Assistant (streaming):")
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print("\n")
+```
 
-  </Tab>
-  <Tab>
-  ```typescript
-  const stream = await client.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-          { role: "user", content: "Write a haiku about a robot." }
-      ],
-      stream: true
-  });
+</Tab>
+<Tab>
 
-  console.log("🤖 Assistant (streaming):");
-  for await (const chunk of stream) {
-      if (chunk.choices[0]?.delta?.content) {
-          process.stdout.write(chunk.choices[0].delta.content);
-      }
-  }
-  console.log("\n");
-  ```
-  </Tab>
+```typescript
+const stream = await client.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+        { role: "user", content: "Write a haiku about a robot." }
+    ],
+    stream: true
+});
+
+console.log("🤖 Assistant (streaming):");
+for await (const chunk of stream) {
+    if (chunk.choices[0]?.delta?.content) {
+        process.stdout.write(chunk.choices[0].delta.content);
+    }
+}
+console.log("\n");
+```
+
+</Tab>
 </LangTabs>
 
 ## Example 4: Multi-Provider Access
@@ -333,36 +343,40 @@ By using the `@observe()` decorator, we capture execution details of any Python 
 Helicone provides access to 100+ LLM providers through a single interface. Simply change the model name to use different providers:
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
-  <Tab>
-  ```python
-  # Use Anthropic Claude
-  response = client.chat.completions.create(
-      model="claude-3.5-sonnet-v2/anthropic",
-      messages=[{"role": "user", "content": "Hello!"}]
-  )
+<Tab>
 
-  # Use Gemini Pro if Anthropic's Claude Sonnet 3.5 is not available
-  response = client.chat.completions.create(
-      model="claude-3.5-sonnet-v2/anthropic,gemini-2.5-flash-lite/google-ai-studio",
-      messages=[{"role": "user", "content": "Hello!"}]
-  )
-  ```
-  </Tab>
-  <Tab>
-  ```typescript
-  // Use Anthropic Claude
-  const response = await client.chat.completions.create({
-      model: "claude-3.5-sonnet-v2/anthropic",
-      messages: [{ role: "user", content: "Hello!" }]
-  });
+```python
+# Use Anthropic Claude
+response = client.chat.completions.create(
+    model="claude-3.5-sonnet-v2/anthropic",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
 
-  // Use Gemini Pro if Anthropic's Claude Sonnet 3.5 is not available
-  const response2 = await client.chat.completions.create({
-      model: "claude-3.5-sonnet-v2/anthropic,gemini-2.5-flash-lite/google-ai-studio",
-      messages: [{ role: "user", content: "Hello!" }]
-  });
-  ```
-  </Tab>
+# Use Gemini Pro if Anthropic's Claude Sonnet 3.5 is not available
+response = client.chat.completions.create(
+    model="claude-3.5-sonnet-v2/anthropic,gemini-2.5-flash-lite/google-ai-studio",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+// Use Anthropic Claude
+const response = await client.chat.completions.create({
+    model: "claude-3.5-sonnet-v2/anthropic",
+    messages: [{ role: "user", content: "Hello!" }]
+});
+
+// Use Gemini Pro if Anthropic's Claude Sonnet 3.5 is not available
+const response2 = await client.chat.completions.create({
+    model: "claude-3.5-sonnet-v2/anthropic,gemini-2.5-flash-lite/google-ai-studio",
+    messages: [{ role: "user", content: "Hello!" }]
+});
+```
+
+</Tab>
 </LangTabs>
 
 ## Learn More

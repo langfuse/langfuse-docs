@@ -27,7 +27,7 @@ export type BoxNeighbors = {
  * sit in a grid or row.
  */
 export function cornersFromNeighbors(
-  neighbors: BoxNeighbors
+  neighbors: BoxNeighbors,
 ): Record<BoxCornerKey, boolean> {
   const { top, right, bottom, left } = neighbors;
   return {
@@ -43,7 +43,7 @@ export function cornersForGridCell(
   row: number,
   col: number,
   rows: number,
-  cols: number
+  cols: number,
 ): Record<BoxCornerKey, boolean> {
   return cornersFromNeighbors({
     top: row > 0,
@@ -78,7 +78,19 @@ export interface CornerBoxProps extends React.HTMLAttributes<HTMLDivElement> {
  * overlap.
  */
 const CornerBox = React.forwardRef<HTMLDivElement, CornerBoxProps>(
-  ({ className, corners, withStripes, hoverStripes, noBorder, style, children, ...props }, ref) => {
+  (
+    {
+      className,
+      corners,
+      withStripes,
+      hoverStripes,
+      noBorder,
+      style,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     const resolved = resolveCorners(corners);
 
     // Build per-corner CSS custom properties: hidden corners are set to "none"
@@ -96,11 +108,13 @@ const CornerBox = React.forwardRef<HTMLDivElement, CornerBoxProps>(
         ref={ref}
         className={cn(
           "relative bg-surface-bg",
-          noBorder ? "corner-box-corners-flush" : "border border-line-structure corner-box-corners",
+          noBorder
+            ? "corner-box-corners-flush"
+            : "border border-line-structure corner-box-corners",
           withStripes && "with-stripes",
           hoverStripes &&
-            "group corner-box-hover-stripes transition-[background] duration-180 ease-out",
-          className
+            "group/box corner-box-hover-stripes transition-[background] duration-180 ease-out",
+          className,
         )}
         style={hasCustomCorners ? { ...cornerStyle, ...style } : style}
         {...props}
@@ -108,7 +122,7 @@ const CornerBox = React.forwardRef<HTMLDivElement, CornerBoxProps>(
         {children}
       </div>
     );
-  }
+  },
 );
 CornerBox.displayName = "CornerBox";
 

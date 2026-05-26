@@ -21,7 +21,7 @@ export const HomeSection = forwardRef<
           observer.disconnect();
         }
       },
-      { threshold: 0, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0, rootMargin: "0px 0px -40px 0px" },
     );
 
     observer.observe(el);
@@ -33,13 +33,14 @@ export const HomeSection = forwardRef<
       ref={(node) => {
         (innerRef as React.MutableRefObject<HTMLElement | null>).current = node;
         if (typeof ref === "function") ref(node);
-        else if (ref) (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+        else if (ref)
+          (ref as React.MutableRefObject<HTMLElement | null>).current = node;
       }}
       className={cn(
         "mx-auto w-full px-4 sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]",
         "transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-        className
+        className,
       )}
       {...props}
     >

@@ -35,13 +35,11 @@ Let's walk through a practical example of using Weco with Langfuse to optimize a
 
 For this example we'll install the weco client in an virtual environment. For **global installation instructions and usage with agent skills please refer to [Weco's docs](https://docs.weco.ai/cli/installation)**.
 
-
 ```python
 !pip install "weco[langfuse]" langfuse openai -q
 ```
 
 Authenticate with Weco:
-
 
 ```python
 !weco login
@@ -51,7 +49,6 @@ Authenticate with Weco:
 
 Set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
-
 ```python
 import os
 
@@ -59,14 +56,13 @@ import os
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
 os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com"  # 🇺🇸 US region
-#os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
+# Other Langfuse data regions: 🇪🇺 EU https://cloud.langfuse.com, 🇯🇵 Japan https://jp.cloud.langfuse.com, ⚕️ HIPAA https://hipaa.cloud.langfuse.com
 
 # Your OpenAI key
 os.environ["OPENAI_API_KEY"] = "sk-proj-***"
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
-
 
 ```python
 from langfuse import get_client
@@ -83,7 +79,6 @@ else:
 ### Step 3: Create a Dataset in Langfuse
 
 Weco evaluates your code against a Langfuse dataset. Each dataset item has an `input` dict and an optional `expected_output` dict. Let's create a small QA dataset.
-
 
 ```python
 dataset = langfuse.create_dataset(name="weco-demo-qa")
@@ -128,7 +123,6 @@ The target function is the code Weco will optimize. It receives an `inputs` dict
 
 Save this as `agent.py` in your working directory:
 
-
 ```python
 %%writefile agent.py
 from openai import OpenAI
@@ -160,7 +154,6 @@ Code evaluators are Python functions that score each target function output. The
 The metric function combines all evaluator scores into a single number that Weco optimizes.
 
 Save this as `evaluators.py`:
-
 
 ```python
 %%writefile evaluators.py
@@ -216,7 +209,6 @@ Create a **Correctness** evaluator:
 
 With the dataset, target function, evaluators, and metric function in place, run Weco from the command line. Weco uses Langfuse as the evaluation backend, running your target function against the dataset on each iteration and tracking progress as experiment runs in Langfuse.
 
-
 ```python
 !weco run --source agent.py \
   --eval-backend langfuse \
@@ -234,6 +226,7 @@ With the dataset, target function, evaluators, and metric function in place, run
 Each optimization step creates a new experiment run in Langfuse. Navigate to **Datasets** → **weco-demo-qa** → **Runs** to compare inputs, outputs, and evaluator scores across all variants side-by-side.
 
 You can also **track iteration-by-iteration progress in the [Weco dashboard](https://dashboard.weco.ai), which shows metric scores and the exact code changes Weco made at each step**. When the run completes, you'll be prompted to apply the best-performing version to your source file.
+
 </Steps>
 
 ## Full Example: End-to-End QA Optimization
@@ -276,4 +269,3 @@ This example optimizes an HR QA agent against a dataset of policy questions, usi
 - [Weco CLI GitHub](https://github.com/WecoAI/weco-cli) — source code and example projects.
 - [Langfuse Datasets documentation](https://langfuse.com/docs/datasets/overview) — creating and managing datasets.
 - [Langfuse Evaluation documentation](https://langfuse.com/docs/scores/overview) — configuring evaluators and scores.
-

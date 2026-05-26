@@ -13,6 +13,7 @@ OpenAI has released their new improved Response API for a better developer exper
 
 <LangTabs items={['Python SDK', 'JS/TS SDK']}>
 <Tab>
+
 ```python
 from langfuse.openai import openai
 from langfuse import get_client
@@ -28,9 +29,11 @@ client.responses.create(
 langfuse = get_client()
 langfuse.flush()
 ```
+
 </Tab>
 
 <Tab>
+
 ```typescript
 import { observeOpenAI } from "../langfuse";
 
@@ -43,13 +46,16 @@ const response = await client.responses.create({
 
 await client.flushAsync();
 ```
+
 </Tab>
 </LangTabs>
 
 **Releases**
+
 - [Python SDK](https://github.com/langfuse/langfuse-python/releases/tag/v2.60.0)
 - [JS/TS SDK](https://github.com/langfuse/langfuse-js/releases/tag/v3.37.0)
 
 **Learn more**
+
 - [OpenAI Response API](https://platform.openai.com/docs/api-reference/responses)
 - [Langfuse OpenAI integration](/integrations/model-providers/openai-py)

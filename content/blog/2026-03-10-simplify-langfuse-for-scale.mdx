@@ -178,13 +178,12 @@ Filters, sorting, and [saved views](/changelog/2025-05-20-save-table-views) repl
 The trace waterfall view isn't going away. It's still one click away from any observation row when you need the full picture of a request.
 But discovery starts with the flat table: filter by observation name, type, model, cost, latency, user, session, or error status to surface the operations that matter, then drill into the trace for context.
 
-
 ## Road to v4: Implementation Hurdles
 
 ### Dual Write
 
 Before migrating the historic data, we had to write all incoming records into the old and new format.
-The problem: live ingestion, where trace metadata can arrive *after* the first observation of a trace.
+The problem: live ingestion, where trace metadata can arrive _after_ the first observation of a trace.
 We needed strong write consistency across all observation records, server-side, without breaking existing SDK contracts.
 
 We evaluated per-event delays, shared metadata stores (Cassandra, DynamoDB), and S3-based reprocessing.

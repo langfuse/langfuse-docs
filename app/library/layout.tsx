@@ -6,5 +6,9 @@ export default function LibraryLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={librarySource.getPageTree()}>{children}</SharedDocsLayout>;
+  return (
+    <SharedDocsLayout tree={librarySource.getPageTree()}>
+      {children}
+    </SharedDocsLayout>
+  );
 }

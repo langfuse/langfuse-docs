@@ -12,11 +12,11 @@ Let's say you have a main prompt with shared instructions, but want to inject a 
 
 **Before diving into the how, let's first zoom out and look at the options you have.**
 
-| Approach | Use when | Trade-offs |
-| --- | --- | --- |
-| [**Static prompt references**](/docs/prompt-management/features/composability) | Sub-prompt is always the same | ✅ Fully declarative, resolved automatically in Playground<br/>❌ No dynamic selection based on runtime values |
-| **Dynamic selection via variables** (this page) | Sub-prompt depends on runtime conditions | ✅ All (sub)prompts managed in Langfuse UI<br/>✅ Selection logic supported (via code)<br/>✅ Variables automatically detected by Langfuse<br/>❌ Not automatically resolved in Playground, prompt experiments |
-| [**External templating**](/faq/all/using-external-templating-libraries) (Jinja, Liquid) | Complex conditionals within a single template | ✅ Full flexibility logic-wise<br/>❌ Prompts not automatically resolved in Playground, prompt experiments <br/>❌ Variables not automatically detected by Langfuse |
+| Approach                                                                                | Use when                                      | Trade-offs                                                                                                                                                                                                     |
+| --------------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [**Static prompt references**](/docs/prompt-management/features/composability)          | Sub-prompt is always the same                 | ✅ Fully declarative, resolved automatically in Playground<br/>❌ No dynamic selection based on runtime values                                                                                                 |
+| **Dynamic selection via variables** (this page)                                         | Sub-prompt depends on runtime conditions      | ✅ All (sub)prompts managed in Langfuse UI<br/>✅ Selection logic supported (via code)<br/>✅ Variables automatically detected by Langfuse<br/>❌ Not automatically resolved in Playground, prompt experiments |
+| [**External templating**](/faq/all/using-external-templating-libraries) (Jinja, Liquid) | Complex conditionals within a single template | ✅ Full flexibility logic-wise<br/>❌ Prompts not automatically resolved in Playground, prompt experiments <br/>❌ Variables not automatically detected by Langfuse                                            |
 
 ## How it works
 
@@ -50,5 +50,3 @@ selected = prompt_a if use_prompt_a else prompt_b
 # Insert into parent
 final_prompt = parent_prompt.compile(selected_prompt=selected.prompt)
 ```
-
-

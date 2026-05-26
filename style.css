@@ -214,6 +214,24 @@
 
 /* Nav layout tokens (`--lf-nav-*`, `--fd-nav-height`) are defined in src/overrides.css */
 
+.mermaid-diagram {
+  border-color: var(--line-structure);
+  background-color: var(--surface-1);
+  color: var(--text-primary);
+}
+
+.embedded-mermaid .mermaid-diagram {
+  border: 0 !important;
+  background-color: transparent !important;
+}
+
+.mermaid-diagram svg {
+  display: block;
+  width: auto;
+  margin-inline: auto;
+  max-width: none;
+}
+
 /* CSS custom properties for shadcn/ui color system */
 @layer base {
   :root {
@@ -548,7 +566,9 @@
 .integration-chip {
   border-radius: 2px;
   background-color: var(--surface-bg);
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .integration-chip:hover {
@@ -558,12 +578,20 @@
 
 /* Marquee animations for integrations carousel */
 @keyframes marquee-left {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 @keyframes marquee-right {
-  from { transform: translateX(-50%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 .animate-marquee-left {
   animation: marquee-left linear infinite;
@@ -838,6 +866,7 @@
 
 .corner-box-corners--hover::before {
   opacity: 0;
+  z-index: 20;
   transition: opacity 0.2s ease;
 }
 

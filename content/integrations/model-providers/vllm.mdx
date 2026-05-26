@@ -15,14 +15,12 @@ This cookbook shows how to trace [vLLM](https://github.com/vllm-project/vllm) in
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It provides tracing, prompt management, and evaluation capabilities to help teams debug, analyze, and iterate on their LLM applications.
 
-
 ## Get Started
 
 We'll walk through a simple example of using vLLM with Langfuse tracing via OpenTelemetry.
 
 <Steps>
 ### Step 1: Install Dependencies
-
 
 ```python
 %pip install vllm langfuse -q
@@ -32,8 +30,6 @@ We'll walk through a simple example of using vLLM with Langfuse tracing via Open
 
 Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
-
-
 ```python
 import os
 
@@ -41,7 +37,7 @@ import os
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Configure OpenTelemetry endpoint & headers
 os.environ["OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"] = "http/protobuf"
@@ -52,11 +48,10 @@ os.environ["OTEL_SERVICE_NAME"] = "vllm"
 
 vLLM automatically exposes OpenTelemetry spans when configured. The Langfuse client set up in the next step captures these OTEL spans and sends them to Langfuse.
 
-
 ```python
 from vllm import LLM, SamplingParams
 
-langfuse_host = "https://cloud.langfuse.com"  # or https://us.cloud.langfuse.com
+langfuse_host = "https://cloud.langfuse.com"  # Other regions: https://us.cloud.langfuse.com (US), https://jp.cloud.langfuse.com (Japan), https://hipaa.cloud.langfuse.com (HIPAA)
 otlp_traces_endpoint = f"{langfuse_host}/api/public/otel/v1/traces"
 
 # --- vLLM ---
@@ -68,7 +63,6 @@ llm = LLM(
 ```
 
 Now we initialize the Langfuse OTel client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
-
 
 ```python
 from langfuse import get_client
@@ -86,7 +80,6 @@ else:
 
 We load the model using vLLM's `LLM` class. In this example, we use a small model (`facebook/opt-125m`) for demonstration purposes. You can replace this with any model supported by vLLM.
 
-
 ```python
 out = llm.generate(
     ["Write one sentence about Berlin."],
@@ -97,9 +90,9 @@ print(out[0].outputs[0].text)
 
 ### Step 5: See traces in Langfuse
 
-After running the model, you can see new spans in Langfuse. 
+After running the model, you can see new spans in Langfuse.
 
-_**Note:** vLLM currently only exports the token counts and latency metrics to Langfuse. The LLM input and output need to be manually captured in a separate trace using the Langfuse SDK.  _
+_**Note:** vLLM currently only exports the token counts and latency metrics to Langfuse. The LLM input and output need to be manually captured in a separate trace using the Langfuse SDK. _
 
 [Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/462b76c435b348aa31ab82351c8ae33b?observation=a95f1c8affd878e9&timestamp=2025-12-23T12:59:03.259Z)
 

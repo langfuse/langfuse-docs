@@ -25,7 +25,7 @@ const linkVariants = cva(
       variant: {
         default: "text-foreground hover:text-muted-foreground",
         nav: "text-text-tertiary hover:text-text-secondary no-underline font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] [text-shadow:0_0_0_#B5AFEA]",
-        text: "leading-snug font-[430] tracking-[-0.26px] text-text-tertiary underline decoration-line-structure underline-offset-2 transition-colors group-hover:text-text-secondary hover:text-text-primary",
+        text: "leading-snug font-[430] tracking-[-0.26px] text-text-tertiary underline decoration-line-structure underline-offset-2 transition-colors group-hover:text-text-secondary group-hover/box:text-text-secondary hover:text-text-primary",
         underline:
           "text-text-links underline decoration-1 underline-offset-2 decoration-text-links hover:text-primary hover:decoration-primary font-normal",
         button:
@@ -39,7 +39,7 @@ const linkVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export type LinkVariants = VariantProps<typeof linkVariants>;
@@ -95,7 +95,13 @@ export function Link({
 
   // Internal URL — use Next.js Link for client-side navigation
   return (
-    <NextLink href={href} target={target} rel={rel} className={classes} {...props}>
+    <NextLink
+      href={href}
+      target={target}
+      rel={rel}
+      className={classes}
+      {...props}
+    >
       {children}
     </NextLink>
   );

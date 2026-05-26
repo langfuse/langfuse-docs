@@ -31,9 +31,7 @@ LANGFUSE_SECRET_KEY="sk-lf-..."
 LANGFUSE_PUBLIC_KEY="pk-lf-..."
 # 🇪🇺 EU region
 LANGFUSE_BASE_URL="https://cloud.langfuse.com"
-# 🇺🇸 US region
-# LANGFUSE_BASE_URL="https://us.cloud.langfuse.com"
-
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 # Set your Vercel AI Gateway API key or OIDC token (Vercel AI Gateway uses the 'AI_GATEWAY_API_KEY' and 'VERCEL_OIDC_TOKEN' environment variables)
 os.environ["OPENAI_API_KEY"] = "<YOUR_VERCEL_AI_GATEWAY_API_KEY_OR_OIDC_TOKEN>"
 ```
@@ -52,8 +50,7 @@ process.env.LANGFUSE_SECRET_KEY = "sk-lf-...";
 process.env.LANGFUSE_PUBLIC_KEY = "pk-lf-...";
 // 🇪🇺 EU region
 process.env.LANGFUSE_BASE_URL = "https://cloud.langfuse.com";
-// 🇺🇸 US region
-// process.env.LANGFUSE_BASE_URL = "https://us.cloud.langfuse.com";
+// Other Langfuse data regions: 🇺🇸 US https://us.cloud.langfuse.com, 🇯🇵 Japan https://jp.cloud.langfuse.com, ⚕️ HIPAA https://hipaa.cloud.langfuse.com
 
 // Set your Vercel AI Gateway API key or OIDC token (Vercel AI Gateway uses the 'AI_GATEWAY_API_KEY' and 'VERCEL_OIDC_TOKEN' environment variables)
 process.env.OPENAI_API_KEY = "<YOUR_VERCEL_AI_GATEWAY_API_KEY_OR_OIDC_TOKEN>";
@@ -249,7 +246,7 @@ async function analyzeText(text: string) {
 
         // Update trace with output
         trace.update({ output: result });
-        
+
         return result;
     } catch (error) {
         trace.update({ output: { error: error instanceof Error ? error.message : String(error) } });
@@ -262,7 +259,7 @@ async function summarizeText(text: string, trace: any) {
         generationName: "summarize-text",
         parent: trace
     });
-    
+
     return await client.chat.completions.create({
         model: "openai/gpt-3.5-turbo",
         messages: [
@@ -277,7 +274,7 @@ async function analyzeSentiment(summary: string, trace: any) {
         generationName: "analyze-sentiment",
         parent: trace
     });
-    
+
     return await client.chat.completions.create({
         model: "openai/gpt-3.5-turbo",
         messages: [

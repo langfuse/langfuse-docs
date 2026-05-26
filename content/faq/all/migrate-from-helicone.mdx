@@ -27,10 +27,10 @@ Use the [Helicone Prompt API](https://docs.helicone.ai/rest/prompt/query-prompts
 
 Helicone uses typed variables (`{{hc:name:type}}`), while Langfuse uses plain `{{variable}}` placeholders compiled at runtime via [`.compile()`](/docs/prompt-management/features/variables).
 
-| Helicone | Langfuse |
-| --- | --- |
+| Helicone                      | Langfuse            |
+| ----------------------------- | ------------------- |
 | `{{hc:customer_name:string}}` | `{{customer_name}}` |
-| `{{hc:is_premium:boolean}}` | `{{is_premium}}` |
+| `{{hc:is_premium:boolean}}`   | `{{is_premium}}`    |
 
 If you relied on Helicone's type validation, move that logic into your application code before calling `.compile()`.
 
@@ -54,7 +54,7 @@ Create prompts in Langfuse via the [SDK](/docs/prompt-management/get-started) or
 
 Helicone prompt partials (`{{hcp:prompt_id:index:environment}}`) pull messages from other prompts. Langfuse offers two alternatives:
 
-- **Shared system instructions**: create a Langfuse *text* prompt for the shared snippet and reference it via [prompt composability](/docs/prompt-management/features/composability).
+- **Shared system instructions**: create a Langfuse _text_ prompt for the shared snippet and reference it via [prompt composability](/docs/prompt-management/features/composability).
 - **Multi-message fragments**: fetch both prompts in code, compile each, and merge message arrays — or use [message placeholders](/docs/prompt-management/features/message-placeholders) to insert messages at specific positions at runtime.
 
 ### 6. Update Application Code
@@ -144,6 +144,7 @@ export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <base64(public_key:secret
 ```
 
 Key constraints:
+
 - Langfuse supports **OTLP over HTTP via both HTTP/JSON and HTTP/protobuf** (`gRPC` is not supported yet).
 - The `x-langfuse-ingestion-version=4` header enables real-time visibility in the Langfuse v4 tracing table for data sent directly via OTEL.
 - See the [OpenTelemetry integration docs](/integrations/native/opentelemetry) for full setup details.

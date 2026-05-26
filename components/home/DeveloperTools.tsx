@@ -22,19 +22,27 @@ export const DeveloperTools = () => {
       <div className="flex relative flex-col gap-8 md:gap-10">
         <div className="flex max-w-[52ch] flex-col gap-4">
           <Heading className="text-left max-w-[16ch] sm:max-w-none">
-            Made for <span className="whitespace-nowrap"><TextHighlight>developers</TextHighlight>,</span>
-            {" "}loved by{" "}
-            <span className="whitespace-nowrap"><TextHighlight>agents</TextHighlight>.</span>
+            Made for{" "}
+            <span className="whitespace-nowrap">
+              <TextHighlight>developers</TextHighlight>,
+            </span>{" "}
+            loved by{" "}
+            <span className="whitespace-nowrap">
+              <TextHighlight>agents</TextHighlight>.
+            </span>
           </Heading>
           <Text className="max-w-[48ch] text-left">
-            Langfuse works by default with your coding agents.
-            Install our MCP servers and CLI to develop at the speed of thought.
-            Let Claude Code, Cursor and Codex do the hard work.
+            Langfuse works by default with your coding agents. Install our MCP
+            servers and CLI to develop at the speed of thought. Let Claude Code,
+            Cursor and Codex do the hard work.
           </Text>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2">
-          <CornerBox className="flex relative z-0 flex-col p-0 min-h-0 md:row-span-2">
+          <CornerBox
+            hoverStripes
+            className="flex relative z-0 flex-col p-0 min-h-0 md:row-span-2"
+          >
             <div className="flex flex-col gap-1 p-4">
               <Link
                 href={SKILL_HREF}
@@ -43,8 +51,9 @@ export const DeveloperTools = () => {
                 SKILL.md
               </Link>
               <Text size="s" className="text-left">
-                A ready-made skill for your coding agent.
-                Manage prompts, traces, and evals through natural language — no manual API calls needed.
+                A ready-made skill for your coding agent. Manage prompts,
+                traces, and evals through natural language — no manual API calls
+                needed.
               </Text>
               <div className="flex justify-center items-center mt-4">
                 <video
@@ -59,16 +68,16 @@ export const DeveloperTools = () => {
               </div>
             </div>
             <div className="flex flex-col items-start px-4 pb-4 -ml-1.25">
-              <Button
-                variant="secondary"
-                href={SKILL_HREF}
-              >
-                Install Skill
+              <Button variant="secondary" size="small" href={SKILL_HREF}>
+                Install skill
               </Button>
             </div>
           </CornerBox>
 
-          <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:mt-0 md:-ml-px">
+          <CornerBox
+            hoverStripes
+            className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:mt-0 md:-ml-px"
+          >
             <Link
               href={CLI_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
@@ -76,20 +85,20 @@ export const DeveloperTools = () => {
               Langfuse CLI
             </Link>
             <Text size="s" className="text-left">
-              Full API access from the terminal.
-              Let coding agents manage Langfuse for you, or script your workflows in CI/CD.
+              Full API access from the terminal. Let coding agents manage
+              Langfuse for you, or script your workflows in CI/CD.
             </Text>
             <div className="flex flex-col items-start mt-4 -ml-1.25">
-              <Button
-                variant="secondary"
-                href={CLI_HREF}
-              >
+              <Button variant="secondary" size="small" href={CLI_HREF}>
                 Configure CLI
               </Button>
             </div>
           </CornerBox>
 
-          <CornerBox className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:-ml-px">
+          <CornerBox
+            hoverStripes
+            className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:-ml-px"
+          >
             <Link
               href={MCP_HREF}
               className="text-left text-[15px] font-medium text-text-secondary"
@@ -101,10 +110,7 @@ export const DeveloperTools = () => {
               Manage prompts, query traces, and more.
             </Text>
             <div className="flex flex-col items-start mt-4 -ml-1.25">
-              <Button
-                variant="secondary"
-                href={MCP_HREF}
-              >
+              <Button variant="secondary" size="small" href={MCP_HREF}>
                 Configure MCP
               </Button>
             </div>

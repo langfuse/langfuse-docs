@@ -41,10 +41,10 @@ const variantClasses: Record<ButtonVariant, { root: string; key: string }> = {
 };
 
 const textButtonBaseClasses =
-  "inline-flex w-full min-w-0 max-w-full items-center justify-center gap-[6px] overflow-hidden px-0 py-1 shadow-none border-0 rounded-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex w-full min-w-0 max-w-full items-center justify-center gap-[6px] overflow-hidden px-0 py-1 shadow-none border-0 rounded-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-pointer";
 
 const buttonBaseClasses =
-  "inline-flex w-full min-w-0 max-w-full items-center justify-center no-underline gap-[6px] overflow-hidden py-0.75 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex w-full min-w-0 max-w-full items-center justify-center no-underline gap-[6px] overflow-hidden py-0.75 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-pointer";
 
 const labelTypographyClasses =
   "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] p-0";
@@ -53,7 +53,11 @@ function isEditableElement(el: Element | null): boolean {
   if (!el) return false;
   const tag = el.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
-  if (el instanceof HTMLElement && (el.isContentEditable || el.closest("[contenteditable='true']"))) return true;
+  if (
+    el instanceof HTMLElement &&
+    (el.isContentEditable || el.closest("[contenteditable='true']"))
+  )
+    return true;
   return false;
 }
 
@@ -73,22 +77,31 @@ function isEditableTarget(target: EventTarget | null): boolean {
 
 function hasRenderableChildren(children: React.ReactNode): boolean {
   return React.Children.toArray(children).some(
-    (child) => child !== null && child !== undefined && child !== false && child !== ""
+    (child) =>
+      child !== null && child !== undefined && child !== false && child !== "",
   );
 }
 
-function buttonVariants({ variant = "primary", size = "default", className }: ButtonVariantOptions) {
+function buttonVariants({
+  variant = "primary",
+  size = "small",
+  className,
+}: ButtonVariantOptions) {
   if (variant === "text") {
     return cn(
       textButtonBaseClasses,
       variantClasses.text.root,
       size === "small" ? "min-h-[26px]" : "min-h-[32px]",
-      className
+      className,
     );
   }
   return cn(
-    'rounded-[2px] border [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]',
-    buttonBaseClasses, variantClasses[variant].root, sizeClasses[size].root, className);
+    "rounded-[2px] border [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
+    buttonBaseClasses,
+    variantClasses[variant].root,
+    sizeClasses[size].root,
+    className,
+  );
 }
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -125,7 +138,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       disabled,
       ...props
     },
-    ref
+    ref,
   ) => {
     const resolvedVariant: ButtonVariant =
       variant === "secondary"
@@ -133,7 +146,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         : variant === "text"
           ? "text"
           : "primary";
-    const resolvedSize: ButtonSize = size === "small" ? "small" : "default";
+    const resolvedSize: ButtonSize = size === "default" ? "default" : "small";
 
     const innerRef = React.useRef<HTMLElement | null>(null);
     const isLink = !asChild && Boolean(href);
@@ -146,7 +159,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           ref.current = node;
         }
       },
-      [ref]
+      [ref],
     );
     const setAnchorRef = React.useCallback((node: HTMLAnchorElement | null) => {
       innerRef.current = node;
@@ -194,7 +207,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <span
         className={cn(
           "button-icon-area flex shrink-0 items-center justify-center h-full aspect-square *:max-w-full rounded-[1.5px] border-[0.5px] border-[rgba(64,61,57,0.20)] dark:border-[rgba(184,182,160,0.25)] bg-[rgba(64,61,57,0.10)] dark:bg-transparent p-[2px] text-button-icon pointer-events-none",
-          variant === "secondary" ? "text-text-tertiary" : "text-surface-1"
+          variant === "secondary" ? "text-text-tertiary" : "text-surface-1",
         )}
         aria-hidden
       >
@@ -204,7 +217,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const content = isIconOnly ? (
       <span
-        className={cn("flex h-full w-full items-center justify-center text-button-icon *:max-w-full pointer-events-none",
+        className={cn(
+          "flex h-full w-full items-center justify-center text-button-icon *:max-w-full pointer-events-none",
           variant === "primary" ? "text-surface-bg" : "text-text-tertiary",
         )}
         aria-hidden
@@ -217,7 +231,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <kbd
           className={cn(
             "flex flex-1 items-center min-w-0 truncate",
-            labelTypographyClasses
+            labelTypographyClasses,
           )}
         >
           {children}
@@ -228,7 +242,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             "justify-center items-center not-italic shrink-0 w-[20px] h-[20px] rounded-px",
             showShortcutonMobile ? "flex" : "hidden lg:flex",
             labelTypographyClasses,
-            variantClasses[resolvedVariant].key
+            variantClasses[resolvedVariant].key,
           )}
           aria-hidden
         >
@@ -241,7 +255,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <span
           className={cn(
             "flex items-center min-w-0 truncate",
-            labelTypographyClasses
+            labelTypographyClasses,
           )}
           aria-hidden
         >
@@ -277,7 +291,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ? "pr-[8px]"
             : "pr-[10px]";
     const buttonPaddingClasses = `${leftPaddingClass} ${rightPaddingClass}`;
-    const iconOnlySizeClass = isIconOnly ? (isSmallSize ? "w-[26px]" : "w-[32px]") : "";
+    const iconOnlySizeClass = isIconOnly
+      ? isSmallSize
+        ? "w-[26px]"
+        : "w-[32px]"
+      : "";
 
     const controlClassName = buttonVariants({
       variant: resolvedVariant,
@@ -286,7 +304,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className,
         isTextVariant && wrapperClassName,
         !isTextVariant && buttonPaddingClasses,
-        iconOnlySizeClass
+        iconOnlySizeClass,
       ),
     });
 
@@ -296,12 +314,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ? "gap-0 justify-center"
         : !hasShortcut && !hasIcon
           ? "gap-0 justify-start"
-          : "gap-[6px] justify-start"
+          : "gap-[6px] justify-start",
     );
 
     const buttonControlClassName = cn(
       controlClassName,
-      isIconOnly ? "gap-0 justify-center" : hasShortcut || hasIcon ? "gap-[6px] justify-start" : "gap-3 justify-center"
+      isIconOnly
+        ? "gap-0 justify-center"
+        : hasShortcut || hasIcon
+          ? "gap-[6px] justify-start"
+          : "gap-3 justify-center",
     );
 
     const linkEl = (
@@ -315,8 +337,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         onClick={
           disabled
             ? (e) => {
-              e.preventDefault();
-            }
+                e.preventDefault();
+              }
             : undefined
         }
         className={linkControlClassName}
@@ -346,16 +368,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <div
         className={cn(
-          "relative flex items-center p-1 group button-wrapper",
+          "relative flex items-center p-1 group button-wrapper cursor-pointer has-[:disabled]:cursor-not-allowed",
           wrapperClassName,
-          size === "small" ? "max-h-[34px]" : "max-h-[40px]"
+          size === "small" ? "max-h-[34px]" : "max-h-[40px]",
         )}
       >
         <HoverCorners />
         {isLink ? linkEl : buttonEl}
       </div>
     );
-  }
+  },
 );
 Button.displayName = "Button";
 

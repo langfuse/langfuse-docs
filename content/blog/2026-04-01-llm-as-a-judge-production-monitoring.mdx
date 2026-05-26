@@ -8,6 +8,7 @@ ogImage: /images/blog/2026-03-25-llm-as-a-judge-production-monitoring/og.jpg
 highlight: true
 ---
 
+import { Details, Summary } from "@/components/Details";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
@@ -36,6 +37,7 @@ Here's how you can build your own version of this for your support agent.
 Instead of asking a model to score helpfulness, ask it a yes/no question: did the user disagree with the assistant? Did the user ask for something outside the agent's scope?
 
 Good event detectors are:
+
 - **Binary.** Yes or no - did the event occur? This maps directly to filtering, alerting, and routing.
 - **Narrow.** One check per detector. The more specific the event, the more actionable the signal.
 - **Tied to an action.** Every detector should answer "and then what?". Who sees it, what do they do with it?
@@ -43,6 +45,7 @@ Good event detectors are:
 ## Four Events Worth Detecting in a Customer Support Agent
 
 There are many things that can go wrong in a free text human - LLM interaction. The four events we opted for in our customer support agent use case are the following:
+
 1. The user curses
 2. The user disagrees with the assistant's response
 3. The user asks something outside of the scope of the agent
@@ -73,8 +76,8 @@ We built template [evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judg
 
 You can see [our version of this evaluator](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/evals?peek=e716ad75-cbf3-465e-afa5-804f3c504ba0) running in our sample project, or use the template prompt below as a starting point:
 
-<details>
-<summary>Example judge prompt: User Distress</summary>
+<Details>
+<Summary>Example judge prompt: User Distress</Summary>
 
 ```
 You are a User Distress Judge evaluating an LLM-based customer support assistant.
@@ -185,7 +188,7 @@ COMMENT: <concise justification>
 \`\`\`
 ```
 
-</details>
+</Details>
 
 ### 2. User Disagreement
 
@@ -201,8 +204,8 @@ COMMENT: <concise justification>
 
 You can see [our version of this evaluator](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/evals?peek=bd0f9452-a64b-4cca-853c-f608bc6e104b) running in our sample project, or use the template prompt below as a starting point:
 
-<details>
-<summary>Example judge prompt: User Disagreement</summary>
+<Details>
+<Summary>Example judge prompt: User Disagreement</Summary>
 
 ```
 You are a User Disagreement Judge evaluating an LLM-based customer support assistant.
@@ -272,7 +275,7 @@ COMMENT: <concise justification>
 \`\`\`
 ```
 
-</details>
+</Details>
 
 ### 3. Out-of-Scope Request
 
@@ -288,8 +291,8 @@ COMMENT: <concise justification>
 
 You can see [our version of this evaluator](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/evals?peek=38089bd6-e1f8-4559-8681-43b9bdaebde0) running in our sample project, or use the template prompt below as a starting point:
 
-<details>
-<summary>Example judge prompt: Out-of-Scope Request</summary>
+<Details>
+<Summary>Example judge prompt: Out-of-Scope Request</Summary>
 
 ```
 You are an Out-of-Scope Request Judge evaluating an LLM-based customer support assistant.
@@ -417,7 +420,7 @@ COMMENT: <concise justification>
 \`\`\`
 ```
 
-</details>
+</Details>
 
 ### 4. Insufficient Answer
 
@@ -427,14 +430,14 @@ COMMENT: <concise justification>
   ![Insufficient answer evaluator example](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/example-insufficient-answer.png)
 </Frame>
 
-**Why it matters:** This catches a different failure mode than disagreement. A user who disagrees tells you the agent was *wrong*. A user asking for more tells you the agent was *insufficient* - the answer was too brief, too vague, or sidestepped the actual question. This often points to knowledge base gaps, an overly cautious system prompt, or topics where the agent hedges instead of answering directly.
+**Why it matters:** This catches a different failure mode than disagreement. A user who disagrees tells you the agent was _wrong_. A user asking for more tells you the agent was _insufficient_ - the answer was too brief, too vague, or sidestepped the actual question. This often points to knowledge base gaps, an overly cautious system prompt, or topics where the agent hedges instead of answering directly.
 
 **What to do with it:** Filter for traces where this fires and look at the preceding assistant turn. Recurring topics where users ask for more are candidates for expanding your knowledge base or loosening system prompt constraints.
 
 You can see [our version of this evaluator](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/evals?peek=639b636f-2ccb-4d86-8bec-48bce21cc880) running in our sample project, or use the template prompt below as a starting point:
 
-<details>
-<summary>Example judge prompt: Insufficient Answer</summary>
+<Details>
+<Summary>Example judge prompt: Insufficient Answer</Summary>
 
 ```
 You are an Insufficient Answer Judge evaluating an LLM-based customer support assistant.
@@ -560,7 +563,7 @@ COMMENT: <concise justification>
 \`\`\`
 ```
 
-</details>
+</Details>
 
 ## Setting This Up in Langfuse
 

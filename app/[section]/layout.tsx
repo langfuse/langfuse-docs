@@ -1,10 +1,7 @@
 import { use } from "react";
 import { notFound } from "next/navigation";
 import { HomeLayout } from "@/components/layout";
-import {
-  SECTION_SLUGS,
-  DEDICATED_APP_SECTIONS,
-} from "@/lib/section-registry";
+import { SECTION_SLUGS, DEDICATED_APP_SECTIONS } from "@/lib/section-registry";
 
 type LayoutProps = {
   children: React.ReactNode;

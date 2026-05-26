@@ -18,6 +18,7 @@ Some model providers charge different rates depending on the number of input tok
 Pricing tiers allow multiple price points for a single model, each with conditions that determine when that tier applies. Tiers are evaluated in priority order, and the first matching tier is used for cost calculation.
 
 For example, Claude Sonnet 4.5 has two tiers:
+
 - **Standard** (default): Applied when input tokens ≤ 200K
 - **Large Context**: Applied when input tokens > 200K (2x input price, 1.5x output price)
 
@@ -25,20 +26,22 @@ For example, Claude Sonnet 4.5 has two tiers:
 
 The following models now have pricing tiers pre-configured in Langfuse and now support accurate cost tracking with zero changes necessary:
 
-| Model | Tiers | Threshold |
-|-------|-------|-----------|
+| Model                        | Tiers                    | Threshold           |
+| ---------------------------- | ------------------------ | ------------------- |
 | `claude-sonnet-4-5-20250929` | Standard / Large Context | > 200K input tokens |
-| `gemini-2.5-pro` | Standard / Large Context | > 200K input tokens |
-| `gemini-3-pro-preview` | Standard / Large Context | > 200K input tokens |
+| `gemini-2.5-pro`             | Standard / Large Context | > 200K input tokens |
+| `gemini-3-pro-preview`       | Standard / Large Context | > 200K input tokens |
 
 ## Custom pricing tiers
 
 You can also define pricing tiers for your own custom models via the Langfuse UI or API. This is useful for:
+
 - Self-hosted models with tiered pricing
 - Fine-tuned models with custom pricing structures
 - Other providers with context-dependent pricing
 
 Each tier includes:
+
 - **Name**: A descriptive name (e.g., "Standard", "Large Context")
 - **Priority**: Evaluation order (0 is reserved for the default pricing tier)
 - **Conditions**: Rules that determine when the tier applies (e.g., input tokens > 200K)

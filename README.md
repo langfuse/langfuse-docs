@@ -14,6 +14,15 @@ To use Node 22 (e.g. with [nvm](https://github.com/nvm-sh/nvm)): `nvm install 22
 2. Run `pnpm i` to install the dependencies.
 3. Run `pnpm dev` to start the development server on localhost:3333
 
+## Formatting
+
+This repo uses [Prettier](https://prettier.io/) for formatting supported source and content files, including Markdown and MDX.
+
+- Run `pnpm run format` to format files.
+- Run `pnpm run format:check` to check formatting in CI mode.
+
+Markdown prose wrapping is preserved and embedded-language formatting is disabled in `.prettierrc.json` so formatting does not change linebreak-sensitive Markdown rendering or fenced code snippet contents.
+
 ## Python cookbooks
 
 All Jupyter notebooks are in the `cookbook/` directory. For JS/TS notebooks we use Deno, see Readme in cookbook folder for more details.

@@ -32,13 +32,11 @@ function SidebarFolderBody({ children }: { children: ReactNode }) {
       className={cn(
         "relative",
         depth === 1 &&
-        "before:absolute before:inset-y-1 before:start-3 before:w-px before:bg-[var(--line-structure)] before:content-['']",
+          "before:absolute before:inset-y-1 before:start-3 before:w-px before:bg-[var(--line-structure)] before:content-['']",
       )}
-      style={
-        {
-          ["--sidebar-label-left" as string]: sidebarNavPaddingInlineStart(depth),
-        }
-      }
+      style={{
+        ["--sidebar-label-left" as string]: sidebarNavPaddingInlineStart(depth),
+      }}
     >
       {children}
     </SidebarFolderContent>
@@ -81,7 +79,10 @@ export function SidebarFolderItem({
           {item.name}
         </SidebarFolderLink>
       ) : (
-        <SidebarFolderTrigger className={SIDEBAR_NAV_ROW_CLASS} style={rowStyle}>
+        <SidebarFolderTrigger
+          className={SIDEBAR_NAV_ROW_CLASS}
+          style={rowStyle}
+        >
           {item.icon}
           {item.name}
         </SidebarFolderTrigger>

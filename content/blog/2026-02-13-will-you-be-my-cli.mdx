@@ -414,11 +414,7 @@ We also built a public, unauthenticated MCP server specifically for documentatio
 </Frame>
 
 **What It Provides**
-The docs MCP server exposes three tools:
-
-1. **`searchLangfuseDocs`** \- Semantic search over all documentation
-2. **`getLangfuseDocsPage`** \- Fetch specific pages as markdown
-3. **`getLangfuseOverview`** \- Get the documentation index (llms.txt)
+The Docs MCP server provides semantic docs search, raw Markdown page retrieval, and an overview backed by `llms.txt`. For the current tool list and input schemas, see the generated [MCP Reference](https://mcp.reference.langfuse.com).
 
 **Installation**
 No authentication required. Works in Cursor, VS Code, Claude Desktop, and any MCP-compatible client:
@@ -462,12 +458,11 @@ The MCP server uses your Langfuse API keys (public and secret key) to authentica
 ```json
 {
   "mcpServers": {
-    "langfuse": {
-      "url": "https://cloud.langfuse.com/api/mcp",
+    "langfuse-cloud": {
+      "url": "https://cloud.langfuse.com/api/public/mcp",
       "transport": "streamableHttp",
-      "auth": {
-        "username": "pk-lf-...",
-        "password": "sk-lf-..."
+      "headers": {
+        "Authorization": "Basic <base64(LANGFUSE_PUBLIC_KEY:LANGFUSE_SECRET_KEY)>"
       }
     }
   }
@@ -488,5 +483,6 @@ Try it out and let us know what you think. And if you build something cool with 
 
 - [Agent Skills Repository](https://github.com/langfuse/skills)
 - [Langfuse CLI on npm](https://www.npmjs.com/package/langfuse-cli)
+- [Langfuse MCP Reference](https://mcp.reference.langfuse.com)
 - [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)
 - [Langfuse Authenticated MCP Server](/docs/api-and-data-platform/features/mcp-server)

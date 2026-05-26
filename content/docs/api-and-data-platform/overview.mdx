@@ -15,12 +15,29 @@ Example use cases:
 - Fine-tuning based on raw exports of traces
 - Correlation of LLM Evals with observed user behavior in Data Warehouse
 
-<Frame fullWidth>
-  <img
-    src="/images/docs/open-data-platform-light.png"
-    alt="Open Data Platform"
-  />
-</Frame>
+## Start here
+
+```mermaid
+graph LR
+    LF["Langfuse<br/><br/>• Traces<br/>• Prompts<br/>• Scores"]
+
+    LF --> API["Public API"]
+    LF --> Dash["In-app Dashboards"]
+    LF --> Metrics["Metrics API v2"]
+    LF --> Observations["Observations API v2"]
+    LF --> Export["Exports to S3 / DWH"]
+```
+
+Choose the data access path based on what you want to build:
+
+| Goal                                                           | Recommended path                                                                   |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Query aggregate cost, usage, latency, volume, or score metrics | [Metrics API v2](/docs/metrics/features/metrics-api#v2)                            |
+| Retrieve row-level spans, generations, or events               | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2)    |
+| Use the API from Python or JS/TS                               | [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk)               |
+| Export large volumes on a schedule                             | [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) |
+| Download a filtered one-off export                             | [Export from UI](/docs/api-and-data-platform/features/export-from-ui)              |
+| Manage prompts, datasets, projects, and other resources        | [Public API](/docs/api-and-data-platform/features/public-api)                      |
 
 ## Features
 
@@ -32,6 +49,8 @@ import {
   Download,
   Cloud,
   Blocks,
+  BarChart3,
+  ListTree,
 } from "lucide-react";
 
 <Cards num={3}>
@@ -51,6 +70,18 @@ import {
     title="Query via SDKs"
     href="/docs/api-and-data-platform/features/query-via-sdk"
     icon={<Code />}
+    arrow
+  />
+  <Card
+    title="Observations API"
+    href="/docs/api-and-data-platform/features/observations-api"
+    icon={<ListTree />}
+    arrow
+  />
+  <Card
+    title="Metrics API"
+    href="/docs/metrics/features/metrics-api"
+    icon={<BarChart3 />}
     arrow
   />
   <Card

@@ -15,6 +15,7 @@ You see traces appearing in Langfuse, but how do you know if you've done it well
 Langfuse's [data model](/docs/observability/data-model) has three levels of grouping: observations (individual steps) are grouped into traces via a `trace_id`, and traces can be grouped into sessions via a `session_id`.
 
 A trace represents one self-contained unit of work in your application. Good examples of a typical trace:
+
 - One chatbot turn (user sends a message, your app retrieves context, calls the LLM, returns a response)
 - One agent run (the agent receives a task, reasons, calls tools, and produces a result)
 - One pipeline execution (a document comes in, gets chunked, embedded, and stored)
@@ -37,9 +38,10 @@ When you click on a trace, you see the trace tree. There are two things you can 
 
 ### Are the right steps showing up?
 
-You should see your LLM calls, tool calls, and other important steps represented in the tree. They should have the correct [observation type](/docs/observability/features/observation-types). 
+You should see your LLM calls, tool calls, and other important steps represented in the tree. They should have the correct [observation type](/docs/observability/features/observation-types).
 
 For example
+
 - an LLM call should show up as a <Fan size={16} className="text-muted-magenta inline" /> `generation`. This is important because a `generation` can carry [cost, token usage, and model information](#track-model-tokens-and-cost-on-generations).
 - a tool call should show up as a <Wrench size={16} className="text-orange-600 inline" /> `tool`. You can then filter on tool call observations when you create [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators.
 
@@ -75,7 +77,8 @@ For your **most viewed observations**, take some extra care to set them up. You 
 
 ![Tracing table with input and output](/images/docs/faq/good-trace-tracing-table-io.png)
 
-Typical input/output for `GENERATION` observations: 
+Typical input/output for `GENERATION` observations:
+
 - For a chatbot: the user message (input) and the assistant response (output).
 - For a RAG pipeline: the user query and the generated answer.
 - For a classification task: the text being classified and the predicted label.
@@ -114,7 +117,7 @@ You can see these attributes on the `GENERATION` observation in the Langfuse UI.
 
 One property of tags is that they are **immutable and must be set at observation creation time**. This makes them great for things you know upfront (where the request came from, which feature it's part of), but not for things you learn later.
 
-If you need to label traces based on something determined after the fact, like an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluation result, use [scores](/docs/evaluation/overview) instead. 
+If you need to label traces based on something determined after the fact, like an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluation result, use [scores](/docs/evaluation/overview) instead.
 
 ### Link prompts to traces
 
@@ -137,6 +140,7 @@ Setting the [user ID](/docs/observability/features/users) connects traces to spe
 If your application involves multiple traces that logically belong together, group them into a [session](/docs/observability/features/sessions). This gives you a session replay view where you can see the full interaction in sequence.
 
 This makes sense when:
+
 - You're building a chatbot (each user message creates a new trace, but the whole conversation is one session)
 - You have multiple agents that each contribute to a final output (e.g., five agents that collaborate to produce a report)
 - Your workflow spans multiple requests with human-in-the-loop steps in between
@@ -144,4 +148,3 @@ This makes sense when:
 If your application is single-request/single-response with no continuity between calls, you probably don't need sessions.
 
 ![Sessions view in Langfuse](/images/docs/faq/good-trace-sessions-view.png)
-

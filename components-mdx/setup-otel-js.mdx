@@ -6,25 +6,24 @@ npm install @opentelemetry/sdk-node
 
 Next is initializing the Node SDK. You can do that either in a dedicated instrumentation file or directly at the top of your main file.
 
-
 <LangTabs items={["Inline setup", "Instrumentation file"]}>
 
 <Tab>
 
 The inline setup is the simplest way to get started. It works well for projects where your main file is executed first and import order is straightforward.
 
-We can now initialize the `LangfuseSpanProcessor` and start the SDK. The `LangfuseSpanProcessor` is the part that takes that collected data and sends it to your Langfuse project. 
+We can now initialize the `LangfuseSpanProcessor` and start the SDK. The `LangfuseSpanProcessor` is the part that takes that collected data and sends it to your Langfuse project.
 
 Important: start the SDK before initializing the logic that needs to be traced to avoid losing data.
 
 ```ts
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
- 
+
 const sdk = new NodeSDK({
   spanProcessors: [new LangfuseSpanProcessor()],
 });
- 
+
 sdk.start();
 ```
 
@@ -56,5 +55,3 @@ import "./instrumentation"; // Must be the first import
 </Tab>
 
 </LangTabs>
-
-

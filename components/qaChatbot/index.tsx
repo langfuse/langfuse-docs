@@ -65,7 +65,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // Track user feedback for each message ID (1 = thumbs up, 0 = thumbs down, null = no feedback)
   const [userFeedback, setUserFeedback] = useState<Map<string, number | null>>(
-    new Map()
+    new Map(),
   );
 
   // Auto-resize and scroll textarea to bottom when content changes
@@ -120,13 +120,17 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const handleFeedback = (
     messageId: string,
     value: number,
-    comment?: string
+    comment?: string,
   ) => {
     // Update the local state
     setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
 
     // Send feedback to Langfuse
-    for (const client of [eulangfuseWebClient, usLangfuseWebClient, jpLangfuseWebClient]) {
+    for (const client of [
+      eulangfuseWebClient,
+      usLangfuseWebClient,
+      jpLangfuseWebClient,
+    ]) {
       client.score({
         traceId: messageId,
         id: `user-feedback-${messageId}`,
@@ -139,7 +143,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
   return (
     <div className={cn("h-[62vh]", className)} {...props}>
-      <div className="flex flex-col h-full border border-border/40 rounded-2xl bg-gradient-to-br from-background via-background/95 to-muted/20 backdrop-blur-md shadow-xl shadow-black/10 dark:shadow-black/30 p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-black/15 dark:hover:shadow-black/40 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:via-transparent before:to-transparent before:pointer-events-none">
+      <div className="flex flex-col h-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 relative overflow-hidden">
         <Conversation className="flex-1 overflow-y-hidden relative z-10">
           {!hasUserMessages && (
             <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
@@ -150,20 +154,28 @@ export const Chat = ({ className, ...props }: ChatProps) => {
               </h2>
               <div className="flex gap-3 items-center flex-wrap justify-center">
                 <button
-                  onClick={() => handleExampleQuestion("What can I use Langfuse for?")}
-                  className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer border border-border rounded-md px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words"
+                  onClick={() =>
+                    handleExampleQuestion("What can I use Langfuse for?")
+                  }
+                  className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
                 >
                   What can I use Langfuse for?
                 </button>
                 <button
-                  onClick={() => handleExampleQuestion("How do I link my prompts to my traces? My code is in python")}
-                  className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer border border-border rounded-md px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words"
+                  onClick={() =>
+                    handleExampleQuestion(
+                      "How do I link my prompts to my traces? My code is in python",
+                    )
+                  }
+                  className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
                 >
                   How do I link my prompts to my traces? My code is in python
                 </button>
                 <button
-                  onClick={() => handleExampleQuestion("How do I get started with tracing?")}
-                  className="text-xs text-muted-foreground italic hover:text-foreground transition-colors cursor-pointer border border-border rounded-md px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words"
+                  onClick={() =>
+                    handleExampleQuestion("How do I get started with tracing?")
+                  }
+                  className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
                 >
                   How do I get started with tracing?
                 </button>
@@ -183,7 +195,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                               <SourcesTrigger
                                 count={
                                   message.parts.filter(
-                                    (part) => part.type === "source-url"
+                                    (part) => part.type === "source-url",
                                   ).length
                                 }
                               />
@@ -200,13 +212,21 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                     })}
                   </Sources>
                 )}
-                <Message 
-                  from={message.role} 
+                <Message
+                  from={message.role}
                   key={message.id}
-                  className={message.role === "assistant" ? "[&>div]:max-w-full" : undefined}
+                  className={
+                    message.role === "assistant"
+                      ? "[&>div]:max-w-full"
+                      : undefined
+                  }
                 >
                   <MessageContent
-                    className={message.role === "assistant" ? "!bg-transparent px-0 rounded-none" : undefined}
+                    className={
+                      message.role === "assistant"
+                        ? "!bg-transparent px-0 rounded-none"
+                        : "!bg-[#403d391a] dark:!bg-[#b8b6a01a] !text-text-primary border border-line-structure rounded-[2px] px-3 py-2"
+                    }
                   >
                     {message.parts.map((part, i) => {
                       if (part.type === "text") {
@@ -222,7 +242,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         const isLastTextPart = i === lastTextPartIndex;
                         // Check if message is complete: not submitted/streaming and no parts are streaming
                         const hasStreamingParts = message.parts.some(
-                          (p) => "state" in p && p.state === "streaming"
+                          (p) => "state" in p && p.state === "streaming",
                         );
                         const isMessageComplete =
                           status !== "submitted" &&
@@ -290,7 +310,9 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           <Reasoning
                             key={`${message.id}-${i}`}
                             className={
-                              hasNextPartDifferentType ? "w-full" : "w-full mb-0"
+                              hasNextPartDifferentType
+                                ? "w-full"
+                                : "w-full mb-0"
                             }
                             isStreaming={part.state === "streaming"}
                           >
@@ -307,7 +329,9 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         return (
                           <Tool
                             key={`${message.id}-${i}`}
-                            className={hasNextPartDifferentType ? undefined : "mb-0"}
+                            className={
+                              hasNextPartDifferentType ? undefined : "mb-0"
+                            }
                           >
                             <ToolHeader
                               type={`tool-${part.toolName}` as const}
@@ -337,7 +361,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
         <PromptInput
           onSubmit={handleSubmit}
-          className="mt-4 border-border/40 shadow-lg transition-all duration-200 hover:shadow-xl hover:border-primary/20 relative z-10"
+          className="mt-4 rounded-[2px] border-line-structure bg-surface-bg shadow-sm relative z-10 focus-within:border-line-cta transition-colors"
         >
           <div className="flex items-end gap-2">
             <PromptInputTextarea
@@ -345,7 +369,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
               onChange={(e) => setInput(e.target.value)}
               value={input}
               placeholder="Ask a question about Langfuse..."
-              className="flex-1 pr-2 min-h-[40px] max-h-[300px] leading-5 pt-[10px] pb-[10px] overflow-y-auto"
+              className="flex-1 pr-2 min-h-[40px] max-h-[300px] leading-5 pt-[10px] pb-[10px] overflow-y-auto text-sm"
               style={{ height: "auto" }}
               minHeight={40}
               maxHeight={300}
@@ -356,7 +380,10 @@ export const Chat = ({ className, ...props }: ChatProps) => {
           </div>
         </PromptInput>
         <p className="mt-6 text-xs text-muted-foreground text-center relative z-10 italic">
-          ⚠️ Warning: Do not enter sensitive information. All chat messages can be viewed in the public example project. Responses may be inaccurate. Please check the documentation for details or reach out to us via the chat widget.
+          ⚠️ Warning: Do not enter sensitive information. All chat messages can
+          be viewed in the public example project. Responses may be inaccurate.
+          Please check the documentation for details or reach out to us via the
+          chat widget.
         </p>
       </div>
     </div>

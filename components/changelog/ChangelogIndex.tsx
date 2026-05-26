@@ -71,7 +71,7 @@ export function ChangelogIndex({
                     {pageNumber}
                   </PaginationLink>
                 </PaginationItem>
-              )
+              ),
             )}
           </div>
           <PaginationItem>

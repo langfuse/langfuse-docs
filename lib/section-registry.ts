@@ -11,6 +11,8 @@ import {
   librarySource,
   usersSource,
   handbookSource,
+  academySource,
+  workshopSource,
   marketingSource,
 } from "@/lib/source";
 
@@ -109,6 +111,20 @@ export const docSections: Record<string, SectionMeta> = {
     layout: "docs",
     hasOwnRoute: true,
   },
+  academy: {
+    source: academySource,
+    collection: "academy",
+    title: "Academy",
+    layout: "docs",
+    hasOwnRoute: true,
+  },
+  workshop: {
+    source: workshopSource,
+    collection: "workshop",
+    title: "Workshop",
+    layout: "docs",
+    hasOwnRoute: true,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -147,6 +163,7 @@ export const SECTION_CONFIG: Record<string, SectionMeta> = {
 export const DEDICATED_MARKETING_SLUGS = new Set<string>([
   "pricing",
   "pricing-self-host",
+  "japan",
 ]);
 
 export const DEDICATED_APP_SECTIONS = new Set<string>([
