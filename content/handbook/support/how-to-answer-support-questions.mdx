@@ -1,169 +1,1255 @@
 ---
 title: How to Answer Support Questions
-description: This internal guide outlines how the langfuse team handles support questions.
+description: Decision tree for support engineers and AI agents answering Langfuse support tickets. Walk down to the matching branch for triage steps, canonical reply templates, and escalation rules.
 ---
 
 # How to Answer Support Questions
 
-This guide outlines how to handle common support questions in a consistent way. Use each question as a playbook: identify the issue, check the relevant systems, and reply with the next clear action for the user. Only assign a ticket to yourself if you are actively working on it.
-We strongly recommend any support engineer to study the Langfuse architecture and implementation in detail by self-hosting Langfuse, implementing Langfuse in private projects, using Langfuse integrations, and building practice projects.
-Generally, always create context around a question. Often, users come with questions but provide limited information. Be confident and ask about their setup and implementation.
+This page is the playbook used by both human support engineers and AI support agents at Langfuse. Each branch in the decision tree below covers a recurring question pattern: how to triage it, what to check, a reply template you can adapt, and when to escalate.
+
+The tree is derived from analyzing ~1,500 closed Pylon tickets across email, Slack, MS Teams, the in-app chat widget, and GitHub Discussions. Patterns and reply phrasings come from real resolutions by the team.
 
 <Callout type="info">
 
-Tools you can use to provide better support:
+Tools you'll use to answer most tickets:
 
-- Pylon
-- Metabase
-- PostHog
-- Stripe
-- Impersonation View
-- Google Forms
+- **Pylon** — primary inbox, ticket metadata, customer tier, internal notes
+- **Metabase** — usage stats, ingestion volume, ClickHouse queries
+- **PostHog** — product analytics, user activity, session replays
+- **Stripe** — subscription, invoice, charge, refund history
+- **Impersonation View** — see the customer's Langfuse UI exactly as they do
+- **Google Forms** — startup discount applications (the form is the source of truth)
+- **DataDog** — ingestion queue depth, worker health, ClickHouse latency
+- **status.langfuse.com** — public incident timeline
 
 </Callout>
 
-## I have higher costs than usual / I was charged unexpectedly
+## Before you reply (preflight)
 
-1. Go to Stripe.
-2. Search for the user's account via domain/email and review the latest invoice, subscription, and billing history.
-3. Check whether the increase came from a plan change, usage increase, additional seats, or a one-off charge.
-4. Cross-check the account in Langfuse Impersonation View to confirm workspace usage and any recent changes that could explain the increase.
-5. Reply with the specific reason for the higher cost and link the relevant invoice or billing page if helpful.
-6. If the charge still looks wrong, escalate internally before confirming any refund or billing correction.
-7. **Important:** sometimes Langfuse previously logged unrelated events from OTEL which led to higher costs. [Read more](https://langfuse.com/faq/all/existing-otel-setup#unwanted-spans-in-langfuse)
-8. For refunds above USD 2,000, loop in the team.
+Before you open a reply box, do these four things in order. Most of the rest of this page assumes you have already done them.
 
-## Do you have a bug bounty program / Security Request
+1. **Identify the customer and tier.** Pylon sidebar shows org name, plan tier (Hobby / Core / Pro / Team / Enterprise / Self-hosted EE), data region, and contract notes. Tier dictates SLA and how aggressively to escalate.
+2. **Locate their environment.** Are they on Langfuse Cloud (which region: EU `cloud.langfuse.com`, US `us.cloud.langfuse.com`, HIPAA `hipaa.cloud.langfuse.com`, Japan `jp.cloud.langfuse.com`) or self-hosted? If self-hosted, what version? The same symptom often has different causes on Cloud vs. self-hosted.
+3. **Check `status.langfuse.com` and DataDog.** If the customer is reporting errors/latency, rule out a known ongoing incident before debugging their side.
+4. **Search Pylon for the same symptom in the last 7 days.** If three other customers are reporting the same thing right now, you're seeing an incident — escalate to engineering rather than answering one-by-one.
 
-1. If the person mentions a real security threat (as shown [here](https://langfuse.com/security/responsible-disclosure#bug-bounty-program)), instantly escalate to a member of the engineering team.
-2. If the person offers their services or minor feedback/recommendations, use the following message:
+Once you've done these four, walk the tree below.
 
-```text
-Hello X,
-thank you very much for your feedback. At the current time, Langfuse doesn't offer a formal bug bounty program.
-Please have a look at [this page](https://langfuse.com/security/responsible-disclosure#bug-bounty-program) as it offers more information in this matter.
-I hope I was able to help you with your inquiry.
-Best,
-Y
-```
+## Decision tree
 
-## I am unable to see view X in Langfuse Cloud
+The headings below are top-level question categories. Click any to drill into specific sub-questions, each with triage steps, a reply template, and escalation rules. Use Cmd/Ctrl-F to jump to a keyword from the customer's message.
 
-1. First verify that Fast Mode (Preview) is toggled on.
+<Callout type="info">
 
-```text
-Hello X,
-I am Y, a support engineer at Langfuse. Have you ensured that Fast Mode on the left sidebar is toggled on?
-Please let me know if this solves your issue?
-Best,
-Y
-```
+**For AI agents:** treat each `<details>` block as a self-contained playbook. When the user's message matches a `<summary>` heading, follow the steps in that block verbatim. If the customer's wording is ambiguous, ask the clarifying question in step 1 before applying a template. Do not invent product behavior — if no branch fits, hand off to a human with `@steffen.schmitz`, `@jannik.maierhoefer`, or `@caleb.seeling` in an internal note.
 
-2. If the response shows that they have toggled the Preview on but the issue remains, try to find the root of the problem by yourself and correspond with another support engineer.
-3. If the issue persists, escalate to engineering and thank the customer for their input.
+</Callout>
 
-```text
-Hello X,
-the support team has talked about this issue internally and has escalated the ticket to engineering to provide a fix.
-Thank you very much for your feedback.
-Best,
-Y
-```
+---
 
-## Our ingestion is very slow for [X], is this an issue on our side?
+### 1. Account, login, and access
 
-1. First check our status page: `status.langfuse.com`.
-2. If no issues is reported on the status page, check DataDog dashboards for any queue delays.
-3. If there is a known issue with [X], answer in the following way:
+<details>
+
+<summary>"I can't log in" / "invalid credentials" / "account not found"</summary>
+
+**The single most common cause is the wrong data region.** Users sign up on one region and then try to log in to another. The reset-password flow says "no account associated" — not because the account doesn't exist, but because it doesn't exist _in the region they're looking at_.
+
+**Triage steps:**
+
+1. Ask the customer (or check from the email signature/domain) which region they signed up in. If they don't know, ask them to try each one: EU `cloud.langfuse.com`, US `us.cloud.langfuse.com`, HIPAA `hipaa.cloud.langfuse.com`, Japan `jp.cloud.langfuse.com`.
+2. If they used SSO originally (Google, GitHub, Azure AD), email+password login will fail with "Please sign in with the identity provider that is linked to your account." Have them try the SSO providers.
+3. If they still can't see their account, look them up by email in the Impersonation View — confirm which region holds their account.
+4. If region is correct and SSO is confirmed, check whether their email is on the email suppression list (see "password reset emails not arriving" below).
+
+**Reply template:**
 
 ```text
-Hello X,
-we are aware of this issue and are working on it.
-We will provide an update on our status page as soon as we have it fixed.
-You can follow the progress on our status page: https://status.langfuse.com
-Best,
-Y
-```
+Hi {name},
 
-3. If this issue is not known, make sure that this is not reported by multiple customers at the same time. If other support tickets experience the same, escalate to engineering. If there are no other support tickets referencing this issue, keep the message in mind in case it is the first message of many.
-4. Ask the customer about their setup. Are they self-hosted or running on cloud?
-5. If they are self-hosted, ask them about their implementation and which version of Langfuse they are using.
-6. For cloud, try to find a solution internally.
+Sorry you're hitting this. The most common cause is signing in on the wrong data region. We run three separate regions and accounts in one are not visible in the others:
 
-## A customer is leaving Langfuse
+- EU:    https://cloud.langfuse.com
+- US:    https://us.cloud.langfuse.com
+- HIPAA: https://hipaa.cloud.langfuse.com
+- Japan: https://jp.cloud.langfuse.com
 
-1. If a customer decides to leave, reply with empathy and ask for concise feedback on what we can improve.
-2. Use the following message:
+Reference: https://langfuse.com/security/data-regions
 
-```text
-Hi X,
+A second possibility: if you originally signed up using Google / GitHub / Azure AD SSO, email+password login will fail. Try clicking the SSO provider button instead.
 
-Thanks for reaching out and sorry to hear that Langfuse fell short for you. We are working hard to improve Langfuse and would be super grateful if you could share a few bullets about what we can improve.
-
-Thanks so much!
-```
-
-## I can't login to my account / Login not working
-
-1. If a customer cannot log in, check whether they may have signed up to the wrong data region.
-2. Ask them to try switching the region on the login page.
-3. Use the following message:
-
-```text
-Hi X,
-
-Sorry that you're experiencing this.
-
-Have you tried changing the region on the login page? Sometimes this happens when an account was created in a different data region than the one currently selected.
-
-Please let me know if that solves it.
+Could you confirm which region and login method, and I'll dig in from there?
 
 Best,
-Y
+{you}
 ```
 
-4. If this does not solve the issue, check if other users are experiencing the same issue. If so, escalate to engineering.
+**Escalate when:** customer confirms region and provider but still can't log in → ping engineering with their email and the org ID, since we may need to look up the account state directly.
 
-## Can we get a 50% discount as a Startup
+Related FAQs: [/faq/all/cannot-see-organization](/faq/all/cannot-see-organization), [/faq/all/forgot-password](/faq/all/forgot-password), [/faq/all/where-is-my-project](/faq/all/where-is-my-project).
 
-1. Direct the customer to the startup program page: `https://langfuse.com/startups`.
-2. Ask them to fill out the application form here: `https://forms.gle/eJAYjRWeCZU1Mn6j8`.
-3. Do not promise approval or timeline beyond what is stated on the page or form.
-4. Use the following message:
+</details>
+
+<details>
+
+<summary>"Password reset emails are not arriving"</summary>
+
+**The usual cause is an email suppression list.** When a previous email to that address bounced or was marked spam by the recipient, our email provider stops delivering to them. This affects one user, not the whole domain.
+
+**Triage steps:**
+
+1. Confirm the customer is on the right data region first (see "I can't log in" above) — if they're on the wrong region, no email will ever arrive because no account exists there.
+2. Ask them to check spam, then escalate to engineering to remove the email from the suppression list.
+3. Once unblocked, ask them to retry password reset.
+
+**Reply template:**
 
 ```text
-Hi X,
+Hi {name},
 
-Thanks for reaching out. You can find all details about our startup program here:
-https://langfuse.com/startups
+Thanks — a quick check first: which data region did you originally sign up in (cloud.langfuse.com EU vs. us.cloud.langfuse.com US vs. hipaa.cloud.langfuse.com)?
 
-To apply, please fill out this form:
-https://forms.gle/eJAYjRWeCZU1Mn6j8
+If you're on the right region and emails still aren't arriving, our email provider may have placed your address on a suppression list (this happens after a previous bounce or spam mark). I'll unblock it on our end — please retry the password reset in ~10 minutes and let me know if it works.
 
 Best,
-Y
+{you}
 ```
 
-## How do I set up SSO?
+**Escalate when:** the suppression list isn't the cause and the customer truly cannot receive any Langfuse email → engineering. Note that we cannot manually reset passwords for security reasons; engineering can confirm account state but the user has to complete the reset themselves.
 
-1. Ask the customer for the required SSO configuration details.
-2. Recommend sharing secrets through a secure channel, such as a password manager link.
-3. Use the following message:
+</details>
+
+<details>
+
+<summary>SSO setup (Okta / Azure AD / Entra / Google Workspace)</summary>
+
+SSO is an EE / Cloud Team-plan-and-above feature. Setup is white-glove: support collects credentials and engineering applies them.
+
+**Triage steps:**
+
+1. Confirm the customer is on a plan tier that includes SSO (Team plan and above on Cloud; EE on self-hosted). If not, route to sales — do not promise a discount.
+2. Collect the four pieces of information: instance URL, issuer URL, client ID, client secret.
+3. Recommend the customer share secrets via a password-manager link (1Password share link, Bitwarden Send, etc.). Do not accept secrets in plaintext email.
+4. Pass the bundle to engineering / Steffen for application.
+
+**Reply template:**
 
 ```text
-Hi X,
+Hi {name},
 
-To set up SSO, I would need the following information from you:
+Happy to help set up SSO. I'll need the following from you:
 
-- Instance URL (e.g., https://cloud.langfuse.com or https://us.cloud.langfuse.com)
-- Issuer URL (e.g., https://example.okta.com)
+- Instance URL (which Langfuse region — cloud.langfuse.com, us.cloud.langfuse.com, hipaa.cloud.langfuse.com, jp.cloud.langfuse.com, or your self-hosted URL)
+- Issuer URL (e.g. https://example.okta.com)
 - Client ID
 - Client Secret
 
-You can share the credentials with us any way that works for you. Usually, a shared link from a password manager works best.
+Please share the client secret via a password-manager link (1Password / Bitwarden / similar) rather than in plain email. Once I have all four, the team will get it applied within one business day.
 
-Let me know if you have additional questions on the setup.
+Let me know if you have any questions on the IdP side.
 
 Best,
-Y
+{you}
 ```
+
+**Escalate when:** customer asks for SCIM, custom claim mapping, or a non-standard IdP — those need engineering review.
+
+</details>
+
+<details>
+
+<summary>2FA recovery / lost authenticator / backup codes</summary>
+
+We treat 2FA recovery as a high-trust operation. Customers must prove ownership.
+
+**Triage steps:**
+
+1. Confirm the customer's identity through a secondary signal: email matches a billing record, work email domain matches the org's domain, or they're on a Slack Connect channel we already trust.
+2. If trust is established, engineering can disable 2FA on the account so the user can re-enroll. Do not do this yourself.
+3. If the customer also lost access to the recovery email, the org owner must act. If the org owner is also locked out, escalate to engineering with full context — this is rare and case-by-case.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+For 2FA recovery we need to verify ownership before disabling MFA. The fastest path:
+
+1. Confirm the org/project this affects.
+2. Confirm the email tied to the account is one you still control.
+
+Once verified, we'll disable 2FA so you can re-enroll on next login. If you've also lost access to the recovery email, please reply from a different verified address on the same org or have the org owner reach out.
+
+Best,
+{you}
+```
+
+Related FAQ: [/faq/all/enforcing-2fa](/faq/all/enforcing-2fa).
+
+</details>
+
+<details>
+
+<summary>"I cannot see my org / project" (RBAC, viewer access, invites)</summary>
+
+Usually one of: wrong region (see top), the user was invited to a different org under the same email, the inviting admin set them as `VIEWER` and that role hides administrative views, or SCIM/SSO group mapping didn't apply.
+
+**Triage steps:**
+
+1. Region check (see top of this section).
+2. Look up the user in Impersonation View — what orgs do they belong to?
+3. Verify role: VIEWER, MEMBER, ADMIN, OWNER. If they need higher, the org's OWNER has to change it; we don't change roles on the customer's behalf without approval from the org owner.
+4. For self-hosted EE: there's no built-in "instance admin / superuser" role. To grant cross-project oversight, use the [Instance Management API](https://langfuse.com/self-hosting/administration/instance-management-api) — script a one-time invite of the admin user to every org.
+
+**Reply template (cloud):**
+
+```text
+Hi {name},
+
+Quick check first: are you signed into the same data region where you were invited (EU cloud.langfuse.com vs. US us.cloud.langfuse.com vs. HIPAA hipaa.cloud.langfuse.com vs. Japan jp.cloud.langfuse.com)?
+
+If so, can you ask your org admin to confirm (a) your email is invited to the right org and (b) you have at least the MEMBER role? Owners are visible under Organization Settings → Members.
+
+Best,
+{you}
+```
+
+Related FAQs: [/faq/all/cannot-see-organization](/faq/all/cannot-see-organization), [/faq/all/inviting-in-langfuse](/faq/all/inviting-in-langfuse), [/docs/administration/rbac](/docs/administration/rbac).
+
+</details>
+
+---
+
+### 2. Billing, pricing, and contracts
+
+<details>
+
+<summary>"I have higher costs than usual / I was charged unexpectedly"</summary>
+
+This is the most sensitive billing question. Lead with empathy and _facts_ — never guess at the cause.
+
+**Triage steps:**
+
+1. Open Stripe, search by email domain or org → recent invoice, subscription, billing history.
+2. Determine the source of the increase: plan change, usage increase (more traces/observations), seat increase, or one-off charge.
+3. Cross-check the org in Impersonation View → Usage tab → confirm trace/observation volume in the billing period.
+4. **Specifically check for OTEL-related overcounting.** A common case: customers had a pre-existing OTEL setup, and after wiring it to Langfuse it ingested unrelated HTTP/DB/framework spans that drove up volume. See [/faq/all/existing-otel-setup#unwanted-spans-in-langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse) — the fix is `blocked_instrumentation_scopes` on the SDK.
+5. Reply with the specific reason, link the invoice or usage view.
+6. If a refund is warranted under USD 2,000 you can approve it directly via Stripe (small POs / proration corrections / clear-cut errors). **For refunds above USD 2,000 loop in the team.**
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Thanks for flagging this. I dug into your billing for {period}:
+
+- {plan tier} → {tier with seat/feature breakdown}
+- Usage in the period: {N} observations / {M} events
+- Compared to prior month: {delta}
+
+The increase comes from {specific cause}. {Invoice link / Usage tab screenshot}.
+
+{Optional: "One common pitfall is OTEL exporters sending non-LLM spans (HTTP, DB, framework spans) to Langfuse, which inflates billed volume. If that matches your setup, see https://langfuse.com/faq/all/existing-otel-setup#unwanted-spans-in-langfuse — adding blocked_instrumentation_scopes typically cuts volume by 50–90%."}
+
+If something here still doesn't add up, let me know and I'll investigate further.
+
+Best,
+{you}
+```
+
+**Escalate when:** the charge is genuinely wrong on our side, refund is over USD 2,000, or the customer is on an enterprise contract with bespoke billing terms (Akio / Clemens for enterprise).
+
+</details>
+
+<details>
+
+<summary>Cancel subscription / downgrade / non-renewal</summary>
+
+Two distinct things customers conflate:
+
+1. **Stripe subscriptions** (Hobby/Core/Pro/Team Cloud) — cancellable from the billing UI directly, but customers often email us. Acknowledge politely and confirm cancellation in Stripe. Note that downgrades take effect at end of billing period.
+2. **Self-hosted EE licenses** — these are _contractual_ and **removing the `LANGFUSE_EE_LICENSE_KEY` env var does not cancel the contract**. A separate written cancellation is required. This catches customers off-guard regularly.
+
+**Reply template (Cloud cancellation):**
+
+```text
+Hi {name},
+
+Done — your Pro subscription is canceled. You'll keep access until the end of the current billing period ({date}), after which the org will be downgraded to Hobby. Your data is retained according to the new plan's retention policy.
+
+Sorry to see you go. If there's anything you wish Langfuse did differently, a few bullets would mean a lot — we read every one.
+
+Best,
+{you}
+```
+
+**Reply template (Self-hosted EE — customer thought they had canceled):**
+
+```text
+Hi {name},
+
+To clarify: removing the EE license key in itself does not cancel the contract — it only disables EE features at runtime. The subscription continues to renew until a written cancellation is filed with Langfuse Support.
+
+I've now {canceled the subscription / refunded invoice {ID} / both}. You should see the refund in 5–10 business days.
+
+For future reference: please send cancellation notice to support@langfuse.com (or your account contact) before the next renewal date.
+
+Best,
+{you}
+```
+
+**Escalate when:** EE contracts above standard tier — Clemens or Akio. Refunds above USD 2,000 — team.
+
+</details>
+
+<details>
+
+<summary>Refund request</summary>
+
+**Triage steps:**
+
+1. Confirm what was charged and when via Stripe.
+2. Determine if the charge was correct (customer's mistake / they didn't downgrade in time) or our error (billing bug / contract misalignment / EE-license-removal-doesn't-cancel confusion above).
+3. Customer error and they're on a small plan: explain politely, offer goodwill credit if appropriate.
+4. Our error or genuine misunderstanding: refund.
+5. For refunds **above USD 2,000, loop in the team.** Do not approve unilaterally.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Sorry for the friction. I {refunded invoice {ID} for ${amount} / canceled the upcoming renewal / both}. Refunds usually take 5–10 business days to appear on the card.
+
+{If goodwill credit: "I've also added {amount} in credit on your next invoice as a goodwill gesture."}
+
+Let me know if there's anything else.
+
+Best,
+{you}
+```
+
+</details>
+
+<details>
+
+<summary>"Can we get a startup discount / 50% off?"</summary>
+
+We run a standard startup program. Discount: **`STARTUP-LF-50`** (50% off, applied at checkout or in billing settings). All applicants go through the form, no exceptions — the form gives us a paper trail.
+
+**Triage steps:**
+
+1. Direct the customer to [langfuse.com/startups](https://langfuse.com/startups).
+2. Ask them to fill out [https://forms.gle/eJAYjRWeCZU1Mn6j8](https://forms.gle/eJAYjRWeCZU1Mn6j8).
+3. Do not promise a timeline or approval beyond what the page says.
+4. Approved applicants receive `STARTUP-LF-50` via email automatically.
+5. For VC firms / venture studios asking for portfolio-wide discounts, the same code applies — they share it with portfolio companies.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Happy to help. Details on the program are here: https://langfuse.com/startups
+
+To apply, please fill out: https://forms.gle/eJAYjRWeCZU1Mn6j8
+
+Once approved you'll get the discount code by email — you can apply it at checkout when upgrading or in your billing settings if you already have a subscription.
+
+Best,
+{you}
+```
+
+</details>
+
+<details>
+
+<summary>Enterprise quote / contract / commercial license</summary>
+
+Anything that mentions: "enterprise", "POC", "Account Manager", "MSA", "DPA signature", "NDA", "PO", "quote for X seats", "self-hosted commercial license for OSS compliance" — route to enterprise.
+
+**Triage steps:**
+
+1. Acknowledge quickly and route. Do not negotiate pricing on the support thread.
+2. Add Akio (`akio@langfuse.com`) and/or Clemens (`clemens@langfuse.com`) to the thread, or move to `enterprise@langfuse.com`.
+3. For commercial licensing on self-hosted to satisfy OSS compliance tools (e.g. Black Duck flagging the `ee/` directories), confirm with the customer whether they're _actually using_ EE features. The base Docker image excludes the `@langfuse/ee` package and is MIT-licensed. Many of these tickets are governance-only and resolve with a confirmation email plus a copy of the license terms.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Thanks for reaching out. I'm looping in {Akio / Clemens / enterprise@langfuse.com} from our enterprise team — they'll be in touch shortly with pricing and contract details.
+
+{Optional, for compliance-only inquiries: "On the OSS / split-licensing question: our official Docker image (langfuse/langfuse) does not include the @langfuse/ee package — EE code only lives in the source monorepo for development and is not present in the published image. Without LANGFUSE_EE_LICENSE_KEY set, no EE features are active and your usage is fully under MIT."}
+
+Best,
+{you}
+```
+
+**Escalate when:** anything > $50k ACV, anything regulated (HIPAA BAA, financial services), or anything where legal is on the customer thread.
+
+</details>
+
+<details>
+
+<summary>Invoice / receipt / PO / "where is my invoice"</summary>
+
+**Triage steps:**
+
+1. Stripe → search customer → invoices/receipts. Send the direct PDF link.
+2. Custom POs from large enterprises (the "Purchase Order PO… please send your most competitive price" template) are usually spam or phishing. If the sender domain doesn't match a known customer, treat as spam and do not respond.
+3. For legitimate POs from active customers, route to finance / Akio.
+
+**Reply template (Stripe invoice download):**
+
+```text
+Hi {name},
+
+Your invoice for {period} is here: {Stripe-hosted invoice URL}. Receipts are also accessible directly from your Langfuse billing settings.
+
+Let me know if you need a different format or VAT details.
+
+Best,
+{you}
+```
+
+</details>
+
+---
+
+### 3. Self-hosting
+
+<details>
+
+<summary>Install / Docker Compose / Kubernetes / Helm questions</summary>
+
+Most self-hosted setup questions are answered by our docs — do not re-derive them. Send the link, ask which doc page they hit a wall on, and dig in.
+
+**Triage steps:**
+
+1. Ask: which deployment target (Docker Compose dev, Kubernetes via Helm, ECS, Cloud Run, etc.)? Which Langfuse version?
+2. Point to [langfuse.com/self-hosting](https://langfuse.com/self-hosting). For K8s specifically, the Helm chart README and [langfuse.com/self-hosting/deployment/kubernetes-helm](https://langfuse.com/self-hosting/deployment/kubernetes-helm).
+3. If they're stuck on a specific error, ask for: full stack/log output, the values.yaml or `docker-compose.yml`, and the output of `kubectl get pods` or `docker ps`.
+
+Related FAQs: [/faq/all/self-hosting-langfuse](/faq/all/self-hosting-langfuse), [/faq/all/debug-docker-deployment](/faq/all/debug-docker-deployment), [/faq/all/self-host-with-load-balancer](/faq/all/self-host-with-load-balancer).
+
+**Escalate when:** customer's setup involves an unsupported backend (e.g. Tencent TCHouse-C as a ClickHouse drop-in — we test against ClickHouse Cloud and OSS ClickHouse only), unusual ingress (service mesh, mTLS-only), or air-gapped envs without internet. These need engineering eyes.
+
+</details>
+
+<details>
+
+<summary>ClickHouse — alternative backends, sizing, migrations</summary>
+
+**Hard rule:** ClickHouse is the only supported OLAP backend. We do not support Elasticsearch, BigQuery, etc. as replacements. Customers asking about this should be redirected to the feature request channel — do not promise it.
+
+**Triage steps for common ClickHouse questions:**
+
+- **"Can I use \<alternative\>?"** No. Direct them to the feature request idea or the existing GitHub discussion if one exists.
+- **"Failed migration / migration deadlock"** → see [/faq/all/self-hosting-clickhouse-handling-failed-migrations](/faq/all/self-hosting-clickhouse-handling-failed-migrations). For large version jumps, advise temporarily extending readiness/liveness probe windows so migration containers aren't killed mid-migration, and reducing to a single web replica during the migration.
+- **"Direct DB ingestion (bypass the web/API)?"** Not supported. The web/worker layer is the only contract. Even if it works today the schema can change in any minor release.
+- **Disk usage too high** → [/faq/all/reduce-clickhouse-disk-size](/faq/all/reduce-clickhouse-disk-size).
+
+**Reply template (alternative backend ask):**
+
+```text
+Hi {name},
+
+ClickHouse is currently our only supported OLAP backend. We've intentionally bet on it for the trace/eval/score query patterns Langfuse needs — alternative backends aren't on the near-term roadmap.
+
+For OSS compliance / single-database environments, the practical paths are:
+- Use ClickHouse Cloud (managed) so you don't operate it yourself
+- Stand up a small dedicated ClickHouse cluster just for Langfuse
+
+If this is blocking adoption, please upvote / comment on the existing GitHub discussion: {link if exists}. The product team reads those.
+
+Best,
+{you}
+```
+
+</details>
+
+<details>
+
+<summary>Postgres — migration failures, table ownership, RDS gotchas</summary>
+
+**Triage steps:**
+
+1. **"Table ownership errors on migration"** → [/faq/all/self-hosting-postgresql-table-ownership-migration-failures](/faq/all/self-hosting-postgresql-table-ownership-migration-failures). Common when running on RDS with a non-superuser DB role.
+2. **Migration deadlock with multiple replicas** → migrations should run with a single web replica. Scale `web` to 1 before applying, scale back up after.
+3. **Connection issues** → check `DATABASE_URL`, `connection_limit`, and that the Langfuse user has CREATE/ALTER on the schema.
+
+Related FAQ: [/faq/all/self-hosting-postgresql-table-ownership-migration-failures](/faq/all/self-hosting-postgresql-table-ownership-migration-failures).
+
+</details>
+
+<details>
+
+<summary>Redis / BullMQ / Queue / Valkey / Elasticache</summary>
+
+**Triage steps:**
+
+1. Confirm Redis is reachable: `redis-cli -h $REDIS_HOST ping`. We require Redis 7+ or compatible (Valkey, ElastiCache).
+2. For Azure Redis with managed identity / Workload Identity, see GitHub discussion #13268 — TLS/SNI setup matters.
+3. For Redis Sentinel, see GitHub discussion #13359 (optional TLS env flag).
+4. Queue management endpoints (BullMQ admin API) are documented at [/faq/all/self-hosting-queue-management-bullmq-admin-api](/faq/all/self-hosting-queue-management-bullmq-admin-api) — useful when ingestion is stuck.
+5. Symptoms of an unhealthy queue: events accepted by API but never appear in UI. Worker logs will show retries.
+
+Related FAQs: [/faq/all/self-hosting-queue-management-bullmq-admin-api](/faq/all/self-hosting-queue-management-bullmq-admin-api), [/faq/all/self-hosting-socket-usage-at-capacity](/faq/all/self-hosting-socket-usage-at-capacity).
+
+</details>
+
+<details>
+
+<summary>S3 / Blob storage / Media uploads / Event export</summary>
+
+Langfuse uses S3-compatible storage for raw event uploads and media. Issues here usually surface as either ingestion failures (events accepted, never processed) or "blob storage export failed" emails.
+
+**Triage steps:**
+
+1. Verify `LANGFUSE_S3_EVENT_UPLOAD_*` env vars are set and the bucket exists.
+2. Verify the IAM principal has `s3:PutObject`, `s3:GetObject`, `s3:ListBucket`. For MinIO, set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true`.
+3. For "blob storage export failed" notifications, check the bucket policy and lifecycle rule didn't recently change.
+4. For media uploads, also set `LANGFUSE_S3_MEDIA_UPLOAD_*`.
+
+Related FAQ: [/faq/all/self-hosting-missing-events-after-ingestion](/faq/all/self-hosting-missing-events-after-ingestion).
+
+</details>
+
+<details>
+
+<summary>Upgrade between Langfuse versions (self-hosted)</summary>
+
+**Triage steps:**
+
+1. Find current version (`docker images | grep langfuse`, or Helm `appVersion`) and target version.
+2. Walk the upgrade notes for each intermediate major. Most v3.x → v3.x are seamless within the same major. v2 → v3 and v3 → v4 require following the migration guides.
+3. For very large jumps (e.g. v3.132 → v3.175): migrations may take minutes. Temporarily extend K8s readiness/liveness probe windows, and **scale to a single web replica during the migration** to avoid Prisma/Postgres migration deadlocks with concurrent replicas.
+4. Test in staging first if the customer has one.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+For a jump that large, the main risk is migration time. Two things to do before upgrading:
+
+1. Temporarily increase the readiness/liveness probe initial-delay and failure-threshold on the web container so it isn't killed mid-migration.
+2. Scale `web` to 1 replica during the migration. Concurrent replicas can deadlock on Prisma/Postgres migrations. Scale back up once migration completes.
+
+We aim for full compatibility within a major version — there are no known breaking changes between v3.132 and the latest v3.x.
+
+Docs: https://langfuse.com/self-hosting/upgrade
+
+Best,
+{you}
+```
+
+Related FAQ: [/faq/all/upgrade-langfuse](/faq/all/upgrade-langfuse).
+
+</details>
+
+<details>
+
+<summary>EE license usage / "do I need an EE license for production?"</summary>
+
+This is a governance/compliance question, not a technical one. The customer is usually preparing for an internal OSS review.
+
+**Canonical facts:**
+
+- Langfuse core (tracing, observability, prompt management, evaluations, dashboards) is MIT-licensed. No EE license required for production use of these.
+- EE features (advanced RBAC, audit log, data retention policies, project-level masking, SCIM, Instance Management API for cross-org admin) require `LANGFUSE_EE_LICENSE_KEY`.
+- The published Docker image (`langfuse/langfuse` on Docker Hub) excludes the `@langfuse/ee` package. EE code is only in the source monorepo for development. Compliance scanners (Black Duck etc.) flagging the `ee/` directories are looking at the source repo, not the runtime image.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Happy to confirm:
+
+1. The core Langfuse features (tracing, observability, prompt management, evaluations, dashboards) are MIT-licensed and free to use in production, with no EE license required.
+2. EE features (advanced RBAC, audit log, data retention policies, project-level masking, SCIM, Instance Management API) require LANGFUSE_EE_LICENSE_KEY. Without that env var set, no EE code paths execute.
+3. The official Docker image langfuse/langfuse on Docker Hub does not bundle the @langfuse/ee package. The ee/ directory exists in the source monorepo for development only; the published image excludes it.
+
+If your compliance review needs this in writing on letterhead, I can route to enterprise@langfuse.com.
+
+Best,
+{you}
+```
+
+</details>
+
+<details>
+
+<summary>CVE / vulnerability report in the Docker image</summary>
+
+Container scanners (Wiz, Snyk, Trivy, Black Duck) regularly produce long lists of CVEs in transitive Node.js dependencies. Most are not exploitable in our usage. The right response is:
+
+**Triage steps:**
+
+1. Check the version the customer scanned. If it's not the latest, ask them to scan the current image first — many CVEs are already patched in the next release.
+2. For genuine concerns, route to `security@langfuse.com` / Steffen for triage.
+3. Do not promise fix timelines. We patch on rolling cadence with each release.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Thanks for the scan output. Could you re-run the scan against the latest image ({current_version}, released {date})? Several of the high-severity CVEs in your list are already addressed in recent releases.
+
+For any that still appear after that, our security team will triage and prioritize. Most CVEs in transitive Node.js dependencies are in code paths Langfuse doesn't exercise — we don't ship a fix for every transient CVE, but we do for anything reachable.
+
+Best,
+{you}
+```
+
+Related FAQ: [/faq/all/data-retention-timeouts-and-errors](/faq/all/data-retention-timeouts-and-errors).
+
+</details>
+
+---
+
+### 4. Ingestion (Cloud and self-hosted)
+
+<details>
+
+<summary>"Traces are missing / slow / not appearing"</summary>
+
+**Triage steps in order:**
+
+1. **status.langfuse.com** — rule out a current incident first.
+2. **DataDog** — check ingestion queue depth, ClickHouse latency. If queues are deep, this is a platform issue and you should escalate, not debug per-customer.
+3. **Customer SDK version** — ask. Old SDKs (Python pre-v3, JS pre-v4) used legacy endpoints with known performance issues. Recommend upgrade to the latest scoped packages (`@langfuse/client`, `@langfuse/tracing`, `@langfuse/otel` or `langfuse` Python v3+).
+4. **Customer's flush behavior** — short-lived processes (Lambdas, CLIs, edge runtimes) must call `langfuse.flush()` before exit. Without this, in-flight events are dropped.
+5. **Customer's filter / time range** — are they looking at the right project, the right environment tag, and a time range that includes "now-5 minutes" (ingestion can be delayed up to ~1–2 minutes in normal operation)?
+6. **Fast Mode (Preview)** is on by default; if they toggled it off, some new views won't appear.
+
+**Reply template (cloud, after status check):**
+
+```text
+Hi {name},
+
+Status page is clear and our queues look healthy on this side. A few things to confirm:
+
+1. Are you on the latest SDK? For Python that's the v3+ scoped packages, for JS that's @langfuse/client / @langfuse/tracing / @langfuse/otel. The legacy `langfuse` JS v3 package and Python v2 SDK both used older endpoints with known delays.
+2. If the process sending traces is short-lived (Lambda, CLI, edge runtime, batch job), make sure you call langfuse.flush() / shutdown() before exit, otherwise in-flight events drop.
+3. What time range are you looking at in the UI, and which environment tag?
+
+If you can share an example traceId or sessionId that's missing, I'll look it up directly.
+
+Best,
+{you}
+```
+
+Related FAQs: [/faq/all/missing-traces](/faq/all/missing-traces), [/faq/all/aws-lambda-and-serverless-functions](/faq/all/aws-lambda-and-serverless-functions), [/faq/all/self-hosting-missing-events-after-ingestion](/faq/all/self-hosting-missing-events-after-ingestion).
+
+**Escalate when:** customer's SDK is current, flush is configured, time range is correct, and traces still don't appear → engineering with the traceId, project ID, and timestamp.
+
+</details>
+
+<details>
+
+<summary>OTEL / OpenTelemetry — unwanted spans, double-counting, semantic conventions</summary>
+
+OTEL is the most common source of _over-ingestion_ surprises. The customer's existing OTEL setup blasts every HTTP request, DB query, and framework span at Langfuse — driving up cost and cluttering the UI.
+
+**Triage steps:**
+
+1. Ask the customer how they wired Langfuse into their OTEL provider (sharing a TracerProvider? exporter-only? auto-instrumentation?).
+2. If they're sharing a global TracerProvider with HTTP / DB / framework auto-instrumentation, recommend setting `blocked_instrumentation_scopes` (Python SDK) or scope filters (JS SDK) to drop non-LLM spans.
+3. For cost-double-counting on agent frameworks (notably pydantic-ai, see issue #1819): there's a known bug we're tracking. Acknowledge and offer to file/link the issue, do not promise a fix date.
+4. For `langfuse.experiment.*` attributes: customers using non-Python SDKs sometimes try to propagate experiment attributes manually and find evaluators don't run. LLM-as-a-Judge currently only runs against OTEL-ingested traces — confirm the legacy SDK path is not in use.
+
+**Reply template (unwanted spans):**
+
+```text
+Hi {name},
+
+That's a common one with existing OTEL setups. Your global TracerProvider is exporting HTTP/DB/framework spans alongside LLM spans, which is why volume is high.
+
+Fix (Python):
+  from langfuse import Langfuse
+  langfuse = Langfuse(
+      blocked_instrumentation_scopes=[
+          "opentelemetry.instrumentation.fastapi",
+          "opentelemetry.instrumentation.asgi",
+          "opentelemetry.instrumentation.httpx",
+          # ... add yours
+      ],
+  )
+
+This typically cuts ingested volume by 50–90% and only LLM/agent spans land in Langfuse.
+
+Full docs: https://langfuse.com/faq/all/existing-otel-setup#unwanted-spans-in-langfuse
+
+Best,
+{you}
+```
+
+Related FAQs: [/faq/all/existing-otel-setup](/faq/all/existing-otel-setup), [/faq/all/unwanted-http-database-spans](/faq/all/unwanted-http-database-spans).
+
+</details>
+
+<details>
+
+<summary>Cost / token tracking mismatch ("the cost looks wrong")</summary>
+
+**Triage steps:**
+
+1. Is the model on our supported pricing list? Check the model in the UI's "Model" definition. Custom models need a `Model` entry with input/output token pricing or Langfuse can't compute cost.
+2. Does the SDK / framework send token counts? If yes, Langfuse uses them; if no, we tokenize the input/output ourselves with the model's tokenizer (best-effort).
+3. For agent frameworks (pydantic-ai notably), token double-counting can happen when both the parent agent span and the child LLM span report usage. Known issue, escalate with the trace link.
+4. For frameworks where Langfuse calculates cost despite the framework also reporting it, the framework's `otel operation.cost` attribute is the source of truth — we override based on our pricing table.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Cost discrepancies usually come from one of three places:
+
+1. Custom or unsupported model — we need a Model entry (Project Settings → Models) with the right input/output token pricing for Langfuse to compute cost. If your model isn't there, cost shows as 0 or uses a generic estimate.
+2. The framework you're using double-reports usage on both parent and child spans (this happens with some agent frameworks). If you can share a trace link, I'll check whether double-counting is the cause.
+3. Tokenization difference between your provider's billing and our internal tokenizer when usage isn't sent — small numerical drift, not a bug.
+
+Can you share a specific trace that looks off, and the model name?
+
+Best,
+{you}
+```
+
+Related FAQs: [/faq/all/costs-tokens-langfuse](/faq/all/costs-tokens-langfuse), [/faq/all/cutting-costs](/faq/all/cutting-costs).
+
+</details>
+
+---
+
+### 5. SDKs and integrations
+
+<details>
+
+<summary>Python SDK</summary>
+
+**Common issues:**
+
+- **Using the legacy `langfuse` Python v2 package.** The `@observe` decorator and OTEL-based ingestion live in v3+. Recommend upgrade.
+- **Short-lived processes** — must `langfuse.flush()` before exit.
+- **`get_prompt()` errors** — usually wrong region, missing API key, or referencing a prompt with the wrong `label`.
+
+Upgrade docs: [/docs/observability/sdk/upgrade-path](/docs/observability/sdk/upgrade-path).
+
+</details>
+
+<details>
+
+<summary>JS / TypeScript SDK</summary>
+
+**Common issues:**
+
+- **The legacy `langfuse` npm package is on v3.x.** v4+ lives under the `@langfuse/*` scoped packages: `@langfuse/client`, `@langfuse/tracing`, `@langfuse/otel`. The in-app evaluator warning "JS SDK v4+ required" means switch to these scoped packages.
+- **Edge runtime / serverless** — make sure to await `flushAsync()`.
+- **Browser usage** — only the public key, never the secret. Recommend a backend proxy.
+
+**Reply template (legacy package confusion):**
+
+```text
+Hi {name},
+
+The "JS SDK v4+" message refers to the new scoped packages (@langfuse/client, @langfuse/tracing, @langfuse/otel), not the legacy `langfuse` npm package. We're freezing the legacy package at v3.x and shipping all new features (incl. evaluators-on-observations) in the scoped ones.
+
+Upgrade guide: https://langfuse.com/docs/observability/sdk/upgrade-path
+
+Best,
+{you}
+```
+
+</details>
+
+<details>
+
+<summary>LangChain / LangGraph</summary>
+
+- Use `CallbackHandler` from `langfuse.callback`. For LangGraph, the same callback works but you may want to set the trace name explicitly per node — see GitHub discussion #13261.
+- **"How do I track non-LLM service costs in LangChain tools?"** — use `update_current_observation(...usage=...)` inside the tool. See GitHub discussion #13514.
+- **Global callback registration** is a recurring feature request (GitHub #13583) — don't promise it.
+
+</details>
+
+<details>
+
+<summary>LlamaIndex / LiteLLM / Vercel AI SDK / Pydantic-AI / CrewAI / Dify / others</summary>
+
+- **LiteLLM** — uses the standard Langfuse callback. Pricing config lives in LiteLLM's `model_list`.
+- **Vercel AI SDK** — uses our OTEL exporter. Make sure `experimental_telemetry: { isEnabled: true }`.
+- **Pydantic-AI** — known cost double-counting bug (issue #1819). Acknowledge, do not promise fix date.
+- **Dify** — there was a Dify-side bug in May 2026 (langgenius/dify #36107) that routed spans to the wrong Langfuse projects. We deleted affected data 2026-05-12T09:42:00Z → 2026-05-13T09:54:00Z. Customers re-discovering this issue should be told it's resolved upstream.
+- **LlamaIndex** — duplicated token counts on generation spans is a known issue (#12897).
+- **OpenAI Agent SDK** — reasoning summary drops in some cases (#12876).
+- **Google ADK / Strands / Mastra / Agno / Haystack / Instructor** — point to the relevant docs page under [/integrations](/integrations).
+
+If the integration isn't documented, ask which framework/version and offer to file a docs issue. We do not custom-build integrations on demand.
+
+</details>
+
+---
+
+### 6. Prompt management
+
+<details>
+
+<summary>Prompt management — versioning, labels, caching, get_prompt issues</summary>
+
+**Common issues:**
+
+- **Old prompt version served from cache** — SDK caches by default. To bypass: `get_prompt(name, cache_ttl_seconds=0)` or set `LANGFUSE_PROMPT_CACHE_TTL=0`.
+- **Linked prompt label resolves to wrong version** — labels are mutable; check Audit log / Prompt history.
+- **MCP server only supports prompt management** today (read-only). Datasets / Traces are on the roadmap.
+- **Conditional / templated prompts** — see [/faq/all/conditional-prompt-embedding](/faq/all/conditional-prompt-embedding).
+
+Related FAQs: [/faq/all/old-prompt-version-caching](/faq/all/old-prompt-version-caching), [/faq/all/link-prompt-management-with-tracing](/faq/all/link-prompt-management-with-tracing), [/faq/all/using-external-templating-libraries](/faq/all/using-external-templating-libraries), [/faq/all/managing-skills-with-prompt-management](/faq/all/managing-skills-with-prompt-management).
+
+</details>
+
+---
+
+### 7. Evaluations
+
+<details>
+
+<summary>"Evaluator is not running on my traces"</summary>
+
+**The single most common cause: the trace was ingested via a legacy SDK path that pre-dates OTEL.** LLM-as-a-Judge currently only runs against OTEL-based observations.
+
+**Diagnostic check:** Open the trace in the UI. If its `metadata.scope.*` and `metadata.resourceAttributes.*` fields exist, it was ingested via OTEL and evaluators should pick it up. If those fields are missing, the trace came via the legacy `/observations` endpoint and won't be scored.
+
+**Triage steps:**
+
+1. Look at one of the customer's recent traces — check for OTEL metadata.
+2. If legacy: ask them to upgrade SDK (Python v3+ scoped packages, JS @langfuse/\* v1+).
+3. If OTEL: check that the evaluator config matches the trace (variable mapping, filter conditions, target observation type). Some evaluators target `observations` rather than `traces`.
+4. Check evaluator logs in UI → Evaluators → click the config → recent runs.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+LLM-as-a-Judge currently only evaluates OTEL-ingested observations. If you open one of the traces that didn't get scored, check whether it has metadata.scope.* / metadata.resourceAttributes.* fields:
+
+- Present → OTEL-based, should be scored
+- Absent → ingested via the legacy SDK path, won't be scored
+
+If you're seeing the absent case, the fix is to upgrade your SDK (Python v3+ scoped packages, JS @langfuse/* v1+). I'm happy to walk through which traces are which if you share a couple of traceIds.
+
+Best,
+{you}
+```
+
+Related FAQ: [/faq/all/observation-eval-not-executing](/faq/all/observation-eval-not-executing).
+
+</details>
+
+<details>
+
+<summary>Datasets and experiments</summary>
+
+**Common issues:**
+
+- **"Duplicate dataset items on ingestion"** — usually customer-side: the same source row gets re-uploaded. Add a unique constraint on `id` when calling `create_dataset_item`.
+- **"How do I version a dataset?"** — datasets are versioned automatically; experiments pin to a snapshot. See the experiments docs.
+- **Java / non-Python SDK** running experiments — they must propagate the right OTEL attributes (`langfuse.experiment.id`, `langfuse.experiment.dataset.id`, `langfuse.experiment.item.id`, `langfuse.experiment.item.root_observation_id`) on the trace. There is no official Java SDK; route to engineering for the canonical attribute schema. See GitHub #13438.
+- **Experiments in CI** — point to the GitHub Action for Langfuse Experiments.
+
+Related FAQ: [/faq/all/langfuse-evaluators-on-dataset-runs](/faq/all/langfuse-evaluators-on-dataset-runs).
+
+</details>
+
+<details>
+
+<summary>Scores — score configs, custom scores, scores API filtering</summary>
+
+- **Custom score type setup** → [/faq/all/manage-score-configs](/faq/all/manage-score-configs).
+- **`scores.get_many` filter not applying** — this was a known bug; verify customer is on the latest SDK. If still broken, escalate with the request body and expected output.
+- **"What are scores?"** → [/faq/all/what-are-scores](/faq/all/what-are-scores).
+
+Related FAQ: [/faq/all/manage-score-configs](/faq/all/manage-score-configs).
+
+</details>
+
+---
+
+### 8. Security and compliance
+
+<details>
+
+<summary>SOC 2 / ISO 27001 reports</summary>
+
+We hold SOC 2 Type II and ISO 27001. Reports go out under NDA to evaluating customers.
+
+**Triage steps:**
+
+1. Confirm the requester is from a real organization actively evaluating Langfuse (look up domain, role).
+2. Akio sends reports as PDFs attached to the email reply. He owns the relationship.
+3. Note: we may be mid-audit with a new vendor; include the engagement letter as a forward-looking signal.
+
+**Reply template (route to Akio):**
+
+```text
+Hi {name},
+
+Happy to share both. Looping in Akio (akio@langfuse.com) who'll send over the SOC 2 Type II and ISO 27001 reports.
+
+For reference, our public security overview is at https://langfuse.com/security.
+
+Best,
+{you}
+```
+
+</details>
+
+<details>
+
+<summary>DPA (Data Processing Agreement)</summary>
+
+**Key fact:** the DPA is auto-applied via our T&Cs at signup. We do not counter-sign on a per-customer basis (unless enterprise specifically requires it).
+
+**Triage steps:**
+
+1. Direct the customer to [langfuse.com/security/dpa](https://langfuse.com/security/dpa) — the PDF there is the executed version.
+2. If they explicitly need a counter-signed copy on their template, route to Akio / Clemens.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Our DPA is auto-applied for all signups under the standard Terms. You can download the executed version directly here for your records:
+
+https://langfuse.com/security/dpa
+
+If your procurement requires a counter-signed copy on your template, let me know and I'll loop in our enterprise team.
+
+Best,
+{you}
+```
+
+</details>
+
+<details>
+
+<summary>BAA / HIPAA</summary>
+
+HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. BAA is required and is signed through legal.
+
+**Triage steps:**
+
+1. Confirm the customer is using or about to use `hipaa.cloud.langfuse.com` (not the standard US/EU regions).
+2. **Cannot migrate accounts between regions.** Existing US/EU customers moving to HIPAA must create a new account on `hipaa.cloud.langfuse.com` and cut over instrumentation. Past trace data does not migrate (we recommend a clean cutover rather than backfill).
+3. For the BAA, route to Akio / Clemens to handle the signature flow.
+4. For HIPAA-region IP allowlisting (egress from Langfuse to customer infra, e.g. for LLM-as-a-judge): static IPs are `35.82.248.193`, `34.211.191.155`, `52.43.164.18` (us-west-2). Full list at [langfuse.com/security/networking](https://langfuse.com/security/networking). **Ingress** to `hipaa.cloud.langfuse.com` sits behind AWS ALBs without static IPs — we cannot publish a stable ingress IP range.
+
+**Reply template (BAA):**
+
+```text
+Hi {name},
+
+For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and have a signed BAA. I'm looping in {Akio / Clemens} to handle the BAA — they'll send it on our paper.
+
+A note for completeness: HIPAA accounts cannot be migrated from the standard US/EU regions. If your team is currently on us.cloud or cloud., the recommended path is to create a fresh account on hipaa.cloud.langfuse.com and cut over instrumentation — past trace data does not need to be backfilled.
+
+Best,
+{you}
+```
+
+</details>
+
+<details>
+
+<summary>Networking — IP allowlist, egress IPs, telemetry firewall rules</summary>
+
+- **Egress (Langfuse → customer infra, e.g. for LLM-as-a-judge eval calls or webhooks):** static IPs are published at [langfuse.com/security/networking](https://langfuse.com/security/networking).
+- **Ingress (customer SDK → Langfuse):** behind AWS ALBs, no static IPs. Customer firewalls must allowlist by hostname.
+- **Telemetry to PostHog** is enabled by default in self-hosted Langfuse and can be disabled via `TELEMETRY_ENABLED=false`. See [langfuse.com/self-hosting/security/telemetry](https://langfuse.com/self-hosting/security/telemetry). Disabling it is compliant under our standard self-hosted terms — provision in older EE self-hosted terms previously required permission, but the current terms don't.
+
+</details>
+
+<details>
+
+<summary>Bug bounty / vulnerability disclosure</summary>
+
+**We do not run a formal bug bounty program.** Almost all inbound is one of:
+
+1. Legitimate disclosure of a real security issue — escalate immediately to engineering.
+2. Outreach from agencies/freelancers offering paid security services — polite decline.
+3. Auto-generated reports of "vulnerabilities" that turn out to be expected behavior (subdomain redirects, password length DoS, etc.) — polite explanation that the behavior is intended.
+
+**Triage steps:**
+
+1. Skim the report. Does it describe a _real, reproducible_ vulnerability? If yes → escalate.
+2. If it's an agency pitch or a generic templated report → use the standard reply.
+3. For ambiguous cases, ask for proof-of-concept before escalating.
+
+**Reply template (no formal program):**
+
+```text
+Hi {name},
+
+Thank you for reaching out. At the current time, Langfuse doesn't offer a formal bug bounty program. Please review our responsible disclosure page, which has the channel for reporting real security issues:
+
+https://langfuse.com/security/responsible-disclosure#bug-bounty-program
+
+Best,
+{you}
+```
+
+**Reply template (report is a false positive, e.g. subdomain redirect flagged as takeover):**
+
+```text
+Hi {name},
+
+Thanks — we've reviewed the report. The behavior you've identified is expected: each of the subdomains in your report redirects to a controlled landing or sub-page on langfuse.com. There is no dangling DNS or unclaimed third-party resource.
+
+Please confirm findings against the live behavior before submitting future reports.
+
+Best,
+{you}
+```
+
+**Escalate immediately when:** any credible report of SSRF, IDOR, cross-tenant data access, authentication bypass, SCIM injection, or credential exposure. Page Steffen / Nimar / engineering on Slack `#security`.
+
+</details>
+
+---
+
+### 9. Data deletion and retention
+
+<details>
+
+<summary>"Delete my account / org / project" / GDPR deletion</summary>
+
+We require users to perform their own deletions for compliance reasons (clear paper trail that the user authorized it). We do not delete accounts on the customer's behalf.
+
+**Triage steps:**
+
+1. Confirm what they want to delete (project / organization / entire account).
+2. Walk them through the in-product flow: Project Settings → Danger Zone for project; Organization Settings → Danger Zone for org. Account deletion is a final delete-all flow from the user settings.
+3. For HIPAA → standard region migrations where the customer wants their old account gone, confirm they've moved everything they need first, then ask them to delete it themselves.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+For compliance / paper-trail reasons we ask customers to perform deletions themselves. The in-product flows are:
+
+- Project: Project Settings → Danger Zone → Delete project
+- Organization: Organization Settings → Danger Zone → Delete organization
+- Account: User Settings → Delete account
+
+Before you delete: confirm you've moved any data, projects, or configurations you want to keep.
+
+If you hit any error during the flow, send a screenshot and I'll dig in.
+
+Best,
+{you}
+```
+
+Related FAQ: [/faq/all/delete-account-langfuse](/faq/all/delete-account-langfuse).
+
+</details>
+
+<details>
+
+<summary>Data retention policies (EE feature)</summary>
+
+Data retention is an EE feature. Hobby/Core/Pro have fixed retention by plan; Team and EE can configure custom retention windows.
+
+**Triage steps:**
+
+1. Confirm plan tier — if not Team/EE, retention is fixed.
+2. For EE: retention is configured per-project via the Project Settings or via the [Instance Management API](https://langfuse.com/self-hosting/administration/instance-management-api).
+3. Note: retention runs as a background job. Customers seeing data still present after the retention window are usually inside the job's cycle — escalate if it persists beyond 24h.
+
+Related FAQs: [/faq/all/data-retention-timeouts-and-errors](/faq/all/data-retention-timeouts-and-errors), [/faq/all/cutting-costs](/faq/all/cutting-costs).
+
+</details>
+
+---
+
+### 10. API errors
+
+<details>
+
+<summary>5xx errors (502 / 503 / 504 / 524 Bad Gateway / Gateway Timeout)</summary>
+
+**Triage steps:**
+
+1. **status.langfuse.com** first. If there's an active incident, point the customer to the status page and acknowledge.
+2. If status is clear, check DataDog for elevated error rates in the last 30 minutes. A short outage may have happened but not been status-posted yet — for short blips this is normal, document it internally if it repeats.
+3. If it's only one customer and our side looks healthy: ask for the timestamp, region, and whether they're hitting `cloud.langfuse.com` / `us.cloud.langfuse.com` / etc. or going through a proxy.
+
+**Reply template (during/after a known short outage):**
+
+```text
+Hi {name},
+
+We had a very short outage around {time}. Things should be back to normal now — can you confirm if you're still seeing the errors? If yes, share the most recent timestamp and I'll dig in.
+
+Best,
+{you}
+```
+
+Related FAQ: [/faq/all/api-524-http-errors](/faq/all/api-524-http-errors), [/faq/all/self-hosting-502-504-network-errors](/faq/all/self-hosting-502-504-network-errors).
+
+</details>
+
+<details>
+
+<summary>429 / rate limit errors</summary>
+
+**Triage steps:**
+
+1. Identify which endpoint they're hitting. Trace ingestion is much more permissive than prompt/API reads.
+2. Recommend exponential backoff in the SDK (the official SDKs do this by default).
+3. For genuine high-throughput needs, route to enterprise — we lift limits per agreement.
+
+Related FAQ: [/faq/all/api-limits](/faq/all/api-limits).
+
+</details>
+
+---
+
+### 11. UI bug / view broken
+
+<details>
+
+<summary>"I can't see view X" / "the page is blank" / "Fast Mode"</summary>
+
+**Triage steps:**
+
+1. **First check: is Fast Mode (Preview) toggled on?** Many views are gated on Fast Mode being enabled. The toggle is on the left sidebar.
+2. Hard refresh (Cmd-Shift-R / Ctrl-Shift-R) to bust any stale assets.
+3. Try Impersonation View — can you reproduce as them?
+4. Ask for browser, version, and console errors.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Quick check: is "Fast Mode" toggled on in the left sidebar? A few of the newer views (incl. Experiments, the redesigned Trace view) are gated on it.
+
+If Fast Mode is on and you still don't see it, a hard refresh (Cmd-Shift-R) usually fixes stale-asset cases. If neither helps, please share the browser, version, and any console errors.
+
+Best,
+{you}
+```
+
+**Escalate when:** the customer confirms Fast Mode is on, has hard-refreshed, and you can reproduce in Impersonation View → engineering.
+
+</details>
+
+---
+
+### 12. Customer leaving Langfuse
+
+<details>
+
+<summary>"We've decided to stop using Langfuse"</summary>
+
+**Triage steps:**
+
+1. Reply with empathy. Do not push for retention on this thread — that's a separate sales conversation, and only if the customer signals interest.
+2. Ask for short feedback. Bullet-point format is fine. Promise nothing in return.
+3. If they're on Cloud, confirm cancellation is processed (see "Cancel subscription" above).
+4. If they're on self-hosted EE, the contract path applies — they need to cancel in writing.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Thanks for letting us know, and sorry Langfuse fell short for you. We'd be really grateful if you could share a few bullets on what we could've done better — we read every one.
+
+I've {canceled your subscription / forwarded to the EE team for contract cancellation}.
+
+Wishing you the best with whatever you choose next.
+
+Best,
+{you}
+```
+
+</details>
+
+---
+
+### 13. Not-actually-support inbox (filter these fast)
+
+<details>
+
+<summary>Spam / partnership / sponsorship / guest post / link insertion</summary>
+
+About 1–2% of the inbox is outreach: "I'd love to write a guest post," "We sell partnerships," "Sponsor our event," "Buy backlinks." Close with a polite no, or no response.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Thanks for reaching out. We're not currently exploring partnerships of this kind. Wishing you the best with your work.
+
+Best,
+{you}
+```
+
+Or no reply — this is also acceptable for transparent spam.
+
+</details>
+
+<details>
+
+<summary>Job applications / recruiting outreach</summary>
+
+We route all applications to one place. Do not engage on the support thread.
+
+**Reply template:**
+
+```text
+Hi {name},
+
+Thanks for your interest in Langfuse. Please apply through our official careers page so the hiring team picks it up:
+
+https://langfuse.com/careers
+
+Best,
+{you}
+```
+
+</details>
+
+<details>
+
+<summary>Auto-reply / out-of-office / language we don't speak</summary>
+
+If the inbound is purely an auto-reply (Zendesk "thank you for reaching out", OOO notices), close the ticket — no human action.
+
+For tickets in languages no one on the team reads natively, reply in English and offer to continue in English. Most customers are bilingual; if not, escalate to the team channel.
+
+</details>
+
+---
+
+## When in doubt
+
+If the customer's question doesn't fit a branch above:
+
+1. **Search this page** with Cmd/Ctrl-F for keywords from their message.
+2. **Search Pylon** for the same symptom in the last 30 days — someone has likely answered it before.
+3. **Ask in `#support` Slack** with the ticket link and your hypothesis. Internal notes on the Pylon ticket also work.
+4. **Hand off** to the relevant owner: see [ownership](/handbook/how-we-work/ownership). If you can't tell who owns it, escalate to Steffen (technical), Akio (commercial), or Clemens (enterprise/legal).
+
+Whenever you find yourself answering a new question for the third time, add it to this page — or add a FAQ entry under `content/faq/all/` and link to it from here. Every recurring question we document is one that Inkeep, Dosu, and future support engineers can answer without humans.
