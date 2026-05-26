@@ -17,6 +17,7 @@ const GITHUB_TREE_BASE = `${REPO_URL}/tree/${REF}`;
 const RAW_BASE = `https://raw.githubusercontent.com/${REPO_SLUG}/${REF}`;
 const OUTPUT_DIR = path.join(process.cwd(), "content", "workshop");
 const DEFAULT_CHAPTER = "00-setup";
+const FENCED_CODE_BLOCK_PATTERN = /(```[\s\S]*?```|~~~[\s\S]*?~~~)/g;
 
 const initialEnvKeys = new Set(Object.keys(process.env));
 
@@ -256,6 +257,70 @@ function splitTarget(target) {
   return { url: match[1], title: match[2] };
 }
 
+function splitReferenceDefinitionTarget(target) {
+  const trimmed = target.trim();
+  if (trimmed.startsWith("<")) {
+    const close = trimmed.indexOf(">");
+    if (close > 0) {
+      const title = trimmed.slice(close + 1).trim();
+      return {
+        url: trimmed.slice(1, close),
+        title: title ? ` ${title}` : "",
+      };
+    }
+  }
+
+  return splitTarget(trimmed);
+}
+
+function normalizeReferenceLabel(label) {
+  return label.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function parseReferenceDefinitionLine(line) {
+  const indent = line.match(/^[ \t]*/)?.[0] ?? "";
+  if (indent.length > 3 || line[indent.length] !== "[") return null;
+
+  const closeBracket = findClosingBracket(line, indent.length);
+  if (closeBracket == null || line[closeBracket + 1] !== ":") return null;
+
+  const label = line.slice(indent.length + 1, closeBracket);
+  const normalizedLabel = normalizeReferenceLabel(label);
+  if (!normalizedLabel) return null;
+
+  const target = line.slice(closeBracket + 2).trim();
+  if (!target) return null;
+
+  return {
+    indent,
+    label,
+    normalizedLabel,
+    ...splitReferenceDefinitionTarget(target),
+  };
+}
+
+function collectReferenceDefinitions(markdown, sourcePath) {
+  const definitions = new Map();
+
+  for (const [index, segment] of markdown
+    .split(FENCED_CODE_BLOCK_PATTERN)
+    .entries()) {
+    if (index % 2 === 1) continue;
+
+    for (const line of segment.split(/\r?\n/)) {
+      const definition = parseReferenceDefinitionLine(line);
+      if (!definition || definitions.has(definition.normalizedLabel)) continue;
+
+      definitions.set(definition.normalizedLabel, {
+        imageUrl: rewriteImageUrl(definition.url, sourcePath),
+        title: definition.title,
+      });
+    }
+  }
+
+  return definitions;
+}
+
 function splitUrlSuffix(url) {
   const match = url.match(/^([^?#]*)([?#][\s\S]*)?$/);
   return {
@@ -394,21 +459,93 @@ function readParenthesizedTarget(markdown, openParen) {
   return null;
 }
 
-function readMarkdownReference(markdown, start, sourcePath, routeBySourcePath) {
+function readReferenceDefinition(
+  markdown,
+  start,
+  sourcePath,
+  routeBySourcePath,
+) {
+  if (start !== 0 && markdown[start - 1] !== "\n") return null;
+
+  const lineEnd = markdown.indexOf("\n", start);
+  const end = lineEnd === -1 ? markdown.length : lineEnd;
+  const definition = parseReferenceDefinitionLine(markdown.slice(start, end));
+  if (!definition) return null;
+
+  return {
+    end,
+    value: `${definition.indent}[${definition.label}]: ${rewriteLinkUrl(
+      definition.url,
+      sourcePath,
+      routeBySourcePath,
+    )}${definition.title}`,
+  };
+}
+
+function readReferenceImage(
+  markdown,
+  closeBracket,
+  text,
+  referenceDefinitions,
+) {
+  let label = text;
+  let end = closeBracket + 1;
+
+  if (markdown[closeBracket + 1] === "[") {
+    const closeLabel = findClosingBracket(markdown, closeBracket + 1);
+    if (closeLabel == null) return null;
+
+    const explicitLabel = markdown.slice(closeBracket + 2, closeLabel);
+    label = explicitLabel || text;
+    end = closeLabel + 1;
+  }
+
+  const definition = referenceDefinitions.get(normalizeReferenceLabel(label));
+  if (!definition) return null;
+
+  return {
+    end,
+    value: `![${text}](${definition.imageUrl}${definition.title})`,
+  };
+}
+
+function readMarkdownReference(
+  markdown,
+  start,
+  sourcePath,
+  routeBySourcePath,
+  referenceDefinitions,
+) {
   const isImage = markdown[start] === "!" && markdown[start + 1] === "[";
   const openBracket = isImage ? start + 1 : start;
   if (markdown[openBracket] !== "[") return null;
 
   const closeBracket = findClosingBracket(markdown, openBracket);
-  if (closeBracket == null || markdown[closeBracket + 1] !== "(") return null;
-
-  const target = readParenthesizedTarget(markdown, closeBracket + 1);
-  if (!target) return null;
+  if (closeBracket == null) return null;
 
   const text = markdown.slice(openBracket + 1, closeBracket);
   const rewrittenText = isImage
     ? text
-    : rewriteMarkdownReferenceSegment(text, sourcePath, routeBySourcePath);
+    : rewriteMarkdownReferenceSegment(
+        text,
+        sourcePath,
+        routeBySourcePath,
+        referenceDefinitions,
+      );
+
+  if (markdown[closeBracket + 1] !== "(") {
+    if (!isImage) return null;
+    return readReferenceImage(
+      markdown,
+      closeBracket,
+      rewrittenText,
+      referenceDefinitions,
+    );
+  }
+
+  const target = readParenthesizedTarget(markdown, closeBracket + 1);
+  if (!target) return null;
+
   const { url, title } = splitTarget(target.target);
   const rewritten = isImage
     ? rewriteImageUrl(url, sourcePath)
@@ -425,16 +562,30 @@ function rewriteMarkdownReferenceSegment(
   segment,
   sourcePath,
   routeBySourcePath,
+  referenceDefinitions,
 ) {
   let output = "";
   let index = 0;
 
   while (index < segment.length) {
+    const definition = readReferenceDefinition(
+      segment,
+      index,
+      sourcePath,
+      routeBySourcePath,
+    );
+    if (definition) {
+      output += definition.value;
+      index = definition.end;
+      continue;
+    }
+
     const reference = readMarkdownReference(
       segment,
       index,
       sourcePath,
       routeBySourcePath,
+      referenceDefinitions,
     );
     if (reference) {
       output += reference.value;
@@ -457,8 +608,13 @@ function rewriteMarkdownReferenceSegment(
 }
 
 function rewriteMarkdownReferences(markdown, sourcePath, routeBySourcePath) {
+  const referenceDefinitions = collectReferenceDefinitions(
+    markdown,
+    sourcePath,
+  );
+
   return markdown
-    .split(/(```[\s\S]*?```|~~~[\s\S]*?~~~)/g)
+    .split(FENCED_CODE_BLOCK_PATTERN)
     .map((segment, index) => {
       if (index % 2 === 1) return segment;
 
@@ -466,6 +622,7 @@ function rewriteMarkdownReferences(markdown, sourcePath, routeBySourcePath) {
         segment,
         sourcePath,
         routeBySourcePath,
+        referenceDefinitions,
       );
     })
     .join("");
