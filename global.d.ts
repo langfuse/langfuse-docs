@@ -71,18 +71,54 @@ declare module "*.mdx?collection=selfHosting" {
 // fumadocs-mdx .md collection modules (same pattern as .mdx above)
 // Some guides/integrations use plain .md extension instead of .mdx
 // ---------------------------------------------------------------------------
-declare module "*.md?collection=docs" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=blog" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=changelog" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=customers" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=faq" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=guides" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=handbook" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=integrations" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=library" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=marketing" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=security" { const mod: _MDXCollectionModule; export = mod; }
-declare module "*.md?collection=selfHosting" { const mod: _MDXCollectionModule; export = mod; }
+declare module "*.md?collection=docs" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=blog" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=changelog" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=customers" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=faq" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=guides" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=handbook" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=integrations" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=library" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=marketing" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=security" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
+declare module "*.md?collection=selfHosting" {
+  const mod: _MDXCollectionModule;
+  export = mod;
+}
 
 // ---------------------------------------------------------------------------
 // @modelcontextprotocol/sdk subpath that TypeScript can't resolve via wildcard

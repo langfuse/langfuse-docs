@@ -32,11 +32,17 @@ function tokenize(text: string): string[] {
   for (const ch of text) {
     const cp = ch.codePointAt(0)!;
     if (/\s/.test(ch)) {
-      if (buf) { tokens.push(buf); buf = ""; }
+      if (buf) {
+        tokens.push(buf);
+        buf = "";
+      }
       continue;
     }
     if (isCjkOrFullWidth(cp)) {
-      if (buf) { tokens.push(buf); buf = ""; }
+      if (buf) {
+        tokens.push(buf);
+        buf = "";
+      }
       tokens.push(ch);
     } else {
       buf += ch;
@@ -67,9 +73,7 @@ const TITLE_FONT_SIZES = [
   108, 96, 88, 80, 72, 64, 56, 48, 42, 36, 34, 32, 30, 28, 26, 24, 22, 20,
 ];
 /** Extra steps at the top for very short single-line titles only. */
-const TITLE_SINGLE_LINE_FONT_SIZES = [
-  120, 112, ...TITLE_FONT_SIZES,
-];
+const TITLE_SINGLE_LINE_FONT_SIZES = [120, 112, ...TITLE_FONT_SIZES];
 /** Long-title search includes the same large sizes as single-line (then steps down). */
 const TITLE_LONG_TITLE_FONT_SIZES = [120, 112, ...TITLE_FONT_SIZES];
 const DESC_FONT_SIZES = [26, 24, 22, 20, 18, 16, 14, 13, 12];
@@ -95,17 +99,17 @@ function effectiveCharCount(line: string, em: number): number {
 
 function isCjkOrFullWidth(cp: number): boolean {
   return (
-    (cp >= 0x2e80 && cp <= 0x9fff) ||  // CJK radicals, kangxi, ideographs
-    (cp >= 0xf900 && cp <= 0xfaff) ||  // CJK compatibility ideographs
-    (cp >= 0xfe30 && cp <= 0xfe4f) ||  // CJK compatibility forms
-    (cp >= 0xff01 && cp <= 0xff60) ||  // fullwidth Latin + halfwidth forms start
-    (cp >= 0xffe0 && cp <= 0xffe6) ||  // fullwidth signs
+    (cp >= 0x2e80 && cp <= 0x9fff) || // CJK radicals, kangxi, ideographs
+    (cp >= 0xf900 && cp <= 0xfaff) || // CJK compatibility ideographs
+    (cp >= 0xfe30 && cp <= 0xfe4f) || // CJK compatibility forms
+    (cp >= 0xff01 && cp <= 0xff60) || // fullwidth Latin + halfwidth forms start
+    (cp >= 0xffe0 && cp <= 0xffe6) || // fullwidth signs
     (cp >= 0x20000 && cp <= 0x2fa1f) || // CJK unified ext B–F, compat supplement
-    (cp >= 0x3000 && cp <= 0x303f) ||  // CJK symbols and punctuation
-    (cp >= 0x3040 && cp <= 0x309f) ||  // Hiragana
-    (cp >= 0x30a0 && cp <= 0x30ff) ||  // Katakana
-    (cp >= 0x31f0 && cp <= 0x31ff) ||  // Katakana phonetic extensions
-    (cp >= 0xac00 && cp <= 0xd7af)     // Hangul syllables
+    (cp >= 0x3000 && cp <= 0x303f) || // CJK symbols and punctuation
+    (cp >= 0x3040 && cp <= 0x309f) || // Hiragana
+    (cp >= 0x30a0 && cp <= 0x30ff) || // Katakana
+    (cp >= 0x31f0 && cp <= 0x31ff) || // Katakana phonetic extensions
+    (cp >= 0xac00 && cp <= 0xd7af) // Hangul syllables
   );
 }
 
@@ -124,7 +128,7 @@ function approxLineWidthPx(line: string, fontSize: number, em: number): number {
 function splitTwoLinesByWidth(
   title: string,
   fontSize: number,
-  innerW: number
+  innerW: number,
 ): string[] | null {
   const budget = innerW;
   const cjk = hasCjk(title);
@@ -144,7 +148,7 @@ function splitTwoLinesByWidth(
     ) {
       const imbalance = Math.abs(
         approxLineWidthPx(l1, fontSize, ANALOG_CHAR_EM) -
-        approxLineWidthPx(l2, fontSize, ANALOG_CHAR_EM)
+          approxLineWidthPx(l2, fontSize, ANALOG_CHAR_EM),
       );
       if (imbalance < bestImbalance) {
         bestImbalance = imbalance;
@@ -155,7 +159,10 @@ function splitTwoLinesByWidth(
   return best;
 }
 
-function splitTwoLines(title: string, maxCharsPerLine: number): string[] | null {
+function splitTwoLines(
+  title: string,
+  maxCharsPerLine: number,
+): string[] | null {
   const cjk = hasCjk(title);
   const words = cjk
     ? tokenize(title)
@@ -181,7 +188,7 @@ function splitTwoLines(title: string, maxCharsPerLine: number): string[] | null 
 function titleStackHeight(
   lineCount: number,
   fontSize: number,
-  lineGap: number
+  lineGap: number,
 ): number {
   const perLine = fontSize * TITLE_LINE_HEIGHT + 14;
   return lineCount * perLine + (lineCount - 1) * lineGap;
@@ -191,7 +198,7 @@ function titleStackHeight(
 function lineExceedsPanelWidth(
   line: string,
   fontSize: number,
-  innerW: number
+  innerW: number,
 ): boolean {
   return approxLineWidthPx(line, fontSize, ANALOG_CHAR_EM) > innerW * 1.02;
 }
@@ -228,7 +235,7 @@ function joinTokens(tokens: string[]): string {
 function greedyWordsToTitleRows(
   title: string,
   fontSize: number,
-  innerW: number
+  innerW: number,
 ): string[] {
   const tokens = hasCjk(title)
     ? tokenize(title)
@@ -269,7 +276,7 @@ function titleLinesFitRenderConstraints(
   lines: string[],
   fontSize: number,
   innerW: number,
-  innerH: number
+  innerH: number,
 ): boolean {
   if (titleStackHeight(lines.length, fontSize, TITLE_LINE_GAP) > innerH) {
     return false;
@@ -297,7 +304,7 @@ function titleLinesFitRenderConstraints(
 function normalizeTitleLines(
   lines: string[],
   fontSize: number,
-  innerW: number
+  innerW: number,
 ): string[] {
   const mc = Math.max(6, Math.floor(innerW / (fontSize * ANALOG_CHAR_EM)));
   const out: string[] = [];
@@ -319,7 +326,7 @@ function tryTwoLineLayout(
   lines: string[],
   fontSize: number,
   innerW: number,
-  innerH: number
+  innerH: number,
 ): { fontSize: number; lines: string[] } | null {
   if (lines.length !== 2) return null;
   if (!titleLinesFitRenderConstraints(lines, fontSize, innerW, innerH))
@@ -335,7 +342,7 @@ function splitTitleIntoBalancedLines(
   title: string,
   fontSize: number,
   innerW: number,
-  targetLines: number
+  targetLines: number,
 ): string[] | null {
   const cjk = hasCjk(title);
   const words = cjk
@@ -347,7 +354,7 @@ function splitTitleIntoBalancedLines(
   const budget = titleTextBudgetWidthPx(innerW);
 
   const width: number[][] = Array.from({ length: n }, () =>
-    Array.from({ length: n }, () => Number.POSITIVE_INFINITY)
+    Array.from({ length: n }, () => Number.POSITIVE_INFINITY),
   );
   for (let i = 0; i < n; i++) {
     let line = "";
@@ -372,10 +379,10 @@ function splitTitleIntoBalancedLines(
   };
 
   const dp: Score[][] = Array.from({ length: targetLines + 1 }, () =>
-    Array.from({ length: n + 1 }, () => ({ ...INF }))
+    Array.from({ length: n + 1 }, () => ({ ...INF })),
   );
   const prev: number[][] = Array.from({ length: targetLines + 1 }, () =>
-    Array.from({ length: n + 1 }, () => -1)
+    Array.from({ length: n + 1 }, () => -1),
   );
   dp[0][0] = { maxSlack: 0, totalSlack: 0 };
 
@@ -416,7 +423,7 @@ function splitTitleIntoBalancedLines(
 function titleLineFillMinRatio(
   lines: string[],
   fontSize: number,
-  innerW: number
+  innerW: number,
 ): number {
   const budget = titleTextBudgetWidthPx(innerW);
   if (budget <= 0 || lines.length === 0) return 0;
@@ -432,7 +439,7 @@ function titleLineFillMinRatio(
 function titleLineFillAvgRatio(
   lines: string[],
   fontSize: number,
-  innerW: number
+  innerW: number,
 ): number {
   const budget = titleTextBudgetWidthPx(innerW);
   if (budget <= 0 || lines.length === 0) return 0;
@@ -447,10 +454,18 @@ function titleLineFillAvgRatio(
 
 function scoreLongTitleCandidate(
   candidate: { fontSize: number; lines: string[] },
-  innerW: number
+  innerW: number,
 ): number {
-  const minFill = titleLineFillMinRatio(candidate.lines, candidate.fontSize, innerW);
-  const avgFill = titleLineFillAvgRatio(candidate.lines, candidate.fontSize, innerW);
+  const minFill = titleLineFillMinRatio(
+    candidate.lines,
+    candidate.fontSize,
+    innerW,
+  );
+  const avgFill = titleLineFillAvgRatio(
+    candidate.lines,
+    candidate.fontSize,
+    innerW,
+  );
   // Emphasize larger type while still rewarding fuller horizontal usage.
   return candidate.fontSize * (0.72 * minFill + 0.28 * avgFill);
 }
@@ -459,7 +474,7 @@ function fitTitleLayoutLongAtLineCount(
   title: string,
   innerW: number,
   innerH: number,
-  targetLines: number
+  targetLines: number,
 ): { fontSize: number; lines: string[] } | null {
   let first: { fontSize: number; lines: string[] } | null = null;
   for (const fontSize of TITLE_LONG_TITLE_FONT_SIZES) {
@@ -467,10 +482,11 @@ function fitTitleLayoutLongAtLineCount(
       title,
       fontSize,
       innerW,
-      targetLines
+      targetLines,
     );
     if (!pair) continue;
-    if (!titleLinesFitRenderConstraints(pair, fontSize, innerW, innerH)) continue;
+    if (!titleLinesFitRenderConstraints(pair, fontSize, innerW, innerH))
+      continue;
     first = { fontSize, lines: pair };
     break;
   }
@@ -506,7 +522,7 @@ function isShortTitle(title: string): boolean {
 function fitTitleLayoutSingleLine(
   title: string,
   innerW: number,
-  innerH: number
+  innerH: number,
 ): { fontSize: number; lines: string[] } | null {
   const text = title.trim();
   for (const fontSize of TITLE_SINGLE_LINE_FONT_SIZES) {
@@ -526,7 +542,7 @@ function fitTitleLayoutSingleLine(
 function fitTitleLayoutLong(
   title: string,
   innerW: number,
-  innerH: number
+  innerH: number,
 ): { fontSize: number; lines: string[] } {
   if (!title.trim()) {
     return { fontSize: 36, lines: [""] };
@@ -536,19 +552,19 @@ function fitTitleLayoutLong(
     title,
     innerW,
     innerH,
-    2
+    2,
   );
   const candidateThreeLine = fitTitleLayoutLongAtLineCount(
     title,
     innerW,
     innerH,
-    3
+    3,
   );
   const candidateFourLine = fitTitleLayoutLongAtLineCount(
     title,
     innerW,
     innerH,
-    4
+    4,
   );
 
   let minLines = Number.POSITIVE_INFINITY;
@@ -563,7 +579,12 @@ function fitTitleLayoutLong(
   if (minLines < Number.POSITIVE_INFINITY) {
     let first: { fontSize: number; lines: string[] } | null = null;
     for (const fontSize of TITLE_LONG_TITLE_FONT_SIZES) {
-      const lines = splitTitleIntoBalancedLines(title, fontSize, innerW, minLines);
+      const lines = splitTitleIntoBalancedLines(
+        title,
+        fontSize,
+        innerW,
+        minLines,
+      );
       if (!lines) continue;
       if (
         titleLinesFitRenderConstraints(lines, fontSize, innerW, innerH) &&
@@ -576,7 +597,12 @@ function fitTitleLayoutLong(
     if (first) {
       let { fontSize: maxFs, lines: maxLines } = first;
       for (let f = first.fontSize + 1; f <= TITLE_MAX_REFINE_FS; f += 1) {
-        const tryLines = splitTitleIntoBalancedLines(title, f, innerW, minLines);
+        const tryLines = splitTitleIntoBalancedLines(
+          title,
+          f,
+          innerW,
+          minLines,
+        );
         if (!tryLines) continue;
         if (
           titleLinesFitRenderConstraints(tryLines, f, innerW, innerH) &&
@@ -592,7 +618,7 @@ function fitTitleLayoutLong(
 
   const chooseBetter = (
     a: { fontSize: number; lines: string[] } | null,
-    b: { fontSize: number; lines: string[] } | null
+    b: { fontSize: number; lines: string[] } | null,
   ): { fontSize: number; lines: string[] } | null => {
     if (!a) return b;
     if (!b) return a;
@@ -608,8 +634,11 @@ function fitTitleLayoutLong(
   };
 
   const bestStructured = chooseBetter(
-    chooseBetter(chooseBetter(candidateTwoLine, candidateThreeLine), candidateFourLine),
-    bestMinLine
+    chooseBetter(
+      chooseBetter(candidateTwoLine, candidateThreeLine),
+      candidateFourLine,
+    ),
+    bestMinLine,
   );
   if (bestStructured) return bestStructured;
 
@@ -632,7 +661,10 @@ function fitTitleLayoutLong(
   }
   let fs = TITLE_FONT_SIZES[TITLE_FONT_SIZES.length - 1];
   let lines = greedyWordsToTitleRows(title, fs, innerW);
-  while (titleStackHeight(lines.length, fs, TITLE_LINE_GAP) > innerH && fs > 12) {
+  while (
+    titleStackHeight(lines.length, fs, TITLE_LINE_GAP) > innerH &&
+    fs > 12
+  ) {
     fs -= 2;
     lines = greedyWordsToTitleRows(title, fs, innerW);
   }
@@ -642,7 +674,7 @@ function fitTitleLayoutLong(
 function fitTitleLayout(
   title: string,
   innerW: number,
-  innerH: number
+  innerH: number,
 ): { fontSize: number; lines: string[] } {
   if (isLongTitle(title)) {
     return fitTitleLayoutLong(title, innerW, innerH);
@@ -666,7 +698,10 @@ function fitTitleLayout(
 
   // 2) Two lines from character budget + slack (fallback).
   for (const fontSize of TITLE_FONT_SIZES) {
-    const baseMc = Math.max(8, Math.floor(innerW / (fontSize * ANALOG_CHAR_EM)));
+    const baseMc = Math.max(
+      8,
+      Math.floor(innerW / (fontSize * ANALOG_CHAR_EM)),
+    );
     for (const s of splitSlack) {
       const mc = baseMc + s;
       const pair = splitTwoLines(title, mc);
@@ -679,7 +714,10 @@ function fitTitleLayout(
 
   // 3) Exactly two lines from word-wrap.
   for (const fontSize of TITLE_FONT_SIZES) {
-    const maxChars = Math.max(8, Math.floor(innerW / (fontSize * ANALOG_CHAR_EM)));
+    const maxChars = Math.max(
+      8,
+      Math.floor(innerW / (fontSize * ANALOG_CHAR_EM)),
+    );
     const wrapped = wrapWords(title, maxChars);
     if (wrapped.length === 2) {
       const ok = tryTwoLineLayout(wrapped, fontSize, innerW, innerH);
@@ -690,7 +728,10 @@ function fitTitleLayout(
   // 4) Fewest wrapped lines possible, then largest font.
   let best: { fontSize: number; lines: string[] } | null = null;
   for (const fontSize of TITLE_FONT_SIZES) {
-    const maxChars = Math.max(8, Math.floor(innerW / (fontSize * ANALOG_CHAR_EM)));
+    const maxChars = Math.max(
+      8,
+      Math.floor(innerW / (fontSize * ANALOG_CHAR_EM)),
+    );
     const wrapped = wrapWords(title, maxChars);
     const normalized = normalizeTitleLines(wrapped, fontSize, innerW);
     const h = titleStackHeight(normalized.length, fontSize, TITLE_LINE_GAP);
@@ -717,7 +758,7 @@ function descStackHeight(
   lineCount: number,
   fontSize: number,
   lineHeight: number,
-  lineGap: number
+  lineGap: number,
 ): number {
   return lineCount * fontSize * lineHeight + (lineCount - 1) * lineGap;
 }
@@ -725,17 +766,19 @@ function descStackHeight(
 function fitDescLayout(
   text: string,
   innerW: number,
-  innerH: number
+  innerH: number,
 ): { fontSize: number; lines: string[] } {
   const lineHeight = 1.36;
 
   for (const fontSize of DESC_FONT_SIZES) {
-    const mc = Math.max(
-      10,
-      Math.floor(innerW / (fontSize * INTER_CHAR_EM))
-    );
+    const mc = Math.max(10, Math.floor(innerW / (fontSize * INTER_CHAR_EM)));
     const lines = wrapWords(text, mc);
-    const h = descStackHeight(lines.length, fontSize, lineHeight, DESC_LINE_GAP);
+    const h = descStackHeight(
+      lines.length,
+      fontSize,
+      lineHeight,
+      DESC_LINE_GAP,
+    );
     if (h <= innerH) {
       return { fontSize, lines };
     }
@@ -753,10 +796,7 @@ function toDataUrl(buffer: ArrayBuffer, mime: string): string {
   const chunk = 0x2000; // 8192, safe for apply
   for (let i = 0; i < bytes.length; i += chunk) {
     const sub = bytes.subarray(i, i + chunk);
-    binary += String.fromCharCode.apply(
-      null,
-      sub as unknown as number[]
-    );
+    binary += String.fromCharCode.apply(null, sub as unknown as number[]);
   }
   return `data:${mime};base64,${btoa(binary)}`;
 }
@@ -797,8 +837,12 @@ export async function GET(request: NextRequest) {
   const bgUrl = new URL(OG_BG_PATH, base);
   const [ogBgData, fontAnalog, fontInter] = await Promise.all([
     fetch(bgUrl).then((r) => (r.ok ? r.arrayBuffer() : Promise.resolve(null))),
-    fetch(new URL("/fonts/F37Analog-Medium.ttf", base)).then((r) => r.arrayBuffer()),
-    fetch(new URL("/fonts/Inter-Regular.ttf", base)).then((r) => r.arrayBuffer()),
+    fetch(new URL("/fonts/F37Analog-Medium.ttf", base)).then((r) =>
+      r.arrayBuffer(),
+    ),
+    fetch(new URL("/fonts/Inter-Regular.ttf", base)).then((r) =>
+      r.arrayBuffer(),
+    ),
   ]);
 
   const { searchParams } = new URL(request.url);
@@ -806,9 +850,7 @@ export async function GET(request: NextRequest) {
   const sectionLabel = searchParams.get("section")?.trim() || undefined;
 
   const rawDescription = searchParams.get("description") ?? undefined;
-  const descriptionText =
-    rawDescription?.trim() ||
-    SITE_DEFAULT_OG_DESCRIPTION;
+  const descriptionText = rawDescription?.trim() || SITE_DEFAULT_OG_DESCRIPTION;
 
   const titleInnerW = CONTENT_W - MIN_EDGE * 2;
   const titleInnerH = TITLE_BAND_H - TITLE_PAD_Y * 2;
@@ -820,159 +862,159 @@ export async function GET(request: NextRequest) {
   const descFit = fitDescLayout(descriptionText, descInnerW, descInnerH);
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        display: "flex",
+        position: "relative",
+        width: CANVAS_W,
+        height: CANVAS_H,
+        backgroundColor: BG_COLOR,
+      }}
+    >
+      {/* Background with decorators — shown only when og-bg.png is present */}
+      {ogBgData ? (
+        <img
+          src={toDataUrl(ogBgData, "image/png")}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: CANVAS_W,
+            height: CANVAS_H,
+          }}
+        />
+      ) : null}
+
+      {sectionLabel ? (
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            left: CONTENT_INSET_X + SECTION_LABEL_LEFT_OFFSET,
+            top: HEADER_TOP,
+            height: HEADER_HEIGHT,
+            alignItems: "center",
+            fontFamily: "Inter",
+            fontWeight: 400,
+            fontSize: 24,
+            lineHeight: 1,
+            color: "#9b9b96",
+          }}
+        >
+          {sectionLabel}
+        </div>
+      ) : null}
+
+      {/* Content column */}
       <div
         style={{
           display: "flex",
-          position: "relative",
-          width: CANVAS_W,
-          height: CANVAS_H,
-          backgroundColor: BG_COLOR,
+          flexDirection: "column",
+          position: "absolute",
+          left: CONTENT_INSET_X,
+          top: CONTENT_TOP,
+          width: CONTENT_W,
+          height: TITLE_BAND_H + BETWEEN_BANDS_H + DESC_BAND_H,
         }}
       >
-        {/* Background with decorators — shown only when og-bg.png is present */}
-        {ogBgData ? (
-          <img
-            src={toDataUrl(ogBgData, "image/png")}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: CANVAS_W,
-              height: CANVAS_H,
-            }}
-          />
-        ) : null}
-
-        {sectionLabel ? (
-          <div
-            style={{
-              display: "flex",
-              position: "absolute",
-              left: CONTENT_INSET_X + SECTION_LABEL_LEFT_OFFSET,
-              top: HEADER_TOP,
-              height: HEADER_HEIGHT,
-              alignItems: "center",
-              fontFamily: "Inter",
-              fontWeight: 400,
-              fontSize: 24,
-              lineHeight: 1,
-              color: "#9b9b96",
-            }}
-          >
-            {sectionLabel}
-          </div>
-        ) : null}
-
-        {/* Content column */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            position: "absolute",
-            left: CONTENT_INSET_X,
-            top: CONTENT_TOP,
-            width: CONTENT_W,
-            height: TITLE_BAND_H + BETWEEN_BANDS_H + DESC_BAND_H,
+            justifyContent: "center",
+            alignItems: "flex-start",
+            height: TITLE_BAND_H,
+            padding: `${TITLE_PAD_Y}px ${MIN_EDGE}px`,
+            boxSizing: "border-box",
+            flexShrink: 0,
+          }}
+        >
+          {/* Each line gets its own highlight strip; gap creates space between lines */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "flex-start",
+              gap: TITLE_LINE_GAP,
+              width: titleInnerW,
+              height: titleInnerH,
+              flexShrink: 0,
+            }}
+          >
+            {titleLinesDisplay.map((line, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  width: titleRowWidthPx(titleInnerW),
+                  justifyContent: "flex-start",
+                  alignItems: "flex-start",
+                }}
+              >
+                <span
+                  style={{
+                    backgroundColor: "#fbff7a",
+                    fontFamily: "F37Analog",
+                    fontWeight: 500,
+                    fontSize: titleFit.fontSize,
+                    lineHeight: TITLE_LINE_HEIGHT,
+                    whiteSpace: "nowrap",
+                    color: "#222220",
+                    padding: "6px 12px",
+                  }}
+                >
+                  {line}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div
+          style={{ height: BETWEEN_BANDS_H, width: CONTENT_W, flexShrink: 0 }}
+        />
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            height: DESC_BAND_H,
+            padding: MIN_EDGE,
+            boxSizing: "border-box",
+            flexShrink: 0,
           }}
         >
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "flex-start",
-              height: TITLE_BAND_H,
-              padding: `${TITLE_PAD_Y}px ${MIN_EDGE}px`,
-              boxSizing: "border-box",
-              flexShrink: 0,
+              width: descInnerW,
+              gap: DESC_LINE_GAP,
             }}
           >
-            {/* Each line gets its own highlight strip; gap creates space between lines */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "flex-start",
-                gap: TITLE_LINE_GAP,
-                width: titleInnerW,
-                height: titleInnerH,
-                flexShrink: 0,
-              }}
-            >
-              {titleLinesDisplay.map((line, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    width: titleRowWidthPx(titleInnerW),
-                    justifyContent: "flex-start",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <span
-                    style={{
-                      backgroundColor: "#fbff7a",
-                      fontFamily: "F37Analog",
-                      fontWeight: 500,
-                      fontSize: titleFit.fontSize,
-                      lineHeight: TITLE_LINE_HEIGHT,
-                      whiteSpace: "nowrap",
-                      color: "#222220",
-                      padding: "6px 12px",
-                    }}
-                  >
-                    {line}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ height: BETWEEN_BANDS_H, width: CONTENT_W, flexShrink: 0 }} />
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "flex-start",
-              height: DESC_BAND_H,
-              padding: MIN_EDGE,
-              boxSizing: "border-box",
-              flexShrink: 0,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                width: descInnerW,
-                gap: DESC_LINE_GAP,
-              }}
-            >
-              {descFit.lines.map((line, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    fontFamily: "Inter",
-                    fontWeight: 400,
-                    fontSize: descFit.fontSize,
-                    lineHeight: 1.36,
-                    color: "#3d3d38",
-                    textAlign: "left",
-                  }}
-                >
-                  {line}
-                </div>
-              ))}
-            </div>
+            {descFit.lines.map((line, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  fontFamily: "Inter",
+                  fontWeight: 400,
+                  fontSize: descFit.fontSize,
+                  lineHeight: 1.36,
+                  color: "#3d3d38",
+                  textAlign: "left",
+                }}
+              >
+                {line}
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    ),
+    </div>,
     {
       width: CANVAS_W,
       height: CANVAS_H,
@@ -980,6 +1022,6 @@ export async function GET(request: NextRequest) {
         { name: "F37Analog", data: fontAnalog, style: "normal", weight: 500 },
         { name: "Inter", data: fontInter, style: "normal", weight: 400 },
       ],
-    }
+    },
   );
 }

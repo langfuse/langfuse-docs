@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     if (!emailSchema.safeParse(email).success) {
       return NextResponse.json(
         { error: "Invalid email address" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${process.env.LOOPS_API_KEY}`,
         },
-      }
+      },
     );
 
     if (loopsResponse.status === 200 || loopsResponse.status === 409) {
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     console.error("Loops", await loopsResponse.text());
     return NextResponse.json(
       {},
-      { status: 500, statusText: "Internal Server Error" }
+      { status: 500, statusText: "Internal Server Error" },
     );
   } catch (error) {
     console.error(error);
@@ -49,8 +49,9 @@ export async function POST(request: NextRequest) {
       {},
       {
         status: 500,
-        statusText: error instanceof Error ? error.message : "Internal Server Error",
-      }
+        statusText:
+          error instanceof Error ? error.message : "Internal Server Error",
+      },
     );
   }
 }

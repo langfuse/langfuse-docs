@@ -1,11 +1,8 @@
-const rateLimitStore = new Map<
-  string,
-  { count: number; resetAt: number }
->();
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 
 export function rateLimit(
   req: Request,
-  opts: { limit: number; windowMs: number }
+  opts: { limit: number; windowMs: number },
 ): { success: boolean; remaining: number } {
   // Clean up expired entries
   const now = Date.now();

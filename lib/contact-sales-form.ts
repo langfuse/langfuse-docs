@@ -152,7 +152,7 @@ export function formatFormDataForEmail(data: ContactFormData): string {
       label: FORM_FIELDS.enterpriseRequirements.label,
       value: data.enterpriseRequirements
         .map(
-          (v) => ENTERPRISE_REQUIREMENTS.find((o) => o.value === v)?.label ?? v
+          (v) => ENTERPRISE_REQUIREMENTS.find((o) => o.value === v)?.label ?? v,
         )
         .join(", "),
     },

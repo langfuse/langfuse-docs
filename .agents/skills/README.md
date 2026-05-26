@@ -14,6 +14,7 @@ verified by `pnpm run agents:sync` and `pnpm run agents:check`.
 ### add-yourself-to-team-langfuse
 
 Use for:
+
 - adding a new team member to the public Langfuse team pages
 - updating `data/authors.json`
 - updating `components-mdx/team-members.mdx`
@@ -25,6 +26,7 @@ Open:
 ### customer-story-setup
 
 Use for:
+
 - converting draft customer-story Markdown into website MDX
 - wiring `content/customers/<slug>.mdx`, `content/customers/meta.json`, and
   `data/authors.json`

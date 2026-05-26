@@ -42,7 +42,7 @@ export function BlogMobileFilters() {
               "shrink-0 px-3 py-1 rounded-full text-[12px] font-[430] transition-colors border",
               !selectedTag
                 ? "bg-text-primary text-surface-bg border-text-primary"
-                : "bg-surface-bg text-text-secondary border-line-structure hover:border-text-tertiary"
+                : "bg-surface-bg text-text-secondary border-line-structure hover:border-text-tertiary",
             )}
           >
             All ({allPosts.length})
@@ -57,7 +57,7 @@ export function BlogMobileFilters() {
                 "shrink-0 px-3 py-1 rounded-full text-[12px] font-[430] transition-colors border capitalize",
                 selectedTag === tag.name
                   ? "bg-text-primary text-surface-bg border-text-primary"
-                  : "bg-surface-bg text-text-secondary border-line-structure hover:border-text-tertiary"
+                  : "bg-surface-bg text-text-secondary border-line-structure hover:border-text-tertiary",
               )}
             >
               {tag.name} ({tag.count})

@@ -50,7 +50,6 @@ const platformFeature = {
 export const FeatureOverview = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 items-stretch px-px not-prose">
-
       {features.map((feature) => (
         <div key={feature.title} className="-ml-px -mr-px">
           <CornerBox className="flex relative z-1 flex-col p-0 min-h-0 h-full p-4">
@@ -63,8 +62,13 @@ export const FeatureOverview = () => {
             <ul className="list-none flex flex-col gap-1.5">
               {feature.items.map((item, itemIndex) => (
                 <li key={itemIndex} className="flex gap-2 items-start">
-                  <span className="w-0.75 h-0.75 shrink-0 bg-text-tertiary mt-2 lg:mt-1.5" aria-hidden />
-                  <Text size="s" className="text-left">{item}</Text>
+                  <span
+                    className="w-0.75 h-0.75 shrink-0 bg-text-tertiary mt-2 lg:mt-1.5"
+                    aria-hidden
+                  />
+                  <Text size="s" className="text-left">
+                    {item}
+                  </Text>
                 </li>
               ))}
             </ul>
@@ -83,7 +87,10 @@ export const FeatureOverview = () => {
           <ul className="list-none flex flex-col gap-1.5">
             {platformFeature.items.map((item, itemIndex) => (
               <li key={itemIndex} className="flex items-start gap-2">
-                <span className="w-0.75 h-0.75 shrink-0 bg-text-tertiary" aria-hidden />
+                <span
+                  className="w-0.75 h-0.75 shrink-0 bg-text-tertiary"
+                  aria-hidden
+                />
                 <Text size="s">{item}</Text>
               </li>
             ))}

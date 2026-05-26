@@ -19,6 +19,8 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 ### Content and maintenance
 
 - `bash scripts/update_cookbook_docs.sh` — convert notebook-based cookbook content into docs markdown.
+- `pnpm run format` — format supported files with Prettier, including Markdown and MDX. Markdown prose wrapping is preserved and embedded-language formatting is disabled to avoid rendering or fenced-snippet changes.
+- `pnpm run format:check` — check Prettier formatting without writing files; CI runs this.
 - `pnpm run link-check` — validate markdown links.
 - `pnpm run sitemap-check` — validate links from generated sitemap.
 
@@ -78,6 +80,8 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
     `embedded-chat.tsx`, `ask-ai-button.tsx`).
 
 ## Writing guidelines
+
+- Use sentence case for user-facing headlines, section headings, and hero copy by default. Keep title case for short standalone navigation/UI labels where it reads more naturally (for example, paired nouns like "Questions & Answers" or conventional labels like "Get Started"). Always preserve proper nouns, acronyms, and official product names.
 
 ### Changelog entries
 

@@ -16,17 +16,19 @@ export interface ChipCardProps {
   children?: React.ReactNode;
 }
 
-const ChipCard = React.forwardRef<HTMLAnchorElement | HTMLDivElement, ChipCardProps>(
-  ({ href, icon, label, tooltip, size = "sm", className, children }, ref) => {
-    const tooltipId = React.useId();
-    const [mounted, setMounted] = React.useState(false);
-    const [open, setOpen] = React.useState(false);
-    const [pos, setPos] = React.useState({ x: 0, y: 0 });
+const ChipCard = React.forwardRef<
+  HTMLAnchorElement | HTMLDivElement,
+  ChipCardProps
+>(({ href, icon, label, tooltip, size = "sm", className, children }, ref) => {
+  const tooltipId = React.useId();
+  const [mounted, setMounted] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [pos, setPos] = React.useState({ x: 0, y: 0 });
 
-    React.useEffect(() => setMounted(true), []);
+  React.useEffect(() => setMounted(true), []);
 
-    const followHandlers = tooltip
-      ? {
+  const followHandlers = tooltip
+    ? {
         "aria-describedby": open ? tooltipId : undefined,
         onPointerEnter: (e: React.PointerEvent) => {
           setOpen(true);
@@ -36,45 +38,47 @@ const ChipCard = React.forwardRef<HTMLAnchorElement | HTMLDivElement, ChipCardPr
         onPointerMove: (e: React.PointerEvent) =>
           setPos({ x: e.clientX, y: e.clientY }),
       }
-      : {};
+    : {};
 
-    const isMd = size === "md";
+  const isMd = size === "md";
 
-    const inner = children ? (
-      <>
-        {children}
-      </>
-    ) : (
-      <>
-        {icon && (
-          <span className={cn(
+  const inner = children ? (
+    <>{children}</>
+  ) : (
+    <>
+      {icon && (
+        <span
+          className={cn(
             "flex justify-center items-center shrink-0",
-            isMd ? "w-6 h-6" : "w-5 h-5"
-          )}>
-            {icon}
-          </span>
-        )}
-        <span className={cn(
-          "font-normal leading-none whitespace-nowrap text-text-secondary",
-          isMd ? "text-[15px]" : "text-[14px]"
-        )}>
-          {label}
+            isMd ? "w-6 h-6" : "w-5 h-5",
+          )}
+        >
+          {icon}
         </span>
-      </>
-    );
+      )}
+      <span
+        className={cn(
+          "font-normal leading-none whitespace-nowrap text-text-secondary",
+          isMd ? "text-[15px]" : "text-[14px]",
+        )}
+      >
+        {label}
+      </span>
+    </>
+  );
 
-    const baseClassName = cn(
-      "corner-box-hover-stripes transition-[background] duration-180 ease-out",
-      "relative group inline-flex items-center",
-      "border border-line-structure bg-surface-bg rounded-[2px]",
-      "cursor-pointer",
-      isMd ? "gap-3 px-4 py-3 min-w-[140px]" : "gap-2.5 px-3.5 py-2.5",
-      className
-    );
+  const baseClassName = cn(
+    "corner-box-hover-stripes transition-[background] duration-180 ease-out",
+    "relative group inline-flex items-center",
+    "border border-line-structure bg-surface-bg rounded-[2px]",
+    "cursor-pointer",
+    isMd ? "gap-3 px-4 py-3 min-w-[140px]" : "gap-2.5 px-3.5 py-2.5",
+    className,
+  );
 
-    const tooltipPortal =
-      tooltip && mounted && open
-        ? createPortal(
+  const tooltipPortal =
+    tooltip && mounted && open
+      ? createPortal(
           <div
             id={tooltipId}
             role="tooltip"
@@ -86,40 +90,39 @@ const ChipCard = React.forwardRef<HTMLAnchorElement | HTMLDivElement, ChipCardPr
           >
             {tooltip}
           </div>,
-          document.body
+          document.body,
         )
-        : null;
+      : null;
 
-    if (href) {
-      return (
-        <>
-          <Link
-            ref={ref as React.ForwardedRef<HTMLAnchorElement>}
-            href={href}
-            className={cn(baseClassName, "corner-box-corners--hover")}
-            {...followHandlers}
-          >
-            {inner}
-          </Link>
-          {tooltipPortal}
-        </>
-      );
-    }
-
+  if (href) {
     return (
       <>
-        <div
-          ref={ref as React.ForwardedRef<HTMLDivElement>}
-          className={baseClassName}
+        <Link
+          ref={ref as React.ForwardedRef<HTMLAnchorElement>}
+          href={href}
+          className={cn(baseClassName, "corner-box-corners--hover")}
           {...followHandlers}
         >
           {inner}
-        </div>
+        </Link>
         {tooltipPortal}
       </>
     );
   }
-);
+
+  return (
+    <>
+      <div
+        ref={ref as React.ForwardedRef<HTMLDivElement>}
+        className={baseClassName}
+        {...followHandlers}
+      >
+        {inner}
+      </div>
+      {tooltipPortal}
+    </>
+  );
+});
 
 ChipCard.displayName = "ChipCard";
 

@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     console.error("SMTP_CONNECTION_URL is not configured");
     return NextResponse.json(
       { error: "Email service not configured" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
           error: "Invalid form data",
           details: validationResult.error.flatten(),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     console.error("Failed to send email:", error);
     return NextResponse.json(
       { error: "Failed to send email" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

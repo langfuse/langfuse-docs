@@ -24,10 +24,7 @@ export function RightSidebarHiringAndCommunity({
   return (
     <>
       {withTopRule && (
-        <div
-          className="h-px w-full bg-line-structure shrink-0"
-          aria-hidden
-        />
+        <div className="h-px w-full bg-line-structure shrink-0" aria-hidden />
       )}
       <div className="pb-px bg-line-structure">
         <div className="px-3 py-3 rounded-sm bg-surface-1">

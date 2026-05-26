@@ -23,7 +23,11 @@ function isEditableElement(el: Element | null): boolean {
   if (!el) return false;
   const tag = el.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
-  if (el instanceof HTMLElement && (el.isContentEditable || el.closest("[contenteditable='true']"))) return true;
+  if (
+    el instanceof HTMLElement &&
+    (el.isContentEditable || el.closest("[contenteditable='true']"))
+  )
+    return true;
   return false;
 }
 
@@ -52,11 +56,12 @@ export const ToAppButton = ({
 
   const signedInCount = Object.values(signedInRegions).filter(Boolean).length;
 
-  const signedInRegion = signedInCount === 1
-    ? Object.entries(cloudRegions).find(
-        ([key]) => signedInRegions[key as CloudRegionKey]
-      )
-    : null;
+  const signedInRegion =
+    signedInCount === 1
+      ? Object.entries(cloudRegions).find(
+          ([key]) => signedInRegions[key as CloudRegionKey],
+        )
+      : null;
 
   if (signedInCount > 1) {
     return (
@@ -67,18 +72,10 @@ export const ToAppButton = ({
     );
   } else if (signedInCount === 1 && signedInRegion) {
     return (
-      <NavigatingButton
-        href={signedInRegion[1].url}
-        label={signedInText}
-      />
+      <NavigatingButton href={signedInRegion[1].url} label={signedInText} />
     );
   } else {
-    return (
-      <NavigatingButton
-        href="/cloud"
-        label={signUpText}
-      />
-    );
+    return <NavigatingButton href="/cloud" label={signUpText} />;
   }
 };
 
@@ -101,7 +98,11 @@ function NavigatingButton({ href, label }: { href: string; label: string }) {
       variant="primary"
       size="small"
       shortcutKey={navigating ? undefined : "L"}
-      icon={navigating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : undefined}
+      icon={
+        navigating ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : undefined
+      }
       iconPosition="end"
       href={href}
       onClick={(e) => {
@@ -134,7 +135,7 @@ function MultiRegionButton({
       e.preventDefault();
       setOpen(true);
     },
-    [open]
+    [open],
   );
 
   useEffect(() => {
@@ -173,7 +174,10 @@ function MultiRegionButton({
         })}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/cloud" className="flex items-center gap-1.5 text-muted-foreground">
+          <Link
+            href="/cloud"
+            className="flex items-center gap-1.5 text-muted-foreground"
+          >
             <Plus className="h-3.5 w-3.5" />
             Add region
           </Link>

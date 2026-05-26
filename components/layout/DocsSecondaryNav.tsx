@@ -4,6 +4,8 @@ import {
   Menu,
   X,
   ChevronRight,
+  GraduationCap,
+  Presentation,
   Unplug,
 } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +23,8 @@ const SECTIONS = [
   { title: "Integrations", path: "/integrations", Icon: Unplug },
   { title: "Self Hosting", path: "/self-hosting", Icon: IconDesktopTower },
   { title: "Guides", path: "/guides", Icon: IconCompass },
+  { title: "Academy", path: "/academy", Icon: GraduationCap },
+  { title: "Workshop", path: "/workshop", Icon: Presentation },
   { title: "AI Engineering Library", path: "/library", Icon: IconBookBookmark },
 ] as const;
 
@@ -47,7 +51,8 @@ export function DocsSecondaryNavMobile() {
   const activeSection = SECTIONS.find((s) => pathname?.startsWith(s.path));
 
   const sectionTitle =
-    activeSection?.title ?? pageNameFromPath("/" + (pathname?.split("/")[1] ?? ""));
+    activeSection?.title ??
+    pageNameFromPath("/" + (pathname?.split("/")[1] ?? ""));
 
   // Prefer tree path for page name (gives the authored title), fall back to slug
   const treeNode = treePath.length > 0 ? treePath[treePath.length - 1] : null;
@@ -62,7 +67,9 @@ export function DocsSecondaryNavMobile() {
   return (
     <div
       className="flex items-center px-3 gap-2 md:hidden sticky z-41 bg-surface-1 border-b border-line-structure [grid-area:header] h-[var(--lf-nav-docs-secondary-height)]"
-      style={{ top: "var(--lf-nav-primary-height)" }}
+      style={{
+        top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
+      }}
     >
       <button
         aria-label={open ? "Close Sidebar" : "Open Sidebar"}
@@ -90,10 +97,12 @@ export function DocsSecondaryNav() {
   const pathname = usePathname();
   return (
     <div
-      className="hidden overflow-x-auto overflow-y-hidden sticky z-40 md:block bg-surface-1"
-      style={{ top: "var(--lf-nav-primary-height)" }}
+      className="hidden overflow-x-auto overflow-y-hidden sticky z-50 md:block bg-surface-1"
+      style={{
+        top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
+      }}
     >
-      <nav className="px-px mx-auto border-b max-w-360 bg-line-structure border-line-structure">
+      <nav className="px-px mx-auto border-b max-w-380 bg-line-structure border-line-structure">
         <div className="flex gap-0 items-stretch rounded-sm bg-surface-1">
           {SECTIONS.map((item) => {
             const isActive = pathname?.startsWith(item.path);
@@ -105,7 +114,7 @@ export function DocsSecondaryNav() {
                   "flex h-[var(--lf-nav-docs-secondary-height)] shrink-0 gap-2 items-center px-4 -mb-px text-sm whitespace-nowrap border-b-2 transition-colors",
                   isActive
                     ? "font-medium with-stripes-alt border-line-cta text-text-primary"
-                    : "border-transparent text-text-tertiary hover:border-line-structure hover:text-text-secondary"
+                    : "border-transparent text-text-tertiary hover:border-line-structure hover:text-text-secondary",
                 )}
               >
                 <item.Icon className="w-4 h-4 shrink-0" />

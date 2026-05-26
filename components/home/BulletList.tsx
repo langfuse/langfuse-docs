@@ -16,11 +16,7 @@ export function BulletList({ items }: { items: BulletItem[] }) {
             aria-hidden
           />
           {item.href ? (
-            <Link
-              href={item.href}
-              variant="text"
-              className="text-[14px]"
-            >
+            <Link href={item.href} variant="text" className="text-[14px]">
               {item.label}
             </Link>
           ) : (

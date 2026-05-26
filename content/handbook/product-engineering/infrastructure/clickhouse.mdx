@@ -36,15 +36,16 @@ The deduplication in ReplacingMergeTrees happens eventually and there is no guar
 Therefore, we perform additional read-side deduplication for most queries to return consistent results.
 
 There are three main ways to perform deduplication on read that we use:
+
 - **FINAL modifier**: This automatically performs the full deduplication that ClickHouse runs on merges.
-   Especially for larger tables, this can be very expensive and slow with a high memory consumption.
-   In addition, this blocks the use of data skipping indexes on older ClickHouse versions.
+  Especially for larger tables, this can be very expensive and slow with a high memory consumption.
+  In addition, this blocks the use of data skipping indexes on older ClickHouse versions.
 - **ORDER BY event_ts LIMIT 1 BY ...**: If we ensure that the sorting order avoids duplicates on updates (i.e. only sorts by time and event_ts), we can
-   use the LIMIT 1 BY clause to return only one row per identifier. This is often the cheapest to compute and makes use of data skipping indexes,
-   but requires careful ordering of the tables. We also observed gotchas where the timestamp shifted between updates which may cause seemingly random results.
+  use the LIMIT 1 BY clause to return only one row per identifier. This is often the cheapest to compute and makes use of data skipping indexes,
+  but requires careful ordering of the tables. We also observed gotchas where the timestamp shifted between updates which may cause seemingly random results.
 - **argMax/argMin functions**: These functions allow us to select the row with the highest/lowest version for each sorting key.
-   This relies on a group-by call on the common identifier, e.g. `GROUP BY project_id, trace_id`.
-   We rarely use this as it has a high memory consumption as it needs to keep the full result set in memory before returning.
+  This relies on a group-by call on the common identifier, e.g. `GROUP BY project_id, trace_id`.
+  We rarely use this as it has a high memory consumption as it needs to keep the full result set in memory before returning.
 
 ### Inserts
 

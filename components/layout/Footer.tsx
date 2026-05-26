@@ -9,14 +9,29 @@ import IconLinkedin from "@/components/icons/linkedin";
 import { cn } from "@/lib/utils";
 
 const socialLinks = [
-  { name: "GitHub", href: "https://github.com/langfuse/langfuse", icon: IconGithub },
+  {
+    name: "GitHub",
+    href: "https://github.com/langfuse/langfuse",
+    icon: IconGithub,
+  },
   { name: "Discord", href: "/discord", icon: IconDiscord },
   { name: "X", href: "https://x.com/langfuse", icon: IconX },
-  { name: "YouTube", href: "https://www.youtube.com/@langfuse", icon: IconYoutube },
-  { name: "LinkedIn", href: "https://www.linkedin.com/company/langfuse/", icon: IconLinkedin },
+  {
+    name: "YouTube",
+    href: "https://www.youtube.com/@langfuse",
+    icon: IconYoutube,
+  },
+  {
+    name: "LinkedIn",
+    href: "https://www.linkedin.com/company/langfuse/",
+    icon: IconLinkedin,
+  },
 ];
 
-const menuItems: { heading: string; items: { name: string; href: string }[] }[] = [
+const menuItems: {
+  heading: string;
+  items: { name: string; href: string }[];
+}[] = [
   {
     heading: "Product",
     items: [
@@ -24,7 +39,10 @@ const menuItems: { heading: string; items: { name: string; href: string }[] }[] 
       { name: "Prompt Management", href: "/docs/prompt-management/overview" },
       { name: "Evaluations", href: "/docs/evaluation/overview" },
       { name: "Metrics", href: "/docs/metrics/overview" },
-      { name: "Playground", href: "/docs/prompt-management/features/playground" },
+      {
+        name: "Playground",
+        href: "/docs/prompt-management/features/playground",
+      },
       { name: "Pricing", href: "/pricing" },
       { name: "Enterprise", href: "/enterprise" },
     ],
@@ -50,6 +68,7 @@ const menuItems: { heading: string; items: { name: string; href: string }[] }[] 
       { name: "Interactive Demo", href: "/docs/demo" },
       { name: "Customers", href: "/users" },
       { name: "AI Engineering Library", href: "/library" },
+      { name: "Workshop", href: "/workshop" },
       { name: "Guides & Cookbooks", href: "/guides" },
     ],
   },
@@ -80,15 +99,15 @@ const footerTextClassName = "text-[13px] leading-[150%] lg:leading-[150%]";
 const footerMonoTextClassName = cn(footerTextClassName, "font-mono");
 const footerLinkTextClassName = cn(
   footerTextClassName,
-  "text-left text-inherit transition-[color]"
+  "text-left text-inherit transition-[color]",
 );
 const footerMonoLinkTextClassName = cn(
   footerMonoTextClassName,
-  "text-left text-inherit transition-[color]"
+  "text-left text-inherit transition-[color]",
 );
 const footerMutedTextClassName = cn(
   footerMonoTextClassName,
-  "text-left text-text-disabled"
+  "text-left text-text-disabled",
 );
 
 export function Footer({ className }: { className?: string }) {
@@ -96,7 +115,7 @@ export function Footer({ className }: { className?: string }) {
     <footer
       className={cn(
         "px-4 pb-8 mx-auto mt-20 w-full sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]",
-        className
+        className,
       )}
     >
       {/* Social icons row */}
@@ -110,7 +129,10 @@ export function Footer({ className }: { className?: string }) {
               href={s.href}
               aria-label={s.name}
               className={linkClassName}
-              {...(isExternal && { target: "_blank", rel: "nofollow noreferrer" })}
+              {...(isExternal && {
+                target: "_blank",
+                rel: "nofollow noreferrer",
+              })}
             >
               <Icon className="size-5" />
             </Link>
@@ -122,20 +144,14 @@ export function Footer({ className }: { className?: string }) {
         <div className="grid grid-cols-2 gap-8 justify-between items-stretch p-4 md:flex md:flex-row">
           {menuItems.map((col) => (
             <div key={col.heading} className="flex flex-col gap-4">
-              <Text
-                size="s"
-                className={footerMutedTextClassName}
-              >
+              <Text size="s" className={footerMutedTextClassName}>
                 {col.heading}
               </Text>
               <ul className="flex flex-col gap-3">
                 {col.items.map((item) => (
                   <li key={item.name}>
                     <Link href={item.href} className={linkClassName}>
-                      <Text
-                        size="s"
-                        className={footerLinkTextClassName}
-                      >
+                      <Text size="s" className={footerLinkTextClassName}>
                         {item.name}
                       </Text>
                     </Link>
@@ -152,10 +168,7 @@ export function Footer({ className }: { className?: string }) {
           <div className="flex flex-wrap gap-y-1 gap-x-4 max-[390px]:gap-x-3">
             {bottomLinks.map((link) => (
               <Link key={link.name} href={link.href} className={linkClassName}>
-                <Text
-                  size="s"
-                  className={footerMonoLinkTextClassName}
-                >
+                <Text size="s" className={footerMonoLinkTextClassName}>
                   {link.name}
                 </Text>
               </Link>
@@ -165,17 +178,10 @@ export function Footer({ className }: { className?: string }) {
       </CornerBox>
       <CornerBox className="flex flex-col gap-y-4 sm:flex-row justify-between sm:items-center px-4 py-2.5 -mt-px bg-transparent">
         <div className="flex flex-col md:flex-row">
-          <Text
-            size="s"
-            className={footerMutedTextClassName}
-          >
+          <Text size="s" className={footerMutedTextClassName}>
             &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH
-          </Text>
-          {' '}
-          <Text
-            size="s"
-            className={footerMutedTextClassName}
-          >
+          </Text>{" "}
+          <Text size="s" className={footerMutedTextClassName}>
             / Finto Technologies Inc.
           </Text>
         </div>

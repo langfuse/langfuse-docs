@@ -16,7 +16,13 @@ export function NavbarExtraContent({
       </div>
       <div className="hidden justify-between items-center sm:flex">
         <ToAppButton />
-        <Button href='/talk-to-us' wrapperClassName="flex-1" variant="secondary" size="small" shortcutKey="g">
+        <Button
+          href="/talk-to-us"
+          wrapperClassName="flex-1"
+          variant="secondary"
+          size="small"
+          shortcutKey="g"
+        >
           Get Demo
         </Button>
       </div>

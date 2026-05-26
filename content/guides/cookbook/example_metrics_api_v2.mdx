@@ -1,0 +1,196 @@
+---
+source: Jupyter Notebook
+title: Query Langfuse Data with Metrics API v2
+sidebarTitle: Metrics API v2
+description: Learn how to query Langfuse Metrics API v2 from a Jupyter notebook to analyze observations and scores with practical examples.
+category: Examples
+---
+
+# Query Langfuse Data with Metrics API v2
+
+This notebook shows how to query the [Langfuse Metrics API v2](https://langfuse.com/docs/metrics/features/metrics-api#v2) from Python to build custom analytics on observations and scores.
+
+We will cover three practical examples:
+
+- Most expensive models over a time window
+- Daily request volume and latency trends
+- Numeric evaluation scores grouped by score name
+
+> **Note:** Metrics API v2 is currently available on **Langfuse Cloud**. Depending on your SDK version, newly ingested data may take a few minutes to appear in the v2 endpoints.
+
+
+## Step 1: Install packages
+
+We use `requests` for the API calls, `pandas` for tabular analysis, and `matplotlib` for a quick chart.
+
+
+
+```python
+%pip install --upgrade requests pandas matplotlib
+
+```
+
+## Step 2: Configure credentials
+
+Get your API keys from your Langfuse project settings in [Langfuse Cloud](https://langfuse.com/cloud). The Metrics API v2 uses HTTP Basic Auth with your public key as the username and your secret key as the password.
+
+
+
+```python
+import os
+
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # EU region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com"  # US region
+
+```
+
+## Step 3: Build a small query helper
+
+The API expects a JSON query object under the `query` parameter. This helper keeps the examples compact and converts the response into a `DataFrame`.
+
+
+
+```python
+import json
+import os
+from datetime import datetime, timedelta, timezone
+
+import pandas as pd
+import requests
+from requests.auth import HTTPBasicAuth
+
+LANGFUSE_PUBLIC_KEY = os.environ["LANGFUSE_PUBLIC_KEY"]
+LANGFUSE_SECRET_KEY = os.environ["LANGFUSE_SECRET_KEY"]
+LANGFUSE_BASE_URL = os.environ.get("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
+
+
+def run_metrics_query(query: dict) -> pd.DataFrame:
+    response = requests.get(
+        f"{LANGFUSE_BASE_URL}/api/public/v2/metrics",
+        params={"query": json.dumps(query)},
+        auth=HTTPBasicAuth(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY),
+        timeout=30,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    df = pd.DataFrame(payload.get("data", []))
+
+    numeric_suffixes = ("_count", "_sum", "_avg", "_p50", "_p75", "_p90", "_p95", "_p99", "_min", "_max")
+
+    for col in df.columns:
+        if col.endswith(numeric_suffixes):
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    return df
+
+
+now = datetime.now(timezone.utc)
+seven_days_ago = now - timedelta(days=7)
+
+print("Query window:", seven_days_ago.isoformat(), "to", now.isoformat())
+
+```
+
+## Step 4: Query the most expensive models
+
+This example groups observation data by `providedModelName` and sums `totalCost`.
+
+
+
+```python
+cost_by_model_query = {
+    "view": "observations",
+    "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+    "dimensions": [{"field": "providedModelName"}],
+    "filters": [],
+    "fromTimestamp": seven_days_ago.isoformat(),
+    "toTimestamp": now.isoformat(),
+    "orderBy": [{"field": "totalCost_sum", "direction": "desc"}],
+    "rowLimit": 10,
+}
+
+cost_by_model_df = run_metrics_query(cost_by_model_query)
+cost_by_model_df
+
+```
+
+## Step 5: Plot daily request volume and latency
+
+Next, we group observations by day and calculate both request count and p95 latency so you can spot traffic and performance changes together.
+
+
+
+```python
+volume_and_latency_query = {
+    "view": "observations",
+    "metrics": [
+        {"measure": "count", "aggregation": "count"},
+        {"measure": "latency", "aggregation": "p95"},
+    ],
+    "dimensions": [],
+    "filters": [],
+    "timeDimension": {"granularity": "day"},
+    "fromTimestamp": seven_days_ago.isoformat(),
+    "toTimestamp": now.isoformat(),
+    "orderBy": [{"field": "timeDimension", "direction": "asc"}],
+    "rowLimit": 100,
+}
+
+volume_and_latency_df = run_metrics_query(volume_and_latency_query)
+volume_and_latency_df
+
+```
+
+
+```python
+if not volume_and_latency_df.empty:
+    plot_df = volume_and_latency_df.copy()
+    plot_df["timeDimension"] = pd.to_datetime(plot_df["timeDimension"])
+    plot_df = plot_df.set_index("timeDimension")
+
+    ax = plot_df[["count_count", "latency_p95"]].plot(
+        subplots=True,
+        figsize=(10, 6),
+        title=["Daily request volume", "Daily p95 latency (ms)"],
+        legend=False,
+        marker="o",
+    )
+else:
+    print("No observations returned for the selected time window.")
+
+```
+
+## Step 6: Analyze numeric evaluation scores
+
+The `scores-numeric` view is useful for aggregating user feedback, evaluator outputs, or experiment results. This example groups by score name and computes the average score.
+
+
+
+```python
+score_summary_query = {
+    "view": "scores-numeric",
+    "metrics": [
+        {"measure": "value", "aggregation": "avg"},
+        {"measure": "count", "aggregation": "count"},
+    ],
+    "dimensions": [{"field": "name"}],
+    "filters": [],
+    "fromTimestamp": seven_days_ago.isoformat(),
+    "toTimestamp": now.isoformat(),
+    "orderBy": [{"field": "value_avg", "direction": "desc"}],
+    "rowLimit": 20,
+}
+
+score_summary_df = run_metrics_query(score_summary_query)
+score_summary_df
+
+```
+
+## Next steps
+
+You can adapt the same helper for other v2 views such as `scores-categorical`, add filters on fields like environment or trace name, or export the resulting `DataFrame` for downstream reporting.
+
+To explore the full query schema and supported fields, see the [Metrics API documentation](https://langfuse.com/docs/metrics/features/metrics-api#v2) and the [API reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics).
+

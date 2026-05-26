@@ -58,7 +58,7 @@ export function DocBodyChrome({
           }
         >
           {versionLabel != null && versionLabel !== "" && (
-            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-secondary text-secondary-foreground">
+            <span className="inline-flex items-center px-2 py-1 text-xs font-medium border bg-stripe-pattern text-text-secondary">
               {versionLabel}
             </span>
           )}
@@ -71,11 +71,10 @@ export function DocBodyChrome({
         {!isCustomerStory && (
           <>
             <hr className="mt-12 mb-0 border-t border-line-structure" />
-            <div
-              className="flex flex-col gap-2 py-6"
-              id="docs-feedback"
-            >
-              <span className="text-sm font-medium">Was this page helpful?</span>
+            <div className="flex flex-col gap-2 py-6" id="docs-feedback">
+              <span className="text-sm font-medium">
+                Was this page helpful?
+              </span>
               <div className="flex items-center justify-between gap-2">
                 <DocsFeedback key={pathname} showLabel={false} />
                 <DocsSupport />

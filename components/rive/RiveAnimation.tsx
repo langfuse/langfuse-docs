@@ -11,7 +11,14 @@ import {
 } from "@rive-app/react-webgl2";
 import type { Event, EventCallback, Rive } from "@rive-app/react-webgl2";
 
-type FitOption = "contain" | "cover" | "fill" | "fitWidth" | "fitHeight" | "none" | "scaleDown";
+type FitOption =
+  | "contain"
+  | "cover"
+  | "fill"
+  | "fitWidth"
+  | "fitHeight"
+  | "none"
+  | "scaleDown";
 
 type RiveAnimationProps = {
   src: string;
@@ -110,7 +117,7 @@ function RiveInstance({
       shouldUseIntersectionObserver: false,
       /** Offscreen GL can occasionally desync hit-testing; disable for interactive scenes. */
       useOffscreenRenderer: false,
-    }
+    },
   );
 
   useEffect(() => {
@@ -119,7 +126,13 @@ function RiveInstance({
       // Diagnose why canvas listeners may be missing (internal runtime API).
       const internal = rive as unknown as {
         runtime?: { hasListeners?: (sm: unknown) => boolean };
-        animator?: { stateMachines?: Array<{ name: string; playing: boolean; instance: unknown }> };
+        animator?: {
+          stateMachines?: Array<{
+            name: string;
+            playing: boolean;
+            instance: unknown;
+          }>;
+        };
       };
       const sms = internal.animator?.stateMachines ?? [];
       for (const sm of sms) {
@@ -148,7 +161,12 @@ function RiveInstance({
         input.value = value;
       }
     }
-  }, [rive, stateMachine, stateMachineBooleanInputs, stateMachineBooleanInputsOn]);
+  }, [
+    rive,
+    stateMachine,
+    stateMachineBooleanInputs,
+    stateMachineBooleanInputsOn,
+  ]);
 
   useEffect(() => {
     if (!rive || !viewModelBooleanInputs) return;
@@ -162,7 +180,9 @@ function RiveInstance({
 
   // Use a ref to avoid re-subscribing the Rive listener on every parent render.
   const onStateChangeRef = useRef(onStateChange);
-  useEffect(() => { onStateChangeRef.current = onStateChange; });
+  useEffect(() => {
+    onStateChangeRef.current = onStateChange;
+  });
 
   useEffect(() => {
     if (!rive) return;
@@ -173,7 +193,9 @@ function RiveInstance({
       }
     };
     rive.on(EventType.StateChange, handler);
-    return () => { rive.off(EventType.StateChange, handler); };
+    return () => {
+      rive.off(EventType.StateChange, handler);
+    };
   }, [rive]);
 
   return (
