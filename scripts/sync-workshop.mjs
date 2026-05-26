@@ -202,7 +202,7 @@ function cleanInlineMarkdown(value) {
     .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/[`*_~]/g, "")
-    .replace(/<[^>]+>/g, "")
+    .replace(/[<>]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -308,29 +308,78 @@ function rewriteLinkUrl(url, sourcePath, routeBySourcePath) {
   return `${githubBase}/${encodeRepoPath(repoPathWithoutSlash)}${suffix}`;
 }
 
+function splitInlineCodeSpans(markdown) {
+  const segments = [];
+  let cursor = 0;
+
+  while (cursor < markdown.length) {
+    const open = markdown.indexOf("`", cursor);
+    if (open === -1) break;
+
+    let markerEnd = open + 1;
+    while (markdown[markerEnd] === "`") markerEnd += 1;
+
+    const marker = markdown.slice(open, markerEnd);
+    const close = markdown.indexOf(marker, markerEnd);
+    if (close === -1) break;
+
+    if (open > cursor) {
+      segments.push({ kind: "text", value: markdown.slice(cursor, open) });
+    }
+    segments.push({
+      kind: "code",
+      value: markdown.slice(open, close + marker.length),
+    });
+    cursor = close + marker.length;
+  }
+
+  if (cursor < markdown.length) {
+    segments.push({ kind: "text", value: markdown.slice(cursor) });
+  }
+
+  return segments;
+}
+
+function rewriteMarkdownReferenceSegment(
+  segment,
+  sourcePath,
+  routeBySourcePath,
+) {
+  const withImages = segment.replace(
+    /!\[([^\]]*)\]\(([^)\n]+)\)/g,
+    (match, alt, target) => {
+      const { url, title } = splitTarget(target);
+      const rewritten = rewriteImageUrl(url, sourcePath);
+      return `![${alt}](${rewritten}${title})`;
+    },
+  );
+
+  return withImages.replace(
+    /(?<!!)\[([^\]\n]+)\]\(([^)\n]+)\)/g,
+    (match, text, target) => {
+      const { url, title } = splitTarget(target);
+      const rewritten = rewriteLinkUrl(url, sourcePath, routeBySourcePath);
+      return `[${text}](${rewritten}${title})`;
+    },
+  );
+}
+
 function rewriteMarkdownReferences(markdown, sourcePath, routeBySourcePath) {
   return markdown
     .split(/(```[\s\S]*?```|~~~[\s\S]*?~~~)/g)
     .map((segment, index) => {
       if (index % 2 === 1) return segment;
 
-      const withImages = segment.replace(
-        /!\[([^\]]*)\]\(([^)\n]+)\)/g,
-        (match, alt, target) => {
-          const { url, title } = splitTarget(target);
-          const rewritten = rewriteImageUrl(url, sourcePath);
-          return `![${alt}](${rewritten}${title})`;
-        },
-      );
-
-      return withImages.replace(
-        /(?<!!)\[([^\]\n]+)\]\(([^)\n]+)\)/g,
-        (match, text, target) => {
-          const { url, title } = splitTarget(target);
-          const rewritten = rewriteLinkUrl(url, sourcePath, routeBySourcePath);
-          return `[${text}](${rewritten}${title})`;
-        },
-      );
+      return splitInlineCodeSpans(segment)
+        .map((inlineSegment) => {
+          if (inlineSegment.kind === "code") return inlineSegment.value;
+          return rewriteMarkdownReferenceSegment(
+            inlineSegment.value,
+            sourcePath,
+            routeBySourcePath,
+          );
+        })
+        .join("");
     })
     .join("");
 }
