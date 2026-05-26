@@ -123,18 +123,10 @@ function slugFromFileName(fileName) {
 }
 
 async function collectWorkshopFiles() {
-  const [docsEntries, learnerEntries, instructorEntries] = await Promise.all([
-    fetchJson("docs"),
+  const [learnerEntries, instructorEntries] = await Promise.all([
     fetchJson("docs/learner"),
     fetchJson("docs/instructor"),
   ]);
-
-  const rootReadme = docsEntries.find(
-    (entry) => entry.type === "file" && entry.name === "README.md",
-  );
-  if (!rootReadme) {
-    throw new Error(`Expected docs/README.md in ${REPO_SLUG}@${REF}`);
-  }
 
   const learnerFiles = sortByName(
     learnerEntries.filter(
@@ -168,7 +160,7 @@ async function collectWorkshopFiles() {
 
   return [
     {
-      sourcePath: "docs/README.md",
+      sourcePath: "README.md",
       outputPath: "index.mdx",
       route: "/workshop",
       shortTitle: "Overview",
