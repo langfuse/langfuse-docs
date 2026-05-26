@@ -25,7 +25,13 @@ const DAYS: DayCard[] = [
     title: "Experiments in CI/CD",
     href: "/changelog/2026-05-25-experiment-ci-cd-gates",
   },
-  { n: "02", weekday: "Tuesday", date: "May 26", hint: "Built for agents" },
+  {
+    n: "02",
+    weekday: "Tuesday",
+    date: "May 26",
+    title: "Langfuse agent skill",
+    href: "/changelog/2026-05-26-langfuse-agent-skill",
+  },
   { n: "03", weekday: "Wednesday", date: "May 27", hint: "Find anything" },
   { n: "04", weekday: "Thursday", date: "May 28", hint: "Evals as code" },
   { n: "05", weekday: "Friday", date: "May 29", hint: "Never miss a thing" },
@@ -400,6 +406,84 @@ function Day1Unveiling() {
   );
 }
 
+function Day2Unveiling() {
+  return (
+    <section id="day-2" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 02 · Tuesday, May 26, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Langfuse agent skill.</span>
+        </h2>
+        <p className="lw5-body">
+          Building an agent is easy. Getting it to production is hard. You set
+          up tracing and evaluators, but how do you know what your agent's real
+          failure modes are? How do you know your LLM-as-a-judge is actually
+          calibrated against your human annotators?
+        </p>
+        <p className="lw5-body">
+          The Langfuse Skill lets you hand your AI coding agent a playbook for
+          working with Langfuse. It teaches Claude Code, Cursor, Codex, etc. how
+          to instrument an app, query traces, manage prompts, and set up
+          evaluators. Drop it into your editor, then describe the job in plain
+          language and the agent runs with it.
+        </p>
+        <p className="lw5-body">
+          In the video below, Marlies uses the{" "}
+          <Link
+            href="/guides/llm-as-a-judge-calibration-skill"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            LLM-as-a-Judge calibration skill
+          </Link>{" "}
+          with Codex to produce a full analysis with accuracy, F1, precision,
+          recall, and cost, all graphed directly in the new Langfuse Experiments
+          view.
+        </p>
+      </div>
+
+      <div className="w-full max-w-[920px] mb-8">
+        <Video
+          src="https://static.langfuse.com/docs-videos/agent-skills-launch.mp4"
+          aspectRatio={16 / 9}
+          className="rounded border border-line-structure"
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-26-langfuse-agent-skill"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/api-and-data-platform/features/agent-skill"
+          >
+            <span>Get started in docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="https://github.com/langfuse/skills"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>View skills on GitHub</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
 function DayCard({ day }: { day: DayCard }) {
   const live = Boolean(day.href);
   const content = (
@@ -484,6 +568,7 @@ export function LaunchWeek5Landing() {
       <div className="max-w-[1440px] mx-auto">
         <Hero />
         <Schedule />
+        <Day2Unveiling />
         <Day1Unveiling />
       </div>
     </div>
