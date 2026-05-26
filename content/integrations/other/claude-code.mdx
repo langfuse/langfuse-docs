@@ -25,6 +25,20 @@ import { Details, Summary } from "@/components/Details";
 
 > **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source LLM engineering platform. It helps teams trace LLM applications, debug issues, evaluate quality, and monitor costs in production.
 
+<Callout type="info" title="NEW: Install via the Claude Code plugin marketplace">
+The easiest way to set this up is now the [Langfuse Observability Plugin](https://github.com/langfuse/Claude-Observability-Plugin). Run these two commands and restart Claude Code:
+
+```bash
+claude plugin marketplace add langfuse/Claude-Observability-Plugin
+claude plugin install langfuse@langfuse-observability
+```
+
+On enable, you'll be prompted for your `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL`. Your secret key is stored in your OS keychain. Requires Python 3.9+ and `pip install "langfuse>=4.0,<5"`.
+
+For AI-assisted or manual setup, see the steps below.
+
+</Callout>
+
 ## What Can This Integration Trace?
 
 By using Claude Code's [hooks system](https://code.claude.com/docs/en/hooks-guide), this integration captures full conversation interactions and sends them to Langfuse. You can monitor:
