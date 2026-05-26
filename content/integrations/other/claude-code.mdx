@@ -10,6 +10,19 @@ import { Details, Summary } from "@/components/Details";
 
 # Claude Code Tracing with Langfuse
 
+<Callout type="info" title="NEW: Install via the Claude Code plugin marketplace">
+The easiest way to set this up is now the [Langfuse Observability Plugin](https://github.com/langfuse/Claude-Observability-Plugin). Run these two commands and restart Claude Code:
+
+```bash
+claude plugin marketplace add langfuse/Claude-Observability-Plugin
+claude plugin install langfuse@langfuse-observability
+```
+
+On enable, you'll be prompted for your `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL`. Keys are stored in your OS keychain. Requires Python 3.9+ and `pip install "langfuse>=4.0,<5"`.
+
+Prefer to wire it up manually? Continue with the steps below.
+</Callout>
+
 <iframe
   width="100%"
   className="aspect-[16/9] rounded border w-full"
