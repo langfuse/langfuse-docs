@@ -194,7 +194,7 @@ function cleanInlineMarkdown(value) {
     .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/[`*_~]/g, "")
-    .replace(/[<>]/g, "")
+    .replace(/<[^>]*>/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -226,7 +226,9 @@ function extractDescription(markdown) {
 
 function splitTarget(target) {
   const trimmed = target.trim();
-  const match = trimmed.match(/^(\S+)(\s+["'][\s\S]*["'])$/);
+  const match = trimmed.match(
+    /^(\S+)(\s+(?:"[\s\S]*"|'[\s\S]*'|\([\s\S]*\)))$/,
+  );
   if (!match) return { url: trimmed, title: "" };
   return { url: match[1], title: match[2] };
 }
@@ -381,11 +383,14 @@ function readMarkdownReference(markdown, start, sourcePath, routeBySourcePath) {
   if (!target) return null;
 
   const text = markdown.slice(openBracket + 1, closeBracket);
+  const rewrittenText = isImage
+    ? text
+    : rewriteMarkdownReferenceSegment(text, sourcePath, routeBySourcePath);
   const { url, title } = splitTarget(target.target);
   const rewritten = isImage
     ? rewriteImageUrl(url, sourcePath)
     : rewriteLinkUrl(url, sourcePath, routeBySourcePath);
-  const prefix = isImage ? `![${text}]` : `[${text}]`;
+  const prefix = isImage ? `![${text}]` : `[${rewrittenText}]`;
 
   return {
     end: target.end,
