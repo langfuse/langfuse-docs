@@ -1,0 +1,121 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Integrate Langfuse with Hermes Agent
+sidebarTitle: Hermes Agent
+logo: /images/integrations/hermes_icon.png
+description: Trace and debug Hermes Agent conversations, LLM calls, and tool usage with Langfuse observability.
+category: Integrations
+---
+
+# Integrate Langfuse with Hermes Agent
+
+This notebook shows how to integrate **Langfuse** with **Hermes Agent** to trace, debug, and evaluate your agent's conversations, LLM calls, and tool usage.
+
+> **What is Hermes Agent?** [Hermes Agent](https://github.com/NousResearch/hermes-agent) is a self-improving AI agent built by [Nous Research](https://nousresearch.com). It features a built-in learning loop, persistent memory, autonomous skill creation, and support for any LLM provider. Hermes ships a bundled Langfuse observability plugin that traces every conversation turn, LLM request, and tool call.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications.
+
+<Steps>
+## Step 1: Install Dependencies
+
+
+```python
+%pip install git+https://github.com/NousResearch/hermes-agent.git langfuse -U
+```
+
+## Step 2: Set Up Environment Variables
+
+Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting).
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://langfuse.com/cloud
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+# The Hermes Langfuse plugin reads HERMES_LANGFUSE_PUBLIC_KEY / HERMES_LANGFUSE_SECRET_KEY /
+# HERMES_LANGFUSE_BASE_URL and falls back to the standard LANGFUSE_* vars above.
+# For production use, set these in ~/.hermes/.env or via `hermes tools`.
+```
+
+With the environment variables set, initialize the Langfuse client. `get_client()` picks up the env vars above and returns a client bound to your project.
+
+
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+## Step 3: Enable the Langfuse Plugin
+
+Hermes ships a bundled Langfuse observability plugin under `plugins/observability/langfuse`. It is **opt-in** — enable it via the CLI or by editing your config file.
+
+The plugin hooks into Hermes lifecycle events (`pre_api_request`, `post_api_request`, `pre_tool_call`, `post_tool_call`) to automatically capture traces for every conversation turn.
+
+
+```python
+# Enable the Langfuse plugin (run this in your terminal, not in a notebook)
+# hermes plugins enable observability/langfuse
+
+# Or use the interactive tool configurator:
+# hermes tools  # → select "Langfuse Observability"
+
+# Verify it is enabled:
+# hermes plugins list  # observability/langfuse should show "enabled"
+```
+
+## Step 4: Run Hermes and Generate a Trace
+
+With the plugin enabled and credentials set, every Hermes conversation turn is automatically traced to Langfuse. Each trace captures:
+
+- **Conversation turns** as the root span ("Hermes turn")
+- **LLM calls** as generation observations with model, usage, cost, and latency
+- **Tool calls** as tool observations with input arguments and results
+- **Token usage and cost** broken down by input, output, cache, and reasoning tokens
+
+You can start a conversation from the CLI:
+
+
+```python
+# Start an interactive conversation (traces are sent automatically)
+# hermes chat -q "What is the weather in San Francisco?"
+
+# Or start a full interactive session:
+# hermes
+```
+
+### Optional: Tune Tracing Behavior
+
+The Hermes Langfuse plugin supports several optional environment variables:
+
+| Variable | Description | Default |
+|---|---|---|
+| `HERMES_LANGFUSE_ENV` | Environment tag (e.g. `production`, `staging`) | — |
+| `HERMES_LANGFUSE_RELEASE` | Release/version tag | — |
+| `HERMES_LANGFUSE_SAMPLE_RATE` | Sampling rate `0.0`–`1.0` | `1.0` |
+| `HERMES_LANGFUSE_MAX_CHARS` | Max characters per traced field | `12000` |
+| `HERMES_LANGFUSE_DEBUG` | Verbose plugin logging (`true`/`false`) | `false` |
+
+Set these in `~/.hermes/.env` or export them in your shell before starting Hermes.
+
+## Step 5: View Traces in Langfuse
+
+After running the example, open [Langfuse Cloud](https://langfuse.com/cloud) to see the full trace including prompts, completions, tool calls, token usage, and latency.
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
