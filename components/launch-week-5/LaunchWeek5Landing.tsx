@@ -415,12 +415,29 @@ function Day2Unveiling() {
           <span className="lw5-highlight">Langfuse agent skill.</span>
         </h2>
         <p className="lw5-body">
-          Hand your AI coding agent a playbook for working with Langfuse. The
-          skill teaches Claude Code, Cursor, Codex, and any other agent that
-          speaks the open Agent Skills format how to instrument an app, query
-          traces, manage prompts, and set up evaluators. Drop it into your
-          editor, then describe the job in plain language and the agent runs
-          with it.
+          Building an agent is easy. Getting it to production is hard. You set
+          up tracing and evaluators, but how do you know what your agent's real
+          failure modes are? How do you know your LLM-as-a-judge is actually
+          calibrated against your human annotators?
+        </p>
+        <p className="lw5-body">
+          The Langfuse Skill lets you hand your AI coding agent a playbook for
+          working with Langfuse. It teaches Claude Code, Cursor, Codex, etc.
+          how to instrument an app, query traces, manage prompts, and set up
+          evaluators. Drop it into your editor, then describe the job in plain
+          language and the agent runs with it.
+        </p>
+        <p className="lw5-body">
+          In the video below, Marlies uses the{" "}
+          <Link
+            href="/guides/llm-as-a-judge-calibration-skill"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            LLM-as-a-Judge calibration skill
+          </Link>{" "}
+          with Codex to produce a full analysis with accuracy, F1, precision,
+          recall, and cost, all graphed directly in the new Langfuse
+          Experiments view.
         </p>
       </div>
 
