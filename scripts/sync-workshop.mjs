@@ -262,7 +262,11 @@ function normalizeRepoPath(sourcePath, relativeTarget) {
   const normalized = posixPath.normalize(
     posixPath.join(sourceDir, relativeTarget),
   );
-  if (normalized === "." || normalized.startsWith("../")) {
+  if (
+    normalized === "." ||
+    normalized === ".." ||
+    normalized.startsWith("../")
+  ) {
     throw new Error(
       `Relative link ${relativeTarget} from ${sourcePath} leaves the repository`,
     );
@@ -308,36 +312,93 @@ function rewriteLinkUrl(url, sourcePath, routeBySourcePath) {
   return `${githubBase}/${encodeRepoPath(repoPathWithoutSlash)}${suffix}`;
 }
 
-function splitInlineCodeSpans(markdown) {
-  const segments = [];
-  let cursor = 0;
+function readInlineCodeSpan(markdown, start) {
+  if (markdown[start] !== "`") return null;
 
-  while (cursor < markdown.length) {
-    const open = markdown.indexOf("`", cursor);
-    if (open === -1) break;
+  let markerEnd = start + 1;
+  while (markdown[markerEnd] === "`") markerEnd += 1;
 
-    let markerEnd = open + 1;
-    while (markdown[markerEnd] === "`") markerEnd += 1;
+  const marker = markdown.slice(start, markerEnd);
+  const close = markdown.indexOf(marker, markerEnd);
+  if (close === -1) return null;
 
-    const marker = markdown.slice(open, markerEnd);
-    const close = markdown.indexOf(marker, markerEnd);
-    if (close === -1) break;
+  return { end: close + marker.length };
+}
 
-    if (open > cursor) {
-      segments.push({ kind: "text", value: markdown.slice(cursor, open) });
+function findClosingBracket(markdown, openBracket) {
+  let depth = 1;
+  let index = openBracket + 1;
+
+  while (index < markdown.length) {
+    const codeSpan = readInlineCodeSpan(markdown, index);
+    if (codeSpan) {
+      index = codeSpan.end;
+      continue;
     }
-    segments.push({
-      kind: "code",
-      value: markdown.slice(open, close + marker.length),
-    });
-    cursor = close + marker.length;
+
+    const char = markdown[index];
+    if (char === "\\") {
+      index += 2;
+      continue;
+    }
+    if (char === "[") depth += 1;
+    if (char === "]") depth -= 1;
+    if (depth === 0) return index;
+
+    index += 1;
   }
 
-  if (cursor < markdown.length) {
-    segments.push({ kind: "text", value: markdown.slice(cursor) });
+  return null;
+}
+
+function readParenthesizedTarget(markdown, openParen) {
+  let depth = 1;
+  let index = openParen + 1;
+
+  while (index < markdown.length) {
+    const char = markdown[index];
+    if (char === "\n") return null;
+    if (char === "\\") {
+      index += 2;
+      continue;
+    }
+    if (char === "(") depth += 1;
+    if (char === ")") depth -= 1;
+    if (depth === 0) {
+      return {
+        end: index + 1,
+        target: markdown.slice(openParen + 1, index),
+      };
+    }
+
+    index += 1;
   }
 
-  return segments;
+  return null;
+}
+
+function readMarkdownReference(markdown, start, sourcePath, routeBySourcePath) {
+  const isImage = markdown[start] === "!" && markdown[start + 1] === "[";
+  const openBracket = isImage ? start + 1 : start;
+  if (markdown[openBracket] !== "[") return null;
+
+  const closeBracket = findClosingBracket(markdown, openBracket);
+  if (closeBracket == null || markdown[closeBracket + 1] !== "(") return null;
+
+  const target = readParenthesizedTarget(markdown, closeBracket + 1);
+  if (!target) return null;
+
+  const text = markdown.slice(openBracket + 1, closeBracket);
+  const { url, title } = splitTarget(target.target);
+  const rewritten = isImage
+    ? rewriteImageUrl(url, sourcePath)
+    : rewriteLinkUrl(url, sourcePath, routeBySourcePath);
+  const prefix = isImage ? `![${text}]` : `[${text}]`;
+
+  return {
+    end: target.end,
+    value: `${prefix}(${rewritten}${title})`,
+  };
 }
 
 function rewriteMarkdownReferenceSegment(
@@ -345,23 +406,34 @@ function rewriteMarkdownReferenceSegment(
   sourcePath,
   routeBySourcePath,
 ) {
-  const withImages = segment.replace(
-    /!\[([^\]]*)\]\(([^)\n]+)\)/g,
-    (match, alt, target) => {
-      const { url, title } = splitTarget(target);
-      const rewritten = rewriteImageUrl(url, sourcePath);
-      return `![${alt}](${rewritten}${title})`;
-    },
-  );
+  let output = "";
+  let index = 0;
 
-  return withImages.replace(
-    /(?<!!)\[([^\]\n]+)\]\(([^)\n]+)\)/g,
-    (match, text, target) => {
-      const { url, title } = splitTarget(target);
-      const rewritten = rewriteLinkUrl(url, sourcePath, routeBySourcePath);
-      return `[${text}](${rewritten}${title})`;
-    },
-  );
+  while (index < segment.length) {
+    const reference = readMarkdownReference(
+      segment,
+      index,
+      sourcePath,
+      routeBySourcePath,
+    );
+    if (reference) {
+      output += reference.value;
+      index = reference.end;
+      continue;
+    }
+
+    const codeSpan = readInlineCodeSpan(segment, index);
+    if (codeSpan) {
+      output += segment.slice(index, codeSpan.end);
+      index = codeSpan.end;
+      continue;
+    }
+
+    output += segment[index];
+    index += 1;
+  }
+
+  return output;
 }
 
 function rewriteMarkdownReferences(markdown, sourcePath, routeBySourcePath) {
@@ -370,16 +442,11 @@ function rewriteMarkdownReferences(markdown, sourcePath, routeBySourcePath) {
     .map((segment, index) => {
       if (index % 2 === 1) return segment;
 
-      return splitInlineCodeSpans(segment)
-        .map((inlineSegment) => {
-          if (inlineSegment.kind === "code") return inlineSegment.value;
-          return rewriteMarkdownReferenceSegment(
-            inlineSegment.value,
-            sourcePath,
-            routeBySourcePath,
-          );
-        })
-        .join("");
+      return rewriteMarkdownReferenceSegment(
+        segment,
+        sourcePath,
+        routeBySourcePath,
+      );
     })
     .join("");
 }
