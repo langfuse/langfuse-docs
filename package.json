@@ -5,11 +5,12 @@
   "scripts": {
     "agents:check": "node scripts/agents/sync-agent-shims.mjs --check",
     "agents:sync": "node scripts/agents/sync-agent-shims.mjs",
+    "predev": "pnpm workshop:sync",
     "dev": "next dev -p 3333 -H 127.0.0.1",
     "format": "prettier --experimental-cli --write .",
     "format:check": "prettier --experimental-cli --check .",
     "postinstall": "bash scripts/postinstall.sh",
-    "prebuild": "node scripts/sync-wordmark-png-for-og.mjs && node scripts/generate_brand_assets_zip.js && node scripts/generate-default-og-png.mjs && node scripts/update-github-stars.js && node scripts/authors/generate-contributors.js && node scripts/copy_md_sources.js && node scripts/generate-sitemap-excludes.js",
+    "prebuild": "node scripts/sync-wordmark-png-for-og.mjs && node scripts/generate_brand_assets_zip.js && node scripts/generate-default-og-png.mjs && node scripts/update-github-stars.js && node scripts/authors/generate-contributors.js && pnpm workshop:sync && node scripts/copy_md_sources.js && node scripts/generate-sitemap-excludes.js",
     "build": "next build",
     "postbuild": "pnpm run postbuild:sitemap && pnpm run postbuild:cleanup && pnpm run postbuild:llms-txt",
     "build:static": "cross-env STATIC_EXPORT=true pnpm run prebuild && cross-env STATIC_EXPORT=true next build && pnpm run postbuild:static",
@@ -19,6 +20,7 @@
     "postbuild:sitemap": "next-sitemap",
     "postbuild:cleanup": "echo 'Removing .next/cache' && rm -rf .next/cache",
     "postbuild:llms-txt": "node scripts/generate_llms_txt.js",
+    "workshop:sync": "node scripts/sync-workshop.mjs",
     "link-check": "node scripts/check-links.js",
     "sitemap-check": "node scripts/check-sitemap-links.js",
     "nuke": "rm -rf .next && rm -rf node_modules && pnpm install"
