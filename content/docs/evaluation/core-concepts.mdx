@@ -12,6 +12,7 @@ Ready to start?
 - [Create a dataset](/docs/evaluation/experiments/datasets) to measure your LLM application's performance consistently
 - [Run an experiment](/docs/evaluation/core-concepts#experiments) to get an overview of how your application is doing
 - [Set up LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) to evaluate your live traces
+- [Create a code-based evaluator](/docs/evaluation/evaluation-methods/code-based-evaluators) for deterministic checks
 
 ## The Evaluation Loop
 
@@ -49,12 +50,13 @@ Scores can be attached to traces, observations, sessions, or dataset runs. Every
 
 Evaluation methods are the functions that score traces, observations, sessions, or dataset runs. You can use a variety of evaluation methods to add [scores](#scores).
 
-| Method                                                                     | What                                                       | Use when                                                               |
-| -------------------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------- |
-| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)       | Use an LLM to evaluate outputs based on custom criteria    | Subjective assessments at scale (tone, accuracy, helpfulness)          |
-| [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui)         | Manually add scores to traces directly in the Langfuse UI  | Quick quality spot checks, reviewing individual traces                 |
-| [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues) | Structured human review workflows with customizable queues | Building ground truth, systematic labeling, team collaboration         |
-| [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)   | Programmatically add scores using the Langfuse API or SDK  | Custom evaluation pipelines, deterministic checks, automated workflows |
+| Method                                                                             | What                                                                       | Use when                                                                  |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)               | Use an LLM to evaluate outputs based on custom criteria                    | Subjective assessments at scale (tone, accuracy, helpfulness)             |
+| [Code-based evaluators](/docs/evaluation/evaluation-methods/code-based-evaluators) | Run custom Python or TypeScript logic to score observations or experiments | Deterministic checks, structured output validation, custom business rules |
+| [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui)                 | Manually add scores to traces directly in the Langfuse UI                  | Quick quality spot checks, reviewing individual traces                    |
+| [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues)         | Structured human review workflows with customizable queues                 | Building ground truth, systematic labeling, team collaboration            |
+| [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)           | Programmatically add scores using the Langfuse API or SDK                  | Custom evaluation pipelines, deterministic checks, automated workflows    |
 
 When setting up new evaluation methods, you can use [Score Analytics](/docs/evaluation/scores/score-analytics) to analyze or sense-check the scores you produce.
 
@@ -66,14 +68,14 @@ An experiment runs your application against a dataset and evaluates the outputs.
 
 Before diving into experiments, it's helpful to understand the building blocks in Langfuse: datasets, dataset items, tasks, scores, and experiments.
 
-| Object                | Definition                                                                                                                                                                                                                                           |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dataset**           | A collection of test cases (dataset items). You can run experiments on a dataset.                                                                                                                                                                    |
-| **Dataset item**      | One item in a dataset. Each dataset item contains an input (the scenario to test) and optionally an expected output.                                                                                                                                 |
-| **Task**              | The application code that you want to test in an experiment. This will be performed on each dataset item, and you will score the output.                                                                                                             |
-| **Evaluation Method** | A function that scores experiment results. In the context of a Langfuse experiment, this can be a [deterministic check](/docs/evaluation/evaluation-methods/custom-scores), or [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). |
-| **Score**             | The output of an evaluation. See [Scores](#scores) for the available data types and details.                                                                                                                                                         |
-| **Experiment Run**    | A single execution of your task against all items in a dataset, producing outputs (and scores).                                                                                                                                                      |
+| Object                | Definition                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dataset**           | A collection of test cases (dataset items). You can run experiments on a dataset.                                                                                                                                                                                                                                                                                    |
+| **Dataset item**      | One item in a dataset. Each dataset item contains an input (the scenario to test) and optionally an expected output.                                                                                                                                                                                                                                                 |
+| **Task**              | The application code that you want to test in an experiment. This will be performed on each dataset item, and you will score the output.                                                                                                                                                                                                                             |
+| **Evaluation Method** | A function that scores experiment results. In the context of a Langfuse experiment, this can be a [code-based evaluator](/docs/evaluation/evaluation-methods/code-based-evaluators), a score ingested from your own code via [API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk), or [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). |
+| **Score**             | The output of an evaluation. See [Scores](#scores) for the available data types and details.                                                                                                                                                                                                                                                                         |
+| **Experiment Run**    | A single execution of your task against all items in a dataset, producing outputs (and scores).                                                                                                                                                                                                                                                                      |
 
 You can find the data model for these objects [here](/docs/evaluation/experiments/data-model).
 
@@ -139,9 +141,9 @@ _While it's optional, we recommend managing the underlying [Datasets](/docs/eval
 
 ## Online Evaluation [#online-evaluation]
 
-For online evaluation, you can configure evaluation methods to automatically score production traces. This helps you catch issues immediately.
+For online evaluation, you can configure evaluation methods to automatically score production observations. This helps you catch issues immediately.
 
-Langfuse currently supports LLM-as-a-Judge and human annotation checks for online evaluation. [Deterministic checks are on the roadmap](https://github.com/orgs/langfuse/discussions/6087).
+Langfuse supports LLM-as-a-Judge, code-based evaluators, and human annotation checks for online evaluation.
 
 ### Monitoring with dashboards
 

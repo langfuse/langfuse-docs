@@ -43,6 +43,7 @@ Text scores are designed for qualitative, open-ended scoring. Because free-form 
 There are four ways to add scores:
 
 - **LLM-as-a-Judge**: Set up [automated evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) that score traces based on custom criteria (e.g. hallucination, tone, relevance). These can return numeric or categorical scores plus reasoning, and can run on live production traces or on experiment results.
+- **Code-based evaluators**: Run [custom Python or TypeScript evaluators](/docs/evaluation/evaluation-methods/code-based-evaluators) in Langfuse for deterministic checks such as exact match, JSON validation, or custom business rules.
 - **Scores via UI**: Team members [manually score](/docs/evaluation/evaluation-methods/scores-via-ui) traces, observations, or sessions directly in the Langfuse UI. Requires a [score config](/faq/all/manage-score-configs) to be set up first.
 - **Annotation Queues**: Set up [structured review workflows](/docs/evaluation/evaluation-methods/annotation-queues) where reviewers work through batches of traces.
 - **Scores via API/SDK**: [Programmatically add scores](/docs/evaluation/evaluation-methods/scores-via-sdk) from your application code. This is the way to go for user feedback (thumbs up/down, star ratings), guardrail results, or custom evaluation pipelines.

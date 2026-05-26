@@ -24,7 +24,7 @@ It helps to separate monitoring into two distinct activities, because they answe
 
 Both aggregate metrics and signal detection depend on fields attached to observations. A lot of what you need is already there once you instrument properly: latency, token-derived cost, model and route metadata, tool outcomes, and errors typically flow from your client and provider APIs without extra wiring.
 
-Beyond the built-in fields, you add evaluation — user feedback (explicit ratings or implicit signals like session abandonment), human annotation, and LLM-as-a-judge scores — by annotating traces manually or running automated evaluators. That data feeds into aggregate charts for tracking trends over time, and into signal rules so individual traces surface when something crosses a threshold you care about.
+Beyond the built-in fields, you add evaluation — user feedback (explicit ratings or implicit signals like session abandonment), human annotation, and automated evaluator scores — by annotating traces manually or running evaluators where they apply. That data feeds into aggregate charts for tracking trends over time, and into signal rules so individual traces surface when something crosses a threshold you care about.
 
 ### Explicit and implicit user feedback [#user-feedback]
 
@@ -66,9 +66,9 @@ Implicit:  extracted field manually edited before approval
 Both register as scores, so they feed into the same dashboards, trend charts, and signal rules as your other evaluation data. To figure out which feedback signals are worth turning into automated evaluators in the first place, see our deeper dive into [Error analysis](/academy/monitoring/error-analysis).
 
 <Callout type="info">
-There are two types of automated evaluators to attach scores to traces: 
+There are two types of automated evaluators for quality scores:
 - LLM-as-a-judge (for quality signals or behavioral patterns like user disagreement)
-- Code-based evaluators (for precise checks like whether the response contains a certain word or exceeds a length limit).
+- [Code-based evaluators](/docs/evaluation/evaluation-methods/code-based-evaluators) (for precise checks on observations or experiments, not traces, like whether the response contains a certain word or exceeds a length limit).
 
 More on both can be found in the [Evaluate](/academy/evaluate) section.
 

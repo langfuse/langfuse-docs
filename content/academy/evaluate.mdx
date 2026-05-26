@@ -44,16 +44,18 @@ Manual evaluation also produces human labels that serve as ground truth for vali
 
 ### Code-based evaluation
 
-Code-based evaluators check properties that can be verified with deterministic logic. They are fast, cheap, and produce the same result every time.
+[Code-based evaluators](/docs/evaluation/evaluation-methods/code-based-evaluators) check properties that can be verified with deterministic logic. In Langfuse, they are UI-authored Python or TypeScript evaluators that run on observations or experiments, not trace-level targets. They are fast, cheap, and produce the same result every time.
 
 Some example checks where code-based evaluators are a natural fit:
 
 - The output is valid JSON or follows a required schema
 - The output contains (or does not contain) specific keywords or patterns
 - The output stays within a length limit
-- The generated SQL executes without errors
+- The generated SQL is syntactically valid
 
 Their limitation is that they cannot assess meaning. A code-based evaluator can check that an output contains the word "refund," but it cannot check whether the output correctly explains the refund policy.
+
+Keep them small and self-contained: the runtime has no network egress, supports only standard libraries, has a 2-second limit, and requires TypeScript syntax that can be erased at runtime.
 
 ### LLM-as-a-judge
 
