@@ -13,7 +13,7 @@ See also the [JS/TS SDK reference](https://js.reference.langfuse.com/classes/_la
 
 - Full flexibility to use your own application logic
 - Use custom scoring functions to evaluate the outputs of a single item and the full run
-- Use [code-based evaluators](/docs/evaluation/evaluation-methods/code-based-evaluators) when you want to author deterministic Python or TypeScript checks in the Langfuse UI and reuse them across observations and experiments
+- Use [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) when you want to author deterministic Python or TypeScript checks in the Langfuse UI and reuse them across observations and experiments
 - Run multiple experiments on the same dataset in parallel
 - Easy to integrate with your existing evaluation infrastructure
 - [Run your experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) to catch regressions before they ship
@@ -219,7 +219,7 @@ Enhance your experiments with evaluators and advanced configuration options.
 
 Evaluators assess the quality of task outputs at the item level. They receive the input, metadata, output, and expected output for each item and return evaluation metrics that are reported as scores on the traces in Langfuse.
 
-These SDK evaluator functions run in your experiment process. If you want to write deterministic evaluator code in the Langfuse UI and have Langfuse execute it on experiment observations, use [code-based evaluators](/docs/evaluation/evaluation-methods/code-based-evaluators).
+These SDK evaluator functions run in your experiment process. If you want to write deterministic evaluator code in the Langfuse UI and have Langfuse execute it on experiment observations, use [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators).
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -1065,7 +1065,7 @@ import { SquarePercent } from "lucide-react";
 
 In the code above, we show how to add scores to the dataset run from your experiment code.
 
-Alternatively, you can run evals in Langfuse. This is useful if you want to use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for semantic criteria or [code-based evaluators](/docs/evaluation/evaluation-methods/code-based-evaluators) for deterministic checks on experiment observations. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how LLM-as-a-judge works end-to-end.
+Alternatively, you can run evals in Langfuse. This is useful if you want to use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for semantic criteria or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks on experiment observations. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how LLM-as-a-judge works end-to-end.
 
 import { Lightbulb } from "lucide-react";
 

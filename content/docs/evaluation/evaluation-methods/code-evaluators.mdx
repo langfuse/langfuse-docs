@@ -1,9 +1,9 @@
 ---
-title: Code-based evaluators
+title: Code evaluators
 description: Use Python or TypeScript code in Langfuse to run deterministic evaluations on observations and experiments.
 ---
 
-# Code-based evaluators
+# Code evaluators
 
 <Callout type="info">
   This feature requires [Fast Preview mode](/docs/v4) to be enabled. Fast
@@ -11,15 +11,15 @@ description: Use Python or TypeScript code in Langfuse to run deterministic eval
   only—enable it in the bottom left of the UI to get started.
 </Callout>
 
-Code-based evaluators run custom Python or TypeScript logic in Langfuse and return one or more [scores](/docs/evaluation/scores/overview). Use them for deterministic, objective checks where code is more reliable than a model-based judgment.
+Code evaluators run custom Python or TypeScript logic in Langfuse and return one or more [scores](/docs/evaluation/scores/overview). Use them for deterministic, objective checks where code is more reliable than a model-based judgment.
 
 Common examples include exact match checks, regex validation, JSON parseability, schema validation, keyword checks, tool-call checks, latency or cost thresholds, and custom business rules.
 
 Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) instead when the evaluation needs semantic judgment, rubric-based reasoning, or subjective assessment such as helpfulness, tone, or answer quality.
 
-## How to use code-based evaluators?
+## How to use code evaluators?
 
-Code-based evaluators can run on two types of data: **Observations** (individual operations from live production traffic) or **Experiments** (controlled test datasets). Your choice depends on whether you're testing in development or
+Code evaluators can run on two types of data: **Observations** (individual operations from live production traffic) or **Experiments** (controlled test datasets). Your choice depends on whether you're testing in development or
 monitoring production.
 
 ### Decision tree
@@ -98,7 +98,7 @@ Run evaluators on individual observations within your traces, such as LLM calls,
 
 - **Operation-level precision**: Filter by observation type to evaluate only the operations that matter, not complete traces.
 - **Deterministic production monitoring**: Check JSON validity, schema compliance, exact matches, latency thresholds, or business rules on live traffic.
-- **Compositional evaluation**: Run different code-based evaluators on different operations within one trace.
+- **Compositional evaluation**: Run different code evaluators on different operations within one trace.
 - **Combined filtering**: Stack observation filters with trace filters such as `userId`, `sessionId`, tags, version, and metadata.
 
 **Data flow**
@@ -129,7 +129,7 @@ Each experiment run generates traces and observations that can be scored by your
 
 1. Create a dataset with test inputs and, optionally, expected outputs.
 2. Run an experiment via UI or SDK. See [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) or [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
-3. Select code-based evaluators to score the generated observations.
+3. Select code evaluators to score the generated observations.
 4. Compare results across experiment runs to make data-driven decisions.
 
 **Example use case**
@@ -145,7 +145,7 @@ Each experiment run generates traces and observations that can be scored by your
 
 ### Create a code evaluator
 
-Go to the Evaluators page and create a new code-based evaluator.
+Go to the Evaluators page and create a new code evaluator.
 
 ### Write the evaluator code
 
@@ -409,19 +409,19 @@ function evaluate({
 </Tab>
 </LangTabs>
 
-## Debug code-based evaluator executions
+## Debug code evaluator executions
 
-Every code-based evaluator execution creates a trace, giving you complete visibility into the evaluation process. This lets you inspect the selected inputs and outputs, experiment context, runtime latency, returned scores, logs, and errors.
+Every code evaluator execution creates a trace, giving you complete visibility into the evaluation process. This lets you inspect the selected inputs and outputs, experiment context, runtime latency, returned scores, logs, and errors.
 
-You can show code-based evaluator execution traces by filtering for the environment `langfuse-code-eval` in the tracing table:
+You can show code evaluator execution traces by filtering for the environment `langfuse-code-eval` in the tracing table:
 
 <Frame fullWidth>
-  ![Tracing table filtered to code-based evaluator
+  ![Tracing table filtered to code evaluator
   executions](/images/docs/evaluation/eval-execution-traces-tracing-table.png)
 </Frame>
 
 <Details>
-<Summary>Code-based evaluator execution status</Summary>
+<Summary>Code evaluator execution status</Summary>
 
 - **Completed**: Evaluation finished successfully and returned valid scores.
 - **Error**: Evaluation failed (click the execution trace ID for inputs, outputs, latency, logs, and error details).
@@ -433,10 +433,10 @@ Use the evaluator test run before enabling a new evaluator. It is the fastest wa
 
 ## Runtime constraints
 
-Code-based evaluators are intended for compact, deterministic checks that can run quickly and safely for many observations.
+Code evaluators are intended for compact, deterministic checks that can run quickly and safely for many observations.
 
 <Callout type="info">
-  Need a specific third-party library or network access for code-based
+  Need a specific third-party library or network access for code
   evaluators? Please share your use case in [GitHub
   Discussions](https://github.com/orgs/langfuse/discussions). Your feedback
   helps us understand where broader runtime support would be useful.
@@ -468,7 +468,7 @@ To debug this, run the evaluator on a small sample observation, remove network c
 <Details>
 <Summary>Can I use third-party packages?</Summary>
 
-No. Code-based evaluators currently support standard libraries only. If your evaluation requires a third-party package, run that logic in your own infrastructure and ingest the result with [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk).
+No. Code evaluators currently support standard libraries only. If your evaluation requires a third-party package, run that logic in your own infrastructure and ingest the result with [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk).
 
 </Details>
 
@@ -480,25 +480,25 @@ No. Code-based evaluators currently support standard libraries only. If your eva
 </Details>
 
 <Details>
-<Summary>Can I create code-based evaluators via API or SDK?</Summary>
+<Summary>Can I create code evaluators via API or SDK?</Summary>
 
-Not yet. Create and manage code-based evaluators in the Langfuse UI. The public evaluator API currently remains scoped to LLM-as-a-Judge evaluators while the code-based evaluator contract is in Fast Preview.
+Not yet. Create and manage code evaluators in the Langfuse UI. The public evaluator API currently remains scoped to LLM-as-a-Judge evaluators while the code evaluator contract is in Fast Preview.
 
 If you want to run deterministic evaluation logic in your own application or CI pipeline, use [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) to ingest the resulting scores into Langfuse.
 
 </Details>
 
 <Details>
-<Summary>Why can't I find code-based evaluator execution traces?</Summary>
+<Summary>Why can't I find code evaluator execution traces?</Summary>
 
-Code-based evaluator executions use the internal environment `langfuse-code-eval`. Internal environments are hidden from the default tracing view, so filter the tracing table by `environment = langfuse-code-eval` or open the execution trace from the related score or evaluator log.
+Code evaluator executions use the internal environment `langfuse-code-eval`. Internal environments are hidden from the default tracing view, so filter the tracing table by `environment = langfuse-code-eval` or open the execution trace from the related score or evaluator log.
 
 </Details>
 
 <Details>
-<Summary>How do I configure code-based evaluators on self-hosted Langfuse?</Summary>
+<Summary>How do I configure code evaluators on self-hosted Langfuse?</Summary>
 
-Code-based evaluators currently require [Langfuse Fast Preview](/docs/v4), which is available on Langfuse Cloud. OSS and self-hosted deployments will receive support as soon as Langfuse v4 is supported outside Langfuse Cloud.
+Code evaluators currently require [Langfuse Fast Preview](/docs/v4), which is available on Langfuse Cloud. OSS and self-hosted deployments will receive support as soon as Langfuse v4 is supported outside Langfuse Cloud.
 
 Follow the [Fast Preview docs](/docs/v4) and the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518) for rollout updates.
 

@@ -1,10 +1,10 @@
 ---
 date: 2026-05-26
 badge: Launch Week 5 🚀
-title: Code-based evaluators
+title: Code evaluators
 description: Run deterministic Python or TypeScript checks on observations and experiments in Langfuse.
 author: Tobias Wochinger
-canonical: /docs/evaluation/evaluation-methods/code-based-evaluators
+canonical: /docs/evaluation/evaluation-methods/code-evaluators
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -12,11 +12,11 @@ import { Book, FileCode } from "lucide-react";
 
 <ChangelogHeader />
 
-You can now create code-based evaluators in Langfuse to score observations and experiments with deterministic Python or TypeScript logic. Use them when a check should be exact: JSON parseability, schema validation, exact match against an expected output, required tool arguments, latency thresholds, cost thresholds, or custom business rules.
+You can now create code evaluators in Langfuse to score observations and experiments with deterministic Python or TypeScript logic. Use them when a check should be exact: JSON parseability, schema validation, exact match against an expected output, required tool arguments, latency thresholds, cost thresholds, or custom business rules.
 
 Run them on live production observations to monitor specific operations, or attach them to experiments to compare prompt and model variants against controlled datasets. Each evaluator returns native Langfuse scores, so results work with trace views, experiment comparisons, filters, dashboards, and Score Analytics.
 
-Code-based evaluators complement [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge): use code for objective checks where deterministic logic is more reliable, and use a judge model for semantic quality, tone, helpfulness, or rubric-based reasoning.
+Code evaluators complement [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge): use code for objective checks where deterministic logic is more reliable, and use a judge model for semantic quality, tone, helpfulness, or rubric-based reasoning.
 
 ## How it works [#how-it-works]
 
@@ -26,10 +26,10 @@ Code-based evaluators complement [LLM-as-a-Judge](/docs/evaluation/evaluation-me
 - Test the evaluator on sample data before enabling it
 - Debug executions through evaluator traces in the `langfuse-code-eval` environment
 
-Code-based evaluators are designed for compact checks that run quickly at scale. They support standard library code, run without network egress, and return one or more numeric, categorical, boolean, or text scores.
+Code evaluators are designed for compact checks that run quickly at scale. They support standard library code, run without network egress, and return one or more numeric, categorical, boolean, or text scores.
 
 <Callout type="info">
-  Code-based evaluators require [Fast Preview mode](/docs/v4). Fast Preview is
+  Code evaluators require [Fast Preview mode](/docs/v4). Fast Preview is
   in open beta and currently available on Langfuse Cloud only.
 </Callout>
 
@@ -39,8 +39,8 @@ Read the setup guide to create your first evaluator, choose the right target, an
 
 <Cards num={2}>
   <Card
-    title="Code-based evaluators"
-    href="/docs/evaluation/evaluation-methods/code-based-evaluators"
+    title="Code evaluators"
+    href="/docs/evaluation/evaluation-methods/code-evaluators"
     icon={<FileCode />}
     arrow
   />
