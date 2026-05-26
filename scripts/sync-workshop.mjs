@@ -729,7 +729,8 @@ async function main() {
     pages: ["index", "learner", "instructor"],
   });
   await writeJson("learner/meta.json", {
-    title: "Learner",
+    title: "Lessons",
+    defaultOpen: true,
     pages: learnerPages,
   });
   await writeJson("instructor/meta.json", {
