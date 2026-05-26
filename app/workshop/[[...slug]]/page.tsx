@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { workshopSource } from "@/lib/source";
 import { DocsChromePage } from "@/components/DocsChromePage";
 import { buildSectionMetadata } from "@/lib/mdx-page";
+import { WORKSHOP_DEFAULT_CHAPTER } from "@/lib/workshop-config.js";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
@@ -11,8 +12,10 @@ type PageProps = {
 
 function redirectFolderIndexes(slug: string[]) {
   if (slug.length !== 1) return;
-  if (slug[0] === "learner") redirect("/workshop/learner/00-setup");
-  if (slug[0] === "instructor") redirect("/workshop/instructor/00-setup");
+  if (slug[0] === "learner")
+    redirect(`/workshop/learner/${WORKSHOP_DEFAULT_CHAPTER}`);
+  if (slug[0] === "instructor")
+    redirect(`/workshop/instructor/${WORKSHOP_DEFAULT_CHAPTER}`);
 }
 
 function hasWorkshopContent() {

@@ -5,6 +5,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import posixPath from "node:path/posix";
 import process from "node:process";
+import workshopConfig from "../lib/workshop-config.js";
 
 const OWNER = "langfuse";
 const REPO = "langfuse-workshop";
@@ -16,8 +17,8 @@ const GITHUB_BLOB_BASE = `${REPO_URL}/blob/${REF}`;
 const GITHUB_TREE_BASE = `${REPO_URL}/tree/${REF}`;
 const RAW_BASE = `https://raw.githubusercontent.com/${REPO_SLUG}/${REF}`;
 const OUTPUT_DIR = path.join(process.cwd(), "content", "workshop");
-const DEFAULT_CHAPTER = "00-setup";
 const FENCED_CODE_BLOCK_PATTERN = /(```[\s\S]*?```|~~~[\s\S]*?~~~)/g;
+const { WORKSHOP_DEFAULT_CHAPTER } = workshopConfig;
 
 const initialEnvKeys = new Set(Object.keys(process.env));
 
@@ -142,20 +143,20 @@ async function collectWorkshopFiles() {
 
   if (
     !learnerFiles.some(
-      (entry) => slugFromFileName(entry.name) === DEFAULT_CHAPTER,
+      (entry) => slugFromFileName(entry.name) === WORKSHOP_DEFAULT_CHAPTER,
     )
   ) {
     throw new Error(
-      `Expected docs/learner/${DEFAULT_CHAPTER}.md in ${REPO_SLUG}@${REF}`,
+      `Expected docs/learner/${WORKSHOP_DEFAULT_CHAPTER}.md in ${REPO_SLUG}@${REF}`,
     );
   }
   if (
     !instructorFiles.some(
-      (entry) => slugFromFileName(entry.name) === DEFAULT_CHAPTER,
+      (entry) => slugFromFileName(entry.name) === WORKSHOP_DEFAULT_CHAPTER,
     )
   ) {
     throw new Error(
-      `Expected docs/instructor/${DEFAULT_CHAPTER}.md in ${REPO_SLUG}@${REF}`,
+      `Expected docs/instructor/${WORKSHOP_DEFAULT_CHAPTER}.md in ${REPO_SLUG}@${REF}`,
     );
   }
 
