@@ -188,13 +188,36 @@ function stripFrontmatter(markdown) {
   return markdown.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, "");
 }
 
+function stripHtmlTags(value) {
+  let output = "";
+  let index = 0;
+
+  while (index < value.length) {
+    if (value[index] !== "<") {
+      output += value[index];
+      index += 1;
+      continue;
+    }
+
+    const closeTag = value.indexOf(">", index + 1);
+    if (closeTag === -1) {
+      index += 1;
+      continue;
+    }
+
+    output += " ";
+    index = closeTag + 1;
+  }
+
+  return output;
+}
+
 function cleanInlineMarkdown(value) {
-  return value
+  return stripHtmlTags(value)
     .replace(/\s*\[#[\w-]+\]\s*$/g, "")
     .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/[`*_~]/g, "")
-    .replace(/<[^>]*>/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
