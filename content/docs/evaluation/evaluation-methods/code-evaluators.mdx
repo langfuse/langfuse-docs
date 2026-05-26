@@ -6,9 +6,10 @@ description: Use Python or TypeScript code in Langfuse to run deterministic eval
 # Code evaluators
 
 <Callout type="info">
-  This feature requires [Fast Preview mode](/docs/v4) to be enabled. Fast
-  Preview is in open beta and currently available on Langfuse Cloud
-  only—enable it in the bottom left of the UI to get started.
+  Code evaluators require observations ingested with an OpenTelemetry-based SDK:
+  Python SDK v3+ or JS/TS SDK v4+. If needed, see the [Python v2 → v3 migration
+  guide](/docs/observability/sdk/upgrade-path/python-v2-to-v3) or [JS/TS v3 →
+  v4 migration guide](/docs/observability/sdk/upgrade-path/js-v3-to-v4).
 </Callout>
 
 Code evaluators run custom Python or TypeScript logic in Langfuse and return one or more [scores](/docs/evaluation/scores/overview). Use them for deterministic, objective checks where code is more reliable than a model-based judgment.
@@ -498,9 +499,12 @@ Code evaluator executions use the internal environment `langfuse-code-eval`. Int
 <Details>
 <Summary>How do I configure code evaluators on self-hosted Langfuse?</Summary>
 
-Code evaluators currently require [Langfuse Fast Preview](/docs/v4), which is available on Langfuse Cloud. OSS and self-hosted deployments will receive support as soon as Langfuse v4 is supported outside Langfuse Cloud.
+For self-hosted deployments, configure the code evaluator dispatcher and execution worker in [Code-based evaluators](/self-hosting/configuration/code-based-evaluators).
 
-Follow the [Fast Preview docs](/docs/v4) and the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518) for rollout updates.
+The only SDK requirement is OpenTelemetry-based ingestion:
+
+- Python SDK v3+ (OTel-based). If you are on Python SDK v2, see the [Python v2 → v3 migration guide](/docs/observability/sdk/upgrade-path/python-v2-to-v3).
+- JS/TS SDK v4+ (OTel-based). If you are on JS/TS SDK v3, see the [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path/js-v3-to-v4).
 
 </Details>
 

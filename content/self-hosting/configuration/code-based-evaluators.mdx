@@ -1,0 +1,97 @@
+---
+title: Code-based evaluators (self-hosted)
+description: Configure dispatchers and workers for self-hosted Code-based evaluator execution.
+label: "Version: v3"
+sidebarTitle: "Code-based evaluators"
+---
+
+# Code-based evaluators
+
+Self-hosted Code-based evaluators execute user-provided code asynchronously through the Langfuse worker. Production self-hosted deployments need a dispatcher for execution. Outside development and test environments, no dispatcher is configured unless the Code-based evaluator environment variables are set.
+
+## Production AWS Lambda dispatcher
+
+Use the AWS Lambda dispatcher for production self-hosted deployments:
+
+```bash
+NEXT_PUBLIC_LANGFUSE_CODE_EVAL_ENABLED=true
+LANGFUSE_CODE_EVAL_DISPATCHER=aws-lambda
+QUEUE_CONSUMER_CODE_EVAL_EXECUTION_QUEUE_IS_ENABLED=true
+```
+
+By default, Langfuse dispatches TypeScript/JavaScript and Python evaluators to these Lambda functions:
+
+```bash
+LANGFUSE_CODE_EVAL_AWS_LAMBDA_NODE_FUNCTION_NAME=code-based-eval-executor-node
+LANGFUSE_CODE_EVAL_AWS_LAMBDA_PYTHON_FUNCTION_NAME=code-based-eval-executor-python
+```
+
+Set these variables if your Lambda functions use different names.
+
+### Lambda runners
+
+Create one Lambda runner per supported runtime. The runner source code is part of [PR #13685](https://github.com/langfuse/langfuse/pull/13685) and will move to `main` after the PR is merged:
+
+| Runtime    | Default function name             | AWS runtime  | Handler         | Bundle file | Runner source                                                                                                                                                                                               |
+| ---------- | --------------------------------- | ------------ | --------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Python     | `code-based-eval-executor-python` | `python3.14` | `index.handler` | `index.py`  | [`scripts/code-eval-runners/python/code_based_eval_handler.py`](https://github.com/langfuse/langfuse/blob/lfe-9832-code-based-evals-data-model/scripts/code-eval-runners/python/code_based_eval_handler.py) |
+| JavaScript | `code-based-eval-executor-node`   | `nodejs24.x` | `index.handler` | `index.mjs` | [`scripts/code-eval-runners/node/code-based-eval-handler.mjs`](https://github.com/langfuse/langfuse/blob/lfe-9832-code-based-evals-data-model/scripts/code-eval-runners/node/code-based-eval-handler.mjs)   |
+
+Configure each Lambda with tenant isolation enabled:
+
+```hcl
+tenancy_config {
+  tenant_isolation_mode = "PER_TENANT"
+}
+```
+
+Use short timeouts and bounded concurrency so evaluator execution cannot consume unbounded Lambda capacity. Langfuse Cloud currently uses 128 MB memory, a 2 second timeout, and reserved concurrency per runtime.
+
+### IAM permissions
+
+Grant the Langfuse worker permission to invoke only the code evaluator runner functions:
+
+```json
+{
+  "Effect": "Allow",
+  "Action": "lambda:InvokeFunction",
+  "Resource": [
+    "arn:aws:lambda:<region>:<account-id>:function:code-based-eval-executor-node",
+    "arn:aws:lambda:<region>:<account-id>:function:code-based-eval-executor-python"
+  ]
+}
+```
+
+The Lambda execution role should be minimal: trust `lambda.amazonaws.com`, allow writing to the runner CloudWatch log groups, and avoid application, database, secret, or storage permissions. User-provided evaluator code runs inside these functions, so the runner role should not have access to Langfuse infrastructure beyond what the Lambda platform itself requires.
+
+For local AWS-compatible endpoints, set a custom Lambda endpoint:
+
+```bash
+LANGFUSE_CODE_EVAL_AWS_LAMBDA_ENDPOINT=http://localhost:4566
+```
+
+<Callout type="warning">
+  Self-hosters deploying Lambda runners are responsible for isolating evaluator
+  execution, including no-network-egress isolation.
+</Callout>
+
+## Local insecure dispatcher
+
+For local development and trusted production environments, you can run Code-based evaluators in the worker process:
+
+```bash
+LANGFUSE_CODE_EVAL_DISPATCHER=insecure-local
+QUEUE_CONSUMER_CODE_EVAL_EXECUTION_QUEUE_IS_ENABLED=true
+```
+
+`insecure-local` runs user-provided code inside the Langfuse worker process. It is only appropriate when all evaluator code is trusted, including in production. It is not a sandbox boundary for untrusted code. It currently supports TypeScript/JavaScript only.
+
+## Queue and runtime knobs
+
+These optional variables tune execution behavior:
+
+| Variable                                          | Description                                                         |
+| ------------------------------------------------- | ------------------------------------------------------------------- |
+| `LANGFUSE_CODE_EVAL_EXECUTION_QUEUE_SHARD_COUNT`  | Number of shards for the Code-based evaluator execution queue.      |
+| `LANGFUSE_CODE_EVAL_EXECUTION_WORKER_CONCURRENCY` | Worker concurrency for Code-based evaluator execution.              |
+| `LANGFUSE_CODE_EVAL_LOCAL_TIMEOUT_MS`             | Timeout in milliseconds for locally executed Code-based evaluators. |
