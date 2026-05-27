@@ -39,7 +39,13 @@ const DAYS: DayCard[] = [
     title: "Full-Text Search",
     href: "/changelog/2026-05-27-clickhouse-full-text-search-fast-mode",
   },
-  { n: "04", weekday: "Thursday", date: "May 28", hint: "Evals as code" },
+  {
+    n: "04",
+    weekday: "Thursday",
+    date: "May 28",
+    title: "Code evaluators",
+    href: "/changelog/2026-05-28-code-evaluators",
+  },
   { n: "05", weekday: "Friday", date: "May 29", hint: "Never miss a thing" },
 ];
 
@@ -575,6 +581,101 @@ function Day3Unveiling() {
   );
 }
 
+function Day4Unveiling() {
+  return (
+    <section id="day-4" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 04 · Thursday, May 28, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Code evaluators.</span>
+        </h2>
+        <p className="lw5-body">
+          Not every evaluation needs a model. JSON parseability, schema
+          validation, exact match, required tool arguments, custom business
+          rules: things you would rather verify with code than ask a judge to
+          “rate this 1–5”. Deterministic, reproducible, no token cost.
+        </p>
+        <p className="lw5-body">
+          Day 4 ships code evaluators. Write a small <code>evaluate</code>{" "}
+          function in Python or TypeScript directly in the Langfuse UI, attach
+          it to live observations or to a dataset experiment, and the result
+          lands as a native Langfuse score. It shows up in trace views,
+          experiment compares, filters, dashboards, and Score Analytics next to
+          your existing scores.
+        </p>
+        <p className="lw5-body">
+          Code evaluators sit alongside{" "}
+          <Link
+            href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            LLM-as-a-Judge
+          </Link>{" "}
+          rather than replacing it. Code wins for objective checks. A judge
+          wins for semantic quality, tone, helpfulness, or rubric reasoning.
+          Together they give you a more complete picture of quality than
+          either approach alone.
+        </p>
+      </div>
+
+      <div
+        className={`${cornerBoxBase} relative w-full max-w-[920px] aspect-video bg-surface-1 flex items-center justify-center overflow-hidden mb-8`}
+      >
+        <div
+          aria-hidden
+          className="lw5-grid-bg absolute inset-0 opacity-50 pointer-events-none"
+        />
+        <div className="relative flex flex-col items-center gap-3 text-text-tertiary">
+          <svg
+            width="44"
+            height="44"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polygon points="10,8 16,12 10,16" fill="currentColor" />
+          </svg>
+          <div className="font-mono text-[11px] uppercase tracking-[.1em]">
+            Screen recording coming soon
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-28-code-evaluators"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/evaluation/evaluation-methods/code-evaluators"
+          >
+            <span>Get started in docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/self-hosting/configuration/code-evaluators"
+          >
+            <span>Self-hosting setup</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
 function DayCard({ day }: { day: DayCard }) {
   const live = Boolean(day.href);
   const content = (
@@ -659,6 +760,7 @@ export function LaunchWeek5Landing() {
       <div className="max-w-[1440px] mx-auto">
         <Hero />
         <Schedule />
+        <Day4Unveiling />
         <Day3Unveiling />
         <Day2Unveiling />
         <Day1Unveiling />
