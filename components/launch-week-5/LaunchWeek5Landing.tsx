@@ -36,7 +36,7 @@ const DAYS: DayCard[] = [
     n: "03",
     weekday: "Wednesday",
     date: "May 27",
-    title: "Faster search in Fast Mode",
+    title: "Full-Text Search",
     href: "/changelog/2026-05-27-clickhouse-full-text-search-fast-mode",
   },
   { n: "04", weekday: "Thursday", date: "May 28", hint: "Evals as code" },
