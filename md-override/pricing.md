@@ -57,7 +57,7 @@ Optional **Teams Add-on** ($300/month):
 
 [Sign up](/cloud)
 
-### Enterprise ($2,499/month)
+### Enterprise (Custom)
 
 For large-scale teams. Enterprise-grade support and security.
 
@@ -213,13 +213,14 @@ Additional usage beyond the included units is billed at graduated rates. Higher 
 
 **Example 5: Enterprise scale (100M units/month on Enterprise)**
 
-- Enterprise base fee: $2,499.00
+- Enterprise pricing: Custom
 - First 100k units: included
 - Next 900k units at $8.00/100k: $72.00
 - Next 9M units at $7.00/100k: $630.00
 - Next 40M units at $6.50/100k: $2,600.00
 - Next 50M units at $6.00/100k: $3,000.00
-- **Total: $8,801.00/month** (custom volume pricing available with yearly commitment)
+- **Usage estimate at standard graduated rates: $6,302.00/month**
+- Contact sales for a custom Enterprise quote. Yearly commitments may qualify for custom volume pricing.
 
 ### Billable Units
 
