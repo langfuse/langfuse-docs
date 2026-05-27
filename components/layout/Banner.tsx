@@ -13,7 +13,7 @@ export function Banner() {
           Launch Week 5 · Day 3: Faster search →
         </span>
         <span className="hidden sm:inline">
-          Langfuse Launch Week 5 · Day 3: Faster search in Fast Mode →
+          Langfuse Launch Week 5 · Day 3: Full-Text Search →
         </span>
       </Link>
     </FumadocsBanner>
