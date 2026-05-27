@@ -618,29 +618,13 @@ function Day4Unveiling() {
         </p>
       </div>
 
-      <div
-        className={`${cornerBoxBase} relative w-full max-w-[920px] aspect-video bg-surface-1 flex items-center justify-center overflow-hidden mb-8`}
-      >
-        <div
-          aria-hidden
-          className="lw5-grid-bg absolute inset-0 opacity-50 pointer-events-none"
+      <div className="w-full max-w-[920px] mb-8">
+        <Video
+          src="https://static.langfuse.com/docs-videos/code-evaluators-launch.mp4"
+          aspectRatio={16 / 9}
+          className="rounded border border-line-structure"
+          gifStyle
         />
-        <div className="relative flex flex-col items-center gap-3 text-text-tertiary">
-          <svg
-            width="44"
-            height="44"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <polygon points="10,8 16,12 10,16" fill="currentColor" />
-          </svg>
-          <div className="font-mono text-[11px] uppercase tracking-[.1em]">
-            Screen recording coming soon
-          </div>
-        </div>
       </div>
 
       <div className="flex flex-wrap gap-2">
