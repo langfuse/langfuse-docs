@@ -1,0 +1,286 @@
+---
+title: Get Started
+description: Set up your first LLM evaluation in Langfuse. Choose between automated monitoring, structured experiments, or human review based on your use case.
+---
+
+# Get Started with Evaluation
+
+This guide helps you set up your first evaluation. If you want to understand what evaluation is and why it matters, check out the [Evaluation Overview](/docs/evaluation/overview) first. For details on concepts like scores, datasets, and experiments, see [Core Concepts](/docs/evaluation/core-concepts).
+
+import GetStartedAutoInstall from "@/components-mdx/get-started/auto-install.mdx";
+import { FaqPreview } from "@/components/faq/FaqPreview";
+import { BookOpen, Wand, TestTube, Users } from "lucide-react";
+
+<Tabs items={["✨ Use AI", "Do it yourself"]}>
+
+<Tab>
+
+<div className="pt-6">
+<Steps>
+## Get API keys
+
+1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
+2.  Create new API credentials in the project settings.
+
+## Set up your AI agent
+
+Use the [Langfuse Skill](https://github.com/langfuse/skills) in your editor's agent mode to automatically set up evaluations for your application.
+
+> What is a Skill? A reusable instruction package for AI coding agents. It gives your agent Langfuse-specific workflows and best practices out of the box.
+
+<GetStartedAutoInstall />
+
+## Set up evals
+
+Start a new agent session, then prompt it to set up evaluations:
+
+```txt filename="Agent instruction"
+"Set up Langfuse evaluations for this application. Help me choose the right evaluation approach and implement it."
+```
+
+The agent will analyze your codebase, recommend the best evaluation method, and help you implement it.
+
+</Steps>
+</div>
+
+</Tab>
+
+<Tab>
+
+<div className="pt-6">
+
+## Pick your starting point [#pick-starting-point]
+
+Different teams need different evaluation approaches. Pick the one that matches what you want to do right now — you can always add more later.
+
+<Cards num={3}>
+  <Card
+    icon={<Wand size="24" />}
+    title="Monitor Production"
+    href="#monitor-production"
+  >
+    Automatically score live traces to catch quality issues in real time.
+  </Card>
+  <Card
+    icon={<TestTube size="24" />}
+    title="Test Before Shipping"
+    href="#test-before-shipping"
+  >
+    Run your app against a dataset and evaluate results before deploying.
+  </Card>
+  <Card
+    icon={<Users size="24" />}
+    title="Human Review"
+    href="#human-review"
+  >
+    Set up structured review queues for domain experts to label and score traces.
+  </Card>
+</Cards>
+
+Not sure which to pick? Here's a rule of thumb:
+
+- **Already have traces in Langfuse?** Start with [Monitor Production](#monitor-production) — you'll get scores on your existing data within minutes.
+- **Building something new or changing prompts?** Start with [Test Before Shipping](#test-before-shipping) — create a dataset and run experiments to validate changes.
+- **Need ground truth or expert review?** Start with [Human Review](#human-review) — build a labeled dataset from real traces.
+
+---
+
+## Monitor Production [#monitor-production]
+
+Use LLM-as-a-Judge to automatically evaluate live traces. An LLM scores your application's outputs against criteria you define — no code changes required.
+
+**Prerequisites:** [Traces flowing into Langfuse](/docs/observability/get-started) and an [LLM connection](/docs/administration/llm-connection) configured.
+
+<Steps>
+
+### Create an evaluator
+
+Navigate to **Evaluators** in the sidebar and click **+ Set up Evaluator**. Choose a managed evaluator (e.g., Hallucination, Helpfulness) or write your own evaluation prompt.
+
+### Select your target data
+
+Choose **Live Observations** to evaluate individual operations (recommended) or **Live Traces** to evaluate complete workflows. Add filters to target specific operations — for example, only evaluate observations named `chat-response`.
+
+### Map variables and activate
+
+Map the evaluator's variables (like `{{input}}` and `{{output}}`) to the corresponding fields in your traces. Preview how the evaluation prompt looks with real data, then save.
+
+</Steps>
+
+New matching traces will be scored automatically. Check the **Scores** tab on any trace to see results.
+
+<Cards num={1}>
+  <Card
+    icon={<BookOpen size="24" />}
+    title="Full LLM-as-a-Judge documentation"
+    href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+    arrow
+  />
+</Cards>
+
+---
+
+## Test Before Shipping [#test-before-shipping]
+
+Run your application against a fixed dataset and evaluate the outputs. This is how you catch regressions before deploying.
+
+**Prerequisites:** [Langfuse SDK installed](/docs/observability/get-started) (Python v3+ or JS/TS v4+).
+
+<Steps>
+
+### Define test data
+
+Start with a few representative inputs and expected outputs. You can use local data or create a dataset in Langfuse.
+
+### Run an experiment
+
+Use the experiment runner SDK to execute your application against every test case and optionally score the results.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client, Evaluation
+from langfuse.openai import OpenAI
+
+langfuse = get_client()
+
+def my_task(*, item, **kwargs):
+    response = OpenAI().chat.completions.create(
+        model="gpt-4.1",
+        messages=[{"role": "user", "content": item["input"]}],
+    )
+    return response.choices[0].message.content
+
+def check_answer(*, output, expected_output, **kwargs):
+    is_correct = expected_output.lower() in output.lower()
+    return Evaluation(name="correctness", value=1.0 if is_correct else 0.0)
+
+result = langfuse.run_experiment(
+    name="My First Experiment",
+    data=[
+        {"input": "What is the capital of France?", "expected_output": "Paris"},
+        {"input": "What is the capital of Germany?", "expected_output": "Berlin"},
+    ],
+    task=my_task,
+    evaluators=[check_answer],
+)
+
+print(result.format())
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { OpenAI } from "openai";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseClient, ExperimentItem } from "@langfuse/client";
+import { observeOpenAI } from "@langfuse/openai";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+otelSdk.start();
+
+const langfuse = new LangfuseClient();
+
+const testData: ExperimentItem[] = [
+  { input: "What is the capital of France?", expectedOutput: "Paris" },
+  { input: "What is the capital of Germany?", expectedOutput: "Berlin" },
+];
+
+const myTask = async (item: ExperimentItem) => {
+  const response = await observeOpenAI(new OpenAI()).chat.completions.create({
+    model: "gpt-4.1",
+    messages: [{ role: "user", content: item.input as string }],
+  });
+  return response.choices[0].message.content;
+};
+
+const checkAnswer = async ({ output, expectedOutput }) => ({
+  name: "correctness",
+  value: expectedOutput && output.toLowerCase().includes(expectedOutput.toLowerCase()) ? 1.0 : 0.0,
+});
+
+const result = await langfuse.experiment.run({
+  name: "My First Experiment",
+  data: testData,
+  task: myTask,
+  evaluators: [checkAnswer],
+});
+
+console.log(await result.format());
+await otelSdk.shutdown();
+```
+
+</Tab>
+</LangTabs>
+
+### Review results
+
+The experiment runner prints a summary table. If you used a Langfuse dataset, results are also available in the Langfuse UI under **Datasets** where you can compare runs side by side.
+
+</Steps>
+
+<Cards num={2}>
+  <Card
+    icon={<BookOpen size="24" />}
+    title="Experiments via SDK"
+    href="/docs/evaluation/experiments/experiments-via-sdk"
+    arrow
+  />
+  <Card
+    icon={<BookOpen size="24" />}
+    title="Experiments via UI"
+    href="/docs/evaluation/experiments/experiments-via-ui"
+    arrow
+  />
+</Cards>
+
+---
+
+## Human Review [#human-review]
+
+Set up annotation queues so domain experts can review traces and add scores manually. This is the best way to build ground truth data and calibrate automated evaluators.
+
+**Prerequisites:** [Traces in Langfuse](/docs/observability/get-started) and at least one [score config](/faq/all/manage-score-configs#create-a-score-config).
+
+<Steps>
+
+### Create a score config
+
+Go to **Settings** → **Score Configs** and create a config that defines what you want to measure. For example, a categorical config with values `correct`, `partially_correct`, and `incorrect`.
+
+### Create an annotation queue
+
+Navigate to **Annotation Queues** and click **New Queue**. Give it a name, attach your score config, and optionally assign team members.
+
+### Add traces and start reviewing
+
+Select traces from the **Traces** table and click **Actions** → **Add to queue**. Open the queue and work through items — score each one, add comments, then click **Complete + next**.
+
+</Steps>
+
+<Cards num={1}>
+  <Card
+    icon={<BookOpen size="24" />}
+    title="Full Annotation Queues documentation"
+    href="/docs/evaluation/evaluation-methods/annotation-queues"
+    arrow
+  />
+</Cards>
+
+</div>
+</Tab>
+</Tabs>
+
+## Next steps
+
+Now that you have your first evaluation running, here are recommended next steps:
+
+- **Combine methods:** Use [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) to build ground truth, then calibrate [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators against human scores.
+- **Build a dataset:** Collect edge cases from production into a [dataset](/docs/evaluation/experiments/datasets) for repeatable testing.
+- **Add to CI:** Run [experiments in your test suite](/docs/evaluation/experiments/experiments-via-sdk#testing-in-ci-environments) to catch regressions automatically.
+- **Track trends:** Use [score analytics](/docs/evaluation/evaluation-methods/score-analytics) and [custom dashboards](/docs/metrics/features/custom-dashboards) to monitor evaluation scores over time.
+
+Looking for something specific? Check the _Evaluation Methods_ and _Experiments_ sections for detailed guides.
