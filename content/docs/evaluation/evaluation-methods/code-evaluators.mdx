@@ -14,7 +14,7 @@ description: Use Python or TypeScript code in Langfuse to run deterministic eval
 
 Code evaluators run custom Python or TypeScript logic in Langfuse and return one or more [scores](/docs/evaluation/scores/overview). Use them for deterministic, objective checks where code is more reliable than a model-based judgment.
 
-Common examples include exact match checks, regex validation, JSON parseability, schema validation, keyword checks, tool-call checks, latency or cost thresholds, and custom business rules.
+Common examples include exact match checks, regex validation, JSON parseability, schema validation, keyword checks, tool-call checks, and custom business rules.
 
 Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) instead when the evaluation needs semantic judgment, rubric-based reasoning, or subjective assessment such as helpfulness, tone, or answer quality.
 
@@ -104,7 +104,7 @@ Run evaluators on individual observations within your traces, such as LLM calls,
 **Why target observations**
 
 - **Operation-level precision**: Filter by observation type to evaluate only the operations that matter, not complete traces.
-- **Deterministic production monitoring**: Check JSON validity, schema compliance, exact matches, latency thresholds, or business rules on live traffic.
+- **Deterministic production monitoring**: Check JSON validity, schema compliance, exact matches, or business rules on live traffic.
 - **Compositional evaluation**: Run different code evaluators on different operations within one trace.
 - **Combined filtering**: Stack observation filters with trace filters such as `userId`, `sessionId`, tags, version, and metadata.
 
@@ -116,7 +116,7 @@ At ingest time, each observation is evaluated against your filter criteria. Matc
 
 - Validate that final LLM responses are parseable JSON
 - Check whether a tool call includes required arguments
-- Monitor latency or cost thresholds for selected model calls
+- Enforce custom business rules for selected model calls
 
 </Tab>
 
@@ -467,7 +467,7 @@ Code evaluators are intended for compact, deterministic checks that can run quic
 
 | Constraint        | Limit / guidance                                                                                                                                                                                                                                           |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Languages         | Write evaluators in Python or TypeScript.                                                                                                                                                                                                                  |
+| Languages         | Write evaluators in Python or TypeScript. On self-hosted deployments, Python requires the `aws-lambda` dispatcher; `insecure-local` supports TypeScript/JavaScript only.                                                                                   |
 | TypeScript syntax | Use [erasable TypeScript syntax](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-8.html#the---erasablesyntaxonly-option). Type annotations and interfaces are fine; avoid enums, namespaces, decorators, and parameter properties. |
 | Dependencies      | Use the language standard library. Third-party packages are not available in the evaluator runtime.                                                                                                                                                        |
 | Network access    | Evaluators run without network egress. Keep all required data in the observation or experiment context.                                                                                                                                                    |
