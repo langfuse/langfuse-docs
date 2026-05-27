@@ -71,11 +71,16 @@ Grant the Langfuse worker permission to invoke only the code evaluator runner fu
 
 ```json
 {
-  "Effect": "Allow",
-  "Action": "lambda:InvokeFunction",
-  "Resource": [
-    "arn:aws:lambda:<region>:<account-id>:function:code-based-eval-executor-node",
-    "arn:aws:lambda:<region>:<account-id>:function:code-based-eval-executor-python"
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": [
+        "arn:aws:lambda:<region>:<account-id>:function:code-based-eval-executor-node",
+        "arn:aws:lambda:<region>:<account-id>:function:code-based-eval-executor-python"
+      ]
+    }
   ]
 }
 ```
@@ -98,6 +103,7 @@ LANGFUSE_CODE_EVAL_AWS_LAMBDA_ENDPOINT=http://localhost:4566
 For local development and trusted production environments, you can run code evaluators in the worker process:
 
 ```bash
+NEXT_PUBLIC_LANGFUSE_CODE_EVAL_ENABLED=true
 LANGFUSE_CODE_EVAL_DISPATCHER=insecure-local
 QUEUE_CONSUMER_CODE_EVAL_EXECUTION_QUEUE_IS_ENABLED=true
 ```

@@ -223,7 +223,7 @@ class EvaluationContext:
 class Score:
     value: int | float | str | bool
     name: str
-    data_type: str | None = None
+    data_type: str
     comment: str | None = None
     config_id: str | None = None
     metadata: dict[str, Any] | None = None
@@ -351,14 +351,14 @@ function evaluate({
 
 ### Score fields
 
-| Field                    | Description                                                                                                                                                                                                        |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                   | Required score name.                                                                                                                                                                                               |
-| `value`                  | Required score value.                                                                                                                                                                                              |
-| `data_type` / `dataType` | Optional for numeric and categorical scores, required when returning boolean or text scores. Supported values are [`NUMERIC`, `CATEGORICAL`, `BOOLEAN`, and `TEXT`](/docs/evaluation/scores/overview#score-types). |
-| `comment`                | Optional reasoning or explanation stored with the score.                                                                                                                                                           |
-| `config_id` / `configId` | Optional score config ID. When provided, the score must satisfy the referenced [score config](/faq/all/manage-score-configs).                                                                                      |
-| `metadata`               | Optional metadata stored with the score.                                                                                                                                                                           |
+| Field                    | Description                                                                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                   | Required score name.                                                                                                                            |
+| `value`                  | Required score value.                                                                                                                           |
+| `data_type` / `dataType` | Required score data type. Supported values are [`NUMERIC`, `CATEGORICAL`, `BOOLEAN`, and `TEXT`](/docs/evaluation/scores/overview#score-types). |
+| `comment`                | Optional reasoning or explanation stored with the score.                                                                                        |
+| `config_id` / `configId` | Optional score config ID. When provided, the score must satisfy the referenced [score config](/faq/all/manage-score-configs).                   |
+| `metadata`               | Optional metadata stored with the score.                                                                                                        |
 
 ## Example: Exact match
 
