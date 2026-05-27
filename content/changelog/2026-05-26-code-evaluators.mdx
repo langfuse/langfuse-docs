@@ -9,11 +9,11 @@ ogImage: /images/changelog/2026-05-27-code-evaluators.png
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
-import { Book, FileCode } from "lucide-react";
+import { Book, FileCode, Server } from "lucide-react";
 
 <ChangelogHeader />
 
-You can now create code evaluators in Langfuse to score observations and experiments with deterministic Python or TypeScript logic. Use them when a check should be exact: JSON parseability, schema validation, exact match against an expected output, required tool arguments, latency thresholds, cost thresholds, or custom business rules.
+You can now create code evaluators in Langfuse to score observations and experiments with deterministic Python or TypeScript logic. Use them for exact checks such as JSON parseability, schema validation, exact match, required tool arguments, latency and cost thresholds, or custom business rules.
 
 Run them on live production observations to monitor specific operations, or attach them to experiments to compare prompt and model variants against controlled datasets. Each evaluator returns native Langfuse scores, so results work with trace views, experiment comparisons, filters, dashboards, and Score Analytics.
 
@@ -29,16 +29,11 @@ Code evaluators complement [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/
 
 Code evaluators are designed for compact checks that run quickly at scale. They support standard library code, run without network egress, and return one or more numeric, categorical, boolean, or text scores.
 
-<Callout type="info">
-  Code evaluators require [Fast Preview mode](/docs/v4). Fast Preview is
-  in open beta and currently available on Langfuse Cloud only.
-</Callout>
-
 ## Get started [#get-started]
 
-Read the setup guide to create your first evaluator, choose the right target, and see Python and TypeScript examples for the evaluator contract.
+Read the setup guide to create your first evaluator, choose the right target, and see Python and TypeScript examples for the evaluator contract. Code evaluators are available across Langfuse environments, including self-hosted deployments.
 
-<Cards num={2}>
+<Cards num={3}>
   <Card
     title="Code evaluators"
     href="/docs/evaluation/evaluation-methods/code-evaluators"
@@ -49,6 +44,12 @@ Read the setup guide to create your first evaluator, choose the right target, an
     title="Evaluation overview"
     href="/docs/evaluation/overview"
     icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Self-hosting setup"
+    href="/self-hosting/configuration/code-based-evaluators"
+    icon={<Server />}
     arrow
   />
 </Cards>
