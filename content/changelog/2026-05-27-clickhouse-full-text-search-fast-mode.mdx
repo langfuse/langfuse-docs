@@ -1,0 +1,68 @@
+---
+date: 2026-05-27
+title: "Faster search in Fast Mode"
+description: Langfuse Cloud is rolling out ClickHouse full-text search for Fast Mode (Preview), improving UI search and adding the matches operator to Observations API v2.
+author: Valeriy
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Search in the Langfuse UI is now better: we are beginning to roll out [ClickHouse full-text search](https://clickhouse.com/docs/engines/table-engines/mergetree-family/textindexes) to **Fast Mode (Preview)** on Langfuse Cloud. This beta improves search and filtering over observation inputs, outputs, and metadata, especially for large projects with high-volume traces.
+
+We are also expanding the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) with a new `matches` operator for token-based search on `input`, `output`, and string metadata filters.
+
+On May 27, 2026, Cloud indexes cover data from March 31, 2026 through May 27, 2026. Backfill for older data is running continuously and should finish shortly.
+
+## Faster search on large projects
+
+ClickHouse full-text search uses text indexes to skip over data that cannot match a query before reading full observation payloads. You can read more in the [ClickHouse GA announcement](https://clickhouse.com/blog/full-text-search-ga-release).
+
+In our benchmarks, some searches moved from multi-second scans over hundreds of GB to sub-second reads over less than 1 GB:
+
+| Query shape               | Before                                   | With full-text search                |
+| ------------------------- | ---------------------------------------- | ------------------------------------ |
+| Large input/output search | 18.205s, 66,130,828 rows, 493.79 GB read | 0.447s, 140,956 rows, 728.51 MB read |
+| Metadata-heavy search     | 1.612s, 66,130,828 rows, 53.14 GB read   | 0.201s, 58,730 rows, 438.83 MB read  |
+
+These gains depend on the search term and data distribution. Queries with very common tokens, substring-only filters, or data that has not been backfilled yet may see more modest gains, and a small number of outliers can perform about the same or slightly slower.
+
+## How to use it in the API
+
+For new high-scale workflows on `/api/public/v2/observations`, prefer `=` when you know the exact value and `matches` when you want token-based search. On input and output filters, substring operators such as `contains`, `starts with`, and `ends with` are rejected with `400` because they would require slow full-content scans. Use `matches` for token search on these fields.
+
+`matches` is case-insensitive for `input` and `output`, so `refund failed` can match `Refund Failed`. For metadata filters, `matches` is case-sensitive and applies to string metadata values for the selected key.
+
+Example `matches` filter for observation output:
+
+```json
+[
+  {
+    "type": "string",
+    "column": "output",
+    "operator": "matches",
+    "value": "refund failed"
+  }
+]
+```
+
+Example exact metadata filter:
+
+```json
+[
+  {
+    "type": "stringObject",
+    "column": "metadata",
+    "key": "environment",
+    "operator": "=",
+    "value": "production"
+  }
+]
+```
+
+Pass the JSON array as the URL-encoded `filter` query parameter on `GET /api/public/v2/observations`. See the [Observations API v2 docs](/docs/api-and-data-platform/features/observations-api#v2) and [API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for the full filter schema.
+
+## More full-text search improvements to come
+
+This is the beginning of our full-text search work in Fast Mode. We are continuing to tune the rollout, expand coverage, and improve search behavior for more query shapes.
