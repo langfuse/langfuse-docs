@@ -46,12 +46,12 @@ Set these variables if your Lambda functions use different names.
 
 ### Lambda runners
 
-Create one Lambda runner per supported runtime. The runner source code is part of [PR #13685](https://github.com/langfuse/langfuse/pull/13685) and will move to `main` after the PR is merged:
+Create one Lambda runner per supported runtime. The runner source code is available on `main`:
 
-| Runtime    | Default function name             | AWS runtime  | Handler         | Bundle file | Runner source                                                                                                                                                                                               |
-| ---------- | --------------------------------- | ------------ | --------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Python     | `code-based-eval-executor-python` | `python3.14` | `index.handler` | `index.py`  | [`scripts/code-eval-runners/python/code_based_eval_handler.py`](https://github.com/langfuse/langfuse/blob/lfe-9832-code-based-evals-data-model/scripts/code-eval-runners/python/code_based_eval_handler.py) |
-| JavaScript | `code-based-eval-executor-node`   | `nodejs24.x` | `index.handler` | `index.mjs` | [`scripts/code-eval-runners/node/code-based-eval-handler.mjs`](https://github.com/langfuse/langfuse/blob/lfe-9832-code-based-evals-data-model/scripts/code-eval-runners/node/code-based-eval-handler.mjs)   |
+| Runtime    | Default function name             | AWS runtime  | Handler         | Bundle file | Runner source                                                                                                                                                               |
+| ---------- | --------------------------------- | ------------ | --------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Python     | `code-based-eval-executor-python` | `python3.14` | `index.handler` | `index.py`  | [`scripts/code-eval-runners/python/code_based_eval_handler.py`](https://github.com/langfuse/langfuse/blob/main/scripts/code-eval-runners/python/code_based_eval_handler.py) |
+| JavaScript | `code-based-eval-executor-node`   | `nodejs24.x` | `index.handler` | `index.mjs` | [`scripts/code-eval-runners/node/code-based-eval-handler.mjs`](https://github.com/langfuse/langfuse/blob/main/scripts/code-eval-runners/node/code-based-eval-handler.mjs)   |
 
 Configure each Lambda with [tenant isolation](https://docs.aws.amazon.com/lambda/latest/dg/tenant-isolation.html) enabled:
 
