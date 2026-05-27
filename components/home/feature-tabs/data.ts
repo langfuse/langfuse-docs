@@ -113,7 +113,7 @@ query = {
   "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
   "fromTimestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(from_ms/1000)),
   "toTimestamp":   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now/1000)),
-  "orderBy": [{"field": "totalCost_sum", "direction": "desc"}],
+  "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
 }
 
 # Get metrics from Langfuse API
@@ -134,7 +134,7 @@ const query = JSON.stringify({
   metrics: [{ measure: "totalCost", aggregation: "sum" }],
   fromTimestamp: from,
   toTimestamp: new Date(now).toISOString(),
-  orderBy: [{ field: "totalCost_sum", direction: "desc" }],
+  orderBy: [{ field: "sum_totalCost", direction: "desc" }],
 });
 
 // Get metrics from Langfuse API

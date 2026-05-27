@@ -49,11 +49,15 @@ The v2 Metrics API provides significant performance improvements through an opti
 
 ### Row Limit
 
-The v2 Metrics API enforces a default `rowLimit` of 100 rows per query to ensure consistent performance. You can specify a custom `rowLimit` in your query to override this default.
+The v2 Metrics API enforces a default `config.row_limit` of 100 rows per query to ensure consistent performance. You can specify a custom `config.row_limit` in your query to override this default.
 
 ### High Cardinality Dimensions
 
 Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` cannot be used for grouping in the v2 Metrics API. Grouping by these high cardinality fields is extremely expensive and rarely useful in practice. These dimensions remain available for filtering.
+
+### Ordering by metrics
+
+When ordering by an aggregated metric, use the returned metric field name in the format `{aggregation}_{measure}`, for example `sum_totalCost` for `{ "measure": "totalCost", "aggregation": "sum" }`. When ordering by the time dimension, use `time_dimension`.
 
 ### Example: Most expensive models used in observations
 
@@ -68,8 +72,8 @@ curl \
     "filters": [],
     "fromTimestamp": "2025-12-01T00:00:00Z",
     "toTimestamp": "2025-12-16T00:00:00Z",
-    "orderBy": [{"field": "totalCost_sum", "direction": "desc"}],
-    "rowLimit": 1000
+    "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+    "config": {"row_limit": 1000}
   }' \
   https://cloud.langfuse.com/api/public/v2/metrics
 ```
@@ -89,7 +93,7 @@ When moving existing queries to v2:
 - Replace `GET /api/public/metrics` with `GET /api/public/v2/metrics`.
 - Replace `view: "traces"` with `view: "observations"` and use trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion` where supported. `userId` and `sessionId` remain available as filters, but cannot be used for grouping in v2.
 - Review your `metrics` array when migrating trace-view queries. In the v2 `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows. Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and group by `traceId` client-side when you need trace-level counts or trace durations.
-- Set `rowLimit` explicitly when migrating queries that should return more than the default 100 rows.
+- Set `config.row_limit` explicitly when migrating queries that should return more than the default 100 rows.
 - Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) instead if you need row-level spans, generations, or events.
 
 The rest of this section documents the legacy v1 endpoint for existing integrations.

@@ -107,8 +107,8 @@ cost_by_model_query = {
     "filters": [],
     "fromTimestamp": seven_days_ago.isoformat(),
     "toTimestamp": now.isoformat(),
-    "orderBy": [{"field": "totalCost_sum", "direction": "desc"}],
-    "rowLimit": 10,
+    "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+    "config": {"row_limit": 10},
 }
 
 cost_by_model_df = run_metrics_query(cost_by_model_query)
@@ -134,8 +134,8 @@ volume_and_latency_query = {
     "timeDimension": {"granularity": "day"},
     "fromTimestamp": seven_days_ago.isoformat(),
     "toTimestamp": now.isoformat(),
-    "orderBy": [{"field": "timeDimension", "direction": "asc"}],
-    "rowLimit": 100,
+    "orderBy": [{"field": "time_dimension", "direction": "asc"}],
+    "config": {"row_limit": 100},
 }
 
 volume_and_latency_df = run_metrics_query(volume_and_latency_query)
@@ -179,8 +179,8 @@ score_summary_query = {
     "filters": [],
     "fromTimestamp": seven_days_ago.isoformat(),
     "toTimestamp": now.isoformat(),
-    "orderBy": [{"field": "value_avg", "direction": "desc"}],
-    "rowLimit": 20,
+    "orderBy": [{"field": "avg_value", "direction": "desc"}],
+    "config": {"row_limit": 20},
 }
 
 score_summary_df = run_metrics_query(score_summary_query)
