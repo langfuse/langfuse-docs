@@ -18,6 +18,10 @@ Common examples include exact match checks, regex validation, JSON parseability,
 
 Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) instead when the evaluation needs semantic judgment, rubric-based reasoning, or subjective assessment such as helpfulness, tone, or answer quality.
 
+<Frame fullWidth>
+  ![Create a code evaluator in Langfuse](/images/docs/code-evaluators/creation-flow.gif)
+</Frame>
+
 ## How to use code evaluators?
 
 Code evaluators can run on two types of data: **Observations** (individual operations from live production traffic) or **Experiments** (controlled test datasets). Your choice depends on whether you're testing in development or
@@ -148,17 +152,33 @@ Each experiment run generates traces and observations that can be scored by your
 
 Go to the Evaluators page and create a new code evaluator.
 
+<Frame fullWidth>
+  ![Select code evaluator in the evaluator setup flow](/images/docs/code-evaluators/create-new-code-evaluator.png)
+</Frame>
+
 ### Write the evaluator code
 
 Choose Python or TypeScript and implement the `evaluate` function. Keep the code deterministic and within the runtime constraints.
+
+<Frame fullWidth>
+  ![Write TypeScript or Python evaluator code](/images/docs/code-evaluators/write-code.png)
+</Frame>
 
 ### Configure where it runs
 
 Select observations or experiments as the target and configure filters, sampling, and mappings as needed.
 
+<Frame fullWidth>
+  ![Configure the code evaluator run target and filters](/images/docs/code-evaluators/configure-run-target.png)
+</Frame>
+
 ### Test the evaluator
 
 Run the evaluator against sample observations before enabling it. Use the preview to confirm that the observation fields and experiment fields passed to `ctx` match what your code expects.
+
+<Frame fullWidth>
+  ![Successful code evaluator test run](/images/docs/code-evaluators/test-success.png)
+</Frame>
 
 ### Trigger the evaluation
 
