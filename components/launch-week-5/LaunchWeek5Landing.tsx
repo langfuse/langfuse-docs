@@ -374,6 +374,7 @@ function Day1Unveiling() {
           src="https://static.langfuse.com/docs-videos/ci-experiment.mp4"
           aspectRatio={16 / 9}
           className="rounded border border-line-structure"
+          gifStyle
         />
       </div>
 
@@ -506,11 +507,7 @@ function Day3Unveiling() {
           UI does not cut it at that scale.
         </p>
         <p className="lw5-body">
-          Day 3 rolls out full-text search to{" "}
-          <b className="text-text-primary font-medium">
-            Fast Mode (Preview)
-          </b>{" "}
-          on Langfuse Cloud. In our benchmarks, large input/output searches
+          Day 3 rolls out full-text search to Langfuse Cloud. In our benchmarks, large input/output searches
           that took 18 seconds and scanned 494 GB now return in under half a
           second and read less than a gigabyte. Metadata-heavy queries dropped
           from 1.6s to 0.2s. The UI gets faster for humans hunting a bug, and
@@ -518,16 +515,7 @@ function Day3Unveiling() {
           agents and scripts the same token-based search programmatically.
         </p>
         <p className="lw5-body">
-          Built by{" "}
-          <Link
-            href="https://github.com/sumerman"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-text-primary font-medium border-b border-text-primary pb-px"
-          >
-            Valeriy Meleshkin
-          </Link>{" "}
-          on top of ClickHouse’s new{" "}
+          Built on top of ClickHouse’s new{" "}
           <Link
             href="https://clickhouse.com/blog/full-text-search-ga-release"
             target="_blank"
@@ -536,8 +524,8 @@ function Day3Unveiling() {
           >
             full-text search release
           </Link>
-          . We pair closely with the ClickHouse storage team on the underlying
-          engine, so features like this land in Langfuse weeks after they ship
+          , we worked closely with the ClickHouse team on the underlying
+          engine, so features like this land in Langfuse days after they ship
           in ClickHouse core.
         </p>
       </div>
@@ -547,6 +535,7 @@ function Day3Unveiling() {
           src="https://static.langfuse.com/docs-videos/full-text-search-launch.mp4"
           aspectRatio={16 / 9}
           className="rounded border border-line-structure"
+          gifStyle
         />
       </div>
 
