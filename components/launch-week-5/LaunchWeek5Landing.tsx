@@ -497,7 +497,7 @@ function Day3Unveiling() {
       <div className="flex flex-col items-start gap-3.5 mb-8">
         <div className="lw5-eyebrow">Day 03 · Wednesday, May 27, 2026</div>
         <h2 className="lw5-h2 max-w-[26ch]">
-          <span className="lw5-highlight">Faster search in Fast Mode.</span>
+          <span className="lw5-highlight">Full-Text Search.</span>
         </h2>
         <p className="lw5-body">
           Production traces pile up fast. A high-traffic app can produce
