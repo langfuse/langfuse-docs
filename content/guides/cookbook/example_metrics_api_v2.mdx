@@ -77,10 +77,10 @@ def run_metrics_query(query: dict) -> pd.DataFrame:
     payload = response.json()
     df = pd.DataFrame(payload.get("data", []))
 
-    numeric_suffixes = ("_count", "_sum", "_avg", "_p50", "_p75", "_p90", "_p95", "_p99", "_min", "_max")
+    numeric_prefixes = ("count_", "sum_", "avg_", "p50_", "p75_", "p90_", "p95_", "p99_", "min_", "max_")
 
     for col in df.columns:
-        if col.endswith(numeric_suffixes):
+        if col.startswith(numeric_prefixes):
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
     return df
@@ -147,10 +147,10 @@ volume_and_latency_df
 ```python
 if not volume_and_latency_df.empty:
     plot_df = volume_and_latency_df.copy()
-    plot_df["timeDimension"] = pd.to_datetime(plot_df["timeDimension"])
-    plot_df = plot_df.set_index("timeDimension")
+    plot_df["time_dimension"] = pd.to_datetime(plot_df["time_dimension"])
+    plot_df = plot_df.set_index("time_dimension")
 
-    ax = plot_df[["count_count", "latency_p95"]].plot(
+    ax = plot_df[["count_count", "p95_latency"]].plot(
         subplots=True,
         figsize=(10, 6),
         title=["Daily request volume", "Daily p95 latency (ms)"],
@@ -193,4 +193,3 @@ score_summary_df
 You can adapt the same helper for other v2 views such as `scores-categorical`, add filters on fields like environment or trace name, or export the resulting `DataFrame` for downstream reporting.
 
 To explore the full query schema and supported fields, see the [Metrics API documentation](https://langfuse.com/docs/metrics/features/metrics-api#v2) and the [API reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics).
-
