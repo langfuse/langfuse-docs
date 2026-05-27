@@ -1,15 +1,31 @@
 ---
-title: Code-based evaluators (self-hosted)
-description: Configure dispatchers and workers for self-hosted Code-based evaluator execution.
+title: Code evaluators (self-hosted)
+description: Configure dispatchers and workers for self-hosted code evaluator execution.
 label: "Version: v3"
-sidebarTitle: "Code-based evaluators"
+sidebarTitle: "Code evaluators"
 ---
 
-# Code-based evaluators
+# Code evaluators
 
-Self-hosted Code-based evaluators execute user-provided code asynchronously through the Langfuse worker. Production self-hosted deployments need a dispatcher for execution. Outside development and test environments, no dispatcher is configured unless the Code-based evaluator environment variables are set.
+Self-hosted code evaluators are picked up by the Langfuse worker and executed through a dispatcher backend. The dispatcher currently invokes either AWS Lambda or the local insecure runner synchronously. Production self-hosted deployments need a dispatcher for execution. Outside development and test environments, no dispatcher is configured unless the code evaluator environment variables are set.
 
-## Production AWS Lambda dispatcher
+## Available dispatchers
+
+Set `LANGFUSE_CODE_EVAL_DISPATCHER` to one of the available dispatchers:
+
+| Dispatcher     | Value            | Use for                                   | Runtime support                  |
+| -------------- | ---------------- | ----------------------------------------- | -------------------------------- |
+| AWS Lambda     | `aws-lambda`     | Production self-hosted deployments        | TypeScript/JavaScript and Python |
+| Local insecure | `insecure-local` | Local development and trusted deployments | TypeScript/JavaScript only       |
+
+<Callout type="warning">
+  If you do not run Langfuse on AWS, use the `insecure-local` dispatcher only
+  when all evaluator code is fully trusted. For sandboxed execution on other
+  platforms, let us know what support you need in [GitHub
+  Discussions](https://github.com/orgs/langfuse/discussions).
+</Callout>
+
+## AWS Lambda dispatcher
 
 Use the AWS Lambda dispatcher for production self-hosted deployments:
 
@@ -37,13 +53,15 @@ Create one Lambda runner per supported runtime. The runner source code is part o
 | Python     | `code-based-eval-executor-python` | `python3.14` | `index.handler` | `index.py`  | [`scripts/code-eval-runners/python/code_based_eval_handler.py`](https://github.com/langfuse/langfuse/blob/lfe-9832-code-based-evals-data-model/scripts/code-eval-runners/python/code_based_eval_handler.py) |
 | JavaScript | `code-based-eval-executor-node`   | `nodejs24.x` | `index.handler` | `index.mjs` | [`scripts/code-eval-runners/node/code-based-eval-handler.mjs`](https://github.com/langfuse/langfuse/blob/lfe-9832-code-based-evals-data-model/scripts/code-eval-runners/node/code-based-eval-handler.mjs)   |
 
-Configure each Lambda with tenant isolation enabled:
+Configure each Lambda with [tenant isolation](https://docs.aws.amazon.com/lambda/latest/dg/tenant-isolation.html) enabled:
 
 ```hcl
 tenancy_config {
   tenant_isolation_mode = "PER_TENANT"
 }
 ```
+
+Tenant isolation mode is supported in all commercial Regions except Asia Pacific (New Zealand).
 
 Use short timeouts and bounded concurrency so evaluator execution cannot consume unbounded Lambda capacity. Langfuse Cloud currently uses 128 MB memory, a 2 second timeout, and reserved concurrency per runtime.
 
@@ -77,7 +95,7 @@ LANGFUSE_CODE_EVAL_AWS_LAMBDA_ENDPOINT=http://localhost:4566
 
 ## Local insecure dispatcher
 
-For local development and trusted production environments, you can run Code-based evaluators in the worker process:
+For local development and trusted production environments, you can run code evaluators in the worker process:
 
 ```bash
 LANGFUSE_CODE_EVAL_DISPATCHER=insecure-local
@@ -90,8 +108,8 @@ QUEUE_CONSUMER_CODE_EVAL_EXECUTION_QUEUE_IS_ENABLED=true
 
 These optional variables tune execution behavior:
 
-| Variable                                          | Description                                                         |
-| ------------------------------------------------- | ------------------------------------------------------------------- |
-| `LANGFUSE_CODE_EVAL_EXECUTION_QUEUE_SHARD_COUNT`  | Number of shards for the Code-based evaluator execution queue.      |
-| `LANGFUSE_CODE_EVAL_EXECUTION_WORKER_CONCURRENCY` | Worker concurrency for Code-based evaluator execution.              |
-| `LANGFUSE_CODE_EVAL_LOCAL_TIMEOUT_MS`             | Timeout in milliseconds for locally executed Code-based evaluators. |
+| Variable                                          | Description                                                   |
+| ------------------------------------------------- | ------------------------------------------------------------- |
+| `LANGFUSE_CODE_EVAL_EXECUTION_QUEUE_SHARD_COUNT`  | Number of shards for the code evaluator execution queue.      |
+| `LANGFUSE_CODE_EVAL_EXECUTION_WORKER_CONCURRENCY` | Worker concurrency for code evaluator execution.              |
+| `LANGFUSE_CODE_EVAL_LOCAL_TIMEOUT_MS`             | Timeout in milliseconds for locally executed code evaluators. |
