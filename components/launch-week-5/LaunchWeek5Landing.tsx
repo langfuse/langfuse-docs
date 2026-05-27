@@ -32,7 +32,13 @@ const DAYS: DayCard[] = [
     title: "Langfuse agent skill",
     href: "/changelog/2026-05-26-langfuse-agent-skill",
   },
-  { n: "03", weekday: "Wednesday", date: "May 27", hint: "Find anything" },
+  {
+    n: "03",
+    weekday: "Wednesday",
+    date: "May 27",
+    title: "Full-Text Search",
+    href: "/changelog/2026-05-27-clickhouse-full-text-search-fast-mode",
+  },
   { n: "04", weekday: "Thursday", date: "May 28", hint: "Evals as code" },
   { n: "05", weekday: "Friday", date: "May 29", hint: "Never miss a thing" },
 ];
@@ -368,6 +374,7 @@ function Day1Unveiling() {
           src="https://static.langfuse.com/docs-videos/ci-experiment.mp4"
           aspectRatio={16 / 9}
           className="rounded border border-line-structure"
+          gifStyle
         />
       </div>
 
@@ -484,6 +491,89 @@ function Day2Unveiling() {
   );
 }
 
+function Day3Unveiling() {
+  return (
+    <section id="day-3" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 03 · Wednesday, May 27, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Full-Text Search.</span>
+        </h2>
+        <p className="lw5-body">
+          Production traces pile up fast. A high-traffic app can produce
+          millions of observations in a week, and when something looks wrong
+          you need to pull the one trace that says “refund failed” out of
+          hundreds of gigabytes in a fraction of a second. A scroll-and-hope
+          UI does not cut it at that scale.
+        </p>
+        <p className="lw5-body">
+          Day 3 rolls out full-text search to Langfuse Cloud. In our benchmarks, large input/output searches
+          that took 18 seconds and scanned 494 GB now return in under half a
+          second and read less than a gigabyte. Metadata-heavy queries dropped
+          from 1.6s to 0.2s. The UI gets faster for humans hunting a bug, and
+          the new <code>matches</code> operator on Observations API v2 gives
+          agents and scripts the same token-based search programmatically.
+        </p>
+        <p className="lw5-body">
+          Built on top of ClickHouse’s new{" "}
+          <Link
+            href="https://clickhouse.com/blog/full-text-search-ga-release"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            full-text search release
+          </Link>
+          , we worked closely with the ClickHouse team on the underlying
+          engine, so features like this land in Langfuse days after they ship
+          in ClickHouse core.
+        </p>
+      </div>
+
+      <div className="w-full max-w-[920px] mb-8">
+        <Video
+          src="https://static.langfuse.com/docs-videos/full-text-search-launch.mp4"
+          aspectRatio={16 / 9}
+          className="rounded border border-line-structure"
+          gifStyle
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-27-clickhouse-full-text-search-fast-mode"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/api-and-data-platform/features/observations-api#v2"
+          >
+            <span>Observations API v2 docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="https://clickhouse.com/blog/full-text-search-ga-release"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>ClickHouse FTS GA post</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
 function DayCard({ day }: { day: DayCard }) {
   const live = Boolean(day.href);
   const content = (
@@ -568,6 +658,7 @@ export function LaunchWeek5Landing() {
       <div className="max-w-[1440px] mx-auto">
         <Hero />
         <Schedule />
+        <Day3Unveiling />
         <Day2Unveiling />
         <Day1Unveiling />
       </div>
