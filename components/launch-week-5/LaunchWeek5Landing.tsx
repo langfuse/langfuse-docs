@@ -40,7 +40,13 @@ const DAYS: DayCard[] = [
     href: "/changelog/2026-05-27-clickhouse-full-text-search-fast-mode",
   },
   { n: "04", weekday: "Thursday", date: "May 28", hint: "Evals as code" },
-  { n: "05", weekday: "Friday", date: "May 29", hint: "Never miss a thing" },
+  {
+    n: "05",
+    weekday: "Friday",
+    date: "May 29",
+    title: "Langfuse MCP, expanded",
+    href: "/changelog/2026-05-29-mcp-update",
+  },
 ];
 
 function LockIcon() {
@@ -574,6 +580,109 @@ function Day3Unveiling() {
   );
 }
 
+function Day5Unveiling() {
+  return (
+    <section id="day-5" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 05 · Friday, May 29, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Langfuse MCP, expanded.</span>
+        </h2>
+        <p className="lw5-body">
+          Until this week the hosted Langfuse MCP server only exposed prompt
+          management. Today it covers most of Langfuse: observations, metrics,
+          scores, score configs, datasets, dataset items, dataset runs, dataset
+          run items, comments, annotation queues, models, media, and health.
+          Fifteen tool categories total.
+        </p>
+        <p className="lw5-body">
+          That means an agent in Claude Desktop, a Linear Agent, or a custom
+          internal tool can investigate a production issue, pull the relevant
+          observation, query metrics, drop a comment for the team, create a
+          score, or stage a dataset item for regression testing, all without
+          leaving the chat.
+        </p>
+        <p className="lw5-body">
+          The MCP server complements the{" "}
+          <Link
+            href="/changelog/2026-05-26-langfuse-agent-skill"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            Langfuse Skill
+          </Link>{" "}
+          (Day 2) and the{" "}
+          <Link
+            href="/docs/api-and-data-platform/features/cli"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            Langfuse CLI
+          </Link>
+          . Use the CLI when your agent can run bash and pre-filter data; use
+          the MCP server when it cannot. Restrict to read-only by allow-listing
+          lookup tools if you don’t want writes.
+        </p>
+      </div>
+
+      <div
+        className={`${cornerBoxBase} relative w-full max-w-[920px] aspect-video bg-surface-1 flex items-center justify-center overflow-hidden mb-8`}
+      >
+        <div
+          aria-hidden
+          className="lw5-grid-bg absolute inset-0 opacity-50 pointer-events-none"
+        />
+        <div className="relative flex flex-col items-center gap-3 text-text-tertiary">
+          <svg
+            width="44"
+            height="44"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polygon points="10,8 16,12 10,16" fill="currentColor" />
+          </svg>
+          <div className="font-mono text-[11px] uppercase tracking-[.1em]">
+            Screen recording coming soon
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-29-mcp-update"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/api-and-data-platform/features/mcp-server"
+          >
+            <span>MCP server docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="https://mcp.reference.langfuse.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>MCP Reference</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
 function DayCard({ day }: { day: DayCard }) {
   const live = Boolean(day.href);
   const content = (
@@ -658,6 +767,7 @@ export function LaunchWeek5Landing() {
       <div className="max-w-[1440px] mx-auto">
         <Hero />
         <Schedule />
+        <Day5Unveiling />
         <Day3Unveiling />
         <Day2Unveiling />
         <Day1Unveiling />
