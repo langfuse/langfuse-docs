@@ -5,7 +5,7 @@ export const NotebookBanner: React.FC<{ src: string; className?: string }> = ({
   src,
   className,
 }) => {
-  // Check if this is a Deno notebook by looking at the filename
+  // Check if this is a TypeScript notebook (Deno kernel) by looking at the filename
   const isDenoNotebook = src.includes("/js_") && src.endsWith(".ipynb");
 
   // Extract the notebook filename from the src path for Binder URL
@@ -16,7 +16,7 @@ export const NotebookBanner: React.FC<{ src: string; className?: string }> = ({
     <div className={className}>
       <Callout type="info">
         <div className="flex flex-wrap gap-1 md:justify-between md:items-center">
-          <span>This is a {isDenoNotebook ? "Deno" : "Jupyter"} notebook</span>
+          <span>This is a {isDenoNotebook ? "TypeScript" : "Jupyter"} notebook</span>
           <div className="flex gap-2 flex-wrap">
             <a
               href={`https://github.com/langfuse/langfuse-docs/blob/main${src}`}
