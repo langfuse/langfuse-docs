@@ -367,7 +367,7 @@ Anything that mentions: "enterprise", "POC", "Account Manager", "MSA", "DPA sign
 
 1. Acknowledge quickly and route. Do not negotiate pricing on the support thread.
 2. Add the enterprise team (`enterprise@langfuse.com`) to the thread.
-3. For commercial licensing on self-hosted to satisfy OSS compliance tools (e.g. Black Duck flagging the `ee/` directories), confirm with the customer whether they're _actually using_ EE features. The base Docker image excludes the `@langfuse/ee` package and is MIT-licensed. Many of these tickets are governance-only and resolve with a confirmation email plus a copy of the license terms.
+3. For commercial licensing on self-hosted to satisfy OSS compliance tools (e.g. Black Duck flagging the `ee/` directories), confirm with the customer whether they're _actually using_ EE features. Many of these tickets are governance-only and resolve with a confirmation email plus a copy of the license terms.
 
 **Reply template:**
 
@@ -375,8 +375,6 @@ Anything that mentions: "enterprise", "POC", "Account Manager", "MSA", "DPA sign
 Hi {name},
 
 Thanks for reaching out. I'm looping in enterprise@langfuse.com from our enterprise team, they'll be in touch shortly with pricing and contract details.
-
-{Optional, for compliance-only inquiries: "On the OSS / split-licensing question: our official Docker image (langfuse/langfuse) does not include the @langfuse/ee package, EE code only lives in the source monorepo for development and is not present in the published image. Without LANGFUSE_EE_LICENSE_KEY set, no EE features are active and your usage is fully under MIT."}
 
 Best,
 {you}
@@ -555,7 +553,6 @@ This is a governance/compliance question, not a technical one. The customer is u
 
 - Langfuse core (tracing, observability, prompt management, evaluations, dashboards) is MIT-licensed. No EE license required for production use of these.
 - EE features (advanced RBAC, audit log, data retention policies, project-level masking, SCIM, Instance Management API for cross-org admin) require `LANGFUSE_EE_LICENSE_KEY`.
-- The published Docker image (`langfuse/langfuse` on Docker Hub) excludes the `@langfuse/ee` package. EE code is only in the source monorepo for development. Compliance scanners (Black Duck etc.) flagging the `ee/` directories are looking at the source repo, not the runtime image.
 
 **Reply template:**
 
@@ -566,7 +563,6 @@ Happy to confirm:
 
 1. The core Langfuse features (tracing, observability, prompt management, evaluations, dashboards) are MIT-licensed and free to use in production, with no EE license required.
 2. EE features (advanced RBAC, audit log, data retention policies, project-level masking, SCIM, Instance Management API) require LANGFUSE_EE_LICENSE_KEY. Without that env var set, no EE code paths execute.
-3. The official Docker image langfuse/langfuse on Docker Hub does not bundle the @langfuse/ee package. The ee/ directory exists in the source monorepo for development only; the published image excludes it.
 
 If your compliance review needs this in writing on letterhead, I can route to enterprise@langfuse.com.
 
