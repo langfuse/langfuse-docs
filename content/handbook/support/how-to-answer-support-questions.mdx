@@ -552,7 +552,7 @@ This is a governance/compliance question, not a technical one. The customer is u
 **Canonical facts:**
 
 - Langfuse core (tracing, observability, prompt management, evaluations, dashboards) is MIT-licensed. No EE license required for production use of these.
-- EE features (advanced RBAC, audit log, data retention policies, project-level masking, SCIM, Instance Management API for cross-org admin) require `LANGFUSE_EE_LICENSE_KEY`.
+- EE features require `LANGFUSE_EE_LICENSE_KEY`. See [/self-hosting/license-key](/self-hosting/license-key) for the canonical list.
 
 **Reply template:**
 
@@ -562,7 +562,7 @@ Hi {name},
 Happy to confirm:
 
 1. The core Langfuse features (tracing, observability, prompt management, evaluations, dashboards) are MIT-licensed and free to use in production, with no EE license required.
-2. EE features (advanced RBAC, audit log, data retention policies, project-level masking, SCIM, Instance Management API) require LANGFUSE_EE_LICENSE_KEY. Without that env var set, no EE code paths execute.
+2. EE features require LANGFUSE_EE_LICENSE_KEY. Without that env var set, no EE code paths execute. Full list: https://langfuse.com/self-hosting/license-key.
 
 If your compliance review needs this in writing on letterhead, I can route to enterprise@langfuse.com.
 
@@ -614,7 +614,6 @@ Best,
 3. **Customer SDK version**: ask. Old SDKs (Python pre-v3, JS pre-v4) used legacy endpoints with known performance issues. Recommend upgrade to the latest scoped packages (`@langfuse/client`, `@langfuse/tracing`, `@langfuse/otel` or `langfuse` Python v3+).
 4. **Customer's flush behavior**: short-lived processes (Lambdas, CLIs, edge runtimes) must call `langfuse.flush()` before exit. Without this, in-flight events are dropped.
 5. **Customer's filter / time range**: are they looking at the right project, the right environment tag, and a time range that includes "now-5 minutes" (ingestion can be delayed up to ~1–2 minutes in normal operation)?
-6. **Fast Mode (Preview)** is on by default; if they toggled it off, some new views won't appear.
 
 **Reply template (cloud, after status check):**
 
@@ -1121,7 +1120,7 @@ Related FAQ: [/faq/all/api-limits](/faq/all/api-limits).
 
 **Triage steps:**
 
-1. **First check: is Fast Mode (Preview) toggled on?** Many views are gated on Fast Mode being enabled. The toggle is on the left sidebar.
+1. **First check: is Fast Mode (Preview) toggled on?** Many views are gated on Fast Mode being enabled.
 2. Hard refresh (Cmd-Shift-R / Ctrl-Shift-R) to bust any stale assets.
 3. Try Impersonation View, can you reproduce as them?
 4. Ask for browser, version, and console errors.
@@ -1131,7 +1130,7 @@ Related FAQ: [/faq/all/api-limits](/faq/all/api-limits).
 ```text
 Hi {name},
 
-Quick check: is "Fast Mode" toggled on in the left sidebar? A few of the newer views (incl. Experiments, the redesigned Trace view) are gated on it.
+Quick check: is "Fast Mode" toggled on? A few of the newer views (incl. Experiments, the redesigned Trace view) are gated on it.
 
 If Fast Mode is on and you still don't see it, a hard refresh (Cmd-Shift-R) usually fixes stale-asset cases. If neither helps, please share the browser, version, and any console errors.
 
