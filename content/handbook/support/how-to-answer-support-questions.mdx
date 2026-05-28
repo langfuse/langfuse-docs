@@ -67,7 +67,7 @@ The headings below are top-level question categories. Click any to drill into sp
 ```text
 Hi {name},
 
-Sorry you're hitting this. The most common cause is signing in on the wrong data region. We run three separate regions and accounts in one are not visible in the others:
+Sorry you're hitting this. The most common cause is signing in on the wrong data region. We run four separate regions and accounts in one are not visible in the others:
 
 - EU:    https://cloud.langfuse.com
 - US:    https://us.cloud.langfuse.com
@@ -107,7 +107,7 @@ Related FAQs: [/faq/all/cannot-see-organization](/faq/all/cannot-see-organizatio
 ```text
 Hi {name},
 
-Thanks — a quick check first: which data region did you originally sign up in (cloud.langfuse.com EU vs. us.cloud.langfuse.com US vs. hipaa.cloud.langfuse.com)?
+Thanks — a quick check first: which data region did you originally sign up in (cloud.langfuse.com EU vs. us.cloud.langfuse.com US vs. hipaa.cloud.langfuse.com HIPAA vs. jp.cloud.langfuse.com Japan)?
 
 If you're on the right region and emails still aren't arriving, our email provider may have placed your address on a suppression list (this happens after a previous bounce or spam mark). I'll unblock it on our end — please retry the password reset in ~10 minutes and let me know if it works.
 
@@ -127,7 +127,7 @@ SSO is an EE / Cloud Team-plan-and-above feature. Setup is white-glove: support 
 
 **Triage steps:**
 
-1. Confirm the customer is on a plan tier that includes SSO (Team plan and above on Cloud; EE on self-hosted). If not, route to sales — do not promise a discount.
+1. Confirm the customer is on a plan tier that includes SSO (Team plan and above on Cloud; included in self-hosted OSS — only SCIM / Org Management API are EE-gated). If not, route to sales — do not promise a discount.
 2. Collect the four pieces of information: instance URL, issuer URL, client ID, client secret.
 3. Recommend the customer share secrets via a password-manager link (1Password share link, Bitwarden Send, etc.). Do not accept secrets in plaintext email.
 4. Pass the bundle to engineering / Steffen for application.
@@ -336,15 +336,15 @@ Best,
 
 <summary>"Can we get a startup discount / 50% off?"</summary>
 
-We run a standard startup program. Discount: **`STARTUP-LF-50`** (50% off, applied at checkout or in billing settings). All applicants go through the form, no exceptions — the form gives us a paper trail.
+We run a standard startup program. Approved applicants get a 50% discount code by email after going through the form — no exceptions. The form gives us a paper trail.
 
 **Triage steps:**
 
 1. Direct the customer to [langfuse.com/startups](https://langfuse.com/startups).
 2. Ask them to fill out [https://forms.gle/eJAYjRWeCZU1Mn6j8](https://forms.gle/eJAYjRWeCZU1Mn6j8).
 3. Do not promise a timeline or approval beyond what the page says.
-4. Approved applicants receive `STARTUP-LF-50` via email automatically.
-5. For VC firms / venture studios asking for portfolio-wide discounts, the same code applies — they share it with portfolio companies.
+4. Approved applicants receive the discount code via email automatically.
+5. For VC firms / venture studios asking for portfolio-wide discounts, the same program applies — portfolio companies should each submit the form.
 
 **Reply template:**
 
@@ -606,8 +606,6 @@ For any that still appear after that, our security team will triage and prioriti
 Best,
 {you}
 ```
-
-Related FAQ: [/faq/all/data-retention-timeouts-and-errors](/faq/all/data-retention-timeouts-and-errors).
 
 </details>
 
@@ -973,7 +971,9 @@ Best,
 
 - **Egress (Langfuse → customer infra, e.g. for LLM-as-a-judge eval calls or webhooks):** static IPs are published at [langfuse.com/security/networking](https://langfuse.com/security/networking).
 - **Ingress (customer SDK → Langfuse):** behind AWS ALBs, no static IPs. Customer firewalls must allowlist by hostname.
-- **Telemetry to PostHog** is enabled by default in self-hosted Langfuse and can be disabled via `TELEMETRY_ENABLED=false`. See [langfuse.com/self-hosting/security/telemetry](https://langfuse.com/self-hosting/security/telemetry). Disabling it is compliant under our standard self-hosted terms — provision in older EE self-hosted terms previously required permission, but the current terms don't.
+- **Telemetry to PostHog** is enabled by default in self-hosted Langfuse. See [langfuse.com/self-hosting/security/telemetry](https://langfuse.com/self-hosting/security/telemetry).
+  - **OSS (self-hosted):** can be disabled via `TELEMETRY_ENABLED=false`. Compliant under our standard self-hosted terms — provision in older EE self-hosted terms previously required permission, but the current terms don't.
+  - **EE (self-hosted):** telemetry is used for license compliance and cannot be disabled. If a customer needs an exception, route to enterprise.
 
 </details>
 
