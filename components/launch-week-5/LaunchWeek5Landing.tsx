@@ -590,9 +590,9 @@ function Day4Unveiling() {
           <span className="lw5-highlight">Code evaluators.</span>
         </h2>
         <p className="lw5-body">
-          Not every evaluation needs a model. JSON parseability, schema
+          Not every evaluation needs an LLM. JSON parseability, schema
           validation, exact match, required tool arguments, custom business
-          rules: things you would rather verify with code than ask a judge to
+          rules: things you would rather verify with code than ask an LLM to
           “rate this 1–5”. Deterministic, reproducible, no token cost.
         </p>
         <p className="lw5-body">
@@ -623,7 +623,6 @@ function Day4Unveiling() {
           src="https://static.langfuse.com/docs-videos/code-evaluators-launch.mp4"
           aspectRatio={16 / 9}
           className="rounded border border-line-structure"
-          gifStyle
         />
       </div>
 
