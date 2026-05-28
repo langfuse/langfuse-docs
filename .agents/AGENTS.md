@@ -53,6 +53,33 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 2. Regenerate docs with `bash scripts/update_cookbook_docs.sh`.
 3. Do **not** hand-edit generated files in `content/guides/cookbook/`.
 4. Avoid `pnpm build` for routine edits or small UI/content changes. Prefer targeted checks or `pnpm dev`, and only run the full production build when it is necessary or explicitly requested.
+5. **Always run `pnpm run format` before committing or opening a PR if you edited any file Prettier formats** (see "Passing CI checks on the first try" below). The `format` CI job runs `pnpm run format:check` and fails the build on a single unformatted file.
+
+## Passing CI checks on the first try
+
+CI runs three required checks on every PR. Run these locally before pushing to avoid a re-run cycle:
+
+### 1. Prettier format (`format` job) — this is the check that most often fails
+
+CI runs `pnpm run format:check`. To fix locally, run `pnpm run format` and commit the result.
+
+- Prettier formats: `.js`, `.jsx`, `.ts`, `.tsx`, `.json`, `.css`, `.scss`, `.md`, `.mdx`, `.yaml`/`.yml`, `.html`. Any change to one of these — including tiny edits like a one-line tweak to an MDX page or a TSX component — can trigger the check.
+- Prettier does **not** format files matched by `.prettierignore` (notebooks, generated cookbook docs, `content/workshop/**`, lockfiles, generated JSON/TXT in `public/`, etc.).
+- Config (`.prettierrc.json`): `proseWrap: "preserve"` (don't reflow Markdown prose), `embeddedLanguageFormatting: "off"` (fenced code blocks are left alone), `trailingComma: "all"`.
+- If you touched only `.prettierignore`'d files (e.g., only a notebook or only a generated file), the check will still pass — no need to run format.
+- When in doubt, just run `pnpm run format` — it's fast and idempotent.
+
+### 2. H1 heading check (`check_h1` job)
+
+CI runs `node scripts/check-h1-headings.js`. It fails if any `.md`/`.mdx` file contains more than one top-level `# ` heading (code-fenced examples are ignored). Use exactly one H1 per markdown file; deeper sections use `##`, `###`, etc.
+
+### 3. Build + link/sitemap checks (`build-and-check-links`, `check-sitemap-links` jobs)
+
+These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The full build is ~10 minutes — don't run it locally for routine edits. Instead, before pushing:
+
+- Check internal links you added/changed point to real pages or anchors.
+- For anchor links (`...#some-id`), make sure the target page defines the anchor explicitly with `[#some-id]` at the end of the heading line.
+- If you renamed or moved a page, also update any references and add a redirect in `next.config.mjs` if needed.
 
 ## Styling and implementation guidelines
 
