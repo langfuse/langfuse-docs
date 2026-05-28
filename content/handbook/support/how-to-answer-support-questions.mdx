@@ -28,7 +28,7 @@ Tools you'll use to answer most tickets:
 
 Before you open a reply box, do these four things in order. Most of the rest of this page assumes you have already done them.
 
-1. **Identify the customer and tier.** Pylon sidebar shows org name, plan tier (Hobby / Core / Pro / Team / Enterprise / Self-hosted EE), data region, and contract notes. Tier dictates SLA and how aggressively to escalate.
+1. **Identify the customer and tier.** Pylon sidebar shows org name, plan tier (Hobby / Core / Pro / Pro + Teams Add-on / Enterprise / Self-hosted EE), data region, and contract notes. Tier dictates SLA and how aggressively to escalate.
 2. **Locate their environment.** Are they on Langfuse Cloud (which region: EU `cloud.langfuse.com`, US `us.cloud.langfuse.com`, HIPAA `hipaa.cloud.langfuse.com`, Japan `jp.cloud.langfuse.com`) or self-hosted? If self-hosted, what version? The same symptom often has different causes on Cloud vs. self-hosted.
 3. **Check `status.langfuse.com` and DataDog.** If the customer is reporting errors/latency, rule out a known ongoing incident before debugging their side.
 4. **Search Pylon for the same symptom in the last 7 days.** If three other customers are reporting the same thing right now, you're seeing an incident, escalate to engineering rather than answering one-by-one.
@@ -117,11 +117,11 @@ Best,
 
 <summary>SSO setup (Okta / Azure AD / Entra / Google Workspace)</summary>
 
-SSO is an EE / Cloud Team-plan-and-above feature. Setup is white-glove: support collects credentials and engineering applies them.
+On Cloud, SSO is included with Pro + Teams Add-on and above; setup is white-glove (support collects credentials, engineering applies them). Self-hosted (OSS and EE) customers configure SSO themselves via env vars.
 
 **Triage steps:**
 
-1. Confirm the customer is on a plan tier that includes SSO (Team plan and above on Cloud; included in self-hosted OSS, only SCIM / Org Management API are EE-gated). If not, route to sales, do not promise a discount.
+1. Confirm the customer is on a plan tier that includes SSO (Pro + Teams Add-on and above on Cloud; included in self-hosted OSS, only SCIM / Org Management API are EE-gated). If not, route to sales, do not promise a discount.
 2. Collect the four pieces of information: instance URL, issuer URL, client ID, client secret.
 3. Recommend the customer share secrets via a password-manager link (1Password share link, Bitwarden Send, etc.). Do not accept secrets in plaintext email.
 4. Pass the bundle to engineering for application.
@@ -262,7 +262,7 @@ Best,
 
 Two distinct things customers conflate:
 
-1. **Stripe subscriptions** (Hobby/Core/Pro/Team Cloud), cancellable from the billing UI directly, but customers often email us. Acknowledge politely and confirm cancellation in Stripe. Note that downgrades take effect at end of billing period.
+1. **Stripe subscriptions** (Hobby/Core/Pro Cloud, with or without the Teams Add-on), cancellable from the billing UI directly, but customers often email us. Acknowledge politely and confirm cancellation in Stripe. Note that downgrades take effect at end of billing period.
 2. **Self-hosted EE licenses**: these are _contractual_ and **removing the `LANGFUSE_EE_LICENSE_KEY` env var does not cancel the contract**. A separate written cancellation is required. This catches customers off-guard regularly.
 
 **Reply template (Cloud cancellation):**
@@ -799,7 +799,7 @@ If the integration isn't documented, ask which framework/version and offer to fi
 
 - **Old prompt version served from cache**: SDK caches by default. To bypass: `get_prompt(name, cache_ttl_seconds=0)`.
 - **Linked prompt label resolves to wrong version**: labels are mutable; check Audit log / Prompt history.
-- **MCP server only supports prompt management** today (read-only). Datasets / Traces are on the roadmap.
+- **MCP server supports prompt management** today (read and write tools by default; clients can opt into a read-only allowlist). Datasets / Traces are on the roadmap.
 - **Conditional / templated prompts**: see [/faq/all/conditional-prompt-embedding](/faq/all/conditional-prompt-embedding).
 
 Related FAQs: [/faq/all/old-prompt-version-caching](/faq/all/old-prompt-version-caching), [/faq/all/link-prompt-management-with-tracing](/faq/all/link-prompt-management-with-tracing), [/faq/all/using-external-templating-libraries](/faq/all/using-external-templating-libraries), [/faq/all/managing-skills-with-prompt-management](/faq/all/managing-skills-with-prompt-management).
@@ -1060,11 +1060,11 @@ Related FAQ: [/faq/all/delete-account-langfuse](/faq/all/delete-account-langfuse
 
 <summary>Data retention policies (EE feature)</summary>
 
-Data retention is an EE feature. Hobby/Core/Pro have fixed retention by plan; Team and EE can configure custom retention windows.
+Data retention is configurable on Pro Cloud and Enterprise (and self-hosted EE). Hobby and Core have fixed retention by plan.
 
 **Triage steps:**
 
-1. Confirm plan tier, if not Team/EE, retention is fixed.
+1. Confirm plan tier: Hobby and Core have fixed retention; Pro Cloud, Enterprise, and self-hosted EE can configure it.
 2. For EE: retention is configured per-project via the Project Settings or via the [Instance Management API](https://langfuse.com/self-hosting/administration/instance-management-api).
 3. Note: retention runs as a background job. Customers seeing data still present after the retention window are usually inside the job's cycle, escalate if it persists beyond 24h.
 
