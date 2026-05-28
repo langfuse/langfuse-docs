@@ -624,11 +624,11 @@ function Day5Unveiling() {
       </div>
 
       <div className="w-full max-w-[920px] mb-8">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/changelog/2026-05-29-mcp-update.png"
-          alt="Langfuse MCP v2: example agent query alongside the new tool categories"
-          className="w-full rounded border border-line-structure"
+        <Video
+          src="https://static.langfuse.com/docs-videos/mcp-v2-launch.mp4"
+          aspectRatio={16 / 9}
+          className="rounded border border-line-structure"
+          gifStyle
         />
       </div>
 
