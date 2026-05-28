@@ -120,7 +120,7 @@ If you use versioned buckets, delete markers and non-current versions need to be
 
 </Callout>
 
-#### Using AWS KMS Encryption
+#### Using AWS KMS Encryption [#using-aws-kms-encryption]
 
 Amazon S3 provides server-side encryption (SSE) options to encrypt your data at rest.
 Langfuse supports AWS KMS encryption for all S3 interactions through the following environment variables:
@@ -381,5 +381,35 @@ ALTER TABLE blob_storage_file_log MODIFY TTL created_at + INTERVAL <DAYS> DAY DE
 ```
 
 Where `<DAYS>` matches the configured bucket lifecycle expiration period.
+
+</Callout>
+
+## Endpoint validation (SSRF defense) [#endpoint-validation]
+
+In addition to the platform-level `LANGFUSE_S3_*` buckets configured via environment variables, project members can configure a blob storage **integration** in the Langfuse UI (Project Settings → Integrations → Blob Storage Export). Because that endpoint is user-supplied, Langfuse validates the host it points at — both when the integration is saved and again every time a connection is opened — to prevent the worker from being pointed at internal services (cloud metadata endpoints, link-local addresses, private RFC1918 / ULA ranges, NAT64/6to4 transition ranges) or being redirected there via DNS rebinding.
+
+Validation behavior:
+
+- **Save-time**: the endpoint hostname is resolved and rejected if any resolved IP falls into a private, link-local, loopback, or special-use range.
+- **Connection-time**: the S3 SDK's HTTP handler and the Azure SDK's request policy re-validate the resolved IP just before each request, so a hostname whose DNS answer changes after save is still blocked.
+- **Cloud**: validation is strict and cannot be relaxed.
+- **Self-hosted**: validation activates when at least one of the allowlist environment variables below is configured. This keeps backward compatibility with internal MinIO and Azurite deployments on private networks. The default will become strict in a future major release.
+- **GCS** and **OCI** are not supported as targets for the blob storage _integration_ (the native object storage integrations configured via environment variables are unaffected).
+
+### Self-hosted allowlist environment variables
+
+Set these on both the Langfuse Web and Worker containers if your internal blob storage endpoint resolves to a private address.
+
+| Variable                                                 | Required / Default | Description                                                                                                            |
+| -------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_HOST`        |                    | Comma-separated list of hostnames that bypass the IP-range check. Example: `minio.internal,storage.svc.cluster.local`. |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS`         |                    | Comma-separated list of individual IPs to allow. Example: `10.0.0.5,fd00::1`.                                          |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |                    | Comma-separated list of CIDR ranges to allow. Example: `10.0.0.0/8,192.168.0.0/16`.                                    |
+
+These mirror the existing `LANGFUSE_LLM_CONNECTION_WHITELISTED_*` variables used for user-configured LLM connections — see [Hardening → Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
+
+<Callout type="info">
+
+Azure container names must be 3–63 characters and contain only lowercase letters, digits, and hyphens. Names that don't meet this constraint are rejected at submission time.
 
 </Callout>
