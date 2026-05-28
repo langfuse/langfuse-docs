@@ -81,7 +81,21 @@ Langfuse (self-hosted) has extensive configuration options via environment varia
 | `LANGFUSE_LOG_FORMAT`                           | `text`             | Set the log format for the application. Possible values are `text`, `json`.                                                                                                                                                                                                                                                                                                                                  |
 | `LANGFUSE_LOG_PROPAGATED_HEADERS`               |                    | Comma-separated list of HTTP header names to propagate through logs via OpenTelemetry baggage. Header names are case-insensitive and will be normalized to lowercase. Useful for debugging and observability. Example: `x-request-id,x-user-id`.                                                                                                                                                             |
 
-### Additional Features
+## Code evaluators
+
+| Variable                                              | Required / Default                | Description                                                                                                                                                                      |
+| ----------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_LANGFUSE_CODE_EVAL_ENABLED`              | `false`                           | Set to `true` to enable code evaluators in the Langfuse UI. See [Code evaluators](/self-hosting/configuration/code-evaluators).                                                  |
+| `LANGFUSE_CODE_EVAL_DISPATCHER`                       |                                   | Dispatcher used for code evaluator execution. Set to `aws-lambda` for production self-hosted deployments. Set to `insecure-local` only when all evaluator code is fully trusted. |
+| `QUEUE_CONSUMER_CODE_EVAL_EXECUTION_QUEUE_IS_ENABLED` | `false`                           | Set to `true` to enable the worker consumer for the code evaluator execution queue. Required when enabling code evaluator execution.                                             |
+| `LANGFUSE_CODE_EVAL_AWS_LAMBDA_NODE_FUNCTION_NAME`    | `code-based-eval-executor-node`   | AWS Lambda function name for TypeScript/JavaScript code evaluator execution when `LANGFUSE_CODE_EVAL_DISPATCHER=aws-lambda`.                                                     |
+| `LANGFUSE_CODE_EVAL_AWS_LAMBDA_PYTHON_FUNCTION_NAME`  | `code-based-eval-executor-python` | AWS Lambda function name for Python code evaluator execution when `LANGFUSE_CODE_EVAL_DISPATCHER=aws-lambda`.                                                                    |
+| `LANGFUSE_CODE_EVAL_AWS_LAMBDA_ENDPOINT`              |                                   | Optional custom AWS Lambda endpoint for local or compatible endpoints.                                                                                                           |
+| `LANGFUSE_CODE_EVAL_EXECUTION_QUEUE_SHARD_COUNT`      |                                   | Optional number of shards for the code evaluator execution queue.                                                                                                                |
+| `LANGFUSE_CODE_EVAL_EXECUTION_WORKER_CONCURRENCY`     |                                   | Optional worker concurrency for code evaluator execution.                                                                                                                        |
+| `LANGFUSE_CODE_EVAL_LOCAL_TIMEOUT_MS`                 |                                   | Optional timeout in milliseconds for locally executed code evaluators.                                                                                                           |
+
+## Additional Features
 
 There are additional features that can be enabled and configured via environment variables.
 
