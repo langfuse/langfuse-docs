@@ -41,6 +41,22 @@ const STATIONS = [
   },
 ];
 
+const STATION_TITLE_JA: Record<string, string> = {
+  trace: "トレース",
+  monitor: "モニタリング",
+  dataset: "データセット\n構築",
+  change: "実験",
+  eval: "評価",
+};
+
+const STATION_HREF_JA: Record<string, string> = {
+  trace: "/academy/japan/tracing",
+  monitor: "/academy/japan/monitoring",
+  dataset: "/academy/japan/datasets",
+  change: "/academy/japan/experiments",
+  eval: "/academy/japan/evaluate",
+};
+
 // Design geometry (px) — fixed 1080×380 canvas, scaled to fit
 const LEFT_X = [0, 221, 442, 663, 884];
 const BOX_W = 196;
@@ -65,7 +81,10 @@ function estimateInitialScale(): number {
   return 0.56;
 }
 
-export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
+export function LoopDiagram({
+  highlight,
+  locale,
+}: { highlight?: string; locale?: string } = {}) {
   const pinnedIndex = highlight
     ? STATIONS.findIndex((s) => s.id === highlight)
     : -1;
@@ -75,6 +94,10 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
 
   // Computed once per mount; only used for initial inline styles.
   const estScale = estimateInitialScale();
+  const getStationTitle = (id: string, title: string) =>
+    locale === "ja" ? (STATION_TITLE_JA[id] ?? title) : title;
+  const getStationHref = (id: string, href: string) =>
+    locale === "ja" ? (STATION_HREF_JA[id] ?? href) : href;
 
   // Cycle active station only when not pinned to a specific one
   useEffect(() => {
@@ -229,14 +252,14 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
               zIndex: 5,
             }}
           >
-            Deploy
+            {locale === "ja" ? "デプロイ" : "Deploy"}
           </div>
 
           {/* Station cards */}
           {STATIONS.map((station, i) => (
             <Link
               key={station.id}
-              href={station.href}
+              href={getStationHref(station.id, station.href)}
               className="corner-box-corners--hover"
               style={{
                 position: "absolute",
@@ -322,7 +345,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
                   whiteSpace: "pre-line",
                 }}
               >
-                {station.title}
+                {getStationTitle(station.id, station.title)}
               </div>
 
               {/* Meta tags */}

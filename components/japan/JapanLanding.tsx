@@ -971,6 +971,17 @@ function FAQ() {
         </p>
       ),
     },
+    {
+      q: "Langfuseの使い方を体系的に学ぶには?",
+      a: (
+        <p>
+          <Link className="japan-link" href="/academy/japan">
+            Langfuse Academy（日本語版）
+          </Link>
+          で、トレース・モニタリング・データセット・実験・評価まで、LLMエンジニアリングのループを日本語で学べます。
+        </p>
+      ),
+    },
   ];
   return (
     <section className="japan-section pt-[120px] pb-10">

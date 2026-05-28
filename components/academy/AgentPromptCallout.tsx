@@ -11,15 +11,20 @@ export interface AgentPromptCalloutProps {
   lede?: React.ReactNode;
   /** The exact text written to the clipboard. */
   prompt: string;
+  locale?: string;
 }
 
 export function AgentPromptCallout({
-  ribbon = "Run with your agent",
+  ribbon,
   title,
   lede,
   prompt,
+  locale,
 }: AgentPromptCalloutProps) {
   const [copied, setCopied] = useState(false);
+  const effectiveRibbon =
+    ribbon ??
+    (locale === "ja" ? "エージェントで実行する" : "Run with your agent");
 
   const onCopy = () => {
     if (typeof navigator === "undefined" || !navigator.clipboard) return;
@@ -36,7 +41,7 @@ export function AgentPromptCallout({
     <figure
       className="agent-prompt not-prose corner-box-corners"
       role="region"
-      aria-label={ribbon}
+      aria-label={effectiveRibbon}
     >
       <header className="agent-prompt__ribbon">
         <span className="agent-prompt__mark" aria-hidden="true">
@@ -50,7 +55,7 @@ export function AgentPromptCallout({
             />
           </svg>
         </span>
-        <span>{ribbon}</span>
+        <span>{effectiveRibbon}</span>
       </header>
 
       {(title || lede) && (

@@ -34,16 +34,27 @@ const STEPS = [
   },
 ];
 
+const STEPS_JA = [
+  { num: "01", label: "収集", title: "トレースを集める" },
+  { num: "02", label: "記録", title: "Open coding" },
+  { num: "03", label: "グループ化", title: "カテゴリにクラスタリング" },
+  { num: "04", label: "定量化", title: "ラベル付けと計測" },
+  { num: "05", label: "実行", title: "判断と実行", accent: true },
+];
+
 function estimateInitialScale(): number {
   if (typeof window === "undefined") return 0.65;
   const vw = document.documentElement.clientWidth;
   return Math.min(1, Math.max(0.3, (vw - 32) / INNER_W));
 }
 
-export function ErrorAnalysisProcessDiagram() {
+export function ErrorAnalysisProcessDiagram({
+  locale,
+}: { locale?: string } = {}) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const estScale = estimateInitialScale();
+  const steps = locale === "ja" ? STEPS_JA : STEPS;
 
   useLayoutEffect(() => {
     const wrap = wrapRef.current;
@@ -73,7 +84,11 @@ export function ErrorAnalysisProcessDiagram() {
   return (
     <figure
       className="error-analysis-process not-prose"
-      aria-label="The five steps of the error analysis process"
+      aria-label={
+        locale === "ja"
+          ? "エラー分析プロセスの5つのステップ"
+          : "The five steps of the error analysis process"
+      }
     >
       <div
         ref={wrapRef}
@@ -87,7 +102,7 @@ export function ErrorAnalysisProcessDiagram() {
           className="error-analysis-process__canvas"
           style={{ transform: `scale(${estScale})` }}
         >
-          {STEPS.map((step, i) => (
+          {steps.map((step, i) => (
             <div key={step.num} className="error-analysis-process__row-cell">
               <article
                 className={`error-analysis-process__step corner-box-corners${

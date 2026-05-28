@@ -173,6 +173,15 @@ const marketingFrontmatterSchema = baseFrontmatterSchema.extend({
 
 export const academy = defineDocs({
   dir: "content/academy",
+  docs: {
+    schema: sidebarFrontmatterSchema,
+    files: ["**/*.mdx", "!japan/**"],
+  },
+  meta: { files: ["**/*.json", "!japan/**"] },
+});
+
+export const academyJa = defineDocs({
+  dir: "content/academy/japan",
   docs: { schema: sidebarFrontmatterSchema },
 });
 

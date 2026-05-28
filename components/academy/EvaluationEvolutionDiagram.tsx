@@ -294,18 +294,24 @@ function Stage({
   );
 }
 
-export function EvaluationEvolutionDiagram() {
+export function EvaluationEvolutionDiagram({
+  locale,
+}: { locale?: string } = {}) {
   return (
     <figure
       className="evaluation-evolution not-prose"
-      aria-label="How evaluation typically evolves from manual review to automated evaluators"
+      aria-label={
+        locale === "ja"
+          ? "評価が手動レビューから自動評価器へと進化する流れ"
+          : "How evaluation typically evolves from manual review to automated evaluators"
+      }
     >
       <div className="evaluation-evolution__wrap">
         <div className="evaluation-evolution__flow">
           <Stage
             className="evaluation-evolution__stage--one"
             step="Step 01"
-            title="Manual review"
+            title={locale === "ja" ? "手動レビュー" : "Manual review"}
           >
             <ManualReviewGlyph />
           </Stage>
@@ -313,7 +319,11 @@ export function EvaluationEvolutionDiagram() {
           <Stage
             className="evaluation-evolution__stage--two"
             step="Step 02"
-            title={"Identify\nfailure\u00a0modes"}
+            title={
+              locale === "ja"
+                ? "\u5931\u6557\u30e2\u30fc\u30c9\u3092\n\u7279\u5b9a\u3059\u308b"
+                : "Identify\nfailure\u00a0modes"
+            }
           >
             <FailureModesGlyph />
           </Stage>
@@ -321,7 +331,7 @@ export function EvaluationEvolutionDiagram() {
           <Stage
             className="evaluation-evolution__stage--three"
             step="Step 03"
-            title="Automate"
+            title={locale === "ja" ? "自動化" : "Automate"}
           >
             <AutomateGlyph />
           </Stage>

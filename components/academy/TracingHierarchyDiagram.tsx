@@ -36,11 +36,15 @@ function Trace({ observationCount }: { observationCount: number }) {
   );
 }
 
-export function TracingHierarchyDiagram() {
+export function TracingHierarchyDiagram({ locale }: { locale?: string } = {}) {
   return (
     <figure
       className="tracing-hierarchy not-prose"
-      aria-label="Sessions contain traces, and traces contain observations"
+      aria-label={
+        locale === "ja"
+          ? "セッションはトレースを含み、トレースはオブザベーションを含みます"
+          : "Sessions contain traces, and traces contain observations"
+      }
     >
       <CornerRing className="tracing-hierarchy__session">
         <span className="tracing-hierarchy__caption">Session</span>

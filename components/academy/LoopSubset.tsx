@@ -39,6 +39,22 @@ const STATION_DATA = {
 
 type StationId = keyof typeof STATION_DATA;
 
+const STATION_TITLE_JA: Record<StationId, string> = {
+  trace: "トレース",
+  monitor: "モニタリング",
+  dataset: "データセット\n構築",
+  change: "実験",
+  eval: "評価",
+};
+
+const STATION_HREF_JA: Record<StationId, string> = {
+  trace: "/academy/japan/tracing",
+  monitor: "/academy/japan/monitoring",
+  dataset: "/academy/japan/datasets",
+  change: "/academy/japan/experiments",
+  eval: "/academy/japan/evaluate",
+};
+
 function Arrow() {
   return (
     <div
@@ -68,7 +84,7 @@ function Arrow() {
   );
 }
 
-function StationRow({ ids }: { ids: StationId[] }) {
+function StationRow({ ids, locale }: { ids: StationId[]; locale?: string }) {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -84,10 +100,12 @@ function StationRow({ ids }: { ids: StationId[] }) {
       <div style={{ display: "flex", alignItems: "stretch" }}>
         {ids.map((id, i) => {
           const s = STATION_DATA[id];
+          const stationTitle = locale === "ja" ? STATION_TITLE_JA[id] : s.title;
+          const stationHref = locale === "ja" ? STATION_HREF_JA[id] : s.href;
           return (
             <Fragment key={id}>
               <Link
-                href={s.href}
+                href={stationHref}
                 className="corner-box-corners--hover"
                 style={{
                   flex: 1,
@@ -165,7 +183,7 @@ function StationRow({ ids }: { ids: StationId[] }) {
                     whiteSpace: "pre-line",
                   }}
                 >
-                  {s.title}
+                  {stationTitle}
                 </div>
 
                 {/* Meta */}
@@ -192,10 +210,10 @@ function StationRow({ ids }: { ids: StationId[] }) {
   );
 }
 
-export function OnlineLoop() {
-  return <StationRow ids={["trace", "monitor"]} />;
+export function OnlineLoop({ locale }: { locale?: string } = {}) {
+  return <StationRow ids={["trace", "monitor"]} locale={locale} />;
 }
 
-export function OfflineLoop() {
-  return <StationRow ids={["dataset", "change", "eval"]} />;
+export function OfflineLoop({ locale }: { locale?: string } = {}) {
+  return <StationRow ids={["dataset", "change", "eval"]} locale={locale} />;
 }

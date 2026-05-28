@@ -1,5 +1,5 @@
 import "server-only";
-import type { ComponentProps, ComponentType } from "react";
+import type { ComponentProps, ComponentType, ReactNode } from "react";
 import { DocsPage } from "fumadocs-ui/page";
 import type { TOCItemType } from "fumadocs-core/toc";
 
@@ -32,10 +32,13 @@ const getIsoDate = (value: unknown): string | undefined => {
 export async function DocsChromePage({
   page,
   bodyChromeProps,
+  bottomSuffix,
 }: {
   page: LoadedPage;
   /** Extra props forwarded to `DocBodyChrome` (e.g. `versionLabel` on self-hosting). */
   bodyChromeProps?: BodyChromeProps;
+  /** Optional node rendered inside DocBodyChrome, after the MDX body. */
+  bottomSuffix?: ReactNode;
 }) {
   const data = page.data;
   const loaded =
@@ -63,6 +66,7 @@ export async function DocsChromePage({
     >
       <DocBodyChrome {...bodyChromeProps}>
         <MDX components={getMDXComponents()} />
+        {bottomSuffix}
       </DocBodyChrome>
     </DocsPage>
   );

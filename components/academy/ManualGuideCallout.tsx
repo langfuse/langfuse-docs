@@ -11,14 +11,19 @@ export interface ManualGuideCalloutProps {
   lede?: React.ReactNode;
   /** CTA button text, default "Open the guide". */
   cta?: string;
+  locale?: string;
 }
 
 export function ManualGuideCallout({
   href,
   topic,
   lede,
-  cta = "Open",
+  cta,
+  locale,
 }: ManualGuideCalloutProps) {
+  const isJa = locale === "ja";
+  const ribbonPrefix = isJa ? "ガイド" : "Guide";
+  const ctaText = cta ?? (isJa ? "開く" : "Open");
   const isExternal = /^https?:/i.test(href);
 
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -53,12 +58,14 @@ export function ManualGuideCallout({
               </svg>
             </span>
             <span>
-              <span className="manual-guide__ribbon-prefix">Guide:</span>{" "}
+              <span className="manual-guide__ribbon-prefix">
+                {ribbonPrefix}:
+              </span>{" "}
               {topic}
             </span>
           </div>
           <span className="manual-guide__cta">
-            {cta}
+            {ctaText}
             <svg
               width="14"
               height="14"

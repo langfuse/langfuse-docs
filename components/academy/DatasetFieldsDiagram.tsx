@@ -53,7 +53,8 @@ function Node({
   );
 }
 
-export function DatasetFieldsDiagram() {
+export function DatasetFieldsDiagram({ locale }: { locale?: string } = {}) {
+  const isJa = locale === "ja";
   const wrapRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const estScale = estimateInitialScale();
@@ -86,7 +87,11 @@ export function DatasetFieldsDiagram() {
   return (
     <figure
       className="dataset-fields not-prose"
-      aria-label="Dataset fields and when they are used"
+      aria-label={
+        locale === "ja"
+          ? "データセットフィールドとその用途"
+          : "Dataset fields and when they are used"
+      }
     >
       <div
         ref={wrapRef}
@@ -105,9 +110,17 @@ export function DatasetFieldsDiagram() {
           <div className="dataset-fields__row-divider" style={{ top: 128 }} />
           <div className="dataset-fields__row-divider" style={{ top: 257 }} />
 
-          <StageLabel y={0} num="01" name="Run experiment" />
-          <StageLabel y={128} num="02" name="Add context" />
-          <StageLabel y={257} num="03" name="Score" />
+          <StageLabel
+            y={0}
+            num="01"
+            name={isJa ? "実験を実行" : "Run experiment"}
+          />
+          <StageLabel
+            y={128}
+            num="02"
+            name={isJa ? "コンテキストを追加" : "Add context"}
+          />
+          <StageLabel y={257} num="03" name={isJa ? "スコアリング" : "Score"} />
 
           <svg
             className="dataset-fields__arrows"
@@ -171,27 +184,27 @@ export function DatasetFieldsDiagram() {
           </svg>
 
           <Node x={160} y={36} width={180} variant="live">
-            Input
+            {isJa ? "入力" : "Input"}
           </Node>
           <Node x={400} y={36} width={220} variant="live">
-            Task execution
+            {isJa ? "タスク実行" : "Task execution"}
           </Node>
           <Node x={680} y={36} width={180} variant="live">
-            Actual output
+            {isJa ? "実出力" : "Actual output"}
           </Node>
 
           <Node x={160} y={164} width={180} variant="stripe">
-            Metadata
+            {isJa ? "メタデータ" : "Metadata"}
           </Node>
           <Node x={400} y={164} width={220} variant="stripe">
-            Extra context for review
+            {isJa ? "レビュー用の追加コンテキスト" : "Extra context for review"}
           </Node>
 
           <Node x={160} y={293} width={180}>
-            Expected output
+            {isJa ? "期待出力" : "Expected output"}
           </Node>
           <Node x={680} y={293} width={180} variant="terminal">
-            Score / compare
+            {isJa ? "スコア / 比較" : "Score / compare"}
           </Node>
         </div>
       </div>
