@@ -695,7 +695,7 @@ Related FAQs: [/faq/all/existing-otel-setup](/faq/all/existing-otel-setup), [/fa
 1. Is the model on our supported pricing list? Check the model in the UI's "Model" definition. Custom models need a `Model` entry with input/output token pricing or Langfuse can't compute cost.
 2. Does the SDK / framework send token counts? If yes, Langfuse uses them; if no, we tokenize the input/output ourselves with the model's tokenizer (best-effort).
 3. For agent frameworks (pydantic-ai notably), token double-counting can happen when both the parent agent span and the child LLM span report usage. Known issue, escalate with the trace link.
-4. For frameworks where Langfuse calculates cost despite the framework also reporting it, the framework's `otel operation.cost` attribute is the source of truth, we override based on our pricing table.
+4. For frameworks where Langfuse calculates cost despite the framework also reporting it, the framework's `otel operation.cost` attribute is overridden: our pricing table is the source of truth.
 
 **Reply template:**
 
@@ -816,7 +816,7 @@ Related FAQs: [/faq/all/old-prompt-version-caching](/faq/all/old-prompt-version-
 
 **The single most common cause: the trace was ingested via a legacy SDK path that pre-dates OTEL.** LLM-as-a-Judge currently only runs against OTEL-based observations.
 
-**Diagnostic check:** Open the trace in the UI. If its `metadata.scope.*` and `metadata.resourceAttributes.*` fields exist, it was ingested via OTEL and evaluators should pick it up. If those fields are missing, the trace came via the legacy `/observations` endpoint and won't be scored.
+**Diagnostic check:** Open the trace in the UI. If its `metadata.scope.*` and `metadata.resourceAttributes.*` fields exist, it was ingested via OTEL and evaluators should pick it up. If those fields are missing, the trace came via the legacy `/api/public/ingestion` endpoint and won't be scored.
 
 **Triage steps:**
 
@@ -853,7 +853,7 @@ Related FAQ: [/faq/all/observation-eval-not-executing](/faq/all/observation-eval
 
 - **"Duplicate dataset items on ingestion"**: usually customer-side: the same source row gets re-uploaded. Add a unique constraint on `id` when calling `create_dataset_item`.
 - **"How do I version a dataset?"**: datasets are versioned automatically; experiments pin to a snapshot. See the experiments docs.
-- **Java / non-Python SDK** running experiments, they must propagate the right OTEL attributes (`langfuse.experiment.id`, `langfuse.experiment.dataset.id`, `langfuse.experiment.item.id`, `langfuse.experiment.item.root_observation_id`) on the trace. There is no official Java SDK; route to engineering for the canonical attribute schema. See GitHub #13438.
+- **Java / non-Python SDK** running experiments, they must propagate the right OTEL attributes (`langfuse.experiment.id`, `langfuse.experiment.dataset.id`, `langfuse.experiment.item.id`, `langfuse.experiment.item.root_observation_id`) on the trace. The official `langfuse-java` client covers prompts and scores via the public API but does not provide native tracing, so experiments require manual OTEL attribute propagation; route to engineering for the canonical attribute schema. See GitHub #13438.
 - **Experiments in CI**: point to the GitHub Action for Langfuse Experiments.
 
 Related FAQ: [/faq/all/langfuse-evaluators-on-dataset-runs](/faq/all/langfuse-evaluators-on-dataset-runs).
