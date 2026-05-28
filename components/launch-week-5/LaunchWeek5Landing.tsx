@@ -501,18 +501,19 @@ function Day3Unveiling() {
         </h2>
         <p className="lw5-body">
           Production traces pile up fast. A high-traffic app can produce
-          millions of observations in a week, and when something looks wrong
-          you need to pull the one trace that says “refund failed” out of
-          hundreds of gigabytes in a fraction of a second. A scroll-and-hope
-          UI does not cut it at that scale.
+          millions of observations in a week, and when something looks wrong you
+          need to pull the one trace that says “refund failed” out of hundreds
+          of gigabytes in a fraction of a second. A scroll-and-hope UI does not
+          cut it at that scale.
         </p>
         <p className="lw5-body">
-          Day 3 rolls out full-text search to Langfuse Cloud. In our benchmarks, large input/output searches
-          that took 18 seconds and scanned 494 GB now return in under half a
-          second and read less than a gigabyte. Metadata-heavy queries dropped
-          from 1.6s to 0.2s. The UI gets faster for humans hunting a bug, and
-          the new <code>matches</code> operator on Observations API v2 gives
-          agents and scripts the same token-based search programmatically.
+          Day 3 rolls out full-text search to Langfuse Cloud. In our benchmarks,
+          large input/output searches that took 18 seconds and scanned 494 GB
+          now return in under half a second and read less than a gigabyte.
+          Metadata-heavy queries dropped from 1.6s to 0.2s. The UI gets faster
+          for humans hunting a bug, and the new <code>matches</code> operator on
+          Observations API v2 gives agents and scripts the same token-based
+          search programmatically.
         </p>
         <p className="lw5-body">
           Built on top of ClickHouse’s new{" "}
@@ -524,9 +525,9 @@ function Day3Unveiling() {
           >
             full-text search release
           </Link>
-          , we worked closely with the ClickHouse team on the underlying
-          engine, so features like this land in Langfuse days after they ship
-          in ClickHouse core.
+          , we worked closely with the ClickHouse team on the underlying engine,
+          so features like this land in Langfuse days after they ship in
+          ClickHouse core.
         </p>
       </div>
 
