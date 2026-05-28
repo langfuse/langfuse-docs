@@ -771,8 +771,8 @@ Best,
 
 <summary>LangChain / LangGraph</summary>
 
-- Use `CallbackHandler` from `langfuse.callback`. For LangGraph, the same callback works but you may want to set the trace name explicitly per node — see GitHub discussion #13261.
-- **"How do I track non-LLM service costs in LangChain tools?"** — use `update_current_observation(...usage=...)` inside the tool. See GitHub discussion #13514.
+- Use `CallbackHandler` from `langfuse.langchain`. For LangGraph, the same callback works but you may want to set the trace name explicitly per node — see GitHub discussion #13261.
+- **"How do I track non-LLM service costs in LangChain tools?"** — use `update_current_generation(...usage_details=...)` inside the tool. See GitHub discussion #13514.
 - **Global callback registration** is a recurring feature request (GitHub #13583) — don't promise it.
 
 </details>
@@ -803,7 +803,7 @@ If the integration isn't documented, ask which framework/version and offer to fi
 
 **Common issues:**
 
-- **Old prompt version served from cache** — SDK caches by default. To bypass: `get_prompt(name, cache_ttl_seconds=0)` or set `LANGFUSE_PROMPT_CACHE_TTL=0`.
+- **Old prompt version served from cache** — SDK caches by default. To bypass: `get_prompt(name, cache_ttl_seconds=0)`.
 - **Linked prompt label resolves to wrong version** — labels are mutable; check Audit log / Prompt history.
 - **MCP server only supports prompt management** today (read-only). Datasets / Traces are on the roadmap.
 - **Conditional / templated prompts** — see [/faq/all/conditional-prompt-embedding](/faq/all/conditional-prompt-embedding).
