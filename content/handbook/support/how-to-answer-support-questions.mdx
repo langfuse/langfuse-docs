@@ -627,7 +627,7 @@ Hi {name},
 
 Status page is clear and our queues look healthy on this side. A few things to confirm:
 
-1. Are you on the latest SDK? For Python that's the v3+ scoped packages, for JS that's @langfuse/client / @langfuse/tracing / @langfuse/otel. The legacy `langfuse` JS v3 package and Python v2 SDK both used older endpoints with known delays.
+1. Are you on the latest SDK? For Python that's `langfuse` v3+, for JS that's the v4+ scoped packages (`@langfuse/client` / `@langfuse/tracing` / `@langfuse/otel`). The legacy `langfuse` JS v3 package and Python v2 SDK both used older endpoints with known delays.
 2. If the process sending traces is short-lived (Lambda, CLI, edge runtime, batch job), make sure you call langfuse.flush() / shutdown() before exit, otherwise in-flight events drop.
 3. What time range are you looking at in the UI, and which environment tag?
 
@@ -821,7 +821,7 @@ Related FAQs: [/faq/all/old-prompt-version-caching](/faq/all/old-prompt-version-
 **Triage steps:**
 
 1. Look at one of the customer's recent traces, check for OTEL metadata.
-2. If legacy: ask them to upgrade SDK (Python v3+ scoped packages, JS @langfuse/\* v1+).
+2. If legacy: ask them to upgrade SDK (Python `langfuse` v3+, JS `@langfuse/*` v4+).
 3. If OTEL: check that the evaluator config matches the trace (variable mapping, filter conditions, target observation type). Some evaluators target `observations` rather than `traces`.
 4. Check evaluator logs in UI → Evaluators → click the config → recent runs.
 
@@ -835,7 +835,7 @@ LLM-as-a-Judge currently only evaluates OTEL-ingested observations. If you open 
 - Present → OTEL-based, should be scored
 - Absent → ingested via the legacy SDK path, won't be scored
 
-If you're seeing the absent case, the fix is to upgrade your SDK (Python v3+ scoped packages, JS @langfuse/* v1+). I'm happy to walk through which traces are which if you share a couple of traceIds.
+If you're seeing the absent case, the fix is to upgrade your SDK (Python langfuse v3+, JS @langfuse/* v4+). I'm happy to walk through which traces are which if you share a couple of traceIds.
 
 Best,
 {you}
@@ -935,13 +935,13 @@ Best,
 
 <summary>BAA / HIPAA</summary>
 
-HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. BAA is required and is signed through legal.
+HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. The BAA applies automatically to accounts on that region with a HIPAA-eligible plan (Pro, Teams, or Enterprise); no separate signature is required.
 
 **Triage steps:**
 
 1. Confirm the customer is using or about to use `hipaa.cloud.langfuse.com` (not the standard US/EU regions).
-2. **Cannot migrate accounts between regions.** Existing US/EU customers moving to HIPAA must create a new account on `hipaa.cloud.langfuse.com` and cut over instrumentation. Past trace data does not migrate (we recommend a clean cutover rather than backfill).
-3. For the BAA, route to the enterprise team to handle the signature flow.
+2. **Account migration:** customers moving from EU/US must create a fresh account on `hipaa.cloud.langfuse.com`. Past trace data can be moved via the [data migration cookbook](/guides/cookbook/example_data_migration).
+3. The BAA auto-applies for eligible accounts. If the customer specifically needs a counter-signature for their procurement process, route to the enterprise team.
 4. For HIPAA-region IP allowlisting (egress from Langfuse to customer infra, e.g. for LLM-as-a-judge): static IPs are `35.82.248.193`, `34.211.191.155`, `52.43.164.18` (us-west-2). Full list at [langfuse.com/security/networking](https://langfuse.com/security/networking). **Ingress** to `hipaa.cloud.langfuse.com` sits behind AWS ALBs without static IPs, we cannot publish a stable ingress IP range.
 
 **Reply template (BAA):**
@@ -949,9 +949,9 @@ HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. BAA 
 ```text
 Hi {name},
 
-For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and have a signed BAA. I'm looping in our enterprise team to handle the BAA, they'll send it on our paper.
+For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro, Teams, or Enterprise). Our BAA applies automatically once those conditions are met, no separate signature is required: https://langfuse.com/security/hipaa.
 
-A note for completeness: HIPAA accounts cannot be migrated from the standard US/EU regions. If your team is currently on us.cloud or cloud., the recommended path is to create a fresh account on hipaa.cloud.langfuse.com and cut over instrumentation, past trace data does not need to be backfilled.
+A note for completeness: HIPAA accounts are provisioned fresh on hipaa.cloud.langfuse.com. If your team is currently on us.cloud or cloud., past trace data can be moved via our data migration cookbook: https://langfuse.com/guides/cookbook/example_data_migration.
 
 Best,
 {you}
