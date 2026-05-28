@@ -16,3 +16,9 @@ alwaysApply: true
 ## Frontend
 
 - When using tailwindcss, never use explicit colors, always use the default semantic color tokens.
+
+## Before committing or opening a PR
+
+- Run `pnpm run format` if you edited any file Prettier formats (`.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.json`, `.css`, `.scss`, `.md`, `.mdx`, `.yaml`/`.yml`, `.html`). CI runs `pnpm run format:check` and fails on a single unformatted file — this is the format check that most often fails on the first try.
+- Files in `.prettierignore` (`content/guides/cookbook/**`, `content/workshop/**`, generated assets in `public/`, lockfiles) are skipped, as are source notebooks (`.ipynb` in `cookbook/`) since Prettier has no parser for them. If you only touched those, no format step is needed.
+- Each `.md`/`.mdx` file must have exactly one H1 (`# `) heading; CI's `check_h1` job rejects multiples.
