@@ -611,10 +611,10 @@ function Day4Unveiling() {
           >
             LLM-as-a-Judge
           </Link>{" "}
-          rather than replacing it. Code wins for objective checks. A judge
-          wins for semantic quality, tone, helpfulness, or rubric reasoning.
-          Together they give you a more complete picture of quality than
-          either approach alone.
+          rather than replacing it. Code wins for objective checks. A judge wins
+          for semantic quality, tone, helpfulness, or rubric reasoning. Together
+          they give you a more complete picture of quality than either approach
+          alone.
         </p>
       </div>
 
