@@ -14,10 +14,40 @@ These are used for password resets, project/organization invitations, and notifi
 
 To enable transactional emails, set the following environment variables on the application containers:
 
-| Variable              | Description                                                                                                                                      |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `SMTP_CONNECTION_URL` | Configure optional SMTP server connection for transactional email. Connection URL is passed to Nodemailer ([docs](https://nodemailer.com/smtp)). |
-| `EMAIL_FROM_ADDRESS`  | Configure from address for transactional email. Required if `SMTP_CONNECTION_URL` is set.                                                        |
+| Variable              | Description                                                                                                                                                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SMTP_CONNECTION_URL` | Connection URL for transactional email. Accepts a standard SMTP URL (`smtp://` or `smtps://`) that is passed to Nodemailer ([docs](https://nodemailer.com/smtp)), or `ses://<region>` (e.g. `ses://us-east-1`) to send via [AWS SES](#aws-ses) using the default AWS credential chain (IAM role, SSO, env vars). |
+| `EMAIL_FROM_ADDRESS`  | Configure from address for transactional email. Required if `SMTP_CONNECTION_URL` is set.                                                                                                                                                                                                                    |
+
+## AWS SES [#aws-ses]
+
+When `SMTP_CONNECTION_URL` is set to `ses://<region>`, Langfuse sends transactional emails through [AWS SES](https://aws.amazon.com/ses/) using the SESv2 API.
+No additional configuration variables are required — credentials are resolved through the [default AWS credential chain](https://docs.aws.amazon.com/sdkref/latest/guide/standardized-credentials.html) (IAM role, IRSA, ECS task role, SSO, `AWS_PROFILE`, or environment variables), which mirrors the credential handling used for [S3 blob storage](/self-hosting/deployment/infrastructure/blobstorage).
+
+If Langfuse is running on AWS, we recommend attaching an IAM role to the Langfuse container with permission to send via SES:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": ["ses:SendEmail"],
+      "Effect": "Allow",
+      "Resource": "*",
+      "Sid": "LangfuseSendEmail"
+    }
+  ]
+}
+```
+
+Make sure the `EMAIL_FROM_ADDRESS` is a [verified identity](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html) in the same region, and that your account is out of the SES sandbox if you need to send to arbitrary recipients.
+
+Example configuration:
+
+```yaml
+SMTP_CONNECTION_URL=ses://us-east-1
+EMAIL_FROM_ADDRESS=no-reply@example.com
+```
 
 ## FAQ
 
