@@ -626,7 +626,7 @@ function Day4Unveiling() {
 
       <div className="w-full max-w-[920px] mb-8">
         <Video
-          src="https://static.langfuse.com/docs-videos/code-evaluators-launch.mp4"
+          src="https://static.langfuse.com/docs-videos/code-evaluators-launch-2.mp4"
           aspectRatio={16 / 9}
           className="rounded border border-line-structure"
         />
