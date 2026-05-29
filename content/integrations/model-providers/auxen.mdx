@@ -38,14 +38,16 @@ os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU re
 #                🇯🇵 JP https://jp.cloud.langfuse.com,
 #                ⚕️  HIPAA https://hipaa.cloud.langfuse.com
 
-# Auxen — per-instance URL + key from the Auxen dashboard:
-os.environ["AUXEN_BASE_URL"] = "https://api.auxen.ai/v1/inst_xxx"
+# Auxen — paste the full per-instance base URL from the Auxen dashboard.
+# The dashboard URL ends in /v1 — keep that segment so the OpenAI client
+# can post directly to /chat/completions without any path-stitching.
+os.environ["AUXEN_BASE_URL"] = "https://api.auxen.ai/v1/inst_xxx/v1"
 os.environ["AUXEN_API_KEY"] = "auxk_..."
 ```
 
 ## Step 3: Langfuse OpenAI Drop-in Replacement
 
-Import the wrapped OpenAI client from Langfuse and point it at your Auxen instance. The base URL needs to end at `/v1` (Auxen instances expose the OpenAI-compatible endpoint there).
+Import the wrapped OpenAI client from Langfuse and point it at your Auxen instance. Use `AUXEN_BASE_URL` directly — it already ends at `/v1`, which is where Auxen exposes the OpenAI-compatible endpoint.
 
 ```python
 # instead of `import openai`:
@@ -53,7 +55,7 @@ from langfuse.openai import openai
 
 client = openai.OpenAI(
     api_key=os.environ.get("AUXEN_API_KEY"),
-    base_url=f"{os.environ.get('AUXEN_BASE_URL').rstrip('/')}/v1",
+    base_url=os.environ.get("AUXEN_BASE_URL"),
 )
 ```
 
