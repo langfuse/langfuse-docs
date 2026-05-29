@@ -21,7 +21,7 @@ export default async function JaAcademyPage({ params }: PageProps) {
           <a
             href="https://gao-ai.com"
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             className="underline underline-offset-2 decoration-1 hover:no-underline"
           >
             GAO, Inc.
