@@ -39,7 +39,13 @@ const DAYS: DayCard[] = [
     title: "Full-Text Search",
     href: "/changelog/2026-05-27-clickhouse-full-text-search-fast-mode",
   },
-  { n: "04", weekday: "Thursday", date: "May 28", hint: "Evals as code" },
+  {
+    n: "04",
+    weekday: "Thursday",
+    date: "May 28",
+    title: "Code evaluators",
+    href: "/changelog/2026-05-28-code-evaluators",
+  },
   {
     n: "05",
     weekday: "Friday",
@@ -507,18 +513,19 @@ function Day3Unveiling() {
         </h2>
         <p className="lw5-body">
           Production traces pile up fast. A high-traffic app can produce
-          millions of observations in a week, and when something looks wrong
-          you need to pull the one trace that says “refund failed” out of
-          hundreds of gigabytes in a fraction of a second. A scroll-and-hope
-          UI does not cut it at that scale.
+          millions of observations in a week, and when something looks wrong you
+          need to pull the one trace that says “refund failed” out of hundreds
+          of gigabytes in a fraction of a second. A scroll-and-hope UI does not
+          cut it at that scale.
         </p>
         <p className="lw5-body">
-          Day 3 rolls out full-text search to Langfuse Cloud. In our benchmarks, large input/output searches
-          that took 18 seconds and scanned 494 GB now return in under half a
-          second and read less than a gigabyte. Metadata-heavy queries dropped
-          from 1.6s to 0.2s. The UI gets faster for humans hunting a bug, and
-          the new <code>matches</code> operator on Observations API v2 gives
-          agents and scripts the same token-based search programmatically.
+          Day 3 rolls out full-text search to Langfuse Cloud. In our benchmarks,
+          large input/output searches that took 18 seconds and scanned 494 GB
+          now return in under half a second and read less than a gigabyte.
+          Metadata-heavy queries dropped from 1.6s to 0.2s. The UI gets faster
+          for humans hunting a bug, and the new <code>matches</code> operator on
+          Observations API v2 gives agents and scripts the same token-based
+          search programmatically.
         </p>
         <p className="lw5-body">
           Built on top of ClickHouse’s new{" "}
@@ -530,9 +537,9 @@ function Day3Unveiling() {
           >
             full-text search release
           </Link>
-          , we worked closely with the ClickHouse team on the underlying
-          engine, so features like this land in Langfuse days after they ship
-          in ClickHouse core.
+          , we worked closely with the ClickHouse team on the underlying engine,
+          so features like this land in Langfuse days after they ship in
+          ClickHouse core.
         </p>
       </div>
 
@@ -572,6 +579,84 @@ function Day3Unveiling() {
             rel="noopener noreferrer"
           >
             <span>ClickHouse FTS GA post</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
+function Day4Unveiling() {
+  return (
+    <section id="day-4" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 04 · Thursday, May 28, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Code evaluators.</span>
+        </h2>
+        <p className="lw5-body">
+          Not every evaluation needs an LLM. JSON parseability, schema
+          validation, exact match, required tool arguments, custom business
+          rules: things you would rather verify with code than ask an LLM to
+          “rate this 1–5”. Deterministic, reproducible, no token cost.
+        </p>
+        <p className="lw5-body">
+          Day 4 ships code evaluators. Write a small <code>evaluate</code>{" "}
+          function in Python or TypeScript directly in the Langfuse UI, attach
+          it to live observations or to a dataset experiment, and the result
+          lands as a native Langfuse score. It shows up in trace views,
+          experiment compares, filters, dashboards, and Score Analytics next to
+          your existing scores.
+        </p>
+        <p className="lw5-body">
+          Code evaluators sit alongside{" "}
+          <Link
+            href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            LLM-as-a-Judge
+          </Link>{" "}
+          rather than replacing it. Code wins for objective checks. A judge wins
+          for semantic quality, tone, helpfulness, or rubric reasoning. Together
+          they give you a more complete picture of quality than either approach
+          alone.
+        </p>
+      </div>
+
+      <div className="w-full max-w-[920px] mb-8">
+        <Video
+          src="https://static.langfuse.com/docs-videos/code-evaluators-launch.mp4"
+          aspectRatio={16 / 9}
+          className="rounded border border-line-structure"
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-28-code-evaluators"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/evaluation/evaluation-methods/code-evaluators"
+          >
+            <span>Get started in docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/self-hosting/configuration/code-evaluators"
+          >
+            <span>Self-hosting setup</span>
             <span className="lw5-kbd">↗</span>
           </Link>
         </span>
@@ -752,6 +837,7 @@ export function LaunchWeek5Landing() {
         <Hero />
         <Schedule />
         <Day5Unveiling />
+        <Day4Unveiling />
         <Day3Unveiling />
         <Day2Unveiling />
         <Day1Unveiling />
