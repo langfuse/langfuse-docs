@@ -681,7 +681,10 @@ function Day5Unveiling() {
           Fifteen tool categories total.
         </p>
         <p className="lw5-body">
-        Agents such as Claude Cowork, Linear Agents, or custom internal tools can now investigate a production issue, pull the relevant observation, query metrics, drop a comment for the team, create a score, or stage a dataset item for regression testing, all without leaving the chat.
+          Agents such as Claude Cowork, Linear Agents, or custom internal tools
+          can now investigate a production issue, pull the relevant observation,
+          query metrics, drop a comment for the team, create a score, or stage a
+          dataset item for regression testing, all without leaving the chat.
         </p>
         <p className="lw5-body">
           The MCP server complements the{" "}

@@ -9,9 +9,7 @@ export function Banner() {
       className="bg-black text-white [&_a]:text-white [&_button]:text-white"
     >
       <Link href="/launch">
-        <span className="sm:hidden">
-          Launch Week 5 · Day 5: Langfuse MCP →
-        </span>
+        <span className="sm:hidden">Launch Week 5 · Day 5: Langfuse MCP →</span>
         <span className="hidden sm:inline">
           Langfuse Launch Week 5 · Day 5: Langfuse MCP, expanded →
         </span>
