@@ -38,9 +38,13 @@ os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU re
 #                🇯🇵 JP https://jp.cloud.langfuse.com,
 #                ⚕️  HIPAA https://hipaa.cloud.langfuse.com
 
-# Auxen — paste the full per-instance base URL from the Auxen dashboard.
-# The dashboard URL ends in /v1 — keep that segment so the OpenAI client
-# can post directly to /chat/completions without any path-stitching.
+# Auxen — paste the full per-instance base URL from the Auxen dashboard
+# exactly as shown. The dashboard URL has two version segments and both
+# are intentional:
+#   - the leading /v1 is Auxen's API version,
+#   - the trailing /v1 is the OpenAI-compatible path inside your instance,
+#     where /chat/completions lives (so the OpenAI client posts directly
+#     to {base_url}/chat/completions without any path-stitching).
 os.environ["AUXEN_BASE_URL"] = "https://api.auxen.ai/v1/inst_xxx/v1"
 os.environ["AUXEN_API_KEY"] = "auxk_..."
 ```
