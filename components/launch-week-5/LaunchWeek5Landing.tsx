@@ -46,7 +46,13 @@ const DAYS: DayCard[] = [
     title: "Code evaluators",
     href: "/changelog/2026-05-28-code-evaluators",
   },
-  { n: "05", weekday: "Friday", date: "May 29", hint: "Never miss a thing" },
+  {
+    n: "05",
+    weekday: "Friday",
+    date: "May 29",
+    title: "Langfuse MCP, expanded",
+    href: "/changelog/2026-05-29-mcp-update",
+  },
 ];
 
 function LockIcon() {
@@ -659,6 +665,92 @@ function Day4Unveiling() {
   );
 }
 
+function Day5Unveiling() {
+  return (
+    <section id="day-5" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 05 · Friday, May 29, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Langfuse MCP, expanded.</span>
+        </h2>
+        <p className="lw5-body">
+          Until this week the hosted Langfuse MCP server only exposed prompt
+          management. Today it covers most of Langfuse: observations, metrics,
+          scores, score configs, datasets, dataset items, dataset runs, dataset
+          run items, comments, annotation queues, models, media, and health.
+          Fifteen tool categories total.
+        </p>
+        <p className="lw5-body">
+          Agents such as Claude Cowork, Linear Agents, or custom internal tools
+          can now investigate a production issue, pull the relevant observation,
+          query metrics, drop a comment for the team, create a score, or stage a
+          dataset item for regression testing, all without leaving the chat.
+        </p>
+        <p className="lw5-body">
+          The MCP server complements the{" "}
+          <Link
+            href="/changelog/2026-05-26-langfuse-agent-skill"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            Langfuse Skill
+          </Link>{" "}
+          (Day 2) and the{" "}
+          <Link
+            href="/docs/api-and-data-platform/features/cli"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            Langfuse CLI
+          </Link>
+          . Use the CLI when your agent can run bash and pre-filter data; use
+          the MCP server when it cannot. Restrict to read-only by allow-listing
+          lookup tools if you don’t want writes.
+        </p>
+      </div>
+
+      <div className="w-full max-w-[920px] mb-8">
+        <Video
+          src="https://static.langfuse.com/docs-videos/mcp-v2-launch.mp4"
+          aspectRatio={16 / 9}
+          className="rounded border border-line-structure"
+          gifStyle
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-29-mcp-update"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/api-and-data-platform/features/mcp-server"
+          >
+            <span>MCP server docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="https://mcp.reference.langfuse.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>MCP Reference</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
 function DayCard({ day }: { day: DayCard }) {
   const live = Boolean(day.href);
   const content = (
@@ -743,6 +835,7 @@ export function LaunchWeek5Landing() {
       <div className="max-w-[1440px] mx-auto">
         <Hero />
         <Schedule />
+        <Day5Unveiling />
         <Day4Unveiling />
         <Day3Unveiling />
         <Day2Unveiling />
