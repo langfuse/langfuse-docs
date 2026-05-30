@@ -8,17 +8,17 @@ description: Native Model Context Protocol (MCP) server for Langfuse, enabling A
 
 Langfuse includes a native [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that enables AI assistants and agents to interact with your Langfuse data programmatically.
 
-Currently, the MCP server is available for [Prompt Management](/docs/prompt-management/overview) and will be extended to the rest of the Langfuse data platform in the future. If you have feedback or ideas for new tools, please [share them on GitHub](https://github.com/orgs/langfuse/discussions/10605).
+If you have feedback or ideas for new tools, please [share them on GitHub](https://github.com/orgs/langfuse/discussions/10605).
 
 <Callout type="info">
 
-This is the authenticated MCP server for the Langfuse data platform. There is also a public MCP server for the Langfuse documentation ([docs](/docs/docs-mcp)).
+If you are running AI agents in an environment where you can install CLI tools and run bash commands, we recommend using the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) instead of the MCP server.
 
 </Callout>
 
 <Callout type="info">
 
-Alternatively you can also work with the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill). Many use cases that aren't supported by the MCP server can be achieved using the skill.
+This is the authenticated MCP server for the Langfuse data platform. There is also a public MCP server for the Langfuse documentation ([docs](/docs/docs-mcp)).
 
 </Callout>
 
@@ -81,8 +81,7 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
 <Callout type="warning">
   **Both read and write tools are available by default.** If you only want to
   use read-only tools, configure your MCP client with an allowlist to restrict
-  access to write operations (`createTextPrompt`, `createChatPrompt`,
-  `updatePromptLabels`).
+  access to write operations. For a full list of tools, see the [MCP Reference](https://mcp.reference.langfuse.com).
 </Callout>
 
 ## Set up [#set-up]
@@ -260,15 +259,6 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
 
 </Steps>
 
-## Use Cases
-
-The MCP server enables powerful workflows for AI-assisted prompt management:
-
-- **Prompt Creation**: "Create a new chat prompt for customer support with system instructions and example messages"
-- **Version Management**: "Update the staging label to point to version 3 of the email-generation prompt"
-- **Prompt Discovery**: "List all prompts tagged with 'production' and show their latest versions"
-- **Iterative Development**: "Create a new version of the code-review prompt with improved instructions"
-
 ## Feedback
 
 We'd love to hear about your experience with the Langfuse MCP server. Share your feedback, ideas, and use cases in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605).
@@ -279,3 +269,4 @@ We'd love to hear about your experience with the Langfuse MCP server. Share your
 - [Prompt Management with MCP](/docs/prompt-management/features/mcp-server) - Prompt-specific workflows and examples
 - [Prompt Management Overview](/docs/prompt-management/overview) - Learn about Langfuse prompt management
 - [Public API](/docs/api-and-data-platform/features/public-api) - REST API for programmatic access
+- [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) - Use Langfuse features from your coding agent
