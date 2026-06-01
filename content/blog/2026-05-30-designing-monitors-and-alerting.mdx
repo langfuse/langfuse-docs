@@ -1,6 +1,6 @@
 ---
-title: "Designing monitors at 10,000-per-region: what we got wrong on the whiteboard"
-description: "Seven non-obvious design decisions from building Monitors & Alerting in Langfuse — batching by query shape, slot-spread scheduling, cadence-from-window, publish-before-commit, and more."
+title: "Designing monitors at 10,000 per region"
+description: "How we designed Langfuse Monitors & Alerting around query-shape batching, load-shaped scheduling, explicit alert state, and at-least-once delivery."
 tag: engineering
 date: 2026/05/30
 author: "Max"
@@ -9,17 +9,39 @@ author: "Max"
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="Designing monitors at 10,000-per-region: what we got wrong on the whiteboard"
-  description="Seven non-obvious design decisions from building Monitors & Alerting in Langfuse."
+  title="Designing monitors at 10,000 per region"
+  description="How we designed Langfuse Monitors & Alerting around query-shape batching, load-shaped scheduling, explicit alert state, and at-least-once delivery."
   authors={["maxdeichmann"]}
   date="May 30, 2026"
 />
 
-We're adding **Monitors** to Langfuse: scheduled point-in-time evaluations of a metric over a rolling window that emit alerts through Slack, webhooks, and GitHub Dispatch. The user-facing pitch is one sentence. The implementation was not.
+We are adding **Monitors** to Langfuse: scheduled evaluations of a metric over a rolling window that emit alerts through Slack, webhooks, and GitHub Dispatch.
 
-What follows is the design we landed on, with emphasis on the parts where our first instinct turned out to be wrong.
+The product concept is simple. A user defines a metric, a time window, a threshold, and a destination. Langfuse evaluates the metric on a cadence and sends an alert when the state changes.
 
-## The brief
+The implementation is less simple because monitors combine three systems that usually want different shapes:
+
+- The query engine wants fewer ClickHouse queries.
+- The scheduler wants predictable work per second.
+- The alerting layer wants conservative side effects when state is ambiguous.
+
+The design below is the one we landed on for v1.
+
+## Monitors look simple until the workload has shape
+
+The target envelope for v1 is large enough that the naive design fails before any individual query is difficult.
+
+| Concern                                          | v1 target                                |
+| ------------------------------------------------ | ---------------------------------------- |
+| Monitors per region                              | 10,000                                   |
+| ClickHouse QPS                                   | ~167 in the worst case                   |
+| Postgres QPS                                     | ~337 from scheduler and queue processors |
+| Events per second                                | ~334 monitor and alert events            |
+| p99 latency from evaluation tick to notification | < 5 minutes                              |
+
+The ClickHouse number assumes the worst case: every monitor has a sub-daily window and evaluates every minute. Daily and weekly windows contribute much less.
+
+The obvious implementation schedules one job per monitor and runs one ClickHouse query per job. That optimizes for the mental model of a single monitor. The production design has to optimize for shared query shapes, deterministic ticks, explicit state transitions, and failure modes.
 
 ```mermaid
 flowchart LR
@@ -32,89 +54,123 @@ flowchart LR
   W --> A[Slack / Webhook / GH Dispatch]
 ```
 
-Target envelope for v1: **10,000 monitors per region**, **p99 < 5 minutes** from evaluation tick to notification, **~167 ClickHouse QPS** at worst case. The worst case assumes every monitor is on the 1-minute cadence tier; daily and weekly tiers contribute trivially.
+## The unit of work is the query shape
 
-That envelope is what forced most of the design decisions below.
+If we run one ClickHouse query per monitor per cadence tick, 10,000 monitors on a 1-minute cadence means 10,000 queries per minute. ClickHouse can absorb a lot, but the cost model says this becomes expensive before the feature becomes interesting.
 
-## Surprise 1: the unit of work is the query shape, not the monitor
+The useful unit is not the monitor. It is the query shape.
 
-The naive scheduler runs one ClickHouse query per monitor per cadence tick. 10k monitors on a 1-minute cadence is 10k queries per minute. ClickHouse is fine with that until it isn't, and the cost model says "isn't" arrives faster than you'd think.
-
-The insight: **the only thing that varies between two monitors with the same `(projectId, view, filters, window)` is which aggregation they want from the same underlying data**. Aggregations are cheap to run side-by-side in one query. So we shard work by query shape, not by monitor.
+Two monitors with the same `(projectId, view, filters, window)` read the same underlying rows. They may want different aggregations, such as p95 latency, average latency, or error count, but those aggregations can run side by side in one query.
 
 ```ts
-schedulerBatchId = xxhash(projectId | view | sortedCanonicalize(filters) | window)
+schedulerBatchId = xxhash(projectId | view | sortedCanonicalize(filters) | window);
 ```
 
-Notes that aren't obvious:
+The important details are:
 
-- `filters` is canonicalized (sorted) before hashing so `[A,B]` and `[B,A]` hash to the same batch. We do this server-side, not client-side, because clients lie.
-- `metric` is **not** in the hash. Two monitors on the same view with different aggregations (p95 latency vs. avg latency) share a batch and a CH query — the worker fans the resulting columns out to N monitors after the fact.
-- This collapses workload from "monitors × cadence" to roughly "distinct query shapes × cadence". For multi-tenant deployments with templated monitors, the compression is large.
+- `filters` are canonicalized before hashing so `[A, B]` and `[B, A]` land in the same batch.
+- Canonicalization happens server-side because clients should not be trusted to preserve batching invariants.
+- `metric` is not part of the hash because multiple aggregations can share one ClickHouse query.
+
+This changes the workload from "monitors x cadence" to "distinct query shapes x cadence."
 
 ```mermaid
 flowchart TB
-  M1[Monitor A - p95 latency] --> B[schedulerBatchId = xxhash project,view,filters,window]
-  M2[Monitor B - avg latency] --> B
-  M3[Monitor C - count errors] --> B
-  B --> Q1[One CH query: SELECT p95, avg, count ...]
+  M1[Monitor A: p95 latency] --> B[schedulerBatchId = xxhash project, view, filters, window]
+  M2[Monitor B: avg latency] --> B
+  M3[Monitor C: count errors] --> B
+  B --> Q1[One CH query: SELECT p95, avg, count]
   Q1 --> F[Fan-out to 3 severity evaluations]
 ```
 
-## Surprise 2: the scheduler ticks every second, not every minute
+This is especially useful for templated monitors. If many projects use the same monitor patterns across environments or services, the scheduler still evaluates by query shape instead of treating each monitor as isolated work.
 
-If 10k monitors all wake up at `:00`, you get a cliff: ClickHouse sees a thousand queries land in the same second and then idle for 59. Bad p99, bad capacity planning.
+## The scheduler shapes load before ClickHouse sees it
 
-So we spread the load by deriving each batch's second-of-minute slot deterministically from `schedulerBatchId`:
+Batching reduces the number of queries. It does not solve burstiness.
+
+If every monitor wakes up on the minute boundary, ClickHouse sees a cliff at `:00` and then idle time for the rest of the minute. That is bad for p99 latency and bad for capacity planning.
+
+### Batches are spread across every second
+
+The scheduler ticks every second. Each batch gets a deterministic second-of-minute slot derived from `schedulerBatchId`.
 
 ```ts
 const offsetMs = Number(schedulerBatchId % 60n) * 1_000;
 return new Date(nextMinuteMs - offsetMs);
 ```
 
-The scheduler ticks every second and only picks up batches whose slot matches. Same code path handles every cadence (1 min, 30 min, 48 h) — slow tiers just don't show up at most ticks.
+On each tick, the scheduler only publishes due batches whose slot matches the current second.
 
 ```mermaid
 flowchart LR
   subgraph T[60-second cycle]
     direction LR
-    S0[0s - slot 0] --> S1[1s - slot 1] --> S2[2s - slot 2] --> Sdots[...] --> S59[59s - slot 59]
+    S0[0s: slot 0] --> S1[1s: slot 1] --> S2[2s: slot 2] --> Sdots[...] --> S59[59s: slot 59]
   end
-  S0 -->|batches with id%60==0| CH[(ClickHouse)]
-  S1 -->|batches with id%60==1| CH
-  S59 -->|batches with id%60==59| CH
+  S0 -->|batches with id % 60 == 0| CH[(ClickHouse)]
+  S1 -->|batches with id % 60 == 1| CH
+  S59 -->|batches with id % 60 == 59| CH
 ```
 
-A nice property falls out: monitors created at different timestamps but sharing a `schedulerBatchId` **converge onto the same slot after one cadence advance**. Add a monitor at 14:23:17, its first run is within the next minute, and after that it's locked into the slot of its query shape. No drift.
+Monitors created at different timestamps but sharing a `schedulerBatchId` converge onto the same slot after one cadence advance. A monitor created at `14:23:17` runs within the next minute, then locks into the slot for its query shape.
 
-## Surprise 3: cadence is derived from window, not user-configurable
+### Cadence is derived from the window
 
-We started with cadence and window as independent fields, the way Datadog and most others do it. We took it out.
+We started with `window` and `cadence` as independent fields. That matches how many monitoring systems expose alert configuration, but it also lets users create workloads like "evaluate a 2-month rolling window every minute."
+
+That query is expensive and usually not useful. The window dominates the cadence by orders of magnitude.
+
+For v1, we removed custom cadence and derive it from the window:
 
 ```ts
 function monitorWindowCadenceMs(windowMs: bigint): bigint {
-  if (windowMs >= 7n * DAY) return 48n * HOUR;   // weekly+   → twice daily
-  if (windowMs >= 1n * DAY) return 30n * MINUTE; // daily     → every 30 min
-  return 1n * MINUTE;                            // hourly-   → every minute
+  if (windowMs >= 7n * DAY) return 48n * HOUR; // weekly+ -> twice daily
+  if (windowMs >= 1n * DAY) return 30n * MINUTE; // daily -> every 30 min
+  return 1n * MINUTE; // hourly- -> every minute
 }
 ```
 
-The reason is operational: independent fields let users create "rolling 2-month window, evaluated every 1 minute." That's a 60 GB query per minute per project that does nothing useful — the window dominates the cadence by four orders of magnitude. We were going to write a guardrail. Instead we removed the field.
+This removes a configuration option because the product does not need the operational footgun yet. If we find users who need a 24-hour window evaluated every 5 minutes, we can reintroduce custom cadence behind a guardrail.
 
-The trade-off: someone with a real reason to evaluate a 24-hour window every 5 minutes can't. We're betting that population is empty, and we'll re-introduce the option behind a feature flag if it isn't.
+`cadence` is still denormalized into a Postgres column on every write. It is a pure function of `window`, but the scheduler's hot query can advance `next_run_at + cadence` directly instead of evaluating a `CASE` expression per row.
 
-`cadence` is then denormalized into a Postgres column on every write, even though it's a pure function of `window`. This is so the scheduler's hot tick query can do `next_run_at + cadence` directly instead of paying for a `CASE` expression per row.
+## The alert state machine owns notification semantics
 
-## Surprise 4: cold-start is its own severity
+The queue processor does not send an alert just because a query returns a value above a threshold. It computes a candidate severity, compares it with prior state, and lets the state machine decide whether a side effect is allowed.
 
-We assumed three states: `OK`, `WARNING`, `ALERT`. Add `NO_DATA` for the obvious case. Done.
+That distinction matters because alerting is where ambiguity becomes user-visible.
 
-Then we hit the first-evaluation case. A monitor has just been created. The first tick fires. ClickHouse returns no rows. What do we emit?
+### Every evaluation produces a candidate severity
 
-- If we treat first-eval-no-data as `NO_DATA → NOTIFY`, every newly-created monitor pages the on-call before it's even configured.
-- If we treat it as `OK`, you can't distinguish "never evaluated" from "evaluated and healthy" in the UI.
+Each batch job runs one ClickHouse query, maps the returned columns back to monitors, and computes a candidate severity for each monitor:
 
-The fix is a fifth severity: `UNKNOWN`, which is the default at row insert and never emits to a channel. The state machine has a hard rule that `UNKNOWN → NO_DATA` is **silent regardless of `noData.mode`** — without prior state, "first eval found nothing" looks identical to "lost data," and you can't page on that ambiguity.
+- `OK` means the metric is inside threshold.
+- `WARNING` means the metric crossed the warning threshold.
+- `ALERT` means the metric crossed the alert threshold.
+- `NO_DATA` means the query returned no usable value.
+
+This candidate severity is not enough to notify. The previous state decides whether the transition matters.
+
+### `UNKNOWN` prevents false certainty
+
+The first evaluation is the ambiguous case.
+
+A monitor has just been created. The first tick fires. ClickHouse returns no rows. This could mean the filter is too narrow, the data source is quiet, the monitor is misconfigured, or the monitored system stopped sending data. Without prior state, those cases are indistinguishable.
+
+Treating that first result as `NO_DATA` would page users for newly created monitors. Treating it as `OK` would tell the UI that the monitor evaluated and was healthy.
+
+So new monitors start as `UNKNOWN`. It means "not yet evaluated into a trustworthy state."
+
+The state machine has one hard rule: `UNKNOWN -> NO_DATA` is silent regardless of `noData.mode`. First-evaluation no-data is not enough evidence to page.
+
+`UNKNOWN -> WARNING` and `UNKNOWN -> ALERT` still emit. A threshold violation on the first evaluation is actionable.
+
+`PAUSED -> UNKNOWN` applies the same logic when a monitor is re-enabled. We do not want a stale pre-pause severity to produce a recovery notification after the underlying data changed while the monitor was off.
+
+### Transitions, not severities, send alerts
+
+The current severity alone does not decide notification. The transition does.
 
 ```mermaid
 stateDiagram-v2
@@ -122,24 +178,26 @@ stateDiagram-v2
   UNKNOWN --> OK: silent
   UNKNOWN --> WARNING: emit
   UNKNOWN --> ALERT: emit
-  UNKNOWN --> NO_DATA: silent (always)
-  NO_DATA --> OK: emit (if NOTIFY)
+  UNKNOWN --> NO_DATA: silent always
+  NO_DATA --> OK: emit if NOTIFY
   NO_DATA --> WARNING: emit
   NO_DATA --> ALERT: emit
   OK --> WARNING: emit
   OK --> ALERT: emit
-  WARNING --> ALERT: emit (escalate)
-  ALERT --> WARNING: emit (de-escalate)
-  WARNING --> OK: emit (recover)
-  ALERT --> OK: emit (recover)
-  PAUSED --> UNKNOWN: silent (re-enable cold-starts)
+  WARNING --> ALERT: emit escalation
+  ALERT --> WARNING: emit de-escalation
+  WARNING --> OK: emit recovery
+  ALERT --> OK: emit recovery
+  PAUSED --> UNKNOWN: silent re-enable
 ```
 
-`PAUSED → UNKNOWN` on re-enable forces a cold-start. Without that step, re-enabling a paused monitor whose underlying data has drifted away would emit a recovery alert from stale state. We'd rather suppress one alert than emit a wrong one.
+An `ALERT` severity is not enough to send another alert. `OK -> ALERT` emits. `WARNING -> ALERT` emits an escalation. `ALERT -> ALERT` stays silent unless `renotify` is enabled for that monitor.
 
-## Surprise 5: publish to the queue *before* committing the transaction
+This keeps the monitor edge-triggered by default while still allowing periodic reminders for teams that want them.
 
-The worker's order of operations looks like this:
+### When the state machine emits, delivery is at least once
+
+Once the state machine decides a transition should emit, the worker publishes the alert to `WebhookQueue` before committing the Postgres transaction.
 
 ```mermaid
 sequenceDiagram
@@ -155,88 +213,95 @@ sequenceDiagram
   end
   W->>PG: BEGIN tx
   W->>PG: SELECT monitors FOR UPDATE SKIP LOCKED
-  W->>W: compute severity, render templates
+  W->>W: compute transition and render templates
   W->>Q: publish MonitorAlert(s)
-  W->>PG: bulk UPDATE severity, alertedAt
+  W->>PG: bulk UPDATE severity and alertedAt
   W->>PG: COMMIT
   W->>W: release RedisLock
 ```
 
-The unusual choice is line 9: we publish the alert to `WebhookQueue` **before** the Postgres commit. The conventional order is commit-then-publish: emit the side-effect only after the durable state change succeeds.
+The conventional order is commit, then publish. We inverted it because the failure modes are not equivalent.
 
-We inverted it on purpose. The failure modes are:
+| Order                | Failure mode                                                                    | Outcome                                                       |
+| -------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Publish, then commit | The alert leaves, but Postgres does not record the new severity or `alertedAt`. | A duplicate alert can happen on a later tick.                 |
+| Commit, then publish | Postgres records the alert, but the queue publish fails.                        | The alert is lost because later ticks think it already fired. |
 
-- **Publish, then commit fails:** the alert fires, but `alertedAt` and `severity` don't update. The next tick recomputes severity, sees it's already at `ALERT`, and (without renotify) stays quiet. Net effect: one extra alert. Sometimes two.
-- **Commit, then publish fails:** state thinks it alerted. Next tick stays quiet. The alert is **lost forever**.
+For monitoring, duplicate alerts are cheaper than lost alerts.
 
-For monitoring, "at least once" beats "at most once" every time. A pager that fires twice for the same incident is a paper cut. A pager that doesn't fire is the reason you bought a pager.
+The Redis lock is acquired before any ClickHouse or Postgres work, not just before the final write. Holding a Postgres row lock while waiting on a multi-second ClickHouse query would tie up database resources on analytical latency. The Redis lock gives us cheap per-batch mutual exclusion before the expensive work starts, and the in-transaction row lock becomes a final consistency backstop.
 
-This also explains the Redis lock. It's acquired **before any ClickHouse or Postgres call**, not just before the write. If we'd held a Postgres row lock through the multi-second ClickHouse query, we'd be blocking PG connection-pool slots on CH latency. Cheap lock first, expensive query inside, transactional state update at the very end.
+### Routing happens after the state machine
 
-## Surprise 6: monitors aren't a new entity in the alerting graph
+The state machine decides whether a monitor event exists. It does not decide where the event goes.
 
-The instinct was to model Monitors → Alerts → Channels with new tables for each edge. The existing system already has `Trigger → Automation → Action` for prompt-change notifications. We extended it instead of duplicating it.
+Langfuse already has `Trigger -> Automation -> Action` for prompt-change notifications. Monitors extend that graph with a new `eventSource: "monitor"` instead of creating a parallel alerting system.
 
 ```mermaid
 flowchart LR
-  M[Monitor evaluation] --> E[Event - eventSource: monitor]
-  E --> T[Trigger - filters by severity, tags, monitorId]
-  T --> AU[Automation - 1:1:1]
-  AU --> AC[Action - Slack / Webhook / GH]
+  M[Monitor evaluation] --> E[Event: eventSource = monitor]
+  E --> T[Trigger: filters by severity, tags, monitorId]
+  T --> AU[Automation: 1:1:1]
+  AU --> AC[Action: Slack / Webhook / GH]
 ```
 
-`Trigger` gets a new `eventSource: "monitor"` value and a discriminated-union of filter columns. That's it. We then inherit:
+This means monitor alerts inherit existing routing behavior:
 
-- **Per-channel routing** (Slack channel A for `severity:ALERT`, channel B for `tag:env:prod`).
-- **Auto-disable-on-4-failures** (already implemented for prompt webhooks; a 404 webhook disables one Automation, not the underlying Monitor).
-- **1:1:1 Trigger / Automation / Action enforcement**, mirrored from the prompt path.
+- Severity filters can send `ALERT` events to one channel and `WARNING` events to another.
+- Tag filters can route `env:prod` separately from `env:dev`.
+- Failed destinations can auto-disable one Automation without disabling the underlying Monitor.
 
-Triggers are matched in-process via `InMemoryFilterService` inside the worker, rather than at the queue routing layer. The alternative — emitting onto an `EntityChangeQueue` that the trigger system already consumes — was explicitly skipped to cut latency and to avoid retrofitting that pipeline for monitor-specific filter columns.
+We reuse the routing model, not every existing hop. The worker matches monitor triggers in-process with `InMemoryFilterService` and publishes directly to `WebhookQueue`. Sending monitor events through the existing `EntityChangeQueue` would add latency and require that pipeline to understand monitor-specific filter columns.
 
-## Surprise 7: the failure policy splits on cadence, not on error type
+## Retry policy depends on cadence
 
-BullMQ retry defaults are `attempts: 6, exponential backoff (5 min)`. That's right for the daily and weekly tiers. It's wrong for the 1-minute tier:
+BullMQ's default retry policy is appropriate for long-cadence work: `attempts: 6` with exponential backoff. It is not appropriate for 1-minute monitors.
 
-- A 1-min-cadence job that throws and gets retried in 5 minutes is racing the next 4 ticks that would have produced the same job. By the time the retry runs, the data is stale and the scheduler is already past it.
+A failed 1-minute job retried 5 minutes later is stale. Four newer scheduler ticks have already had the chance to publish the same batch with fresher data.
 
-So we wrap the worker:
+So the worker treats failures differently by cadence:
 
-```
-if (job throws) and (window is 1-min cadence):
-  ACK the job, log, do nothing
-  the scheduler will re-publish naturally on next tick
+```txt
+if job throws and window resolves to 1-minute cadence:
+  ACK the job, log the failure, and wait for the next scheduler tick
 else:
-  re-throw → BullMQ retries with backoff
+  rethrow and let BullMQ retry with backoff
 ```
 
-The scheduler picks the fast-cadence retry back up "for free" via the 5-minute TTL on `last_published_run_at`. Long-cadence jobs aren't getting another bite for hours, so BullMQ's retry actually means something.
+For fast cadence monitors, the scheduler is the retry mechanism. For daily and weekly monitors, BullMQ retries matter because the next natural evaluation is hours away.
 
-Deadlettering anything at all points to a systemic problem and pages us via Datadog. It's not a routine failure mode.
+Deadlettering a monitor job is not a routine failure path. It points to a systemic problem and should page us through Datadog.
 
-## What we deferred
+## What we deliberately did not build in v1
 
-These are interesting and we're not doing them yet:
+We scoped v1 around scalar threshold monitors because that covers the main alerting use case without introducing an expression language or per-dimension state.
 
-- **Dimension rollup** (one monitor evaluating across `env`, `model`, `region` and alerting per cell). Complicates batch execution and severity diffing in non-trivial ways. v1 forces "one monitor per dimension value."
-- **Anomaly / % change thresholds.** Requires an expression language and historical state. Threshold-only for v1.
-- **Compound conditions** (AND/OR across metrics). Same expression-language problem.
-- **Region-wide batching.** We batch within a project. Cross-project batching multiplies the blast radius of a slow query and complicates tenant isolation.
-- **Project-wide batching** (UNION ALL across query shapes for one project). High-priority follow-up; the savings depend on how much filter-shape overlap real customer monitors have. Needs measurement.
+| Deferred                             | Why not v1                                                                                                  | What would make us revisit it                                                |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Dimension rollup                     | One monitor evaluating across `env`, `model`, or `region` complicates batch execution and severity diffing. | Customers create many near-identical monitors by dimension.                  |
+| Anomaly or percent-change thresholds | These need historical state and expression semantics.                                                       | Static thresholds prove insufficient for common production use cases.        |
+| Compound conditions                  | `AND` and `OR` across metrics need the same expression-language work.                                       | Users need incident definitions that combine multiple metrics.               |
+| Region-wide batching                 | Cross-project batching increases blast radius and complicates tenant isolation.                             | Query-shape overlap is high enough to justify the isolation trade-off.       |
+| Project-wide batching                | `UNION ALL` across query shapes looks promising, but the savings depend on real monitor shape overlap.      | Production usage shows enough repeated filters and windows within a project. |
 
-## What the numbers look like
+The most likely follow-up is project-wide batching. It has a clear optimization path, but it needs measurement from real monitor configurations before we add the complexity.
 
-| Concern | v1 target |
-| --- | --- |
-| Monitors per region | 10,000 |
-| ClickHouse QPS | ~167 (worst case, all 1-min cadence) |
-| Postgres QPS | ~337 (scheduler + queue processors) |
-| Events per second | ~334 (monitor event + alert) |
-| p99 latency (tick → notification) | < 5 minutes |
+## What the numbers mean
 
-The 167 CH QPS figure assumes zero batching benefit (every monitor is its own query shape). Real-world batching from shared filter shapes should pull this down materially, but the design holds even if it doesn't.
+The design holds under the pessimistic case where every monitor has a unique query shape:
 
-## The bigger lesson
+| Concern                                          | v1 target                                |
+| ------------------------------------------------ | ---------------------------------------- |
+| Monitors per region                              | 10,000                                   |
+| ClickHouse QPS                                   | ~167 worst case                          |
+| Postgres QPS                                     | ~337 from scheduler and queue processors |
+| Events per second                                | ~334 monitor and alert events            |
+| p99 latency from evaluation tick to notification | < 5 minutes                              |
 
-Most of the surprises share a shape: the obvious design optimizes for a single monitor and breaks at population scale. The fixes — batching by query shape, slot-spread scheduling, cadence-from-window, redis-lock-before-PG — all push complexity off the per-monitor path and onto the per-batch or per-tick path, where there's room for it.
+Real workloads should be better than this because shared filter shapes collapse multiple monitors into one ClickHouse query. The design does not depend on that compression to stay within the envelope.
 
-The state machine and the publish-before-commit choice are different. Those are admissions that monitoring is a domain where the cheap failure mode is "alert too much" and the expensive one is "miss the page." Whenever we had to pick, we picked the cheap one.
+## The design principle
+
+The obvious design optimizes for individual monitors. The production design optimizes for shared query shapes, deterministic ticks, explicit transitions, and at-least-once side effects.
+
+On the execution side, we push complexity from monitors into batches. On the alerting side, we push ambiguity into an explicit state machine before any notification leaves the system.
