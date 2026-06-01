@@ -32,6 +32,7 @@ import {
 import { TrustedBy } from "../components/TrustedBy";
 import { trustedByData } from "@/data/trusted-by";
 import Image from "next/image";
+import { isCloudAppHref } from "@/lib/google-ads";
 
 // Reusable graduated pricing text with calculator link
 const GraduatedPricingText = () => {
@@ -1463,6 +1464,9 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                       variant={tier.featured ? "primary" : "secondary"}
                       size="default"
                       href={tier.href}
+                      {...(isCloudAppHref(tier.href)
+                        ? { "data-launch-app-cta": "" }
+                        : {})}
                       wrapperClassName="flex-1"
                       className={cn(
                         "justify-center!",
@@ -1487,6 +1491,9 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     variant={tier.featured ? "primary" : "secondary"}
                     size="default"
                     href={tier.href}
+                    {...(isCloudAppHref(tier.href)
+                      ? { "data-launch-app-cta": "" }
+                      : {})}
                     className={cn(
                       "justify-center!",
                       !tier.featured &&
