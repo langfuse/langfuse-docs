@@ -5,37 +5,23 @@ import Script from "next/script";
 import {
   GOOGLE_ADS_CONVERSIONS,
   GOOGLE_ADS_ID,
+  LAUNCH_APP_CTA_SELECTOR,
   reportGoogleAdsConversion,
 } from "@/lib/google-ads";
 
-// Matches the Langfuse cloud app on any region subdomain, e.g.
-// cloud.langfuse.com, us.cloud.langfuse.com, hipaa.cloud.langfuse.com.
-const CLOUD_APP_HOST = /(^|\.)cloud\.langfuse\.com$/i;
-
-function isCloudAppHref(href: string): boolean {
-  try {
-    const url = new URL(href, window.location.origin);
-    if (url.origin === window.location.origin) {
-      return url.pathname === "/cloud" || url.pathname.startsWith("/cloud/");
-    }
-    return CLOUD_APP_HOST.test(url.hostname);
-  } catch {
-    return false;
-  }
-}
-
 // Loads the Google Ads global site tag and reports the "launch app" conversion
-// (sign ups / sign ins) whenever a user clicks any CTA that navigates to the
-// Langfuse cloud app. A delegated listener keeps this working for every current
-// and future cloud CTA without touching each button.
+// (sign ups / sign ins) whenever a user clicks a CTA that navigates to the
+// Langfuse cloud app. CTAs opt in via the `data-launch-app-cta` attribute, so
+// incidental cloud.langfuse.com links (e.g. in docs/blog content) are not
+// counted as conversions. A delegated listener keeps this working for every
+// marked CTA without touching each button.
 export function GoogleAds() {
   useEffect(() => {
     // Capture phase runs before button onClick handlers, so CTAs that
     // preventDefault to navigate programmatically are still tracked.
     const handler = (event: MouseEvent) => {
-      const anchor = (event.target as Element | null)?.closest("a[href]");
-      const href = anchor?.getAttribute("href");
-      if (!href || !isCloudAppHref(href)) return;
+      const target = event.target as Element | null;
+      if (!target?.closest(LAUNCH_APP_CTA_SELECTOR)) return;
       reportGoogleAdsConversion(GOOGLE_ADS_CONVERSIONS.launchApp, {
         value: 1.0,
         currency: "USD",

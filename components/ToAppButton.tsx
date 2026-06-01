@@ -105,6 +105,7 @@ function NavigatingButton({ href, label }: { href: string; label: string }) {
       }
       iconPosition="end"
       href={href}
+      data-launch-app-cta=""
       onClick={(e) => {
         e.preventDefault();
         navigate();
@@ -167,7 +168,9 @@ function MultiRegionButton({
           return (
             signedInRegions[key] && (
               <DropdownMenuItem asChild key={key}>
-                <Link href={region.url}>{region.label}</Link>
+                <Link href={region.url} data-launch-app-cta="">
+                  {region.label}
+                </Link>
               </DropdownMenuItem>
             )
           );
