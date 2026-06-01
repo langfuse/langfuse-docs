@@ -158,6 +158,7 @@ export default function CloudRegionSelectorPage() {
                 <a
                   key={regionKey}
                   href={href}
+                  data-launch-app-cta=""
                   onClick={(event) => handleRegionSelect(regionKey, event)}
                   className="group flex items-center gap-4 px-4 py-4 transition-colors hover:bg-surface-1 sm:px-5"
                 >

@@ -18,6 +18,7 @@ import {
   type CloudRegionKey,
 } from "@/lib/cloud-regions";
 import { useCloudRegionSignIn } from "@/lib/use-cloud-region-sign-in";
+import { isCloudAppHref } from "@/lib/google-ads";
 
 function isEditableElement(el: Element | null): boolean {
   if (!el) return false;
@@ -105,6 +106,7 @@ function NavigatingButton({ href, label }: { href: string; label: string }) {
       }
       iconPosition="end"
       href={href}
+      {...(isCloudAppHref(href) ? { "data-launch-app-cta": "" } : {})}
       onClick={(e) => {
         e.preventDefault();
         navigate();
@@ -167,7 +169,9 @@ function MultiRegionButton({
           return (
             signedInRegions[key] && (
               <DropdownMenuItem asChild key={key}>
-                <Link href={region.url}>{region.label}</Link>
+                <Link href={region.url} data-launch-app-cta="">
+                  {region.label}
+                </Link>
               </DropdownMenuItem>
             )
           );

@@ -28,6 +28,10 @@ import {
   FORM_FIELDS,
   type ContactFormData,
 } from "@/lib/contact-sales-form";
+import {
+  GOOGLE_ADS_CONVERSIONS,
+  reportGoogleAdsConversion,
+} from "@/lib/google-ads";
 
 export function ContactSalesForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,6 +77,7 @@ export function ContactSalesForm() {
       }
 
       setIsSuccess(true);
+      reportGoogleAdsConversion(GOOGLE_ADS_CONVERSIONS.talkToUsFormSubmit);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
