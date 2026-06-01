@@ -54,7 +54,7 @@ exa = Exa(api_key= os.environ["EXA_API_KEY"])
 langfuse = get_client()
 ```
 
-## Example 1: Trace Exa `search_and_contents`
+## Example 1: Trace Exa `search`
 
 To monitor your Exa search operations, we use the [Langfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators). In this example, the `@observe()` decorator captures the inputs, outputs, and execution time of the `search_with_exa()` function. For more control over the data you are sending to Langfuse, you can use the [Context Manager or create manual observations](https://langfuse.com/docs/observability/sdk/python/instrumentation#custom-instrumentation) using the Python SDK.
 
@@ -64,10 +64,9 @@ from langfuse import observe
 @observe(as_type="retriever")
 def search_with_exa(query: str, num_results: int = 5):
     """Search the web using Exa AI and return results."""
-    results = exa.search_and_contents(
+    results = exa.search(
         query,
-        num_results=num_results,
-        text=True
+        num_results=num_results
     )
     return results
 
@@ -78,7 +77,7 @@ search_results = search_with_exa("What is Langfuse and how does it help with LLM
 for result in search_results.results:
     print(f"Title: {result.title}")
     print(f"URL: {result.url}")
-    print(f"Text: {result.text[:200]}...\n")
+    print()
 ```
 
 ## Example 2: Exa Search together with OpenAI
@@ -92,21 +91,23 @@ from langfuse.openai import OpenAI
 @observe()
 def search_and_summarize(query: str):
 
-    # 1. Exa search
+    # 1. Exa search with highlights
     @observe(as_type="retriever")
     def search_with_exa(query: str, num_results: int = 5):
-        """Search the web using Exa AI and return results."""
+        """Search the web using Exa AI and return results with highlights."""
         results = exa.search_and_contents(
             query,
             num_results=num_results,
-            text=True
+            highlights=True
         )
         return results
 
     results = search_with_exa(query)
 
-    # 2. Build a short context
-    context = "\n".join([f"{r.title} ({r.url}): {r.text}" for r in results.results])
+    # 2. Build context from search results
+    context = "\n".join([
+        f"{r.title}: {' '.join(r.highlights)}" for r in results.results
+    ])
 
     # 3. Summarize with OpenAI
     client = OpenAI()
