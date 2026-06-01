@@ -16,13 +16,12 @@ export const LAUNCH_APP_CTA_SELECTOR = `[${LAUNCH_APP_CTA_ATTR}]`;
 // cloud.langfuse.com, us.cloud.langfuse.com, hipaa.cloud.langfuse.com.
 const CLOUD_APP_HOST = /(^|\.)cloud\.langfuse\.com$/i;
 
-// Returns true if the href points to the cloud app, either via the internal
-// `/cloud` route or an external region URL. SSR-safe (does not read `window`),
-// so it can be used at render time to decide whether to mark a CTA.
+// Returns true only if the href points directly to a `*.cloud.langfuse.com`
+// region URL. The internal `/cloud` region-selector route is intentionally not
+// matched, so conversions count actual navigations into the app (sign up / sign
+// in) rather than visits to the region picker. SSR-safe (does not read
+// `window`), so it can be used at render time to decide whether to mark a CTA.
 export function isCloudAppHref(href: string): boolean {
-  if (href.startsWith("/")) {
-    return href === "/cloud" || href.startsWith("/cloud/");
-  }
   try {
     return CLOUD_APP_HOST.test(new URL(href).hostname);
   } catch {

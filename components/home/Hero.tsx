@@ -70,7 +70,6 @@ export function Hero() {
               size="default"
               shortcutKey="s"
               href="/cloud"
-              data-launch-app-cta=""
             >
               Start free
             </Button>
