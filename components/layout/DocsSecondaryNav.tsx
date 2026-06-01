@@ -1,6 +1,13 @@
 "use client";
 
-import { Menu, X, ChevronRight, GraduationCap, Unplug } from "lucide-react";
+import {
+  Menu,
+  X,
+  ChevronRight,
+  GraduationCap,
+  Presentation,
+  Unplug,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -17,6 +24,7 @@ const SECTIONS = [
   { title: "Self Hosting", path: "/self-hosting", Icon: IconDesktopTower },
   { title: "Guides", path: "/guides", Icon: IconCompass },
   { title: "Academy", path: "/academy", Icon: GraduationCap },
+  { title: "Workshop", path: "/workshop", Icon: Presentation },
   { title: "AI Engineering Library", path: "/library", Icon: IconBookBookmark },
 ] as const;
 

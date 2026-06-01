@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type {
   InkeepAIChatSettings,
   InkeepSearchSettings,
@@ -31,12 +32,22 @@ type InkeepSharedSettings = {
   modalSettings: InkeepModalSettings;
 };
 
-const useInkeepSettings = (): InkeepSharedSettings => {
+const useInkeepSettings = (): InkeepSharedSettings | null => {
   const { resolvedTheme } = useTheme();
   const posthog = usePostHog();
 
+  useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_INKEEP_API_KEY) {
+      console.warn("Inkeep API key is missing.");
+    }
+  }, []);
+
+  if (!process.env.NEXT_PUBLIC_INKEEP_API_KEY) {
+    return null;
+  }
+
   const baseSettings: InkeepBaseSettings = {
-    apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY! || "",
+    apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY,
     primaryBrandColor: "#E11312",
     organizationDisplayName: "Langfuse",
     colorMode: {
