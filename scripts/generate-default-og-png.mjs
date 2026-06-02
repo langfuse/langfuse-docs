@@ -26,7 +26,7 @@ const ogBgDataUri = `data:image/png;base64,${fs
   .readFileSync(ogBgPath)
   .toString("base64")}`;
 
-const title = "Langfuse \u2013 Open Source LLM Engineering Platform";
+const title = "Langfuse \u2013 Open Source AI Engineering Platform";
 const description =
   "Traces, evals, prompt management and metrics to debug and improve your LLM application.";
 
