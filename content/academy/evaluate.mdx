@@ -1,7 +1,7 @@
 ---
 title: Evaluation
 sidebarTitle: Evaluation
-description: How to judge whether experiment outputs are good, using manual review, code-based checks, and LLM-as-a-judge evaluators.
+description: How to judge whether experiment outputs are good, using manual review, code evaluator checks, and LLM-as-a-judge evaluators.
 ---
 
 # Evaluation
@@ -42,18 +42,18 @@ This is an important process, reading outputs builds an understanding of what yo
 
 Manual evaluation also produces human labels that serve as ground truth for validating automated evaluators later.
 
-### Code-based evaluation
+### Code evaluators
 
-Code-based evaluators check properties that can be verified with deterministic logic. They are fast, cheap, and produce the same result every time.
+[Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) check properties that can be verified with deterministic logic. In Langfuse, they are UI-authored Python or TypeScript evaluators that run on observations or experiments, not trace-level targets. They are fast, cheap, and produce the same result every time.
 
-Some example checks where code-based evaluators are a natural fit:
+Some example checks where code evaluators are a natural fit:
 
 - The output is valid JSON or follows a required schema
 - The output contains (or does not contain) specific keywords or patterns
 - The output stays within a length limit
-- The generated SQL executes without errors
+- The generated SQL is syntactically valid
 
-Their limitation is that they cannot assess meaning. A code-based evaluator can check that an output contains the word "refund," but it cannot check whether the output correctly explains the refund policy.
+Their limitation is that they cannot assess meaning. A code evaluator can check that an output contains the word "refund," but it cannot check whether the output correctly explains the refund policy.
 
 ### LLM-as-a-judge
 
@@ -67,13 +67,13 @@ LLM judges are imperfect and easy to get wrong. This means:
 - They need calibration against human preferences to verify they are measuring what you think they are measuring
 - They can share blind spots with your application's LLM, especially when the same model family is used for both
 
-These limitations aren't reasons to avoid LLM judges. An LLM judge that has been calibrated against human labels and is backed by code-based checks is a reliable evaluator.
+These limitations aren't reasons to avoid LLM judges. An LLM judge that has been calibrated against human labels and is backed by code evaluator checks is a reliable evaluator.
 
 ## Reference-based vs reference-free evaluators [#reference-based-vs-reference-free]
 
-Both code-based and LLM-as-a-judge evaluators can be either reference-based or reference-free. A reference-based evaluator compares the output against a predefined expected output, like a correct answer or a golden response. A reference-free evaluator assesses the output on its own, without needing a ground truth to compare against.
+Both code evaluators and LLM-as-a-judge evaluators can be either reference-based or reference-free. A reference-based evaluator compares the output against a predefined expected output, like a correct answer or a golden response. A reference-free evaluator assesses the output on its own, without needing a ground truth to compare against.
 
-|                 | Code-based               | LLM-as-a-judge / manual                                     |
+|                 | Code evaluators          | LLM-as-a-judge / manual                                     |
 | --------------- | ------------------------ | ----------------------------------------------------------- |
 | Reference-based | Exact string match check | "Does the response correctly explain this specific policy?" |
 | Reference-free  | Validate JSON structure  | Tone-of-voice evaluation; language detection                |
@@ -111,7 +111,7 @@ _A SQL agent that converts natural-language questions into SQL against a company
 
 | Quality                            | Method         |
 | ---------------------------------- | -------------- |
-| Query executes against the schema  | Code-based     |
+| Query is syntactically valid       | Code evaluator |
 | Query answers the user's intent    | LLM-as-a-judge |
 | Calibration on a continuous sample | Manual review  |
 
@@ -131,11 +131,11 @@ _A tone-of-voice rewriter that takes draft marketing copy and rewrites it to mat
 
 _An invoice-processing tool that extracts structured fields (vendor, total, due date) from uploaded PDFs. The dataset has exact-match labels for each field._
 
-| Quality                               | Method                                          |
-| ------------------------------------- | ----------------------------------------------- |
-| Extracted JSON matches the schema     | Code-based                                      |
-| Each field matches the expected value | Code-based (exact match against dataset labels) |
-| Edge cases and new vendor formats     | Manual review (sample)                          |
+| Quality                               | Method                                              |
+| ------------------------------------- | --------------------------------------------------- |
+| Extracted JSON matches the schema     | Code evaluator                                      |
+| Each field matches the expected value | Code evaluator (exact match against dataset labels) |
+| Edge cases and new vendor formats     | Manual review (sample)                              |
 
 </Tab>
 </Tabs>

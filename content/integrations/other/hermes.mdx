@@ -20,7 +20,6 @@ The steps below follow Hermes' [official Langfuse plugin docs](https://hermes-ag
 <Steps>
 ## Step 1: Install Dependencies
 
-
 ```python
 %pip install git+https://github.com/NousResearch/hermes-agent.git langfuse -U
 ```
@@ -42,7 +41,6 @@ The plugin also accepts the standard SDK env vars (`LANGFUSE_PUBLIC_KEY`, `LANGF
 
 The cell below sets the same credentials inside this Python kernel so we can quickly verify them with the Langfuse SDK. **Note:** these `os.environ` values are scoped to the notebook process and will not be visible to a `hermes chat` command run in a separate terminal — use `~/.hermes/.env` for that.
 
-
 ```python
 import os
 
@@ -58,8 +56,6 @@ os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU reg
 ```
 
 With the environment variables set, initialize the Langfuse client to confirm your credentials work. Hermes uses its own internal client, so this step is purely a sanity check that your keys are valid.
-
-
 
 ```python
 from langfuse import get_client
@@ -84,7 +80,6 @@ The plugin hooks into Hermes lifecycle events (`pre_api_request` / `post_api_req
 - One tool observation per tool call
 
 Session grouping uses the Hermes session ID (or task ID for sub-agents), so every turn within a `hermes chat` session lives under one Langfuse session. The plugin is also **fail-open**: missing SDK, missing credentials, or a transient Langfuse error all turn into a silent no-op — the agent loop is never impacted.
-
 
 ```python
 # Enable the Langfuse plugin (run this in your terminal, not in a notebook)
@@ -113,7 +108,6 @@ With the plugin enabled and credentials set, every Hermes conversation turn is a
 
 You can start a conversation from the CLI:
 
-
 ```python
 # Send a one-off message (traces are sent automatically):
 # hermes chat -q "hello"
@@ -126,13 +120,13 @@ You can start a conversation from the CLI:
 
 The Hermes Langfuse plugin supports several optional environment variables:
 
-| Variable | Description | Default |
-|---|---|---|
-| `HERMES_LANGFUSE_ENV` | Environment tag (e.g. `production`, `staging`) | — |
-| `HERMES_LANGFUSE_RELEASE` | Release/version tag | — |
-| `HERMES_LANGFUSE_SAMPLE_RATE` | Sampling rate `0.0`–`1.0` | `1.0` |
-| `HERMES_LANGFUSE_MAX_CHARS` | Max characters per traced field | `12000` |
-| `HERMES_LANGFUSE_DEBUG` | Verbose plugin logging (`true`/`false`) | `false` |
+| Variable                      | Description                                    | Default |
+| ----------------------------- | ---------------------------------------------- | ------- |
+| `HERMES_LANGFUSE_ENV`         | Environment tag (e.g. `production`, `staging`) | —       |
+| `HERMES_LANGFUSE_RELEASE`     | Release/version tag                            | —       |
+| `HERMES_LANGFUSE_SAMPLE_RATE` | Sampling rate `0.0`–`1.0`                      | `1.0`   |
+| `HERMES_LANGFUSE_MAX_CHARS`   | Max characters per traced field                | `12000` |
+| `HERMES_LANGFUSE_DEBUG`       | Verbose plugin logging (`true`/`false`)        | `false` |
 
 Set these in `~/.hermes/.env` or export them in your shell before starting Hermes.
 
