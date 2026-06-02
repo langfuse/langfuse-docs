@@ -86,7 +86,7 @@ export function DatasetFieldsDiagram() {
   return (
     <figure
       className="dataset-fields not-prose"
-      aria-label="Dataset fields and when they are used"
+      aria-label="データセットフィールドとその用途"
     >
       <div
         ref={wrapRef}
@@ -105,9 +105,9 @@ export function DatasetFieldsDiagram() {
           <div className="dataset-fields__row-divider" style={{ top: 128 }} />
           <div className="dataset-fields__row-divider" style={{ top: 257 }} />
 
-          <StageLabel y={0} num="01" name="Run experiment" />
-          <StageLabel y={128} num="02" name="Add context" />
-          <StageLabel y={257} num="03" name="Score" />
+          <StageLabel y={0} num="01" name="実験を実行" />
+          <StageLabel y={128} num="02" name="コンテキストを追加" />
+          <StageLabel y={257} num="03" name="スコアリング" />
 
           <svg
             className="dataset-fields__arrows"
@@ -171,27 +171,27 @@ export function DatasetFieldsDiagram() {
           </svg>
 
           <Node x={160} y={36} width={180} variant="live">
-            Input
+            入力
           </Node>
           <Node x={400} y={36} width={220} variant="live">
-            Task execution
+            タスク実行
           </Node>
           <Node x={680} y={36} width={180} variant="live">
-            Actual output
+            実出力
           </Node>
 
           <Node x={160} y={164} width={180} variant="stripe">
-            Metadata
+            メタデータ
           </Node>
           <Node x={400} y={164} width={220} variant="stripe">
-            Extra context for review
+            レビュー用の追加コンテキスト
           </Node>
 
           <Node x={160} y={293} width={180}>
-            Expected output
+            期待出力
           </Node>
           <Node x={680} y={293} width={180} variant="terminal">
-            Score / compare
+            スコア / 比較
           </Node>
         </div>
       </div>

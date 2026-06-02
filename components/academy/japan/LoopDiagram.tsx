@@ -7,37 +7,37 @@ const STATIONS = [
   {
     id: "trace",
     label: "Online",
-    title: "Trace",
+    title: "トレース",
     meta: ["traces", "sessions", "agents", "prompts"],
-    href: "/academy/tracing",
+    href: "/academy/japan/tracing",
   },
   {
     id: "monitor",
     label: "Online",
-    title: "Monitor",
+    title: "モニタリング",
     meta: ["dashboards", "LLM-as-judge", "feedback"],
-    href: "/academy/monitoring",
+    href: "/academy/japan/monitoring",
   },
   {
     id: "dataset",
     label: "Offline",
-    title: "Build\ndatasets",
+    title: "データセット\n構築",
     meta: ["datasets", "features-as-tests"],
-    href: "/academy/datasets",
+    href: "/academy/japan/datasets",
   },
   {
     id: "change",
     label: "Offline",
-    title: "Experiment",
+    title: "実験",
     meta: ["prompts", "models", "code variants"],
-    href: "/academy/experiments",
+    href: "/academy/japan/experiments",
   },
   {
     id: "eval",
     label: "Offline",
-    title: "Evaluate",
+    title: "評価",
     meta: ["judges", "custom evals", "annotation"],
-    href: "/academy/evaluate",
+    href: "/academy/japan/evaluate",
   },
 ];
 
@@ -229,7 +229,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
               zIndex: 5,
             }}
           >
-            Deploy
+            デプロイ
           </div>
 
           {/* Station cards */}

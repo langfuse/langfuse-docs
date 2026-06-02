@@ -114,13 +114,13 @@ export function RagTraceViewDiagram() {
   return (
     <figure
       className="rag-trace-view not-prose"
-      aria-label="RAG chat pipeline trace timeline"
+      aria-label="RAG チャットパイプラインのトレースタイムライン"
     >
       <div className="rag-trace-view__card">
         <div className="rag-trace-view__columns">
           <div className="rag-trace-view__column-header rag-trace-view__column-header--left">
-            <span>Name</span>
-            <span>Duration</span>
+            <span>名前</span>
+            <span>所要時間</span>
           </div>
           <div className="rag-trace-view__column-header">
             <div className="rag-trace-view__ruler">

@@ -14,7 +14,7 @@ export interface AgentPromptCalloutProps {
 }
 
 export function AgentPromptCallout({
-  ribbon = "Run with your agent",
+  ribbon = "エージェントで実行する",
   title,
   lede,
   prompt,

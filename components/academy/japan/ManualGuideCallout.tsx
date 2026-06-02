@@ -17,7 +17,7 @@ export function ManualGuideCallout({
   href,
   topic,
   lede,
-  cta = "Open",
+  cta = "開く",
 }: ManualGuideCalloutProps) {
   const isExternal = /^https?:/i.test(href);
 
@@ -53,7 +53,7 @@ export function ManualGuideCallout({
               </svg>
             </span>
             <span>
-              <span className="manual-guide__ribbon-prefix">Guide:</span>{" "}
+              <span className="manual-guide__ribbon-prefix">ガイド:</span>{" "}
               {topic}
             </span>
           </div>

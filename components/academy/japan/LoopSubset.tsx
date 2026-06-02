@@ -6,34 +6,34 @@ import { Fragment, useEffect, useState } from "react";
 const STATION_DATA = {
   trace: {
     label: "Online",
-    title: "Trace",
+    title: "トレース",
     meta: ["traces", "sessions", "agents", "prompts"],
-    href: "/academy/tracing",
+    href: "/academy/japan/tracing",
   },
   monitor: {
     label: "Online",
-    title: "Monitor",
+    title: "モニタリング",
     meta: ["dashboards", "LLM-as-judge", "feedback"],
-    href: "/academy/monitoring",
+    href: "/academy/japan/monitoring",
   },
   dataset: {
     label: "Offline",
-    title: "Build\ndatasets",
+    title: "データセット\n構築",
     meta: ["datasets", "features-as-tests"],
-    href: "/academy/datasets",
+    href: "/academy/japan/datasets",
     smallTitle: true,
   },
   change: {
     label: "Offline",
-    title: "Experiment",
+    title: "実験",
     meta: ["prompts", "models", "code variants"],
-    href: "/academy/experiments",
+    href: "/academy/japan/experiments",
   },
   eval: {
     label: "Offline",
-    title: "Evaluate",
+    title: "評価",
     meta: ["judges", "custom evals", "annotation"],
-    href: "/academy/evaluate",
+    href: "/academy/japan/evaluate",
   },
 } as const;
 

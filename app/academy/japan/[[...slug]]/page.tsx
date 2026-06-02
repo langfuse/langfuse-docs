@@ -12,21 +12,25 @@ export default async function JaAcademyPage({ params }: PageProps) {
   const { slug = [] } = await params;
   const page = academyJaSource.getPage(slug);
   if (!page) notFound();
+  // Only the Academy intro page (empty slug) shows the translation credit.
+  const isIntroPage = slug.length === 0;
   return (
     <DocsChromePage
       page={page}
       bottomSuffix={
-        <div className="mt-10 text-right text-xs italic text-fd-muted-foreground">
-          Translation by{" "}
-          <a
-            href="https://gao-ai.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2 decoration-1 hover:no-underline"
-          >
-            GAO, Inc.
-          </a>
-        </div>
+        isIntroPage ? (
+          <div className="mt-10 text-right text-xs italic text-fd-muted-foreground">
+            Translation by{" "}
+            <a
+              href="https://gao-ai.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 decoration-1 hover:no-underline"
+            >
+              GAO, Inc.
+            </a>
+          </div>
+        ) : undefined
       }
     />
   );

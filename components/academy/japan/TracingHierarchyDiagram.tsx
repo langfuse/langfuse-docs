@@ -40,7 +40,7 @@ export function TracingHierarchyDiagram() {
   return (
     <figure
       className="tracing-hierarchy not-prose"
-      aria-label="Sessions contain traces, and traces contain observations"
+      aria-label="セッションはトレースを含み、トレースはオブザベーションを含みます"
     >
       <CornerRing className="tracing-hierarchy__session">
         <span className="tracing-hierarchy__caption">Session</span>

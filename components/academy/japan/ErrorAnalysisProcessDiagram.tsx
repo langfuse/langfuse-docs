@@ -6,32 +6,11 @@ const INNER_W = 1100;
 const INNER_H = 150;
 
 const STEPS = [
-  {
-    num: "01",
-    label: "Collect",
-    title: "Gather traces",
-  },
-  {
-    num: "02",
-    label: "Note",
-    title: "Open coding",
-  },
-  {
-    num: "03",
-    label: "Group",
-    title: "Cluster into categories",
-  },
-  {
-    num: "04",
-    label: "Quantify",
-    title: "Label & measure",
-  },
-  {
-    num: "05",
-    label: "Act",
-    title: "Decide & act",
-    accent: true,
-  },
+  { num: "01", label: "収集", title: "トレースを集める" },
+  { num: "02", label: "記録", title: "Open coding" },
+  { num: "03", label: "グループ化", title: "カテゴリにクラスタリング" },
+  { num: "04", label: "定量化", title: "ラベル付けと計測" },
+  { num: "05", label: "実行", title: "判断と実行", accent: true },
 ];
 
 function estimateInitialScale(): number {
@@ -73,7 +52,7 @@ export function ErrorAnalysisProcessDiagram() {
   return (
     <figure
       className="error-analysis-process not-prose"
-      aria-label="The five steps of the error analysis process"
+      aria-label="エラー分析プロセスの5つのステップ"
     >
       <div
         ref={wrapRef}
