@@ -494,18 +494,25 @@ def _set_trace_attrs(span, trace_obj) -> None:
         _set_scalar(span, "langfuse.trace.metadata._raw", md)
 
 
+# Map source observation types to the type strings the OTEL ingestion
+# endpoint accepts. Langfuse's server-side ObservationTypeMapper supports
+# each of these directly, so we preserve the original type instead of
+# collapsing everything to "span".
 _OBS_TYPE_MAP = {
     "SPAN": "span",
     "GENERATION": "generation",
     "EVENT": "event",
-    "AGENT": "span",
-    "TOOL": "span",
-    "CHAIN": "span",
-    "RETRIEVER": "span",
-    "EVALUATOR": "span",
-    "EMBEDDING": "generation",
-    "GUARDRAIL": "span",
+    "AGENT": "agent",
+    "TOOL": "tool",
+    "CHAIN": "chain",
+    "RETRIEVER": "retriever",
+    "EVALUATOR": "evaluator",
+    "EMBEDDING": "embedding",
+    "GUARDRAIL": "guardrail",
 }
+
+# Observation types that carry model / usage / cost details.
+_GENERATION_LIKE_TYPES = {"generation", "embedding"}
 
 
 def _set_observation_attrs(span, obs) -> None:
@@ -527,10 +534,11 @@ def _set_observation_attrs(span, obs) -> None:
             _set_scalar(span, f"langfuse.observation.metadata.{k}", v)
     elif md is not None:
         _set_scalar(span, "langfuse.observation.metadata._raw", md)
-    # Generation-only attributes. ObservationV2 renames `model` to
+    # Model / usage / cost attributes apply to generation-like types
+    # (generation + embedding). ObservationV2 renames `model` to
     # `provided_model_name`; fall back to `model` for the v1 type used by
     # self-hosted migrations.
-    if obs_type == "generation":
+    if obs_type in _GENERATION_LIKE_TYPES:
         model_name = getattr(obs, "provided_model_name", None) or getattr(obs, "model", None)
         _set_scalar(span, "langfuse.observation.model.name", model_name)
         if obs.model_parameters:
