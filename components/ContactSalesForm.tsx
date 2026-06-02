@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,14 @@ import {
   reportGoogleAdsConversion,
 } from "@/lib/google-ads";
 
+function RequiredMarker({ required }: { required: boolean }) {
+  if (!required) {
+    return null;
+  }
+
+  return <span className="text-destructive">*</span>;
+}
+
 export function ContactSalesForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -43,22 +51,31 @@ export function ContactSalesForm() {
     defaultValues: defaultFormValues,
   });
 
-  const selectedRequirements = form.watch("enterpriseRequirements");
+  const currentSetup = form.watch(FORM_FIELDS.currentSetup.name);
+  const { getValues, reset, setValue } = form;
 
-  const toggleRequirement = (value: string) => {
-    const current = form.getValues("enterpriseRequirements");
-    if (current.includes(value)) {
-      form.setValue(
-        "enterpriseRequirements",
-        current.filter((v) => v !== value),
-        { shouldValidate: true },
-      );
-    } else {
-      form.setValue("enterpriseRequirements", [...current, value], {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const deployment = params.get(FORM_FIELDS.deployment.name);
+    const isValidDeployment = FORM_FIELDS.deployment.options.some(
+      (option) => option.value === deployment,
+    );
+
+    if (deployment && isValidDeployment) {
+      reset({
+        ...getValues(),
+        deployment,
+      });
+    }
+  }, [getValues, reset]);
+
+  useEffect(() => {
+    if (currentSetup !== "other-tool") {
+      setValue(FORM_FIELDS.currentSetupOther.name, "", {
         shouldValidate: true,
       });
     }
-  };
+  }, [currentSetup, setValue]);
 
   async function onSubmit(data: ContactFormData) {
     setIsSubmitting(true);
@@ -108,9 +125,7 @@ export function ContactSalesForm() {
             <FormItem>
               <FormLabel>
                 {FORM_FIELDS.name.label}{" "}
-                {FORM_FIELDS.name.required && (
-                  <span className="text-destructive">*</span>
-                )}
+                <RequiredMarker required={FORM_FIELDS.name.required} />
               </FormLabel>
               <FormControl>
                 <Input placeholder={FORM_FIELDS.name.placeholder} {...field} />
@@ -127,9 +142,7 @@ export function ContactSalesForm() {
             <FormItem>
               <FormLabel>
                 {FORM_FIELDS.email.label}{" "}
-                {FORM_FIELDS.email.required && (
-                  <span className="text-destructive">*</span>
-                )}
+                <RequiredMarker required={FORM_FIELDS.email.required} />
               </FormLabel>
               <FormControl>
                 <Input
@@ -150,9 +163,7 @@ export function ContactSalesForm() {
             <FormItem>
               <FormLabel>
                 {FORM_FIELDS.company.label}{" "}
-                {FORM_FIELDS.company.required && (
-                  <span className="text-destructive">*</span>
-                )}
+                <RequiredMarker required={FORM_FIELDS.company.required} />
               </FormLabel>
               <FormControl>
                 <Input
@@ -167,21 +178,29 @@ export function ContactSalesForm() {
 
         <FormField
           control={form.control}
-          name={FORM_FIELDS.message.name}
+          name={FORM_FIELDS.building.name}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                {FORM_FIELDS.message.label}{" "}
-                {FORM_FIELDS.message.required && (
-                  <span className="text-destructive">*</span>
-                )}
+                {FORM_FIELDS.building.label}{" "}
+                <RequiredMarker required={FORM_FIELDS.building.required} />
               </FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder={FORM_FIELDS.message.placeholder}
-                  {...field}
-                />
-              </FormControl>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={FORM_FIELDS.building.placeholder}
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {FORM_FIELDS.building.options.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -189,22 +208,119 @@ export function ContactSalesForm() {
 
         <FormField
           control={form.control}
-          name={FORM_FIELDS.usage.name}
+          name={FORM_FIELDS.currentSetup.name}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                {FORM_FIELDS.usage.label}{" "}
-                {FORM_FIELDS.usage.required && (
-                  <span className="text-destructive">*</span>
-                )}
+                {FORM_FIELDS.currentSetup.label}{" "}
+                <RequiredMarker required={FORM_FIELDS.currentSetup.required} />
               </FormLabel>
-              <FormControl>
-                <Input placeholder={FORM_FIELDS.usage.placeholder} {...field} />
-              </FormControl>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={FORM_FIELDS.currentSetup.placeholder}
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {FORM_FIELDS.currentSetup.options.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {currentSetup === "other-tool" && (
+          <FormField
+            control={form.control}
+            name={FORM_FIELDS.currentSetupOther.name}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {FORM_FIELDS.currentSetupOther.label}{" "}
+                  <RequiredMarker required={currentSetup === "other-tool"} />
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={FORM_FIELDS.currentSetupOther.placeholder}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <div className="space-y-2">
+          <div className="text-sm font-medium">
+            LLM apps or agents - today vs. in 6-12 months{" "}
+            <span className="text-destructive">*</span>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name={FORM_FIELDS.productionAppCount.name}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{FORM_FIELDS.productionAppCount.label}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            FORM_FIELDS.productionAppCount.placeholder
+                          }
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {FORM_FIELDS.productionAppCount.options.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name={FORM_FIELDS.plannedAppCount.name}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{FORM_FIELDS.plannedAppCount.label}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={FORM_FIELDS.plannedAppCount.placeholder}
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {FORM_FIELDS.plannedAppCount.options.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
         <FormField
           control={form.control}
@@ -213,11 +329,13 @@ export function ContactSalesForm() {
             <FormItem>
               <FormLabel>
                 {FORM_FIELDS.deployment.label}{" "}
-                {FORM_FIELDS.deployment.required && (
-                  <span className="text-destructive">*</span>
-                )}
+                <RequiredMarker required={FORM_FIELDS.deployment.required} />
               </FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                key={field.value}
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue
@@ -245,48 +363,24 @@ export function ContactSalesForm() {
             <FormItem>
               <FormLabel>
                 {FORM_FIELDS.userCount.label}{" "}
-                {FORM_FIELDS.userCount.required && (
-                  <span className="text-destructive">*</span>
-                )}
+                <RequiredMarker required={FORM_FIELDS.userCount.required} />
               </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder={FORM_FIELDS.userCount.placeholder}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name={FORM_FIELDS.enterpriseRequirements.name}
-          render={() => (
-            <FormItem>
-              <FormLabel>
-                {FORM_FIELDS.enterpriseRequirements.label}{" "}
-                {FORM_FIELDS.enterpriseRequirements.required && (
-                  <span className="text-destructive">*</span>
-                )}
-              </FormLabel>
-              <div className="space-y-2 rounded-[2px] border border-line-structure p-3">
-                {FORM_FIELDS.enterpriseRequirements.options.map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-2 cursor-pointer text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedRequirements.includes(option.value)}
-                      onChange={() => toggleRequirement(option.value)}
-                      className="h-4 w-4 rounded-[2px] border-line-structure accent-line-cta"
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={FORM_FIELDS.userCount.placeholder}
                     />
-                    {option.label}
-                  </label>
-                ))}
-              </div>
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {FORM_FIELDS.userCount.options.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -294,18 +388,17 @@ export function ContactSalesForm() {
 
         <FormField
           control={form.control}
-          name={FORM_FIELDS.additionalNotes.name}
+          name={FORM_FIELDS.message.name}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                {FORM_FIELDS.additionalNotes.label}{" "}
-                {FORM_FIELDS.additionalNotes.required && (
-                  <span className="text-destructive">*</span>
-                )}
+                {FORM_FIELDS.message.label}{" "}
+                <RequiredMarker required={FORM_FIELDS.message.required} />
               </FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder={FORM_FIELDS.additionalNotes.placeholder}
+                  placeholder={FORM_FIELDS.message.placeholder}
+                  rows={4}
                   {...field}
                 />
               </FormControl>
