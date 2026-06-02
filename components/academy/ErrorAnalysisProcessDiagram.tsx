@@ -117,7 +117,7 @@ export function ErrorAnalysisProcessDiagram({
                 </div>
                 <h3 className="error-analysis-process__title">{step.title}</h3>
               </article>
-              {i < STEPS.length - 1 && (
+              {i < steps.length - 1 && (
                 <div
                   className="error-analysis-process__connector"
                   aria-hidden="true"
