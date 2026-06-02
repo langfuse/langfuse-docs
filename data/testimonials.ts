@@ -90,7 +90,7 @@ export const testimonials: Testimonial[] = [
     avatar: "/images/walloflove/RomanGeugelin.avif",
     platform: "producthunt",
     content:
-      "Best AI engineering platform out there by far. The speed with which they ship and how close they are to the community is mindblowing.",
+      "Best LLM engineering platform out there by far. The speed with which they ship and how close they are to the community is mindblowing.",
     postURL:
       "https://www.producthunt.com/products/langfuse/reviews?review=1274265",
   },
@@ -151,7 +151,7 @@ export const testimonials: Testimonial[] = [
     handle: "@MaxPrilutskiy",
     avatar: "/images/walloflove/MaxPrilutskiy.jpg",
     platform: "producthunt",
-    content: "Extremely reliable AI Engineering Platform.",
+    content: "Extremely reliable LLM Engineering Platform.",
     postURL:
       "https://www.producthunt.com/products/langfuse/reviews?founderReview=262381",
   },
