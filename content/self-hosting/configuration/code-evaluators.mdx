@@ -7,7 +7,9 @@ sidebarTitle: "Code evaluators"
 
 # Code evaluators
 
-Self-hosted code evaluators are picked up by the Langfuse worker and executed through a dispatcher backend. The dispatcher currently invokes either AWS Lambda or the local insecure runner synchronously. Production self-hosted deployments need a dispatcher for execution. Outside development and test environments, no dispatcher is configured unless the code evaluator environment variables are set.
+Self-hosted code evaluators are picked up by the Langfuse worker and executed through a dispatcher backend. The dispatcher currently invokes either AWS Lambda or the local insecure runner synchronously. Production self-hosted deployments need a dispatcher for execution.
+
+Code evaluator availability is derived from `LANGFUSE_CODE_EVAL_DISPATCHER`. If this variable is unset, code evaluators are disabled for self-hosted deployments. Set it on the web service so the UI can show the supported code evaluator templates, and on the worker service so executions can be dispatched.
 
 ## Available dispatchers
 
@@ -30,10 +32,11 @@ Set `LANGFUSE_CODE_EVAL_DISPATCHER` to one of the available dispatchers:
 Use the AWS Lambda dispatcher for production self-hosted deployments:
 
 ```bash
-NEXT_PUBLIC_LANGFUSE_CODE_EVAL_ENABLED=true
 LANGFUSE_CODE_EVAL_DISPATCHER=aws-lambda
 QUEUE_CONSUMER_CODE_EVAL_EXECUTION_QUEUE_IS_ENABLED=true
 ```
+
+The AWS Lambda dispatcher enables TypeScript/JavaScript and Python code evaluators.
 
 By default, Langfuse dispatches TypeScript/JavaScript and Python evaluators to these Lambda functions:
 
@@ -103,7 +106,6 @@ LANGFUSE_CODE_EVAL_AWS_LAMBDA_ENDPOINT=http://localhost:4566
 For local development and trusted production environments, you can run code evaluators in the worker process:
 
 ```bash
-NEXT_PUBLIC_LANGFUSE_CODE_EVAL_ENABLED=true
 LANGFUSE_CODE_EVAL_DISPATCHER=insecure-local
 QUEUE_CONSUMER_CODE_EVAL_EXECUTION_QUEUE_IS_ENABLED=true
 ```
