@@ -21,7 +21,7 @@ export const CredibilitySentence = ({
   if (style === "list") {
     return (
       <div className={className}>
-        <p>Langfuse is the most widely adopted AI Engineering platform:</p>
+        <p>Langfuse is the most widely adopted LLM Engineering platform:</p>
         <ul className="mt-2 list-disc list-inside space-y-1">
           <li>
             <Metric className={metricClassName}>
@@ -52,7 +52,7 @@ export const CredibilitySentence = ({
 
   return (
     <p className={className}>
-      Langfuse is the most widely adopted AI Engineering platform with{" "}
+      Langfuse is the most widely adopted LLM Engineering platform with{" "}
       <Metric className={metricClassName}>
         {getGitHubStars().toLocaleString()} GitHub stars
       </Metric>
