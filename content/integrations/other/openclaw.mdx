@@ -39,9 +39,10 @@ Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse]
 Langfuse authenticates OTLP requests with [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication). Generate the header value by base64-encoding your keys as `public_key:secret_key`:
 
 ```bash
+# macOS / BSD
 echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
-# For long keys on GNU systems, add -w 0 to disable line wrapping
-```
+# Linux / GNU (disable line wrapping)
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64 -w 0
 
 ### Enable OpenTelemetry export in OpenClaw
 
