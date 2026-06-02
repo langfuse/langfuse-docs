@@ -1,14 +1,14 @@
 ---
 title: Web callbacks
-description: Trigger a browser-side HTTP callback from a trace or observation in Langfuse.
+description: Trigger a browser-side HTTP callback from a trace, observation, or session in Langfuse.
 sidebarTitle: Web Callbacks
 ---
 
 # Web callbacks
 
-Web callbacks let project members trigger an HTTP `POST` request from a trace or observation in Langfuse. Use them to connect trace debugging to your own tools, for example opening an internal investigation workflow, notifying an external system, or sending a selected trace ID to a local helper service.
+Web callbacks let project members trigger an HTTP `POST` request from a trace, observation, or session in Langfuse. Use them to connect debugging workflows to your own tools, for example opening an internal investigation workflow, notifying an external system, or sending a selected trace or session ID to a local helper service.
 
-Unlike [prompt webhooks](/docs/prompt-management/features/webhooks-slack-integrations), web callbacks are not event-driven automations. A project member manually triggers them from the trace detail menu.
+Unlike [prompt webhooks](/docs/prompt-management/features/webhooks-slack-integrations), web callbacks are not event-driven automations. A project member manually triggers them from a trace, observation, or session detail view.
 
 <Callout type="info">
   Web callbacks send only identifiers. Trace input, output, metadata, scores,
@@ -27,7 +27,7 @@ Only one web callback endpoint can be configured per project.
 
 ## Trigger a callback
 
-Open a trace or observation and click the three-dot actions menu in the detail header. If an enabled endpoint exists, the menu shows `Call <callback name>`.
+Open a trace or observation and click the three-dot actions menu in the detail header. If an enabled endpoint exists, the menu shows `Call <callback name>`. On session detail pages, use the web callback button in the header.
 
 When you click the action, Langfuse immediately shows the configured toast message and sends the request from your browser to the configured endpoint.
 
@@ -42,7 +42,8 @@ Langfuse sends a JSON `POST` request with the following payload:
     {
       "projectId": "project-id",
       "traceId": "trace-id",
-      "observationId": null
+      "observationId": null,
+      "sessionId": "session-id"
     }
   ]
 }
@@ -53,8 +54,9 @@ Payload fields:
 - `version`: Payload contract version. The current version is `1`.
 - `items`: List of selected objects. V1 sends one item.
 - `projectId`: Langfuse project ID.
-- `traceId`: Trace ID for the selected trace or observation.
-- `observationId`: `null` for trace-level callbacks, or the selected observation ID for observation-level callbacks.
+- `traceId`: Trace ID for the selected trace or observation. `null` for session-level callbacks.
+- `observationId`: `null` for trace-level and session-level callbacks, or the selected observation ID for observation-level callbacks.
+- `sessionId`: Session ID when available. `null` if the selected trace or observation is not part of a session.
 
 If your receiver needs the full trace, observation, session, or score data, use the IDs from the payload to query the [Langfuse API](/docs/api-and-data-platform/features/public-api) from your own backend.
 
@@ -99,8 +101,9 @@ type WebCallbackPayload = {
   version: 1;
   items: Array<{
     projectId: string;
-    traceId: string;
+    traceId: string | null;
     observationId: string | null;
+    sessionId: string | null;
   }>;
 };
 
