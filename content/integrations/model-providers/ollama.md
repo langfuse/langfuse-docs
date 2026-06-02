@@ -18,7 +18,7 @@ Ollama ([GitHub](https://github.com/ollama/ollama)) is an open-source platform t
 
 ## What is Langfuse?
 
-Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is an open-source LLM engineering platform that helps teams collaboratively debug, analyze, and iterate on their LLM applications via tracing, prompt management and evaluations.
+Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is an open-source AI engineering platform that helps teams collaboratively debug, analyze, and iterate on their LLM applications via tracing, prompt management and evaluations.
 
 ### Local Deployment of Langfuse
 

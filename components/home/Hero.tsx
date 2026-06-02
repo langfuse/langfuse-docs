@@ -34,7 +34,7 @@ export function Hero() {
               highlightClassName="mix-blend-multiply"
               className="max-[499px]:pr-1.75"
             >
-              Ai
+              AI
             </TextHighlight>
             <TextHighlight
               highlightClassName="mix-blend-multiply"

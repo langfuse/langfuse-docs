@@ -110,7 +110,7 @@ function TalkToUsContent() {
         </ul>
       </div>
       <Text className="text-left not-prose">
-        Langfuse is the most widely adopted LLM Engineering platform with{" "}
+        Langfuse is the most widely adopted AI Engineering platform with{" "}
         <strong className="font-[580]">
           {getGitHubStars().toLocaleString()} GitHub stars
         </strong>
