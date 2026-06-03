@@ -19,7 +19,9 @@ export function buildLocalizedAlternates({
     languages[locale] = buildPageUrl(`${basePath}${slugPath}`);
   }
 
-  languages["x-default"] = languages[defaultLocale];
+  if (languages[defaultLocale]) {
+    languages["x-default"] = languages[defaultLocale];
+  }
 
   return languages;
 }
