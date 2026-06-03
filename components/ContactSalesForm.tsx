@@ -67,7 +67,7 @@ export function ContactSalesForm() {
         deployment,
       });
     }
-  }, [getValues, reset]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- hydrate from URL once on mount only.
 
   useEffect(() => {
     if (currentSetup !== "other-tool") {
@@ -331,11 +331,7 @@ export function ContactSalesForm() {
                 {FORM_FIELDS.deployment.label}{" "}
                 <RequiredMarker required={FORM_FIELDS.deployment.required} />
               </FormLabel>
-              <Select
-                key={field.value}
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue

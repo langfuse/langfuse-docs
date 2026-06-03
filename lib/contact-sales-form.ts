@@ -103,7 +103,7 @@ export const FORM_FIELDS = {
   },
   productionAppCount: {
     name: "productionAppCount" as const,
-    label: "In production today",
+    label: "In production",
     placeholder: "Select",
     required: true,
     options: LLM_APP_COUNT_OPTIONS,
@@ -234,7 +234,9 @@ export function formatFormDataForEmail(data: ContactFormData): string {
       label: FORM_FIELDS.currentSetup.label,
       value:
         getLabel(CURRENT_SETUP_OPTIONS, data.currentSetup) +
-        (data.currentSetupOther ? ` (${data.currentSetupOther})` : ""),
+        (data.currentSetup === "other-tool" && data.currentSetupOther
+          ? ` (${data.currentSetupOther})`
+          : ""),
     },
     {
       label: FORM_FIELDS.productionAppCount.label,
