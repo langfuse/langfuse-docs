@@ -1,0 +1,40 @@
+---
+date: 2026-04-10
+title: Free-Form Text Scores
+description: Capture open-ended feedback and qualitative annotations with the new TEXT score type.
+author: tobiaswochinger
+ogImage: /images/changelog/2026-04-10-text-scores.png
+canonical: /docs/evaluation/scores/overview
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Langfuse now supports `TEXT` scores for open-ended feedback and qualitative annotations. Use them to capture reviewer notes, user feedback, or other qualitative input directly as scores on traces and observations.
+
+This is especially useful for open coding workflows: collect qualitative labels and notes first, then turn recurring patterns into categorical, boolean, or numeric scores once your taxonomy is clear.
+
+Text scores are stored as strings between 1 and 500 characters and are available via the API and SDKs. They work alongside numeric, categorical, and boolean scores, but are intentionally excluded from score analytics because free-form text cannot be meaningfully aggregated.
+
+## What's New
+
+- Create `TEXT` scores for qualitative feedback and annotations
+- Ingest text score values via UI, API, and SDKs
+- Use text scores for open coding before formalizing recurring patterns into structured scores
+
+## Get started
+
+<Cards num={2}>
+  <Card
+    title="Score Types"
+    href="/docs/evaluation/scores/overview#score-types"
+    icon={<Book />}
+  />
+  <Card
+    title="Scores via SDK"
+    href="/docs/evaluation/evaluation-methods/scores-via-sdk"
+    icon={<Book />}
+  />
+</Cards>

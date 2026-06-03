@@ -12,42 +12,62 @@ interface CTACardProps {
   showArrow?: boolean;
 }
 
-export function CTACard({ title, description, children, className, showArrow = false }: CTACardProps) {
+export function CTACard({
+  title,
+  description,
+  children,
+  className,
+  showArrow = false,
+}: CTACardProps) {
   return (
-    <Card className={cn("border bg-card mt-8", className)}>
-      <CardContent className="p-8">
-        <div className="flex flex-col md:flex-row md:items-center gap-6">
-          <div className="flex-1 md:flex-[2] space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">
+    <Card className={cn("mt-8", className)} hoverStripes>
+      <CardContent className="not-prose p-6">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center">
+          <div className="flex-1 space-y-2 md:flex-2">
+            <h3 className="m-0 text-xl font-medium leading-tight text-text-primary">
               {title}
             </h3>
-            <p className="text-muted-foreground">
-              {description}
-            </p>
+            <p className="m-0 text-text-tertiary">{description}</p>
           </div>
           {children && (
-            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-end items-center md:flex-1">
-              {showArrow ? (
-                React.Children.map(children, (child) => {
-                  if (React.isValidElement(child) && (child.type === Button || child.props.asChild)) {
-                    return React.cloneElement(child, {
-                      children: (
-                        <div className="flex items-center gap-2">
-                          {child.props.children}
-                          <ArrowRight className="h-4 w-4" />
-                        </div>
-                      )
-                    } as any);
-                  }
-                  return child;
-                })
-              ) : (
-                children
-              )}
+            <div className="flex flex-col gap-3 justify-center items-center sm:flex-row md:justify-end md:flex-1">
+              {showArrow
+                ? React.Children.map(children, (child) => {
+                    if (React.isValidElement(child) && child.type === Button) {
+                      if (
+                        child.props.asChild &&
+                        React.isValidElement(child.props.children)
+                      ) {
+                        // asChild: inject arrow inside the <a> so Slot renders <a> with button classes
+                        const linkChild = child.props
+                          .children as React.ReactElement;
+                        return React.cloneElement(child, {
+                          children: React.cloneElement(linkChild, {
+                            children: (
+                              <span className="flex gap-2 items-center">
+                                {linkChild.props.children}
+                                <ArrowRight className="w-4 h-4" />
+                              </span>
+                            ),
+                          }),
+                        } as any);
+                      }
+                      return React.cloneElement(child, {
+                        children: (
+                          <span className="flex gap-2 items-center">
+                            {child.props.children}
+                            <ArrowRight className="w-4 h-4" />
+                          </span>
+                        ),
+                      } as any);
+                    }
+                    return child;
+                  })
+                : children}
             </div>
           )}
         </div>
       </CardContent>
     </Card>
   );
-} 
+}

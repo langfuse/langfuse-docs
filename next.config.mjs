@@ -1,12 +1,17 @@
-import remarkGfm from "remark-gfm";
-import nextra from "nextra";
+import path from "path";
+import { fileURLToPath } from "url";
+import { createMDX } from "fumadocs-mdx/next";
 import NextBundleAnalyzer from "@next/bundle-analyzer";
 
 import * as redirects from "./lib/redirects.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
+
+const withMDX = createMDX();
 
 /**
  * CSP headers
@@ -32,18 +37,8 @@ const cspHeader =
 `
     : "";
 
-// nextra config
-const withNextra = nextra({
-  theme: "nextra-theme-docs",
-  themeConfig: "./theme.config.tsx",
-  mdxOptions: {
-    remarkPlugins: [remarkGfm],
-  },
-  defaultShowCopyCode: true,
-});
-
-// next config
-const nextraConfig = withNextra({
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   // Enable static export when STATIC_EXPORT env var is set
   ...(process.env.STATIC_EXPORT === "true" && {
     output: "export",
@@ -53,8 +48,75 @@ const nextraConfig = withNextra({
   }),
   experimental: {
     scrollRestoration: true,
+    // Reduce peak memory during production build (helps avoid OOM on Vercel)
+    webpackMemoryOptimizations: true,
+    serverSourceMaps: false,
+  },
+  // Reduce memory usage during build
+  productionBrowserSourceMaps: false,
+  turbopack: {
+    // Fix Turbopack panic when running from a git worktree with multiple lockfiles.
+    // Tell Turbopack to use this worktree's directory as the root.
+    root: __dirname,
   },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
+
+  // Sparticuz Chromium ships brotli-compressed binaries under `bin/`; Next's file tracer
+  // often omits them from the serverless bundle, breaking `executablePath()` on Vercel.
+  // Keys are matched with picomatch against normalized app routes (e.g. `/app/api/md-to-pdf`
+  // matches `/api/md-to-pdf` via `contains: true`).
+  outputFileTracingIncludes: {
+    "/api/md-to-pdf": [
+      "./lib/stripMdxForPlainMarkdown.js",
+      "./node_modules/@sparticuz/chromium/**",
+      "./node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/**",
+    ],
+  },
+
+  webpack(config, { isServer, webpack }) {
+    config.resolve = config.resolve ?? {};
+    // Prevent recharts (and its exclusive deps: redux toolkit, immer, etc.) from
+    // being hoisted into a synchronous shared chunk that loads on every page.
+    // Recharts is only used on the /wrapped page — keep it in async-only chunks
+    // so it's never downloaded unless the wrapped page actually renders it.
+    if (!isServer) {
+      const sc = config.optimization?.splitChunks;
+      if (sc && typeof sc === "object") {
+        sc.cacheGroups = sc.cacheGroups ?? {};
+        sc.cacheGroups.rechartsVendor = {
+          test: /[\\/]node_modules[\\/](@reduxjs[\\/]toolkit|recharts|victory-vendor|react-redux|immer|reselect|decimal\.js-light|eventemitter3)[\\/]/,
+          name: "vendor-recharts",
+          chunks: "async", // never pulled into initial/synchronous bundles
+          priority: 30,
+          enforce: true,
+        };
+      }
+    }
+
+    // Prevent client bundle from failing on Node built-ins (e.g. fumadocs-mdx using fs/promises)
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        "fs/promises": false,
+        path: false,
+        os: false,
+        url: false,
+        module: false,
+        stream: false,
+        buffer: false,
+      };
+      // Strip the node: URI scheme prefix so webpack can apply the fallback above.
+      // fumadocs-mdx server code uses `import 'node:fs/promises'` which webpack
+      // doesn't handle natively in browser bundles.
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+          resource.request = resource.request.replace(/^node:/, "");
+        }),
+      );
+    }
+    return config;
+  },
 
   images: {
     // Disable image optimization for static export
@@ -68,11 +130,24 @@ const nextraConfig = withNextra({
       },
       {
         protocol: "https",
+        hostname: "langfuse.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "github.com",
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
+    qualities: [75, 100],
   },
   headers() {
     const headers = [
@@ -104,6 +179,22 @@ const nextraConfig = withNextra({
             key: "Content-Security-Policy",
             value: cspHeader.replace(/\n/g, ""),
           },
+        ],
+      },
+      // Agent Skills Discovery — CORS and caching
+      {
+        source: "/.well-known/agent-skills/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
+        ],
+      },
+      // MCP Discovery — CORS and caching
+      {
+        source: "/.well-known/mcp.json",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
         ],
       },
       // Mark markdown endpoints as noindex and ensure correct content type
@@ -146,13 +237,46 @@ const nextraConfig = withNextra({
   async rewrites() {
     // Serve any ".md" path by mapping to the static copy in public/md-src
     // Example: /docs.md -> /md-src/docs.md, /docs/observability/overview.md -> /md-src/docs/observability/overview.md
-    return [
-      {
-        source: "/:path*.md",
-        destination: "/md-src/:path*.md",
-      },
-    ];
-  },
-});
+    return {
+      // Run BEFORE Next serves content/public files so it can override HTML routes
+      // when the client explicitly asks for markdown.
+      beforeFiles: [
+        // Agent Skills Discovery (RFC 8615 .well-known URI)
+        {
+          source: "/.well-known/agent-skills",
+          destination: "/well-known-agent-skills.json",
+        },
+        {
+          source: "/.well-known/agent-skills/index.json",
+          destination: "/well-known-agent-skills.json",
+        },
 
-export default withBundleAnalyzer(nextraConfig);
+        // Optional: make "/" negotiable too (remove if you don't have md-src/index.md)
+        {
+          source: "/",
+          has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
+          destination: "/md-src/index.md",
+        },
+
+        // Content negotiation: /docs or /docs/observability/overview -> /md-src/... .md
+        // Excludes /api, /_next, md-src, .md files, and .txt files (served directly from public/).
+        {
+          source:
+            "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.md$)(?!.*\\.txt$)(?!.*\\.json$).*)",
+          has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
+          destination: "/md-src/:path.md",
+        },
+      ],
+
+      // Keep your existing "manual .md" access:
+      afterFiles: [
+        {
+          source: "/:path*.md",
+          destination: "/md-src/:path*.md",
+        },
+      ],
+    };
+  },
+};
+
+export default withBundleAnalyzer(withMDX(nextConfig));

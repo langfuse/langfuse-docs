@@ -1,5 +1,8 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 // Image Zoom Modal Component
 const ImageZoomModal = ({
@@ -11,7 +14,11 @@ const ImageZoomModal = ({
   alt: string;
   onClose: () => void;
 }) => {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
@@ -27,9 +34,11 @@ const ImageZoomModal = ({
     };
   }, [onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-1000 flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={onClose}
     >
       <div className="relative max-h-[90vh] max-w-[90vw] bg-white rounded-lg shadow-2xl">
@@ -59,7 +68,8 @@ const ImageZoomModal = ({
           </svg>
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
@@ -136,14 +146,14 @@ export const Frame = ({
         ref={frameRef}
         className={cn(
           "mt-4 border rounded inline-block overflow-hidden",
-          className
+          className,
         )}
       >
         <div
           className={cn(
-            "inline bg-primary/5 max-w-2xl [&>*]:mt-0 [&>*]:mb-0 [&>img]:block [&>img]:w-full [&>img]:h-auto [&>img]:leading-none [&>img]:align-top",
+            "block bg-primary/5 max-w-2xl [&>*]:mt-0 [&>*]:mb-0 [&>*]:p-0 [&_img]:block [&_img]:w-full [&_img]:h-auto [&_img]:leading-none [&_img]:align-top [&_img]:my-0 [&_p]:my-0",
             fullWidth && "max-w-full",
-            transparent && "bg-transparent"
+            transparent && "bg-transparent",
           )}
         >
           {children}

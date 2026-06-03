@@ -1,0 +1,35 @@
+---
+date: 2025-11-03
+title: Advanced Filtering for Public Traces and Observations API
+badge: Launch Week 4 🚀
+description: The traces endpoint in public API now supports complex JSON-based filtering. 
+ogImage: /images/changelog/2025-11-03-filter-for-observations-api.png
+author: Valeriy
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+**Day 1 of [Launch Week 4](/blog/2025-10-29-launch-week-4)** brings advanced filtering capabilities to the Public API.
+
+Use the new `filter` parameter to filter traces and observations by any field. This enables more sophisticated and flexible trace and observation queries.
+
+## Key features
+
+- **JSON-encoded filtering**: Pass complex filter objects supporting datetime, string, number, and array filter types
+- **Full backward compatibility**: Legacy query parameters continue to work; advanced filters take precedence when both are provided
+- **Schema validation**: Built-in validation ensures filter parameters are correctly formatted
+- **Filter merging**: Advanced and legacy filters can be combined seamlessly
+
+This enhancement allows you to perform more precise data retrieval from the public API while maintaining compatibility with existing integrations.
+
+## Learn more
+
+import { Calendar, Book } from "lucide-react";
+
+<Cards num={1}>
+  <Card title="Traces API Reference" href="https://api.reference.langfuse.com/#tag/trace/get/api/public/traces" icon={<Book />} />
+  <Card title="Observations API Reference" href="https://api.reference.langfuse.com/#tag/observation/get/api/public/observations" icon={<Book />} />
+  <Card title="See all Launch Week releases" href="/blog/2025-10-29-launch-week-4" icon={<Calendar />} />
+</Cards>
