@@ -34,7 +34,7 @@ export function Hero() {
               highlightClassName="mix-blend-multiply"
               className="max-[499px]:pr-1.75"
             >
-              LLM
+              AI
             </TextHighlight>
             <TextHighlight
               highlightClassName="mix-blend-multiply"
@@ -57,8 +57,8 @@ export function Hero() {
         ></Heading>
         <div className="flex flex-col gap-6">
           <Text className="max-w-xl">
-            Debug AI applications and agents in minutes. Spot issues before your
-            users do. Collaborate with your team to continuously improve on
+            Debug LLM applications and agents in minutes. Spot issues before
+            your users do. Collaborate with your team to continuously improve on
             cost, latency and quality.{" "}
             <span className="hidden md:inline">
               Any model, any framework. Based on OpenTelemetry.

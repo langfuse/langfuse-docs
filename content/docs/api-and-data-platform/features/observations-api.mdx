@@ -59,19 +59,20 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 
 #### Available Field Groups
 
-| Group      | Fields                                                                                  |
-| ---------- | --------------------------------------------------------------------------------------- |
-| `core`     | Always included: id, traceId, startTime, endTime, projectId, parentObservationId, type  |
-| `basic`    | name, level, statusMessage, version, environment, bookmarked, public, userId, sessionId |
-| `time`     | completionStartTime, createdAt, updatedAt                                               |
-| `io`       | input, output                                                                           |
-| `metadata` | metadata                                                                                |
-| `model`    | providedModelName, internalModelId, modelParameters                                     |
-| `usage`    | usageDetails, costDetails, totalCost                                                    |
-| `prompt`   | promptId, promptName, promptVersion                                                     |
-| `metrics`  | latency, timeToFirstToken                                                               |
+| Group           | Fields                                                                                                                 |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `core`          | Always included: id, traceId, startTime, endTime, projectId, parentObservationId, type                                 |
+| `basic`         | name, level, statusMessage, version, environment, bookmarked, public, userId, sessionId                                |
+| `time`          | completionStartTime, createdAt, updatedAt                                                                              |
+| `io`            | input, output                                                                                                          |
+| `metadata`      | metadata                                                                                                               |
+| `model`         | providedModelName, internalModelId, modelParameters                                                                    |
+| `usage`         | usageDetails, inputUsage, outputUsage, totalUsage, costDetails, inputCost, outputCost, totalCost, usagePricingTierName |
+| `prompt`        | promptId, promptName, promptVersion                                                                                    |
+| `metrics`       | latency, timeToFirstToken                                                                                              |
+| `trace_context` | tags, release, traceName                                                                                               |
 
-If `fields` is not specified, `core` and `basic` field groups are returned by default.
+If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response — not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`. Note that `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision — cast them to a numeric type in your pipeline.
 
 **2. Cursor-Based Pagination**
 
@@ -187,14 +188,16 @@ With all fields included
       "statusMessage": "",
       "version": "",
       "environment": "default",
+      "bookmarked": false,
+      "public": false,
       "completionStartTime": "2025-12-17T16:09:00.995Z",
       "createdAt": "2025-12-17T16:09:00.875Z",
       "updatedAt": "2025-12-17T16:09:01.456Z",
       "input": "{\"messages\":[{\"role\":\"user\",\"content\":\"Perfect.\"}]}",
       "output": "{\"role\":\"assistant\",\"content\":\"You're all set. Have a great day!\"}",
       "metadata": {},
-      "model": "gpt-4o",
-      "internalModelId": "",
+      "providedModelName": "gpt-4o",
+      "internalModelId": "clm1a2b3c4d5e6f7g8h9i0j1",
       "modelParameters": {
         "temperature": 0.2
       },
@@ -207,13 +210,13 @@ With all fields included
       "outputUsage": 68,
       "totalUsage": 166,
       "costDetails": {
-        "input": 0.000196,
-        "output": 0.000204,
-        "total": 0.00083
+        "input": 0.00049,
+        "output": 0.00204,
+        "total": 0.00253
       },
-      "inputCost": 0.000196,
-      "outputCost": 0.000204,
-      "totalCost": 0.00083,
+      "inputCost": 0.00049,
+      "outputCost": 0.00204,
+      "totalCost": 0.00253,
       "promptId": "",
       "promptName": "",
       "promptVersion": null,
@@ -221,10 +224,14 @@ With all fields included
       "timeToFirstToken": 0.12,
       "userId": "",
       "sessionId": "support-chat-session",
-      "modelId": null,
-      "inputPrice": null,
-      "outputPrice": null,
-      "totalPrice": null
+      "modelId": "clm1a2b3c4d5e6f7g8h9i0j1",
+      "inputPrice": "0.000005",
+      "outputPrice": "0.00003",
+      "totalPrice": null,
+      "usagePricingTierName": null,
+      "tags": ["support", "chat"],
+      "release": "v1.4.2",
+      "traceName": "support-chat"
     }
   ],
   "meta": {
