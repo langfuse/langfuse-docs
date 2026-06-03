@@ -13,10 +13,10 @@ category: Integrations
 > **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source AI engineering platform. It helps teams trace agentic applications, debug issues, evaluate quality, and monitor costs in production.
 
 <Callout type="info" title="Install via the Codex plugin marketplace">
-The easiest way to set this up is the [Langfuse Codex Plugin](https://github.com/langfuse/langfuse-codex-plugin). Add the marketplace and enable the plugin:
+The easiest way to set this up is the [Langfuse Codex Plugin](https://github.com/langfuse/codex-observability-plugin). Add the marketplace and enable the plugin:
 
 ```bash
-codex plugin marketplace add langfuse/langfuse-codex-plugin
+codex plugin marketplace add langfuse/codex-observability-plugin
 ```
 
 Then enable plugin hooks and the tracing plugin in `~/.codex/config.toml`, and set your Langfuse keys (full steps below). Requires Node.js 22+ and Codex 0.128+.
@@ -61,7 +61,7 @@ Tracing is **opt-in** via the `TRACE_TO_LANGFUSE` environment variable. The hook
 Add the Langfuse marketplace via the Codex CLI:
 
 ```bash
-codex plugin marketplace add langfuse/langfuse-codex-plugin
+codex plugin marketplace add langfuse/codex-observability-plugin
 ```
 
 ### Enable the plugin
@@ -72,7 +72,7 @@ Enable plugin hooks and the tracing plugin globally in `~/.codex/config.toml`, o
 [features]
 plugin_hooks = true
 
-[plugins."tracing@langfuse-codex-plugin"]
+[plugins."tracing@codex-observability-plugin"]
 enabled = true
 ```
 
@@ -141,7 +141,7 @@ The credential variables also accept a `LANGFUSE_CODEX_` prefix (for example `LA
 
 ### No traces appearing in Langfuse
 
-1. **The plugin isn't enabled.** Confirm `plugin_hooks = true` and the `tracing@langfuse-codex-plugin` plugin is enabled in `~/.codex/config.toml`.
+1. **The plugin isn't enabled.** Confirm `plugin_hooks = true` and the `tracing@codex-observability-plugin` plugin is enabled in `~/.codex/config.toml`.
 2. **Tracing isn't turned on.** `TRACE_TO_LANGFUSE` must be the exact string `"true"` and visible to the Codex process. Also verify the public key starts with `pk-lf-`.
 3. **Enable debug logging.** Set `LANGFUSE_CODEX_DEBUG=true` to log to stderr and surface the actual cause.
 
@@ -160,7 +160,7 @@ When enabled, the plugin uploads completed Codex transcript data to Langfuse, in
 
 ## Resources
 
-- [Langfuse Codex Plugin (GitHub)](https://github.com/langfuse/langfuse-codex-plugin)
+- [Langfuse Codex Plugin (GitHub)](https://github.com/langfuse/codex-observability-plugin)
 - [OpenAI Codex documentation](https://github.com/openai/codex)
 - [Langfuse Sessions](/docs/observability/features/sessions)
 - [Langfuse TypeScript SDK](/docs/observability/sdk/overview)
