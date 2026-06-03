@@ -70,7 +70,7 @@ const resourcesFeatured: FeaturedItem = {
   ),
   title: "Langfuse joins ClickHouse",
   description:
-    "Our goal continues to be building the best LLM engineering platform",
+    "Our goal continues to be building the best AI engineering platform",
   cta: "Read story",
   href: "/blog/joining-clickhouse",
 };

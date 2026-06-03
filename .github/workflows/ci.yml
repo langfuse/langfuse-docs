@@ -5,6 +5,10 @@ name: "CI"
 on:
   pull_request:
   merge_group:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   # Add pre-job to skip duplicate actions in merge queues
@@ -17,7 +21,8 @@ jobs:
       - id: skip_check
         uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5.3.1
         with:
-          do_not_skip: '["workflow_dispatch"]'
+          skip_after_successful_duplicate: "true"
+          do_not_skip: '["workflow_dispatch", "schedule", "merge_group"]'
 
   check_h1:
     needs:
@@ -221,3 +226,51 @@ jobs:
         if: ${{ contains(needs.*.result, 'failure') }}
         run: exit 1
         working-directory: .
+      - name: Notify Slack
+        if: failure() && github.event_name == 'push' && (github.ref == 'refs/heads/main')
+        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ CI failed on ${{ github.ref_name }}",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "❌ CI Failed",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n`${{ github.ref_name }}`"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Triggered by:*\n${{ github.actor }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Workflow Logs",
+                        "emoji": true
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                      "style": "danger"
+                    }
+                  ]
+                }
+              ]
+            }
