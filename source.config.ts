@@ -176,6 +176,11 @@ export const academy = defineDocs({
   docs: { schema: sidebarFrontmatterSchema },
 });
 
+export const workshop = defineDocs({
+  dir: "content/workshop",
+  docs: { schema: sidebarFrontmatterSchema },
+});
+
 export const marketing = defineDocs({
   dir: "content/marketing",
   docs: { schema: marketingFrontmatterSchema },

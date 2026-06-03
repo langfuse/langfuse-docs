@@ -27,14 +27,14 @@ function PageFooterNavLink({ item, direction }: PageFooterNavLinkProps) {
 
   return (
     <Link
-      className="relative flex items-center p-1 group button-wrapper cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="group relative flex h-full min-h-18 items-center p-1 group button-wrapper cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       href={item.url}
       aria-label={`${label}: ${item.name}`}
     >
       <HoverCorners />
       <div
         className={cn(
-          "group w-full flex min-h-18 min-w-0 items-center gap-3 border border-line-structure bg-surface-bg p-4 no-underline shadow-lg/5 transition-colors hover:border-line-cta hover:bg-surface-1",
+          "w-full h-full flex min-w-0 items-center gap-3 border border-line-structure bg-surface-bg p-4 no-underline shadow-lg/5 transition-colors hover:border-line-cta hover:bg-surface-1",
           direction === "next" ? "justify-end text-right" : "text-left",
         )}
       >
@@ -73,7 +73,10 @@ export function PageFooterNav({
   if (!previous && !next) return null;
 
   return (
-    <div className={cn("grid gap-3 sm:grid-cols-2", className)} {...props}>
+    <div
+      className={cn("grid auto-rows-fr gap-3 sm:grid-cols-2", className)}
+      {...props}
+    >
       {previous ? (
         <PageFooterNavLink item={previous} direction="previous" />
       ) : (
