@@ -182,6 +182,12 @@ export function LaunchWeek5Styles() {
         box-shadow: 0 0 0 0 rgba(83,138,46,0.55);
         animation: lw5-pulse 1.8s ease-out infinite;
       }
+      .lw5-page .lw5-pill.lw5-pill-live {
+        padding: 2px 8px; gap: 5px; font-size: 10px;
+      }
+      .lw5-page .lw5-pill.lw5-pill-live .lw5-pulse {
+        width: 5px; height: 5px;
+      }
       @keyframes lw5-pulse {
         0%   { box-shadow: 0 0 0 0 rgba(83,138,46,0.55); }
         70%  { box-shadow: 0 0 0 10px rgba(83,138,46,0); }
@@ -234,6 +240,11 @@ export function LaunchWeek5Styles() {
         transition: border-color 150ms, transform 150ms;
       }
       .lw5-day-card:hover { border-color: var(--line-cta); }
+      .lw5-day-card[data-state="live"] {
+        background: var(--surface-bg);
+        border-color: var(--line-cta);
+      }
+      .lw5-day-card[data-state="live"] .lw5-day-num { color: var(--text-primary); }
       .lw5-day-card[data-state="locked"] .lw5-day-num { color: var(--text-disabled); }
       .lw5-day-card[data-state="locked"]::before {
         content: ""; position: absolute; inset: 0;

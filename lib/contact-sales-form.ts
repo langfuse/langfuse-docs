@@ -13,112 +13,201 @@ function sanitizeForEmailHeader(input: string): string {
 }
 
 export const DEPLOYMENT_OPTIONS = [
-  { value: "not-decided", label: "Not decided yet" },
-  { value: "self-hosted", label: "Self-Hosted" },
-  { value: "cloud", label: "Cloud (SaaS)" },
+  { value: "cloud", label: "Cloud" },
+  { value: "self-hosted", label: "Self-hosted" },
+  { value: "undecided", label: "Undecided" },
 ] as const;
 
-export const ENTERPRISE_REQUIREMENTS = [
-  { value: "none", label: "None (Want to use Core, Pro, Open Source)" },
-  { value: "legal-dpa", label: "Need for custom legal terms or DPA" },
+export const BUILDING_OPTIONS = [
   {
-    value: "security-review",
-    label: "Must complete a security questionnaire/review",
+    value: "customer-facing-ai",
+    label: "Customer-facing AI product or agent (in or near production)",
   },
   {
-    value: "high-usage",
-    label: "Anticipate very high usage and need custom plan",
+    value: "internal-assistant",
+    label: "Internal assistant/copilot for employees",
   },
   {
-    value: "enterprise-features",
-    label: "Need features in enterprise versions",
+    value: "platform",
+    label: "A platform serving multiple teams building with LLMs",
   },
-  { value: "rfp", label: "Competitive RfP" },
+  {
+    value: "prototyping",
+    label: "Still prototyping — nothing in production yet",
+  },
+] as const;
+
+export const CURRENT_SETUP_OPTIONS = [
+  { value: "langfuse-cloud", label: "Already using Langfuse Cloud" },
+  {
+    value: "langfuse-self-hosted",
+    label: "Already self-hosting Langfuse (OSS)",
+  },
+  { value: "own-tooling", label: "Built our own tracing/eval tooling" },
+  { value: "other-tool", label: "Using another tool" },
+  { value: "nothing-yet", label: "Nothing yet" },
+] as const;
+
+export const LLM_APP_COUNT_OPTIONS = [
+  { value: "0", label: "0" },
+  { value: "1-5", label: "1–5" },
+  { value: "6-20", label: "6–20" },
+  { value: "20-plus", label: "20+" },
+] as const;
+
+export const USER_COUNT_OPTIONS = [
+  { value: "1-5", label: "1–5" },
+  { value: "6-25", label: "6–25" },
+  { value: "26-100", label: "26–100" },
+  { value: "100-plus", label: "100+" },
 ] as const;
 
 export const FORM_FIELDS = {
   name: {
     name: "name" as const,
-    label: "Your name",
+    label: "Name",
     placeholder: "John Doe",
     required: true,
   },
   email: {
     name: "email" as const,
-    label: "Email address",
-    placeholder: "john@company.com",
+    label: "Work email",
+    placeholder: "your.name@acme.com",
     required: true,
   },
   company: {
     name: "company" as const,
-    label: "Company/Project",
+    label: "Company name",
     placeholder: "Acme Inc.",
     required: true,
   },
-  message: {
-    name: "message" as const,
-    label: "What would you like to learn/understand in the conversation?",
-    placeholder:
-      "Please share anything that will help prepare for our meeting.",
+  building: {
+    name: "building" as const,
+    label: "What are you building?",
+    placeholder: "Select an option",
     required: true,
+    options: BUILDING_OPTIONS,
   },
-  usage: {
-    name: "usage" as const,
-    label: "How have you used Langfuse so far?",
-    placeholder: "e.g., Evaluated the product, using in production...",
+  currentSetup: {
+    name: "currentSetup" as const,
+    label: "Your current setup",
+    placeholder: "Select an option",
     required: true,
+    options: CURRENT_SETUP_OPTIONS,
+  },
+  currentSetupOther: {
+    name: "currentSetupOther" as const,
+    label: "Which tool?",
+    placeholder: "e.g., LangSmith, Braintrust, custom internal tool...",
+    required: false,
+  },
+  productionAppCount: {
+    name: "productionAppCount" as const,
+    label: "In production",
+    placeholder: "Select",
+    required: true,
+    options: LLM_APP_COUNT_OPTIONS,
+  },
+  plannedAppCount: {
+    name: "plannedAppCount" as const,
+    label: "Planned in future",
+    placeholder: "Select",
+    required: true,
+    options: LLM_APP_COUNT_OPTIONS,
   },
   deployment: {
     name: "deployment" as const,
-    label: "Where do you (want to) use Langfuse?",
+    label: "Where do you want to run Langfuse?",
     placeholder: "Select an option",
     required: true,
     options: DEPLOYMENT_OPTIONS,
   },
   userCount: {
     name: "userCount" as const,
-    label: "How many users are you planning to onboard in the next 6 months?",
-    placeholder: "e.g., 10, 50, 100+",
+    label: "How many people would use Langfuse?",
+    placeholder: "Select an option",
     required: true,
+    options: USER_COUNT_OPTIONS,
   },
-  enterpriseRequirements: {
-    name: "enterpriseRequirements" as const,
-    label:
-      "Do you have specific requirements that would necessitate the Enterprise version?",
-    required: true,
-    options: ENTERPRISE_REQUIREMENTS,
-  },
-  additionalNotes: {
-    name: "additionalNotes" as const,
-    label: "Additional Notes",
+  message: {
+    name: "message" as const,
+    label: "What do you want to get out of the conversation?",
     placeholder:
-      "Please share anything that will help prepare for our meeting.",
-    required: false,
+      "e.g. We're scaling 3 agents to production and need better evals + cost tracking across teams.",
+    required: true,
   },
 } as const;
 
-export const contactFormSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200),
-  email: z.string().email("Invalid email address").max(254),
-  // Company is sanitized because it's used in the email subject header
-  company: z
+const optionValues = <T extends readonly { value: string }[]>(options: T) =>
+  options.map((option) => option.value);
+
+const optionValueSchema = <T extends readonly { value: string }[]>(
+  options: T,
+  message: string,
+) =>
+  z
     .string()
-    .min(1, "Company/Project is required")
-    .max(200)
-    .transform(sanitizeForEmailHeader),
-  message: z
-    .string()
-    .min(1, "Please tell us what you'd like to learn")
-    .max(5000),
-  usage: z.string().min(1, "Please describe your Langfuse usage").max(2000),
-  deployment: z.string().min(1, "Please select a deployment option").max(100),
-  userCount: z.string().min(1, "Please provide expected user count").max(100),
-  enterpriseRequirements: z
-    .array(z.string().max(100))
-    .min(1, "Please select at least one option")
-    .max(10),
-  additionalNotes: z.string().max(5000).optional(),
-});
+    .min(1, message)
+    .refine((value) => optionValues(options).includes(value), message);
+
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+export const contactFormSchema = z
+  .object({
+    name: z.string().min(1, "Name is required").max(200),
+    email: z.string().email("Invalid email address").max(254),
+    // Company is sanitized because it's used in the email subject header
+    company: z
+      .string()
+      .min(1, "Company name is required")
+      .max(200)
+      .transform(sanitizeForEmailHeader),
+    building: optionValueSchema(
+      BUILDING_OPTIONS,
+      "Please select what you are building",
+    ),
+    currentSetup: optionValueSchema(
+      CURRENT_SETUP_OPTIONS,
+      "Please select your current setup",
+    ),
+    currentSetupOther: z.string().max(200).optional(),
+    productionAppCount: optionValueSchema(
+      LLM_APP_COUNT_OPTIONS,
+      "Please select current production usage",
+    ),
+    plannedAppCount: optionValueSchema(
+      LLM_APP_COUNT_OPTIONS,
+      "Please select planned usage",
+    ),
+    deployment: optionValueSchema(
+      DEPLOYMENT_OPTIONS,
+      "Please select a deployment option",
+    ),
+    userCount: optionValueSchema(
+      USER_COUNT_OPTIONS,
+      "Please select expected user count",
+    ),
+    message: z
+      .string()
+      .min(1, "Please tell us what you want to get out of the conversation")
+      .max(5000),
+  })
+  .superRefine((data, ctx) => {
+    if (data.currentSetup === "other-tool" && !data.currentSetupOther?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["currentSetupOther"],
+        message: "Please tell us which tool you are using",
+      });
+    }
+  });
 
 export type ContactFormData = z.infer<typeof contactFormSchema>;
 
@@ -126,43 +215,73 @@ export const defaultFormValues: ContactFormData = {
   name: "",
   email: "",
   company: "",
-  message: "",
-  usage: "",
+  building: "",
+  currentSetup: "",
+  currentSetupOther: "",
+  productionAppCount: "",
+  plannedAppCount: "",
   deployment: "",
   userCount: "",
-  enterpriseRequirements: [],
-  additionalNotes: "",
+  message: "",
 };
 
-export function formatFormDataForEmail(data: ContactFormData): string {
-  const fields = [
+function getEmailFields(data: ContactFormData) {
+  const getLabel = <T extends readonly { value: string; label: string }[]>(
+    options: T,
+    value: string,
+  ) => options.find((option) => option.value === value)?.label ?? value;
+
+  return [
     { label: FORM_FIELDS.name.label, value: data.name },
     { label: FORM_FIELDS.email.label, value: data.email },
     { label: FORM_FIELDS.company.label, value: data.company },
-    { label: FORM_FIELDS.message.label, value: data.message },
-    { label: FORM_FIELDS.usage.label, value: data.usage },
+    {
+      label: FORM_FIELDS.building.label,
+      value: getLabel(BUILDING_OPTIONS, data.building),
+    },
+    {
+      label: FORM_FIELDS.currentSetup.label,
+      value:
+        getLabel(CURRENT_SETUP_OPTIONS, data.currentSetup) +
+        (data.currentSetup === "other-tool" && data.currentSetupOther
+          ? ` (${data.currentSetupOther})`
+          : ""),
+    },
+    {
+      label: "Agents/LLM features in production today",
+      value: getLabel(LLM_APP_COUNT_OPTIONS, data.productionAppCount),
+    },
+    {
+      label: "Agents/LLM features planned in the future",
+      value: getLabel(LLM_APP_COUNT_OPTIONS, data.plannedAppCount),
+    },
     {
       label: FORM_FIELDS.deployment.label,
-      value:
-        DEPLOYMENT_OPTIONS.find((o) => o.value === data.deployment)?.label ??
-        data.deployment,
-    },
-    { label: FORM_FIELDS.userCount.label, value: data.userCount },
-    {
-      label: FORM_FIELDS.enterpriseRequirements.label,
-      value: data.enterpriseRequirements
-        .map(
-          (v) => ENTERPRISE_REQUIREMENTS.find((o) => o.value === v)?.label ?? v,
-        )
-        .join(", "),
+      value: getLabel(DEPLOYMENT_OPTIONS, data.deployment),
     },
     {
-      label: FORM_FIELDS.additionalNotes.label,
-      value: data.additionalNotes || "N/A",
+      label: FORM_FIELDS.userCount.label,
+      value: getLabel(USER_COUNT_OPTIONS, data.userCount),
     },
+    { label: FORM_FIELDS.message.label, value: data.message },
   ];
+}
 
-  return fields.map((f) => `**${f.label}**\n${f.value}`).join("\n\n");
+export function formatFormDataForEmail(data: ContactFormData): string {
+  return getEmailFields(data)
+    .map((field) => `${field.label}\n${field.value}`)
+    .join("\n\n");
+}
+
+export function formatFormDataForEmailHtml(data: ContactFormData): string {
+  return getEmailFields(data)
+    .map(
+      (field) =>
+        `<p><strong>${escapeHtml(field.label)}</strong><br />${escapeHtml(
+          field.value,
+        ).replace(/\r?\n/g, "<br />")}</p>`,
+    )
+    .join("\n");
 }
 
 export function generateEmailContent(data: ContactFormData): string {
@@ -178,6 +297,22 @@ Team Langfuse
 ---
 
 Your request:
+
+${formattedData}`;
+}
+
+export function generateEmailHtmlContent(data: ContactFormData): string {
+  const formattedData = formatFormDataForEmailHtml(data);
+
+  return `<p>Dear ${escapeHtml(data.name)},</p>
+
+<p>Thanks for reaching out. We will respond shortly. Feel free to reply to this message if you want to add any additional context.</p>
+
+<p>Best<br />Team Langfuse</p>
+
+<hr />
+
+<p>Your request:</p>
 
 ${formattedData}`;
 }
