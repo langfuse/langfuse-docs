@@ -39,6 +39,8 @@ The [Agent Skill](/docs/api-and-data-platform/features/agent-skill) follows the 
 
 A skill is a self-contained folder with a `SKILL.md` entrypoint plus reference docs for specific workflows. Coding agents produce better results with it installed because they follow Langfuse's documented best practices instead of guessing the API.
 
+Those reference docs include a guide on using the [Langfuse CLI](#cli), so the skill teaches your agent the exact commands to query traces, manage prompts, and run evaluators rather than leaving it to improvise HTTP requests.
+
 The skill uses progressive disclosure: only the frontmatter sits in the agent's context, and the full instructions load on demand when a task is relevant. Context stays small until the agent actually needs the details.
 
 <Cards>
