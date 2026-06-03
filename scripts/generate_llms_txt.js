@@ -5,7 +5,7 @@ const path = require("path");
 const SITEMAP_PATH = "public/sitemap-0.xml";
 const TITLE = "Langfuse";
 const INTRO_DESCRIPTION =
-  "Langfuse is an **open-source LLM engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
+  "Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
 const MAIN_SECTIONS = ["docs", "integrations"];
 const OPTIONAL_SECTIONS = ["self-hosting"];
 
