@@ -39,6 +39,7 @@ const menuItems: {
       { name: "Prompt Management", href: "/docs/prompt-management/overview" },
       { name: "Evaluations", href: "/docs/evaluation/overview" },
       { name: "Metrics", href: "/docs/metrics/overview" },
+      { name: "Langfuse for Agents", href: "/agents" },
       {
         name: "Playground",
         href: "/docs/prompt-management/features/playground",
