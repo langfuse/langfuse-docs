@@ -138,7 +138,9 @@ const formatCodexToml = () => {
       }
       if (server.env) {
         lines.push(`[mcp_servers.${name}.env]`);
-        for (const [envName, envValue] of Object.entries(sortObject(server.env))) {
+        for (const [envName, envValue] of Object.entries(
+          sortObject(server.env),
+        )) {
           lines.push(`${envName} = ${JSON.stringify(envValue)}`);
         }
       }
@@ -149,7 +151,9 @@ const formatCodexToml = () => {
         for (const [headerName, headerValue] of Object.entries(
           sortObject(server.headers),
         )) {
-          lines.push(`${JSON.stringify(headerName)} = ${JSON.stringify(headerValue)}`);
+          lines.push(
+            `${JSON.stringify(headerName)} = ${JSON.stringify(headerValue)}`,
+          );
         }
       }
     }
@@ -165,22 +169,21 @@ const formatClaudeSettings = () =>
 
 const formatCursorEnvironment = () => {
   const cursorEnvironment = config.cursor?.environment ?? {};
-  const terminals =
-    cursorEnvironment.terminals ??
-    [
-      {
-        name: "Development Terminal",
-        command: config.shared.devCommand,
-        ...(config.shared.devTerminalDescription
-          ? { description: config.shared.devTerminalDescription }
-          : {}),
-      },
-    ];
+  const terminals = cursorEnvironment.terminals ?? [
+    {
+      name: "Development Terminal",
+      command: config.shared.devCommand,
+      ...(config.shared.devTerminalDescription
+        ? { description: config.shared.devTerminalDescription }
+        : {}),
+    },
+  ];
 
   return (
     JSON.stringify(
       {
-        agentCanUpdateSnapshot: cursorEnvironment.agentCanUpdateSnapshot ?? false,
+        agentCanUpdateSnapshot:
+          cursorEnvironment.agentCanUpdateSnapshot ?? false,
         install: config.shared.setupScript,
         terminals,
       },
@@ -437,7 +440,9 @@ for (const output of symlinkOutputs) {
         error.code === "ENOENT"
       ) {
         hasMismatch = true;
-        console.error(`Missing symlink shim: ${output.path}. Run "pnpm run agents:sync".`);
+        console.error(
+          `Missing symlink shim: ${output.path}. Run "pnpm run agents:sync".`,
+        );
         continue;
       }
 
@@ -496,7 +501,9 @@ for (const directory of managedDirectoryEntries) {
   if (checkMode) {
     hasMismatch = true;
     for (const child of unexpectedChildren) {
-      console.error(`Unexpected generated shim: ${resolve(directory.path, child)}`);
+      console.error(
+        `Unexpected generated shim: ${resolve(directory.path, child)}`,
+      );
     }
     continue;
   }

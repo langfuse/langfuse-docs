@@ -1,4 +1,4 @@
 export function stripMdxForPlainMarkdown(
   content: string,
-  options?: { unwrapCalloutsForPlainMd?: boolean }
+  options?: { unwrapCalloutsForPlainMd?: boolean },
 ): string;

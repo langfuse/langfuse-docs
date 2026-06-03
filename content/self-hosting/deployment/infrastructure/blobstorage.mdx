@@ -306,24 +306,24 @@ Langfuse provides a native OCI Object Storage integration using the OCI SDK, whi
 
 To enable the native OCI integration, set `LANGFUSE_USE_OCI_NATIVE_OBJECT_STORAGE=true` and choose an authentication method via `LANGFUSE_OCI_AUTH_TYPE`.
 
-| Variable                                 | Required / Default | Description                                                                                                                                     |
-| ---------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_USE_OCI_NATIVE_OBJECT_STORAGE` | `false`            | Set to `true` to enable the native OCI Object Storage integration.                                                                              |
-| `LANGFUSE_OCI_AUTH_TYPE`                  | Required           | Authentication method. One of: `workload_identity`, `instance_principal`, `resource_principal`, `oci_profile`, `session_token`.                  |
-| `LANGFUSE_OCI_CONFIG_FILE`               |                    | Path to the OCI config file. Required for `oci_profile` and `session_token` auth types.                                                         |
-| `LANGFUSE_OCI_CONFIG_PROFILE`            |                    | OCI config profile name. Used with `oci_profile` and `session_token` auth types.                                                                |
+| Variable                                 | Required / Default | Description                                                                                                                     |
+| ---------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_USE_OCI_NATIVE_OBJECT_STORAGE` | `false`            | Set to `true` to enable the native OCI Object Storage integration.                                                              |
+| `LANGFUSE_OCI_AUTH_TYPE`                 | Required           | Authentication method. One of: `workload_identity`, `instance_principal`, `resource_principal`, `oci_profile`, `session_token`. |
+| `LANGFUSE_OCI_CONFIG_FILE`               |                    | Path to the OCI config file. Required for `oci_profile` and `session_token` auth types.                                         |
+| `LANGFUSE_OCI_CONFIG_PROFILE`            |                    | OCI config profile name. Used with `oci_profile` and `session_token` auth types.                                                |
 
 The standard `LANGFUSE_S3_*` environment variables (bucket, region, endpoint, prefix, force path style) are reused for OCI Object Storage. Do not set `*_ACCESS_KEY_ID` / `*_SECRET_ACCESS_KEY` when using the native OCI auth methods.
 
 #### Authentication Methods
 
-| Auth Type            | Use Case                                                                                      |
-| -------------------- | --------------------------------------------------------------------------------------------- |
-| `instance_principal` | Running on OCI Compute with IAM dynamic group policies. Recommended for production on OCI.    |
-| `workload_identity`  | Running on OKE (Oracle Kubernetes Engine) with OCI Workload Identity configured.               |
+| Auth Type            | Use Case                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| `instance_principal` | Running on OCI Compute with IAM dynamic group policies. Recommended for production on OCI.              |
+| `workload_identity`  | Running on OKE (Oracle Kubernetes Engine) with OCI Workload Identity configured.                        |
 | `resource_principal` | Running inside an OCI managed service or runtime that injects Resource Principal environment variables. |
-| `oci_profile`        | Local development using an OCI config file with a named profile.                               |
-| `session_token`      | Short-lived user authentication via `oci session authenticate`. Suited for interactive/dev use. |
+| `oci_profile`        | Local development using an OCI config file with a named profile.                                        |
+| `session_token`      | Short-lived user authentication via `oci session authenticate`. Suited for interactive/dev use.         |
 
 #### Example Configuration (Instance Principal)
 
@@ -359,6 +359,7 @@ The bucket lifecycle expiration period determines how long these updates can be 
 Once the raw events are deleted by the lifecycle policy, delta-updates will create duplicate entries instead of merging.
 
 On Langfuse Cloud, this is set to 30 days. For details on update behavior, see [How to update traces, observations, and scores?](/faq/all/tracing-data-updates).
+
 </Callout>
 
 Configure a lifecycle expiration rule for your storage provider:

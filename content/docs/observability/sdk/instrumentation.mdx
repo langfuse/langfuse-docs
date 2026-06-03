@@ -14,7 +14,7 @@ There are two main ways to instrument your application with the Langfuse SDKs:
 - Using our **[native integrations](/integrations)** for popular LLM and agent libraries such as OpenAI, LangChain or the Vercel AI SDK. They automatically create observations and traces and capture prompts, responses, usage, and errors.
 - Manually instrumenting your application with the Langfuse SDK. The SDKs provide 3 ways to create observations:
   - **[Context manager](#context-manager)**
-  - **[Observe wrapper](#observe-wrapper)** 
+  - **[Observe wrapper](#observe-wrapper)**
   - **[Manual observations](#manual-observations)**
 
 All approaches are interoperable. You can nest a decorator-created observation inside a context manager or mix manual spans with our [native integrations](/integrations).
@@ -25,13 +25,13 @@ Instrument your application with the Langfuse SDK using the following methods:
 
 ### Context manager [#context-manager]
 
-The context manager allows you to create a new span and set it as the currently active observation in the OTel context for its duration. All new observations created within this block will automatically be its children. 
+The context manager allows you to create a new span and set it as the currently active observation in the OTel context for its duration. All new observations created within this block will automatically be its children.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 [`start_as_current_observation()`](https://python.reference.langfuse.com/langfuse#Langfuse.start_as_current_observation) is the primary way to create observations while ensuring the active OpenTelemetry context is updated. Any child observations created inside the `with` block inherit the parent automatically.
 
-Observations can have different [types](/docs/observability/features/observation-types) by setting the `as_type` parameter. 
+Observations can have different [types](/docs/observability/features/observation-types) by setting the `as_type` parameter.
 
 ```python
 from langfuse import get_client, propagate_attributes
@@ -58,7 +58,7 @@ with langfuse.start_as_current_observation(
 <Tab title="JS/TS SDK">
 [`startActiveObservation`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startActiveObservation.html) accepts a callback, makes the new span active for the callback scope, and ends it automatically, even across async boundaries.
 
-Observations can have different [types](/docs/observability/features/observation-types) by setting the `asType` parameter. 
+Observations can have different [types](/docs/observability/features/observation-types) by setting the `asType` parameter.
 
 ```ts /startActiveObservation/
 import { startActiveObservation, startObservation } from "@langfuse/tracing";
@@ -76,6 +76,7 @@ await startActiveObservation("user-request", async (span) => {
   span.update({ output: "Answered." });
 });
 ```
+
 </Tab>
 </LangTabs>
 
@@ -88,7 +89,7 @@ The observe decorator is an easy way to automatically capture inputs, outputs, t
 
 Use [`observe()`](https://python.reference.langfuse.com/langfuse#observe) to decorate a function and automatically capture inputs, outputs, timings, and errors.
 
-Observations can have different [types](/docs/observability/features/observation-types) by setting the `as_type` parameter. 
+Observations can have different [types](/docs/observability/features/observation-types) by setting the `as_type` parameter.
 
 ```python /@observe/
 from langfuse import observe
@@ -110,7 +111,7 @@ Capturing large inputs/outputs may add overhead. Disable IO capture per decorato
 
 Use [`observe()`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.observe.html) to wrap a function and automatically capture inputs, outputs, timings, and errors.
 
-Observations can have different [types](/docs/observability/features/observation-types) by setting the `asType` parameter. 
+Observations can have different [types](/docs/observability/features/observation-types) by setting the `asType` parameter.
 
 ```ts /observe/ /updateActiveObservation/
 import { observe, updateActiveObservation } from "@langfuse/tracing";
@@ -225,7 +226,7 @@ with langfuse.start_as_current_observation(as_type="span", name="main-operation"
 </Tab>
 <Tab title="JS/TS SDK">
 
-[`startObservation`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#startobservation) gives you full control over creating observations. 
+[`startObservation`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#startobservation) gives you full control over creating observations.
 
 You can pass the `asType` parameter to specify the [type of observation](/docs/observability/features/observation-types) to create.
 
@@ -291,13 +292,13 @@ span.update({ output: "Successfully answered user request." }).end();
   missing observations in Langfuse.
 </Callout>
 
-
 </Tab>
 </LangTabs>
 
 ## Nesting observations [#nesting-observations]
 
-The Langfuse SDKs methods automatically handle the nesting of observations. 
+The Langfuse SDKs methods automatically handle the nesting of observations.
+
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 
@@ -370,7 +371,6 @@ child_gen.end()
 parent.end()
 ```
 
-
 </Tab>
 <Tab title="JS/TS SDK">
 Nesting happens automatically via OpenTelemetry context propagation. When you create a new observation with [`startActiveObservation`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startActiveObservation.html), it becomes a child of whatever was active at the time.
@@ -392,6 +392,7 @@ await startActiveObservation("outer-process", async () => {
   });
 });
 ```
+
 </Tab>
 </LangTabs>
 
@@ -412,10 +413,10 @@ langfuse = get_client()
 
 with langfuse.start_as_current_observation(as_type="generation", name="llm-call", model="gpt-5-mini") as gen:
     gen.update(input={"prompt": "Why is the sky blue?"})
-    
+
     # ... make LLM call ...
     response_text = "Rayleigh scattering..."
-    
+
     gen.update(
         output=response_text,
         usage_details={"input_tokens": 5, "output_tokens": 50},
@@ -429,7 +430,6 @@ with langfuse.start_as_current_observation(as_type="span", name="data-processing
     # ... more processing ...
     langfuse.update_current_span(output={"result": "final_data"})
 ```
-
 
 </Tab>
 <Tab title="JS/TS SDK">
@@ -445,6 +445,7 @@ await startActiveObservation("user-request", async (span) => {
   });
 });
 ```
+
 </Tab>
 </LangTabs>
 
@@ -484,6 +485,7 @@ with langfuse.start_as_current_observation(as_type="span", name="user-workflow")
 ```
 
 When using the `@observe()` decorator:
+
 ```python /propagate_attributes/
 from langfuse import observe, propagate_attributes
 
@@ -529,6 +531,7 @@ await startActiveObservation("user-workflow", async () => {
   );
 });
 ```
+
 </Tab>
 </LangTabs>
 
@@ -540,6 +543,7 @@ For distributed tracing across multiple services, use the `as_baggage` parameter
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
+
 ```python /as_baggage=True/
 from langfuse import get_client, propagate_attributes
 import requests
@@ -554,8 +558,10 @@ with langfuse.start_as_current_observation(as_type="span", name="api-request"):
     ):
         requests.get("https://service-b.example.com/api")
 ```
+
 </Tab>
 <Tab title="JS/TS SDK">
+
 ```ts /asBaggage/
 import { propagateAttributes, startActiveObservation } from "@langfuse/tracing";
 
@@ -572,6 +578,7 @@ await startActiveObservation("api-request", async () => {
   );
 });
 ```
+
 </Tab>
 </LangTabs>
 
@@ -693,17 +700,18 @@ propagateAttributes(
   }
 );
 ```
+
 </Tab>
 </LangTabs>
 
 ## Trace and observation IDs [#trace-ids]
 
-Langfuse follows the [W3C Trace Context standard](https://www.w3.org/TR/trace-context/): 
+Langfuse follows the [W3C Trace Context standard](https://www.w3.org/TR/trace-context/):
 
 - trace IDs are 32-character lowercase hex strings (16 bytes)
 - observation IDs are 16-character lowercase hex strings (8 bytes)
 
-You cannot set arbitrary observation IDs, but you can generate deterministic trace IDs to correlate with external systems. 
+You cannot set arbitrary observation IDs, but you can generate deterministic trace IDs to correlate with external systems.
 
 See [Trace IDs & Distributed Tracing](/docs/observability/features/trace-ids-and-distributed-tracing) for more information on correlating traces across services.
 
@@ -718,7 +726,7 @@ langfuse = get_client()
 
 external_request_id = "req_12345"
 deterministic_trace_id = langfuse.create_trace_id(seed=external_request_id)
-``` 
+```
 
 Use [`get_current_trace_id()`](https://python.reference.langfuse.com/langfuse#Langfuse.get_current_trace_id) to get the current trace ID and [`get_current_observation_id`](https://python.reference.langfuse.com/langfuse#Langfuse.get_current_observation_id) to get the current observation ID.
 
@@ -733,6 +741,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-op") as curr
     observation_id = langfuse.get_current_observation_id()
     print(trace_id, observation_id)
 ```
+
 </Tab>
 <Tab title="JS/TS SDK">
 Use [`createTraceId`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.createTraceId.html) to generate a deterministic trace ID from a seed.
@@ -767,6 +776,7 @@ await startObservation("run", async (span) => {
   console.log(`Current trace ID: ${traceId}`);
 });
 ```
+
 </Tab>
 </LangTabs>
 
@@ -797,6 +807,7 @@ with langfuse.start_as_current_observation(
 ):
     pass
 ```
+
 </Tab>
 <Tab title="JS/TS SDK">
 
@@ -819,6 +830,7 @@ const span = startObservation(
 
 span.end();
 ```
+
 </Tab>
 </LangTabs>
 
@@ -865,12 +877,8 @@ langfuse = get_client()
 langfuse.shutdown()
 ```
 
-
-
 </Tab>
 <Tab title="JS/TS SDK">
-
-
 
 <Tabs items={["Generic Serverless function", "Vercel Cloud Functions"]}>
 <Tab>
@@ -948,7 +956,6 @@ export async function POST() {
 
 </Tab>
 </Tabs>
-
 
 </Tab>
 </LangTabs>

@@ -28,21 +28,23 @@ export default async function SectionDocPage(props: PageProps) {
   const params = await props.params;
   const { section, slug: slugParam } = params;
   const slug = slugParam ?? [];
-  const isMarketing = MARKETING_SECTIONS.has(section as (typeof MARKETING_SLUGS)[number]);
+  const isMarketing = MARKETING_SECTIONS.has(
+    section as (typeof MARKETING_SLUGS)[number],
+  );
   const effectiveSlug = isMarketing ? [section] : slug;
 
   if (!SECTION_SLUGS.includes(section)) notFound();
   if (DEDICATED_APP_SECTIONS.has(section)) notFound();
 
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result = await loadPage(config.source, effectiveSlug);
   if (!result) notFound();
   const { MDX, page } = result;
 
   const contentWidth: ResolvedContentWidth =
-    (page.data as Record<string, unknown>).contentWidth as ContentWidthType | undefined
-    ?? "default";
+    ((page.data as Record<string, unknown>).contentWidth as
+      | ContentWidthType
+      | undefined) ?? "default";
 
   let bodyClient = <MDX components={getMDXComponents()} />;
 
@@ -55,14 +57,18 @@ export default async function SectionDocPage(props: PageProps) {
               route: p.url,
               name: p.data.title,
               title: p.data.title,
-              frontMatter: primitiveOnly(p.data as unknown as Record<string, unknown>),
+              frontMatter: primitiveOnly(
+                p.data as unknown as Record<string, unknown>,
+              ),
             })),
           ),
           changelogPages: changelogSource.getPages().map((p) => ({
             route: p.url,
             name: p.data.title,
             title: p.data.title,
-            frontMatter: primitiveOnly(p.data as unknown as Record<string, unknown>),
+            frontMatter: primitiveOnly(
+              p.data as unknown as Record<string, unknown>,
+            ),
           })),
         }}
       >
@@ -75,7 +81,7 @@ export default async function SectionDocPage(props: PageProps) {
     <div
       className={cn(
         "mx-auto w-full py-10 md:py-16",
-        contentWidthClasses[contentWidth]
+        contentWidthClasses[contentWidth],
       )}
       data-content-width={contentWidth}
     >
@@ -98,7 +104,12 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const page = config.source.getPage(effectiveSlug);
 
   if (!page) return { title: "Not Found" };
-  return buildSectionMetadata(page as any, section, config.title, effectiveSlug);
+  return buildSectionMetadata(
+    page as any,
+    section,
+    config.title,
+    effectiveSlug,
+  );
 }
 
 export function generateStaticParams() {

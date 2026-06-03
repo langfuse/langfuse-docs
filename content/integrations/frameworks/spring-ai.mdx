@@ -11,7 +11,7 @@ This guide shows how to integrate [Langfuse](/) with [Spring AI](https://docs.sp
 
 **Spring AI**: Spring-based framework for AI development with built-in OTel tracing for AI calls.
 
-**Langfuse**: Open source LLM engineering platform for observability, evals and prompt management.
+**Langfuse**: Open source AI engineering platform for observability, evals and prompt management.
 
 <Callout type="info" emoji="💡">
   Checkout the [Langfuse Example
@@ -194,7 +194,6 @@ public class ChatModelCompletionContentObservationFilter implements ObservationF
 With these configurations and dependencies in place, your Spring Boot application is ready to produce OpenTelemetry traces. Spring AI’s internal calls (e.g. when you invoke a chat model or generate an embedding) will be recorded as spans.
 
 Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc., and – since we enabled them – events for the prompt and response content​
-
 
 ## Step 2: Configure Langfuse
 

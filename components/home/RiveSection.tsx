@@ -10,7 +10,7 @@ import RiveMock from "@/components/home/img/rive-mock.png";
 
 const RiveAnimation = dynamic(
   () => import("@/components/rive/RiveAnimation").then((m) => m.RiveAnimation),
-  { ssr: false }
+  { ssr: false },
 );
 
 const RIVE_FILE = "/animations/langfuse_axonometric.riv";
@@ -91,7 +91,7 @@ export const RiveSection = () => {
         }
         setRiveSectionInView(false);
       },
-      { threshold: RIVE_IN_VIEW_THRESHOLD, rootMargin: "0px 0px -10% 0px" }
+      { threshold: RIVE_IN_VIEW_THRESHOLD, rootMargin: "0px 0px -10% 0px" },
     );
     observer.observe(el);
     return () => {
@@ -102,7 +102,7 @@ export const RiveSection = () => {
 
   const loadViewModelBooleans = useMemo(
     () => ({ [RIVE_LOAD_VIEW_MODEL_PATH]: riveSectionInView }),
-    [riveSectionInView]
+    [riveSectionInView],
   );
 
   const handleStateChange = useCallback((states: string[]) => {
@@ -138,10 +138,20 @@ export const RiveSection = () => {
     <HomeSection id="llm-engineering-loop" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start">
         <Heading>
-          <TextHighlight className="whitespace-nowrap">Launch,&nbsp;</TextHighlight><TextHighlight className="whitespace-nowrap">observe,&nbsp;</TextHighlight><TextHighlight className="whitespace-nowrap">improve</TextHighlight> — repeat.
+          <TextHighlight className="whitespace-nowrap">
+            Launch,&nbsp;
+          </TextHighlight>
+          <TextHighlight className="whitespace-nowrap">
+            observe,&nbsp;
+          </TextHighlight>
+          <TextHighlight className="whitespace-nowrap">improve</TextHighlight> —
+          repeat.
         </Heading>
         <Text className="text-left max-w-[64ch]">
-          Langfuse helps you ship AI Agents/Products from prototype to production and beyond. Once in production we power your continous improvement loop using production data to make your agents and LLM applications ever more powerful.
+          Langfuse helps you ship AI Agents/Products from prototype to
+          production and beyond. Once in production we power your continous
+          improvement loop using production data to make your agents and LLM
+          applications ever more powerful.
         </Text>
       </div>
 

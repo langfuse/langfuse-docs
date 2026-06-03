@@ -8,7 +8,7 @@ const zipPath = path.join(publicDir, "brand-assets.zip");
 
 if (!fs.existsSync(assetsDir)) {
   console.warn(
-    "[generate_brand_assets_zip] Skipping: public/brand-assets not found."
+    "[generate_brand_assets_zip] Skipping: public/brand-assets not found.",
   );
   process.exit(0);
 }
@@ -23,20 +23,20 @@ const result = spawnSync(
   {
     cwd: publicDir,
     stdio: "inherit",
-  }
+  },
 );
 
 if (result.error) {
   console.error(
     "[generate_brand_assets_zip] Failed to run zip command:",
-    result.error.message
+    result.error.message,
   );
   process.exit(1);
 }
 
 if (result.status !== 0) {
   console.error(
-    `[generate_brand_assets_zip] zip command failed with status ${result.status}.`
+    `[generate_brand_assets_zip] zip command failed with status ${result.status}.`,
   );
   process.exit(result.status || 1);
 }

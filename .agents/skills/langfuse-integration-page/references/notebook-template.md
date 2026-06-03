@@ -56,13 +56,13 @@ os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU reg
 os.environ["<PARTNER>_API_KEY"] = "..."
 ```
 
-**Cell 6 — markdown** *(skip for the OpenAI drop-in pattern)*
+**Cell 6 — markdown** _(skip for the OpenAI drop-in pattern)_
 
 ```
 With the environment variables set, initialize the Langfuse client. `get_client()` picks up the env vars above and returns a client bound to your project.
 ```
 
-**Cell 7 — code** *(skip for the OpenAI drop-in pattern)*
+**Cell 7 — code** _(skip for the OpenAI drop-in pattern)_
 
 ```python
 from langfuse import get_client

@@ -18,12 +18,12 @@ The [Context Manager](/docs/observability/sdk/instrumentation#context-management
 
 ```typescript
 import { startActiveObservation, propagateAttributes } from "npm:@langfuse/tracing";
- 
+
 await startActiveObservation("context-manager", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" },
   });
- 
+
   // Propagate userId to all child observations
   await propagateAttributes(
     {
@@ -37,7 +37,7 @@ await startActiveObservation("context-manager", async (span) => {
       version: "1.0.0",
     },
     async () => {
-        
+
       // YOUR CODE HERE
       const { text } = await generateText({
         model: openai("gpt-5"),

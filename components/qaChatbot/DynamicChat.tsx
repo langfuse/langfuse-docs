@@ -7,5 +7,5 @@ import dynamic from "next/dynamic";
 // The actual Chat implementation lives in qaChatbot/index.tsx.
 export const Chat = dynamic(
   () => import("@/components/qaChatbot").then((m) => ({ default: m.Chat })),
-  { ssr: false }
+  { ssr: false },
 );

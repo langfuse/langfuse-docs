@@ -35,7 +35,7 @@ export default function MetabaseDashboard({
         const metabaseTheme = resolvedTheme === "light" ? "day" : "night";
 
         const response = await fetch(
-          `/api/metabase-embed?dashboardId=${dashboardId}&theme=${metabaseTheme}`
+          `/api/metabase-embed?dashboardId=${dashboardId}&theme=${metabaseTheme}`,
         ).catch((fetchError) => {
           // Handle network errors gracefully - don't re-throw, set error state
           console.error("Network error:", fetchError);
@@ -53,10 +53,10 @@ export default function MetabaseDashboard({
             response.status === 404
               ? "Dashboard not found"
               : response.status === 403
-              ? "Access denied"
-              : response.status >= 500
-              ? "Server error - please try again later"
-              : `Request failed with status ${response.status}`;
+                ? "Access denied"
+                : response.status >= 500
+                  ? "Server error - please try again later"
+                  : `Request failed with status ${response.status}`;
           setError(errorMessage);
           return;
         }
@@ -83,7 +83,7 @@ export default function MetabaseDashboard({
         // Final fallback - ensure all errors are handled gracefully without throwing
         console.error("Error fetching Metabase embed URL:", err);
         setError(
-          err instanceof Error ? err.message : "Failed to load dashboard"
+          err instanceof Error ? err.message : "Failed to load dashboard",
         );
       } finally {
         setLoading(false);
@@ -113,7 +113,7 @@ export default function MetabaseDashboard({
         className={cn(
           "w-full mt-5 rounded overflow-hidden border bg-card min-h-[200px]",
           "flex items-center justify-center",
-          className
+          className,
         )}
       >
         <Loader />
@@ -127,7 +127,7 @@ export default function MetabaseDashboard({
         className={cn(
           "w-full mt-5 rounded overflow-hidden border bg-card min-h-[200px]",
           "flex items-center justify-center",
-          className
+          className,
         )}
       >
         <div className="text-red-500 text-center">
@@ -144,7 +144,7 @@ export default function MetabaseDashboard({
         className={cn(
           "w-full mt-5 rounded overflow-hidden border bg-card min-h-[200px]",
           "flex items-center justify-center",
-          className
+          className,
         )}
       >
         <div>Dashboard not available</div>
@@ -161,7 +161,7 @@ export default function MetabaseDashboard({
       allowTransparency
       className={cn(
         "w-full mt-5 rounded overflow-hidden border bg-card",
-        className
+        className,
       )}
       title={title}
     />

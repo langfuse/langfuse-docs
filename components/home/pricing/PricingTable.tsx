@@ -32,6 +32,7 @@ import {
 import { TrustedBy } from "../components/TrustedBy";
 import { trustedByData } from "@/data/trusted-by";
 import Image from "next/image";
+import { isCloudAppHref } from "@/lib/google-ads";
 
 // Reusable graduated pricing text with calculator link
 const GraduatedPricingText = () => {
@@ -178,7 +179,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Enterprise",
       id: "tier-enterprise",
-      href: "/talk-to-us",
+      href: "/talk-to-us?deployment=cloud",
       featured: false,
       description:
         "For large scale teams. Enterprise-grade support and security.",
@@ -234,7 +235,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Enterprise",
       id: "tier-self-hosted-enterprise",
-      href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
+      href: "/talk-to-us?deployment=self-hosted",
       featured: false,
       pillClassName: "bg-[#FAFF6A] text-[#1A1A1A]",
       description:
@@ -1463,11 +1464,14 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                       variant={tier.featured ? "primary" : "secondary"}
                       size="default"
                       href={tier.href}
+                      {...(isCloudAppHref(tier.href)
+                        ? { "data-launch-app-cta": "" }
+                        : {})}
                       wrapperClassName="flex-1"
                       className={cn(
                         "justify-center!",
                         !tier.featured &&
-                          "group-hover:border-line-structure hover:border-line-cta"
+                          "group-hover:border-line-structure hover:border-line-cta",
                       )}
                     >
                       {tier.cta}
@@ -1487,10 +1491,13 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     variant={tier.featured ? "primary" : "secondary"}
                     size="default"
                     href={tier.href}
+                    {...(isCloudAppHref(tier.href)
+                      ? { "data-launch-app-cta": "" }
+                      : {})}
                     className={cn(
                       "justify-center!",
                       !tier.featured &&
-                        "group-hover:border-line-structure hover:border-line-cta"
+                        "group-hover:border-line-structure hover:border-line-cta",
                     )}
                   >
                     {tier.cta}
@@ -1536,45 +1543,47 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     + optional
                   </div>
                   <CornerBox className="p-3 pt-4 w-full">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-bold text-primary">
-                      {tier.addOn.name}
-                    </span>
-                    {tier.addOn.price && (
+                    <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-bold text-primary">
-                        {tier.addOn.price}
+                        {tier.addOn.name}
                       </span>
-                    )}
-                  </div>
-                  <ul className="mt-1 space-y-1 text-sm">
-                    {tier.addOn.mainFeatures.map((feature) => (
-                      <li key={feature} className="flex space-x-2">
-                        <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {tier.addOn.cta && (
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      href={tier.addOn.cta.href}
-                      wrapperClassName="mt-3"
-                      className="justify-center! group-hover:border-line-structure hover:border-line-cta"
-                    >
-                      {tier.addOn.cta.text}
-                    </Button>
-                  )}
-                  {tier.addOn.calloutLink && (
-                    <div className="mt-2 text-xs text-center text-muted-foreground">
-                      <Link
-                        href={tier.addOn.calloutLink.href}
-                        className="underline hover:text-primary"
-                      >
-                        {tier.addOn.calloutLink.text}
-                      </Link>
+                      {tier.addOn.price && (
+                        <span className="text-sm font-bold text-primary">
+                          {tier.addOn.price}
+                        </span>
+                      )}
                     </div>
-                  )}
+                    <ul className="mt-1 space-y-1 text-sm">
+                      {tier.addOn.mainFeatures.map((feature) => (
+                        <li key={feature} className="flex space-x-2">
+                          <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                          <span className="text-muted-foreground">
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    {tier.addOn.cta && (
+                      <Button
+                        variant="secondary"
+                        size="small"
+                        href={tier.addOn.cta.href}
+                        wrapperClassName="mt-3"
+                        className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+                      >
+                        {tier.addOn.cta.text}
+                      </Button>
+                    )}
+                    {tier.addOn.calloutLink && (
+                      <div className="mt-2 text-xs text-center text-muted-foreground">
+                        <Link
+                          href={tier.addOn.calloutLink.href}
+                          className="underline hover:text-primary"
+                        >
+                          {tier.addOn.calloutLink.text}
+                        </Link>
+                      </div>
+                    )}
                   </CornerBox>
                 </div>
               )}

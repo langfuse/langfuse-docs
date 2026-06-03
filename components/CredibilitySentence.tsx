@@ -42,9 +42,8 @@ export const CredibilitySentence = ({
             Docker pulls
           </li>
           <li>
-            Trusted by{" "}
-            <strong>{FORTUNE_50_COMPANIES} of the Fortune 50</strong> and{" "}
-            <strong>{FORTUNE_500_COMPANIES} of the Fortune 500</strong>
+            Trusted by <strong>{FORTUNE_50_COMPANIES} of the Fortune 50</strong>{" "}
+            and <strong>{FORTUNE_500_COMPANIES} of the Fortune 500</strong>
           </li>
         </ul>
       </div>
@@ -66,8 +65,7 @@ export const CredibilitySentence = ({
       <Metric className={metricClassName}>
         {(DOCKER_PULLS / 1_000_000).toFixed(0)}M+ Docker pulls
       </Metric>
-      . Trusted by{" "}
-      <strong>{FORTUNE_50_COMPANIES} of the Fortune 50</strong> and{" "}
+      . Trusted by <strong>{FORTUNE_50_COMPANIES} of the Fortune 50</strong> and{" "}
       <strong>{FORTUNE_500_COMPANIES} of the Fortune 500</strong> companies.
     </p>
   );

@@ -10,12 +10,16 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
       guidesSource
         .getPages()
         .filter((page) => page.url.startsWith("/guides/cookbook/"))
-        .reduce((acc, page) => {
-          const category = (page.data.category as string | undefined) ?? "Other";
-          if (!acc[category]) acc[category] = [];
-          acc[category].push(page);
-          return acc;
-        }, {} as Record<string, CookbookPage[]>)
+        .reduce(
+          (acc, page) => {
+            const category =
+              (page.data.category as string | undefined) ?? "Other";
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(page);
+            return acc;
+          },
+          {} as Record<string, CookbookPage[]>,
+        ),
     )
       .sort(([categoryA], [categoryB]) => {
         if (categories) {
@@ -41,9 +45,7 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
                 page.data.title ??
                 page.slugs[page.slugs.length - 1]
                   .split("_")
-                  .map(
-                    (word) => word.charAt(0).toUpperCase() + word.slice(1)
-                  )
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                   .join(" ");
               return (
                 <Card

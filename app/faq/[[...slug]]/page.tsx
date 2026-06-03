@@ -46,7 +46,9 @@ export default async function FaqPage({ params }: PageProps) {
   notFound();
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug = [] } = await params;
   const page = faqSource.getPage(slug);
   if (page) return buildSectionMetadata(page, "faq", "FAQ", slug);

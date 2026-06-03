@@ -6,5 +6,7 @@ export default function DocsPageLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={source.getPageTree()}>{children}</SharedDocsLayout>;
+  return (
+    <SharedDocsLayout tree={source.getPageTree()}>{children}</SharedDocsLayout>
+  );
 }

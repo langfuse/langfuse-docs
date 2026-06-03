@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import type { UIMessage } from 'ai';
+import { z } from "zod";
+import type { UIMessage } from "ai";
 
 export type InkeepUIMessage = UIMessage<
   never,
@@ -11,15 +11,15 @@ export type InkeepUIMessage = UIMessage<
 >;
 
 const InkeepRecordTypes = z.enum([
-  'documentation',
-  'site',
-  'discourse_post',
-  'github_issue',
-  'github_discussion',
-  'stackoverflow_question',
-  'discord_forum_post',
-  'discord_message',
-  'custom_question_answer',
+  "documentation",
+  "site",
+  "discourse_post",
+  "github_issue",
+  "github_discussion",
+  "stackoverflow_question",
+  "discord_forum_post",
+  "discord_message",
+  "custom_question_answer",
 ]);
 
 const LinkType = z.union([
@@ -44,11 +44,11 @@ export const ProvideLinksToolSchema = z.object({
 export type ProvideLinksData = z.infer<typeof ProvideLinksToolSchema>;
 
 const KnownAnswerConfidence = z.enum([
-  'very_confident',
-  'somewhat_confident',
-  'not_confident',
-  'no_sources',
-  'other',
+  "very_confident",
+  "somewhat_confident",
+  "not_confident",
+  "no_sources",
+  "other",
 ]);
 
 const AnswerConfidence = z.union([KnownAnswerConfidence, z.string()]); // evolvable

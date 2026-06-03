@@ -7,9 +7,10 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: "/" # Location of package manifests
-    rebase-strategy: "disabled" # use dependabot-rebase-stale
     schedule:
       interval: "daily"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: chore
       prefix-development: chore
@@ -27,3 +28,17 @@ updates:
           - "lucide-react"
           - "posthog-js"
           - "react-icons"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      github-actions:
+        patterns:
+          - "*"

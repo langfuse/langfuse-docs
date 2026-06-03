@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   type ComponentProps,
@@ -7,26 +7,34 @@ import {
   useEffectEvent,
   useRef,
   useState,
-} from 'react';
-import { Check, Link2, RefreshCw, Send, Square, Trash2, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Text } from '@/components/ui/text';
-import { Link } from '@/components/ui/link';
-import { AIChatEmptyState, AIChatMessage, ThinkingIndicator } from './ai-chat-shared';
-import { Presence } from '@radix-ui/react-presence';
-import { useAISearchContext, useChatContext, buildUserMessage } from './search-context';
-import { encodeShareUrl, extractTextFromParts } from './chat-share';
+} from "react";
+import { Check, Link2, RefreshCw, Send, Square, Trash2, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { Link } from "@/components/ui/link";
+import {
+  AIChatEmptyState,
+  AIChatMessage,
+  ThinkingIndicator,
+} from "./ai-chat-shared";
+import { Presence } from "@radix-ui/react-presence";
+import {
+  useAISearchContext,
+  useChatContext,
+  buildUserMessage,
+} from "./search-context";
+import { encodeShareUrl, extractTextFromParts } from "./chat-share";
 
 // ─── Header ────────────────────────────────────────────────────────────────────
 
-function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
+function AISearchPanelHeader({ className, ...props }: ComponentProps<"div">) {
   const { setOpen } = useAISearchContext();
 
   return (
     <div
       className={cn(
-        'sticky top-0 p-4 flex items-start gap-2 border-b border-line-structure',
+        "sticky top-0 p-4 flex items-start gap-2 border-b border-line-structure",
         className,
       )}
       {...props}
@@ -36,7 +44,7 @@ function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
           Ask AI
         </Text>
         <Text size="s" className="text-left text-text-tertiary text-xs">
-          Powered by{' '}
+          Powered by{" "}
           <Link
             href="https://inkeep.com"
             className="text-text-tertiary decoration-line-structure underline-offset-2"
@@ -63,21 +71,25 @@ function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
 
 function ShareChatButton() {
   const { messages } = useChatContext();
-  const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
+  const [state, setState] = useState<"idle" | "copied" | "error">("idle");
 
   const shareChat = () => {
     const shared = messages
-      .filter((m) => m.role === 'user' || m.role === 'assistant')
-      .map((m) => ({ role: m.role as 'user' | 'assistant', text: extractTextFromParts(m.parts ?? []) }));
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({
+        role: m.role as "user" | "assistant",
+        text: extractTextFromParts(m.parts ?? []),
+      }));
     const url = encodeShareUrl(shared);
-    navigator.clipboard.writeText(url)
+    navigator.clipboard
+      .writeText(url)
       .then(() => {
-        setState('copied');
-        setTimeout(() => setState('idle'), 2000);
+        setState("copied");
+        setTimeout(() => setState("idle"), 2000);
       })
       .catch(() => {
-        setState('error');
-        setTimeout(() => setState('idle'), 2000);
+        setState("error");
+        setTimeout(() => setState("idle"), 2000);
       });
   };
 
@@ -85,23 +97,33 @@ function ShareChatButton() {
     <Button
       variant="secondary"
       size="small"
-      icon={state === 'copied' ? <Check className="size-3" /> : <Link2 className="size-3" />}
+      icon={
+        state === "copied" ? (
+          <Check className="size-3" />
+        ) : (
+          <Link2 className="size-3" />
+        )
+      }
       onClick={shareChat}
     >
-      {state === 'copied' ? 'Link copied' : state === 'error' ? 'Failed' : 'Share'}
+      {state === "copied"
+        ? "Link copied"
+        : state === "error"
+          ? "Failed"
+          : "Share"}
     </Button>
   );
 }
 
 function AISearchInputActions() {
   const { messages, status, setMessages, stop, regenerate } = useChatContext();
-  const isLoading = status === 'streaming' || status === 'submitted';
+  const isLoading = status === "streaming" || status === "submitted";
 
   if (messages.length === 0) return null;
 
   return (
     <div className="flex items-center gap-1 px-2 pt-2">
-      {!isLoading && messages.at(-1)?.role === 'assistant' && (
+      {!isLoading && messages.at(-1)?.role === "assistant" && (
         <Button
           variant="secondary"
           size="small"
@@ -116,7 +138,10 @@ function AISearchInputActions() {
         variant="secondary"
         size="small"
         icon={<Trash2 className="size-3" />}
-        onClick={() => { stop(); setMessages([]); }}
+        onClick={() => {
+          stop();
+          setMessages([]);
+        }}
       >
         Clear
       </Button>
@@ -126,19 +151,24 @@ function AISearchInputActions() {
 
 // ─── Input form ────────────────────────────────────────────────────────────────
 
-const StorageKeyInput = '__ai_search_input';
+const StorageKeyInput = "__ai_search_input";
 
-function AISearchInput({ autoFocus = true, ...props }: ComponentProps<'form'> & { autoFocus?: boolean }) {
+function AISearchInput({
+  autoFocus = true,
+  ...props
+}: ComponentProps<"form"> & { autoFocus?: boolean }) {
   const { status, sendMessage, stop } = useChatContext();
   const [input, setInput] = useState(() =>
-    typeof window === 'undefined' ? '' : (localStorage.getItem(StorageKeyInput) ?? ''),
+    typeof window === "undefined"
+      ? ""
+      : (localStorage.getItem(StorageKeyInput) ?? ""),
   );
-  const isLoading = status === 'streaming' || status === 'submitted';
+  const isLoading = status === "streaming" || status === "submitted";
 
   const wasLoadingRef = useRef(false);
   useEffect(() => {
     if (autoFocus && !isLoading && wasLoadingRef.current) {
-      document.getElementById('nd-ai-input')?.focus();
+      document.getElementById("nd-ai-input")?.focus();
     }
     wasLoadingRef.current = isLoading;
   }, [autoFocus, isLoading]);
@@ -149,12 +179,16 @@ function AISearchInput({ autoFocus = true, ...props }: ComponentProps<'form'> & 
     if (message.length === 0) return;
 
     void sendMessage(buildUserMessage(message));
-    setInput('');
+    setInput("");
     localStorage.removeItem(StorageKeyInput);
   };
 
   return (
-    <form {...props} className={cn('flex flex-wrap items-end gap-1 p-2', props.className)} onSubmit={onStart}>
+    <form
+      {...props}
+      className={cn("flex flex-wrap items-end gap-1 p-2", props.className)}
+      onSubmit={onStart}
+    >
       <TextareaAutoResize
         value={input}
         placeholder="Ask a question"
@@ -166,7 +200,7 @@ function AISearchInput({ autoFocus = true, ...props }: ComponentProps<'form'> & 
           localStorage.setItem(StorageKeyInput, e.target.value);
         }}
         onKeyDown={(event) => {
-          if (!event.shiftKey && event.key === 'Enter') {
+          if (!event.shiftKey && event.key === "Enter") {
             if (isLoading) {
               event.preventDefault();
             } else {
@@ -204,8 +238,8 @@ function AISearchInput({ autoFocus = true, ...props }: ComponentProps<'form'> & 
 
 // ─── Auto-resizing textarea ────────────────────────────────────────────────────
 
-function TextareaAutoResize(props: ComponentProps<'textarea'>) {
-  const shared = cn('col-start-1 row-start-1', props.className);
+function TextareaAutoResize(props: ComponentProps<"textarea">) {
+  const shared = cn("col-start-1 row-start-1", props.className);
 
   return (
     <div className="grid min-w-0 flex-[1_1_0%]">
@@ -213,12 +247,12 @@ function TextareaAutoResize(props: ComponentProps<'textarea'>) {
         id="nd-ai-input"
         {...props}
         className={cn(
-          'resize-none bg-transparent placeholder:text-text-tertiary focus-visible:outline-none',
+          "resize-none bg-transparent placeholder:text-text-tertiary focus-visible:outline-none",
           shared,
         )}
       />
-      <div className={cn(shared, 'break-all invisible')}>
-        {`${props.value?.toString() ?? ''}\n`}
+      <div className={cn(shared, "break-all invisible")}>
+        {`${props.value?.toString() ?? ""}\n`}
       </div>
     </div>
   );
@@ -228,7 +262,10 @@ function TextareaAutoResize(props: ComponentProps<'textarea'>) {
 
 const SCROLL_THRESHOLD = 40;
 
-function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, messageCount: number) {
+function useAutoScroll(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  messageCount: number,
+) {
   const isStuckRef = useRef(true);
 
   useEffect(() => {
@@ -241,14 +278,14 @@ function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, mes
       isStuckRef.current = distFromBottom <= SCROLL_THRESHOLD;
     }
 
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
   }, [containerRef]);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el || !isStuckRef.current) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
+    el.scrollTo({ top: el.scrollHeight, behavior: "instant" });
   }, [messageCount, containerRef]);
 
   // Re-observe when messageCount changes (child element may have changed)
@@ -260,7 +297,7 @@ function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, mes
 
     const observer = new ResizeObserver(() => {
       if (isStuckRef.current) {
-        el.scrollTo({ top: el.scrollHeight, behavior: 'instant' });
+        el.scrollTo({ top: el.scrollHeight, behavior: "instant" });
       }
     });
     observer.observe(child);
@@ -270,10 +307,14 @@ function useAutoScroll(containerRef: React.RefObject<HTMLDivElement | null>, mes
 
 // ─── Message list panel (empty state + messages) ───────────────────────────────
 
-function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>) {
+function AISearchPanelList({
+  className,
+  style,
+  ...props
+}: ComponentProps<"div">) {
   const chat = useChatContext();
-  const messages = chat.messages.filter((msg) => msg.role !== 'system');
-  const isWaiting = chat.status === 'submitted';
+  const messages = chat.messages.filter((msg) => msg.role !== "system");
+  const isWaiting = chat.status === "submitted";
   const containerRef = useRef<HTMLDivElement>(null);
 
   useAutoScroll(containerRef, messages.length);
@@ -285,10 +326,13 @@ function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>
   return (
     <div
       ref={containerRef}
-      className={cn('overflow-y-auto min-w-0 flex flex-col p-4 overscroll-contain', className)}
+      className={cn(
+        "overflow-y-auto min-w-0 flex flex-col p-4 overscroll-contain",
+        className,
+      )}
       style={{
         maskImage:
-          'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
+          "linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)",
         ...style,
       }}
       {...props}
@@ -314,11 +358,11 @@ function useAiPanelNarrowLayout() {
   const [narrow, setNarrow] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 1439px)');
+    const mq = window.matchMedia("(max-width: 1439px)");
     const apply = () => setNarrow(mq.matches);
     apply();
-    mq.addEventListener('change', apply);
-    return () => mq.removeEventListener('change', apply);
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
   }, []);
 
   return narrow;
@@ -328,7 +372,7 @@ function useAiPanelNarrowLayout() {
  * Mobile keyboards shrink the visual viewport while `position: fixed` often stays tied to the
  * layout viewport — the composer can sit under the keyboard. Approximate overlap and lift the panel.
  */
-function useVisualViewportBottomOverlap(active: boolean) {
+export function useVisualViewportBottomOverlap(active: boolean) {
   const [px, setPx] = useState(0);
 
   useEffect(() => {
@@ -344,11 +388,11 @@ function useVisualViewportBottomOverlap(active: boolean) {
     };
 
     update();
-    vv.addEventListener('resize', update);
-    vv.addEventListener('scroll', update);
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
     return () => {
-      vv.removeEventListener('resize', update);
-      vv.removeEventListener('scroll', update);
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
       setPx(0);
     };
   }, [active]);
@@ -360,20 +404,20 @@ function useHotKey() {
   const { open, setOpen } = useAISearchContext();
 
   const onKeyPress = useEffectEvent((e: KeyboardEvent) => {
-    if (e.key === 'Escape' && open) {
+    if (e.key === "Escape" && open) {
       setOpen(false);
       e.preventDefault();
     }
 
-    if (e.key === '/' && (e.metaKey || e.ctrlKey) && !open) {
+    if (e.key === "/" && (e.metaKey || e.ctrlKey) && !open) {
       setOpen(true);
       e.preventDefault();
     }
   });
 
   useEffect(() => {
-    window.addEventListener('keydown', onKeyPress);
-    return () => window.removeEventListener('keydown', onKeyPress);
+    window.addEventListener("keydown", onKeyPress);
+    return () => window.removeEventListener("keydown", onKeyPress);
   }, []);
 }
 
@@ -383,7 +427,9 @@ export function AISearchPanel() {
   const { open, setOpen } = useAISearchContext();
   useHotKey();
   const narrowLayout = useAiPanelNarrowLayout();
-  const keyboardOverlapPx = useVisualViewportBottomOverlap(open && narrowLayout);
+  const keyboardOverlapPx = useVisualViewportBottomOverlap(
+    open && narrowLayout,
+  );
 
   // Skip the enter animation when the panel remounts while already open
   // (e.g. navigating between layout groups). useState(open) captures the
@@ -398,11 +444,11 @@ export function AISearchPanel() {
     <>
       <Presence present={open}>
         <div
-          data-state={open ? 'open' : 'closed'}
+          data-state={open ? "open" : "closed"}
           className={cn(
-            'fixed inset-0 z-50 backdrop-blur-sm bg-[hsl(var(--primary)/0.3)] wide:hidden',
-            'data-[state=closed]:animate-fd-fade-out',
-            !skipEnterAnimation && 'data-[state=open]:animate-fd-fade-in',
+            "fixed inset-0 z-50 backdrop-blur-sm bg-[hsl(var(--primary)/0.3)] wide:hidden",
+            "data-[state=closed]:animate-fd-fade-out",
+            !skipEnterAnimation && "data-[state=open]:animate-fd-fade-in",
           )}
           onClick={() => setOpen(false)}
         />
@@ -410,14 +456,15 @@ export function AISearchPanel() {
       <Presence present={open}>
         <div
           className={cn(
-            'overflow-hidden z-50 bg-surface-1 text-text-primary [--ai-chat-width:320px] border-line-structure',
-            'max-wide:fixed max-wide:inset-x-4 max-md:bottom-4 max-md:top-4 max-wide:bottom-8 max-wide:top-8 max-wide:border max-wide:border-line-structure max-wide:shadow-xl max-wide:max-w-[600px] max-wide:mx-auto',
-            'wide:sticky wide:top-[var(--fd-nav-height)] wide:h-[calc(100dvh-var(--fd-nav-height)-2px)] wide:border-l wide:ms-auto',
-            'wide:in-[#nd-docs-layout]:[grid-area:toc] wide:in-[#nd-notebook-layout]:row-span-full wide:in-[#nd-notebook-layout]:col-start-5',
-            'wide:in-[#home-layout]:top-[calc(var(--fd-banner-height,0px)+var(--lf-nav-primary-height))] wide:in-[#home-layout]:h-[calc(100dvh-var(--fd-banner-height,0px)-var(--lf-nav-primary-height))] wide:in-[#home-layout]:w-(--ai-chat-width) wide:in-[#home-layout]:shrink-0 wide:in-[#home-layout]:border-r',
+            "overflow-hidden z-50 bg-surface-1 text-text-primary [--ai-chat-width:320px] border-line-structure",
+            "max-wide:fixed max-wide:inset-x-4 max-md:bottom-4 max-md:top-4 max-wide:bottom-8 max-wide:top-8 max-wide:border max-wide:border-line-structure max-wide:shadow-xl max-wide:max-w-[600px] max-wide:mx-auto",
+            "wide:sticky wide:top-[calc(var(--fd-nav-height)+var(--fd-banner-height,0px))] wide:h-[calc(100dvh-var(--fd-nav-height)-var(--fd-banner-height,0px)-2px)] wide:border-l wide:ms-auto",
+            "wide:in-[#nd-docs-layout]:[grid-area:toc] wide:in-[#nd-notebook-layout]:row-span-full wide:in-[#nd-notebook-layout]:col-start-5",
+            "wide:in-[#home-layout]:top-[calc(var(--fd-banner-height,0px)+var(--lf-nav-primary-height))] wide:in-[#home-layout]:h-[calc(100dvh-var(--fd-banner-height,0px)-var(--lf-nav-primary-height))] wide:in-[#home-layout]:w-(--ai-chat-width) wide:in-[#home-layout]:shrink-0 wide:in-[#home-layout]:border-r",
             open
-              ? (!skipEnterAnimation && 'animate-fd-dialog-in wide:animate-[ask-ai-open_200ms]')
-              : 'animate-fd-dialog-out wide:animate-[ask-ai-close_200ms]',
+              ? !skipEnterAnimation &&
+                  "animate-fd-dialog-in wide:animate-[ask-ai-open_200ms]"
+              : "animate-fd-dialog-out wide:animate-[ask-ai-close_200ms]",
           )}
           style={
             narrowLayout && keyboardOverlapPx > 0
@@ -438,4 +485,3 @@ export function AISearchPanel() {
     </>
   );
 }
-

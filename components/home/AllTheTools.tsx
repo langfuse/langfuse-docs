@@ -96,11 +96,13 @@ export function AllTheTools() {
     <HomeSection id="platform-features" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start mb-10">
         <Heading className="sm:max-w-none max-w-[24ch]">
-          All the tools, <TextHighlight className="sm:pr-1.5">one</TextHighlight><TextHighlight>integrated platform.</TextHighlight>
+          All the tools,{" "}
+          <TextHighlight className="sm:pr-1.5">one</TextHighlight>
+          <TextHighlight>integrated platform.</TextHighlight>
         </Heading>
         <Text className="text-left max-w-[46ch]">
-          One integrated platform to trace, manage prompts, evaluate,
-          and experiment from prototype to production scale.
+          One integrated platform to trace, manage prompts, evaluate, and
+          experiment from prototype to production scale.
         </Text>
       </div>
       <div className="flex flex-col gap-2">
@@ -115,7 +117,10 @@ export function AllTheTools() {
               >
                 <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden sm:max-h-[200px] sm:flex-row xl:max-h-[337px] xl:flex-col">
                   <div className="flex relative z-10 flex-1 flex-col gap-1 p-4 pb-1 sm:pb-2.5">
-                    <Text size="m" className="font-medium text-left text-text-secondary">
+                    <Text
+                      size="m"
+                      className="font-medium text-left text-text-secondary"
+                    >
                       {tool.title}
                     </Text>
                     <Text size="s" className={toolDescriptionClassName}>
@@ -147,7 +152,10 @@ export function AllTheTools() {
               >
                 <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden xl:min-h-[277px] lg:max-h-[277px]">
                   <div className="flex relative z-10 flex-col gap-1 p-2 pb-2.5 sm:p-4">
-                    <Text size="m" className="font-medium text-left text-text-secondary">
+                    <Text
+                      size="m"
+                      className="font-medium text-left text-text-secondary"
+                    >
                       {tool.title}
                     </Text>
                     <Text size="s" className={toolDescriptionClassName}>

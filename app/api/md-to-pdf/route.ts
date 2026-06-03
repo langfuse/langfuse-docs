@@ -42,7 +42,7 @@ function serializeError(error: unknown) {
 function logPdfError(
   stage: string,
   error: unknown,
-  context: Record<string, unknown> = {}
+  context: Record<string, unknown> = {},
 ) {
   console.error(`[md-to-pdf] ${stage}`, {
     ...context,
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
     if (!url || typeof url !== "string") {
       return NextResponse.json(
         { error: "Missing or invalid 'url' query parameter" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
     } catch {
       return NextResponse.json(
         { error: "Invalid URL format" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
           error: `Fetching from ${markdownUrl.hostname} is not permitted.`,
           allowed: Array.from(allowedHostnames),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -121,12 +121,15 @@ export async function GET(request: NextRequest) {
     //   /terms        -> /md-src/terms.md
     //   /docs/foo     -> /md-src/docs/foo.md
     //   /terms.md     -> /md-src/terms.md
-    
+
     const isLangfuseHost = firstPartyHostnames.has(markdownUrl.hostname);
 
     // In local dev, callers may still pass production URLs.
     // Route those requests to the local dev server.
-    if (process.env.NODE_ENV === "development" && markdownUrl.hostname === "langfuse.com") {
+    if (
+      process.env.NODE_ENV === "development" &&
+      markdownUrl.hostname === "langfuse.com"
+    ) {
       markdownUrl = new URL(markdownUrl.toString());
       markdownUrl.protocol = "http:";
       markdownUrl.hostname = "127.0.0.1";
@@ -150,14 +153,14 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       return NextResponse.json(
         { error: `Failed to fetch markdown: ${response.statusText}` },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
     let markdownContent = await response.text();
     markdownContent = markdownContent.replace(
       /^---\r?\n[\s\S]*?\r?\n---\r?\n/,
-      ""
+      "",
     );
     markdownContent = stripMdxForPlainMarkdown(markdownContent, {
       unwrapCalloutsForPlainMd: false,
@@ -227,7 +230,7 @@ export async function GET(request: NextRequest) {
               error:
                 "PDF rendering is unavailable locally. Install dev dependencies (`pnpm install`) or ensure local Chrome is installed.",
             },
-            { status: 500 }
+            { status: 500 },
           );
         }
       }
@@ -239,7 +242,7 @@ export async function GET(request: NextRequest) {
       let executablePath: string;
       try {
         executablePath = await chromium.executablePath(
-          brotliBinDir || undefined
+          brotliBinDir || undefined,
         );
       } catch (resolveErr) {
         logPdfError("chromium.executablePath failed", resolveErr, {
@@ -314,7 +317,7 @@ export async function GET(request: NextRequest) {
         error: "Internal server error while generating PDF",
         message: "An unexpected error occurred.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -16,7 +16,12 @@ export function SectionHeading({
   children,
 }: SectionHeadingProps) {
   return (
-    <div className={cn("relative group border-t border-l border-r border-b border-border p-6 lg:p-8", className)}>
+    <div
+      className={cn(
+        "relative group border-t border-l border-r border-b border-border p-6 lg:p-8",
+        className,
+      )}
+    >
       <HoverStars />
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between lg:gap-8">
         <div className="flex-1">
@@ -30,12 +35,9 @@ export function SectionHeading({
           )}
         </div>
         {children && (
-          <div className="mt-4 lg:mt-0 lg:text-right">
-            {children}
-          </div>
+          <div className="mt-4 lg:mt-0 lg:text-right">{children}</div>
         )}
       </div>
     </div>
   );
 }
-

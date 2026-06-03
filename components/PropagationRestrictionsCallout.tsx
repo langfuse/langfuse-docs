@@ -2,16 +2,29 @@ import { Callout } from "@/components/ui/callout";
 import { Link } from "@/components/ui/link";
 
 interface PropagationRestrictionsCalloutProps {
-  attributes?: ("userId" | "sessionId" | "metadata" | "version" | "tags" | "traceName")[];
+  attributes?: (
+    | "userId"
+    | "sessionId"
+    | "metadata"
+    | "version"
+    | "tags"
+    | "traceName"
+  )[];
 }
 
 export function PropagationRestrictionsCallout({
-  attributes = ["userId", "sessionId", "metadata", "version", "tags", "traceName"],
+  attributes = [
+    "userId",
+    "sessionId",
+    "metadata",
+    "version",
+    "tags",
+    "traceName",
+  ],
 }: PropagationRestrictionsCalloutProps) {
   const pythonLink =
     "/docs/observability/sdk/instrumentation#propagate-attributes";
-  const tsLink =
-    "/docs/observability/sdk/instrumentation#propagate-attributes";
+  const tsLink = "/docs/observability/sdk/instrumentation#propagate-attributes";
 
   const formatAttributes = (attrs: string[]) => {
     if (attrs.length === 1) return `\`${attrs[0]}\``;
@@ -31,10 +44,10 @@ export function PropagationRestrictionsCallout({
       {isGeneric ? (
         <div className="my-3">
           We use Attribute Propagation to propagate specific attributes (userId,
-          sessionId, version, tags, metadata, traceName) across all observations in an
-          execution context. We will use all observations with these attributes
-          to calculate attribute-level metrics. Please consider the following
-          when using Attribute Propagation:
+          sessionId, version, tags, metadata, traceName) across all observations
+          in an execution context. We will use all observations with these
+          attributes to calculate attribute-level metrics. Please consider the
+          following when using Attribute Propagation:
         </div>
       ) : (
         <div className="my-3">

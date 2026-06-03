@@ -44,7 +44,10 @@ export function ProductUpdateSignup(props: {
   return (
     <form
       onSubmit={onSubmit}
-      className={cn("flex gap-y-2 w-full flex-row items-center max-w-sm", props.className)}
+      className={cn(
+        "flex gap-y-2 w-full flex-row items-center max-w-sm",
+        props.className,
+      )}
     >
       <Input
         placeholder="email"
