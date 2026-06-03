@@ -225,6 +225,14 @@
   background-color: transparent !important;
 }
 
+/* Inside the centered flex layout the SVG's width:auto can't resolve and the
+   diagram collapses to 0x0. Give it a definite width so it renders at its
+   natural size (capped by the inline max-width Mermaid sets). */
+.embedded-mermaid .mermaid-diagram svg {
+  width: 100%;
+  height: auto;
+}
+
 .mermaid-diagram svg {
   display: block;
   width: auto;
