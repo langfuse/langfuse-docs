@@ -78,7 +78,7 @@ Optional **Yearly Commitment**:
 - Billing via invoice
 - Vendor onboarding
 
-[Contact sales](/talk-to-us) | [Enterprise FAQ](/enterprise)
+[Contact sales](/talk-to-us?deployment=cloud) | [Enterprise FAQ](/enterprise)
 
 ## Feature Comparison (Cloud)
 
