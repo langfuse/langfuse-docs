@@ -1,0 +1,96 @@
+---
+title: "Let your agent cook, but you're still the chef"
+date: 2026/06/03
+description: The full AI engineering loop can technically be automated now. But that doesn't mean it should. Here is what we think you should hand to agents, and what you should keep doing yourself.
+tag: engineering
+author: Lotte
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Tweet } from "@/components/Tweet";
+
+<BlogHeader
+  title="Let your agent cook, but you're still the chef"
+  description="The full AI engineering loop can technically be automated now. But that doesn't mean it should. Here is what we think you should hand to agents, and what you should keep doing yourself."
+  date="June 3, 2026"
+  authors={["lotteverheyden"]}
+/>
+
+AI agents can run almost every step of the [AI engineering loop](#ai-engineering-loop) on their own. The tools are in place, the context is available, and the loop can close without a human touching it.
+
+That is also where the industry is heading, often referred to as "continual learning":
+
+<Tweet id="2061206120233054327" />
+
+We think this is directionally right. We also think handing over the whole loop is a mistake. Automate past the point where you can still vouch for the output, and you'll find yourself shipping _agent slop_.
+
+# What do we mean by AI engineering loop? [#ai-engineering-loop]
+
+The AI engineering loop is how we describe the process of continuously improving AI agents, based on what we have seen across the industry and across our user base. We wrote about it extensively in our [academy](/academy/ai-engineering-loop).
+
+<LoopDiagram />
+
+Part of the loop runs on live activity. Traces flow in from production, and monitoring surfaces what is happening and anything worth a closer look. Part of monitoring is reading traces yourself. This gives you direct insight into how the system behaves and is one of the more valuable steps in the whole process.
+
+The rest happens in development, before shipping a change. You try something, check whether the agent performs better against a dataset, and if it does, you deploy the change to production and the loop starts over again. This is a continuous process.
+
+# You could automate all of it
+
+Walk through the steps and none of them technically need a human. Instrumenting an app is something agents do fully autonomously now. For every other step, platforms usually have an [API](/docs/api-and-data-platform/features/public-api) or a [CLI](/docs/api-and-data-platform/features/cli) an agent can call to do the work.
+
+So if every step can be automated, the loop can close on its own. But while we can technically automate the entire process, that does not mean we should. Removing yourself from the loop comes at a cost, and that cost has a name: **agent slop**.
+
+# But you'd be producing _agent slop_
+
+> **Agent slop**: low-quality AI agents, mass produced by other AI agents
+
+You want your agent to behave the way you decided is right, with the nuance you care about. That nuance lives in your head and is based on your continuously evolving opinion. Automate the entire loop and the agent optimizes toward a target that is not complete, and becomes stale over time.
+
+<Frame fullWidth>
+  ![Without course correction along the way, the loop drifts off the path and never reaches the optimal destination](/images/blog/2026-06-03-let-your-agent-cook-but-youre-still-the-chef/agent-slop.png)
+</Frame>
+
+This produces agents that behave sort of how you want, but people can feel the quality bar is lacking. Your users deserve better than that, and it's your responsibility to hold the bar high.
+
+<Callout type="info">
+A practical example of an incomplete target function is when we ran [autoresearch on the Langfuse skill](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch). An agent optimizes against the evaluator's gradient, so misspecify the target and it will move in the wrong direction very quickly.
+</Callout>
+
+
+# What to automate, and what to keep manual
+
+We do see a future where most of this loop runs on its own. But you need to make **deliberate choices on what an agent can own, and keep yourself involved where your judgment is the product**.
+
+## Keep looking at your traces manually
+
+AI applications produce behavior you cannot predict in advance. If you only read the traces an agent or previously set up evaluators flagged for you, you only ever see the slice it was already told to look at. To catch what would otherwise slip through, sample your traces regularly and read them yourself. **This is also where your opinion gets formed**.
+
+<Frame fullWidth>
+  ![The AI engineering loop annotated with the steps where you should keep looking at traces manually](/images/blog/2026-06-03-let-your-agent-cook-but-youre-still-the-chef/manual-steps-loop.png)
+</Frame>
+
+One thing worth mentioning is the value of **implicit user signals**. It's technically automated, but the input stays human. It's a great way to surface traces worth a closer look, that you didn't tell the system to look at.
+
+## Automate the rest
+
+Everything else can be handed to an agent, **as long as it has the context to do it well**. That context comes in two layers.
+
+The first layer is universal: the best practices of AI engineering that hold regardless of what you are building. For Langfuse, we put a lot of these into the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse), so any agent can pick them up.
+
+
+### Your job is providing the right context
+
+The second layer is yours. This is without a doubt the most important one. What your app should do, what counts as a good answer, which behaviors are unacceptable: only you can teach that, and as your application matures this will be more and more about opinionated nuances. 
+
+In practice, this context will take the form of datasets with expected outputs, evaluators that encode your quality bar, and comments you leave on traces. **These all come from you manually looking at your traces**. 
+
+The sharper this context, the more of the loop you can safely hand off.
+
+<Callout type="info">
+[Error analysis](/academy/monitoring/error-analysis) is one structured way to do this: read through traces, group the failures into categories, and decide what to fix before you build evaluators.
+</Callout>
+
+
+# Your taste is the edge
+
+The mechanical work of the loop is going to agents, and that is good news: it frees you for the part that makes your agent yours. With the labor becoming the same for everyone, what sets your agent apart is your sense of what good looks like, and the care you put into teaching it.
