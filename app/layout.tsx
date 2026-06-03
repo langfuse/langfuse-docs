@@ -32,6 +32,7 @@ const f37Analog = localFont({
   weight: "500",
 });
 import { Hubspot } from "@/components/analytics/hubspot";
+import { GoogleAds } from "@/components/analytics/google-ads";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
@@ -90,6 +91,7 @@ export default function RootLayout({
         {process.env.NODE_ENV === "production" && (
           <>
             <GoogleTagManager gtmId="GTM-NGLK4TZX" />
+            <GoogleAds />
             <Hubspot />
             <Script
               id="cookieyes"

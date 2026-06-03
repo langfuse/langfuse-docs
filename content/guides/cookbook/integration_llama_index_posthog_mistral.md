@@ -9,7 +9,7 @@ category: Integrations
 In this cookbook, we show you how to build a RAG application with [LlamaIndex](https://www.llamaindex.ai/), observe the steps with [Langfuse](https://langfuse.com/), and analyze the data in [PostHog](https://posthog.com/).
 
 ## What is Langfuse?
-[Langfuse](https://langfuse.com/) is an open-source LLM engineering platform designed to help engineers understand and optimize user interactions with their language model applications. It provides tools for tracking, debugging, and improving LLM performance in real-world use cases. Langfuse is available both as a managed [cloud solution](https://langfuse.com/cloud) and for [local or self-hosted](https://langfuse.com/docs/deployment/feature-overview) deployments.
+[Langfuse](https://langfuse.com/) is an open-source AI engineering platform designed to help engineers understand and optimize user interactions with their language model applications. It provides tools for tracking, debugging, and improving LLM performance in real-world use cases. Langfuse is available both as a managed [cloud solution](https://langfuse.com/cloud) and for [local or self-hosted](https://langfuse.com/docs/deployment/feature-overview) deployments.
 
 ## What is PostHog?
 [PostHog](https://posthog.com/) is a popular choice for product analytics. Combining Langfuse's LLM analytics with PostHog's product analytics makes it easy to:

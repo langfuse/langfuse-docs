@@ -71,6 +71,8 @@ For organizations created before the cutoff date, the "Preview" toggle is availa
 
 The toggle remains reversible for organizations created before the cutoff date.
 
+**Export source cutoff (2026-05-20):** Cloud projects created on or after this date are locked to **Enriched observations (recommended)** as the export source for blob storage, PostHog, and Mixpanel integrations. Legacy export sources are hidden from the UI for these projects. Projects created before this date retain full choice across all export sources.
+
 <Callout type="info">
 Data from SDKs `langfuse-js` < `5.0.0`, `langfuse-python` < `4.0.0`, or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes in the new UI. Upgrade to the latest SDKs or set that header on your OTEL span exporter to see new data in real time.
 </Callout>

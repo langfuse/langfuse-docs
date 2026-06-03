@@ -1,0 +1,39 @@
+---
+date: 2026-05-15
+title: "Choose columns and compress blob storage exports"
+description: Pick which field groups are written to each row and enable gzip compression in scheduled S3, GCS, and Azure exports. Shrink files and drop fields you don't want to land in your warehouse.
+author: Niklas
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Two new controls let you reduce the size of your scheduled blob storage exports: column selection and gzip compression. Both are configurable per integration in **Project Settings → Integrations → Blob Storage**.
+
+**Column selection.** Eleven groups cover the enriched observations row — toggle off the ones you don't need:
+
+- **Drop `metadata` for privacy.** Keep user data out of your warehouse without filtering downstream.
+- **Drop `io` to shrink files.** Inputs and outputs are usually the largest columns; deselecting them produces dramatically smaller exports for cost or latency analytics.
+- **Drop `tools` and `prompt`** when your downstream consumer only needs traces, timings, and cost.
+
+<Frame fullWidth>
+  ![Blob storage export field group settings](/images/changelog/2026-05-15-blob-storage-export-field-groups/blob_exporter_settings_field_groups.png)
+</Frame>
+
+The `core` group (`id`, `trace_id`, `start_time`, `end_time`, `project_id`, `parent_observation_id`, `type`) is required and always exported. The other ten groups — `basic`, `time`, `io`, `metadata`, `model`, `usage`, `prompt`, `metrics`, `tools`, `trace_context` — are individually toggleable. Existing integrations continue to export all groups; no action needed unless you want to narrow the schema.
+
+Field groups are only available with the new enriched observations export, which is based on the [denormalized v4 data model](/docs/v4). The legacy export source uses a fixed column set and is unaffected.
+
+**Gzip compression.** New integrations compress exported files with gzip by default, producing `.csv.gz`, `.json.gz`, or `.jsonl.gz` files readable by most data warehouses and pipeline tools without a manual decompression step. Toggle **Gzip Compression** off if your consumer expects plain files. Existing integrations are unaffected — they were backfilled as uncompressed so nothing breaks for current consumers.
+
+Both controls are available on the REST API: `exportFieldGroups` and `compressed` on [`GET`/`PUT /api/public/integrations/blob-storage`](https://api.reference.langfuse.com/#tag/blobstorageintegrations).
+
+## Learn more
+
+import { FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Export to Blob Storage" href="/docs/api-and-data-platform/features/export-to-blob-storage" icon={<FileCode />} arrow />
+  <Card title="Export Field Reference" href="/docs/api-and-data-platform/features/blob-storage-export-fields" icon={<FileCode />} arrow />
+</Cards>
