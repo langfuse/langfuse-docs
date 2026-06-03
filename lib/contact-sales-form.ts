@@ -150,6 +150,15 @@ const optionValueSchema = <T extends readonly { value: string }[]>(
     .min(1, message)
     .refine((value) => optionValues(options).includes(value), message);
 
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export const contactFormSchema = z
   .object({
     name: z.string().min(1, "Name is required").max(200),
@@ -216,13 +225,13 @@ export const defaultFormValues: ContactFormData = {
   message: "",
 };
 
-export function formatFormDataForEmail(data: ContactFormData): string {
+function getEmailFields(data: ContactFormData) {
   const getLabel = <T extends readonly { value: string; label: string }[]>(
     options: T,
     value: string,
   ) => options.find((option) => option.value === value)?.label ?? value;
 
-  const fields = [
+  return [
     { label: FORM_FIELDS.name.label, value: data.name },
     { label: FORM_FIELDS.email.label, value: data.email },
     { label: FORM_FIELDS.company.label, value: data.company },
@@ -239,11 +248,11 @@ export function formatFormDataForEmail(data: ContactFormData): string {
           : ""),
     },
     {
-      label: FORM_FIELDS.productionAppCount.label,
+      label: "Agents/LLM features in production today",
       value: getLabel(LLM_APP_COUNT_OPTIONS, data.productionAppCount),
     },
     {
-      label: FORM_FIELDS.plannedAppCount.label,
+      label: "Agents/LLM features planned in the future",
       value: getLabel(LLM_APP_COUNT_OPTIONS, data.plannedAppCount),
     },
     {
@@ -256,8 +265,23 @@ export function formatFormDataForEmail(data: ContactFormData): string {
     },
     { label: FORM_FIELDS.message.label, value: data.message },
   ];
+}
 
-  return fields.map((f) => `**${f.label}**\n${f.value}`).join("\n\n");
+export function formatFormDataForEmail(data: ContactFormData): string {
+  return getEmailFields(data)
+    .map((field) => `${field.label}\n${field.value}`)
+    .join("\n\n");
+}
+
+export function formatFormDataForEmailHtml(data: ContactFormData): string {
+  return getEmailFields(data)
+    .map(
+      (field) =>
+        `<p><strong>${escapeHtml(field.label)}</strong><br />${escapeHtml(
+          field.value,
+        ).replace(/\r?\n/g, "<br />")}</p>`,
+    )
+    .join("\n");
 }
 
 export function generateEmailContent(data: ContactFormData): string {
@@ -273,6 +297,22 @@ Team Langfuse
 ---
 
 Your request:
+
+${formattedData}`;
+}
+
+export function generateEmailHtmlContent(data: ContactFormData): string {
+  const formattedData = formatFormDataForEmailHtml(data);
+
+  return `<p>Dear ${escapeHtml(data.name)},</p>
+
+<p>Thanks for reaching out. We will respond shortly. Feel free to reply to this message if you want to add any additional context.</p>
+
+<p>Best<br />Team Langfuse</p>
+
+<hr />
+
+<p>Your request:</p>
 
 ${formattedData}`;
 }
