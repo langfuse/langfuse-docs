@@ -1,0 +1,166 @@
+---
+title: "Trace OpenAI Codex with Langfuse"
+sidebarTitle: Codex
+logo: /images/integrations/openai_icon.svg
+description: "Trace OpenAI Codex CLI coding sessions, agent turns, tool calls, token usage, and subagents with Langfuse for comprehensive observability."
+category: Integrations
+---
+
+# OpenAI Codex tracing with Langfuse
+
+> **What is Codex?** [Codex](https://github.com/openai/codex) is OpenAI's agentic coding tool. It runs in your terminal (and IDE), understands your codebase, edits code, runs commands, and can spawn subagents to work on tasks in parallel.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source AI engineering platform. It helps teams trace agentic applications, debug issues, evaluate quality, and monitor costs in production.
+
+<Callout type="info" title="Install via the Codex plugin marketplace">
+The easiest way to set this up is the [Langfuse Codex Plugin](https://github.com/langfuse/langfuse-codex-plugin). Add the marketplace and enable the plugin:
+
+```bash
+codex plugin marketplace add langfuse/langfuse-codex-plugin
+```
+
+Then enable plugin hooks and the tracing plugin in `~/.codex/config.toml`, and set your Langfuse keys (full steps below). Requires Node.js 22+ and Codex 0.128+.
+
+</Callout>
+
+## What can this integration trace?
+
+Using Codex's plugin hooks, this integration reads the transcript Codex writes for each session and sends it to Langfuse. You can monitor:
+
+- **User inputs**: every prompt you send to Codex
+- **Model responses**: assistant messages and reasoning summaries for each model call in a turn
+- **Tool calls**: shell commands (`exec_command`), file edits (`apply_patch`), MCP tools, web search, and subagent calls — with their inputs, outputs, and error status
+- **Token usage**: input, output, cached, and reasoning tokens per model call, so you can monitor cost
+- **Subagents**: subagent threads resolved from their own transcripts and nested under the spawning turn
+- **Sessions**: all turns from one Codex session grouped together for replay
+- **Timing**: accurate, backdated start and end times for every step
+
+## How it works
+
+Codex provides a plugin system with [hooks](https://github.com/openai/codex) that run custom commands at lifecycle points. This integration uses the **Stop hook**, which runs after each Codex turn.
+
+1. The plugin registers a `Stop` hook that runs each time Codex finishes a turn.
+2. The hook reads Codex's session transcript (the rollout file).
+3. Turns are reconstructed and converted into Langfuse traces using the [Langfuse TypeScript SDK](/docs/observability/sdk/overview).
+4. All turns from the same session are grouped using a shared [`session_id`](/docs/observability/features/sessions).
+5. A small sidecar file records which turns were already uploaded, so resuming a session never creates duplicates.
+
+Tracing is **opt-in** via the `TRACE_TO_LANGFUSE` environment variable. The hook fails open: if anything goes wrong, it logs and exits without blocking your Codex session.
+
+## Quick start
+
+<Steps>
+
+### Set up Langfuse
+
+1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
+2. Create a new project and copy your API keys from the project settings.
+
+### Add the plugin marketplace
+
+Add the Langfuse marketplace via the Codex CLI:
+
+```bash
+codex plugin marketplace add langfuse/langfuse-codex-plugin
+```
+
+### Enable the plugin
+
+Enable plugin hooks and the tracing plugin globally in `~/.codex/config.toml`, or only for a specific project in `<project>/.codex/config.toml`:
+
+```toml
+[features]
+plugin_hooks = true
+
+[plugins."tracing@langfuse-codex-plugin"]
+enabled = true
+```
+
+### Set your Langfuse credentials [#set-credentials]
+
+Tracing stays off until `TRACE_TO_LANGFUSE` is `"true"`, so you opt in explicitly. Add your credentials to your shell profile (`~/.zshrc`, `~/.bashrc`, or `~/.bash_profile`):
+
+```bash
+export TRACE_TO_LANGFUSE="true"
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+```
+
+Alternatively, create a JSON config file at `~/.codex/langfuse.json` (global) or `<project>/.codex/langfuse.json` (per-project):
+
+```json
+{
+  "enabled": true,
+  "public_key": "pk-lf-...",
+  "secret_key": "sk-lf-...",
+  "base_url": "https://cloud.langfuse.com"
+}
+```
+
+Configuration is resolved as defaults → global config file → project config file → environment variables, with environment variables taking precedence. `LANGFUSE_CODEX_*` variables override the matching standard `LANGFUSE_*` variables, so you can scope credentials to Codex.
+
+### Use Codex
+
+Run Codex as usual. After each turn, the trace is sent to Langfuse:
+
+```bash
+cd your-project
+codex
+```
+
+### View traces in Langfuse
+
+Open your Langfuse project to see the captured traces. The structure mirrors how Codex actually works:
+
+- **Turn trace** (`Codex Turn`): one trace per turn, from your prompt to the final answer, captured as an [agent observation](/docs/observability/features/observation-types).
+- **Generations**: one per model response in the turn. Each shows the input it received, the model's reasoning and text, the tool calls it requested, and token usage.
+- **Tool spans** (`exec_command`, `apply_patch`, `spawn_agent`, …): nested under the generation that triggered them, with input, output, and error status. Failed commands are flagged as errors.
+- **Subagents**: subagent threads are nested under the spawning turn so you can follow parallel work in one place.
+- **Sessions**: all turns from the same Codex session are grouped via [`session_id`](/docs/observability/features/sessions) — open the Sessions tab to replay the full run.
+
+</Steps>
+
+## Environment variables
+
+| Variable                       | Description                                                                                                                                                             | Required            |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `TRACE_TO_LANGFUSE`            | Set to `"true"` to enable tracing                                                                                                                                       | Yes                 |
+| `LANGFUSE_PUBLIC_KEY`          | Your Langfuse public key (`pk-lf-...`)                                                                                                                                  | Yes                 |
+| `LANGFUSE_SECRET_KEY`          | Your Langfuse secret key (`sk-lf-...`)                                                                                                                                  | Yes                 |
+| `LANGFUSE_BASE_URL`            | Langfuse host. EU: `https://cloud.langfuse.com`, US: `https://us.cloud.langfuse.com`, Japan: `https://jp.cloud.langfuse.com`, HIPAA: `https://hipaa.cloud.langfuse.com` | No (defaults to EU) |
+| `LANGFUSE_TRACING_ENVIRONMENT` | Environment label for the traces (e.g. `production`)                                                                                                                    | No                  |
+| `LANGFUSE_CODEX_TAGS`          | Tags for all traces (JSON array or comma-separated)                                                                                                                     | No                  |
+| `LANGFUSE_CODEX_METADATA`      | JSON object of metadata to attach to all traces                                                                                                                         | No                  |
+| `LANGFUSE_CODEX_MAX_CHARS`     | Truncate inputs/outputs longer than this many characters (default `20000`)                                                                                              | No                  |
+| `LANGFUSE_CODEX_DEBUG`         | Set to `"true"` for verbose logging to stderr                                                                                                                           | No                  |
+
+The credential variables also accept a `LANGFUSE_CODEX_` prefix (for example `LANGFUSE_CODEX_PUBLIC_KEY`), which takes precedence over the standard variable.
+
+## Troubleshooting
+
+### No traces appearing in Langfuse
+
+1. **The plugin isn't enabled.** Confirm `plugin_hooks = true` and the `tracing@langfuse-codex-plugin` plugin is enabled in `~/.codex/config.toml`.
+2. **Tracing isn't turned on.** `TRACE_TO_LANGFUSE` must be the exact string `"true"` and visible to the Codex process. Also verify the public key starts with `pk-lf-`.
+3. **Enable debug logging.** Set `LANGFUSE_CODEX_DEBUG=true` to log to stderr and surface the actual cause.
+
+### Authentication errors
+
+Verify your API keys are correct and that `LANGFUSE_BASE_URL` matches the region your keys belong to:
+
+- **EU region**: `https://cloud.langfuse.com`
+- **US region**: `https://us.cloud.langfuse.com`
+- **Japan region**: `https://jp.cloud.langfuse.com`
+- **HIPAA region**: `https://hipaa.cloud.langfuse.com`
+
+### Data privacy
+
+When enabled, the plugin uploads completed Codex transcript data to Langfuse, including prompts, assistant messages, reasoning summaries, tool inputs and outputs, model metadata, and token usage. Don't enable tracing for sessions containing data you don't want stored in Langfuse, and use `LANGFUSE_CODEX_MAX_CHARS` to cap how much of large inputs and outputs is captured.
+
+## Resources
+
+- [Langfuse Codex Plugin (GitHub)](https://github.com/langfuse/langfuse-codex-plugin)
+- [OpenAI Codex documentation](https://github.com/openai/codex)
+- [Langfuse Sessions](/docs/observability/features/sessions)
+- [Langfuse TypeScript SDK](/docs/observability/sdk/overview)
