@@ -6,10 +6,10 @@ const INNER_W = 1100;
 const INNER_H = 150;
 
 const STEPS = [
-  { num: "01", label: "収集", title: "トレースを集める" },
-  { num: "02", label: "記録", title: "Open coding" },
-  { num: "03", label: "グループ化", title: "カテゴリにクラスタリング" },
-  { num: "04", label: "定量化", title: "ラベル付けと計測" },
+  { num: "01", label: "収集", title: "トレースを\n集める" },
+  { num: "02", label: "記録", title: "オープン\nコーディング" },
+  { num: "03", label: "グループ化", title: "カテゴリに\nクラスタリング" },
+  { num: "04", label: "定量化", title: "ラベル付けと\n計測" },
   { num: "05", label: "実行", title: "判断と実行", accent: true },
 ];
 
@@ -160,7 +160,7 @@ export function ErrorAnalysisProcessDiagram() {
           align-items: center;
           gap: 8px;
           font-family: var(--font-mono);
-          font-size: 12px;
+          font-size: 16px;
           letter-spacing: 0.1em;
           color: var(--text-disabled);
           text-transform: uppercase;
@@ -185,11 +185,12 @@ export function ErrorAnalysisProcessDiagram() {
         .error-analysis-process__title {
           font-family: var(--font-analog), serif;
           font-weight: 500;
-          font-size: 24px;
+          font-size: 22px;
           line-height: 1.08;
           letter-spacing: -0.005em;
           color: var(--text-primary);
           margin: 0;
+          white-space: pre-line;
         }
 
         .error-analysis-process__connector {

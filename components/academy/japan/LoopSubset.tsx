@@ -5,34 +5,34 @@ import { Fragment, useEffect, useState } from "react";
 
 const STATION_DATA = {
   trace: {
-    label: "Online",
+    label: "オンライン",
     title: "トレース",
-    meta: ["traces", "sessions", "agents", "prompts"],
+    meta: ["トレース", "セッション", "エージェント", "プロンプト"],
     href: "/academy/japan/tracing",
   },
   monitor: {
-    label: "Online",
+    label: "オンライン",
     title: "モニタリング",
-    meta: ["dashboards", "LLM-as-judge", "feedback"],
+    meta: ["ダッシュボード", "LLM-as-a-Judge", "フィードバック"],
     href: "/academy/japan/monitoring",
   },
   dataset: {
-    label: "Offline",
+    label: "オフライン",
     title: "データセット\n構築",
-    meta: ["datasets", "features-as-tests"],
+    meta: ["データセット", "features-as-tests"],
     href: "/academy/japan/datasets",
     smallTitle: true,
   },
   change: {
-    label: "Offline",
+    label: "オフライン",
     title: "実験",
-    meta: ["prompts", "models", "code variants"],
+    meta: ["プロンプト", "モデル", "コードのバリアント"],
     href: "/academy/japan/experiments",
   },
   eval: {
-    label: "Offline",
+    label: "オフライン",
     title: "評価",
-    meta: ["judges", "custom evals", "annotation"],
+    meta: ["LLM-as-a-Judge", "カスタム評価", "アノテーション"],
     href: "/academy/japan/evaluate",
   },
 } as const;
@@ -136,7 +136,7 @@ function StationRow({ ids }: { ids: StationId[] }) {
                 <div
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: 10,
+                    fontSize: 12,
                     color: "var(--text-secondary)",
                     letterSpacing: "0.06em",
                     textTransform: "uppercase",
@@ -173,13 +173,17 @@ function StationRow({ ids }: { ids: StationId[] }) {
                   style={{
                     marginTop: 10,
                     fontFamily: "var(--font-mono)",
-                    fontSize: 10,
+                    fontSize: 12,
                     color: "var(--text-tertiary)",
                     letterSpacing: "0.02em",
                     lineHeight: 1.5,
                   }}
                 >
-                  {s.meta.join(" · ")}
+                  {s.meta.map((m) => (
+                    <div key={m} style={{ whiteSpace: "nowrap" }}>
+                      {m}
+                    </div>
+                  ))}
                 </div>
               </Link>
 

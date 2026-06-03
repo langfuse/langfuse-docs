@@ -304,7 +304,7 @@ export function EvaluationEvolutionDiagram() {
         <div className="evaluation-evolution__flow">
           <Stage
             className="evaluation-evolution__stage--one"
-            step="Step 01"
+            step="ステップ 01"
             title="手動レビュー"
           >
             <ManualReviewGlyph />
@@ -312,7 +312,7 @@ export function EvaluationEvolutionDiagram() {
           <Connector />
           <Stage
             className="evaluation-evolution__stage--two"
-            step="Step 02"
+            step="ステップ 02"
             title={
               "\u5931\u6557\u30e2\u30fc\u30c9\u3092\n\u7279\u5b9a\u3059\u308b"
             }
@@ -322,7 +322,7 @@ export function EvaluationEvolutionDiagram() {
           <Connector />
           <Stage
             className="evaluation-evolution__stage--three"
-            step="Step 03"
+            step="ステップ 03"
             title="自動化"
           >
             <AutomateGlyph />

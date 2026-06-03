@@ -6,37 +6,37 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 const STATIONS = [
   {
     id: "trace",
-    label: "Online",
+    label: "オンライン",
     title: "トレース",
-    meta: ["traces", "sessions", "agents", "prompts"],
+    meta: ["トレース", "セッション", "エージェント", "プロンプト"],
     href: "/academy/japan/tracing",
   },
   {
     id: "monitor",
-    label: "Online",
+    label: "オンライン",
     title: "モニタリング",
-    meta: ["dashboards", "LLM-as-judge", "feedback"],
+    meta: ["ダッシュボード", "LLM-as-a-Judge", "フィードバック"],
     href: "/academy/japan/monitoring",
   },
   {
     id: "dataset",
-    label: "Offline",
+    label: "オフライン",
     title: "データセット\n構築",
-    meta: ["datasets", "features-as-tests"],
+    meta: ["データセット", "features-as-tests"],
     href: "/academy/japan/datasets",
   },
   {
     id: "change",
-    label: "Offline",
+    label: "オフライン",
     title: "実験",
-    meta: ["prompts", "models", "code variants"],
+    meta: ["プロンプト", "モデル", "コードのバリアント"],
     href: "/academy/japan/experiments",
   },
   {
     id: "eval",
-    label: "Offline",
+    label: "オフライン",
     title: "評価",
-    meta: ["judges", "custom evals", "annotation"],
+    meta: ["LLM-as-a-Judge", "カスタム評価", "アノテーション"],
     href: "/academy/japan/evaluate",
   },
 ];
@@ -220,7 +220,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
               background: "var(--surface-bg)",
               padding: "4px 12px",
               fontFamily: "var(--font-mono)",
-              fontSize: 11,
+              fontSize: 14,
               color: "var(--text-secondary)",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
@@ -293,7 +293,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
               <div
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: 10,
+                  fontSize: 15,
                   color: "var(--text-secondary)",
                   letterSpacing: "0.06em",
                   textTransform: "uppercase",
@@ -316,7 +316,10 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
                   marginTop: 6,
                   fontFamily: "var(--font-analog)",
                   fontWeight: 500,
-                  fontSize: station.id === "dataset" ? 22 : 26,
+                  fontSize:
+                    station.id === "dataset" || station.id === "monitor"
+                      ? 22
+                      : 26,
                   lineHeight: 1.05,
                   color: "var(--text-primary)",
                   whiteSpace: "pre-line",
@@ -330,13 +333,17 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
                 style={{
                   marginTop: 10,
                   fontFamily: "var(--font-mono)",
-                  fontSize: 10,
+                  fontSize: 14,
                   color: "var(--text-tertiary)",
                   letterSpacing: "0.02em",
                   lineHeight: 1.5,
                 }}
               >
-                {station.meta.join(" · ")}
+                {station.meta.map((m) => (
+                  <div key={m} style={{ whiteSpace: "nowrap" }}>
+                    {m}
+                  </div>
+                ))}
               </div>
             </Link>
           ))}

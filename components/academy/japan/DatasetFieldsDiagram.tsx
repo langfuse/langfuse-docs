@@ -106,7 +106,7 @@ export function DatasetFieldsDiagram() {
           <div className="dataset-fields__row-divider" style={{ top: 257 }} />
 
           <StageLabel y={0} num="01" name="実験を実行" />
-          <StageLabel y={128} num="02" name="コンテキストを追加" />
+          <StageLabel y={128} num="02" name={"コンテキスト\n追加"} />
           <StageLabel y={257} num="03" name="スコアリング" />
 
           <svg
@@ -184,7 +184,7 @@ export function DatasetFieldsDiagram() {
             メタデータ
           </Node>
           <Node x={400} y={164} width={220} variant="stripe">
-            レビュー用の追加コンテキスト
+            レビュー用の追加情報
           </Node>
 
           <Node x={160} y={293} width={180}>
@@ -252,7 +252,7 @@ export function DatasetFieldsDiagram() {
           flex-direction: column;
           justify-content: center;
           padding-left: 14px;
-          padding-right: 20px;
+          padding-right: 8px;
         }
 
         .dataset-fields__stage-num,
@@ -267,14 +267,15 @@ export function DatasetFieldsDiagram() {
         .dataset-fields__stage-num {
           margin-bottom: 4px;
           color: var(--text-disabled);
-          font-size: 10px;
+          font-size: 14px;
           letter-spacing: 0.06em;
         }
 
         .dataset-fields__stage-name {
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.04em;
           line-height: 1.4;
+          white-space: pre-line;
         }
 
         .dataset-fields__arrows {
@@ -339,6 +340,7 @@ export function DatasetFieldsDiagram() {
           font-size: 18px;
           font-weight: 500;
           line-height: 1.1;
+          white-space: pre-line;
         }
 
         .dataset-fields__node--live {

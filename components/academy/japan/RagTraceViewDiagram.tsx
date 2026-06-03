@@ -191,7 +191,7 @@ export function RagTraceViewDiagram() {
               event
             </span>
           </div>
-          <span>1 trace, 8 observations - p95 1.82s</span>
+          <span>1 トレース、8 オブザベーション - p95 1.82s</span>
         </div>
       </div>
 

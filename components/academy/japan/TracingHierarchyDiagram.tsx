@@ -18,7 +18,9 @@ function Observation() {
   return (
     <CornerRing className="tracing-hierarchy__observation">
       <span className="tracing-hierarchy__dot" />
-      <span className="tracing-hierarchy__observation-label">Observation</span>
+      <span className="tracing-hierarchy__observation-label">
+        オブザベーション
+      </span>
     </CornerRing>
   );
 }
@@ -26,7 +28,7 @@ function Observation() {
 function Trace({ observationCount }: { observationCount: number }) {
   return (
     <CornerRing className="tracing-hierarchy__trace">
-      <span className="tracing-hierarchy__caption">Trace</span>
+      <span className="tracing-hierarchy__caption">トレース</span>
       <div className="tracing-hierarchy__observations">
         {Array.from({ length: observationCount }, (_, index) => (
           <Observation key={index} />
@@ -43,7 +45,7 @@ export function TracingHierarchyDiagram() {
       aria-label="セッションはトレースを含み、トレースはオブザベーションを含みます"
     >
       <CornerRing className="tracing-hierarchy__session">
-        <span className="tracing-hierarchy__caption">Session</span>
+        <span className="tracing-hierarchy__caption">セッション</span>
         <div className="tracing-hierarchy__traces">
           {TRACE_OBSERVATION_COUNTS.map((observationCount, index) => (
             <Trace key={index} observationCount={observationCount} />

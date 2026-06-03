@@ -65,7 +65,7 @@ export function AgentPromptCallout({
         <button
           type="button"
           onClick={onCopy}
-          aria-label={copied ? "Copied" : "Copy prompt"}
+          aria-label={copied ? "コピー済み" : "プロンプトをコピー"}
           className={`agent-prompt__copy${
             copied ? " agent-prompt__copy--copied" : ""
           }`}
