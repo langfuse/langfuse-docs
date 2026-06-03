@@ -1,0 +1,44 @@
+---
+title: n8n Integration
+seoTitle: n8n and Langfuse
+sidebarTitle: n8n
+logo: /images/integrations/n8n_icon.svg
+---
+
+# Integration: n8n
+
+> [n8n](https://github.com/n8n-io/n8n) is a fair-code licensed workflow automation platform.
+
+## Prompt Management Integration
+
+<Frame>
+  ![n8n node for
+  langfuse](/images/docs/prompt-management-node-in-n8n-workflow.png)
+</Frame>
+
+Langfuse Prompt Management is available via an n8n node. Learn more in the [n8n Node documentation](/docs/prompts/n8n-node).
+
+## Tracing Integration
+
+### Officially Supported
+
+Currently, there is no native n8n tracing integration. Please upvote the related GitHub discussion [here](https://github.com/orgs/langfuse/discussions/4397) if you are interested in this.
+
+### Workarounds
+
+While there is no native integration, there are several ways to trace your n8n AI workflows in Langfuse.
+
+#### Using OpenRouter with Broadcast
+
+You can use [OpenRouter](https://openrouter.ai/) as your LLM provider in n8n, and send traces to Langfuse using OpenRouter's [Broadcast feature](/integrations/gateways/openrouter#broadcast).
+
+#### Community Supported
+
+<Frame>
+  ![n8n workflow with OpenAI model traced in
+  Langfuse](/images/docs/n8n-nodes-openai-langfuse-workflow.png)
+</Frame>
+
+[@rorubyy](https://github.com/rorubyy) has created a n8n node for that wraps OpenAI models and sends tracing data to Langfuse. You can find it here: [rorubyy/n8n-nodes-openai-langfuse](https://github.com/rorubyy/n8n-nodes-openai-langfuse)
+
+Alternatively, [@rwb-truelime](https://github.com/rwb-truelime) has developed [n8n-langfuse-shipper](https://github.com/rwb-truelime/n8n-langfuse-shipper), a Python project that ships n8n execution data to Langfuse using the OTEL (OpenTelemetry) API. This approach provides a broader integration by capturing workflow execution data from n8n and forwarding it to Langfuse for observability and tracing.

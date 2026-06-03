@@ -1,10 +1,14 @@
+"use client";
+
 import Link from "next/link";
-import { Header } from "../../Header";
-import { HomeSection } from "../components/HomeSection";
+import { HomeSection } from "../HomeSection";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "../../ui/tabs";
 import { useState } from "react";
 import React from "react";
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
+import { TextHighlight } from "@/components/ui/text-highlight";
 import { PricingCalculator } from "./PricingCalculator";
 import { PricingFAQ } from "./PricingFAQ";
 import { PricingDiscounts } from "./PricingDiscounts";
@@ -22,7 +26,7 @@ type DeploymentOptionParams = {
 const deploymentOptions: Record<DeploymentOption, DeploymentOptionParams> = {
   cloud: {
     switch: (
-      <span className="flex flex-row items-center gap-x-1">
+      <span className="flex flex-row gap-x-1 items-center">
         Langfuse Cloud
         <span className="hidden md:block"> (we host)</span>
       </span>
@@ -34,7 +38,7 @@ const deploymentOptions: Record<DeploymentOption, DeploymentOptionParams> = {
   },
   selfHosted: {
     switch: (
-      <span className="flex flex-row items-center gap-x-1">
+      <span className="flex flex-row gap-x-1 items-center">
         Self-hosted
         <span className="hidden md:block"> (you host)</span>
       </span>
@@ -57,21 +61,31 @@ export function PricingPage({
   const variant = isPricingPage ? initialVariant : localVariant;
 
   return (
-    <HomeSection id="pricing" className={cn(isPricingPage && "px-0 sm:px-0")}>
-      <div className="isolate overflow-hidden">
+    <HomeSection
+      id="pricing"
+      className={cn(
+        "not-prose",
+        isPricingPage &&
+          "md:max-w-none xl:max-w-none px-4 sm:px-6 md:px-8 pt-8 md:pt-12",
+      )}
+    >
+      <div className="isolate">
         <div className="flow-root pb-16 lg:pb-0">
           <div className="mx-auto max-w-7xl">
-            <Header
-              title={deploymentOptions[variant].title}
-              description={deploymentOptions[variant].subtitle}
-              h="h1"
-            />
+            <div className="flex flex-col gap-4 mb-8 items-center text-center">
+              <Heading as="h1" size="large">
+                <TextHighlight>
+                  {deploymentOptions[variant].title}
+                </TextHighlight>
+              </Heading>
+              <Text>{deploymentOptions[variant].subtitle}</Text>
+            </div>
 
             {/* Deployment Options Tabs */}
             <Tabs
               defaultValue={variant}
               value={variant}
-              className="mt-4 flex justify-center"
+              className="flex justify-center mt-4"
               onValueChange={(value) => {
                 if (!isPricingPage) {
                   setLocalVariant(value as "cloud" | "selfHosted");
@@ -104,10 +118,12 @@ export function PricingPage({
         {isPricingPage ? (
           <>
             <div className="relative">
-              <div className={cn(
-                "mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8",
-                variant === "cloud" ? "mt-16" : "mt-0"
-              )}>
+              <div
+                className={cn(
+                  "mx-auto max-w-7xl py-12 sm:py-16",
+                  variant === "cloud" ? "mt-16" : "mt-0",
+                )}
+              >
                 {variant === "cloud" && <PricingCalculator />}
                 <PricingDiscounts />
                 <PricingFAQ />
@@ -116,7 +132,7 @@ export function PricingPage({
           </>
         ) : (
           <>
-            <div className="text-center mt-10">
+            <div className="mt-10 text-center">
               For a detailed comparison and FAQ, see our{" "}
               <Link
                 href={deploymentOptions[variant].href}

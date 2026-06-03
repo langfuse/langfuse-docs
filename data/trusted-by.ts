@@ -26,7 +26,7 @@ export const trustedByData: TrustedByData = {
       {
         name: "SumUp",
         logo: "/images/customers/picing-logos/sumup.png",
-        caseStudyUrl: "/customers/sumup",
+        caseStudyUrl: "/users/sumup",
       },
       //{ name: "Brevo", logo: "/images/customers/picing-logos/brevo.png" },
     ],
@@ -34,12 +34,12 @@ export const trustedByData: TrustedByData = {
       {
         name: "Khan Academy",
         logo: "/images/customers/picing-logos/khanacademy.png",
-        caseStudyUrl: "/customers/khan-academy",
+        caseStudyUrl: "/users/khan-academy",
       },
       {
         name: "Merck Group",
         logo: "/images/customers/picing-logos/merckgroup.png",
-        caseStudyUrl: "/customers/merckgroup",
+        caseStudyUrl: "/users/merckgroup",
       },
       //{ name: "Cinc Systems", logo: "/images/customers/picing-logos/cincsystems.png" },
       //{ name: "HG Capital", logo: "/images/customers/picing-logos/hgcapital.png" },

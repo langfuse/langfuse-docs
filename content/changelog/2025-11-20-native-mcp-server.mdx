@@ -1,0 +1,59 @@
+---
+date: 2025-11-20
+title: Hosted MCP Server for Langfuse Prompt Management
+description: Langfuse now includes a native Model Context Protocol (MCP) server with write capabilities, enabling AI agents to fetch and update prompts directly.
+author: Michael
+ogImage: /images/changelog/2025-11-20-native-mcp-server.png
+canonical: /docs/api-and-data-platform/features/mcp-server
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We're excited to announce that Langfuse now includes a **native MCP server** built directly into the platform. We release it with support for [Prompt Management](/docs/prompt-management/overview) and will extend it to the rest of the Langfuse data platform in the future.
+
+Our previous Prompt MCP server ([changelog](/changelog/2025-02-16-mcp-server-update)) was a node package. The new one uses `StreamableHttp` to communicate with the Langfuse API directly, no need for building or installing any external dependencies.
+
+<Callout type="info">
+**Update (May 2026):** The current MCP tool list, input schemas, and setup snippets now live in the generated [MCP Reference](https://mcp.reference.langfuse.com).
+</Callout>
+
+## What's New
+
+The native MCP server launched at `/api/public/mcp` with five tools for comprehensive prompt management:
+
+**Read Operations:**
+
+- `getPrompt` - Fetch specific prompts by name, label, or version
+- `listPrompts` - Browse all prompts with filtering and pagination
+
+**Write Operations:**
+
+- `createTextPrompt` - Create new text prompt versions
+- `createChatPrompt` - Create new chat prompt versions (OpenAI-style messages)
+- `updatePromptLabels` - Manage labels across prompt versions
+
+## Setup
+
+Simply configure your MCP client with BasicAuth credentials:
+
+```bash
+# Claude Code - one command
+claude mcp add --transport http langfuse https://cloud.langfuse.com/api/public/mcp \
+    --header "Authorization: Basic {your-base64-token}"
+```
+
+The native server uses a stateless architecture, ensuring clean separation between projects and reliable operation across all deployment types (Cloud, self-hosted, or local development).
+
+See [documentation](/docs/api-and-data-platform/features/mcp-server) for more details.
+
+## Feedback
+
+We'd love to hear about your experience with the Langfuse MCP server. Share your feedback, ideas, and use cases in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605).
+
+## Get Started
+
+- [MCP Server Documentation](/docs/api-and-data-platform/features/mcp-server) - Complete setup guide
+- [MCP Reference](https://mcp.reference.langfuse.com) - Current tools, setup snippets, schemas, and generated requests
+- [Prompt Management with MCP](/docs/prompt-management/features/mcp-server) - Prompt-specific workflows

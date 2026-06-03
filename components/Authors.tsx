@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,6 +11,8 @@ import {
 } from "@/components/ui/hover-card";
 import { Github, Linkedin, Twitter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Text } from "@/components/ui/text";
+import { HoverCorners } from "@/components/ui/corner-box";
 
 export type Author = {
   firstName: string;
@@ -28,14 +32,14 @@ const findAuthor = (authorName: string): Author => {
   const author =
     allAuthors[authorName as keyof typeof allAuthors] ??
     Object.values(allAuthors).find(
-      (author) => author.firstName.toLowerCase() === authorName.toLowerCase()
+      (author) => author.firstName.toLowerCase() === authorName.toLowerCase(),
     ) ??
     Object.values(allAuthors).find(
-      (author) => author.name.toLowerCase() === authorName.toLowerCase()
+      (author) => author.name.toLowerCase() === authorName.toLowerCase(),
     );
   if (!author) {
     throw new Error(
-      `Author "${authorName}" is not present in allAuthors. Please check data/authors.json.`
+      `Author "${authorName}" is not present in allAuthors. Please check data/authors.json.`,
     );
   }
   return author;
@@ -47,7 +51,7 @@ export const Authors = (props: { authors: string[] }) => {
   // Show only overlapping avatars when there are more than 2 authors
   if (props.authors.length > 2) {
     return (
-      <div className="flex justify-center py-7 max-w-xl">
+      <div className="flex justify-center py-4 max-w-xl">
         <div className="flex -space-x-2">
           {props.authors.map((author) => (
             <AuthorAvatar author={author} key={author} />
@@ -58,7 +62,7 @@ export const Authors = (props: { authors: string[] }) => {
   }
 
   return (
-    <div className="flex flex-wrap gap-x-10 gap-y-6 justify-center py-7 max-w-xl">
+    <div className="flex flex-wrap gap-x-10 gap-y-6 justify-center py-4 max-w-xl">
       {props.authors.map((author) => (
         <Author
           author={author}
@@ -79,6 +83,7 @@ export const Author = (props: { author: string; hideLastName?: boolean }) => {
         <div
           className="flex items-center gap-4 cursor-default"
           key={props.author}
+          suppressHydrationWarning
         >
           <Image
             src={author.image}
@@ -89,7 +94,7 @@ export const Author = (props: { author: string; hideLastName?: boolean }) => {
           />
           <span
             className={cn(
-              "text-primary/60 group-hover:text-primary whitespace-nowrap"
+              "text-primary/60 group-hover:text-primary whitespace-nowrap",
             )}
           >
             {props.hideLastName ? author.firstName : author.name}
@@ -111,6 +116,7 @@ export const AuthorAvatar = (props: { author: string }) => {
           className="group shrink-0 relative"
           key={props.author}
           title={author.name}
+          suppressHydrationWarning
         >
           <Image
             src={author.image}
@@ -136,36 +142,46 @@ export const AuthorHoverCardContent = ({
   align?: "start" | "center" | "end";
 }) => {
   return (
-    <HoverCardContent className="w-56 p-0" side={side} align={align}>
-      <div className="flex flex-col gap-2 text-left w-full">
-        <div className="flex items-center gap-3 justify-start p-3 pb-1">
+    <HoverCardContent className="w-56 p-0 not-prose" side={side} align={align}>
+      <div className="flex flex-col text-left w-full relative z-51">
+        <div className="flex items-center gap-3 justify-start py-2.5 px-3">
           <Image
             src={author.image}
-            width={40}
-            height={40}
-            className="rounded-full border border-border"
+            width={32}
+            height={32}
+            className="rounded-full border border-line-structure shrink-0 my-0"
             alt={`Picture ${author.name}`}
           />
-          <div className="space-y-0.5 text-left">
-            <h4 className="text-sm font-semibold">{author.name}</h4>
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <Text
+              as="span"
+              size="s"
+              className="font-[540] text-left text-text-primary my-0 leading-[1.2]"
+            >
+              {author.name}
+            </Text>
             {author.title && (
-              <span className="text-xs text-muted-foreground block">
+              <Text
+                as="span"
+                className="text-xs text-left text-text-tertiary block my-0 leading-[1.2]"
+              >
                 {author.title}
-              </span>
+              </Text>
             )}
           </div>
         </div>
-        <Separator />
-        <div className="flex flex-col gap-1 w-full p-3 pt-1">
+        <Separator className="bg-line-structure" />
+        <div className="flex flex-col w-full py-1.5 px-2">
           {author.twitter && (
             <Link
               href={`https://twitter.com/${author.twitter}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+              className="link-box relative flex items-center gap-2 px-1 py-1 text-text-tertiary hover:text-text-primary no-underline hover:underline decoration-1 underline-offset-4 decoration-text-tertiary/40 transition-colors"
             >
-              <Twitter className="h-4 w-4" />
-              <span className="text-xs">@{author.twitter}</span>
+              <HoverCorners />
+              <Twitter className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-xs truncate">@{author.twitter}</span>
             </Link>
           )}
           {author.github && (
@@ -173,10 +189,11 @@ export const AuthorHoverCardContent = ({
               href={`https://github.com/${author.github}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+              className="link-box relative flex items-center gap-2 px-1 py-1 text-text-tertiary hover:text-text-primary no-underline hover:underline decoration-1 underline-offset-4 decoration-text-tertiary/40 transition-colors"
             >
-              <Github className="h-4 w-4" />
-              <span className="text-xs">{author.github}</span>
+              <HoverCorners />
+              <Github className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-xs truncate">{author.github}</span>
             </Link>
           )}
           {author.linkedin && (
@@ -184,10 +201,11 @@ export const AuthorHoverCardContent = ({
               href={`https://www.linkedin.com/in/${author.linkedin}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+              className="link-box relative flex items-center gap-2 px-1 py-1 text-text-tertiary hover:text-text-primary no-underline hover:underline decoration-1 underline-offset-4 decoration-text-tertiary/40 transition-colors"
             >
-              <Linkedin className="h-4 w-4" />
-              <span className="text-xs">LinkedIn</span>
+              <HoverCorners />
+              <Linkedin className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-xs truncate">LinkedIn</span>
             </Link>
           )}
         </div>

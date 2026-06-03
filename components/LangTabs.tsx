@@ -1,6 +1,13 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
-import { Tabs } from "nextra/components";
+import {
+  Tabs as FumadocsTabs,
+  Tab as FumadocsTab,
+  TabsList as FumadocsTabsList,
+  TabsTrigger as FumadocsTabsTrigger,
+} from "fumadocs-ui/components/tabs";
+import { cn } from "@/lib/utils";
+import { CornerBox } from "./ui";
 
 const KEY = "synced-tabs:language";
 const normalize = (s: string) => s.trim().toLowerCase();
@@ -49,6 +56,25 @@ if (typeof window !== "undefined") {
   });
 }
 
+function toValue(s: string): string {
+  return s.toLowerCase().replace(/\s/g, "-");
+}
+
+export function LangTab({
+  className,
+  ...props
+}: React.ComponentProps<typeof FumadocsTab>) {
+  return (
+    <FumadocsTab
+      className={cn(
+        "pt-4 text-sm bg-transparent rounded-none prose-no-margin bg-stripe-pattern",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
 export function LangTabs(props: {
   items: any[];
   children: React.ReactNode;
@@ -56,21 +82,6 @@ export function LangTabs(props: {
   onChange?: (next: number) => void;
 }) {
   const { items, children, defaultIndex = 0, onChange } = props;
-  const storedLabel = useSyncExternalStore(
-    store.subscribe,
-    store.getSnapshot,
-    store.getSnapshot
-  );
-
-  // Track the current active index separately
-  const [currentIndex, setCurrentIndex] = React.useState<number>(
-    defaultIndex >= 0 && defaultIndex < items.length ? defaultIndex : 0
-  );
-
-  // Ref for the container element to calculate relative scroll position
-  const containerRef = useRef<HTMLDivElement>(null);
-  // Store the offset from the top of the tabs container to the viewport top
-  const pendingOffsetRef = useRef<number | null>(null);
 
   const labels: (string | null)[] = useMemo(() => {
     return items.map((it) => {
@@ -79,48 +90,61 @@ export function LangTabs(props: {
         it &&
         typeof it === "object" &&
         "label" in it &&
-        typeof (it as any).label === "string"
+        typeof it.label === "string"
       )
-        return (it as any).label as string;
+        return it.label as string;
       return null;
     });
   }, [items]);
 
+  const values = useMemo(
+    () => labels.map((l, i) => (l ? toValue(l) : String(i))),
+    [labels],
+  );
+  const storedLabel = useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot,
+  );
+
   const initialLabel = useMemo(
     () => labels[defaultIndex] ?? null,
-    [labels, defaultIndex]
+    [labels, defaultIndex],
   );
 
   useEffect(() => {
     if (storedLabel == null && initialLabel) store.set(initialLabel);
   }, [storedLabel, initialLabel]);
 
-  // Update currentIndex when storedLabel changes and matches available tabs
+  const [internalValue, setInternalValue] = React.useState(
+    values[defaultIndex] ?? values[0],
+  );
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const pendingOffsetRef = useRef<number | null>(null);
+
   useEffect(() => {
     const target = storedLabel ?? initialLabel;
     if (target) {
       const idx = labels.findIndex(
-        (l) => typeof l === "string" && normalize(l) === normalize(target)
+        (l) => typeof l === "string" && normalize(l) === normalize(target),
       );
       if (idx !== -1) {
-        setCurrentIndex(idx);
+        setInternalValue(values[idx]);
         return;
       }
       const asNum = Number(target);
       if (!Number.isNaN(asNum) && asNum >= 0 && asNum < items.length) {
-        setCurrentIndex(asNum);
+        setInternalValue(values[asNum]);
         return;
       }
     }
-    // If no match found, keep the current index unchanged
-  }, [storedLabel, initialLabel, labels, items.length]);
+  }, [storedLabel, initialLabel, labels, items.length, values]);
 
-  // Restore scroll position after tab content renders
   useEffect(() => {
     if (pendingOffsetRef.current !== null && containerRef.current) {
       const savedOffset = pendingOffsetRef.current;
       pendingOffsetRef.current = null;
-
       const restoreScroll = () => {
         if (containerRef.current) {
           const currentRect = containerRef.current.getBoundingClientRect();
@@ -130,43 +154,63 @@ export function LangTabs(props: {
           }
         }
       };
-
-      // Try multiple times to overcome any competing scroll behaviors
       restoreScroll();
       requestAnimationFrame(restoreScroll);
       setTimeout(restoreScroll, 0);
       setTimeout(restoreScroll, 50);
     }
-  }, [currentIndex]);
+  }, [internalValue]);
 
-  const selectedIndex = useMemo(() => {
-    // Ensure currentIndex is within bounds
-    return currentIndex >= 0 && currentIndex < items.length ? currentIndex : 0;
-  }, [currentIndex, items.length]);
-
-  const handleChange = (next: number) => {
-    // Save the container's offset from viewport top before tab change
+  const handleValueChange = (v: string) => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       pendingOffsetRef.current = rect.top;
     }
-    setCurrentIndex(next);
-    const label = labels[next];
+    setInternalValue(v);
+    const idx = values.indexOf(v);
+    const label = idx !== -1 ? labels[idx] : null;
     if (typeof label === "string") store.set(label);
-    else store.set(String(next));
-    if (typeof onChange === "function") onChange(next);
+    else store.set(v);
+    if (typeof onChange === "function" && idx !== -1) onChange(idx);
   };
 
   return (
     <div ref={containerRef}>
-      <Tabs
-        items={items}
-        selectedIndex={selectedIndex}
-        onChange={handleChange}
-        storageKey={undefined as unknown as string}
-      >
-        {children}
-      </Tabs>
+      <CornerBox>
+        <FumadocsTabs
+          key={internalValue}
+          defaultValue={internalValue}
+          className="flex overflow-hidden flex-col my-0 rounded-none border-none"
+        >
+          <FumadocsTabsList
+            className={
+              "flex overflow-x-auto overflow-y-hidden flex-nowrap gap-2 px-4 pt-1 rounded-none border-b sm:gap-4 not-prose border-line-structure min-h-9 bg-surface-bg"
+            }
+          >
+            {items.map((item, i) => (
+              <FumadocsTabsTrigger
+                key={i}
+                value={values[i]}
+                onClick={() => handleValueChange(values[i])}
+                className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b border-transparent pb-2 pt-1.5 text-xs text-text-tertiary transition-colors font-[430] hover:text-foreground cursor-pointer disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-line-cta data-[state=active]:text-text-primary data-[state=active]:font-medium"
+              >
+                {typeof item === "string" ? item : (item?.label ?? String(i))}
+              </FumadocsTabsTrigger>
+            ))}
+          </FumadocsTabsList>
+          {React.Children.map(children, (child, i) => {
+            if (!React.isValidElement(child)) return child;
+            return React.cloneElement(
+              child as React.ReactElement<{ value: string }>,
+              {
+                value: values[i] ?? String(i),
+              },
+            );
+          })}
+        </FumadocsTabs>
+      </CornerBox>
     </div>
   );
 }
+
+export const LangTabsWithTab = Object.assign(LangTabs, { Tab: LangTab });

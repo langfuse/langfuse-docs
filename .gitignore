@@ -1,5 +1,6 @@
 .next
 node_modules
+.pnpm-store
 .vercel
 
 .env.local
@@ -9,8 +10,11 @@ node_modules
 # next sitemap
 public/robots.txt
 public/sitemap*.xml
-public/llms.txt
+.sitemap-excludes.json
+.sitemap-all-pages.json
+public/llms*.txt
 public/md-src
+content/workshop/
 
 # we use pnpm
 package-lock.json
@@ -103,6 +107,24 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+# playwright cli
+.playwright/
+.playwright-cli/
+.playwright-mcp/
+.mcp.json
+.claude/settings.json
+.claude/settings.local.json
+.claude/launch.json
+.claude/skills/
+.cursor/mcp.json
+.cursor/environment.json
+.cursor/commands/
+.cursor/skills/
+.cursor/rules/
+.vscode/mcp.json
+.codex/config.toml
+.codex/environments/environment.toml
+
 # Editor-based Rest Client
 .idea/httpRequests
 
@@ -119,3 +141,7 @@ fabric.properties
 !.idea/runConfigurations
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all
+
+# fumadocs-mdx generated
+.source/
+*.tsbuildinfo

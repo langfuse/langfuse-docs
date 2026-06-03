@@ -1,0 +1,51 @@
+---
+title: Overview
+seoTitle: "Evaluation of LLM Applications"
+description: With Langfuse you can capture all your LLM evaluations in one place. You can combine a variety of different evaluation metrics like model-based evaluations (LLM-as-a-Judge), human annotations or fully custom evaluation workflows via API/SDKs. This allows you to measure quality, tonality, factual accuracy, completeness, and other dimensions of your LLM application.
+---
+
+import { LoopDiagram } from "@/components/academy/LoopDiagram";
+
+# Evaluation Overview
+
+Evals give you a repeatable check of your LLM application's behavior. You replace guesswork with data, and catch regressions before you ship a change.
+
+<Frame fullWidth>
+  <img src="/images/docs/score-analytics-full-dashboard.png" alt="Score Analytics dashboard in Langfuse showing evaluation scores trended over time across multiple evaluators." />
+</Frame>
+
+Evaluation runs across most of the [AI engineering loop](/academy/ai-engineering-loop): you score live traces in production, turn interesting examples into datasets, run experiments to compare changes, and judge the results with manual or automated evaluators. It happens both **online**, on live production traces, and **offline**, before you ship a change.
+
+<LoopDiagram />
+
+<Callout type="info" emoji="🎥">
+
+[**Watch this walkthrough**](/watch-demo?tab=evaluation) of Langfuse Evaluation and how to use it to improve your LLM application.
+
+</Callout>
+
+## Getting Started
+
+Start with the [Core Concepts](/docs/evaluation/core-concepts) page. It explains how evaluators, scores, datasets, and experiments fit together in Langfuse, which makes the rest of the docs much easier to navigate.
+
+Once you have that context, use the table below to find the right feature page:
+
+| If you want to...                                   | Use this Langfuse feature                                                                                                                      |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Review and rate traces manually                     | [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues), [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui) |
+| Leave open-ended notes on traces                    | [Text scores](/docs/evaluation/scores/overview#score-types), [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues)        |
+| Track recurring failure categories                  | [Score configs](/faq/all/manage-score-configs), [scores](/docs/evaluation/scores/overview#score-types)                                         |
+| Build a reusable set of test cases                  | [Datasets](/docs/evaluation/experiments/datasets)                                                                                              |
+| Compare prompt, model, or code changes side by side | [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui), [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) |
+| Block deploys on regressions                        | [CI/CD experiments](/docs/evaluation/experiments/experiments-ci-cd)                                                                            |
+| Run deterministic checks                            | [Code Evaluators](/docs/evaluation/evaluation-methods/code-evaluators)                                                                         |
+| Automatically score live production traces          | [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) |
+| See how scores trend over time                      | [Score Analytics](/docs/evaluation/scores/score-analytics), [custom dashboards](/docs/metrics/features/custom-dashboards)                      |
+
+Already know what you're looking for? Browse _Evaluation Methods_ and _Experiments_ in the sidebar.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-scores"]} />

@@ -1,0 +1,18 @@
+---
+title: Timezone errors in self-hosted Langfuse
+tags: [self-hosting]
+---
+
+# Timezone errors in self-hosted Langfuse
+
+**Langfuse requires all infrastructure components (ClickHouse and Postgres) to run in the UTC timezone.** Non-UTC timezones are not supported and will cause queries to return incorrect or empty results.
+
+If you are seeing missing traces or observations, verify that your ClickHouse instance is running in UTC:
+
+```sql
+SELECT timezone()
+```
+
+This should return `UTC`. If it returns a different timezone, update your ClickHouse server configuration to remove any custom [`timezone`](https://clickhouse.com/docs/en/operations/server-configuration-parameters/settings#timezone) setting and restart the server. The same applies to your [Postgres timezone setting](/self-hosting/deployment/infrastructure/postgres).
+
+If you would like us to consider supporting other timezones, please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046).

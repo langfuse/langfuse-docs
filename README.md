@@ -1,26 +1,33 @@
-![GitHub Banner](https://github.com/langfuse/langfuse-docs/assets/2834609/e403ad73-73fa-43f0-9925-292b05ce58de)
+<img width="2400" height="600" alt="hero-b" src="https://github.com/user-attachments/assets/382a0209-262d-42b0-8107-e0997c568d13" />
 
 # Langfuse Docs
 
-Repo for [langfuse.com](https://langfuse.com). Based on [Nextra](https://nextra.site/).
-
-## GitHub Codespaces
-
-You can easily contribute to the docs using GitHub Codespaces. Just click on the "Code" button and select "Open with Codespaces". This will open a new Codespace with all the dependencies installed and the development server running.
+Repo for [langfuse.com](https://langfuse.com). Built with [Fumadocs](https://fumadocs.vercel.app/) and Next.js App Router.
 
 ## Local Development
 
 Pre-requisites: Node.js 22, pnpm v9.5.0
 
+To use Node 22 (e.g. with [nvm](https://github.com/nvm-sh/nvm)): `nvm install 22` then `nvm use` (or `nvm use 22`). The repo includes an `.nvmrc` so `nvm use` picks 22 automatically.
+
 1. Optional: Create env based on [.env.template](./.env.template)
 2. Run `pnpm i` to install the dependencies.
 3. Run `pnpm dev` to start the development server on localhost:3333
+
+## Formatting
+
+This repo uses [Prettier](https://prettier.io/) for formatting supported source and content files, including Markdown and MDX.
+
+- Run `pnpm run format` to format files.
+- Run `pnpm run format:check` to check formatting in CI mode.
+
+Markdown prose wrapping is preserved and embedded-language formatting is disabled in `.prettierrc.json` so formatting does not change linebreak-sensitive Markdown rendering or fenced code snippet contents.
 
 ## Python cookbooks
 
 All Jupyter notebooks are in the `cookbook/` directory. For JS/TS notebooks we use Deno, see Readme in cookbook folder for more details.
 
-To render them within the documentation site, we convert them to markdown using `jupyter nbconvert`, move them to right path in the pages/ directory where they are rendered by Nextra (remark).
+To render them within the documentation site, we convert them to markdown using `jupyter nbconvert`, move them to the right path in the `content/guides/cookbook/` directory where they are picked up by Fumadocs.
 
 Steps after updating notebooks:
 
@@ -28,7 +35,7 @@ Steps after updating notebooks:
 2. Run `bash scripts/update_cookbook_docs.sh` (uv will automatically handle dependencies)
 3. Commit the changed markdown files
 
-**Note**: All `.md` files or `.mdx` files that contain "source: ⚠️ Jupyter Notebook" on top in the `pages/` directory are automatically generated from Jupyter notebooks. Do not edit them manually as they will be overwritten. Always edit the Jupyter notebooks and run the conversion script.
+**Note**: All `.md` or `.mdx` files that contain "source: ⚠️ Jupyter Notebook" on top in `content/guides/cookbook/` are automatically generated from Jupyter notebooks. Do not edit them manually — they will be overwritten. Always edit the Jupyter notebooks and run the conversion script.
 
 ## Media
 
@@ -46,18 +53,25 @@ To embed a "gif", actually embed a video and use `gifMode` (`<Video src="" gifMo
 
 ## Stack
 
-- [Nextra](https://nextra.site/)
-- [Next.js](https://nextjs.org/)
+- [Fumadocs](https://fumadocs.vercel.app/) (docs framework)
+- [Next.js](https://nextjs.org/) App Router
 - [shadcn/ui](https://ui.shadcn.com)
 - [Tailwind CSS](https://tailwindcss.com/)
 
 Interested in stack of Q&A docs chatbot? Checkout the [blog post](https://langfuse.com/blog/qa-chatbot-for-langfuse-docs) for implementation details (all open source)
 
+## Search & AI chat
+
+The docs site uses [Inkeep](https://inkeep.com/) for two separate embeds:
+
+- **Search** — Inkeep's embedded search widget.
+- **Ask AI chat** — Fumadocs' built-in Inkeep chat integration.
+
 ## LLM Features
 
 The docs site includes four interconnected features designed to make documentation accessible to LLMs and AI tools:
 
-1. **Markdown URL endpoints** (`.md` suffix): Append `.md` to any URL (e.g., `/docs.md`) to get raw markdown. Built at compile time via `scripts/copy_md_sources.js` which copies all `.mdx` files from `/pages` to `/public/md-src/` as static `.md` files with inlined MDX components.
+1. **Markdown URL endpoints** (`.md` suffix): Append `.md` to any URL (e.g., `/docs.md`) to get raw markdown. Built at compile time via `scripts/copy_md_sources.js` which copies all `.mdx`/`.md` files from `content/` to `public/md-src/` as static `.md` files with inlined MDX components.
 
 2. **Copy as Markdown button**: UI button on docs pages that fetches the `.md` endpoint and copies to clipboard for pasting into ChatGPT/Claude/Cursor.
 
