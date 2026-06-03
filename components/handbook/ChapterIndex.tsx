@@ -1,59 +1,42 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
-import { Cards } from "nextra/components";
-import { CHAPTER_ORDER } from "@/pages/handbook/chapters/_meta";
+import { handbookSource } from "@/lib/source";
+import { CHAPTER_ORDER } from "@/lib/handbook-meta";
+import { Cards, Card } from "@/components/docs";
+import { Text } from "@/components/ui/text";
 
 export const ChapterIndex = () => {
-  const pages = getPagesUnderRoute("/handbook/chapters") as Array<
-    Page & { frontMatter: any }
-  >;
-
-  // Filter out the _meta.tsx file and sort pages
-  const chapterPages = pages
-    .filter(
-      (page) =>
-        page.route !== "/handbook/chapters" && !page.route.includes("_meta")
-    )
+  const chapterPages = handbookSource
+    .getPages()
+    .filter((page) => page.url.startsWith("/handbook/chapters/"))
     .sort((a, b) => {
-      // Extract the chapter name from the route (e.g., "/handbook/chapters/mission" -> "mission")
-      const getChapterName = (route: string) => route.split("/").pop() || "";
-      const chapterA = getChapterName(a.route);
-      const chapterB = getChapterName(b.route);
-
-      // Get the order index for each chapter
+      const getChapterName = (url: string) => url.split("/").pop() ?? "";
+      const chapterA = getChapterName(a.url);
+      const chapterB = getChapterName(b.url);
       const indexA = CHAPTER_ORDER.indexOf(chapterA);
       const indexB = CHAPTER_ORDER.indexOf(chapterB);
-
-      // If both chapters are in the order array, sort by their position
-      if (indexA !== -1 && indexB !== -1) {
-        return indexA - indexB;
-      }
-
-      // If only one is in the order array, prioritize it
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
       if (indexA !== -1) return -1;
       if (indexB !== -1) return 1;
-
-      // If neither is in the order array, fall back to alphabetical
-      return a.route.localeCompare(b.route);
+      return a.url.localeCompare(b.url);
     });
 
   return (
-    <div className="my-6">
-      <Cards num={1}>
-        {chapterPages.map((page, index) => (
-          <Cards.Card
-            href={page.route}
-            key={page.route}
-            title={page.meta?.title || page.frontMatter?.title || page.name}
-            icon={
-              <span className="text-base font-medium font-mono">
-                {index + 1}
-              </span>
-            }
-            arrow
-          />
-        ))}
-      </Cards>
-    </div>
+    <Cards num={1} className="not-prose">
+      {chapterPages.map((page, index) => (
+        <Card key={page.url} href={page.url}>
+          <div className="flex flex-row items-center gap-2.5 text-text-primary">
+            <Text size="s" className="font-medium font-mono shrink-0">
+              {index + 1}
+            </Text>
+            <Text
+              as="h3"
+              size="s"
+              className="not-prose mb-0 text-left text-text-secondary"
+            >
+              {page.data.title}
+            </Text>
+          </div>
+        </Card>
+      ))}
+    </Cards>
   );
 };

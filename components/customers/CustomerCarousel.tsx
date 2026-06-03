@@ -1,7 +1,7 @@
-import { getPagesUnderRoute } from "nextra/context";
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { type Page } from "nextra";
 import { useMemo, useState, useEffect } from "react";
 import {
   Carousel,
@@ -12,11 +12,11 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 
-interface CustomerStory {
+export interface CustomerStory {
   route: string;
   frontMatter: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
     customerLogo?: string;
     customerLogoDark?: string;
     customerQuote?: string;
@@ -25,15 +25,16 @@ interface CustomerStory {
     quoteCompany?: string;
     quoteAuthorImage?: string;
     showInCustomerIndex?: boolean;
+    [key: string]: unknown;
   };
   meta?: {
     title: string;
   };
-  name: string;
+  name?: string;
 }
 
 interface CustomerCarouselProps {
-  path?: string;
+  stories: CustomerStory[];
   title?: string;
   description?: string;
   showDots?: boolean;
@@ -42,19 +43,19 @@ interface CustomerCarouselProps {
 }
 
 export const CustomerCarousel = ({
-  path = "/customers",
+  stories: allStories,
   title,
   description,
   showDots = true,
   loop = false,
   className = "",
 }: CustomerCarouselProps) => {
-  // Memoize the original filtered stories to avoid repeated getPagesUnderRoute calls
+  // Filter stories where showInCustomerIndex is not explicitly false
   const originalStories = useMemo(() => {
-    return (getPagesUnderRoute(path) as Array<CustomerStory>).filter(
-      (page) => page.frontMatter?.showInCustomerIndex !== false
+    return allStories.filter(
+      (page) => page.frontMatter?.showInCustomerIndex !== false,
     );
-  }, [path]);
+  }, [allStories]);
 
   const customerStories = useMemo(() => {
     // For infinite loop, duplicate items to ensure smooth looping
@@ -130,12 +131,12 @@ export const CustomerCarousel = ({
     <div className={`w-full ${className}`}>
       {/* Header */}
       {(title || description) && (
-        <div className="text-center mb-8">
+        <div className="mb-8 text-center">
           {title && (
-            <h2 className="text-3xl font-bold text-foreground mb-4">{title}</h2>
+            <h2 className="mb-4 text-3xl font-bold text-foreground">{title}</h2>
           )}
           {description && (
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
+            <p className="text-lg text-gray-600 dark:text-gray-400">
               {description}
             </p>
           )}
@@ -143,7 +144,7 @@ export const CustomerCarousel = ({
       )}
 
       {/* Carousel */}
-      <div className="w-full max-w-6xl mx-auto">
+      <div className="mx-auto w-full max-w-6xl px-12">
         <Carousel
           setApi={setApi}
           opts={{
@@ -161,17 +162,17 @@ export const CustomerCarousel = ({
               >
                 <Link
                   href={story.route}
-                  className={`group block bg-card border rounded-lg p-4 md:p-8 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-500 cursor-pointer flex flex-col h-full min-h-[250px] md:min-h-[300px] ${
+                  className={`no-underline group block bg-card border rounded-lg p-4 md:p-8 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-500 cursor-pointer flex flex-col h-full min-h-[250px] md:min-h-[300px] ${
                     index === current - 1
                       ? "opacity-100"
                       : isInView[index]
-                      ? "opacity-20 md:opacity-50"
-                      : "opacity-20"
+                        ? "opacity-20 md:opacity-50"
+                        : "opacity-20"
                   }`}
                 >
                   {/* Customer Logo */}
                   {story.frontMatter.customerLogo && (
-                    <div className="flex items-center mb-8">
+                    <div className="flex items-center mb-4">
                       {story.frontMatter.customerLogoDark ? (
                         <>
                           <Image
@@ -179,7 +180,7 @@ export const CustomerCarousel = ({
                             alt={`${story.frontMatter.title} logo`}
                             width={250}
                             height={80}
-                            className="h-8 w-auto object-contain dark:hidden"
+                            className="object-contain w-auto h-8 dark:hidden"
                             quality={100}
                             priority={false}
                             unoptimized={false}
@@ -189,7 +190,7 @@ export const CustomerCarousel = ({
                             alt={`${story.frontMatter.title} logo`}
                             width={250}
                             height={80}
-                            className="h-8 w-auto object-contain hidden dark:block"
+                            className="hidden object-contain w-auto h-8 dark:block"
                             quality={100}
                             priority={false}
                             unoptimized={false}
@@ -201,7 +202,7 @@ export const CustomerCarousel = ({
                           alt={`${story.frontMatter.title} logo`}
                           width={250}
                           height={80}
-                          className="h-8 w-auto object-contain dark:invert dark:brightness-0 dark:contrast-200"
+                          className="object-contain w-auto h-8 dark:invert dark:brightness-0 dark:contrast-200"
                           quality={100}
                           priority={false}
                           unoptimized={false}
@@ -212,7 +213,7 @@ export const CustomerCarousel = ({
 
                   {/* Quote */}
                   {story.frontMatter.customerQuote && (
-                    <blockquote className="text-gray-500 dark:text-gray-200 text-xl leading-relaxed mb-4">
+                    <blockquote className="text-xl leading-relaxed text-gray-500 dark:text-gray-200 not-italic !m-0 !mb-4 !border-0 !pl-0">
                       "{story.frontMatter.customerQuote}"
                     </blockquote>
                   )}
@@ -224,20 +225,19 @@ export const CustomerCarousel = ({
                   {(story.frontMatter.quoteAuthor ||
                     story.frontMatter.quoteRole ||
                     story.frontMatter.quoteCompany) && (
-                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                      <div className="flex items-center gap-3">
+                    <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex gap-3 items-center">
                         {/* Profile Picture */}
                         {story.frontMatter.quoteAuthorImage && (
-                          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                          <div className="overflow-hidden flex-shrink-0 w-12 h-12 rounded-full border border-border">
                             <Image
                               src={story.frontMatter.quoteAuthorImage}
                               alt={`${story.frontMatter.quoteAuthor} profile picture`}
-                              width={40}
-                              height={40}
-                              className="w-full h-full object-cover"
-                              quality={100}
-                              priority={false}
-                              unoptimized={false}
+                              width={48}
+                              height={48}
+                              className="object-cover w-full h-full !m-0"
+                              quality={90}
+                              unoptimized
                             />
                           </div>
                         )}
@@ -264,7 +264,7 @@ export const CustomerCarousel = ({
                           )}
                         </div>
                       </div>
-                      <div className="w-6 h-6 min-w-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600 transition-colors">
+                      <div className="flex justify-center items-center w-6 h-6 bg-gray-100 rounded-full transition-colors min-w-6 dark:bg-gray-700 group-hover:bg-gray-200 dark:group-hover:bg-gray-600">
                         <svg
                           className="w-3 h-3 text-gray-600 dark:text-gray-400"
                           fill="none"

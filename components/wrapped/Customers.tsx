@@ -1,40 +1,29 @@
 "use client";
 
-import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import Image from "next/image";
-import { type Page } from "nextra";
+import type { StaticImageData } from "next/image";
 import { useMemo, useRef } from "react";
+import { useWrappedData, type PageData } from "./WrappedDataContext";
 import { useInView } from "framer-motion";
 import { motion } from "framer-motion";
 import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
 import { HoverStars } from "./components/HoverStars";
-import intuitLight from "../home/img/intuit_light.svg";
-import intuitDark from "../home/img/intuit_dark.svg";
-import samsaraLight from "../home/img/samsara_light.png";
-import samsaraDark from "../home/img/samsara_dark.png";
-import khanacademyLight from "../home/img/khanacademy_light.png";
-import khanacademyDark from "../home/img/khanacademy_dark.png";
-import twilioLight from "../home/img/twilio_light.svg";
-import twilioDark from "../home/img/twilio_dark.svg";
-import sumupLight from "../home/img/sumup_light.svg";
-import sumupDark from "../home/img/sumup_dark.svg";
-import telusLight from "../home/img/telus_light.png";
-import telusDark from "../home/img/telus_dark.png";
-import magicPatternsLight from "../home/img/magicpatterns_light.png";
-import magicPatternsDark from "../home/img/magicpatterns_dark.png";
-import merckLight from "../home/img/merck-dark.png";
-import merckDark from "../home/img/merck-light.png";
-import juiceboxLight from "../home/img/juicebox_light.svg";
-import juiceboxDark from "../home/img/juicebox_dark.svg";
-import pigmentLight from "../home/img/pigment_light.svg";
-import pigmentDark from "../home/img/pigment_dark.svg";
-import sevenelevenLight from "../home/img/seveneleven_light.png";
-import sevenelevenDark from "../home/img/seveneleven_dark.png";
-import circlebackLight from "../home/img/circleback_light.png";
-import circlebackDark from "../home/img/circleback_dark.png";
+import adobeLogo from "../home/img/adobe.svg";
+import canvaLogo from "../home/img/canva.svg";
+import circlebackLogo from "../home/img/circleback.svg";
+import freeeLogo from "../home/img/freee.svg";
+import intuitLogo from "../home/img/intuit.svg";
+import khanacademyLogo from "../home/img/khan.svg";
+import magicPatternsLogo from "../home/img/magic.svg";
+import merckLogo from "../home/img/merck.svg";
+import pigmentLogo from "../home/img/pigment.svg";
+import samsaraLogo from "../home/img/samsara.svg";
+import sumupLogo from "../home/img/sumup.svg";
+import telusLogo from "../home/img/telus.svg";
+import twilioLogo from "../home/img/twilio.svg";
 
 interface CustomerStory {
   route: string;
@@ -53,24 +42,41 @@ interface CustomerStory {
 
 // Companies with customer stories
 const companiesWithStories = [
-  { name: "SumUp", path: "/customers/sumup", light: sumupLight, dark: sumupDark },
-  { name: "Khan Academy", path: "/customers/khan-academy", light: khanacademyLight, dark: khanacademyDark },
-  { name: "Magic Patterns", path: "/customers/magic-patterns-ai-design-tools", light: magicPatternsLight, dark: magicPatternsDark },
-  { name: "Merck", path: "/customers/merckgroup", light: merckLight, dark: merckDark },
+  { name: "Canva", path: "/users/canva", logo: canvaLogo },
+  { name: "SumUp", path: "/users/sumup", logo: sumupLogo },
+  {
+    name: "Khan Academy",
+    path: "/users/khan-academy",
+    logo: khanacademyLogo,
+  },
+  {
+    name: "Magic Patterns",
+    path: "/users/magic-patterns-ai-design-tools",
+    logo: magicPatternsLogo,
+  },
+  {
+    name: "Merck",
+    path: "/users/merckgroup",
+    logo: merckLogo,
+  },
 ];
 
 // Companies without customer stories (logos only)
-// Note: Most logos use counterintuitive naming (_light for dark mode, _dark for light mode)
-// But Intuit uses intuitive naming (_light for light mode, _dark for dark mode)
 const companiesWithoutStories = [
-  { name: "Samsara", light: samsaraLight, dark: samsaraDark, isIntuitive: false },
-  { name: "Twilio", light: twilioLight, dark: twilioDark, isIntuitive: false },
-  { name: "Telus", light: telusLight, dark: telusDark, isIntuitive: false },
-  { name: "Pigment", light: pigmentLight, dark: pigmentDark, isIntuitive: false },
-  { name: "Juicebox", light: juiceboxLight, dark: juiceboxDark, isIntuitive: false },
-  { name: "Intuit", light: intuitLight, dark: intuitDark, isIntuitive: true },
-  { name: "Seven Eleven Japan", light: sevenelevenLight, dark: sevenelevenDark, isIntuitive: false },
-  { name: "Circleback", light: circlebackLight, dark: circlebackDark, isIntuitive: false },
+  { name: "Samsara", logo: samsaraLogo },
+  { name: "Twilio", logo: twilioLogo },
+  { name: "Telus", logo: telusLogo },
+  { name: "Pigment", logo: pigmentLogo },
+  { name: "Adobe", logo: adobeLogo },
+  {
+    name: "Intuit",
+    logo: intuitLogo,
+  },
+  {
+    name: "Circleback",
+    logo: circlebackLogo,
+  },
+  { name: "freee", logo: freeeLogo },
 ];
 
 function CustomerStoryCard({ story }: { story: CustomerStory }) {
@@ -80,108 +86,66 @@ function CustomerStoryCard({ story }: { story: CustomerStory }) {
       className="group relative w-full block [perspective:1000px]"
     >
       {/* Hidden content to determine height */}
-      <div className="invisible p-6 lg:p-8 flex flex-col">
-        {story.frontMatter.customerLogo && <div className="h-6 mb-4" />}
+      <div className="flex invisible flex-col p-6 lg:p-8">
+        {story.frontMatter.customerLogo && <div className="mb-4 h-6" />}
         {story.frontMatter.customerQuote && (
-          <div className="text-base sm:text-lg leading-relaxed mb-4">
+          <div className="mb-4 text-base leading-relaxed sm:text-lg">
             "{story.frontMatter.customerQuote}"
           </div>
         )}
         {(story.frontMatter.quoteAuthor ||
           story.frontMatter.quoteRole ||
           story.frontMatter.quoteCompany) && (
-          <div className="flex items-center gap-3">
+          <div className="flex gap-3 items-center">
             {story.frontMatter.quoteAuthorImage && (
-              <div className="w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 shrink-0" />
             )}
             <div className="flex-1">
               {story.frontMatter.quoteAuthor && (
-                <div className="font-semibold text-sm sm:text-base" />
+                <div className="text-sm font-semibold sm:text-base" />
               )}
-              <div className="text-xs sm:text-sm mt-1" />
+              <div className="mt-1 text-xs sm:text-sm" />
             </div>
           </div>
         )}
       </div>
-      
-      <div className="absolute inset-0 transition-transform duration-700 [transform-style:preserve-3d] [transform:rotateY(180deg)] lg:[transform:rotateY(0deg)] lg:group-hover:[transform:rotateY(180deg)]">
+
+      <div className="absolute inset-0 transition-transform duration-700 transform-3d transform-[rotateY(180deg)] lg:transform-[rotateY(0deg)] lg:group-hover:transform-[rotateY(180deg)]">
         {/* Front side - Logo only */}
-        <div className="absolute inset-0 flex items-center justify-center p-6 lg:p-8 [backface-visibility:hidden]">
+        <div className="flex absolute inset-0 justify-center items-center p-6 lg:p-8 backface-hidden">
           {story.frontMatter.customerLogo && (
-            <div className="flex items-center justify-center">
-              {story.frontMatter.customerLogoDark ? (
-                <>
-                  <Image
-                    src={story.frontMatter.customerLogo}
-                    alt={`${story.frontMatter.title} logo`}
-                    width={200}
-                    height={80}
-                    className="h-8 w-auto object-contain dark:hidden"
-                    quality={100}
-                  />
-                  <Image
-                    src={story.frontMatter.customerLogoDark}
-                    alt={`${story.frontMatter.title} logo`}
-                    width={200}
-                    height={80}
-                    className="h-8 w-auto object-contain hidden dark:block"
-                    quality={100}
-                  />
-                </>
-              ) : (
-                <Image
-                  src={story.frontMatter.customerLogo}
-                  alt={`${story.frontMatter.title} logo`}
-                  width={200}
-                  height={80}
-                  className="h-8 w-auto object-contain dark:invert dark:brightness-0 dark:contrast-200"
-                  quality={100}
-                />
-              )}
+            <div className="flex justify-center items-center">
+              <Image
+                src={story.frontMatter.customerLogo}
+                alt={`${story.frontMatter.title} logo`}
+                width={200}
+                height={80}
+                className="object-contain w-auto h-8"
+                quality={100}
+              />
             </div>
           )}
         </div>
 
         {/* Back side - Full story card */}
-        <div className="absolute inset-0 p-6 lg:p-8 flex flex-col items-center lg:items-start [backface-visibility:hidden] [transform:rotateY(180deg)]">
+        <div className="absolute inset-0 p-6 lg:p-8 flex flex-col items-center lg:items-start [backface-visibility:hidden] transform-[rotateY(180deg)]">
           {/* Customer Logo */}
           {story.frontMatter.customerLogo && (
-            <div className="flex items-center mb-4 flex-shrink-0">
-              {story.frontMatter.customerLogoDark ? (
-                <>
-                  <Image
-                    src={story.frontMatter.customerLogo}
-                    alt={`${story.frontMatter.title} logo`}
-                    width={200}
-                    height={60}
-                    className="h-6 w-auto object-contain dark:hidden"
-                    quality={100}
-                  />
-                  <Image
-                    src={story.frontMatter.customerLogoDark}
-                    alt={`${story.frontMatter.title} logo`}
-                    width={200}
-                    height={60}
-                    className="h-6 w-auto object-contain hidden dark:block"
-                    quality={100}
-                  />
-                </>
-              ) : (
-                <Image
-                  src={story.frontMatter.customerLogo}
-                  alt={`${story.frontMatter.title} logo`}
-                  width={200}
-                  height={60}
-                  className="h-6 w-auto object-contain dark:invert dark:brightness-0 dark:contrast-200"
-                  quality={100}
-                />
-              )}
+            <div className="flex flex-shrink-0 items-center mb-4">
+              <Image
+                src={story.frontMatter.customerLogo}
+                alt={`${story.frontMatter.title} logo`}
+                width={200}
+                height={60}
+                className="object-contain w-auto h-6"
+                quality={100}
+              />
             </div>
           )}
 
           {/* Quote */}
           {story.frontMatter.customerQuote && (
-            <blockquote className="text-base sm:text-lg leading-relaxed mb-4 text-center lg:text-left">
+            <blockquote className="mb-4 text-base leading-relaxed text-center sm:text-lg lg:text-left">
               "{story.frontMatter.customerQuote}"
             </blockquote>
           )}
@@ -190,33 +154,31 @@ function CustomerStoryCard({ story }: { story: CustomerStory }) {
           {(story.frontMatter.quoteAuthor ||
             story.frontMatter.quoteRole ||
             story.frontMatter.quoteCompany) && (
-            <div className="flex items-center gap-3 flex-shrink-0 justify-center lg:justify-start">
+            <div className="flex flex-shrink-0 gap-3 justify-center items-center lg:justify-start">
               {story.frontMatter.quoteAuthorImage && (
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden flex-shrink-0">
+                <div className="overflow-hidden flex-shrink-0 w-12 h-12 rounded-full sm:w-16 sm:h-16">
                   <Image
                     src={story.frontMatter.quoteAuthorImage}
                     alt={`${story.frontMatter.quoteAuthor} profile picture`}
                     width={64}
                     height={64}
-                    className="w-full h-full object-cover"
+                    className="object-cover w-full h-full"
                     quality={100}
                   />
                 </div>
               )}
               <div className="flex-1 min-w-0">
                 {story.frontMatter.quoteAuthor && (
-                  <div className="font-semibold text-sm sm:text-base break-words">
+                  <div className="text-sm font-semibold break-words sm:text-base">
                     {story.frontMatter.quoteAuthor}
                   </div>
                 )}
                 {(story.frontMatter.quoteRole ||
                   story.frontMatter.quoteCompany) && (
-                  <div className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
+                  <div className="mt-1 text-xs break-words sm:text-sm text-muted-foreground">
                     {story.frontMatter.quoteRole}
                     {story.frontMatter.quoteRole &&
-                      story.frontMatter.quoteCompany && (
-                        <span> at </span>
-                      )}
+                      story.frontMatter.quoteCompany && <span> at </span>}
                     {story.frontMatter.quoteCompany}
                   </div>
                 )}
@@ -229,38 +191,15 @@ function CustomerStoryCard({ story }: { story: CustomerStory }) {
   );
 }
 
-function CompanyLogo({
-  name,
-  light,
-  dark,
-  isIntuitive = false,
-}: {
-  name: string;
-  light: any;
-  dark: any;
-  isIntuitive?: boolean;
-}) {
-  // Most logos use counterintuitive naming (_light for dark mode, _dark for light mode)
-  // But some like Intuit use intuitive naming (_light for light mode, _dark for dark mode)
-  const lightModeImage = isIntuitive ? light : dark;
-  const darkModeImage = isIntuitive ? dark : light;
-
+function CompanyLogo({ name, logo }: { name: string; logo: StaticImageData }) {
   return (
     <div className="p-3 lg:p-4 flex items-center justify-center min-h-[100px]">
       <Image
-        src={lightModeImage}
+        src={logo}
         alt={`${name} logo`}
         width={200}
         height={80}
-        className="h-8 w-auto object-contain dark:hidden"
-        quality={100}
-      />
-      <Image
-        src={darkModeImage}
-        alt={`${name} logo`}
-        width={200}
-        height={80}
-        className="h-8 w-auto object-contain hidden dark:block"
+        className="object-contain w-auto h-8"
         quality={100}
       />
     </div>
@@ -269,24 +208,22 @@ function CompanyLogo({
 
 type CustomerItem =
   | { type: "story"; story: CustomerStory & { company: any } }
-  | { type: "logo"; company: typeof companiesWithoutStories[0] }
+  | { type: "logo"; company: (typeof companiesWithoutStories)[0] }
   | { type: "text"; text: string };
 
 export function Customers() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
-  const allStories = (getPagesUnderRoute("/customers") as Array<
-    Page & { frontMatter: any }
-  >).filter(
-    (page) => page.frontMatter?.showInCustomerIndex !== false
-  );
+  const allStories = useWrappedData().usersPages.filter(
+    (page: PageData) => page.frontMatter?.showInCustomerIndex !== false,
+  ) as Array<CustomerStory>;
 
   // Match stories with companies
   const customerStories = companiesWithStories
     .map((company) => {
       const story = allStories.find(
-        (s) => s.route === company.path || s.route === `${company.path}/`
+        (s) => s.route === company.path || s.route === `${company.path}/`,
       );
       return story ? { ...story, company } : null;
     })
@@ -296,23 +233,24 @@ export function Customers() {
   const orderedItems = useMemo(() => {
     // Create maps for easy lookup
     const storyMap = new Map(
-      customerStories.map((story) => [story.company.name, story])
+      customerStories.map((story) => [story.company.name, story]),
     );
     const logoMap = new Map(
-      companiesWithoutStories.map((company) => [company.name, company])
+      companiesWithoutStories.map((company) => [company.name, company]),
     );
 
     // Define the exact order
     const order: Array<{ type: "story" | "logo" | "text"; name: string }> = [
       // First column
       { type: "logo", name: "Intuit" },
+      { type: "story", name: "Canva" },
       { type: "story", name: "SumUp" },
       // Continue with rest in desired order...
       { type: "logo", name: "Samsara" },
       { type: "logo", name: "Twilio" },
       { type: "logo", name: "Telus" },
-      { type: "logo", name: "Juicebox" },
-      { type: "logo", name: "Seven Eleven Japan" },
+      { type: "logo", name: "Adobe" },
+      { type: "logo", name: "freee" },
       { type: "story", name: "Khan Academy" },
       { type: "logo", name: "Circleback" },
       { type: "text", name: "And thousands more..." },
@@ -359,7 +297,7 @@ export function Customers() {
             const row = Math.floor(index / columns);
             const col = index % columns;
             const delay = (row + col) * 0.1; // Stagger delay
-            
+
             const animationProps = {
               initial: { opacity: 0, y: 20, scale: 0.95 },
               animate: isInView
@@ -374,15 +312,13 @@ export function Customers() {
 
             // Use negative margins to overlap borders on all sides except first item
             // For columns layout, we overlap top and left borders
-            const marginClass = index === 0 
-              ? "" 
-              : "-mt-[1px] -ml-[1px]";
+            const marginClass = index === 0 ? "" : "-mt-[1px] -ml-[1px]";
 
             if (item.type === "story") {
               return (
                 <motion.div
                   key={`story-${item.story.route || index}`}
-                  className={`relative group border border-border bg-background break-inside-avoid ${marginClass}`}
+                  className={`relative border group border-border bg-background break-inside-avoid ${marginClass}`}
                   {...animationProps}
                 >
                   <HoverStars />
@@ -393,7 +329,7 @@ export function Customers() {
               return (
                 <motion.div
                   key={`logo-${item.company.name || index}`}
-                  className={`relative group border border-border bg-background break-inside-avoid ${marginClass}`}
+                  className={`relative border group border-border bg-background break-inside-avoid ${marginClass}`}
                   {...animationProps}
                 >
                   <HoverStars />
@@ -408,7 +344,7 @@ export function Customers() {
                   {...animationProps}
                 >
                   <div className="p-3 lg:p-4 flex items-center justify-center min-h-[100px]">
-                    <p className="text-sm text-muted-foreground text-center">
+                    <p className="text-sm text-center text-muted-foreground">
                       {item.text}
                     </p>
                   </div>
@@ -421,4 +357,3 @@ export function Customers() {
     </WrappedSection>
   );
 }
-

@@ -1,0 +1,141 @@
+---
+title: Get Started
+sidebarTitle: Get Started
+description: Get started with Langfuse Prompt Management.
+---
+
+# Get Started with Prompt Management
+
+This guide walks you through creating and using a prompt with Langfuse. If you're looking to understand what prompt management is and why it matters, check out the [Prompt Management Overview](/docs/prompt-management/overview) first. For details on how prompts are structured in Langfuse and how it works in the background, see [Core Concepts](/docs/prompt-management/data-model).
+
+import { Details, Summary } from "@/components/Details";
+import PromptCreate from "@/components-mdx/prompt-create.mdx";
+import PromptUse from "@/components-mdx/prompt-use.mdx";
+import { FaqPreview } from "@/components/faq/FaqPreview";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/components/ui/link";
+
+<div className="rounded-lg border bg-muted-blue/5 px-6 pb-6 [&>h2]:mt-6 [&>h2]:mb-4">
+
+## Agentic installation [#agentic-installation]
+
+Install the [Langfuse Agent Skill](https://github.com/langfuse/skills) to let your coding agent access all Langfuse features.
+
+<Tabs items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}>
+
+<Tab>
+
+Ask your coding agent to install the skill by pointing to the [GitHub repository](https://github.com/langfuse/skills) and instruct it to migrate your prompts.
+
+```txt filename="Agent instruction"
+Install the Langfuse Agent Skill from github.com/langfuse/skills
+and use it to migrate the prompts in this codebase to Langfuse.
+```
+
+</Tab>
+
+<Tab>
+
+Langfuse has a [Cursor Plugin](https://cursor.com/docs/plugins) that includes the skill automatically.
+
+<div className="flex gap-2 mt-3 mb-6">
+  <Button asChild>
+    <Link
+      href="https://cursor.com/marketplace/langfuse"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Install Plugin in Cursor
+    </Link>
+  </Button>
+</div>
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Migrate the prompts in this codebase to Langfuse.
+```
+
+</Tab>
+
+<Tab>
+
+Install via npm ([skills CLI](https://www.npmjs.com/package/skills)):
+
+```bash
+npx skills add langfuse/skills --skill "langfuse"
+```
+
+If you want to target a specific agent directly:
+
+```bash
+npx skills add langfuse/skills --skill "langfuse" --agent "<agent-id>"
+```
+
+<Details>
+<Summary>Alternatively you can manually clone the skill</Summary>
+
+1. Clone repo somewhere stable
+
+```bash
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+```
+
+2. Make sure your agent's skills dir exists
+
+```bash
+mkdir -p /path/to/<agent-skill-root>/skills
+```
+
+3. Symlink the skill folder
+
+```bash
+ln -s /path/to/langfuse-skills/skills/langfuse /path/to/<agent-skill-root>/skills/langfuse
+```
+
+</Details>
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Migrate the prompts in this codebase to Langfuse.
+```
+
+</Tab>
+
+</Tabs>
+
+</div>
+
+## Manual installation [#manual-installation]
+
+This guide helps you get started with Langfuse Prompt Management manually.
+
+<Steps>
+### Get API keys
+
+1.  [Create Langfuse account](https://langfuse.com/cloud) or [self-host Langfuse](/self-hosting).
+2.  Create new API credentials in the project settings.
+
+### Create a prompt [#create-update-prompt-diy]
+
+<PromptCreate />
+
+### Use the prompt in your code [#use-prompt-diy]
+
+<PromptUse />
+
+</Steps>
+
+## Not seeing what you expected?
+
+<FaqPreview tags={["prompt-management-get-started"]} />
+
+## Next steps
+
+Now that you've used your first prompt, there are a couple of things we recommend you do next to make the most of Langfuse Prompt Management:
+
+- [Link prompts to traces](/docs/prompt-management/features/link-to-traces) to analyze performance by prompt version
+- [Use version control and labels](/docs/prompt-management/features/prompt-version-control) to manage deployments across environments
+
+Looking for something specific? Take a look under _Features_ for guides on specific topics.

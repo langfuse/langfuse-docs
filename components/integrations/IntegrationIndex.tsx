@@ -1,22 +1,10 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
-import { Cards } from "nextra/components";
+import { integrationsSource } from "@/lib/source";
+import { Cards } from "@/components/docs";
 import {
-  Puzzle,
-  Globe,
-  Server,
-  Wrench,
-  RectangleEllipsis,
-  ChartBar,
-  Code,
-  Database,
-} from "lucide-react";
-import nativeIntegrationsMeta from "../../pages/integrations/native/_meta";
-import dataPlatformIntegrationsMeta from "../../pages/integrations/data-platform/_meta";
+  nativeIntegrationsMeta,
+  dataPlatformIntegrationsMeta,
+} from "@/lib/integrations-meta";
 
-/**
- * Transforms meta config entries into integration page objects
- */
 function additionalLinksFromMeta(metaConfig: Record<string, any>) {
   return Object.entries(metaConfig)
     .filter(([_, config]) => config.href)
@@ -26,7 +14,15 @@ function additionalLinksFromMeta(metaConfig: Record<string, any>) {
     }));
 }
 
-const categoryConfig = {
+const categoryConfig: Record<
+  string,
+  {
+    title: string;
+    description: string;
+    additionalLinks?: { route: string; frontMatter: any }[];
+    featuredLinks?: ProcessedIntegrationPage[];
+  }
+> = {
   native: {
     title: "Native",
     description: "Native integrations with Langfuse",
@@ -35,7 +31,6 @@ const categoryConfig = {
   frameworks: {
     title: "Frameworks",
     description: "Integrate with popular AI frameworks",
-    // Featured links shown first, separated by a divider from the rest
     featuredLinks: [
       {
         route: "/integrations/frameworks/langchain",
@@ -116,32 +111,31 @@ const categoryConfig = {
   },
 };
 
-type IntegrationPage = Page & { frontMatter: any };
+export const categoryOrder = Object.keys(categoryConfig);
+
+type IntegrationPage = { route: string; name?: string; frontMatter: any };
 type ProcessedIntegrationPage = IntegrationPage & { title: string };
 
-/**
- * Loads pages from the filesystem for a given category
- */
 function loadFilesystemPages(category: string): IntegrationPage[] {
   try {
-    const pages = getPagesUnderRoute(
-      `/integrations/${category}`
-    ) as IntegrationPage[];
-    // Filter out category index pages and only keep actual integration pages
-    return pages.filter(
-      (page) =>
-        page.route !== `/integrations/${category}` &&
-        page.route !== `/integrations/${category}/index`
-    );
-  } catch (error) {
-    // Category directory doesn't exist or has no pages
+    const allParams = integrationsSource.generateParams();
+    return allParams
+      .filter(({ slug }) => slug.length >= 2 && slug[0] === category)
+      .map(({ slug }) => {
+        const page = integrationsSource.getPage(slug);
+        if (!page) return null;
+        return {
+          route: `/integrations/${slug.join("/")}`,
+          name: String(slug[slug.length - 1] || ""),
+          frontMatter: page.data as unknown as Record<string, unknown>,
+        } as IntegrationPage;
+      })
+      .filter(Boolean) as IntegrationPage[];
+  } catch {
     return [];
   }
 }
 
-/**
- * Processes pages by adding title and sorting alphabetically
- */
 function processPages(pages: IntegrationPage[]): ProcessedIntegrationPage[] {
   return pages
     .map((page) => ({
@@ -152,119 +146,126 @@ function processPages(pages: IntegrationPage[]): ProcessedIntegrationPage[] {
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 
+function getCategory(category: string) {
+  const config = categoryConfig[category];
+  if (!config) return null;
+
+  const filesystemPages = loadFilesystemPages(category);
+  const mergedPages = [
+    ...(config.additionalLinks ?? []),
+    ...(filesystemPages ?? []),
+  ];
+
+  if (mergedPages.length === 0) return null;
+
+  return {
+    config,
+    pages: processPages(mergedPages),
+    featured: config.featuredLinks,
+  };
+}
+
+function IntegrationCards({
+  pages,
+  featured,
+}: {
+  pages: ProcessedIntegrationPage[];
+  featured?: ProcessedIntegrationPage[];
+}) {
+  return (
+    <>
+      {featured && featured.length > 0 && (
+        <Cards num={3}>
+          {featured.slice(0, 6).map((page) => (
+            <Cards.Card
+              href={page.route}
+              key={page.route}
+              title={page.title}
+              className=""
+              icon={
+                page.frontMatter?.logo ? (
+                  <img
+                    src={page.frontMatter.logo}
+                    alt=""
+                    className="w-5 h-5 object-contain"
+                  />
+                ) : undefined
+              }
+              arrow
+            >
+              {""}
+            </Cards.Card>
+          ))}
+        </Cards>
+      )}
+      <div className={featured && featured.length > 0 ? "mt-8" : ""}>
+        <Cards num={3}>
+          {pages
+            .filter((p) => !(featured || []).some((f) => f.route === p.route))
+            .map((page) => (
+              <Cards.Card
+                href={page.route}
+                key={page.route}
+                title={page.title}
+                className=""
+                icon={
+                  page.frontMatter?.logo ? (
+                    <img
+                      src={page.frontMatter.logo}
+                      alt=""
+                      className="w-5 h-5 object-contain"
+                    />
+                  ) : undefined
+                }
+                arrow
+              >
+                {""}
+              </Cards.Card>
+            ))}
+        </Cards>
+      </div>
+    </>
+  );
+}
+
+/**
+ * Renders a single integration category's description and cards.
+ * Headings are expected to be provided in the MDX so they appear in the TOC.
+ */
+export function IntegrationCategory({ category }: { category: string }) {
+  const data = getCategory(category);
+  if (!data) return null;
+
+  return (
+    <div className="mb-6">
+      <p className="text-sm text-text-tertiary -mt-4 mb-4">
+        {data.config.description}
+      </p>
+      <IntegrationCards pages={data.pages} featured={data.featured} />
+    </div>
+  );
+}
+
+/**
+ * Legacy wrapper that renders all categories with headings inline.
+ * Prefer using IntegrationCategory per-section in MDX for TOC support.
+ */
 export const IntegrationIndex = () => {
-  // Infer category order from the keys of categoryConfig, preserving their order of appearance
-  const categoryOrder = Object.keys(categoryConfig);
-
-  // Get pages from each category by merging filesystem and additional links
-  const categorizedPages = {} as Record<string, ProcessedIntegrationPage[]>;
-
-  categoryOrder.forEach((category) => {
-    const config = categoryConfig[category];
-
-    // Always load from filesystem
-    const filesystemPages = loadFilesystemPages(category);
-
-    // Merge with additional links if they exist
-    const mergedPages = [
-      ...(config.additionalLinks ?? []),
-      ...(filesystemPages ?? []),
-    ];
-
-    // Only include categories that have pages
-    if (mergedPages.length > 0) {
-      categorizedPages[category] = processPages(mergedPages);
-    }
-  });
-
   return (
     <>
       {categoryOrder
-        .filter(
-          (category) =>
-            categorizedPages[category] && categorizedPages[category].length > 0
-        )
+        .filter((category) => getCategory(category) !== null)
         .map((category) => {
-          const config = categoryConfig[category];
-          const pages = categorizedPages[category];
-          const featured = (categoryConfig as any)[category]?.featuredLinks as
-            | ProcessedIntegrationPage[]
-            | undefined;
-
+          const data = getCategory(category)!;
           return (
             <div key={category} className="my-10">
-              <div className="flex items-center gap-3 mb-4">
-                {config.icon}
-                <div>
-                  <h3 className="font-semibold tracking-tight text-slate-900 dark:text-slate-100 text-2xl">
-                    {config.title}
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {config.description}
-                  </p>
-                </div>
-              </div>
-              {/* Featured (non-duplicated) */}
-              {featured && featured.length > 0 && (
-                <Cards num={3}>
-                  {featured
-                    .slice(0, 6)
-                    .map((page) => (
-                      <Cards.Card
-                        href={page.route}
-                        key={page.route}
-                        title={page.title}
-                        icon={
-                          (page as any).frontMatter?.logo ? (
-                            <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
-                              <img
-                                src={(page as any).frontMatter.logo}
-                                alt=""
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                          ) : (
-                            config.icon
-                          )
-                        }
-                        arrow
-                      >
-                        {""}
-                      </Cards.Card>
-                    ))}
-                </Cards>
-              )}
-              <div className={featured && featured.length > 0 ? "mt-8" : ""}>
-                <Cards num={3}>
-                  {pages
-                    .filter(
-                      (p) => !(featured || []).some((f) => f.route === p.route)
-                    )
-                    .map((page) => (
-                  <Cards.Card
-                    href={page.route}
-                    key={page.route}
-                    title={page.title}
-                    icon={
-                      page.frontMatter?.logo ? (
-                        <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
-                          <img
-                            src={page.frontMatter.logo}
-                            alt=""
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      ) : (
-                        config.icon
-                      )
-                    }
-                    arrow
-                  >
-                    {""}
-                  </Cards.Card>
-                ))}
-                </Cards>
-              </div>
+              <h3 className="font-semibold tracking-tight text-text-primary text-2xl mb-1">
+                {data.config.title}
+              </h3>
+              <p className="text-sm text-text-tertiary mb-4">
+                {data.config.description}
+              </p>
+              <IntegrationCards pages={data.pages} featured={data.featured} />
             </div>
           );
         })}

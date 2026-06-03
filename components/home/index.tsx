@@ -1,50 +1,29 @@
-import dynamic from "next/dynamic";
-
-// Non-dynamic imports for everyhting that renders on top
-import { Background } from "../Background";
 import { Hero } from "./Hero";
 import { FeatureTabsSection } from "./FeatureTabsSection";
-
-// Dynamic imports for everything that is below the fold
-const Usage = dynamic(() => import("./Usage"), {
-  ssr: false,
-});
-const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
-  ssr: false,
-});
-const OpenSource = dynamic(() => import("./OpenSource"), {
-  ssr: false,
-});
-const Pricing = dynamic(() => import("./pricing"), {
-  ssr: false,
-});
-const Security = dynamic(() => import("./Security"), {
-  ssr: false,
-});
-const WallOfLove = dynamic(() => import("./WallOfLove"), {
-  ssr: false,
-});
-const CustomerStories = dynamic(() => import("./CustomerStories"), {
-  ssr: false,
-});
-const CTAGetStarted = dynamic(() => import("./CTAGetStarted"), {
-  ssr: false,
-});
+import { RiveSection } from "./RiveSection";
+import { AllTheTools } from "./AllTheTools";
+import { Integrations } from "./Integrations";
+import { OpenSource } from "./OpenSource";
+import { DeveloperTools } from "./DeveloperTools";
+import { Enterprise } from "./Enterprise";
+import { WhyLangfuse } from "./WhyLangfuse";
+import { GetStartedSection } from "./GetStartedSection";
+import { FAQ } from "./FAQ";
 
 export const Home = () => (
   <>
-    <main className="relative overflow-hidden w-full">
+    <main className="overflow-hidden relative w-full hero-bg xl:px-5 2xl:px-10">
       <Hero />
       <FeatureTabsSection />
-      <Usage />
-      <IntegrationsGrid />
+      <RiveSection />
+      <AllTheTools />
+      <Integrations />
       <OpenSource />
-      <Security />
-      <CustomerStories />
-      <Pricing />
-      <WallOfLove />
-      <CTAGetStarted />
+      <DeveloperTools />
+      <Enterprise />
+      <WhyLangfuse />
+      <GetStartedSection />
+      <FAQ />
     </main>
-    <Background />
   </>
 );
