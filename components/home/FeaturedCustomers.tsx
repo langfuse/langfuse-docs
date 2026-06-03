@@ -20,26 +20,33 @@ const stories = [
     name: "Canva",
     logo: canvaLogo as StaticImageData,
     logoMono: canvaMono as StaticImageData,
-    description: "Canva's AI team relies on Langfuse to trace and debug their generative design features in production.",
+    description:
+      "Canva's AI team relies on Langfuse to trace and debug their generative design features in production.",
     href: "/users/canva",
   },
   {
     name: "Khan Academy",
     logo: khanAcademyLogo as StaticImageData,
     logoMono: khanAcademyMono as StaticImageData,
-    description: "Khan Academy builds Khanmigo, their AI tutor, on Langfuse to debug and improve student-facing LLM features.",
+    description:
+      "Khan Academy builds Khanmigo, their AI tutor, on Langfuse to debug and improve student-facing LLM features.",
     href: "/users/khan-academy",
   },
   {
     name: "SumUp",
     logo: sumupLogo as StaticImageData,
     logoMono: sumupMono as StaticImageData,
-    description: "SumUp runs AI-powered support for 4 million merchants across 35+ markets on Langfuse.",
+    description:
+      "SumUp runs AI-powered support for 4 million merchants across 35+ markets on Langfuse.",
     href: "/users/sumup",
   },
 ] as const;
 
-export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br: true } }: { corners?: BoxCorners }) {
+export function FeaturedCustomers({
+  corners = { tl: true, tr: true, bl: true, br: true },
+}: {
+  corners?: BoxCorners;
+}) {
   const [active, setActive] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredLogo, setHoveredLogo] = useState<number | null>(null);
@@ -96,7 +103,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
                   height={50}
                   className={cn(
                     "absolute inset-0 object-contain w-full h-full transition-opacity duration-150",
-                    isActive ? "opacity-0" : "opacity-100"
+                    isActive ? "opacity-0" : "opacity-100",
                   )}
                 />
                 <Image
@@ -106,7 +113,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
                   height={100}
                   className={cn(
                     "relative object-cover w-full h-full transition-opacity duration-150",
-                    isActive ? "opacity-100" : "opacity-0"
+                    isActive ? "opacity-100" : "opacity-0",
                   )}
                 />
               </div>
@@ -136,7 +143,9 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
                     {logoInner}
                   </CornerBox>
                 ) : (
-                  <div className={cn("relative", logoShellClass)}>{logoInner}</div>
+                  <div className={cn("relative", logoShellClass)}>
+                    {logoInner}
+                  </div>
                 )}
               </a>
             );
@@ -145,11 +154,7 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
 
         {/* Button: right of logos on mobile, far right on desktop */}
         <div className="ml-auto shrink-0 lg:ml-0 lg:order-last">
-          <Button
-            href="/cloud"
-            size="default"
-            shortcutKey="s"
-          >
+          <Button href="/cloud" size="default" shortcutKey="s">
             Start free
           </Button>
         </div>
@@ -189,7 +194,10 @@ export function FeaturedCustomers({ corners = { tl: true, tr: true, bl: true, br
                 />
               </svg>
             </a>
-            <Text size="s" className="text-left mt-0.5 line-clamp-2 min-h-[calc(2*1.5em)] lg:line-clamp-1 lg:min-h-0 text-text-tertiary">
+            <Text
+              size="s"
+              className="text-left mt-0.5 line-clamp-2 min-h-[calc(2*1.5em)] lg:line-clamp-1 lg:min-h-0 text-text-tertiary"
+            >
               {story.description}
             </Text>
           </motion.div>

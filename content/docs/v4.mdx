@@ -56,10 +56,10 @@ As agentic applications grow more complex, a single trace can contain hundreds o
 
 ## Preview access and rollout timeline
 
-| Organization creation date (Langfuse Cloud)    | Fast Preview default | "Preview" toggle visibility            |
-| ---------------------------------------------- | -------------------- | -------------------------------------- |
-| Before April 14, 2026, 14:00 UTC (15:00 CET)   | Optional             | Visible (you can switch on/off)        |
-| On/after April 14, 2026, 14:00 UTC (15:00 CET) | Enabled by default   | Hidden (already on Fast Preview)       |
+| Organization creation date (Langfuse Cloud)    | Fast Preview default | "Preview" toggle visibility      |
+| ---------------------------------------------- | -------------------- | -------------------------------- |
+| Before April 14, 2026, 14:00 UTC (15:00 CET)   | Optional             | Visible (you can switch on/off)  |
+| On/after April 14, 2026, 14:00 UTC (15:00 CET) | Enabled by default   | Hidden (already on Fast Preview) |
 
 If you signed up recently and do not see the toggle, your organization is already on the new experience by default.
 For organizations created before the cutoff date, the "Preview" toggle is available in the bottom-left corner of the UI to opt in to "Fast Preview".
@@ -70,6 +70,8 @@ For organizations created before the cutoff date, the "Preview" toggle is availa
 </Frame>
 
 The toggle remains reversible for organizations created before the cutoff date.
+
+**Export source cutoff (2026-05-20):** Cloud projects created on or after this date are locked to **Enriched observations (recommended)** as the export source for blob storage, PostHog, and Mixpanel integrations. Legacy export sources are hidden from the UI for these projects. Projects created before this date retain full choice across all export sources.
 
 <Callout type="info">
 Data from SDKs `langfuse-js` < `5.0.0`, `langfuse-python` < `4.0.0`, or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes in the new UI. Upgrade to the latest SDKs or set that header on your OTEL span exporter to see new data in real time.
@@ -119,7 +121,7 @@ The new [Observations API v2](/docs/api-and-data-platform/features/observations-
 
 [Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) execute in seconds as we do not need to query ClickHouse for each evaluation anymore.
 
-## Under the hood
+## Under the hood [#under-the-hood]
 
 <Frame fullWidth>
   ![Langfuse data model
@@ -127,6 +129,15 @@ The new [Observations API v2](/docs/api-and-data-platform/features/observations-
 </Frame>
 
 This preview is powered by a simplified observation-centric data model. Trace-level attributes such as `user_id`, `session_id`, and `metadata` now propagate automatically to observations, which helps remove expensive joins and keep the product fast at larger scale. Learn more in the [data model docs](/docs/observability/data-model) and [Explore Observations](/faq/all/explore-observations-in-v4).
+
+### What changes
+
+|                        | Classic model                                   | Observation-centric model                                                                                                                                                           |
+| ---------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Storage**            | Separate mutable Traces and Observations tables | Single immutable Observations table                                                                                                                                                 |
+| **Context attributes** | Stored on the trace, joined at query time       | Propagated to every observation on SDK side.                                                                                                                                        |
+| **Trace input/output** | Set directly on the trace                       | Removed, use observation IO instead. (For legacy LLM-as-a-judge evaluators that depend on trace input and output, users can use the deprecated `set_trace_io` methods in the SDKs.) |
+| **Mutability**         | Traces and observations are mutable             | Observations are immutable (written once)                                                                                                                                           |
 
 ## OSS and self-hosting
 
@@ -161,7 +172,7 @@ If you have questions about the rollout, migration steps, SDK upgrades, or anyth
   />
   <Card
     title="Dashboard Changes in Fast Preview"
-    href="/docs/metrics/v4-dashboard-changes"
+    href="/faq/all/dashboard-changes-in-v4"
     icon={<LayoutDashboard />}
   />
   <Card

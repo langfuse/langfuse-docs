@@ -15,19 +15,13 @@ const sizeClasses: Record<HeadingSize, string> = {
   // 68px / line-height 105%
   big: cn(
     "max-[390px]:text-[35px] text-[44px] md:text-[54px] xl:text-[68px] leading-[105%]",
-    "text-center"
+    "text-center",
   ),
   // 50px / line-height 110% (between big and normal)
-  large: cn(
-    "text-[32px] sm:text-[44px] leading-[100%] md:text-[50px]"
-  ),
+  large: cn("text-[32px] sm:text-[44px] leading-[100%] md:text-[50px]"),
   // 32px / line-height 115%
-  normal: cn(
-    "text-[32px] leading-[115%]"
-  ),
-  small: cn(
-    "text-[15px] leading-[115%]"
-  ),
+  normal: cn("text-[32px] leading-[115%]"),
+  small: cn("text-[15px] leading-[115%]"),
 };
 
 /** Shared typographic base for all heading sizes. */
@@ -35,7 +29,7 @@ const headingBaseClasses = cn(
   "text-text-primary",
   "font-analog font-medium not-italic",
   "[font-variant-numeric:ordinal]",
-  "[font-feature-settings:'dlig'_on]"
+  "[font-feature-settings:'dlig'_on]",
 );
 
 const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
@@ -45,7 +39,7 @@ const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
       className={cn(headingBaseClasses, sizeClasses[size], className)}
       {...props}
     />
-  )
+  ),
 );
 Heading.displayName = "Heading";
 

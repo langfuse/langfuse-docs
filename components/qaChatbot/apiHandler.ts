@@ -1,9 +1,5 @@
 import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import {
-  streamText,
-  UIMessage,
-  stepCountIs,
-} from "ai";
+import { streamText, UIMessage, stepCountIs } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import {
   observe,
@@ -57,12 +53,21 @@ export const handler = async (req: Request) => {
         type: "chat",
       });
 
-      const reasoningSummary = prompt.config
-        .reasoningSummary as "low" | "medium" | "high" | undefined;
-      const textVerbosity = prompt.config
-        .textVerbosity as "low" | "medium" | "high" | undefined;
-      const reasoningEffort = prompt.config
-        .reasoningEffort as "low" | "medium" | "high" | undefined;
+      const reasoningSummary = prompt.config.reasoningSummary as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+      const textVerbosity = prompt.config.textVerbosity as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+      const reasoningEffort = prompt.config.reasoningEffort as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
 
       const chatHistory = messages.map((msg) => ({
         role: msg.role,

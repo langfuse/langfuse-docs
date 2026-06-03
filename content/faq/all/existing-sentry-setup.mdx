@@ -11,6 +11,7 @@ This guide covers how to configure Langfuse alongside Sentry. If you haven't alr
 ## Why Sentry can conflict with Langfuse
 
 Sentry's JavaScript/Node SDK (v8+) and Python SDK (v3+) automatically initialize OpenTelemetry when you call `Sentry.init()`. This includes:
+
 - Creating a `SentrySpanProcessor`
 - Setting up `SentryPropagator` for distributed tracing
 - Installing `SentryContextManager`
@@ -183,15 +184,14 @@ Adjust your allowed [scopes](/faq/all/existing-otel-setup#instrumentation-scopes
 
 When using `skipOpenTelemetrySetup: true`, you must manually configure all of Sentry's OTEL components:
 
-| Component | Purpose |
-|-----------|---------|
-| `SentrySampler` | Applies Sentry's sampling decisions |
-| `SentrySpanProcessor` | Sends spans to Sentry |
-| `SentryPropagator` | Handles distributed tracing headers |
-| `SentryContextManager` | Manages async context for Sentry |
+| Component              | Purpose                             |
+| ---------------------- | ----------------------------------- |
+| `SentrySampler`        | Applies Sentry's sampling decisions |
+| `SentrySpanProcessor`  | Sends spans to Sentry               |
+| `SentryPropagator`     | Handles distributed tracing headers |
+| `SentryContextManager` | Manages async context for Sentry    |
 
 If you omit any of these, Sentry's tracing may not work correctly.
-
 
 ### Option C: Isolated TracerProvider [#isolated-tracer-provider]
 
@@ -247,7 +247,6 @@ langfuse = Langfuse(tracer_provider=TracerProvider())
 - Sentry's sampling doesn't affect Langfuse traces
 - Langfuse and Sentry traces won't share context
 - Some spans may appear orphaned in Langfuse if their parent is in Sentry's provider
-
 
 ## Common Issues
 

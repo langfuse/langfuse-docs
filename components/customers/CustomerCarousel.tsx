@@ -53,7 +53,7 @@ export const CustomerCarousel = ({
   // Filter stories where showInCustomerIndex is not explicitly false
   const originalStories = useMemo(() => {
     return allStories.filter(
-      (page) => page.frontMatter?.showInCustomerIndex !== false
+      (page) => page.frontMatter?.showInCustomerIndex !== false,
     );
   }, [allStories]);
 
@@ -162,12 +162,13 @@ export const CustomerCarousel = ({
               >
                 <Link
                   href={story.route}
-                  className={`no-underline group block bg-card border rounded-lg p-4 md:p-8 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-500 cursor-pointer flex flex-col h-full min-h-[250px] md:min-h-[300px] ${index === current - 1
+                  className={`no-underline group block bg-card border rounded-lg p-4 md:p-8 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-500 cursor-pointer flex flex-col h-full min-h-[250px] md:min-h-[300px] ${
+                    index === current - 1
                       ? "opacity-100"
                       : isInView[index]
                         ? "opacity-20 md:opacity-50"
                         : "opacity-20"
-                    }`}
+                  }`}
                 >
                   {/* Customer Logo */}
                   {story.frontMatter.customerLogo && (
@@ -224,62 +225,62 @@ export const CustomerCarousel = ({
                   {(story.frontMatter.quoteAuthor ||
                     story.frontMatter.quoteRole ||
                     story.frontMatter.quoteCompany) && (
-                      <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex gap-3 items-center">
-                          {/* Profile Picture */}
-                          {story.frontMatter.quoteAuthorImage && (
-                            <div className="overflow-hidden flex-shrink-0 w-12 h-12 rounded-full border border-border">
-                              <Image
-                                src={story.frontMatter.quoteAuthorImage}
-                                alt={`${story.frontMatter.quoteAuthor} profile picture`}
-                                width={48}
-                                height={48}
-                                className="object-cover w-full h-full !m-0"
-                                quality={90}
-                                unoptimized
-                              />
+                    <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex gap-3 items-center">
+                        {/* Profile Picture */}
+                        {story.frontMatter.quoteAuthorImage && (
+                          <div className="overflow-hidden flex-shrink-0 w-12 h-12 rounded-full border border-border">
+                            <Image
+                              src={story.frontMatter.quoteAuthorImage}
+                              alt={`${story.frontMatter.quoteAuthor} profile picture`}
+                              width={48}
+                              height={48}
+                              className="object-cover w-full h-full !m-0"
+                              quality={90}
+                              unoptimized
+                            />
+                          </div>
+                        )}
+                        <div>
+                          {story.frontMatter.quoteAuthor && (
+                            <div className="font-semibold text-gray-900 dark:text-gray-100">
+                              {story.frontMatter.quoteAuthor}
                             </div>
                           )}
-                          <div>
-                            {story.frontMatter.quoteAuthor && (
-                              <div className="font-semibold text-gray-900 dark:text-gray-100">
-                                {story.frontMatter.quoteAuthor}
-                              </div>
-                            )}
-                            {(story.frontMatter.quoteRole ||
-                              story.frontMatter.quoteCompany) && (
-                                <div>
-                                  {story.frontMatter.quoteRole && (
-                                    <span>{story.frontMatter.quoteRole}</span>
-                                  )}
-                                  {story.frontMatter.quoteRole &&
-                                    story.frontMatter.quoteCompany && (
-                                      <span> at </span>
-                                    )}
-                                  {story.frontMatter.quoteCompany && (
-                                    <span>{story.frontMatter.quoteCompany}</span>
-                                  )}
-                                </div>
+                          {(story.frontMatter.quoteRole ||
+                            story.frontMatter.quoteCompany) && (
+                            <div>
+                              {story.frontMatter.quoteRole && (
+                                <span>{story.frontMatter.quoteRole}</span>
                               )}
-                          </div>
-                        </div>
-                        <div className="flex justify-center items-center w-6 h-6 bg-gray-100 rounded-full transition-colors min-w-6 dark:bg-gray-700 group-hover:bg-gray-200 dark:group-hover:bg-gray-600">
-                          <svg
-                            className="w-3 h-3 text-gray-600 dark:text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 12h14M12 5l7 7-7 7"
-                            />
-                          </svg>
+                              {story.frontMatter.quoteRole &&
+                                story.frontMatter.quoteCompany && (
+                                  <span> at </span>
+                                )}
+                              {story.frontMatter.quoteCompany && (
+                                <span>{story.frontMatter.quoteCompany}</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    )}
+                      <div className="flex justify-center items-center w-6 h-6 bg-gray-100 rounded-full transition-colors min-w-6 dark:bg-gray-700 group-hover:bg-gray-200 dark:group-hover:bg-gray-600">
+                        <svg
+                          className="w-3 h-3 text-gray-600 dark:text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 12h14M12 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
                 </Link>
               </CarouselItem>
             ))}
@@ -303,10 +304,11 @@ export const CustomerCarousel = ({
                     api.scrollTo(targetIndex);
                   }
                 }}
-                className={`w-2 h-2 rounded-full transition-all duration-200 ${index === (current - 1) % originalStories.length
+                className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                  index === (current - 1) % originalStories.length
                     ? "bg-primary w-6"
                     : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
-                  }`}
+                }`}
                 aria-label={`Go to customer story ${index + 1}`}
               />
             ))}

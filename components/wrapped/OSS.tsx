@@ -2,7 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { useInView, useMotionValue, useSpring, motion } from "framer-motion";
-import { Users, GitPullRequest, MessageSquare, Star, type LucideIcon } from "lucide-react";
+import {
+  Users,
+  GitPullRequest,
+  MessageSquare,
+  Star,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { getGitHubStars } from "@/lib/github-stars";
 import contributors from "./data/oss-contributors-2025.json";
@@ -37,15 +43,13 @@ function AnimatedMetric({ targetValue }: { targetValue: number }) {
     return springValue.on("change", (latest) => {
       if (ref.current) {
         ref.current.textContent = Intl.NumberFormat("en-US").format(
-          Math.floor(latest)
+          Math.floor(latest),
         );
       }
     });
   }, [springValue]);
 
-  return (
-    <span className="inline-block tabular-nums" ref={ref} />
-  );
+  return <span className="inline-block tabular-nums" ref={ref} />;
 }
 
 function MetricCard({ value, label, suffix, icon: Icon }: MetricCardProps) {
@@ -100,7 +104,10 @@ export function OSS() {
         title="To the Builders..."
         subtitle="Big thanks to all contributors of 2025!"
       />
-      <div ref={containerRef} className="relative group border-l border-r border-b border-border -mt-[1px] p-6 lg:p-8">
+      <div
+        ref={containerRef}
+        className="relative group border-l border-r border-b border-border -mt-[1px] p-6 lg:p-8"
+      >
         <HoverStars />
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {contributors.map((contributor, index) => {
@@ -123,7 +130,6 @@ export function OSS() {
                   className="inline-flex items-center gap-1 rounded-full border px-1 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-sm hover:bg-muted transition-colors"
                 >
                   {contributor.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={contributor.avatarUrl}
                       alt={contributor.login}

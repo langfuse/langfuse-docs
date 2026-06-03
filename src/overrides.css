@@ -18,7 +18,6 @@
   --fd-nav-height: calc(
     var(--lf-nav-primary-height) + var(--lf-nav-docs-secondary-height)
   );
-  --fd-banner-height: 0px;
 }
 
 /*
@@ -233,20 +232,41 @@
    sidebar section heading. Also remove the top fade mask so the first item isn't
    clipped (the sidebar sits flush against the navbar). */
 @media (min-width: 768px) {
-  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] {
+  .docs-chrome-compact
+    #nd-docs-layout
+    #nd-sidebar
+    [data-radix-scroll-area-viewport] {
     padding-top: 8px;
-    mask-image: linear-gradient(to bottom, white, white calc(100% - 12px), transparent) !important;
+    mask-image: linear-gradient(
+      to bottom,
+      white,
+      white calc(100% - 12px),
+      transparent
+    ) !important;
   }
   /* Hide the top separator line and its corner decorators on the first section
      heading (it sits flush against the navbar in compact mode). */
-  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type {
+  .docs-chrome-compact
+    #nd-docs-layout
+    #nd-sidebar
+    [data-radix-scroll-area-viewport]
+    p:first-of-type {
     margin-top: 0;
     padding-top: 4px;
   }
-  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type::after {
+  .docs-chrome-compact
+    #nd-docs-layout
+    #nd-sidebar
+    [data-radix-scroll-area-viewport]
+    p:first-of-type::after {
     display: none;
   }
-  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type > span[aria-hidden] {
+  .docs-chrome-compact
+    #nd-docs-layout
+    #nd-sidebar
+    [data-radix-scroll-area-viewport]
+    p:first-of-type
+    > span[aria-hidden] {
     display: none !important;
   }
 }
@@ -294,7 +314,7 @@
 }
 
 .layout-wrapper {
-  max-width: 1440px;
+  max-width: 1520px;
   margin: 0 auto;
   position: relative;
   border-right: 1px solid var(--line-structure);
@@ -411,7 +431,7 @@
   margin: 0 0 1px 1px;
   border-radius: calc(var(--radius) - 4px);
   background-color: var(--line-structure) !important;
-  top: var(--fd-nav-height);
+  top: calc(var(--fd-nav-height) + var(--fd-banner-height, 0px));
 }
 
 /* Sidebar active link */
@@ -703,9 +723,9 @@
   display: none;
 }
 
-@media (min-width: 1440px) {
+@media (min-width: 1520px) {
   #nd-docs-layout [data-sidebar-panel] {
-    left: calc((100vw - 1440px) / 2);
+    left: calc((100vw - 1520px) / 2);
   }
 }
 
@@ -715,8 +735,10 @@
 #nd-toc {
   --text-links: var(--line-cta);
   padding: 0;
-  /* Full viewport minus docs header stack; 2px ≈ outer chrome / rounding */
-  max-height: calc(100dvh - var(--fd-nav-height) - 1px);
+  /* Full viewport minus docs header stack + optional banner; 1px ≈ outer chrome / rounding */
+  max-height: calc(
+    100dvh - var(--fd-nav-height) - var(--fd-banner-height, 0px) - 1px
+  );
   border-bottom-width: 0;
   border-radius: 0 !important;
   z-index: 10;
@@ -890,6 +912,16 @@ ul[data-gh-discussions-list] {
   width: 100%;
 }
 
+.shiki .fd-scroll-container > pre:not(:has(.line)) {
+  padding-left: var(--padding-left, calc(var(--spacing) * 4));
+  padding-right: var(--padding-right, calc(var(--spacing) * 4));
+}
+
+.shiki .fd-scroll-container > pre:not(:has(.line)) > code,
+.shiki .fd-scroll-container > pre > code.language-env {
+  display: block;
+}
+
 .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
   border: 1px solid var(--line-structure);
   border-radius: 4px;
@@ -946,11 +978,6 @@ svg .edgeLabel {
   row-gap: 0.2rem;
 }
 
-/* Subsequent details should have less of a gap */
-details + details {
-  margin-top: 0.5rem !important;
-}
-
 /* Docs footer pagination: style as secondary buttons */
 #nd-page > div:last-child > a {
   display: inline-flex !important;
@@ -980,16 +1007,6 @@ details + details {
 }
 #nd-page > div:last-child > a > p:last-child {
   display: none !important;
-}
-
-/* Fix detail padding */
-details > div {
-  padding: 0.25rem;
-}
-
-/* Details header should be bold */
-details > summary {
-  font-weight: 700;
 }
 
 #nd-page > .prose {
@@ -1155,14 +1172,22 @@ details > summary {
   }
 }
 .ellipsis-dots::after {
-  content: '';
+  content: "";
   animation: ellipsis 1.4s steps(4, end) infinite;
 }
 @keyframes ellipsis {
-  0% { content: ''; }
-  25% { content: '.'; }
-  50% { content: '..'; }
-  75% { content: '...'; }
+  0% {
+    content: "";
+  }
+  25% {
+    content: ".";
+  }
+  50% {
+    content: "..";
+  }
+  75% {
+    content: "...";
+  }
 }
 
 /*

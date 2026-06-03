@@ -16,7 +16,10 @@ export function HomeMainArea({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const spotlightState = useMemo(() => createPatternSpotlightState(), []);
 
-  useEffect(() => () => disposePatternSpotlight(spotlightState), [spotlightState]);
+  useEffect(
+    () => () => disposePatternSpotlight(spotlightState),
+    [spotlightState],
+  );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -27,7 +30,7 @@ export function HomeMainArea({ children }: { children: ReactNode }) {
       const y = ((e.clientY - rect.top) / rect.height) * 100;
       updatePatternSpotlightTarget(() => ref.current, spotlightState, x, y);
     },
-    [spotlightState]
+    [spotlightState],
   );
 
   return (

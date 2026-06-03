@@ -26,7 +26,7 @@ We built an [AI agent skill for Langfuse](https://github.com/langfuse/skills/tre
 
 ## The Evaluation Setup
 
-You can evaluate a skill systematically by storing a list of user prompts as a [Dataset](/docs/evaluation/experiments/datasets)  in Langfuse, [run an experiment](/docs/evaluation/experiments/experiments-via-sdk) by spinning up coding agents with these prompts, and [tracing](/docs/observability/overview) the agent's behavior. Based the results, you can improve the skill and measure the quality by running the pipeline again. 
+You can evaluate a skill systematically by storing a list of user prompts as a [Dataset](/docs/evaluation/experiments/datasets) in Langfuse, [run an experiment](/docs/evaluation/experiments/experiments-via-sdk) by spinning up coding agents with these prompts, and [tracing](/docs/observability/overview) the agent's behavior. Based the results, you can improve the skill and measure the quality by running the pipeline again.
 
 <Frame fullWidth>
   ![Evaluation pipeline](/images/blog/2026-02-26-evaluate-ai-agent-skills/evaluation-pipeline.png)
@@ -36,13 +36,13 @@ This approach treats skill evaluation like prompt evaluation: define inputs, cap
 
 ### The dataset
 
-We created 2 datasets: 
+We created 2 datasets:
 | Dataset | Description |
 |---|---|
 | **cli-tests** | A set with user prompts where the agent should use the CLI to access Langfuse. |
 | **instrumentation-tests** | A set with the same user prompt `"instrument my application with Langfuse"` every time, and a folder name that points to a folder with a small existing application. |
 
-The expected output is a list of things the LLM as a judge should verify. 
+The expected output is a list of things the LLM as a judge should verify.
 
 ### Experiment setup
 
@@ -55,7 +55,6 @@ We used Claude Agent SDK to run the agents. You can easily integrate Langfuse wi
 **Repository structure**
 
 The [repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/evaluating-ai-agent-skills) consists of the script to run the experiment, and repositories to spin up the agents. The skill is intalled globally on the Claude account.
-
 
 <div>
   <FileTree>
@@ -71,7 +70,7 @@ The [repository](https://github.com/langfuse/langfuse-examples/tree/main/applica
 
 **Spinning up an agent**
 
-Each experiment run spins up an agent inside a test repository. A couple of things to note: 
+Each experiment run spins up an agent inside a test repository. A couple of things to note:
 
 **Injecting context**
 
@@ -115,6 +114,7 @@ Before knowing what to improve, we need to look at the traces of the first datas
 </Frame>
 
 You can immediately see that the skill was invoked relatively early in the trace, which is a good sign. Going deeper into each step reveals more about the agent's behavior. A couple of things immediately stand out:
+
 - A high number of CLI commands resulted in an error.
 - Sometimes the agent would switch to using Curl commands instead of the CLI.
 - The agent would sometimes invent CLI resources and actions that didn't exist.
@@ -124,9 +124,9 @@ From these observations we derived **initial metrics to track each iteration**: 
 
 ### Iteration 1: Not enforcing Langfuse URL
 
-The first experiment run showed the same pattern in over 90% of the cases: the agent would check if credentials were set, use a CLI command and then get the error `No server URL found`. At some point it would attempt a workaround by explicitly setting the server with `--server` instead of using the environment variable. This behavior would introduce 1-2 unnecessary round trips to the CLI. 
+The first experiment run showed the same pattern in over 90% of the cases: the agent would check if credentials were set, use a CLI command and then get the error `No server URL found`. At some point it would attempt a workaround by explicitly setting the server with `--server` instead of using the environment variable. This behavior would introduce 1-2 unnecessary round trips to the CLI.
 
-The root cause was in the skill itself. In our example showing how to set environment variables, we had a comment saying the Langfuse host was optional. 
+The root cause was in the skill itself. In our example showing how to set environment variables, we had a comment saying the Langfuse host was optional.
 
 ```bash
 export LANGFUSE_PUBLIC_KEY=pk-lf-...
@@ -134,11 +134,11 @@ export LANGFUSE_SECRET_KEY=sk-lf-...
 export LANGFUSE_HOST=https://cloud.langfuse.com  # optional, default is EU
 ```
 
-By changing that one comment to say the host is mandatory, the agent started checking for it upfront and setting it when missing. The number of retries for that specific error went to zero immediately. You can see the before and after in [this commit](https://github.com/langfuse/skills/pull/4/changes/904a0ff1a6b9d4e4cc66ae26eb38d193a53d958b). 
+By changing that one comment to say the host is mandatory, the agent started checking for it upfront and setting it when missing. The number of retries for that specific error went to zero immediately. You can see the before and after in [this commit](https://github.com/langfuse/skills/pull/4/changes/904a0ff1a6b9d4e4cc66ae26eb38d193a53d958b).
 
 ### Iteration 2: Hallucinated CLI parameters
 
-With the server issue fixed, a second pattern stood out: the agent would invent CLI resources and actions that didn't exist. 
+With the server issue fixed, a second pattern stood out: the agent would invent CLI resources and actions that didn't exist.
 
 ```bash
 > npx langfuse-cli api prompts get --name summarizer
@@ -148,17 +148,18 @@ error: unknown option '--name'
 
 The CLI has `--help` at every level to let you discover what's available, but the agent only used it after experiencing an error. It didn't use it proactively. This caused an avg error rate of 25% on Langfuse CLI commands.
 
-[Adding explicit instructions to the skill telling the agent to always use `--help` to discover what's available](https://github.com/langfuse/skills/pull/5/changes/a1b3f710ed2ebcc9b9bd729b73c86ee12d3bcfba) brought Langfuse CLI errors down to zero. 
+[Adding explicit instructions to the skill telling the agent to always use `--help` to discover what's available](https://github.com/langfuse/skills/pull/5/changes/a1b3f710ed2ebcc9b9bd729b73c86ee12d3bcfba) brought Langfuse CLI errors down to zero.
 
 Interesting to note here is that the number of actions the agent needed didn't actually decrease. The retries were gone, but replaced by `--help` calls before each command. No errors is better than constant retries, but the efficiency gap tells us where to invest next: surfacing more information at the top level of the CLI so the agent needs fewer discovery steps.
 
 ### Iteration 3: Skill invocation issues
+
 Now it was time to move on to the second goal: folding observability best practices into the main skill. We added a new reference doc with instrumentation guidance and rewrote the main SKILL.md to be more conceptual by framing the skill as "use Langfuse effectively" instead of just listing the CLI and docs access.
 
-| | Description |
-|---|---|
+|            | Description                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Before** | Interact with Langfuse and access its documentation. Use when needing to (1) query or modify Langfuse data programmatically via the CLI — traces, prompts, datasets, scores, sessions, and any other API resource, (2) look up Langfuse documentation, concepts, integration guides, or SDK usage, or (3) understand how any Langfuse feature works. This skill covers CLI-based API access (via npx) and multiple documentation retrieval methods. |
-| **After** | Skill for working with Langfuse effectively across use cases: instrumentation, prompt management, debugging, and data access. Includes core principles, workflows, and use-case-specific best practices.|
+| **After**  | Skill for working with Langfuse effectively across use cases: instrumentation, prompt management, debugging, and data access. Includes core principles, workflows, and use-case-specific best practices.                                                                                                                                                                                                                                            |
 
 The result was that the skill stopped being invoked entirely. User prompts like "fetch the last ten traces," which had worked before, now led the agent to look for logs in a local repository, or reach for a competitor product instead of Langfuse. The skill wasn't even being considered.
 
@@ -168,7 +169,7 @@ After some iterations we settled onto a very similar description as before, but 
 
 How do you evaluate whether the outcome of a complex task is correct? We did the following to verify whether the agent could correctly instrument an existing application with Langfuse observability:
 
-This requires a slightly different evaluation setup. Each Claude Agent SDK run starts with the same prompt, but in a different subfolder, containing a small existing application. One folder might have a basic OpenAI chat app, another a LangChain RAG pipeline. The dataset input and expected output are adjusted accordingly.  
+This requires a slightly different evaluation setup. Each Claude Agent SDK run starts with the same prompt, but in a different subfolder, containing a small existing application. One folder might have a basic OpenAI chat app, another a LangChain RAG pipeline. The dataset input and expected output are adjusted accordingly.
 
 <Frame fullWidth>
   ![Observability dataset](/images/blog/2026-02-26-evaluate-ai-agent-skills/observability-dataset.png)
@@ -186,9 +187,10 @@ A few things learned from the process:
 
 ## What's Next
 
-There's more to improve. A couple of things to consider: 
-- adding specific best practices under the `references` folder. This comes with specific datasets to test the skill against. 
-- improving the efficiency of the skill, so bringing the number of CLI calls down. 
+There's more to improve. A couple of things to consider:
+
+- adding specific best practices under the `references` folder. This comes with specific datasets to test the skill against.
+- improving the efficiency of the skill, so bringing the number of CLI calls down.
 - there's still room to improve the auto-instrumentation skill, especially in complex scenarios.
 
-If you're interested in trying the out skill yourself, you can find them in the [Langfuse Skills GitHub repository](https://github.com/langfuse/skills). 
+If you're interested in trying the out skill yourself, you can find them in the [Langfuse Skills GitHub repository](https://github.com/langfuse/skills).

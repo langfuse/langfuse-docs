@@ -25,32 +25,32 @@ message, **ask explicitly** and wait for answers (or confirm defaults).
 
 ### Content & publishing
 
-| Topic | Ask |
-|--------|-----|
-| **Company name** | Legal/marketing name for copy and quotes |
-| **Company website** | Public URL for the `[Company](https://...)` link in **About &lt;Company&gt;** |
-| **Slug** | Filename: `<slug>.mdx` (lowercase, hyphens), e.g. `cresta` -> `cresta.mdx` |
-| **Page title** | H1 string for `BlogHeader` + YAML `title` (often "How &lt;Company&gt; ... with Langfuse") |
-| **Short description** | YAML `description` + `BlogHeader` description (SEO/social; 1-2 sentences) |
-| **Publish date** | YAML `date` + `BlogHeader` `date` (e.g. `March 26, 2026`) |
-| **OG image** | Optional `ogImage:` path; if unset, leave empty like other stories |
+| Topic                 | Ask                                                                                       |
+| --------------------- | ----------------------------------------------------------------------------------------- |
+| **Company name**      | Legal/marketing name for copy and quotes                                                  |
+| **Company website**   | Public URL for the `[Company](https://...)` link in **About &lt;Company&gt;**             |
+| **Slug**              | Filename: `<slug>.mdx` (lowercase, hyphens), e.g. `cresta` -> `cresta.mdx`                |
+| **Page title**        | H1 string for `BlogHeader` + YAML `title` (often "How &lt;Company&gt; ... with Langfuse") |
+| **Short description** | YAML `description` + `BlogHeader` description (SEO/social; 1-2 sentences)                 |
+| **Publish date**      | YAML `date` + `BlogHeader` `date` (e.g. `March 26, 2026`)                                 |
+| **OG image**          | Optional `ogImage:` path; if unset, leave empty like other stories                        |
 
 ### Authors (BlogHeader `authors={["..."]}`)
 
-| Topic | Ask |
-|--------|-----|
-| **Byline author(s)** | Who should appear under the title (keys from `data/authors.json`) |
+| Topic                        | Ask                                                                                                                                                                                                                                                                                 |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Byline author(s)**         | Who should appear under the title (keys from `data/authors.json`)                                                                                                                                                                                                                   |
 | **External / guest speaker** | If not in `authors.json`: collect name, title, optional socials, and **headshot path** under `public/images/people/` or `public/images/customers/<slug>/`, then **add an entry to `data/authors.json`** (see existing entries). Every `authors` key must resolve in `authors.json`. |
 
 ### Branding & Users index card
 
-| Topic | Ask |
-|--------|-----|
-| **Logos** | Paths for `customerLogo` and `customerLogoDark` (light + dark mode), usually under **`public/images/customers/<slug>/`** |
-| **Pull quote** | `customerQuote` (short, for grid card) |
-| **Quote attribution** | `quoteAuthor`, `quoteRole`, `quoteCompany` |
-| **Speaker headshot (optional)** | `quoteAuthorImage` for card/SEO if you use the same as Canva |
-| **Show on /users** | `showInCustomerIndex: true|false` |
+| Topic                           | Ask                                                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Logos**                       | Paths for `customerLogo` and `customerLogoDark` (light + dark mode), usually under **`public/images/customers/<slug>/`** |
+| **Pull quote**                  | `customerQuote` (short, for grid card)                                                                                   |
+| **Quote attribution**           | `quoteAuthor`, `quoteRole`, `quoteCompany`                                                                               |
+| **Speaker headshot (optional)** | `quoteAuthorImage` for card/SEO if you use the same as Canva                                                             |
+| **Show on /users**              | `showInCustomerIndex: true \| false`                                                                                     |
 
 ### Images (screenshots & diagrams)
 

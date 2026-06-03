@@ -30,10 +30,7 @@ export function BlogPostSidebar({
               href="/blog"
               className="flex items-center gap-1 px-2 py-0.5 w-full text-left text-text-tertiary hover:text-text-primary transition-colors"
             >
-              <Text
-                size="s"
-                className="text-left text-inherit text-[13px]"
-              >
+              <Text size="s" className="text-left text-inherit text-[13px]">
                 + All [{totalPosts}]
               </Text>
             </Link>

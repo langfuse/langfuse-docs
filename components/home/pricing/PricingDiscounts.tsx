@@ -48,10 +48,7 @@ export const PricingDiscounts = () => (
             hoverStripes
             className="p-4 -mt-px -ml-px flex flex-col gap-2"
           >
-            <Text
-              as="dt"
-              className="text-left font-medium text-text-secondary"
-            >
+            <Text as="dt" className="text-left font-medium text-text-secondary">
               {discount.name}
             </Text>
             <Text as="dd" size="s" className="text-left">

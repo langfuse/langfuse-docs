@@ -390,6 +390,7 @@ Langfuse supports **pricing tiers** for models, enabling accurate cost calculati
 #### How tier matching works
 
 Each model can have multiple pricing tiers, each with:
+
 - **Name**: A descriptive name (e.g., "Standard", "Large Context")
 - **Priority**: Evaluation order (0 is reserved for default tier)
 - **Conditions**: Rules that determine when the tier applies
@@ -398,13 +399,13 @@ Each model can have multiple pricing tiers, each with:
 When calculating cost, Langfuse evaluates tiers in priority order (excluding the default tier). The first tier whose conditions are satisfied is used. If no conditional tier matches, the default tier is applied.
 
 **Condition format:**
+
 - `usageDetailPattern`: A regex pattern to match usage detail keys (e.g., `input` matches `input_tokens`, `input_cached_tokens`, etc.)
 - `operator`: Comparison operator (`gt`, `gte`, `lt`, `lte`, `eq`, `neq`)
 - `value`: The threshold value to compare against
 - `caseSensitive`: Whether the pattern matching is case-sensitive (default: false)
 
 For example, the "Large Context" tier for Claude Sonnet 4.5 has a condition: `input > 200000`, meaning it applies when the sum of all usage details matching the pattern "input" exceeds 200,000 tokens.
-
 
 ### Custom model definitions [#custom-model-definitions]
 

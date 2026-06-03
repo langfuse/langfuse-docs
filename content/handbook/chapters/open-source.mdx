@@ -45,9 +45,10 @@ Enterprise Edition (EE) modules live in clearly marked `/ee` directories. These 
 
 The Langfuse deployment stack is exactly the same for OSS, Enterprise self-host, and Langfuse Cloud. See our [Self-Hosting Guide](/self-hosting) for instructions on running Langfuse locally and deployments at production scale.
 
-<details>
-<summary>Architecture</summary>
+<Details>
+<Summary>Architecture</Summary>
 
+import { Details, Summary } from "@/components/Details";
 import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
 
 <ArchitectureDiagram />
@@ -56,35 +57,35 @@ import ArchitectureDescription from "@/components-mdx/architecture-description-v
 
 <ArchitectureDescription />
 
-</details>
+</Details>
 
 ## Frequently Asked Questions [#enterprise-edition-ee-faq]
 
-<details>
-<summary>Is Langfuse really open source?</summary>
+<Details>
+<Summary>Is Langfuse really open source?</Summary>
 
 Yes. Everything outside the `/ee` folders is MIT-licensed — an OSI-approved license. You get the four freedoms: use, study, modify, distribute.
 
-</details>
+</Details>
 
-<details>
-<summary>Will I accidentally use EE features?</summary>
+<Details>
+<Summary>Will I accidentally use EE features?</Summary>
 
 No. EE packages are isolated and gated by the license key check. You can run the core image without a key without running EE code.
 
-</details>
+</Details>
 
-<details>
-<summary>Which self-host licensing options exist?</summary>
+<Details>
+<Summary>Which self-host licensing options exist?</Summary>
 
 All product features are freely available under the MIT license.
 
 A commercial Enterprise license is only required for advanced security capabilities such as SCIM, extended audit logging, and data retention policies (see [pricing page](/pricing-self-host)). You can add a [license key](/self-hosting/license-key) to your deployment to enable these features at any time.
 
-</details>
+</Details>
 
-<details>
-<summary>Does Langfuse rely only on open-source components?</summary>
+<Details>
+<Summary>Does Langfuse rely only on open-source components?</Summary>
 
 Yes. The entire stack is open source and can be self-hosted. Find a complete list in the configuration files across our repositories:
 
@@ -94,31 +95,31 @@ Yes. The entire stack is open source and can be self-hosted. Find a complete lis
 
 As the core Langfuse server is most actively developed, we run an [automated license check](https://github.com/langfuse/langfuse/actions/workflows/licensecheck.yml) on every change to avoid adding dependencies with non-permissive licenses. If you find any issues, please let us know.
 
-</details>
+</Details>
 
-<details>
-<summary>What's the release cadence and how do I stay up to date?</summary>
+<Details>
+<Summary>What's the release cadence and how do I stay up to date?</Summary>
 
 We cut a **GitHub Release multiple times a week** (tagged `vX.Y.Z`) and publish detailed notes in the [changelog](https://github.com/langfuse/langfuse/releases). Langfuse Cloud is always running the latest version; self-host users can pull the identical Docker image tag to stay up to date or upgrade on their own schedule ([docs](/self-hosting/upgrade)).
 
-</details>
+</Details>
 
-<details>
-<summary>Does the OSS build phone home? Can I disable telemetry?</summary>
+<Details>
+<Summary>Does the OSS build phone home? Can I disable telemetry?</Summary>
 
 By default, Langfuse OSS sends **aggregated usage telemetry** (no personal data) so we can improve the product. **No traces, prompts, or customer data leave your cluster.** You can disable it via `TELEMETRY_ENABLED=false` (details in the [telemetry docs](/self-hosting/security/telemetry)).
 
-</details>
+</Details>
 
-<details>
-<summary>Can I run Langfuse completely offline / air-gapped?</summary>
+<Details>
+<Summary>Can I run Langfuse completely offline / air-gapped?</Summary>
 
 Yes. After the initial image pull, Langfuse **does not require any outbound network calls** to work. Teams in regulated environments run it inside air-gapped Kubernetes clusters; just disable telemetry as above and mirror the Docker registry locally.
 
-</details>
+</Details>
 
-<details>
-<summary>How do I contribute?</summary>
+<Details>
+<Summary>How do I contribute?</Summary>
 
 Here are the best ways to contribute to Langfuse via GitHub:
 
@@ -126,10 +127,10 @@ Here are the best ways to contribute to Langfuse via GitHub:
 2. Create and comment on [Issues](/issues).
 3. Create a pull request. See [Contributing.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md) to get started.
 
-</details>
+</Details>
 
-<details>
-<summary>I want to see the code!</summary>
+<Details>
+<Summary>I want to see the code!</Summary>
 
 All our repositories are on [GitHub](https://github.com/langfuse):
 
@@ -138,10 +139,10 @@ All our repositories are on [GitHub](https://github.com/langfuse):
 - JS SDK and integrations: [`langfuse/langfuse-js`](https://github.com/langfuse/langfuse-js)
 - Docs: [`langfuse/langfuse-docs`](https://github.com/langfuse/langfuse-docs)
 
-</details>
+</Details>
 
-<details>
-<summary>Can you share some public metrics on how widely Langfuse is used?</summary>
+<Details>
+<Summary>Can you share some public metrics on how widely Langfuse is used?</Summary>
 
 Sure, we summarized some statistics in [this blog post](/blog/2024-11-most-used-oss-llmops) and in the dashboard below.
 
@@ -149,4 +150,4 @@ import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.md
 
 <PublicMetricsDashboard />
 
-</details>
+</Details>

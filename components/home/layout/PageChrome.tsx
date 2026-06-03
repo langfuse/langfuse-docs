@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import Script from "next/script";
 import { Banner } from "../../layout/Banner";
 import { Navbar } from "../../layout/Navbar";
-import { AISearch, FloatingAskAIButton } from "@/components/inkeep/search";
+import { AISearch, FloatingAskAI } from "@/components/inkeep/search";
 import { ForceLightMode } from "@/components/ForceLightMode";
 
 /**
@@ -32,7 +32,7 @@ export function PageChrome({
       <Banner />
       <Navbar />
       {children}
-      <FloatingAskAIButton />
+      <FloatingAskAI />
     </AISearch>
   );
 }

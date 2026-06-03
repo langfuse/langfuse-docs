@@ -79,7 +79,7 @@ curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
 
 ## Access via SDKs
 
-Both the Langfuse [Python SDK](/docs/sdk/python/decorators) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
+Both the Langfuse [Python SDK](/docs/sdk/python/sdk-v3) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
 
 You can use your editor's Intellisense to explore the API methods and their parameters.
 
@@ -87,7 +87,11 @@ You can use your editor's Intellisense to explore the API methods and their para
 
 In Python SDK v4 and JS/TS SDK v5, the high-performance resources are the
 defaults: `api.observations`, `api.scores`, and `api.metrics`. Legacy v1
-resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`).
+resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). See
+[Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) for SDK examples.
+
+Observations API v2 and Metrics API v2 are currently Cloud-only. For self-hosted
+deployments, use the endpoints available in your Langfuse version.
 
 </Callout>
 
@@ -106,12 +110,25 @@ When using the [Python SDK](/docs/sdk/python/sdk-v3):
 from langfuse import get_client
 
 langfuse = get_client()
-...
-# fetch a trace
-langfuse.api.trace.get(trace_id)
 
-# async client via asyncio
-await langfuse.async_api.trace(trace_id)
+# Retrieve row-level observations via Observations API v2
+observations = langfuse.api.observations.get_many(
+    trace_id="trace-id",
+    fields="core,basic,usage",
+    limit=100,
+)
+
+# Retrieve aggregates via Metrics API v2
+metrics = langfuse.api.metrics.get(query="""
+{
+  "view": "observations",
+  "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+  "dimensions": [{"field": "providedModelName"}],
+  "filters": [],
+  "fromTimestamp": "2025-05-01T00:00:00Z",
+  "toTimestamp": "2025-05-13T00:00:00Z"
+}
+""")
 
 # explore more endpoints via Intellisense
 langfuse.api.*
@@ -126,9 +143,25 @@ await langfuse.async_api.*
 import { LangfuseClient } from '@langfuse/client';
 
 const langfuse = new LangfuseClient();
-...
-// fetch a trace
-await langfuse.api.trace.get(traceId);
+
+// Retrieve row-level observations via Observations API v2
+const observations = await langfuse.api.observations.getMany({
+  traceId: "trace-id",
+  fields: "core,basic,usage",
+  limit: 100,
+});
+
+// Retrieve aggregates via Metrics API v2
+const metrics = await langfuse.api.metrics.get({
+  query: JSON.stringify({
+    view: "observations",
+    metrics: [{ measure: "totalCost", aggregation: "sum" }],
+    dimensions: [{ field: "providedModelName" }],
+    filters: [],
+    fromTimestamp: "2025-05-01T00:00:00Z",
+    toTimestamp: "2025-05-13T00:00:00Z"
+  })
+});
 
 // explore more endpoints via Intellisense
 langfuse.api.*
@@ -189,7 +222,10 @@ try {
 ## Ingest Traces via the API
 
 <Callout type="info">
-  The OpenTelemetry Endpoint will replace the Ingestion API in the future. Therefore, it is strongly recommended to switch to the OpenTelemetry Endpoint for trace ingestion. Please refer to the [OpenTelemetry docs](/integrations/native/opentelemetry) for more information.
+  The OpenTelemetry Endpoint will replace the Ingestion API in the future.
+  Therefore, it is strongly recommended to switch to the OpenTelemetry Endpoint
+  for trace ingestion. Please refer to the [OpenTelemetry
+  docs](/integrations/native/opentelemetry) for more information.
 </Callout>
 
 - [OpenTelemetry Traces Ingestion Endpoint](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) implements the OTLP/HTTP specification for trace ingestion, providing native OpenTelemetry integration for Langfuse Observability.
@@ -197,8 +233,16 @@ try {
 
 ## Retrieve Data via the API
 
-- [Observations API](/docs/api-and-data-platform/features/observations-api) - Retrieve observation data (spans, generations, events) from Langfuse for use in custom workflows, evaluation pipelines, and analytics. The v2 API offers high-performance data retrieval with cursor-based pagination and selective field retrieval.
-- [Metrics API](/docs/metrics/features/metrics-api) - Retrieve aggregated analytics and metrics from your Langfuse data. Query across different views (observations, scores) with customizable dimensions, metrics, filters, and time granularity for powerful custom reports and dashboards.
+For new data extraction workflows, use the v2 data APIs:
+
+- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) - Retrieve observation data (spans, generations, events) from Langfuse for custom workflows, evaluation pipelines, and analytics.
+- [Metrics API v2](/docs/metrics/features/metrics-api#v2) - Retrieve aggregated analytics and metrics from your Langfuse data.
+
+<Callout type="info">
+
+Older trace, observation, and metrics read APIs remain available, but are not recommended as the default for new extraction workflows because they are less performant at scale. See [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) for row-level data and [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
+
+</Callout>
 
 ## Alternatives
 

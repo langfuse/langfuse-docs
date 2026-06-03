@@ -32,7 +32,8 @@ export function SidebarItem({
     p.length > 1 && p.endsWith("/") ? p.slice(0, -1) : p;
 
   const active =
-    (item.type as string) !== "link" && normalize(item.url) === normalize(pathname);
+    (item.type as string) !== "link" &&
+    normalize(item.url) === normalize(pathname);
 
   return (
     <SidebarItemBase
@@ -41,7 +42,9 @@ export function SidebarItem({
       active={active}
       icon={item.icon}
       className={ITEM_CLASS}
-      style={{ paddingInlineStart: `calc(${2 * depth} * var(--spacing) + 6px)` }}
+      style={{
+        paddingInlineStart: `calc(${2 * depth} * var(--spacing) + 6px)`,
+      }}
     >
       {item.name}
     </SidebarItemBase>

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type {
   InkeepAIChatSettings,
   InkeepSearchSettings,
@@ -8,8 +9,6 @@ import type {
 } from "@inkeep/cxkit-react";
 import { useTheme } from "next-themes";
 import { type PostHog, usePostHog } from "posthog-js/react";
-import { usePathname } from "next/navigation";
-import { useMemo } from "react";
 
 const customAnalyticsCallback = (
   event: InkeepCallbackEvent,
@@ -26,16 +25,6 @@ const customAnalyticsCallback = (
   });
 };
 
-const inkeepCustomTabsToSlugs: { tab: string; slug: string | string[] }[] = [
-  { tab: "Docs", slug: "/docs" },
-  { tab: "Integrations", slug: "/integrations" },
-  { tab: "Self Hosting", slug: "/self-hosting" },
-  { tab: "FAQ & Guides", slug: ["/faq", "/guides"] },
-  { tab: "Security", slug: "/security" },
-  { tab: "Handbook", slug: "/handbook" },
-  { tab: "Blog", slug: "/blog" },
-];
-
 type InkeepSharedSettings = {
   baseSettings: InkeepBaseSettings;
   aiChatSettings: InkeepAIChatSettings;
@@ -43,41 +32,28 @@ type InkeepSharedSettings = {
   modalSettings: InkeepModalSettings;
 };
 
-const useInkeepSettings = (): InkeepSharedSettings => {
+const useInkeepSettings = (): InkeepSharedSettings | null => {
   const { resolvedTheme } = useTheme();
   const posthog = usePostHog();
-  const pathname = usePathname() ?? "";
 
-  const tabOfCurrentDocsSection = useMemo(() => {
-    return inkeepCustomTabsToSlugs.find((t) => {
-      const slugs = Array.isArray(t.slug) ? t.slug : [t.slug];
-      return slugs.some((slug) => pathname.startsWith(slug));
-    })?.tab;
-  }, [pathname]);
+  useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_INKEEP_API_KEY) {
+      console.warn("Inkeep API key is missing.");
+    }
+  }, []);
+
+  if (!process.env.NEXT_PUBLIC_INKEEP_API_KEY) {
+    return null;
+  }
 
   const baseSettings: InkeepBaseSettings = {
-    apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY! || "",
+    apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY,
     primaryBrandColor: "#E11312",
     organizationDisplayName: "Langfuse",
     colorMode: {
       forcedColorMode: resolvedTheme,
     },
     onEvent: (event) => customAnalyticsCallback(event, posthog),
-    transformSource: (source, type) => {
-      const tab = inkeepCustomTabsToSlugs.find((t) => {
-        const slugs = Array.isArray(t.slug) ? t.slug : [t.slug];
-        return slugs.some((slug) =>
-          source.url.startsWith("https://langfuse.com" + slug),
-        );
-      })?.tab;
-      if (type === "searchResultItem") {
-        return {
-          ...source,
-          ...(tab ? { tabs: [tab] } : {}),
-        };
-      }
-      return source;
-    },
   };
 
   const modalSettings: InkeepModalSettings = {
@@ -86,12 +62,6 @@ const useInkeepSettings = (): InkeepSharedSettings => {
 
   const searchSettings: InkeepSearchSettings = {
     placeholder: "Search",
-    tabs: inkeepCustomTabsToSlugs
-      .map((t) => t.tab)
-      .concat(["All", "GitHub"])
-      .map((t) =>
-        t === tabOfCurrentDocsSection ? [t, { isAlwaysVisible: true }] : t,
-      ),
   };
 
   const disclaimerSettings: AIChatDisclaimerSettings = {

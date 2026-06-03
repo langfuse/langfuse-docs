@@ -25,14 +25,17 @@ export const FaqIndex = () => {
   const pages = faqSource.getPages();
   const categorizedPages = pages
     .filter((page) => page.url !== "/faq/all")
-    .reduce((acc, page) => {
-      const tags = (page.data.tags as string[] | undefined) ?? ["Other"];
-      tags.forEach((tag) => {
-        if (!acc[tag]) acc[tag] = [];
-        acc[tag].push(page);
-      });
-      return acc;
-    }, {} as Record<string, FaqPage[]>);
+    .reduce(
+      (acc, page) => {
+        const tags = (page.data.tags as string[] | undefined) ?? ["Other"];
+        tags.forEach((tag) => {
+          if (!acc[tag]) acc[tag] = [];
+          acc[tag].push(page);
+        });
+        return acc;
+      },
+      {} as Record<string, FaqPage[]>,
+    );
 
   return (
     <>
@@ -61,7 +64,10 @@ export const FaqIndex = () => {
               ))}
             </Cards>
             <p className="mt-4">
-              <Link href={`/faq/tag/${encodeURIComponent(tag)}`} variant="underline">
+              <Link
+                href={`/faq/tag/${encodeURIComponent(tag)}`}
+                variant="underline"
+              >
                 {pages.length > PREVIEW_PAGES_PER_TAG
                   ? `View all (${pages.length - PREVIEW_PAGES_PER_TAG} more) ->`
                   : `View all ->`}

@@ -56,7 +56,7 @@ const GhDiscussionsPreviewInternal = ({
           (!labels ||
             discussion.labels.some((label) => labels.includes(label))) &&
           (searchTerm === "" ||
-            discussion.title.toLowerCase().includes(searchTerm.toLowerCase()))
+            discussion.title.toLowerCase().includes(searchTerm.toLowerCase())),
       ),
     }));
   }, [labels, searchTerm]);
@@ -97,7 +97,7 @@ const GhDiscussionsPreviewInternal = ({
     const startIndex = (currentPage - 1) * itemsPerPage;
     const displayedDiscussions = sortedDiscussions.slice(
       startIndex,
-      startIndex + itemsPerPage
+      startIndex + itemsPerPage,
     );
 
     if (displayedDiscussions.length === 0) {
@@ -110,16 +110,13 @@ const GhDiscussionsPreviewInternal = ({
 
     return (
       <>
-        <ul
-          className="list-none not-prose"
-          data-gh-discussions-list
-        >
+        <ul className="list-none not-prose" data-gh-discussions-list>
           {displayedDiscussions.map((discussion, idx) => (
             <li
               key={discussion.number}
               className={cn(
                 "relative hover:z-10",
-                idx > 0 && "border-t border-line-structure"
+                idx > 0 && "border-t border-line-structure",
               )}
             >
               <a
@@ -150,9 +147,7 @@ const GhDiscussionsPreviewInternal = ({
 
                     <span>•</span>
                     <div className="inline-flex gap-1 items-center">
-                      <span
-                        className="h-4 inline-flex items-center gap-1 px-1.5 rounded-full text-xs bg-surface-1 text-text-tertiary"
-                      >
+                      <span className="h-4 inline-flex items-center gap-1 px-1.5 rounded-full text-xs bg-surface-1 text-text-tertiary">
                         <IconMessage className="h-3" />
                         {discussion.comment_count}
                       </span>
@@ -164,9 +159,7 @@ const GhDiscussionsPreviewInternal = ({
                           </span>
                         )}
                       {category === "Support" && discussion.resolved && (
-                        <span
-                          className="h-4 px-1.5 rounded-full text-xs bg-muted-green/10 text-muted-green"
-                        >
+                        <span className="h-4 px-1.5 rounded-full text-xs bg-muted-green/10 text-muted-green">
                           Resolved
                         </span>
                       )}
@@ -221,7 +214,7 @@ const GhDiscussionsPreviewInternal = ({
                   {pageNumber}
                 </PaginationLink>
               </PaginationItem>
-            )
+            ),
           )}
           <PaginationItem>
             <PaginationNext
@@ -248,7 +241,7 @@ const GhDiscussionsPreviewInternal = ({
         >
           {discussion.title}
         </Link>
-      ))
+      )),
     );
   };
 
@@ -299,8 +292,13 @@ const GhDiscussionsPreviewInternal = ({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <DropdownButton size="small" icon={<IconSort className="w-4 h-4" />}>
-                  <span className="min-w-12 text-center">{sortType.charAt(0).toUpperCase() + sortType.slice(1)}</span>
+                <DropdownButton
+                  size="small"
+                  icon={<IconSort className="w-4 h-4" />}
+                >
+                  <span className="min-w-12 text-center">
+                    {sortType.charAt(0).toUpperCase() + sortType.slice(1)}
+                  </span>
                 </DropdownButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -336,10 +334,16 @@ const GhDiscussionsPreviewInternal = ({
           </div>
         </div>
         <div className="border border-line-structure bg-surface-bg">
-          <TabsContent value="Support" className="pt-0 rounded-none bg-transparent">
+          <TabsContent
+            value="Support"
+            className="pt-0 rounded-none bg-transparent"
+          >
             {renderDiscussions("Support")}
           </TabsContent>
-          <TabsContent value="Ideas" className="pt-0 rounded-none bg-transparent">
+          <TabsContent
+            value="Ideas"
+            className="pt-0 rounded-none bg-transparent"
+          >
             {renderDiscussions("Ideas")}
           </TabsContent>
         </div>

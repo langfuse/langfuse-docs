@@ -66,7 +66,7 @@ export function PricingPage({
       className={cn(
         "not-prose",
         isPricingPage &&
-          "md:max-w-none xl:max-w-none px-4 sm:px-6 md:px-8 pt-8 md:pt-12"
+          "md:max-w-none xl:max-w-none px-4 sm:px-6 md:px-8 pt-8 md:pt-12",
       )}
     >
       <div className="isolate">
@@ -74,7 +74,9 @@ export function PricingPage({
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-col gap-4 mb-8 items-center text-center">
               <Heading as="h1" size="large">
-                <TextHighlight>{deploymentOptions[variant].title}</TextHighlight>
+                <TextHighlight>
+                  {deploymentOptions[variant].title}
+                </TextHighlight>
               </Heading>
               <Text>{deploymentOptions[variant].subtitle}</Text>
             </div>
@@ -116,10 +118,12 @@ export function PricingPage({
         {isPricingPage ? (
           <>
             <div className="relative">
-              <div className={cn(
-                "mx-auto max-w-7xl py-12 sm:py-16",
-                variant === "cloud" ? "mt-16" : "mt-0"
-              )}>
+              <div
+                className={cn(
+                  "mx-auto max-w-7xl py-12 sm:py-16",
+                  variant === "cloud" ? "mt-16" : "mt-0",
+                )}
+              >
                 {variant === "cloud" && <PricingCalculator />}
                 <PricingDiscounts />
                 <PricingFAQ />

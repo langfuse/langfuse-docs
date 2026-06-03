@@ -17,11 +17,7 @@ function getItemOffset(depth: number) {
  * Custom separator (page-tree `type: "separator"`) — Fumadocs renders these as `<p>` via
  * `SidebarSeparator`. Use with `sidebar.components.Separator` on `DocsLayout`, same pattern as `Item`.
  */
-export function SidebarSeparatorItem({
-  item,
-}: {
-  item: PageTree.Separator;
-}) {
+export function SidebarSeparatorItem({ item }: { item: PageTree.Separator }) {
   const depth = useFolderDepth();
   const labelLeft = `calc(${3 * depth} * var(--spacing) + 4px)`;
 
@@ -34,10 +30,10 @@ export function SidebarSeparatorItem({
         "after:pointer-events-none after:absolute after:right-0 after:h-px after:content-['']",
         // depth 0: 1px line at the TOP of the separator
         depth === 0 &&
-        "pt-3 mt-2 after:top-0 after:left-0 after:bg-[var(--line-structure)]",
+          "pt-3 mt-2 after:top-0 after:left-0 after:bg-[var(--line-structure)]",
         // depth > 0: 1px underline beneath the label
         depth > 0 &&
-        "mt-3 text-text-tertiary after:bottom-0 after:left-[calc(var(--sidebar-label-left)_+_2px)] after:bg-[var(--line-structure)]",
+          "mt-3 text-text-tertiary after:bottom-0 after:left-[calc(var(--sidebar-label-left)_+_2px)] after:bg-[var(--line-structure)]",
       )}
       style={
         {

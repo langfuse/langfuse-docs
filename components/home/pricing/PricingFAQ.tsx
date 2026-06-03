@@ -50,7 +50,7 @@ const faqs: FAQItem[] = [
   {
     question: "Where is the data stored?",
     answer:
-      "Langfuse Cloud is hosted on AWS and data is stored in the US or EU depending on your selection. See our [security and privacy documentation](/security) for more details.",
+      "Langfuse Cloud is hosted on AWS and data is stored in the US, EU, or Japan depending on your selection. Enterprise customers can also choose a HIPAA-compliant US region. See our [security and privacy documentation](/security) for more details.",
   },
   {
     question: "I have security questions, where to start?",

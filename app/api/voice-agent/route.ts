@@ -10,7 +10,7 @@ export async function POST(_request: NextRequest) {
   if (!livekitUrl || !livekitApiKey || !livekitApiSecret) {
     return NextResponse.json(
       { error: "Voice agent is not configured" },
-      { status: 503 }
+      { status: 503 },
     );
   }
 
@@ -23,14 +23,19 @@ export async function POST(_request: NextRequest) {
     const at = new AccessToken(livekitApiKey, livekitApiSecret, {
       identity: userId ?? "guest",
     });
-    at.addGrant({ roomJoin: true, room: roomName, canPublish: true, canSubscribe: true });
+    at.addGrant({
+      roomJoin: true,
+      room: roomName,
+      canPublish: true,
+      canSubscribe: true,
+    });
     const token = await at.toJwt();
 
     return NextResponse.json({ token, url: livekitUrl, room: roomName });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Failed to create token" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

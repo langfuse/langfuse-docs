@@ -6,5 +6,9 @@ export default function IntegrationsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={integrationsSource.getPageTree()}>{children}</SharedDocsLayout>;
+  return (
+    <SharedDocsLayout tree={integrationsSource.getPageTree()}>
+      {children}
+    </SharedDocsLayout>
+  );
 }

@@ -28,7 +28,8 @@ const BlogFilterContext = createContext<BlogFilterState | null>(null);
 
 export function useBlogFilter() {
   const ctx = useContext(BlogFilterContext);
-  if (!ctx) throw new Error("useBlogFilter must be used inside BlogFilterProvider");
+  if (!ctx)
+    throw new Error("useBlogFilter must be used inside BlogFilterProvider");
   return ctx;
 }
 
@@ -58,13 +59,13 @@ export function BlogFilterProvider({
       .sort(
         (a, b) =>
           (new Date(b.frontMatter?.date ?? 0).getTime() || 0) -
-          (new Date(a.frontMatter?.date ?? 0).getTime() || 0)
+          (new Date(a.frontMatter?.date ?? 0).getTime() || 0),
       );
   }, [pages]);
 
   const tags = useMemo<TagWithCount[]>(
     () => computeTagCounts(allPosts.map((p) => p.frontMatter?.tag)),
-    [allPosts]
+    [allPosts],
   );
 
   const filteredPosts = useMemo(() => {
@@ -85,7 +86,8 @@ export function BlogFilterProvider({
 
   const highlightPosts = useMemo(() => {
     const marked = allPosts.filter((p) => p.frontMatter?.highlight === true);
-    if (marked.length >= HIGHLIGHT_COUNT) return marked.slice(0, HIGHLIGHT_COUNT);
+    if (marked.length >= HIGHLIGHT_COUNT)
+      return marked.slice(0, HIGHLIGHT_COUNT);
     const remaining = allPosts.filter((p) => !marked.includes(p));
     return [...marked, ...remaining].slice(0, HIGHLIGHT_COUNT);
   }, [allPosts]);

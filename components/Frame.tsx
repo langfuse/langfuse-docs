@@ -69,7 +69,7 @@ const ImageZoomModal = ({
         </button>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 
@@ -146,14 +146,14 @@ export const Frame = ({
         ref={frameRef}
         className={cn(
           "mt-4 border rounded inline-block overflow-hidden",
-          className
+          className,
         )}
       >
         <div
           className={cn(
             "block bg-primary/5 max-w-2xl [&>*]:mt-0 [&>*]:mb-0 [&>*]:p-0 [&_img]:block [&_img]:w-full [&_img]:h-auto [&_img]:leading-none [&_img]:align-top [&_img]:my-0 [&_p]:my-0",
             fullWidth && "max-w-full",
-            transparent && "bg-transparent"
+            transparent && "bg-transparent",
           )}
         >
           {children}

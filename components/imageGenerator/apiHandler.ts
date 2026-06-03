@@ -19,9 +19,10 @@ const handler = async (req: Request) => {
   if (!success) {
     return new Response(
       JSON.stringify({
-        error: "Rate limit exceeded. Image generation is limited to 3 per minute. Please try again later.",
+        error:
+          "Rate limit exceeded. Image generation is limited to 3 per minute. Please try again later.",
       }),
-      { status: 429, headers: { "Content-Type": "application/json" } }
+      { status: 429, headers: { "Content-Type": "application/json" } },
     );
   }
 
@@ -29,10 +30,10 @@ const handler = async (req: Request) => {
     await req.json();
 
   if (!prompt || prompt.trim().length === 0) {
-    return new Response(
-      JSON.stringify({ error: "Prompt is required." }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Prompt is required." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   return propagateAttributes(
@@ -65,7 +66,11 @@ const handler = async (req: Request) => {
         });
 
         const usage = (result as any).usage as
-          | { input_tokens?: number; output_tokens?: number; total_tokens?: number }
+          | {
+              input_tokens?: number;
+              output_tokens?: number;
+              total_tokens?: number;
+            }
           | undefined;
 
         updateActiveObservation(
@@ -102,7 +107,8 @@ const handler = async (req: Request) => {
 
         return new Response(
           JSON.stringify({
-            error: err instanceof Error ? err.message : "Failed to generate image",
+            error:
+              err instanceof Error ? err.message : "Failed to generate image",
           }),
           { status: 500, headers: { "Content-Type": "application/json" } },
         );
