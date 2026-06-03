@@ -260,6 +260,11 @@ const marqueeRow1: MarqueeItem[] = [
     icon: "/images/integrations/openclaw_icon.svg",
   },
   {
+    label: "Claude Cowork",
+    href: "/integrations/other/cowork",
+    icon: "/images/integrations/claude_icon.png",
+  },
+  {
     label: "Claude Agent SDK (Python)",
     href: "/integrations/frameworks/claude-agent-sdk",
     icon: "/images/integrations/claude_icon.png",

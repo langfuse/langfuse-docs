@@ -1,0 +1,78 @@
+---
+title: "Trace Claude Cowork with Langfuse"
+sidebarTitle: Claude Cowork
+logo: /images/integrations/claude_icon.png
+description: "Monitor Claude Cowork activity with Langfuse using Cowork's native OpenTelemetry export for full visibility into prompts, tool and MCP calls, skills, and approval decisions."
+category: Integrations
+---
+
+# Trace Claude Cowork with Langfuse
+
+> **What is Claude Cowork?** [Claude Cowork](https://support.claude.com/en/articles/14477985-monitor-claude-cowork-activity-with-opentelemetry) is a collaborative way to work with Claude in the Claude desktop app, available on Team and Enterprise plans. It can run tools, invoke MCP servers, use skills and plugins, and act on your files, with human approval steps along the way.
+
+> **What is Langfuse?** [Langfuse](/) is an open-source AI engineering platform that helps teams trace LLM calls, monitor performance, and debug issues in their AI applications.
+
+## Why trace Claude Cowork?
+
+- **Understand agent behavior.** Read the prompts, tool and MCP invocations, and skills Claude Cowork uses under the hood.
+- **Audit activity across your organization.** See which tools were called, which files were accessed, and which approval decisions were made.
+- **Track usage and costs.** Monitor API requests, token counts, and errors over time.
+
+## Trace Claude Cowork via OpenTelemetry
+
+Claude Cowork has built-in [OpenTelemetry](https://support.claude.com/en/articles/14477985-monitor-claude-cowork-activity-with-opentelemetry) export, and Langfuse is an [OpenTelemetry backend](/integrations/native/opentelemetry). Point Cowork's exporter directly at Langfuse's OTLP endpoint and events flow in with no SDK, no proxy, and no code changes.
+
+Because the export happens inside Claude Cowork itself, it captures Cowork's full activity: the user's prompt text, tool and MCP invocations with execution details, file access, skills and plugins that were activated, human approval decisions, and API requests with token counts and errors. A shared `prompt.id` correlates every event that originated from a single user input.
+
+<Callout type="info">
+  Langfuse's OTLP endpoint accepts **OTLP over HTTP** in both `http/protobuf` and `http/json` — the two protocols Claude Cowork offers. Langfuse does not support gRPC, so make sure you select one of the HTTP options in Cowork.
+</Callout>
+
+<Steps>
+
+### Set up Langfuse
+
+Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting). Create a project and copy your public and secret API keys from the project settings.
+
+### Create your Basic Auth header
+
+Langfuse authenticates OTLP requests with [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication). Generate the header value by base64-encoding your keys as `public_key:secret_key`:
+
+```bash
+# macOS / BSD
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
+# Linux / GNU (disable line wrapping)
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64 -w 0
+```
+
+### Configure OpenTelemetry export in Claude Cowork
+
+In the Claude desktop app, open **Organization settings → Cowork** and fill in the OpenTelemetry fields ([Cowork requires the Claude desktop app v1.1.4173 or later on a Team or Enterprise plan](https://support.claude.com/en/articles/14477985-monitor-claude-cowork-activity-with-opentelemetry)):
+
+| Field             | Value                                                                                                                                                                                                                                                                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **OTLP endpoint** | `https://cloud.langfuse.com/api/public/otel` (🇪🇺 EU). For other regions, use `https://us.cloud.langfuse.com/api/public/otel` (🇺🇸 US), `https://jp.cloud.langfuse.com/api/public/otel` (🇯🇵 Japan), or `https://hipaa.cloud.langfuse.com/api/public/otel` (⚕️ HIPAA). For a self-hosted deployment, use `http://localhost:3000/api/public/otel`. |
+| **OTLP protocol** | `HTTP/protobuf` or `HTTP/JSON`                                                                                                                                                                                                                                                                                                                 |
+| **OTLP headers**  | `Authorization: Basic <AUTH_STRING>` (the base64 value from the previous step) and `x-langfuse-ingestion-version: 4` (surfaces events in real time in Fast Preview)                                                                                                                                                                            |
+
+Save the configuration. Events are sent to Langfuse immediately afterwards.
+
+<Callout type="info">
+  If Cowork sends to the endpoint exactly as entered without appending the signal path, use the trace-specific endpoint instead: `https://cloud.langfuse.com/api/public/otel/v1/traces` (adjust the host for your region).
+</Callout>
+
+### View traces in Langfuse
+
+Use Claude Cowork as usual. Open your Langfuse project to see the captured activity, where you can inspect prompts, tool and MCP calls, skill usage, approval decisions, token counts, and errors.
+
+</Steps>
+
+<Callout type="warning" title="Sensitive data is exported by default">
+  Claude Cowork includes user prompt content, tool parameters, and user email addresses in the exported events by default. If you need to redact or drop any of this, filter it at an OpenTelemetry collector placed between Cowork and Langfuse. See Anthropic's [Cowork OpenTelemetry guide](https://support.claude.com/en/articles/14477985-monitor-claude-cowork-activity-with-opentelemetry) for details.
+</Callout>
+
+## Learn more
+
+- [Langfuse OpenTelemetry endpoint](/integrations/native/opentelemetry): Endpoint, authentication, and supported protocols
+- [Getting started with Langfuse](/docs/observability/get-started): Setting up API keys and projects
+- [Monitor Claude Cowork activity with OpenTelemetry](https://support.claude.com/en/articles/14477985-monitor-claude-cowork-activity-with-opentelemetry): Anthropic's setup guide
