@@ -108,7 +108,7 @@ To keep an agent read-only, allow-list the lookup tools and leave out the write 
 
 Agents are impatient. They fan out many queries while working through a task, so slow responses waste both wall-clock time and tokens. Langfuse runs on [ClickHouse](/blog/joining-clickhouse), the columnar database built for fast analytical queries, which keeps reads quick even over hundreds of gigabytes of traces.
 
-**Full-text search via API.** The `matches` operator on [Observations API v2](/docs/api-and-data-platform/features/observations-api) gives agents token-based full-text search over trace inputs and outputs. In our benchmarks, a search that previously took 18 seconds and scanned 494 GB now returns in under half a second and reads less than a gigabyte. Your agent can pull the one trace where a refund failed out of millions of observations without scrolling.
+**Full-text search via API.** The `matches` operator on [Observations API v2](/docs/api-and-data-platform/features/public-api#observations-api) gives agents token-based full-text search over trace inputs and outputs. In our benchmarks, a search that previously took 18 seconds and scanned 494 GB now returns in under half a second and reads less than a gigabyte. Your agent can pull the one trace where a refund failed out of millions of observations without scrolling.
 
 **A REST API that covers everything.** Every Langfuse feature has an endpoint, so an agent can read traces, write scores, manage prompts, and run dataset experiments programmatically. The [CLI](#cli) and [MCP server](#mcp) both build on this same API.
 

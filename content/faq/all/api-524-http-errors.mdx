@@ -13,7 +13,7 @@ For older data retrieval endpoints, the recommended fix is to move to the v2 dat
 
 To prevent 524 errors across API endpoints:
 
-1. **Use v2 data APIs for extraction**: Follow the [Observations API v2 upgrade guidance](/docs/api-and-data-platform/features/observations-api#upgrade-from-older-reads) for row-level data and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
+1. **Use v2 data APIs for extraction**: Follow the [Observations API v2 upgrade guidance](/docs/api-and-data-platform/features/public-api#observations-api) for row-level data and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
 2. **Always use the endpoint's timestamp filters**: v2 Observations uses `fromStartTime` and `toStartTime`; Metrics API v2 uses `fromTimestamp` and `toTimestamp` inside the JSON `query`; older trace reads use `fromTimestamp` and `toTimestamp` URL parameters.
 3. **Add specific filters**: Use `userId`, `sessionId`, `name`, `tags`, or other filters to narrow your query
 
@@ -21,7 +21,7 @@ To prevent 524 errors across API endpoints:
 
 The older trace read endpoints remain available, but are not recommended as the default for new data extraction workflows. They are particularly susceptible to 524 errors on large projects.
 
-Follow the [Observations API v2 upgrade guidance](/docs/api-and-data-platform/features/observations-api#upgrade-from-older-reads) to move trace and observation extraction workflows to the v2 API. For aggregate reporting, use [Metrics API v2](/docs/metrics/features/metrics-api#v2).
+Follow the [Observations API v2 upgrade guidance](/docs/api-and-data-platform/features/public-api#observations-api) to move trace and observation extraction workflows to the v2 API. For aggregate reporting, use [Metrics API v2](/docs/metrics/features/metrics-api#v2).
 
 ### Additional Self-Host Options
 

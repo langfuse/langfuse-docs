@@ -565,7 +565,7 @@ function Day3Unveiling() {
         <span className="lw5-btn-wrap">
           <Link
             className="lw5-btn lw5-btn-secondary"
-            href="/docs/api-and-data-platform/features/observations-api#v2"
+            href="/docs/api-and-data-platform/features/public-api#observations-api"
           >
             <span>Observations API v2 docs</span>
             <span className="lw5-kbd">↗</span>
