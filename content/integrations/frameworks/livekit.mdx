@@ -114,7 +114,7 @@ def setup_langfuse(
 
 Create a `NodeTracerProvider` configured with the `LangfuseSpanProcessor` and pass it to LiveKit via `telemetry.setTracerProvider()`. In OpenTelemetry JS SDK v2 (required by `@langfuse/otel` v5), providers are immutable, so the span processor must be supplied at construction time.
 
-Because LiveKit generates many internal spans, set `shouldExportSpan: () => true` so that all telemetry is forwarded.
+Because LiveKit generates many internal spans, set `shouldExportSpan: () => true` so that all telemetry is forwarded. Call `tracerProvider.register()` to also set it as the global OpenTelemetry provider, so spans from your own instrumentation (the OTel API or `@langfuse/tracing` helpers) are captured alongside LiveKit's.
 
 <Callout type="warning">
 Do **not** pass the `metadata` option to `telemetry.setTracerProvider()`. LiveKit handles that option by calling `provider.addSpanProcessor()`, an API that was removed in OpenTelemetry JS SDK v2 (which `@langfuse/otel` v5 depends on). Passing it throws `TypeError: provider.addSpanProcessor is not a function` and crashes the worker on job entry. To attach attributes to every span, add your own span processor to the `spanProcessors` array at construction time instead.
@@ -136,6 +136,11 @@ export function setupLangfuse(): NodeTracerProvider {
       new LangfuseSpanProcessor({ shouldExportSpan: () => true }),
     ],
   });
+
+  // Register as the global OpenTelemetry provider so that spans you create in
+  // your own code (via the OTel API or @langfuse/tracing helpers) are also
+  // exported to Langfuse, not just LiveKit's internal spans.
+  tracerProvider.register();
 
   // Pass the provider to LiveKit WITHOUT the metadata option (see warnings above).
   // The cast bridges the SDK v1/v2 type mismatch; it is safe at runtime.
