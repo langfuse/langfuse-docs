@@ -10,11 +10,11 @@ export function Banner() {
     >
       <Link href="https://luma.com/7dny2x72">
         <span className="sm:hidden">
-          [Virtual] Langfuse Town Hall - Register →
+          [Virtual] Langfuse Town Hall · Jun 11 - Register →
         </span>
         <span className="hidden sm:inline">
-          [Virtual] Langfuse Town Hall: ClickHouse, V4, Latest Releases, Roadmap
-          - Register →
+          [Virtual] Langfuse Town Hall · Jun 11, 9am PT / 6pm CEST: V4,
+          Releases, Roadmap - Register →
         </span>
       </Link>
     </FumadocsBanner>
