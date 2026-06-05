@@ -86,7 +86,7 @@ Skills are not done when the first version works. They need review and iteration
 
 We review skill output like product behavior: missing evidence, vague summaries, wrong source priority, unstable formatting, and places where the agent stopped too early. Each miss becomes a workflow change.
 
-For example, after a May 31 `Experiment Backfill Missing Logs` alert was missed, we changed the weekly production review workflow to require a full paginated Datadog event sweep before clustering alerts. The final report must confirm that every production monitor title found in the window is represented or explicitly excluded.
+For example, one `Experiment Backfill Missing Logs` alert did not make it into a review. We changed the weekly production review workflow to require a full paginated Datadog event sweep before clustering alerts. The final report must confirm that every production monitor title found in the window is represented or explicitly excluded.
 
 The same pattern applies to Datadog investigation. The `datadog-query-recipes` skill documents environment routing across `prod-us`, `prod-eu`, `prod-hipaa`, and `prod-jp`, tenant correlation for public API traces, queue consumer telemetry, span query shapes, and metric names. The agent starts with aggregate queries and fetches raw spans, logs, or traces only after a cluster is identified.
 
