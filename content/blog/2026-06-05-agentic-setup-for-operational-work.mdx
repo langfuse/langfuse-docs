@@ -58,20 +58,11 @@ This keeps engineers focused on systems judgment, not weekly evidence collection
 
 The `weekly-production-review` skill produces an event-centric report from Linear bug tickets, Datadog alert/page signals, incident.io incidents, and public status-page events.
 
-The output shape is fixed:
+The report has one main section and three evidence sections. The main section is the event view: one row per production issue we may discuss on Monday. If one checkout regression causes two Datadog monitors to page and one Linear bug to be filed, it is still one event.
 
-| Table                    | What each row represents           | What it answers                                                                                                                                               |
-| ------------------------ | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Event-centric view       | One deduplicated production event  | What actually broke, what is fixed, what is open, and what needs action.                                                                                      |
-| Customer incident table  | One incident or status-page event  | What customers saw and how it was communicated.                                                                                                               |
-| Linear bug table         | One bug-labeled Linear issue       | Which issues were created, updated, completed, or still open with production evidence, and whether they count as production bugs.                             |
-| Datadog alert/page table | One grouped monitor or page signal | Which production monitors paged, why they alerted, and whether they were incidents, bugs, infra/dependency issues, expected tests, monitor noise, or unknown. |
+The evidence sections keep the source data separate. The Linear section lists the underlying bug issues and their status. The Datadog section lists monitor/page signals, including noise and expected tests. The customer incident section lists what was communicated externally. This avoids counting the same breakage once as an incident, again as an alert, and again as a bug.
 
-Fixed tables make the output comparable across runs. Engineers can scan the same columns each time, spot missing evidence, and bring the output into engineering sync without reformatting it.
-
-The event-centric view is the main story. If one checkout regression causes two Datadog monitors to page and one Linear bug to be filed, the report has one event row, two Datadog evidence rows, and one Linear bug row marked as counted. This avoids counting the same production breakage once as an incident, again as an alert, and again as a bug.
-
-Datadog is the evidence layer. It proves or measures what happened, but it does not create extra production events by itself. The workflow is read-only by default and requires human approval before Linear comments, new issues, incident follow-ups, or monitor changes.
+The workflow is read-only by default. The agent can summarize and deduplicate, but it needs human approval before Linear comments, new issues, incident follow-ups, or monitor changes.
 
 We review the output every Monday in an engineering check-in. The team looks at the previous week's production review, agrees which signals need action, and routes follow-ups to the engineers closest to the affected systems.
 
