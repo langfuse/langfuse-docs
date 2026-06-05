@@ -14,6 +14,7 @@ import {
   handbook,
   marketing,
   academy,
+  workshop,
 } from "fumadocs-mdx:collections/server";
 import { CONTENT_DIR_TO_URL_PREFIX } from "./content-dir-map.js";
 
@@ -145,6 +146,12 @@ export const academySource = loader({
   baseUrl: baseUrl("academy"),
   source: academy.toFumadocsSource(),
   pageTree: { idPrefix: "academy", transformers: [shortTitleTransformer] },
+});
+
+export const workshopSource = loader({
+  baseUrl: baseUrl("workshop"),
+  source: workshop.toFumadocsSource(),
+  pageTree: { idPrefix: "workshop", transformers: [shortTitleTransformer] },
 });
 
 export const marketingSource = loader({

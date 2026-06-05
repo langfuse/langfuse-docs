@@ -37,7 +37,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 - Support SLA
 - Billing via AWS Marketplace or invoice
 
-[Talk to sales](https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2) | [Enterprise FAQ](/enterprise)
+[Talk to sales](/talk-to-us?deployment=self-hosted) | [Enterprise FAQ](/enterprise)
 
 ## Feature Comparison (Self-Hosted)
 

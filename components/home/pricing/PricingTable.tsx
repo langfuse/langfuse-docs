@@ -32,6 +32,7 @@ import {
 import { TrustedBy } from "../components/TrustedBy";
 import { trustedByData } from "@/data/trusted-by";
 import Image from "next/image";
+import { isCloudAppHref } from "@/lib/google-ads";
 
 // Reusable graduated pricing text with calculator link
 const GraduatedPricingText = () => {
@@ -178,7 +179,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Enterprise",
       id: "tier-enterprise",
-      href: "/talk-to-us",
+      href: "/talk-to-us?deployment=cloud",
       featured: false,
       description:
         "For large scale teams. Enterprise-grade support and security.",
@@ -234,7 +235,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Enterprise",
       id: "tier-self-hosted-enterprise",
-      href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
+      href: "/talk-to-us?deployment=self-hosted",
       featured: false,
       pillClassName: "bg-[#FAFF6A] text-[#1A1A1A]",
       description:
@@ -1463,6 +1464,9 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                       variant={tier.featured ? "primary" : "secondary"}
                       size="default"
                       href={tier.href}
+                      {...(isCloudAppHref(tier.href)
+                        ? { "data-launch-app-cta": "" }
+                        : {})}
                       wrapperClassName="flex-1"
                       className={cn(
                         "justify-center!",
@@ -1487,6 +1491,9 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     variant={tier.featured ? "primary" : "secondary"}
                     size="default"
                     href={tier.href}
+                    {...(isCloudAppHref(tier.href)
+                      ? { "data-launch-app-cta": "" }
+                      : {})}
                     className={cn(
                       "justify-center!",
                       !tier.featured &&
