@@ -1,0 +1,297 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Trace Snowflake Cortex REST API Calls with Langfuse
+description: Learn how to trace Snowflake Cortex REST API calls with Langfuse using the OpenAI SDK wrapper (Chat Completions API) or Anthropic SDK wrapper (Messages API). Supports Anthropic, OpenAI, Meta, Mistral, DeepSeek, and Snowflake models.
+category: Integrations
+sidebarTitle: Snowflake Cortex
+logo: /images/integrations/snowflake-logo.svg
+---
+
+# Snowflake Cortex Integration
+
+In this guide, we'll show you how to integrate [Langfuse](/) with [Snowflake Cortex](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-rest-api).
+
+> **What is Snowflake Cortex?** [Snowflake Cortex](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-rest-api) provides serverless, fully managed access to industry-leading LLMs from **Anthropic** (Claude), **OpenAI** (GPT), **Meta** (Llama), **Mistral**, **DeepSeek**, and **Snowflake** (custom fine-tunes) through two industry-standard APIs. All inference runs within your Snowflake account — your data never leaves Snowflake's security perimeter.
+
+> **What is Langfuse?** [Langfuse](/) is an open source LLM engineering platform that helps teams trace LLM calls, monitor performance, and debug issues in their AI applications.
+
+Snowflake Cortex supports two API specifications:
+
+| API | Endpoint | Supported models | Langfuse wrapper |
+|---|---|---|---|
+| **Chat Completions** (OpenAI-compatible) | `/api/v2/cortex/v1/chat/completions` | All models | `langfuse.openai` |
+| **Messages** (Anthropic-compatible) | `/api/v2/cortex/v1/messages` | Claude models only | `AnthropicInstrumentor` (OTel) |
+
+<Callout type="info" emoji="ℹ️">
+**Note:** *Langfuse is also natively integrated with [LangChain](https://langfuse.com/integrations/frameworks/langchain), [LlamaIndex](https://langfuse.com/integrations/frameworks/llamaindex), [LiteLLM](https://langfuse.com/integrations/gateways/litellm), and [other frameworks](https://langfuse.com/integrations). If you use one of them, any use of Snowflake Cortex models is instrumented right away.*
+</Callout>
+
+## Setup
+
+```bash
+pip install langfuse openai anthropic httpx opentelemetry-instrumentation-anthropic
+```
+
+```python
+import os
+
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+# 🇪🇺 EU region
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"
+# 🇺🇸 US region
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com"
+
+SNOWFLAKE_ACCOUNT = "<your-snowflake-account>"  # e.g. "myorg-myaccount"
+SNOWFLAKE_PAT = "<your-programmatic-access-token>"
+```
+
+---
+
+## Chat Completions API
+
+The Chat Completions API follows the OpenAI specification and supports **all Cortex models** — Claude, GPT, Llama, Mistral, DeepSeek, and Snowflake. Use the [Langfuse OpenAI SDK wrapper](/integrations/model-providers/openai-py) to automatically trace all calls.
+
+### Example 1: Simple LLM Call
+
+```python
+from langfuse.openai import OpenAI
+
+client = OpenAI(
+    base_url=f"https://{SNOWFLAKE_ACCOUNT}.snowflakecomputing.com/api/v2/cortex/v1",
+    api_key=SNOWFLAKE_PAT,
+)
+
+completion = client.chat.completions.create(
+    model="claude-sonnet-4-5",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What is Snowflake Cortex? Answer in 2-3 sentences."},
+    ],
+    name="cortex-simple-call",
+)
+print(completion.choices[0].message.content)
+```
+
+![Simple Cortex trace in Langfuse](https://langfuse.com/images/cookbook/integration-snowflake-cortex/simple-trace.png)
+
+*Example trace showing a single Cortex Chat Completions call with model, tokens, and latency.*
+
+### Example 2: Nested LLM Calls with `@observe()`
+
+By using the `@observe()` decorator, we can capture execution details of any Python function, including nested LLM calls, inputs, outputs, and execution times.
+
+- The `@observe()` decorator captures inputs, outputs, and execution details of the functions
+- Nested functions `summarize` and `classify_sentiment` are also decorated, creating a hierarchy of traces
+- Each LLM call within the functions is logged, providing a detailed trace of the execution flow
+
+```python
+from langfuse import observe
+from langfuse.openai import OpenAI
+
+client = OpenAI(
+    base_url=f"https://{SNOWFLAKE_ACCOUNT}.snowflakecomputing.com/api/v2/cortex/v1",
+    api_key=SNOWFLAKE_PAT,
+)
+
+@observe()
+def summarize(text: str) -> str:
+    response = client.chat.completions.create(
+        model="claude-sonnet-4-5",
+        messages=[
+            {"role": "user", "content": f"Summarize in 2-3 sentences:\n\n{text}"},
+        ],
+        name="summarize",
+    )
+    return response.choices[0].message.content
+
+@observe()
+def classify_sentiment(text: str) -> str:
+    response = client.chat.completions.create(
+        model="claude-sonnet-4-5",
+        messages=[
+            {"role": "user", "content": f"Classify the sentiment as POSITIVE, NEGATIVE, or NEUTRAL. Respond with just the label.\n\n{text}"},
+        ],
+        name="classify-sentiment",
+    )
+    return response.choices[0].message.content
+
+@observe()
+def analyze_document(doc: str) -> dict:
+    summary = summarize(doc)
+    sentiment = classify_sentiment(doc)
+    return {"summary": summary, "sentiment": sentiment}
+
+result = analyze_document(
+    "The release of open-weight large language models has accelerated innovation "
+    "across the AI industry. Researchers can now fine-tune powerful models on "
+    "domain-specific data without relying solely on proprietary APIs, lowering "
+    "the barrier to entry for startups and academic labs alike."
+)
+```
+
+![Nested trace in Langfuse](https://langfuse.com/images/cookbook/integration-snowflake-cortex/nested-trace.png)
+
+*The trace shows the full execution hierarchy: `analyze_document` → `summarize` + `classify_sentiment`, each with its own generation span.*
+
+### Example 3: Custom Metadata
+
+Use `propagate_attributes` to attach user IDs, session IDs, tags, and metadata to all spans within an execution scope.
+
+```python
+from langfuse import observe, propagate_attributes
+from langfuse.openai import OpenAI
+
+client = OpenAI(
+    base_url=f"https://{SNOWFLAKE_ACCOUNT}.snowflakecomputing.com/api/v2/cortex/v1",
+    api_key=SNOWFLAKE_PAT,
+)
+
+@observe()
+def my_cortex_pipeline(user_input: str):
+    with propagate_attributes(
+        user_id="user_123",
+        session_id="session_abc",
+        tags=["cortex", "production"],
+        metadata={"snowflake_account": SNOWFLAKE_ACCOUNT},
+    ):
+        response = client.chat.completions.create(
+            model="claude-sonnet-4-5",
+            messages=[{"role": "user", "content": user_input}],
+            name="cortex-with-metadata",
+        )
+        return response.choices[0].message.content
+
+result = my_cortex_pipeline("What are the benefits of running LLMs inside Snowflake?")
+print(result)
+```
+
+### Example 4: Streaming
+
+```python
+from langfuse.openai import OpenAI
+
+client = OpenAI(
+    base_url=f"https://{SNOWFLAKE_ACCOUNT}.snowflakecomputing.com/api/v2/cortex/v1",
+    api_key=SNOWFLAKE_PAT,
+)
+
+stream = client.chat.completions.create(
+    model="mistral-large2",
+    messages=[
+        {"role": "user", "content": "Write a haiku about data warehousing."},
+    ],
+    stream=True,
+    name="cortex-streaming",
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+```
+
+---
+
+## Messages API
+
+The Messages API follows the Anthropic specification and supports **Claude models only**. Use the [AnthropicInstrumentor](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) to automatically send OpenTelemetry spans to Langfuse.
+
+The Anthropic SDK sends credentials via `x-api-key` by default, but Snowflake expects a `Bearer` token. Use an `httpx` client to override the authorization header.
+
+### Example 5: Simple Messages Call
+
+```python
+from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
+AnthropicInstrumentor().instrument()
+
+import httpx
+from anthropic import Anthropic
+
+http_client = httpx.Client(
+    headers={"Authorization": f"Bearer {SNOWFLAKE_PAT}"},
+)
+
+client = Anthropic(
+    api_key="not-used",
+    base_url=f"https://{SNOWFLAKE_ACCOUNT}.snowflakecomputing.com/api/v2/cortex",
+    http_client=http_client,
+    default_headers={"Authorization": f"Bearer {SNOWFLAKE_PAT}"},
+)
+
+response = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "What is Snowflake Cortex? Answer in 2-3 sentences."},
+    ],
+)
+print(response.content[0].text)
+```
+
+![Messages API trace in Langfuse](https://langfuse.com/images/cookbook/integration-snowflake-cortex/messages-api-trace.png)
+
+*Trace from the Anthropic Messages API via OpenTelemetry instrumentation.*
+
+### Example 6: Multi-turn Conversation
+
+```python
+import httpx
+from langfuse import observe
+from anthropic import Anthropic
+
+http_client = httpx.Client(
+    headers={"Authorization": f"Bearer {SNOWFLAKE_PAT}"},
+)
+
+client = Anthropic(
+    api_key="not-used",
+    base_url=f"https://{SNOWFLAKE_ACCOUNT}.snowflakecomputing.com/api/v2/cortex",
+    http_client=http_client,
+    default_headers={"Authorization": f"Bearer {SNOWFLAKE_PAT}"},
+)
+
+@observe()
+def chat(conversation: list[dict]) -> str:
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1024,
+        system="You are a helpful data engineering assistant.",
+        messages=conversation,
+    )
+    return response.content[0].text
+
+history = []
+for user_msg in [
+    "What is a Snowflake stage?",
+    "How does it differ from an external stage?",
+]:
+    history.append({"role": "user", "content": user_msg})
+    reply = chat(history)
+    history.append({"role": "assistant", "content": reply})
+    print(f"User: {user_msg}")
+    print(f"Assistant: {reply}\n")
+```
+
+---
+
+### Available Models
+
+Snowflake Cortex provides access to models from **Anthropic** (Claude), **OpenAI** (GPT), **Meta** (Llama), **Mistral**, **DeepSeek**, and **Snowflake** — all accessible via the Chat Completions API. Claude models are also accessible via the Messages API. Model availability varies by region.
+
+See the full model list and region matrix in the [Cortex REST API docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-rest-api).
+
+### Authentication Options
+
+The examples above use a **Programmatic Access Token (PAT)**, the simplest approach. Snowflake Cortex also supports **Key-Pair (JWT)** and **OAuth** authentication.
+
+For a detailed walkthrough of all three methods, see: [You Have Three Options to Authenticate to the Cortex REST API — Here's How Each One Works](https://medium.com/snowflake/you-have-three-options-to-authenticate-to-the-cortex-rest-api-heres-how-each-one-works-cfede8c15aec)
+
+For the official reference, see the [Cortex REST API docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-rest-api).
+
+<Callout type="warning">
+**Authorization:** Your default role must have the `SNOWFLAKE.CORTEX_USER` database role. This is granted to `PUBLIC` by default, so most users already have it. If not, ask your admin to run: `GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE my_role;`
+</Callout>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
