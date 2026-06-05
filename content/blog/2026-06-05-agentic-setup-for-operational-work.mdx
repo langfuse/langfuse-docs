@@ -1,7 +1,7 @@
 ---
 title: How we use agents to review production infrastructure
 date: 2026/06/05
-description: We use repo-owned agent workflows to review infra cost, production bugs, pages, security diffs, and telemetry without turning engineers into weekly report writers.
+description: How repo-owned agent workflows help us review incidents, infra cost, security findings, and production telemetry.
 tag: engineering
 author: Max
 ---
@@ -10,14 +10,14 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="How we use agents to review production infrastructure"
-  description="We use repo-owned agent workflows to review infra cost, production bugs, pages, security diffs, and telemetry without turning engineers into weekly report writers."
+  description="How repo-owned agent workflows help us review incidents, infra cost, security findings, and production telemetry."
   date="June 5, 2026"
   authors={["maxdeichmann"]}
 />
 
-We use agents for data-heavy production engineering work: infra cost analysis, weekly production review, security review, Datadog debugging, and telemetry cleanup. We avoided doing this manually because it would have slowed the team down. Engineers would have spent hours each week collecting evidence from dashboards, tickets, incidents, and logs before deciding what needed action.
+We use agents to turn production data into recurring engineering review artifacts: weekly incident and bug review, infra cost analysis, security findings, and Datadog investigations.
 
-The setup started working once the repository told the agent which data sources exist, which queries to run, which tables to return, when it may write back to Linear, and which caveats must be preserved. Engineers still make the judgment calls, but the evidence-gathering layer is cheap enough to run often and discuss in engineering sync.
+The pattern is simple: make the data queryable through MCP, keep workflow instructions in the repo, require fixed output tables, and let engineers approve follow-ups. This gives us more production visibility without weekly report-writing work.
 
 ## We wanted more production visibility without weekly reporting work
 
