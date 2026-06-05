@@ -110,6 +110,8 @@ Fixed tables make the output comparable across runs. Engineers can scan the same
 
 The skill treats Datadog as evidence, not as the canonical event. A production event is represented by exactly one canonical object: an incident, a Linear bug, or an explicit alert disposition. It is read-only by default and requires human approval before Linear comments, new issues, incident follow-ups, or monitor changes.
 
+We review the output every Monday in an engineering check-in. The team looks at the previous week's production review, agrees which signals need action, and routes follow-ups to the engineers closest to the affected systems.
+
 ## Cloud cost analysis depends on warehouse data
 
 Agents need data access before they need better prompts. For cost analysis, this means pushing cost data into the data warehouse, exposing it through Metabase, and making the relevant tables accessible through MCP. The `analyze-cloud-costs` skill does not ask the model to "think about spend." It points the agent at cost marts and forces it to pick a grain before querying:
