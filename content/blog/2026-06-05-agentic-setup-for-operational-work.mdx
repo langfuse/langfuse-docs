@@ -133,7 +133,7 @@ The same pattern applies to Datadog investigation. The `datadog-query-recipes` s
 
 ## Next: ClickHouse query-log analysis by feature area
 
-The next step is to connect agents directly to ClickHouse query-log data through MCP. We already started tagging ClickHouse queries with dimensions such as project, feature area, route, service, storage backend, and workload.
+The next step is to connect agents directly to ClickHouse query-log data through MCP. We already started tagging ClickHouse queries with dimensions such as project, feature area, route, service, storage backend, and workload. We also have dashboards that show live resource consumption per ClickHouse cluster and feature.
 
 Once the ClickHouse MCP has access to the query log, the agent can aggregate query cost and performance by product surface:
 
@@ -141,7 +141,7 @@ Once the ClickHouse MCP has access to the query log, the agent can aggregate que
 | ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | Which feature areas consume the most ClickHouse resources? | Group by feature, route, service, storage, workload, and project.                   |
 | Which APIs are getting more expensive over time?           | Trend `read_rows`, `read_bytes`, memory usage, and CPU profile events by API route. |
-| Which projects drive load for a feature area?              | Group low-cardinality project tags within a specific feature or route.              |
+| Which projects drive load for a feature area?              | Group project tags within a specific feature or route.                              |
 | Which query shapes need engineering review?                | Rank normalized query hashes within a feature area by resource usage.               |
 
 This would let the agent produce a regular ClickHouse cost and performance review with the same fixed-output pattern: top feature areas, fast-growing routes, expensive query shapes, and links back to the query-log evidence.
