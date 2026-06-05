@@ -21,32 +21,13 @@ The pattern is simple: make the data queryable through MCP, keep workflow instru
 
 ## We wanted more production visibility without weekly reporting work
 
-We already had Datadog, Linear, incident.io, a public status page, Metabase, GitHub Actions, and ClickHouse. The gap was cross-system review.
+We already had Datadog, Linear, incident.io, a public status page, Metabase, GitHub Actions, and ClickHouse. The gap was cross-system review: connecting customer incidents, monitor pages, production bugs, infra cost drivers, and security findings into one weekly engineering artifact.
 
-For a weekly production review, an engineer needs to answer:
-
-| Question                                                  | Source systems                                          |
-| --------------------------------------------------------- | ------------------------------------------------------- |
-| What broke for customers?                                 | incident.io, public status page, Linear                 |
-| Which monitors paged?                                     | Datadog                                                 |
-| Which production bugs were created, fixed, or still open? | Linear                                                  |
-| Which infra cost drivers changed?                         | Data warehouse, Metabase, AWS CUR, ClickHouse cost data |
-| Which security findings were introduced in PRs?           | GitHub Actions, Semgrep, Claude Code security review    |
-
-These questions matter, but answering them manually is report assembly. We did not want engineers doing that every week before discussing incidents, cost drivers, alerts, and security actions.
+That review matters, but assembling it manually is report work. We did not want engineers doing that every week before discussing incidents, cost drivers, alerts, and security actions.
 
 ## The system combines MCP, repo-owned skills, and fixed tables
 
-The system has four layers:
-
-| Layer               | Purpose                                                                                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Queryable data      | Production data must live in systems the agent can query: Datadog, Linear, incident.io, Metabase, GitHub, and eventually ClickHouse query logs.  |
-| MCP access          | The agent needs tool access to those systems instead of screenshots, copied dashboards, or stale summaries.                                      |
-| Repo-owned skills   | The workflow lives in [`langfuse/langfuse`](https://github.com/langfuse/langfuse/tree/main/.agents), not in one engineer's local prompt history. |
-| Fixed output tables | The agent returns the same sections every run, so engineers can scan them quickly and compare runs over time.                                    |
-
-The production review instructions are part of the codebase. Root `AGENTS.md` and `CLAUDE.md` are discovery surfaces, while `.agents/AGENTS.md`, `.agents/config.json`, and `.agents/skills/**` own durable workflow definitions.
+The system has four layers: queryable production data, MCP access to that data, repo-owned skills, and fixed output tables. The workflow lives in [`langfuse/langfuse`](https://github.com/langfuse/langfuse/tree/main/.agents), not in one engineer's local prompt history. Root `AGENTS.md` and `CLAUDE.md` are discovery surfaces, while `.agents/AGENTS.md`, `.agents/config.json`, and `.agents/skills/**` own durable workflow definitions.
 
 Linear is the deduplication layer across workflows. Before the agent reports a finding as new, it searches existing Linear issues and comments. This keeps recurring alerts, bugs, cost regressions, and security findings from showing up as fresh work every week.
 
@@ -94,28 +75,15 @@ We review the output every Monday in an engineering check-in. The team looks at 
 
 ## Cloud cost analysis depends on warehouse data
 
-Agents need data access before they need better prompts. For cost analysis, this means pushing cost data into the data warehouse, exposing it through Metabase, and making the relevant tables accessible through MCP. The `analyze-cloud-costs` skill does not ask the model to "think about spend." It points the agent at cost marts and forces it to pick a grain before querying:
+Agents need data access before they need better prompts. For cost analysis, this means pushing cost data into the data warehouse, exposing it through Metabase, and making the relevant tables accessible through MCP. The `analyze-cloud-costs` skill does not ask the model to "think about spend." It points the agent at cost marts and forces it to choose a grain: daily totals, recent complete UTC days versus a baseline, provider and service breakdowns, usage type, operation, account, and cost per 100k tracing events.
 
-| Question                   | Data grain                                                                                                  |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| What did we spend per day? | Total cost, AWS cost, ClickHouse cost, tracing events, and cost per 100k events.                            |
-| What changed?              | Recent complete UTC days compared with a prior baseline.                                                    |
-| What drove the change?     | Provider, service, usage type, operation, account, and day.                                                 |
-| What caveats apply?        | Current-day AWS CUR rows can arrive late, and ClickHouse credit labels need care in billing interpretation. |
-
-The agent runs the broad pass: query source tables, identify drivers, preserve caveats, and return the same breakdown every time.
+The agent runs the broad pass: query source tables, identify drivers, preserve caveats such as incomplete current-day AWS CUR rows, and return the same breakdown every time.
 
 ## Security review uses layered automation
 
-For security, one model pass is not enough. We use layers that catch different classes of issues.
+For security, one model pass is not enough. We use Semgrep baseline scans for deterministic PR checks, Claude Code security review for trusted non-draft same-repo PRs, and a daily DeepSec automation for selected repositories.
 
-| Layer                       | Scope                                     | Purpose                                                                                           |
-| --------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Semgrep baseline scan       | Pull requests                             | Fails on newly introduced static-analysis findings instead of historical findings.                |
-| Claude Code security review | Trusted non-draft same-repo pull requests | Reviews security-relevant code context that static analysis may miss.                             |
-| DeepSec daily scan          | Selected repositories                     | Produces recurring findings that can be reviewed, revalidated, and routed to the right engineers. |
-
-Semgrep runs on pull requests with the PR base SHA as a baseline, so the job fails on newly introduced findings instead of historical findings. It uses an explicit ruleset, disables metrics, and runs in a pinned container image. Claude Code security review runs only on trusted non-draft same-repo PRs, pins the action checkout by SHA, disables persisted checkout credentials, and uses a repository secret for the Claude API key.
+Semgrep uses the PR base SHA as a baseline, so the job fails on newly introduced findings instead of historical findings. It uses an explicit ruleset, disables metrics, and runs in a pinned container image. Claude Code security review pins the action checkout by SHA, disables persisted checkout credentials, and uses a repository secret for the Claude API key.
 
 We also run a daily DeepSec automation over selected repositories. It scans the repository, processes findings with an agent, revalidates high-severity findings, and exports a compact findings table. Before routing a finding, the agent checks Linear for existing issues so the same vulnerability does not get reported every day. DeepSec workspace state and generated reports stay ignored and local.
 
@@ -135,13 +103,4 @@ The same pattern applies to Datadog investigation. The `datadog-query-recipes` s
 
 The next step is to connect agents directly to ClickHouse query-log data through MCP. We already started tagging ClickHouse queries with dimensions such as project, feature area, route, service, storage backend, and workload. We also have dashboards that show live resource consumption per ClickHouse cluster and feature.
 
-Once the ClickHouse MCP has access to the query log, the agent can aggregate query cost and performance by product surface:
-
-| Question                                                   | Query-log signal                                                                    |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Which feature areas consume the most ClickHouse resources? | Group by feature, route, service, storage, workload, and project.                   |
-| Which APIs are getting more expensive over time?           | Trend `read_rows`, `read_bytes`, memory usage, and CPU profile events by API route. |
-| Which projects drive load for a feature area?              | Group project tags within a specific feature or route.                              |
-| Which query shapes need engineering review?                | Rank normalized query hashes within a feature area by resource usage.               |
-
-This would let the agent produce a regular ClickHouse cost and performance review with the same fixed-output pattern: top feature areas, fast-growing routes, expensive query shapes, and links back to the query-log evidence.
+Once the ClickHouse MCP has access to the query log, the agent can aggregate query cost and performance by product surface: top feature areas, fast-growing API routes, projects driving load within a feature, expensive normalized query hashes, and links back to the query-log evidence.
