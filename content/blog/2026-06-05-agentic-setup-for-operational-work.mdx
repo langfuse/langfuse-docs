@@ -51,44 +51,22 @@ The production review instructions are part of the codebase. Root `AGENTS.md` an
 ```mermaid
 flowchart LR
   subgraph Harness["Repo-owned agent harness"]
-    Router["AGENTS.md router"]
-    Skills["Skills<br/>weekly production review<br/>cloud cost analysis<br/>Datadog recipes<br/>security review"]
+    Router["AGENTS.md"]
+    Skills["Skills<br/>production review<br/>cost analysis<br/>Datadog recipes<br/>security review"]
     MCP["MCP servers<br/>and plugins"]
-    Output["Fixed output tables<br/>incidents, bugs, pages, cost, security"]
+    Tables["Fixed output tables"]
     Router --> Skills
     Skills --> MCP
-    Skills --> Output
+    Skills --> Tables
   end
 
-  subgraph ProdData["Production data"]
-    DD["Datadog EU/US"]
-    MB["Metabase<br/>cost marts"]
-    INC["incident.io"]
-    PYLON["Pylon"]
-    CH["ClickHouse query log<br/>planned MCP"]
-  end
+  Prod["Production data<br/>Datadog EU/US<br/>Metabase cost marts<br/>incident.io<br/>Pylon<br/>[planned] ClickHouse query log"]
+  Work["Workflow tools<br/>Linear<br/>GitHub<br/>Slack<br/>Langfuse docs MCP<br/>DeepSec daily scan"]
+  Review["Monday engineering review<br/>routing + follow-ups"]
 
-  subgraph Workflow["Workflow tools"]
-    Linear["Linear"]
-    GitHub["GitHub"]
-    Slack["Slack"]
-    Playwright["Playwright"]
-    Docs["Langfuse docs MCP"]
-    DeepSec["DeepSec daily scan"]
-  end
-
-  MCP --> DD
-  MCP --> MB
-  MCP --> INC
-  MCP --> PYLON
-  MCP -.-> CH
-  MCP --> Linear
-  MCP --> GitHub
-  MCP --> Slack
-  MCP --> Playwright
-  MCP --> Docs
-  Skills --> DeepSec
-  Output --> Review["Engineering review<br/>sync, routing, follow-ups"]
+  MCP --> Prod
+  MCP --> Work
+  Tables --> Review
 ```
 
 The hiring signal is the workflow itself: engineers spend time on systems judgment, not weekly evidence collection. They decide whether a cost driver is acceptable, whether a page was customer-impacting, whether a bug needs an owner, whether a monitor is noisy, and whether a PR introduces a security risk.
