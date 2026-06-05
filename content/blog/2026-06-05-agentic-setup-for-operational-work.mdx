@@ -48,6 +48,8 @@ The system has four layers:
 
 The production review instructions are part of the codebase. Root `AGENTS.md` and `CLAUDE.md` are discovery surfaces, while `.agents/AGENTS.md`, `.agents/config.json`, and `.agents/skills/**` own durable workflow definitions.
 
+Linear is the deduplication layer across workflows. Before the agent reports a finding as new, it searches existing Linear issues and comments. This keeps recurring alerts, bugs, cost regressions, and security findings from showing up as fresh work every week.
+
 ```mermaid
 flowchart LR
   subgraph Harness["Repo-owned agent harness"]
@@ -115,7 +117,7 @@ For security, one model pass is not enough. We use layers that catch different c
 
 Semgrep runs on pull requests with the PR base SHA as a baseline, so the job fails on newly introduced findings instead of historical findings. It uses an explicit ruleset, disables metrics, and runs in a pinned container image. Claude Code security review runs only on trusted non-draft same-repo PRs, pins the action checkout by SHA, disables persisted checkout credentials, and uses a repository secret for the Claude API key.
 
-We also run a daily DeepSec automation over selected repositories. It scans the repository, processes findings with an agent, revalidates high-severity findings, and exports a compact findings table. The routing layer matters: Max can review the table and send concrete findings to the engineers closest to the affected system. DeepSec workspace state and generated reports stay ignored and local.
+We also run a daily DeepSec automation over selected repositories. It scans the repository, processes findings with an agent, revalidates high-severity findings, and exports a compact findings table. Before routing a finding, the agent checks Linear for existing issues so the same vulnerability does not get reported every day. DeepSec workspace state and generated reports stay ignored and local.
 
 The model review reasons about code context. The Semgrep baseline is deterministic. The daily DeepSec pass catches repository-level issues outside a single PR's diff.
 
