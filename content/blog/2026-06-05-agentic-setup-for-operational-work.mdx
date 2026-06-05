@@ -25,13 +25,13 @@ We already had Datadog, Linear, incident.io, a public status page, Metabase, Git
 
 For a weekly production review, an engineer needs to answer:
 
-| Question | Source systems |
-| --- | --- |
-| What broke for customers? | incident.io, public status page, Linear |
-| Which monitors paged? | Datadog |
-| Which production bugs were created, fixed, or still open? | Linear |
-| Which infra cost drivers changed? | Data warehouse, Metabase, AWS CUR, ClickHouse cost data |
-| Which security findings were introduced in PRs? | GitHub Actions, Semgrep, Claude Code security review |
+| Question                                                  | Source systems                                          |
+| --------------------------------------------------------- | ------------------------------------------------------- |
+| What broke for customers?                                 | incident.io, public status page, Linear                 |
+| Which monitors paged?                                     | Datadog                                                 |
+| Which production bugs were created, fixed, or still open? | Linear                                                  |
+| Which infra cost drivers changed?                         | Data warehouse, Metabase, AWS CUR, ClickHouse cost data |
+| Which security findings were introduced in PRs?           | GitHub Actions, Semgrep, Claude Code security review    |
 
 These questions matter, but answering them manually is report assembly. We did not want engineers doing that every week before discussing incidents, cost drivers, alerts, and security actions.
 
@@ -39,12 +39,12 @@ These questions matter, but answering them manually is report assembly. We did n
 
 The system has four layers:
 
-| Layer | Purpose |
-| --- | --- |
-| Queryable data | Production data must live in systems the agent can query: Datadog, Linear, incident.io, Metabase, GitHub, and eventually ClickHouse query logs. |
-| MCP access | The agent needs tool access to those systems instead of screenshots, copied dashboards, or stale summaries. |
-| Repo-owned skills | The workflow lives in [`langfuse/langfuse`](https://github.com/langfuse/langfuse/tree/main/.agents), not in one engineer's local prompt history. |
-| Fixed output tables | The agent returns the same sections every run, so engineers can scan them quickly and compare runs over time. |
+| Layer               | Purpose                                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Queryable data      | Production data must live in systems the agent can query: Datadog, Linear, incident.io, Metabase, GitHub, and eventually ClickHouse query logs.  |
+| MCP access          | The agent needs tool access to those systems instead of screenshots, copied dashboards, or stale summaries.                                      |
+| Repo-owned skills   | The workflow lives in [`langfuse/langfuse`](https://github.com/langfuse/langfuse/tree/main/.agents), not in one engineer's local prompt history. |
+| Fixed output tables | The agent returns the same sections every run, so engineers can scan them quickly and compare runs over time.                                    |
 
 The production review instructions are part of the codebase. Root `AGENTS.md` and `CLAUDE.md` are discovery surfaces, while `.agents/AGENTS.md`, `.agents/config.json`, and `.agents/skills/**` own durable workflow definitions.
 
@@ -99,11 +99,11 @@ The `weekly-production-review` skill produces an event-centric report from Linea
 
 The output shape is fixed:
 
-| Table | What it answers |
-| --- | --- |
-| Event-centric view | What actually broke, what is fixed, what is open, and what needs action. |
-| Customer incident table | What customers saw and how it was communicated. |
-| Linear bug table | Which bug-labeled issues were created, updated, completed, or still open with production evidence. |
+| Table                    | What it answers                                                                                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Event-centric view       | What actually broke, what is fixed, what is open, and what needs action.                                                                                      |
+| Customer incident table  | What customers saw and how it was communicated.                                                                                                               |
+| Linear bug table         | Which bug-labeled issues were created, updated, completed, or still open with production evidence.                                                            |
 | Datadog alert/page table | Which production monitors paged, why they alerted, and whether they were incidents, bugs, infra/dependency issues, expected tests, monitor noise, or unknown. |
 
 Fixed tables make the output comparable across runs. Engineers can scan the same columns each time, spot missing evidence, and bring the output into engineering sync without reformatting it.
@@ -114,12 +114,12 @@ The skill treats Datadog as evidence, not as the canonical event. A production e
 
 Agents need data access before they need better prompts. For cost analysis, this means pushing cost data into the data warehouse, exposing it through Metabase, and making the relevant tables accessible through MCP. The `analyze-cloud-costs` skill does not ask the model to "think about spend." It points the agent at cost marts and forces it to pick a grain before querying:
 
-| Question | Data grain |
-| --- | --- |
-| What did we spend per day? | Total cost, AWS cost, ClickHouse cost, tracing events, and cost per 100k events. |
-| What changed? | Recent complete UTC days compared with a prior baseline. |
-| What drove the change? | Provider, service, usage type, operation, account, and day. |
-| What caveats apply? | Current-day AWS CUR rows can arrive late, and ClickHouse credit labels need care in billing interpretation. |
+| Question                   | Data grain                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| What did we spend per day? | Total cost, AWS cost, ClickHouse cost, tracing events, and cost per 100k events.                            |
+| What changed?              | Recent complete UTC days compared with a prior baseline.                                                    |
+| What drove the change?     | Provider, service, usage type, operation, account, and day.                                                 |
+| What caveats apply?        | Current-day AWS CUR rows can arrive late, and ClickHouse credit labels need care in billing interpretation. |
 
 The agent runs the broad pass: query source tables, identify drivers, preserve caveats, and return the same breakdown every time.
 
@@ -127,11 +127,11 @@ The agent runs the broad pass: query source tables, identify drivers, preserve c
 
 For security, one model pass is not enough. We use layers that catch different classes of issues.
 
-| Layer | Scope | Purpose |
-| --- | --- | --- |
-| Semgrep baseline scan | Pull requests | Fails on newly introduced static-analysis findings instead of historical findings. |
-| Claude Code security review | Trusted non-draft same-repo pull requests | Reviews security-relevant code context that static analysis may miss. |
-| DeepSec daily scan | Selected repositories | Produces recurring findings that can be reviewed, revalidated, and routed to the right engineers. |
+| Layer                       | Scope                                     | Purpose                                                                                           |
+| --------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Semgrep baseline scan       | Pull requests                             | Fails on newly introduced static-analysis findings instead of historical findings.                |
+| Claude Code security review | Trusted non-draft same-repo pull requests | Reviews security-relevant code context that static analysis may miss.                             |
+| DeepSec daily scan          | Selected repositories                     | Produces recurring findings that can be reviewed, revalidated, and routed to the right engineers. |
 
 Semgrep runs on pull requests with the PR base SHA as a baseline, so the job fails on newly introduced findings instead of historical findings. It uses an explicit ruleset, disables metrics, and runs in a pinned container image. Claude Code security review runs only on trusted non-draft same-repo PRs, pins the action checkout by SHA, disables persisted checkout credentials, and uses a repository secret for the Claude API key.
 
@@ -155,11 +155,11 @@ The next step is to connect agents directly to ClickHouse query-log data through
 
 Once the ClickHouse MCP has access to the query log, the agent can aggregate query cost and performance by product surface:
 
-| Question | Query-log signal |
-| --- | --- |
-| Which feature areas consume the most ClickHouse resources? | Group by feature, route, service, storage, workload, and project. |
-| Which APIs are getting more expensive over time? | Trend `read_rows`, `read_bytes`, memory usage, and CPU profile events by API route. |
-| Which projects drive load for a feature area? | Group low-cardinality project tags within a specific feature or route. |
-| Which query shapes need engineering review? | Rank normalized query hashes within a feature area by resource usage. |
+| Question                                                   | Query-log signal                                                                    |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Which feature areas consume the most ClickHouse resources? | Group by feature, route, service, storage, workload, and project.                   |
+| Which APIs are getting more expensive over time?           | Trend `read_rows`, `read_bytes`, memory usage, and CPU profile events by API route. |
+| Which projects drive load for a feature area?              | Group low-cardinality project tags within a specific feature or route.              |
+| Which query shapes need engineering review?                | Rank normalized query hashes within a feature area by resource usage.               |
 
 This would let the agent produce a regular ClickHouse cost and performance review with the same fixed-output pattern: top feature areas, fast-growing routes, expensive query shapes, and links back to the query-log evidence.
