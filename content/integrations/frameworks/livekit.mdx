@@ -11,29 +11,59 @@ This guide shows you how to integrate **Langfuse** with **LiveKit Agents** for o
 
 > **What is LiveKit Agents?** [LiveKit Agents](https://docs.livekit.io/agents/) ([GitHub](https://github.com/livekit/agents)) is an open-source Python and Node.js framework for building production-grade multimodal and voice AI agents. It provides a complete set of tools and abstractions for feeding realtime media through AI pipelines, supporting both high-performance STT-LLM-TTS voice pipelines and speech-to-speech models with any AI provider.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It offers tracing and monitoring capabilities for LLM applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
 
 ## Get Started
 
-LiveKit Agents includes built-in OpenTelemetry support. The [Langfuse Python SDK](/docs/observability/sdk/overview) can register as an OpenTelemetry span exporter, so all you need is to create a `TracerProvider`, hand it to both LiveKit and Langfuse, and traces will appear in your Langfuse dashboard automatically.
+LiveKit Agents includes built-in OpenTelemetry support. The Langfuse SDK registers as an OpenTelemetry span processor, so all you need is to create a `TracerProvider`, hand it to both LiveKit and Langfuse, and traces will appear in your Langfuse dashboard automatically.
+
+LiveKit Agents ships for both Python and Node.js. Select your language in the tabs below.
 
 <Steps>
 
 ### Step 1: Install Dependencies
 
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
+
 ```bash
 pip install langfuse livekit-agents livekit-plugins-openai livekit-plugins-silero livekit-plugins-turn-detector opentelemetry-sdk python-dotenv
 ```
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+```bash
+npm install @langfuse/otel @opentelemetry/sdk-trace-node @livekit/agents @livekit/agents-plugin-openai @livekit/agents-plugin-silero
+```
+
+</Tab>
+</LangTabs>
 
 ### Step 2: Configure Langfuse SDK
 
 Set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
 import EnvPython from "@/components-mdx/env-python.mdx";
+import EnvJS from "@/components-mdx/env-js.mdx";
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 
 <EnvPython />
 
+</Tab>
+<Tab title="JS/TS SDK">
+
+<EnvJS />
+
+</Tab>
+</LangTabs>
+
 ### Step 3: Set Up the Langfuse Tracer Provider
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 
 Create a shared `TracerProvider` and pass it to both LiveKit (via `set_tracer_provider`) and the Langfuse SDK. The Langfuse SDK automatically registers an exporter on the provider to send spans to Langfuse.
 
@@ -79,7 +109,58 @@ def setup_langfuse(
     return trace_provider
 ```
 
+</Tab>
+<Tab title="JS/TS SDK">
+
+Create a `NodeTracerProvider` configured with the `LangfuseSpanProcessor` and pass it to LiveKit via `telemetry.setTracerProvider()`. In OpenTelemetry JS SDK v2 (required by `@langfuse/otel` v5), providers are immutable, so the span processor must be supplied at construction time.
+
+Because LiveKit generates many internal spans, set `shouldExportSpan: () => true` so that all telemetry is forwarded. Call `tracerProvider.register()` to also set it as the global OpenTelemetry provider, so spans from your own instrumentation (the OTel API or `@langfuse/tracing` helpers) are captured alongside LiveKit's.
+
+<Callout type="warning">
+Do **not** pass the `metadata` option to `telemetry.setTracerProvider()`. LiveKit handles that option by calling `provider.addSpanProcessor()`, an API that was removed in OpenTelemetry JS SDK v2 (which `@langfuse/otel` v5 depends on). Passing it throws `TypeError: provider.addSpanProcessor is not a function` and crashes the worker on job entry. To attach attributes to every span, add your own span processor to the `spanProcessors` array at construction time instead.
+</Callout>
+
+<Callout type="info">
+As of `@livekit/agents` v1.4.x, `setTracerProvider()` is still typed against OpenTelemetry JS SDK v1, while `@langfuse/otel` v5 uses SDK v2. The two `NodeTracerProvider` types are structurally incompatible, so TypeScript requires a cast. The cast is safe at runtime: LiveKit only calls `getTracer()` on the provider, which both SDK versions support.
+</Callout>
+
+```ts filename="agent.ts"
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { telemetry } from "@livekit/agents";
+
+export function setupLangfuse(): NodeTracerProvider {
+  const tracerProvider = new NodeTracerProvider({
+    spanProcessors: [
+      // LiveKit emits many non-LLM spans; forward all of them to Langfuse
+      new LangfuseSpanProcessor({ shouldExportSpan: () => true }),
+    ],
+  });
+
+  // Register as the global OpenTelemetry provider so that spans you create in
+  // your own code (via the OTel API or @langfuse/tracing helpers) are also
+  // exported to Langfuse, not just LiveKit's internal spans.
+  tracerProvider.register();
+
+  // Pass the provider to LiveKit WITHOUT the metadata option (see warnings above).
+  // The cast bridges the SDK v1/v2 type mismatch; it is safe at runtime.
+  telemetry.setTracerProvider(
+    tracerProvider as unknown as Parameters<
+      typeof telemetry.setTracerProvider
+    >[0],
+  );
+
+  return tracerProvider;
+}
+```
+
+</Tab>
+</LangTabs>
+
 ### Step 4: Use the Tracer Provider in Your Entrypoint
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 
 Call `setup_langfuse()` before `AgentSession.start()`. You can pass optional metadata (such as `langfuse.session.id`) that will be attached to every span.
 
@@ -110,7 +191,32 @@ async def entrypoint(ctx: JobContext):
     await session.start(agent=MyAgent(), room=ctx.room)
 ```
 
-You can find a full end-to-end example [on GitHub](https://github.com/livekit/agents/blob/main/examples/voice_agents/langfuse_trace.py).
+You can find a full end-to-end Python example [on GitHub](https://github.com/livekit/agents/blob/main/examples/voice_agents/langfuse_trace.py).
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+Call `setupLangfuse()` inside your agent entrypoint before the session starts, and flush the provider on shutdown so no spans are lost when a job ends.
+
+```ts filename="agent.ts"
+import { type JobContext, defineAgent } from "@livekit/agents";
+
+export default defineAgent({
+  entry: async (ctx: JobContext) => {
+    const tracerProvider = setupLangfuse();
+
+    // Flush buffered spans when the job shuts down
+    ctx.addShutdownCallback(async () => {
+      await tracerProvider.forceFlush();
+    });
+
+    // ... start your AgentSession as usual (see the LiveKit Agents docs)
+  },
+});
+```
+
+</Tab>
+</LangTabs>
 
 ### Step 5: View Traces in Langfuse
 
@@ -130,7 +236,7 @@ import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
 - [LiveKit Agents Documentation](https://docs.livekit.io/agents/)
 - [LiveKit Telemetry Guide](https://docs.livekit.io/agents/build/metrics/)
-- [End-to-end example](https://github.com/livekit/agents/blob/main/examples/voice_agents/langfuse_trace.py)
+- [End-to-end Python example](https://github.com/livekit/agents/blob/main/examples/voice_agents/langfuse_trace.py)
 
 ## GitHub Discussions
 

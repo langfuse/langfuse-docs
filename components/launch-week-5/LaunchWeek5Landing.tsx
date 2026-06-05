@@ -32,9 +32,27 @@ const DAYS: DayCard[] = [
     title: "Langfuse agent skill",
     href: "/changelog/2026-05-26-langfuse-agent-skill",
   },
-  { n: "03", weekday: "Wednesday", date: "May 27", hint: "Find anything" },
-  { n: "04", weekday: "Thursday", date: "May 28", hint: "Evals as code" },
-  { n: "05", weekday: "Friday", date: "May 29", hint: "Never miss a thing" },
+  {
+    n: "03",
+    weekday: "Wednesday",
+    date: "May 27",
+    title: "Full-Text Search",
+    href: "/changelog/2026-05-27-clickhouse-full-text-search-fast-mode",
+  },
+  {
+    n: "04",
+    weekday: "Thursday",
+    date: "May 28",
+    title: "Code evaluators",
+    href: "/changelog/2026-05-28-code-evaluators",
+  },
+  {
+    n: "05",
+    weekday: "Friday",
+    date: "May 29",
+    title: "Langfuse MCP, expanded",
+    href: "/changelog/2026-05-29-mcp-update",
+  },
 ];
 
 function LockIcon() {
@@ -368,6 +386,7 @@ function Day1Unveiling() {
           src="https://static.langfuse.com/docs-videos/ci-experiment.mp4"
           aspectRatio={16 / 9}
           className="rounded border border-line-structure"
+          gifStyle
         />
       </div>
 
@@ -484,6 +503,254 @@ function Day2Unveiling() {
   );
 }
 
+function Day3Unveiling() {
+  return (
+    <section id="day-3" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 03 · Wednesday, May 27, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Full-Text Search.</span>
+        </h2>
+        <p className="lw5-body">
+          Production traces pile up fast. A high-traffic app can produce
+          millions of observations in a week, and when something looks wrong you
+          need to pull the one trace that says “refund failed” out of hundreds
+          of gigabytes in a fraction of a second. A scroll-and-hope UI does not
+          cut it at that scale.
+        </p>
+        <p className="lw5-body">
+          Day 3 rolls out full-text search to Langfuse Cloud. In our benchmarks,
+          large input/output searches that took 18 seconds and scanned 494 GB
+          now return in under half a second and read less than a gigabyte.
+          Metadata-heavy queries dropped from 1.6s to 0.2s. The UI gets faster
+          for humans hunting a bug, and the new <code>matches</code> operator on
+          Observations API v2 gives agents and scripts the same token-based
+          search programmatically.
+        </p>
+        <p className="lw5-body">
+          Built on top of ClickHouse’s new{" "}
+          <Link
+            href="https://clickhouse.com/blog/full-text-search-ga-release"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            full-text search release
+          </Link>
+          , we worked closely with the ClickHouse team on the underlying engine,
+          so features like this land in Langfuse days after they ship in
+          ClickHouse core.
+        </p>
+      </div>
+
+      <div className="w-full max-w-[920px] mb-8">
+        <Video
+          src="https://static.langfuse.com/docs-videos/full-text-search-launch.mp4"
+          aspectRatio={16 / 9}
+          className="rounded border border-line-structure"
+          gifStyle
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-27-clickhouse-full-text-search-fast-mode"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/api-and-data-platform/features/observations-api#v2"
+          >
+            <span>Observations API v2 docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="https://clickhouse.com/blog/full-text-search-ga-release"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>ClickHouse FTS GA post</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
+function Day4Unveiling() {
+  return (
+    <section id="day-4" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 04 · Thursday, May 28, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Code evaluators.</span>
+        </h2>
+        <p className="lw5-body">
+          Not every evaluation needs an LLM. JSON parseability, schema
+          validation, exact match, required tool arguments, custom business
+          rules: things you would rather verify with code than ask an LLM to
+          “rate this 1–5”. Deterministic, reproducible, no token cost.
+        </p>
+        <p className="lw5-body">
+          Day 4 ships code evaluators. Write a small <code>evaluate</code>{" "}
+          function in Python or TypeScript directly in the Langfuse UI, attach
+          it to live observations or to a dataset experiment, and the result
+          lands as a native Langfuse score. It shows up in trace views,
+          experiment compares, filters, dashboards, and Score Analytics next to
+          your existing scores.
+        </p>
+        <p className="lw5-body">
+          Code evaluators sit alongside{" "}
+          <Link
+            href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            LLM-as-a-Judge
+          </Link>{" "}
+          rather than replacing it. Code wins for objective checks. A judge wins
+          for semantic quality, tone, helpfulness, or rubric reasoning. Together
+          they give you a more complete picture of quality than either approach
+          alone.
+        </p>
+      </div>
+
+      <div className="w-full max-w-[920px] mb-8">
+        <Video
+          src="https://static.langfuse.com/docs-videos/code-evaluators-launch-2.mp4"
+          aspectRatio={16 / 9}
+          className="rounded border border-line-structure"
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-28-code-evaluators"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/evaluation/evaluation-methods/code-evaluators"
+          >
+            <span>Get started in docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/self-hosting/configuration/code-evaluators"
+          >
+            <span>Self-hosting setup</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
+function Day5Unveiling() {
+  return (
+    <section id="day-5" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
+      <div className="flex flex-col items-start gap-3.5 mb-8">
+        <div className="lw5-eyebrow">Day 05 · Friday, May 29, 2026</div>
+        <h2 className="lw5-h2 max-w-[26ch]">
+          <span className="lw5-highlight">Langfuse MCP, expanded.</span>
+        </h2>
+        <p className="lw5-body">
+          Until this week the hosted Langfuse MCP server only exposed prompt
+          management. Today it covers most of Langfuse: observations, metrics,
+          scores, score configs, datasets, dataset items, dataset runs, dataset
+          run items, comments, annotation queues, models, media, and health.
+          Fifteen tool categories total.
+        </p>
+        <p className="lw5-body">
+          Agents such as Claude Cowork, Linear Agents, or custom internal tools
+          can now investigate a production issue, pull the relevant observation,
+          query metrics, drop a comment for the team, create a score, or stage a
+          dataset item for regression testing, all without leaving the chat.
+        </p>
+        <p className="lw5-body">
+          The MCP server complements the{" "}
+          <Link
+            href="/changelog/2026-05-26-langfuse-agent-skill"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            Langfuse Skill
+          </Link>{" "}
+          (Day 2) and the{" "}
+          <Link
+            href="/docs/api-and-data-platform/features/cli"
+            className="text-text-primary font-medium border-b border-text-primary pb-px"
+          >
+            Langfuse CLI
+          </Link>
+          . Use the CLI when your agent can run bash and pre-filter data; use
+          the MCP server when it cannot. Restrict to read-only by allow-listing
+          lookup tools if you don’t want writes.
+        </p>
+      </div>
+
+      <div className="w-full max-w-[920px] mb-8">
+        <Video
+          src="https://static.langfuse.com/docs-videos/mcp-v2-launch.mp4"
+          aspectRatio={16 / 9}
+          className="rounded border border-line-structure"
+          gifStyle
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-primary"
+            href="/changelog/2026-05-29-mcp-update"
+          >
+            <span>Read the changelog</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="/docs/api-and-data-platform/features/mcp-server"
+          >
+            <span>MCP server docs</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+        <span className="lw5-btn-wrap">
+          <Link
+            className="lw5-btn lw5-btn-secondary"
+            href="https://mcp.reference.langfuse.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>MCP Reference</span>
+            <span className="lw5-kbd">↗</span>
+          </Link>
+        </span>
+      </div>
+    </section>
+  );
+}
+
 function DayCard({ day }: { day: DayCard }) {
   const live = Boolean(day.href);
   const content = (
@@ -568,6 +835,9 @@ export function LaunchWeek5Landing() {
       <div className="max-w-[1440px] mx-auto">
         <Hero />
         <Schedule />
+        <Day5Unveiling />
+        <Day4Unveiling />
+        <Day3Unveiling />
         <Day2Unveiling />
         <Day1Unveiling />
       </div>
