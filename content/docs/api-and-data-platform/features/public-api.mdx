@@ -247,6 +247,36 @@ The Observations API retrieves observation data (spans, generations, events) fro
 
 The v2 endpoint (`GET /api/public/v2/observations`) is optimized for high-performance retrieval at scale. It supports selective field retrieval, so you request only the field groups you need instead of full rows, and cursor-based pagination for consistent performance regardless of result set size.
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+<Accordion type="single" collapsible>
+  <AccordionItem value="upgrade-from-older-reads">
+    <AccordionTrigger>
+      Migrate from legacy trace and observation reads
+    </AccordionTrigger>
+    <AccordionContent className="overflow-x-auto">
+
+| Existing usage                                                            | Recommended replacement                                                                                 |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| List traces with `GET /api/public/traces`                                 | Use `GET /api/public/v2/observations?fromStartTime=<from>&toStartTime=<to>` and group rows by `traceId` |
+| Fetch one trace with `GET /api/public/traces/{traceId}`                   | Use `GET /api/public/v2/observations?traceId=<traceId>&fromStartTime=<from>&toStartTime=<to>`           |
+| List observations with `GET /api/public/observations`                     | Use `GET /api/public/v2/observations?fromStartTime=<from>&toStartTime=<to>`                             |
+| Fetch one observation with `GET /api/public/observations/{observationId}` | Use `GET /api/public/v2/observations?filter=<id filter>&fromStartTime=<from>&toStartTime=<to>`          |
+
+Always include `fromStartTime` and `toStartTime` to keep each request bounded.
+
+The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. For single-observation lookups, pass a URL-encoded `filter` condition on the `id` column; see the [v2 Observations API reference](https://api.reference.langfuse.com/#tag/observations) for the filter schema.
+
+    </AccordionContent>
+
+  </AccordionItem>
+</Accordion>
+
 <Callout type="warning">
 
 **Cloud-only:** The v2 Observations API is only available on Langfuse Cloud. We are working on a robust migration path for self-hosted deployments.
