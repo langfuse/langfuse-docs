@@ -87,7 +87,7 @@ These interfaces are the compatibility targets across Langfuse releases.
 <Callout type="warning">
 
 The ClickHouse schema is not a stable API contract.
-Major Langfuse upgrades, background migrations, and performance work such as [Simplify Langfuse for Scale](/changelog/2026-03-10-simplify-for-scale) can change tables, columns, deduplication behavior, or join patterns.
+Major Langfuse upgrades, background migrations, and performance work such as [Simplify Langfuse for Scale](/changelog/2026-03-10-simplify-for-scale) can change tables, columns, deduplication behavior, or join patterns at any time.
 Custom queries that read `traces`, `observations`, `scores`, or internal materialized views should be validated as part of every Langfuse upgrade.
 
 </Callout>
@@ -96,7 +96,7 @@ If you do query ClickHouse directly:
 
 - Use a dedicated read-only user or a dedicated read-only compute group where available.
 - Keep direct analytical traffic away from the primary ingestion path. On ClickHouse Cloud or BYOC, use separate compute groups and configure `CLICKHOUSE_READ_ONLY_URL` for supported Langfuse read paths, especially Public API and filter/helper reads.
-- Always include project and time filters where possible. Langfuse tracing data is optimized around project and time access patterns.
+- Always include project and time filters where possible. Langfuse tracing data is optimized around project and time access patterns including monthly partioning.
 - Do not write directly to Langfuse tables. Use the Public API or SDKs for creating and updating Langfuse data.
 - If a missing API filter or field forces you to query ClickHouse directly, please open a [GitHub issue](https://github.com/langfuse/langfuse/issues) with your use case; APIs are the preferred long-term extension point.
 
