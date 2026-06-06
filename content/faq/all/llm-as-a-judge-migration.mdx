@@ -26,11 +26,13 @@ Trace-level evaluators will continue to work. This is an upgrade path, not a dep
 ## When to Upgrade
 
 ### ✅ Upgrade Now If:
+
 - **You're experiencing evaluation delays, backlogs, or slow evaluation processing** (observation-level evaluations complete in seconds)
 - You're using or planning to use OTel-based SDKs (Python v3+ or JS/TS v4+)
 - You're setting up new evaluators
 
 ### ⏸️ Stay with Trace-Level For Now If:
+
 - You're on legacy SDKs (Python v2 or JS/TS v3) and can't upgrade yet
 - Your trace evaluators work perfectly for your use case
 - You need to evaluate aggregate workflow data spanning multiple operations
@@ -39,10 +41,10 @@ Trace-level evaluators will continue to work. This is an upgrade path, not a dep
 
 ### SDK Requirements for Observation-Level Evaluators
 
-| Requirement | Python | JS/TS |
-|-------------|--------|-------|
-| **Minimum SDK version** | v3+ (OTel-based) | v4+ (OTel-based) |
-| **Upgrade guide** | [Python v2 → v3](/docs/observability/sdk/upgrade-path/python-v2-to-v3) | [JS/TS v3 → v4](/docs/observability/sdk/upgrade-path/js-v3-to-v4) |
+| Requirement             | Python                                                                 | JS/TS                                                             |
+| ----------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **Minimum SDK version** | v3+ (OTel-based)                                                       | v4+ (OTel-based)                                                  |
+| **Upgrade guide**       | [Python v2 → v3](/docs/observability/sdk/upgrade-path/python-v2-to-v3) | [JS/TS v3 → v4](/docs/observability/sdk/upgrade-path/js-v3-to-v4) |
 
 ### Zero-Downtime Migration Strategy
 
@@ -84,7 +86,7 @@ The wizard shows your configuration side-by-side:
    - Use `observation.metadata` for custom fields
 
 3. **Choose upgrade action**:
-   - **Keep both active**: Test new evaluator alongside old one 
+   - **Keep both active**: Test new evaluator alongside old one
    - **Mark old as inactive**: Old evaluator stops, new one takes over (recommended initially)
    - **Delete old evaluator**: Permanently remove legacy evaluator
 
@@ -112,6 +114,7 @@ Most trace evaluators have input/output that map directly to a specific observat
 </Frame>
 
 **Before (Trace-level)**:
+
 ```
 Target: Traces
 Filter: name = "user-workflow"
@@ -122,6 +125,7 @@ Variables:
 ```
 
 **After (Observation-level)**:
+
 ```
 Target: Observations
 Filter: traceName = "user-workflow"
@@ -147,6 +151,7 @@ Variables:
    - Better cost control (can filter to specific operation types)
 
 **Important**: The resulting score is now **attached to the observation**, not the trace. This means:
+
 - Scores appear on the specific observation in the trace tree
 - You can have multiple scores per trace (one per evaluated observation)
 
@@ -159,11 +164,13 @@ Variables:
 ### For Users on Legacy SDKs (Python v2, JS/TS v3)
 
 **Option 1: Upgrade to OTel-based SDK** (Recommended)
+
 1. Upgrade to Python SDK v3+ or JS/TS SDK v4+ (see [Prerequisites](#prerequisites))
 2. Update your instrumentation code using the migration guides
 3. Upgrade evaluators using the wizard
 
 **Option 2: Continue with Trace-Level Evaluators**
+
 - No changes needed—trace-level evaluators will continue to work
 - Upgrade when ready
 
@@ -188,4 +195,4 @@ If you need to revert after upgrading:
 
 ---
 
-*Last updated: February 10, 2026*
+_Last updated: February 10, 2026_

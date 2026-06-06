@@ -31,13 +31,14 @@ import {
   Bot,
   FileCode,
   Wand,
+  Users,
 } from "lucide-react";
 
 <TutorialCards>
   <TutorialCard
     title="Error Analysis"
     description="Review traces to classify issues like hallucinations, irrelevance, and formatting errors. Turn raw logs into actionable insights."
-    href="/blog/2025-08-29-error-analysis-to-evaluate-llm-applications"
+    href="/academy/monitoring/error-analysis"
     icon={<Bug />}
   />
   <TutorialCard
@@ -51,6 +52,12 @@ import {
     description="Build a testing foundation with deterministic checks and probabilistic ones using LLM judges to prevent regressions."
     href="/blog/2025-10-21-testing-llm-applications"
     icon={<TestTube />}
+  />
+  <TutorialCard
+    title="CI/CD for Experiments"
+    description="Run Langfuse experiments in CI/CD pipelines to catch quality regressions before they reach production."
+    href="/docs/evaluation/experiments/experiments-ci-cd"
+    icon={<FileCode />}
   />
   <TutorialCard
     title="Synthetic Dataset Generation"
@@ -106,6 +113,18 @@ Extend your evaluation approach for complex, multi-step applications.
     description="Use the Langfuse skill to analyze trace feedback and iteratively improve your prompts."
     href="/blog/2026-02-16-prompt-improvement-claude-skills"
     icon={<Wand />}
+  />
+  <TutorialCard
+    title="How to Calibrate your LLM-as-a-Judge with the Langfuse Skill"
+    description="Test whether your judge prompt agrees with how you would label cases, and iterate until it does."
+    href="/guides/llm-as-a-judge-calibration-skill"
+    icon={<TestTube />}
+  />
+  <TutorialCard
+    title="Human-in-the-Loop Scoring"
+    description="Capture human judgments from your own review tooling and ingest them into Langfuse as structured scores, validated against a score config."
+    href="/guides/human-in-the-loop-scoring"
+    icon={<Users />}
   />
 </TutorialCards>
 

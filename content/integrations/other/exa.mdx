@@ -13,13 +13,12 @@ In this guide, we'll show you how to integrate [Langfuse](https://langfuse.com) 
 
 > **What is Exa?** [Exa](https://exa.ai/) is an AI-powered search API built for LLMs and AI applications. Unlike traditional search engines, Exa is designed to understand semantic meaning and retrieve high-quality, relevant results that are perfect for AI use cases like RAG (Retrieval-Augmented Generation), research, and content discovery.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source AI engineering platform that helps teams trace API calls, monitor performance, and debug issues in their LLM applications.
 
 <Steps>
 ## Install Dependencies
 
 First, install the necessary Python packages:
-
 
 ```python
 %pip install langfuse exa-py
@@ -29,15 +28,14 @@ First, install the necessary Python packages:
 
 Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting). You'll also need your Exa and OpenAI API key.
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your Exa API key
 os.environ["EXA_API_KEY"] = "..."
@@ -48,7 +46,6 @@ os.environ["OPENAI_API_KEY"] = "sk-..."
 
 With the environment variables set, we can now initialize the Exa and the Langfuse client.
 
-
 ```python
 from exa_py import Exa
 from langfuse import get_client
@@ -57,10 +54,9 @@ exa = Exa(api_key= os.environ["EXA_API_KEY"])
 langfuse = get_client()
 ```
 
-## Example 1: Trace Exa `search_and_contents` 
+## Example 1: Trace Exa `search`
 
 To monitor your Exa search operations, we use the [Langfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators). In this example, the `@observe()` decorator captures the inputs, outputs, and execution time of the `search_with_exa()` function. For more control over the data you are sending to Langfuse, you can use the [Context Manager or create manual observations](https://langfuse.com/docs/observability/sdk/python/instrumentation#custom-instrumentation) using the Python SDK.
-
 
 ```python
 from langfuse import observe
@@ -68,10 +64,9 @@ from langfuse import observe
 @observe(as_type="retriever")
 def search_with_exa(query: str, num_results: int = 5):
     """Search the web using Exa AI and return results."""
-    results = exa.search_and_contents(
+    results = exa.search(
         query,
-        num_results=num_results,
-        text=True
+        num_results=num_results
     )
     return results
 
@@ -82,13 +77,12 @@ search_results = search_with_exa("What is Langfuse and how does it help with LLM
 for result in search_results.results:
     print(f"Title: {result.title}")
     print(f"URL: {result.url}")
-    print(f"Text: {result.text[:200]}...\n")
+    print()
 ```
 
 ## Example 2: Exa Search together with OpenAI
 
-You can also trace more complex workflows that involve summarizing the search results with OpenAI. Here we use the [Langfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to group both the Exa search and the OpenAI generation into one trace. 
-
+You can also trace more complex workflows that involve summarizing the search results with OpenAI. Here we use the [Langfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to group both the Exa search and the OpenAI generation into one trace.
 
 ```python
 import os
@@ -97,21 +91,23 @@ from langfuse.openai import OpenAI
 @observe()
 def search_and_summarize(query: str):
 
-    # 1. Exa search
+    # 1. Exa search with highlights
     @observe(as_type="retriever")
     def search_with_exa(query: str, num_results: int = 5):
-        """Search the web using Exa AI and return results."""
+        """Search the web using Exa AI and return results with highlights."""
         results = exa.search_and_contents(
             query,
             num_results=num_results,
-            text=True
+            highlights=True
         )
         return results
 
     results = search_with_exa(query)
 
-    # 2. Build a short context
-    context = "\n".join([f"{r.title} ({r.url}): {r.text}" for r in results.results])
+    # 2. Build context from search results
+    context = "\n".join([
+        f"{r.title}: {' '.join(r.highlights)}" for r in results.results
+    ])
 
     # 3. Summarize with OpenAI
     client = OpenAI()
@@ -140,6 +136,7 @@ After executing the traced functions, log in to your [Langfuse Dashboard](https:
 ![Example trace in the Langfuse UI](https://langfuse.com/images/cookbook/integration_exa/exa-search-example-trace.png)
 
 [Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/27c03a05a881ae454f6612a99cc54a92?observation=5af197a22620dc4a&timestamp=2025-10-28T10:20:13.672Z)
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

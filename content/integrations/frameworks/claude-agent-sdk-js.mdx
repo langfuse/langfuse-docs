@@ -15,11 +15,11 @@ The [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-typescript
 
 This notebook demonstrates how to use the [`ClaudeAgentSDKInstrumentation`](https://github.com/Arize-ai/openinference/tree/main/js/packages/openinference-instrumentation-claude-agent-sdk) library from [OpenInference](https://github.com/Arize-ai/openinference) to automatically instrument Claude Agent SDK calls and send OpenTelemetry spans to Langfuse.
 
-> **What is Claude Agent SDK?**  
-The [Claude Agent SDK](https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-typescript) is Anthropic's open-source framework for building AI agents. It provides a clean API for creating tool-using agents with the `query()` function, including native support for MCP servers and custom tools.
+> **What is Claude Agent SDK?**\
+> The [Claude Agent SDK](https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-typescript) is Anthropic's open-source framework for building AI agents. It provides a clean API for creating tool-using agents with the `query()` function, including native support for MCP servers and custom tools.
 
-> **What is Langfuse?**  
-[Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
+> **What is Langfuse?**\
+> [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
 
 <Steps>
 ## Step 1: Install Dependencies
@@ -36,7 +36,6 @@ npm install @anthropic-ai/claude-agent-sdk @arizeai/openinference-instrumentatio
 
 Set up your Langfuse and Anthropic API keys. You can get Langfuse keys by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). Get your Anthropic API key from the [Anthropic Console](https://console.anthropic.com/).
 
-
 ```typescript
 Deno.env.set("ANTHROPIC_API_KEY", "sk-ant-...");
 
@@ -44,7 +43,7 @@ Deno.env.set("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
 Deno.env.set("LANGFUSE_SECRET_KEY", "sk-lf-...");
 
 Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); // 🇪🇺 EU region
-// Deno.env.set("LANGFUSE_BASE_URL", "https://us.cloud.langfuse.com"); // 🇺🇸 US region
+// Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
 
 ## Step 3: Initialize OpenTelemetry with Langfuse
@@ -52,7 +51,6 @@ Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); // 🇪🇺 EU 
 Set up the OpenTelemetry SDK with the `LangfuseSpanProcessor` and the [`ClaudeAgentSDKInstrumentation`](https://github.com/Arize-ai/openinference/tree/main/js/packages/openinference-instrumentation-claude-agent-sdk) from OpenInference. The instrumentation automatically captures agent runs and tool calls, sending them as OpenTelemetry spans to Langfuse.
 
 We also provide a custom [`shouldExportSpan`](https://langfuse.com/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) filter to include spans from the `@arizeai/openinference-instrumentation-claude-agent-sdk` instrumentation scope alongside the default Langfuse filter.
-
 
 ```typescript
 import { NodeSDK } from "npm:@opentelemetry/sdk-node";
@@ -86,7 +84,6 @@ sdk.start();
 
 Use the Claude Agent SDK's `query()` function to run an agent. All agent steps, tool calls, and model completions are automatically traced and sent to Langfuse.
 
-
 ```typescript
 const { query } = ClaudeAgentSDK;
 
@@ -111,6 +108,7 @@ After running the agent, navigate to your Langfuse Trace Table. You will find de
 ![Claude Agent SDK JS/TS example trace in Langfuse](https://langfuse.com/images/cookbook/integration_claude_agent_sdk/claude-agent-sdk-js-example-trace.png)
 
 [Link to example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/96f872a9582504826774a153dd23cfc4?observation=4dab2d5a8f86b306&timestamp=2026-03-13T10%3A09%3A28.575Z&traceId=96f872a9582504826774a153dd23cfc4)
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more-js.mdx";

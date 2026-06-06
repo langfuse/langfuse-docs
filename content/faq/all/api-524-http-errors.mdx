@@ -7,30 +7,29 @@ tags: [platform]
 
 The 524 error class on Langfuse Cloud indicates that your request timed out because ClickHouse ran out of resources or out of time while processing your query.
 This typically occurs when queries scan too much data due to overly broad filter conditions.
-The main patch for those errors is adding narrow time-frame conditions to reduce the amount of data to be scanned.
+For older data retrieval endpoints, the recommended fix is to move to the v2 data APIs instead of tuning the old query, as the older APIs are less performant at scale.
 
 ## General Approaches
 
-To prevent 524 errors across all API endpoints:
+To prevent 524 errors across API endpoints:
 
-1. **Always use timestamp filters**: Add `fromTimestamp` and `toTimestamp` parameters to limit the time range
-2. **Add specific filters**: Use `userId`, `sessionId`, `name`, `tags`, or other filters to narrow your query
+1. **Use v2 data APIs for extraction**: Follow the [Observations API v2 upgrade guidance](/docs/api-and-data-platform/features/observations-api#upgrade-from-older-reads) for row-level data and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
+2. **Always use the endpoint's timestamp filters**: v2 Observations uses `fromStartTime` and `toStartTime`; Metrics API v2 uses `fromTimestamp` and `toTimestamp` inside the JSON `query`; older trace reads use `fromTimestamp` and `toTimestamp` URL parameters.
+3. **Add specific filters**: Use `userId`, `sessionId`, `name`, `tags`, or other filters to narrow your query
 
-## Optimizations for GET /api/public/traces
+## Older trace reads
 
-The [`GET /api/public/traces`](https://api.reference.langfuse.com/#tag/trace/get/api/public/traces) endpoint is particularly susceptible to 524 errors.
-Follow these best practices:
+The older trace read endpoints remain available, but are not recommended as the default for new data extraction workflows. They are particularly susceptible to 524 errors on large projects.
 
-- **Add timestamp filters**: E.g. run `GET /api/public/traces?page=1&limit=10&fromTimestamp=2025-10-16T00:00:00.000Z&toTimestamp=2025-10-17T00:00:00.000Z`.
-- **Use the `fields` parameter**: Request only the data you need to avoid expensive joins (e.g. `GET /api/public/traces?fields=core,io`).
+Follow the [Observations API v2 upgrade guidance](/docs/api-and-data-platform/features/observations-api#upgrade-from-older-reads) to move trace and observation extraction workflows to the v2 API. For aggregate reporting, use [Metrics API v2](/docs/metrics/features/metrics-api#v2).
 
 ### Additional Self-Host Options
 
-Self-hosters can configure server-side defaults and restrictions for the `GET /api/public/traces` endpoint via environment variables.
+For self-hosted deployments that still use older trace reads, you can configure server-side defaults and restrictions for the `GET /api/public/traces` endpoint via environment variables.
 Enforcement order: rejection → default date range → default fields.
 
 | Variable                                      | Type                                      | Description                                                                                                                                                                                                                                                   |
-|-----------------------------------------------|-------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `LANGFUSE_API_TRACES_REJECT_NO_DATE_RANGE`    | `"true"` / `"false"` (default: `"false"`) | Reject requests that do not include a `fromTimestamp` parameter with HTTP 400.                                                                                                                                                                                |
 | `LANGFUSE_API_TRACES_DEFAULT_DATE_RANGE_DAYS` | Positive integer (optional)               | When no `fromTimestamp` is provided, automatically apply a lookback window of N days from `toTimestamp` (or now). Ignored when rejection is enabled.                                                                                                          |
 | `LANGFUSE_API_TRACES_DEFAULT_FIELDS`          | Comma-separated string (optional)         | Default field groups returned when the caller does not specify a `fields` query parameter. Valid groups: `core`, `io`, `scores`, `observations`, `metrics`. E.g. `"core"` or `"core,io"`. An explicit `fields` query parameter always overrides this default. |

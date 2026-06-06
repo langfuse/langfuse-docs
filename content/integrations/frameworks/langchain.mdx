@@ -19,7 +19,7 @@ Langfuse integrates with LangChain using **LangChain Callbacks** — the standar
 
 > **What is LangGraph?** [LangGraph](https://python.langchain.com/docs/get_started/introduction/) is a framework built on top of LangChain that makes it easier to design and run stateful, multi-step AI agents using a graph-based architecture.
 
-> **What is Langfuse?**  [Langfuse](/) is a platform for observability and tracing of LLM applications. It captures everything happening during an LLM interaction: inputs, outputs, tool usage, retries, latencies and costs and allows you to evaluate and debug your application.
+> **What is Langfuse?** [Langfuse](/) is a platform for observability and tracing of LLM applications. It captures everything happening during an LLM interaction: inputs, outputs, tool usage, retries, latencies and costs and allows you to evaluate and debug your application.
 
 ## Getting Started
 
@@ -46,7 +46,7 @@ Next, set up your Langfuse API keys. You can get these keys by signing up for a 
 LANGFUSE_SECRET_KEY = "sk-lf-..."
 LANGFUSE_PUBLIC_KEY = "pk-lf-..."
 LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# LANGFUSE_BASE_URL = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 OPENAI_API_KEY = "sk-proj-..."
 ```
@@ -117,22 +117,21 @@ Next, set up your Langfuse API keys. You can get these keys by signing up for a 
 LANGFUSE_SECRET_KEY = "sk-lf-..."
 LANGFUSE_PUBLIC_KEY = "pk-lf-..."
 LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# LANGFUSE_BASE_URL = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 OPENAI_API_KEY = "sk-proj-..."
 ```
 
 With the environment variables set, we can now initialize the `langfuseSpanProcessor` which is passed to the main OpenTelemetry SDK that orchestrates tracing.
 
-
 ```typescript
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
- 
+
 const sdk = new NodeSDK({
   spanProcessors: [new LangfuseSpanProcessor()],
 });
- 
+
 sdk.start();
 ```
 
@@ -142,7 +141,7 @@ Instantiate the CallbackHandler. Optionally, you can pass additional attributes 
 
 ```typescript
 import { CallbackHandler } from "@langfuse/langchain";
- 
+
 // Initialize the Langfuse CallbackHandler
 const langfuseHandler = new CallbackHandler({
   sessionId: "user-session-123",
@@ -179,7 +178,7 @@ const agent = createAgent({
 
 console.log(
   await agent.invoke(
-    { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] }, 
+    { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] },
     { callbacks: [langfuseHandler] }
     )
 );
@@ -192,11 +191,10 @@ After executing the application, navigate to your [Langfuse Trace Table](https:/
 ![Langfuse Trace](https://langfuse.com/images/cookbook/example-js-sdk/js_integration_langchain_trace.png)
 
 [Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2c1581dd9cecdafb6ca091b83d7ea99a?timestamp=2025-10-30T08:45:41.319Z)
+
 </Steps>
 </Tab>
 </Tabs>
-
-
 
 ## Example Notebooks
 
@@ -441,7 +439,6 @@ await chain.invoke(
 </Tab>
 
 </LangTabs>
-
 
 ### Trace IDs & Distributed Tracing
 
@@ -703,13 +700,13 @@ Langfuse and Langchain are under active development. Thus, we are constantly imp
 
 Python SDK v3 introduces a completely revised Langfuse core with a new **observability API**. While the LangChain integration still relies on a `CallbackHandler`, nearly all ergonomics have changed. The table below highlights the most important breaking changes:
 
-| Topic               | v2                                                                | v3                                                                     |
-| ------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Package import      | `from langfuse.callback import CallbackHandler`                   | `from langfuse.langchain import CallbackHandler`                       |
-| Client handling     | Multiple instantiated clients                                     | Singleton pattern, access via `get_client()`                           |
-| Trace/Span context  | `CallbackHandler` optionally accepted `root` to group runs        | Use context managers `with langfuse.start_as_current_observation(...)`        |
+| Topic               | v2                                                                | v3                                                                        |
+| ------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Package import      | `from langfuse.callback import CallbackHandler`                   | `from langfuse.langchain import CallbackHandler`                          |
+| Client handling     | Multiple instantiated clients                                     | Singleton pattern, access via `get_client()`                              |
+| Trace/Span context  | `CallbackHandler` optionally accepted `root` to group runs        | Use context managers `with langfuse.start_as_current_observation(...)`    |
 | Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Use `metadata["langfuse_user_id"]` OR `propagate_attributes(user_id=...)` |
-| Constructor args    | `CallbackHandler(sample_rate=..., user_id=...)`                   | No constructor args – use Langfuse client or spans                     |
+| Constructor args    | `CallbackHandler(sample_rate=..., user_id=...)`                   | No constructor args – use Langfuse client or spans                        |
 
 Minimal migration example:
 

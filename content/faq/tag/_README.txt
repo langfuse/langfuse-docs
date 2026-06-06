@@ -1,0 +1,1 @@
+There are two distinct tag behaviors: `meta.json` defines which tags appear in the sidebar navigation, while frontmatter tags automatically produce individual tag pages regardless of whether they're listed in `meta.json`.

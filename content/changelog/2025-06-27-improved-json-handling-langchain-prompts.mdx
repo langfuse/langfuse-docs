@@ -9,7 +9,7 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-We've shipped significant improvements for handling JSON in prompts designed to be consumed via `get_langchain_prompt()` (Python) and `getLangchainPrompt()` (JS/TS). 
+We've shipped significant improvements for handling JSON in prompts designed to be consumed via `get_langchain_prompt()` (Python) and `getLangchainPrompt()` (JS/TS).
 
 You no longer need to add extra escaping brackets for JSON content in your prompts, making prompt creation more intuitive and reducing common integration issues.
 
@@ -42,8 +42,8 @@ There's also a LangChain variable {country} with single braces.
 # Store the prompt in Langfuse
 langfuse = Langfuse()
 langfuse.create_prompt(
-    name="my_prompt", 
-    prompt=prompt_string, 
+    name="my_prompt",
+    prompt=prompt_string,
     labels=["production"]
 )
 
@@ -54,12 +54,13 @@ langchain_prompt_string = prompt.get_langchain_prompt()
 # Use with LangChain
 langchain_prompt = PromptTemplate.from_template(langchain_prompt_string)
 formatted_prompt = langchain_prompt.format(
-    animal="dog", 
+    animal="dog",
     country="France"
 )
 ```
 
 The SDK now automatically:
+
 - Converts `{{animal}}` (Langfuse variables) to `{animal}` (LangChain format)
 - Properly escapes the JSON structure to avoid conflicts with LangChain templating
 - Maintains the integrity of both your JSON content and variable substitution
@@ -67,6 +68,7 @@ The SDK now automatically:
 ## Availability
 
 This improvement is available in:
+
 - **Python SDK**: [v3.0.6](https://github.com/langfuse/langfuse-python/releases/tag/v3.0.6) and later
 - **JavaScript/TypeScript SDK**: [v3.37.6](https://github.com/langfuse/langfuse-js/releases/tag/v3.37.6) and later
 

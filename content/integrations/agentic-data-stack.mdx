@@ -10,12 +10,12 @@ category: Integrations
 
 The [Agentic Data Stack](https://clickhouse.com/ai) is an open-source, self-hosted stack for agentic analytics built by [ClickHouse](https://clickhouse.com). It connects a chat UI ([LibreChat](https://www.librechat.ai/)) to your data ([ClickHouse](https://clickhouse.com)) via [MCP](https://modelcontextprotocol.io), with full LLM observability powered by Langfuse — all deployable with a single `docker compose up` command.
 
-| Component | Role |
-| --- | --- |
-| [**LibreChat**](https://www.librechat.ai/) | Chat UI with multi-model support (OpenAI, Anthropic, Google, and more) |
-| [**ClickHouse**](https://clickhouse.com) | Fast analytical database for querying your data |
-| [**ClickHouse MCP**](https://github.com/ClickHouse/mcp-clickhouse) | MCP server that gives AI agents access to ClickHouse |
-| [**Langfuse**](https://langfuse.com) | LLM observability — traces, evaluations, prompt management |
+| Component                                                          | Role                                                                   |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| [**LibreChat**](https://www.librechat.ai/)                         | Chat UI with multi-model support (OpenAI, Anthropic, Google, and more) |
+| [**ClickHouse**](https://clickhouse.com)                           | Fast analytical database for querying your data                        |
+| [**ClickHouse MCP**](https://github.com/ClickHouse/mcp-clickhouse) | MCP server that gives AI agents access to ClickHouse                   |
+| [**Langfuse**](https://langfuse.com)                               | LLM observability — traces, evaluations, prompt management             |
 
 <Frame className="my-10 max-w-2xl mx-auto">
   ![Agentic Data Stack architecture — LibreChat connects to LLMs, ClickHouse via MCP, and Langfuse for observability](/images/docs/agentic-data-stack/architecture.png)
@@ -52,7 +52,7 @@ LANGFUSE_SECRET_KEY=sk-lf-...
 LANGFUSE_BASE_URL=https://cloud.langfuse.com
 
 # US region
-# LANGFUSE_BASE_URL=https://us.cloud.langfuse.com
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
 
 For self-hosted Langfuse, set `LANGFUSE_BASE_URL` to your instance URL (e.g., `http://localhost:3000`).
@@ -120,10 +120,10 @@ This starts all services: LibreChat, ClickHouse, ClickHouse MCP, Langfuse, Postg
 
 ### Access the services
 
-| Service | URL |
-| --- | --- |
-| **LibreChat** (Chat UI) | [http://localhost:3080](http://localhost:3080) |
-| **Langfuse** (Observability) | [http://localhost:3000](http://localhost:3000) |
+| Service                            | URL                                            |
+| ---------------------------------- | ---------------------------------------------- |
+| **LibreChat** (Chat UI)            | [http://localhost:3080](http://localhost:3080) |
+| **Langfuse** (Observability)       | [http://localhost:3000](http://localhost:3000) |
 | **MinIO Console** (Object storage) | [http://localhost:9091](http://localhost:9091) |
 
 Sign in with the credentials you configured during setup. The same email and password work for both LibreChat and Langfuse.

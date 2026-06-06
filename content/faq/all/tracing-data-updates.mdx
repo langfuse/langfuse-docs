@@ -22,8 +22,8 @@ UI-based updates ([tags](/docs/observability/features/tags), bookmarks, [publish
 **Via SDK or Ingestion API**
 
 - You can upsert traces, observations, and scores based on their `id` (and, optionally, `timestamp` for traces, `startTime` for observations, and `timestamp` for scores, respectively).
-- **Within 60 days of creation**, updates will be merged into the existing trace, observation, or score.
-- **After 60 days**, updates may create duplicate entries containing only the changed fields. This can lead to inconsistencies in dashboards and historical filtering.
+- **Within 30 days of creation**, updates will be merged into the existing trace, observation, or score.
+- **After 30 days**, updates may create duplicate entries containing only the changed fields. This can lead to inconsistencies in dashboards and historical filtering.
 - Sending a full event with `id`, same `timestamp/startTime`, and all desired properties will always replace the existing record instead of producing a duplicate and is recommended for long-term updates.
 
 **Example behaviour**
@@ -37,19 +37,19 @@ We will use traces as the example case, but the same applies to observations and
 { id: "foo", timestamp: "2025-01-01T12:00:00Z", name: "My Trace" }
 -> { id: "foo", timestamp: "2025-01-01T12:00:00Z", name: "My Trace" }
 
-## Send a delta-update within 60 days (e.g. on 2025-02-01). This updates the original trace.
+## Send a delta-update within 30 days (e.g. on 2025-01-20). This updates the original trace.
 { id: "foo", userId: "user_1" }
 -> { id: "foo", timestamp: "2025-01-01T12:00:00Z", name: "My Trace", userId: "user_1" }
 
-## Send a delta-update after more than 60 days (e.g. on 2025-05-01). This creates a duplicate record.
+## Send a delta-update after more than 30 days (e.g. on 2025-05-01). This creates a duplicate record.
 { id: "foo", userId: "user_2" }
 -> { id: "foo", timestamp: "2025-01-01T12:00:00Z", name: "My Trace" }, { id: "foo", timestamp: "2025-05-01T00:00:00Z", userId: "user_2" }
 
-## Send a delta-update after more than 60 days (e.g. on 2025-05-01) with the original timestamp. This will replace the original record.
+## Send a delta-update after more than 30 days (e.g. on 2025-05-01) with the original timestamp. This will replace the original record.
 { id: "foo", timestamp: "2025-01-01T12:00:00Z", userId: "user_3" }
 -> { id: "foo", timestamp: "2025-01-01T12:00:00Z", userId: "user_3" }
 
-## Send a full replacement after more than 60 days (e.g. on 2025-05-01) with the original timestamp. This will replace the original record.
+## Send a full replacement after more than 30 days (e.g. on 2025-05-01) with the original timestamp. This will replace the original record.
 { id: "foo", timestamp: "2025-01-01T12:00:00Z", name: "My Trace", userId: "user_4" }
 -> { id: "foo", timestamp: "2025-01-01T00:00:00Z", name: "My Trace", userId: "user_4" }
 ```

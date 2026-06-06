@@ -7,7 +7,7 @@ export const SITE_DEFAULT_OG_DESCRIPTION =
 /** Root layout default Open Graph / Twitter image (dynamic wordmark card). */
 export function buildDefaultSiteOgImageUrl(): string {
   return `${BASE_URL}/api/og?${new URLSearchParams({
-    title: "Langfuse – Open Source LLM Engineering Platform",
+    title: "Langfuse – Open Source AI Engineering Platform",
     description: SITE_DEFAULT_OG_DESCRIPTION,
   }).toString()}`;
 }
@@ -25,7 +25,7 @@ export function buildOgImageUrl({
 }: {
   title: string;
   description?: string | null;
-  section?: string;
+  section?: string | null;
   staticOgImage?: string | null;
 }): string {
   if (staticOgImage) {
@@ -33,6 +33,6 @@ export function buildOgImageUrl({
   }
   const params = new URLSearchParams({ title });
   if (description) params.set("description", description);
-  if (section) params.set("section", section);
+  if (section?.trim()) params.set("section", section.trim());
   return `${BASE_URL}/api/og?${params.toString()}`;
 }

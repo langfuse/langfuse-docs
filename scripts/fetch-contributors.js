@@ -20,7 +20,7 @@ const OUTPUT = path.join(
   "components",
   "wrapped",
   "data",
-  "oss-contributors-2025.json"
+  "oss-contributors-2025.json",
 );
 
 const token = process.env.GITHUB_TOKEN;
@@ -32,7 +32,7 @@ async function fetchCommits(owner, repo) {
 
   while (true) {
     const url = `https://api.github.com/repos/${owner}/${repo}/commits?since=${encodeURIComponent(
-      SINCE
+      SINCE,
     )}&per_page=${perPage}&page=${page}`;
 
     const res = await fetch(url, {
@@ -44,7 +44,9 @@ async function fetchCommits(owner, repo) {
     });
 
     if (!res.ok) {
-      throw new Error(`GitHub API error ${res.status} ${res.statusText} for ${url}`);
+      throw new Error(
+        `GitHub API error ${res.status} ${res.statusText} for ${url}`,
+      );
     }
 
     const data = await res.json();

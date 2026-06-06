@@ -8,7 +8,13 @@ description: Native Model Context Protocol (MCP) server for Langfuse, enabling A
 
 Langfuse includes a native [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that enables AI assistants and agents to interact with your Langfuse data programmatically.
 
-Currently, the MCP server is available for [Prompt Management](/docs/prompt-management/overview) and will be extended to the rest of the Langfuse data platform in the future. If you have feedback or ideas for new tools, please [share them on GitHub](https://github.com/orgs/langfuse/discussions/10605).
+If you have feedback or ideas for new tools, please [share them on GitHub](https://github.com/orgs/langfuse/discussions/10605).
+
+<Callout type="info">
+
+If you are running AI agents in an environment where you can install CLI tools and run bash commands, we recommend using the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) instead of the MCP server.
+
+</Callout>
 
 <Callout type="info">
 
@@ -16,19 +22,11 @@ This is the authenticated MCP server for the Langfuse data platform. There is al
 
 </Callout>
 
-<Callout type="info">
-
-Alternatively you can also work with the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill). Many use cases that aren't supported by the MCP server can be achieved using the skill. 
-
-</Callout>
-
-
-
 ## Configuration
 
 The Langfuse MCP server uses a stateless architecture where each API key is scoped to a specific project. Use the following configuration to connect to the MCP server:
 
-<Tabs items={["Cloud EU", "Cloud US", "HIPAA US", "Self-Hosted"]}>
+<Tabs items={["Cloud EU", "Cloud US", "Cloud Japan", "HIPAA US", "Self-Hosted"]}>
 
 <Tab>
 
@@ -41,6 +39,14 @@ The Langfuse MCP server uses a stateless architecture where each API key is scop
 <Tab>
 
 - Endpoint: `https://us.cloud.langfuse.com/api/public/mcp`
+- Transport: `streamableHttp`
+- Authentication: Basic Auth via authorization header
+
+</Tab>
+
+<Tab>
+
+- Endpoint: `https://jp.cloud.langfuse.com/api/public/mcp`
 - Transport: `streamableHttp`
 - Authentication: Basic Auth via authorization header
 
@@ -64,50 +70,21 @@ The Langfuse MCP server uses a stateless architecture where each API key is scop
 
 </Tabs>
 
-## Available Tools
+## MCP Reference
 
-The MCP server provides five tools for comprehensive prompt management.
+<Callout type="info">
+
+The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source for current Langfuse MCP servers, setup snippets, tools, input schemas, and generated request examples.
+
+</Callout>
 
 <Callout type="warning">
   **Both read and write tools are available by default.** If you only want to
   use read-only tools, configure your MCP client with an allowlist to restrict
-  access to write operations (`createTextPrompt`, `createChatPrompt`,
-  `updatePromptLabels`).
+  access to write operations. For a full list of tools, see the [MCP Reference](https://mcp.reference.langfuse.com).
 </Callout>
 
-### Read Operations
-
-- **`getPrompt`** - Fetch a specific prompt by name with optional label or version
-
-  - Supports filtering by production/staging labels
-  - Returns compiled prompt with metadata
-  - Read-only operation (auto-approved by clients)
-
-- **`listPrompts`** - List all prompts in the project
-  - Optional filtering by name, tag, or label
-  - Cursor-based pagination support
-  - Returns prompt metadata and available versions
-
-### Write Operations
-
-- **`createTextPrompt`** - Create a new text prompt version
-
-  - Supports template variables with `{{variable}}` syntax
-  - Optional labels, config, tags, and commit message
-  - Automatic version incrementing
-
-- **`createChatPrompt`** - Create a new chat prompt version
-
-  - OpenAI-style message format (role + content)
-  - Supports system, user, and assistant roles
-  - Template variables in message content
-
-- **`updatePromptLabels`** - Manage labels across prompt versions
-  - Add or move labels between versions
-  - Labels are unique (auto-removed from other versions)
-  - Cannot modify the auto-managed `latest` label
-
-## Set up
+## Set up [#set-up]
 
 <Steps>
 
@@ -138,6 +115,10 @@ The MCP server provides five tools for comprehensive prompt management.
    claude mcp add --transport http langfuse https://us.cloud.langfuse.com/api/public/mcp \
        --header "Authorization: Basic {your-base64-token}"
 
+   # Langfuse Cloud (Japan)
+   claude mcp add --transport http langfuse https://jp.cloud.langfuse.com/api/public/mcp \
+       --header "Authorization: Basic {your-base64-token}"
+
    # Langfuse Cloud (HIPAA)
    claude mcp add --transport http langfuse https://hipaa.cloud.langfuse.com/api/public/mcp \
        --header "Authorization: Basic {your-base64-token}"
@@ -162,7 +143,7 @@ The MCP server provides five tools for comprehensive prompt management.
 3. Click **"Add Custom MCP"**
 4. Add your Langfuse MCP server configuration, replace `{your-base64-token}` with your encoded credentials:
 
-<Tabs items={["Cloud EU", "Cloud US", "HIPAA US", "Self-Hosted"]}>
+<Tabs items={["Cloud EU", "Cloud US", "Cloud Japan", "HIPAA US", "Self-Hosted"]}>
 
 <Tab>
 
@@ -190,6 +171,24 @@ The MCP server provides five tools for comprehensive prompt management.
     "servers": {
       "langfuse": {
         "url": "https://us.cloud.langfuse.com/api/public/mcp",
+        "headers": {
+          "Authorization": "Basic {your-base64-token}"
+        }
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="mcp.json" /{your-base64-token}/
+{
+  "mcp": {
+    "servers": {
+      "langfuse": {
+        "url": "https://jp.cloud.langfuse.com/api/public/mcp",
         "headers": {
           "Authorization": "Basic {your-base64-token}"
         }
@@ -248,6 +247,7 @@ The MCP server provides five tools for comprehensive prompt management.
 - Endpoint: `/api/public/mcp`
   - EU: `https://cloud.langfuse.com/api/public/mcp`
   - US: `https://us.cloud.langfuse.com/api/public/mcp`
+  - Japan: `https://jp.cloud.langfuse.com/api/public/mcp`
   - HIPAA: `https://hipaa.cloud.langfuse.com/api/public/mcp`
   - Self-Hosted: `https://your-domain.com/api/public/mcp`
 - Transport: `streamableHttp`
@@ -259,21 +259,15 @@ The MCP server provides five tools for comprehensive prompt management.
 
 </Steps>
 
-## Use Cases
-
-The MCP server enables powerful workflows for AI-assisted prompt management:
-
-- **Prompt Creation**: "Create a new chat prompt for customer support with system instructions and example messages"
-- **Version Management**: "Update the staging label to point to version 3 of the email-generation prompt"
-- **Prompt Discovery**: "List all prompts tagged with 'production' and show their latest versions"
-- **Iterative Development**: "Create a new version of the code-review prompt with improved instructions"
-
 ## Feedback
 
 We'd love to hear about your experience with the Langfuse MCP server. Share your feedback, ideas, and use cases in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605).
 
 ## Related Documentation
 
+- [MCP Reference](https://mcp.reference.langfuse.com) - Reference for MCP servers, setup snippets, tools, schemas, and requests
 - [Prompt Management with MCP](/docs/prompt-management/features/mcp-server) - Prompt-specific workflows and examples
 - [Prompt Management Overview](/docs/prompt-management/overview) - Learn about Langfuse prompt management
 - [Public API](/docs/api-and-data-platform/features/public-api) - REST API for programmatic access
+- [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) - Use Langfuse features from your coding agent
+- [Langfuse for Agents](/agents) - Overview of the skill, CLI, and MCP server for coding agents

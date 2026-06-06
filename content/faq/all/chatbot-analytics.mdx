@@ -4,6 +4,8 @@ description: "Learn how to use chatbot analytics tools to monitor performance, t
 tags: [article]
 ---
 
+import { Details, Summary } from "@/components/Details";
+
 # Chatbot Analytics: How to Improve your AI Chatbot with Langfuse
 
 <Frame fullWidth>
@@ -150,8 +152,7 @@ LANGFUSE_SECRET_KEY="sk-lf-..."
 LANGFUSE_PUBLIC_KEY="pk-lf-..."
 # 🇪🇺 EU region
 LANGFUSE_BASE_URL="https://cloud.langfuse.com"
-# 🇺🇸 US region
-# LANGFUSE_BASE_URL="https://us.cloud.langfuse.com"
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
 
 ```python
@@ -180,16 +181,16 @@ main()
 
 To effectively measure and improve your chatbot, track these key metrics:
 
-| Metric | What It Measures | Why It Matters |
-|--------|-----------------|----------------|
-| **Messages per session** | Average number of messages in a conversation | Indicates engagement depth and conversation complexity |
-| **Session duration** | How long users spend interacting with the chatbot | Helps understand user engagement and satisfaction |
-| **Resolution rate** | Percentage of conversations that achieve the user's goal | Direct measure of chatbot effectiveness |
-| **Escalation rate** | How often conversations are handed off to a human agent | Identifies gaps in chatbot capabilities |
-| **Response latency** | Time between user message and chatbot response | Critical for user experience and retention |
-| **Cost per conversation** | Token usage and associated costs per session | Essential for budgeting and optimization |
-| **User satisfaction score** | Direct feedback from users (thumbs up/down, ratings) | Ground truth measure of chatbot quality |
-| **Hallucination rate** | How often the chatbot generates inaccurate information | Critical for trust and compliance |
+| Metric                      | What It Measures                                         | Why It Matters                                         |
+| --------------------------- | -------------------------------------------------------- | ------------------------------------------------------ |
+| **Messages per session**    | Average number of messages in a conversation             | Indicates engagement depth and conversation complexity |
+| **Session duration**        | How long users spend interacting with the chatbot        | Helps understand user engagement and satisfaction      |
+| **Resolution rate**         | Percentage of conversations that achieve the user's goal | Direct measure of chatbot effectiveness                |
+| **Escalation rate**         | How often conversations are handed off to a human agent  | Identifies gaps in chatbot capabilities                |
+| **Response latency**        | Time between user message and chatbot response           | Critical for user experience and retention             |
+| **Cost per conversation**   | Token usage and associated costs per session             | Essential for budgeting and optimization               |
+| **User satisfaction score** | Direct feedback from users (thumbs up/down, ratings)     | Ground truth measure of chatbot quality                |
+| **Hallucination rate**      | How often the chatbot generates inaccurate information   | Critical for trust and compliance                      |
 
 Use [custom dashboards](/docs/metrics/features/custom-dashboards) in Langfuse to visualize these metrics over time and across user segments.
 
@@ -223,30 +224,30 @@ When evaluating a chatbot analytics platform, consider these key capabilities:
 
 ## FAQ
 
-<details>
-<summary>What is chatbot analytics?</summary>
+<Details>
+<Summary>What is chatbot analytics?</Summary>
 
 Chatbot analytics is the practice of collecting, measuring, and analyzing data from your AI chatbot to understand its performance and improve user experience. This includes tracking metrics like response quality, conversation length, user satisfaction, cost per conversation, and error rates. With proper analytics, you can identify where your chatbot struggles, optimize prompts, and make data-driven improvements.
 
-</details>
+</Details>
 
-<details>
-<summary>What chatbot analytics tools should I use?</summary>
+<Details>
+<Summary>What chatbot analytics tools should I use?</Summary>
 
 The best toolset depends on your needs. For LLM-powered chatbots, start with an LLM observability platform like Langfuse for conversation tracing, cost tracking, and quality evaluation. Add product analytics tools like PostHog for user behavior analysis, and evaluation frameworks like Ragas for automated quality assessment. Most teams find that a combination of 2-3 tools covers their analytics needs.
 
-</details>
+</Details>
 
-<details>
-<summary>How do I measure chatbot performance?</summary>
+<Details>
+<Summary>How do I measure chatbot performance?</Summary>
 
 Measure chatbot performance across multiple dimensions: (1) **Quality** — use LLM-as-a-Judge evaluation and user feedback scores, (2) **Efficiency** — track response latency, cost per conversation, and token usage, (3) **Effectiveness** — measure resolution rate, escalation rate, and user satisfaction, (4) **Safety** — monitor hallucination rate, compliance violations, and prompt injection attempts. Use custom dashboards to visualize trends over time.
 
-</details>
+</Details>
 
-<details>
-<summary>How do I improve my chatbot's responses?</summary>
+<Details>
+<Summary>How do I improve my chatbot's responses?</Summary>
 
 Start by analyzing your chatbot analytics to identify problem areas. Use conversation tracing to inspect low-quality responses and understand why they failed. Set up automated evaluations to score responses on key dimensions (helpfulness, accuracy, tone). Build a dataset of problematic conversations and run experiments to test prompt improvements before deploying them to production. Continuously monitor production performance and feed edge cases back into your test dataset.
 
-</details>
+</Details>
