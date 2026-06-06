@@ -1,0 +1,219 @@
+---
+title: RAG Observability with Langfuse
+sidebarTitle: RAG Observability
+description: Learn how to trace and observe RAG (Retrieval-Augmented Generation) pipelines with Langfuse using the @observe decorator and the retriever observation type.
+category: Observability
+---
+
+# RAG Observability with Langfuse
+
+This cookbook shows you how to instrument a Retrieval-Augmented Generation (RAG) pipeline with Langfuse to get full visibility into retrieval and generation steps. You'll trace each stage — document retrieval, context building, and LLM generation — so you can debug quality issues, measure latency, and compare configurations.
+
+Related resources:
+
+- [RAG Observability and Evals blog post](/blog/2025-10-28-rag-observability-and-evals) — broader workflow including experiments
+- [RAG evaluation with RAGAS](/guides/cookbook/evaluation_of_rag_with_ragas) — automated quality scoring with RAGAS metrics
+
+## Step 1: Install dependencies
+
+```python
+%pip install langfuse langchain langchain-openai langchain-community faiss-cpu --upgrade
+```
+
+## Step 2: Configure environment
+
+Get your Langfuse API keys from the project settings page.
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+Initialize the Langfuse client and verify the connection.
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+## Step 3: Build the RAG pipeline with tracing
+
+Langfuse captures your RAG pipeline at two levels:
+
+1. **The full request** — traced with `@observe()`, capturing the question and the final answer
+2. **The retrieval step** — traced with `start_as_current_observation(as_type="retriever")`, recording which documents were fetched and from where
+
+The LangChain `CallbackHandler` automatically traces the LLM call inside LangChain chains, capturing the prompt, model, token usage, and response.
+
+```python
+from langfuse import get_client, observe
+from langfuse.langchain import CallbackHandler
+from langchain_community.document_loaders import WebBaseLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_community.vectorstores import FAISS
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+
+langfuse = get_client()
+langfuse_handler = CallbackHandler()  # Traces LangChain LLM calls automatically
+
+SYSTEM_PROMPT = (
+    "Answer the question using only the context below. "
+    "If the context does not contain enough information, say so.\n\n"
+    "Context:\n{context}"
+)
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", SYSTEM_PROMPT),
+    ("human", "{question}"),
+])
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+answer_chain = prompt | llm | StrOutputParser()
+
+
+def build_retriever(urls: list[str], chunk_size: int = 512, chunk_overlap: int = 50):
+    loader = WebBaseLoader(urls)
+    docs = loader.load()
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )
+    splits = splitter.split_documents(docs)
+    vectorstore = FAISS.from_documents(splits, OpenAIEmbeddings())
+    return vectorstore.as_retriever(search_kwargs={"k": 4})
+
+
+@observe()  # Creates a Langfuse trace for each call
+def rag_pipeline(question: str, urls: list[str]) -> dict:
+    retriever = build_retriever(urls)
+
+    # Trace the retrieval step with the "retriever" observation type
+    with langfuse.start_as_current_observation(
+        as_type="retriever",
+        name="retrieve_documents",
+        input=question,
+    ) as retriever_span:
+        docs = retriever.invoke(question)
+        retriever_span.update(
+            output=[
+                {"content": doc.page_content, "source": doc.metadata.get("source", "")}
+                for doc in docs
+            ]
+        )
+
+    context = "\n\n".join(doc.page_content for doc in docs)
+
+    # The CallbackHandler traces the LLM call inside the chain automatically
+    answer = answer_chain.invoke(
+        {"context": context, "question": question},
+        config={"callbacks": [langfuse_handler]},
+    )
+
+    return {"answer": answer, "num_docs": len(docs)}
+```
+
+## Step 4: Run the pipeline
+
+```python
+urls = ["https://langfuse.com/docs"]
+
+result = rag_pipeline(
+    question="What is Langfuse and what are its main features?",
+    urls=urls,
+)
+
+print(result["answer"])
+langfuse.flush()  # Ensure all events are sent before the script exits
+```
+
+## What you'll see in Langfuse
+
+Open your Langfuse project and navigate to **Traces**. Each call to `rag_pipeline` creates one trace with three nested observations:
+
+| Observation | Type | What it captures |
+|---|---|---|
+| `rag_pipeline` | span (root) | Question as input, final answer as output |
+| `retrieve_documents` | retriever | Query as input, list of retrieved chunks with source URLs as output |
+| LLM call | generation | Full prompt, model name, token usage, and raw response |
+
+The `retriever` observation type renders with a distinct icon in the Langfuse UI, making it easy to filter all retrieval steps across your traces and spot quality issues in your document retrieval.
+
+![RAG trace in Langfuse](/images/docs/tracing-rag.png)
+
+## Step 5: Add user and session context
+
+Tag traces with user and session identifiers to make filtering and debugging easier in production.
+
+```python
+from langfuse import observe, propagate_attributes
+
+@observe()
+def rag_pipeline_with_context(
+    question: str,
+    urls: list[str],
+    user_id: str | None = None,
+    session_id: str | None = None,
+) -> dict:
+    # Propagate user/session context to all nested observations
+    with propagate_attributes(
+        user_id=user_id,
+        session_id=session_id,
+        tags=["rag"],
+        metadata={"urls": urls},
+    ):
+        retriever = build_retriever(urls)
+
+        with langfuse.start_as_current_observation(
+            as_type="retriever",
+            name="retrieve_documents",
+            input=question,
+            metadata={"chunk_size": 512, "top_k": 4},
+        ) as retriever_span:
+            docs = retriever.invoke(question)
+            retriever_span.update(
+                output=[
+                    {"content": doc.page_content, "source": doc.metadata.get("source", "")}
+                    for doc in docs
+                ]
+            )
+
+        context = "\n\n".join(doc.page_content for doc in docs)
+        answer = answer_chain.invoke(
+            {"context": context, "question": question},
+            config={"callbacks": [langfuse_handler]},
+        )
+
+    return {"answer": answer, "num_docs": len(docs)}
+
+
+result = rag_pipeline_with_context(
+    question="How do I get started with Langfuse tracing?",
+    urls=["https://langfuse.com/docs"],
+    user_id="user-42",
+    session_id="session-abc123",
+)
+
+langfuse.flush()
+```
+
+## Next steps
+
+With tracing in place, the natural next step is evaluation:
+
+- **Score retrieval quality** — Run [Experiments](/docs/evaluation/experiments/experiments-via-sdk) comparing different chunk sizes or embedding models to find the optimal retrieval configuration
+- **Automate answer scoring** — Set up [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) to continuously score faithfulness and answer relevance on production traces
+- **RAGAS metrics** — See the [RAG evaluation with RAGAS cookbook](/guides/cookbook/evaluation_of_rag_with_ragas) for metric-based evaluation including faithfulness, answer relevancy, and context precision
+- **Datasets and baselines** — Create a [Langfuse Dataset](/docs/evaluation/experiments/datasets) from your traces to build a regression suite as your RAG pipeline evolves
