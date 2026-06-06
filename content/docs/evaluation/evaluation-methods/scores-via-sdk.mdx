@@ -8,20 +8,7 @@ sidebarTitle: Scores via API/SDK
 
 You can use the Langfuse SDKs or API to add [scores](/docs/evaluation/scores/overview) to traces, observations, sessions and dataset runs. This is an evaluation method that allows to set up custom evaluation workflows and extend the scoring capabilities of Langfuse. See the [data model](/docs/evaluation/scores/data-model#scores) for full details on the score object.
 
-## Common Use Cases
-
-- **Collecting user feedback**: collect in-app feedback from your users on application quality or performance. Can be captured in the frontend via our Browser SDK.
-  -> [Example Notebook](/guides/cookbook/user-feedback)
-
-- **Custom evaluation data pipeline**: continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
-  -> [Example Notebook](/guides/cookbook/example_external_evaluation_pipelines)
-
-- **Guardrails and security checks**: check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
-  -> [Example Notebook](/guides/cookbook/security-and-guardrails)
-
-- **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse, optionally following your custom schema by referencing a config.
-- **Custom run-time evaluations**: e.g. track whether the generated SQL code actually worked, or if the structured output was valid JSON.
-- **Session-level quality tracking**: score full conversations (for example, support chats or agent threads) by attaching scores via `sessionId` in the SDK/API.
+If you want Langfuse to run deterministic Python or TypeScript logic for you, use [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators). Use this page when your application, pipeline, or CI job computes scores and sends them to Langfuse via API or SDK.
 
 ## Ingesting Scores via API/SDKs
 
@@ -919,3 +906,35 @@ For example, let's assume you'd like to ingest a text score to capture **reviewe
 When creating a score, you can provide an optional `id` (JS/TS) / `score_id` (Python) parameter. This will update the score if it already exists within your project.
 
 If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter as an idempotency key when initially creating the score.
+
+## Related guides
+
+<ManualGuideList
+  guides={[
+    {
+      href: "/guides/cookbook/user-feedback",
+      topic: "Collecting user feedback",
+      lede: "Collect in-app feedback from your users on application quality or performance, captured in the frontend via our Browser SDK.",
+    },
+    {
+      href: "/guides/cookbook/example_external_evaluation_pipelines",
+      topic: "Custom evaluation data pipeline",
+      lede: "Continuously monitor quality by fetching traces, running custom evaluations, and ingesting scores back into Langfuse.",
+    },
+    {
+      href: "/guides/cookbook/security-and-guardrails",
+      topic: "Guardrails and security checks",
+      lede: "Check whether output contains a certain keyword, matches a required structure or format, or exceeds a length limit.",
+    },
+    {
+      href: "/guides/human-in-the-loop-scoring",
+      topic: "Custom internal workflow tooling",
+      lede: "Build internal tooling for human-in-the-loop workflows, ingesting scores back into Langfuse following your custom schema.",
+    },
+    {
+      href: "/guides/cookbook/example_evaluating_multi_turn_conversations",
+      topic: "Session-level quality tracking",
+      lede: "Score full conversations, such as support chats or agent threads, by attaching scores via sessionId in the SDK or API.",
+    },
+  ]}
+/>

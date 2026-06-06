@@ -10,6 +10,7 @@ import {
   Map,
   MessageSquare,
   Newspaper,
+  Presentation,
   ScrollText,
   Users,
   type LucideIcon,
@@ -39,6 +40,7 @@ export const productLinks: NavPanelLink[] = [
 
 export const resourcesLinks: NavPanelLink[] = [
   { name: "Academy", href: "/academy", icon: BookOpen },
+  { name: "Workshop", href: "/workshop", icon: Presentation },
   { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "Changelog", href: "/changelog", icon: ScrollText },
   { name: "Roadmap", href: "/docs/roadmap", icon: Map },
