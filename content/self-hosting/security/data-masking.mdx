@@ -42,7 +42,7 @@ For comprehensive documentation including code examples, advanced patterns, and 
 
 ---
 
-## Server-Side Ingestion Masking (EE)
+## Server-Side Ingestion Masking (EE) [#server-side-ingestion-masking-ee]
 
 <Callout type="info">
   This feature requires an Enterprise license. Please add your [license
@@ -51,6 +51,14 @@ For comprehensive documentation including code examples, advanced patterns, and 
 
 Server-side ingestion masking allows self-hosted Langfuse administrators to define custom callback logic for masking or redacting sensitive data from tracing events as they are ingested.
 This feature operates at the Langfuse Worker container level, providing centralized data masking across all clients.
+
+<Callout type="warning">
+
+Server-side masking is a centralized safety net, not a replacement for client-side masking when sensitive data must never leave the application boundary.
+In the self-hosted ingestion pipeline, events are written to the event blob storage bucket before the Worker calls the masking callback.
+The callback masks data before it is processed into ClickHouse and downstream Langfuse views.
+
+</Callout>
 
 **Key benefits:**
 
@@ -134,19 +142,19 @@ Your callback must return:
 
 <Callout type="warning">
   The response object must maintain the same structure as the input.
-  Only modify the values you want to mask—do not add, remove, or rename fields.
+  Only modify the values you want to mask—do not add, remove, or rename fields. Langfuse parses the callback response as JSON and expects the OpenTelemetry shape during downstream processing, but it does not run a separate structural validation at the callback boundary.
 </Callout>
 
 #### Error Handling
 
 Error handling behavior is configured via `LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED`:
 
-| Scenario                | Fail Closed (default)         | Fail Open                                |
-| ----------------------- | ----------------------------- | ---------------------------------------- |
-| Callback timeout        | Event dropped, warning logged | Event processed unmasked, warning logged |
-| HTTP error (4xx, 5xx)   | Event dropped, warning logged | Event processed unmasked, warning logged |
-| Invalid response schema | Event dropped, warning logged | Event processed unmasked, warning logged |
-| Network error           | Event dropped, warning logged | Event processed unmasked, warning logged |
+| Scenario              | Fail open (default, `false`)             | Fail closed (`true`)          |
+| --------------------- | ---------------------------------------- | ----------------------------- |
+| Callback timeout      | Event processed unmasked, warning logged | Event dropped, warning logged |
+| HTTP error (4xx, 5xx) | Event processed unmasked, warning logged | Event dropped, warning logged |
+| Invalid JSON response | Event processed unmasked, warning logged | Event dropped, warning logged |
+| Network error         | Event processed unmasked, warning logged | Event dropped, warning logged |
 
 ### Limitations
 
@@ -232,7 +240,7 @@ LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED=true
 - Events are being dropped unexpectedly
   1. Check that your masking service is responding within the configured timeout.
   2. Verify the response schema matches the input schema exactly.
-  3. Review Langfuse Web container logs for warning messages.
+  3. Review Langfuse Worker container logs for warning messages.
   4. Temporarily set `LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED=false` to diagnose issues.
 - High latency on trace ingestion
   1. Monitor your masking service response times.
@@ -240,6 +248,6 @@ LANGFUSE_INGESTION_MASKING_CALLBACK_FAIL_CLOSED=true
   3. Optimize your masking logic or add caching where appropriate.
   4. Ensure network latency between Langfuse and your masking service is minimal.
 - Masking not being applied
-  1. Verify `LANGFUSE_INGESTION_MASKING_CALLBACK_URL` is correctly set on the Langfuse Web container.
-  2. Check that your masking service is reachable from the Langfuse Web container.
+  1. Verify `LANGFUSE_INGESTION_MASKING_CALLBACK_URL` is correctly set on the Langfuse Worker container.
+  2. Check that your masking service is reachable from the Langfuse Worker container.
   3. Ensure your masking logic is correctly modifying the data and returning it.
