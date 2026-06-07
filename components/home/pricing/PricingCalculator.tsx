@@ -82,15 +82,21 @@ const calculatePricingBreakdown = (events: number): TierBreakdown[] => {
 // Plan configuration
 type PlanConfig = {
   name: string;
-  baseFee: number;
+  baseFee: number | null;
+  priceLabel: string;
 };
 
 const PLAN_CONFIGS: PlanConfig[] = [
-  { name: "Core", baseFee: 29 },
-  { name: "Pro", baseFee: 199 },
-  { name: "Pro + Teams", baseFee: 499 },
-  { name: "Enterprise", baseFee: 2499 },
+  { name: "Core", baseFee: 29, priceLabel: "$29/month" },
+  { name: "Pro", baseFee: 199, priceLabel: "$199/month" },
+  { name: "Pro + Teams", baseFee: 499, priceLabel: "$499/month" },
+  { name: "Enterprise", baseFee: null, priceLabel: "Custom" },
 ];
+
+const DEFAULT_PLAN_CONFIG = PLAN_CONFIGS[0];
+
+const getPlanConfig = (planName: string) =>
+  PLAN_CONFIGS.find((plan) => plan.name === planName) ?? DEFAULT_PLAN_CONFIG;
 
 // Utility functions
 const formatNumber = (num: number) => num.toLocaleString();
@@ -113,11 +119,14 @@ export function PricingCalculator({
 }: {
   initialPlan?: string;
 }) {
+  const initialPlanConfig = getPlanConfig(initialPlan);
   const [monthlyEvents, setMonthlyEvents] = useState<string>("200,000");
-  const [selectedPlan, setSelectedPlan] = useState<string>(initialPlan);
-  const [currentBaseFee, setCurrentBaseFee] = useState<number>(
-    PLAN_CONFIGS.find((p) => p.name === initialPlan)?.baseFee || 0,
+  const [selectedPlan, setSelectedPlan] = useState<string>(
+    initialPlanConfig.name,
   );
+  const [currentPlanConfig, setCurrentPlanConfig] =
+    useState<PlanConfig>(initialPlanConfig);
+  const currentBaseFee = currentPlanConfig.baseFee;
 
   // Calculate pricing breakdown (single source of truth)
   const pricingBreakdown = useMemo(() => {
@@ -135,9 +144,9 @@ export function PricingCalculator({
   }, [pricingBreakdown]);
 
   const handlePlanChange = (value: string) => {
-    const newPlan = PLAN_CONFIGS.find((plan) => plan.name === value);
-    setSelectedPlan(value);
-    setCurrentBaseFee(newPlan?.baseFee || 0);
+    const newPlan = getPlanConfig(value);
+    setSelectedPlan(newPlan.name);
+    setCurrentPlanConfig(newPlan);
   };
 
   const handleEventsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,8 +177,7 @@ export function PricingCalculator({
                   <SelectContent>
                     {PLAN_CONFIGS.map((plan) => (
                       <SelectItem key={plan.name} value={plan.name}>
-                        {plan.name}{" "}
-                        {plan.baseFee > 0 ? `($${plan.baseFee}/month)` : ""}
+                        {plan.name} ({plan.priceLabel})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -196,7 +204,7 @@ export function PricingCalculator({
             </div>
 
             <CornerBox className="p-4 bg-surface-1 sm:p-6 flex items-center justify-center">
-              {currentBaseFee > 0 ? (
+              {currentBaseFee !== null ? (
                 <div className="w-full text-center">
                   <div className="flex flex-col gap-3 justify-center items-center text-base font-medium sm:flex-row sm:gap-4 sm:text-lg">
                     <div className="text-center">
@@ -232,12 +240,22 @@ export function PricingCalculator({
                   </div>
                 </div>
               ) : (
-                <div className="w-full text-center">
+                <div className="w-full max-w-md text-center">
                   <div className="text-2xl font-bold sm:text-3xl text-primary">
-                    {formatCurrency(calculatedPrice)}
+                    Custom pricing
                   </div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    Total Usage Cost / Month
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    Contact sales for an enterprise quote. Usage below is shown
+                    at the standard graduated rates, and yearly commitments may
+                    qualify for custom volume pricing.
+                  </div>
+                  <div className="mt-4">
+                    <div className="text-xl font-bold text-primary sm:text-2xl">
+                      {formatCurrency(calculatedPrice)}
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Estimated usage / month at standard rates
+                    </div>
                   </div>
                 </div>
               )}

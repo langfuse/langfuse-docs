@@ -183,7 +183,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: false,
       description:
         "For large scale teams. Enterprise-grade support and security.",
-      price: "$2499",
+      price: "Custom",
       calloutLink: {
         text: "Enterprise FAQ",
         href: "/enterprise",
