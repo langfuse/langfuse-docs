@@ -33,6 +33,10 @@ const f37Analog = localFont({
 });
 import { Hubspot } from "@/components/analytics/hubspot";
 import { GoogleAds } from "@/components/analytics/google-ads";
+import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
+import { RedditPixel } from "@/components/analytics/reddit-ads";
+import { TwitterPixel } from "@/components/analytics/twitter-ads";
+import { ConversionTracker } from "@/components/analytics/ConversionTracker";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
@@ -92,6 +96,10 @@ export default function RootLayout({
           <>
             <GoogleTagManager gtmId="GTM-NGLK4TZX" />
             <GoogleAds />
+            <LinkedInInsightTag />
+            <RedditPixel />
+            <TwitterPixel />
+            <ConversionTracker />
             <Hubspot />
             <Script
               id="cookieyes"

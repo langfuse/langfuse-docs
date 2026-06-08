@@ -1,0 +1,26 @@
+// Reddit Pixel + conversion tracking.
+//
+// Fill in the advertiser pixel ID from Reddit Ads Manager
+// (Events Manager → Pixel). It looks like "t2_xxxxxxxx".
+//
+// Reddit uses standard event names (no per-conversion ID needed). The pixel
+// only loads when the ID is set, so it is safe to ship before the ID exists.
+export const REDDIT_PIXEL_ID: string = ""; // e.g. "t2_xxxxxxxx"
+
+export const REDDIT_EVENTS: {
+  launchApp: string;
+  talkToUs: string;
+} = {
+  launchApp: "SignUp", // sign up / sign in
+  talkToUs: "Lead", // talk-to-us form lead
+};
+
+export const isRedditEnabled = REDDIT_PIXEL_ID !== "";
+
+export function reportRedditConversion(eventName: string) {
+  if (typeof window === "undefined" || typeof window.rdt !== "function") {
+    return;
+  }
+
+  window.rdt("track", eventName);
+}
