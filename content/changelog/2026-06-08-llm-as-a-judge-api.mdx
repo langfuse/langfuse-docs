@@ -1,0 +1,50 @@
+---
+date: 2026-06-08
+title: Manage LLM-as-a-Judge evaluators via the API
+description: Create, version, and update LLM-as-a-Judge evaluators and evaluation rules programmatically through the (unstable) public API.
+author: Marlies
+canonical: /docs/evaluation/evaluation-methods/llm-as-a-judge
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Code } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now set up and manage LLM-as-a-Judge evaluation programmatically through the public API, in addition to the Langfuse UI. This lets you define how data is scored and what data gets evaluated entirely in code, so your evaluation setup can live in version control and roll out the same way across projects.
+
+Common things this unlocks:
+
+- **Version-control your evaluators** — keep judge prompts, output definitions, and model configuration in your repo and create new versions through CI.
+- **Replicate setups across projects** — script the same evaluators and rules into staging and production instead of recreating them by hand.
+- **Automate rollouts** — enable, pause, or repoint evaluation rules as part of a deployment pipeline.
+
+The endpoints are designed to be explored and consumed by coding agents. Point an agent at the API reference and let it create evaluators and wire up evaluation rules for you, rather than clicking through the UI.
+
+The API splits the setup into two resources:
+
+- **Evaluators** define _how_ to score data: the judge prompt, its `{{variables}}`, the structured output definition (numeric, boolean, or categorical), and the optional model configuration. Evaluators are versioned — creating one under an existing name produces the next version, and active rules automatically move to it.
+- **Evaluation rules** define _what_ gets evaluated: the target (live observations or experiments), filters, sampling rate, and the mapping from your data onto the evaluator's variables. Each rule references an evaluator family by `name` and `scope`.
+
+```
+POST   /api/public/unstable/evaluators
+GET    /api/public/unstable/evaluators
+GET    /api/public/unstable/evaluators/{evaluatorId}
+
+POST   /api/public/unstable/evaluation-rules
+GET    /api/public/unstable/evaluation-rules
+GET    /api/public/unstable/evaluation-rules/{evaluationRuleId}
+PUT    /api/public/unstable/evaluation-rules/{evaluationRuleId}
+DELETE /api/public/unstable/evaluation-rules/{evaluationRuleId}
+```
+
+<Callout type="info">
+  These endpoints are **unstable** and may change while the underlying evaluation data model is being redesigned. The UI workflow remains fully supported.
+</Callout>
+
+## Get started
+
+<Cards num={2}>
+  <Card title="LLM-as-a-Judge documentation" href="/docs/evaluation/evaluation-methods/llm-as-a-judge" icon={<Book />} />
+  <Card title="Evaluators API reference" href="https://api.reference.langfuse.com/#tag/unstableevaluators" icon={<Code />} />
+</Cards>
