@@ -5,7 +5,7 @@
 //
 // Reddit uses standard event names (no per-conversion ID needed). The pixel
 // only loads when the ID is set, so it is safe to ship before the ID exists.
-export const REDDIT_PIXEL_ID: string = ""; // e.g. "t2_xxxxxxxx"
+export const REDDIT_PIXEL_ID: string = "a2_j57h34zw84n1";
 
 export const REDDIT_EVENTS: {
   launchApp: string;
