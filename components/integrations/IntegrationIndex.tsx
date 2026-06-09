@@ -27,6 +27,23 @@ const categoryConfig: Record<
     title: "Native",
     description: "Native integrations with Langfuse",
     additionalLinks: additionalLinksFromMeta(nativeIntegrationsMeta),
+    featuredLinks: [
+      {
+        route: "/docs/api-and-data-platform/features/public-api",
+        frontMatter: { title: "API" },
+        title: "API",
+      },
+      {
+        route: "/docs/sdk/python/sdk-v3",
+        frontMatter: { title: "Python SDK" },
+        title: "Python SDK",
+      },
+      {
+        route: "/docs/sdk/typescript/guide",
+        frontMatter: { title: "JS/TS SDK" },
+        title: "JS/TS SDK",
+      },
+    ],
   },
   frameworks: {
     title: "Frameworks",
