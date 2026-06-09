@@ -1,7 +1,8 @@
 // Reddit Pixel + conversion tracking.
 //
-// Fill in the advertiser pixel ID from Reddit Ads Manager
-// (Events Manager → Pixel). It looks like "t2_xxxxxxxx".
+// Fill in the pixel ID from Reddit Ads Manager (Events Manager → Pixel →
+// "Install the Pixel"). It is the `pixel_id` / `rdt('init', …)` value and uses
+// the "a2_" prefix (e.g. "a2_xxxxxxxxx") — not the "t2_" account-ID prefix.
 //
 // Reddit uses standard event names (no per-conversion ID needed). The pixel
 // only loads when the ID is set, so it is safe to ship before the ID exists.
