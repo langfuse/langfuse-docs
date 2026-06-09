@@ -11,6 +11,15 @@ import {
 } from "@/lib/og-url";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { AISearch } from "@/components/inkeep/search";
+import { Hubspot } from "@/components/analytics/hubspot";
+import { GoogleAds } from "@/components/analytics/google-ads";
+import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
+import { RedditPixel } from "@/components/analytics/reddit-ads";
+import { TwitterPixel } from "@/components/analytics/twitter-ads";
+import { ConversionTracker } from "@/components/analytics/ConversionTracker";
+import "../style.css";
+import "@vidstack/react/player/styles/base.css";
+import "../src/overrides.css";
 
 const interVariable = Inter({
   subsets: ["latin"],
@@ -31,15 +40,6 @@ const f37Analog = localFont({
   display: "swap",
   weight: "500",
 });
-import { Hubspot } from "@/components/analytics/hubspot";
-import { GoogleAds } from "@/components/analytics/google-ads";
-import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
-import { RedditPixel } from "@/components/analytics/reddit-ads";
-import { TwitterPixel } from "@/components/analytics/twitter-ads";
-import { ConversionTracker } from "@/components/analytics/ConversionTracker";
-import "../style.css";
-import "@vidstack/react/player/styles/base.css";
-import "../src/overrides.css";
 
 const defaultOgImageUrl = buildDefaultSiteOgImageUrl();
 

@@ -18,7 +18,12 @@ export const REDDIT_EVENTS: {
 export const isRedditEnabled = REDDIT_PIXEL_ID !== "";
 
 export function reportRedditConversion(eventName: string) {
-  if (typeof window === "undefined" || typeof window.rdt !== "function") {
+  if (
+    !eventName ||
+    !REDDIT_PIXEL_ID ||
+    typeof window === "undefined" ||
+    typeof window.rdt !== "function"
+  ) {
     return;
   }
 
