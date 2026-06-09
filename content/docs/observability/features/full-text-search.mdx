@@ -21,15 +21,6 @@ Use the search bar above the traces and observations tables to search across `in
 
 Search uses [ClickHouse full-text search](https://clickhouse.com/docs/engines/table-engines/mergetree-family/textindexes). Text indexes let Langfuse skip over data that cannot match a query before reading full observation payloads, which keeps search fast even for large projects with high-volume traces. You can read more in the [ClickHouse GA announcement](https://clickhouse.com/blog/full-text-search-ga-release).
 
-In our benchmarks, some searches moved from multi-second scans over hundreds of GB to sub-second reads over less than 1 GB:
-
-| Query shape               | Before                                   | With full-text search                |
-| ------------------------- | ---------------------------------------- | ------------------------------------ |
-| Large input/output search | 18.205s, 66,130,828 rows, 493.79 GB read | 0.447s, 140,956 rows, 728.51 MB read |
-| Metadata-heavy search     | 1.612s, 66,130,828 rows, 53.14 GB read   | 0.201s, 58,730 rows, 438.83 MB read  |
-
-These gains depend on the search term and data distribution. Queries with very common tokens or substring-only filters may see more modest gains.
-
 ## Search via the API [#api]
 
 The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) supports a `matches` operator for token-based full-text search on `input`, `output`, and string `metadata` filters.
