@@ -6,14 +6,14 @@
 //
 // The Insight Tag only loads when a partner ID is set, and each conversion only
 // fires when its ID is non-zero, so it is safe to ship before the IDs exist.
-export const LINKEDIN_PARTNER_ID: string = ""; // e.g. "1234567"
+export const LINKEDIN_PARTNER_ID: string = "9239642";
 
 export const LINKEDIN_CONVERSIONS: {
   launchApp: number;
   talkToUs: number;
 } = {
-  launchApp: 0, // sign up / sign in
-  talkToUs: 0, // talk-to-us form lead
+  launchApp: 28126114, // "Launch App (Sign up)" conversion
+  talkToUs: 28126122, // "Talk to Us (Lead)" conversion
 };
 
 export const isLinkedInEnabled = LINKEDIN_PARTNER_ID !== "";
