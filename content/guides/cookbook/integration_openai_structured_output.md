@@ -20,6 +20,7 @@ If you use the OpenAI Python SDK, you can use the [Langfuse drop-in replacement]
 
 Alternative imports:
 + from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
+
 ```
 
 
