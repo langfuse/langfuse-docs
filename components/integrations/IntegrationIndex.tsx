@@ -122,6 +122,11 @@ const categoryConfig: Record<
       "Use Langfuse data and metrics in your own application and data platform",
     additionalLinks: additionalLinksFromMeta(dataPlatformIntegrationsMeta),
   },
+  "developer-tools": {
+    title: "Developer Tools",
+    description:
+      "Trace AI coding assistants, editors, and CLIs, or use Langfuse directly from your editor",
+  },
   other: {
     title: "Other",
     description: "Other integrations",
