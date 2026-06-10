@@ -385,7 +385,7 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 </Tab>
 <Tab>
-Boolean scores must be provided as a float (`0` or `1`). The value's string equivalent will be automatically populated and is accessible on read.
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean.
 
 ```bash
 curl -X POST https://cloud.langfuse.com/api/public/scores \
@@ -842,7 +842,7 @@ Certain score properties might be inferred based on your input:
 
 - **If you don't provide a score data type** it will always be inferred. See tables below for details.
 - **For boolean and categorical scores**, we will provide the score value in both numerical and string format where possible. The score value format that is not provided as input, i.e. the translated value is referred to as the inferred value in the tables below.
-- **On read for boolean scores both** numerical and string representations of the score value will be returned, e.g. both 1 and True.
+- **On read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores)**, boolean scores are returned as a single boolean `value`.
 - **For categorical scores**, the string representation is always provided and a numerical mapping of the category will be produced only if a `ScoreConfig` was provided.
 
 Detailed Examples:
