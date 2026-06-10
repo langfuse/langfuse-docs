@@ -15,7 +15,7 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
   to `/api/public/v3/scores`.
 </Callout>
 
-The new `GET /api/public/v3/scores` endpoint makes exporting scores at scale faster and simpler: cursor-based pagination, a single typed `value` field, and filters that accept lists of values and numeric ranges.
+The new `GET /api/public/v3/scores` endpoint makes querying scores faster and simpler: cursor-based pagination, a single typed `value` field, and filters that accept lists of values and numeric ranges.
 
 ```
 GET /api/public/v3/scores?dataType=NUMERIC&name=hallucination,toxicity&valueMax=0.5
@@ -23,13 +23,13 @@ GET /api/public/v3/scores?dataType=NUMERIC&name=hallucination,toxicity&valueMax=
 
 Common cases this simplifies:
 
-- **Sync scores to your warehouse** with cursor pagination that stays stable while new scores are written — no drifting page offsets on large exports.
+- **Compare experiment runs** by fetching the scores of one or more dataset runs in a single request, e.g. `experimentId=run-a,run-b`.
 - **Pull only failing evals** by combining `name`, `dataType=NUMERIC`, and `valueMax` in a single request instead of filtering client-side.
 - **Audit annotations per reviewer** with the new `authorUserId` filter, e.g. `source=ANNOTATION&authorUserId=user-123`.
 
 **One typed `value` field.** The v2 split between a numeric `value` and a separate `stringValue` is gone. v3 returns a single `value` whose type follows the `dataType`: a number for `NUMERIC`, a boolean for `BOOLEAN`, and a string for `CATEGORICAL`, `TEXT`, and `CORRECTION`. No more decoding booleans from `1`/`0` or looking up category strings.
 
-**Cursor-based pagination.** Pass `limit` (max 100) and follow the base64url `cursor` from the response `meta` to fetch the next page; it's absent on the final page. This replaces v2's `page` parameter.
+**Cursor-based pagination.** Pass `limit` (max 100) and follow the base64url `cursor` from the response `meta` to fetch the next page; it's absent on the final page. This replaces v2's `page` parameter. For recurring full exports to your data warehouse, use the [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through the API.
 
 **List filters and value ranges.** Most filters now take comma-separated lists — `id`, `name`, `source`, `dataType`, `environment`, `configId`, `queueId`, `authorUserId`, `traceId`, `sessionId`, `observationId`, and `experimentId` (previously `datasetRunId`). Values within one parameter are OR-ed, parameters are AND-ed, and enum filters like `source` and `dataType` are case-insensitive. The v2 `operator`/`value` pair is replaced by an exact-match `value` list (for `NUMERIC`, `BOOLEAN`, and `CATEGORICAL` scores) plus `valueMin`/`valueMax` range bounds for numeric scores.
 
