@@ -31,18 +31,18 @@ Common cases this simplifies:
 
 **Cursor-based pagination.** Pass `limit` (max 100) and follow the `cursor` from the response `meta` to fetch the next page; it's absent on the final page. This replaces v2's `page` parameter. For recurring full exports to your data warehouse, use the [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through the API.
 
-**List filters and value ranges.** Most filters now take comma-separated lists — `id`, `name`, `source`, `dataType`, `environment`, `configId`, `queueId`, `authorUserId`, `traceId`, `sessionId`, `observationId`, and `experimentId` (previously `datasetRunId`). Values within one parameter are OR-ed, parameters are AND-ed, and enum filters like `source` and `dataType` are case-insensitive. The v2 `operator`/`value` pair is replaced by an exact-match `value` list (for `NUMERIC`, `BOOLEAN`, and `CATEGORICAL` scores) plus `valueMin`/`valueMax` range bounds for numeric scores.
+**List filters and value ranges.** Most filters now take comma-separated lists — `id`, `name`, `source`, `dataType`, `environment`, `configId`, `queueId`, `authorUserId`, `traceId`, `sessionId`, `observationId`, and `experimentId` (previously `datasetRunId`). Values within one parameter are OR-ed, parameters are AND-ed: `name=hallucination,toxicity&source=EVAL` returns eval scores named either `hallucination` or `toxicity`. The v2 `operator`/`value` pair is replaced by an exact-match `value` list (for `NUMERIC`, `BOOLEAN`, and `CATEGORICAL` scores) plus `valueMin`/`valueMax` range bounds for numeric scores.
 
-**Selective field retrieval.** Responses default to the lean `core` group; opt into more via the `fields` parameter:
+**Selective field retrieval.** Responses always include the core fields and stay lean by default; opt into additional field groups via the `fields` parameter:
 
 ```
-GET /api/public/v3/scores?fields=core,details,subject,annotation
+GET /api/public/v3/scores?fields=details,subject,annotation
 ```
 
 - `details` — `comment`, `configId`, `metadata`
 - `subject` — what the score is attached to, as a discriminated object (`kind`: `trace`, `observation`, `session`, or `experiment`) replacing v2's flat `traceId`/`observationId`/`sessionId`/`datasetRunId` fields
 - `annotation` — `authorUserId`, `queueId`
 
-**Migrating from v2.** v3 queries scores directly instead of joining traces, which keeps response times predictable at any volume. Filters therefore target score properties: for trace-level questions like "scores for traces of user X", the [Metrics API](/docs/metrics/features/metrics-api) replaces the v2 `userId` and `traceTags` filters and the `trace` field group. Every filter is now an explicit, typed parameter, replacing v2's JSON-stringified `filter` argument, and fetching a single score works through the `id` filter, replacing the get-by-id endpoint. Validation fails fast: invalid combinations (e.g. `valueMin` without `dataType=NUMERIC`, or unknown `fields` groups) return HTTP 400 instead of silently returning unfiltered results.
+**Migrating from v2.** v3 queries scores directly instead of joining traces, which keeps response times predictable at any volume. Filters therefore target score properties: for trace-level questions like "scores for traces of user X", the [Metrics API](/docs/metrics/features/metrics-api) replaces the v2 `userId` and `traceTags` filters and the `trace` field group. Every filter is now an explicit, typed parameter, replacing v2's JSON-stringified `filter` argument, and fetching a single score works through the `id` filter, replacing the get-by-id endpoint. Invalid filter combinations are rejected with HTTP 400.
 
 The full parameter reference is in the [API docs](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores).
