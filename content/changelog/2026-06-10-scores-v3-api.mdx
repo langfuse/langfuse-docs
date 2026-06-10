@@ -33,7 +33,7 @@ Common cases this simplifies:
 
 **List filters and value ranges.** Most filters now take comma-separated lists — `id`, `name`, `source`, `dataType`, `environment`, `configId`, `queueId`, `authorUserId`, `traceId`, `sessionId`, `observationId`, and `experimentId` (previously `datasetRunId`). Values within one parameter are OR-ed, parameters are AND-ed: `name=hallucination,toxicity&source=EVAL` returns eval scores named either `hallucination` or `toxicity`. The v2 `operator`/`value` pair is replaced by an exact-match `value` list (for `NUMERIC`, `BOOLEAN`, and `CATEGORICAL` scores) plus `valueMin`/`valueMax` range bounds for numeric scores.
 
-**Selective field retrieval.** Responses always include the core fields and stay lean by default; opt into additional field groups via the `fields` parameter:
+**Selective field retrieval.** Responses always include the core fields — `id`, `projectId`, `name`, `value`, `dataType`, `source`, `timestamp`, `environment`, `createdAt`, and `updatedAt` — and stay lean by default; opt into additional field groups via the `fields` parameter:
 
 ```
 GET /api/public/v3/scores?fields=details,subject,annotation
