@@ -1,7 +1,7 @@
 ---
 title: "The week users extracted our AWS credentials — and why we slept fine"
 date: 2026/06/08
-description: "Code evaluators let Langfuse users run their own Python or TypeScript to score incoming LLM observability data. Here is how we safely execute that code across {{TENANT_COUNT}} tenants and {{MONTHLY_RUNS}} monthly runs."
+description: "Code evaluators let Langfuse users run their own Python or TypeScript to score incoming LLM observability data. Here is how we safely execute that code across thousands of tenants and millions of monthly runs."
 tag: engineering
 author: Tobias
 ---
@@ -10,13 +10,14 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="The week users extracted our AWS credentials — and why we slept fine"
-  description="Code evaluators let Langfuse users run their own Python or TypeScript to score incoming LLM observability data. Here is how we safely execute that code across {{TENANT_COUNT}} tenants and {{MONTHLY_RUNS}} monthly runs."
+  description="Code evaluators let Langfuse users run their own Python or TypeScript to score incoming LLM observability data. Here is how we safely execute that code across thousands of tenants and millions of monthly runs."
   authors={["tobiaswochinger"]}
+  date="June 8, 2026"
 />
 
 Two weeks ago we shipped [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators): you write a small Python or TypeScript function and Langfuse runs it to score your traces. Last week, a few users started probing the boundaries — extracting our AWS credentials from the runtime to find out what an attacker could actually do with them.
 
-We are still sleeping fine. This post is about the system that lets us: how we run our users' code inside our own infrastructure, next to **{{TENANT_COUNT}} other tenants**, at peak around **{{MONTHLY_RUNS}} executions a month**, without it becoming the scariest thing we operate.
+We are still sleeping fine. This post is about the system that lets us: how we run our users' code inside our own infrastructure, next to **thousands of other tenants**, at peak **millions of executions a month**, without it becoming the scariest thing we operate.
 
 <Video
   src="https://static.langfuse.com/docs-videos/2026-05-29-code-evaluator-creation-flow.mp4"
@@ -46,7 +47,7 @@ The hard requirement was **multi-tenant security**. The test I kept coming back 
 
 And the stakes are real. Companies like [SumUp](/customers/sumup) (AI support for four million payment merchants), [Khan Academy](/customers/khan-academy) (its Khanmigo student tutor), and [Merck](/customers/merckgroup) (80+ AI teams) use Langfuse to observe the LLM features they ship to real users. Whatever we built had to assume the code running inside it was hostile.
 
-Around that, we wanted to support **Python and TypeScript** (teams write evaluators in whatever their app is written in), handle **~{{MONTHLY_RUNS}} executions a month**, and not wreck the "easy to self-host" story Langfuse is built on.
+Around that, we wanted to support **Python and TypeScript** (teams write evaluators in whatever their app is written in), handle **millions of executions a month**, and not wreck the "easy to self-host" story Langfuse is built on.
 
 Two things were explicitly _non_-requirements for v1 — and that mattered as much as the requirements:
 
@@ -73,15 +74,15 @@ AWS Lambda fit the shape of the problem almost exactly. Each invocation runs in 
 
 The first thing to get right is that Lambda reuses execution environments. A "cold" invocation gets a fresh microVM; subsequent "warm" invocations can reuse the same one, including whatever the previous run left behind in memory or in `/tmp`. For most workloads that reuse is a feature. For running untrusted code from different tenants, naively sharing a warm environment between two of them is a data leak waiting to happen.
 
-### Solving warm environments without {{LAMBDA_COUNT}} Lambdas
+### Solving warm environments without tens of thousands of Lambdas
 
-So how do you stop a warm environment from ever being reused across tenants? The most intuitive answer is to give every tenant its own pair of functions — one Python, one TypeScript. With {{TENANT_COUNT}} tenants, that is more than **{{LAMBDA_COUNT}} Lambdas**.
+So how do you stop a warm environment from ever being reused across tenants? The most intuitive answer is to give every tenant its own pair of functions — one Python, one TypeScript. With thousands of tenants, that is **tens of thousands of Lambdas**.
 
-It would work, but the operational weight is brutal. You provision two functions every time a project is created, tear them down when it is deleted, and — worst of all — keep the small runner harness that lives _inside_ each function in sync across all eleven thousand of them every time you change a line of it. No thanks.
+It would work, but the operational weight is brutal. You provision two functions every time a project is created, tear them down when it is deleted, and — worst of all — keep the small runner harness that lives _inside_ each function in sync across the entire fleet every time you change a line of it. No thanks.
 
 Luckily, AWS shipped a better answer: [tenant isolation](https://docs.aws.amazon.com/lambda/latest/dg/tenant-isolation.html), a relatively new Lambda capability. You pass a tenant ID with each invocation, and Lambda guarantees an execution environment is only ever reused for the _same_ tenant. Different tenant, different environment — enforced by the platform, not by our code.
 
-That collapses eleven thousand functions back down to **two**: one shared Python runner and one shared TypeScript runner. We key the isolation on `organizationId:projectId`, because project is already the primary data-isolation boundary everywhere else in Langfuse. The accepted tradeoff is that two evaluators in the same project (and same language) can land in the same execution environment — but everything in a project is already mutually visible within that project, so that shared boundary exposes nothing a user couldn't already see.
+That collapses that fleet back down to **two**: one shared Python runner and one shared TypeScript runner. We key the isolation on `organizationId:projectId`, because project is already the primary data-isolation boundary everywhere else in Langfuse. The accepted tradeoff is that two evaluators in the same project (and same language) can land in the same execution environment — but everything in a project is already mutually visible within that project, so that shared boundary exposes nothing a user couldn't already see.
 
 The headroom is comfortable: Lambda allows us roughly 1,250 isolated environments per runner, and the most distinct projects we have ever seen run evaluators in a single hour is a little over 200. Moving to a finer-grained key later is a config change, not a redesign.
 
