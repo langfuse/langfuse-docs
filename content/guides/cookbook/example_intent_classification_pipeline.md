@@ -638,7 +638,7 @@ for index, row in cluster_traces_df.iterrows():
 
 ## Conclusion
 
-Each approach has its pros and cons.  
+Each approach has its pros and cons.\
 
 The supervised approach requires a lot of effort upfront to prepare a labelled dataset of an appropriate size.  During inference, it will only be able to assign labels that it was trained on, so it will not handle new cases well.  However, the inference will be consistent.
 

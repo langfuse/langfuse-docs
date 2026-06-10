@@ -23,7 +23,7 @@ We'll walk through a simple example of using smolagents and integrating it with 
 ### Step 1: Install Dependencies
 
 ```python
-%pip install langfuse 'smolagents[telemetry]' opentelemetry-sdk opentelemetry-exporter-otlp openinference-instrumentation-smolagents
+%pip install langfuse 'smolagents[telemetry]' opentelemetry-sdk opentelemetry-exporter-otlp openinference-instrumentation-smolagents ddgs
 ```
 
 ### Step 2: Set Up Environment Variables
@@ -80,10 +80,10 @@ from smolagents import (
     ToolCallingAgent,
     DuckDuckGoSearchTool,
     VisitWebpageTool,
-    HfApiModel,
+    InferenceClientModel,
 )
 
-model = HfApiModel(
+model = InferenceClientModel(
     model_id="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
 )
 

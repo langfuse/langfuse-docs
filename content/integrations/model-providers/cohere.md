@@ -12,7 +12,7 @@ This guide shows you how to integrate Cohere with Langfuse using the OpenAI SDK 
 
 > **What is Cohere?** [Cohere](https://docs.cohere.com/docs/) is an AI platform that provides state-of-the-art language models via API, allowing developers to build applications with natural language understanding capabilities.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform for tracing, monitoring, and debugging LLM applications.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source AI engineering platform for tracing, monitoring, and debugging LLM applications.
 
 ## Step 1: Install Dependencies
 

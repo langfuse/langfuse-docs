@@ -1,5 +1,6 @@
 ---
-title: Example Multi Modal Traces
+title: "Example: Multi-modality and attachments"
+source: ⚠️ Jupyter notebook
 category: Examples
 description: Examples of how to use multi-modality and attachments with the Langfuse Python SDK.
 ---

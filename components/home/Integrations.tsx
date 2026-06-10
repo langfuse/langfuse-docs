@@ -246,7 +246,7 @@ type MarqueeItem = { label: string; href: string; icon: string };
 const marqueeRow1: MarqueeItem[] = [
   {
     label: "Claude Code",
-    href: "/integrations/other/claude-code",
+    href: "/integrations/developer-tools/claude-code",
     icon: "/images/integrations/anthropic_icon.png",
   },
   {
@@ -311,7 +311,7 @@ const marqueeRow1: MarqueeItem[] = [
   },
   {
     label: "Cursor",
-    href: "/integrations/other/cursor",
+    href: "/integrations/developer-tools/cursor",
     icon: "/images/integrations/cursor_icon.png",
   },
   {

@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 import {
   contactFormSchema,
   generateEmailContent,
+  generateEmailHtmlContent,
 } from "@/lib/contact-sales-form";
 
 export async function POST(request: NextRequest) {
@@ -31,6 +32,7 @@ export async function POST(request: NextRequest) {
 
     const data = validationResult.data;
     const emailContent = generateEmailContent(data);
+    const emailHtmlContent = generateEmailHtmlContent(data);
 
     const transporter = nodemailer.createTransport(smtpUrl);
 
@@ -40,6 +42,7 @@ export async function POST(request: NextRequest) {
       replyTo: "sales@langfuse.com",
       subject: `Langfuse - ${data.company}`,
       text: emailContent,
+      html: emailHtmlContent,
     });
 
     return NextResponse.json({ success: true });

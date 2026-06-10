@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense } from "react";
-import { Header } from "@/components/Header";
 import { ContactSalesForm } from "@/components/ContactSalesForm";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
@@ -14,6 +13,7 @@ import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import { TextHighlight } from "@/components/ui/text-highlight";
 
 function SwitchToggle({
   checked,
@@ -110,7 +110,7 @@ function TalkToUsContent() {
         </ul>
       </div>
       <Text className="text-left not-prose">
-        Langfuse is the most widely adopted LLM Engineering platform with{" "}
+        Langfuse is the most widely adopted AI Engineering platform with{" "}
         <strong className="font-[580]">
           {getGitHubStars().toLocaleString()} GitHub stars
         </strong>
@@ -229,15 +229,18 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
 
   return (
     <HomeSection>
-      <Header
-        title={isDiscoverOpen ? "See Langfuse in Action" : "Get a Demo"}
-        h="h1"
-        description={
-          isDiscoverOpen
+      <div className="not-prose flex flex-col gap-2 mb-6 items-center text-center text-balance">
+        <Heading as="h1" size="large" className="m-0">
+          <TextHighlight>
+            {isDiscoverOpen ? "See Langfuse in action" : "Get a demo"}
+          </TextHighlight>
+        </Heading>
+        <Text className="m-0">
+          {isDiscoverOpen
             ? "Watch short videos to see how Langfuse helps you build better LLM applications"
-            : "Learn more about Langfuse — talk to us or watch videos"
-        }
-      />
+            : "Learn more about Langfuse — talk to us or watch videos"}
+        </Text>
+      </div>
 
       <div className="w-full max-w-6xl px-4 not-prose">
         <div className="flex flex-col md:flex-row gap-8">

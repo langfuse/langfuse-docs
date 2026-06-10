@@ -19,7 +19,22 @@ graph LR
 ```
 
 - **Web container (NextJs)**: Serves the UI application and all APIs.
-- **Worker container (Express)**: Processes ingestion events in the background and executes async tasks (e.g. exports, LLM as a Judge).
+- **Worker container (Express)**: Processes ingestion events in the background and executes async tasks (e.g. exports, eval execution).
+
+### Evaluation Layer
+
+```mermaid
+graph LR
+    Worker["Langfuse Worker<br/>(Evaluation Orchestration)"]
+    LLM["External LLM Providers<br/>(LLM-as-a-Judge)"]
+    CodeEval["AWS Lambda<br/>(Code Evaluator Runners)"]
+
+    Worker -->|LLM API Calls| LLM
+    Worker -->|CodeEvalDispatcher| CodeEval
+```
+
+- **LLM-as-a-Judge**: The worker calls external LLM providers to execute model-based evaluators.
+- **Code evaluator Lambda runners**: Execute [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) outside the worker through the `CodeEvalDispatcher` abstraction. Production deployments use tenant-isolated AWS Lambda runners with [AWS Lambda tenant isolation](https://docs.aws.amazon.com/lambda/latest/dg/tenant-isolation.html).
 
 ### Storage Layer
 
@@ -98,10 +113,23 @@ graph TB
 
     subgraph VPN["<span style='display:block; width:100%; text-align:left; white-space: nowrap;'><i>Langfuse Cloud (US, EU, HIPAA)</i></span>"]
         ECS["AWS ECS Fargate (Web + Worker)"]
-        ECS --> ElastiCache["ElastiCache Redis (Clustered)"]
-        ECS --> S3[S3 Buckets]
-        ECS --> Aurora[Aurora PostgreSQL]
-        ECS --> CH[ClickHouse Cloud]
+
+        subgraph StorageInfra["Storage"]
+            ElastiCache["ElastiCache Redis (Clustered)"]
+            S3[S3 Buckets]
+            Aurora[Aurora PostgreSQL]
+            CH[ClickHouse Cloud]
+        end
+
+        subgraph EvaluationInfra["Evaluation Execution"]
+            Lambda["AWS Lambda<br/>(Tenant-Isolated Code Evaluator Runners)"]
+        end
+
+        ECS --> ElastiCache
+        ECS --> S3
+        ECS --> Aurora
+        ECS --> CH
+        ECS -->|CodeEvalDispatcher| Lambda
     end
 
     subgraph OSS["Managed OSS Deployment Templates"]

@@ -295,3 +295,16 @@ curl -X POST 'https://<host set in project settings>/chat/completions' \
   ]
 }'
 ```
+
+### OpenAI Responses API endpoints
+
+Some OpenAI-compatible providers expose the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses) instead of the Chat Completions API. For these providers, enable **Use Responses API** on the OpenAI LLM Connection so Langfuse sends Playground, LLM-as-a-Judge, and prompt experiment requests through the Responses API.
+
+For example, to use OpenAI models on Amazon Bedrock through the Bedrock Mantle endpoint:
+
+1. Navigate to **Project Settings** > **LLM Connections** and click **Add new LLM API key**.
+2. Select **OpenAI** as the provider.
+3. Enter your [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html).
+4. Under **Advanced Settings**, set the **Base URL** to `https://bedrock-mantle.<aws-region>.api.aws/openai/v1`.
+5. Enable **Use Responses API**.
+6. Add the **custom model names** available in your Bedrock account, for example `openai.gpt-5.5` or `openai.gpt-5.4`.

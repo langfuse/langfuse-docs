@@ -68,6 +68,7 @@ function contentPathToRoute(filePath) {
     changelog: "changelog",
     faq: "faq",
     handbook: "handbook",
+    academy: "academy",
     security: "security",
     blog: "blog",
     customers: "users",
