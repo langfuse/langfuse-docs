@@ -138,7 +138,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
 
 </Tab>
 <Tab>
-Boolean scores must be provided as a float. The value's string equivalent will be automatically populated and is accessible on read. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
 
 ```python
 from langfuse import get_client
@@ -295,7 +295,7 @@ await langfuse.flush();
 
 </Tab>
 <Tab>
-Boolean scores must be provided as a float. The value's string equivalent will be automatically populated and is accessible on read. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
 
 ```ts
 import { LangfuseClient } from "@langfuse/client";
@@ -345,7 +345,7 @@ await langfuse.flush();
 </Tab>
 <Tab>
 
-You can also create scores directly via the [REST API](https://api.reference.langfuse.com/#tag/score/POST/api/public/scores). Authenticate using HTTP Basic Auth with your Langfuse Public Key as username and Secret Key as password.
+You can also create scores directly via the [REST API](https://api.reference.langfuse.com/#tag/legacyscorev1/POST/api/public/scores). Authenticate using HTTP Basic Auth with your Langfuse Public Key as username and Secret Key as password.
 
 <Tabs items={["Numeric", "Categorical", "Boolean", "Text"]}>
 <Tab>
@@ -745,7 +745,7 @@ await langfuse.flush();
 </Tab>
 <Tab>
 
-You can also enforce score configs via the [REST API](https://api.reference.langfuse.com/#tag/score/POST/api/public/scores) by providing a `configId`.
+You can also enforce score configs via the [REST API](https://api.reference.langfuse.com/#tag/legacyscorev1/POST/api/public/scores) by providing a `configId`.
 
 <Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
 <Tab>
