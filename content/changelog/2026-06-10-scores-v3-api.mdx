@@ -1,0 +1,48 @@
+---
+date: 2026-06-10
+title: "Scores API v3"
+description: Cursor-based pagination, a typed value field, and list-based filters with numeric ranges on the new GET /api/public/v3/scores endpoint.
+author: Niklas
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+<Callout type="info">
+  The previous `/api/public/v2/scores` endpoints are deprecated. On deployments
+  fully migrated to [Langfuse v4](/docs/v4), they return a 404 error — switch
+  to `/api/public/v3/scores`.
+</Callout>
+
+The new `GET /api/public/v3/scores` endpoint makes exporting scores at scale faster and simpler: cursor-based pagination, a single typed `value` field, and filters that accept lists of values and numeric ranges.
+
+```
+GET /api/public/v3/scores?dataType=NUMERIC&name=hallucination,toxicity&valueMax=0.5
+```
+
+Common cases this simplifies:
+
+- **Sync scores to your warehouse** with cursor pagination that stays stable while new scores are written — no drifting page offsets on large exports.
+- **Pull only failing evals** by combining `name`, `dataType=NUMERIC`, and `valueMax` in a single request instead of filtering client-side.
+- **Audit annotations per reviewer** with the new `authorUserId` filter, e.g. `source=ANNOTATION&authorUserId=user-123`.
+
+**One typed `value` field.** The v2 split between a numeric `value` and a separate `stringValue` is gone. v3 returns a single `value` whose type follows the `dataType`: a number for `NUMERIC`, a boolean for `BOOLEAN`, and a string for `CATEGORICAL`, `TEXT`, and `CORRECTION`. No more decoding booleans from `1`/`0` or looking up category strings.
+
+**Cursor-based pagination.** Pass `limit` (max 100) and follow the base64url `cursor` from the response `meta` to fetch the next page; it's absent on the final page. This replaces v2's `page` parameter.
+
+**List filters and value ranges.** Most filters now take comma-separated lists — `id`, `name`, `source`, `dataType`, `environment`, `configId`, `queueId`, `authorUserId`, `traceId`, `sessionId`, `observationId`, and `experimentId` (previously `datasetRunId`). Values within one parameter are OR-ed, parameters are AND-ed, and enum filters like `source` and `dataType` are case-insensitive. The v2 `operator`/`value` pair is replaced by an exact-match `value` list (for `NUMERIC`, `BOOLEAN`, and `CATEGORICAL` scores) plus `valueMin`/`valueMax` range bounds for numeric scores.
+
+**Selective field retrieval.** Responses default to the lean `core` group; opt into more via the `fields` parameter:
+
+```
+GET /api/public/v3/scores?fields=core,details,subject,annotation
+```
+
+- `details` — `comment`, `configId`, `metadata`
+- `subject` — what the score is attached to, as a discriminated object (`kind`: `trace`, `observation`, `session`, or `experiment`) replacing v2's flat `traceId`/`observationId`/`sessionId`/`datasetRunId` fields
+- `annotation` — `authorUserId`, `queueId`
+
+**Migrating from v2.** v3 queries scores directly instead of joining traces, which keeps response times predictable at any volume. Filters therefore target score properties: for trace-level questions like "scores for traces of user X", the [Metrics API](/docs/metrics/features/metrics-api) replaces the v2 `userId` and `traceTags` filters and the `trace` field group. Every filter is now an explicit, typed parameter, replacing v2's JSON-stringified `filter` argument, and fetching a single score works through the `id` filter, replacing the get-by-id endpoint. Validation fails fast: invalid combinations (e.g. `valueMin` without `dataType=NUMERIC`, or unknown `fields` groups) return HTTP 400 instead of silently returning unfiltered results.
+
+The full parameter reference is in the [API docs](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores).
