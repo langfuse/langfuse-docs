@@ -22,10 +22,6 @@ As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-ea
 
 With Fable 5 landing in early June, part of the pitch was that it is strong at this kind of self-correcting loop. So we used Claude Fable 5 in Claude Code's `/goal` mode to run a simple classification auto-improvement loop end to end.
 
-<Frame>
-  ![Lance Martin post about designing loops with Fable 5](/images/blog/2026-06-10-auto-improvement-classification/lance-martin-fable-5-loops.png)
-</Frame>
-
 We gave it a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
 
 It did the job: train accuracy moved from 78% to 97% in four runs. Performance on the held-out test set barely moved. By the end, 11 test errors were shared across every prompt variant. The question shifted from "how do we run auto-improvement loops better?" to "what would the dataset have needed to contain for auto improvement to work better?"
