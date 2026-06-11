@@ -40,7 +40,7 @@ In order for the support team to actually use the internal agent, we need to mak
   }}
 />
 
-The historical tickets are grouped by recurring behavior into a few [datasets](/academy/datasets#what-makes-a-good-dataset):
+We can use AI to understand which patterns exist in the historical data from the support ticketing system, and use that to group into a few datasets by recurring behavior:
 
 <DatasetBlock
   datasets={[
@@ -98,6 +98,13 @@ The historical tickets are grouped by recurring behavior into a few [datasets](/
     },
   ]}
 />
+
+<Callout type="info">
+  Splitting into multiple datasets vs keeping it in one is a
+  [trade-off](/academy/datasets#what-makes-a-good-dataset). Grouping allows you to measure
+  performance per use case and lets you run a subset when needed. One big dataset can make sense too, especially early on when the
+  optimal split isn't clear yet.
+</Callout>
 
 We now iterate on the prompt, [running each version against these datasets](/academy/experiments#how-experiments-are-used), until the drafts reach the bar where the support team would actually find them useful. Each run is graded with:
 
