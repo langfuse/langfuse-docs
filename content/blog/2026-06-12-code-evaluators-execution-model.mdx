@@ -31,7 +31,7 @@ Evaluation is how you find out whether your LLM app is actually any good. [Readi
 
 But a lot of what teams want to check is not subjective at all. Is the output valid JSON? Does the answer match the expected value? A model is an expensive, non-deterministic way to answer questions that a few lines of code answer perfectly every time.
 
-That is what code evaluators are: you provide the Python or TypeScript code to evaluates observations, configure when it should be triggered, and Langfuse runs it for you at scale.
+That is what code evaluators are: you provide the Python or TypeScript code to evaluate observations, configure when it should be triggered, and Langfuse runs it for you at scale.
 
 Here is the "is the output valid JSON" check from above as an actual evaluator:
 
@@ -172,7 +172,7 @@ Concretely:
 
 - **No egress.** The Lambdas are attached to a separate VPC with its own security group and no access to internal or external networks. Here we were less worried about data leaking and more about our compute being abused against other parties. Rate-limited, allowlist-based egress can be added later as a separate feature.
 
-- **Strict limits.** Execution time (2s), source size (256 KiB), and input/output payloads (5.5 MiB) are all capped to prevent abuse.
+- **Strict limits.** Execution time (2s), source size (256 KB), input payloads (5.5 MB), and results (256 KB) are all capped to prevent abuse.
 
 ## Plan meets production
 
@@ -185,7 +185,7 @@ Admittedly, there was one blind spot on our side: those environment variables al
 <Frame fullWidth>
   ![GuardDuty finding: credentials for the code-eval runner role used from an
   external IP
-  address](/images/blog/2026-06-08-running-customer-code-safely/guardduty-external-ip.png)
+  address](/images/blog/2026-06-12-code-evaluators-execution-model/guardduty-external-ip.png)
 </Frame>
 
 There is not much you can do about the extraction itself: the credentials are reserved by AWS, and scrubbing things like `os.environ` or `process.env` makes it harder but not impossible. You could add in-process sandboxing as defense in depth, but extraction would remain possible while adding significant complexity and overhead.
@@ -195,14 +195,14 @@ In the end, least privilege paid off: GuardDuty flagged the runner credentials b
 <Frame fullWidth>
   ![GuardDuty anomaly list showing AccessDenied for every API call made with the
   extracted
-  credentials](/images/blog/2026-06-08-running-customer-code-safely/guardduty-access-denied.png)
+  credentials](/images/blog/2026-06-12-code-evaluators-execution-model/guardduty-access-denied.png)
 </Frame>
 
 The plan held.
 
 ## What's next
 
-We deliberately traded features for properties we could verify: no egress, no dependencies, no credentials in v1. In exchange we got tenant isolation we didn’t have to build and a runner whose stolen credentials open nothing. Most importantly, we got the feature into real users’ hands quickly - and the feedback flowing.
+We deliberately traded features for properties we could verify: no egress, no dependencies, no credentials in v1. In exchange we got tenant isolation we didn't have to build and a runner whose stolen credentials open nothing. Most importantly, we got the feature into real users' hands quickly - and the feedback flowing.
 
 If you want to try code evaluators, the [docs](/docs/evaluation/evaluation-methods/code-evaluators) are the place to start. If one of the decisions outlined here blocks you, tell us in [GitHub Discussions](https://github.com/orgs/langfuse/discussions): what we add next is driven by what you run into.
 
