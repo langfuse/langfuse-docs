@@ -140,7 +140,7 @@ This is not a story about a bad agent. The mechanics were excellent:
 
 ## What we learned
 
-**1. A clean metric still does not save you.** Exact-match accuracy against gold labels sounds foolproof, but if you keep selecting prompt versions on train accuracy, you still overfit. Round 1 did it through memorized precedents. Round 2 did it through increasingly tuned but still train-selected rules. The fix is not better prompting alone. It is a validation split for selection, plus a train set stocked with the hard cases.
+**1. A clean metric still does not save you.** Exact-match accuracy against gold labels sounds foolproof, but if you keep selecting prompt versions on train accuracy, you still overfit. Round 1 did it through memorized precedents. Round 2 did it through increasingly tuned but still train-selected rules. In hindsight, we should have stuck with the boring best practice: train for fitting, a validation split for selection, and the test set used once at the end. The fix is not better prompting alone. It is that validation split, plus a train set stocked with the hard cases.
 
 **2. The agent did exactly what we asked.** We said "reach 95% on train," and it found the shortest path there. That is the same broader loop lesson we wrote about earlier: agents can run the inner loop very well, but humans still need to set the objective, the data, and the stopping rules.
 
@@ -151,7 +151,7 @@ This is not a story about a bad agent. The mechanics were excellent:
 None of this means "do not automate the loop." It means: automate the inner loop, own the outer one. A realistic split for a classification task like this:
 
 - **Agent-owned:** running experiments, scoring, per-error annotation, drafting hypothesis-driven prompt revisions, diffing errors across runs, flagging plateaus
-- **Human-owned:** the target function, including the held-out data nobody optimizes against, dataset composition, when to restart with different constraints, and when to stop
+- **Human-owned:** the target function, including the validation and held-out test data nobody optimizes against, dataset composition, when to restart with different constraints, and when to stop
 
 The infrastructure for the agent-owned half is exactly what Langfuse provides: datasets, prompt versioning, experiments, and trace comments give the agent a full read/write workbench, and give you the audit trail to vouch for what it did.
 
