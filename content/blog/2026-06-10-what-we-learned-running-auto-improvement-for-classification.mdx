@@ -1,7 +1,7 @@
 ---
-title: "97% on train, 82% on test: Fable 5 ran the loop. Our evaluation setup didn't."
+title: "97% on train, 82% on test: validation and test data matter more than the loop"
 date: 2026/06/10
-description: "Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The mechanics worked. Our evaluation setup didn't."
+description: "Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The loop worked. What we learned was why validation and test datasets are what make the result mean anything."
 tag: engineering
 author: Annabell
 ---
@@ -10,8 +10,8 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Frame } from "@/components/Frame";
 
 <BlogHeader
-  title="97% on train, 82% on test: Fable 5 ran the loop. Our evaluation setup didn't."
-  description="Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The mechanics worked. Our evaluation setup didn't."
+  title="97% on train, 82% on test: validation and test data matter more than the loop"
+  description="Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The loop worked. What we learned was why validation and test datasets are what make the result mean anything."
   date="June 10, 2026"
   authors={["annabellschafer"]}
 />
@@ -26,18 +26,18 @@ We picked a task with one of the cleanest target functions in AI engineering: **
 
 So we gave Claude Fable 5, running in Claude Code, a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
 
-It hit the target in 4 runs. The interesting question was not whether Fable could operate the loop. It could. The more interesting failure was ours: we never set up a proper validation split, so the loop optimized against the train set and called it progress.
+It hit the target in 4 runs. The interesting question was not whether Fable could operate the loop. It could. The more interesting lesson was about evaluation design: without a proper validation split, even a clean train/test setup is not enough, because the loop will optimize on train and make the eventual test result feel like a surprise instead of a check.
 
 ## TL;DR
 
 - **The loop worked:** Claude Fable 5 ran the process end to end and hit 97% train accuracy in 4 fully autonomous runs
-- **The failure was ours:** we selected prompt versions on the train split instead of sticking to the usual validation-set best practice
+- **The real lesson is about data splits:** train and test alone were not enough; we should have used a validation split for selection and kept test purely for the final check
 - **The held-out result:** the 97% prompt scored **82% on the held-out test set**, a 15-point generalization gap
 - **Earlier was better:** the _second_ prompt version, 90.5% train with general label definitions only, beat the "optimized" one on test with **84%**
 - **Round two:** restarting with explicit "generalize, don't overfit" instructions produced a more principled prompt at 94% train, which scored **81% on test**. Statistically indistinguishable from the others.
 - **The real ceiling:** 11 of the test errors were identical across every prompt variant. Past about 85%, this looked less like a prompt problem and more like a hard taxonomy problem: some papers sit on boundaries humans would argue about too, and more examples may have helped as much as more prompt edits.
 
-If you only take one thing from this experiment, take this: **the loop worked; our evaluation setup didn't.**
+If you only take one thing from this experiment, take this: **validation and test datasets are what make a loop result trustworthy.**
 
 ## Why a classification task
 
@@ -143,7 +143,7 @@ This is not a story about a bad agent. The mechanics were excellent:
 
 ## What we learned
 
-**1. A clean metric still does not save you.** Exact-match accuracy against gold labels sounds foolproof, but if you keep selecting prompt versions on train accuracy, you still overfit. Round 1 did it through memorized precedents. Round 2 did it through increasingly tuned but still train-selected rules. In hindsight, we should have stuck with the boring best practice: train for fitting, a validation split for selection, and the test set used once at the end. The fix is not better prompting alone. It is that validation split, plus a train set stocked with the hard cases.
+**1. A clean metric still does not save you without a validation set.** Exact-match accuracy against gold labels sounds foolproof, but if you keep selecting prompt versions on train accuracy, you still overfit. Round 1 did it through memorized precedents. Round 2 did it through increasingly tuned but still train-selected rules. In hindsight, we should have stuck with the boring best practice: train for fitting, a validation split for selection, and the test set used once at the end. The fix is not better prompting alone. It is that validation split, plus a train set stocked with the hard cases.
 
 **2. The agent did exactly what we asked.** We said "reach 95% on train," and it found the shortest path there. That is the same broader loop lesson we wrote about earlier: agents can run the inner loop very well, but humans still need to set the objective, the data, and the stopping rules.
 
@@ -158,7 +158,7 @@ None of this means "do not automate the loop." It means: automate the inner loop
 
 The infrastructure for the agent-owned half is exactly what Langfuse provides: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a full read/write workbench, and give you the audit trail to vouch for what it did.
 
-That last part matters most. The agent will get to your target. Make sure it is the right one. The loop worked. Our evaluation setup didn't.
+That last part matters most. The agent will get to your target. Make sure it is the right one, and make sure your validation and test datasets are set up to tell you whether it actually improved.
 
 ---
 
