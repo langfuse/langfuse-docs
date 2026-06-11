@@ -16,17 +16,17 @@ import { Frame } from "@/components/Frame";
   authors={["annabellschafer"]}
 />
 
-We had just shared our take on [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering): agents are getting good enough to run more of the loop, but that only matters if the loop itself is set up well. Then Claude Fable 5 came out and was explicitly promoted for loop-shaped work, which made it a good moment to try this again on a simple setup.
+We had just argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering) that agents can run more of the loop now, but only if the loop itself is set up well. When Fable 5 came out and was promoted for loop-shaped work, it felt like a good moment to test that on a simple benchmark.
 
 <Frame>
   ![Lance Martin post about designing loops with Fable 5](/images/blog/2026-06-10-auto-improvement-classification/lance-martin-fable-5-loops.png)
 </Frame>
 
-Based on what we learned from [running autoresearch on the Langfuse skill in March](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch), we picked a task with one of the cleanest target functions in AI engineering: **exact-match accuracy against gold labels**. The interesting question was not whether Fable could operate the loop. It could. The more interesting failure was ours: we never set up a proper validation split, so the loop optimized against the train set and called it progress.
+We picked a task with one of the cleanest target functions in AI engineering: **exact-match accuracy against gold labels**.
 
 So we gave Claude Fable 5, running in Claude Code, a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
 
-It hit the target in 4 runs. That part worked. The failure came later: we let the loop hill-climb on the train split, and it overfitted.
+It hit the target in 4 runs. The interesting question was not whether Fable could operate the loop. It could. The more interesting failure was ours: we never set up a proper validation split, so the loop optimized against the train set and called it progress.
 
 ## TL;DR
 
