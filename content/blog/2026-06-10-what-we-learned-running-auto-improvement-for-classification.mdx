@@ -28,10 +28,6 @@ So we gave Claude Fable 5, running in Claude Code, a classification task, a trai
 
 It hit the target in 4 runs. The interesting question was not whether Fable could operate the loop. It could. The more interesting lesson was about evaluation design: without a proper validation split, even a clean train/test setup is not enough, because the loop will optimize on train and make the eventual test result feel like a surprise instead of a check. By the end, 11 test errors were shared across every prompt variant. That turned the story from "how do we run loops better?" into "what would the dataset have needed to contain for this loop to actually learn something that transfers?"
 
-## TL;DR
-
-The loop optimized fast. Held-out performance did not meaningfully improve. By the end, 11 test errors were shared across every prompt variant, which made the real question less about prompting and more about what kind of validation set and boundary cases the dataset would have needed for the loop to work at all.
-
 ## Why a classification task
 
 If you are going to hand a loop to an agent, classification is the ideal first candidate:
