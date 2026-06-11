@@ -1,0 +1,301 @@
+---
+title: Customer support chatbot
+sidebarTitle: Support chatbot
+description: How a customer-facing support chatbot is rolled out in phases, from offline testing on historical tickets to internal drafts to answering customers directly.
+---
+
+# Customer support chatbot
+
+## Context
+
+A SaaS company wants to automate its customer support chat. Today a team of support reps answers every conversation, and years of resolved tickets sit in the ticketing system. The bot would speak to customers in the company's name, so a bad answer does damage beyond one conversation: customers lose trust in support as a whole.
+
+That risk rules out shipping straight to customers. Instead, the rollout happens in three phases, each one earning the confidence for the next:
+
+| Phase              | What's live                                  | Gate to the next phase                                                                   |
+| ------------------ | -------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 1. Offline         | Nothing, the agent is in development         | Drafts good enough that reps want them                                                   |
+| 2. Internal        | The agent drafts replies, reps edit and send | The difference between drafted and sent replies stays small across ticket categories     |
+| 3. Customer-facing | The bot answers customers directly           | Nothing, this is the end goal: the agent keeps being improved continuously in this phase |
+
+## Phase 1: creating the initial agent version
+
+In order for support reps to actually use the internal agent, we need to make sure the initial version is already useful for them. To get there, we can lean on a lot of historical data from resolved tickets that we already have, no synthetic data generation needed.
+
+<AnnotatedLoop
+  ariaLabel="The loop in phase 1: only the offline stages are active"
+  stations={{
+    trace: { dimmed: true, note: "not live yet" },
+    monitor: { dimmed: true, note: "not live yet" },
+    dataset: { note: "from resolved tickets" },
+    change: { note: "prompt and retrieval variants" },
+    eval: { note: "compare against the rep's reply" },
+  }}
+/>
+
+The historical tickets are grouped by recurring behavior into a few [datasets](/academy/datasets#what-makes-a-good-dataset):
+
+<DatasetBlock
+  datasets={[
+    {
+      name: "howto-questions",
+      description:
+        "Questions about how to use a product feature. The reply explains the steps and links the relevant help article.",
+      items: [
+        {
+          input: "How do I set up recurring tasks?",
+          expectedOutput:
+            "Refers to the 'Recurring tasks' help article. Recommends setting a repeat schedule in the task menu.",
+        },
+        {
+          input: "Can I export my data to CSV?",
+          expectedOutput:
+            "Refers to the 'Exporting data' article. Confirms CSV export is available on the Pro plan.",
+        },
+      ],
+    },
+    {
+      name: "account-changes",
+      description:
+        "Requests that touch the customer's plan, seats, or roles. The reply points at the right settings and who can change them.",
+      items: [
+        {
+          input:
+            "I can't add my colleague to our workspace, the invite says 'seat limit reached'.",
+          expectedOutput:
+            "Refers to the seat management docs. Recommends deactivating a former member or adding seats under Billing.",
+        },
+        {
+          input: "How do I transfer ownership of a workspace?",
+          expectedOutput:
+            "Refers to the 'Workspace roles' docs. Recommends transferring ownership under Settings → Members, which requires an admin.",
+        },
+      ],
+    },
+    {
+      name: "troubleshooting",
+      description:
+        "Something does not work the way the customer expects. The reply diagnoses the issue or asks for what's needed to diagnose it.",
+      items: [
+        {
+          input: "The CSV export is missing the custom fields we added.",
+          expectedOutput:
+            "Refers to the export settings docs. Recommends selecting 'Export with custom fields' in the export dialog.",
+        },
+        {
+          input: "My calendar integration stopped syncing this morning.",
+          expectedOutput:
+            "Asks for the integration name and the last successful sync time, and links the status page.",
+        },
+      ],
+    },
+  ]}
+/>
+
+We now iterate on the prompt, [running each version against these datasets](/academy/experiments#how-experiments-are-used), until the drafts reach the bar where reps would actually find them useful. Each run is graded with:
+
+<EvaluatorBlock
+  evaluators={[
+    {
+      name: "resolution_match",
+      type: "LLM-as-a-judge",
+      check:
+        "Does the draft refer to the same sources and recommend the same thing as the rep did?",
+      returns: "binary, per dataset item",
+      details: (
+        <>
+          A{" "}
+          <a href="/academy/evaluate#reference-based-vs-reference-free">
+            reference-based
+          </a>{" "}
+          evaluator: the expected output gives it the rep's sources and
+          recommendation to compare against. It has to be an LLM-as-a-judge
+          rather than a code check because two replies can recommend the same
+          thing in completely different words.
+        </>
+      ),
+    },
+    {
+      name: "manual review",
+      type: "Human",
+      check: "Vibe check on a sample of drafts",
+    },
+  ]}
+/>
+
+Notice that we are not judging the tone of voice automatically here. This is on purpose: a few [manual checks](/academy/evaluate#how-evaluation-typically-evolves) are enough to make sure the drafts sound acceptable, and we will use phase 2 to get the tone of voice perfectly aligned.
+
+When the evaluator scores are good enough and the manual review looks good, the agent moves into the reps' tool.
+
+<mark>TODO: describe a trace.</mark>
+
+## Phase 2: internal rollout
+
+In this phase, the agent drafts a reply for every incoming ticket, and a rep can use it and edit it before sending. We can use the difference between the agent's draft and what the rep actually sends as a very reliable [user signal](/academy/monitoring#user-feedback).
+
+Another, more explicit user signal is a thumbs up or thumbs down button on the draft, where reps can also leave written feedback.
+
+<AnnotatedLoop
+  ariaLabel="The loop in phase 2: fully active, driven by the difference between drafted and sent replies"
+  stations={{
+    trace: { note: "every draft is traced" },
+    monitor: { note: "edit_type on every trace" },
+    dataset: { note: "heavily edited drafts become new items" },
+    change: { note: "fixes for recurring edit patterns" },
+    eval: { note: "rerun the datasets before shipping" },
+  }}
+/>
+
+Both signals are captured as scores on every draft [trace](/academy/tracing#anatomy-of-a-trace):
+
+<EvaluatorBlock
+  evaluators={[
+    {
+      name: "edit_type",
+      type: "LLM-as-a-judge",
+      check: (
+        <>
+          Classifies the rep's edit as <code>none</code>, <code>tone</code>,{" "}
+          <code>corrected</code>, or <code>added</code>
+        </>
+      ),
+      returns: "categorical, on the trace",
+      details: (
+        <>
+          A judge comparing the draft to the sent reply. <code>tone</code>{" "}
+          means the rep reworded it but kept the content, <code>corrected</code>{" "}
+          that something wrong was removed or fixed, <code>added</code> that
+          the draft was kept but missing information was added. It has to be a
+          judge because telling a rewording apart from a content change
+          requires reading both texts.
+        </>
+      ),
+    },
+    {
+      name: "rep_feedback",
+      type: "Human",
+      check: "Thumbs up or down on the draft, with optional written feedback",
+      returns: "binary plus comment, on the trace",
+      details: (
+        <>
+          Captured directly from the button in the reps' tool, no evaluator
+          needed: the click writes the score. The written comments give
+          context the diff alone can't.
+        </>
+      ),
+    },
+  ]}
+/>
+
+Traces with a bad score can then be looked at, improved, and added to the datasets if they weren't covered before.
+
+One iteration through the loop then looks like this: [monitoring](/academy/monitoring#metrics-and-signals) shows a spike of `corrected` drafts in the `troubleshooting` category. The traces reveal the agent keeps citing an outdated export dialog, because the help-article index is stale. The index gets refreshed, the `troubleshooting` dataset is rerun to confirm the fix, and the share of `corrected` drafts drops.
+
+The share of edited drafts should go down over time. Once drafts go out mostly unchanged across all ticket categories, the agent is ready to face customers.
+
+## Phase 3: customer-facing rollout
+
+The bot now answers customers directly, and the signal that drove phase 2 disappears: nobody edits the reply before the customer sees it. Instead, we introduce a couple of new implicit user signals that will help us learn and improve over time.
+
+<AnnotatedLoop
+  ariaLabel="The loop in phase 3: driven by implicit user signals instead of rep edits"
+  stations={{
+    trace: { note: "every customer conversation" },
+    monitor: { note: "user signals and risk monitoring" },
+    dataset: { note: "bad conversations become new items" },
+    change: { note: "fixes for what monitoring surfaces" },
+    eval: { note: "rerun the datasets before shipping" },
+  }}
+/>
+
+Customers rarely rate their support chat, so the main focus is on gathering implicit user signals:
+
+<EvaluatorBlock
+  evaluators={[
+    {
+      name: "handoff_requested",
+      type: "LLM-as-a-judge",
+      check: "Detects the customer asking for a human",
+      returns: "binary, on the trace",
+      details: (
+        <>
+          Customers ask for a human in free text, so there is nothing for a
+          code evaluator to match on. Scoring the trace puts the flag on the
+          exact turn where the customer gave up on the bot.
+        </>
+      ),
+    },
+    {
+      name: "question_repeated",
+      type: "LLM-as-a-judge",
+      check: "Detects the customer rephrasing the same question",
+      returns: "binary, on the trace",
+      details: (
+        <>
+          A form of{" "}
+          <a href="/academy/monitoring#user-feedback">implicit feedback</a>:
+          a customer repeating themself means the previous answer didn't land.
+          Only a judge reading the conversation can tell a rephrasing apart
+          from a follow-up question.
+        </>
+      ),
+    },
+    {
+      name: "session_outcome",
+      type: "LLM-as-a-judge",
+      check: "Classifies how the conversation ended",
+      returns: "categorical, on the session",
+      details: (
+        <>
+          Runs when the conversation closes and classifies it as{" "}
+          <code>resolved</code>, <code>abandoned</code>, or{" "}
+          <code>handed_off</code>. Categorical because the three endings each
+          mean something different for the bot's performance. Scored on the
+          session rather than the trace, since the outcome belongs to the
+          conversation as a whole.
+        </>
+      ),
+    },
+  ]}
+/>
+
+With the rep gone, we monitor every reply for reputation-damaging behavior. These evaluators don't block anything: they flag sent replies so the team can follow up with the customer quickly.
+
+<EvaluatorBlock
+  evaluators={[
+    {
+      name: "data_leak",
+      type: "LLM-as-a-judge",
+      check:
+        "Does the reply reveal data about anyone other than this customer?",
+      returns: "binary, on the trace",
+      details: (
+        <>
+          <a href="/academy/evaluate#reference-based-vs-reference-free">
+            Reference-free
+          </a>
+          , so it can run on every production reply without an expected
+          output. Recognizing personal data in any phrasing requires language
+          understanding, hence an LLM-as-a-judge.
+        </>
+      ),
+    },
+    {
+      name: "out_of_scope_help",
+      type: "LLM-as-a-judge",
+      check:
+        "Does the reply promise a refund, discount, or commitment instead of handing off?",
+      returns: "binary, on the trace",
+      details: (
+        <>
+          Also reference-free, running on every production reply. A judge
+          rather than a keyword check because a commitment can be phrased in
+          endless ways: "we'll ship that next month" contains no forbidden
+          word.
+        </>
+      ),
+    },
+  ]}
+/>
+
+With these signals, there is a good setup to continuously improve the agent: bad conversations get surfaced, get improved, and become dataset items, to test against structurally. The team can also use this setup to safely try out a newer/cheaper/faster model, and make an informed decision on whether to deploy it or not.
