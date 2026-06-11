@@ -20,7 +20,7 @@ Loop-shaped workflows are having a moment. Boris Cherny put it plainly: much of 
 
 We gave Claude Fable 5 a classification task: a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: hit 95% accuracy or stop at 15 runs. Train accuracy went from 78% to 97% in four runs. Test performance barely moved. The 11 remaining errors were shared across every prompt variant.
 
-The question stopped being how to run the loop. It became whether the benchmark had enough signal and enough edge cases for the loop to generalize. As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), the mechanics aren't the hard part anymore. Loop design and human judgment still matter, otherwise you're just optimizing your way into agent slop.
+The loop did its job. What it surfaced was a dataset problem.
 
 ## The task and setup
 
@@ -80,5 +80,7 @@ None of this means "do not automate the loop." It means: automate the inner loop
 
 - **Agent-owned:** running experiments, scoring, per-error annotation, drafting hypothesis-driven prompt revisions, diffing errors across runs, flagging plateaus
 - **Human-owned:** the target function, including the validation and held-out test data nobody optimizes against, dataset composition, when to restart with different constraints, and when to stop
+
+As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), the mechanics aren't the hard part anymore. This experiment shows what the hard part actually is: the target function, the dataset, and the judgment calls nobody automates against.
 
 This is exactly what Langfuse is good for: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a workbench and an audit trail.
