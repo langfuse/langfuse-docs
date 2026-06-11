@@ -26,18 +26,11 @@ We picked a task with one of the cleanest target functions in AI engineering: **
 
 So we gave Claude Fable 5, running in Claude Code, a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
 
-It hit the target in 4 runs. The interesting question was not whether Fable could operate the loop. It could. The more interesting lesson was about evaluation design: without a proper validation split, even a clean train/test setup is not enough, because the loop will optimize on train and make the eventual test result feel like a surprise instead of a check.
+It hit the target in 4 runs. The interesting question was not whether Fable could operate the loop. It could. The more interesting lesson was about evaluation design: without a proper validation split, even a clean train/test setup is not enough, because the loop will optimize on train and make the eventual test result feel like a surprise instead of a check. By the end, 11 test errors were shared across every prompt variant. That turned the story from "how do we run loops better?" into "what would the dataset have needed to contain for this loop to actually learn something that transfers?"
 
 ## TL;DR
 
-- **The loop worked:** Claude Fable 5 ran the process end to end and hit 97% train accuracy in 4 fully autonomous runs
-- **The real lesson is about data splits:** train and test alone were not enough; we should have used a validation split for selection and kept test purely for the final check
-- **The held-out result:** the 97% prompt scored **82% on the held-out test set**, a 15-point generalization gap
-- **Earlier was better:** the _second_ prompt version, 90.5% train with general label definitions only, beat the "optimized" one on test with **84%**
-- **Round two:** restarting with explicit "generalize, don't overfit" instructions produced a more principled prompt at 94% train, which scored **81% on test**. Statistically indistinguishable from the others.
-- **The real ceiling:** 11 of the test errors were identical across every prompt variant. Past about 85%, this looked less like a prompt problem and more like a hard taxonomy problem: some papers sit on boundaries humans would argue about too, and more examples may have helped as much as more prompt edits.
-
-If you only take one thing from this experiment, take this: **validation and test datasets are what make a loop result trustworthy.**
+The loop optimized fast. Held-out performance did not meaningfully improve. By the end, 11 test errors were shared across every prompt variant, which made the real question less about prompting and more about what kind of validation set and boundary cases the dataset would have needed for the loop to work at all.
 
 ## Why a classification task
 
@@ -129,25 +122,17 @@ And the final test run?
 | v4 - precedent list, round 1 | 97.0% | 82.0% | 15.0 |
 | v9 - general principles, round 2 | 94.0% | 81.0% | 13.0 |
 
-**81%.** Even the disciplined, principle-only round did not transfer. With 100 test items these three results are statistically indistinguishable, but that is exactly the point: 3.5 points of "principled" train improvement bought _zero_ measurable test improvement. The extra rules pinned down borderline train papers while nudging test lookalikes the wrong way. Selection on train accuracy overfits to train, even when every individual edit looks generalizable.
+**81%.** But that headline misses the more important result: **11 test errors were shared by all three prompt variants.** With 100 test items, these held-out scores are statistically indistinguishable, which means the disciplined second round bought _zero_ measurable test improvement. The loop got better at fitting the train split while leaving the same hard cases unresolved.
 
-And the kicker: **11 test errors were shared by all three prompt variants.** Combined with the train papers that were missed again and again, the practical ceiling for this model on this taxonomy is around 85%. The residual is not just prompt quality. It is a hard taxonomy problem. Is a "queryable database of Windows drivers" a Databases paper or a Software Engineering paper? Reasonable people disagree, and so did every prompt version. When humans struggle to agree on the boundary, it is not surprising the model does too, and at that point more examples or clearer label definitions may help more than another prompt edit.
-
-## What the agent was genuinely good at
-
-This is not a story about a bad agent. The mechanics were excellent:
-
-- **Orchestration.** It ran experiments as background jobs, monitored them, and chained analysis -> hypothesis -> prompt publish -> next run without supervision. Nine train runs, three test runs, around 2,500 task-model calls, fully hands-off inside each round.
-- **The annotation pattern.** Without being told to, it developed a structured error-analysis vocabulary across runs, tagging failures as `NEW ERROR`, `REGRESSION`, or `PERSISTENT`, with the pull mechanism named. Every annotation went onto the [Langfuse trace](/docs/observability/data-model#traces) as a [comment](/docs/observability/features/comments), so the whole audit trail lives next to the data. Diffing errors _across_ runs, not just counting them, is what caught the whack-a-mole dynamics.
-- **Honest self-assessment.** It flagged its own plateau and recommended stopping. Agents that argue for _less_ work are rarer than they should be.
+That is the real ceiling in the data. Once the same errors survive every prompt variant, the problem stops looking like "we need another round of prompt edits" and starts looking like "prompt iteration is now the wrong tool." Some of those papers sit on boundaries humans would argue about too. At that point, more examples, clearer label definitions, or a different task model are probably higher-leverage than another pass through the loop.
 
 ## What we learned
 
-**1. A clean metric still does not save you without a validation set.** Exact-match accuracy against gold labels sounds foolproof, but if you keep selecting prompt versions on train accuracy, you still overfit. Round 1 did it through memorized precedents. Round 2 did it through increasingly tuned but still train-selected rules. In hindsight, we should have stuck with the boring best practice: train for fitting, a validation split for selection, and the test set used once at the end. The fix is not better prompting alone. It is that validation split, plus a train set stocked with the hard cases.
+**1. Train, validation, and test do different jobs.** Exact-match accuracy against gold labels sounds foolproof, but if you keep selecting prompt versions on train accuracy, you still overfit. In hindsight, we should have stuck with the boring best practice: train for fitting, a validation split for selection, and the test set used once at the end.
 
-**2. The agent did exactly what we asked.** We said "reach 95% on train," and it found the shortest path there. That is the same broader loop lesson we wrote about earlier: agents can run the inner loop very well, but humans still need to set the objective, the data, and the stopping rules.
+**2. The stronger finding is not just that we skipped validation.** It is that even a disciplined round 2, with more principled and general prompt changes, bought zero measurable test improvement. By that point the loop was no longer teaching us how to prompt better. It was teaching us that prompt iteration had run out of room.
 
-**3. Past about 85%, this became a taxonomy problem.** Several errors survived every prompt version. Some of those papers sit on boundaries humans struggle with too, so it is not surprising the model does as well. At that point, more labeled examples, clearer category definitions, or a stronger task model are probably higher-leverage than another prompt revision.
+**3. That leaves the open question in the dataset.** What would the benchmark itself have needed to look like for this loop to work? More repeated boundary cases, clearer category definitions, more examples of ambiguous classes, a true validation split, maybe even an "unsure" bucket? Until that answer is clearer, running the loop harder is probably the wrong move.
 
 ## Where this is actually useful today
 
@@ -158,7 +143,7 @@ None of this means "do not automate the loop." It means: automate the inner loop
 
 The infrastructure for the agent-owned half is exactly what Langfuse provides: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a full read/write workbench, and give you the audit trail to vouch for what it did.
 
-That last part matters most. The agent will get to your target. Make sure it is the right one, and make sure your validation and test datasets are set up to tell you whether it actually improved.
+That last part matters most. The agent will get to your target. Make sure it is the right one. And if the validation split stays flat, the next move is probably not a better loop. It is a better dataset.
 
 ---
 
