@@ -31,7 +31,7 @@ Our task was to classify arXiv papers into one of 10 categories from title, auth
 - a small runner built with [**Langfuse Experiments via the SDK**](/docs/evaluation/experiments/experiments-via-sdk)
 - `gpt-4o-mini` as the task model<sup id="fnref-model-choice"><a href="#fn-model-choice">1</a></sup>
 
-The starting prompt was minimal. After each run, the agent reviewed the errors, wrote [comments](/docs/observability/features/comments) on the [Langfuse trace](/docs/observability/data-model#traces), published a new [prompt version](/docs/prompt-management/features/prompt-version-control), and ran again.
+The starting prompt was minimal, consisting only of a list of labels with instructions to pick one. After each run, the agent reviewed the errors, wrote [comments](/docs/observability/features/comments) on the [Langfuse trace](/docs/observability/data-model#traces), published a new [prompt version](/docs/prompt-management/features/prompt-version-control), and ran again.
 
 _Suggested platform screenshot: the Langfuse workbench for this loop, showing the dataset, prompt, and experiment setup together._
 
