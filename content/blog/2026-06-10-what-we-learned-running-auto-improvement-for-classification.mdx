@@ -50,9 +50,9 @@ Our concrete task: classify arXiv papers into one of 10 categories, such as Data
 
 We kept it deliberately simple:
 
-- a train split with 200 labeled examples and a held-out test split with 100, stored in **Langfuse Datasets**
-- a system prompt, with model config and a strict JSON response schema, managed in **Langfuse Prompt Management**, fetched by the `production` label at runtime
-- a small Python runner using **Langfuse Experiments** via the SDK: it runs a dataset against the current production prompt, scores every row with exact-match accuracy, and links everything back to the dataset run
+- a train split with 200 labeled examples and a held-out test split with 100, stored in [**Langfuse Datasets**](/docs/evaluation/experiments/datasets)
+- a system prompt, with model config and a strict JSON response schema, managed in [**Langfuse Prompt Management**](/docs/prompt-management/get-started), fetched by the [`production` label](/docs/prompt-management/features/prompt-version-control) at runtime
+- a small Python runner using [**Langfuse Experiments via the SDK**](/docs/evaluation/experiments/experiments-via-sdk): it runs a dataset against the current production prompt, scores every row with exact-match accuracy, and links everything back to the dataset run
 - `gpt-4o-mini` at temperature `0` as the task model
 
 We chose `gpt-4o-mini` deliberately. A stronger model like `gpt-5.5` likely would have done better out of the box, but it is also much more expensive. For a narrow task like this, that tradeoff matters: if a bit of prompt iteration can make a cheaper model perform well enough, that is often a better production choice than paying frontier-model prices on every classification call.
@@ -65,8 +65,8 @@ The instructions we gave the agent translated into this loop:
 
 1. Run the train dataset with the current prompt.
 2. Score every row as correct or incorrect.
-3. Write a short qualitative annotation on every error: what went wrong, what likely pulled the model to the wrong label. These were posted as comments on the Langfuse trace.
-4. Form a hypothesis and revise only the prompt, published as a new version to Langfuse.
+3. Write a short qualitative annotation on every error: what went wrong, what likely pulled the model to the wrong label. These were posted as [comments](/docs/observability/features/comments) on the [Langfuse trace](/docs/observability/data-model#traces).
+4. Form a hypothesis and revise only the prompt, published as a new [prompt version](/docs/prompt-management/features/prompt-version-control) to Langfuse.
 5. Repeat until accuracy reached 95% or 15 train runs.
 6. Run the final prompt once on the held-out test split and report the gap.
 
@@ -135,7 +135,7 @@ And the kicker: **11 test errors were shared by all three prompt variants.** Com
 This is not a story about a bad agent. The mechanics were excellent:
 
 - **Orchestration.** It ran experiments as background jobs, monitored them, and chained analysis -> hypothesis -> prompt publish -> next run without supervision. Nine train runs, three test runs, around 2,500 task-model calls, fully hands-off inside each round.
-- **The annotation pattern.** Without being told to, it developed a structured error-analysis vocabulary across runs, tagging failures as `NEW ERROR`, `REGRESSION`, or `PERSISTENT`, with the pull mechanism named. Every annotation went onto the Langfuse trace as a comment, so the whole audit trail lives next to the data. Diffing errors _across_ runs, not just counting them, is what caught the whack-a-mole dynamics.
+- **The annotation pattern.** Without being told to, it developed a structured error-analysis vocabulary across runs, tagging failures as `NEW ERROR`, `REGRESSION`, or `PERSISTENT`, with the pull mechanism named. Every annotation went onto the [Langfuse trace](/docs/observability/data-model#traces) as a [comment](/docs/observability/features/comments), so the whole audit trail lives next to the data. Diffing errors _across_ runs, not just counting them, is what caught the whack-a-mole dynamics.
 - **Honest self-assessment.** It flagged its own plateau and recommended stopping. Agents that argue for _less_ work are rarer than they should be.
 
 ## What we learned
@@ -153,7 +153,7 @@ None of this means "do not automate the loop." It means: automate the inner loop
 - **Agent-owned:** running experiments, scoring, per-error annotation, drafting hypothesis-driven prompt revisions, diffing errors across runs, flagging plateaus
 - **Human-owned:** the target function, including the validation and held-out test data nobody optimizes against, dataset composition, when to restart with different constraints, and when to stop
 
-The infrastructure for the agent-owned half is exactly what Langfuse provides: datasets, prompt versioning, experiments, and trace comments give the agent a full read/write workbench, and give you the audit trail to vouch for what it did.
+The infrastructure for the agent-owned half is exactly what Langfuse provides: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a full read/write workbench, and give you the audit trail to vouch for what it did.
 
 That last part matters most. The agent will get to your target. Make sure it is the right one.
 
