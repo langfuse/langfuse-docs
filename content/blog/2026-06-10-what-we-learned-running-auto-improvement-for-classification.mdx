@@ -124,14 +124,6 @@ The intro question deserves a direct answer. Based on these runs, the dataset li
 
 In other words: the loop was good enough to expose where the benchmark stopped teaching it. What it needed next was not another prompt tweak, but a dataset that better represented the boundary conditions we actually cared about.
 
-## What we learned
-
-**1. Auto-improvement can optimize fast without improving the thing you actually care about.** Train accuracy moved quickly. Held-out performance did not.
-
-**2. A disciplined second round still bought zero measurable test improvement.** Once the same held-out errors survive every prompt variant, the next bottleneck is probably no longer the prompt.
-
-**3. The loop is still useful because it surfaced that limit quickly.** The right response is not to give up on automation, but to improve the benchmark before pushing the loop harder.
-
 ## Where this is actually useful today
 
 None of this means "do not automate the loop." It means: automate the inner loop, own the outer one. A realistic split for a classification task like this:
