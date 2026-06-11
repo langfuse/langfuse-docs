@@ -16,9 +16,13 @@ import { Frame } from "@/components/Frame";
   authors={["annabellschafer"]}
 />
 
-Loop-shaped workflows are having a moment. Boris Cherny put it plainly: much of his job is "to design loops." The design is the task, the environment, the eval, the exit condition. Then you hand it to an agent in `/goal` mode and let it run.
+Loop-shaped workflows are having a moment. `@steipete` put it plainly: you should not be prompting coding agents anymore, you should be designing loops that prompt your agents.
 
-We gave Claude Fable 5 a classification task: a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: hit 95% accuracy or stop at 15 runs. Train accuracy went from 78% to 97% in four runs. Test performance barely moved. The 11 remaining errors on test were shared across every prompt variant.
+<Frame>
+  ![Peter Steinberger post about designing loops that prompt your agents](/images/blog/2026-06-10-auto-improvement-classification/peter-steinberger-design-loops.png)
+</Frame>
+
+We designed a loop and gave Claude Fable 5 a classification task: a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: hit 95% accuracy or stop at 15 runs. Train accuracy went from 78% to 97% in four runs. Test performance barely moved. The 11 remaining errors on test were shared across every prompt variant.
 
 The loop did its job. What it surfaced was a dataset problem.
 
