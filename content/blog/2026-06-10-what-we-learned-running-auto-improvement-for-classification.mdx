@@ -24,81 +24,33 @@ The question stopped being how to run the loop. It became whether the benchmark 
 
 ## The task and setup
 
-We picked classification on purpose. If you are going to hand a loop to an agent, it is one of the cleanest first candidates: exact-match accuracy gives you a crisp target function, it shows up everywhere in real workflows, and the label ambiguity makes it a useful stress test.
+Our task was to classify arXiv papers into one of 10 categories from title, authors, and abstract. We picked classification because it gives you a crisp target function: exact-match accuracy.
 
-Our concrete task was to classify arXiv papers into one of 10 categories, such as Databases, Information Retrieval, Software Engineering, and Sound, from title, authors, and abstract.
+- a train split with 200 labeled examples and a held-out test split with 100 in [**Langfuse Datasets**](/docs/evaluation/experiments/datasets)
+- a prompt in [**Prompt Management**](/docs/prompt-management/get-started)
+- a small runner built with [**Langfuse Experiments via the SDK**](/docs/evaluation/experiments/experiments-via-sdk)
+- `gpt-4o-mini` as the task model
 
-We kept the setup deliberately simple:
-
-- a train split with 200 labeled examples and a held-out test split with 100, stored in [**Langfuse Datasets**](/docs/evaluation/experiments/datasets)
-- a system prompt, with model config and a strict JSON response schema, managed in [**Langfuse Prompt Management**](/docs/prompt-management/get-started), fetched by the [`production` label](/docs/prompt-management/features/prompt-version-control) at runtime
-- a small Python runner using [**Langfuse Experiments via the SDK**](/docs/evaluation/experiments/experiments-via-sdk): it runs a dataset against the current production prompt, scores every row with exact-match accuracy, and links everything back to the dataset run
-- `gpt-4o-mini` at temperature `0` as the task model
-
-We chose `gpt-4o-mini` deliberately. A stronger model like `gpt-5.5` likely would have done better out of the box, but it is also much more expensive. For a narrow task like this, that tradeoff matters: if a bit of prompt iteration can make a cheaper model perform well enough, that is often a better production choice than paying frontier-model prices on every classification call.
-
-The starting prompt was as bare as it gets: "Classify this paper with a label" plus the flat list of allowed labels.
-
-## The auto-improving loop, powered by Fable
-
-The instructions we gave the agent translated into this loop:
-
-1. Run the train dataset with the current prompt.
-2. Score every row as correct or incorrect.
-3. Write a short qualitative annotation on every error: what went wrong, what likely pulled the model to the wrong label. These were posted as [comments](/docs/observability/features/comments) on the [Langfuse trace](/docs/observability/data-model#traces).
-4. Form a hypothesis and revise only the prompt, published as a new [prompt version](/docs/prompt-management/features/prompt-version-control) to Langfuse.
-5. Repeat until accuracy reached 95% or 15 train runs.
-6. Run the final prompt once on the held-out test split and report the gap.
+The starting prompt was minimal. After each run, the agent reviewed the errors, wrote [comments](/docs/observability/features/comments) on the [Langfuse trace](/docs/observability/data-model#traces), published a new [prompt version](/docs/prompt-management/features/prompt-version-control), and ran again.
 
 <Frame fullWidth>
   ![Diagram of the autonomous training loop: start from a base prompt, run the train split, score rows, comment on errors, revise the prompt, and then run the held-out test split once](/images/blog/2026-06-10-auto-improvement-classification/fable-classification-loop-diagram.png)
 </Frame>
 
-We ran this with Claude Code's goal mode, which keeps the agent working autonomously until the stopping condition holds. Experiments ran as background tasks; the agent picked up each result, did its error analysis, published the next prompt version, and kicked off the next run without intervention.
-
 ## Round 1: the hill sprint
 
-| Run | Prompt strategy | Train accuracy |
-| --- | --- | ---: |
-| 1 | **v1 - flat label list.** "Classify this paper with a label" plus 10 label names | 78.0% |
-| 2 | **v2 - definitions + decision rules.** One-line definition per label, general boundary rules from error analysis | 90.5% |
-| 3 | **v3 - sharpened boundary rules.** More aggressive IR-vs-DB and HCI-vs-Society rules | 90.0% |
-| 4 | **v4 - precedent list.** Around 30 concrete "pattern -> label" precedents distilled from prior failures | **97.0%** |
-
-The first jump is the legitimate one: v1's errors showed the model treating "Emerging Technologies" as a catch-all for anything mentioning LLMs, and missing that education and policy papers belong to "Computers and Society." v2 fixed that with _general_ definitions, a 12.5-point jump.
-
-Run 3 is where it got interesting: the sharpened rules fixed 10 errors and **broke 11 papers that run 2 had right**. Classic whack-a-mole. Every boundary you push captures lookalikes on the other side.
-
-The agent's response to the whack-a-mole was clever, and exactly wrong: it replaced abstract rules with a list of concrete precedents distilled from the training failures, things like "a census of Windows drivers -> Software Engineering" and "watermarking RAG databases -> Security." Train accuracy jumped to 97%. Stopping condition met, in 4 of the allowed 15 runs.
-
-Then came the held-out test set:
+The first round optimized fast:
 
 | Prompt | Train | Test | Gap |
 | --- | ---: | ---: | ---: |
 | v2 - general definitions | 90.5% | **84.0%** | 6.5 |
 | v4 - train-derived precedents | **97.0%** | 82.0% | **15.0** |
 
-The precedent list was memorization wearing a trench coat. On test, v4's precedents fixed 4 papers that matched trained patterns and miscaptured 6 lookalikes they were never meant for. Net negative. The "worse" prompt won.
+Moving from a flat label list to general definitions was real progress. But once the agent started encoding concrete precedents from the training failures, train accuracy jumped while generalization got worse. The prompt that looked best on train was not the one that held up on test.
 
 ## Round 2: "generalize this time"
 
-So we restarted the loop from v2 with new instructions: every prompt change must be a _general taxonomy principle_ backed by a class of errors, at least three failures sharing a mechanism, never a single-paper precedent. And no touching the test set.
-
-| Run | Prompt strategy | Train accuracy |
-| --- | --- | ---: |
-| 5 | **v5 - principles rewrite + a `reasoning` output field** | 84.0% |
-| 6 | **v6 - v2 base + class-level principles** such as hardware -> Emerging Tech, "what is success measured by", and "level of analysis" | 91.0% |
-| 7 | **v7 - IR owns search/recommendation infrastructure; audio is a data-type rule; crypto code -> Security** | 93.5% |
-| 8 | **v8 - subject-vs-representation for audio; rule precedence; serving-cost -> Databases** | 94.0% |
-| 9 | **v9 - unified audio rule; requirements engineering -> Software Engineering** | 94.0% |
-
-Two things are worth pausing on.
-
-First, the v5 regression: adding a chain-of-thought-style `reasoning` field, a change that _feels_ like it should always help, made things worse. The model used the reasoning to rationalize surface cues. At one point it justified labeling a robot-navigation paper as Human-Computer Interaction by calling the vision-language model a "user." Structural changes are hypotheses too. They need the same experimental treatment.
-
-Second, the plateau was honest. By run 8 the agent reported, unprompted, that many of the remaining papers had been missed repeatedly under every general formulation and that fixing them would require the very paper-specific precedents we were deliberately avoiding. Its conclusion was that the realistic ceiling for a generalizable prompt on this train set was around 94 to 95%, and that we should stop instead of chasing the ambiguous tail.
-
-And the final test run?
+So we restarted from the more general prompt and changed the rules: no single-paper precedents, only class-level principles, and no touching the test set.
 
 | Prompt | Train | Test | Gap |
 | --- | ---: | ---: | ---: |
@@ -106,33 +58,27 @@ And the final test run?
 | v4 - precedent list, round 1 | 97.0% | 82.0% | 15.0 |
 | v9 - general principles, round 2 | 94.0% | 81.0% | 13.0 |
 
-**81%.** But that headline misses the more important result: **11 test errors were shared by all three prompt variants.** With 100 test items, these held-out scores are statistically indistinguishable, which means the disciplined second round bought _zero_ measurable test improvement. The loop got better at fitting the train split while leaving the same hard cases unresolved.
+The disciplined second round did not help. Adding a `reasoning` field even made things worse: it encouraged the model to rationalize surface cues instead of resolving the label boundary. By the end, the agent had concluded that the remaining errors mostly sat on ambiguous boundaries and that fixing them would require exactly the kind of paper-specific precedents we were trying to avoid.
 
-That is the real ceiling in the data. Once the same errors survive every prompt variant, the problem stops looking like "we need another round of prompt edits" and starts looking like "the next bottleneck is probably not the prompt." Some of those papers sit on boundaries humans would argue about too. At that point, more examples, clearer label definitions, or a different task model are probably higher-leverage than another pass through the loop. The useful part is that the loop surfaced that limit quickly.
+The most important result was not 81% vs. 84%. It was that **11 test errors were shared by all three prompt variants.** That means the loop got better at fitting the train split while leaving the same hard cases unresolved.
 
 ## What the dataset would have needed
 
-The intro question deserves a direct answer. Based on these runs, the dataset likely needed three things:
+Based on these runs, the dataset likely needed three things:
 
-**1. A real validation split for selection.** We had train for fitting and test for the final check, but nothing in between. That meant the loop rewarded prompt changes on train accuracy alone, which made it too easy to overfit.
+**1. A real validation split.** We had train for fitting and test for the final check, but nothing in between. So the loop selected prompt versions on train accuracy alone.
 
-**2. More repeated boundary cases in the confusing parts of the taxonomy.** The hard errors were not random. They clustered around boundaries like Information Retrieval vs. Databases, Human-Computer Interaction vs. Computers and Society, and subject vs. representation for audio papers. A stronger dataset would have contained more examples of those edge types, so a general rule had to prove itself across several similar cases instead of one anecdote.
+**2. More repeated edge cases.** The hard errors clustered around a few label boundaries, especially Information Retrieval vs. Databases, Human-Computer Interaction vs. Computers and Society, and subject vs. representation for audio papers. A stronger benchmark would have forced new rules to prove themselves across multiple similar cases.
 
-**3. Clearer label policy for genuinely ambiguous papers.** Some of the shared errors look like cases humans would argue about too. If the benchmark wants one exact label, it needs sharper tie-break rules, more canonical examples per class, and maybe even an `unsure` or multi-label policy if the taxonomy itself does not cleanly force one answer.
+**3. Clearer policy for ambiguous papers.** Some of the shared errors look genuinely arguable. If the benchmark wants one exact label, it needs sharper tie-break rules, better canonical examples, and maybe even an `unsure` or multi-label policy.
 
-In other words: the loop was good enough to expose where the benchmark stopped teaching it. What it needed next was not another prompt tweak, but a dataset that better represented the boundary conditions we actually cared about.
+That is the real lesson: the loop did its job. It surfaced, quickly, that the next bottleneck was not another prompt tweak. It was the dataset.
 
 ## Where this is actually useful today
 
-None of this means "do not automate the loop." It means: automate the inner loop, own the outer one. A realistic split for a classification task like this:
+None of this means "do not automate the loop." It means: automate the inner loop, own the outer one.
 
 - **Agent-owned:** running experiments, scoring, per-error annotation, drafting hypothesis-driven prompt revisions, diffing errors across runs, flagging plateaus
 - **Human-owned:** the target function, including the validation and held-out test data nobody optimizes against, dataset composition, when to restart with different constraints, and when to stop
 
-The infrastructure for the agent-owned half is exactly what Langfuse provides: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a full read/write workbench, and give you the audit trail to vouch for what it did.
-
-That last part matters most. The agent will get to your target. Make sure it is the right one. And if the validation split stays flat, the next move may be to improve the dataset before pushing the loop further.
-
----
-
-_All experiments: `gpt-4o-mini`, temperature `0`, strict JSON schema output. Optimizer agent: Claude Fable 5 in Claude Code with goal mode. 9 train runs, 200 items, plus 3 test runs, 100 items, across both rounds. Full prompt version history and per-run error annotations live in Langfuse._
+This is exactly what Langfuse is good for: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a workbench and an audit trail.
