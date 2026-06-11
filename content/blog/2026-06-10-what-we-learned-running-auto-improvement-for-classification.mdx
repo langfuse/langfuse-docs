@@ -24,19 +24,13 @@ As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-ea
 
 The question stopped being "how do we run auto-improvement loops better?" It became: what would the dataset have needed to contain for any of this to actually work?
 
-## Why a classification task
+## The task and setup
 
-If you are going to hand a loop to an agent, classification is the ideal first candidate:
+We picked classification on purpose. If you are going to hand a loop to an agent, it is one of the cleanest first candidates: exact-match accuracy gives you a crisp target function, it shows up everywhere in real workflows, and the label ambiguity makes it a useful stress test.
 
-- **A clear target function.** Exact-match accuracy. No LLM-as-judge calibration debates.
-- **Known to be hard.** Getting _humans_ to agree on labels is famously difficult. Expecting a model to hit 100% against noisy gold labels is unrealistic, which makes the optimization dynamics interesting.
-- **It is everywhere.** User-intent routing, email triage, support-ticket tagging, legal-case bucketing, fraud and risk categorization, lead qualification, content labeling. These are usually sub-tasks inside larger workflows, exactly the kind of contained, measurable component where a loop like this can already be useful today.
+Our concrete task was to classify arXiv papers into one of 10 categories, such as Databases, Information Retrieval, Software Engineering, and Sound, from title, authors, and abstract.
 
-Our concrete task: classify arXiv papers into one of 10 categories, such as Databases, Information Retrieval, Software Engineering, and Sound, from title, authors, and abstract.
-
-## The setup
-
-We kept it deliberately simple:
+We kept the setup deliberately simple:
 
 - a train split with 200 labeled examples and a held-out test split with 100, stored in [**Langfuse Datasets**](/docs/evaluation/experiments/datasets)
 - a system prompt, with model config and a strict JSON response schema, managed in [**Langfuse Prompt Management**](/docs/prompt-management/get-started), fetched by the [`production` label](/docs/prompt-management/features/prompt-version-control) at runtime
@@ -118,13 +112,25 @@ And the final test run?
 
 That is the real ceiling in the data. Once the same errors survive every prompt variant, the problem stops looking like "we need another round of prompt edits" and starts looking like "the next bottleneck is probably not the prompt." Some of those papers sit on boundaries humans would argue about too. At that point, more examples, clearer label definitions, or a different task model are probably higher-leverage than another pass through the loop. The useful part is that the loop surfaced that limit quickly.
 
+## What the dataset would have needed
+
+The intro question deserves a direct answer. Based on these runs, the dataset likely needed three things:
+
+**1. A real validation split for selection.** We had train for fitting and test for the final check, but nothing in between. That meant the loop rewarded prompt changes on train accuracy alone, which made it too easy to overfit.
+
+**2. More repeated boundary cases in the confusing parts of the taxonomy.** The hard errors were not random. They clustered around boundaries like Information Retrieval vs. Databases, Human-Computer Interaction vs. Computers and Society, and subject vs. representation for audio papers. A stronger dataset would have contained more examples of those edge types, so a general rule had to prove itself across several similar cases instead of one anecdote.
+
+**3. Clearer label policy for genuinely ambiguous papers.** Some of the shared errors look like cases humans would argue about too. If the benchmark wants one exact label, it needs sharper tie-break rules, more canonical examples per class, and maybe even an `unsure` or multi-label policy if the taxonomy itself does not cleanly force one answer.
+
+In other words: the loop was good enough to expose where the benchmark stopped teaching it. What it needed next was not another prompt tweak, but a dataset that better represented the boundary conditions we actually cared about.
+
 ## What we learned
 
-**1. Train, validation, and test do different jobs.** Exact-match accuracy against gold labels sounds foolproof, but if you keep selecting prompt versions on train accuracy, you still overfit. In hindsight, we should have stuck with the boring best practice: train for fitting, a validation split for selection, and the test set used once at the end.
+**1. Auto-improvement can optimize fast without improving the thing you actually care about.** Train accuracy moved quickly. Held-out performance did not.
 
-**2. The stronger finding is not just that we skipped validation.** It is that even a disciplined round 2, with more principled and general prompt changes, bought zero measurable test improvement. By that point the loop had probably taught us most of what prompt iteration could teach us within this setup.
+**2. A disciplined second round still bought zero measurable test improvement.** Once the same held-out errors survive every prompt variant, the next bottleneck is probably no longer the prompt.
 
-**3. That leaves the open question in the dataset.** What would the benchmark itself have needed to look like for this loop to work better? More repeated boundary cases, clearer category definitions, more examples of ambiguous classes, a true validation split, maybe even an "unsure" bucket? Until that answer is clearer, improving the dataset is probably higher-leverage than pushing the loop harder.
+**3. The loop is still useful because it surfaced that limit quickly.** The right response is not to give up on automation, but to improve the benchmark before pushing the loop harder.
 
 ## Where this is actually useful today
 
