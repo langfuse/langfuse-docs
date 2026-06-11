@@ -1,5 +1,5 @@
 ---
-title: Amazon Bedrock
+title: "Amazon Bedrock Integration"
 sidebarTitle: Amazon Bedrock
 seoTitle: Open Source Observability and Metrics for Amazon Bedrock
 description: Open source observability for Amazon Bedrock applications and the Bedrock SDK.
@@ -180,6 +180,7 @@ Alex: Hello! I'm Alex, your AI personal finance advisor from SmartFinance Adviso
 Here are some important rules for the interaction:
 -  Always stay in character, as Alex, an AI from SmartFinance Advisors.
 -  If you are unsure how to respond, say "I'm sorry, I didn't quite catch that. Could you please rephrase your question?"
+
 """
 
 conversation = [

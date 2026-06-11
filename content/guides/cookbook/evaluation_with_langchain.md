@@ -1,5 +1,5 @@
 ---
-title: Evaluation with Langchain
+title: "Run Langchain Evaluations on data in Langfuse"
 description: Cookbook that demonstrates how to run Langchain evaluations on data in Langfuse.
 category: Evaluation
 ---

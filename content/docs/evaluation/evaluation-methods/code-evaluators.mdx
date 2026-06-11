@@ -505,7 +505,7 @@ No. Code evaluators currently support standard libraries only. If your evaluatio
 <Details>
 <Summary>Can I create code evaluators via API or SDK?</Summary>
 
-Not yet. Create and manage code evaluators in the Langfuse UI. The public evaluator API currently remains scoped to LLM-as-a-Judge evaluators while the code evaluator contract is in Fast Preview.
+Yes. In addition to the Langfuse UI, the unstable public evaluator endpoints accept `type: "code"` to create code evaluators and reference them from evaluation rules. See the [Evaluators API reference](https://api.reference.langfuse.com/#tag/unstableevaluators) — note that these endpoints are unstable and may change.
 
 If you want to run deterministic evaluation logic in your own application or CI pipeline, use [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) to ingest the resulting scores into Langfuse.
 

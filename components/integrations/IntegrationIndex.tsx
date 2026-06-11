@@ -27,6 +27,23 @@ const categoryConfig: Record<
     title: "Native",
     description: "Native integrations with Langfuse",
     additionalLinks: additionalLinksFromMeta(nativeIntegrationsMeta),
+    featuredLinks: [
+      {
+        route: "/docs/api-and-data-platform/features/public-api",
+        frontMatter: { title: "API" },
+        title: "API",
+      },
+      {
+        route: "/docs/sdk/python/sdk-v3",
+        frontMatter: { title: "Python SDK" },
+        title: "Python SDK",
+      },
+      {
+        route: "/docs/sdk/typescript/guide",
+        frontMatter: { title: "JS/TS SDK" },
+        title: "JS/TS SDK",
+      },
+    ],
   },
   frameworks: {
     title: "Frameworks",
@@ -104,6 +121,11 @@ const categoryConfig: Record<
     description:
       "Use Langfuse data and metrics in your own application and data platform",
     additionalLinks: additionalLinksFromMeta(dataPlatformIntegrationsMeta),
+  },
+  "developer-tools": {
+    title: "Developer Tools",
+    description:
+      "Trace AI coding assistants, editors, and CLIs, or use Langfuse directly from your editor",
   },
   other: {
     title: "Other",
@@ -198,7 +220,7 @@ function IntegrationCards({
           ))}
         </Cards>
       )}
-      <div className={featured && featured.length > 0 ? "mt-8" : ""}>
+      <div className={featured && featured.length > 0 ? "mt-4" : ""}>
         <Cards num={3}>
           {pages
             .filter((p) => !(featured || []).some((f) => f.route === p.route))

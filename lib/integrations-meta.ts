@@ -12,5 +12,17 @@ export const nativeIntegrationsMeta: Record<string, MetaEntry> = {
     href: "/docs/sdk/typescript/guide",
     title: "JS/TS SDK",
   },
+  "mcp-server": {
+    href: "/docs/api-and-data-platform/features/mcp-server",
+    title: "MCP Server",
+  },
+  cli: {
+    href: "/docs/api-and-data-platform/features/cli",
+    title: "CLI",
+  },
+  api: {
+    href: "/docs/api-and-data-platform/features/public-api",
+    title: "API",
+  },
 };
 export const dataPlatformIntegrationsMeta: Record<string, MetaEntry> = {};
