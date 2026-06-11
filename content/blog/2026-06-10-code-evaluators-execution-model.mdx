@@ -31,7 +31,7 @@ In late May we shipped [code evaluators](/docs/evaluation/evaluation-methods/cod
 
 Evaluation is how you find out whether your LLM app is actually any good. While we absolutely recommend reviewing some traces by hands (link to loop blogbost by lotte), it simply doesn't scale to millions of traces. The usual state-of-the art practice is to deploy LLM-as-judge evaluators (links) based on the error modes that you derived from your sampled traces: they are great in capturing things like agent helpfulness, conciseness or tone.
 
-But a lot of what teams want to check is not subjective at all. Is the output valid JSON? Does it match the schema? Does the answer match the expected value? A model is an expensive, non-deterministic way to answer questions that a few lines of code answer perfectly every time.
+But a lot of what teams want to check is not subjective at all. Is the output valid JSON? Does the answer match the expected value? A model is an expensive, non-deterministic way to answer questions that a few lines of code answer perfectly every time.
 
 That is what code evaluators are: you write a small Python or TypeScript function, it returns one or more scores. No need to setup infrastructure on your side - you provide the code, configure when it should be triggered and Langfuse will run it for you at scale.
 
@@ -57,11 +57,11 @@ function evaluate({ observation: { output } }: EvaluationContext): EvaluationRes
 }
 ```
 
-Code evaluators are usually fairly restricted workloads: an evaluator run is **short** (in the 100s milliseconds region, **deterministic** (same input, same score), and **stateless** (no filesystem, no state between runs).
-
-This is a sharp distinction from agent sandboxing that is currently everywhere: these need long lived environments, file-system access, snapshotting and ~~`pip install`~~ `uv add` at runtime.
-
 ## Requirements and non-goals
+
+as you can, see Code evaluators are usually fairly restricted workloads: they are **short** (in the 100s milliseconds region, **deterministic** (same input, same score), and **stateless** (no filesystem, no state between runs).
+
+This is a sharp distinction from agent sandboxing like E2B or Modal) that is currently everywhere: these need long lived environments, file-system access, snapshotting and ~~`pip install`~~ `uv add` at runtime.
 
 So knowing what we don't need (agent sandboxes), we can think about what our users need:
 
@@ -69,58 +69,75 @@ So knowing what we don't need (agent sandboxes), we can think about what our use
 - Scale: we have ingest hundreds of millions of observations per day. Each of them can potentially trigger one ore more code evaluators that will then need to recive the observation to process
 - Self-hosting parity: Langfuse is easy to self-host and we want to keep it this way. It shouldn't take an infra team to operate it and secure it.
 - Python and TypeScript support: Users want develop in the language they are familiar in. Python as data scientists favorite language and TypeScript as evolving standard as AI application engineers
-- Transparency: Code that is running automatically upon ingestion of observations is great - but what if its execution fails? Users need to be able to quickly debug any issues
+
+(and then obviously the obvious ones like operating and maintenance cost)
 
 At Langfuse we're big believers in shipping fast and often: Get sth in the hand of users, learn from their feedback and learn from operating it for them.
 Same same with code evaluators which is also why we purposefully kept the initial slice lean and deferred some requirements (network capabilities, third-party library support) to future iterations.
 
-## The design space
+## Options we considered
 
-> **✍️ TODO (1 short lead-in sentence):** We grouped the options by isolation model; each rejected group had a concrete dealbreaker.
+Sandboxing untrusted code is not a new problem and so we had a variety of options available:
 
-| Option                                                                 | Isolation                  | Startup | Why we rejected it                                                                                                                                                                           |
-| ---------------------------------------------------------------------- | -------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Webhook dispatch** (user hosts an HTTP endpoint, we POST work to it) | User-side                  | n/a     | High setup friction for someone who wants `output === expected`; user must build queueing/scaling; lost data points get blamed on Langfuse                                                   |
-| **Managed sandbox provider** (E2B, Modal, Vercel Sandbox)              | MicroVM                    | Fast    | Third-party dependency on a core workflow; severely complicates self-hosting                                                                                                                 |
-| **V8 isolates** (`isolated-vm`)                                        | In-process                 | ~0 ms   | Breach lands the attacker in the same process as other tenants' data; TS only                                                                                                                |
-| **Deno + Pyodide**                                                     | In-process                 | Fast    | Same blast-radius problem; n8n's Pyodide sandbox had a [9.9-severity escape](https://www.cyera.com/research/n8scape-pyodide-sandbox-escape-9-9-critical-post-auth-rce-in-n8n-cve-2025-68668) |
-| **wasmtime**                                                           | Process                    | Fast    | No C extensions — closes the door on numpy/pandas; escape still lands on a shared machine                                                                                                    |
-| **gVisor / Firecracker / Kata**                                        | Syscall-filtered / MicroVM | Fast    | Strongest isolation, but custom containerd/runsc setups and KVM requirements — not shippable as a Helm chart, which breaks self-hosting parity                                               |
-| **Container per run** (Fargate, K8s Jobs)                              | Container                  | ~1 min  | Startup measured in minutes for a 2-second job; quota anxiety at thousands of concurrent tasks                                                                                               |
-| **Langfuse-managed evaluators only** (no user code)                    | n/a                        | n/a     | Customizability is the entire point; users hit the wall of a curated library quickly                                                                                                         |
-| **AWS Lambda** ✅                                                      | MicroVM (AWS-managed)      | ~100 ms | —                                                                                                                                                                                            |
+**Making it the user's problem** (probably need to find a nicer title given the previous review comments)
 
-> **✍️ TODO (optional, 1 paragraph):** Expand the in-process row group slightly in prose: hardening with seccomp/blocklists is possible but is permanent security work outside our core product — cite Cloudflare being [open](https://blog.cloudflare.com/mitigating-spectre-and-other-security-threats-the-cloudflare-workers-security-model/) about what V8 isolates demand.
+The genius behind tools like Claude Code is that they get rid of an entire category of problems by moving the execution to their users. No tenant isolation that you need to deal with, full access to the users environment. In our case we could have used webhooks to trigger our users infrastructure, expecting the scores as results. While very tempting, it would have made for an awful user experience: every user would have had to set up a webhook target that can potentially serve hundreds of requests per second with payloads that can easily go in the megabytes.
 
-## The chosen design: shared Lambda runners with tenant isolation
+**Offering a custom DSL**
 
-> **✍️ TODO (1 paragraph):** Lambda fits the workload's shape: AWS-managed microVM per environment, ~100 ms startup, scales without us operating anything.
+If the checks are all fairly similar and deterministic, why even offering the full power of a programming language? Coulnd't we do a small DSL / query builder that generates only safe code in the background? Use cases for sure a similar but data isn't. While a DSL could for sure serve a majority of workloads, we'd face just as many requests by users who wouldn't fit these narrow boxes and who'd be blocked. Plus, a custom DSL wouldn't be in distribution for humans or agents.
+
+**In process isolation**
+
+Fast startup time, no extra infrastructure components: In process isolation with tools like v8-isolate, wasmtime, seccomp, deno or pyodide would have been the next best solution - especially with our self-hoster requirement in mind. But they are incredible hard to get right and if breached users end up in a critical space with other customer's data. Looking at the effort it takes to keep cloudflare workers safe, or the incident history of tools like N8N, we simply didn't feel comfortable that this would be a solution that would let us sleep soundly.
+
+**Firecracker, gvisor, Kata**
+
+The gold standard solutions. Powering the likes of AWS Lambda, Claude Code on the web or OpenAI code execution. Unfortunately, they are non trivial to deploy as they require KVM (Linux Hardware Virtualization) and or special container runtimes. Doable for us as a on-off but not really something that we want to put on our customers.
+
+**Kubernetes jobs**
+
+Dispatching code evaluations as Kubernetes jobs (or Fargate tasks) in our case would fit the self-hosting story very well and remains probably one of the best options for self hosters that don't want to use one of the Hyper Scalers as backend. However, dispatching one container to run a workload of a few 100 milliseconds is also quite heavy and noise.
+
+## Our runtime of choice: AWS Lambdas
+
+AWS Lambdas turned out to fit the shape of the problem almost exactly. Each invocation runs in an AWS-managed microVM, startup is around 100ms, and literally built for high concurrency workloads.
+
+Having looked at the different options our stance on our self-hoster requirement had also changed. After we spoke to customers at different sizes, it became clear that there wouldnt't be a one size fits all solution - even if would get everyone to run in an K8s compatible environment. Having that in mind we decided to chose AWS Lambda as first cloud native implementation of a extendable dispatcher specification.
+
+```TypeScript
+export interface CodeEvalDispatcher {
+  name: string;
+  dispatch(input: DispatchInput): Promise<DispatchResult>;
+}
+```
+
+Self-hoster can use that with their own credentials or use the also included insecure local dispatcher for development or trusted environments.
+
+<Callout type="warning">
+  The local dispatcher executes evaluator code in-process, without the isolation
+  guarantees described in this post. It is not safe against cross-tenant access
+  and must not be used in production.
+</Callout>
+
+TODO: Add another callout to let us know in the GH discussions if they need a specific new dispatcher backend
 
 ### Warm environments, and why naive Lambda is not enough
 
-Keep (condensed from current draft):
+One major factor for AWS lambdas was that we found that security story very managable. AWS operates under the least privilege principle giving us safe defaults where every decision to widen the capabilities is a conscious ones.
 
-- Lambda reuses execution environments. Warm invocations inherit whatever the previous run left in memory or `/tmp`. Fine for normal workloads; a cross-tenant leak for untrusted code.
-- Intuitive fix: one function pair (Python + TypeScript) per tenant → tens of thousands of Lambdas, provisioning/teardown lifecycle, and a runner harness to keep in sync across the whole fleet. Operationally brutal.
-- Actual fix: [Lambda tenant isolation](https://docs.aws.amazon.com/lambda/latest/dg/tenant-isolation.html) — pass a tenant ID per invocation; AWS guarantees an environment is only ever reused for the same tenant. Two shared runners total.
-- Tenant key: `organizationId:projectId` — project is already the data-isolation boundary everywhere else in Langfuse. Accepted tradeoff: evaluators within one project share a runtime boundary, which exposes nothing not already mutually visible in that project.
-- Headroom: ~1,250 isolated environments per runner vs. ~200 peak distinct projects running evaluators in any hour. Moving to a finer key is a config change.
+However, there was on gotcha around Lambdas: invocations are not as isolated as you think.
+"Cold" invocation gets a fresh microVM; subsequent "warm" invocations can reuse the same one, including whatever the previous run left behind in memory or in `/tmp`. This could potentially lead to leaked data across tenants.
 
-### Dispatch: synchronous and inline, on purpose
+Until late last year your only option would have been to have one lambda function per tenant. There are no restrictions on the amount of lambdas but we would have inherited quite some complexity for the life cycle management: Creating the functions dynamically upon tenant creation, tearing them down if unused or Langfuse project is deleted. And worst: Keeping the our tiny harness within the function in sync.
 
-What an invocation carries: the evaluator **source code** (read from Postgres) plus the **reduced variables** the user mapped (JSONPath/variable mapping happens in the worker). Measured payloads (p95 well under 200 KB) sit comfortably below Lambda's 6 MB sync invoke limit.
+Luckily, AWS launched tenant isolation (https://aws.amazon.com/about-aws/whats-new/2025/11/aws-lambda-tenant-isolation-mode/). Projects are the current security boundary in Langfuse giving us a good tradeof of tenant key cardinality and security. And best of all: we end up with a fixed number of 2 lambda functions instead of `tenant * 2` (node + python) lambdas that are versioned and deployed via our IaC setup.
 
-Options considered (from the implementation plan — good public material):
+### Dispatch: synchronous and inline
 
-| Strategy             | Why / why not                                                                                                                                  |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sync + inline** ✅ | Simplest path that's correct: direct result handling, no callback auth or DLQ machinery, and an egress-free runner since nothing is downloaded |
-| Sync + S3            | Adds object storage to the hot path for payload outliers we don't have                                                                         |
-| Async + inline       | Buys backpressure/retries at the cost of callback auth, idempotent result writes, stale-execution cleanup                                      |
-| Async + S3           | The high-volume shape — deliberately not the MVP                                                                                               |
+Having the operational experience of operating hundred of millions LLM-as-a-judge invocations we felt comfortable starting with the simplest possible setup with lambdas: synchronous invocation with inlined payload (Lambda limit at 6mb). As adoption grows async invocation using AWS SQS combined with signed S3 URLs give us a clear and most importantly non breaking upgrade path.
 
-- Over-limit payloads **fail hard** with an actionable error (reduce variable mapping / shorten source) — no silent truncation, no S3 fallback in v1.
-- Moving to async later changes nothing in the user-facing contract.
+Upon invocation we send payload and user source code to the lambda. A tiny Langfuse provided harness in the Lambda handles payload parsing and invocation of the user's code.:
 
 ```mermaid
 sequenceDiagram
@@ -140,66 +157,49 @@ sequenceDiagram
     W->>S: Write scores
 ```
 
-### Code lives in Postgres, not S3
+### The principle of least privilege
 
-- Source is capped at 256 KiB and stored on the evaluator template; the worker sends it inline on every dispatch.
-- This spends invoke-payload budget but eliminates a separate artifact lifecycle to manage and secure — and it is what makes the egress-free runner possible (nothing to download).
-- If custom dependencies arrive later, that becomes a build-time artifact problem (code + lockfile → immutable image), not a runtime `pip install`.
+AWS lambdas are giving us the perfect controllable sandbox. All the more important not to mess up things up on the way. For us that meant: religiously following the principle of least privilege. Credentials that you don't pass, actions you don't perform or capabilities that you don't add - all things that can't blow up.
 
-### TypeScript without a transpiler
+Concretely this meant:
 
-Keep (condensed from current draft):
+- Only interact with the code on client side or within the lambda. Once it enters our backend we just treat it as random string. This also meant skipping any necessary transpilation step for TypeScript based evaluators. Specifically this means we only allow erasable TypeScript syntax ((https://nodejs.org/api/module.html#modulestriptypescripttypescode-options)) which we can strip upon lambda invocation - a fair compromise given the usual characteristics of code evaluators.
+- Minimal lambda permissions: the lambdas executing the code can do one thing only: write cloudwatch logs to a specific logs. No other credentials than these AWS credentials are passed and hence can't be leaked.
+- No egress: Lambdas are attached to a separate VPC with its own security group and no access to internal or external networks. For this we weren't so much worried about data leaking but rather abuse of our compute to abuse other parties. Adding rate-limited and allow-list based egress later on can then be its own isolated feature. This
+- Strict limits: we have execution limits (2s), memory limits (128MB) and payload limits on source (256KB), inputs and outputs (5.5 MiB) in place to prevent any abuse.
 
-- Lambda does not run TypeScript. Transpiling untrusted code in our worker pulls a full TS toolchain into a security-sensitive path — rejected.
-- "TS-lite" instead: JavaScript plus erasable type annotations via Node's built-in [`stripTypeScriptTypes`](https://nodejs.org/api/module.html#modulestriptypescripttypescode-options), executed inside the Lambda. Annotations and interfaces work; `enum`, `namespace`, decorators throw a clear error.
+## Meeting real life
 
-### The dispatcher seam, and self-hosting
+We were confident that the implementation was robust - thanks to our extensive planning, threat modelling with our ClickHouse security team and an extensive testing suite based on the excellent Floci AWS simulator (link). but in the end plans are nothing; planning is everything - we know that people would put code evalautors to the test as soon as they were launched. And guess what - they did.
 
-- The worker talks to a small `dispatch({ code, variables })` interface scoped to organization/project — it models Langfuse concepts, not AWS ones. The AWS Lambda dispatcher is one implementation behind it.
-- Self-hosters point the AWS Lambda dispatcher at their own account via environment variables. GCP / Azure / Kubernetes backends are an implementation detail behind the same seam, added based on demand.
-- For local development and non-production setups there is a local dispatcher (TypeScript only).
+A few days after the release we had a security researcher reaching out claiming that database credentials could be extracted from the code evaluation execution by reading out environment variables and returning the result as score comments. The part about the database credentials was luckily a give aways for AI slob - as said above: we don't pass any credentials to the execution environment.
+What held up though was the extraction of the environments variable via score comments - an attack vector we had considered before and planned for.
 
-<Callout type="warning">
-  The local dispatcher executes evaluator code in-process, without the isolation
-  guarantees described in this post. It is not safe against cross-tenant access
-  and must not be used in production.
-</Callout>
-
-## The security stance
-
-> **✍️ TODO (1 lead-in sentence):** Principles, not anecdotes. Every control assumes the code is hostile.
-
-- **The runner is the least-privileged component in the system.** Its execution role can write its own CloudWatch logs and nothing else: no Langfuse credentials, no other AWS service. The execution trace shown in Langfuse is written by the _worker_, so the runner never needs credentials in the first place.
-- **No network egress.** Runners sit in a VPC with no internet route. The concern is less exfiltration (users can already read their own project's data) than abuse — Langfuse-funded Lambda capacity hammering third-party APIs. Inline code + variables mean a no-egress setup costs nothing today and leaves room for an allowlisted proxy later.
-- **Hard limits that fail loudly.** 2 s timeout, 256 KiB source cap, payload caps, output size caps.
-- **Every result is validated** against the score contract before it is ingested.
-- **Test before live.** In-app editor with validation; evaluators can run against real observations from your own project before being enabled.
-
-> **✍️ TODO (optional):** One or two sentences on the error taxonomy — user errors (runtime exception, timeout, oversized payload, unsupported TS syntax) surface to the user sanitized and don't retry; infra errors (throttling, transient Lambda failures) retry and alert us. Shows operational thought without bloating the post.
-
-## Validation
-
-> **✍️ TODO (1 short paragraph, dry and confident — this replaces the "week users stole our credentials" narrative):**
->
-> - Built and iterated locally against [floci](https://floci.io/), a local cloud emulator — full error-case matrix (malformed code, oversized payloads, timeouts, unsupported TypeScript) without a deploy in the loop.
-> - The isolation model and IAM setup were pressure-tested by the ClickHouse security team before launch.
-> - In production: shortly after launch, users probed the boundaries — including extracting the runner's AWS credentials from the environment and attempting to use them externally. The credentials grant exactly what the design says: nothing. Every call returned `AccessDenied`, and GuardDuty flagged the external use immediately. (2-3 sentences max, no drama; ASNs in screenshots must be redacted before publishing.)
+Admittely, one blind spot on our side was that these environment variables also include the AWS injected reserved credentials (add link to dosc) for the Lambda execution itself. A few hours after the initial reach out bounty hunters started to probe the AWS API using the extracted credentials:
 
 <Frame fullWidth>
   ![GuardDuty anomaly list showing AccessDenied for every API call made with the
-  extracted
+  leaked
   credentials](/images/blog/2026-06-08-running-customer-code-safely/guardduty-access-denied.png)
+</Frame>
+
+There is not much you can do about this. The passed credentials are reserved by AWS and scrubbing of things like `os.environ` or `process.env` make things harder but not impossible.
+You could of course in-process sandbox things adding defense-in-depth but in the end it always remains one possible vector while adding significant complexity and overhead.
+
+In the end our religious adherence to the principle of least privilege and strictly following AWS best practices (e.g [when it comes to attaching lambdas to VPCs](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html) payed off: GuardDuty confirmed all requests being denied and attackers eventually gave up. Our plan held up.
+
+<Frame fullWidth>
+  ![GuardDuty finding: credentials for the code-eval runner role used from an
+  external IP
+  address](/images/blog/2026-06-08-running-customer-code-safely/guardduty-external-ip.png)
 </Frame>
 
 ## What's next
 
-These are v1 choices, not permanent limits. In rough order of demand:
+We deliberately traded features for properties we could verify: no egress, no dependencies, no credentials in v1 — in exchange for tenant isolation we did not have to build ourselves, a runner whose stolen credentials open nothing and most importantly: getting this in the hands of real users as quickly as possible to open up the feedback stream.
 
-- **Controlled network egress** through an allowlisting proxy with strict rate limits.
-- **Managed dependency environments** (numpy, pandas, common JS utilities) as prebuilt runner variants.
-- **More dispatcher backends** (GCP, Azure, Kubernetes) based on self-hoster demand.
-- **Async dispatch** if connection lifetimes or backpressure become the bottleneck — invisible to evaluator authors.
+Deterministic checks and LLM-as-a-judge now cover both halves of evaluation; the deferred features come back one at a time, each with the same security bar.
 
-If one of these is blocking you, tell us in [GitHub Discussions](https://github.com/orgs/langfuse/discussions).
-
-> **✍️ TODO (closer, 2 sentences):** Try code evaluators ([docs](/docs/evaluation/evaluation-methods/code-evaluators)); hiring link (/careers) if this kind of problem sounds fun.
+If you want to try code evaluators, the [docs](/docs/evaluation/evaluation-methods/code-evaluators) are the place to start.
+Please also let us know if one of the outliend decisions block you - tell us in [GitHub Discussions](https://github.com/orgs/langfuse/discussions); what we add next is driven by what you run into.
+And if running untrusted code across thousands of tenants sounds like a fun problem, [we are hiring](/careers).
