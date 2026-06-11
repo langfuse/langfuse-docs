@@ -16,32 +16,15 @@ import { Frame } from "@/components/Frame";
   authors={["annabellschafer"]}
 />
 
-Loop-shaped workflows are having momentum. Boris Cherny recently put it bluntly: much of his job is "to design loops."
-
-A common pattern is simple:
-
-- run the task
-- inspect failures
-- revise
-- run again
-
-Primitives like `/goal` in Claude Code and Outcomes in Claude Managed Agent make that pattern easy to apply to a concrete benchmark.
+Loop-shaped workflows are having momentum. Boris Cherny recently put it bluntly: much of his job is "to design loops." A common way to improve task performance now is to let a model iterate against an evaluation: run the task, inspect failures, revise, and run again. Primitives like `/goal` in Claude Code and Outcomes in Claude Managed Agent make that pattern easy to apply to a concrete benchmark.
 
 As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), the mechanics are not the hard part anymore. Loop design and human involvement still matter, especially if you want to avoid optimizing your way into agent slop.
 
 With Fable 5 landing in early June, part of the pitch was that it is strong at this kind of self-correcting loop. So we used Claude Fable 5 in Claude Code's `/goal` mode to run a simple classification auto-improvement loop end to end.
 
-Here is what we gave it:
+We gave it a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
 
-- **Task:** classify arXiv papers into one of 10 categories
-- **Stack:** a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets) and a prompt in [Prompt Management](/docs/prompt-management/get-started)
-- **Goal:** hit 95% train accuracy or stop after 15 runs, then run the held-out test set once
-
-<Callout type="info">
-Train accuracy moved from 78% to 97% in four runs. The held-out test set barely moved, and 11 test errors were shared across every prompt variant.
-
-That shifted the question from "how do we run auto-improvement loops better?" to "what would the dataset have needed to contain for auto improvement to work better?"
-</Callout>
+It did the job: train accuracy moved from 78% to 97% in four runs. Performance on the held-out test set barely moved. By the end, 11 test errors were shared across every prompt variant. The question shifted from "how do we run auto-improvement loops better?" to "what would the dataset have needed to contain for auto improvement to work better?"
 
 ## Why a classification task
 
