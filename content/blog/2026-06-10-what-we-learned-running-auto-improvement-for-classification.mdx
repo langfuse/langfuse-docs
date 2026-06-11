@@ -16,19 +16,19 @@ import { Frame } from "@/components/Frame";
   authors={["annabellschafer"]}
 />
 
-Loop-shaped workflows are having a moment. The interesting question is no longer whether agents can run them end to end. They can. The harder question is whether the thing they are hill-climbing on is actually good enough.
+Loop-shaped workflows are having momentum. Boris Cherny recently put it bluntly: much of his job is "to design loops." A common way to improve task performance now is to let a model iterate against an evaluation: run the task, inspect failures, revise, and run again. Primitives like `/goal` in Claude Code and Outcomes in Claude Managed Agent make that pattern easy to apply to a concrete benchmark.
 
-That is the broader point we made in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering). This post is a much smaller, more concrete version of the same problem.
+As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), the mechanics are not the hard part anymore. Loop design and human involvement still matter, especially if you want to avoid optimizing your way into agent slop.
 
-Fable 5 had just come out, and part of the pitch around it was that it handles this kind of self-correcting loop well. So we used it to run a simple classification auto-improvement loop end to end.
+With Fable 5 landing in early June, part of the pitch was that it is strong at this kind of self-correcting loop. So we used Claude Fable 5 in Claude Code's `/goal` mode to run a simple classification auto-improvement loop end to end.
 
 <Frame>
   ![Lance Martin post about designing loops with Fable 5](/images/blog/2026-06-10-auto-improvement-classification/lance-martin-fable-5-loops.png)
 </Frame>
 
-So we gave Claude Fable 5, running in Claude Code, a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
+We gave it a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
 
-It did the job: train accuracy moved from 78% to 97% in four runs. But we had no true validation split, only train and held-out test. That turned out to be the real lesson. Held-out performance barely moved, and by the end 11 test errors were shared across every prompt variant. The question shifted from "how do we run auto-improvement loops better?" to "what would the dataset have needed to contain for auto improvement to work better?"
+It did the job: train accuracy moved from 78% to 97% in four runs. Performance on the held-out test set barely moved. By the end, 11 test errors were shared across every prompt variant. The question shifted from "how do we run auto-improvement loops better?" to "what would the dataset have needed to contain for auto improvement to work better?"
 
 ## Why a classification task
 
