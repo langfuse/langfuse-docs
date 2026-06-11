@@ -1,7 +1,7 @@
 ---
-title: "97% on train, 82% on test: validation and test data matter more than the loop"
+title: "Auto improvement hit 97% on train, 82% on test: why validation and test data matter more than the loop"
 date: 2026/06/10
-description: "Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The loop worked. What we learned was why validation and test datasets are what make the result mean anything."
+description: "Claude Fable 5 had just come out, so we used it to run an auto-improvement loop end to end. It improved train accuracy fast. What it really taught us was that validation and test data matter more than the loop."
 tag: engineering
 author: Annabell
 ---
@@ -10,23 +10,23 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Frame } from "@/components/Frame";
 
 <BlogHeader
-  title="97% on train, 82% on test: validation and test data matter more than the loop"
-  description="Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The loop worked. What we learned was why validation and test datasets are what make the result mean anything."
+  title="Auto improvement hit 97% on train, 82% on test: why validation and test data matter more than the loop"
+  description="Claude Fable 5 had just come out, so we used it to run an auto-improvement loop end to end. It improved train accuracy fast. What it really taught us was that validation and test data matter more than the loop."
   date="June 10, 2026"
   authors={["annabellschafer"]}
 />
 
-We had just argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering) that agents can run more of the loop now, but only if the loop itself is set up well. When Fable 5 came out and was promoted for loop-shaped work, it felt like a good moment to test that on a simple benchmark.
+Auto improvement is easy to over-credit. If the data split is wrong, a loop can look successful while teaching you almost nothing about whether the result will generalize.
+
+Claude Fable 5 had just come out and was being promoted for loop-shaped work, so we used it to run a simple classification auto-improvement loop end to end.
 
 <Frame>
   ![Lance Martin post about designing loops with Fable 5](/images/blog/2026-06-10-auto-improvement-classification/lance-martin-fable-5-loops.png)
 </Frame>
 
-We picked a task with one of the cleanest target functions in AI engineering: **exact-match accuracy against gold labels**.
-
 So we gave Claude Fable 5, running in Claude Code, a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
 
-It hit the target in 4 runs. The interesting question was not whether Fable could operate the loop. It could. The more interesting lesson was about evaluation design: without a proper validation split, even a clean train/test setup is not enough, because the loop will optimize on train and make the eventual test result feel like a surprise instead of a check. By the end, 11 test errors were shared across every prompt variant. That turned the story from "how do we run loops better?" into "what would the dataset have needed to contain for this loop to actually learn something that transfers?"
+It did the job: train accuracy moved from 78% to 97% in four runs. But we had no true validation split, only train and held-out test. The result was the real lesson. Held-out performance barely moved, and by the end 11 test errors were shared across every prompt variant. That turned the story from "how do we run auto-improvement loops better?" into "what would the dataset have needed to contain for auto improvement to actually teach us something that transfers?"
 
 ## Why a classification task
 
