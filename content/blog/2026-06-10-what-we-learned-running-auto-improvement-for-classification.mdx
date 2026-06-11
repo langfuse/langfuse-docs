@@ -1,7 +1,7 @@
 ---
-title: "97% on train, 82% on test: Claude Fable 5 ran the loop. We should have used a validation set."
+title: "97% on train, 82% on test: Fable 5 ran the loop. Our evaluation setup didn't."
 date: 2026/06/10
-description: "Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The mechanics worked. The failure was our train-only selection setup."
+description: "Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The mechanics worked. Our evaluation setup didn't."
 tag: engineering
 author: Annabell
 ---
@@ -10,8 +10,8 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Frame } from "@/components/Frame";
 
 <BlogHeader
-  title="97% on train, 82% on test: Claude Fable 5 ran the loop. We should have used a validation set."
-  description="Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The mechanics worked. The failure was our train-only selection setup."
+  title="97% on train, 82% on test: Fable 5 ran the loop. Our evaluation setup didn't."
+  description="Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The mechanics worked. Our evaluation setup didn't."
   date="June 10, 2026"
   authors={["annabellschafer"]}
 />
@@ -36,6 +36,8 @@ It hit the target in 4 runs. That part worked. The failure came later: we let th
 - **Earlier was better:** the _second_ prompt version, 90.5% train with general label definitions only, beat the "optimized" one on test with **84%**
 - **Round two:** restarting with explicit "generalize, don't overfit" instructions produced a more principled prompt at 94% train, which scored **81% on test**. Statistically indistinguishable from the others.
 - **The real ceiling:** 11 of the test errors were identical across every prompt variant. Past about 85%, this looked less like a prompt problem and more like a hard taxonomy problem: some papers sit on boundaries humans would argue about too, and more examples may have helped as much as more prompt edits.
+
+If you only take one thing from this experiment, take this: **the loop worked; our evaluation setup didn't.**
 
 ## Why a classification task
 
@@ -156,7 +158,7 @@ None of this means "do not automate the loop." It means: automate the inner loop
 
 The infrastructure for the agent-owned half is exactly what Langfuse provides: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a full read/write workbench, and give you the audit trail to vouch for what it did.
 
-That last part matters most. The agent will get to your target. Make sure it is the right one.
+That last part matters most. The agent will get to your target. Make sure it is the right one. The loop worked. Our evaluation setup didn't.
 
 ---
 
