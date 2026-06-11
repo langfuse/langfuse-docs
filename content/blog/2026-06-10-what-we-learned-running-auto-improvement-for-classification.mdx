@@ -16,9 +16,9 @@ import { Frame } from "@/components/Frame";
   authors={["annabellschafer"]}
 />
 
-Auto improvement can be genuinely useful, but only if the data split lets you tell real progress from train-set improvement.
+There has been a lot of interest in loops recently. [@bcherny](https://x.com/bcherny) has said that his job is to "write loops." More broadly, letting models hill-climb on an evaluation is becoming a common recipe for improving task performance: `/goal` in Claude Code and Outcomes in Claude Managed Agent are primitives that let you apply that general recipe to a specific task.
 
-Claude Fable 5 had just come out and was being promoted for loop-shaped work, so we used it to run a simple classification auto-improvement loop end to end.
+As mentioned in our prompting guide, Fable 5 is good at self-correcting in a loop. So we used it to run a simple classification auto-improvement loop end to end.
 
 <Frame>
   ![Lance Martin post about designing loops with Fable 5](/images/blog/2026-06-10-auto-improvement-classification/lance-martin-fable-5-loops.png)
@@ -26,7 +26,7 @@ Claude Fable 5 had just come out and was being promoted for loop-shaped work, so
 
 So we gave Claude Fable 5, running in Claude Code, a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
 
-It did the job: train accuracy moved from 78% to 97% in four runs. But we had no true validation split, only train and held-out test. The result was the real lesson. Held-out performance barely moved, and by the end 11 test errors were shared across every prompt variant. That shifted the question from "how do we run auto-improvement loops better?" to "what would the dataset have needed to contain for auto improvement to work better?"
+It did the job: train accuracy moved from 78% to 97% in four runs. But we had no true validation split, only train and held-out test. That turned out to be the real lesson. Held-out performance barely moved, and by the end 11 test errors were shared across every prompt variant. The question shifted from "how do we run auto-improvement loops better?" to "what would the dataset have needed to contain for auto improvement to work better?"
 
 ## Why a classification task
 
