@@ -29,9 +29,11 @@ Our task was to classify arXiv papers into one of 10 categories from title, auth
 - a train split with 200 labeled examples and a held-out test split with 100 in [**Langfuse Datasets**](/docs/evaluation/experiments/datasets)
 - a prompt in [**Prompt Management**](/docs/prompt-management/get-started)
 - a small runner built with [**Langfuse Experiments via the SDK**](/docs/evaluation/experiments/experiments-via-sdk)
-- `gpt-4o-mini` as the task model
+- `gpt-4o-mini` as the task model<sup id="fnref-model-choice"><a href="#fn-model-choice">1</a></sup>
 
 The starting prompt was minimal. After each run, the agent reviewed the errors, wrote [comments](/docs/observability/features/comments) on the [Langfuse trace](/docs/observability/data-model#traces), published a new [prompt version](/docs/prompt-management/features/prompt-version-control), and ran again.
+
+_Suggested platform screenshot: the Langfuse workbench for this loop, showing the dataset, prompt, and experiment setup together._
 
 <Frame fullWidth>
   ![Diagram of the autonomous training loop: start from a base prompt, run the train split, score rows, comment on errors, revise the prompt, and then run the held-out test split once](/images/blog/2026-06-10-auto-improvement-classification/fable-classification-loop-diagram.png)
@@ -48,6 +50,8 @@ The first round optimized fast:
 
 Moving from a flat label list to general definitions was real progress. But once the agent started encoding concrete precedents from the training failures, train accuracy jumped while generalization got worse. The prompt that looked best on train was not the one that held up on test.
 
+_Suggested platform screenshot: the Langfuse runs overview comparing prompt versions and scores across the experiment history._
+
 ## Round 2: "generalize this time"
 
 So we restarted from the more general prompt and changed the rules: no single-paper precedents, only class-level principles, and no touching the test set.
@@ -61,6 +65,8 @@ So we restarted from the more general prompt and changed the rules: no single-pa
 The disciplined second round did not help. Adding a `reasoning` field even made things worse: it encouraged the model to rationalize surface cues instead of resolving the label boundary. By the end, the agent had concluded that the remaining errors mostly sat on ambiguous boundaries and that fixing them would require exactly the kind of paper-specific precedents we were trying to avoid.
 
 The most important result was not 81% vs. 84%. It was that **11 test errors were shared by all three prompt variants.** That means the loop got better at fitting the train split while leaving the same hard cases unresolved.
+
+_Suggested platform screenshot: one recurring hard example in Langfuse, with the trace and annotation showing why the boundary case stayed unresolved._
 
 ## What the dataset would have needed
 
@@ -84,3 +90,5 @@ None of this means "do not automate the loop." It means: automate the inner loop
 As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), the mechanics aren't the hard part anymore. This experiment shows what the hard part actually is: the target function, the dataset, and the judgment calls nobody automates against.
 
 This is exactly what Langfuse is good for: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a workbench and an audit trail.
+
+<p id="fn-model-choice"><sup>1</sup> We used <code>gpt-4o-mini</code> because this is a narrow, repetitive classification task where improving a cheaper model is often more useful than paying frontier-model prices. A stronger model likely would have performed better out of the box, but that would have answered a different question.</p>
