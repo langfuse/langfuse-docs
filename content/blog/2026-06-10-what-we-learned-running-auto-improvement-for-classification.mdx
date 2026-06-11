@@ -1,7 +1,7 @@
 ---
-title: "97% on train, 82% on test: We let Claude Fable 5 auto-improve a classification prompt"
+title: "97% on train, 82% on test: Claude Fable 5 ran the loop. We should have used a validation set."
 date: 2026/06/10
-description: "Last time, autoresearch taught us our target function was wrong. This time we gave an agent a clean target: exact-match accuracy on gold labels, and it found a new way to fail."
+description: "Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The mechanics worked. The failure was our train-only selection setup."
 tag: engineering
 author: Annabell
 ---
@@ -10,28 +10,29 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Frame } from "@/components/Frame";
 
 <BlogHeader
-  title="97% on train, 82% on test: We let Claude Fable 5 auto-improve a classification prompt"
-  description="Last time, autoresearch taught us our target function was wrong. This time we gave an agent a clean target: exact-match accuracy on gold labels, and it found a new way to fail."
+  title="97% on train, 82% on test: Claude Fable 5 ran the loop. We should have used a validation set."
+  description="Fable 5 had just come out, so we used it to run a prompt-improvement loop end to end. The mechanics worked. The failure was our train-only selection setup."
   date="June 10, 2026"
   authors={["annabellschafer"]}
 />
 
-We had just shared our take on [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering): agents are getting good enough to run more of the loop, but that only matters if the loop itself is set up well. Then Claude Fable 5 came out and was explicitly promoted for loop-shaped work, so we tried that claim on a simple setup and watched what happened when an agent ran the loop end to end.
+We had just shared our take on [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering): agents are getting good enough to run more of the loop, but that only matters if the loop itself is set up well. Then Claude Fable 5 came out and was explicitly promoted for loop-shaped work, which made it a good moment to try this again on a simple setup.
 
 <Frame>
   ![Lance Martin post about designing loops with Fable 5](/images/blog/2026-06-10-auto-improvement-classification/lance-martin-fable-5-loops.png)
 </Frame>
 
-Based on what we learned from [running autoresearch on the Langfuse skill in March](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch), we picked a task with one of the cleanest target functions in AI engineering: **exact-match accuracy against gold labels**.
+Based on what we learned from [running autoresearch on the Langfuse skill in March](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch), we picked a task with one of the cleanest target functions in AI engineering: **exact-match accuracy against gold labels**. The interesting question was not whether Fable could operate the loop. It could. The more interesting failure was ours: we never set up a proper validation split, so the loop optimized against the train set and called it progress.
 
 So we gave Claude Fable 5, running in Claude Code, a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
 
-It hit the target in 4 runs. Spoiler: even with a perfect metric, it found a new way to fail. It did not hill-climb so much as _hill-sprint_, and like most sprinters, it did not look left or right. It overfitted.
+It hit the target in 4 runs. That part worked. The failure came later: we let the loop hill-climb on the train split, and it overfitted.
 
 ## TL;DR
 
-- **Baseline to target:** 78% -> 97% train accuracy in 4 fully autonomous runs
-- **The catch:** the 97% prompt scored **82% on the held-out test set**, a 15-point generalization gap
+- **The loop worked:** Claude Fable 5 ran the process end to end and hit 97% train accuracy in 4 fully autonomous runs
+- **The failure was ours:** we selected prompt versions on the train split instead of sticking to the usual validation-set best practice
+- **The held-out result:** the 97% prompt scored **82% on the held-out test set**, a 15-point generalization gap
 - **Earlier was better:** the _second_ prompt version, 90.5% train with general label definitions only, beat the "optimized" one on test with **84%**
 - **Round two:** restarting with explicit "generalize, don't overfit" instructions produced a more principled prompt at 94% train, which scored **81% on test**. Statistically indistinguishable from the others.
 - **The real ceiling:** 11 of the test errors were identical across every prompt variant. Past about 85%, this looked less like a prompt problem and more like a hard taxonomy problem: some papers sit on boundaries humans would argue about too, and more examples may have helped as much as more prompt edits.
