@@ -1,7 +1,7 @@
 ---
-title: "97% on train, 82% on test: auto-improvement without a validation split"
+title: "97% on train, 82% on test: auto-improvement needs a validation split"
 date: 2026/06/10
-description: "Claude Fable 5 had just come out, so we used it to run an auto-improvement loop end to end. It improved train accuracy fast. What it really taught us was that validation and test data matter more than the loop."
+description: "Claude Fable 5 had just come out, so we used it to run an auto-improvement loop end to end. It improved train accuracy fast. What it really taught us was how much a validation split matters."
 tag: engineering
 author: Annabell
 ---
@@ -10,13 +10,13 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Frame } from "@/components/Frame";
 
 <BlogHeader
-  title="97% on train, 82% on test: auto-improvement without a validation split"
-  description="Claude Fable 5 had just come out, so we used it to run an auto-improvement loop end to end. It improved train accuracy fast. What it really taught us was that validation and test data matter more than the loop."
+  title="97% on train, 82% on test: auto-improvement needs a validation split"
+  description="Claude Fable 5 had just come out, so we used it to run an auto-improvement loop end to end. It improved train accuracy fast. What it really taught us was how much a validation split matters."
   date="June 10, 2026"
   authors={["annabellschafer"]}
 />
 
-Auto improvement is easy to over-credit. If the data split is wrong, a loop can look successful while teaching you almost nothing about whether the result will generalize.
+Auto improvement can be genuinely useful, but only if the data split lets you tell real progress from train-set improvement.
 
 Claude Fable 5 had just come out and was being promoted for loop-shaped work, so we used it to run a simple classification auto-improvement loop end to end.
 
@@ -26,7 +26,7 @@ Claude Fable 5 had just come out and was being promoted for loop-shaped work, so
 
 So we gave Claude Fable 5, running in Claude Code, a classification task, a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: **iterate on the train set until you hit 95% accuracy or 15 runs, whichever comes first. Then run the held-out test set once.**
 
-It did the job: train accuracy moved from 78% to 97% in four runs. But we had no true validation split, only train and held-out test. The result was the real lesson. Held-out performance barely moved, and by the end 11 test errors were shared across every prompt variant. That turned the story from "how do we run auto-improvement loops better?" into "what would the dataset have needed to contain for auto improvement to actually teach us something that transfers?"
+It did the job: train accuracy moved from 78% to 97% in four runs. But we had no true validation split, only train and held-out test. The result was the real lesson. Held-out performance barely moved, and by the end 11 test errors were shared across every prompt variant. That shifted the question from "how do we run auto-improvement loops better?" to "what would the dataset have needed to contain for auto improvement to work better?"
 
 ## Why a classification task
 
@@ -120,15 +120,15 @@ And the final test run?
 
 **81%.** But that headline misses the more important result: **11 test errors were shared by all three prompt variants.** With 100 test items, these held-out scores are statistically indistinguishable, which means the disciplined second round bought _zero_ measurable test improvement. The loop got better at fitting the train split while leaving the same hard cases unresolved.
 
-That is the real ceiling in the data. Once the same errors survive every prompt variant, the problem stops looking like "we need another round of prompt edits" and starts looking like "prompt iteration is now the wrong tool." Some of those papers sit on boundaries humans would argue about too. At that point, more examples, clearer label definitions, or a different task model are probably higher-leverage than another pass through the loop.
+That is the real ceiling in the data. Once the same errors survive every prompt variant, the problem stops looking like "we need another round of prompt edits" and starts looking like "the next bottleneck is probably not the prompt." Some of those papers sit on boundaries humans would argue about too. At that point, more examples, clearer label definitions, or a different task model are probably higher-leverage than another pass through the loop. The useful part is that the loop surfaced that limit quickly.
 
 ## What we learned
 
 **1. Train, validation, and test do different jobs.** Exact-match accuracy against gold labels sounds foolproof, but if you keep selecting prompt versions on train accuracy, you still overfit. In hindsight, we should have stuck with the boring best practice: train for fitting, a validation split for selection, and the test set used once at the end.
 
-**2. The stronger finding is not just that we skipped validation.** It is that even a disciplined round 2, with more principled and general prompt changes, bought zero measurable test improvement. By that point the loop was no longer teaching us how to prompt better. It was teaching us that prompt iteration had run out of room.
+**2. The stronger finding is not just that we skipped validation.** It is that even a disciplined round 2, with more principled and general prompt changes, bought zero measurable test improvement. By that point the loop had probably taught us most of what prompt iteration could teach us within this setup.
 
-**3. That leaves the open question in the dataset.** What would the benchmark itself have needed to look like for this loop to work? More repeated boundary cases, clearer category definitions, more examples of ambiguous classes, a true validation split, maybe even an "unsure" bucket? Until that answer is clearer, running the loop harder is probably the wrong move.
+**3. That leaves the open question in the dataset.** What would the benchmark itself have needed to look like for this loop to work better? More repeated boundary cases, clearer category definitions, more examples of ambiguous classes, a true validation split, maybe even an "unsure" bucket? Until that answer is clearer, improving the dataset is probably higher-leverage than pushing the loop harder.
 
 ## Where this is actually useful today
 
@@ -139,7 +139,7 @@ None of this means "do not automate the loop." It means: automate the inner loop
 
 The infrastructure for the agent-owned half is exactly what Langfuse provides: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a full read/write workbench, and give you the audit trail to vouch for what it did.
 
-That last part matters most. The agent will get to your target. Make sure it is the right one. And if the validation split stays flat, the next move is probably not a better loop. It is a better dataset.
+That last part matters most. The agent will get to your target. Make sure it is the right one. And if the validation split stays flat, the next move may be to improve the dataset before pushing the loop further.
 
 ---
 
