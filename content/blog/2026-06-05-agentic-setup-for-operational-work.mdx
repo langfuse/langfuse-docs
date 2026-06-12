@@ -18,10 +18,9 @@ import { FileTree } from "@/components/docs";
 
 We use agents to turn production data into recurring artifacts for engineering review:
 
-1. The weekly production review surfaces important production signals to act on.
+1. A weekly production review surfaces important production signals to act on.
 2. Cloud cost analysis explains the main infrastructure spend drivers.
 3. Daily repository scans turn security findings into engineering priorities.
-4. Datadog investigations help us debug production telemetry across environments.
 
 With AI, we can generate these reviews without adding bureaucracy for the engineering team. Engineers stay focused on systems judgment instead of weekly evidence collection. They decide whether a cost driver is acceptable, whether a page was customer-impacting, whether a bug needs an owner, whether a monitor is noisy, and whether a DeepSec finding needs an owner.
 
@@ -45,7 +44,7 @@ The workflow lives in [`langfuse/langfuse`](https://github.com/langfuse/langfuse
       <FileTree.Folder name="analyze-cloud-costs" defaultOpen>
         <FileTree.File name="SKILL.md" />
       </FileTree.Folder>
-      <FileTree.Folder name="datadog-query-recipes" defaultOpen>
+      <FileTree.Folder name="security-review" defaultOpen>
         <FileTree.File name="SKILL.md" />
       </FileTree.Folder>
     </FileTree.Folder>
@@ -58,7 +57,7 @@ Linear is the deduplication layer across workflows. Before the agent reports an 
 flowchart LR
   subgraph Harness["Repo-owned agent harness"]
     Router["AGENTS.md"]
-    Skills["<u>Skills</u><br/>production review<br/>cost analysis<br/>Datadog debugging<br/>security review"]
+    Skills["<u>Skills</u><br/>production review<br/>cost analysis<br/>security review"]
     MCP["MCP servers"]
     Tables["Fixed output tables"]
     Router --> Skills
@@ -81,7 +80,7 @@ flowchart LR
 
 The `weekly-production-review` skill produces a report from Linear bug tickets, Datadog error signals, and public status-page incidents.
 
-The agent produces tables for monitor alerts, errored traces, and error logs from PagerDuty. It also produces a table for bug-labeled Linear tickets and their status, plus any public incident we published. This gives us one weekly pass over the signals that may need action: bug fixes to prioritize, incidents to discuss with the team, and Datadog errors that should become follow-up issues.
+The agent produces tables for monitor alerts, errored traces, and error logs from Datadog. It also produces a table for bug-labeled Linear tickets and their status, plus any public incident we published. This gives us one weekly pass over the signals that may need action: bug fixes to prioritize, incidents to discuss with the team, and Datadog errors that should become follow-up issues.
 
 We iterated heavily on this skill to get the output right. The agent needs to query each data source in the right way, deduplicate issues across tools, and keep regions distinct. It also needs to preserve links between sources, for example incident.io or Datadog links already attached to Linear tickets.
 
