@@ -68,7 +68,7 @@ function evaluate({
 
 As the example shows, code evaluators are fairly restricted workloads: they are **short** (typically hundreds of milliseconds), **deterministic** (same input, same score), and **stateless** (no filesystem, no state between runs).
 
-This is a sharp distinction from the agent sandboxes (E2B, Modal) that are everywhere right now: they exist to provide long-lived environments, filesystem access, snapshotting, and ~~`pip install`~~ `uv add` at runtime. Evaluators need none of that.
+This is a sharp distinction from the agent sandboxes (E2B, Modal) that are everywhere right now: they exist to provide long-lived environments, filesystem access, snapshotting, and ~~`pip install`~~ `uv add` at runtime. Many evaluators need none of that.
 
 What we needed instead:
 
@@ -91,11 +91,11 @@ Tools like Claude Code sidestep this category of problems entirely by running on
 
 **Offering a custom DSL**
 
-If the checks are all fairly similar and deterministic why offer the full power of a programming language at all? Couldn't a small DSL or query builder generate only safe code? The use cases may be similar, but the data isn't. While a DSL could serve a majority of workloads, the long tail of checks that don't fit its boxes is exactly where users would get stuck, with no escape hatch. And a custom DSL wouldn't be in distribution for humans or agents.
+If the checks are all fairly similar and deterministic why offer the full power of a programming language at all? Couldn't a small domain-specific language (DSL) or query builder generate only safe code? The use cases may be similar, but the data isn't. While a DSL could serve a majority of workloads, the long tail of checks that don't fit its boxes is exactly where users would get stuck, with no escape hatch. And a custom DSL wouldn't be in distribution for humans or agents.
 
 **In-process isolation**
 
-Fast startup and no extra infrastructure components: in-process isolation with tools like V8 isolates, wasmtime, seccomp, Deno, or Pyodide would have been the next best solution, especially with our self-hosting requirement in mind. But these are incredibly hard to get right, and a breach does not land the attacker in some empty sandbox: it lands them in the environment that holds our service credentials, our network access, and other customers' data. The teams running this model at scale know it: Cloudflare layers process sandboxing and a sub-24-hour V8 patch cadence [on top of isolates](https://blog.cloudflare.com/mitigating-spectre-and-other-security-threats-the-cloudflare-workers-security-model/), and n8n's Pyodide sandbox was still [escaped via a blocklist bypass](https://www.cyera.com/research/n8scape-pyodide-sandbox-escape-9-9-critical-post-auth-rce-in-n8n-cve-2025-68668) (CVSS 9.9). We were not comfortable owning that risk, and even less comfortable asking self-hosters to.
+Fast startup and no extra infrastructure components: in-process isolation with tools like V8 isolates, wasmtime, seccomp, Deno, or Pyodide would have been the next best solution, especially with our self-hosting requirement in mind. But these are incredibly hard to get right because the enforcement is software living in the same process as the untrusted code: a single bug in the permission check, the syscall filter, or the runtime itself, and the attacker is inside the environment that holds our service credentials, our network access, and other customers' data. No second boundary. Cloudflare, running this model at scale, layers process sandboxing and a sub-24-hour V8 patch cadence [on top of isolates](https://blog.cloudflare.com/mitigating-spectre-and-other-security-threats-the-cloudflare-workers-security-model/); n8n's Pyodide sandbox was still [escaped via a blocklist bypass](https://www.cyera.com/research/n8scape-pyodide-sandbox-escape-9-9-critical-post-auth-rce-in-n8n-cve-2025-68668) (CVSS 9.9). We were not comfortable owning that risk, and even less comfortable asking self-hosters to.
 
 **Firecracker, gVisor, Kata**
 
