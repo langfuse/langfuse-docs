@@ -37,9 +37,12 @@ function estimateInitialScale(): number {
 
 export function AnnotatedLoop({
   stations = {},
+  subloop = false,
   ariaLabel = "The AI engineering loop annotated for this phase",
 }: {
   stations?: Partial<Record<StationId, StationAnnotation>>;
+  /** Draw a small return arrow from Monitor back to Trace (a sub-loop). */
+  subloop?: boolean;
   ariaLabel?: string;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -47,6 +50,7 @@ export function AnnotatedLoop({
   const estScale = estimateInitialScale();
 
   const traceDimmed = Boolean(stations.trace?.dimmed);
+  const deployDimmed = traceDimmed || Boolean(stations.eval?.dimmed);
 
   useLayoutEffect(() => {
     const wrap = wrapRef.current;
@@ -143,7 +147,29 @@ export function AnnotatedLoop({
               />
             ))}
 
-            <g opacity={traceDimmed ? 0.3 : 1}>
+            {subloop ? (
+              <g>
+                <path
+                  d="M 319 240 L 319 282 L 98 282 L 98 240"
+                  fill="none"
+                  stroke="var(--surface-cta-primary)"
+                  strokeWidth="11"
+                  strokeLinecap="butt"
+                  strokeLinejoin="miter"
+                />
+                <path
+                  d="M 319 240 L 319 282 L 98 282 L 98 240"
+                  fill="none"
+                  stroke="var(--text-primary)"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  markerEnd="url(#lfa-arrow-dark)"
+                />
+              </g>
+            ) : null}
+
+            <g opacity={deployDimmed ? 0.3 : 1}>
               <path
                 d="M 982 240 L 982 310 L 98 310 L 98 240"
                 fill="none"
@@ -180,7 +206,7 @@ export function AnnotatedLoop({
               border: "1px solid var(--line-structure)",
               borderRadius: 2,
               zIndex: 5,
-              opacity: traceDimmed ? 0.4 : 1,
+              opacity: deployDimmed ? 0.4 : 1,
             }}
           >
             Deploy

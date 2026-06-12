@@ -1,0 +1,313 @@
+---
+title: Music streaming DJ
+sidebarTitle: Music DJ
+description: How a net-new, low-risk DJ feature in a music streaming app goes live almost immediately and improves from listening behavior.
+---
+
+import { DjProductScreens } from "@/components/academy/DjProductScreens";
+
+# Music streaming DJ
+
+<Callout type="info">
+  This is an example to illustrate the concepts of the [Langfuse
+  Academy](/academy).
+</Callout>
+
+## Context
+
+A music streaming app adds a DJ feature in beta. The DJ keeps a queue going based on what the user has played before and what the algorithm thinks the user will like. Every few songs it says a short word about what's coming up and why it chose it. Listeners can also optionally interact with the DJ to steer it, by clicking a microphone button and talking to it.
+
+<DjProductScreens />
+
+Two characteristics drive how to approach the AI engineering setup:
+
+1. The **risk of a bad output is low**. The worst case is a skipped song or an awkward DJ comment, and the feature is labeled beta.
+2. This is a new feature, so **there is no historical data to start from**, and the team will need to learn from live listener behavior.
+
+Because of this, it makes sense to go live as soon as possible and iterate based on live feedback from the beginning.
+
+## Tracing the DJ
+
+There are two different kinds of traces that will together form a session:
+
+| Trace name          | Details                                                                                                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plan-next-set`     | Plans the next set of tracks and writes the commentary, triggered by the DJ itself every few songs or by a DJ request.<br />**input:** listening context and any instructions<br />**output:** next tracks queued, plus the commentary line |
+| `handle-dj-request` | Handles a voice request from the listener, triggered by the microphone button.<br />**input:** voice clip and the current queue<br />**output:** a short reply, plus instructions for the `plan-next-set` run it triggers                   |
+
+A listening session and both trace types up close:
+
+<Tabs
+  items={[
+    "Example session",
+    "Example plan-next-set trace",
+    "Example handle-dj-request trace",
+  ]}
+>
+<Tab>
+
+<TraceViewDiagram
+  ariaLabel="A listening session with DJ-initiated traces and one user request"
+  label="Session listen_7f3e · user u_8841"
+  rows={[
+    {
+      kind: "trace",
+      name: "plan-next-set",
+      preview: '"Kicking off with two favorites from your week."',
+      duration: "2.8s",
+    },
+    {
+      kind: "trace",
+      name: "plan-next-set",
+      preview: '"Staying in this lane with some mellow electronica."',
+      duration: "2.4s",
+    },
+    {
+      kind: "trace",
+      name: "handle-dj-request",
+      preview: '"Play something calmer."',
+      duration: "1.6s",
+    },
+    {
+      kind: "trace",
+      name: "plan-next-set",
+      preview: '"Calming it down, here is some ambient piano."',
+      chips: ["triggered by dj-request"],
+      duration: "1.5s",
+    },
+  ]}
+/>
+
+</Tab>
+<Tab>
+
+<TraceViewDiagram
+  ariaLabel="The observations inside a plan-next-set trace"
+  rows={[
+    {
+      kind: "trace",
+      name: "plan-next-set",
+      chips: ["session: listen_7f3e", "user: u_8841"],
+      duration: "1.5s",
+      input:
+        'taste: electronica, downtempo · recent: Tycho "Awake", Bonobo "Kerala" · instruction: "calmer"',
+      output:
+        '4 tracks queued · commentary: "Calming it down, here is some ambient piano."',
+    },
+    {
+      kind: "tool",
+      name: "select-tracks",
+      duration: "0.6s",
+      indent: true,
+      input:
+        'taste: electronica, downtempo · recent: Tycho "Awake", Bonobo "Kerala" · instruction: "calmer"',
+      output:
+        'Nils Frahm "Says" · Ólafur Arnalds "Saman" · Max Richter "On the Nature of Daylight" · Joep Beving "Sleeping Lotus"',
+    },
+    {
+      kind: "gen",
+      name: "write-commentary",
+      chips: ["gpt-4.1-mini", "120 tok", "$0.0002"],
+      duration: "0.9s",
+      indent: true,
+      input: 'the 4 selected tracks · instruction: "calmer"',
+      output: '"Calming it down, here is some ambient piano."',
+    },
+  ]}
+/>
+
+</Tab>
+<Tab>
+
+<TraceViewDiagram
+  ariaLabel="The observations inside a handle-dj-request trace"
+  rows={[
+    {
+      kind: "trace",
+      name: "handle-dj-request",
+      chips: ["session: listen_7f3e", "user: u_8841"],
+      duration: "1.6s",
+      input: "voice clip (2s)",
+      output: 'reply: "Got it, calming things down." · instruction: "calmer"',
+    },
+    {
+      kind: "tool",
+      name: "transcribe-request",
+      duration: "0.4s",
+      indent: true,
+      input: "voice clip (2s)",
+      output: '"Play something calmer."',
+    },
+    {
+      kind: "gen",
+      name: "interpret-request",
+      chips: ["gpt-4.1-mini", "210 tok", "$0.0004"],
+      duration: "1.2s",
+      indent: true,
+      input: '"Play something calmer." · current queue',
+      output: 'reply: "Got it, calming things down." · instruction: "calmer"',
+    },
+    {
+      kind: "event",
+      name: "trigger-plan-next-set",
+      duration: "@ 1.6s",
+      indent: true,
+      input: 'instruction: "calmer"',
+    },
+  ]}
+/>
+
+</Tab>
+</Tabs>
+
+## Capturing user behavior
+
+In order to learn from users, we will log some interesting behavior on the applicable traces.
+
+<EvaluatorBlock
+  evaluators={[
+    {
+      name: "track_skipped",
+      type: "Player event",
+      check: "The listener skips a DJ-picked track shortly after it starts",
+      returns: "binary plus comment, on the plan-next-set trace",
+      details: (
+        <>
+          No evaluator needed, the player writes the score. It always lands on
+          the <code>plan-next-set</code> trace whose set was playing at that
+          moment, and the comment holds which track was skipped, so a set with
+          several misses collects several scores.
+        </>
+      ),
+    },
+    {
+      name: "dj_replaced",
+      type: "Player event",
+      check: "The listener turns the DJ off but keeps listening",
+      returns: "binary, on the session",
+      details: (
+        <>
+          Simply ending a session says little: the listener may just have
+          arrived somewhere. Continuing to listen without the DJ is what makes
+          it a signal, the listener chose music over the DJ.
+        </>
+      ),
+    },
+    {
+      name: "message_type",
+      type: "LLM-as-a-judge",
+      check: (
+        <>
+          Classifies each voice request as <code>steering</code>,{" "}
+          <code>correction</code>, <code>repeated_instruction</code>,{" "}
+          <code>positive_reaction</code>, or <code>negative_reaction</code>
+        </>
+      ),
+      returns: "categorical, on the handle-dj-request trace",
+      details: (
+        <>
+          <code>steering</code> is normal use of the feature and stays out of
+          the failure counts. <code>correction</code> means the DJ's last
+          action missed. <code>repeated_instruction</code> means the DJ failed
+          to follow an instruction it already got: a compliance failure rather
+          than a taste miss, and it asks for a different fix.
+        </>
+      ),
+    },
+  ]}
+/>
+
+In principle, the team could already iterate with only this in place. Tracing and monitoring form a small loop of their own. In the beginning, this is probably enough for the team to quickly improve the DJ feature.
+
+<AnnotatedLoop
+  ariaLabel="A sub-loop between tracing and monitoring, with the offline stages not yet in use"
+  subloop
+  stations={{
+    trace: { note: "every set and every request" },
+    monitor: { note: "skips, dj_replaced, message_type" },
+    dataset: { dimmed: true, note: "not yet" },
+    change: { dimmed: true, note: "not yet" },
+    eval: { dimmed: true, note: "not yet" },
+  }}
+/>
+
+As the setup matures, and the team wants to have more structured testing in place, they can start building datasets and experiments on top of these signals.
+
+## Structured testing
+
+With only the live signals, testing a change means shipping it and watching the scores. The team can add two more deliberate ways of testing: experiments on datasets, and A/B tests on live users.
+
+### Experiments on datasets
+
+In this use case, testing end to end is very hard offline: whether a session was good only shows in live listening behavior, and taste differs per user, so no expected output holds for everyone. A single step like `select-tracks` can be tested, with the expectation describing the direction of the set rather than exact tracks:
+
+<DatasetBlock
+  datasets={[
+    {
+      name: "selection-directions",
+      description:
+        "Listening contexts paired with good and bad directions for the next set. Tests only the select-tracks step.",
+      items: [
+        {
+          input:
+            "taste: indie folk · recent: Big Thief 'Vampire Empire', Fleet Foxes 'Mykonos' · instruction: none",
+          expectedOutput:
+            "Good directions: adjacent indie folk, soft rock. Bad directions: high-energy EDM, hip hop.",
+        },
+        {
+          input:
+            "taste: electronica, house · recent: an upbeat house set · instruction: 'something calmer'",
+          expectedOutput:
+            "Good directions: downtempo, ambient electronica. Bad directions: more upbeat house, ignoring the instruction.",
+        },
+      ],
+    },
+  ]}
+/>
+
+<EvaluatorBlock
+  evaluators={[
+    {
+      name: "direction_match",
+      type: "LLM-as-a-judge",
+      check:
+        "Does the selected set go in one of the good directions and avoid the bad ones?",
+      returns: "binary, per dataset item",
+      details: (
+        <>
+          A{" "}
+          <a href="/academy/evaluate#reference-based-vs-reference-free">
+            reference-based
+          </a>{" "}
+          evaluator: the expected output gives it the directions to grade
+          against. It runs on the <code>select-tracks</code> step only, not the
+          whole DJ, so a run is cheap and a failure points directly at
+          selection.
+        </>
+      ),
+    },
+  ]}
+/>
+
+### A/B tests on live users
+
+Some changes are hard to grade offline, like the tone of voice of the commentary. Since the risk is low, the team can give a small group of listeners the new version and compare the signal scores between the groups, like the skip rate and the `message_type` distribution. If the new version does better, they can roll it out to everyone.
+
+With this in place, the full loop is running:
+
+<AnnotatedLoop
+  ariaLabel="The full loop for the DJ: live signals, step-scoped datasets, experiments, and A/B tests"
+  stations={{
+    trace: { note: "every set and every request" },
+    monitor: { note: "skips, dj_replaced, message_type, A/B comparisons" },
+    dataset: { note: "from what we see while monitoring production" },
+    change: { note: "selection algorithm, DJ prompt, ..." },
+    eval: { note: "grade step outputs against their expectations" },
+  }}
+/>
+
+## Wrap-up
+
+This is an example of a feature that's is low risk and there is no historical data to learn from. The best thing you can do in such cases is getting traces in as soon as possible and start monitoring them to learn from. Everything else, datasets, experiments, A/B tests, can be built on top of that over time.
+
+Check out the [other examples](/academy/examples) or the [academy](/academy) to learn more.
