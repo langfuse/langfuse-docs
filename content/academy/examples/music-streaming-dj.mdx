@@ -24,11 +24,11 @@ Two characteristics drive how to approach the AI engineering setup:
 1. The **risk of a bad output is low**. The worst case is a skipped song or an awkward DJ comment, and the feature is labeled beta.
 2. This is a new feature, so **there is no historical data to start from**, and the team will need to learn from live listener behavior.
 
-Because of this, it makes sense to go live as soon as possible and iterate based on live feedback from the beginning.
+Because of this, it makes sense to go live as soon as possible and [iterate based on live feedback from the beginning](/academy/ai-engineering-loop#you-dont-have-to-close-the-full-loop-on-day-one).
 
 ## Tracing the DJ
 
-There are two different kinds of traces that will together form a session:
+There are two different kinds of [traces](/academy/tracing#anatomy-of-a-trace) that will together [form a session](/academy/tracing#traces-vs-sessions):
 
 | Trace name          | Details                                                                                                                                                                                                                                     |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -162,7 +162,7 @@ A listening session and both trace types up close:
 
 ## Capturing user behavior
 
-In order to learn from users, we will log some interesting behavior on the applicable traces.
+In order to learn from users, we will log some [interesting behavior](/academy/monitoring#user-feedback) on the applicable traces.
 
 <EvaluatorBlock
   evaluators={[
@@ -217,7 +217,7 @@ In order to learn from users, we will log some interesting behavior on the appli
   ]}
 />
 
-In principle, the team could already iterate with only this in place. Tracing and monitoring form a small loop of their own. In the beginning, this is probably enough for the team to quickly improve the DJ feature.
+In principle, the team could already iterate with only this in place. Tracing and [monitoring](/academy/monitoring#metrics-and-signals) form a small loop of their own. In the beginning, this is probably enough for the team to quickly improve the DJ feature.
 
 <AnnotatedLoop
   ariaLabel="A sub-loop between tracing and monitoring, with the offline stages not yet in use"
@@ -235,11 +235,11 @@ As the setup matures, and the team wants to have more structured testing in plac
 
 ## Structured testing
 
-With only the live signals, testing a change means shipping it and watching the scores. The team can add two more deliberate ways of testing: experiments on datasets, and A/B tests on live users.
+With only the live signals, testing a change means shipping it and watching the scores. The team can add two more deliberate ways of testing: [experiments on datasets](/academy/experiments#how-experiments-are-used), and A/B tests on live users.
 
 ### Experiments on datasets
 
-In this use case, testing end to end is very hard offline: whether a session was good only shows in live listening behavior, and taste differs per user, so no expected output holds for everyone. A single step like `select-tracks` can be tested, with the expectation describing the direction of the set rather than exact tracks:
+In this use case, testing end to end is very hard offline: whether a session was good only shows in live listening behavior, and taste differs per user, so no expected output holds for everyone. [A single step](/academy/datasets#what-makes-a-good-dataset) like `select-tracks` can be tested, with the expectation describing the direction of the set rather than exact tracks:
 
 <DatasetBlock
   datasets={[
@@ -306,7 +306,7 @@ With this in place, the full loop is running:
   }}
 />
 
-## Wrap-up
+## Conclusion
 
 This is an example of a feature that's is low risk and there is no historical data to learn from. The best thing you can do in such cases is getting traces in as soon as possible and start monitoring them to learn from. Everything else, datasets, experiments, A/B tests, can be built on top of that over time.
 
