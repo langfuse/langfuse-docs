@@ -1,97 +1,112 @@
 ---
 title: How we use agents to review production infrastructure
 date: 2026/06/05
-description: How repo-owned agent workflows help us review incidents, infra cost, DeepSec findings, and production telemetry.
+description: How repo-owned agent workflows help us review incidents, infra cost, security findings, and bugs in production.
 tag: engineering
 author: Max
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { FileTree } from "@/components/docs";
 
 <BlogHeader
   title="How we use agents to review production infrastructure"
-  description="How repo-owned agent workflows help us review incidents, infra cost, DeepSec findings, and production telemetry."
+  description="How repo-owned agent workflows help us review incidents, infra cost, security findings, and bugs in production."
   date="June 5, 2026"
   authors={["maxdeichmann"]}
 />
 
-We use agents to turn production data into recurring engineering review artifacts: weekly incident and bug review, infra cost analysis, DeepSec findings, and Datadog investigations.
+We use agents to turn production data into recurring artifacts for engineering review:
 
-The pattern is simple: make the data queryable through MCP, keep workflow instructions in the repo, require fixed output tables, and let engineers approve follow-ups. This gives us more production visibility without weekly report-writing work.
+1. The weekly production review surfaces important production signals to act on.
+2. Cloud cost analysis explains the main infrastructure spend drivers.
+3. Daily repository scans turn security findings into engineering priorities.
+4. Datadog investigations help us debug production telemetry across environments.
 
-## We wanted more production visibility without weekly reporting work
+With AI, we can generate these reviews without adding bureaucracy for the engineering team. Engineers stay focused on systems judgment instead of weekly evidence collection. They decide whether a cost driver is acceptable, whether a page was customer-impacting, whether a bug needs an owner, whether a monitor is noisy, and whether a DeepSec finding needs an owner.
 
-We already had Datadog, Linear, incident.io, a public status page, Metabase, GitHub Actions, and ClickHouse. We also run four production environments: `prod-us`, `prod-eu`, `prod-hipaa`, and `prod-jp`. The gap was cross-system review: connecting customer incidents, monitor pages, production bugs, infra cost drivers, and DeepSec findings into one weekly engineering artifact without manually checking every environment and tool.
+The data already lived across our tools, like Datadog, Linear, incident.io, and Metabase, spread across four production environments. Nothing pulled the systems together, so reviewing it every week would mean going through each tool and environment by hand.
 
-That review matters, but assembling it manually is report work. We did not want engineers doing that every week before discussing incidents, cost drivers, alerts, and DeepSec findings.
+This post walks through our current setup and how we got there.
 
-## The system combines MCP, repo-owned skills, and fixed tables
+## The system combines MCP, repo-owned skills, and fixed output tables
 
-The system has four layers: queryable production data, MCP access to that data, repo-owned skills, and fixed output tables. The workflow lives in [`langfuse/langfuse`](https://github.com/langfuse/langfuse/tree/main/.agents), not in one engineer's local prompt history. Root `AGENTS.md` and `CLAUDE.md` are discovery surfaces, while `.agents/AGENTS.md` and `.agents/skills/**` own durable workflow definitions.
+We set up a system with four layers. First, we made the relevant data queryable. For example, we built pipelines that move AWS cost data into BigQuery, join it with business data in dbt, and surface it in Metabase. Second, we exposed these sources to the agent harness through MCP. Third, we developed and iterated on repo-owned skills. Fourth, each skill defines a stable output table.
 
-Linear is the deduplication layer across workflows. Before the agent reports a finding as new, it searches existing Linear issues and comments. This keeps recurring alerts, bugs, cost regressions, and DeepSec findings from showing up as fresh work every week.
+The workflow lives in [`langfuse/langfuse`](https://github.com/langfuse/langfuse/tree/main/.agents), not in one engineer's local prompt history.
+
+<FileTree>
+  <FileTree.Folder name=".agents" defaultOpen>
+    <FileTree.File name="AGENTS.md" />
+    <FileTree.Folder name="skills" defaultOpen>
+      <FileTree.Folder name="weekly-production-review" defaultOpen>
+        <FileTree.File name="SKILL.md" />
+      </FileTree.Folder>
+      <FileTree.Folder name="analyze-cloud-costs" defaultOpen>
+        <FileTree.File name="SKILL.md" />
+      </FileTree.Folder>
+      <FileTree.Folder name="datadog-query-recipes" defaultOpen>
+        <FileTree.File name="SKILL.md" />
+      </FileTree.Folder>
+    </FileTree.Folder>
+  </FileTree.Folder>
+</FileTree>
+
+Linear is the deduplication layer across workflows. Before the agent reports an item as new, it searches existing Linear issues and comments. This keeps recurring items from showing up as fresh work every week.
 
 ```mermaid
 flowchart LR
   subgraph Harness["Repo-owned agent harness"]
     Router["AGENTS.md"]
-    Skills["Skills<br/>production review<br/>cost analysis<br/>Datadog recipes<br/>DeepSec review"]
-    MCP["MCP servers<br/>and plugins"]
+    Skills["<u>Skills</u><br/>production review<br/>cost analysis<br/>Datadog debugging<br/>security review"]
+    MCP["MCP servers"]
     Tables["Fixed output tables"]
     Router --> Skills
     Skills --> MCP
     Skills --> Tables
   end
 
-  Prod["Production data<br/>Datadog EU/US<br/>Metabase cost marts<br/>incident.io<br/>Pylon<br/>[planned] ClickHouse query log"]
-  Work["Workflow tools<br/>Linear<br/>GitHub<br/>Slack<br/>Langfuse docs MCP<br/>DeepSec daily scan"]
-  Review["Monday engineering review<br/>routing + follow-ups"]
+  Prod["<u>Production data</u><br/>Datadog<br/>Metabase cost marts<br/>incident.io<br/>Pylon<br/>"]
+  Work["<u>Workflow tools</u><br/>Linear<br/>GitHub<br/>Slack<br/>Langfuse docs MCP<br/>DeepSec"]
+  Review["Monday engineering review"]
 
   MCP --> Prod
   MCP --> Work
   Tables --> Review
 ```
 
-This keeps engineers focused on systems judgment, not weekly evidence collection. They decide whether a cost driver is acceptable, whether a page was customer-impacting, whether a bug needs an owner, whether a monitor is noisy, and whether a DeepSec finding should be routed.
+## How each workflow works
 
-## Weekly production review joins incidents, bugs, and pages
+### Weekly production review
 
-The `weekly-production-review` skill produces an event-centric report from Linear bug tickets, Datadog alert/page signals, incident.io incidents, and public status-page events.
+The `weekly-production-review` skill produces a report from Linear bug tickets, Datadog error signals, and public status-page incidents.
 
-The report has one main section and three evidence sections. The main section is the event view: one row per production issue we may discuss on Monday. If one checkout regression causes two Datadog monitors to page and one Linear bug to be filed, it is still one event.
+The agent produces tables for monitor alerts, errored traces, and error logs from PagerDuty. It also produces a table for bug-labeled Linear tickets and their status, plus any public incident we published. This gives us one weekly pass over the signals that may need action: bug fixes to prioritize, incidents to discuss with the team, and Datadog errors that should become follow-up issues.
 
-The evidence sections keep the source data separate. The Linear section lists the underlying bug issues and their status. The Datadog section lists monitor/page signals, including noise and expected tests. The customer incident section lists what was communicated externally. This avoids counting the same breakage once as an incident, again as an alert, and again as a bug.
+We iterated heavily on this skill to get the output right. The agent needs to query each data source in the right way, deduplicate issues across tools, and keep regions distinct. It also needs to preserve links between sources, for example incident.io or Datadog links already attached to Linear tickets.
 
-The workflow is read-only by default. The agent can summarize and deduplicate, but it needs human approval before Linear comments, new issues, incident follow-ups, or monitor changes.
+### Cloud cost analysis depends on warehouse data
 
-We review the output every Monday in an engineering check-in. The team looks at the previous week's production review, agrees which signals need action, and routes follow-ups to the engineers closest to the affected systems.
+Agents need data access before they need better prompts. For cost analysis, we export AWS CUR reports into BigQuery, expose the resulting marts through Metabase, and make the relevant tables accessible through MCP.
 
-## Cloud cost analysis depends on warehouse data
+The `analyze-cloud-costs` skill does not ask the model to "think about spend." It points the agent at cost marts and asks for the same grain every time: recent complete days versus a baseline, provider/service breakdowns, and cost per 100k ingested billable events.
 
-Agents need data access before they need better prompts. For cost analysis, this means pushing cost data into the data warehouse, exposing it through Metabase, and making the relevant tables accessible through MCP. The `analyze-cloud-costs` skill does not ask the model to "think about spend." It points the agent at cost marts and forces it to choose a grain: daily totals, recent complete UTC days versus a baseline, provider and service breakdowns, usage type, operation, account, and cost per 100k tracing events.
+The agent runs the broad pass: it queries source tables, identifies drivers, preserves caveats such as incomplete current-day AWS CUR rows, and returns the same breakdown every time.
 
-The agent runs the broad pass: query source tables, identify drivers, preserve caveats such as incomplete current-day AWS CUR rows, and return the same breakdown every time.
+### Security skill turns daily scans into a triage table
 
-## DeepSec turns daily scans into routed findings
+The daily security automation runs DeepSec on selected repositories. It scans the repositories, processes findings, revalidates high-severity findings, and exports a compact findings table for review.
 
-The recurring security workflow is the daily DeepSec automation. It scans selected repositories, processes findings with a Codex-backed agent, revalidates high-severity findings, and exports a compact findings table for review.
-
-Before routing a finding, the agent checks Linear for existing issues so the same vulnerability does not get reported every day. Findings stay read-only until a human reviews the table and chooses which rows should become Linear tickets, GitHub follow-ups, or direct engineer pings.
-
-DeepSec workspace state, prompts, and generated reports stay ignored and local. The public artifact is the triage output: severity, affected file, revalidation state, and recommended next step.
+Before assigning work, the agent checks Linear for existing issues so the same vulnerability does not get reported every day. We then review the list and let the agent create Linear tickets for the relevant findings. Linear Intelligence assigns those tickets to the right engineer.
 
 ## Skills need review and iteration
 
 Skills are not done when the first version works. They need review and iteration until engineers can trust them in a recurring workflow.
 
-We review skill output like product behavior: missing evidence, vague summaries, wrong source priority, unstable formatting, and places where the agent stopped too early. Each miss becomes a workflow change.
+We review skill output like product behavior: whether the agent found enough evidence, kept formatting stable, and stopped at the right point. Each miss becomes a workflow change.
 
-For example, one `Experiment Backfill Missing Logs` alert did not make it into a review. We changed the weekly production review workflow to require a full paginated Datadog event sweep before clustering alerts. The final report must confirm that every production monitor title found in the window is represented or explicitly excluded.
-
-The same pattern applies to Datadog investigation. The `datadog-query-recipes` skill documents environment routing across `prod-us`, `prod-eu`, `prod-hipaa`, and `prod-jp`, tenant correlation for public API traces, queue consumer telemetry, span query shapes, and metric names. The agent starts with aggregate queries and fetches raw spans, logs, or traces only after a cluster is identified.
+_For example, we initially missed many error cases when searching Datadog for issues. We then updated the skill with the same instructions we would give a coworker: which data to query, how to filter it, and how to link the results. This improved output quality over time._
 
 ## Next: ClickHouse query-log analysis by feature area
 
-The next step is to connect agents directly to ClickHouse query-log data through MCP. We already started tagging ClickHouse queries with dimensions such as project, API surface, feature area, route, query name, operation, and physical table. We also have dashboards that show live resource consumption per ClickHouse cluster and feature.
-
-Once the ClickHouse MCP has access to the query log, the agent can aggregate query cost and performance by product surface: public API versus tRPC, top feature areas, fast-growing routes, projects driving load within a feature, expensive normalized query hashes, and links back to the query-log evidence.
+The next step is to connect agents directly to ClickHouse query-log data through MCP. We already tag ClickHouse queries with dimensions such as project, API route, feature area, query name, and accessed tables. Today, dashboards use these tags to show live resource consumption for each ClickHouse cluster. Next, we want agents to use the same data to enrich the production review and cost reports. This should let us allocate ClickHouse cost to specific features or projects and find access patterns that caused API performance issues.
