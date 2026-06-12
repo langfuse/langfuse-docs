@@ -1,0 +1,108 @@
+---
+title: "97% on train, 82% on test: auto-improvement loops have a validation gap"
+date: 2026/06/10
+description: "Claude Fable 5 had just come out, so we used it to run an auto-improvement loop end to end. It improved train accuracy fast. What it really taught us was how much a validation split matters."
+tag: engineering
+author: Annabell
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
+
+<BlogHeader
+  title="97% on train, 82% on test: auto-improvement loops have a validation gap"
+  description="Claude Fable 5 had just come out, so we used it to run an auto-improvement loop end to end. It improved train accuracy fast. What it really taught us was how much a validation split matters."
+  date="June 10, 2026"
+  authors={["annabellschafer"]}
+/>
+
+Loop-shaped workflows are having a moment. `@steipete` put it plainly: you should not be prompting coding agents anymore, you should be designing loops that prompt your agents.
+
+<Frame>
+  ![Peter Steinberger post about designing loops that prompt your agents](/images/blog/2026-06-10-auto-improvement-classification/peter-steinberger-design-loops.png)
+</Frame>
+
+We designed a loop and gave Claude Fable 5 a classification task: a train/test split in [Langfuse Datasets](/docs/evaluation/experiments/datasets), a prompt in [Prompt Management](/docs/prompt-management/get-started), and a goal: hit 95% accuracy or stop at 15 runs. Train accuracy went from 78% to 97% in four runs. Test performance barely moved. The 11 remaining errors on test were shared across every prompt variant.
+
+The loop did its job. What it surfaced was a dataset problem.
+
+## The task and setup
+
+Our task was to classify arXiv papers into one of 10 categories from title, authors, and abstract, using this [Kaggle dataset](https://www.kaggle.com/datasets/sumitm004/arxiv-scientific-research-papers-dataset). We picked classification because it gives you a crisp target function: exact-match accuracy.
+
+- a train split with 200 labeled examples and a held-out test split with 100 in [**Langfuse Datasets**](/docs/evaluation/experiments/datasets)
+- a prompt in [**Prompt Management**](/docs/prompt-management/get-started)
+- a small runner built with [**Langfuse Experiments via the SDK**](/docs/evaluation/experiments/experiments-via-sdk)
+- `gpt-4o-mini` as the task model<sup id="fnref-model-choice"><a href="#fn-model-choice">1</a></sup>
+
+The starting prompt was minimal, consisting only of a list of labels with instructions to pick one. After each run, the agent reviewed the errors, wrote [comments](/docs/observability/features/comments) on the [Langfuse trace](/docs/observability/data-model#traces), published a new [prompt version](/docs/prompt-management/features/prompt-version-control), and ran again.
+
+_Suggested platform screenshot: the Langfuse workbench for this loop, showing the dataset, prompt, and experiment setup together._
+
+<Frame fullWidth>
+  ![Diagram of the autonomous training loop: start from a base prompt, run the train split, score rows, comment on errors, revise the prompt, and then run the held-out test split once](/images/blog/2026-06-10-auto-improvement-classification/fable-classification-loop-diagram.png)
+</Frame>
+
+## Round 1: the hill sprint
+
+The first round optimized fast:
+
+| Prompt | Train | Test | Gap |
+| --- | ---: | ---: | ---: |
+| v1 - flat label list | 78.0% | - | - |
+| v2 - general definitions | 90.5% | **84.0%** | 6.5 |
+| v3 - sharpened boundary rules | 90.0% | - | - |
+| v4 - train-derived precedents | **97.0%** | 82.0% | **15.0** |
+
+Moving from a flat label list to general definitions was real progress. But once the agent started encoding concrete precedents from the training failures, train accuracy jumped while generalization got worse. The prompt that looked best on train was not the one that held up on test.
+
+_Suggested platform screenshot: the Langfuse runs overview comparing prompt versions and scores across the experiment history._
+
+## Round 2: "generalize this time"
+
+So we restarted from the more general prompt and changed the rules: no single-paper precedents, only class-level principles, and no touching the test set.
+
+| Prompt | Train | Test | Gap |
+| --- | ---: | ---: | ---: |
+| v2 - general definitions, round 1 | 90.5% | **84.0%** | 6.5 |
+| v5 - reasoning field, round 2 | 84.0% | - | - |
+| v9 - general principles, round 2 | 94.0% | 81.0% | 13.0 |
+
+Only selected prompts were run on the held-out test split.
+
+The disciplined second round did not produce better held-out results. Adding a `reasoning` field also did not help: in our runs, it seemed to encourage the model to rationalize surface cues instead of resolving the label boundary.
+
+By the end, Fable's own analysis suggested that many of the remaining errors sat on genuinely fuzzy category boundaries, so it stopped before hitting the 95% target. Pushing further likely would have required adding increasingly specific case-by-case rules, rather than finding broader principles that generalized.
+
+The final prompt version of round 2 hit 81.0% accuracy on test. That is a 13-point gap to the train set, and very much in line with the drop between train and test in round 1. It just took more turns to get to the point of overfitting.
+
+In the end, the best-performing prompt on test was still `v2` from the first round. That iteration simply added broad descriptions to the label-only version, and it generalized best.
+
+_Suggested platform screenshot: one recurring hard example in Langfuse, with the trace and annotation showing why the boundary case stayed unresolved._
+
+## What the dataset would have needed
+
+Based on these runs, the dataset likely needed three things:
+
+**1. A real validation split.** We had train for fitting and test for the final check, but nothing in between. So the loop selected prompt versions on train accuracy alone.
+
+**2. More repeated edge cases.** The hard errors clustered around a few label boundaries, especially Information Retrieval vs. Databases, Human-Computer Interaction vs. Computers and Society, and subject vs. representation for audio papers. A stronger benchmark would have forced new rules to prove themselves across multiple similar cases.
+
+**3. Clearer policy for ambiguous papers.** Some of the shared errors look genuinely arguable. If the benchmark wants one exact label, it needs sharper tie-break rules, better canonical examples, and maybe even an `unsure` or multi-label policy.
+
+That is the real lesson: the loop did its job. It surfaced, quickly, that the next bottleneck was not another prompt tweak. It was the dataset.
+
+## Where this is actually useful today
+
+None of this means "do not automate the loop." It means: automate the inner loop, own the outer one.
+
+- **Agent-owned:** running experiments, scoring, per-error annotation, drafting hypothesis-driven prompt revisions, diffing errors across runs, flagging plateaus
+- **Human-owned:** the target function, including the validation and held-out test data nobody optimizes against, dataset composition, when to restart with different constraints, and when to stop
+
+As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), the mechanics aren't the hard part anymore. This experiment shows what the hard part actually is: the target function, the dataset, and the judgment calls nobody automates against.
+
+This is exactly what Langfuse is good for: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a workbench and an audit trail.
+
+<Callout type="info">
+  <span id="fn-model-choice"><sup>1</sup> We used <code>gpt-4o-mini</code> because one realistic production strategy for a narrow, repetitive classification task like this is to tune a cheaper model rather than default to a frontier model. A stronger model likely would have performed better out of the box, but that would have tested a different tradeoff.</span>
+</Callout>
