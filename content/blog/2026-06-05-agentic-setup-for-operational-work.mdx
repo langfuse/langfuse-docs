@@ -80,9 +80,9 @@ flowchart LR
 
 The `weekly-production-review` skill produces a report from Linear bug tickets, Datadog error signals, and public status-page incidents.
 
-The agent produces tables for monitor alerts, errored traces, and error log patterns from Datadog. It also produces a table for bug-labeled Linear tickets and their status, plus any public incident we published. This gives us one weekly pass over the signals that may need action: bug fixes to prioritize, incidents to discuss with the team, and Datadog errors that should become follow-up issues.
+The agent returns tables for Datadog monitor alerts, errored traces, error log patterns, bug-labeled Linear tickets, and public incidents. This gives us one weekly pass over the signals that may need action: bugs to prioritize, incidents to discuss, and Datadog errors that should become follow-up issues.
 
-We iterated heavily on this skill to get the output right. The agent needs to query each data source in the right way, deduplicate issues across tools, and keep regions distinct. It also needs to preserve links between sources, for example incident.io or Datadog links already attached to Linear tickets.
+We iterated heavily on this skill. The agent needs to query each source with the right filters, deduplicate issues across tools, keep regions distinct, and preserve links already attached to Linear tickets.
 
 ### Cloud cost analysis depends on warehouse data
 
@@ -96,16 +96,18 @@ The agent runs the broad pass: it queries source tables, identifies drivers, pre
 
 The daily security automation runs DeepSec on selected repositories. It scans the repositories, processes findings, revalidates high-severity findings, and exports a compact findings table for review.
 
-Before assigning work, the agent checks Linear for existing issues so the same vulnerability does not get reported every day. We then review the list and let the agent create Linear tickets for the relevant findings. Linear Intelligence assigns those tickets to the right engineer.
+Before assigning work, the agent checks Linear for existing issues so the same vulnerability does not get reported every day. After reviewing the table, we ask the agent to create Linear tickets for the relevant findings. Linear Intelligence assigns those tickets to the right engineer.
 
 ## Skills need review and iteration
 
 Skills are not done when the first version works. They need review and iteration until engineers can trust them in a recurring workflow.
 
-We review skill output like product behavior: whether the agent found enough evidence, kept formatting stable, and stopped at the right point. Each miss becomes a Skill change.
+We review skill output like product behavior: whether the agent found enough evidence, kept formatting stable, and stopped at the right point. Each miss becomes a skill change.
 
-For example, we initially missed many error cases when searching Datadog for issues. We then updated the Skill with the same instructions we would give a coworker: which data to query, how to filter it, and how to link the results. This improved output quality over time.
+_For example, we initially missed many error cases when searching Datadog for issues. We then updated the skill with the same instructions we would give a coworker: which data to query, how to filter it, and how to link the results. This improved output quality over time._
 
 ## Next: ClickHouse query-log analysis by feature area
 
-The next step is to connect agents directly to ClickHouse query-log data through MCP. We already tag ClickHouse queries with dimensions such as project, API route, feature area, query name, and accessed tables. Today, dashboards use these tags to show live resource consumption for each ClickHouse cluster. Next, we want agents to use the same data to enrich the production review and cost reports. This should let us allocate ClickHouse cost to specific features or projects and find access patterns that caused API performance issues.
+The next step is to connect agents directly to ClickHouse query-log data through MCP. We already tag ClickHouse queries with dimensions such as project, API route, feature area, query name, and accessed tables. Today, dashboards use these tags to show live resource consumption for each ClickHouse cluster.
+
+Next, we want agents to use the same data to enrich the production review and cost reports. This should let us allocate ClickHouse cost to specific features or projects and find access patterns that caused API performance issues.
