@@ -1,0 +1,67 @@
+---
+title: Full-Text Search
+description: Find content across the inputs, outputs, and metadata of your traces and observations with full-text search in Langfuse.
+sidebarTitle: Full-Text Search
+---
+
+# Full-Text Search
+
+Full-text search lets you find all occurrences of a specific keyword or phrase across the inputs, outputs, and metadata of your traces and observations. This is especially useful when debugging complex applications where you remember a piece of content but not which trace it belongs to.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/full-text-search-launch.mp4"
+  aspectRatio={16 / 9}
+/>
+
+## Search in the UI
+
+Use the search bar above the traces and observations tables to search across `input` and `output` content. Matching traces and observations are returned so you can quickly locate the run you are looking for and combine search with the existing filters and time range selectors.
+
+## Performance [#performance]
+
+Search uses [ClickHouse full-text search](https://clickhouse.com/docs/engines/table-engines/mergetree-family/textindexes). Text indexes let Langfuse skip over data that cannot match a query before reading full observation payloads, which keeps search fast even for large projects with high-volume traces. You can read more in the [ClickHouse GA announcement](https://clickhouse.com/blog/full-text-search-ga-release).
+
+## Search via the API [#api]
+
+The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) supports a `matches` operator for token-based full-text search on `input`, `output`, and string `metadata` filters.
+
+When building filters on `/api/public/v2/observations`, prefer `=` when you know the exact value and `matches` when you want token-based search:
+
+- `matches` is **case-insensitive** for `input` and `output`, so `refund failed` can match `Refund Failed`.
+- For metadata filters, `matches` is **case-sensitive** and applies to the string metadata value of the selected key.
+- Substring operators such as `contains`, `starts with`, and `ends with` are rejected with `400` on `input` and `output` filters because they would require slow full-content scans. Use `matches` for token search on these fields instead.
+
+Example `matches` filter for observation output:
+
+```json
+[
+  {
+    "type": "string",
+    "column": "output",
+    "operator": "matches",
+    "value": "refund failed"
+  }
+]
+```
+
+Example exact metadata filter:
+
+```json
+[
+  {
+    "type": "stringObject",
+    "column": "metadata",
+    "key": "environment",
+    "operator": "=",
+    "value": "production"
+  }
+]
+```
+
+Pass the JSON array as the URL-encoded `filter` query parameter on `GET /api/public/v2/observations`. See the [Observations API v2 docs](/docs/api-and-data-platform/features/observations-api#v2) and the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for the full filter schema.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-search"]} />

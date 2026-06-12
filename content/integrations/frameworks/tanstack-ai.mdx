@@ -1,0 +1,103 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for TanStack AI with Langfuse
+sidebarTitle: TanStack AI
+logo: /images/integrations/tanstack_ai_icon.png
+description: Learn how to trace TanStack AI applications with Langfuse via OpenTelemetry
+category: Integrations
+---
+
+# Trace TanStack AI with Langfuse
+
+[TanStack AI](https://tanstack.com/ai/latest) is TanStack's framework for building AI-powered applications in TypeScript, with a provider-agnostic `chat()` API, streaming, and tool calling. By combining TanStack AI with **Langfuse**, you can trace, monitor, and analyze every agent step, tool call, and model response in development and production.
+
+This notebook demonstrates how to use the [`openInferenceMiddleware`](https://github.com/Arize-ai/openinference/tree/main/js/packages/openinference-tanstack-ai) from [OpenInference](https://github.com/Arize-ai/openinference) to automatically instrument TanStack AI calls and send OpenTelemetry spans to Langfuse.
+
+> **What is TanStack AI?**\
+> [TanStack AI](https://tanstack.com/ai/latest/docs/getting-started/overview) is a TypeScript framework for building AI applications. It provides a unified, provider-agnostic `chat()` API with built-in support for streaming, tool calling, and pluggable provider adapters (OpenAI, Anthropic, and more).
+
+> **What is Langfuse?**\
+> [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
+
+<Steps>
+## Step 1: Install Dependencies
+
+Install the necessary packages:
+
+```bash
+npm install @tanstack/ai @tanstack/ai-openai @arizeai/openinference-tanstack-ai @langfuse/otel @opentelemetry/sdk-node
+```
+
+> **Note**: This cookbook uses **Deno.js** for execution, which requires different syntax for importing packages and setting environment variables. For Node.js applications, the setup process is similar but uses standard `npm` packages and `process.env`.
+
+## Step 2: Configure Environment
+
+Set up your Langfuse and OpenAI API keys. You can get Langfuse keys by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). Get your OpenAI API key from the [OpenAI Platform](https://platform.openai.com/api-keys).
+
+```typescript
+Deno.env.set("OPENAI_API_KEY", "sk-proj-...");
+
+Deno.env.set("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+Deno.env.set("LANGFUSE_SECRET_KEY", "sk-lf-...");
+
+Deno.env.set("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); // 🇪🇺 EU region
+// Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+```
+
+## Step 3: Initialize OpenTelemetry with Langfuse
+
+Set up the OpenTelemetry SDK with the `LangfuseSpanProcessor`. The `openInferenceMiddleware` from OpenInference uses your application's existing OpenTelemetry tracer provider, so this setup must run **before** any TanStack AI calls.
+
+We also provide a custom [`shouldExportSpan`](https://langfuse.com/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) filter to include spans from the `@arizeai/openinference-tanstack-ai` instrumentation scope alongside the default Langfuse filter.
+
+```typescript
+import { NodeSDK } from "npm:@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor, isDefaultExportSpan } from "npm:@langfuse/otel";
+
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor({
+      shouldExportSpan: ({ otelSpan }) =>
+        isDefaultExportSpan(otelSpan) ||
+        otelSpan.instrumentationScope.name ===
+          "@arizeai/openinference-tanstack-ai",
+    }),
+  ],
+});
+
+sdk.start();
+```
+
+## Step 4: Run the Agent
+
+Add `openInferenceMiddleware()` to the `middleware` option of TanStack AI's `chat()` call. All agent steps, tool calls, and model completions are automatically traced and sent to Langfuse. The middleware works for both streaming and non-streaming calls.
+
+```typescript
+import { chat } from "npm:@tanstack/ai";
+import { openaiText } from "npm:@tanstack/ai-openai";
+import { openInferenceMiddleware } from "npm:@arizeai/openinference-tanstack-ai";
+
+const text = await chat({
+  adapter: openaiText("gpt-4o-mini"),
+  stream: false,
+  systemPrompts: ["You are a concise technical explainer."],
+  messages: [
+    { role: "user", content: "What is the capital of France? Answer in a single sentence." },
+  ],
+  middleware: [openInferenceMiddleware()],
+});
+
+console.log(text);
+
+await sdk.shutdown();
+```
+
+## Step 5: View Traces in Langfuse
+
+After running the agent, navigate to your Langfuse Trace Table. You will find detailed traces of the agent's execution, providing insights into every agent step, tool call, input, output, and performance metric.
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more-js.mdx";
+
+<LearnMore />
