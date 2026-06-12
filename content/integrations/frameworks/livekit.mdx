@@ -92,7 +92,7 @@ def setup_langfuse(
 
     if not public_key or not secret_key or not base_url:
         raise ValueError(
-            "LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, and LANGFUSE_BASE_URL must be set"
+            "LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, and LANGFUSE_BASE_URL (or LANGFUSE_HOST) must be set"
         )
 
     trace_provider = TracerProvider()
