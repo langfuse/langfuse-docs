@@ -30,7 +30,7 @@ This post walks through our current setup and how we got there.
 
 ## The system combines MCP, repo-owned skills, and fixed output tables
 
-We set up a system with four layers. First, we made the relevant data queryable. For example, we built pipelines that move AWS cost data into BigQuery, join it with business data in dbt, and surface it in Metabase. Second, we exposed these sources to the agent harness through MCP. Third, we developed and iterated on repo-owned skills. Fourth, each skill defines a stable output table.
+We set up a system with four layers. First, we made the relevant data queryable. Second, we exposed these sources to the agent harness through MCP. Third, we developed and iterated on repo-owned skills. Fourth, each skill defines a stable output table.
 
 The workflow lives in [`langfuse/langfuse`](https://github.com/langfuse/langfuse/tree/main/.agents), not in one engineer's local prompt history.
 
@@ -80,13 +80,13 @@ flowchart LR
 
 The `weekly-production-review` skill produces a report from Linear bug tickets, Datadog error signals, and public status-page incidents.
 
-The agent produces tables for monitor alerts, errored traces, and error logs from Datadog. It also produces a table for bug-labeled Linear tickets and their status, plus any public incident we published. This gives us one weekly pass over the signals that may need action: bug fixes to prioritize, incidents to discuss with the team, and Datadog errors that should become follow-up issues.
+The agent produces tables for monitor alerts, errored traces, and error log patterns from Datadog. It also produces a table for bug-labeled Linear tickets and their status, plus any public incident we published. This gives us one weekly pass over the signals that may need action: bug fixes to prioritize, incidents to discuss with the team, and Datadog errors that should become follow-up issues.
 
 We iterated heavily on this skill to get the output right. The agent needs to query each data source in the right way, deduplicate issues across tools, and keep regions distinct. It also needs to preserve links between sources, for example incident.io or Datadog links already attached to Linear tickets.
 
 ### Cloud cost analysis depends on warehouse data
 
-Agents need data access before they need better prompts. For cost analysis, we export AWS CUR reports into BigQuery, expose the resulting marts through Metabase, and make the relevant tables accessible through MCP.
+Agents need data access before they need better prompts. For cost analysis, we export AWS CUR reports into BigQuery, enrich them with business data using dbt, expose the resulting marts through Metabase, and make the relevant tables accessible through MCP.
 
 The `analyze-cloud-costs` skill does not ask the model to "think about spend." It points the agent at cost marts and asks for the same grain every time: recent complete days versus a baseline, provider/service breakdowns, and cost per 100k ingested billable events.
 
@@ -102,9 +102,9 @@ Before assigning work, the agent checks Linear for existing issues so the same v
 
 Skills are not done when the first version works. They need review and iteration until engineers can trust them in a recurring workflow.
 
-We review skill output like product behavior: whether the agent found enough evidence, kept formatting stable, and stopped at the right point. Each miss becomes a workflow change.
+We review skill output like product behavior: whether the agent found enough evidence, kept formatting stable, and stopped at the right point. Each miss becomes a Skill change.
 
-_For example, we initially missed many error cases when searching Datadog for issues. We then updated the skill with the same instructions we would give a coworker: which data to query, how to filter it, and how to link the results. This improved output quality over time._
+For example, we initially missed many error cases when searching Datadog for issues. We then updated the Skill with the same instructions we would give a coworker: which data to query, how to filter it, and how to link the results. This improved output quality over time.
 
 ## Next: ClickHouse query-log analysis by feature area
 
