@@ -74,7 +74,9 @@ The disciplined second round did not produce better held-out results. Adding a `
 
 By the end, Fable's own analysis suggested that many of the remaining errors sat on genuinely fuzzy category boundaries, so it stopped before hitting the 95% target. Pushing further likely would have required adding increasingly specific case-by-case rules, rather than finding broader principles that generalized.
 
-The most important result was not 81% vs. 84%. It was that **11 test errors were shared by all three prompt variants.** That means the loop got better at fitting the train split while leaving the same hard cases unresolved.
+The final prompt version of round 2 hit 81.0% accuracy on test. That is a 13-point gap to the train set, and very much in line with the drop between train and test in round 1. It just took more turns to get to the point of overfitting.
+
+In the end, the best-performing prompt on test was still `v2` from the first round. That iteration simply added broad descriptions to the label-only version, and it generalized best.
 
 _Suggested platform screenshot: one recurring hard example in Langfuse, with the trace and annotation showing why the boundary case stayed unresolved._
 
