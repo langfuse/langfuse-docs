@@ -141,7 +141,58 @@ Notice that we are not judging the tone of voice automatically here. This is on 
 
 When the evaluator scores are good enough and the manual review looks good, the agent moves into the support ticketing system.
 
-<mark>TODO: describe a trace.</mark>
+Before moving on to the next section, this is what a trace could look like:
+
+<TraceViewDiagram
+  ariaLabel="The observations inside a draft-support-reply trace"
+  rows={[
+    {
+      kind: "trace",
+      name: "draft-support-reply",
+      chips: ["dataset item: account-changes"],
+      duration: "3.1s",
+      input:
+        "\"I can't add my colleague to our workspace, the invite says 'seat limit reached'.\"",
+      output:
+        '"Hi Sam, all 10 seats on your plan are in use. You can free one up by deactivating a former member under Settings → Members, or add seats under Billing."',
+    },
+    {
+      kind: "retriever",
+      name: "find-similar-tickets",
+      duration: "0.5s",
+      indent: true,
+      input: "the ticket text",
+      output: "3 resolved tickets: T-3107, T-2954, T-2381 (seat limit, adding members)",
+    },
+    {
+      kind: "retriever",
+      name: "search-help-articles",
+      duration: "0.4s",
+      indent: true,
+      input: '"seat limit, add seats"',
+      output: "'Managing seats' · 'Billing settings'",
+    },
+    {
+      kind: "tool",
+      name: "fetch-account-details",
+      duration: "0.3s",
+      indent: true,
+      input: "workspace W-2209",
+      output: "plan: Team · seats: 10 of 10 in use",
+    },
+    {
+      kind: "gen",
+      name: "draft-reply",
+      chips: ["gpt-4.1", "1.4k tok", "$0.01"],
+      duration: "1.9s",
+      indent: true,
+      input:
+        "the ticket text · account details · 2 help articles · 3 resolved tickets",
+      output:
+        '"Hi Sam, all 10 seats on your plan are in use. You can free one up by deactivating a former member under Settings → Members, or add seats under Billing."',
+    },
+  ]}
+/>
 
 ## Phase 2: internal rollout
 
