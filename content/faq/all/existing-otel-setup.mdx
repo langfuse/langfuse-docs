@@ -547,7 +547,9 @@ This is largely a tradeoff. You can't filter parent spans without affecting the 
 {/* PYTHON */}
 
 ```python
-with langfuse.trace(name="my-operation", user_id="user-123", session_id="session-456") as trace:
+from langfuse import propagate_attributes
+
+with propagate_attributes(trace_name="my-operation", user_id="user-123", session_id="session-456"):
     # Your code here
 ```
 
