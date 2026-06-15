@@ -3,6 +3,8 @@ const xml2js = require("xml2js");
 const path = require("path");
 
 const SITEMAP_PATH = "public/sitemap-0.xml";
+// Per-page metadata produced by scripts/generate-sitemap-excludes.js.
+const ALL_PAGES_PATH = ".sitemap-all-pages.json";
 const TITLE = "Langfuse";
 const INTRO_DESCRIPTION =
   "Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
@@ -36,11 +38,35 @@ function generateTitle(url) {
     .replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
+// Load per-page metadata (title/description) keyed by URL pathname. Lets
+// llms.txt use the real frontmatter title and description instead of titles
+// guessed from the URL slug. Falls back gracefully if the file is missing.
+function loadPageMeta() {
+  const map = new Map();
+  try {
+    const file = path.join(process.cwd(), ALL_PAGES_PATH);
+    const pages = JSON.parse(fs.readFileSync(file, "utf-8"));
+    for (const page of pages) {
+      if (page && page.loc) {
+        map.set(page.loc, {
+          title: page.title,
+          description: page.description,
+        });
+      }
+    }
+  } catch {
+    // Not generated yet — fall back to slug-derived titles only.
+  }
+  return map;
+}
+
 function generateSubFile(entries, config) {
   let content = `# ${config.subFileHeading}\n\n`;
-  entries.forEach(({ title, url }) => {
+  entries.forEach(({ title, description, url }) => {
     const mdUrl = url.endsWith(".md") ? url : `${url}.md`;
-    content += `- [${title}](${mdUrl})\n`;
+    content += description
+      ? `- [${title}](${mdUrl}): ${description}\n`
+      : `- [${title}](${mdUrl})\n`;
   });
   return content;
 }
@@ -61,11 +87,20 @@ async function generateLLMsList() {
       urlsBySection[section] = [];
     });
 
+    // Per-page metadata (real frontmatter title/description) keyed by pathname.
+    const pageMeta = loadPageMeta();
+
     // Sort URLs into sections
     const urls = result.urlset.url.map((url) => url.loc[0]);
     urls.forEach((url) => {
-      const urlPath = new URL(url).pathname.split("/")[1]; // Get first part of path
-      const entry = { title: generateTitle(url), url };
+      const pathname = new URL(url).pathname;
+      const urlPath = pathname.split("/")[1]; // Get first part of path
+      const meta = pageMeta.get(pathname) || {};
+      const entry = {
+        title: meta.title || generateTitle(url),
+        description: meta.description || "",
+        url,
+      };
 
       if (MAIN_SECTIONS.includes(urlPath)) {
         urlsBySection[urlPath].push(entry);
