@@ -2,7 +2,7 @@
 title: "Trace OpenClaw with Langfuse"
 sidebarTitle: OpenClaw
 logo: /images/integrations/openclaw_icon.svg
-description: "Trace your OpenClaw AI agent with Langfuse using OpenClaw's native OpenTelemetry export for full visibility into prompts, reasoning, tool calls, and costs."
+description: "Trace your OpenClaw AI agent with Langfuse using the OpenClaw x Langfuse plugin, or OpenClaw's native OpenTelemetry export for full visibility into prompts, reasoning, tool calls, and costs."
 category: Integrations
 ---
 
@@ -18,9 +18,78 @@ category: Integrations
 - **Improve your agent.** Identify where the agent gets confused so you can tweak skills, system prompts, and configurations.
 - **Track costs.** Monitor spending across models and sessions.
 
-## Trace OpenClaw via OpenTelemetry
+## Set up tracing
 
-OpenClaw has built-in [OpenTelemetry](https://docs.openclaw.ai/gateway/opentelemetry) export, and Langfuse is an [OpenTelemetry backend](/integrations/native/opentelemetry). Point OpenClaw's exporter directly at Langfuse's OTLP endpoint and traces flow in with no SDK, no proxy, and no code changes.
+There are two ways to send OpenClaw data to Langfuse. Pick the one that fits your needs:
+
+- **OpenClaw x Langfuse plugin** _(recommended)_ — install a plugin from [ClawHub](https://clawhub.ai/plugins/openclaw-x-langfuse-plugin), paste your Langfuse keys, and you're done. It forwards model usage as Langfuse generations grouped by session, including token counts, costs, and errors.
+- **OpenTelemetry export** — point OpenClaw's native OTLP exporter at Langfuse for the full span tree (model calls, tool execution, skill usage, harness lifecycle, and context assembly). Choose this when you want complete agent observability rather than usage and cost tracking alone.
+
+<Tabs items={["OpenClaw x Langfuse plugin (recommended)", "OpenTelemetry export"]}>
+
+<Tab>
+
+The [OpenClaw x Langfuse plugin](https://clawhub.ai/plugins/openclaw-x-langfuse-plugin) (the "Langfuse Bridge") subscribes to OpenClaw's internal diagnostics bus and translates `model.usage` and error events into Langfuse generations, grouped by OpenClaw session. Input and output text is recovered from session transcripts when available.
+
+<Steps>
+
+### Set up Langfuse
+
+Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting). Create a project and copy your public and secret API keys from the project settings.
+
+### Install the plugin
+
+Install the plugin from ClawHub:
+
+```bash
+openclaw plugins install clawhub:openclaw-x-langfuse-plugin
+```
+
+### Configure the plugin
+
+Enable the plugin in `openclaw.json` and provide your Langfuse credentials:
+
+```json
+{
+  "plugins": {
+    "allow": ["langfuse-bridge", "...any-other-plugins-you-have..."],
+    "entries": {
+      "langfuse-bridge": {
+        "enabled": true,
+        "config": {
+          "publicKey": "pk-lf-...",
+          "secretKey": "sk-lf-...",
+          "baseUrl": "https://cloud.langfuse.com"
+        }
+      }
+    }
+  }
+}
+```
+
+`baseUrl` selects your Langfuse data region: 🇪🇺 EU `https://cloud.langfuse.com`, 🇺🇸 US `https://us.cloud.langfuse.com`, 🇯🇵 Japan `https://jp.cloud.langfuse.com`, ⚕️ HIPAA `https://hipaa.cloud.langfuse.com`, or your own URL for a 🏠 local deployment (e.g. `http://localhost:3000`).
+
+You can also supply the credentials through the `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` environment variables instead of putting them in `openclaw.json`.
+
+### Restart the gateway
+
+Apply the configuration by restarting the OpenClaw gateway:
+
+```bash
+openclaw gateway restart
+```
+
+### View traces in Langfuse
+
+Run OpenClaw as usual. Open your Langfuse project to see generations grouped by session, with token usage, costs, and any forwarded errors.
+
+</Steps>
+
+</Tab>
+
+<Tab>
+
+OpenClaw has built-in [OpenTelemetry](https://docs.openclaw.ai/gateway/opentelemetry) export, and Langfuse is an [OpenTelemetry backend](/integrations/native/opentelemetry). Point OpenClaw's exporter directly at Langfuse's OTLP endpoint and traces flow in with no plugin, no proxy, and no code changes.
 
 Because the export happens inside OpenClaw itself, it is **model-agnostic** (it works whether you call Claude, GPT, DeepSeek, or a local model) and captures OpenClaw's full span tree: model calls, tool execution, skill usage, harness lifecycle, and context assembly, along with `gen_ai.*` attributes for model, token usage, and cost.
 
@@ -82,12 +151,17 @@ Run OpenClaw as usual. Open your Langfuse project to see captured traces, where 
 
 </Steps>
 
+</Tab>
+
+</Tabs>
+
 <Callout type="info" title="Did you know?">
   Already routing OpenClaw's LLM calls through [OpenRouter](https://openrouter.ai/)? You can also capture traces without touching OpenClaw's config by connecting your Langfuse keys in [OpenRouter settings](https://openrouter.ai/settings) to enable [Broadcast](/integrations/gateways/openrouter#broadcast). Note that this only traces the LLM calls routed through OpenRouter, not OpenClaw's tool and skill spans.
 </Callout>
 
 ## Learn more
 
+- [OpenClaw x Langfuse plugin](https://clawhub.ai/plugins/openclaw-x-langfuse-plugin): Install and configuration details on ClawHub
 - [Langfuse OpenTelemetry endpoint](/integrations/native/opentelemetry): Endpoint, authentication, and supported protocols
 - [Getting started with Langfuse](/docs/observability/get-started): Setting up API keys and projects
 - [OpenClaw OpenTelemetry docs](https://docs.openclaw.ai/gateway/opentelemetry): Full list of OTel configuration options
