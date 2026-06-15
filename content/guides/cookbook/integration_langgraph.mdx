@@ -230,8 +230,16 @@ from langchain_community.utilities import WikipediaAPIWrapper
 from datetime import datetime
 from langchain.tools import tool
 
-# Define a tools that searches Wikipedia
-wikipedia_tool = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+# Define a tool that searches Wikipedia
+_wikipedia_query = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+
+@tool("wikipedia")
+def wikipedia_tool(query: str) -> str:
+    """Search Wikipedia for the given query and return a summary."""
+    try:
+        return _wikipedia_query.invoke(query)
+    except Exception as exc:
+        return f"Wikipedia lookup failed ({exc}). Answer from your own knowledge instead."
 
 # Define a new tool that returns the current datetime
 @tool("current_datetime")
