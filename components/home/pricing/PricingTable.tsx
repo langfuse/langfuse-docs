@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/hover-card";
 import { TrustedBy } from "../components/TrustedBy";
 import { trustedByData } from "@/data/trusted-by";
-import Image from "next/image";
 import { isCloudAppHref } from "@/lib/google-ads";
 
 // Reusable graduated pricing text with calculator link
@@ -237,23 +236,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-self-hosted-enterprise",
       href: "/talk-to-us?deployment=self-hosted",
       featured: false,
-      pillClassName: "bg-[#FAFF6A] text-[#1A1A1A]",
       description:
         "Dedicated Langfuse deployment with enterprise capabilities and support.",
-      pill: (
-        <>
-          <span className="inline-flex rounded-sm p-0.5">
-            <Image
-              src="/images/logos/clickhouse_icon.svg"
-              alt=""
-              width={14}
-              height={14}
-              className="size-3.5 rounded-[2px]"
-            />
-          </span>
-          ClickHouse Cloud / BYOC / Private
-        </>
-      ),
       price: "Custom Pricing",
       mainFeatures: [
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
