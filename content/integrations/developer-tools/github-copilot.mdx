@@ -26,7 +26,7 @@ GitHub Copilot has built-in [OpenTelemetry export](https://code.visualstudio.com
 All spans follow the [OpenTelemetry GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/), which Langfuse maps natively to traces, generations, and tool observations.
 
 <Callout type="warning" title="Content capture is off by default">
-  By default, Copilot exports span structure, timing, and token counts but **no prompt content, model responses, or tool arguments**. To see inputs and outputs in Langfuse, enable content capture (`github.copilot.chat.otel.captureContent` in VS Code, `COPILOT_OTEL_CAPTURE_CONTENT` for the CLI). Only enable it if you are comfortable storing this content in Langfuse.
+  By default, Copilot exports span structure, timing, and token counts but **no prompt content, model responses, or tool arguments**. To see inputs and outputs in Langfuse, enable content capture (`github.copilot.chat.otel.captureContent` in VS Code, `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true` for the Copilot CLI). Only enable it if you are comfortable storing this content in Langfuse.
 </Callout>
 
 <Callout type="info">
@@ -84,10 +84,10 @@ The standalone [Copilot CLI](https://github.com/github/copilot-cli) is configure
 export COPILOT_OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
 export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <AUTH_STRING>,x-langfuse-ingestion-version=4"
-export COPILOT_OTEL_CAPTURE_CONTENT=true # opt-in: include prompts, responses, and tool arguments
+export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true # opt-in: include prompts, responses, and tool arguments
 ```
 
-When you launch terminal CLI sessions from VS Code with OpenTelemetry enabled, the extension forwards `COPILOT_OTEL_ENABLED` and the endpoint automatically.
+When you launch terminal CLI sessions from VS Code with OpenTelemetry enabled, the extension forwards `COPILOT_OTEL_ENABLED` and the endpoint automatically — but **not** the content-capture flag, so set `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` yourself if you want prompts and responses from CLI sessions.
 
 ### Use Copilot and view traces in Langfuse
 
@@ -128,7 +128,7 @@ Verify your API keys are correct, the base64 string was generated without line w
 
 ### Traces have no input/output content
 
-Content capture is off by default. Enable `github.copilot.chat.otel.captureContent` (VS Code) or `COPILOT_OTEL_CAPTURE_CONTENT=true` (CLI) and start a new Copilot session.
+Content capture is off by default — the spans still carry model name and token usage, but prompts, responses, and tool arguments are suppressed. Enable `github.copilot.chat.otel.captureContent` (VS Code) or `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true` (Copilot CLI) and start a new Copilot session.
 
 ## Learn more
 
