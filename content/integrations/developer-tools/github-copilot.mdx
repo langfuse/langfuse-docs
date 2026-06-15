@@ -93,12 +93,14 @@ When you launch terminal CLI sessions from VS Code with OpenTelemetry enabled, t
 
 Use Copilot chat or agent mode as usual. Open your Langfuse project to see the captured traces:
 
-- **Agent traces** (`invoke_agent`): one trace per interaction, from your prompt to the final answer
+- **Agent traces** (`invoke_agent`): one trace per turn, from your prompt to the final answer
 - **Generations** (`chat`): one per model call, with input messages, response, model name, and token usage
-- **Tool spans** (`execute_tool`): nested under the agent span, with arguments and results when content capture is enabled
-- **Sessions**: interactions that share a Copilot conversation are grouped via the conversation ID
+- **Tool spans** (`bash`, `view`, `grep`, …): nested under the agent span, with arguments and results when content capture is enabled
+- **Sessions**: turns that share a Copilot conversation are grouped via the session ID — open the Sessions view to replay a full multi-turn run
 
-<!-- TODO: add example trace screenshot (upload to static.langfuse.com) and a public example trace link -->
+![GitHub Copilot CLI trace in Langfuse showing the invoke_agent span, model calls, and a bash tool call with its arguments and result](/images/docs/github-copilot/github-copilot-example-trace.png)
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cmpy5u3fb06o5ad0j04xohhmz/traces/3c52df03622a6327ea8893f465bebbe1?observation=3e4ecedc1e42b364&timestamp=2026-06-15T09%3A09%3A54.208Z)
 
 </Steps>
 
