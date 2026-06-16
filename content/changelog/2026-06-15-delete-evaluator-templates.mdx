@@ -1,0 +1,39 @@
+---
+date: 2026-06-15
+title: Delete evaluator templates
+description: Remove evaluator templates you no longer need from the UI, the unstable public API, and MCP, with safeguards that block deletion while rules still depend on them.
+author: Tobias Wochinger
+canonical: /docs/evaluation/evaluation-methods/llm-as-a-judge
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Code } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now delete evaluator templates you no longer need — from the Langfuse UI, the unstable public API (`DELETE /unstable/evaluators/{id}`), and MCP. Deleting an evaluator template removes all of its versions in one step.
+
+To prevent accidental breakage, deletion is blocked while running evaluators or evaluation rules still reference the template — the UI surfaces those dependencies upfront in the delete dialog so you know what to detach first. Langfuse-managed evaluator templates cannot be deleted.
+
+<Callout type="info">
+  The public API and MCP tools are **unstable** and may change while the
+  underlying evaluation data model is being redesigned. The UI workflow remains
+  fully supported.
+</Callout>
+
+## Get started
+
+<Cards num={2}>
+  <Card
+    title="Evaluation methods"
+    href="/docs/evaluation/overview"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Evaluators API reference"
+    href="https://api.reference.langfuse.com/#tag/unstableevaluators"
+    icon={<Code />}
+    arrow
+  />
+</Cards>
