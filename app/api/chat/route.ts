@@ -98,7 +98,7 @@ export async function POST(req: Request) {
 
   try {
     const result = streamText({
-      model: inkeep("inkeep-qa-sonnet-4") as unknown as Parameters<
+      model: inkeep("inkeep-qa-expert") as unknown as Parameters<
         typeof streamText
       >[0]["model"],
       tools: {
