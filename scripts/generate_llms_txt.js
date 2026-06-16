@@ -2,9 +2,12 @@ const fs = require("fs");
 const xml2js = require("xml2js");
 const path = require("path");
 
-const SITEMAP_PATH = "public/sitemap-0.xml";
+// Resolve paths from the repo root so the script is CWD-independent
+// (matches scripts/generate-sitemap-excludes.js).
+const repoRoot = path.join(__dirname, "..");
+const SITEMAP_PATH = path.join(repoRoot, "public", "sitemap-0.xml");
 // Per-page metadata produced by scripts/generate-sitemap-excludes.js.
-const ALL_PAGES_PATH = ".sitemap-all-pages.json";
+const ALL_PAGES_PATH = path.join(repoRoot, ".sitemap-all-pages.json");
 const TITLE = "Langfuse";
 const INTRO_DESCRIPTION =
   "Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
@@ -44,8 +47,7 @@ function generateTitle(url) {
 function loadPageMeta() {
   const map = new Map();
   try {
-    const file = path.join(process.cwd(), ALL_PAGES_PATH);
-    const pages = JSON.parse(fs.readFileSync(file, "utf-8"));
+    const pages = JSON.parse(fs.readFileSync(ALL_PAGES_PATH, "utf-8"));
     for (const page of pages) {
       if (page && page.loc) {
         map.set(page.loc, {
@@ -111,7 +113,7 @@ async function generateLLMsList() {
       }
     });
 
-    const publicDir = path.join(process.cwd(), "public");
+    const publicDir = path.join(repoRoot, "public");
 
     // Write sub-files for each section
     const sectionEntries = {
