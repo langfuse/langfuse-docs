@@ -97,7 +97,7 @@ The agent runs the broad pass: it queries source tables, identifies drivers, pre
 
 ### Security skill turns daily scans into a triage table
 
-The [`security-review`](https://github.com/langfuse/langfuse/tree/main/.agents/skills/security-review) skill runs DeepSec daily on selected repositories. It scans the repositories and exports a compact findings table for review.
+The `security-review` skill runs DeepSec daily on selected repositories. It scans the repositories and exports a compact findings table for review.
 
 Before assigning work, the agent checks Linear for existing issues so the same vulnerability does not get reported every day. After reviewing the table, we ask the agent to create Linear tickets for the relevant findings. Linear Intelligence assigns those tickets to the right engineer.
 
