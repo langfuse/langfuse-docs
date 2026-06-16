@@ -93,7 +93,7 @@ Agents need data access before they need better prompts. For cost analysis, we e
 
 The [`analyze-cloud-costs`](https://github.com/langfuse/langfuse/tree/main/.agents/skills/analyze-cloud-costs) skill does not ask the model to "think about spend." It points the agent at cost marts and asks for the same grain every time: recent complete days versus a baseline, provider/service breakdowns, and cost per 100k ingested billable events.
 
-The agent runs the broad pass: it queries source tables, identifies drivers, preserves caveats such as incomplete current-day AWS Cost and Usage Report rows, and returns the same breakdown every time.
+The agent runs the broad pass: it queries source tables, identifies drivers, preserves caveats such as incomplete current-day rows in the AWS Cost and Usage Reports, and returns the same breakdown every time.
 
 ### Security skill turns daily scans into a triage table
 
