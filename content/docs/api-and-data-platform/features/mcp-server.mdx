@@ -65,6 +65,10 @@ The Langfuse MCP server uses a stateless architecture where each API key is scop
 - Endpoint: `https://your-domain.com/api/public/mcp`
 - Transport: `streamableHttp`
 - Authentication: Basic Auth via authorization header
+- For reverse-proxy deployments, make sure the proxy preserves the public `Host`
+  header. If the MCP endpoint receives an internal host instead, set
+  `LANGFUSE_MCP_ALLOWED_HOSTS` to a comma-separated list of exact additional
+  hostnames or origins accepted by the MCP endpoint. Otherwise, you get a `403` error.
 
 </Tab>
 
