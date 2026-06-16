@@ -23,15 +23,17 @@ We use agents to turn production data into recurring artifacts for engineering r
 2. Cloud cost analysis explains the main infrastructure spend drivers.
 3. Daily repository scans turn security findings into engineering priorities.
 
+The impact is concrete: every week we now find regressions or new error cases that an engineer looks into, instead of letting them slip by unnoticed across our tools and production environments.
+
 With AI, we can generate these reviews without adding bureaucracy for the engineering team. Engineers stay focused on systems judgment instead of weekly evidence collection. They decide whether a cost driver is acceptable, whether a page was customer-impacting, whether a bug needs an owner, whether a monitor is noisy, and whether a DeepSec finding needs an owner.
 
 The data already lived across our tools, like Datadog, Linear, incident.io, and Metabase, spread across four production environments. Nothing pulled the systems together, so reviewing it every week would mean going through each tool and environment by hand.
 
 This post walks through our current setup and how we got there.
 
-## The system combines MCP, repo-owned skills, and fixed output tables
+## The system combines queryable data, MCP, and repo-owned skills
 
-We set up a system with four layers. First, we made the relevant data queryable. Second, we exposed these sources to the agent harness through MCP. Third, we developed and iterated on repo-owned skills. Fourth, each skill defines a fixed output table.
+We set up a system with three layers. First, we made the relevant data queryable. Second, we exposed these sources to the agent harness through MCP. Third, we developed and iterated on repo-owned skills, each of which defines a fixed output table for review.
 
 The workflow lives in [`langfuse/langfuse`](https://github.com/langfuse/langfuse/tree/main/.agents), not in one engineer's local prompt history.
 
@@ -79,7 +81,7 @@ flowchart LR
 
 ### Weekly production review
 
-The `weekly-production-review` skill produces a report from Linear bug tickets, Datadog error signals, and public status-page incidents.
+The [`weekly-production-review`](https://github.com/langfuse/langfuse/tree/main/.agents/skills/weekly-production-review) skill produces a report from Linear bug tickets, Datadog error signals, and public status-page incidents.
 
 The agent returns signals it finds in our production environments. This gives us one weekly pass over the signals that may need action: bugs to prioritize, incidents to discuss, and Datadog errors that should become follow-up issues.
 
@@ -87,11 +89,11 @@ We iterated heavily on this skill. The agent needs to query each source with the
 
 ### Cloud cost analysis depends on warehouse data
 
-Agents need data access before they need better prompts. For cost analysis, we export AWS CUR reports into BigQuery, enrich them with business data using dbt, expose the resulting marts through Metabase, and make the relevant tables accessible through MCP.
+Agents need data access before they need better prompts. For cost analysis, we export AWS Cost and Usage Reports into BigQuery, enrich them with business data using dbt, expose the resulting marts through Metabase, and make the relevant tables accessible through MCP.
 
-The `analyze-cloud-costs` skill does not ask the model to "think about spend." It points the agent at cost marts and asks for the same grain every time: recent complete days versus a baseline, provider/service breakdowns, and cost per 100k ingested billable events.
+The [`analyze-cloud-costs`](https://github.com/langfuse/langfuse/tree/main/.agents/skills/analyze-cloud-costs) skill does not ask the model to "think about spend." It points the agent at cost marts and asks for the same grain every time: recent complete days versus a baseline, provider/service breakdowns, and cost per 100k ingested billable events.
 
-The agent runs the broad pass: it queries source tables, identifies drivers, preserves caveats such as incomplete current-day AWS CUR rows, and returns the same breakdown every time.
+The agent runs the broad pass: it queries source tables, identifies drivers, preserves caveats such as incomplete current-day rows in the AWS Cost and Usage Reports, and returns the same breakdown every time.
 
 ### Security skill turns daily scans into a triage table
 
