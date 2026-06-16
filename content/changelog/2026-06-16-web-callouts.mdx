@@ -1,0 +1,29 @@
+---
+date: 2026-06-16
+title: Web Callouts
+description: Trigger a configured HTTP request from trace, observation, or session views to connect Langfuse debugging workflows to your internal tools.
+author: Nimar
+canonical: /docs/observability/features/web-callouts
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now configure a Web Callout for a project and trigger it directly from trace, observation, and session views. Langfuse sends a synchronous backend `POST` request with the project ID plus the selected trace, observation, and session IDs, so your service can fetch the full context through the API and open the right workflow.
+
+Use it to open an internal support case from a trace, send a failing observation to an incident workflow, or jump from a session to a custom investigation tool. Project admins configure the endpoint, toast text, enablement, and static request headers under **Project Settings** > **Integrations** > **Web Callouts**.
+
+Callouts send identifiers only, support encrypted static headers for backend authentication, validate targets before each request, follow redirects safely, time out after 5 seconds, and do not retry. They are manually triggered from the UI rather than event-driven webhooks.
+
+## Get started [#get-started]
+
+<Cards num={1}>
+  <Card
+    title="Web Callouts"
+    href="/docs/observability/features/web-callouts"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
