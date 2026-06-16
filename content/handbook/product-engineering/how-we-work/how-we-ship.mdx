@@ -13,12 +13,12 @@ When in doubt, tag your lead (24h SLA on the Linear inbox). Keep one Linear proj
 
 ### Priority levels [#priority-levels]
 
-| Priority | Timeline | Description | Examples |
-|----------|----------|-------------|----------|
-| **P0 (urgent)** | Immediately, drop everything | - Security incidents (e.g. data breach)<br/>- Performance issues (ingestion delay, ClickHouse CPU/memory issues)<br/>- Issues with large-scale impact that break our application | Traces table does not load, login broken |
-| **P1 (high)** | Same week | - Issues with smaller-scale impact<br/>- Improvements that are under 1h of work and have a big impact for many customers; great to move fast on, since users get excited that we ship<br/>- Delighting a user the same day with a small change that helps them | Some edge case does not work for dashboards |
-| **P2 (mid)** | Same month | - Papercut fixes that don't have wide-ranging impact | Trace tree UI breaks when users have many scores |
-| **P3 (low)** | Backlog | - Nice-to-have additions to Langfuse that aren't urgent | Create a new prompt based on a non-latest prompt version |
+| Priority        | Timeline                     | Description                                                                                                                                                                                                                                                    | Examples                                                 |
+| --------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **P0 (urgent)** | Immediately, drop everything | - Security incidents (e.g. data breach)<br/>- Performance issues (ingestion delay, ClickHouse CPU/memory issues)<br/>- Issues with large-scale impact that break our application                                                                               | Traces table does not load, login broken                 |
+| **P1 (high)**   | Same week                    | - Issues with smaller-scale impact<br/>- Improvements that are under 1h of work and have a big impact for many customers; great to move fast on, since users get excited that we ship<br/>- Delighting a user the same day with a small change that helps them | Some edge case does not work for dashboards              |
+| **P2 (mid)**    | Same month                   | - Papercut fixes that don't have wide-ranging impact                                                                                                                                                                                                           | Trace tree UI breaks when users have many scores         |
+| **P3 (low)**    | Backlog                      | - Nice-to-have additions to Langfuse that aren't urgent                                                                                                                                                                                                        | Create a new prompt based on a non-latest prompt version |
 
 ## Daily responsibilities
 
@@ -47,8 +47,8 @@ Goal: keep the number of loops per change to a minimum and let individual contri
      - **Driver**: the engineer
      - **Approver**: pod lead, Max, or Marc (those in the decision meeting)
      - **Informed**: any engineer who may have additional context (see [Getting help](#getting-help))
- 
    - Sometimes a 15 min meeting without an RFC can also help to save time. This is up to the engineer to schedule.
+
 2. In the meeting discussing the RFC:
    - Each complex engineering project has a few important items. We should focus on them during the meeting and have as much data as possible to make a confident decision.
    - The meeting is recorded, so it captures the detail needed to generate the spec or issue description.
@@ -61,7 +61,7 @@ You can pull in anyone on the team at any time; 15 minutes of shared discussion 
 
 - **UI/UX**: for larger UI/UX changes, get input from the designer or Nikita. They are happy to help come up with great UI/UX early on.
 - **ClickHouse**: for more complex ClickHouse queries, get input from the ClickHouse [DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0); otherwise we risk performance and maintainability anti-patterns.
-- **Product Owners**: if you work in the product area of another engineer it sometimes helps to get their input. 
+- **Product Owners**: if you work in the product area of another engineer it sometimes helps to get their input.
 
 ## Implementation
 
@@ -88,11 +88,11 @@ We use Linear as our internal project planning and ticketing tool. It helps us:
 
 #### Issue states
 
-| State | Description |
-|-------|-------------|
-| **Triage** | - Unassigned, no labels or priority<br/>- Created via the GitHub Issue integration, or in Linear by non-engineering team members<br/>- Marc/Max subscribe, triage, assign, add labels, and refine the title<br/>- After assignment, the engineer dedupes against existing tickets and handles communication with users |
-| **Backlog** | - Everyone manages their own backlog in Linear<br/>- Only backlog what you plan or hope to do over the next 1–2 quarters; send the rest to [GitHub Discussions](https://langfuse.com/ideas)<br/>- See the [conventions below](#linear-conventions) for titles, labels, and Pylon links |
-| **Todo / In progress** | See [Priority levels](#priority-levels) for handling guidelines |
+| State                  | Description                                                                                                                                                                                                                                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triage**             | - Unassigned, no labels or priority<br/>- Created via the GitHub Issue integration, or in Linear by non-engineering team members<br/>- Marc/Max subscribe, triage, assign, add labels, and refine the title<br/>- After assignment, the engineer dedupes against existing tickets and handles communication with users |
+| **Backlog**            | - Everyone manages their own backlog in Linear<br/>- Only backlog what you plan or hope to do over the next 1–2 quarters; send the rest to [GitHub Discussions](https://langfuse.com/ideas)<br/>- See the [conventions below](#linear-conventions) for titles, labels, and Pylon links                                 |
+| **Todo / In progress** | See [Priority levels](#priority-levels) for handling guidelines                                                                                                                                                                                                                                                        |
 
 #### Conventions [#linear-conventions]
 
