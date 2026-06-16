@@ -11,10 +11,6 @@ Web Callouts let project members trigger a configured backend HTTP request from 
 Unlike [prompt webhooks](/docs/prompt-management/features/webhooks-slack-integrations), Web Callouts are manually triggered from the UI. Langfuse sends the request synchronously from the backend when the user clicks the action.
 
 <Callout type="info">
-  This feature is currently behind the `env` variable `LANGFUSE_ENABLE_WEB_CALLOUTS`. It will be rolled out to cloud soon, at which point we will remove this variable.
-</Callout>
-
-<Callout type="info">
   Web Callouts send identifiers only. The request payload only sends the trace/observation/session ID and the project id.
   Fetch additional data from the Langfuse API in your own backend if your workflow needs it.
 </Callout>

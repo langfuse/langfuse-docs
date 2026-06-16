@@ -11,11 +11,11 @@ import { Book } from "lucide-react";
 
 <ChangelogHeader />
 
-You can now configure a Web Callout for a project and trigger it directly from trace, observation, and session views. Langfuse sends a synchronous backend `POST` request with the project ID plus the selected trace, observation, and session IDs, so your service can fetch the full context through the API and open the right workflow.
+You can now configure a Web Callout for a project and trigger it directly from trace, observation, and session views. Langfuse sends a synchronous backend `POST` request with the project ID plus the selected trace, observation, and session IDs.
 
-Use it to open an internal support case from a trace, send a failing observation to an incident workflow, or jump from a session to a custom investigation tool. Project admins configure the endpoint, toast text, enablement, and static request headers under **Project Settings** > **Integrations** > **Web Callouts**.
+For example, connect a trace to your support system: a user clicks **Open in Support Tool**, your backend receives the trace ID, fetches the full trace from the Langfuse API, and opens the right customer case. Other common uses are sending a failing observation to an incident workflow or jumping from a session to an internal investigation dashboard.
 
-Callouts send identifiers only, support encrypted static headers for backend authentication, validate targets before each request, follow redirects safely, time out after 5 seconds, and do not retry. They are manually triggered from the UI rather than event-driven webhooks.
+Project admins configure the endpoint, toast text, enablement, and encrypted static request headers under **Project Settings** > **Integrations** > **Web Callouts**. Callouts validate targets before each request, time out after 5 seconds, and do not retry.
 
 ## Get started [#get-started]
 
