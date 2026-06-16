@@ -36,40 +36,32 @@ Goal: keep the number of loops per change to a minimum and let individual contri
 ### Small and mid-sized changes (e.g. adding a new filter to a table, a new field to a form…)
 
 - The engineer leads: capture very brief notes in Linear, or just a descriptive title.
-- Feel free to have a brief discussion with your lead, Max, or Marc if it speeds things up and reduces risk/uncertainty.
+- Feel free to have a brief discussion with anyone if it speeds things up and reduces risk/uncertainty.
 - If you plan to have a reviewer for the change, involve them in the planning process.
-- Asking Claude Code or ChatGPT "what am I missing?" or "how would you build this?" is a great, fast way to get feedback and reduce uncertainty.
+- Asking Coding Agents "what am I missing?" or "how would you build this?" is a great, fast way to get feedback and reduce uncertainty.
 
 ### Larger projects (e.g. supporting agents in Langfuse, rebuilding SDKs…)
 
-- The engineer does initial investigation and writes a short RFC (Google Doc or Linear) with the research and a rough spec, then schedules a meeting with their lead, Marc, or Max and other team members who hold relevant context.
-- Pull people in early for insights and feedback (pod lead, Max, Marc); we're always approachable early in a project.
-- The early goal is usually to learn about the most critical and risky items first.
+1. The engineer does initial investigation, writes a short RFC (in Linear), and schedules a meeting.
+   - Define roles pre project start roles together with your lead:
+      Driver: Engineer
+      Approver: Pod Lead, Max, Marc (involved in decision meeting)
+      Informed: any engineer who may have additional context. Check [Getting help](#getting-help) for this.
+ 
+   - Sometimes a 15 min meeting without an RFC can also help to save time. This is up to the engineer to schedule.
+2. In the meeting discussing the RFC:
+   - Each complex engineering project has a few important items. We should focus on them during the meeting and have as much data as possible to make a confident decision.
+   - The meeting is recorded, so it captures the detail needed to generate the spec or issue description.
+   - Discuss timelines and how we can make things faster.
+   - Agree on an implementation plan afterward; sync with your lead if needed.
 
-In the decision meeting:
-
-- **Define the roles before the project starts:**
-  - **Driver**: the engineer
-  - **Approver**: pod lead, Max, or Marc (those in the decision meeting)
-  - **Consulted**: product owners ([DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0)) and anyone with relevant context
-  - **Informed**: any engineer who is impacted
-- De-risk and clarify all the important open questions.
-- Discuss timelines and how we can move faster (e.g. by cutting scope).
-- Agree on an implementation plan; sync with your lead afterward if needed.
-- Meetings are recorded; the captured detail is useful for generating the spec or issue description.
-
-A few notes on larger projects:
-
-- Involve Max if you think it's needed; either way, share the RFC with him for async review.
-- For strategic projects, involve both Max and Marc to align on what and how to build.
-- The engineer owns the Linear project: log the outcome, and any later changes from the meeting or follow-up discussions, to the ticket or project.
-
-### Getting help
+### Getting help [#getting-help]
 
 You can pull in anyone on the team at any time; 15 minutes of shared discussion often improves the output a lot.
 
-- **UI/UX**: for larger UI/UX changes, get input from Max or Marc. Otherwise, draw a small sketch and ask anyone on the team for feedback. We take the time to polish UI/UX.
+- **UI/UX**: for larger UI/UX changes, get input from the designer or Nikita. They are happy to help come up with great UI/UX early on.
 - **ClickHouse**: for more complex ClickHouse queries, get input from the ClickHouse [DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0); otherwise we risk performance and maintainability anti-patterns.
+- **Product Owners**: if you work in the product area of another engineer it sometimes helps to get their input. 
 
 ## Implementation
 
