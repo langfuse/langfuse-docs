@@ -30,7 +30,7 @@ This post walks through our current setup and how we got there.
 
 ## The system combines MCP, repo-owned skills, and fixed output tables
 
-We set up a system with four layers. First, we made the relevant data queryable. Second, we exposed these sources to the agent harness through MCP. Third, we developed and iterated on repo-owned skills. Fourth, each skill defines a stable output table.
+We set up a system with four layers. First, we made the relevant data queryable. Second, we exposed these sources to the agent harness through MCP. Third, we developed and iterated on repo-owned skills. Fourth, each skill defines a fixed output table.
 
 The workflow lives in [`langfuse/langfuse`](https://github.com/langfuse/langfuse/tree/main/.agents), not in one engineer's local prompt history.
 
@@ -65,7 +65,7 @@ flowchart LR
     Skills --> Tables
   end
 
-  Prod["<u>Production data</u><br/>Datadog<br/>Metabase cost marts<br/>incident.io<br/>Pylon<br/>"]
+  Prod["<u>Production data</u><br/>Datadog<br/>Metabase cost marts<br/>incident.io<br/>Pylon"]
   Work["<u>Workflow tools</u><br/>Linear<br/>GitHub<br/>Slack<br/>Langfuse docs MCP<br/>DeepSec"]
   Review["Monday engineering review"]
 
@@ -94,7 +94,7 @@ The agent runs the broad pass: it queries source tables, identifies drivers, pre
 
 ### Security skill turns daily scans into a triage table
 
-The daily security automation runs DeepSec on selected repositories. It scans the repositories and exports a compact findings table for review.
+The `security-review` skill runs DeepSec daily on selected repositories. It scans the repositories and exports a compact findings table for review.
 
 Before assigning work, the agent checks Linear for existing issues so the same vulnerability does not get reported every day. After reviewing the table, we ask the agent to create Linear tickets for the relevant findings. Linear Intelligence assigns those tickets to the right engineer.
 
