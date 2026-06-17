@@ -302,7 +302,7 @@ const versionedDataset = await langfuse.dataset.get("qa-dataset", {
 const result = await versionedDataset.runExperiment({
   name: "Baseline Experiment v1",
   description: "Running on dataset v1",
-  task: async ({ item }) => {
+  task: async (item) => {
     // Your LLM application logic here
     // For this example, we'll just return the expected output
     return item.expectedOutput;
@@ -453,7 +453,7 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-await langfuse.api.datasetItems.create({
+await langfuse.dataset.createItem({
   datasetName: "<dataset_name>",
   input: { text: "hello world" },
   expectedOutput: { text: "hello world" },
@@ -505,6 +505,7 @@ You can upsert items by providing the `id` of the item you want to update.
 
 ```python
 langfuse.create_dataset_item(
+    dataset_name="<dataset_name>",
     id="<item_id>",
     # example: update status to "ARCHIVED"
     status="ARCHIVED"
@@ -521,7 +522,8 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-await langfuse.api.datasetItems.create({
+await langfuse.dataset.createItem({
+  datasetName: "<dataset_name>",
   id: "<item_id>",
   // example: update status to "ARCHIVED"
   status: "ARCHIVED",

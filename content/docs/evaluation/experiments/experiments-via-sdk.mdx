@@ -273,7 +273,7 @@ const dataset = await langfuse.dataset.get("visual-qa", {
 
 const result = await dataset.runExperiment({
   name: "Visual QA",
-  task: async ({ item }) => {
+  task: async (item) => {
     const image = item.input.image as LangfuseMediaReference;
 
     // Use the format expected by your model provider.

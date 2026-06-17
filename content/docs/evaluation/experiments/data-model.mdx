@@ -74,12 +74,12 @@ direction LR
 
 Dataset item media references point from a stored media token in `input`, `expectedOutput`, or `metadata` to a signed media download URL.
 
-| Attribute         | Type   | Required | Description                                                                                                   |
-| ----------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `field`           | string | Yes      | Dataset item field containing the reference. One of `input`, `expected_output`, or `metadata`.                |
-| `referenceString` | string | Yes      | Original Langfuse media reference string stored in the dataset item.                                          |
-| `jsonPath`        | string | Yes      | JSONPath of the string holding the reference inside the field, for example `$['image']`.                      |
-| `media`           | object | Yes      | Resolved media metadata. `null` if the referenced media does not exist or has not been uploaded successfully. |
+| Attribute         | Type   | Required       | Description                                                                                                                                 |
+| ----------------- | ------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `field`           | string | Yes            | Field enum for the dataset item property containing the reference. One of `input`, `expected_output` (for `expectedOutput`), or `metadata`. |
+| `referenceString` | string | Yes            | Original Langfuse media reference string stored in the dataset item.                                                                        |
+| `jsonPath`        | string | Yes            | JSONPath of the string holding the reference inside the field, for example `$['image']`.                                                    |
+| `media`           | object | Yes (nullable) | Resolved media metadata. `null` if the referenced media does not exist or has not been uploaded successfully.                               |
 
 The nested `media` object contains `mediaId`, `contentType`, `contentLength`, `url`, and `urlExpiry`. The `url` is a signed download URL and should be used before `urlExpiry`.
 
