@@ -1,0 +1,112 @@
+---
+title: Observability for eve with Langfuse
+sidebarTitle: eve
+logo: /images/integrations/eve_icon.svg
+description: Trace eve agents with Langfuse via OpenTelemetry. Capture model calls, tool calls, and full agent runs with token usage and cost.
+---
+
+# Observability for eve with Langfuse
+
+This guide shows you how to integrate **Langfuse** with **eve** to trace and debug your agents. eve emits OpenTelemetry spans for every run, so connecting Langfuse is a matter of pointing those spans at your Langfuse project.
+
+> **What is eve?** [eve](https://eve.dev) is an open-source TypeScript framework from Vercel for building durable agents as ordinary files in a project. It ships with durable execution, a sandbox, tools, subagents, schedules, and built-in OpenTelemetry tracing.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source observability platform for AI agents and LLM applications. It helps you visualize and monitor model calls, tool usage, cost, latency, and more.
+
+> **How do they work together?** [Every eve run produces a trace](https://eve.dev/docs/guides/instrumentation), and the spans are standard OpenTelemetry, built on the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) telemetry conventions. eve registers its tracer in `agent/instrumentation.ts` via `registerOTel`. By adding the `LangfuseSpanProcessor`, every model call, tool call, and sandbox command flows into Langfuse — where Langfuse maps them to traces, generations, and tool observations.
+
+<Steps>
+
+## Create an eve agent
+
+If you don't have an eve agent yet, scaffold one with the eve CLI:
+
+```bash
+npx eve@latest init my-agent
+cd my-agent
+```
+
+See the full [eve quickstart](https://eve.dev/docs/getting-started) for details.
+
+## Install the Langfuse OpenTelemetry packages
+
+Add the Langfuse span processor and the Vercel OpenTelemetry helper that eve's instrumentation uses:
+
+```bash
+npm install @langfuse/otel @vercel/otel
+```
+
+## Add your Langfuse credentials
+
+Get your API keys from your [Langfuse project settings](https://cloud.langfuse.com) and add them to your agent's `.env` file. You can sign up for [Langfuse Cloud](https://langfuse.com/cloud) or [self-host Langfuse](https://langfuse.com/self-hosting).
+
+```bash filename=".env"
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+# LANGFUSE_BASE_URL="https://us.cloud.langfuse.com" # 🇺🇸 US region
+```
+
+## Register the Langfuse span processor
+
+eve configures telemetry in `agent/instrumentation.ts`. Register the `LangfuseSpanProcessor` on the `registerOTel` call so eve's spans are exported to Langfuse:
+
+```typescript filename="agent/instrumentation.ts"
+import { defineInstrumentation } from "eve/instrumentation";
+import { registerOTel } from "@vercel/otel";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+export default defineInstrumentation({
+  setup: ({ agentName }) =>
+    registerOTel({
+      serviceName: agentName,
+      spanProcessors: [
+        new LangfuseSpanProcessor({
+          // Export every eve span — agent run, model calls, tool calls, and
+          // sandbox commands. Omit this to keep only LLM-relevant spans.
+          shouldExportSpan: () => true,
+        }),
+      ],
+    }),
+});
+```
+
+The `LangfuseSpanProcessor` reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` from the environment.
+
+<Callout type="info">
+  By default, the `LangfuseSpanProcessor` only exports LLM-relevant spans (model
+  calls, tool calls, and spans from known instrumentors). Set
+  `shouldExportSpan: () => true` to also capture eve's run-level span and sandbox
+  commands, giving you the full agent run in one trace.
+</Callout>
+
+## Run your agent
+
+Start your agent and send it a message:
+
+```bash
+npm run dev
+```
+
+Each run is now exported to Langfuse.
+
+## View traces in Langfuse
+
+Open your [Langfuse dashboard](https://cloud.langfuse.com) to see the trace for each run. eve's spans map to the Langfuse data model as follows:
+
+- **Model calls** become **generations** with the model name, token usage, and cost.
+- **Tool calls** become **tool observations** with their inputs and outputs.
+- The **agent run** and **sandbox commands** appear as nested **spans**, so you can replay exactly what the agent did.
+
+</Steps>
+
+## Trace-level attributes (sessions, users, tags)
+
+To group runs into [sessions](/docs/observability/features/sessions), attribute them to a [user](/docs/observability/features/users), or add [tags](/docs/observability/features/tags), set the corresponding `langfuse.*` attributes on the root span of a run. See [Propagating trace attributes to all spans](/integrations/native/opentelemetry#propagating-attributes) for the full list and recommended propagation pattern.
+
+## References
+
+- [eve instrumentation docs](https://eve.dev/docs/guides/instrumentation)
+- [Langfuse OpenTelemetry endpoint](/integrations/native/opentelemetry)
+- [Langfuse + Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) (eve's telemetry is built on the same conventions)
+- [`@langfuse/otel` on npm](https://www.npmjs.com/package/@langfuse/otel)
