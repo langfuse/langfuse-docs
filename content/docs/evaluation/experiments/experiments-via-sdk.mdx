@@ -211,6 +211,95 @@ When using Langfuse datasets, dataset runs are automatically created in Langfuse
 
 Experiments always run on the latest dataset version at experiment time. Support for running experiments on specific dataset versions will be added to the SDK shortly.
 
+### Multi-modal experiments [#multimodal-experiments]
+
+SDK-based experiments can run on datasets that include media attachments in `input`, `expectedOutput`, or `metadata`. Fetch the dataset with media reference resolution enabled so each media token is hydrated into a signed `LangfuseMediaReference`.
+
+<Callout type="info">
+  Multi-modal datasets are supported for SDK-based experiments with Python SDK
+  `>= 4.10.0` and JS/TS SDK `@langfuse/client >= 5.5.0`. UI-based
+  experiments do not yet support dataset items with media attachments.
+</Callout>
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+```python
+from langfuse import get_client
+from langfuse.media import LangfuseMediaReference
+
+langfuse = get_client()
+
+dataset = langfuse.get_dataset(
+    "visual-qa",
+    resolve_media_references=True,
+)
+
+def my_multi_modal_task(*, item, **kwargs):
+    image = item.input["image"]
+    assert isinstance(image, LangfuseMediaReference)
+
+    # Use the format expected by your model provider.
+    image_data_uri = image.fetch_data_uri()
+
+    # Call your multi-modal application here.
+    return run_visual_qa(
+        question=item.input["question"],
+        image=image_data_uri,
+    )
+
+result = dataset.run_experiment(
+    name="Visual QA",
+    task=my_multi_modal_task,
+)
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```typescript
+import {
+  LangfuseClient,
+  LangfuseMediaReference,
+} from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+const dataset = await langfuse.dataset.get("visual-qa", {
+  resolveMediaReferences: true,
+});
+
+const result = await dataset.runExperiment({
+  name: "Visual QA",
+  task: async ({ item }) => {
+    const image = item.input.image as LangfuseMediaReference;
+
+    // Use the format expected by your model provider.
+    const imageDataUri = await image.fetchDataUri();
+
+    // Call your multi-modal application here.
+    return runVisualQa({
+      question: item.input.question,
+      image: imageDataUri,
+    });
+  },
+});
+```
+
+</Tab>
+</LangTabs>
+
+`LangfuseMediaReference` exposes helpers to fetch the media as raw bytes, raw base64, or a data URI:
+
+| SDK    | Bytes           | Base64           | Data URI           |
+| ------ | --------------- | ---------------- | ------------------ |
+| Python | `fetch_bytes()` | `fetch_base64()` | `fetch_data_uri()` |
+| JS/TS  | `fetchBytes()`  | `fetchBase64()`  | `fetchDataUri()`   |
+
+The resolved URLs are signed and expire. If a URL expires before your experiment uses it, fetch the dataset again with media reference resolution enabled.
+
 ### Advanced Features
 
 Enhance your experiments with evaluators and advanced configuration options.

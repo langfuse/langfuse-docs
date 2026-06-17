@@ -65,9 +65,23 @@ direction LR
 | `input`               | object        | No       | Input data for the dataset item                                                                                                                             |
 | `expectedOutput`      | object        | No       | Expected output data for the dataset item                                                                                                                   |
 | `metadata`            | object        | No       | Additional metadata for the dataset item                                                                                                                    |
+| `mediaReferences`     | object[]      | No       | Resolved media references found in `input`, `expectedOutput`, and `metadata`. Only returned when requested through the API or SDK media resolution options. |
 | `sourceTraceId`       | string        | No       | ID of the source trace to link this dataset item to                                                                                                         |
 | `sourceObservationId` | string        | No       | ID of the source observation to link this dataset item to                                                                                                   |
 | `status`              | DatasetStatus | No       | Status of the dataset item. Defaults to ACTIVE for newly created items. Possible values: `ACTIVE`, `ARCHIVED`                                               |
+
+#### DatasetItemMediaReference object [#datasetitemmediareference-object]
+
+Dataset item media references point from a stored media token in `input`, `expectedOutput`, or `metadata` to a signed media download URL.
+
+| Attribute         | Type   | Required | Description                                                                                                   |
+| ----------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `field`           | string | Yes      | Dataset item field containing the reference. One of `input`, `expected_output`, or `metadata`.                |
+| `referenceString` | string | Yes      | Original Langfuse media reference string stored in the dataset item.                                          |
+| `jsonPath`        | string | Yes      | JSONPath of the string holding the reference inside the field, for example `$['image']`.                      |
+| `media`           | object | Yes      | Resolved media metadata. `null` if the referenced media does not exist or has not been uploaded successfully. |
+
+The nested `media` object contains `mediaId`, `contentType`, `contentLength`, `url`, and `urlExpiry`. The `url` is a signed download URL and should be used before `urlExpiry`.
 
 ### DatasetRun (Experiment Run) [#datasetrun-experiment-run]
 

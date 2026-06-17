@@ -39,6 +39,90 @@ import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx
 <CreateDatasetItem />
 </Steps>
 
+## Multi-modal dataset items
+
+Dataset item `input`, `expectedOutput`, and `metadata` fields can include media attachments such as images, audio, video, documents, and other files. You can add media from the Langfuse UI when creating or editing an item, or upload media through the Python and JS/TS SDKs with `LangfuseMedia`.
+
+<Callout type="info">
+  Multi-modal datasets are supported for SDK-based experiments with Python SDK
+  `>= 4.10.0` and JS/TS SDK `@langfuse/client >= 5.5.0`. UI-based
+  experiments do not yet support dataset items with media attachments.
+</Callout>
+
+In the UI, open a dataset item and use the attach button, drag-and-drop, or paste files into the `input`, `expectedOutput`, or `metadata` editor.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-06-17-create-multimodal-dataset-item.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+In the SDKs, wrap media in `LangfuseMedia` before creating the dataset item. The SDK uploads the media, stores a reference in the dataset item, and the Langfuse UI renders the attachment preview.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+from langfuse.media import LangfuseMedia
+
+langfuse = get_client()
+
+langfuse.create_dataset_item(
+    dataset_name="visual-qa",
+    input={
+        "question": "What is shown in this image?",
+        "image": LangfuseMedia(
+            file_path="./example.jpg",
+            content_type="image/jpeg",
+        ),
+    },
+    expected_output={"label": "invoice"},
+)
+
+dataset = langfuse.get_dataset(
+    "visual-qa",
+    resolve_media_references=True,
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient, LangfuseMedia } from "@langfuse/client";
+import fs from "node:fs";
+
+const langfuse = new LangfuseClient();
+
+await langfuse.dataset.createItem({
+  datasetName: "visual-qa",
+  input: {
+    question: "What is shown in this image?",
+    image: new LangfuseMedia({
+      source: "bytes",
+      contentBytes: fs.readFileSync("./example.jpg"),
+      contentType: "image/jpeg",
+    }),
+  },
+  expectedOutput: { label: "invoice" },
+});
+
+const dataset = await langfuse.dataset.get("visual-qa", {
+  resolveMediaReferences: true,
+});
+```
+
+</Tab>
+</LangTabs>
+
+See [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk#multimodal-experiments) for using multi-modal items in experiments.
+
+<Callout type="info">
+  CSV imports are intended for text and structured JSON dataset items. Use the
+  UI item editor or SDKs for multi-modal dataset items.
+</Callout>
+
 ## Dataset Folders
 
 Datasets can be organized into virtual folders to group datasets serving similar use cases.
