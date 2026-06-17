@@ -17,7 +17,7 @@ Unlike [prompt webhooks](/docs/prompt-management/features/webhooks-slack-integra
 
 ## Configure a Web Callout
 
-Open **Project Settings** > **Integrations** > **Web Callouts** and create a callout endpoint. You need Admin/Owner (`integrations:CRUD`) permissions to setup new callouts.
+Open **Project Settings** > **Integrations** > **Web Callouts** and create a callout endpoint. You need Admin/Owner (`integrations:CRUD`) permissions to configure new callouts.
 Callouts are configured per project and can be invoked by **all** users in a project.
 
 Configure:
@@ -37,7 +37,7 @@ After setup, users with project read access can trigger the callout from:
 - The session details header.
 
 Langfuse sends the request immediately when the user clicks the action. The UI shows a success toast only after your endpoint returns a 2xx response.
-The request times out after 5 seconds. Calls will not be retried. Calls are rate limited, you can disable rate limiting on self-hosted deployments via env vars, see self-hosting.
+The request times out after 5 seconds. Calls will not be retried and are are rate limited.
 
 ## Request Payload
 
