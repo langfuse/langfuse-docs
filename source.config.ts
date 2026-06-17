@@ -1,4 +1,9 @@
-import { defineDocs, defineConfig, frontmatterSchema } from "fumadocs-mdx/config";
+import {
+  defineDocs,
+  defineConfig,
+  frontmatterSchema,
+} from "fumadocs-mdx/config";
+import lastModified from "fumadocs-mdx/plugins/last-modified";
 import monokaiProLightRaw from "./lib/themes/monokai-pro-light.json";
 
 // JSON imports widen fontStyle to `string` instead of the required literal union.
@@ -13,10 +18,7 @@ import { z } from "zod";
 // Use this helper so both string dates and Date objects are accepted and
 // normalised to an ISO date string (YYYY-MM-DD).
 const yamlDateField = z
-  .union([
-    z.string(),
-    z.date().transform((d) => d.toISOString().split("T")[0]),
-  ])
+  .union([z.string(), z.date().transform((d) => d.toISOString().split("T")[0])])
   .nullish();
 
 // Base schema that adds canonical and noindex to the default frontmatter schema.
@@ -171,6 +173,20 @@ const marketingFrontmatterSchema = baseFrontmatterSchema.extend({
 
 export const academy = defineDocs({
   dir: "content/academy",
+  docs: {
+    schema: sidebarFrontmatterSchema,
+    files: ["**/*.mdx", "!japan/**"],
+  },
+  meta: { files: ["**/*.json", "!japan/**"] },
+});
+
+export const academyJa = defineDocs({
+  dir: "content/academy/japan",
+  docs: { schema: sidebarFrontmatterSchema },
+});
+
+export const workshop = defineDocs({
+  dir: "content/workshop",
   docs: { schema: sidebarFrontmatterSchema },
 });
 
@@ -180,6 +196,7 @@ export const marketing = defineDocs({
 });
 
 export default defineConfig({
+  plugins: [lastModified()],
   mdxOptions: {
     remarkPlugins: [remarkGfm, remarkMdxMermaid],
     providerImportSource: "@/mdx-components",

@@ -10,7 +10,7 @@ export const getFaqPages = () => faqSource.getPages();
 export const getFilteredFaqPages = (
   faqPages: FaqPage[],
   tags: string[],
-  limit: number | undefined = undefined
+  limit: number | undefined = undefined,
 ) => {
   return faqPages
     .filter((page) => page.url !== "/faq/all")
@@ -18,9 +18,7 @@ export const getFilteredFaqPages = (
       const faqTags = (page.data.tags as string[] | undefined) ?? [];
       return faqTags.some((tag) => tags.includes(tag));
     })
-    .sort((a, b) =>
-      (a.data.title ?? "").localeCompare(b.data.title ?? "")
-    )
+    .sort((a, b) => (a.data.title ?? "").localeCompare(b.data.title ?? ""))
     .slice(0, limit);
 };
 

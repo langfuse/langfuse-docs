@@ -12,27 +12,62 @@ const cards = [
       {
         label: "Docker Compose",
         href: "/self-hosting/deployment/docker-compose",
-        icon: <Image src="/images/integrations/docker.svg" alt="" width={18} height={18} />,
+        icon: (
+          <Image
+            src="/images/integrations/docker.svg"
+            alt=""
+            width={18}
+            height={18}
+          />
+        ),
       },
       {
         label: "Kubernetes (Helm)",
         href: "/self-hosting/deployment/kubernetes-helm",
-        icon: <Image src="/images/integrations/kubernetes.svg" alt="" width={18} height={18} />,
+        icon: (
+          <Image
+            src="/images/integrations/kubernetes.svg"
+            alt=""
+            width={18}
+            height={18}
+          />
+        ),
       },
       {
         label: "AWS (Terraform)",
         href: "/self-hosting/deployment/aws",
-        icon: <Image src="/images/integrations/aws.svg" alt="" width={18} height={18} />,
+        icon: (
+          <Image
+            src="/images/integrations/aws.svg"
+            alt=""
+            width={18}
+            height={18}
+          />
+        ),
       },
       {
         label: "GCP (Terraform)",
         href: "/self-hosting/deployment/gcp",
-        icon: <Image src="/images/integrations/gcp.svg" alt="" width={18} height={18} />,
+        icon: (
+          <Image
+            src="/images/integrations/gcp.svg"
+            alt=""
+            width={18}
+            height={18}
+          />
+        ),
       },
       {
         label: "Azure (Terraform)",
         href: "/self-hosting/deployment/azure",
-        icon: <Image src="/images/integrations/microsoft_icon.svg" alt="" width={18} height={18} />,
+        icon: (
+          <Image
+            src="/images/integrations/microsoft_icon.svg"
+            alt=""
+            width={18}
+            height={18}
+          />
+        ),
       },
     ],
   },
@@ -40,22 +75,40 @@ const cards = [
     title: "MIT license",
     bullets: [
       { label: "All product features MIT licensed", href: "/self-hosting" },
-      { label: "Scales to billions of monthly events", href: "/self-hosting/configuration/scaling" },
-      { label: "Fork, modify, contribute", href: "https://github.com/langfuse/langfuse" },
+      {
+        label: "Scales to billions of monthly events",
+        href: "/self-hosting/configuration/scaling",
+      },
+      {
+        label: "Fork, modify, contribute",
+        href: "https://github.com/langfuse/langfuse",
+      },
     ],
   },
   {
     title: "APIs & exports",
     bullets: [
-      { label: "REST APIs for everything", href: "/docs/api-and-data-platform/features/public-api" },
-      { label: "Query SDK", href: "/docs/api-and-data-platform/features/query-via-sdk" },
-      { label: "S3 blob storage export", href: "/docs/api-and-data-platform/features/export-to-blob-storage" },
+      {
+        label: "REST APIs for everything",
+        href: "/docs/api-and-data-platform/features/public-api",
+      },
+      {
+        label: "Query SDK",
+        href: "/docs/api-and-data-platform/features/query-via-sdk",
+      },
+      {
+        label: "S3 blob storage export",
+        href: "/docs/api-and-data-platform/features/export-to-blob-storage",
+      },
     ],
   },
   {
     title: "Active OSS community",
     bullets: [
-      { label: "22,000+ GitHub stars", href: "https://github.com/langfuse/langfuse" },
+      {
+        label: "22,000+ GitHub stars",
+        href: "https://github.com/langfuse/langfuse",
+      },
       { label: "5,000+ Discord members", href: "https://langfuse.com/discord" },
       { label: "Weekly releases and community hours", href: "/changelog" },
     ],
@@ -70,7 +123,8 @@ export const OpenSource = () => {
           <TextHighlight>Open platform.</TextHighlight> Open source.
         </Heading>
         <Text className="text-left max-w-[48ch]">
-          We are huge fans of open standards and data portability. Langfuse won&apos;t lock in your data, ever.
+          We are huge fans of open standards and data portability. Langfuse
+          won&apos;t lock in your data, ever.
         </Text>
       </div>
 

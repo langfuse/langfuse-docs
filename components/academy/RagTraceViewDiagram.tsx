@@ -100,7 +100,11 @@ function Indents({ depth }: { depth: number }) {
   return (
     <>
       {Array.from({ length: depth }, (_, index) => (
-        <span key={index} className="rag-trace-view__indent" aria-hidden="true" />
+        <span
+          key={index}
+          className="rag-trace-view__indent"
+          aria-hidden="true"
+        />
       ))}
     </>
   );
@@ -108,7 +112,10 @@ function Indents({ depth }: { depth: number }) {
 
 export function RagTraceViewDiagram() {
   return (
-    <figure className="rag-trace-view not-prose" aria-label="RAG chat pipeline trace timeline">
+    <figure
+      className="rag-trace-view not-prose"
+      aria-label="RAG chat pipeline trace timeline"
+    >
       <div className="rag-trace-view__card">
         <div className="rag-trace-view__columns">
           <div className="rag-trace-view__column-header rag-trace-view__column-header--left">
@@ -128,10 +135,15 @@ export function RagTraceViewDiagram() {
 
         <div className="rag-trace-view__body">
           {ROWS.map((row) => (
-            <div className="rag-trace-view__row" key={`${row.type}-${row.name}-${row.duration}`}>
+            <div
+              className="rag-trace-view__row"
+              key={`${row.type}-${row.name}-${row.duration}`}
+            >
               <div className="rag-trace-view__left">
                 <Indents depth={row.depth} />
-                <span className={`rag-trace-view__pill rag-trace-view__pill--${row.type}`}>
+                <span
+                  className={`rag-trace-view__pill rag-trace-view__pill--${row.type}`}
+                >
                   {row.label}
                 </span>
                 <span className="rag-trace-view__name">{row.name}</span>
@@ -148,7 +160,10 @@ export function RagTraceViewDiagram() {
                 ) : (
                   <span
                     className={`rag-trace-view__bar rag-trace-view__bar--${row.type}`}
-                    style={{ left: `${row.barLeft}%`, width: `${row.barWidth}%` }}
+                    style={{
+                      left: `${row.barLeft}%`,
+                      width: `${row.barWidth}%`,
+                    }}
                     aria-hidden="true"
                   />
                 )}
@@ -159,10 +174,22 @@ export function RagTraceViewDiagram() {
 
         <div className="rag-trace-view__footer">
           <div className="rag-trace-view__legend">
-            <span className="rag-trace-view__legend-item rag-trace-view__legend-item--trace"><span />trace</span>
-            <span className="rag-trace-view__legend-item rag-trace-view__legend-item--span"><span />span</span>
-            <span className="rag-trace-view__legend-item rag-trace-view__legend-item--gen"><span />generation</span>
-            <span className="rag-trace-view__legend-item rag-trace-view__legend-item--event"><span />event</span>
+            <span className="rag-trace-view__legend-item rag-trace-view__legend-item--trace">
+              <span />
+              trace
+            </span>
+            <span className="rag-trace-view__legend-item rag-trace-view__legend-item--span">
+              <span />
+              span
+            </span>
+            <span className="rag-trace-view__legend-item rag-trace-view__legend-item--gen">
+              <span />
+              generation
+            </span>
+            <span className="rag-trace-view__legend-item rag-trace-view__legend-item--event">
+              <span />
+              event
+            </span>
           </div>
           <span>1 trace, 8 observations - p95 1.82s</span>
         </div>

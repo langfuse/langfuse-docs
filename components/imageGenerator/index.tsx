@@ -4,10 +4,7 @@ import { useState, useMemo } from "react";
 import type { HTMLAttributes, FormEvent } from "react";
 import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
-import {
-  Suggestions,
-  Suggestion,
-} from "@/components/ai-elements/suggestion";
+import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { Image as AiImage } from "@/components/ai-elements/image";
 import { LangfuseWeb } from "langfuse";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
@@ -248,7 +245,7 @@ export const ImageGenerator = ({
                     "p-1.5 rounded-[2px] transition-colors",
                     feedback === 1
                       ? "text-green-700 dark:text-green-400"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
                 >
                   <ThumbsUpIcon className="size-3.5" />
@@ -259,7 +256,7 @@ export const ImageGenerator = ({
                     "p-1.5 rounded-[2px] transition-colors",
                     feedback === 0
                       ? "text-red-700 dark:text-red-400"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
                 >
                   <ThumbsDownIcon className="size-3.5" />
@@ -270,7 +267,8 @@ export const ImageGenerator = ({
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground text-center relative z-10 italic">
-          Powered by GPT-Image-1. Limited to 3 generations per minute. All interactions are traced in the public example project.
+          Powered by GPT-Image-1. Limited to 3 generations per minute. All
+          interactions are traced in the public example project.
         </p>
       </div>
     </div>

@@ -43,7 +43,6 @@ If you are self-hosting Langfuse, the Python SDK v3 requires [**Langfuse platfor
 
 </Details>
 
-
 <Details>
 <Summary>Legacy documentation</Summary>
 
@@ -113,6 +112,7 @@ async function main() {
 // Shutdown flushes events and is required for short-lived applications
 main().finally(() => sdk.shutdown());
 ```
+
 _[When do I need to use `shutdown()`?](/docs/observability/data-model#background-processing)_
 
 **5. Run your application and see the trace in Langfuse:**
@@ -126,7 +126,6 @@ npx tsx index.ts
 </Frame>
 
 See the [trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ef10df7b3f9e4a8adc834c18934bace0?timestamp=2025-12-03T14%3A44%3A10.907Z&observation=c71b480595bbe18c).
-
 
 </Tab>
 </LangTabs>
@@ -147,6 +146,7 @@ Pip install the [Langfuse Python SDK](https://pypi.org/project/langfuse/).
 ```bash
 pip install langfuse
 ```
+
 </Tab>
 <Tab title="JS/TS SDK">
 
@@ -165,7 +165,7 @@ npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 
 To authenticate with Langfuse, add your Langfuse credentials as environment variables. You can get your credentials by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
-If you are self-hosting Langfuse or using a [data region](/security/data-regions) other than the default (EU, https://cloud.langfuse.com), ensure you configure the host argument or the `LANGFUSE_BASE_URL` environment variable.
+If you are self-hosting Langfuse or using a [data region](/security/data-regions) other than the default (EU, https://cloud.langfuse.com), ensure you configure the base URL argument or the `LANGFUSE_BASE_URL` environment variable.
 
 You can also pass the credentials [directly to the constructor](#client-setup).
 
@@ -213,7 +213,6 @@ If you are using Next.js, please use the OpenTelemetry setup via the `NodeSDK` d
 
 </Tab>
 </LangTabs>
-
 
 ### Client Setup [#client-setup]
 
@@ -288,7 +287,6 @@ const langfuse = new LangfuseClient({
 
 </Details>
 
-
 </Tab>
 </LangTabs>
 
@@ -302,7 +300,6 @@ With the SDK set up, you can:
 - [Query data](/docs/api-and-data-platform/features/query-via-sdk)
 
 </Steps>
-
 
 ## OpenTelemetry foundation
 

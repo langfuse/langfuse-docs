@@ -8,7 +8,6 @@ description: Understand what tracing is, how traces are structured, and why they
 
 ## How tracing fits into the loop
 
-
 Traditional software is largely deterministic, executions follow a pre-defined format. For LLM applications that's not the case. Agent executions can be messy, we are dealing with emergent behaviour with rich and unexpected inputs and outputs, and execution order. You need something else to follow your agent's behavior: [traces](/docs/observability/overview).
 
 A trace is a structured record of what your application did for a single request: which steps it took, what data it saw, what it produced.
@@ -30,7 +29,6 @@ A trace can be as complex or as simple as your application requires, but all tra
   start/end time, and metadata about what happened during that step.*
 </Callout>
 
-
 ### Hierarchy
 
 A trace has a hierarchical tree structure. Nested inside are observations that can contain other observations, forming a parent-child structure that mirrors the actual execution of your AI application.
@@ -45,12 +43,12 @@ You can see what happened in what order, and which steps were part of which larg
 
 **Observation types.** In order to make it easy to differentiate between operations, you'll see different [types of observations](/docs/observability/features/observation-types). Each type of observation is used to capture different kinds of interactions of an agent.
 
-| Action of an agent | Observation type | Typical observation input/output |
-| --- | --- | --- |
-| A call to a language model | `generation` | Full prompt or message history as input, the completion as output, plus metadata like the model name and token counts |
-| A step that fetches information from an external source | `retriever` | Query and the returned documents |
-| An invocation of a tool or function by an agent | `tool` | Which tool was called, the arguments, and the return value |
-| General processes | `span` | Highly dependent on the use case |
+| Action of an agent                                      | Observation type | Typical observation input/output                                                                                      |
+| ------------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------- |
+| A call to a language model                              | `generation`     | Full prompt or message history as input, the completion as output, plus metadata like the model name and token counts |
+| A step that fetches information from an external source | `retriever`      | Query and the returned documents                                                                                      |
+| An invocation of a tool or function by an agent         | `tool`           | Which tool was called, the arguments, and the return value                                                            |
+| General processes                                       | `span`           | Highly dependent on the use case                                                                                      |
 
 Observation types make it easier to read traces and to filter. In a trace with 20 observations, being able to quickly spot the LLM calls saves time.
 
@@ -65,6 +63,45 @@ Most of the time you would not see an entire agent's lifecycle execution in one 
 <TracingHierarchyDiagram />
 
 A general rule of thumb is: **one trace corresponds to one invocation of your system**, typically one API call or one agent execution. A session then groups multiple traces together, for example all the turns in a multi-turn conversation.
+
+To make this concrete, here are two examples of applications and how they designed their trace-session split:
+
+<Tabs items={["Customer support chatbot", "PR review agent"]}>
+<Tab>
+
+_A customer support chatbot embedded on a SaaS company's help page. Users open it to ask questions about their account, billing, or product usage. A typical session is a handful of back-and-forth turns until the issue is resolved or the conversation is handed off to a human agent._
+
+The trace and session split looks like this:
+
+```
+Session: conversation_8f2a
+├── Trace: "Why was I charged twice this month?"
+├── Trace: "Can you refund the duplicate?"
+└── Trace: "Thanks, when will I see it?"
+```
+
+That way, evaluating the execution of the chatbot for a given input can be done on one single trace in isolation. For inspecting the entire conversation, one can look at the session as a whole.
+
+</Tab>
+<Tab>
+
+_An automated code review agent that runs on every commit pushed to an open pull request. For each run, the agent reads the diff and the surrounding files, executes static checks, and posts inline review comments. A PR usually receives several review runs over its lifetime as the author iterates._
+
+The trace and session split looks like this:
+
+```
+Session: PR #1234
+├── Trace: review run on commit a3f9b
+├── Trace: review run on commit c7d2e
+└── Trace: review run on commit 8b1f0
+```
+
+Here a trace is one review iteration. The comment quality depends on what was read. Splitting each step of a review iteration into its own trace would scatter the context and make the review hard to follow.
+
+</Tab>
+</Tabs>
+
+The shared tradeoff: cut too small and a trace loses the cohesion to tell a story; cut too large and individual failures get buried inside an unreadable trace.
 
 ## Where to start
 

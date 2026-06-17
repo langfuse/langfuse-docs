@@ -70,7 +70,9 @@ export function BlogPostList({ posts }: { posts: BlogPageItem[] }) {
                     </Text>
                     {post.frontMatter?.author && (
                       <>
-                        <span className="text-[12px] text-text-tertiary md:hidden">·</span>
+                        <span className="text-[12px] text-text-tertiary md:hidden">
+                          ·
+                        </span>
                         <Text
                           size="s"
                           className="text-left md:text-right text-[12px] text-text-tertiary"

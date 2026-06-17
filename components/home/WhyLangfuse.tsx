@@ -52,10 +52,26 @@ const reasons = [
 ];
 
 const OPEN_PATHS = [
-  { d: "M0.999993 7.53333V8.46667H5.66666C6.69759 8.46667 7.53333 9.3024 7.53333 10.3333V15H8.46666V7.53333H0.999993Z", exitX: -4, exitY: 4 },
-  { d: "M0.999993 8.46666V7.53333H5.66666C6.69759 7.53333 7.53333 6.69759 7.53333 5.66666V0.999993H8.46666V8.46666H0.999993Z", exitX: -4, exitY: -4 },
-  { d: "M15 7.53333V8.46667H10.3333C9.30241 8.46667 8.46667 9.3024 8.46667 10.3333V15H7.53334V7.53333H15Z", exitX: 4, exitY: 4 },
-  { d: "M15 8.46666V7.53333H10.3333C9.30241 7.53333 8.46667 6.69759 8.46667 5.66666V0.999993H7.53334V8.46666H15Z", exitX: 4, exitY: -4 },
+  {
+    d: "M0.999993 7.53333V8.46667H5.66666C6.69759 8.46667 7.53333 9.3024 7.53333 10.3333V15H8.46666V7.53333H0.999993Z",
+    exitX: -4,
+    exitY: 4,
+  },
+  {
+    d: "M0.999993 8.46666V7.53333H5.66666C6.69759 7.53333 7.53333 6.69759 7.53333 5.66666V0.999993H8.46666V8.46666H0.999993Z",
+    exitX: -4,
+    exitY: -4,
+  },
+  {
+    d: "M15 7.53333V8.46667H10.3333C9.30241 8.46667 8.46667 9.3024 8.46667 10.3333V15H7.53334V7.53333H15Z",
+    exitX: 4,
+    exitY: 4,
+  },
+  {
+    d: "M15 8.46666V7.53333H10.3333C9.30241 7.53333 8.46667 6.69759 8.46667 5.66666V0.999993H7.53334V8.46666H15Z",
+    exitX: 4,
+    exitY: -4,
+  },
 ];
 
 function AccordionIcon({ isOpen }: { isOpen: boolean }) {
@@ -126,8 +142,9 @@ export function WhyLangfuse() {
           <TextHighlight>Why use</TextHighlight> Langfuse?
         </Heading>
         <Text className="max-w-[48ch] text-left">
-          Langfuse is the most widely adopted open-source LLM engineering platform.
-          Developers who value open-source and control over their data build production grade agents and LLM applications with Langfuse.
+          Langfuse is the most widely adopted open-source LLM engineering
+          platform. Developers who value open-source and control over their data
+          build production grade agents and LLM applications with Langfuse.
         </Text>
       </div>
 

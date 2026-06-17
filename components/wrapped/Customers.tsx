@@ -96,18 +96,18 @@ function CustomerStoryCard({ story }: { story: CustomerStory }) {
         {(story.frontMatter.quoteAuthor ||
           story.frontMatter.quoteRole ||
           story.frontMatter.quoteCompany) && (
-            <div className="flex gap-3 items-center">
-              {story.frontMatter.quoteAuthorImage && (
-                <div className="w-12 h-12 sm:w-16 sm:h-16 shrink-0" />
+          <div className="flex gap-3 items-center">
+            {story.frontMatter.quoteAuthorImage && (
+              <div className="w-12 h-12 sm:w-16 sm:h-16 shrink-0" />
+            )}
+            <div className="flex-1">
+              {story.frontMatter.quoteAuthor && (
+                <div className="text-sm font-semibold sm:text-base" />
               )}
-              <div className="flex-1">
-                {story.frontMatter.quoteAuthor && (
-                  <div className="text-sm font-semibold sm:text-base" />
-                )}
-                <div className="mt-1 text-xs sm:text-sm" />
-              </div>
+              <div className="mt-1 text-xs sm:text-sm" />
             </div>
-          )}
+          </div>
+        )}
       </div>
 
       <div className="absolute inset-0 transition-transform duration-700 transform-3d transform-[rotateY(180deg)] lg:transform-[rotateY(0deg)] lg:group-hover:transform-[rotateY(180deg)]">
@@ -154,50 +154,44 @@ function CustomerStoryCard({ story }: { story: CustomerStory }) {
           {(story.frontMatter.quoteAuthor ||
             story.frontMatter.quoteRole ||
             story.frontMatter.quoteCompany) && (
-              <div className="flex flex-shrink-0 gap-3 justify-center items-center lg:justify-start">
-                {story.frontMatter.quoteAuthorImage && (
-                  <div className="overflow-hidden flex-shrink-0 w-12 h-12 rounded-full sm:w-16 sm:h-16">
-                    <Image
-                      src={story.frontMatter.quoteAuthorImage}
-                      alt={`${story.frontMatter.quoteAuthor} profile picture`}
-                      width={64}
-                      height={64}
-                      className="object-cover w-full h-full"
-                      quality={100}
-                    />
+            <div className="flex flex-shrink-0 gap-3 justify-center items-center lg:justify-start">
+              {story.frontMatter.quoteAuthorImage && (
+                <div className="overflow-hidden flex-shrink-0 w-12 h-12 rounded-full sm:w-16 sm:h-16">
+                  <Image
+                    src={story.frontMatter.quoteAuthorImage}
+                    alt={`${story.frontMatter.quoteAuthor} profile picture`}
+                    width={64}
+                    height={64}
+                    className="object-cover w-full h-full"
+                    quality={100}
+                  />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                {story.frontMatter.quoteAuthor && (
+                  <div className="text-sm font-semibold break-words sm:text-base">
+                    {story.frontMatter.quoteAuthor}
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
-                  {story.frontMatter.quoteAuthor && (
-                    <div className="text-sm font-semibold break-words sm:text-base">
-                      {story.frontMatter.quoteAuthor}
-                    </div>
-                  )}
-                  {(story.frontMatter.quoteRole ||
-                    story.frontMatter.quoteCompany) && (
-                      <div className="mt-1 text-xs break-words sm:text-sm text-muted-foreground">
-                        {story.frontMatter.quoteRole}
-                        {story.frontMatter.quoteRole &&
-                          story.frontMatter.quoteCompany && <span> at </span>}
-                        {story.frontMatter.quoteCompany}
-                      </div>
-                    )}
-                </div>
+                {(story.frontMatter.quoteRole ||
+                  story.frontMatter.quoteCompany) && (
+                  <div className="mt-1 text-xs break-words sm:text-sm text-muted-foreground">
+                    {story.frontMatter.quoteRole}
+                    {story.frontMatter.quoteRole &&
+                      story.frontMatter.quoteCompany && <span> at </span>}
+                    {story.frontMatter.quoteCompany}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+          )}
         </div>
       </div>
     </Link>
   );
 }
 
-function CompanyLogo({
-  name,
-  logo,
-}: {
-  name: string;
-  logo: StaticImageData;
-}) {
+function CompanyLogo({ name, logo }: { name: string; logo: StaticImageData }) {
   return (
     <div className="p-3 lg:p-4 flex items-center justify-center min-h-[100px]">
       <Image

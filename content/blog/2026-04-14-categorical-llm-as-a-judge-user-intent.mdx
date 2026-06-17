@@ -33,14 +33,14 @@ Once every trace has an intent label attached to it, a few things become possibl
 
 We defined six intent categories that map to distinct user needs:
 
-| Category | Description |
-|---|---|
-| `conceptual-question` | The user wants to understand what Langfuse is, how a feature or concept works, or wants a high-level explanation. |
+| Category                  | Description                                                                                                                                                                |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `conceptual-question`     | The user wants to understand what Langfuse is, how a feature or concept works, or wants a high-level explanation.                                                          |
 | `implementation-question` | The user wants to build, integrate, or write code with Langfuse. This includes getting-started questions, framework-specific integration, debugging errors, and API usage. |
-| `self-hosting` | The user wants to deploy or run Langfuse on their own infrastructure. Includes Docker, Kubernetes, local setup, and infrastructure questions. |
-| `pricing-and-comparison` | The user asks about cost, pricing plans, or compares Langfuse to an alternative. |
-| `ui-feedback` | The user gives feedback, reports a UI issue, or makes a product suggestion about the Langfuse application itself. |
-| `irrelevant-to-langfuse` | Greetings with no question, test messages, gibberish, or requests completely unrelated to Langfuse. |
+| `self-hosting`            | The user wants to deploy or run Langfuse on their own infrastructure. Includes Docker, Kubernetes, local setup, and infrastructure questions.                              |
+| `pricing-and-comparison`  | The user asks about cost, pricing plans, or compares Langfuse to an alternative.                                                                                           |
+| `ui-feedback`             | The user gives feedback, reports a UI issue, or makes a product suggestion about the Langfuse application itself.                                                          |
+| `irrelevant-to-langfuse`  | Greetings with no question, test messages, gibberish, or requests completely unrelated to Langfuse.                                                                        |
 
 <Details>
 <Summary>Read the full evaluator prompt here.</Summary>
@@ -49,14 +49,16 @@ You are a user intent classifier for a Langfuse support chatbot.
 You will be given the user's message. Classify it into exactly one of the following categories.
 
 **Categories**
+
 - **conceptual-question**: The user wants to understand what Langfuse is, how a feature or concept works, or wants a high-level explanation. The user is not trying to build or set up anything yet. Examples: "What is Langfuse?", "How does tracing work?", "Explain this to a product manager."
-- **implementation-question**: The user wants to build, integrate, or write code with Langfuse. This includes getting-started questions, framework-specific integration, requests for code examples, debugging errors, and API usage. If the user is trying to *do* something with Langfuse in their application, it belongs here.
+- **implementation-question**: The user wants to build, integrate, or write code with Langfuse. This includes getting-started questions, framework-specific integration, requests for code examples, debugging errors, and API usage. If the user is trying to _do_ something with Langfuse in their application, it belongs here.
 - **self-hosting**: The user wants to deploy or run Langfuse on their own infrastructure. Includes Docker, Kubernetes, local setup, resource provisioning, and infrastructure questions. If the question is about running Langfuse itself rather than using it in an application, it belongs here.
 - **pricing-and-comparison**: The user asks about cost, pricing plans, or compares Langfuse to an alternative (e.g. "How does Langfuse compare to X?"). A general "What can Langfuse do?" question is conceptual, not a comparison.
 - **ui-feedback**: The user gives feedback, reports a UI issue, or makes a product suggestion about the Langfuse application itself. The user is commenting on their experience, not asking a question.
 - **irrelevant-to-langfuse**: Greetings with no question, test messages, gibberish, or requests completely unrelated to Langfuse (e.g. shopping lists, weather, song lyrics).
 
 **Rules**
+
 1. Classify based on the user's primary goal. A user asking "what are traces?" is **conceptual**; a user asking "how do I set up tracing in Python?" is **implementation**.
 2. When a message touches multiple categories, choose the one that best matches what the user is ultimately trying to achieve.
 3. If the message is in a non-English language, classify based on the translated intent, language does not affect the category.

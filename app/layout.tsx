@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { RootProvider } from "fumadocs-ui/provider/next";
-import { GoogleTagManager } from '@next/third-parties/google';
+import { GoogleTagManager } from "@next/third-parties/google";
 import localFont from "next/font/local";
-import { Inter } from 'next/font/google'
+import { Inter } from "next/font/google";
 import { DevAriaHiddenConsoleFilter } from "@/components/DevAriaHiddenConsoleFilter";
 import {
   buildDefaultSiteOgImageUrl,
@@ -11,9 +11,18 @@ import {
 } from "@/lib/og-url";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { AISearch } from "@/components/inkeep/search";
+import { Hubspot } from "@/components/analytics/hubspot";
+import { GoogleAds } from "@/components/analytics/google-ads";
+import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
+import { RedditPixel } from "@/components/analytics/reddit-ads";
+import { TwitterPixel } from "@/components/analytics/twitter-ads";
+import { ConversionTracker } from "@/components/analytics/ConversionTracker";
+import "../style.css";
+import "@vidstack/react/player/styles/base.css";
+import "../src/overrides.css";
 
 const interVariable = Inter({
-  subsets: ['latin'],
+  subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
 });
@@ -31,10 +40,6 @@ const f37Analog = localFont({
   display: "swap",
   weight: "500",
 });
-import { Hubspot } from "@/components/analytics/hubspot";
-import "../style.css";
-import "@vidstack/react/player/styles/base.css";
-import "../src/overrides.css";
 
 const defaultOgImageUrl = buildDefaultSiteOgImageUrl();
 
@@ -72,15 +77,29 @@ export default function RootLayout({
       className={`${interVariable.variable} ${geistMono.variable} ${f37Analog.variable}`}
     >
       <body className="font-sans antialiased">
-        {process.env.NODE_ENV === "development" && <DevAriaHiddenConsoleFilter />}
+        {process.env.NODE_ENV === "development" && (
+          <DevAriaHiddenConsoleFilter />
+        )}
         <PostHogProvider>
-          <RootProvider>
+          <RootProvider
+            i18n={{
+              locale: "en",
+              translations: {
+                lastUpdate: "Last edited",
+              },
+            }}
+          >
             <AISearch>{children}</AISearch>
           </RootProvider>
         </PostHogProvider>
         {process.env.NODE_ENV === "production" && (
           <>
             <GoogleTagManager gtmId="GTM-NGLK4TZX" />
+            <GoogleAds />
+            <LinkedInInsightTag />
+            <RedditPixel />
+            <TwitterPixel />
+            <ConversionTracker />
             <Hubspot />
             <Script
               id="cookieyes"

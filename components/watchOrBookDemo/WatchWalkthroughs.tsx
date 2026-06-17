@@ -82,10 +82,7 @@ function WatchWalkthroughsInner({ className }: { className?: string }) {
                 title={`Langfuse ${tab.label.toLowerCase()} video`}
               />
               <div className="mt-4 flex justify-center">
-                <Button
-                  icon={<BookOpen size={16} />}
-                  href={tab.docs.href}
-                >
+                <Button icon={<BookOpen size={16} />} href={tab.docs.href}>
                   <span className="flex items-center gap-2">
                     {tab.docs.title}
                     <ExternalLink size={12} className="ml-auto" />

@@ -7,7 +7,10 @@ const INNER_H = 386;
 
 function estimateInitialScale(): number {
   if (typeof window === "undefined") return 0.69;
-  return Math.min(1, Math.max(0.25, (document.documentElement.clientWidth - 32) / INNER_W));
+  return Math.min(
+    1,
+    Math.max(0.25, (document.documentElement.clientWidth - 32) / INNER_W),
+  );
 }
 
 function StageLabel({
@@ -81,7 +84,10 @@ export function DatasetFieldsDiagram() {
   }, []);
 
   return (
-    <figure className="dataset-fields not-prose" aria-label="Dataset fields and when they are used">
+    <figure
+      className="dataset-fields not-prose"
+      aria-label="Dataset fields and when they are used"
+    >
       <div
         ref={wrapRef}
         suppressHydrationWarning
@@ -103,32 +109,90 @@ export function DatasetFieldsDiagram() {
           <StageLabel y={128} num="02" name="Add context" />
           <StageLabel y={257} num="03" name="Score" />
 
-          <svg className="dataset-fields__arrows" viewBox={`0 0 ${INNER_W} ${INNER_H}`} aria-hidden="true">
+          <svg
+            className="dataset-fields__arrows"
+            viewBox={`0 0 ${INNER_W} ${INNER_H}`}
+            aria-hidden="true"
+          >
             <defs>
-              <marker id="dataset-fields-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <marker
+                id="dataset-fields-arrow"
+                viewBox="0 0 10 10"
+                refX="9"
+                refY="5"
+                markerWidth="7"
+                markerHeight="7"
+                orient="auto-start-reverse"
+              >
                 <path d="M0 0 L10 5 L0 10 Z" fill="var(--text-secondary)" />
               </marker>
-              <marker id="dataset-fields-arrow-dashed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <marker
+                id="dataset-fields-arrow-dashed"
+                viewBox="0 0 10 10"
+                refX="9"
+                refY="5"
+                markerWidth="7"
+                markerHeight="7"
+                orient="auto-start-reverse"
+              >
                 <path d="M0 0 L10 5 L0 10 Z" fill="var(--text-tertiary)" />
               </marker>
             </defs>
-            <path className="dataset-fields__arrow" d="M 340 64 H 400" markerEnd="url(#dataset-fields-arrow)" />
-            <path className="dataset-fields__arrow" d="M 620 64 H 680" markerEnd="url(#dataset-fields-arrow)" />
-            <path className="dataset-fields__arrow" d="M 340 192 H 400" markerEnd="url(#dataset-fields-arrow)" />
-            <path className="dataset-fields__arrow" d="M 340 321 H 680" markerEnd="url(#dataset-fields-arrow)" />
-            <path className="dataset-fields__arrow dataset-fields__arrow--dashed" d="M 770 94 V 286" markerEnd="url(#dataset-fields-arrow-dashed)" />
-            <path className="dataset-fields__arrow dataset-fields__arrow--dashed" d="M 510 222 V 250 H 770 V 286" markerEnd="url(#dataset-fields-arrow-dashed)" />
+            <path
+              className="dataset-fields__arrow"
+              d="M 340 64 H 400"
+              markerEnd="url(#dataset-fields-arrow)"
+            />
+            <path
+              className="dataset-fields__arrow"
+              d="M 620 64 H 680"
+              markerEnd="url(#dataset-fields-arrow)"
+            />
+            <path
+              className="dataset-fields__arrow"
+              d="M 340 192 H 400"
+              markerEnd="url(#dataset-fields-arrow)"
+            />
+            <path
+              className="dataset-fields__arrow"
+              d="M 340 321 H 680"
+              markerEnd="url(#dataset-fields-arrow)"
+            />
+            <path
+              className="dataset-fields__arrow dataset-fields__arrow--dashed"
+              d="M 770 94 V 286"
+              markerEnd="url(#dataset-fields-arrow-dashed)"
+            />
+            <path
+              className="dataset-fields__arrow dataset-fields__arrow--dashed"
+              d="M 510 222 V 250 H 770 V 286"
+              markerEnd="url(#dataset-fields-arrow-dashed)"
+            />
           </svg>
 
-          <Node x={160} y={36} width={180} variant="live">Input</Node>
-          <Node x={400} y={36} width={220} variant="live">Task execution</Node>
-          <Node x={680} y={36} width={180} variant="live">Actual output</Node>
+          <Node x={160} y={36} width={180} variant="live">
+            Input
+          </Node>
+          <Node x={400} y={36} width={220} variant="live">
+            Task execution
+          </Node>
+          <Node x={680} y={36} width={180} variant="live">
+            Actual output
+          </Node>
 
-          <Node x={160} y={164} width={180} variant="stripe">Metadata</Node>
-          <Node x={400} y={164} width={220} variant="stripe">Extra context for review</Node>
+          <Node x={160} y={164} width={180} variant="stripe">
+            Metadata
+          </Node>
+          <Node x={400} y={164} width={220} variant="stripe">
+            Extra context for review
+          </Node>
 
-          <Node x={160} y={293} width={180}>Expected output</Node>
-          <Node x={680} y={293} width={180} variant="terminal">Score / compare</Node>
+          <Node x={160} y={293} width={180}>
+            Expected output
+          </Node>
+          <Node x={680} y={293} width={180} variant="terminal">
+            Score / compare
+          </Node>
         </div>
       </div>
 

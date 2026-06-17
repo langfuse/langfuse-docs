@@ -6,5 +6,9 @@ export default function SelfHostingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SharedDocsLayout tree={selfHostingSource.getPageTree()}>{children}</SharedDocsLayout>;
+  return (
+    <SharedDocsLayout tree={selfHostingSource.getPageTree()}>
+      {children}
+    </SharedDocsLayout>
+  );
 }

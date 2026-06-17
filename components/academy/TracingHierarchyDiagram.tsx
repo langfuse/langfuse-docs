@@ -9,7 +9,9 @@ function CornerRing({
   className: string;
   children: ReactNode;
 }) {
-  return <div className={`tracing-hierarchy__ring ${className}`}>{children}</div>;
+  return (
+    <div className={`tracing-hierarchy__ring ${className}`}>{children}</div>
+  );
 }
 
 function Observation() {
@@ -36,7 +38,10 @@ function Trace({ observationCount }: { observationCount: number }) {
 
 export function TracingHierarchyDiagram() {
   return (
-    <figure className="tracing-hierarchy not-prose" aria-label="Sessions contain traces, and traces contain observations">
+    <figure
+      className="tracing-hierarchy not-prose"
+      aria-label="Sessions contain traces, and traces contain observations"
+    >
       <CornerRing className="tracing-hierarchy__session">
         <span className="tracing-hierarchy__caption">Session</span>
         <div className="tracing-hierarchy__traces">

@@ -23,7 +23,7 @@ langfuse = get_client()
 
 external_request_id = "req_12345"
 deterministic_trace_id = langfuse.create_trace_id(seed=external_request_id)
-``` 
+```
 
 Use [`get_current_trace_id()`](https://python.reference.langfuse.com/langfuse#Langfuse.get_current_trace_id) to get the current trace ID and [`get_current_observation_id`](https://python.reference.langfuse.com/langfuse#Langfuse.get_current_observation_id) to get the current observation ID.
 
@@ -38,6 +38,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-op") as curr
     observation_id = langfuse.get_current_observation_id()
     print(trace_id, observation_id)
 ```
+
 </Tab>
 <Tab title="JS/TS SDK">
 Use [`createTraceId`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.createTraceId.html) to generate a deterministic trace ID from a seed.
@@ -59,6 +60,7 @@ await startObservation("run", async (span) => {
   console.log(`Current trace ID: ${traceId}`);
 });
 ```
+
 </Tab>
 </LangTabs>
 
@@ -142,7 +144,6 @@ const scoringTraceId = await createTraceId(externalId);
 ```
 
 Setting a parentSpanContext will detach the created span from the active span context as it no longer inherits from the current active span in the context.
-
 
 Learn more in the [Langfuse SDK instrumentation docs](/docs/observability/sdk/instrumentation#trace-ids).
 

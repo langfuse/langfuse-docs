@@ -17,13 +17,43 @@ type TocItem = { id: string; title: string; depth: number; url: string };
 
 const HOME_SECTIONS: TocItem[] = [
   { id: "overview", title: "Overview", depth: 2, url: "#overview" },
-  { id: "llm-engineering-loop", title: "LLM engineering loop", depth: 2, url: "#llm-engineering-loop" },
-  { id: "platform-features", title: "Platform features", depth: 2, url: "#platform-features" },
+  {
+    id: "llm-engineering-loop",
+    title: "LLM engineering loop",
+    depth: 2,
+    url: "#llm-engineering-loop",
+  },
+  {
+    id: "platform-features",
+    title: "Platform features",
+    depth: 2,
+    url: "#platform-features",
+  },
   { id: "integrations", title: "Integrations", depth: 2, url: "#integrations" },
-  { id: "open-source", title: "Open platform. Open source.", depth: 2, url: "#open-source" },
-  { id: "developers-agents", title: "Developers & agents", depth: 2, url: "#developers-agents" },
-  { id: "scale-and-security", title: "Scale & security", depth: 2, url: "#scale-and-security" },
-  { id: "why-langfuse", title: "Why Langfuse?", depth: 2, url: "#why-langfuse" },
+  {
+    id: "open-source",
+    title: "Open platform. Open source.",
+    depth: 2,
+    url: "#open-source",
+  },
+  {
+    id: "developers-agents",
+    title: "Developers & agents",
+    depth: 2,
+    url: "#developers-agents",
+  },
+  {
+    id: "scale-and-security",
+    title: "Scale & security",
+    depth: 2,
+    url: "#scale-and-security",
+  },
+  {
+    id: "why-langfuse",
+    title: "Why Langfuse?",
+    depth: 2,
+    url: "#why-langfuse",
+  },
   { id: "get-started", title: "Get Started", depth: 2, url: "#get-started" },
   { id: "faq", title: "FAQ", depth: 2, url: "#faq" },
 ];
@@ -58,11 +88,16 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
   const active = useActiveAnchors();
   const activeId = active[0] ?? null;
   const listRef = useRef<HTMLDivElement>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number } | null>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    top: number;
+    height: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!activeId || !listRef.current) return;
-    const el = listRef.current.querySelector(`[data-id="${activeId}"]`) as HTMLElement | null;
+    const el = listRef.current.querySelector(
+      `[data-id="${activeId}"]`,
+    ) as HTMLElement | null;
     if (!el) return;
     setIndicatorStyle({ top: el.offsetTop, height: el.offsetHeight });
   }, [activeId]);
@@ -71,7 +106,10 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
 
   return (
     <div className="flex-1 px-4 py-4 min-h-0">
-      <Text size="s" className="block text-left font-[580] text-text-primary mb-3 -ml-1.5">
+      <Text
+        size="s"
+        className="block text-left font-[580] text-text-primary mb-3 -ml-1.5"
+      >
         On this page
       </Text>
 
@@ -86,7 +124,8 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
             style={{
               top: indicatorStyle.top,
               height: indicatorStyle.height,
-              transition: "top 0.2s cubic-bezier(0.4,0,0.2,1), height 0.2s cubic-bezier(0.4,0,0.2,1)",
+              transition:
+                "top 0.2s cubic-bezier(0.4,0,0.2,1), height 0.2s cubic-bezier(0.4,0,0.2,1)",
             }}
           />
         )}
@@ -103,13 +142,18 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
                   const target = document.getElementById(item.id);
                   if (target) {
                     e.preventDefault();
-                    target.scrollIntoView({ behavior: "smooth", block: "start" });
+                    target.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
                   }
                 }}
                 className={cn(
                   "py-1.5 ps-3 transition-colors duration-150 wrap-anywhere",
                   item.depth === 3 ? "ps-6" : item.depth >= 4 ? "ps-8" : "ps-3",
-                  isActive ? "text-text-primary" : "text-text-tertiary hover:text-text-secondary"
+                  isActive
+                    ? "text-text-primary"
+                    : "text-text-tertiary hover:text-text-secondary",
                 )}
               >
                 <Text size="s" className="text-left text-inherit">
@@ -138,7 +182,8 @@ export function HomeAside() {
       className="hidden wide:flex wide:data-ai-open:hidden flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0"
       style={{
         top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
-        height: "calc(100vh - var(--fd-banner-height, 0px) - var(--lf-nav-primary-height))",
+        height:
+          "calc(100vh - var(--fd-banner-height, 0px) - var(--lf-nav-primary-height))",
       }}
     >
       <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 rounded-sm bg-surface-1">

@@ -1,0 +1,164 @@
+---
+title: "Trace Kiro CLI with Langfuse"
+sidebarTitle: Kiro CLI
+logo: /images/integrations/kiro_icon.png
+description: "Trace Kiro CLI AI agent activity — prompts, tool use, and completions — with Langfuse for comprehensive observability of your terminal coding sessions."
+category: Integrations
+---
+
+# Kiro CLI Tracing with Langfuse
+
+> **What is Kiro CLI?** [**Kiro CLI**](https://kiro.dev) is a terminal-based AI coding tool by AWS that runs AI agents to help you write, edit, and understand code from the command line. Kiro CLI provides a [hooks system](https://kiro.dev/docs/cli/hooks/) that lets you run custom commands at different lifecycle points during agent activity.
+
+> **What is Langfuse?** [**Langfuse**](https://langfuse.com/) is an open-source AI engineering platform. It helps teams trace LLM applications, debug issues, evaluate quality, and monitor costs in production.
+
+## What Can This Integration Trace?
+
+Using [Kiro CLI hooks](https://kiro.dev/docs/cli/hooks/), this integration captures agent activity during coding sessions and sends traces to Langfuse. Five hook types are supported:
+
+| Kiro CLI Hook      | What It Traces                       |
+| ------------------ | ------------------------------------ |
+| `agentSpawn`       | Agent initialization                 |
+| `userPromptSubmit` | User prompts and queries             |
+| `preToolUse`       | Tool invocations before execution    |
+| `postToolUse`      | Tool results and execution time      |
+| `stop`             | Agent completion with a status score |
+
+Key observability features include:
+
+- **Traces grouped by conversation**: Each conversation gets its own trace in Langfuse.
+- **Sessions grouped by workspace**: All traces from the same workspace folder are grouped into a [session](/docs/observability/features/sessions).
+- **Dynamic tagging**: Automatic `kiro` and event-based tags so you can filter quickly.
+- **Completion status scoring**: A `completion_status` score (`1` completed, `0.5` aborted, `0` error) is recorded when the agent stops.
+- **Non-blocking error handling**: Tracing never interferes with your coding flow — failures fail open.
+
+## How It Works
+
+Kiro CLI runs a shell command on each hook event. This integration registers a single Node.js handler (`hooks/hook-handler.js`) that reads the event payload from stdin and forwards it to Langfuse via the [JS/TS SDK](/docs/observability/sdk/overview).
+
+```
+Kiro CLI triggers a hook event
+    → Shell command runs hook-handler.js
+    → Reads event payload from stdin
+    → Creates or updates the Langfuse trace for the conversation
+    → Routes to the event-specific handler
+    → Creates generations, spans, events, and scores in Langfuse
+    → Flushes data before exit
+```
+
+### Trace Hierarchy
+
+Each conversation produces one trace (keyed by the conversation ID) with the following structure:
+
+- **Trace** — one per conversation, grouped into a **session** by workspace folder
+  - **Generation** (`User Prompt`) — the prompt you submitted, with the model used
+  - **Spans** (`Tool: <name>`, `Tool Result: <name>`) — tool invocations and their outputs, including duration
+  - **Events** (`Agent Spawned`, `Agent Stopped`) — lifecycle markers
+  - **Score** (`completion_status`) — recorded when the agent stops
+
+## Quick Start
+
+<Steps>
+
+### Set Up Langfuse
+
+1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
+2. Create a new project and copy your API keys from the project settings.
+
+### Copy the Integration Files to Your Project
+
+Clone the [kiro-cli-langfuse](https://github.com/dhanpraja231/kiro-cli-langfuse) repository and copy the agent definition and hook handler into your project:
+
+```bash
+git clone https://github.com/dhanpraja231/kiro-cli-langfuse.git
+
+cp -r kiro-cli-langfuse/.kiro/agents/ your-project/.kiro/agents/
+cp -r kiro-cli-langfuse/hooks/ your-project/hooks/
+```
+
+This adds:
+
+- `.kiro/agents/langfuse-observer.json` — a Kiro CLI agent definition that wires the hooks to the handler
+- `hooks/` — the Node.js handler code and Langfuse client
+
+### Install Dependencies
+
+```bash
+cd your-project/hooks && npm install
+```
+
+### Configure Langfuse Credentials
+
+Create a `.env` file in your project root with your Langfuse API keys:
+
+```bash
+# Langfuse credentials - get these from https://cloud.langfuse.com
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+
+# Optional: self-hosted or non-EU Langfuse URL (defaults to cloud.langfuse.com)
+# LANGFUSE_BASE_URL=https://your-langfuse-instance.com
+```
+
+**Environment Variables:**
+
+| Variable              | Description                                                                                                                                                                 | Required            |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `LANGFUSE_PUBLIC_KEY` | Your Langfuse public key                                                                                                                                                    | Yes                 |
+| `LANGFUSE_SECRET_KEY` | Your Langfuse secret key                                                                                                                                                    | Yes                 |
+| `LANGFUSE_BASE_URL`   | Langfuse base URL. EU: `https://cloud.langfuse.com`, US: `https://us.cloud.langfuse.com`, Japan: `https://jp.cloud.langfuse.com`, HIPAA: `https://hipaa.cloud.langfuse.com` | No (defaults to EU) |
+
+### Activate the Langfuse Observer Agent
+
+Switch to the `langfuse-observer` agent inside Kiro CLI:
+
+```bash
+/agent swap langfuse-observer
+```
+
+Alternatively, merge the `hooks` field from `langfuse-observer.json` into your existing agent configuration so tracing runs without switching agents.
+
+### View Traces in Langfuse
+
+Use Kiro CLI as usual. Open your [Langfuse dashboard](https://cloud.langfuse.com) and navigate to **Traces**. You can:
+
+- Filter by the `kiro` tag to see all Kiro CLI traces.
+- Open the [Sessions](/docs/observability/features/sessions) tab and filter by your workspace folder to see traces from a specific project.
+- Click a trace to see the full conversation breakdown with nested spans, generations, events, and the completion score.
+
+</Steps>
+
+## Customization
+
+### Filter Specific Tools
+
+By default the agent runs the handler for every tool. To trace only specific tools, edit `.kiro/agents/langfuse-observer.json` and add a `matcher` to the `preToolUse` (and/or `postToolUse`) hook:
+
+```json
+{
+  "hooks": {
+    "preToolUse": [
+      {
+        "matcher": "fs_write",
+        "command": "node hooks/hook-handler.js"
+      }
+    ]
+  }
+}
+```
+
+Supported matchers include `fs_write`, `fs_read`, `execute_bash`, `use_aws`, `@git`, `@git/status`, or `*` for all tools.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) v18+
+- [Kiro CLI](https://kiro.dev) installed
+- A [Langfuse](https://langfuse.com) account (cloud or self-hosted)
+
+## Resources
+
+- [kiro-cli-langfuse Repository](https://github.com/dhanpraja231/kiro-cli-langfuse)
+- [Kiro CLI Hooks Documentation](https://kiro.dev/docs/cli/hooks/)
+- [Trace Kiro IDE with Langfuse](/integrations/developer-tools/kiro)
+- [Langfuse JS/TS SDK](/docs/observability/sdk/overview)
+- [Langfuse Sessions](/docs/observability/features/sessions)

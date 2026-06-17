@@ -45,7 +45,7 @@ export function HoverPostRow({
       <div
         className={cn(
           "flex-1 min-w-0 flex flex-col gap-1.5",
-          hasHoverPreview ? "md:group-hover:mr-[136px]" : null
+          hasHoverPreview ? "md:group-hover:mr-[136px]" : null,
         )}
       >
         <Text
@@ -56,9 +56,7 @@ export function HoverPostRow({
         </Text>
 
         <h3 className="text-left text-[16px] font-analog font-medium text-text-primary leading-snug md:truncate">
-          <TextHighlight
-            highlightClassName="origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700 ease-out"
-          >
+          <TextHighlight highlightClassName="origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700 ease-out">
             {title}
           </TextHighlight>
         </h3>
@@ -77,7 +75,7 @@ export function HoverPostRow({
         <div
           className={cn(
             "flex md:shrink-0 md:flex-col md:items-end gap-1 md:gap-0.5 pt-0.5",
-            hasHoverPreview ? "md:group-hover:invisible" : null
+            hasHoverPreview ? "md:group-hover:invisible" : null,
           )}
         >
           {metaRight}

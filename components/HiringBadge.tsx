@@ -34,9 +34,12 @@ export function HiringBadge({ className }: { className?: string }) {
       duration: 1.5 + Math.random() * 0.6,
     };
     setGoats((prev) => [...prev, newGoat]);
-    setTimeout(() => {
-      setGoats((prev) => prev.filter((g) => g.id !== newGoat.id));
-    }, (newGoat.duration + 0.5) * 1000);
+    setTimeout(
+      () => {
+        setGoats((prev) => prev.filter((g) => g.id !== newGoat.id));
+      },
+      (newGoat.duration + 0.5) * 1000,
+    );
   };
 
   const goatOverlay =
@@ -64,7 +67,7 @@ export function HiringBadge({ className }: { className?: string }) {
               );
             })}
           </div>,
-          document.body
+          document.body,
         )
       : null;
 
@@ -90,10 +93,12 @@ export function HiringBadge({ className }: { className?: string }) {
             "bg-surface-bg text-text-secondary",
             "shadow-sm [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
             "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]",
-            "no-underline transition-colors"
+            "no-underline transition-colors",
           )}
         >
-          <span className="text-xs shrink-0" aria-hidden>🐐</span>
+          <span className="text-xs shrink-0" aria-hidden>
+            🐐
+          </span>
           <span className="relative min-w-0 flex-1 text-left">
             <span className={cn("block truncate", isHovered && "invisible")}>
               Hiring in Europe and SF
@@ -101,7 +106,7 @@ export function HiringBadge({ className }: { className?: string }) {
             <span
               className={cn(
                 "absolute left-0 top-0 whitespace-nowrap",
-                !isHovered && "invisible"
+                !isHovered && "invisible",
               )}
             >
               Looking for GOATS!

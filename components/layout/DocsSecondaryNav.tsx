@@ -5,6 +5,7 @@ import {
   X,
   ChevronRight,
   GraduationCap,
+  Presentation,
   Unplug,
 } from "lucide-react";
 import Link from "next/link";
@@ -23,6 +24,7 @@ const SECTIONS = [
   { title: "Self Hosting", path: "/self-hosting", Icon: IconDesktopTower },
   { title: "Guides", path: "/guides", Icon: IconCompass },
   { title: "Academy", path: "/academy", Icon: GraduationCap },
+  { title: "Workshop", path: "/workshop", Icon: Presentation },
   { title: "AI Engineering Library", path: "/library", Icon: IconBookBookmark },
 ] as const;
 
@@ -49,7 +51,8 @@ export function DocsSecondaryNavMobile() {
   const activeSection = SECTIONS.find((s) => pathname?.startsWith(s.path));
 
   const sectionTitle =
-    activeSection?.title ?? pageNameFromPath("/" + (pathname?.split("/")[1] ?? ""));
+    activeSection?.title ??
+    pageNameFromPath("/" + (pathname?.split("/")[1] ?? ""));
 
   // Prefer tree path for page name (gives the authored title), fall back to slug
   const treeNode = treePath.length > 0 ? treePath[treePath.length - 1] : null;
@@ -111,7 +114,7 @@ export function DocsSecondaryNav() {
                   "flex h-[var(--lf-nav-docs-secondary-height)] shrink-0 gap-2 items-center px-4 -mb-px text-sm whitespace-nowrap border-b-2 transition-colors",
                   isActive
                     ? "font-medium with-stripes-alt border-line-cta text-text-primary"
-                    : "border-transparent text-text-tertiary hover:border-line-structure hover:text-text-secondary"
+                    : "border-transparent text-text-tertiary hover:border-line-structure hover:text-text-secondary",
                 )}
               >
                 <item.Icon className="w-4 h-4 shrink-0" />

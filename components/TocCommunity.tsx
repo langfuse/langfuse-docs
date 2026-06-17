@@ -13,7 +13,7 @@ export default function TocCommunity({ className }: TocCommunityProps) {
     <div
       className={cn(
         "flex items-center justify-between gap-2 px-2 py-3",
-        className
+        className,
       )}
     >
       <div className="flex items-center gap-3">

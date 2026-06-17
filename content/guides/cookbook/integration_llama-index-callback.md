@@ -1,5 +1,5 @@
 ---
-title: Integration Llama Index Callback
+title: "Cookbook LlamaIndex Integration"
 description: Example cookbook for the LlamaIndex Langfuse integration.
 category: Integrations
 ---

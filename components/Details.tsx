@@ -34,13 +34,13 @@ export function Details({
       <div
         className={cn(
           "relative my-4 border border-line-structure bg-surface-bg",
-          isOpen ? "corner-box-corners" : "corner-box-corners--hover"
+          isOpen ? "corner-box-corners" : "corner-box-corners--hover",
         )}
       >
         <details
           className={cn(
             "group relative overflow-hidden bg-surface-bg [&_summary~*]:px-4 [&_summary~*]:text-text-secondary [&_summary+*]:pt-4 [&_summary~*:last-child]:pb-4 [&_summary~p:first-of-type]:mt-0 [&_summary~p:last-of-type]:mb-0",
-            className
+            className,
           )}
           open={open}
           onToggle={(event) => {
@@ -63,8 +63,10 @@ export function Summary({ children, className, ...props }: SummaryProps) {
     <summary
       className={cn(
         "flex list-none items-center justify-between gap-4 px-4 py-2 text-text-primary cursor-pointer [&::-webkit-details-marker]:hidden",
-        context?.isOpen ? "with-stripes border-b border-line-structure" : "hover:bg-surface-1",
-        className
+        context?.isOpen
+          ? "with-stripes border-b border-line-structure"
+          : "hover:bg-surface-1",
+        className,
       )}
       {...props}
     >
@@ -73,7 +75,7 @@ export function Summary({ children, className, ...props }: SummaryProps) {
         aria-hidden
         className={cn(
           "shrink-0 text-base leading-none w-3 text-center select-none",
-          context?.isOpen ? "text-text-primary" : "text-text-tertiary"
+          context?.isOpen ? "text-text-primary" : "text-text-tertiary",
         )}
       >
         {context?.isOpen ? "-" : "+"}

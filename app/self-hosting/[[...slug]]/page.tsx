@@ -18,7 +18,9 @@ export default async function SelfHostingPage({ params }: PageProps) {
   return <DocsChromePage page={page} bodyChromeProps={{ versionLabel }} />;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug = [] } = await params;
   const page = selfHostingSource.getPage(slug);
   if (!page) return { title: "Not Found" };

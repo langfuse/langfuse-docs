@@ -30,16 +30,25 @@ export function ContentColumns({
   footerClassName,
 }: ContentColumnsProps) {
   return (
-    <div id="home-layout" className={cn("flex flex-1 mx-auto w-full min-h-0 max-w-380 overflow-clip", className)}>
+    <div
+      id="home-layout"
+      className={cn(
+        "flex flex-1 mx-auto w-full min-h-0 max-w-380 overflow-clip",
+        className,
+      )}
+    >
       {leftSidebar ?? <HomeSidebar />}
       <HomeMainArea>
         {children}
         <Footer className={footerClassName} />
       </HomeMainArea>
       {showAside ? (
-        rightSidebar ?? <HomeAside />
+        (rightSidebar ?? <HomeAside />)
       ) : (
-        <div aria-hidden className="hidden lg:block w-px shrink-0 bg-line-structure" />
+        <div
+          aria-hidden
+          className="hidden lg:block w-px shrink-0 bg-line-structure"
+        />
       )}
       <AISearchPanel />
     </div>

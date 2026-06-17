@@ -1,0 +1,199 @@
+---
+title: Build a human-in-the-loop scoring workflow
+sidebarTitle: Human-in-the-loop scoring
+description: Capture human judgments from your own review tooling and ingest them into Langfuse as structured scores, validated against a score config.
+category: Evaluation
+---
+
+# Build a human-in-the-loop scoring workflow
+
+Many teams keep a human in the loop to judge LLM output. Langfuse offers built-in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) for this, but sometimes you already have your own internal review tool, or want reviewers to work inside an existing app.
+
+This guide shows how to connect that custom tooling to Langfuse: pull the traces your reviewers should look at, then ingest their judgments back as [scores](/docs/evaluation/scores/overview) via the SDK or API. Standardizing those scores against a [score config](/faq/all/manage-score-configs) keeps them consistent for later analysis.
+
+<Callout type="info">
+  If you do not need to own the review UI, use Langfuse [annotation
+  queues](/docs/evaluation/evaluation-methods/annotation-queues) instead. They
+  give you a built-in reviewer interface, queue management, and score configs
+  without writing any tooling. If you are considering building your own UI
+  because annotation queues are missing a feature you need, we would love to
+  hear about it: please open a [feature
+  request](https://github.com/orgs/langfuse/discussions/new?category=ideas) on
+  GitHub.
+</Callout>
+
+## Prerequisites
+
+- Traces already flowing into Langfuse from your application. See [tracing](/docs/observability/get-started) if you have not set this up yet.
+- A custom annotation or review UI where your reviewers view traces and submit their judgments.
+- The Langfuse SDK installed and credentials (`LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`) available in your environment.
+
+## Walkthrough
+
+<Steps>
+
+### Define a score config
+
+A [score config](/faq/all/manage-score-configs) standardizes the schema your reviewers score against, so every reviewer submits the same shape of data. This config needs to be created in Langfuse first.
+
+_For example, for a support QA tool you might define a categorical config named `support_quality` with the categories `excellent`, `acceptable`, and `poor`._
+
+See [how to create and manage score configs](/faq/all/manage-score-configs) to set this up, then note the resulting `configId`, which you will reference when ingesting scores.
+
+### Surface traces to your reviewers
+
+Pull the traces your reviewers should look at, then render their inputs and outputs in your tool. You can do this via the SDKs or the [public API](/docs/api-and-data-platform/features/public-api), filtering by name, user, tags, or time range to build a review queue.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# List recent traces for review, e.g. all traces of a given name
+response = langfuse.api.trace.list(name="support-conversation", limit=50)
+
+for trace in response.data:
+    # Render trace.input / trace.output in your review tool
+    print(trace.id, trace.input)
+```
+
+_See the [Python SDK reference](https://python.reference.langfuse.com)._
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// List recent traces for review, e.g. all traces of a given name
+const response = await langfuse.api.trace.list({
+  name: "support-conversation",
+  limit: 50,
+});
+
+for (const trace of response.data) {
+  // Render trace.input / trace.output in your review tool
+  console.log(trace.id, trace.input);
+}
+```
+
+_See the [JS/TS SDK reference](https://js.reference.langfuse.com)._
+
+</Tab>
+<Tab>
+
+```bash
+curl -G https://cloud.langfuse.com/api/public/traces \
+  -u "pk-lf-...":"sk-lf-..." \
+  --data-urlencode "name=support-conversation" \
+  --data-urlencode "limit=50"
+```
+
+_See the [API reference](https://api.reference.langfuse.com)._
+
+</Tab>
+</LangTabs>
+
+### Ingest the reviewer's judgment as a score
+
+When a reviewer submits their decision, write it back to Langfuse as a score, referencing the `configId` from step 1 so the value is validated against the schema.
+
+Attach the score to whatever the reviewer is judging: a single response (`trace_id`, and optionally `observation_id` to target a specific step within the trace), or a full [session](/docs/observability/features/sessions) (`session_id`) when they rate a conversation as a whole.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Score a single response
+langfuse.create_score(
+    trace_id="trace_id_here",
+    name="support_quality",
+    value="acceptable",  # must match a category in the config
+    data_type="CATEGORICAL",
+    config_id="your_config_id",  # validates the value against the config
+    comment="Resolved the issue but tone was a bit terse.",
+)
+
+# Or score a full conversation by passing session_id instead of trace_id
+langfuse.create_score(
+    session_id="session_id_here",
+    name="support_quality",
+    value="excellent",
+    data_type="CATEGORICAL",
+    config_id="your_config_id",
+)
+```
+
+_See the [Python SDK reference](https://python.reference.langfuse.com)._
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// Score a single response
+langfuse.score.create({
+  traceId: "trace_id_here",
+  name: "support_quality",
+  value: "acceptable", // must match a category in the config
+  dataType: "CATEGORICAL",
+  configId: "your_config_id", // validates the value against the config
+  comment: "Resolved the issue but tone was a bit terse.",
+});
+
+// Or score a full conversation by passing sessionId instead of traceId
+langfuse.score.create({
+  sessionId: "session_id_here",
+  name: "support_quality",
+  value: "excellent",
+  dataType: "CATEGORICAL",
+  configId: "your_config_id",
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+_See the [JS/TS SDK reference](https://js.reference.langfuse.com)._
+
+</Tab>
+<Tab>
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "traceId": "trace_id_here",
+    "name": "support_quality",
+    "value": "acceptable",
+    "dataType": "CATEGORICAL",
+    "configId": "your_config_id",
+    "comment": "Resolved the issue but tone was a bit terse."
+  }'
+```
+
+_See the [API reference](https://api.reference.langfuse.com)._
+
+</Tab>
+</LangTabs>
+
+When you reference a config, Langfuse validates the score before storing it: the name must match the config, a categorical value must map to one of the configured categories, and a numeric value must fall within the configured range. See [enforcing a score config](/docs/evaluation/evaluation-methods/scores-via-sdk#enforcing-a-score-config) for the full validation rules.
+
+</Steps>
+
+## What you can do with the scores
+
+Once reviews are flowing in, the scores appear on the linked traces and sessions in the Langfuse UI. You can filter and slice on them, fetch them via the public API to drive your own dashboards, or use [score analytics](/docs/evaluation/scores/score-analytics) to track reviewer agreement and quality trends over time.

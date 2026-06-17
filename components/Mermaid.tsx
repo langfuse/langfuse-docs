@@ -1,63 +1,243 @@
-import { renderMermaidSVG } from "beautiful-mermaid";
-import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
+"use client";
 
-interface MermaidProps {
-  chart: string;
-}
+import { useEffect, useState } from "react";
+import type { MermaidConfig } from "mermaid";
+import { Loader2 } from "lucide-react";
+import { useTheme } from "next-themes";
 
-// beautiful-mermaid is stricter than mermaid.js, so normalize a couple of
-// legacy patterns that still exist in docs content before rendering.
-function normalizeMermaidInput(chart: string): string {
-  const lines = chart.split("\n");
+const renderedSvgCache = new Map<string, string>();
+const renderedSvgByThemeModeCache = new Map<string, string>();
+const pendingRenderCache = new Map<string, Promise<string>>();
 
-  let startIndex = 0;
-  if (lines[0]?.trim() === "---") {
-    const closingIndex = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
-    if (closingIndex !== -1) {
-      startIndex = closingIndex + 1;
-    }
-  }
+let nextMermaidRenderId = 0;
+let mermaidRenderQueue = Promise.resolve();
 
-  return lines
-    .slice(startIndex)
-    .map((line) => line.replace(/;\s*$/, ""))
-    .join("\n")
+function getCssVariableValue(name: string): string {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
     .trim();
 }
 
-// The library inlines Google Fonts imports into the SVG. Strip those so
-// diagrams inherit the site's existing font setup instead of loading fonts.
-function normalizeMermaidSvgFonts(svg: string): string {
-  return svg.replace(/@import\s+url\('https:\/\/fonts\.googleapis\.com\/[^']+'\);\s*/g, "");
+function getMermaidThemeValues() {
+  return {
+    surface1: getCssVariableValue("--surface-1"),
+    surface2: getCssVariableValue("--surface-2"),
+    textPrimary: getCssVariableValue("--text-primary"),
+    textTertiary: getCssVariableValue("--text-tertiary"),
+    lineCta: getCssVariableValue("--line-cta"),
+    lineStructure: getCssVariableValue("--line-structure"),
+  };
 }
 
-export function Mermaid({ chart }: MermaidProps) {
-  try {
-    const svg = normalizeMermaidSvgFonts(renderMermaidSVG(normalizeMermaidInput(chart), {
-      bg: "var(--surface-1)",
-      fg: "var(--text-primary)",
-      line: "var(--line-cta)",
-      accent: "var(--line-cta)",
-      muted: "var(--text-tertiary)",
-      surface: "var(--surface-2)",
-      border: "var(--text-tertiary)",
-      interactive: false,
-      transparent: true,
-    }));
+function getMermaidConfig(
+  themeValues: ReturnType<typeof getMermaidThemeValues>,
+): MermaidConfig {
+  const {
+    surface1,
+    surface2,
+    textPrimary,
+    textTertiary,
+    lineCta,
+    lineStructure,
+  } = themeValues;
 
-    return (
-      <div
-        className="mermaid-diagram my-4 overflow-x-auto border p-4 not-prose rounded-none"
-        dangerouslySetInnerHTML={{ __html: svg }}
-      />
-    );
-  } catch (error) {
-    console.warn("Failed to render Mermaid diagram", error);
+  return {
+    startOnLoad: false,
+    securityLevel: "strict",
+    theme: "base",
+    htmlLabels: true,
+    fontFamily: "var(--font-sans)",
+    themeVariables: {
+      background: "transparent",
+      mainBkg: surface2,
+      primaryColor: surface2,
+      primaryBorderColor: textTertiary,
+      primaryTextColor: textPrimary,
+      secondaryColor: surface1,
+      secondaryBorderColor: textTertiary,
+      secondaryTextColor: textPrimary,
+      tertiaryColor: surface1,
+      tertiaryBorderColor: textTertiary,
+      tertiaryTextColor: textPrimary,
+      lineColor: lineCta,
+      textColor: textPrimary,
+      edgeLabelBackground: surface1,
+      clusterBkg: surface1,
+      clusterBorder: lineStructure,
+      nodeBorder: textTertiary,
+      defaultLinkColor: lineCta,
+    },
+  };
+}
 
+function getMermaidCacheKey(chart: string, themeMode: string): string {
+  return `${themeMode}\n${chart}`;
+}
+
+function enqueueMermaidRender<T>(render: () => Promise<T>): Promise<T> {
+  const queuedRender = mermaidRenderQueue.then(render, render);
+  mermaidRenderQueue = queuedRender.then(
+    () => undefined,
+    () => undefined,
+  );
+  return queuedRender;
+}
+
+async function renderMermaidChart(
+  chart: string,
+  cacheKey: string,
+  themeValues: ReturnType<typeof getMermaidThemeValues>,
+): Promise<string> {
+  const cachedSvg = renderedSvgCache.get(cacheKey);
+  if (cachedSvg) return cachedSvg;
+
+  const pendingRender = pendingRenderCache.get(cacheKey);
+  if (pendingRender) return pendingRender;
+
+  const mermaidConfig = getMermaidConfig(themeValues);
+  const renderPromise = enqueueMermaidRender(() =>
+    import("mermaid").then(({ default: mermaid }) => {
+      mermaid.initialize(mermaidConfig);
+      return mermaid.render(`mermaid-diagram-${nextMermaidRenderId++}`, chart);
+    }),
+  )
+    .then(({ svg }) => {
+      renderedSvgCache.set(cacheKey, svg);
+      pendingRenderCache.delete(cacheKey);
+      return svg;
+    })
+    .catch((error: unknown) => {
+      pendingRenderCache.delete(cacheKey);
+      throw error;
+    });
+
+  pendingRenderCache.set(cacheKey, renderPromise);
+  return renderPromise;
+}
+
+export function Mermaid({ chart }: { chart: string }) {
+  const { resolvedTheme } = useTheme();
+  const [error, setError] = useState<Error | null>(null);
+  const [renderedSvg, setRenderedSvg] = useState<string | null>(null);
+  const [renderedCacheKey, setRenderedCacheKey] = useState<string | null>(null);
+  const [currentTheme, setCurrentTheme] = useState<{
+    cacheSignature: string;
+    values: ReturnType<typeof getMermaidThemeValues>;
+  } | null>(null);
+  const currentCacheKey =
+    currentTheme === null
+      ? null
+      : getMermaidCacheKey(chart, currentTheme.cacheSignature);
+  const isRendered =
+    renderedSvg !== null && renderedCacheKey === currentCacheKey;
+  const themeModeCacheKey =
+    resolvedTheme === undefined
+      ? null
+      : getMermaidCacheKey(chart, resolvedTheme);
+  const visibleSvg =
+    isRendered || themeModeCacheKey === null
+      ? renderedSvg
+      : (renderedSvgByThemeModeCache.get(themeModeCacheKey) ?? null);
+
+  useEffect(() => {
+    setError(null);
+    setCurrentTheme(null);
+
+    if (resolvedTheme === undefined) return;
+
+    const frame = requestAnimationFrame(() => {
+      const values = getMermaidThemeValues();
+      setCurrentTheme({
+        cacheSignature: [
+          resolvedTheme,
+          values.surface1,
+          values.surface2,
+          values.textPrimary,
+          values.textTertiary,
+          values.lineCta,
+          values.lineStructure,
+        ].join("\n"),
+        values,
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [resolvedTheme]);
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    if (currentTheme === null) return;
+
+    const cacheKey = getMermaidCacheKey(chart, currentTheme.cacheSignature);
+    setError(null);
+
+    const cachedSvg = renderedSvgCache.get(cacheKey);
+    if (cachedSvg) {
+      if (themeModeCacheKey !== null) {
+        renderedSvgByThemeModeCache.set(themeModeCacheKey, cachedSvg);
+      }
+      setRenderedSvg(cachedSvg);
+      setRenderedCacheKey(cacheKey);
+      return;
+    }
+
+    setRenderedSvg(null);
+    setRenderedCacheKey(null);
+
+    renderMermaidChart(chart, cacheKey, currentTheme.values)
+      .then((svg) => {
+        if (!isCurrent) return;
+
+        if (themeModeCacheKey !== null) {
+          renderedSvgByThemeModeCache.set(themeModeCacheKey, svg);
+        }
+        setRenderedSvg(svg);
+        setRenderedCacheKey(cacheKey);
+      })
+      .catch((renderError: unknown) => {
+        if (!isCurrent) return;
+
+        console.warn("Failed to render Mermaid diagram", renderError);
+        setError(
+          renderError instanceof Error
+            ? renderError
+            : new Error(String(renderError)),
+        );
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [chart, currentTheme, themeModeCacheKey]);
+
+  if (error) {
     return (
-      <CodeBlock title="Mermaid">
-        <Pre>{normalizeMermaidInput(chart)}</Pre>
-      </CodeBlock>
+      <pre className="my-4 overflow-x-auto border border-line-structure bg-surface-1 p-4 text-left text-xs text-text-primary not-prose">
+        {chart}
+      </pre>
     );
   }
+
+  return (
+    <div className="mermaid-diagram my-4 overflow-x-auto border p-4 not-prose rounded-none">
+      {visibleSvg === null && (
+        <div
+          aria-hidden="true"
+          className="flex items-center justify-center py-6"
+        >
+          <Loader2 className="size-4 animate-spin text-text-tertiary" />
+        </div>
+      )}
+      <div
+        key={renderedCacheKey ?? themeModeCacheKey}
+        className={visibleSvg === null ? "hidden" : ""}
+        dangerouslySetInnerHTML={
+          visibleSvg === null ? undefined : { __html: visibleSvg }
+        }
+      />
+    </div>
+  );
 }

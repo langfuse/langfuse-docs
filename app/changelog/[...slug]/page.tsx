@@ -22,7 +22,7 @@ export default async function ChangelogPostPage(props: PageProps) {
   const { page, MDX } = result;
 
   const frontMatter = primitiveOnly(
-    page.data as unknown as Record<string, unknown>
+    page.data as unknown as Record<string, unknown>,
   ) as ChangelogFrontMatter;
   const footerItems = getPageFooterItems(
     changelogSource.getPages().filter((page) => page.url !== "/changelog"),
@@ -32,7 +32,6 @@ export default async function ChangelogPostPage(props: PageProps) {
       getTitle: (page) => page.data.title,
     },
   );
-
 
   return (
     <ContentColumns footerClassName="xl:max-w-[680px]">

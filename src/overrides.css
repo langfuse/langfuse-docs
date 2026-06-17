@@ -232,20 +232,41 @@
    sidebar section heading. Also remove the top fade mask so the first item isn't
    clipped (the sidebar sits flush against the navbar). */
 @media (min-width: 768px) {
-  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] {
+  .docs-chrome-compact
+    #nd-docs-layout
+    #nd-sidebar
+    [data-radix-scroll-area-viewport] {
     padding-top: 8px;
-    mask-image: linear-gradient(to bottom, white, white calc(100% - 12px), transparent) !important;
+    mask-image: linear-gradient(
+      to bottom,
+      white,
+      white calc(100% - 12px),
+      transparent
+    ) !important;
   }
   /* Hide the top separator line and its corner decorators on the first section
      heading (it sits flush against the navbar in compact mode). */
-  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type {
+  .docs-chrome-compact
+    #nd-docs-layout
+    #nd-sidebar
+    [data-radix-scroll-area-viewport]
+    p:first-of-type {
     margin-top: 0;
     padding-top: 4px;
   }
-  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type::after {
+  .docs-chrome-compact
+    #nd-docs-layout
+    #nd-sidebar
+    [data-radix-scroll-area-viewport]
+    p:first-of-type::after {
     display: none;
   }
-  .docs-chrome-compact #nd-docs-layout #nd-sidebar [data-radix-scroll-area-viewport] p:first-of-type > span[aria-hidden] {
+  .docs-chrome-compact
+    #nd-docs-layout
+    #nd-sidebar
+    [data-radix-scroll-area-viewport]
+    p:first-of-type
+    > span[aria-hidden] {
     display: none !important;
   }
 }
@@ -410,7 +431,7 @@
   margin: 0 0 1px 1px;
   border-radius: calc(var(--radius) - 4px);
   background-color: var(--line-structure) !important;
-  top: var(--fd-nav-height);
+  top: calc(var(--fd-nav-height) + var(--fd-banner-height, 0px));
 }
 
 /* Sidebar active link */
@@ -714,8 +735,10 @@
 #nd-toc {
   --text-links: var(--line-cta);
   padding: 0;
-  /* Full viewport minus docs header stack; 2px ≈ outer chrome / rounding */
-  max-height: calc(100dvh - var(--fd-nav-height) - 1px);
+  /* Full viewport minus docs header stack + optional banner; 1px ≈ outer chrome / rounding */
+  max-height: calc(
+    100dvh - var(--fd-nav-height) - var(--fd-banner-height, 0px) - 1px
+  );
   border-bottom-width: 0;
   border-radius: 0 !important;
   z-index: 10;
@@ -887,6 +910,16 @@ ul[data-gh-discussions-list] {
    fd-scroll-container (overflow: auto) to scroll horizontally as expected. */
 .fd-scroll-container > pre {
   width: 100%;
+}
+
+.shiki .fd-scroll-container > pre:not(:has(.line)) {
+  padding-left: var(--padding-left, calc(var(--spacing) * 4));
+  padding-right: var(--padding-right, calc(var(--spacing) * 4));
+}
+
+.shiki .fd-scroll-container > pre:not(:has(.line)) > code,
+.shiki .fd-scroll-container > pre > code.language-env {
+  display: block;
 }
 
 .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
@@ -1139,14 +1172,22 @@ svg .edgeLabel {
   }
 }
 .ellipsis-dots::after {
-  content: '';
+  content: "";
   animation: ellipsis 1.4s steps(4, end) infinite;
 }
 @keyframes ellipsis {
-  0% { content: ''; }
-  25% { content: '.'; }
-  50% { content: '..'; }
-  75% { content: '...'; }
+  0% {
+    content: "";
+  }
+  25% {
+    content: ".";
+  }
+  50% {
+    content: "..";
+  }
+  75% {
+    content: "...";
+  }
 }
 
 /*

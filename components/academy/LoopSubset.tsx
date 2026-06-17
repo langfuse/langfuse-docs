@@ -49,13 +49,7 @@ function Arrow() {
         padding: "0 8px",
       }}
     >
-      <svg
-        width="24"
-        height="14"
-        viewBox="0 0 24 14"
-        fill="none"
-        aria-hidden
-      >
+      <svg width="24" height="14" viewBox="0 0 24 14" fill="none" aria-hidden>
         <path
           d="M0 7 L17 7"
           stroke="var(--text-secondary)"
@@ -80,7 +74,7 @@ function StationRow({ ids }: { ids: StationId[] }) {
   useEffect(() => {
     const interval = setInterval(
       () => setActive((p) => (p + 1) % ids.length),
-      1800
+      1800,
     );
     return () => clearInterval(interval);
   }, [ids.length]);

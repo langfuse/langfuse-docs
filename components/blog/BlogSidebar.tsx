@@ -7,12 +7,7 @@ import { useBlogFilter } from "./BlogFilterContext";
 import { cn } from "@/lib/utils";
 
 export function BlogSidebar() {
-  const {
-    selectedTag,
-    setSelectedTag,
-    tags,
-    allPosts,
-  } = useBlogFilter();
+  const { selectedTag, setSelectedTag, tags, allPosts } = useBlogFilter();
 
   return (
     <SidebarShell>
@@ -32,7 +27,7 @@ export function BlogSidebar() {
                 "flex items-center gap-1 px-2 py-0.5 w-full text-left transition-colors",
                 !selectedTag
                   ? "text-text-primary"
-                  : "text-text-tertiary hover:text-text-primary"
+                  : "text-text-tertiary hover:text-text-primary",
               )}
             >
               <Text size="s" className="text-left text-inherit text-[13px]">
@@ -43,18 +38,19 @@ export function BlogSidebar() {
               <button
                 key={tag.name}
                 onClick={() =>
-                  setSelectedTag(
-                    selectedTag === tag.name ? null : tag.name
-                  )
+                  setSelectedTag(selectedTag === tag.name ? null : tag.name)
                 }
                 className={cn(
                   "flex items-center gap-1 px-2 py-0.5 w-full text-left transition-colors",
                   selectedTag === tag.name
                     ? "text-text-primary"
-                    : "text-text-tertiary hover:text-text-primary"
+                    : "text-text-tertiary hover:text-text-primary",
                 )}
               >
-                <Text size="s" className="text-left text-inherit text-[13px] capitalize">
+                <Text
+                  size="s"
+                  className="text-left text-inherit text-[13px] capitalize"
+                >
                   + {tag.name} [{tag.count}]
                 </Text>
               </button>

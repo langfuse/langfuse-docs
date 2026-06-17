@@ -12,7 +12,8 @@ response = openai.chat.completions.create(
     messages=[{"role": "user", "content": "Hello"}]
 )`;
 
-const homeCodeBlockClassName = "my-0 w-full text-left [&_pre]:text-left rounded-[1px] shadow-none border border-line-structure bg-surface-1";
+const homeCodeBlockClassName =
+  "my-0 w-full text-left [&_pre]:text-left rounded-[1px] shadow-none border border-line-structure bg-surface-1";
 
 export function ClickHouseLangfuseCodeBlocks() {
   return (

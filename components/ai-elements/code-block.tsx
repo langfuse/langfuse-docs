@@ -1,23 +1,26 @@
-'use client';
+"use client";
 
-import { CheckIcon, CopyIcon } from 'lucide-react';
-import type { ComponentProps, HTMLAttributes, ReactNode } from 'react';
-import { createContext, useContext, useState } from 'react';
-import dynamic from 'next/dynamic';
-import type { SyntaxHighlighterProps } from 'react-syntax-highlighter';
+import { CheckIcon, CopyIcon } from "lucide-react";
+import type { ComponentProps, HTMLAttributes, ReactNode } from "react";
+import { createContext, useContext, useState } from "react";
+import dynamic from "next/dynamic";
+import type { SyntaxHighlighterProps } from "react-syntax-highlighter";
 import {
   oneDark,
   oneLight,
-} from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // Dynamically import the full Prism highlighter so the ~1.5 MB refractor language
 // bundle is NOT pulled into the shared webpack chunk loaded on every route.
 // It only downloads when a <CodeBlock> is actually rendered on screen.
 const SyntaxHighlighter = dynamic<SyntaxHighlighterProps>(
-  () => import('react-syntax-highlighter').then((m) => ({ default: m.Prism as React.ComponentType<SyntaxHighlighterProps> })),
-  { ssr: false, loading: () => null }
+  () =>
+    import("react-syntax-highlighter").then((m) => ({
+      default: m.Prism as React.ComponentType<SyntaxHighlighterProps>,
+    })),
+  { ssr: false, loading: () => null },
 );
 
 type CodeBlockContextType = {
@@ -25,7 +28,7 @@ type CodeBlockContextType = {
 };
 
 const CodeBlockContext = createContext<CodeBlockContextType>({
-  code: '',
+  code: "",
 });
 
 export type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
@@ -45,75 +48,74 @@ export const CodeBlock = ({
   customStyle = {},
   ...props
 }: CodeBlockProps) => {
-
   const defaultStyle = {
     margin: 0,
-    padding: '1rem',
-    fontSize: '0.875rem',
-    background: 'hsl(var(--muted) / 0.02)',
-    color: 'hsl(var(--foreground))',
-  }
+    padding: "1rem",
+    fontSize: "0.875rem",
+    background: "hsl(var(--muted) / 0.02)",
+    color: "hsl(var(--foreground))",
+  };
 
   return (
-      <CodeBlockContext.Provider value={{ code }}>
-    <div
-      className={cn(
-        'relative w-full overflow-hidden rounded-md bg-muted/30 text-foreground',
-        className,
-      )}
-      {...props}
-    >
-      <div className="relative">
-        <SyntaxHighlighter
-          language={language}
-          style={oneLight}
-          customStyle={{
-            ...defaultStyle,
-            ...customStyle,
-          }}
-          showLineNumbers={showLineNumbers}
-          lineNumberStyle={{
-            color: 'hsl(var(--muted-foreground))',
-            paddingRight: '1rem',
-            minWidth: '2.5rem',
-          }}
-          codeTagProps={{
-            className: 'font-mono',
-          }}
-          className="dark:hidden overflow-hidden"
-        >
-          {code}
-        </SyntaxHighlighter>
-        <SyntaxHighlighter
-          language={language}
-          style={oneDark}
-          customStyle={{
-            ...defaultStyle,
-            ...customStyle,
-          }}
-          showLineNumbers={showLineNumbers}
-          lineNumberStyle={{
-            color: 'hsl(var(--muted-foreground))',
-            paddingRight: '1rem',
-            minWidth: '2.5rem',
-          }}
-          codeTagProps={{
-            className: 'font-mono',
-          }}
-          className="hidden dark:block overflow-hidden"
-        >
-          {code}
-        </SyntaxHighlighter>
-        {children && (
-          <div className="absolute right-2 top-2 flex items-center gap-2">
-            {children}
-          </div>
+    <CodeBlockContext.Provider value={{ code }}>
+      <div
+        className={cn(
+          "relative w-full overflow-hidden rounded-md bg-muted/30 text-foreground",
+          className,
         )}
+        {...props}
+      >
+        <div className="relative">
+          <SyntaxHighlighter
+            language={language}
+            style={oneLight}
+            customStyle={{
+              ...defaultStyle,
+              ...customStyle,
+            }}
+            showLineNumbers={showLineNumbers}
+            lineNumberStyle={{
+              color: "hsl(var(--muted-foreground))",
+              paddingRight: "1rem",
+              minWidth: "2.5rem",
+            }}
+            codeTagProps={{
+              className: "font-mono",
+            }}
+            className="dark:hidden overflow-hidden"
+          >
+            {code}
+          </SyntaxHighlighter>
+          <SyntaxHighlighter
+            language={language}
+            style={oneDark}
+            customStyle={{
+              ...defaultStyle,
+              ...customStyle,
+            }}
+            showLineNumbers={showLineNumbers}
+            lineNumberStyle={{
+              color: "hsl(var(--muted-foreground))",
+              paddingRight: "1rem",
+              minWidth: "2.5rem",
+            }}
+            codeTagProps={{
+              className: "font-mono",
+            }}
+            className="hidden dark:block overflow-hidden"
+          >
+            {code}
+          </SyntaxHighlighter>
+          {children && (
+            <div className="absolute right-2 top-2 flex items-center gap-2">
+              {children}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  </CodeBlockContext.Provider>
-  )
-}
+    </CodeBlockContext.Provider>
+  );
+};
 
 export type CodeBlockCopyButtonProps = ComponentProps<typeof Button> & {
   onCopy?: () => void;
@@ -133,8 +135,8 @@ export const CodeBlockCopyButton = ({
   const { code } = useContext(CodeBlockContext);
 
   const copyToClipboard = async () => {
-    if (typeof window === 'undefined' || !navigator.clipboard.writeText) {
-      onError?.(new Error('Clipboard API not available'));
+    if (typeof window === "undefined" || !navigator.clipboard.writeText) {
+      onError?.(new Error("Clipboard API not available"));
       return;
     }
 
@@ -153,7 +155,7 @@ export const CodeBlockCopyButton = ({
   return (
     <Button
       className={cn(
-        'shrink-0 size-7 w-7 rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-muted/60',
+        "shrink-0 size-7 w-7 rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-muted/60",
         className,
       )}
       onClick={copyToClipboard}

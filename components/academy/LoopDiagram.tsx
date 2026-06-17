@@ -81,7 +81,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
     if (pinnedIndex >= 0) return;
     const id = setInterval(
       () => setActive((p) => (p + 1) % STATIONS.length),
-      1800
+      1800,
     );
     return () => clearInterval(id);
   }, [pinnedIndex]);
@@ -245,9 +245,10 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
                 width: i === pinnedIndex ? BOX_W + 2 : BOX_W,
                 height: i === pinnedIndex ? BOX_H + 2 : BOX_H,
                 background: "var(--surface-bg)",
-                border: i === pinnedIndex
-                  ? "2px solid var(--text-primary)"
-                  : "1px solid var(--line-structure)",
+                border:
+                  i === pinnedIndex
+                    ? "2px solid var(--text-primary)"
+                    : "1px solid var(--line-structure)",
                 borderRadius: 2,
                 display: "flex",
                 flexDirection: "column",
@@ -262,7 +263,9 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.borderColor =
-                  i === pinnedIndex ? "var(--text-primary)" : "var(--line-structure)")
+                  i === pinnedIndex
+                    ? "var(--text-primary)"
+                    : "var(--line-structure)")
               }
             >
               {/* Pulse indicator dot */}
@@ -334,7 +337,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
                 }}
               >
                 {station.meta.join(" · ")}
-            </div>
+              </div>
             </Link>
           ))}
         </div>

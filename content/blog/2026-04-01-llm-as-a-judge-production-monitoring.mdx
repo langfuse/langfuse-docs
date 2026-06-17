@@ -37,6 +37,7 @@ Here's how you can build your own version of this for your support agent.
 Instead of asking a model to score helpfulness, ask it a yes/no question: did the user disagree with the assistant? Did the user ask for something outside the agent's scope?
 
 Good event detectors are:
+
 - **Binary.** Yes or no - did the event occur? This maps directly to filtering, alerting, and routing.
 - **Narrow.** One check per detector. The more specific the event, the more actionable the signal.
 - **Tied to an action.** Every detector should answer "and then what?". Who sees it, what do they do with it?
@@ -44,6 +45,7 @@ Good event detectors are:
 ## Four Events Worth Detecting in a Customer Support Agent
 
 There are many things that can go wrong in a free text human - LLM interaction. The four events we opted for in our customer support agent use case are the following:
+
 1. The user curses
 2. The user disagrees with the assistant's response
 3. The user asks something outside of the scope of the agent
@@ -428,7 +430,7 @@ COMMENT: <concise justification>
   ![Insufficient answer evaluator example](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/example-insufficient-answer.png)
 </Frame>
 
-**Why it matters:** This catches a different failure mode than disagreement. A user who disagrees tells you the agent was *wrong*. A user asking for more tells you the agent was *insufficient* - the answer was too brief, too vague, or sidestepped the actual question. This often points to knowledge base gaps, an overly cautious system prompt, or topics where the agent hedges instead of answering directly.
+**Why it matters:** This catches a different failure mode than disagreement. A user who disagrees tells you the agent was _wrong_. A user asking for more tells you the agent was _insufficient_ - the answer was too brief, too vague, or sidestepped the actual question. This often points to knowledge base gaps, an overly cautious system prompt, or topics where the agent hedges instead of answering directly.
 
 **What to do with it:** Filter for traces where this fires and look at the preceding assistant turn. Recurring topics where users ask for more are candidates for expanding your knowledge base or loosening system prompt constraints.
 

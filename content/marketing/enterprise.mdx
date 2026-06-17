@@ -5,7 +5,7 @@ description: FAQ and deployment options for Langfuse in an enterprise environmen
 
 # Langfuse for Enterprise
 
-Langfuse is the leading LLM Engineering platform built for enterprise-grade security, scalability, and compliance. Trusted by **19 of the Fortune 50** and **63 of the Fortune 500**, Langfuse addresses key challenges when deploying LLM-based applications within an enterprise environment.
+Langfuse is the leading AI Engineering platform built for enterprise-grade security, scalability, and compliance. Trusted by **19 of the Fortune 50** and **63 of the Fortune 500**, Langfuse addresses key challenges when deploying LLM-based applications within an enterprise environment.
 
 import { Details, Summary } from "@/components/Details";
 import { CredibilitySentence } from "@/components/CredibilitySentence";
@@ -182,13 +182,21 @@ Here are our general SLOs of our support for our Enterprise Cloud customers. The
 <Details>
 <Summary>Uptime SLA for our enterprise customers</Summary>
 
-Our Enterprise Cloud customers get an uptime SLA:
+Our Enterprise Cloud customers get an uptime SLA on Langfuse Cloud:
 
-- Guaranteed 99.9% uptime
-- 99.00% to 99.89% inclusive - 10% credit
-- Less than 99% - 20% credit
+**Target:** 99.9% Monthly Uptime Percentage.
 
-If Langfuse fails to maintain an uptime percentage of greater than 99% for any 3 months in a 6 month period, Customer may terminate their agreement upon 10 days written notice to Langfuse. The calculations of uptime do not include: Delays to data ingestion or scheduled maintenance.
+**Service credits** apply when monthly uptime falls below target:
+
+- Below 99.9% but at or above 99.0% — 5% credit
+- Below 99.0% but at or above 95.0% — 10% credit
+- Below 95.0% — 25% credit
+
+Langfuse Cloud is considered "Unavailable" for a one-minute interval when at least three authenticated trace-ingestion API requests were made during that interval and none were accepted. Uptime calculations exclude downtime caused by force majeure events, third-party services outside our control, customer misconfiguration or improper use, planned maintenance announced at least 72 hours in advance, and beta or experimental features.
+
+To claim a credit, open a support case within 24 hours of discovering the unavailability and submit the claim by the end of the month following the affected month, including the incident dates, times, and supporting evidence.
+
+See the full [Langfuse Cloud Service Level Agreement](https://clickhouse.com/legal/agreements/langfuse-service-level-agreement) for the authoritative terms.
 
 </Details>
 

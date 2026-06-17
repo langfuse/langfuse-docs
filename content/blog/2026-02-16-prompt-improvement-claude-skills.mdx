@@ -19,7 +19,6 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 import { Frame } from "@/components/Frame";
 
-
 Did you know you can use an AI agent and the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) to iteratively improve your prompts? You annotate a handful of traces in Langfuse, then let the agent fetch your feedback, analyze the patterns, and propose prompt changes. It's a fast way to get from a rough first prompt to something more robust. It will get you from 10% to 70% before you invest in more structured evaluation like datasets and automated scoring.
 
 We'll walk through the full loop using an example: a chatbot that searches past GitHub discussions in the Langfuse repository. We'll use Claude with the Langfuse skill as the AI agent.
@@ -31,7 +30,6 @@ We'll walk through the full loop using an example: a chatbot that searches past 
 **An AI agent with the Langfuse skill installed**. You can use any AI agent, we'll use Claude with the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) in this guide (which uses the [Langfuse CLI](https://github.com/langfuse/langfuse-cli) under the hood).
 
 **Your prompt managed in Langfuse Prompt Management (optional)**. This lets the agent fetch and update your prompt directly, and links prompts to traces automatically. See the [Prompt Management setup guide](/docs/prompt-management/get-started) and [linking prompts to traces](/docs/prompt-management/features/link-to-traces).
-
 
 ## Context on the Workflow
 
@@ -47,7 +45,7 @@ The workflow is a loop with three steps: you look at traces, annotate the ones t
 
 ### The Example Application
 
-We're using a chatbot that searches GitHub discussions in the [Langfuse repository](https://github.com/langfuse/langfuse/discussions) to help users find whether their bug or feature request has already been  in the past.
+We're using a chatbot that searches GitHub discussions in the [Langfuse repository](https://github.com/langfuse/langfuse/discussions) to help users find whether their bug or feature request has already been in the past.
 
 <Frame>
   <img src="/images/docs/guides/prompt-improvement-terminal-example.png" alt="Terminal output of the GitHub issue search chatbot" />
@@ -98,7 +96,6 @@ def main():
 
 {/* TODO: link to the full example repository */}
 
-
 ## Let's Dive In
 
 Before you start, you need to have some traces to work with. If your application isn't live yet, you can manually enter a few inputs to start with. In my case, I ran the chatbot with about 10 different inputs to cover a range of cases: feature requests, bug reports, off-topic questions, and some that were intentionally vague.
@@ -122,7 +119,6 @@ You can do this in Langfuse with **scores and comments**. I like to create a few
 Every time you notice something, annotate the trace with the relevant score and add your specific feedback as a comment. The score gives Claude the category, the comment gives it the reason why, which is what you want Claude to address later on.
 
 You don't need to score every trace. Just the ones where something is clearly off. I scored 8 out of roughly 10.
-
 
 ### 2. Analyze with Claude
 

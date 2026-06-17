@@ -29,8 +29,7 @@ export function ForceLightMode() {
     //     may already reflect "light" (set during the first run), which would
     //     incorrectly record "light" as the previous theme and prevent restore.
     if (previousTheme.current === undefined) {
-      previousTheme.current =
-        localStorage.getItem("theme") ?? "system";
+      previousTheme.current = localStorage.getItem("theme") ?? "system";
     }
 
     stripDarkFromDocument();

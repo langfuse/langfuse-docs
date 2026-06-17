@@ -17,7 +17,7 @@ Finally, initialize the Langfuse `CallbackHandler` and add it to your chain. The
 
 ```typescript
 import { CallbackHandler } from "@langfuse/langchain";
- 
+
 // Initialize the Langfuse CallbackHandler
 const langfuseHandler = new CallbackHandler();
 ```
@@ -46,7 +46,7 @@ const agent = createAgent({
 
 console.log(
     await agent.invoke(
-        { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] }, 
+        { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] },
         { callbacks: [langfuseHandler] }
     )
 );

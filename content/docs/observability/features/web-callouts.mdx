@@ -1,0 +1,84 @@
+---
+title: Web Callouts
+description: Trigger an HTTP callout from a trace, observation, or session in Langfuse.
+sidebarTitle: Web Callouts
+---
+
+# Web Callouts
+
+Web Callouts let project members trigger a configured backend HTTP request from a trace, observation, or session in the Langfuse UI. Use them to connect debugging workflows to internal tools, support systems, incident workflows, or custom investigation services.
+
+Unlike [prompt webhooks](/docs/prompt-management/features/webhooks-slack-integrations), Web Callouts are manually triggered from the UI. Langfuse sends the request synchronously from the backend when the user clicks the action.
+
+<Callout type="info">
+  This feature is currently behind the `env` variable `LANGFUSE_ENABLE_WEB_CALLOUTS`. It will be rolled out to cloud soon, at which point we will remove this variable.
+</Callout>
+
+<Callout type="info">
+  Web Callouts send identifiers only. The request payload only sends the trace/observation/session ID and the project id.
+  Fetch additional data from the Langfuse API in your own backend if your workflow needs it.
+</Callout>
+
+## Configure a Web Callout
+
+Open **Project Settings** > **Integrations** > **Web Callouts** and create a callout endpoint. You need `integrations:CRUD` permissions.
+Callouts are configured per project and can be invoked by **all** users in a project.
+
+Configure:
+
+- **Name:** shown in the action menu, for example `Open in Support Tool`.
+- **URL:** HTTP or HTTPS endpoint that accepts `POST` requests. Custom ports are supported.
+- **Success toast message:** shown after your endpoint returns a successful response.
+- **Enabled:** disabled callouts are hidden from the action menu.
+- **Request headers:** optional static headers, for example `Authorization: Bearer <token>`.
+
+## Trigger a Web Callout
+
+After setup, users with project read access can trigger the callout from:
+
+- The action menu on trace details.
+- The action menu on observation details.
+- The session details header.
+
+Langfuse sends the request immediately when the user clicks the action. The UI shows a success toast only after your endpoint returns a 2xx response.
+The request times out after 5 seconds. Calls will not be retried.
+
+## Request Payload
+
+Langfuse sends a JSON `POST` request with this structure:
+
+```json filename="web-callout-payload.json"
+{
+  "version": 1,
+  "items": [
+    {
+      "projectId": "project-id",
+      "traceId": "trace-id",
+      "observationId": null,
+      "sessionId": "session-id"
+    }
+  ]
+}
+```
+
+Note: all ID fields except for the `projectId` are nullable.
+Langfuse validates that the trace, observation, and session belong to the project before sending the request.
+
+## Endpoint Requirements
+
+Your endpoint must:
+
+- Accept `POST` requests with `Content-Type: application/json`.
+- Return any HTTP 2xx status within 5 seconds.
+
+Langfuse treats non-2xx responses, network errors, invalid URLs, and timeouts as failed callouts and shows an error toast.
+
+Web Callouts are not retried and Langfuse does not keep a delivery log.
+
+## Authentication and Headers
+
+You can configure static request headers for authentication, for example `Authorization` or `X-API-Key`.
+Header values are encrypted at rest and are sent from the Langfuse backend. When editing an existing header without changing its name, leaving the value empty keeps the stored encrypted value.
+
+Langfuse sets `Content-Type: application/json` and `User-Agent: Langfuse/1.0` automatically.
+The following header names cannot be configured: `content-length`, `content-type`, `cookie`, and `host`.

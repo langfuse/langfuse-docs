@@ -62,11 +62,13 @@ const ImageZoomModal = ({
         onClose();
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
-        const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+        const newIndex =
+          currentIndex > 0 ? currentIndex - 1 : images.length - 1;
         onNavigate(newIndex);
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
-        const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+        const newIndex =
+          currentIndex < images.length - 1 ? currentIndex + 1 : 0;
         onNavigate(newIndex);
       }
     };
@@ -133,7 +135,7 @@ const ImageZoomModal = ({
                 "w-2 h-2 rounded-full transition-colors",
                 index === currentIndex
                   ? "bg-white"
-                  : "bg-white/40 hover:bg-white/60"
+                  : "bg-white/40 hover:bg-white/60",
               )}
               aria-label={`Go to image ${index + 1}`}
             />
@@ -141,7 +143,7 @@ const ImageZoomModal = ({
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 
@@ -159,14 +161,14 @@ const Carousel = React.forwardRef<
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [carouselRef, api] = useEmblaCarousel(
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
       },
-      plugins
+      plugins,
     );
     const [canScrollPrev, setCanScrollPrev] = React.useState(false);
     const [canScrollNext, setCanScrollNext] = React.useState(false);
@@ -203,7 +205,7 @@ const Carousel = React.forwardRef<
           scrollNext();
         }
       },
-      [scrollPrev, scrollNext]
+      [scrollPrev, scrollNext],
     );
 
     // Extract images from the carousel
@@ -211,11 +213,12 @@ const Carousel = React.forwardRef<
       const images: { src: string; alt: string }[] = [];
 
       if (carouselContainerRef.current) {
-        const imgElements = carouselContainerRef.current.querySelectorAll('img');
+        const imgElements =
+          carouselContainerRef.current.querySelectorAll("img");
         imgElements.forEach((img) => {
           images.push({
             src: img.src,
-            alt: img.alt || 'Image',
+            alt: img.alt || "Image",
           });
         });
       }
@@ -224,36 +227,47 @@ const Carousel = React.forwardRef<
     }, []);
 
     // Handle image clicks for zoom
-    const handleImageClick = useCallback((e: MouseEvent) => {
-      const target = e.target as HTMLElement;
+    const handleImageClick = useCallback(
+      (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
 
-      // Check if clicked on an image inside this carousel
-      if (target.tagName === 'IMG' && carouselContainerRef.current?.contains(target)) {
-        // Only handle clicks on desktop (screens wider than 500px)
-        if (window.innerWidth <= 500) {
-          return;
+        // Check if clicked on an image inside this carousel
+        if (
+          target.tagName === "IMG" &&
+          carouselContainerRef.current?.contains(target)
+        ) {
+          // Only handle clicks on desktop (screens wider than 500px)
+          if (window.innerWidth <= 500) {
+            return;
+          }
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          const images = extractImages();
+          const imgSrc = (target as HTMLImageElement).src;
+          const currentIndex = images.findIndex((img) => img.src === imgSrc);
+
+          if (currentIndex !== -1) {
+            setZoomedImage({ images, currentIndex });
+          }
         }
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        const images = extractImages();
-        const imgSrc = (target as HTMLImageElement).src;
-        const currentIndex = images.findIndex(img => img.src === imgSrc);
-
-        if (currentIndex !== -1) {
-          setZoomedImage({ images, currentIndex });
-        }
-      }
-    }, [extractImages]);
+      },
+      [extractImages],
+    );
 
     // Navigate zoomed images
-    const handleZoomNavigate = useCallback((index: number) => {
-      if (api) {
-        api.scrollTo(index);
-      }
-      setZoomedImage(prev => prev ? { ...prev, currentIndex: index } : null);
-    }, [api]);
+    const handleZoomNavigate = useCallback(
+      (index: number) => {
+        if (api) {
+          api.scrollTo(index);
+        }
+        setZoomedImage((prev) =>
+          prev ? { ...prev, currentIndex: index } : null,
+        );
+      },
+      [api],
+    );
 
     // Close zoom
     const handleZoomClose = useCallback(() => {
@@ -284,10 +298,10 @@ const Carousel = React.forwardRef<
 
     // Set up image click listener
     React.useEffect(() => {
-      document.addEventListener('click', handleImageClick, true);
+      document.addEventListener("click", handleImageClick, true);
 
       return () => {
-        document.removeEventListener('click', handleImageClick, true);
+        document.removeEventListener("click", handleImageClick, true);
       };
     }, [handleImageClick]);
 
@@ -310,7 +324,7 @@ const Carousel = React.forwardRef<
             ref={(el) => {
               carouselContainerRef.current = el;
               if (ref) {
-                if (typeof ref === 'function') {
+                if (typeof ref === "function") {
                   ref(el);
                 } else {
                   ref.current = el;
@@ -337,7 +351,7 @@ const Carousel = React.forwardRef<
         )}
       </>
     );
-  }
+  },
 );
 Carousel.displayName = "Carousel";
 
@@ -354,7 +368,7 @@ const CarouselContent = React.forwardRef<
         className={cn(
           "flex",
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
-          className
+          className,
         )}
         {...props}
       />
@@ -377,7 +391,7 @@ const CarouselItem = React.forwardRef<
       className={cn(
         "min-w-0 shrink-0 grow-0 basis-full",
         orientation === "horizontal" ? "pl-4" : "pt-4",
-        className
+        className,
       )}
       {...props}
     />
@@ -401,7 +415,7 @@ const CarouselPrevious = React.forwardRef<
         orientation === "horizontal"
           ? "-left-12 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
-        className
+        className,
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
@@ -428,7 +442,7 @@ const CarouselNext = React.forwardRef<
         orientation === "horizontal"
           ? "-right-12 top-1/2 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
-        className
+        className,
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}

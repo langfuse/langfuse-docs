@@ -70,7 +70,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // Track user feedback for each message ID (1 = thumbs up, 0 = thumbs down, null = no feedback)
   const [userFeedback, setUserFeedback] = useState<Map<string, number | null>>(
-    new Map()
+    new Map(),
   );
 
   // Auto-resize and scroll textarea to bottom when content changes
@@ -125,7 +125,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const handleFeedback = (
     messageId: string,
     value: number,
-    comment?: string
+    comment?: string,
   ) => {
     // Update the local state
     setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
@@ -160,19 +160,27 @@ export const Chat = ({ className, ...props }: ChatProps) => {
               </h2>
               <div className="flex gap-3 items-center flex-wrap justify-center">
                 <button
-                  onClick={() => handleExampleQuestion("What can I use Langfuse for?")}
+                  onClick={() =>
+                    handleExampleQuestion("What can I use Langfuse for?")
+                  }
                   className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
                 >
                   What can I use Langfuse for?
                 </button>
                 <button
-                  onClick={() => handleExampleQuestion("How do I link my prompts to my traces? My code is in python")}
+                  onClick={() =>
+                    handleExampleQuestion(
+                      "How do I link my prompts to my traces? My code is in python",
+                    )
+                  }
                   className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
                 >
                   How do I link my prompts to my traces? My code is in python
                 </button>
                 <button
-                  onClick={() => handleExampleQuestion("How do I get started with tracing?")}
+                  onClick={() =>
+                    handleExampleQuestion("How do I get started with tracing?")
+                  }
                   className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
                 >
                   How do I get started with tracing?
@@ -193,7 +201,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                               <SourcesTrigger
                                 count={
                                   message.parts.filter(
-                                    (part) => part.type === "source-url"
+                                    (part) => part.type === "source-url",
                                   ).length
                                 }
                               />
@@ -210,10 +218,14 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                     })}
                   </Sources>
                 )}
-                <Message 
-                  from={message.role} 
+                <Message
+                  from={message.role}
                   key={message.id}
-                  className={message.role === "assistant" ? "[&>div]:max-w-full" : undefined}
+                  className={
+                    message.role === "assistant"
+                      ? "[&>div]:max-w-full"
+                      : undefined
+                  }
                 >
                   <MessageContent
                     className={
@@ -236,7 +248,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         const isLastTextPart = i === lastTextPartIndex;
                         // Check if message is complete: not submitted/streaming and no parts are streaming
                         const hasStreamingParts = message.parts.some(
-                          (p) => "state" in p && p.state === "streaming"
+                          (p) => "state" in p && p.state === "streaming",
                         );
                         const isMessageComplete =
                           status !== "submitted" &&
@@ -304,7 +316,9 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           <Reasoning
                             key={`${message.id}-${i}`}
                             className={
-                              hasNextPartDifferentType ? "w-full" : "w-full mb-0"
+                              hasNextPartDifferentType
+                                ? "w-full"
+                                : "w-full mb-0"
                             }
                             isStreaming={part.state === "streaming"}
                           >
@@ -321,7 +335,9 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         return (
                           <Tool
                             key={`${message.id}-${i}`}
-                            className={hasNextPartDifferentType ? undefined : "mb-0"}
+                            className={
+                              hasNextPartDifferentType ? undefined : "mb-0"
+                            }
                           >
                             <ToolHeader
                               type={`tool-${part.toolName}` as const}
@@ -370,7 +386,10 @@ export const Chat = ({ className, ...props }: ChatProps) => {
           </div>
         </PromptInput>
         <p className="mt-6 text-xs text-muted-foreground text-center relative z-10 italic">
-          ⚠️ Warning: Do not enter sensitive information. All chat messages can be viewed in the public example project. Responses may be inaccurate. Please check the documentation for details or reach out to us via the chat widget.
+          ⚠️ Warning: Do not enter sensitive information. All chat messages can
+          be viewed in the public example project. Responses may be inaccurate.
+          Please check the documentation for details or reach out to us via the
+          chat widget.
         </p>
       </div>
     </div>

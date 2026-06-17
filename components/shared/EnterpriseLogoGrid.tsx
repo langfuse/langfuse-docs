@@ -124,7 +124,12 @@ const LogoImage = ({
         <Image
           src={logo}
           alt={`${name} logo`}
-          className={cn("h-[56px] w-auto scale-125", hoverable ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200" : "")}
+          className={cn(
+            "h-[56px] w-auto scale-125",
+            hoverable
+              ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
+              : "",
+          )}
           sizes="(max-width: 768px) 30vw"
           priority={false}
         />
@@ -136,7 +141,12 @@ const LogoImage = ({
     <Image
       src={logo}
       alt={`${name} logo`}
-      className={cn("h-[56px] object-cover max-w-full", hoverable ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200" : "")}
+      className={cn(
+        "h-[56px] object-cover max-w-full",
+        hoverable
+          ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
+          : "",
+      )}
       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
       priority={false}
     />
@@ -161,7 +171,12 @@ function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
                 : `${company.name} uses Langfuse`
             }
           >
-            <LogoImage hoverable={false} logo={company.logo} name={company.name} compact />
+            <LogoImage
+              hoverable={false}
+              logo={company.logo}
+              name={company.name}
+              compact
+            />
           </div>
         );
       })}
@@ -185,7 +200,10 @@ export const EnterpriseLogoGrid = ({
       {/* Mobile: scrolling marquee or static scroll fallback */}
       {shouldReduceMotion ? (
         <div
-          className={cn("sm:hidden overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", className)}
+          className={cn(
+            "sm:hidden overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            className,
+          )}
           aria-label="Enterprise customers using Langfuse"
         >
           <div className="flex items-center w-max py-2">
@@ -194,7 +212,10 @@ export const EnterpriseLogoGrid = ({
         </div>
       ) : (
         <div
-          className={cn("sm:hidden overflow-hidden w-full mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]", className)}
+          className={cn(
+            "sm:hidden overflow-hidden w-full mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]",
+            className,
+          )}
           aria-label="Enterprise customers using Langfuse"
         >
           <motion.div
