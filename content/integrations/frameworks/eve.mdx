@@ -62,9 +62,11 @@ export default defineInstrumentation({
       serviceName: agentName,
       spanProcessors: [
         new LangfuseSpanProcessor({
-          // Export every eve span — agent run, model calls, tool calls, and
-          // sandbox commands. Omit this to keep only LLM-relevant spans.
-          shouldExportSpan: () => true,
+          // Export the full eve run — agent run, model calls, tool calls, and
+          // sandbox commands — but drop the low-level HTTP spans that
+          // @vercel/otel emits for each fetch to the model provider.
+          shouldExportSpan: ({ otelSpan }) =>
+            otelSpan.instrumentationScope.name !== "@vercel/otel/fetch",
         }),
       ],
     }),
@@ -75,9 +77,13 @@ The `LangfuseSpanProcessor` reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, 
 
 <Callout type="info">
   By default, the `LangfuseSpanProcessor` only exports LLM-relevant spans (model
-  calls, tool calls, and spans from known instrumentors). Set
-  `shouldExportSpan: () => true` to also capture eve's run-level span and sandbox
-  commands, giving you the full agent run in one trace.
+  calls, tool calls, and spans from known instrumentors), which already excludes
+  the `@vercel/otel/fetch` HTTP spans. The `shouldExportSpan` filter above
+  instead keeps eve's full run — the run-level span and sandbox commands — while
+  still dropping that HTTP noise. Use `shouldExportSpan: () => true` to export
+  everything, or omit it entirely to keep only the LLM-relevant subset. See
+  [filtering by instrumentation scope](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope)
+  for more.
 </Callout>
 
 ## Run your agent
