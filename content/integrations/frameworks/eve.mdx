@@ -76,6 +76,15 @@ export default defineInstrumentation({
 The `LangfuseSpanProcessor` reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` from the environment.
 
 <Callout type="info">
+  Registering the `LangfuseSpanProcessor` via `registerOTel` requires
+  `@vercel/otel` v2 or later, which is built on the same OpenTelemetry JS SDK v2
+  as `@langfuse/otel` ([vercel/otel#154](https://github.com/vercel/otel/issues/154)).
+  The install command above already pulls in a compatible version. If you wire
+  Langfuse into a custom OpenTelemetry setup instead, you can register the
+  processor on a [`NodeSDK`](/docs/observability/sdk/overview) as well.
+</Callout>
+
+<Callout type="info">
   By default, the `LangfuseSpanProcessor` only exports LLM-relevant spans (model
   calls, tool calls, and spans from known instrumentors), which already excludes
   the `@vercel/otel/fetch` HTTP spans. The `shouldExportSpan` filter above

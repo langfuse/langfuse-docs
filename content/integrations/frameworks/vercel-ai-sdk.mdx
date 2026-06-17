@@ -196,11 +196,13 @@ tracerProvider.register();
 ```
 
 <Callout>
-  If you are using Next.js, please use a manual OpenTelemetry setup via the
-  `NodeTracerProvider` rather than via `registerOTel` from `@vercel/otel`. This
-  is because [the `@vercel/otel` package does not yet support the OpenTelemetry
-  JS SDK v2](https://github.com/vercel/otel/issues/154) on which the
-  `@langfuse/tracing` and `@langfuse/otel` packages are based.
+  If you are using Next.js, you can register the `LangfuseSpanProcessor` via
+  `registerOTel` from `@vercel/otel` as long as you are on `@vercel/otel` v2 or
+  later. [Earlier versions did not support the OpenTelemetry JS SDK
+  v2](https://github.com/vercel/otel/issues/154) on which the
+  `@langfuse/tracing` and `@langfuse/otel` packages are based; this was resolved
+  in `@vercel/otel` v2. The manual `NodeTracerProvider` setup shown above also
+  works and avoids the version requirement.
 
 </Callout>
 
