@@ -15,9 +15,11 @@ This guide shows you how to integrate **Langfuse** with **eve** to trace and deb
 
 > **How do they work together?** [Every eve run produces a trace](https://eve.dev/docs/guides/instrumentation), and the spans are standard OpenTelemetry, built on the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) telemetry conventions. eve registers its tracer in `agent/instrumentation.ts` via `registerOTel`. By adding the `LangfuseSpanProcessor`, every model call, tool call, and sandbox command flows into Langfuse — where Langfuse maps them to traces, generations, and tool observations.
 
+## Get Started
+
 <Steps>
 
-## Create an eve agent
+### Create an eve agent
 
 If you don't have an eve agent yet, scaffold one with the eve CLI:
 
@@ -28,7 +30,7 @@ cd my-agent
 
 See the full [eve quickstart](https://eve.dev/docs/getting-started) for details.
 
-## Install the Langfuse OpenTelemetry packages
+### Install the Langfuse OpenTelemetry packages
 
 Add the Langfuse span processor and the Vercel OpenTelemetry helper that eve's instrumentation uses:
 
@@ -36,7 +38,7 @@ Add the Langfuse span processor and the Vercel OpenTelemetry helper that eve's i
 npm install @langfuse/otel @vercel/otel
 ```
 
-## Add your Langfuse credentials
+### Add your Langfuse credentials
 
 Get your API keys from your [Langfuse project settings](https://cloud.langfuse.com) and add them to your agent's `.env` file. You can sign up for [Langfuse Cloud](https://langfuse.com/cloud) or [self-host Langfuse](https://langfuse.com/self-hosting).
 
@@ -47,7 +49,7 @@ LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
 # LANGFUSE_BASE_URL="https://us.cloud.langfuse.com" # 🇺🇸 US region
 ```
 
-## Register the Langfuse span processor
+### Register the Langfuse span processor
 
 eve configures telemetry in `agent/instrumentation.ts`. Register the `LangfuseSpanProcessor` on the `registerOTel` call so eve's spans are exported to Langfuse:
 
@@ -95,7 +97,7 @@ The `LangfuseSpanProcessor` reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, 
   for more.
 </Callout>
 
-## Run your agent
+### Run your agent
 
 Start your agent and send it a message:
 
@@ -105,7 +107,7 @@ npm run dev
 
 Each run is now exported to Langfuse.
 
-## View traces in Langfuse
+### View traces in Langfuse
 
 Open your [Langfuse dashboard](https://cloud.langfuse.com) to see the trace for each run. eve's spans map to the Langfuse data model as follows:
 
