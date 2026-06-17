@@ -496,7 +496,7 @@ export function Integrations() {
         </Heading>
         <Text className="text-left max-w-[52ch]">
           Langfuse works with any language and framework supporting OTel
-          instrumentation. Additionally, 80+ integrations make getting started
+          instrumentation. Additionally, 100+ integrations make getting started
           even easier. No framework lock-in.
         </Text>
       </div>
@@ -525,7 +525,7 @@ export function Integrations() {
               size="m"
               className="font-medium text-left text-text-secondary"
             >
-              80+ more integrations
+              100+ more integrations
             </Text>
           </div>
           <div className="flex flex-col gap-2 w-full">
