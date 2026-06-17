@@ -195,6 +195,7 @@ With these configurations and dependencies in place, your Spring Boot applicatio
 
 Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc., and – since we enabled them – events for the prompt and response content.
 
+
 ## ⚠️ Important: JDBC Dependency Conflict
 
 If your Spring AI application uses a JDBC datasource, you may encounter a dependency conflict that prevents the application from starting. This is caused by a version mismatch between OpenTelemetry libraries.
@@ -214,13 +215,15 @@ The following method did not exist:
 
 This happens because:
 
-1. `micrometer-tracing-bridge-otel` (version 1.4.4 in Spring Boot 3.4.x) has a transitive dependency on `opentelemetry-instrumentation-api-incubator:2.9.0-alpha`
-2. `opentelemetry-jdbc:2.17.0-alpha` (from `opentelemetry-spring-boot-starter`) requires `opentelemetry-instrumentation-api-incubator:2.17.0-alpha`
-3. Maven resolves this in favor of the older transitive dependency (2.9.0-alpha), causing the method-not-found error
+1. `micrometer-tracing-bridge-otel` (managed by Spring Boot) has a transitive dependency on an older `opentelemetry-instrumentation-api-incubator` version
+2. `opentelemetry-jdbc` (from `opentelemetry-spring-boot-starter`) requires a newer `opentelemetry-instrumentation-api-incubator` version
+3. Maven resolves this in favor of the older transitive dependency, causing the method-not-found error
+
+> **Note:** The exact version numbers in the error message may vary depending on your Spring Boot and OpenTelemetry versions. Look for the same `setCaptureQueryParameters` method-not-found error.
 
 ### The Solution
 
-Exclude the problematic transitive dependency and explicitly declare the correct version in your `pom.xml`:
+Exclude the problematic transitive dependency from `micrometer-tracing-bridge-otel`. Since the guide's BOM already manages `opentelemetry-instrumentation-api-incubator`, you don't need to specify a version:
 
 ```xml
 <dependency>
@@ -233,11 +236,16 @@ Exclude the problematic transitive dependency and explicitly declare the correct
         </exclusion>
     </exclusions>
 </dependency>
-<dependency>
-    <groupId>io.opentelemetry.instrumentation</groupId>
-    <artifactId>opentelemetry-instrumentation-api-incubator</artifactId>
-    <version>2.17.0-alpha</version>
-</dependency>
+```
+
+> **Note:** The `opentelemetry-instrumentation-bom` in your `<dependencyManagement>` will automatically resolve the correct version. No explicit version declaration is needed.
+
+**For Gradle users:**
+
+```groovy
+configurations.all {
+    exclude group: 'io.opentelemetry.instrumentation', module: 'opentelemetry-instrumentation-api-incubator'
+}
 ```
 
 ### Reference
