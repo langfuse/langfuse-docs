@@ -353,9 +353,9 @@ const marqueeRow2: MarqueeItem[] = [
     icon: "/images/integrations/temporal.svg",
   },
   {
-    label: "Agentic Data Stack",
-    href: "/integrations/agentic-data-stack",
-    icon: "/images/integrations/opentelemetry_icon.svg",
+    label: "ClickHouse Agentic Data Stack",
+    href: "/integrations/other/agentic-data-stack",
+    icon: "/images/integrations/clickhouse_icon.svg",
   },
   {
     label: "Mastra",
