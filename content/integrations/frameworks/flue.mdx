@@ -88,7 +88,7 @@ app.route("/", flue());
 export default app;
 ```
 
-> **Capturing prompts and responses:** by default the adapter exports only metadata (identifiers, durations, model, token usage, and cost) and omits prompts, completions, and tool payloads. To include content, pass an `exportContent` callback — `createOpenTelemetryObserver({ exportContent: (event) => event })` exports everything (use a sanitizing callback in production). Captured content is attached to the span attributes and appears under each observation's **Metadata** in Langfuse.
+> **Capturing prompts and responses:** by default the adapter exports only metadata (identifiers, durations, model, token usage, and cost) and omits prompts, completions, and tool payloads. To include content, pass an `exportContent` callback — `createOpenTelemetryObserver({ exportContent: (event) => event })` exports everything (use a sanitizing callback in production). Langfuse maps the captured content to each observation's **Input** and **Output**, and surfaces Flue tool calls as dedicated **Tool** observations (delegated tasks become **Agent** observations).
 
 ## Step 4: Add an example workflow
 
@@ -147,7 +147,7 @@ You can also run a workflow once without the server with `npx flue run weather -
 
 ## Step 6: View traces in Langfuse
 
-After running the workflow, open your [Langfuse dashboard](https://langfuse.com/cloud) to see the full trace: the workflow span, each model turn mapped to a generation (with model, token usage, and cost), and nested tool calls.
+After running the workflow, open your [Langfuse dashboard](https://langfuse.com/cloud) to see the full trace: the workflow span, each model turn mapped to a generation (with model, token usage, and cost), and tool calls captured as nested **Tool** observations with their inputs and outputs.
 
 <!-- TODO: add a screenshot of a Flue trace. Upload the PNG to public/images/cookbook/integration-flue/flue-example-trace.png and embed it here with an image tag pointing at https://langfuse.com/images/cookbook/integration-flue/flue-example-trace.png -->
 
