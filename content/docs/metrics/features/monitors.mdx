@@ -1,0 +1,161 @@
+---
+title: Monitors
+sidebarTitle: Monitors
+description: Set threshold-based alerts on your LLM application metrics and route notifications through automations when thresholds are breached.
+---
+
+# Monitors
+
+<Callout type="info">
+  Monitors are available on [Langfuse Cloud](https://langfuse.com/pricing) only.
+</Callout>
+
+Monitors allow you catch cost and quality issues before they impact your users.
+
+You can receive notifications over Slack, trigger GitHub Actions, or call your own Webhooks.
+
+## Create a monitor [#create]
+
+Navigate to [**Monitors**](https://cloud.langfuse.com/project/~/monitors) in your project and click **New Monitor**.
+
+<Steps>
+
+### Configure the metric
+
+Choose what data the monitor measures.
+
+| Field           | Description                                                       |
+| --------------- | ----------------------------------------------------------------- |
+| **Data source** | `Observations`, `Scores (numeric)`, or `Scores (categorical)`     |
+| **Metric**      | Aggregation + measure — e.g. `avg latency`, `count`, `p95 cost`   |
+| **Filters**     | Narrow the dataset (model name, tags, user ID, environment, etc.) |
+
+### Set alert conditions
+
+Choose what range you expect the metric values to fall within.
+
+| Field                 | Description                                                                              |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| **Operator**          | `>`, `≥`, `<`, `≤`, `=`, `≠` — direction of the alert condition                          |
+| **Alert threshold**   | Required. Crossing this value sets severity to **ALERT**.                                |
+| **Warning threshold** | Optional. Crossing this value (before the alert threshold) sets severity to **WARNING**. |
+| **Window**            | How far back each evaluation looks (eg `1 hour`, `1 day`, `1 week`)                      |
+
+### Configure advanced settings (optional)
+
+Choose special handling for edge cases when data is missing or when the monitors stay in an unresolved state for extended periods of time.
+
+**No-data handling** — what happens when the query returns no data:
+
+| Mode                                  | Behavior                                                            |
+| ------------------------------------- | ------------------------------------------------------------------- |
+| **Treat missing data as 0** (default) | Treat null as `0` and compare against thresholds                    |
+| **Keep the previous severity**        | Hold the previous severity; emit no alert                           |
+| **Show severity NO_DATA**             | Record `NO_DATA` severity; emit no alert                            |
+| **Notify after sustained NO_DATA**    | Record `NO_DATA` severity; fire an alert after a configurable delay |
+
+**Renotify** — whether to re-alert while severity stays elevated:
+
+| Mode              | Behavior                                                        |
+| ----------------- | --------------------------------------------------------------- |
+| `Off` (default)   | Alert fires once on each severity transition                    |
+| `Every N minutes` | Re-fires every N minutes while severity persists (1–10,080 min) |
+
+### Select a notification channel
+
+Select one or more automations from the **Automations** panel. When an alert fires, Langfuse publishes the event to each selected automation, which dispatches your configured actions (Slack message, webhook, etc.).
+
+See [Automations](#automations) to set up actions before linking them here.
+
+### Name and save
+
+Give the monitor a descriptive name (max 200 characters) and optional tags, then click **Save**. The monitor becomes **ACTIVE** immediately and schedules its first evaluation.
+
+</Steps>
+
+## Alert states [#alert-states]
+
+Each monitor carries a **severity** that updates after every evaluation.
+
+| Severity  | Meaning                                                                                                    |
+| --------- | ---------------------------------------------------------------------------------------------------------- |
+| `UNKNOWN` | Initial state — not yet evaluated                                                                          |
+| `OK`      | Metric is within bounds                                                                                    |
+| `WARNING` | Metric crossed the warning threshold                                                                       |
+| `ALERT`   | Metric crossed the alert threshold                                                                         |
+| `NO_DATA` | Query returned no data and no-data mode is **Show severity NO_DATA** or **Notify after sustained NO_DATA** |
+| `PAUSED`  | Monitor is paused; no evaluations run                                                                      |
+
+**When alerts fire:**
+
+- Alert (`* → WARNING | ALERT`): always notifies.
+- Recovery (`WARNING | ALERT → OK`): always notifies.
+- No data (`NO_DATA ↔ WARNING | ALERT | OK`): only notifies when no-data mode is **Notify after sustained NO DATA**.
+- Sustained severity (`WARNING → WARNING`, `ALERT → ALERT`): fires only when **Renotify** is enabled.
+
+## Pause and resume [#pause]
+
+From the monitor list or detail page, use the row actions menu to **Pause** or **Resume** a monitor. A paused monitor skips all evaluations; its severity is frozen at `PAUSED`. Resuming sets it back to `ACTIVE` and schedules the next evaluation.
+
+## Automations [#automations]
+
+Automations route monitor alerts to external systems. Each automation pairs a **trigger** (when to fire) with an **action** (what to do).
+
+Three action types are available:
+
+| Action             | What it does                                                |
+| ------------------ | ----------------------------------------------------------- |
+| **Slack**          | Posts a formatted alert message to a Slack channel          |
+| **Webhook**        | HTTP POST to your endpoint with an HMAC-signed JSON payload |
+| **GitHub Actions** | Fires a `workflow_dispatch` event on a GitHub repository    |
+
+### Create and link an automation [#automations-setup]
+
+1. Navigate to [**Automations**](https://cloud.langfuse.com/project/~/automations) and create a new automation with event source **Monitor**.
+2. [Create a new monitor](#create) or edit an existing monitor.
+3. Select the new automation in the **Automations** panel.
+
+A monitor fires every linked automation whenever its severity transitions (see [Alert states](#alert-states)).
+
+<Callout type="warn">
+  After **5 consecutive delivery failures**, Langfuse automatically disables the
+  automation's trigger. Re-enable it from the Automations page once the endpoint
+  is restored.
+</Callout>
+
+### Webhook payload [#automations-webhook-payload]
+
+Your endpoint receives a signed JSON body:
+
+```json filename="monitor-alert-payload.json"
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "timestamp": "2024-07-10T10:30:00Z",
+  "type": "monitor-alert",
+  "apiVersion": "v1",
+  "payload": {
+    "monitorId": "monitor_abc123",
+    "projectId": "proj_xyz789",
+    "permalink": "https://cloud.langfuse.com/project/proj_xyz789/monitors/monitor_abc123",
+    "message": {
+      "title": "avg latency crossed alert threshold",
+      "body": "avg latency is 1234 ms (threshold: 1000 ms) over the last 1 hour"
+    },
+    "severity": "ALERT",
+    "timestamp": "2024-07-10T10:30:00Z",
+    "fromTimestamp": "2024-07-10T09:30:00Z",
+    "toTimestamp": "2024-07-10T10:30:00Z",
+    "view": "observations",
+    "filters": [],
+    "window": "1h"
+  }
+}
+```
+
+Signature verification works identically to prompt webhooks — see [Webhooks](/docs/prompt-management/features/webhooks-slack-integrations#get-started) for the HMAC validation code.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-monitors"]} />
