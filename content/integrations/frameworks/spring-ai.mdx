@@ -195,6 +195,57 @@ With these configurations and dependencies in place, your Spring Boot applicatio
 
 Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc., and – since we enabled them – events for the prompt and response content.
 
+## ⚠️ Important: JDBC Dependency Conflict
+
+If your Spring AI application uses a JDBC datasource, you may encounter a dependency conflict that prevents the application from starting. This is caused by a version mismatch between OpenTelemetry libraries.
+
+### The Problem
+
+When you add JDBC dependencies (e.g., `spring-boot-starter-jdbc`), the application fails to start with an error like:
+
+```
+APPLICATION FAILED TO START
+
+An attempt was made to call a method that does not exist.
+
+The following method did not exist:
+    'setCaptureQueryParameters(boolean)'
+```
+
+This happens because:
+
+1. `micrometer-tracing-bridge-otel` (version 1.4.4 in Spring Boot 3.4.x) has a transitive dependency on `opentelemetry-instrumentation-api-incubator:2.9.0-alpha`
+2. `opentelemetry-jdbc:2.17.0-alpha` (from `opentelemetry-spring-boot-starter`) requires `opentelemetry-instrumentation-api-incubator:2.17.0-alpha`
+3. Maven resolves this in favor of the older transitive dependency (2.9.0-alpha), causing the method-not-found error
+
+### The Solution
+
+Exclude the problematic transitive dependency and explicitly declare the correct version in your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-api-incubator</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry.instrumentation</groupId>
+    <artifactId>opentelemetry-instrumentation-api-incubator</artifactId>
+    <version>2.17.0-alpha</version>
+</dependency>
+```
+
+### Reference
+
+For more details, see:
+- [Spring AI Demo Fix PR](https://github.com/langfuse/langfuse-examples/pull/34)
+- [Related Bug Report](https://github.com/langfuse/langfuse/issues/14312)
+
 ## Step 2: Configure Langfuse
 
 Now that your Spring AI application is emitting OpenTelemetry trace data, the next step is to direct that data to Langfuse.
