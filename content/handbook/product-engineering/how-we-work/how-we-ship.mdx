@@ -1,0 +1,108 @@
+---
+title: How we ship
+description: How the engineering team prioritizes, plans, builds, and ships at Langfuse.
+---
+
+# How we ship
+
+## Prioritization
+
+To avoid spending hours each week triaging and prioritizing tickets, everyone manages their own priorities and escalates to their lead when work piles up. This only works if we share an understanding of SLAs and the quarterly [roadmapping process](/handbook/product-engineering/how-we-work/roadmapping).
+
+When in doubt, tag your lead (24h SLA on the Linear inbox). Keep one Linear project or issue for your current main task, and the [bug view](https://linear.app/langfuse/view/bugs-confirmedopen-97856f9f745c) or "My issues" for smaller work. Every ticket has a priority.
+
+### Priority levels [#priority-levels]
+
+| Priority        | Timeline                     | Description                                                                                                                                                                                                                                                    | Examples                                                 |
+| --------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **P0 (urgent)** | Immediately, drop everything | - Security incidents (e.g. data breach)<br/>- Performance issues (ingestion delay, ClickHouse CPU/memory issues)<br/>- Issues with large-scale impact that break our application                                                                               | Traces table does not load, login broken                 |
+| **P1 (high)**   | Same week                    | - Issues with smaller-scale impact<br/>- Improvements that are under 1h of work and have a big impact for many customers; great to move fast on, since users get excited that we ship<br/>- Delighting a user the same day with a small change that helps them | Some edge case does not work for dashboards              |
+| **P2 (mid)**    | Same month                   | - Papercut fixes that don't have wide-ranging impact                                                                                                                                                                                                           | Trace tree UI breaks when users have many scores         |
+| **P3 (low)**    | Backlog                      | - Nice-to-have additions to Langfuse that aren't urgent                                                                                                                                                                                                        | Create a new prompt based on a non-latest prompt version |
+
+## Daily responsibilities
+
+We balance busy work with making progress on the most important project we're driving forward. To keep that balance, we hold ourselves to a few response times:
+
+- **Linear inbox**: clear once a day.
+- **Pylon inbox**: clear twice a day. Acknowledge a user's request ASAP, then look into it or work on a fix.
+- **PR reviews**: if you're a reviewer, turn it around within 24h; if it lands in the morning, review the same day. See [Code review](/handbook/product-engineering/how-we-work/code-review) for details.
+- **Bug fixes and support**: spend at most ~2h/day on bug fixes, support tickets, and similar. Fixing bugs is sometimes critical for the company, but if you consistently spend more than 2h/day, talk to your lead to get buy-in or distribute the work across the team.
+
+## Specification
+
+Goal: keep the number of loops per change to a minimum and let individual contributors make as many decisions as possible. How much upfront alignment a change needs depends on its size and risk.
+
+### Small and mid-sized changes (e.g. adding a new filter to a table, a new field to a form…)
+
+- The engineer leads: capture very brief notes in Linear, or just a descriptive title.
+- Feel free to have a brief discussion with anyone if it speeds things up and reduces risk/uncertainty.
+- If you plan to have a reviewer for the change, involve them in the planning process.
+- Asking Coding Agents "what am I missing?" or "how would you build this?" is a great, fast way to get feedback and reduce uncertainty.
+
+### Larger projects (e.g. supporting agents in Langfuse, rebuilding SDKs…)
+
+1. The engineer does initial investigation, writes a short RFC (in Linear), and schedules a meeting.
+   - Define the roles before the project starts, together with your lead:
+     - **Driver**: the engineer
+     - **Approver**: pod lead, Max, or Marc (those in the decision meeting)
+     - **Informed**: any engineer who may have additional context (see [Getting help](#getting-help))
+   - Sometimes a 15 min meeting without an RFC can also help to save time. This is up to the engineer to schedule.
+
+2. In the meeting discussing the RFC:
+   - Each complex engineering project has a few important items. We should focus on them during the meeting and have as much data as possible to make a confident decision.
+   - The meeting is recorded, so it captures the detail needed to generate the spec or issue description.
+   - Discuss timelines and how we can make things faster.
+   - Agree on an implementation plan afterward; sync with your lead if needed.
+
+### Getting help [#getting-help]
+
+You can pull in anyone on the team at any time; 15 minutes of shared discussion often improves the output a lot.
+
+- **UI/UX**: for larger UI/UX changes, get input from the designer or Nikita. They are happy to help come up with great UI/UX early on.
+- **ClickHouse**: for more complex ClickHouse queries, get input from the ClickHouse [DRI](https://docs.google.com/spreadsheets/d/1gOvWf_uSAtcXxWkR_gMuWX8-OYmSJNIPXTmPGfZ2DGY/edit?gid=0#gid=0); otherwise we risk performance and maintainability anti-patterns.
+- **Product Owners**: if you work in the product area of another engineer it sometimes helps to get their input.
+
+## Implementation
+
+- **No uncertainty**: the engineer understands the challenges of the issue/feature and how to implement it. Go ahead and build.
+- **Uncertainty or questions**: tag your lead on the Linear ticket with a clear, specific question to get an answer or buy-in for the change.
+
+## Releases
+
+- **Complex changes/projects**: agree on a release plan: which PRs to merge and release, and in what order.
+- Always write [public docs](/docs) or a [changelog post](/changelog) when you ship something.
+
+## Tools
+
+### Linear
+
+We use Linear as our internal project planning and ticketing tool. It helps us:
+
+- Collect user feedback in one place
+- Discuss product requirements and implementation details
+- Understand what work is left to finish a project
+- Triage and prioritize bugs
+- Keep knowledge in one place, reducing the Linear/Slack split by keeping as much as possible in Linear
+- Integrate with other tools (Pylon, GitHub, Cursor, etc.) to smooth the workflow
+
+#### Issue states
+
+| State                  | Description                                                                                                                                                                                                                                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triage**             | - Unassigned, no labels or priority<br/>- Created via the GitHub Issue integration, or in Linear by non-engineering team members<br/>- Marc/Max subscribe, triage, assign, add labels, and refine the title<br/>- After assignment, the engineer dedupes against existing tickets and handles communication with users |
+| **Backlog**            | - Everyone manages their own backlog in Linear<br/>- Only backlog what you plan or hope to do over the next 1–2 quarters; send the rest to [GitHub Discussions](https://langfuse.com/ideas)<br/>- See the [conventions below](#linear-conventions) for titles, labels, and Pylon links                                 |
+| **Todo / In progress** | See [Priority levels](#priority-levels) for handling guidelines                                                                                                                                                                                                                                                        |
+
+#### Conventions [#linear-conventions]
+
+- **Titles**: keep them precise and brief, so any engineer scanning a list of tickets roughly understands each one. Descriptions are optional; when you add one, keep it short and precise.
+- **Labels**: every issue has a label, and you can use Linear views to see all tickets for a label. Use labels for product areas, and the "feat-..." labels for most issues. Before creating a new label, check that no existing one fits ([labels](https://linear.app/langfuse/settings/issue-labels)); move new labels to the workspace/organization level, since they're created at the project level by default.
+- **Assignment**: enable "assign to self on creation", and assign to self when creating from third-party tools.
+- **Projects**: only create a project for work with a clear end (no endless bucket of tickets).
+- **Pylon**: link Pylon threads to Linear issues with "Thread links". When you close a Linear ticket, resolve the Pylon thread to tell the user we shipped the fix or request. It's two minutes of effort that shows we ship fast. Snooze threads you want to revisit (e.g. next week).
+- **Internal Slack messages**: for internal (non-user-facing) messages, use the Linear app in Slack to create an issue. This links the Slack thread to the issue, and people are notified when the ticket changes state.
+
+### Slack
+
+Slack is busy and full of noisy channels, and we don't want notifications pulling you away from focused work. See the short guide on [how to consume Slack channels](/handbook/tools-and-processes/using-slack).
