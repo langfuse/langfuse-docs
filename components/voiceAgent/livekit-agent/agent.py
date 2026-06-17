@@ -41,24 +41,41 @@ def setup_langfuse(
 ) -> TracerProvider:
     from opentelemetry.sdk.trace import SpanProcessor
 
-    eu_host = os.getenv("NEXT_PUBLIC_EU_LANGFUSE_BASE_URL")
-    eu_public_key = os.getenv("NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY")
-    eu_secret_key = os.getenv("EU_LANGFUSE_SECRET_KEY")
+    region_configs = [
+        (
+            "EU",
+            os.getenv("NEXT_PUBLIC_EU_LANGFUSE_BASE_URL"),
+            os.getenv("NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY"),
+            os.getenv("EU_LANGFUSE_SECRET_KEY"),
+        ),
+        (
+            "US",
+            os.getenv("NEXT_PUBLIC_US_LANGFUSE_BASE_URL"),
+            os.getenv("NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY"),
+            os.getenv("US_LANGFUSE_SECRET_KEY"),
+        ),
+        (
+            "JP",
+            os.getenv("NEXT_PUBLIC_JP_LANGFUSE_BASE_URL"),
+            os.getenv("NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY"),
+            os.getenv("JP_LANGFUSE_SECRET_KEY"),
+        ),
+        (
+            "INTERNAL",
+            os.getenv("NEXT_PUBLIC_INTERNAL_LANGFUSE_BASE_URL"),
+            os.getenv("NEXT_PUBLIC_INTERNAL_LANGFUSE_PUBLIC_KEY"),
+            os.getenv("INTERNAL_LANGFUSE_SECRET_KEY"),
+        ),
+    ]
 
-    us_host = os.getenv("NEXT_PUBLIC_US_LANGFUSE_BASE_URL")
-    us_public_key = os.getenv("NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY")
-    us_secret_key = os.getenv("US_LANGFUSE_SECRET_KEY")
-
-    jp_host = os.getenv("NEXT_PUBLIC_JP_LANGFUSE_BASE_URL")
-    jp_public_key = os.getenv("NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY")
-    jp_secret_key = os.getenv("JP_LANGFUSE_SECRET_KEY")
-
-    if not all([eu_host, eu_public_key, eu_secret_key]):
-        raise ValueError("EU Langfuse env vars must be set: NEXT_PUBLIC_EU_LANGFUSE_BASE_URL, NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY, EU_LANGFUSE_SECRET_KEY")
-    if not all([us_host, us_public_key, us_secret_key]):
-        raise ValueError("US Langfuse env vars must be set: NEXT_PUBLIC_US_LANGFUSE_BASE_URL, NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY, US_LANGFUSE_SECRET_KEY")
-    if not all([jp_host, jp_public_key, jp_secret_key]):
-        raise ValueError("JP Langfuse env vars must be set: NEXT_PUBLIC_JP_LANGFUSE_BASE_URL, NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY, JP_LANGFUSE_SECRET_KEY")
+    for region_name, host, public_key, secret_key in region_configs:
+        if not all([host, public_key, secret_key]):
+            raise ValueError(
+                f"{region_name} Langfuse env vars must be set: "
+                f"NEXT_PUBLIC_{region_name}_LANGFUSE_BASE_URL, "
+                f"NEXT_PUBLIC_{region_name}_LANGFUSE_PUBLIC_KEY, "
+                f"{region_name}_LANGFUSE_SECRET_KEY"
+            )
 
     class LangfuseAttributeSpanProcessor(SpanProcessor):
         """Adds Langfuse trace attributes to every span."""
@@ -77,11 +94,7 @@ def setup_langfuse(
     # on the shared TracerProvider, handling batching/auth/export to the respective region.
     # should_export_span=lambda span: True bypasses the default LLM-only filter so that
     # all LiveKit agent spans (STT, TTS, LLM, turn detection, etc.) are captured.
-    for host, public_key, secret_key in [
-        (eu_host, eu_public_key, eu_secret_key),
-        (us_host, us_public_key, us_secret_key),
-        (jp_host, jp_public_key, jp_secret_key),
-    ]:
+    for _, host, public_key, secret_key in region_configs:
         Langfuse(
             public_key=public_key,
             secret_key=secret_key,

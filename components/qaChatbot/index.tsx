@@ -39,24 +39,9 @@ import {
   ToolOutput,
   ToolInput,
 } from "@/components/ai-elements/tool";
-import { LangfuseWeb } from "langfuse";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
-
-const eulangfuseWebClient = new LangfuseWeb({
-  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
-  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
-});
-
-const usLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
-});
-
-const jpLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
-});
+import { demoLangfuseWebClients } from "@/lib/demo-langfuse-web-clients";
 
 type ChatProps = HTMLAttributes<HTMLDivElement>;
 
@@ -126,7 +111,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
     setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
 
     // Send feedback to Langfuse
-    for (const client of [eulangfuseWebClient, usLangfuseWebClient, jpLangfuseWebClient]) {
+    for (const client of demoLangfuseWebClients) {
       client.score({
         traceId: messageId,
         id: `user-feedback-${messageId}`,

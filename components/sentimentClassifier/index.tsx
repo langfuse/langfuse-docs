@@ -8,24 +8,9 @@ import {
   Suggestions,
   Suggestion,
 } from "@/components/ai-elements/suggestion";
-import { LangfuseWeb } from "langfuse";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
 import { SendIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
-
-const eulangfuseWebClient = new LangfuseWeb({
-  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
-  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
-});
-
-const usLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
-});
-
-const jpLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
-});
+import { demoLangfuseWebClients } from "@/lib/demo-langfuse-web-clients";
 
 type SentimentResult = {
   sentiment: "positive" | "negative" | "neutral";
@@ -121,7 +106,7 @@ export const SentimentClassifier = ({
   const handleFeedback = (value: number) => {
     if (!result) return;
     setFeedback(value);
-    for (const client of [eulangfuseWebClient, usLangfuseWebClient, jpLangfuseWebClient]) {
+    for (const client of demoLangfuseWebClients) {
       client.score({
         traceId: result.traceId,
         id: `user-feedback-${result.traceId}`,
