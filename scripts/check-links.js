@@ -8,7 +8,13 @@ const http = require("http");
 const { URL } = require("url");
 
 const readFileAsync = promisify(fs.readFile);
-const EXCLUDED_HOSTNAMES = new Set(["status.langfuse.com"]);
+const EXCLUDED_HOSTNAMES = new Set([
+  "status.langfuse.com",
+  "cloud.langfuse.com",
+  "us.cloud.langfuse.com",
+  "jp.cloud.langfuse.com",
+  "hipaa.cloud.langfuse.com",
+]);
 
 // Configuration options
 const CONFIG = {

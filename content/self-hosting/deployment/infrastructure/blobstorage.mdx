@@ -291,7 +291,16 @@ LANGFUSE_USE_GOOGLE_CLOUD_STORAGE=true
 LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse # Bucket name
 LANGFUSE_GOOGLE_CLOUD_STORAGE_CREDENTIALS=<json-credentials OR path-to-credentials.json> # JSON key or path to JSON key file. Optional. Will fallback to environment credentials
 LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/ # Optional prefix to store events within a subpath of the bucket
+GOOGLE_CLOUD_UNIVERSE_DOMAIN=googleapis.com # Optional. Google Cloud universe domain. Defaults to `googleapis.com`
 ```
+
+<Callout type="info">
+
+By default, the native integration connects to the public Google Cloud universe (`googleapis.com`).
+To target a sovereign or private Google Cloud universe (for example, a Google Distributed Cloud or government deployment), set `GOOGLE_CLOUD_UNIVERSE_DOMAIN` to your universe's domain.
+The value applies across all authentication methods (JSON credentials, key file, and environment credentials).
+
+</Callout>
 
 ### Google Cloud Storage (Compatibility Mode)
 

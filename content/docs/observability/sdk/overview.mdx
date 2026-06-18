@@ -165,7 +165,7 @@ npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 
 To authenticate with Langfuse, add your Langfuse credentials as environment variables. You can get your credentials by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
-If you are self-hosting Langfuse or using a [data region](/security/data-regions) other than the default (EU, https://cloud.langfuse.com), ensure you configure the host argument or the `LANGFUSE_BASE_URL` environment variable.
+If you are self-hosting Langfuse or using a [data region](/security/data-regions) other than the default (EU, https://cloud.langfuse.com), ensure you configure the base URL argument or the `LANGFUSE_BASE_URL` environment variable.
 
 You can also pass the credentials [directly to the constructor](#client-setup).
 
@@ -205,7 +205,7 @@ You can learn more about setting up OpenTelemetry in your JS environment [here](
 <Callout type="info">
 **Next.js users:**
 
-If you are using Next.js, please use the OpenTelemetry setup via the `NodeSDK` described above rather than via `registerOTel` from `@vercel/otel`. This is because [the `@vercel/otel` package does not yet support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based.
+If you are using Next.js, you can register the `LangfuseSpanProcessor` via `registerOTel` from `@vercel/otel` as long as you are on `@vercel/otel` v2 or later. [Earlier versions did not support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based; this was resolved in `@vercel/otel` v2. The `NodeSDK` setup described above also works and carries no version requirement.
 
 [See here for a full example for the Vercel AI SDK with NextJS on Vercel](/docs/observability/sdk/typescript/instrumentation#native-instrumentation).
 

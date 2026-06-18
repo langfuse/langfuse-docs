@@ -30,12 +30,12 @@ Get your Langfuse keys from the project settings in [Langfuse Cloud](https://lan
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# os.environ.setdefault("LANGFUSE_BASE_URL", "https://us.cloud.langfuse.com") # 🇺🇸 US region
 
-os.environ["DASHSCOPE_API_KEY"] = "sk-..."  # Get your API key from https://qwen.ai/apiplatform
+os.environ.setdefault("DASHSCOPE_API_KEY", "sk-...")  # Get your API key from https://qwen.ai/apiplatform
 ```
 
 ## Step 3: Use Langfuse OpenAI Drop-in Replacement

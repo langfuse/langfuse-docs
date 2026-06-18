@@ -229,7 +229,6 @@ This is the most sensitive billing question. Lead with empathy and _facts_, neve
 3. Cross-check the org in Impersonation View → Usage tab → confirm trace/observation volume in the billing period.
 4. **Specifically check for OTEL-related overcounting.** A common case: customers had a pre-existing OTEL setup, and after wiring it to Langfuse it ingested unrelated HTTP/DB/framework spans that drove up volume. See [/faq/all/existing-otel-setup#unwanted-spans-in-langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse), the fix is `blocked_instrumentation_scopes` on the SDK.
 5. Reply with the specific reason, link the invoice or usage view.
-6. If a refund is warranted under USD 2,000 you can approve it directly via Stripe (small POs / proration corrections / clear-cut errors). **For refunds above USD 2,000 loop in the team.**
 
 **Reply template:**
 
@@ -244,16 +243,11 @@ Thanks for flagging this. I dug into your billing for {period}:
 
 The increase comes from {specific cause}. {Invoice link / Usage tab screenshot}.
 
-{Optional: "One common pitfall is OTEL exporters sending non-LLM spans (HTTP, DB, framework spans) to Langfuse, which inflates billed volume. If that matches your setup, see https://langfuse.com/faq/all/existing-otel-setup#unwanted-spans-in-langfuse, adding blocked_instrumentation_scopes typically cuts volume by 50–90%."}
-
 If something here still doesn't add up, let me know and I'll investigate further.
 
 Best,
 {you}
 ```
-
-**Escalate when:** the charge is genuinely wrong on our side, refund is over USD 2,000, or the customer is on an enterprise contract with bespoke billing terms (loop in the enterprise team).
-
 </details>
 
 <details>

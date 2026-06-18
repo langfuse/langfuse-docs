@@ -163,28 +163,52 @@ You can read more about using Langfuse with an existing OpenTelemetry setup [her
 
 ## Mask sensitive data
 
-If your trace data (inputs, outputs, metadata) might contain sensitive information (PII, secrets), you can provide a mask function during client initialization. This function will be applied to all relevant data before it’s sent to Langfuse.
+If your trace data might contain sensitive information such as PII or secrets, configure a masking hook before sending spans to Langfuse. For Python SDK applications, prefer `mask_otel_spans` because it runs at export stage on raw OpenTelemetry span attributes, including spans created by third-party instrumentations.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 
-The `mask` function should accept data as a keyword argument and return the masked data. The returned data must be JSON-serializable.
+Use `mask_otel_spans` to return sparse patches for the OpenTelemetry spans that should change before export.
 
 ```python
-from langfuse import Langfuse
 import re
+from typing import Optional
 
-def pii_masker(data: any, **kwargs) -> any:
-    if isinstance(data, str):
-        return re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "[EMAIL_REDACTED]", data)
-    elif isinstance(data, dict):
-        return {k: pii_masker(data=v) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [pii_masker(data=item) for item in data]
-    return data
+from langfuse import Langfuse
+from langfuse.types import (
+    MaskOtelSpansParams,
+    MaskOtelSpansResult,
+    OtelSpanPatch,
+)
 
-langfuse = Langfuse(mask=pii_masker)
+email_pattern = re.compile(r"\b[\w.-]+?@[\w.-]+?\.\w+?\b")
+
+
+def mask_otel_spans(
+    *, params: MaskOtelSpansParams
+) -> Optional[MaskOtelSpansResult]:
+    patches = {}
+
+    for identifier, span in params.spans.items():
+        replacements = {}
+
+        for key, value in span.attributes.items():
+            if isinstance(value, str):
+                masked_value = email_pattern.sub("[EMAIL_REDACTED]", value)
+
+                if masked_value != value:
+                    replacements[key] = masked_value
+
+        if replacements:
+            patches[identifier] = OtelSpanPatch(set_attributes=replacements)
+
+    return MaskOtelSpansResult(span_patches=patches)
+
+
+langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
 ```
+
+`mask_otel_spans` is synchronous and usually runs on the OpenTelemetry batch span processor worker thread; during `flush()` and shutdown it may run on the caller thread. Keep the function fast to avoid backing up the export queue. See [masking](/docs/observability/features/masking) for the full behavior, error handling, and legacy `mask` comparison.
 
 </Tab>
 <Tab title="JS/TS SDK">
