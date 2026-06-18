@@ -88,9 +88,9 @@ Each monitor carries a **severity** that updates after every evaluation.
 
 **When alerts fire:**
 
-- Alert (`* → WARNING | ALERT`): always notifies.
+- Alert (`UNKNOWN | OK → WARNING | ALERT`): always notifies.
 - Recovery (`WARNING | ALERT → OK`): always notifies.
-- No data (`NO_DATA ↔ WARNING | ALERT | OK`): only notifies when no-data mode is **Notify after sustained NO DATA**.
+- No data (`NO_DATA ↔ WARNING | ALERT | OK | UNKNOWN`): only notifies when no-data mode is **Notify after sustained `NO_DATA`**.
 - Sustained severity (`WARNING → WARNING`, `ALERT → ALERT`): fires only when **Renotify** is enabled.
 
 ## Pause and resume [#pause]
@@ -152,7 +152,7 @@ Your endpoint receives a signed JSON body:
 }
 ```
 
-Signature verification works identically to prompt webhooks — see [Webhooks](/docs/prompt-management/features/webhooks-slack-integrations#get-started) for the HMAC validation code.
+Signature verification works identically to prompt webhooks — see [Webhooks](/docs/prompt-management/features/webhooks-slack-integrations) for the HMAC validation code.
 
 ## GitHub Discussions
 
