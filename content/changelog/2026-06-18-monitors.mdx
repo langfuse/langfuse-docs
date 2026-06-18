@@ -1,0 +1,37 @@
+---
+date: 2026-06-18
+title: Monitors and Alerts v1
+description: Create monitors that watch cost, quality, and latency metrics and notify your team over Slack, webhooks, or GitHub Actions when they move outside expected ranges.
+author: Mark Salpeter
+ogImage: /images/changelog/2026-06-18-monitors.png
+canonical: /docs/metrics/features/monitors
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Cloud } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now set threshold-based monitors on your LLM application metrics and catch cost and quality issues before they impact your users. Pick a metric, define the range you expect it to stay within, and get notified the moment it drifts.
+
+- Catch a **sudden cost spike** when average cost per trace crosses a ceiling.
+- Catch a **quality drop** when an evaluation score falls below your bar.
+- Catch a **latency regression** when p95 latency for a model climbs past your SLA.
+
+When a threshold is breached, the monitor fires through your linked automations — post a formatted message to **Slack**, HTTP POST to a **webhook**, or trigger a **GitHub Actions** workflow so your team and your pipelines can respond automatically.
+
+<Callout type="info">
+  Monitors are available on [Langfuse Cloud](/pricing) only.
+</Callout>
+
+## Get started
+
+<Cards num={2}>
+  <Card title="Monitors docs" href="/docs/metrics/features/monitors" icon={<Book />} arrow />
+  <Card
+    title="Create a monitor on Langfuse Cloud"
+    href="https://cloud.langfuse.com/project/~/monitors"
+    icon={<Cloud />}
+    arrow
+  />
+</Cards>
