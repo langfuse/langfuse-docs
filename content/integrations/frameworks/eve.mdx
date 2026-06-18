@@ -97,9 +97,41 @@ The `LangfuseSpanProcessor` reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, 
   for more.
 </Callout>
 
+### Define a simple agent
+
+A minimal eve agent is a tool plus a system prompt. The weather agent below — a single `getWeather` tool and a short instruction — produces the kind of run shown in the example trace below:
+
+```ts filename="agent/tools/getWeather.ts"
+import { defineTool } from "eve/tools";
+import { z } from "zod";
+
+export default defineTool({
+  description: "Return mock weather data for a city.",
+  inputSchema: z.object({ city: z.string().min(1) }),
+  async execute({ city }) {
+    return { city, condition: "cloudy", temperatureC: 18 };
+  },
+});
+```
+
+```ts filename="agent/agent.ts"
+import { defineAgent } from "eve";
+
+export default defineAgent({
+  model: "openai/gpt-4o-mini",
+});
+```
+
+```markdown filename="agent/instructions.md"
+You are a concise weather assistant. When asked about the weather, call the
+getWeather tool, then answer in one sentence. Mention that the data is mocked.
+```
+
+eve discovers these files automatically. Model provider authentication (the Vercel AI Gateway or an `OPENAI_API_KEY`) follows the [eve quickstart](https://eve.dev/docs/getting-started).
+
 ### Run your agent
 
-Start your agent and send it a message:
+Start your agent and send it a message, for example _"What's the weather in Berlin? Use the getWeather tool, then answer in one sentence."_:
 
 ```bash
 npm run dev
