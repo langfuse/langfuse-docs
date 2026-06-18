@@ -11,16 +11,16 @@ category: Integrations
 
 This notebook shows how to integrate **Langfuse** with **[Flue](https://flueframework.com)** to trace, debug, and evaluate your agents and workflows via OpenTelemetry.
 
-> **What is Flue?**
+> **What is Flue?**\
 > [Flue](https://flueframework.com) is an open-source TypeScript framework for building durable AI agents and workflows. It gives any model a harness-style runtime — sessions, tools, skills, sandboxed filesystem and shell access, and durable execution — so you can write agents once and run them anywhere (Node.js, Cloudflare, CI).
 
-> **What is Langfuse?**
+> **What is Langfuse?**\
 > [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications.
 
 <Steps>
 ## Step 1: Install dependencies
 
-Flue ships a dedicated [`@flue/opentelemetry`](https://github.com/withastro/flue/tree/main/packages/opentelemetry) adapter that turns its public `observe(...)` event stream into OpenTelemetry spans. Pair it with the Langfuse OpenTelemetry SDK ([`@langfuse/otel`](https://langfuse.com/docs/observability/sdk/typescript/setup)) to export those spans to Langfuse.
+Flue ships a dedicated [`@flue/opentelemetry`](https://github.com/withastro/flue/tree/main/packages/opentelemetry) adapter that turns its public `observe(...)` event stream into OpenTelemetry spans. Pair it with the Langfuse OpenTelemetry SDK ([`@langfuse/otel`](https://langfuse.com/docs/observability/sdk/overview#setup)) to export those spans to Langfuse.
 
 ```bash
 npm install @flue/runtime @flue/opentelemetry @langfuse/otel @opentelemetry/sdk-node @opentelemetry/api hono valibot
@@ -47,7 +47,7 @@ OPENAI_API_KEY="sk-proj-..."
 
 ## Step 3: Register the Langfuse OpenTelemetry observer
 
-`@flue/opentelemetry` only converts Flue events into spans — your application owns the OpenTelemetry SDK and exporter. Configure the SDK with the Langfuse [`LangfuseSpanProcessor`](https://langfuse.com/docs/observability/sdk/typescript/setup) and register the observer in your Flue app's entrypoint (`src/app.ts`).
+`@flue/opentelemetry` only converts Flue events into spans — your application owns the OpenTelemetry SDK and exporter. Configure the SDK with the Langfuse [`LangfuseSpanProcessor`](https://langfuse.com/docs/observability/sdk/overview#setup) and register the observer in your Flue app's entrypoint (`src/app.ts`).
 
 Flue's model-turn spans follow the [OpenTelemetry GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/), so Langfuse maps them to generations with model, token usage, and cost automatically. The other Flue spans (workflow, operation, tool, task) are emitted under the `@flue/opentelemetry` instrumentation scope, so we extend the default Langfuse span filter to [include that scope](https://langfuse.com/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
 
@@ -74,10 +74,14 @@ const sdk = new NodeSDK({
 
 sdk.start();
 
-// Flush spans before a one-shot process (e.g. `flue run`) exits.
-process.on("beforeExit", async () => {
-  await sdk.shutdown();
-});
+// Flush buffered spans on exit: the one-shot `flue run` path (the event
+// loop drains) and Ctrl+C on the long-running `flue dev` server (signals).
+for (const signal of ["beforeExit", "SIGINT", "SIGTERM"] as const) {
+  process.once(signal, async () => {
+    await sdk.shutdown();
+    if (signal !== "beforeExit") process.exit(0);
+  });
+}
 
 // Register the observer after sdk.start() so it uses the configured tracer.
 observe(createOpenTelemetryObserver());
@@ -149,9 +153,7 @@ You can also run a workflow once without the server with `npx flue run weather -
 
 After running the workflow, open your [Langfuse dashboard](https://langfuse.com/cloud) to see the full trace: the workflow span, each model turn mapped to a generation (with model, token usage, and cost), and tool calls captured as nested **Tool** observations with their inputs and outputs.
 
-<!-- TODO: add a screenshot of a Flue trace. Upload the PNG to public/images/cookbook/integration-flue/flue-example-trace.png and embed it here with an image tag pointing at https://langfuse.com/images/cookbook/integration-flue/flue-example-trace.png -->
-
-[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a11bbc4370b42e3646f4fb2e9ff33b53)
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/0000000000000000000000006a33b22b)
 
 </Steps>
 
