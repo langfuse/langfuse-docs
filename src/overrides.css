@@ -1208,3 +1208,18 @@ inkeep-portal .inkeep-widget-vars {
   --ikp-font-family-body: var(--font-sans);
   --ikp-font-family-mono: var(--font-mono);
 }
+
+/*
+ * Blockquote callouts: disable the automatic typographic quotation marks.
+ * fumadocs-ui's prose typography (css/dist/style.css) styles `.prose blockquote`
+ * with `quotes: "\201C""\201D""\2018""\2019"` and injects them via
+ * `content: open-quote` / `content: close-quote` on the first/last paragraph.
+ * We use blockquotes as plain callout boxes, so the marks are unwanted.
+ */
+.prose blockquote {
+  quotes: none;
+}
+.prose blockquote p:first-of-type::before,
+.prose blockquote p:last-of-type::after {
+  content: none;
+}
