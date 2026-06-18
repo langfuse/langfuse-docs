@@ -14,7 +14,7 @@ Monitors allow you to catch cost and quality issues before they impact your user
 
 You can receive notifications over Slack, trigger GitHub Actions, or call your own Webhooks.
 
-## Create a monitor [#create]
+## Create a monitor [#monitor-setup]
 
 Navigate to [**Monitors**](https://cloud.langfuse.com/project/~/monitors) in your project and click **New Monitor**.
 
@@ -39,7 +39,7 @@ Choose what range you expect the metric values to fall within.
 | **Operator**          | `>`, `≥`, `<`, `≤`, `=`, `≠` — direction of the alert condition                          |
 | **Alert threshold**   | Required. Crossing this value sets severity to **ALERT**.                                |
 | **Warning threshold** | Optional. Crossing this value (before the alert threshold) sets severity to **WARNING**. |
-| **Window**            | How far back each evaluation looks (e.g. `1 hour`, `1 day`, `1 week`)                      |
+| **Window**            | How far back each evaluation looks (e.g. `1 hour`, `1 day`, `1 week`)                    |
 
 ### Configure advanced settings (optional)
 
@@ -61,7 +61,7 @@ Choose special handling for edge cases when data is missing or when a monitor st
 | `Off` (default)   | Alert fires once on each severity transition                    |
 | `Every N minutes` | Re-fires every N minutes while severity persists (1–10,080 min) |
 
-### Select a notification channel
+### Select a notification channel [#notification-channel]
 
 Select one or more automations from the **Automations** panel. When an alert fires, Langfuse publishes the event to each selected automation, which dispatches your configured actions (Slack message, webhook, etc.).
 
@@ -99,9 +99,9 @@ From the monitor list or detail page, use the row actions menu to **Pause** or *
 
 ## Automations [#automations]
 
-Automations route monitor alerts to external systems. Each automation pairs a **trigger** (when to fire) with an **action** (what to do).
+Automations route monitor alerts to external systems. Each automation pairs a **trigger** (a monitor severity change) with an **action** (a notification sent to an external system).
 
-Three action types are available:
+Three notification channels are available:
 
 | Action             | What it does                                                |
 | ------------------ | ----------------------------------------------------------- |
@@ -109,11 +109,22 @@ Three action types are available:
 | **Webhook**        | HTTP POST to your endpoint with an HMAC-signed JSON payload |
 | **GitHub Actions** | Fires a `workflow_dispatch` event on a GitHub repository    |
 
-### Create and link an automation [#automations-setup]
+If you would like to see another channel added, please add to the [GitHub discussions](#gh-discussion).
 
-1. Navigate to [**Automations**](https://cloud.langfuse.com/project/~/automations) and create a new automation with event source **Monitor**.
-2. [Create a new monitor](#create) or edit an existing monitor.
-3. Select the new automation in the **Automations** panel.
+### Create a monitor automation [#automation-setup]
+
+1. Navigate to [**Automations**](https://cloud.langfuse.com/project/~/automations) and click **Create Automation**.
+2. Select event source **Monitor**.
+3. Select an action type (**Slack**, **Webhook**, or **GitHub Actions**).
+4. Configure the action: provide a Slack channel, a webhook endpoint URL, or a GitHub repository dispatch URL, event type, and personal access token.
+5. Give the automation a name and click **Save**. It will appear in the [**Automations** panel](#notification-channel) when you create or edit monitors.
+
+### Link a monitor to an automation
+
+1. [Create a new monitor automation](#automation-setup) or edit an existing one.
+2. [Create a new monitor](#monitor-setup) or edit an existing one.
+3. Select the automation from the [**Automations** panel](#notification-channel) found in the **notifications section** of the monitor editor.
+4. Click **Save** to link the monitor to the selected automations.
 
 A monitor fires every linked automation whenever its severity transitions (see [Alert states](#alert-states)).
 
@@ -154,7 +165,7 @@ Your endpoint receives a signed JSON body:
 
 Signature verification works identically to prompt webhooks — see [Webhooks](/docs/prompt-management/features/webhooks-slack-integrations) for the HMAC validation code.
 
-## GitHub Discussions
+## GitHub Discussions [#gh-discussion]
 
 import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
 
