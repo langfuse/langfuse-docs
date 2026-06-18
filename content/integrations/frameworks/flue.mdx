@@ -84,7 +84,9 @@ for (const signal of ["beforeExit", "SIGINT", "SIGTERM"] as const) {
 }
 
 // Register the observer after sdk.start() so it uses the configured tracer.
-observe(createOpenTelemetryObserver());
+// exportContent forwards prompts/responses/tool payloads so they appear in
+// each observation's Input/Output; return a sanitized event in production.
+observe(createOpenTelemetryObserver({ exportContent: (event) => event }));
 
 const app = new Hono();
 app.route("/", flue());
@@ -92,7 +94,7 @@ app.route("/", flue());
 export default app;
 ```
 
-> **Capturing prompts and responses:** by default the adapter exports only metadata (identifiers, durations, model, token usage, and cost) and omits prompts, completions, and tool payloads. To include content, pass an `exportContent` callback — `createOpenTelemetryObserver({ exportContent: (event) => event })` exports everything (use a sanitizing callback in production). Langfuse maps the captured content to the corresponding observation's **Input** and **Output**, surfaces Flue tool calls as dedicated **Tool** observations, and shows delegated tasks as **Agent** observations.
+> **Capturing prompts and responses:** the `exportContent` callback in the snippet above forwards full content — prompts, completions, and tool payloads — which Langfuse maps to the corresponding observation's **Input** and **Output** (model turns become **Generation** observations, tool calls become **Tool** observations, and delegated tasks become **Agent** observations). Omit the callback to export only metadata (identifiers, durations, model, token usage, and cost); in production, return a sanitized event from `exportContent` to redact sensitive data before it leaves your app.
 
 ## Step 4: Add an example workflow
 
