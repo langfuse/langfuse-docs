@@ -130,14 +130,16 @@ See [Langchain Integration (JS/TS)](/integrations/frameworks/langchain) for more
 
 When using the [Vercel AI SDK Integration](/integrations/frameworks/vercel-ai-sdk)
 
-```ts filename="instrumentation.ts" {/sampleRate: 0.5/}
+```ts filename="instrumentation.ts" {/new TraceIdRatioBasedSampler(0.5)/}
 import { registerOTel } from "@vercel/otel";
-import { LangfuseExporter } from "langfuse-vercel";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
 
 export function register() {
   registerOTel({
     serviceName: "langfuse-vercel-ai-nextjs-example",
-    traceExporter: new LangfuseExporter({ sampleRate: 0.5 }),
+    traceSampler: new TraceIdRatioBasedSampler(0.5),
+    spanProcessors: [new LangfuseSpanProcessor()],
   });
 }
 ```
