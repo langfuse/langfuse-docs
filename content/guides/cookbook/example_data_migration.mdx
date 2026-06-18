@@ -45,19 +45,19 @@ The Langfuse public API does not currently support programmatic creation of: **L
 import os
 
 # --- SOURCE project credentials ---
-os.environ["LANGFUSE_SOURCE_PUBLIC_KEY"] = "pk-lf-.."
-os.environ["LANGFUSE_SOURCE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_SOURCE_HOST"] = "https://cloud.langfuse.com"  # e.g. EU cloud
+os.environ.setdefault("LANGFUSE_SOURCE_PUBLIC_KEY", "pk-lf-..")
+os.environ.setdefault("LANGFUSE_SOURCE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_SOURCE_HOST", "https://cloud.langfuse.com")  # e.g. EU cloud
 
 # --- DESTINATION project credentials ---
-os.environ["LANGFUSE_DEST_PUBLIC_KEY"] = "pk-lf-.."
-os.environ["LANGFUSE_DEST_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_DEST_HOST"] = "https://hipaa.cloud.langfuse.com"  # e.g. HIPAA cloud
+os.environ.setdefault("LANGFUSE_DEST_PUBLIC_KEY", "pk-lf-..")
+os.environ.setdefault("LANGFUSE_DEST_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_DEST_HOST", "https://hipaa.cloud.langfuse.com")  # e.g. HIPAA cloud
 
 # --- Optional time filter for the observations migration (ISO 8601) ---
 # Leave empty to migrate all traces.
-os.environ["LANGFUSE_MIGRATE_FROM_TIMESTAMP"] = "2026-03-01T00:00:00Z"  # e.g. "2025-01-01T00:00:00Z"
-os.environ["LANGFUSE_MIGRATE_TO_TIMESTAMP"] = "2026-04-20T00:00:00Z"    # e.g. "2025-02-01T00:00:00Z"
+os.environ.setdefault("LANGFUSE_MIGRATE_FROM_TIMESTAMP", "2026-03-01T00:00:00Z")  # e.g. "2025-01-01T00:00:00Z"
+os.environ.setdefault("LANGFUSE_MIGRATE_TO_TIMESTAMP", "2026-04-20T00:00:00Z")    # e.g. "2025-02-01T00:00:00Z"
 
 ```
 
