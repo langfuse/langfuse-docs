@@ -90,7 +90,7 @@ def load_github_discussions():
                     "login": discussion['author']['login'] if discussion['author'] else "[deleted]",
                     "html_url": discussion['author']['url'] if discussion['author'] else ""
                 },
-                "category": discussion['category']['name'] if discussion['category'] else ""
+                "category": discussion['category']['name'] if discussion['category'] else "Uncategorized"
             })
         
         if not discussions['pageInfo']['hasNextPage']:
