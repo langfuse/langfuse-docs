@@ -57,48 +57,55 @@ export function EvaluatorBlock({
         {evaluators.map((evaluator, index) => {
           const expandable = Boolean(evaluator.details);
           const isOpen = expandable && open.has(index);
+          const rowContent = (
+            <>
+              <span className="evaluator-block__name">{evaluator.name}</span>
+              {evaluator.check ? (
+                <span className="evaluator-block__check">
+                  {evaluator.check}
+                </span>
+              ) : null}
+              {expandable ? (
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  aria-hidden
+                  className="evaluator-block__chevron"
+                  style={{
+                    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                >
+                  <path
+                    d="M4 6l4 4 4-4"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ) : (
+                <span className="evaluator-block__chevron-spacer" aria-hidden />
+              )}
+            </>
+          );
           return (
             <div className="evaluator-block__group" key={evaluator.name}>
-              <button
-                type="button"
-                className="evaluator-block__row"
-                onClick={expandable ? () => toggle(index) : undefined}
-                aria-expanded={expandable ? isOpen : undefined}
-                style={expandable ? undefined : { cursor: "default" }}
-              >
-                <span className="evaluator-block__name">{evaluator.name}</span>
-                {evaluator.check ? (
-                  <span className="evaluator-block__check">
-                    {evaluator.check}
-                  </span>
-                ) : null}
-                {expandable ? (
-                  <svg
-                    width="11"
-                    height="11"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    aria-hidden
-                    className="evaluator-block__chevron"
-                    style={{
-                      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                    }}
-                  >
-                    <path
-                      d="M4 6l4 4 4-4"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                ) : (
-                  <span
-                    className="evaluator-block__chevron-spacer"
-                    aria-hidden
-                  />
-                )}
-              </button>
+              {expandable ? (
+                <button
+                  type="button"
+                  className="evaluator-block__row"
+                  onClick={() => toggle(index)}
+                  aria-expanded={isOpen}
+                >
+                  {rowContent}
+                </button>
+              ) : (
+                <div className="evaluator-block__row evaluator-block__row--static">
+                  {rowContent}
+                </div>
+              )}
 
               {isOpen ? (
                 <div className="evaluator-block__details">
@@ -172,6 +179,14 @@ export function EvaluatorBlock({
 
         .evaluator-block__row:hover {
           background: var(--surface-1);
+        }
+
+        .evaluator-block__row--static {
+          cursor: default;
+        }
+
+        .evaluator-block__row--static:hover {
+          background: transparent;
         }
 
         .evaluator-block__name {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useId, useLayoutEffect, useRef } from "react";
 
 const STATIONS = [
   { id: "trace", label: "Online", title: "Trace" },
@@ -51,6 +51,10 @@ export function AnnotatedLoop({
 
   const traceDimmed = Boolean(stations.trace?.dimmed);
   const deployDimmed = traceDimmed || Boolean(stations.eval?.dimmed);
+
+  const uid = useId().replace(/:/g, "");
+  const arrowId = `lfa-arrow-${uid}`;
+  const arrowDarkId = `lfa-arrow-dark-${uid}`;
 
   useLayoutEffect(() => {
     const wrap = wrapRef.current;
@@ -112,7 +116,7 @@ export function AnnotatedLoop({
           >
             <defs>
               <marker
-                id="lfa-arrow"
+                id={arrowId}
                 viewBox="0 0 10 10"
                 refX="9"
                 refY="5"
@@ -123,7 +127,7 @@ export function AnnotatedLoop({
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-secondary)" />
               </marker>
               <marker
-                id="lfa-arrow-dark"
+                id={arrowDarkId}
                 viewBox="0 0 10 10"
                 refX="9"
                 refY="5"
@@ -142,7 +146,7 @@ export function AnnotatedLoop({
                 stroke="var(--text-secondary)"
                 strokeWidth="1.25"
                 fill="none"
-                markerEnd="url(#lfa-arrow)"
+                markerEnd={`url(#${arrowId})`}
                 strokeLinecap="round"
               />
             ))}
@@ -164,7 +168,7 @@ export function AnnotatedLoop({
                   strokeWidth="1.25"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  markerEnd="url(#lfa-arrow-dark)"
+                  markerEnd={`url(#${arrowDarkId})`}
                 />
               </g>
             ) : null}
@@ -185,7 +189,7 @@ export function AnnotatedLoop({
                 strokeWidth="1.25"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                markerEnd="url(#lfa-arrow-dark)"
+                markerEnd={`url(#${arrowDarkId})`}
               />
             </g>
           </svg>
