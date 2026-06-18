@@ -92,7 +92,7 @@ app.route("/", flue());
 export default app;
 ```
 
-> **Capturing prompts and responses:** by default the adapter exports only metadata (identifiers, durations, model, token usage, and cost) and omits prompts, completions, and tool payloads. To include content, pass an `exportContent` callback — `createOpenTelemetryObserver({ exportContent: (event) => event })` exports everything (use a sanitizing callback in production). Langfuse maps the captured content to each observation's **Input** and **Output**, and surfaces Flue tool calls as dedicated **Tool** observations (delegated tasks become **Agent** observations).
+> **Capturing prompts and responses:** by default the adapter exports only metadata (identifiers, durations, model, token usage, and cost) and omits prompts, completions, and tool payloads. To include content, pass an `exportContent` callback — `createOpenTelemetryObserver({ exportContent: (event) => event })` exports everything (use a sanitizing callback in production). Langfuse maps the captured content to the corresponding observation's **Input** and **Output**, surfaces Flue tool calls as dedicated **Tool** observations, and shows delegated tasks as **Agent** observations.
 
 ## Step 4: Add an example workflow
 
@@ -153,7 +153,7 @@ You can also run a workflow once without the server with `npx flue run weather -
 
 After running the workflow, open your [Langfuse dashboard](https://langfuse.com/cloud) to see the full trace: the workflow span, each model turn mapped to a generation (with model, token usage, and cost), and tool calls captured as nested **Tool** observations with their inputs and outputs.
 
-[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/0000000000000000000000006a33b22b)
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/44bd24918fb224f50b88dc23de15cc01)
 
 </Steps>
 
