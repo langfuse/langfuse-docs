@@ -87,8 +87,8 @@ def load_github_discussions():
                 "resolved": discussion['answer'] is not None,
                 "labels": [label['name'] for label in discussion['labels']['nodes']],
                 "author": {
-                    "login": discussion['author']['login'],
-                    "html_url": discussion['author']['url']
+                    "login": discussion['author']['login'] if discussion['author'] else "ghost",
+                    "html_url": discussion['author']['url'] if discussion['author'] else ""
                 },
                 "category": discussion['category']['name']
             })
