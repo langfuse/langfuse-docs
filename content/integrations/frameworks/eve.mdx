@@ -64,12 +64,13 @@ export default defineInstrumentation({
       serviceName: agentName,
       spanProcessors: [
         new LangfuseSpanProcessor({
-          // Export only eve's GenAI spans — model calls, tool calls, and agent
-          // invocations. eve's durable-workflow orchestration spans and the
-          // @vercel/otel HTTP spans are infrastructure noise we keep out of
-          // Langfuse.
+          // Export eve's GenAI spans — model calls, tool calls, and agent
+          // invocations (scope `gen_ai`) — plus eve's own run span (scope
+          // `eve`), which is the parent that ties them into one trace. Drop
+          // everything else: the durable-workflow orchestration spans and the
+          // @vercel/otel HTTP spans.
           shouldExportSpan: ({ otelSpan }) =>
-            otelSpan.instrumentationScope.name === "gen_ai",
+            ["gen_ai", "eve"].includes(otelSpan.instrumentationScope.name),
         }),
       ],
     }),
@@ -90,12 +91,15 @@ The `LangfuseSpanProcessor` reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, 
 <Callout type="info">
   eve runs every turn as a durable workflow, so it emits many low-level
   orchestration spans (instrumentation scope `workflow`) alongside the model and
-  tool calls (scope `gen_ai`). The `shouldExportSpan` filter above keeps only the
-  `gen_ai` spans, so Langfuse shows the agent invocations, generations, and tool
-  calls without the workflow plumbing. Because the dropped spans include the
-  run's parent spans, the kept observations can appear as
-  [orphaned spans](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope)
-  in the UI. To keep eve's full run tree instead, drop only the HTTP noise with
+  tool calls (scope `gen_ai`) and the run span (scope `eve`). The
+  `shouldExportSpan` filter above keeps the `gen_ai` and `eve` scopes, so
+  Langfuse shows the agent invocations, generations, and tool calls nested under
+  eve's run span as one clean trace — without the workflow plumbing. Keeping the
+  `eve` scope matters: it is the parent that holds the GenAI spans together, so
+  dropping it would leave them as
+  [orphaned spans](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
+  To keep eve's full run tree including the workflow spans, drop only the HTTP
+  noise with
   `({ otelSpan }) => otelSpan.instrumentationScope.name !== "@vercel/otel/fetch"`,
   or use `() => true` to export everything. See
   [filtering by instrumentation scope](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope)
@@ -146,8 +150,9 @@ Each run is now exported to Langfuse.
 
 ### View traces in Langfuse
 
-Open your [Langfuse dashboard](https://cloud.langfuse.com) to see the trace for each run. With the `gen_ai`-only filter above, eve's spans map to the Langfuse data model as follows:
+Open your [Langfuse dashboard](https://cloud.langfuse.com) to see the trace for each run. With the scope filter above, eve's spans map to the Langfuse data model as follows:
 
+- The **eve run** becomes the **root span** that the rest nest under.
 - **Agent invocations** become **agent observations**.
 - **Model calls** become **generations** with the model name, token usage, and cost.
 - **Tool calls** become **tool observations** with their inputs and outputs.
