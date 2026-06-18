@@ -18,7 +18,7 @@ Use it to migrate a chat or agent route to AI SDK v7 beta while keeping Langfuse
 The beta package requires Node.js 22 or later.
 
 ```bash
-npm install ai@beta @ai-sdk/openai@beta @langfuse/vercel-ai-sdk@beta @langfuse/tracing@beta @langfuse/otel@beta @opentelemetry/sdk-node
+npm install ai@beta @ai-sdk/openai@beta @langfuse/client@beta @langfuse/vercel-ai-sdk@beta @langfuse/tracing@beta @langfuse/otel@beta @opentelemetry/sdk-node
 ```
 
 ```typescript filename="instrumentation.ts"
@@ -41,7 +41,11 @@ import "./instrumentation";
 
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { LangfuseClient } from "@langfuse/client";
 import { propagateAttributes } from "@langfuse/tracing";
+
+const langfuseClient = new LangfuseClient();
+const langfusePrompt = await langfuseClient.getPrompt("support-chat/default");
 
 await propagateAttributes(
   {
@@ -53,13 +57,10 @@ await propagateAttributes(
   () =>
     generateText({
       model: openai("gpt-5.1"),
-      prompt: "Explain RAG in one paragraph.",
+      prompt: langfusePrompt.compile({ topic: "RAG" }),
       runtimeContext: {
         route: "support-chat",
-        langfusePrompt: {
-          name: "support-chat/default",
-          version: 3,
-        },
+        langfusePrompt,
       },
       telemetry: {
         functionId: "support-chat",
