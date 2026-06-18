@@ -212,13 +212,17 @@ def generate_sitemap(discussions, filename="public/github-discussions-sitemap.xm
     print(f"Sitemap generated at {file_path}")
 
 if __name__ == "__main__":
+    import sys
     try:
         discussions = load_github_discussions()
         save_discussions_to_json(discussions)
         generate_sitemap(discussions)
     except ValueError as e:
         print(f"Error: {e}")
+        sys.exit(1)
     except requests.exceptions.RequestException as e:
         print(f"Network error occurred: {e}")
+        sys.exit(1)
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+        sys.exit(1)
