@@ -30,6 +30,11 @@ const jpLangfuseWebClient = new LangfuseWeb({
   baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
 });
 
+const internalLangfuseWebClient = new LangfuseWeb({
+  publicKey: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_PUBLIC_KEY,
+  baseUrl: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_BASE_URL,
+});
+
 type GeneratedImage = {
   base64: string;
   mediaType: string;
@@ -123,6 +128,7 @@ export const ImageGenerator = ({
       eulangfuseWebClient,
       usLangfuseWebClient,
       jpLangfuseWebClient,
+      internalLangfuseWebClient,
     ]) {
       client.score({
         traceId: currentImage.traceId,
