@@ -56,7 +56,7 @@ eve configures telemetry in `agent/instrumentation.ts`. Register the `LangfuseSp
 ```typescript filename="agent/instrumentation.ts"
 import { defineInstrumentation } from "eve/instrumentation";
 import { registerOTel } from "@vercel/otel";
-import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseSpanProcessor, isDefaultExportSpan } from "@langfuse/otel";
 
 export default defineInstrumentation({
   setup: ({ agentName }) =>
@@ -64,16 +64,14 @@ export default defineInstrumentation({
       serviceName: agentName,
       spanProcessors: [
         new LangfuseSpanProcessor({
-          // Export eve's GenAI spans — model calls, tool calls, and agent
-          // invocations (scope `gen_ai`) — eve's own run span (scope `eve`),
-          // which is the parent that ties them into one trace, and any spans
-          // you add with the Langfuse SDK (scope `langfuse-sdk`). Drop
-          // everything else: the durable-workflow orchestration spans and the
-          // @vercel/otel HTTP spans.
-          shouldExportSpan: ({ otelSpan }) => {
-            const scope = otelSpan.instrumentationScope.name;
-            return ["gen_ai", "eve", "langfuse-sdk"].includes(scope);
-          },
+          // Keep Langfuse's default export filter (Langfuse SDK spans, GenAI
+          // spans, and known LLM instrumentors), and additionally keep eve's
+          // `gen_ai` spans and its own run span (scope `eve`). Everything else —
+          // eve's durable-workflow orchestration and the @vercel/otel HTTP
+          // spans — is dropped.
+          shouldExportSpan: ({ otelSpan }) =>
+            isDefaultExportSpan(otelSpan) ||
+            ["gen_ai", "eve"].includes(otelSpan.instrumentationScope.name),
         }),
       ],
     }),
@@ -94,18 +92,19 @@ The `LangfuseSpanProcessor` reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, 
 <Callout type="info">
   eve runs every turn as a durable workflow, so it emits many low-level
   orchestration spans (instrumentation scope `workflow`) alongside the model and
-  tool calls (scope `gen_ai`) and the run span (scope `eve`). The
-  `shouldExportSpan` filter above keeps the `gen_ai` and `eve` scopes, so
-  Langfuse shows the agent invocations, generations, and tool calls nested under
-  eve's run span as one clean trace — without the workflow plumbing. Keeping the
-  `eve` scope matters: it is the parent that holds the GenAI spans together, so
-  dropping it would leave them as
+  tool calls (scope `gen_ai`) and the run span (scope `eve`). `shouldExportSpan`
+  replaces Langfuse's default filter, so the snippet above composes with
+  `isDefaultExportSpan` to keep that default behavior — Langfuse SDK spans
+  (`langfuse-sdk`), GenAI spans, and known LLM instrumentors — and then also
+  keeps eve's `gen_ai` and `eve` scopes. The result is one clean trace: agent
+  invocations, generations, and tool calls nested under eve's run span, plus any
+  observations you add with the Langfuse SDK (see the "Interoperability with the
+  JS/TS SDK" section below), without the workflow plumbing. Keeping the `eve`
+  scope matters — it is the
+  parent that holds the GenAI spans together, so dropping it would leave them as
   [orphaned spans](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
-  The `langfuse-sdk` scope is kept too, so any spans you add manually with the
-  Langfuse SDK (see the "Interoperability with the JS/TS SDK" section below) are
-  exported as well. Note that this allowlist replaces Langfuse's default filter
-  rather than extending it. To keep eve's full run tree including the workflow
-  spans, drop only the HTTP noise with
+  To keep eve's full run tree including the workflow spans, drop only the HTTP
+  noise with
   `({ otelSpan }) => otelSpan.instrumentationScope.name !== "@vercel/otel/fetch"`,
   or use `() => true` to export everything. See
   [filtering by instrumentation scope](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope)
