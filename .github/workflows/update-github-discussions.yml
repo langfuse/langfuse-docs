@@ -27,7 +27,7 @@ jobs:
       - name: Run load_github_discussions.py
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: uv run --with requests --python 3.11 -- python scripts/load_github_discussions.py
+        run: uv run --with requests --python 3.12 -- python scripts/load_github_discussions.py
 
       - name: Commit and push if changed
         run: |

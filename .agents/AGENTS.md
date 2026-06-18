@@ -135,6 +135,7 @@ Please check the following:
 - We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.
 - When deep-linking to a section via a link that uses the `#` anchor, make sure the anchor is explicitly defined in the source page via `[#anchor]` at the end of the header line, e.g. `## Get Started [#get-started]`.
 - If a page/route includes a top-of-file comment that points to an `md-override` source, verify both files are kept in sync whenever either side is edited.
+- When linking to a Langfuse app page from docs, use `https://cloud.langfuse.com/project/~/[path]` — the `~` sentinel redirects to the reader's last-used project and region automatically.
 
 ## Cursor Cloud specific instructions
 
