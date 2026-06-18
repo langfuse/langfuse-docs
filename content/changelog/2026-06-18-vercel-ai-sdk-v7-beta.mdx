@@ -21,13 +21,27 @@ The beta package requires Node.js 22 or later.
 npm install ai@beta @ai-sdk/openai@beta @langfuse/vercel-ai-sdk@beta @langfuse/tracing@beta @langfuse/otel@beta @opentelemetry/sdk-node
 ```
 
-```typescript
-import { generateText, registerTelemetry } from "ai";
-import { openai } from "@ai-sdk/openai";
-import { propagateAttributes } from "@langfuse/tracing";
+```typescript filename="instrumentation.ts"
+import { registerTelemetry } from "ai";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
 
 registerTelemetry(new LangfuseVercelAiSdkIntegration());
+```
+
+```typescript filename="app.ts"
+import "./instrumentation";
+
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { propagateAttributes } from "@langfuse/tracing";
 
 await propagateAttributes(
   {

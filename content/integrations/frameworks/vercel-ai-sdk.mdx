@@ -41,7 +41,7 @@ npm install ai@beta @ai-sdk/openai@beta @langfuse/vercel-ai-sdk@beta @langfuse/t
 
 </Callout>
 
-Set up OpenTelemetry with the Langfuse span processor, then register the Langfuse Vercel AI SDK integration once at application startup. For Next.js applications, place this in `instrumentation.ts`; for plain Node.js applications, run it before your AI SDK calls.
+Create an `instrumentation.ts` file with the OpenTelemetry exporter setup and register the Langfuse Vercel AI SDK integration once at application startup.
 
 ```typescript filename="instrumentation.ts"
 import { registerTelemetry } from "ai";
@@ -49,10 +49,8 @@ import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 
-export const langfuseSpanProcessor = new LangfuseSpanProcessor();
-
 const sdk = new NodeSDK({
-  spanProcessors: [langfuseSpanProcessor],
+  spanProcessors: [new LangfuseSpanProcessor()],
 });
 
 sdk.start();
@@ -60,9 +58,11 @@ sdk.start();
 registerTelemetry(new LangfuseVercelAiSdkIntegration());
 ```
 
-After the integration is registered, AI SDK v7 emits telemetry by default. Use `telemetry` to set the function name, include selected runtime context keys, or opt out of telemetry for a specific call.
+In the file that runs your AI SDK calls, import `instrumentation.ts` first. After the integration is registered, AI SDK v7 emits telemetry by default. Use `telemetry` to set the function name, include selected runtime context keys, or opt out of telemetry for a specific call.
 
-```typescript
+```typescript filename="app.ts"
+import "./instrumentation";
+
 import { generateText, tool } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { propagateAttributes } from "@langfuse/tracing";
