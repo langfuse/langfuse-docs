@@ -241,14 +241,10 @@ if (!template.includes(TOKENS_PLACEHOLDER)) {
 }
 
 // Drop the template's leading authoring comment (internal-only: it references
-// repo paths) so the public page stays free of repo-internal references, then
-// prepend an external-safe generated-by notice.
-const body = template
+// repo paths) so the public page stays free of repo-internal references.
+const output = template
   .replace(/^<!--[\s\S]*?-->\n+/, "")
   .replace(TOKENS_PLACEHOLDER, tokensMarkdown);
-const output =
-  "<!-- Generated from the live Langfuse design system. Do not edit by hand. -->\n\n" +
-  body;
 fs.writeFileSync(outPath, output);
 
 const totalTokens =
