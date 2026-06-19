@@ -10,8 +10,21 @@ The Langfuse design system is implemented with Tailwind CSS and
 This document covers UI heuristics; see the references for the full token and
 component detail:
 
-- [Design tokens](references/design-tokens.md) - the complete color, typography, and radius token set (light and dark).
+- [Design tokens](references/design-tokens.md) - the complete color, typography, and radius token set (light and dark). This file is auto-generated from `style.css` and `app/layout.tsx` by `scripts/sync-design-tokens.js`; run `pnpm sync-design-tokens` to refresh it. Treat it, not this document, as the source of truth for exact values.
 - [Components](references/components.md) - component patterns and how tokens map to shadcn/ui.
+
+## Before using these tokens (required)
+
+The token reference is generated from the live app theme and can go stale.
+Regenerate it before reading or applying any color, font, typography, or radius
+value:
+
+```sh
+pnpm sync-design-tokens
+```
+
+Only rely on [references/design-tokens.md](references/design-tokens.md) after
+running this.
 
 ## Core principles
 
@@ -43,12 +56,18 @@ Use the text tokens to express hierarchy instead of opacity hacks:
 
 ## Radius
 
-A single base radius (`--radius: 0.5rem`) drives the scale: `rounded-lg`
-(`--radius`), `rounded-md` (`--radius - 2px`), `rounded-sm` (`--radius - 4px`).
-Prefer these over arbitrary radii.
+A single base radius (`--radius`) drives the scale: `rounded-lg`, `rounded-md`,
+and `rounded-sm`. Prefer these over arbitrary radii. See the
+[design tokens](references/design-tokens.md) reference for the resolved values.
 
 ## Typography in UI
 
-- Body and UI: `font-sans` (Geist Sans).
-- Code and monospaced data: `font-mono` (Geist Mono).
+- Body and UI: `font-sans`.
+- Code and monospaced data: `font-mono`.
+- Display / serif accent: `font-analog`.
 - Headings in sentence case; reserve title case for short standalone labels.
+
+The exact font families and weights backing these utilities are resolved from
+`app/layout.tsx` and listed in the
+[design tokens](references/design-tokens.md) reference, so they never drift from
+the app.

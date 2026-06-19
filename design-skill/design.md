@@ -1,6 +1,6 @@
 # Langfuse Design
 
-> Langfuse's design and brand system - our logo, typography, color palette, voice, and product UI patterns. Langfuse is the open source AI engineering platform. 
+> Langfuse's design and brand system - our logo, typography, color palette, voice, and product UI patterns. Langfuse is the open source AI engineering platform.
 > The official brand assets and download package live at https://langfuse.com/brand.
 
 ## Get the Agent Skill
@@ -11,6 +11,10 @@ Install them with a single command:
 ```sh
 npx skills add langfuse/design-skill
 ```
+
+The skill regenerates its design tokens from the live app theme on use - see
+[SKILL.md](SKILL.md), which requires running `pnpm sync-design-tokens` before
+any token value is applied, so the design system is never outdated.
 
 ## Guidelines
 

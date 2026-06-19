@@ -37,28 +37,37 @@ Usage rules:
 
 ## Color palette
 
+Before applying any color or font value, regenerate the token reference so it
+reflects the live app theme: run `pnpm sync-design-tokens`.
+
 Langfuse uses a warm, near-neutral palette with a high-energy yellow as the
-primary call-to-action accent. Colors are defined as design tokens (see
-[design-tokens.md](../design-system/references/design-tokens.md) for the
-complete set, including dark mode). The brand-defining values:
+primary call-to-action accent. Colors are defined as design tokens, never
+hard-coded hex. The brand-defining roles map to these tokens:
 
-| Role         | Light     | Dark      |
-| ------------ | --------- | --------- |
-| Background   | `#f6f6f3` | `#171714` |
-| Primary text | `#222220` | `#e8e8e4` |
-| CTA / accent | `#fbff81` | `#4c4d23` |
-| Links        | `#4f39f6` | `#7b8ff8` |
-| Code surface | `#333333` | `#0e0e0c` |
-| Beige accent | `#f1ede1` | `#f1ede1` |
+| Role                      | Token                    |
+| ------------------------- | ------------------------ |
+| Page background           | `--surface-bg`           |
+| Primary text              | `--text-primary`         |
+| CTA / accent (the yellow) | `--surface-cta-primary`  |
+| Links                     | `--text-links`           |
+| Code surface              | `--surface-code`         |
+| Warm beige accent         | `--surface-beige-accent` |
 
-Principle: in product and site code, always reference the **semantic token**
-(e.g. `surface-bg`, `text-primary`, `surface-cta-primary`) rather than a
-hard-coded hex value, so light and dark modes stay in sync.
+The exact light and dark values for every token are maintained in the
+auto-generated [design tokens](../design-system/references/design-tokens.md)
+reference (`pnpm sync-design-tokens`). In product and site code, always
+reference the **semantic token** rather than a hard-coded hex value, so light
+and dark modes stay in sync.
 
 ## Typography
 
-- **Sans (UI and body):** Geist Sans (`--font-geist-sans`).
-- **Mono (code):** Geist Mono (`--font-geist-mono`).
+- **Sans (UI and body):** Tailwind `font-sans` / `--font-sans`.
+- **Mono (code):** `font-mono` / `--font-mono`.
+- **Display (serif accent):** `font-analog` / `--font-analog`.
+
+The exact font families and weights are resolved from `app/layout.tsx` and
+listed in the [design tokens](../design-system/references/design-tokens.md)
+reference, so they never drift from the app.
 
 Use sentence case for headlines, section headings, and hero copy by default.
 Keep title case only for short standalone navigation/UI labels where it reads

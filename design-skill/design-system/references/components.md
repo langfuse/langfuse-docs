@@ -33,7 +33,7 @@ a matter of choosing the right variant rather than passing colors:
 - Background: `surface-code` (dark in both themes) with `surface-code-grey` for inline variants.
 - Syntax accents: `text-code-orange`, `text-code-pink`, `text-code-blue`; secondary code text uses `text-code-secondary`.
 - Border: `line-code-border`. Copy buttons use `surface-code-button`.
-- Font: `font-mono` (Geist Mono).
+- Font: `font-mono` (see [design-tokens.md](design-tokens.md) for the resolved family).
 
 ## Callouts
 
