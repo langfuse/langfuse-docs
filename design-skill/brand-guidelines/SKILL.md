@@ -17,28 +17,25 @@ Three asset families are available, each in light, dark, and monochrome
 variants (SVG and PNG):
 
 - **Icon** - the standalone mark. Color and monochrome.
-  - `/brand-assets/icon/color/langfuse-icon.svg` (and `.png`)
-  - `/brand-assets/icon/monochrome/langfuse-icon-monochrome.svg`
+  - [Color (SVG)](https://langfuse.com/brand-assets/icon/color/langfuse-icon.svg) / [Color (PNG)](https://langfuse.com/brand-assets/icon/color/langfuse-icon.png)
+  - [Monochrome (SVG)](https://langfuse.com/brand-assets/icon/monochrome/langfuse-icon-monochrome.svg)
 - **Wordmark - Langfuse** - the primary wordmark.
-  - Light: `/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg` (and `.png`)
-  - Dark (white): `/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.svg` (and `.png`)
-  - Monochrome: `/brand-assets/wordmark/Langfuse/monochrome/langfuse-wordart-monochrome.svg`
+  - [Light (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg) / [Light (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse/light/langfuse-wordart.png)
+  - [Dark / white (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.svg) / [Dark / white (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.png)
+  - [Monochrome (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse/monochrome/langfuse-wordart-monochrome.svg)
 - **Wordmark - Langfuse by ClickHouse** - the co-branded lockup.
-  - Light: `/brand-assets/wordmark/Langfuse by ClickHouse/light/langfuse-by-clickhouse.svg` (and `.png`)
-  - Dark (white): `/brand-assets/wordmark/Langfuse by ClickHouse/dark/langfuse-by-clickhouse-white.svg` (and `.png`)
-  - Monochrome: `/brand-assets/wordmark/Langfuse by ClickHouse/monochrome/langfuse-by-clickhouse-monochrome.svg`
+  - [Light (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.svg) / [Light (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.png)
+  - [Dark / white (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.svg) / [Dark / white (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.png)
+  - [Monochrome (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/monochrome/langfuse-by-clickhouse-monochrome.svg)
 
 Usage rules:
 
 - Use the light wordmark on light backgrounds and the dark (white) wordmark on dark or photographic backgrounds.
 - Use the monochrome variants when color reproduction is constrained (single-color print, embossing, watermarks).
 - Maintain clear space around the logo and never stretch, recolor, or add effects to it.
-- Download the complete package (all variants) from [langfuse.com/brand](https://langfuse.com/brand) (`/brand-assets.zip`).
+- Download the complete package (all variants) from [langfuse.com/brand](https://langfuse.com/brand).
 
 ## Color palette
-
-Before applying any color or font value, regenerate the token reference so it
-reflects the live app theme: run `pnpm sync-design-tokens`.
 
 Langfuse uses a warm, near-neutral palette with a high-energy yellow as the
 primary call-to-action accent. Colors are defined as design tokens, never
@@ -53,11 +50,10 @@ hard-coded hex. The brand-defining roles map to these tokens:
 | Code surface              | `--surface-code`         |
 | Warm beige accent         | `--surface-beige-accent` |
 
-The exact light and dark values for every token are maintained in the
-auto-generated [design tokens](../design-system/references/design-tokens.md)
-reference (`pnpm sync-design-tokens`). In product and site code, always
-reference the **semantic token** rather than a hard-coded hex value, so light
-and dark modes stay in sync.
+The exact light and dark values for every token, kept in sync with the live
+app, are published at [langfuse.com/design.md](https://langfuse.com/design.md).
+Always reference the **semantic token** rather than a hard-coded hex value, so
+light and dark modes stay in sync.
 
 ## Typography
 
@@ -65,9 +61,9 @@ and dark modes stay in sync.
 - **Mono (code):** `font-mono` / `--font-mono`.
 - **Display (serif accent):** `font-analog` / `--font-analog`.
 
-The exact font families and weights are resolved from `app/layout.tsx` and
-listed in the [design tokens](../design-system/references/design-tokens.md)
-reference, so they never drift from the app.
+The exact font families and weights backing these utilities are published,
+in sync with the live app, at
+[langfuse.com/design.md](https://langfuse.com/design.md).
 
 Use sentence case for headlines, section headings, and hero copy by default.
 Keep title case only for short standalone navigation/UI labels where it reads
