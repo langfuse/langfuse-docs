@@ -17,6 +17,8 @@ Full-text search lets you find all occurrences of a specific keyword or phrase a
 
 Use the search bar above the traces and observations tables to search across `input` and `output` content. Matching traces and observations are returned so you can quickly locate the run you are looking for and combine search with the existing filters and time range selectors.
 
+On the v4 Observations and Traces tables, full-text search is also available inline in the [Filter Search Bar](/docs/observability/features/filter-search-bar), alongside structured filters like `level:ERROR` and `latency:>2`.
+
 ## Performance [#performance]
 
 Search uses [ClickHouse full-text search](https://clickhouse.com/docs/engines/table-engines/mergetree-family/textindexes). Text indexes let Langfuse skip over data that cannot match a query before reading full observation payloads, which keeps search fast even for large projects with high-volume traces. You can read more in the [ClickHouse GA announcement](https://clickhouse.com/blog/full-text-search-ga-release).
