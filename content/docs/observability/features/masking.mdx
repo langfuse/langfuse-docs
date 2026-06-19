@@ -75,6 +75,12 @@ langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
 - The hook can only change span attributes. It cannot change the span name, IDs, parent relationship, resource attributes, events, links, or instrumentation scope.
 - The hook affects only spans exported by this Langfuse client. If the same OpenTelemetry spans are sent to another exporter, that exporter receives its own unmodified copy.
 
+<Callout type="info">
+
+`mask_otel_spans` only affects spans that pass through the Langfuse Python SDK span processor and are exported by this Langfuse client. If you also send telemetry to another observability backend through a separate OpenTelemetry span processor or exporter, that backend receives its own unmodified copy of the spans. Configure masking separately for any non-Langfuse exporter.
+
+</Callout>
+
 <Callout type="warning">
 
 `mask_otel_spans` is synchronous. It usually runs on the OpenTelemetry batch span processor worker thread, so it should not block the main caller thread of your application. During `flush()` and shutdown it may run on the caller thread.
