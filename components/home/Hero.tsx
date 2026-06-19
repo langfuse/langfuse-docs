@@ -5,15 +5,20 @@ import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { HeroStatsStrip } from "@/components/home/HeroStatsStrip";
 import { HeroSlogan } from "@/components/home/HeroSlogan";
+import type { HeroSloganVariant } from "@/lib/hero-slogan-variant";
 
-export function Hero() {
+export function Hero({
+  heroSloganVariant,
+}: {
+  heroSloganVariant: HeroSloganVariant;
+}) {
   return (
     <HomeSection className="pt-5 sm:pt-8 md:pt-[60px]">
       <CornerBox className="-mb-px -mt-px">
         <HeroStatsStrip />
       </CornerBox>
       <CornerBox className="flex flex-col gap-4 sm:gap-8 md:gap-10 items-center px-4 py-8 sm:px-8 sm:py-10">
-        <HeroSlogan />
+        <HeroSlogan initialVariant={heroSloganVariant} />
         <div className="flex flex-col gap-6">
           <Text className="max-w-xl">
             Trace and evaluate AI Agents. Collaborate with your team to

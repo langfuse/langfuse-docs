@@ -1,23 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { usePostHog } from "posthog-js/react";
 import { Heading } from "@/components/ui/heading";
 import { TextHighlight } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
-
-const STORAGE_KEY = "langfuse-hero-slogan-variant";
-
-type HeroSloganVariant = "ai-engineering" | "agent-evals";
-
-function pickVariant(): HeroSloganVariant {
-  return Math.random() < 0.5 ? "ai-engineering" : "agent-evals";
-}
+import {
+  HERO_SLOGAN_VARIANT_KEY,
+  type HeroSloganVariant,
+} from "@/lib/hero-slogan-variant";
 
 function readStoredVariant(): HeroSloganVariant | null {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(HERO_SLOGAN_VARIANT_KEY);
     if (stored === "ai-engineering" || stored === "agent-evals") {
       return stored;
     }
@@ -29,7 +25,7 @@ function readStoredVariant(): HeroSloganVariant | null {
 
 function persistVariant(variant: HeroSloganVariant) {
   try {
-    localStorage.setItem(STORAGE_KEY, variant);
+    localStorage.setItem(HERO_SLOGAN_VARIANT_KEY, variant);
   } catch {
     // ignore write failures
   }
@@ -40,6 +36,8 @@ const headingClassName = cn(
   "[leading-trim:both] [text-edge:cap]",
 );
 
+const desktopWordSpacing = "max-[499px]:pr-1.75 min-[500px]:pr-2";
+
 function AiEngineeringSlogan() {
   return (
     <>
@@ -49,10 +47,10 @@ function AiEngineeringSlogan() {
       >
         Open Source<span className="inline max-[499px]:hidden">&nbsp;</span>
       </TextHighlight>
-      <span className="flex min-[500px]:inline">
+      <span className="flex flex-wrap justify-center min-[500px]:inline">
         <TextHighlight
           highlightClassName="mix-blend-multiply"
-          className="max-[499px]:pr-1.75"
+          className={desktopWordSpacing}
         >
           AI
         </TextHighlight>
@@ -71,9 +69,6 @@ function AiEngineeringSlogan() {
 }
 
 function AgentEvalsSlogan() {
-  const wordGap = "gap-x-1.5 sm:gap-x-2";
-  const phraseGap = "gap-x-3 sm:gap-x-4";
-
   return (
     <>
       <TextHighlight
@@ -82,61 +77,87 @@ function AgentEvalsSlogan() {
       >
         Open Source
       </TextHighlight>
-      <span
-        className={cn(
-          "flex flex-wrap justify-center items-center",
-          phraseGap,
-        )}
-      >
-        <span className={cn("inline-flex items-center", wordGap)}>
-          <TextHighlight highlightClassName="mix-blend-multiply">
-            Agent
-          </TextHighlight>
-          <TextHighlight highlightClassName="mix-blend-multiply">
-            Evals
-          </TextHighlight>
-        </span>
-        <span className={cn("inline-flex items-center", wordGap)}>
-          <TextHighlight highlightClassName="mix-blend-multiply">
-            and
-          </TextHighlight>
-          <TextHighlight highlightClassName="mix-blend-multiply">
-            Tracing
-          </TextHighlight>
-        </span>
+      <span className="flex flex-wrap justify-center min-[500px]:inline">
+        <TextHighlight
+          highlightClassName="mix-blend-multiply"
+          className={desktopWordSpacing}
+        >
+          Agent
+        </TextHighlight>
+        <TextHighlight
+          highlightClassName="mix-blend-multiply"
+          className={desktopWordSpacing}
+        >
+          Evals
+        </TextHighlight>
+        <TextHighlight
+          highlightClassName="mix-blend-multiply"
+          className={desktopWordSpacing}
+        >
+          and
+        </TextHighlight>
+        <TextHighlight highlightClassName="mix-blend-multiply">
+          Tracing
+        </TextHighlight>
       </span>
     </>
   );
 }
 
-export function HeroSlogan() {
+function trackHeroSloganExposure(
+  posthog: ReturnType<typeof usePostHog>,
+  capture: ReturnType<typeof usePostHogClientCapture>,
+  variant: HeroSloganVariant,
+  isNewAssignment: boolean,
+) {
+  posthog.register({ hero_slogan_variant: variant });
+  capture("hero_slogan_exposure", {
+    variant,
+    is_new_assignment: isNewAssignment,
+  });
+}
+
+export function HeroSlogan({
+  initialVariant,
+}: {
+  initialVariant: HeroSloganVariant;
+}) {
   const posthog = usePostHog();
   const capture = usePostHogClientCapture();
-  const [variant, setVariant] = useState<HeroSloganVariant>("ai-engineering");
+  const trackedRef = useRef(false);
 
   useEffect(() => {
-    const stored = readStoredVariant();
-    const nextVariant = stored ?? pickVariant();
-    const isNewAssignment = !stored;
+    const hadLocalStorage = readStoredVariant() !== null;
+    persistVariant(initialVariant);
 
-    if (!stored) {
-      persistVariant(nextVariant);
+    if (trackedRef.current) {
+      return;
     }
 
-    setVariant(nextVariant);
+    const runTracking = () => {
+      if (trackedRef.current) {
+        return;
+      }
+      trackedRef.current = true;
+      trackHeroSloganExposure(
+        posthog,
+        capture,
+        initialVariant,
+        !hadLocalStorage,
+      );
+    };
 
-    posthog.register({ hero_slogan_variant: nextVariant });
-    capture("hero_slogan_exposure", {
-      variant: nextVariant,
-      is_new_assignment: isNewAssignment,
-    });
-    // Track once when the hero mounts on the homepage.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if ((posthog as { __loaded?: boolean }).__loaded) {
+      runTracking();
+      return;
+    }
+
+    posthog.onSessionId(runTracking);
+  }, [capture, initialVariant, posthog]);
 
   return (
     <Heading as="h1" size="big" className={headingClassName}>
-      {variant === "ai-engineering" ? (
+      {initialVariant === "ai-engineering" ? (
         <AiEngineeringSlogan />
       ) : (
         <AgentEvalsSlogan />

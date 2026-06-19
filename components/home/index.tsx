@@ -9,11 +9,16 @@ import { Enterprise } from "./Enterprise";
 import { WhyLangfuse } from "./WhyLangfuse";
 import { GetStartedSection } from "./GetStartedSection";
 import { FAQ } from "./FAQ";
+import type { HeroSloganVariant } from "@/lib/hero-slogan-variant";
 
-export const Home = () => (
+export const Home = ({
+  heroSloganVariant,
+}: {
+  heroSloganVariant: HeroSloganVariant;
+}) => (
   <>
     <main className="overflow-hidden relative w-full hero-bg xl:px-5 2xl:px-10">
-      <Hero />
+      <Hero heroSloganVariant={heroSloganVariant} />
       <FeatureTabsSection />
       <RiveSection />
       <AllTheTools />
