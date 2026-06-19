@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
 import { hsPageView } from "@/components/analytics/hubspot";
+import { crPageView } from "@/components/analytics/common-room";
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isInitialPageView = useRef(true);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -36,6 +38,13 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     if (pathname) {
       posthog.capture("$pageview");
       hsPageView(pathname);
+      // Common Room's snippet auto-tracks the first page load, so only report
+      // subsequent client-side navigations to avoid double counting.
+      if (isInitialPageView.current) {
+        isInitialPageView.current = false;
+      } else {
+        crPageView();
+      }
     }
   }, [pathname]);
 
