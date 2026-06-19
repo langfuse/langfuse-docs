@@ -1,0 +1,121 @@
+---
+title: Slack Integration with Langfuse
+sidebarTitle: Slack
+logo: /images/integrations/slack_icon.svg
+description: Send Langfuse prompt update and monitor alert notifications to Slack channels.
+---
+
+import { Details, Summary } from "@/components/Details";
+
+# Slack Integration
+
+Send Langfuse notifications to Slack so your team can see prompt changes and monitor alerts in the channels where you already coordinate releases, incidents, and product updates.
+
+<div className="not-prose my-6 flex flex-wrap gap-3">
+  <a
+    href="http://cloud.langfuse.com/api/public/slack/marketplace-install"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex h-10 items-center gap-3 rounded border border-line-structure bg-white px-4 font-sans text-sm font-semibold text-black no-underline shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+  >
+    <img
+      src="/images/integrations/slack_icon.svg"
+      alt=""
+      className="h-5 w-5"
+    />
+    Add to Slack
+  </a>
+</div>
+
+## What the Slack app does
+
+The Langfuse Slack app posts selected Langfuse events into Slack channels. Teams use it to keep prompt changes visible during development and to route monitor alerts into operational channels.
+
+You need a Langfuse account and project to use the Slack integration. Slack notifications are configured per Langfuse project.
+
+- [**Prompt notifications**](/docs/prompt-management/features/webhooks-slack-integrations): Get notified when prompt versions are created, updated, or deleted. Use this to review production prompt changes, coordinate releases, and audit prompt lifecycle events.
+- [**Monitor alerts**](/docs/metrics/features/monitors): Send threshold-based alert and recovery notifications for Langfuse monitors to Slack. Use this to surface latency, cost, score, or quality changes before they affect users.
+
+## Get started
+
+<Steps>
+
+### Add Langfuse to Slack
+
+Click **Add to Slack** above and authorize Langfuse for your Slack workspace.
+
+<Frame>
+  ![Allow Langfuse to access Slack](/images/docs/slack-marketplace-allow-access.png)
+</Frame>
+
+After installation, Langfuse redirects you back to the app.
+
+### Log in to Langfuse
+
+Choose the data region that matches your Langfuse project, then sign in or create an account.
+
+<Frame className="max-w-md">
+  ![Select the Langfuse region before signing in](/images/docs/slack-langfuse-region-login.png)
+</Frame>
+
+### Connect your project with Slack
+
+Choose the Langfuse project that should use this Slack workspace. Alerts and prompt notifications for that project will post to the channels you configure.
+
+<Frame>
+  ![Connect a Slack workspace to a Langfuse project](/images/docs/slack-project-connect.png)
+</Frame>
+
+### Test the integration
+
+Select a Slack channel and send a test message to confirm that Langfuse can post to your workspace.
+
+<Frame>
+  ![Test the Langfuse Slack integration](/images/docs/slack-test-integration.png)
+</Frame>
+
+### Configure notifications
+
+Choose what Langfuse should send to Slack:
+
+- [Configure prompt update notifications](/docs/prompt-management/features/webhooks-slack-integrations) for prompt version creation, updates, deletion, labels, and tags.
+- [Configure monitor alert notifications](/docs/metrics/features/monitors) for warning, alert, recovery, and re-notification events.
+
+</Steps>
+
+## FAQ
+
+<Details>
+<Summary>Which Slack permissions does Langfuse request?</Summary>
+
+Langfuse requests the following bot scopes:
+
+- `channels:read`: Read public channel metadata so you can choose a destination channel.
+- `groups:read`: Read private channel metadata for private channels that the app was invited to.
+- `chat:write`: Post configured Langfuse notifications as the Langfuse app.
+- `chat:write.public`: Post to public channels without requiring the app to be manually invited first.
+
+</Details>
+
+<Details>
+<Summary>Why can't I select a private Slack channel?</Summary>
+
+Invite the Langfuse app to the private channel in Slack first, then refresh the channel selector in Langfuse. Slack only exposes private channels to apps that are members of those channels.
+
+</Details>
+
+<Details>
+<Summary>How does Langfuse handle Slack data?</Summary>
+
+Langfuse uses Slack OAuth to connect your workspace. Slack credentials are stored encrypted in Langfuse. The Slack app posts only the notifications you configure to the selected Slack channels.
+
+For details about how Langfuse handles data, see the [Langfuse Privacy Policy](/privacy).
+
+</Details>
+
+<Details>
+<Summary>Where can I get support?</Summary>
+
+Contact [support@langfuse.com](mailto:support@langfuse.com) or use the in-app support flow in Langfuse.
+
+</Details>
