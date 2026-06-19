@@ -28,10 +28,10 @@ _**Note:** This guide uses our Python SDK v2. We have a new, improved SDK availa
 ```python
 import os
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_HOST"] = ""
-os.environ["OPENAI_API_KEY"] = ""
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
+os.environ.setdefault("LANGFUSE_HOST", "")
+os.environ.setdefault("OPENAI_API_KEY", "")
 ```
 
 

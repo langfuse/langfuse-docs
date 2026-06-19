@@ -187,12 +187,12 @@ When using the [Vercel AI SDK Integration](/integrations/frameworks/vercel-ai-sd
 
 ```ts filename="instrumentation.ts" {/environment: "production"/}
 import { registerOTel } from "@vercel/otel";
-import { LangfuseExporter } from "langfuse-vercel";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
 
 export function register() {
   registerOTel({
     serviceName: "langfuse-vercel-ai-nextjs-example",
-    traceExporter: new LangfuseExporter({ environment: "production" }),
+    spanProcessors: [new LangfuseSpanProcessor({ environment: "production" })],
   });
 }
 ```

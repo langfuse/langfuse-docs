@@ -55,6 +55,15 @@ export interface GlossaryTerm {
 // Glossary data
 const glossaryTerms: GlossaryTerm[] = [
   {
+    term: "AI Engineering Loop",
+    id: "ai-engineering-loop",
+    definition:
+      "A lifecycle for continuously improving AI-powered systems by connecting production visibility with development workflows. It moves from tracing and monitoring real behavior to building datasets, running experiments, and evaluating changes before the cycle starts again.",
+    link: "/academy/ai-engineering-loop",
+    categories: ["OBSERVABILITY", "EVALUATION"],
+    relatedTerms: ["Trace", "LLM-as-a-Judge", "Dataset", "Evaluator"],
+  },
+  {
     term: "Agent",
     id: "agent",
     definition:

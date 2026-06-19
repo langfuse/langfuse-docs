@@ -32,13 +32,13 @@ LANGFUSE_PUBLIC_KEY = "pk-lf-..."
 LANGFUSE_SECRET_KEY = "sk-lf-..."
 LANGFUSE_AUTH = base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
 
-os.environ["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel/v1/traces"  # 🇪🇺 EU data region
+os.environ.setdefault("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "https://cloud.langfuse.com/api/public/otel/v1/traces")  # 🇪🇺 EU data region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel
-os.environ["OTEL_EXPORTER_OTLP_TRACES_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
-os.environ['OTEL_EXPORTER_OTLP_TRACES_PROTOCOL']= "http/protobuf"
+os.environ.setdefault("OTEL_EXPORTER_OTLP_TRACES_HEADERS", f"Authorization=Basic {LANGFUSE_AUTH}")
+os.environ.setdefault("OTEL_EXPORTER_OTLP_TRACES_PROTOCOL", "http/protobuf")
 
 # Set your OpenAI API key.
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
 ```
 
 Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` uses the endpoint and headers from the environment variables.

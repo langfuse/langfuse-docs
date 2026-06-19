@@ -11,7 +11,45 @@ Langfuse [pricing](/pricing) is based on the number of ingested units per billin
 
 For Langfuse Cloud, you can use our [pricing calculator](/pricing?calculatorOpen=true) to estimate your monthly costs based on your expected usage.
 
-### FAQ
+## Self-hosted (OSS)
+
+Self-hosted Langfuse (OSS) is free under the MIT license, so there is no usage-based bill. The unit definition above is still useful when you want to quantify your data volume, for example to estimate the cost of moving to [Langfuse Cloud](/pricing) or to size a [self-hosted](/self-hosting) deployment.
+
+You can read your unit counts directly from the built-in **Langfuse Usage Management** dashboard, one of Langfuse's curated dashboards (see [Custom Dashboards](/docs/metrics/features/custom-dashboards)).
+
+<Steps>
+
+### Open the dashboard
+
+In your Langfuse project, go to **Dashboards** and open **Langfuse Usage Management**.
+
+<Frame>
+  ![List of Langfuse dashboards including the maintained Langfuse Usage Management dashboard](/images/docs/self-hosted-usage-management-dashboards-list.png)
+</Frame>
+
+### Select the last 30 days
+
+Set the date range to the last 30 days to capture a month of usage.
+
+### Sum the counts
+
+Add the count widgets together to get your monthly units:
+
+- **Total Trace Count**
+- **Total Observation Count**
+- **Total Score Count** (add the numeric and categorical widgets)
+
+<Frame>
+  ![Langfuse Usage Management dashboard showing total trace, observation, and score counts](/images/docs/self-hosted-usage-management-dashboard.png)
+</Frame>
+
+</Steps>
+
+For the example above:
+
+`Units` = `20,070 Traces` + `119,500 Observations` + `561 Scores` = `140,131 units / month` (≈ `1,681,572 units / year`)
+
+## FAQ
 
 **How can I track my usage in Langfuse Cloud?** Use the Usage Monitoring Report in the Dashboards tab in Langfuse to analyze your Langfuse Cloud usage per project. For organization-wide usage, use the [spend alerts](/docs/administration/spend-alerts).
 
