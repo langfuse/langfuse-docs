@@ -425,6 +425,37 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 </Tab>
 </LangTabs>
 
+### Browser score ingestion [#browser-score-ingestion]
+
+Use `@langfuse/browser` when the score is created in frontend code, for example thumbs up/down user feedback, star ratings, or client-side quality signals. The browser SDK only needs a Langfuse public key and sends each score immediately via the ingestion API. Do not expose a secret key in browser code.
+
+For backend services, scripts, CI jobs, and evaluation pipelines, use `@langfuse/client` as shown in the JS/TS SDK examples above.
+
+```bash
+npm install @langfuse/browser
+```
+
+```ts
+import { LangfuseBrowserClient } from "@langfuse/browser";
+
+const langfuse = new LangfuseBrowserClient({
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY!,
+  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL, // optional, defaults to https://cloud.langfuse.com
+});
+
+await langfuse.score({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  id: `user-feedback-${message.traceId}`, // optional, use as an idempotency key
+  name: "user-feedback",
+  value: 1, // 1 for positive, 0 for negative
+  dataType: "BOOLEAN",
+  comment: "Helpful answer", // optional
+});
+```
+
+`score()` returns `{ id }` after ingestion succeeds. No `flush()` call is required.
+
 ### Session-level Scores
 
 To score an entire session (without attaching the score to a trace or observation), provide only `session_id` (Python SDK) or `sessionId` (JS/TS SDK and API).

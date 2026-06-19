@@ -1,0 +1,15 @@
+---
+title: Why do I see empty files in my blob storage export?
+description: Empty files in a Langfuse blob storage export are expected and normal — this article explains why they appear and how to handle them in downstream pipelines.
+tags: [platform, integration]
+---
+
+import BlobStorageEmptyFiles from "@/components-mdx/blob-storage-empty-files.mdx";
+
+# Why do I see empty files in my blob storage export?
+
+The [blob storage integration](/docs/api-and-data-platform/features/export-to-blob-storage) exports one time window of data per run, writing a file per table (for example `observations_v2/` and `scores/`). If you find empty files in your bucket, this is expected behavior — here's why, and how to handle it.
+
+<BlobStorageEmptyFiles />
+
+For the full file layout and field reference, see the [Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields).
