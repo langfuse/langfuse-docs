@@ -46,7 +46,7 @@ Your backend sends the trace ID so frontend can link feedback to the trace.
 
 ```typescript
 // app/api/chat/route.ts
-import { getActiveTraceId } from "@Langfuse/tracing";
+import { getActiveTraceId } from "@langfuse/tracing";
 
 export const POST = observe(async (req: Request) => {
   const result = streamText({
