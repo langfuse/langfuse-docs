@@ -68,7 +68,7 @@ import { LangfuseBrowserClient } from "@langfuse/browser";
 
 const langfuse = new LangfuseBrowserClient({
   publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY!,
-  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_HOST,
+  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL,
 });
 function FeedbackButtons({ messageId }: { messageId: string }) {
   const handleFeedback = async (value: number, comment?: string) => {
