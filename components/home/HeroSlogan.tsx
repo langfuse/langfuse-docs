@@ -71,36 +71,39 @@ function AiEngineeringSlogan() {
 }
 
 function AgentEvalsSlogan() {
+  const wordGap = "gap-x-1.5 sm:gap-x-2";
+  const phraseGap = "gap-x-3 sm:gap-x-4";
+
   return (
     <>
       <TextHighlight
         highlightClassName="mix-blend-multiply"
         className="whitespace-nowrap"
       >
-        Open Source<span className="inline max-[499px]:hidden">&nbsp;</span>
+        Open Source
       </TextHighlight>
-      <span className="flex min-[500px]:inline">
-        <TextHighlight
-          highlightClassName="mix-blend-multiply"
-          className="max-[499px]:pr-1.75"
-        >
-          Agent
-        </TextHighlight>
-        <TextHighlight
-          highlightClassName="mix-blend-multiply"
-          className="max-[499px]:pr-1.75"
-        >
-          Evals
-        </TextHighlight>
-        <TextHighlight
-          highlightClassName="mix-blend-multiply"
-          className="max-[499px]:pr-1.75"
-        >
-          and
-        </TextHighlight>
-        <TextHighlight highlightClassName="mix-blend-multiply">
-          Tracing
-        </TextHighlight>
+      <span
+        className={cn(
+          "flex flex-wrap justify-center items-center",
+          phraseGap,
+        )}
+      >
+        <span className={cn("inline-flex items-center", wordGap)}>
+          <TextHighlight highlightClassName="mix-blend-multiply">
+            Agent
+          </TextHighlight>
+          <TextHighlight highlightClassName="mix-blend-multiply">
+            Evals
+          </TextHighlight>
+        </span>
+        <span className={cn("inline-flex items-center", wordGap)}>
+          <TextHighlight highlightClassName="mix-blend-multiply">
+            and
+          </TextHighlight>
+          <TextHighlight highlightClassName="mix-blend-multiply">
+            Tracing
+          </TextHighlight>
+        </span>
       </span>
     </>
   );
