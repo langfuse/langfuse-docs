@@ -17,6 +17,7 @@ import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
 import { RedditPixel } from "@/components/analytics/reddit-ads";
 import { TwitterPixel } from "@/components/analytics/twitter-ads";
 import { ConversionTracker } from "@/components/analytics/ConversionTracker";
+import { ScarfPixel } from "@/components/analytics/scarf";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
@@ -100,6 +101,7 @@ export default function RootLayout({
             <RedditPixel />
             <TwitterPixel />
             <ConversionTracker />
+            <ScarfPixel />
             <Hubspot />
             <Script
               id="cookieyes"
