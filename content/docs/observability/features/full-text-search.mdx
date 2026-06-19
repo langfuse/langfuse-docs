@@ -23,6 +23,8 @@ On the v4 Observations and Traces tables, full-text search is also available inl
 
 Search uses [ClickHouse full-text search](https://clickhouse.com/docs/engines/table-engines/mergetree-family/textindexes). Text indexes let Langfuse skip over data that cannot match a query before reading full observation payloads, which keeps search fast even for large projects with high-volume traces. You can read more in the [ClickHouse GA announcement](https://clickhouse.com/blog/full-text-search-ga-release).
 
+Because these indexes are token-based, a query matches whole words rather than substrings within them — `error` matches `error` but not `errors` — and a multi-word query matches as a contiguous phrase.
+
 ## Search via the API [#api]
 
 The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) supports a `matches` operator for token-based full-text search on `input`, `output`, and string `metadata` filters.

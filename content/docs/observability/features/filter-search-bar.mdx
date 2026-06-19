@@ -74,7 +74,7 @@ A bare word or phrase searches across ids, names, input, and output:
 refund failed
 ```
 
-Scope it to a single payload with `input:` or `output:` (for example `output:"refund failed"`). Free-text matching is case-insensitive — see [Full-Text Search](/docs/observability/features/full-text-search) for how it works and how to search via the API.
+Scope it to a single payload with `input:` or `output:` (for example `output:"refund failed"`). Matching is case-insensitive and word-based: a term matches whole words — `error` matches `error` but not `errors` — and a multi-word term matches as a contiguous phrase. The bar searches with the same v4 ClickHouse full-text search documented in [Full-Text Search](/docs/observability/features/full-text-search).
 
 ## Field aliases [#aliases]
 
