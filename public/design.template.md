@@ -1,6 +1,9 @@
 <!--
-  This page is generated from the live Langfuse design system.
-  Do not edit by hand.
+  Static template for the public Langfuse design page (served at
+  https://langfuse.com/design.md). The live design.md is generated from this
+  template by scripts/sync-design-tokens.js, which replaces the DESIGN_TOKENS
+  placeholder below with design tokens read from the live app theme.
+  Edit this template; never edit the generated design.md.
 -->
 
 # Langfuse Design
@@ -57,10 +60,10 @@ hard-coded hex. The brand-defining roles map to these tokens:
 | Code surface              | `--surface-code`         |
 | Warm beige accent         | `--surface-beige-accent` |
 
-The exact light and dark values for every token, kept in sync with the live
-app, are published at [langfuse.com/design.md](https://langfuse.com/design.md).
-Always reference the **semantic token** rather than a hard-coded hex value, so
-light and dark modes stay in sync.
+The exact light and dark values for every token are listed in the Design tokens
+section below, generated from the live app theme. Always reference the
+**semantic token** rather than a hard-coded hex value, so light and dark modes
+stay in sync.
 
 ## Typography
 
@@ -68,9 +71,8 @@ light and dark modes stay in sync.
 - **Mono (code):** `font-mono` / `--font-mono`.
 - **Display (serif accent):** `font-analog` / `--font-analog`.
 
-The exact font families and weights backing these utilities are published,
-in sync with the live app, at
-[langfuse.com/design.md](https://langfuse.com/design.md).
+The exact font families and weights backing these utilities are listed in the
+Design tokens section below, generated from the live app theme.
 
 Use sentence case for headlines, section headings, and hero copy by default.
 Keep title case only for short standalone navigation/UI labels where it reads
@@ -86,5 +88,13 @@ and official product names (Langfuse, ClickHouse, OpenTelemetry).
 
 Channels: [GitHub](https://github.com/langfuse), [X/Twitter](https://x.com/langfuse), [LinkedIn](https://linkedin.com/company/langfuse).
 
+## Design tokens
+
+The complete Langfuse design token set, generated directly from the live app
+theme so it always matches production. Every token below has a light value and,
+where defined, a dark value. Always reference the semantic token in code, never
+a raw value.
+
+<!-- DESIGN_TOKENS -->
 
 Brand asset library and full download package: https://langfuse.com/brand

@@ -1,8 +1,11 @@
 /**
- * Generates the public, externally-hosted Langfuse design page from the live
- * source of truth so it never drifts from the actual app theme.
+ * Generates the public, externally-hosted Langfuse design page by combining a
+ * static template with live design tokens, so the page never drifts from the
+ * actual app theme.
  *
- *   Source of truth:
+ *   Inputs:
+ *     - public/design.template.md — the static, hand-edited page content with a
+ *       `<!-- DESIGN_TOKENS -->` placeholder marking where the live tokens go.
  *     - style.css        — Tailwind v4 `@theme` block (fonts, radius, color
  *                          token aliases) and the `:root` / `:root[class~="dark"]`
  *                          custom properties (the raw light/dark token values).
@@ -11,11 +14,11 @@
  *                          F37 Analog and their weights).
  *
  *   Output:
- *     - public/design.md — served at https://langfuse.com/design.md. The page
- *       is fully self-contained for external consumers (humans and agents):
- *       it contains no repo-internal paths or commands, only public URLs.
+ *     - public/design.md — the combined "live" page, served at
+ *       https://langfuse.com/design.md. Generated (gitignored); do not edit by
+ *       hand. It is self-contained for external consumers (humans and agents):
+ *       no repo-internal paths or commands, only public URLs.
  *
- * The file is fully generated — do not hand-edit it. Edit this script instead.
  * Runs via `pnpm sync-design-tokens` and as part of `prebuild`.
  */
 "use strict";
@@ -25,11 +28,11 @@ const path = require("path");
 const repoRoot = path.join(__dirname, "..");
 const styleCssPath = path.join(repoRoot, "style.css");
 const layoutPath = path.join(repoRoot, "app", "layout.tsx");
+const templatePath = path.join(repoRoot, "public", "design.template.md");
 const outPath = path.join(repoRoot, "public", "design.md");
 
-// Public URL of the installable skill repo (mirrors `npx skills add langfuse/design-skill`).
-const SKILL_REPO_URL = "https://github.com/langfuse/design-skill";
-const BRAND_GUIDELINES_URL = `${SKILL_REPO_URL}/blob/main/brand-guidelines/SKILL.md`;
+// Placeholder in the template that gets replaced with the generated token tables.
+const TOKENS_PLACEHOLDER = "<!-- DESIGN_TOKENS -->";
 
 /** Capture the balanced `{ ... }` body that follows the first selector match. */
 function extractBlock(css, selectorRegex) {
@@ -198,74 +201,54 @@ for (const d of themeDecls) {
   }
 }
 
-const sections = [];
-sections.push(
-  "<!--\n" +
-    "  This page is generated from the live Langfuse design system.\n" +
-    "  Do not edit by hand.\n" +
-    "-->",
-);
-sections.push("# Langfuse Design");
-sections.push(
-  "> Langfuse's design and brand system - logo, typography, color palette,\n" +
-    "> design tokens, and product UI patterns. Langfuse is the open source AI\n" +
-    "> engineering platform. Brand assets and the full download package live at\n" +
-    "> https://langfuse.com/brand.",
-);
-
-sections.push("## Get the Agent Skill");
-sections.push(
-  "The canonical, versioned guidelines and design tokens are maintained as an\n" +
-    "Agent Skill. Install them with a single command:",
-);
-sections.push("```sh\nnpx skills add langfuse/design-skill\n```");
-
-sections.push("## Guidelines");
-sections.push(
-  `- [Brand guidelines](${BRAND_GUIDELINES_URL}) - logo, icon, color palette, typography, and voice for press, partner pages, and external-facing content.`,
-);
-
-sections.push("## Design tokens");
-sections.push(
-  "The complete Langfuse design token set, generated directly from the live app\n" +
-    "theme so it always matches production. Every token below has a light value\n" +
-    "and, where defined, a dark value. Always reference the semantic token in\n" +
-    "code, never a raw value.",
-);
+// Assemble just the dynamic token tables that fill the template placeholder.
+const tokenSections = [];
 
 for (const key of ["surface", "text", "line", "callout"]) {
   const g = groups[key];
   if (!g.rows.length) continue;
-  sections.push(`### ${g.title}`);
-  sections.push(renderTable(["Token", "Light", "Dark"], g.rows));
+  tokenSections.push(`### ${g.title}`);
+  tokenSections.push(renderTable(["Token", "Light", "Dark"], g.rows));
 }
 
 if (semantic.length) {
-  sections.push("### Base and semantic tokens (shadcn/ui)");
-  sections.push(
+  tokenSections.push("### Base and semantic tokens (shadcn/ui)");
+  tokenSections.push(
     "Consumed via `hsl(var(--token))` (or directly) by shadcn/ui components.",
   );
-  sections.push(renderTable(["Token", "Light", "Dark"], semantic));
+  tokenSections.push(renderTable(["Token", "Light", "Dark"], semantic));
 }
 
 if (fontRows.length) {
-  sections.push("### Typography");
-  sections.push(
+  tokenSections.push("### Typography");
+  tokenSections.push(
     renderTable(["Utility", "Token", "Primary font", "Full stack"], fontRows),
   );
 }
 
 if (radiusRows.length) {
-  sections.push("### Radius");
-  sections.push(renderTable(["Token", "Value", "Tailwind"], radiusRows));
+  tokenSections.push("### Radius");
+  tokenSections.push(renderTable(["Token", "Value", "Tailwind"], radiusRows));
 }
 
-sections.push(
-  "Brand asset library and full download package: https://langfuse.com/brand",
-);
+const tokensMarkdown = tokenSections.join("\n\n");
 
-const output = sections.join("\n\n") + "\n";
-fs.mkdirSync(path.dirname(outPath), { recursive: true });
+const template = fs.readFileSync(templatePath, "utf-8");
+if (!template.includes(TOKENS_PLACEHOLDER)) {
+  throw new Error(
+    `[sync-design-tokens] Placeholder "${TOKENS_PLACEHOLDER}" not found in ${path.relative(repoRoot, templatePath)}`,
+  );
+}
+
+// Drop the template's leading authoring comment (internal-only: it references
+// repo paths) so the public page stays free of repo-internal references, then
+// prepend an external-safe generated-by notice.
+const body = template
+  .replace(/^<!--[\s\S]*?-->\n+/, "")
+  .replace(TOKENS_PLACEHOLDER, tokensMarkdown);
+const output =
+  "<!-- Generated from the live Langfuse design system. Do not edit by hand. -->\n\n" +
+  body;
 fs.writeFileSync(outPath, output);
 
 const totalTokens =
@@ -274,5 +257,5 @@ const totalTokens =
   fontRows.length +
   radiusRows.length;
 console.log(
-  `[sync-design-tokens] Wrote ${totalTokens} token(s) to ${path.relative(repoRoot, outPath)}`,
+  `[sync-design-tokens] Wrote ${totalTokens} token(s) into ${path.relative(repoRoot, outPath)} (from ${path.relative(repoRoot, templatePath)})`,
 );
