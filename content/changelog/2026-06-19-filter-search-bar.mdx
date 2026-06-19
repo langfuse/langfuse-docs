@@ -43,7 +43,7 @@ Type a field name and autocomplete suggests operators and observed values; press
 
 The bar parses your text into an AST and compiles it down to the same filter representation the sidebar and the filters API already use. Two consequences: your existing **Saved Views keep working unchanged**, and the full query is **serialized into the URL**, so sending someone the link reproduces the exact filtered view (a frequently requested workflow).
 
-Free-text terms are matched with [ClickHouse full-text search](/changelog/2026-05-27-clickhouse-full-text-search-fast-mode) over input, output and metadata, so search stays fast on projects with millions of traces. A bare term searches ids, names, input and output; `input:` and `output:` scope it to one payload.
+Free-text terms are matched with [ClickHouse full-text search](/changelog/2026-05-27-clickhouse-full-text-search-fast-mode), so search stays fast on projects with millions of traces. A bare term searches ids, names, input and output; `input:` and `output:` scope it to one payload.
 
 ## The story behind it
 
