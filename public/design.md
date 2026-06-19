@@ -10,116 +10,81 @@
 > engineering platform. Brand assets and the full download package live at
 > https://langfuse.com/brand.
 
-## Get the Agent Skill
-
-The canonical, versioned guidelines and design tokens are maintained as an
-Agent Skill. Install them with a single command:
-
-```sh
-npx skills add langfuse/design-skill
-```
-
 ## Guidelines
 
-- [Brand guidelines](https://github.com/langfuse/design-skill/blob/main/brand-guidelines/SKILL.md) - logo, icon, color palette, typography, and voice for press, partner pages, and external-facing content.
+Langfuse is the **open source AI engineering platform**. Teams use Langfuse to trace, evaluate, and improve LLM applications and AI agents in production. These guidelines cover the brand fundamentals for external-facing content. Official assets and a full download package are at [langfuse.com/brand](https://langfuse.com/brand).
 
-## Design tokens
+### Logo and icon
 
-The complete Langfuse design token set, generated directly from the live app
-theme so it always matches production. Every token below has a light value
-and, where defined, a dark value. Always reference the semantic token in
-code, never a raw value.
+The Langfuse trademark includes the Langfuse name and logo assets. **Do not**
+modify these assets or use them in a way that suggests sponsorship, endorsement,
+or confuses Langfuse with another brand.
 
-### Surfaces
+Three asset families are available, each in light, dark, and monochrome
+variants (SVG and PNG):
 
-| Token                    | Light       | Dark        |
-| ------------------------ | ----------- | ----------- |
-| `--surface-bg`           | `#f6f6f3`   | `#171714`   |
-| `--surface-1`            | `#edede8`   | `#1e1e1b`   |
-| `--surface-2`            | `#e5e5e1`   | `#252522`   |
-| `--surface-code`         | `#333333`   | `#0e0e0c`   |
-| `--surface-cta-primary`  | `#fbff81`   | `#4c4d23`   |
-| `--surface-beige-accent` | `#f1ede1`   | `#f1ede1`   |
-| `--surface-button-grey`  | `#403d391a` | `#ffffff1a` |
-| `--surface-code-grey`    | `#3d3d3d`   | `#2a2a2a`   |
-| `--surface-code-button`  | `#51504f`   | `#3a3937`   |
+- **Icon** - the standalone mark. Color and monochrome.
+  - [Color (SVG)](https://langfuse.com/brand-assets/icon/color/langfuse-icon.svg) / [Color (PNG)](https://langfuse.com/brand-assets/icon/color/langfuse-icon.png)
+  - [Monochrome (SVG)](https://langfuse.com/brand-assets/icon/monochrome/langfuse-icon-monochrome.svg)
+- **Wordmark - Langfuse** - the primary wordmark.
+  - [Light (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg) / [Light (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse/light/langfuse-wordart.png)
+  - [Dark / white (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.svg) / [Dark / white (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.png)
+  - [Monochrome (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse/monochrome/langfuse-wordart-monochrome.svg)
+- **Wordmark - Langfuse by ClickHouse** - the co-branded lockup.
+  - [Light (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.svg) / [Light (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.png)
+  - [Dark / white (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.svg) / [Dark / white (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.png)
+  - [Monochrome (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/monochrome/langfuse-by-clickhouse-monochrome.svg)
 
-### Text
+Usage rules:
 
-| Token                   | Light       | Dark        |
-| ----------------------- | ----------- | ----------- |
-| `--text-primary`        | `#222220`   | `#e8e8e4`   |
-| `--text-secondary`      | `#3d3d38`   | `#b4b4ae`   |
-| `--text-tertiary`       | `#6b6b66`   | `#7a7a74`   |
-| `--text-disabled`       | `#a7a7a0`   | `#4a4a45`   |
-| `--text-code-secondary` | `#fffcf280` | `#e8e8dc80` |
-| `--text-links`          | `#4f39f6`   | `#7b8ff8`   |
-| `--text-code-orange`    | `#c17e2e`   | `#e8935a`   |
-| `--text-code-pink`      | `#d05376`   | `#e86b9a`   |
-| `--text-code-blue`      | `#438aa5`   | `#6ab8cc`   |
+- Use the light wordmark on light backgrounds and the dark (white) wordmark on dark or photographic backgrounds.
+- Use the monochrome variants when color reproduction is constrained (single-color print, embossing, watermarks).
+- Maintain clear space around the logo and never stretch, recolor, or add effects to it.
+- Download the complete package (all variants) from [langfuse.com/brand](https://langfuse.com/brand).
 
-### Lines and borders
+## Color palette
 
-| Token                 | Light     | Dark      |
-| --------------------- | --------- | --------- |
-| `--line-structure`    | `#cfcfc9` | `#2c2c29` |
-| `--line-divider-dash` | `#bebeb6` | `#232320` |
-| `--line-cta`          | `#404039` | `#b8b6a0` |
-| `--line-code-border`  | `#333333` | `#3a3a38` |
+Langfuse uses a warm, near-neutral palette with a high-energy yellow as the
+primary call-to-action accent. Colors are defined as design tokens, never
+hard-coded hex. The brand-defining roles map to these tokens:
 
-### Callouts
+| Role                      | Token                    |
+| ------------------------- | ------------------------ |
+| Page background           | `--surface-bg`           |
+| Primary text              | `--text-primary`         |
+| CTA / accent (the yellow) | `--surface-cta-primary`  |
+| Links                     | `--text-links`           |
+| Code surface              | `--surface-code`         |
+| Warm beige accent         | `--surface-beige-accent` |
 
-| Token               | Light     | Dark |
-| ------------------- | --------- | ---- |
-| `--callout-info`    | `#b3abef` | —    |
-| `--callout-warning` | `#e09d00` | —    |
-| `--callout-error`   | `#cc3314` | —    |
-| `--callout-success` | `#538a2e` | —    |
-| `--callout-idea`    | `#119da4` | —    |
+The exact light and dark values for every token, kept in sync with the live
+app, are published at [langfuse.com/design.md](https://langfuse.com/design.md).
+Always reference the **semantic token** rather than a hard-coded hex value, so
+light and dark modes stay in sync.
 
-### Base and semantic tokens (shadcn/ui)
+## Typography
 
-Consumed via `hsl(var(--token))` (or directly) by shadcn/ui components.
+- **Sans (UI and body):** Tailwind `font-sans` / `--font-sans`.
+- **Mono (code):** `font-mono` / `--font-mono`.
+- **Display (serif accent):** `font-analog` / `--font-analog`.
 
-| Token                      | Light               | Dark                |
-| -------------------------- | ------------------- | ------------------- |
-| `--background`             | `0 0% 99%`          | `0 0% 6.7%`         |
-| `--foreground`             | `222.2 84% 4.9%`    | `210 40% 98%`       |
-| `--muted`                  | `214 32% 91%`       | `0 0% 18%`          |
-| `--muted-foreground`       | `#7a7a74`           | `215 20.2% 65.1%`   |
-| `--popover`                | `0 0% 100%`         | `222.2 14% 4.9%`    |
-| `--popover-foreground`     | `222.2 84% 4.9%`    | `210 40% 98%`       |
-| `--card`                   | `0 0% 100%`         | `0 0% 0%`           |
-| `--card-foreground`        | `222.2 84% 4.9%`    | `210 40% 98%`       |
-| `--ring`                   | `214 32% 91%`       | `0 0% 18%`          |
-| `--border`                 | `214 32% 91%`       | `0 0% 18%`          |
-| `--input`                  | `214 32% 91%`       | `0 0% 18%`          |
-| `--primary`                | `222.2 47.4% 11.2%` | `210 40% 98%`       |
-| `--primary-foreground`     | `210 40% 98%`       | `222.2 47.4% 11.2%` |
-| `--secondary`              | `214 32% 91%`       | `0 0% 18%`          |
-| `--secondary-foreground`   | `222.2 47.4% 11.2%` | `210 40% 98%`       |
-| `--accent`                 | `214 32% 91%`       | `0 0% 18%`          |
-| `--destructive`            | `0 84.2% 60.2%`     | `0 62.8% 30.6%`     |
-| `--destructive-foreground` | `210 40% 98%`       | `0 85.7% 97.3%`     |
-| `--muted-green`            | `84 81% 44%`        | —                   |
-| `--muted-magenta`          | `330 90% 70%`       | —                   |
-| `--muted-blue`             | `239 84% 67%`       | —                   |
+The exact font families and weights backing these utilities are published,
+in sync with the live app, at
+[langfuse.com/design.md](https://langfuse.com/design.md).
 
-### Typography
+Use sentence case for headlines, section headings, and hero copy by default.
+Keep title case only for short standalone navigation/UI labels where it reads
+more naturally (e.g. "Get Started"). Always preserve proper nouns, acronyms,
+and official product names (Langfuse, ClickHouse, OpenTelemetry).
 
-| Utility       | Token           | Primary font     | Full stack                                                                                                                              |
-| ------------- | --------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `font-sans`   | `--font-sans`   | Inter            | `var(--font-inter), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"` |
-| `font-mono`   | `--font-mono`   | Geist Mono (500) | `var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`            |
-| `font-analog` | `--font-analog` | F37 Analog (500) | `var(--font-analog), serif`                                                                                                             |
+## Voice and positioning
 
-### Radius
+- **Who we are:** the open source AI engineering platform, part of ClickHouse. Vendor-neutral and built on [OpenTelemetry](https://langfuse.com/integrations/native/opentelemetry). Available as Langfuse Cloud or self-hosted at production scale.
+- **What we help teams do:** trace, evaluate, and improve LLM applications and AI agents - across observability, prompt management, and evaluations.
+- **Tone:** helpful and conversational, not marketing copy. Be specific - name actual features, metrics, and commands. Lead with what's now possible rather than past limitations. Avoid filler headings like "Why This Matters" or "Key Benefits."
+- **Open by default:** MIT-licensed core, public [handbook](https://langfuse.com/handbook/chapters/story), and an integrated, open tooling layer.
 
-| Token         | Value                       | Tailwind     |
-| ------------- | --------------------------- | ------------ |
-| `--radius`    | `0.5rem`                    | (base)       |
-| `--radius-lg` | `var(--radius)`             | `rounded-lg` |
-| `--radius-md` | `calc(var(--radius) - 2px)` | `rounded-md` |
-| `--radius-sm` | `calc(var(--radius) - 4px)` | `rounded-sm` |
+Channels: [GitHub](https://github.com/langfuse), [X/Twitter](https://x.com/langfuse), [LinkedIn](https://linkedin.com/company/langfuse).
+
 
 Brand asset library and full download package: https://langfuse.com/brand
