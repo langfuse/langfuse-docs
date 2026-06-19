@@ -181,9 +181,6 @@ export function Footer({ className }: { className?: string }) {
         <div className="flex flex-col md:flex-row">
           <Text size="s" className={footerMutedTextClassName}>
             &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH
-          </Text>{" "}
-          <Text size="s" className={footerMutedTextClassName}>
-            / Finto Technologies Inc.
           </Text>
         </div>
         <Text size="s" className={footerMutedTextClassName}>
