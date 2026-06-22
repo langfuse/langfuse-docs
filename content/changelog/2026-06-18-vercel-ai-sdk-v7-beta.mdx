@@ -1,0 +1,93 @@
+---
+date: 2026-06-18
+title: Trace AI SDK v7 beta
+description: Use the new @langfuse/vercel-ai-sdk beta package to trace Vercel AI SDK v7 beta calls in Langfuse.
+author: Hassieb
+canonical: /integrations/frameworks/vercel-ai-sdk
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Package } from "lucide-react";
+
+<ChangelogHeader />
+
+Langfuse now ships a beta telemetry integration for the Vercel AI SDK v7 beta. Install `@langfuse/vercel-ai-sdk@beta` with `ai@beta`, keep the regular Langfuse OpenTelemetry exporter setup in place, and register `LangfuseVercelAiSdkIntegration` once. AI SDK calls then emit OpenTelemetry spans that Langfuse maps into traces, generations, tool calls, embeddings, and reranks.
+
+Use it to migrate a chat or agent route to AI SDK v7 beta while keeping Langfuse user IDs, sessions, tags, and trace metadata via `propagateAttributes`. You can also attach route or feature metadata through `runtimeContext`, and link Langfuse Prompt Management versions to model-call observations with `runtimeContext.langfusePrompt`.
+
+The beta package requires Node.js 22 or later.
+
+```bash
+npm install ai@beta @ai-sdk/openai@beta @langfuse/client@beta @langfuse/vercel-ai-sdk@beta @langfuse/tracing@beta @langfuse/otel@beta @opentelemetry/sdk-node
+```
+
+```typescript filename="instrumentation.ts"
+import { registerTelemetry } from "ai";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+
+registerTelemetry(new LangfuseVercelAiSdkIntegration());
+```
+
+```typescript filename="app.ts"
+import "./instrumentation";
+
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { LangfuseClient } from "@langfuse/client";
+import { propagateAttributes } from "@langfuse/tracing";
+
+const langfuseClient = new LangfuseClient();
+const langfusePrompt = await langfuseClient.getPrompt("support-chat/default");
+
+await propagateAttributes(
+  {
+    traceName: "support-chat",
+    userId: "user-123",
+    sessionId: "session-456",
+    tags: ["production", "chat"],
+  },
+  () =>
+    generateText({
+      model: openai("gpt-5.1"),
+      prompt: langfusePrompt.compile({ topic: "RAG" }),
+      runtimeContext: {
+        route: "support-chat",
+        langfusePrompt,
+      },
+      telemetry: {
+        functionId: "support-chat",
+        includeRuntimeContext: {
+          route: true,
+          langfusePrompt: true,
+        },
+      },
+    }),
+);
+```
+
+AI SDK v7 excludes `runtimeContext` from telemetry events unless each top-level key is explicitly included. Langfuse maps included runtime context keys to observation metadata, except `langfusePrompt`, which is used for prompt linking.
+
+## Get started [#get-started]
+
+<Cards num={2}>
+  <Card
+    title="Vercel AI SDK integration"
+    href="/integrations/frameworks/vercel-ai-sdk"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="NPM package"
+    href="https://www.npmjs.com/package/@langfuse/vercel-ai-sdk"
+    icon={<Package />}
+    arrow
+  />
+</Cards>
