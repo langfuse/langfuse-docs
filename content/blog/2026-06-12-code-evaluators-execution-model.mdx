@@ -27,13 +27,13 @@ This post walks through how we designed the runtime environment for it, the opti
 
 ## Why code evaluators
 
-Evaluation is how you find out whether your LLM app is actually any good. [Reading traces yourself](/blog/2026-06-09-ai-is-eating-ai-engineering) is where your opinion of your application gets formed, and nothing replaces it. But nobody reads millions of traces by hand. The standard move is to turn the error modes you found while reading into [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) that score every trace for things like agent helpfulness, conciseness, or tone.
+Evaluation is how you find out whether your LLM app is actually any good. [Reading traces yourself](/blog/2026-06-09-ai-is-eating-ai-engineering) is where your opinion of your application gets formed, and nothing replaces it. But nobody reads millions of traces by hand. [Error analysis](/academy/monitoring/error-analysis) turns that reading into a list of error modes, and the standard move is to encode each one as an [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) that scores every trace for things like agent helpfulness, conciseness, or tone.
 
 But a lot of what teams want to check is not subjective at all. Is the output valid JSON? Does the answer match the expected value? A model is an expensive, non-deterministic way to answer questions that a few lines of code answer perfectly every time.
 
 That is what code evaluators are: you provide the Python or TypeScript code to evaluate observations, configure when it should be triggered, and Langfuse runs it for you at scale.
 
-Here is the "is the output valid JSON" check from above as an actual evaluator:
+Let's look at the example from above as an actual evaluator:
 
 ```ts
 function evaluate({
