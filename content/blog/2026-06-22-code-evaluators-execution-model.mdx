@@ -1,6 +1,6 @@
 ---
 title: "Designing the runtime for Langfuse code evaluators"
-date: 2026/06/12
+date: 2026/06/22
 description: "Code evaluators let you score traces with your own Python or TypeScript code. A look at the execution model behind them: the requirements, the options we rejected, and the security stance we adopted."
 tag: engineering
 author: Tobias
@@ -12,7 +12,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   title="Designing the runtime for Langfuse code evaluators"
   description="Code evaluators let you score traces with your own Python or TypeScript code. A look at the execution model behind them: the requirements, the options we rejected, and the security stance we adopted."
   authors={["tobiaswochinger"]}
-  date="June 12, 2026"
+  date="June 22, 2026"
 />
 
 In late May we shipped [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators): you write a small Python or TypeScript function and Langfuse runs it to score your traces. By design, this means effectively anybody can run untrusted code in our multi-tenant SaaS environment: an environment that holds petabytes of critical data from thousands of teams.
@@ -185,7 +185,7 @@ Admittedly, there was one blind spot on our side: those environment variables al
 <Frame fullWidth>
   ![GuardDuty finding: credentials for the code-eval runner role used from an
   external IP
-  address](/images/blog/2026-06-12-code-evaluators-execution-model/guardduty-external-ip.png)
+  address](/images/blog/2026-06-22-code-evaluators-execution-model/guardduty-external-ip.png)
 </Frame>
 
 There is not much you can do about the extraction itself: the credentials are reserved by AWS, and scrubbing things like `os.environ` or `process.env` makes it harder but not impossible. You could add in-process sandboxing as defense in depth, but extraction would remain possible while adding significant complexity and overhead.
@@ -195,7 +195,7 @@ In the end, least privilege paid off: GuardDuty flagged the runner credentials b
 <Frame fullWidth>
   ![GuardDuty anomaly list showing AccessDenied for every API call made with the
   extracted
-  credentials](/images/blog/2026-06-12-code-evaluators-execution-model/guardduty-access-denied.png)
+  credentials](/images/blog/2026-06-22-code-evaluators-execution-model/guardduty-access-denied.png)
 </Frame>
 
 The plan held.
