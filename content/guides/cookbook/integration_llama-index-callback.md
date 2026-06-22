@@ -41,7 +41,7 @@ This example uses OpenAI for embeddings and chat completions.
 ```python
 import os
 
-os.environ["OPENAI_API_KEY"] = ""
+os.environ.setdefault("OPENAI_API_KEY", "")
 ```
 
 ## Index

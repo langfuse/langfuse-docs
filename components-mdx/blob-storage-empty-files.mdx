@@ -1,0 +1,15 @@
+Empty files are expected and normal — they are not an error or a sign of data loss. A given time window may contain data for some tables but not others (for example, observations but no scores in that window). When a table has no data for a window, the exporter may still write a file for it, and that file will be empty.
+
+What an empty file looks like depends on the configured file format:
+
+| Format    | Empty file looks like        |
+| --------- | ---------------------------- |
+| **JSON**  | A file containing `[]`       |
+| **JSONL** | An empty file                |
+| **CSV**   | A header row only (or empty) |
+
+Build downstream pipelines to tolerate empty files:
+
+- Treat an empty file as "no data in this window for this table," not as a failure, and don't alert on its presence.
+- Don't assume a file is always present for every window and table. **List the objects in each directory and ingest what's there** rather than relying on a fixed file-per-window pattern.
+- Point pipelines at the directory (for example `observations_v2/` or `scores/`) rather than parsing filenames. The directory prefixes are stable, but the exact filename format within them is not a stable contract.

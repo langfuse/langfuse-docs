@@ -112,19 +112,19 @@ One short paragraph mentioning that keys come from Langfuse project settings, li
 
 **Cell 5 — code. Env vars.**
 
-Always include the three Langfuse vars in this exact shape (both regions, US commented out) plus whatever the partner needs:
+Always include the three Langfuse vars in this exact shape (EU active by default, other regions noted in a comment) plus whatever the partner needs:
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://langfuse.com/cloud
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region (API host)
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region (API host)
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region (API host)
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # <Partner> API key
-os.environ["<PARTNER>_API_KEY"] = "..."
+os.environ.setdefault("<PARTNER>_API_KEY", "...")
 ```
 
 **Cell 6 — markdown + cell 7 — code. Initialize Langfuse client with auth check.** (Skip this pair for the `openai-drop-in` pattern, which relies on the langfuse OpenAI wrapper instead.)

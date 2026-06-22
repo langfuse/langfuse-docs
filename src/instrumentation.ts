@@ -19,7 +19,18 @@ const jpSpanProcessor = new LangfuseSpanProcessor({
   baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
 });
 
-const spanProcessors = [euSpanProcessor, usSpanProcessor, jpSpanProcessor];
+const internalSpanProcessor = new LangfuseSpanProcessor({
+  publicKey: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_PUBLIC_KEY,
+  secretKey: process.env.INTERNAL_LANGFUSE_SECRET_KEY,
+  baseUrl: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_BASE_URL,
+});
+
+const spanProcessors = [
+  euSpanProcessor,
+  usSpanProcessor,
+  jpSpanProcessor,
+  internalSpanProcessor,
+];
 
 export const flush = async () =>
   Promise.all(spanProcessors.map((p) => p.forceFlush()));

@@ -1,0 +1,56 @@
+---
+date: 2026-06-19
+title: "Filter Search Bar"
+description: "Filter traces and observations by typing. A fast query bar with operators, full-text search, wildcards, and autocomplete."
+author: Nikita Kabardin
+ogVideo: /images/changelog/2026-06-19-filter-search-bar.mp4
+canonical: https://langfuse.com/docs/observability/features/filter-search-bar
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Say you are debugging an agent and you want the ERROR-level tool calls from the last hour, in production, slower than two seconds, on your checkout flow. Until now that meant clicking through a stack of sidebar dropdowns. Now you can just type it — the bar suggests fields and values as you go, so there's nothing to memorize:
+
+```
+level:ERROR type:TOOL environment:production latency:>2 name:*checkout*
+```
+
+The **Filter Search Bar** turns one line of text into the same filters you would otherwise assemble in the sidebar, with autocomplete the whole way.
+
+<Callout type="info">
+  The Filter Search Bar runs on the Langfuse v4 data model. It is currently
+  available on Langfuse Cloud only; turn on **Fast** on the Observations or
+  Traces table to use it. Open-source support follows once the v4 schema
+  migration is ready for self-hosted deployments.
+</Callout>
+
+## What you can type
+
+- **Fields and values:** `level:ERROR`, `environment:production`, `user:alice`
+- **Short aliases:** type less with `env` (environment), `user` (user id), `session` (session id), `model` (model name), `cost` (total cost), `tokens` (total tokens), `tags` (trace tags), plus `ttft` and `tps`
+- **Operators:** `latency:>2`, `cost:>=0.01`, `startTime:>2026-06-01`
+- **Full-text search:** a bare word or phrase like `refund failed` matches across ids, names, input and output; scope it with `input:` or `output:`
+- **Wildcards:** `name:*checkout*` (contains), `name:checkout*` (starts with)
+- **Negation:** `-environment:production`
+- **Metadata and scores:** `metadata.region:eu`, `scores.accuracy:>0.8`
+- **Any-of for one field:** `level:(ERROR OR WARNING)`
+
+Type a field name and autocomplete suggests operators and observed values; press Enter to apply. The bar runs next to the existing filter sidebar and time-range selector.
+
+## How it works
+
+The bar parses your text into an AST and compiles it down to the same filter representation the sidebar and the filters API already use. Two consequences: your existing **Saved Views keep working unchanged**, and the full query is **serialized into the URL**, so sending someone the link reproduces the exact filtered view (a frequently requested workflow).
+
+Free-text terms are matched with [ClickHouse full-text search](/changelog/2026-05-27-clickhouse-full-text-search-fast-mode), so search stays fast on projects with millions of traces. A bare term searches ids, names, input and output; `input:` and `output:` scope it to one payload.
+
+## The story behind it
+
+This one took a while: a custom grammar with a hand-written parser, a text input rebuilt from scratch on a single contenteditable, and a lot of edge cases. We wrote up the whole path, dead ends included, in a thread: [how we built the Filter Search Bar](https://x.com/nkabardin/status/2067931939235926186).
+
+## What is next
+
+This is the foundation for one query language across Langfuse, including nested boolean expressions and broader coverage. We would love to hear which queries you reach for most.
+
+See the [Filter Search Bar docs](/docs/observability/features/filter-search-bar) to learn how to use it.
