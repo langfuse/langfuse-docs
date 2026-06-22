@@ -23,7 +23,7 @@ import { usePathname } from "next/navigation";
 // — the same approach `PostHogProvider` uses for `$pageview` — so client-side
 // navigations are counted too. Scarf responds with `no-store`, so each new
 // request reaches Scarf without a cache-busting query param.
-const SCARF_PIXEL_ID = "a083b1ee-8b4b-4903-88e8-ecbf7f22e7fe";
+const SCARF_PIXEL_ID = "e976646f-b5b2-4877-83ea-6d52444533ea";
 
 export function ScarfPixel() {
   const pathname = usePathname();
