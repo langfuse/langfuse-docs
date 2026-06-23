@@ -94,7 +94,7 @@ client = Anthropic(
 
 # Make the API call to Anthropic
 message = client.messages.create(
-    model="claude-opus-4-20250514",
+    model="claude-haiku-4-5",
     max_tokens=1000,
     temperature=1,
     system="You are a world-class poet. Respond only with short poems.",
@@ -128,7 +128,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="claude-opus-4-20250514", # Anthropic model name
+    model="claude-haiku-4-5", # Anthropic model name
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Who are you?"}
