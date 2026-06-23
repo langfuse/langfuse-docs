@@ -42,12 +42,12 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
 ### Optional Configuration
 
-Langfuse also uses S3 for batch exports and for multi-modal tracing.
+Langfuse also uses S3 for batch exports, multi-modal tracing, and multi-modal datasets.
 Those use-cases are opt-in and can be configured separately.
 Use the following information to enable them.
 Langfuse uses the credentials to generate short-lived, pre-signed URLs that allow SDKs to upload media assets or to download batch exports.
 
-#### Multi-Modal Tracing
+#### Multi-Modal Tracing and Datasets
 
 | Variable                                        | Required / Default | Description                                                                                                          |
 | ----------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
@@ -204,7 +204,7 @@ Please follow the MinIO documentation or use a cloud provider managed blob store
 
 #### Configuring Minio for Media Uploads [#minio-media-uploads]
 
-To enable multimodal tracing, presigned URLs allow SDK clients and browsers outside the Docker network to directly upload and download media assets. Therefore, the `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` must resolve to the Docker host's address.
+To enable multi-modal tracing and multi-modal datasets, presigned URLs allow SDK clients and browsers outside the Docker network to directly upload and download media assets. Therefore, the `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` must resolve to the Docker host's address.
 
 **Development Environment:** When running `docker compose` locally, set `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` to `http://localhost:9090` to ensure presigned URLs correctly loop back to the local instance.
 
