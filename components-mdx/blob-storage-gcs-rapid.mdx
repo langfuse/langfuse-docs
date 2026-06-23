@@ -1,0 +1,20 @@
+Langfuse's blob exporter uses S3-compatible XML API multipart uploads (`CreateMultipartUpload` → `UploadPart` → `CompleteMultipartUpload`). GCS **Rapid Storage** (Zonal Buckets) does not support the XML API — it only accepts gRPC `BidiWriteObject` writes — so multipart uploads, and therefore blob export, will fail.
+
+### Which storage classes work
+
+| Provider                | Compatible classes                                              | Notes                                       |
+| ----------------------- | --------------------------------------------------------------- | ------------------------------------------- |
+| **GCS**                 | Standard, Nearline, Coldline, Archive                           | Rapid (Zonal Buckets) is **not** compatible |
+| **AWS S3**              | All classes including Glacier tiers                             | No restrictions                             |
+| **Azure Blob**          | Hot, Cool, Cold, Archive                                        | No restrictions                             |
+| **Other S3-compatible** | MinIO, Backblaze B2, Cloudflare R2, DigitalOcean Spaces, Wasabi | All support multipart uploads               |
+
+GCS Rapid is the only known incompatible storage class across all supported providers.
+
+### How to tell you have a Rapid bucket
+
+The storage class metadata shows as `RAPID`. Some tooling may display it as `None` or empty because `RAPID` is not a valid S3 storage class.
+
+### Fix
+
+Create a regular (non-zonal) GCS bucket with the **Standard** storage class (or Nearline / Coldline / Archive) and point your blob storage integration at it instead.
