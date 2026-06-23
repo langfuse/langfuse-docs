@@ -81,7 +81,7 @@ Dataset item media references point from a stored media token in `input`, `expec
 | `jsonPath`        | string | Yes            | JSONPath of the string holding the reference inside the field, for example `$['image']`.                                                    |
 | `media`           | object | Yes (nullable) | Resolved media metadata. `null` if the referenced media does not exist or has not been uploaded successfully.                               |
 
-The nested `media` object contains `mediaId`, `contentType`, `contentLength`, `url`, and `urlExpiry`. The `url` is a signed download URL and should be used before `urlExpiry`.
+The nested `media` object contains `mediaId`, `contentType`, `contentLength`, `url`, and `urlExpiry`. The `url` is a signed download URL and should be used before its expiration date. To refresh the signed URL, refetch the dataset.
 
 ### DatasetRun (Experiment Run) [#datasetrun-experiment-run]
 
