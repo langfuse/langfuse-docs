@@ -72,7 +72,8 @@ export const ResourcesIndex = ({ prefix = "/resources/engineering/" } = {}) => {
             <ul className="mt-4 divide-y divide-border border-t border-border">
               {items.map((page) => {
                 const date = formatDate(
-                  (page.data as Record<string, unknown>).lastModified,
+                  (page.data as unknown as Record<string, unknown>)
+                    .lastModified,
                 );
                 return (
                   <li key={page.url} className="py-4">
