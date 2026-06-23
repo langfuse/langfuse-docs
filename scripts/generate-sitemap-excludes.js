@@ -132,6 +132,7 @@ function contentPathToRoute(filePath) {
     security: "security",
     blog: "blog",
     customers: "users",
+    resources: "resources",
     // marketing pages are served at the root (no section prefix)
     marketing: "",
   };
