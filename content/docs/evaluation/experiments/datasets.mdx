@@ -80,10 +80,7 @@ langfuse.create_dataset_item(
     expected_output={"label": "invoice"},
 )
 
-dataset = langfuse.get_dataset(
-    "visual-qa",
-    resolve_media_references=True,
-)
+dataset = langfuse.get_dataset("visual-qa")
 ```
 
 </Tab>
@@ -108,9 +105,7 @@ await langfuse.dataset.createItem({
   expectedOutput: { label: "invoice" },
 });
 
-const dataset = await langfuse.dataset.get("visual-qa", {
-  resolveMediaReferences: true,
-});
+const dataset = await langfuse.dataset.get("visual-qa");
 ```
 
 </Tab>

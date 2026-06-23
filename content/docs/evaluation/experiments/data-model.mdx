@@ -58,17 +58,17 @@ direction LR
 
 #### DatasetItem object [#datasetitem-object]
 
-| Attribute             | Type          | Required | Description                                                                                                                                                 |
-| --------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                  | string        | Yes      | Unique identifier for the dataset item. Dataset items are upserted on their id. Id needs to be unique (project-level) and cannot be reused across datasets. |
-| `datasetId`           | string        | Yes      | ID of the dataset this item belongs to                                                                                                                      |
-| `input`               | object        | No       | Input data for the dataset item                                                                                                                             |
-| `expectedOutput`      | object        | No       | Expected output data for the dataset item                                                                                                                   |
-| `metadata`            | object        | No       | Additional metadata for the dataset item                                                                                                                    |
-| `mediaReferences`     | object[]      | No       | Resolved media references found in `input`, `expectedOutput`, and `metadata`. Only returned when requested through the API or SDK media resolution options. |
-| `sourceTraceId`       | string        | No       | ID of the source trace to link this dataset item to                                                                                                         |
-| `sourceObservationId` | string        | No       | ID of the source observation to link this dataset item to                                                                                                   |
-| `status`              | DatasetStatus | No       | Status of the dataset item. Defaults to ACTIVE for newly created items. Possible values: `ACTIVE`, `ARCHIVED`                                               |
+| Attribute             | Type          | Required | Description                                                                                                                                                          |
+| --------------------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                  | string        | Yes      | Unique identifier for the dataset item. Dataset items are upserted on their id. Id needs to be unique (project-level) and cannot be reused across datasets.          |
+| `datasetId`           | string        | Yes      | ID of the dataset this item belongs to                                                                                                                               |
+| `input`               | object        | No       | Input data for the dataset item                                                                                                                                      |
+| `expectedOutput`      | object        | No       | Expected output data for the dataset item                                                                                                                            |
+| `metadata`            | object        | No       | Additional metadata for the dataset item                                                                                                                             |
+| `mediaReferences`     | object[]      | No       | Resolved media references found in `input`, `expectedOutput`, and `metadata`. Included on SDK dataset fetches and API responses that include resolved dataset media. |
+| `sourceTraceId`       | string        | No       | ID of the source trace to link this dataset item to                                                                                                                  |
+| `sourceObservationId` | string        | No       | ID of the source observation to link this dataset item to                                                                                                            |
+| `status`              | DatasetStatus | No       | Status of the dataset item. Defaults to ACTIVE for newly created items. Possible values: `ACTIVE`, `ARCHIVED`                                                        |
 
 #### DatasetItemMediaReference object [#datasetitemmediareference-object]
 

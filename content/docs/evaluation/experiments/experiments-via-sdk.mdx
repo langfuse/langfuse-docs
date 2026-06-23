@@ -213,7 +213,7 @@ Experiments always run on the latest dataset version at experiment time. Support
 
 ### Multi-modal experiments [#multimodal-experiments]
 
-SDK-based experiments can run on datasets that include media attachments in `input`, `expectedOutput`, or `metadata`. Fetch the dataset with media reference resolution enabled so each media token is hydrated into a signed `LangfuseMediaReference`.
+SDK-based experiments can run on datasets that include media attachments in `input`, `expectedOutput`, or `metadata`. When you fetch the dataset via the SDK, each media token is hydrated into a signed `LangfuseMediaReference` by default.
 
 <Callout type="info">
   Multi-modal datasets are supported for SDK-based experiments with Python SDK
@@ -231,10 +231,7 @@ from langfuse.media import LangfuseMediaReference
 
 langfuse = get_client()
 
-dataset = langfuse.get_dataset(
-    "visual-qa",
-    resolve_media_references=True,
-)
+dataset = langfuse.get_dataset("visual-qa")
 
 def my_multi_modal_task(*, item, **kwargs):
     image = item.input["image"]
@@ -267,9 +264,7 @@ import {
 
 const langfuse = new LangfuseClient();
 
-const dataset = await langfuse.dataset.get("visual-qa", {
-  resolveMediaReferences: true,
-});
+const dataset = await langfuse.dataset.get("visual-qa");
 
 const result = await dataset.runExperiment({
   name: "Visual QA",
@@ -298,7 +293,7 @@ const result = await dataset.runExperiment({
 | Python | `fetch_bytes()` | `fetch_base64()` | `fetch_data_uri()` |
 | JS/TS  | `fetchBytes()`  | `fetchBase64()`  | `fetchDataUri()`   |
 
-The resolved URLs are signed and expire. If a URL expires before your experiment uses it, fetch the dataset again with media reference resolution enabled.
+The resolved URLs are signed and expire. If a URL expires before your experiment uses it, fetch the dataset again to receive fresh media references.
 
 ### Advanced Features
 

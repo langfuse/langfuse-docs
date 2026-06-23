@@ -19,7 +19,7 @@ import { Book, FlaskConical } from "lucide-react";
 
 You can now add media attachments to Langfuse dataset items and use them in SDK-based multi-modal experiments. Dataset item `input`, `expectedOutput`, and `metadata` can include media uploaded from the UI or via the Python and JS/TS SDKs.
 
-Use this to build visual QA datasets, compare generated images against reference files, or run evaluations over audio, documents, and other multi-modal inputs. The SDKs can resolve dataset media references back into signed media handles so your experiment code can pass bytes, base64, or data URIs to model providers.
+Use this to build visual QA datasets, compare generated images against reference files, or run evaluations over audio, documents, and other multi-modal inputs. In SDK-based experiments, dataset media is resolved into media references by default, with helpers to fetch them as bytes, base64, or data URIs depending on the format your model provider expects.
 
 <Callout type="info">
   Multi-modal datasets are supported for SDK-based experiments with Python SDK
