@@ -1,15 +1,4 @@
-Langfuse's blob exporter uses S3-compatible XML API multipart uploads (`CreateMultipartUpload` → `UploadPart` → `CompleteMultipartUpload`). GCS **Rapid Storage** (Zonal Buckets) does not support the XML API — it only accepts gRPC `BidiWriteObject` writes — so multipart uploads, and therefore blob export, will fail.
-
-### Which storage classes work
-
-| Provider                | Compatible classes                                              | Notes                                       |
-| ----------------------- | --------------------------------------------------------------- | ------------------------------------------- |
-| **GCS**                 | Standard, Nearline, Coldline, Archive                           | Rapid (Zonal Buckets) is **not** compatible |
-| **AWS S3**              | All classes including Glacier tiers                             | No restrictions                             |
-| **Azure Blob**          | Hot, Cool, Cold, Archive                                        | No restrictions                             |
-| **Other S3-compatible** | MinIO, Backblaze B2, Cloudflare R2, DigitalOcean Spaces, Wasabi | All support multipart uploads               |
-
-GCS Rapid is the only known incompatible storage class across all supported providers.
+Langfuse's blob exporter uses S3-compatible XML API multipart uploads (`CreateMultipartUpload` → `UploadPart` → `CompleteMultipartUpload`). GCS **Rapid Storage** (Zonal Buckets) does not support the XML API — it only accepts gRPC `BidiWriteObject` writes — so multipart uploads, and therefore blob export, will fail. All other GCS storage classes (Standard, Nearline, Coldline, Archive) and all storage classes on AWS S3, Azure Blob, and other S3-compatible providers work without restrictions. GCS Rapid is the only known incompatible storage class.
 
 ### How to tell you have a Rapid bucket
 
