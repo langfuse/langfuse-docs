@@ -151,7 +151,7 @@ The status card on the same page also surfaces:
 - **Export mode** — `Full history`, `From setup date`, or `From custom date` (plus the start date where applicable).
 - A **Last export failed** alert with the error message and time when in the Error state.
 
-While an export is running, the UI polls for updates every few seconds so the badge refreshes automatically. If a worker crashes mid-export, a 2-hour safety-valve TTL ensures the badge reverts from Running to its underlying state (typically Queued) so the next scheduled run can proceed.
+If a worker crashes mid-export, a 2-hour safety-valve TTL ensures the badge reverts from Running to its underlying state (typically Queued) so the next scheduled run can proceed. Reload the page to see the latest status.
 
 A failed export is retried automatically on the next run; repeated failures trigger a notification.
 
