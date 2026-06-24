@@ -3,7 +3,6 @@
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import adobeLogo from "../home/img/adobe.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
@@ -42,8 +41,8 @@ const companies: CompanyLogo[] = [
     logo: twilioLogo,
   },
   {
-    name: "Adobe",
-    logo: adobeLogo,
+    name: "Pigment",
+    logo: pigmentLogo,
   },
   {
     name: "Khan Academy",
@@ -99,11 +98,6 @@ const companies: CompanyLogo[] = [
   {
     name: "Rocket Money",
     logo: rocketMoneyLogo,
-  },
-  {
-    name: "Pigment",
-    logo: pigmentLogo,
-    hidden: true,
   },
 ];
 
