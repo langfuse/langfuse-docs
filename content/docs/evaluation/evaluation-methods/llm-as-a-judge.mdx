@@ -126,6 +126,12 @@ Evaluate live production traffic to monitor your LLM application performance in 
 
 Run evaluators on individual observations within your traces—such as LLM calls, retrieval operations, embedding generations, or tool calls.
 
+#### Context available to observation-level evaluators [#observation-evaluator-context]
+
+Observation-level evaluators map variables from the matched observation. They can use fields on that observation, such as `input`, `output`, `metadata`, and propagated attributes like `traceName`, `userId`, `sessionId`, and `tags`.
+
+They do not load sibling or child observations from the same trace. If your evaluator needs the overall request and response of an application or agent invocation, target a root observation that records that overall input and output. The evaluator still only sees data on that root observation; it will not automatically include data from child observations unless your application writes the required summary or context onto the root observation.
+
 **Why target Observations**
 
 - **Dramatically faster execution**: Evaluations complete in seconds, not minutes. Eliminates evaluation delays and backlogs. Asynchronous architecture processes thousands of evaluations per minute.
@@ -148,6 +154,10 @@ At ingest time, each observation is evaluated against your filter criteria. Matc
 <Tab>
 
 Run evaluators on complete traces, evaluating entire workflow executions from start to finish.
+
+<Callout type="warning">
+Trace-level LLM-as-a-Judge evaluators are legacy. They are available for classic deployments, but they are not supported in events-table-only Langfuse v4 preview deployments because they depend on lookups against the legacy traces and observations tables. For v4 preview deployments, migrate to observation-level evaluators and put the data the judge needs on the target observation.
+</Callout>
 
 <Callout type="info">
 **Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).

@@ -23,6 +23,10 @@ Observation-level evaluators offer:
 
 Trace-level evaluators will continue to work. This is an upgrade path, not a deprecation.
 
+<Callout type="warning">
+If you are running an events-table-only Langfuse v4 preview deployment, trace-level and legacy-dataset-based LLM-as-a-Judge evaluators are not supported because they depend on lookups against the legacy traces and observations tables. Use observation-level evaluators and target an observation that contains the input, output, and context the judge needs.
+</Callout>
+
 ## When to Upgrade
 
 ### ✅ Upgrade Now If:
@@ -30,12 +34,14 @@ Trace-level evaluators will continue to work. This is an upgrade path, not a dep
 - **You're experiencing evaluation delays, backlogs, or slow evaluation processing** (observation-level evaluations complete in seconds)
 - You're using or planning to use OTel-based SDKs (Python v3+ or JS/TS v4+)
 - You're setting up new evaluators
+- You're using Langfuse Fast Preview or an events-table-only v4 preview deployment
 
 ### ⏸️ Stay with Trace-Level For Now If:
 
 - You're on legacy SDKs (Python v2 or JS/TS v3) and can't upgrade yet
 - Your trace evaluators work perfectly for your use case
 - You need to evaluate aggregate workflow data spanning multiple operations
+- You are not using an events-table-only v4 preview deployment
 
 ## Prerequisites
 
@@ -154,6 +160,8 @@ Variables:
 
 - Scores appear on the specific observation in the trace tree
 - You can have multiple scores per trace (one per evaluated observation)
+
+Observation-level evaluators can only map variables from the matched observation. They do not automatically read sibling or child observations from the same trace. If the judge needs an end-to-end request and response, target a root observation that records those values, and write any additional required context onto that root observation.
 
 <Frame fullWidth>
   ![Score output example](/images/docs/evaluator-score-output-example.png)
