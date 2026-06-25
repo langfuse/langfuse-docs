@@ -138,6 +138,7 @@ The integration settings page shows a status badge:
 | Badge        | Meaning                                                                                |
 | ------------ | -------------------------------------------------------------------------------------- |
 | **Active**   | Enabled and synced; the next export is scheduled for the future.                       |
+| **Running**  | An export job is currently in progress (shown with a spinner).                         |
 | **Queued**   | An export is due and waiting to run.                                                   |
 | **Pending**  | Enabled but has not run an export yet (`Data exported up to` shows `Never (pending)`). |
 | **Disabled** | The integration is turned off.                                                         |
@@ -149,6 +150,8 @@ The status card on the same page also surfaces:
 - **Next export scheduled** — when the next run will happen.
 - **Export mode** — `Full history`, `From setup date`, or `From custom date` (plus the start date where applicable).
 - A **Last export failed** alert with the error message and time when in the Error state.
+
+If a worker crashes mid-export, a 2-hour safety-valve TTL ensures the badge reverts from Running to its underlying state (typically Queued) so the next scheduled run can proceed. Reload the page to see the latest status.
 
 A failed export is retried automatically on the next run; repeated failures trigger a notification.
 

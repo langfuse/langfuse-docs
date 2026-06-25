@@ -11,7 +11,6 @@ import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
 import { HoverStars } from "./components/HoverStars";
-import adobeLogo from "../home/img/adobe.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import freeeLogo from "../home/img/freee.svg";
@@ -67,7 +66,6 @@ const companiesWithoutStories = [
   { name: "Twilio", logo: twilioLogo },
   { name: "Telus", logo: telusLogo },
   { name: "Pigment", logo: pigmentLogo },
-  { name: "Adobe", logo: adobeLogo },
   {
     name: "Intuit",
     logo: intuitLogo,
@@ -249,13 +247,12 @@ export function Customers() {
       { type: "logo", name: "Samsara" },
       { type: "logo", name: "Twilio" },
       { type: "logo", name: "Telus" },
-      { type: "logo", name: "Adobe" },
+      { type: "logo", name: "Pigment" },
       { type: "logo", name: "freee" },
       { type: "story", name: "Khan Academy" },
       { type: "logo", name: "Circleback" },
       { type: "text", name: "And thousands more..." },
       { type: "story", name: "Merck" },
-      { type: "logo", name: "Pigment" },
       { type: "story", name: "Magic Patterns" },
     ];
 

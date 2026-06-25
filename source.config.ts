@@ -191,6 +191,20 @@ export const workshop = defineDocs({
   docs: { schema: sidebarFrontmatterSchema },
 });
 
+// SEO/GEO resources section (e.g. /resources/engineering). Supports optional
+// tags so the index listing can group articles by category (comparisons,
+// migrations, …).
+const resourcesFrontmatterSchema = sidebarFrontmatterSchema.extend({
+  tags: z.array(z.string()).optional(),
+});
+
+export const resources = defineDocs({
+  dir: "content/resources",
+  docs: {
+    schema: resourcesFrontmatterSchema,
+  },
+});
+
 export const marketing = defineDocs({
   dir: "content/marketing",
   docs: { schema: marketingFrontmatterSchema },

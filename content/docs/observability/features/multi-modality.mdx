@@ -101,7 +101,7 @@ Supported formats:
 
 ### Custom attachments
 
-If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, or metadata. See the multi-modal documentation for examples.
+If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, metadata, or dataset items. See the multi-modal documentation for examples.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
@@ -247,6 +247,8 @@ The base64 data URIs and the wrapped `LangfuseMedia` objects in Langfuse traces 
 - `SOURCE_TYPE`: Source type of the media file, can be `base64_data_uri`, `bytes`, or `file`
 
 Based on this token, the Langfuse UI can automatically detect the `mediaId` and render the media file inline. The `LangfuseMedia` class provides utility functions to extract the `mediaId` from the reference string.
+
+For multi-modal datasets, use [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk#multimodal-experiments) to fetch dataset items with resolved `LangfuseMediaReference` objects and pass the media into your model provider.
 
 ### 3. Resolving Media References
 
