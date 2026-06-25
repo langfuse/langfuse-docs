@@ -1,37 +1,31 @@
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * Fixed-aspect-ratio carousel slide that handles mixed image sizes gracefully.
- * Uses a 16:9 container with object-cover so the carousel height stays
- * consistent regardless of the source image's native aspect ratio.
+ * Carousel slide for the careers polaroids. Renders each image at a uniform
+ * height with its natural width so slides sit side-by-side as a filmstrip with
+ * no letterboxing above or below the image.
  */
 export function CarouselSlide({
   src,
   alt,
   className,
-  aspectRatio = "aspect-[16/9]",
+  frame = true,
 }: {
   src: string;
   alt: string;
   className?: string;
-  aspectRatio?: string;
+  frame?: boolean;
 }) {
   return (
-    <div
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
       className={cn(
-        "relative w-full overflow-hidden rounded border border-line-structure bg-surface-1",
-        aspectRatio,
+        "h-56 w-auto sm:h-64 md:h-72 md:cursor-pointer",
+        frame && "rounded border border-line-structure bg-surface-1",
         className,
       )}
-    >
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        className="object-cover md:cursor-pointer"
-        sizes="(max-width: 680px) 100vw, 680px"
-      />
-    </div>
+    />
   );
 }
