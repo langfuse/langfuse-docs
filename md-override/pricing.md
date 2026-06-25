@@ -254,6 +254,13 @@ The primary way is to reduce the number of billable units you ingest. See [tips 
 **When do I get billed?**
 You get one bill each month. The plan fee is charged at the start of the month, and usage is charged at the end of the month.
 
+**What are Langfuse Cloud Credits, and how do they affect me?**
+A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing).
+
+Langfuse Cloud Credits only apply to customers with a committed spend contract for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed spend contract, please contact your account team.
+
+If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.
+
 **Can I set up alerts on usage fees?**
 Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to receive email notifications when spending exceeds predefined thresholds.
 

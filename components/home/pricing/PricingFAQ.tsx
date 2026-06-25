@@ -33,6 +33,11 @@ const faqs: FAQItem[] = [
       "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
   },
   {
+    question: "What are Langfuse Cloud Credits, and how do they affect me?",
+    answer:
+      "A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing). Langfuse Cloud Credits only apply to customers with a committed spend contract for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed spend contract, please contact your account team. If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.",
+  },
+  {
     question: "Can I set up alerts on the usage fees?",
     answer:
       "Yes, you can configure spend alerts to receive email notifications when your organization's spending exceeds predefined monetary thresholds. This helps you monitor costs and take action before unexpected charges occur. Navigate to your organization settings and the Billing tab to configure spend alerts. Learn more in our [spend alerts documentation](/docs/administration/spend-alerts).",
