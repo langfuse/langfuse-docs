@@ -122,12 +122,10 @@ export function RoleFinderQuiz({
       setHistory((h) => h.slice(0, -1));
       return;
     }
-    setHistory((h) => {
-      if (h.length === 0) return h;
-      const previous = h[h.length - 1];
-      setView({ type: "question", id: previous });
-      return h.slice(0, -1);
-    });
+    if (history.length === 0) return;
+    const previous = history[history.length - 1];
+    setView({ type: "question", id: previous });
+    setHistory((h) => h.slice(0, -1));
   };
 
   const startOver = () => {
