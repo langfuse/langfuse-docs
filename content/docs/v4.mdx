@@ -25,7 +25,7 @@ Langfuse is now observations-first. Queries that used to require expensive joins
 - **SDK:** Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace trace update calls with `propagate_attributes()`.
 - **OTEL:** Set the `x-langfuse-ingestion-version: 4` HTTP header on your span exporter. Propagate trace attributes to _all_ observations. [See setup guide](/integrations/native/opentelemetry)
 - **UI:** If your organization was created before April 14, 2026, 14:00 UTC (15:00 CET), enable the **Preview** toggle (bottom-left) to opt in. Organizations created on/after this cutoff are already on "Fast Preview" and do not see the toggle. Filter observations directly in the new unified table and create saved views for productive defaults. [See saved views guide](/faq/all/explore-observations-in-v4)
-- **Evals:** Migrate LLM-as-a-Judge evals to the observation level. Trace-level and legacy-dataset-based LLM-as-a-Judge evaluators are not supported in events-table-only v4 preview deployments because they depend on legacy traces/observations table lookups. [See evals migration guide](/faq/all/llm-as-a-judge-migration)
+- **Evals:** Migrate LLM-as-a-Judge evals to the observation level. [See evals migration guide](/faq/all/llm-as-a-judge-migration)
 
 ---
 
