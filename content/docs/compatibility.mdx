@@ -1,0 +1,103 @@
+---
+title: Versions & compatibility
+description: How Langfuse server, SDK, and API versions relate across GA versions, minimum server requirements, and Cloud vs self-hosted availability.
+---
+
+# Versions & compatibility
+
+Reference for how Langfuse's server, SDK, and API versions relate across Langfuse Cloud and self-hosted deployments.
+
+<Callout type="info">
+Langfuse Cloud runs the latest version, including both GA and preview features. New capabilities usually ship to **Langfuse Cloud** first (as preview), then become GA for **OSS / self-hosted** once validated. Availability therefore differs between the two. This page calls out the difference per version, API, and endpoint.
+</Callout>
+
+## GA versions [#ga]
+
+Generally available versions. Forward-looking tracks that are not yet GA, such as the server v4 [Fast Preview](/docs/v4), are in **preview**.
+
+| Component | GA version | Package / repo | Notes |
+| --- | --- | --- | --- |
+| Server | v3 | [langfuse/langfuse](https://github.com/langfuse/langfuse/releases) <a href="https://github.com/langfuse/langfuse/releases"><img className="inline" src="https://img.shields.io/github/v/release/langfuse/langfuse?style=flat-square&label=release" alt="Langfuse server release" /></a> | ClickHouse + Redis + S3/blob storage + worker |
+| Python SDK | v4 | [`langfuse`](https://pypi.org/project/langfuse/) <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi" alt="PyPI langfuse" /></a> | OpenTelemetry-based since v3 |
+| JS/TS SDK | v5 | [`@langfuse/*`](https://www.npmjs.com/package/@langfuse/tracing) <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm" alt="NPM @langfuse/tracing" /></a> | OpenTelemetry-based since v4 |
+| Other languages | n/a | [OpenTelemetry](/integrations/native/opentelemetry) | Any OTel SDK to the Langfuse OTel endpoint |
+
+## SDK ↔ server compatibility [#sdk-server]
+
+Recent SDKs require a recent self-hosted server. Cloud always satisfies these minimums.
+
+| SDK & version | Min. self-hosted server | Status | Upgrade guide |
+| --- | --- | --- | --- |
+| Python SDK v4 | [≥ 3.125.0](https://github.com/langfuse/langfuse/releases/tag/v3.125.0) | GA | |
+| Python SDK v3 | [≥ 3.125.0](https://github.com/langfuse/langfuse/releases/tag/v3.125.0) | Legacy | [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) |
+| Python SDK v2 | server v2+ | Legacy | [Python v2 → v3](/docs/observability/sdk/upgrade-path/python-v2-to-v3) |
+| Python SDK v1 | unsupported on v3 | End of life | [All paths](/docs/observability/sdk/upgrade-path) |
+| JS/TS SDK v5 | [≥ 3.95.0](https://github.com/langfuse/langfuse/releases/tag/v3.95.0) | GA | |
+| JS/TS SDK v4 | [≥ 3.95.0](https://github.com/langfuse/langfuse/releases/tag/v3.95.0) | Legacy | [JS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) |
+| JS/TS SDK v3 / v2 | server v2+ | Legacy | [JS v3 → v4](/docs/observability/sdk/upgrade-path/js-v3-to-v4) |
+| JS/TS SDK v1 | unsupported on v3 | End of life | [All paths](/docs/observability/sdk/upgrade-path) |
+
+The server is backwards compatible with older SDKs. When upgrading an SDK, run a recent server too. See the [versioning policy](/self-hosting/upgrade/versioning).
+
+## Server versions [#server]
+
+| Version | Highlights | Status | Security patches | Upgrade guide |
+| --- | --- | --- | --- | --- |
+| v1 | PostgreSQL, synchronous ingestion. | End of life | No | [v1 → v2](/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2) |
+| v2 | PostgreSQL, synchronous ingestion. Rebuilt usage & cost tracking. Supports SDK v1+. | End of life | No | [v2 → v3](/self-hosting/upgrade/upgrade-guides/upgrade-v2-to-v3) |
+| v3 | ClickHouse + Redis + S3/blob storage + worker; asynchronous, event-driven. Requires SDK v2+. | GA | Yes | |
+| v4 ([Fast Preview](/docs/v4)) | Observations-first data model, faster at scale. Cloud-only preview. | Preview | Yes | [Adopt](/docs/v4) |
+
+v1 and v2 are end of life; upgrade is recommended. v2 → v3 is an infrastructure migration (adds ClickHouse, Redis, blob storage).
+
+## API versions [#api]
+
+### Ingestion [#ingestion]
+
+| Endpoint | Status | Notes |
+| --- | --- | --- |
+| `POST /api/public/otel/v1/traces` | Recommended | OpenTelemetry (OTLP) endpoint, server v3+ (self-hosted ≥ 3.22.0). The path forward for all ingestion. |
+| `POST /api/public/ingestion` | Deprecated | Legacy batch ingestion; async on v3+ (returns `207`). Use the OTel endpoint. |
+
+### Read APIs [#read-apis]
+
+Current versions use cursor pagination and selective field groups. **Legacy** endpoints still work but are superseded by a current version. **Deprecated** endpoints will be removed in a future version; migrate to the replacement shown in Notes.
+
+| Endpoint | Status | Notes |
+| --- | --- | --- |
+| `GET /api/public/v2/observations` | Current | Cloud (GA); self-hosted via the v4 preview opt-in |
+| `GET /api/public/observations` | Legacy | |
+| `GET /api/public/observations/{id}` | Deprecated | Use `GET /api/public/v2/observations` |
+| `GET /api/public/v2/metrics` | Current | Cloud (GA); self-hosted via the v4 preview opt-in |
+| `GET /api/public/metrics` | Legacy | |
+| `GET /api/public/v3/scores` | Current | GA (Cloud and self-hosted) |
+| `GET /api/public/scores` | Legacy | |
+| `GET /api/public/v2/scores` | Deprecated | Use `GET /api/public/v3/scores` |
+| `GET /api/public/traces/{id}` | Deprecated | Use `GET /api/public/v2/observations` |
+| `GET /api/public/sessions` | Deprecated | Use `GET /api/public/v2/observations` |
+| `/api/public/mcp` | Preview | [MCP server](/docs/api-and-data-platform/features/mcp-server); v4 ([Fast Preview](/docs/v4)) only |
+
+- Self-hosted Observations/Metrics v2 require the v4 preview opt-in (`LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`).
+- SDKs default to the current resources (`api.observations`, `api.scores`, `api.metrics`); legacy versions are under `api.legacy.*` (e.g. `api.legacy.observations_v1` / `observationsV1`). On self-hosted, use the legacy observations and metrics resources until their v2 APIs are GA there.
+- Metrics v2 has no `traces` view.
+
+<Callout type="warning">
+Real-time v2 data requires Python SDK ≥ 4.0.0, JS/TS SDK ≥ 5.0.0, or `x-langfuse-ingestion-version: 4` on your OTEL exporter. Otherwise data can lag up to 10 minutes.
+</Callout>
+
+See the [Observations API](/docs/api-and-data-platform/features/observations-api) and [Metrics API](/docs/metrics/features/metrics-api) pages for details.
+
+## Evaluations & integrations [#evals-integrations]
+
+Each has a current version (built on the v4 data model) and a deprecated version that still works but will be removed. Both run on Cloud and self-hosted. Some also require a specific plan or edition; see [pricing](/pricing).
+
+| Capability | Current | Deprecated |
+| --- | --- | --- |
+| [Evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Span / observation-level (server ≥ 3.150.0; Python SDK v3+ / JS SDK v4+) | Trace-level (Python SDK v2+ / JS SDK v3+) |
+| [PostHog](/integrations/analytics/posthog) | Enriched observations | Traces and observations (legacy) |
+| [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) | Enriched observations | Traces and observations (legacy) |
+| [Mixpanel](/integrations/analytics/mixpanel) | Enriched observations | Traces and observations (legacy) |
+
+## How versioning works [#policy]
+
+Langfuse uses [semantic versioning](/self-hosting/upgrade/versioning): a major bump means a breaking change (infrastructure or public-API removal). Server and SDKs are versioned independently. Release notes: [server](https://github.com/langfuse/langfuse/releases), [Python SDK](https://github.com/langfuse/langfuse-python/releases), [JS/TS SDK](https://github.com/langfuse/langfuse-js/releases).
