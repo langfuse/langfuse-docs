@@ -1,0 +1,43 @@
+---
+date: 2026-06-26
+title: "Ask AI in the Filter Search Bar"
+description: "Describe the filters you want in plain language and the search bar builds them as editable query pills. Opt-in on Langfuse Cloud, powered by AWS Bedrock with zero data retention."
+author: Nikita Kabardin
+canonical: https://langfuse.com/docs/observability/features/filter-search-bar#ask-ai
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+The [Filter Search Bar](/changelog/2026-06-19-filter-search-bar) is fast once you know your field names. On a project you have not touched in a while, you often don't. What was the metadata key for the routing queue again? Is it `name` or `traceName`? **Ask AI** closes that gap: click it, describe what you want, and the bar writes the query for you.
+
+> enterprise plan customers stuck in the membership-support queue
+
+turns into the right `metadata.*` filters and shows them as editable pills you can adjust by hand.
+
+<Callout type="info">
+  Ask AI is in beta and available on **Langfuse Cloud only**. It is **off by
+  default**; an organization owner or admin turns it on in **Organization
+  Settings → General → AI Features**. It runs on models hosted on AWS Bedrock
+  with zero data retention. See [data privacy and security](/security/ai-features).
+</Callout>
+
+## Why it is accurate
+
+The difference from a generic "natural language to filter" box is that Ask AI is **project-aware**. The request carries a compact, client-side snapshot of your project: the columns and values already loaded in the table, the metadata keys it has seen, and how many rows currently match. So your words map to the schema you actually have, not a plausible guess:
+
+- "routing queue should be membership-support" becomes `metadata.routing.queue:*membership-support*` (a real key, not a dead `traceName`)
+- "support chat sessions" becomes `traceName:SupportChatSession` (the name that exists, not an invented `type:chat`)
+
+It can only produce filters the bar's grammar supports: column filters, metadata, numeric and categorical scores, input and output content search, `has:` null checks, tag any/all/none, and negation. Any column it tries to invent is dropped before the query runs.
+
+## How it works
+
+Ask AI is a button that sits next to the bar, always available. We deliberately left **Tab alone** (it stays autocomplete and focus navigation), so there is nothing to relearn. Press the button, type your request, hit Enter. With an empty bar it builds a query from scratch; with filters already in place it **refines** them, adding, changing, or removing as you ask ("also only errors", "drop the latency one"). Everything lands as ordinary query pills through the same path the sidebar uses, so it is lossless and the browser back button undoes it.
+
+## What is next
+
+This is the same idea as our older [magic filter](/changelog/2025-09-30-natural-language-filters), rebuilt to live inside the search bar and to understand your project's data. Try it on a project whose schema you have forgotten, and tell us where it guesses wrong.
+
+See the [Ask AI docs](/docs/observability/features/filter-search-bar#ask-ai) for the details.

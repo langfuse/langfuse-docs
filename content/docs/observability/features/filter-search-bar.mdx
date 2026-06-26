@@ -96,6 +96,24 @@ Most fields accept a short alias so you can type less. The canonical field name 
 | `dataset`    | experiment dataset  |
 | `experiment` | experiment name     |
 
+## Ask AI [#ask-ai]
+
+If you don't know a project's field names yet, click **Ask AI**, describe the filter you want in plain language, and the bar builds the query for you as editable pills.
+
+<Callout type="info">
+  Ask AI is in beta and available on **Langfuse Cloud only**. It is **off by
+  default**; an organization owner or admin enables it in **Organization
+  Settings → General → AI Features**. It runs on models hosted on AWS Bedrock
+  with zero data retention. See [data privacy and security](/security/ai-features).
+</Callout>
+
+Ask AI is **project-aware**: the request carries a compact, client-side snapshot of the columns, values, and metadata keys already loaded in the table, so natural language maps to your project's real schema rather than a generic guess. "enterprise customers in the membership-support queue", for example, resolves to the actual `metadata.*` keys your traces use.
+
+- It is a button next to the bar; **Tab is not affected** and stays autocomplete and focus navigation.
+- With an empty bar it builds a query from scratch; with existing filters it **refines** them (add, change, or remove) based on your request.
+- It can only emit filters the [syntax](#syntax) supports, and any column it invents is dropped before the query is applied.
+- Results apply through the same path as the sidebar, so they are lossless and you can undo with the browser back button.
+
 ## Share and save queries [#share]
 
 The full query is serialized into the URL, so sending someone the link reproduces the exact filtered view. Because the bar compiles to the same filter representation as the sidebar, your existing Saved Views keep working unchanged.

@@ -1,0 +1,29 @@
+---
+date: 2026-06-26
+title: "Keyboard shortcuts for annotation queues"
+description: "Process an annotation queue without the mouse: arrow through items, jump between score fields, pick options with number keys, and complete with Cmd+Enter."
+author: Nikita Kabardin
+canonical: https://langfuse.com/docs/evaluation/evaluation-methods/annotation-queues#keyboard-shortcuts
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Annotation is repetitive by design: open an item, score a few dimensions, maybe leave a comment, move on. Do that two hundred times with a mouse and the round-trips are the slow part. Annotation queues are now fully keyboard-driven, so you can keep your hands on the keys and just go.
+
+The scheme is spreadsheet-style, with a navigate mode and an edit mode. Shortcuts stay out of your way while you are typing in a text field or while a dialog is open:
+
+- **`→` / `←`** move to the next and previous item in the queue
+- **`↑` / `↓`** move between score fields, wrapping at the ends
+- **`1`–`9`** select the Nth option on a categorical or boolean field
+- **`Enter`** commits a value or opens a dropdown
+- **`Esc`** steps out of a text field back to field navigation
+- **`Cmd`/`Ctrl` + `Enter`** completes the item and advances to the next
+- **`?`** opens the full cheatsheet
+
+The hints are built in, so you don't have to memorize the table: number badges show up on categorical options when a field is focused, the `↑`/`↓` legend sits beside the score list, and the `⌘↵` / `Ctrl↵` hint rides on the **Mark Completed** button. Out-of-range numeric scores are caught before the item advances.
+
+The score-field keys also work in the inline **Annotate** drawer on trace, observation, and session pages, so quick one-off annotations are faster too.
+
+See the [annotation queue docs](/docs/evaluation/evaluation-methods/annotation-queues#keyboard-shortcuts) for the full list.
