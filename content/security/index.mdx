@@ -21,6 +21,16 @@ import { CredibilitySentence } from "@/components/CredibilitySentence";
 
 <CredibilitySentence />
 
+## Langfuse Cloud security model
+
+Langfuse Cloud is a fully managed, multi-tenant SaaS deployment. The security model combines three layers:
+
+- **Security posture:** The production service is based on the same open-source Langfuse codebase, is covered by SOC 2 Type II and ISO 27001 audits, and undergoes annual third-party penetration tests. You can request the latest reports [here](/request-security-docs).
+- **Tenant isolation:** All product data is scoped to a project. Every record is associated with a `projectId`, API keys are project-scoped, and authenticated requests are authorized through RBAC before queries are made. See the [Security FAQ](/security/security-faq) and [RBAC docs](/docs/administration/rbac).
+- **Customer controls:** Teams can reduce what reaches Langfuse and how long it stays there with [masking](/docs/observability/features/masking), [data retention](/docs/administration/data-retention), [data deletion](/docs/administration/data-deletion), region selection, SSO/SCIM, and audit logs.
+
+Langfuse Cloud runs on AWS and ClickHouse Cloud in isolated regional environments. Supporting services such as Postgres, ClickHouse, Redis, and S3 are covered by the same cloud security program: private network placement, least-privilege service access, encryption at rest and in transit, monitoring, and vendor/compliance review. If your requirements mandate infrastructure-level isolation in your own account or VPC, use [self-hosted Langfuse](/self-hosting) or contact us about Enterprise options.
+
 ## Compliance
 
 We maintain [internal policies](/security/policies) and adhere to several industry-standard compliance frameworks. Please check [Security FAQs](/security/security-faq) for more details.
@@ -67,13 +77,13 @@ Langfuse is an **open‑source AI engineering platform** that provides tracing, 
 
 ### What deployment models are available?
 
-- **Langfuse Cloud** – fully‑managed SaaS (multi‑tenant) with US, EU and HIPAA data regions
+- **Langfuse Cloud** – fully‑managed SaaS (multi‑tenant) with US, EU, Japan, and HIPAA data regions
 - **Self‑hosted OSS** – MIT‑licensed software that you can deploy on your own infrastructure
 - **Self‑hosted Enterprise Edition** – commercial license with additional security/compliance features and vendor support.
 
 ### Which cloud provider and regions do you use?
 
-Langfuse Cloud mainly runs on **AWS and Clickhouse via AWS**:
+Langfuse Cloud mainly runs on **AWS and ClickHouse Cloud**:
 
 - **US & HIPAA region**: us-west-2 (Oregon)
 - **EU region**: eu-west-1 (Ireland)
