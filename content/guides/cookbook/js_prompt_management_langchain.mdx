@@ -200,7 +200,7 @@ As we passed the langfuse callback handler, we can explore the execution trace i
 
 [Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4c35a5f52ca0588d022d2ac55d7322e7?timestamp=2025-08-25T13%3A59%3A30.900Z&display=details&observation=40be66bf70a82583)
 
-## Example 1: OpenAI functions and JsonOutputFunctionsParser
+## Example 1: OpenAI functions with structured output
 
 ### Add prompt to Langfuse
 
@@ -263,10 +263,6 @@ const extractionFunctionSchema = {
 
 ```typescript
 import { ChatOpenAI } from "npm:@langchain/openai";
-import { JsonOutputFunctionsParser } from "npm:langchain/output_parsers";
-
-// Instantiate the parser
-const parser = new JsonOutputFunctionsParser();
 
 // Instantiate the ChatOpenAI class
 const model = new ChatOpenAI({ 
@@ -274,13 +270,10 @@ const model = new ChatOpenAI({
     temperature: extractorPrompt.config.temperature
 });
 
-// Create a new runnable, bind the function to the model, and pipe the output through the parser
-const runnable = model
-  .bind({
-    functions: [extractionFunctionSchema],
-    function_call: { name: "extractor" },
-  })
-  .pipe(parser);
+// Create a runnable that uses OpenAI function calling and returns parsed JSON
+const runnable = model.withStructuredOutput(extractionFunctionSchema, {
+  method: "functionCalling",
+});
 ```
 
 ### Invoke chain
