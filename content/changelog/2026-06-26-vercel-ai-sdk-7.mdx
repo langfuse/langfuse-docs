@@ -1,7 +1,7 @@
 ---
-date: 2026-06-18
-title: Trace AI SDK v7 beta
-description: Use the new @langfuse/vercel-ai-sdk beta package to trace Vercel AI SDK v7 beta calls in Langfuse.
+date: 2026-06-26
+title: Trace AI SDK 7 with Langfuse
+description: Use @langfuse/vercel-ai-sdk 5.9.0 to trace Vercel AI SDK 7 calls in Langfuse.
 author: Hassieb
 canonical: /integrations/frameworks/vercel-ai-sdk
 ---
@@ -11,20 +11,12 @@ import { Book, Package } from "lucide-react";
 
 <ChangelogHeader />
 
-<Callout type="info">
-  AI SDK 7 and `@langfuse/vercel-ai-sdk` are now generally available. Use the
-  current [Vercel AI SDK integration docs](/integrations/frameworks/vercel-ai-sdk)
-  for new projects.
-</Callout>
+AI SDK 7 is generally available, and the Langfuse Vercel AI SDK integration is stable as of `@langfuse/vercel-ai-sdk@5.9.0`. Register `LangfuseVercelAiSdkIntegration` once with the AI SDK telemetry registry and keep exporting spans through the Langfuse OpenTelemetry span processor.
 
-Langfuse now ships a beta telemetry integration for the Vercel AI SDK v7 beta. Install `@langfuse/vercel-ai-sdk@beta` with `ai@beta`, keep the regular Langfuse OpenTelemetry exporter setup in place, and register `LangfuseVercelAiSdkIntegration` once. AI SDK calls then emit OpenTelemetry spans that Langfuse maps into traces, generations, tool calls, embeddings, and reranks.
-
-Use it to migrate a chat or agent route to AI SDK v7 beta while keeping Langfuse user IDs, sessions, tags, and trace metadata via `propagateAttributes`. You can also attach route or feature metadata through `runtimeContext`, and link Langfuse Prompt Management versions to model-call observations with `runtimeContext.langfusePrompt`.
-
-The beta package requires Node.js 22 or later.
+The stable setup uses the regular `latest` npm tags:
 
 ```bash
-npm install ai@beta @ai-sdk/openai@beta @langfuse/client@beta @langfuse/vercel-ai-sdk@beta @langfuse/tracing@beta @langfuse/otel@beta @opentelemetry/sdk-node
+npm install ai @ai-sdk/openai @langfuse/client @langfuse/vercel-ai-sdk @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 ```
 
 ```typescript filename="instrumentation.ts"
@@ -79,9 +71,9 @@ await propagateAttributes(
 );
 ```
 
-AI SDK v7 excludes `runtimeContext` from telemetry events unless each top-level key is explicitly included. Langfuse maps included runtime context keys to observation metadata, except `langfusePrompt`, which is used for prompt linking.
+If you adopted the beta integration, remove the `@beta` tags from your AI SDK and Langfuse packages. The runtime shape stays the same: AI SDK 7 emits telemetry after registration, while `runtimeContext` keys must be explicitly included with `telemetry.includeRuntimeContext`.
 
-## Get started [#get-started]
+## Get started
 
 <Cards num={2}>
   <Card
