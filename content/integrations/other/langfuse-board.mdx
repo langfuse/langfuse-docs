@@ -1,0 +1,88 @@
+---
+title: "CEO Dashboard for Langfuse"
+sidebarTitle: langfuse-board
+description: "Open-source executive dashboard that turns your Langfuse data into a CEO-friendly view of AI costs, usage, and quality."
+category: Integrations
+---
+
+# langfuse-board
+
+> **What is langfuse-board?**: [langfuse-board](https://github.com/cocolocow/langfuse-board) is an open-source dashboard that plugs into your Langfuse instance and presents your LLM data in a format non-technical stakeholders can read. Costs, usage, quality — one screen, no traces, no jargon.
+
+> **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source LLM engineering platform. It helps teams trace LLM applications, debug issues, evaluate quality, and monitor costs in production.
+
+## What Can This Integration Do?
+
+langfuse-board reads your Langfuse data via the API and presents it in a clean executive dashboard:
+
+- **Cost Overview** — Total spend, daily trends, monthly projections, breakdown by model and provider
+- **Usage Analytics** — Active users, requests per day, token consumption, top users
+- **Quality Metrics** — Average and P95 latency, error rates, quality scores
+- **Live Feed** — Real-time stream of traces with status, cost, and latency
+- **Custom Dimensions** — Break down data by any Langfuse metadata field (user, account, feature, plan)
+
+## How It Works
+
+```
+┌─────────┐     ┌───────────┐     ┌─────────────────┐     ┌──────────────┐
+│ Your App │────▶│  Langfuse  │────▶│  langfuse-board  │────▶│  CEO-friendly │
+│  (LLMs)  │     │ (tracking) │     │   (dashboard)    │     │    screen    │
+└─────────┘     └───────────┘     └─────────────────┘     └──────────────┘
+```
+
+1. Your application sends traces to Langfuse as usual
+2. langfuse-board connects to your Langfuse instance via the API
+3. It caches responses with smart TTLs to stay within rate limits (works on the free plan)
+4. Non-technical stakeholders see costs, trends, and quality at a glance
+
+## Quick Start
+
+<Steps>
+
+### Prerequisites
+
+- A Langfuse account ([cloud](https://cloud.langfuse.com) or [self-hosted](/self-hosting)) with API keys
+- Node.js 20+ and pnpm, or Docker
+
+### Clone and configure
+
+```bash
+git clone https://github.com/cocolocow/langfuse-board.git
+cd langfuse-board
+cp .env.example .env
+```
+
+Edit `.env` with your Langfuse credentials:
+
+```env
+LANGFUSE_HOST=https://cloud.langfuse.com
+LANGFUSE_PUBLIC_KEY=pk-lf-your-key
+LANGFUSE_SECRET_KEY=sk-lf-your-key
+```
+
+### Start the dashboard
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Open http://localhost:3000 to see your dashboard.
+
+Alternatively, use Docker:
+
+```bash
+docker compose up
+```
+
+### Try with mock data (no Langfuse needed)
+
+Set `LANGFUSE_MOCK=true` in `.env` to see the dashboard with realistic demo data.
+
+</Steps>
+
+## Resources
+
+- [GitHub Repository](https://github.com/cocolocow/langfuse-board)
+- [Website](https://langfuse-board-landing.vercel.app)
+- [Contributing Guide](https://github.com/cocolocow/langfuse-board/blob/main/CONTRIBUTING.md)
