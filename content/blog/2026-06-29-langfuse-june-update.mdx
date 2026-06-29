@@ -1,0 +1,116 @@
+---
+title: "Langfuse June Update"
+description: "Monitors and alerts, Langfuse Assistant public beta, AI-powered filter search bar, V4 self-host preview, multi-modal datasets, and more"
+ogImage: /images/blog/2026-06-29-langfuse-june-update/june-update.png
+tag: update
+date: 2026/06/29
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse June Update"
+  description="Monitors and alerts, Langfuse Assistant public beta, AI-powered filter search bar, V4 self-host preview, multi-modal datasets, and more"
+  authors={["marcklingen"]}
+  date="June 29, 2026"
+/>
+
+June was one of the biggest shipping months yet. We opened the Langfuse Assistant to everyone on Cloud, launched Monitors and Alerts for production oversight, shipped a new grammar-based filter search bar with AI assistance, announced the V4 self-host preview, and kept adding the features the community has been asking for. Here's the full recap.
+
+## Monitors and alerts
+
+<Frame>
+  ![Monitors and alerts](/images/changelog/2026-06-19-monitors-list.png)
+</Frame>
+
+You can now create monitors that watch any cost, quality, or latency metric in your project and fire alerts when values drift outside the range you set. Notifications land in Slack, via webhook, or in a GitHub Actions workflow. Monitors ship with configurable evaluation windows, live preview so you can see how the rule would have behaved on recent data, and up to 20 monitors per organization.
+
+Use them for things like: alert when p95 latency on your chat endpoint exceeds 3 s, ping Slack when hallucination scores on production observations spike above 0.4, or open a GitHub issue when daily token cost jumps more than 20 % week-over-week.
+
+→ [Changelog](/changelog/2026-06-19-monitors) · [Docs](/docs/metrics/features/monitors)
+
+## Langfuse Assistant public beta
+
+<Frame>
+  <video
+    src="https://static.langfuse.com/docs-videos/in-app-agent.mp4"
+    autoPlay
+    loop
+    muted
+    playsInline
+  />
+</Frame>
+
+The Langfuse Assistant is now available to everyone on Cloud — no feature flag, no waitlist. Open it from any page and ask questions in plain language: "Why are my hallucination scores higher on gpt-5.5 than claude-opus-4-8?", "Show me the last 10 traces where the tool call failed", "Create an eval rule that checks for JSON parseability on all new observations." The assistant has access to your traces, metrics, scores, prompts, and more through the Langfuse MCP server and takes action on your behalf.
+
+→ [Changelog](/changelog/2026-06-19-langfuse-assistant-public-beta)
+
+## Filter Search Bar and Ask AI
+
+<Frame>
+  <video
+    src="/images/changelog/2026-06-19-filter-search-bar.mp4"
+    autoPlay
+    loop
+    muted
+    playsInline
+  />
+</Frame>
+
+The new grammar-based Filter Search Bar replaces the old filter sidebar for traces and observations. Type filters directly — `model:gpt-5.5 latency:>2000 score.hallucination:<0.3` — with autocomplete, operators, full-text search, and wildcard support. It's keyboard-first and fast.
+
+On top of that, **Ask AI** (June 26) lets you describe what you're looking for in plain English. Type your intent, press Tab, and the bar drafts the matching filter pills for you to review and edit before applying. Powered by AWS Bedrock with zero data retention; opt-in on Cloud.
+
+→ Filter Search Bar: [Changelog](/changelog/2026-06-19-filter-search-bar) · [Docs](/docs/observability/features/filter-search-bar)
+→ Ask AI: [Changelog](/changelog/2026-06-26-ask-ai-filter-search-bar) · [Docs](/docs/observability/features/filter-search-bar#ask-ai)
+
+## V4 self-host preview
+
+The V4 data model — which landed on Langfuse Cloud in March and cut query times by 165× or more — is now available as a **self-host preview** for new deployments. The team published migration guidance and a dedicated discussion thread for questions and feedback.
+
+This is the preview milestone the community has been waiting for since the V4 architecture announcement. A full migration path for existing self-hosted v3 deployments is coming next.
+
+→ [Self-host preview announcement](https://github.com/orgs/langfuse/discussions/14157)
+
+## Multi-modal datasets
+
+<Frame>
+  ![Multi-modal datasets](/images/changelog/2026-06-23-multi-modal-datasets.png)
+</Frame>
+
+Dataset items now support images, audio, video, documents, and any other media attachment. Attach files when creating items via the SDK and run multi-modal experiments the same way you would text-only ones. Input and expected output can reference any media type Langfuse already supports in traces.
+
+→ [Changelog](/changelog/2026-06-23-multi-modal-datasets) · [Docs](/docs/evaluation/experiments/datasets)
+
+## Score from the browser
+
+A new `@langfuse/browser` package lets you ingest scores from your frontend with only a **public key** — no server call needed. Wire it up to thumbs up/down buttons, star ratings, or any implicit signal and scores appear as native Langfuse scores on the right trace.
+
+The package is safe to ship client-side: the public key cannot write traces or read data — only ingest scores.
+
+→ [Changelog](/changelog/2026-06-18-browser-score-ingestion) · [Docs](/docs/evaluation/evaluation-methods/scores-via-sdk)
+
+## Evaluators via MCP
+
+The Langfuse MCP server now exposes evaluator and evaluation rule management as tools. An agent can inspect a failing trace, write a code evaluator that detects the pattern, and wire it to an evaluation rule — all in one conversation. The unstable public API also now accepts `type: "code"` for code evaluators alongside the existing `llm_as_judge` type.
+
+→ [Changelog](/changelog/2026-06-10-evaluators-via-mcp) · [MCP reference](https://mcp.reference.langfuse.com/)
+
+## More June releases
+
+- **[Scores API v3](/changelog/2026-06-10-scores-v3-api)** — Cursor-based pagination, a single typed `value` field, and comma-separated list filters plus `valueMin`/`valueMax` ranges on `GET /api/public/v3/scores`. The v2 endpoint is deprecated.
+- **[Trace AI SDK 7](/changelog/2026-06-26-vercel-ai-sdk-7)** — `@langfuse/vercel-ai-sdk` 5.9.0 adds stable support for Vercel AI SDK 7. An earlier beta package (`@langfuse/vercel-ai-sdk` beta) was also shipped on June 18 for early adopters.
+- **[Web Callouts](/changelog/2026-06-17-web-callouts)** — Call any HTTP endpoint directly from a trace, observation, or session view to trigger external workflows without leaving Langfuse.
+- **[Keyboard shortcuts for annotation queues](/changelog/2026-06-26-annotation-queue-keyboard-shortcuts)** — Arrow through queue items, jump between score fields, pick options with number keys, and submit with Cmd+Enter. No mouse required.
+- **[Delete evaluator templates](/changelog/2026-06-15-delete-evaluator-templates)** — Remove evaluator templates you no longer need from the UI, API, and MCP, with safeguards that block deletion if active evaluation rules still depend on them.
+- **[Mask exported spans in Python](/changelog/2026-06-16-python-sdk-export-stage-masking)** — Run media detection and configured masking on every span in the Python SDK span processor, including spans from third-party OpenTelemetry libraries.
+- **[OpenAI models on Amazon Bedrock](/changelog/2026-06-02-openai-on-amazon-bedrock)** — Connect Bedrock-hosted OpenAI models (including `openai.gpt-5.5` and `openai.gpt-5.4`) to Langfuse LLM Connections via the OpenAI Responses API for use in Playground, evaluators, and experiments.
+- **Claude Fable 5 and Mythos 5 pricing** — Both models are now recognized automatically for cost tracking.
+- **Redesigned trace timeline** — The trace detail view was rebuilt as a two-pane waterfall drawer with subtree wall-clock durations, condensed layout, and smoother scrolling across all screen sizes.
+
+## Town Hall recap
+
+We held the June Town Hall on June 11 covering V4 self-host preview, the new Japan Cloud region, Observation Evaluations, Code Evaluators in CI, Experiment Dashboards, full-text search, MCP server and CLI, and the roadmap. Recording on YouTube.
+
+→ [Watch the recording](https://www.youtube-nocookie.com/watch?v=R6q9OWTwCy0)
