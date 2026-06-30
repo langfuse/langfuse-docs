@@ -78,16 +78,7 @@ enabled = true
 
 ### Set your Langfuse credentials [#set-credentials]
 
-Tracing stays off until `TRACE_TO_LANGFUSE` is `"true"`, so you opt in explicitly. Add your credentials to your shell profile (`~/.zshrc`, `~/.bashrc`, or `~/.bash_profile`):
-
-```bash
-export TRACE_TO_LANGFUSE="true"
-export LANGFUSE_PUBLIC_KEY="pk-lf-..."
-export LANGFUSE_SECRET_KEY="sk-lf-..."
-export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
-```
-
-Alternatively, create a JSON config file at `~/.codex/langfuse.json` (global) or `<project>/.codex/langfuse.json` (per-project):
+Tracing stays off until you opt in explicitly. The recommended setup is a JSON config file at `~/.codex/langfuse.json` (global) or `<project>/.codex/langfuse.json` (per-project):
 
 ```json
 {
@@ -98,7 +89,18 @@ Alternatively, create a JSON config file at `~/.codex/langfuse.json` (global) or
 }
 ```
 
-Configuration is resolved as defaults → global config file → project config file → environment variables, with environment variables taking precedence. `LANGFUSE_CODEX_*` variables override the matching standard `LANGFUSE_*` variables, so you can scope credentials to Codex.
+If you prefer environment variables, use the Codex-scoped variables in the shell that starts Codex:
+
+```bash
+export TRACE_TO_LANGFUSE="true"
+export LANGFUSE_CODEX_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_CODEX_SECRET_KEY="sk-lf-..."
+export LANGFUSE_CODEX_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+```
+
+Avoid exporting standard `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` globally for Codex. Codex Desktop and other Codex infrastructure may also read standard Langfuse/OpenTelemetry environment variables, which can send internal app-server spans such as `plugin/list`, `config/read`, or `auth` to your Langfuse project. The Codex-scoped variables and JSON config file are only used by this tracing hook.
+
+Configuration is resolved as defaults → global config file → project config file → environment variables, with environment variables taking precedence. `LANGFUSE_CODEX_*` variables override the matching standard `LANGFUSE_*` variables.
 
 ### Use Codex
 
@@ -123,19 +125,19 @@ Open your Langfuse project to see the captured traces. The structure mirrors how
 
 ## Environment variables
 
-| Variable                       | Description                                                                                                                                                             | Required            |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `TRACE_TO_LANGFUSE`            | Set to `"true"` to enable tracing                                                                                                                                       | Yes                 |
-| `LANGFUSE_PUBLIC_KEY`          | Your Langfuse public key (`pk-lf-...`)                                                                                                                                  | Yes                 |
-| `LANGFUSE_SECRET_KEY`          | Your Langfuse secret key (`sk-lf-...`)                                                                                                                                  | Yes                 |
-| `LANGFUSE_BASE_URL`            | Langfuse host. EU: `https://cloud.langfuse.com`, US: `https://us.cloud.langfuse.com`, Japan: `https://jp.cloud.langfuse.com`, HIPAA: `https://hipaa.cloud.langfuse.com` | No (defaults to EU) |
-| `LANGFUSE_TRACING_ENVIRONMENT` | Environment label for the traces (e.g. `production`)                                                                                                                    | No                  |
-| `LANGFUSE_CODEX_TAGS`          | Tags for all traces (JSON array or comma-separated)                                                                                                                     | No                  |
-| `LANGFUSE_CODEX_METADATA`      | JSON object of metadata to attach to all traces                                                                                                                         | No                  |
-| `LANGFUSE_CODEX_MAX_CHARS`     | Truncate inputs/outputs longer than this many characters (default `20000`)                                                                                              | No                  |
-| `LANGFUSE_CODEX_DEBUG`         | Set to `"true"` for verbose logging to stderr                                                                                                                           | No                  |
+| Variable                     | Description                                                                                                                                                             | Required            |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `TRACE_TO_LANGFUSE`          | Set to `"true"` to enable tracing                                                                                                                                       | Yes                 |
+| `LANGFUSE_CODEX_PUBLIC_KEY`  | Your Langfuse public key (`pk-lf-...`)                                                                                                                                  | Yes                 |
+| `LANGFUSE_CODEX_SECRET_KEY`  | Your Langfuse secret key (`sk-lf-...`)                                                                                                                                  | Yes                 |
+| `LANGFUSE_CODEX_BASE_URL`    | Langfuse host. EU: `https://cloud.langfuse.com`, US: `https://us.cloud.langfuse.com`, Japan: `https://jp.cloud.langfuse.com`, HIPAA: `https://hipaa.cloud.langfuse.com` | No (defaults to EU) |
+| `LANGFUSE_CODEX_ENVIRONMENT` | Environment label for the traces (e.g. `production`)                                                                                                                    | No                  |
+| `LANGFUSE_CODEX_TAGS`        | Tags for all traces (JSON array or comma-separated)                                                                                                                     | No                  |
+| `LANGFUSE_CODEX_METADATA`    | JSON object of metadata to attach to all traces                                                                                                                         | No                  |
+| `LANGFUSE_CODEX_MAX_CHARS`   | Truncate inputs/outputs longer than this many characters (default `20000`)                                                                                              | No                  |
+| `LANGFUSE_CODEX_DEBUG`       | Set to `"true"` for verbose logging to stderr                                                                                                                           | No                  |
 
-The credential variables also accept a `LANGFUSE_CODEX_` prefix (for example `LANGFUSE_CODEX_PUBLIC_KEY`), which takes precedence over the standard variable.
+The hook also accepts standard `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`, and `LANGFUSE_TRACING_ENVIRONMENT` variables as fallbacks. Prefer the `LANGFUSE_CODEX_*` variables or the JSON config file to avoid leaking credentials into unrelated Codex infrastructure telemetry.
 
 ## Troubleshooting
 
@@ -153,6 +155,12 @@ Verify your API keys are correct and that `LANGFUSE_BASE_URL` matches the region
 - **US region**: `https://us.cloud.langfuse.com`
 - **Japan region**: `https://jp.cloud.langfuse.com`
 - **HIPAA region**: `https://hipaa.cloud.langfuse.com`
+
+### Unexpected Codex infrastructure spans
+
+If you see traces named `plugin/list`, `config/read`, `model/list`, `mcpServerStatus/list`, `auth`, or similar, those are Codex infrastructure spans, not Codex execution traces from this plugin. Execution traces created by this plugin are named `Codex Turn` and contain generation and tool observations.
+
+This usually means standard Langfuse credentials are visible to the Codex Desktop app-server or another Codex process. Remove globally exported `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` values from shell profiles or launch configuration, restart Codex, and use `~/.codex/langfuse.json` or `LANGFUSE_CODEX_*` variables instead.
 
 ### Data privacy
 
