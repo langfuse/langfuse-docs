@@ -8,6 +8,9 @@ const path = require("path");
 const {
   stripMdxForPlainMarkdown,
 } = require("../lib/stripMdxForPlainMarkdown.js");
+const {
+  replaceComponentsWithMarkdown,
+} = require("../lib/markdown-component-renderers.js");
 const { CONTENT_DIR_TO_URL_PREFIX } = require("../lib/content-dir-map.js");
 
 const SOURCE_DIR = path.join(process.cwd(), "content");
@@ -93,7 +96,9 @@ function copyAll() {
     const dir = path.dirname(dest);
     ensureDir(dir);
     const originalContent = fs.readFileSync(file, "utf8");
-    const inlined = inlineComponentsMdx(originalContent, file);
+    const inlined = replaceComponentsWithMarkdown(
+      inlineComponentsMdx(originalContent, file),
+    );
     const processed = stripMdxForPlainMarkdown(inlined, {
       unwrapCalloutsForPlainMd: true,
     });

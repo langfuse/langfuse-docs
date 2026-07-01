@@ -1000,7 +1000,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: "US, EU, or JP",
             Core: "US, EU, or JP",
-            Pro: "US, EU, or JP",
+            Pro: "US, EU, JP, or HIPAA",
             Enterprise: "US, EU, JP, or HIPAA",
           },
         },

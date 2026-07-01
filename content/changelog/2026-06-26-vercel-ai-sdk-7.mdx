@@ -1,0 +1,91 @@
+---
+date: 2026-06-26
+title: Trace AI SDK 7 with Langfuse
+description: Use @langfuse/vercel-ai-sdk 5.9.0 to trace Vercel AI SDK 7 calls in Langfuse.
+author: Hassieb
+canonical: /integrations/frameworks/vercel-ai-sdk
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Package } from "lucide-react";
+
+<ChangelogHeader />
+
+AI SDK 7 is generally available, and the Langfuse Vercel AI SDK integration is stable as of `@langfuse/vercel-ai-sdk@5.9.0`. Register `LangfuseVercelAiSdkIntegration` once with the AI SDK telemetry registry and keep exporting spans through the Langfuse OpenTelemetry span processor.
+
+The stable setup uses the regular `latest` npm tags:
+
+```bash
+npm install ai @ai-sdk/openai @langfuse/client @langfuse/vercel-ai-sdk @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
+```
+
+```typescript filename="instrumentation.ts"
+import { registerTelemetry } from "ai";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+
+registerTelemetry(new LangfuseVercelAiSdkIntegration());
+```
+
+```typescript filename="app.ts"
+import "./instrumentation";
+
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { LangfuseClient } from "@langfuse/client";
+import { propagateAttributes } from "@langfuse/tracing";
+
+const langfuseClient = new LangfuseClient();
+const langfusePrompt = await langfuseClient.getPrompt("support-chat/default");
+
+await propagateAttributes(
+  {
+    traceName: "support-chat",
+    userId: "user-123",
+    sessionId: "session-456",
+    tags: ["production", "chat"],
+  },
+  () =>
+    generateText({
+      model: openai("gpt-5.1"),
+      prompt: langfusePrompt.compile({ topic: "RAG" }),
+      runtimeContext: {
+        route: "support-chat",
+        langfusePrompt,
+      },
+      telemetry: {
+        functionId: "support-chat",
+        includeRuntimeContext: {
+          route: true,
+          langfusePrompt: true,
+        },
+      },
+    }),
+);
+```
+
+If you adopted the beta integration, remove the `@beta` tags from your AI SDK and Langfuse packages. The runtime shape stays the same: AI SDK 7 emits telemetry after registration, while `runtimeContext` keys must be explicitly included with `telemetry.includeRuntimeContext`.
+
+## Get started
+
+<Cards num={2}>
+  <Card
+    title="Vercel AI SDK integration"
+    href="/integrations/frameworks/vercel-ai-sdk"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="NPM package"
+    href="https://www.npmjs.com/package/@langfuse/vercel-ai-sdk"
+    icon={<Package />}
+    arrow
+  />
+</Cards>

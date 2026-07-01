@@ -1,0 +1,129 @@
+---
+title: Filter Search Bar
+description: Filter and search traces and observations by typing — fields, operators, wildcards, aliases, and full-text search in one query bar with autocomplete.
+sidebarTitle: Filter Search Bar
+---
+
+# Filter Search Bar
+
+The Filter Search Bar lets you filter and search the Observations and Traces tables by typing a single line of text instead of assembling filters in the sidebar. It parses your query into the same filters the sidebar produces, autocompletes fields and values as you type, and serializes the full query into the URL so you can share an exact view with a link.
+
+```
+level:ERROR type:TOOL environment:production latency:>2 name:*checkout*
+```
+
+<Callout type="info">
+  The Filter Search Bar runs on the Langfuse v4 data model and is currently
+  available on Langfuse Cloud. Turn on **Fast** on the Observations or Traces
+  table to use it. Open-source support follows once the v4 schema migration is
+  ready for self-hosted deployments.
+</Callout>
+
+The bar runs next to the existing filter sidebar and time-range selector. Because the bar and the sidebar are two editors over the same filter state, anything you type appears as sidebar filters and vice versa. Type a field name and autocomplete suggests operators and observed values; press Enter to apply.
+
+## Query syntax [#syntax]
+
+A query is a list of `field:value` filters, combined with implicit AND.
+
+### Fields and values
+
+`level:ERROR`, `environment:production`, `user:alice`. Type a field name and the bar suggests the values it has observed for that field, so you don't have to memorize them.
+
+### Operators
+
+`latency:>2`, `cost:>=0.01`, `startTime:>2026-06-01` — `>`, `>=`, `<`, and `<=` work on numeric and datetime fields.
+
+### Wildcards and exact match
+
+On text fields, use `*` as a wildcard:
+
+- `name:*checkout*` — contains
+- `name:checkout*` — starts with
+- `name:*checkout` — ends with
+- `name:checkout` — bare term, defaults to contains
+- `name:=checkout` — exact match
+
+### Negation
+
+Prefix a filter with `-` to exclude: `-environment:production`.
+
+### Any-of and all-of
+
+- `level:(ERROR OR WARNING)` — match either value for one field
+- `tags:(billing AND urgent)` — match all values (array fields)
+
+### Metadata and scores
+
+Use dot paths for nested fields:
+
+- `metadata.region:eu`
+- `scores.accuracy:>0.8`
+- `traceScores.helpfulness:positive`
+
+Quote keys that contain spaces or special characters after the prefix: `scores."Answer Relevance":>=0.9`, `metadata."my key":eu`.
+
+### Null checks
+
+`has:endTime` matches rows where the field is set; `-has:endTime` matches rows where it is null.
+
+### Full-text search
+
+A bare word or phrase searches across ids, names, input, and output:
+
+```
+refund failed
+```
+
+Scope it to a single payload with `input:` or `output:` (for example `output:"refund failed"`). Matching is case-insensitive and word-based: a term matches whole words — `error` matches `error` but not `errors` — and a multi-word term matches as a contiguous phrase. The bar searches with the same v4 ClickHouse full-text search documented in [Full-Text Search](/docs/observability/features/full-text-search).
+
+## Field aliases [#aliases]
+
+Most fields accept a short alias so you can type less. The canonical field name always works too.
+
+| Alias        | Field               |
+| ------------ | ------------------- |
+| `env`        | environment         |
+| `user`       | user id             |
+| `session`    | session id          |
+| `model`      | model name          |
+| `prompt`     | prompt name         |
+| `cost`       | total cost          |
+| `tokens`     | total tokens        |
+| `tags`       | trace tags          |
+| `status`     | status message      |
+| `ttft`       | time to first token |
+| `tps`        | tokens per second   |
+| `dataset`    | experiment dataset  |
+| `experiment` | experiment name     |
+
+## Ask AI [#ask-ai]
+
+If you don't know a project's field names yet, click **Ask AI**, describe the filter you want in plain language, and the bar builds the query for you as editable pills.
+
+<Callout type="info">
+  Ask AI is in beta and available on **Langfuse Cloud only**. It is **off by
+  default**; an organization owner or admin enables it in **Organization
+  Settings → General → AI Features**. It runs on models hosted on AWS Bedrock
+  with zero data retention. See [data privacy and security](/security/ai-features).
+</Callout>
+
+Ask AI is **project-aware**: the request carries a compact, client-side snapshot of the columns, values, and metadata keys already loaded in the table, so natural language maps to your project's real schema rather than a generic guess. "enterprise customers in the membership-support queue", for example, resolves to the actual `metadata.*` keys your traces use.
+
+- It is a button next to the bar, always available.
+- With an empty bar it builds a query from scratch; with existing filters it **refines** them (add, change, or remove) based on your request.
+- It can only emit filters the [syntax](#syntax) supports, and any column it invents is dropped before the query is applied.
+- Results apply through the same path as the sidebar, so they are lossless and you can undo with the browser back button.
+
+## Share and save queries [#share]
+
+The full query is serialized into the URL, so sending someone the link reproduces the exact filtered view. Because the bar compiles to the same filter representation as the sidebar, your existing Saved Views keep working unchanged.
+
+## Reserved tokens
+
+Some operator-like tokens are not supported yet and are flagged instead of being treated as text: `!`, and the lowercase words `and`, `or`, and `not`. Use `-field:value` to exclude and `field:(A OR B)` to match several values of one field. To search for a reserved word as literal text, quote it (`"or"`).
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-filter-search-bar"]} />

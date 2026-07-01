@@ -4,6 +4,9 @@ description: Export traces, observations, enriched observations, and scores to B
 sidebarTitle: Export to Blob Storage
 ---
 
+import BlobStorageReExporting from "@/components-mdx/blob-storage-re-exporting.mdx";
+import BlobStorageEmptyFiles from "@/components-mdx/blob-storage-empty-files.mdx";
+
 # Export via Blob Storage Integration
 
 <AvailabilityBanner
@@ -18,7 +21,7 @@ sidebarTitle: Export to Blob Storage
 
 You can create schedule exports to a Blob Storage, e.g. S3, GCS, or Azure Blob Storage, for `traces`, `observations`, enriched observations, and `scores`.
 
-Those exports can run on an `hourly`, `daily`, or `weekly` schedule.
+Those exports can run every `20 minutes`, or on an `hourly`, `daily`, or `weekly` schedule.
 Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
 Select whether you want to use S3, a S3 compatible storage, Google Cloud Storage, or Azure Blob Storage.
 
@@ -27,7 +30,7 @@ Select whether you want to use S3, a S3 compatible storage, Google Cloud Storage
 To set up the export navigate to `Your Project` > `Settings` > `Integrations` > `Blob Storage`.
 
 Fill in the settings to authenticate with your vendor, enable the integration, and press save.
-Within an hour an initial export should start and continue based on the schedule you have selected.
+An initial export starts shortly after you enable the integration and then continues on the schedule you selected.
 The export supports CSV, JSON, and JSONL file formats.
 Read [our blob storage documentation](/self-hosting/deployment/infrastructure/blobstorage) for more information on how to get credentials for your specific vendor.
 
@@ -108,6 +111,57 @@ New integrations default to all eleven groups, so behavior matches earlier expor
 - `compressed` — boolean; defaults to `true` for new integrations. When `true`, files are written as `.csv.gz`, `.json.gz`, or `.jsonl.gz`.
 
 See the [API reference](https://api.reference.langfuse.com/#tag/blobstorageintegrations) for the full schema.
+
+## Export modes [#export-modes]
+
+The **Export Mode** determines how far back the integration starts exporting from:
+
+| Mode                 | Starts from                           | When to use                                                                                                          |
+| -------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Full history**     | The earliest data in your project     | You want a complete one-time backfill of all existing data alongside ongoing exports.                                |
+| **From setup date**  | The moment you enable the integration | You only care about data going forward and don't need history — the lightest option to get started.                  |
+| **From custom date** | A start date you choose               | You want history from a specific point (for example, the start of a quarter) without exporting everything before it. |
+
+Changing the mode resets the sync position, so it's also the mechanism for re-scanning history — see [Re-exporting data and configuration changes](#re-exporting).
+
+## How exports run [#how-exports-run]
+
+Each run exports one time window of data to your bucket, then advances and exports the next window on your configured schedule.
+
+- **Export delay.** Data is exported with a short delay rather than right up to the current moment, so records still moving through ingestion are not exported half-written. Expect a brief lag between when an event is recorded and when it appears in your bucket.
+- **Catch-up / backfill.** When an integration starts from a historic point — or falls behind — it works forward through the backlog and may write many files in quick succession before settling into its normal cadence. A freshly created full-history integration does this until it catches up to the present.
+
+## Export status [#export-status]
+
+The integration settings page shows a status badge:
+
+| Badge        | Meaning                                                                                |
+| ------------ | -------------------------------------------------------------------------------------- |
+| **Active**   | Enabled and synced; the next export is scheduled for the future.                       |
+| **Running**  | An export job is currently in progress (shown with a spinner).                         |
+| **Queued**   | An export is due and waiting to run.                                                   |
+| **Pending**  | Enabled but has not run an export yet (`Data exported up to` shows `Never (pending)`). |
+| **Disabled** | The integration is turned off.                                                         |
+| **Error**    | The most recent export failed; an error message and timestamp are shown.               |
+
+The status card on the same page also surfaces:
+
+- **Data exported up to** — timestamp of the last successfully exported window (or `Never (pending)`).
+- **Next export scheduled** — when the next run will happen.
+- **Export mode** — `Full history`, `From setup date`, or `From custom date` (plus the start date where applicable).
+- A **Last export failed** alert with the error message and time when in the Error state.
+
+If a worker crashes mid-export, a 2-hour safety-valve TTL ensures the badge reverts from Running to its underlying state (typically Queued) so the next scheduled run can proceed. Reload the page to see the latest status.
+
+A failed export is retried automatically on the next run; repeated failures trigger a notification.
+
+## Re-exporting data and configuration changes [#re-exporting]
+
+<BlobStorageReExporting />
+
+## Empty files in your bucket [#empty-files]
+
+<BlobStorageEmptyFiles />
 
 ## Alternatives
 
