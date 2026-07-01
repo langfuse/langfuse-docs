@@ -52,7 +52,7 @@ function injectChangelogAgentNotice(processed, originalContent) {
   const canonicalUrl = canonical
     ? canonical.startsWith("http")
       ? canonical
-      : `https://langfuse.com${canonical}`
+      : `https://langfuse.com${canonical.startsWith("/") ? canonical : `/${canonical}`}`
     : null;
   const reference = canonicalUrl
     ? `the canonical documentation for this feature (${canonicalUrl}) and the API/SDK reference (https://api.reference.langfuse.com)`
@@ -160,7 +160,7 @@ function copyAll() {
 
     // For changelog entries, prepend an AI-agent notice so models use the page
     // to confirm a feature exists rather than copying release-time examples.
-    const destRel = path.relative(OUTPUT_DIR, dest);
+    const destRel = path.relative(OUTPUT_DIR, dest).split(path.sep).join("/");
     const isChangelogEntry =
       destRel.startsWith(`${CHANGELOG_URL_PREFIX}/`) &&
       destRel !== `${CHANGELOG_URL_PREFIX}/index.md`;
