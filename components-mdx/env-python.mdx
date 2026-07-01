@@ -4,3 +4,21 @@ LANGFUSE_PUBLIC_KEY = "pk-lf-..."
 LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
+
+<Callout type="info">
+
+A `.env` file is not loaded automatically. Load it before initializing Langfuse, for example with [python-dotenv](https://pypi.org/project/python-dotenv/):
+
+```bash
+pip install python-dotenv
+```
+
+```python
+from dotenv import load_dotenv
+
+load_dotenv()  # load variables from .env
+```
+
+Alternatively, set the variables directly in your shell (e.g. `export LANGFUSE_SECRET_KEY=...`).
+
+</Callout>
