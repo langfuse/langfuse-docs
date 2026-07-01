@@ -298,15 +298,9 @@ REDIS_SENTINEL_ENABLED=true
 REDIS_SENTINEL_NODES=10.0.1.10:26379,10.0.1.11:26379,10.0.1.12:26379
 REDIS_SENTINEL_MASTER_NAME=langfuse-master
 REDIS_AUTH=your-redis-password
-REDIS_TLS_ENABLED=true
+REDIS_TLS_ENABLED=true # required if REDIS_SENTINEL_TLS_ENABLED=true
 REDIS_SENTINEL_TLS_ENABLED=true
 ```
-
-<Callout type="info">
-
-`REDIS_SENTINEL_TLS_ENABLED` requires `REDIS_TLS_ENABLED=true`. If you set `REDIS_SENTINEL_TLS_ENABLED=true` while `REDIS_TLS_ENABLED` is `false`, the Sentinel TLS configuration is ignored and Langfuse logs a warning on startup. This lets you set up TLS for Sentinel connections without patching the Docker image.
-
-</Callout>
 
 ## Sizing Recommendations
 
