@@ -1233,7 +1233,7 @@ const sections: Section[] = [
       },
       {
         name: "Data processing agreement (GDPR)",
-        href: "/security/dpa",
+        href: "/dpa",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
         },
