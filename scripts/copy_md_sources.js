@@ -17,6 +17,61 @@ const SOURCE_DIR = path.join(process.cwd(), "content");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "md-src");
 const OVERRIDE_DIR = path.join(process.cwd(), "md-override");
 
+// Directories whose .md output is historical changelog content. Agents fetch
+// these pages (via the ".md" route or the docs MCP `getLangfuseDocsPage` tool)
+// and can mistake the release-time code snippets for current implementation
+// guidance. We prepend a machine-readable notice so agents use changelog
+// entries only to confirm a feature exists, and follow the canonical docs /
+// API / SDK reference for implementation. See CHANGELOG_AGENT_NOTICE below.
+const CHANGELOG_URL_PREFIX = "changelog";
+
+/**
+ * Read the `canonical` frontmatter value (a docs path) from raw MDX, if present.
+ * @param {string} originalContent
+ * @returns {string | null}
+ */
+function extractCanonicalPath(originalContent) {
+  const fmMatch = originalContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!fmMatch) return null;
+  const canonicalMatch = fmMatch[1].match(/^canonical:\s*(\S+)\s*$/m);
+  return canonicalMatch ? canonicalMatch[1].trim() : null;
+}
+
+/**
+ * Prepend an AI-agent notice to changelog markdown, inserted right after the
+ * YAML frontmatter block so it is the first thing a model reads in the body.
+ * The notice steers agents away from using (potentially outdated) release-time
+ * code examples for implementation and toward the canonical docs / API / SDK
+ * reference.
+ * @param {string} processed  markdown already stripped for plain output
+ * @param {string} originalContent  raw MDX source (for frontmatter lookup)
+ * @returns {string}
+ */
+function injectChangelogAgentNotice(processed, originalContent) {
+  const canonical = extractCanonicalPath(originalContent);
+  const canonicalUrl = canonical
+    ? canonical.startsWith("http")
+      ? canonical
+      : `https://langfuse.com${canonical}`
+    : null;
+  const reference = canonicalUrl
+    ? `the canonical documentation for this feature (${canonicalUrl}) and the API/SDK reference (https://api.reference.langfuse.com)`
+    : `the current documentation (https://langfuse.com/docs) and the API/SDK reference (https://api.reference.langfuse.com)`;
+  const notice =
+    `> **Note for AI agents and LLMs:** This is a Langfuse changelog entry. ` +
+    `Use it only to confirm that a feature exists and when it shipped. ` +
+    `Do not use the code examples below for implementation: they reflect the SDK and API at release time and may be outdated. ` +
+    `For implementation, always follow ${reference}.`;
+
+  const fmMatch = processed.match(/^(---\r?\n[\s\S]*?\r?\n---\r?\n)/);
+  if (fmMatch) {
+    const frontmatter = fmMatch[1];
+    const body = processed.slice(frontmatter.length).replace(/^\s*\n/, "");
+    return `${frontmatter}\n${notice}\n\n${body}`;
+  }
+  return `${notice}\n\n${processed.replace(/^\s*\n/, "")}`;
+}
+
 /**
  * Recursively walk a directory collecting file paths.
  */
@@ -99,9 +154,20 @@ function copyAll() {
     const inlined = replaceComponentsWithMarkdown(
       inlineComponentsMdx(originalContent, file),
     );
-    const processed = stripMdxForPlainMarkdown(inlined, {
+    let processed = stripMdxForPlainMarkdown(inlined, {
       unwrapCalloutsForPlainMd: true,
     });
+
+    // For changelog entries, prepend an AI-agent notice so models use the page
+    // to confirm a feature exists rather than copying release-time examples.
+    const destRel = path.relative(OUTPUT_DIR, dest);
+    const isChangelogEntry =
+      destRel.startsWith(`${CHANGELOG_URL_PREFIX}/`) &&
+      destRel !== `${CHANGELOG_URL_PREFIX}/index.md`;
+    if (isChangelogEntry) {
+      processed = injectChangelogAgentNotice(processed, originalContent);
+    }
+
     fs.writeFileSync(dest, processed, "utf8");
     copied += 1;
   }
