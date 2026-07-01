@@ -2,7 +2,29 @@
 
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import { cn } from "@/lib/utils";
+
+/**
+ * READMEs (e.g. langfuse-terraform-aws) embed raw HTML like <img width height>
+ * for hero images; rehype-raw parses that HTML instead of leaving it as literal
+ * escaped text, and rehype-sanitize keeps that safe since the HTML is fetched
+ * from an external source at runtime.
+ */
+const readmeSanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    img: [
+      ...(defaultSchema.attributes?.img ?? []),
+      "width",
+      "height",
+      "alt",
+      "align",
+    ],
+  },
+};
 
 /**
  * Renders markdown content with doc-style typography (headings, lists, tables, code).
@@ -12,7 +34,11 @@ import { cn } from "@/lib/utils";
 export function RenderedReadmeContent({ content }: { content: string }) {
   return (
     <div className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={readmeComponents}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw, [rehypeSanitize, readmeSanitizeSchema]]}
+        components={readmeComponents}
+      >
         {content}
       </ReactMarkdown>
     </div>
@@ -156,4 +182,12 @@ const readmeComponents: Components = {
     </td>
   ),
   hr: () => <hr className="my-4 border-border" />,
+  img: ({ alt, ...props }) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      alt={alt ?? ""}
+      className="my-3 h-auto max-w-full rounded-md"
+      {...props}
+    />
+  ),
 };
