@@ -18,7 +18,7 @@ Since Reflexes are classifiers, they return exactly one category per evaluation 
 
 ## Before you start
 
-- A Morph API key (`sk-...`) from the [Morph dashboard](https://morphllm.com/dashboard).
+- A Morph API key (`sk-...`) from the [Morph dashboard](https://morphllm.com/dashboard/api-keys).
 - A Reflex `model` id and its exact **labels** — the categories you configure in Langfuse must match these exactly. You can list a model's labels with one prediction:
 
 ```bash
@@ -50,6 +50,7 @@ Click **Change the provider → Add LLM connection** and configure it:
   ```
 
   Leave **Use Responses API** and **Extra Headers** off — you don't need them.
+
 - Turn off **Use default models**, and under **Custom models** add the Reflex `model` ids you want to use (e.g. `jailbreak`).
 
 Click **Create connection**, then select that connection and the model.
@@ -110,18 +111,18 @@ The evaluator scores **new** matching traces automatically as they come in. To s
 
 Morph ships a set of pre-trained Reflexes. Copy the `model` id into the connection's **Custom models**, and the categories into the evaluator's **Categories** — exactly as written, they're case-sensitive.
 
-| Reflex `model`       | Categories                                                                    | Catches                               |
-| -------------------- | ----------------------------------------------------------------------------- | -------------------------------------- |
-| `jailbreak`          | `benign`, `jailbreak`                                                         | Prompt-injection / jailbreak attempts |
-| `guardrail`          | `false`, `true`                                                               | Harassment or NSFW content            |
-| `leaked-thinking`    | `clean`, `leaked`                                                             | Agent leaking its internal thinking   |
-| `stuck-in-a-loop`    | `progressing`, `looping`                                                      | Agent blocked, not trying new things  |
-| `incomplete-thought` | `complete`, `incomplete`                                                      | User sent a truncated prompt          |
-| `user-frustrated`    | `Frustrated`, `Not Frustrated`                                                | User is frustrated with the agent     |
-| `ambiguity`          | `low`, `med`, `high`                                                          | How underspecified a prompt is        |
-| `difficulty`         | `easy`, `medium`, `hard`                                                      | Prompt difficulty, for model routing  |
-| `domain`             | `general`, `summary`, `coding`, `design`, `data`                              | Topic of a request (multi-label — see note below) |
-| **Custom**           | Get them from your [Reflex dashboard](https://morphllm.com/dashboard/reflex)  | Your own trained classifier           |
+| Reflex `model`       | Categories                                                                   | Catches                                           |
+| -------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------- |
+| `jailbreak`          | `benign`, `jailbreak`                                                        | Prompt-injection / jailbreak attempts             |
+| `guardrail`          | `false`, `true`                                                              | Harassment or NSFW content                        |
+| `leaked-thinking`    | `clean`, `leaked`                                                            | Agent leaking its internal thinking               |
+| `stuck-in-a-loop`    | `progressing`, `looping`                                                     | Agent blocked, not trying new things              |
+| `incomplete-thought` | `complete`, `incomplete`                                                     | User sent a truncated prompt                      |
+| `user-frustrated`    | `Frustrated`, `Not Frustrated`                                               | User is frustrated with the agent                 |
+| `ambiguity`          | `low`, `med`, `high`                                                         | How underspecified a prompt is                    |
+| `difficulty`         | `easy`, `medium`, `hard`                                                     | Prompt difficulty, for model routing              |
+| `domain`             | `general`, `summary`, `coding`, `design`, `data`                             | Topic of a request (multi-label — see note below) |
+| **Custom**           | Get them from your [Reflex dashboard](https://morphllm.com/dashboard/reflex) | Your own trained classifier                       |
 
 <Callout type="warning">
   `domain` is a multi-label Reflex, but the evaluator attaches **only the top
