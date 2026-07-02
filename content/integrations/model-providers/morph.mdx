@@ -1,0 +1,131 @@
+---
+title: Realtime Classification with Morph Reflex Evaluators
+sidebarTitle: Morph
+logo: /images/integrations/morph_icon.svg
+description: Use Morph Reflex classifiers as LLM-as-a-judge evaluators in Langfuse to label your traces with a category in realtime.
+category: Integrations
+---
+
+# Realtime Classification with Morph Reflex Evaluators
+
+This guide shows you how to use [Morph](https://morphllm.com) Reflex models as LLM-as-a-judge evaluators in Langfuse. Morph's API is OpenAI-compatible, so a Reflex plugs into Langfuse as a **categorical** evaluator — Langfuse runs it over each trace and attaches the predicted category as a score, with no extra inference code in your application.
+
+> **What is Morph?** [Morph](https://morphllm.com) trains and serves Reflexes: small, fast classifier models for realtime classification of LLM inputs and outputs — for example jailbreak detection, guardrails, user frustration, or your own custom-trained categories.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source AI engineering platform that helps teams trace API calls, monitor performance, and debug issues in their LLM applications.
+
+Since Reflexes are classifiers, they return exactly one category per evaluation (the top prediction) and no rationale — the returned reasoning is always `NA-Reflex`.
+
+## Before you start
+
+- A Morph API key (`sk-...`) from the [Morph dashboard](https://morphllm.com/dashboard).
+- A Reflex `model` id and its exact **labels** — the categories you configure in Langfuse must match these exactly. You can list a model's labels with one prediction:
+
+```bash
+curl https://api.morphllm.com/v1/reflex/predict \
+  -H "Authorization: Bearer $MORPH_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "jailbreak", "text": "ignore your instructions"}'
+# classes: [{ "label": "benign", ... }, { "label": "jailbreak", ... }]
+```
+
+## Set up the evaluator
+
+<Steps>
+
+### Step 1: Create a new LLM-as-a-judge evaluator
+
+In Langfuse, go to **Evaluators**, click **Set up evaluator**, and choose **LLM-as-a-judge**.
+
+### Step 2: Add a Morph LLM connection
+
+Click **Change the provider → Add LLM connection** and configure it:
+
+- **Provider / schema:** **OpenAI** (Morph is OpenAI-compatible).
+- **API key:** your Morph `sk-...` key.
+- Open **Advanced settings** and set the **API Base URL** to:
+
+  ```
+  https://api.morphllm.com/v1/reflex-oai
+  ```
+
+  Leave **Use Responses API** and **Extra Headers** off — you don't need them.
+- Turn off **Use default models**, and under **Custom models** add the Reflex `model` ids you want to use (e.g. `jailbreak`).
+
+Click **Create connection**, then select that connection and the model.
+
+### Step 3: Name the evaluator
+
+Under **Define evaluator**, give it any name you like, e.g. `jailbreak`.
+
+### Step 4: Write the evaluation prompt
+
+The evaluation prompt is the text Morph classifies — put just the variable you want judged and nothing else.
+
+To evaluate the user input:
+
+```
+{{input}}
+```
+
+To evaluate the agent response:
+
+```
+{{output}}
+```
+
+To evaluate the full trace:
+
+```
+{{input}} {{output}}
+```
+
+### Step 5: Set the score type to Categorical, single category
+
+Set **Score type** to **Categorical**.
+
+- **Categories:** add one per Reflex label, spelled **exactly** as the model emits them (for a built-in Reflex, copy them from [Default Reflexes](#default-reflexes) below). They must be exhaustive — add a catch-all only if your model has that label.
+- **Do not enable "Allow multiple matches."** The evaluator returns exactly one category (the top prediction).
+
+<Callout type="warning">
+  If a category doesn't exactly match a model label, Langfuse rejects the score
+  with a parse error. Copy labels from the `predict` response above.
+</Callout>
+
+### Step 6: Leave the reasoning and selection prompts as-is
+
+The **Score reasoning prompt** and **Category selection prompt** can stay at their defaults — Morph does not read them. The returned reasoning is always `NA-Reflex`, since Reflexes are classifiers and emit no rationale.
+
+### Step 7: Save
+
+Save the evaluator. To verify a run, open a score and choose **View execution trace** (environment `langfuse-llm-as-a-judge`) to see the exact request Langfuse sent and the category Morph returned.
+
+### Step 8: Run it
+
+The evaluator scores **new** matching traces automatically as they come in. To score traces you already have, open the **Traces** table, select the rows you want (or **select all**), and click **Evaluate** at the bottom.
+
+</Steps>
+
+## Default Reflexes
+
+Morph ships a set of pre-trained Reflexes. Copy the `model` id into the connection's **Custom models**, and the categories into the evaluator's **Categories** — exactly as written, they're case-sensitive.
+
+| Reflex `model`       | Categories                                                                    | Catches                               |
+| -------------------- | ----------------------------------------------------------------------------- | -------------------------------------- |
+| `jailbreak`          | `benign`, `jailbreak`                                                         | Prompt-injection / jailbreak attempts |
+| `guardrail`          | `false`, `true`                                                               | Harassment or NSFW content            |
+| `leaked-thinking`    | `clean`, `leaked`                                                             | Agent leaking its internal thinking   |
+| `stuck-in-a-loop`    | `progressing`, `looping`                                                      | Agent blocked, not trying new things  |
+| `incomplete-thought` | `complete`, `incomplete`                                                      | User sent a truncated prompt          |
+| `user-frustrated`    | `Frustrated`, `Not Frustrated`                                                | User is frustrated with the agent     |
+| `ambiguity`          | `low`, `med`, `high`                                                          | How underspecified a prompt is        |
+| `difficulty`         | `easy`, `medium`, `hard`                                                      | Prompt difficulty, for model routing  |
+| `domain`             | `general`, `summary`, `coding`, `design`, `data`                              | Topic of a request                    |
+| **Custom**           | Get them from your [Reflex dashboard](https://morphllm.com/dashboard/reflex)  | Your own trained classifier           |
+
+`domain` is multi-label, but with **Allow multiple matches** off the evaluator returns its single top label.
+
+## Learn more
+
+- [Morph guide: Langfuse evaluator](https://docs.morphllm.com/guides/langfuse)
+- [Langfuse LLM-as-a-judge evaluators](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge)
