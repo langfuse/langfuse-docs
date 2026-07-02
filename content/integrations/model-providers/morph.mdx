@@ -120,10 +120,18 @@ Morph ships a set of pre-trained Reflexes. Copy the `model` id into the connecti
 | `user-frustrated`    | `Frustrated`, `Not Frustrated`                                                | User is frustrated with the agent     |
 | `ambiguity`          | `low`, `med`, `high`                                                          | How underspecified a prompt is        |
 | `difficulty`         | `easy`, `medium`, `hard`                                                      | Prompt difficulty, for model routing  |
-| `domain`             | `general`, `summary`, `coding`, `design`, `data`                              | Topic of a request                    |
+| `domain`             | `general`, `summary`, `coding`, `design`, `data`                              | Topic of a request (multi-label — see note below) |
 | **Custom**           | Get them from your [Reflex dashboard](https://morphllm.com/dashboard/reflex)  | Your own trained classifier           |
 
-`domain` is multi-label, but with **Allow multiple matches** off the evaluator returns its single top label.
+<Callout type="warning">
+  `domain` is a multi-label Reflex, but the evaluator attaches **only the top
+  predicted label** to each trace — the OpenAI-compatible endpoint returns
+  exactly one category per evaluation, so secondary labels are discarded. Keep
+  **Allow multiple matches** off; enabling it does not surface additional
+  labels. If you need every matching label, call the `/v1/reflex/predict`
+  endpoint directly (see [Before you start](#before-you-start)) and attach the
+  results as [scores via the SDK](/docs/evaluation/evaluation-methods/scores-via-sdk).
+</Callout>
 
 ## Resources
 
