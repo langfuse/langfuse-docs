@@ -184,7 +184,7 @@ compiled = langchain_prompt.format(criticLevel="expert", movie="Dune 2")
 
 # For chat prompts
 langfuse_chat_prompt = langfuse.get_prompt("movie-critic-chat")
-langchain_chat_prompt = ChatPromptTemplate.from_template(
+langchain_chat_prompt = ChatPromptTemplate.from_messages(
     langfuse_chat_prompt.get_langchain_prompt()
 )
 
@@ -224,8 +224,8 @@ const compiled = await langchainPrompt.format({
 const langfuseChatPrompt = await langfuse.prompt.get("movie-critic-chat", {
   type: "chat",
 });
-const langchainChatPrompt = ChatPromptTemplate.fromTemplate(
-  langfuseChatPrompt.getLangchainPrompt()
+const langchainChatPrompt = ChatPromptTemplate.fromMessages(
+  langfuseChatPrompt.getLangchainPrompt().map((m) => [m.role, m.content])
 );
 
 // Compile with variables
