@@ -300,6 +300,11 @@ const marqueeRow1: MarqueeItem[] = [
     icon: "/images/integrations/openrouter_icon.svg",
   },
   {
+    label: "Eden AI",
+    href: "/integrations/gateways/edenai",
+    icon: "/images/integrations/edenai_icon.svg",
+  },
+  {
     label: "n8n",
     href: "/integrations/no-code/n8n",
     icon: "/images/integrations/n8n_icon.svg",
