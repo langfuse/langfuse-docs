@@ -77,7 +77,7 @@ langfuse.flush()
 If using the `@observe()` decorator:
 
 ```python
-from langfuse import observe, langfuse_context
+from langfuse import observe, get_client
 
 @observe()
 def main():
@@ -85,7 +85,7 @@ def main():
     pass
 
 main()
-langfuse_context.flush()
+get_client().flush()
 ```
 
 </Tab>
