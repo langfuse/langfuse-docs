@@ -9,13 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { Text } from "@/components/ui/text";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from "@/components/ui/carousel";
 import { CredibilitySentence } from "@/components/CredibilitySentence";
 import Image from "next/image";
 
@@ -60,7 +53,7 @@ If complex technical problems & great developer experiences excite you, we'd lov
 
 ## Team
 
-import { PolaroidFrame } from "@/components/careers";
+import { PolaroidGallery } from "@/components/careers";
 import TeamMembers from "@/components-mdx/team-members.mdx";
 
 <TeamMembers />
@@ -69,85 +62,11 @@ import TeamMembers from "@/components-mdx/team-members.mdx";
 
 <div className="text-center">
 
-## Impressions
+## Team Impressions
 
 </div>
 
-<Carousel
-  className="w-full"
-  opts={{
-    loop: true,
-    align: "center",
-  }}
->
-  <CarouselContent
-    viewportClassName="py-6"
-    className="-ml-8 items-center"
-  >
-    <CarouselItem className="basis-auto pl-8">
-      <PolaroidFrame
-        src="/images/careers/san-francisco-june-2026.png"
-        place="San Francisco"
-        year="June 2026"
-        dateLabel="Date"
-        ratio="4/3"
-        rotate={-1.2}
-      />
-    </CarouselItem>
-    <CarouselItem className="basis-auto pl-8">
-      <PolaroidFrame
-        src="/images/careers/san-francisco-july-2024.png"
-        place="San Francisco"
-        year="July 2024"
-        dateLabel="Date"
-        ratio="3/4"
-        rotate={1.1}
-      />
-    </CarouselItem>
-    <CarouselItem className="basis-auto pl-8">
-      <PolaroidFrame
-        src="/images/careers/munich-may-2026.png"
-        place="Munich"
-        year="May 2026"
-        dateLabel="Date"
-        ratio="3/4"
-        rotate={-0.8}
-      />
-    </CarouselItem>
-    <CarouselItem className="basis-auto pl-8">
-      <PolaroidFrame
-        src="/images/careers/portugal-july-2025.png"
-        place="Portugal"
-        year="July 2025"
-        dateLabel="Date"
-        ratio="4/3"
-        rotate={0.9}
-      />
-    </CarouselItem>
-    <CarouselItem className="basis-auto pl-8">
-      <PolaroidFrame
-        src="/images/careers/tokyo-may-2026.png"
-        place="Tokyo"
-        year="May 2026"
-        dateLabel="Date"
-        ratio="4/3"
-        rotate={-1.1}
-      />
-    </CarouselItem>
-    <CarouselItem className="basis-auto pl-8">
-      <PolaroidFrame
-        src="/images/careers/berlin-june-2026.png"
-        place="Berlin"
-        year="June 2026"
-        dateLabel="Date"
-        ratio="3/4"
-        rotate={1.2}
-      />
-    </CarouselItem>
-  </CarouselContent>
-  <CarouselPrevious />
-  <CarouselNext />
-</Carousel>
+<PolaroidGallery />
 
 <CTACard
   title="Curious to build with us?"
