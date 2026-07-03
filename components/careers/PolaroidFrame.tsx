@@ -14,13 +14,15 @@ const MD_PHOTO_HEIGHT_PX = 288;
 export type PolaroidFrameProps = {
   /** Image URL (local `/images/...` or remote). */
   src: string;
-  /** Accessible description. Defaults to `"${place}, ${year}"` when both are set. */
+  /** Accessible description. Defaults to the caption (description, or location + year). */
   alt?: string;
-  /** Location caption (F37 Analog). Renders a muted "Place" placeholder when empty. */
-  place?: string;
+  /** Handwritten-style caption (F37 Analog). Renders a muted placeholder when empty. */
+  description?: string;
+  /** Location shown as a small label next to the date, e.g. "Berlin". */
+  location?: string;
   /** Year or date caption (Geist Mono). Renders a dashed blank line when empty. */
   year?: string | number;
-  /** Label above the year/date line. Default `"Year"`; use `"Date"` for values like "June 2026". */
+  /** Label above the year/date line when no `location` is set. Default `"Date"`. */
   dateLabel?: string;
   /** Photo aspect ratio, e.g. `"4/3"`, `"3/4"`, `"16/9"`. Default `"4/3"`. */
   ratio?: `${number}/${number}`;
@@ -32,12 +34,14 @@ export type PolaroidFrameProps = {
 
 function buildAlt(
   alt: string | undefined,
-  place: string | undefined,
+  description: string | undefined,
+  location: string | undefined,
   year: string | number | undefined,
 ): string {
   if (alt) return alt;
-  if (place && year) return `${place}, ${year}`;
-  if (place) return place;
+  if (description) return description;
+  if (location && year) return `${location}, ${year}`;
+  if (location) return location;
   return "Team photo";
 }
 
@@ -57,15 +61,17 @@ function photoWidthAtHeight(
 export function PolaroidFrame({
   src,
   alt,
-  place,
+  description,
+  location,
   year,
-  dateLabel = "Year",
+  dateLabel = "Date",
   ratio = "4/3",
   rotate = 0,
   className,
   priority,
 }: PolaroidFrameProps) {
-  const hasPlace = Boolean(place?.trim());
+  const hasDescription = Boolean(description?.trim());
+  const captionLabel = location?.trim() || dateLabel;
   const yearText =
     year !== undefined && year !== null && String(year).trim() !== ""
       ? String(year)
@@ -92,7 +98,7 @@ export function PolaroidFrame({
         >
           <Image
             src={src}
-            alt={buildAlt(alt, place, year)}
+            alt={buildAlt(alt, description, location, year)}
             fill
             priority={priority}
             sizes={`(max-width: 768px) 50vw, ${photoWidthMd}px`}
@@ -106,14 +112,14 @@ export function PolaroidFrame({
               className={cn(
                 "font-analog text-sm font-medium leading-[110%]",
                 "border-b border-dashed border-line-divider-dash pb-1",
-                hasPlace ? "text-text-primary" : "text-text-disabled",
+                hasDescription ? "text-text-primary" : "text-text-disabled",
               )}
             >
-              {hasPlace ? place : "Place"}
+              {hasDescription ? description : "Description"}
             </p>
             <div className="mt-1.5 flex items-center gap-1.5">
               <span className="font-mono text-[9px] uppercase tracking-[0.04em] text-text-tertiary">
-                {dateLabel}
+                {captionLabel}
               </span>
               <span
                 className={cn(
