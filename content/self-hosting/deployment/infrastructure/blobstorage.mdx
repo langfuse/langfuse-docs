@@ -387,11 +387,9 @@ Over time, this data accumulates and increases storage costs.
 It is recommended to configure a bucket lifecycle (expiration) policy to automatically delete objects after a defined number of days.
 
 <Callout type="warning">
-Langfuse uses raw event data from the bucket to merge the multiple ingestion events that make up a single trace, observation, or score into the final record.
-The bucket lifecycle expiration period determines how long related events can still be merged.
-Once the raw events are deleted by the lifecycle policy, later events for the same record can create duplicate entries instead of merging.
+Langfuse uses raw event data from the bucket for its **internal** ingestion processing — combining the multiple events an SDK emits for a single record (for example, the start and end events of one observation) into the final trace, observation, or score. The bucket lifecycle expiration period determines how long these related events can still be combined; once the raw events are deleted by the lifecycle policy, this internal reprocessing is no longer possible.
 
-On Langfuse Cloud, this is set to 30 days. Note that traces and observations should be treated as immutable once ingested — see [How to update traces, observations, and scores?](/faq/all/tracing-data-updates) for details.
+This governs Langfuse's internal event handling, **not** a user-facing update window. Traces and observations are immutable once ingested: re-sending an event with the same `id` to update a record is not supported and creates a duplicate regardless of the lifecycle period. On Langfuse Cloud, the retention period is 30 days. See [How to update traces, observations, and scores?](/faq/all/tracing-data-updates) for details.
 
 </Callout>
 
