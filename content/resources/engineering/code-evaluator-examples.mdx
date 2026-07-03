@@ -1,10 +1,10 @@
 ---
-title: 10 Code Evaluator Examples for AI Application Evaluation
+title: 10 code evaluator examples for AI application evaluation
 description: "Ten copy-paste code evaluators for LLM applications: output validation, PII screening, RAG citation checks, numeric tolerance, refusal detection, and more."
 tags: [guide, evaluation]
 ---
 
-# 10 Code Evaluator Examples for AI Application Evaluation
+# 10 code evaluator examples for AI application evaluation
 
 [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) are deterministic functions that score traces and experiment outputs in Langfuse. They cost nothing to run, return the same verdict every time, and execute in milliseconds, which makes them the right tool for every check that does not need judgment: format validation, policy screens, tolerance comparisons, and structural assertions. Save the [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) budget for the questions only a model can answer.
 
@@ -44,7 +44,7 @@ For any application that promises JSON to a downstream consumer. Checks that the
 ```python
 import json
 
-REQUIRED = {"intent": str, "confidence": float, "entities": list}
+REQUIRED = {"intent": str, "confidence": (int, float), "entities": list}
 
 def evaluate(ctx):
     try:
@@ -131,7 +131,7 @@ def evaluate(ctx):
 
 ## 7. Numeric answer within tolerance
 
-For applications that compute or extract numbers (finance, analytics, unit conversion), exact string match is the wrong test. Extract the number and compare within a tolerance against the expected value.
+For applications that compute or extract numbers (finance, analytics, unit conversion), exact string match is the wrong test. Extract the first number and compare within a tolerance against the expected value (switch to `nums[-1]` if your answers end with the result).
 
 ```python
 import re
@@ -143,8 +143,14 @@ def evaluate(ctx):
         return EvaluationResult(scores=[
             Score(name="numeric_match", value=False, data_type="BOOLEAN",
                   comment="No number found or no expected value")])
-    got, want = float(nums[-1]), float(expected)
-    ok = abs(got - want) <= abs(want) * 0.01  # 1% tolerance
+    try:
+        got, want = float(nums[0]), float(expected)
+    except (ValueError, TypeError):
+        return EvaluationResult(scores=[
+            Score(name="numeric_match", value=False, data_type="BOOLEAN",
+                  comment=f"Expected value is not numeric: {expected!r}")])
+    tol = max(abs(want) * 0.01, 1e-9)  # absolute floor avoids exact-match when expected is 0
+    ok = abs(got - want) <= tol  # 1% tolerance
     return EvaluationResult(scores=[
         Score(name="numeric_match", value=ok, data_type="BOOLEAN",
               comment=f"got {got}, expected {want}")
