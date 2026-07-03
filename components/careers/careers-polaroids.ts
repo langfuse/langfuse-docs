@@ -72,7 +72,7 @@ export const careersPolaroids: CareersPolaroid[] = [
     rotate: 0.7,
   },
   {
-    src: "/images/careers/tokyo-may-2026-dinner.png",
+    src: "/images/careers/tokyo-may-2026-clickhouse-dinner.png",
     description: "ClickHouse AI team dinner",
     location: "Tokyo",
     year: "May 2026",
@@ -154,7 +154,6 @@ const MONTH_INDEX: Record<string, number> = {
   october: 10,
   november: 11,
   december: 12,
-  christmas: 12,
 };
 
 /** Parse caption date for sorting (year + month; month 0 = year-only). */
