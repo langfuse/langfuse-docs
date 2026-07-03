@@ -516,13 +516,13 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 ## Advanced
 
-### Preventing Duplicate Scores
+### Preventing Duplicate Scores [#preventing-duplicate-scores]
 
 By default, Langfuse allows for multiple scores of the same `name` on the same trace. This is useful if you'd like to track the evolution of a score over time or if e.g. you've received multiple user feedback scores on the same trace.
 
 In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and passing this as an `id` (JS/TS) / `score_id` (Python) when creating the score, for example `trace_id-score_name`.
 
-Note that if you expect API calls for the same score to be 30+ days apart, you should also use the same timestamp. See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#updating-traces-observations-and-scores) for more details.
+See [How to update traces, observations, and scores](/faq/all/tracing-data-updates) for more details on Langfuse's immutable data model.
 
 ### Enforcing a Score Config
 
