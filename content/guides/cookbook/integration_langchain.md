@@ -18,7 +18,7 @@ Follow the [integration guide](https://langfuse.com/integrations/frameworks/lang
 
 
 ```python
-%pip install langfuse langchain langchain_openai langchain_community --upgrade
+%pip install langfuse langchain langchain-classic langchain_openai langchain_community --upgrade
 ```
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
@@ -57,8 +57,8 @@ langfuse_handler = CallbackHandler()
 ```python
 from operator import itemgetter
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 
 langfuse_handler = CallbackHandler()
 
@@ -138,8 +138,8 @@ os.environ.setdefault("SERPAPI_API_KEY", "...")
 from langchain_community.document_loaders import SeleniumURLLoader
 from langchain_chroma import Chroma
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
-from langchain.chains import RetrievalQA
+from langchain_openai import OpenAI, OpenAIEmbeddings
+from langchain_classic.chains import RetrievalQA
 
 langfuse_handler = CallbackHandler()
 
@@ -183,7 +183,7 @@ os.environ.setdefault("OPENAI_API_VERSION", "2023-09-01-preview")
 
 ```python
 from langchain_openai import AzureChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langfuse.langchain import CallbackHandler
  
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
