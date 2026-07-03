@@ -1,0 +1,236 @@
+---
+title: 10 Code Evaluator Examples for AI Application Evaluation
+description: "Ten copy-paste code evaluators for LLM applications: output validation, PII screening, RAG citation checks, numeric tolerance, refusal detection, and more."
+tags: [guide, evaluation]
+---
+
+# 10 Code Evaluator Examples for AI Application Evaluation
+
+[Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) are deterministic functions that score traces and experiment outputs in Langfuse. They cost nothing to run, return the same verdict every time, and execute in milliseconds, which makes them the right tool for every check that does not need judgment: format validation, policy screens, tolerance comparisons, and structural assertions. Save the [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) budget for the questions only a model can answer.
+
+**TL;DR:** Each example below is a complete, paste-ready evaluator following the Langfuse [function contract](/docs/evaluation/evaluation-methods/code-evaluators#function-contract): an `evaluate` function that receives the observation (input, output, metadata) plus experiment context, and returns one or more scores. The evaluator runtime provides the language standard library only, and every example respects that: no third-party packages.
+
+All examples use the Python contract; the [TypeScript contract](/docs/evaluation/evaluation-methods/code-evaluators#function-contract) is equivalent.
+
+```python
+# Shared contract used by every example below (provided by Langfuse):
+# def evaluate(ctx: EvaluationContext) -> EvaluationResult
+#   ctx.observation.input / .output / .metadata
+#   ctx.experiment.item_expected_output / .item_metadata  (experiments only)
+#   Score(name, value, data_type="BOOLEAN"|"NUMERIC"|"CATEGORICAL", comment=...)
+```
+
+## 1. Normalized exact match
+
+For experiments with a known expected output. Raw string equality fails on trivial differences, so normalize case and whitespace first. Use this for classification tasks, canned answers, and command generation.
+
+```python
+def evaluate(ctx):
+    def norm(s):
+        return " ".join(str(s).lower().split())
+
+    expected = ctx.experiment.item_expected_output if ctx.experiment else None
+    match = expected is not None and norm(ctx.observation.output) == norm(expected)
+    return EvaluationResult(scores=[
+        Score(name="exact_match", value=match, data_type="BOOLEAN",
+              comment=None if match else f"Expected {expected!r}")
+    ])
+```
+
+## 2. Structured output validation
+
+For any application that promises JSON to a downstream consumer. Checks that the output parses and that required keys exist with the right types. Catches the failure mode that breaks production integrations silently.
+
+```python
+import json
+
+REQUIRED = {"intent": str, "confidence": float, "entities": list}
+
+def evaluate(ctx):
+    try:
+        data = json.loads(str(ctx.observation.output))
+        missing = [k for k, t in REQUIRED.items()
+                   if k not in data or not isinstance(data[k], t)]
+        ok, comment = not missing, f"Missing/mistyped: {missing}" if missing else None
+    except (json.JSONDecodeError, TypeError) as e:
+        ok, comment = False, f"Not valid JSON: {e}"
+    return EvaluationResult(scores=[
+        Score(name="valid_structured_output", value=ok, data_type="BOOLEAN", comment=comment)
+    ])
+```
+
+## 3. PII pattern screen
+
+A cheap safety net that flags outputs containing email addresses, phone numbers, or card-like digit runs. Pattern matching is not a full PII solution (see the masking docs for prevention), but as an evaluator it turns silent leaks into scored, alertable events.
+
+```python
+import re
+
+PATTERNS = {
+    "email": r"[\w.+-]+@[\w-]+\.[\w.]+",
+    "phone": r"\+?\d[\d\s().-]{8,}\d",
+    "card": r"\b(?:\d[ -]?){13,16}\b",
+}
+
+def evaluate(ctx):
+    text = str(ctx.observation.output)
+    hits = [name for name, pat in PATTERNS.items() if re.search(pat, text)]
+    return EvaluationResult(scores=[
+        Score(name="pii_detected", value=bool(hits), data_type="BOOLEAN",
+              comment=f"Matched: {', '.join(hits)}" if hits else None)
+    ])
+```
+
+## 4. Citation presence for RAG answers
+
+A RAG answer that cites nothing is a hallucination risk even when it reads well. This checks that the answer references at least one of the retrieved sources (passed via metadata by your instrumentation). It is a groundedness proxy, not a faithfulness judgment; pair it with a judge for the semantic half.
+
+```python
+def evaluate(ctx):
+    output = str(ctx.observation.output)
+    sources = (ctx.observation.metadata or {}).get("retrieved_ids", [])
+    cited = [s for s in sources if str(s) in output]
+    return EvaluationResult(scores=[
+        Score(name="cites_retrieved_source", value=bool(cited), data_type="BOOLEAN",
+              comment=f"Cited {len(cited)}/{len(sources)} retrieved sources")
+    ])
+```
+
+## 5. Verbosity budget
+
+Answer length correlates with cost, latency, and user abandonment. A numeric score lets you track drift over time on a dashboard instead of discovering it in a complaint.
+
+```python
+def evaluate(ctx):
+    words = len(str(ctx.observation.output).split())
+    return EvaluationResult(scores=[
+        Score(name="answer_words", value=words, data_type="NUMERIC"),
+        Score(name="within_length_budget", value=words <= 250, data_type="BOOLEAN",
+              comment=f"{words} words (budget 250)"),
+    ])
+```
+
+## 6. Banned-terms compliance
+
+Every team has phrases the product must not say: competitor disparagement, unapproved claims, deprecated product names. Encode the list once and score every trace against it.
+
+```python
+import re
+
+BANNED = ["guaranteed returns", "medical advice", "legacy-product-name"]
+
+def evaluate(ctx):
+    text = str(ctx.observation.output).lower()
+    hits = [t for t in BANNED if re.search(rf"\b{re.escape(t)}\b", text)]
+    return EvaluationResult(scores=[
+        Score(name="compliance_terms", value="fail" if hits else "pass",
+              data_type="CATEGORICAL",
+              comment=f"Found: {hits}" if hits else None)
+    ])
+```
+
+## 7. Numeric answer within tolerance
+
+For applications that compute or extract numbers (finance, analytics, unit conversion), exact string match is the wrong test. Extract the number and compare within a tolerance against the expected value.
+
+```python
+import re
+
+def evaluate(ctx):
+    expected = ctx.experiment.item_expected_output if ctx.experiment else None
+    nums = re.findall(r"-?\d+(?:\.\d+)?", str(ctx.observation.output).replace(",", ""))
+    if expected is None or not nums:
+        return EvaluationResult(scores=[
+            Score(name="numeric_match", value=False, data_type="BOOLEAN",
+                  comment="No number found or no expected value")])
+    got, want = float(nums[-1]), float(expected)
+    ok = abs(got - want) <= abs(want) * 0.01  # 1% tolerance
+    return EvaluationResult(scores=[
+        Score(name="numeric_match", value=ok, data_type="BOOLEAN",
+              comment=f"got {got}, expected {want}")
+    ])
+```
+
+## 8. Refusal and non-answer detection
+
+Overly cautious models refuse legitimate requests, and the failure hides inside polite prose. A pattern heuristic catches the bulk of refusals; route the flagged traces to an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) or a judge for confirmation.
+
+```python
+import re
+
+REFUSAL_MARKERS = [
+    r"\bI (?:can(?:no|')t|am unable to|won't be able to)\b",
+    r"\bas an AI\b",
+    r"\bI don't have (?:access|the ability)\b",
+]
+
+def evaluate(ctx):
+    text = str(ctx.observation.output)
+    refused = any(re.search(p, text, re.IGNORECASE) for p in REFUSAL_MARKERS)
+    return EvaluationResult(scores=[
+        Score(name="refusal_detected", value=refused, data_type="BOOLEAN")
+    ])
+```
+
+## 9. Agent trajectory check via metadata
+
+Agent quality is not only the final answer; it is also how the agent got there. If your instrumentation records the tool sequence in metadata, an evaluator can assert trajectory properties: required tools used, step budget respected, no forbidden tools.
+
+```python
+def evaluate(ctx):
+    meta = ctx.observation.metadata or {}
+    tools = meta.get("tool_sequence", [])
+    scores = [
+        Score(name="used_required_tool", value="search" in tools, data_type="BOOLEAN"),
+        Score(name="step_count", value=len(tools), data_type="NUMERIC"),
+        Score(name="within_step_budget", value=len(tools) <= 10, data_type="BOOLEAN",
+              comment=f"{len(tools)} tool calls (budget 10)"),
+    ]
+    return EvaluationResult(scores=scores)
+```
+
+## 10. Token-overlap similarity (no dependencies)
+
+When you need "roughly the same answer" rather than exact equality and cannot import an embedding library, token-level F1 against the expected output is a serviceable stdlib-only signal. It is coarse: treat scores in the middle band as "send to a judge", not as verdicts.
+
+```python
+def evaluate(ctx):
+    def tokens(s):
+        return set(str(s).lower().split())
+
+    expected = ctx.experiment.item_expected_output if ctx.experiment else None
+    got, want = tokens(ctx.observation.output), tokens(expected or "")
+    overlap = len(got & want)
+    precision = overlap / len(got) if got else 0.0
+    recall = overlap / len(want) if want else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+    return EvaluationResult(scores=[
+        Score(name="token_f1", value=round(f1, 3), data_type="NUMERIC")
+    ])
+```
+
+## When to use code evaluators versus LLM-as-a-judge
+
+Use a code evaluator when the check is decidable: format, presence, bounds, tolerance, policy patterns. Use a [judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) when the check requires reading: helpfulness, faithfulness to sources, tone, reasoning quality.
+
+The strongest setups chain them. A free deterministic screen runs on every trace, and the expensive judge runs only where the screen flags something (or on a sample of clean traces to catch what patterns miss). Examples 3, 8, and 10 are written with exactly that handoff in mind.
+
+Two practical notes from the [runtime constraints](/docs/evaluation/evaluation-methods/code-evaluators#runtime-constraints): the evaluator environment provides the standard library only, so anything needing `numpy` or an HTTP call belongs in an [external evaluation pipeline](/docs/evaluation/evaluation-methods/scores-via-sdk) that writes scores back via the SDK; and evaluators receive the observation you target, so make sure your instrumentation puts the fields you score (like `tool_sequence` above) into input, output, or metadata.
+
+## FAQ
+
+### Can code evaluators run on production traces or only in experiments?
+
+Both. On production traces the `ctx.experiment` context is empty, so expected-output checks (examples 1, 7, 10) apply to experiments, while assertion-style checks (2, 3, 5, 6, 8, 9) run anywhere.
+
+### Can one evaluator return several scores?
+
+Yes. `EvaluationResult` takes a list of scores, as in examples 5 and 9. Grouping related checks in one evaluator keeps execution overhead and configuration surface small.
+
+### Do code evaluator runs cost anything?
+
+There is no LLM cost, since no model is called. Stored scores count as regular [billable units](/docs/administration/billable-units), the same as any score.
+
+### How do I debug an evaluator that is not producing scores?
+
+See the [debugging section](/docs/evaluation/evaluation-methods/code-evaluators#debug-code-evaluator-executions) of the reference: execution logs show exceptions and returned values per run. The most common failures are type assumptions (output is a dict, not a string) and targeting an observation whose fields are empty.

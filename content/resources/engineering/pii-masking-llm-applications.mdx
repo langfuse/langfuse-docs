@@ -1,0 +1,75 @@
+---
+title: PII Masking Patterns for LLM Applications
+description: "Where to mask PII in an LLM application: client-side SDK masking, server-side ingestion masking, gateway-level filtering, and detection with evaluators. Patterns and trade-offs."
+tags: [guide]
+---
+
+# PII Masking Patterns for LLM Applications
+
+LLM applications move user text through more systems than almost any other software: prompts, retrieved documents, model providers, observability platforms, and logs. Personal data can leak into any of them. The teams that handle this well do not pick one masking tool; they decide **at which layer each kind of data gets stopped**, and use a small number of mechanisms deliberately.
+
+**TL;DR:** There are four places to control PII in an LLM application: in the client SDK before data leaves your process, at the ingestion server before data is stored, at a gateway before data reaches a model provider, and after the fact via detection and remediation. Start client-side (it covers the most common requirement with the least machinery), add server-side enforcement when clients cannot be trusted to mask consistently, and run a detection evaluator regardless, because every preventive layer misses sometimes.
+
+## Layer 1: Mask in the SDK before data leaves your process
+
+The [Langfuse masking feature](/docs/observability/features/masking) runs a function you define over trace data before it is sent, so sensitive values never leave your application. Since June 2026 this includes `mask_otel_spans`, which applies your masking to every span the Python SDK exports, including spans created by third-party OpenTelemetry instrumentation you do not control.
+
+This is the right default layer because it fails safe (data that is masked at the source cannot leak downstream), it needs no extra infrastructure, and it composes with any deployment model, Cloud or self-hosted.
+
+Two patterns dominate in practice:
+
+- **Structured redaction.** You know where the sensitive fields are (a `user_email` argument, a customer record in the prompt context). Redact by field name or path. Cheap, precise, and the comments in your masked traces stay debuggable.
+- **Pattern scrubbing.** Regexes for emails, phone numbers, card-like digit runs, and IDs with known shapes, applied to all string values. The [masking docs](/docs/observability/features/masking) include ready examples. This is a coarse safety net: expect false negatives on free text.
+
+Keep the masking function fast. It runs in the export path of your spans, so anything heavier than field lookups and compiled regexes deserves scrutiny; put slow analysis in Layer 4 instead of the hot path.
+
+## Layer 2: Enforce masking at ingestion (server-side)
+
+Client-side masking depends on every team wiring it correctly. When that assumption fails (many teams, many SDKs, third-party services you do not control), self-hosted Langfuse deployments can enforce [server-side ingestion masking](/self-hosting/security/data-masking#server-side-ingestion-masking-ee) (Enterprise): a callback your infrastructure exposes that inspects and rewrites every event before storage, regardless of which client sent it.
+
+Use this layer when masking is a compliance requirement rather than a hygiene preference, because it turns "every client should mask" into "nothing unmasked can be stored". The trade-offs: it is an Enterprise self-hosted feature, your callback becomes part of the ingestion path (build it for throughput and availability), and centralized rules know less about field semantics than the application does. Most teams run it _in addition to_ client-side masking, not instead.
+
+## Layer 3: Filter at the gateway, before the model provider
+
+Masking for observability does not change what the model provider sees. If the requirement is "certain data must not reach the LLM vendor", the control point is between your application and the provider: an [LLM gateway](/resources/engineering/llm-gateway) or middleware that filters or pseudonymizes requests in flight.
+
+For unstructured PII (names, addresses, medical details in free text), regexes are not enough at this layer, and teams reach for NER- or model-based detectors, including libraries from the [security and guardrails ecosystem](/docs/security-and-guardrails). Two cautions from real deployments:
+
+- **Check the maintenance status of any filtering library before you depend on it.** The ecosystem moves fast and several once-popular projects have gone quiet; a stale detector is a silent compliance hole.
+- **Model-based detection costs latency on every request.** For latency-sensitive paths, prefer pseudonymization of known entities and asynchronous deep scanning over synchronous free-text NER.
+
+## Layer 4: Detect and remediate what got through
+
+Every preventive layer misses sometimes, so treat detection as mandatory rather than optional. Two mechanisms in Langfuse cover it:
+
+- **A PII screen as a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators)** running on production traces turns leaks into scored, queryable events (see a ready-made pattern in our [code evaluator examples](/resources/engineering/code-evaluator-examples)). Track the score on a dashboard; a rising trend means an upstream layer regressed.
+- **Retention and deletion as the backstop.** Short [data retention](/docs/administration/data-retention) bounds the blast radius of anything that slips through, and traces containing incident data can be deleted. Decide your retention posture as part of the masking design, not after the first incident.
+
+## Choosing your combination
+
+| Requirement                                          | Layers                                                   |
+| ---------------------------------------------------- | -------------------------------------------------------- |
+| Keep obvious PII out of observability data           | 1 (SDK masking with field redaction + pattern scrubbing) |
+| Compliance guarantee that nothing unmasked is stored | 1 + 2 (server-side enforcement, self-hosted EE)          |
+| Provider must never see certain data                 | 3 (gateway/middleware filtering) + 1 for observability   |
+| Detect regressions and incidents                     | 4 (evaluator screen + retention policy), always          |
+
+Start with Layer 1 this week, add Layer 4 the same week (it is one evaluator), and introduce Layers 2 and 3 when a named requirement demands them.
+
+## FAQ
+
+### Should I mask before or after the model call?
+
+Both concerns exist independently. Masking for observability (Layers 1 and 2) controls what is stored in Langfuse; filtering for the provider (Layer 3) controls what the model sees. A prompt can legitimately contain PII the model needs while your stored traces redact it.
+
+### Does masking break the ability to debug traces?
+
+Field-level redaction preserves structure, so traces stay readable ("card `****`" still shows _that_ a card was discussed). Aggressive whole-text scrubbing hurts debuggability; prefer targeted redaction plus short retention over blanking everything.
+
+### Can I mask data that third-party frameworks emit?
+
+Yes. The `mask_otel_spans` option applies your masking function to spans from third-party OpenTelemetry instrumentation exported through the Langfuse Python SDK, closing the gap where framework-generated spans bypassed application-level masking. See the [masking docs](/docs/observability/features/masking) for behavior details.
+
+### Is prompt-level instruction ("do not repeat personal data") a masking strategy?
+
+No. Instructions influence model behavior; they do not control what your systems store or transmit. Treat them as a UX nicety, never as a privacy control.
