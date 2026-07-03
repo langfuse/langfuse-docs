@@ -4,7 +4,7 @@ tags: [guide, integration]
 description: "Langfuse works from any language with an OpenTelemetry SDK: point the OTLP exporter at the Langfuse endpoint. Setup for Go, Java, C#/.NET, and Ruby."
 ---
 
-# Use Langfuse from Any Language via OpenTelemetry
+# Use Langfuse from any language via OpenTelemetry
 
 The Langfuse SDKs cover Python and JavaScript/TypeScript, but Langfuse itself is an [OpenTelemetry backend](/integrations/native/opentelemetry): any language with an OpenTelemetry SDK can send traces to the Langfuse OTLP endpoint. If your stack is Go, Java, C#, Ruby, or anything else with OTel support, you do not need to wait for a native SDK.
 
@@ -46,7 +46,7 @@ otel.SetTracerProvider(tp)
 defer tp.Shutdown(ctx) // flush before exit; short-lived programs lose spans otherwise
 ```
 
-Instrument LLM calls by setting `gen_ai.*` attributes on the spans you create around them. For automatic LLM instrumentation in Go, [OpenLIT](/integrations/native/opentelemetry) provides library support that exports to Langfuse the same way.
+Instrument LLM calls by setting `gen_ai.*` attributes on the spans you create around them. For automatic LLM instrumentation in Go, [OpenLIT](/docs/opentelemetry/example-openlit) provides library support that exports to Langfuse the same way.
 
 ## Java
 
@@ -58,7 +58,7 @@ OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
 java -javaagent:opentelemetry-javaagent.jar -jar app.jar
 ```
 
-The agent instruments HTTP calls automatically; wrap your LLM client calls in spans with `gen_ai.*` attributes (or use [OpenLLMetry](/integrations/native/opentelemetry), which extends automatic LLM instrumentation to Java) so model calls render as generations rather than generic HTTP spans.
+The agent instruments HTTP calls automatically; wrap your LLM client calls in spans with `gen_ai.*` attributes (or use [OpenLLMetry](/docs/opentelemetry/example-openllmetry), which extends automatic LLM instrumentation to Java) so model calls render as generations rather than generic HTTP spans.
 
 ## C# / .NET
 
