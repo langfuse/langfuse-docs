@@ -1,7 +1,7 @@
 ---
 title: Migrate from Arize Phoenix to Langfuse
 description: "Step-by-step guide to migrating from Arize Phoenix to Langfuse: keep your OpenInference instrumentation, repoint one OTLP endpoint, and map datasets, experiments, and prompts."
-tags: [comparison, guide]
+tags: [migration, guide]
 ---
 
 # Migrate from Arize Phoenix to Langfuse
@@ -64,7 +64,7 @@ PHOENIX_COLLECTOR_ENDPOINT="http://localhost:6006"
 
 # After (Langfuse): standard OTel exporter variables
 OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"  # EU region
-OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
 ```
 
 `AUTH_STRING` is your base64-encoded Langfuse project keys
