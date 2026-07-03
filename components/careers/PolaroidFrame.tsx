@@ -11,28 +11,16 @@ const POLAROID_SHADOW =
 /** Tailwind `md:h-72` — used for `sizes` hints on the photo. */
 const MD_PHOTO_HEIGHT_PX = 288;
 
-const captionLabelClassName =
-  "font-mono text-[9px] uppercase tracking-[0.04em] text-text-tertiary";
-
-const captionValueClassName = (filled: boolean) =>
-  cn(
-    "inline-block border-b border-dashed border-line-divider-dash pb-px",
-    "font-mono text-[10px] tracking-[0.02em]",
-    filled ? "text-text-secondary" : "text-text-disabled",
-  );
-
 export type PolaroidFrameProps = {
   /** Image URL (local `/images/...` or remote). */
   src: string;
-  /** Accessible description. Defaults from caption fields when omitted. */
+  /** Accessible description. Defaults to `"${place}, ${year}"` when both are set. */
   alt?: string;
-  /** Top-line caption (F37 Analog). Renders a muted "Description" placeholder when empty. */
-  description?: string;
-  /** Location shown beside the date (Geist Mono). */
-  location?: string;
-  /** Date caption (Geist Mono). Renders a dashed blank line when empty. */
+  /** Location caption (F37 Analog). Renders a muted "Place" placeholder when empty. */
+  place?: string;
+  /** Year or date caption (Geist Mono). Renders a dashed blank line when empty. */
   year?: string | number;
-  /** Label for the date field. Default `"Date"`; use `"Year"` for year-only values. */
+  /** Label above the year/date line. Default `"Year"`; use `"Date"` for values like "June 2026". */
   dateLabel?: string;
   /** Photo aspect ratio, e.g. `"4/3"`, `"3/4"`, `"16/9"`. Default `"4/3"`. */
   ratio?: `${number}/${number}`;
@@ -44,20 +32,12 @@ export type PolaroidFrameProps = {
 
 function buildAlt(
   alt: string | undefined,
-  description: string | undefined,
-  location: string | undefined,
+  place: string | undefined,
   year: string | number | undefined,
 ): string {
   if (alt) return alt;
-  const when = year !== undefined && year !== null ? String(year).trim() : "";
-  if (description && when) {
-    return location
-      ? `${description}, ${location}, ${when}`
-      : `${description}, ${when}`;
-  }
-  if (description) return description;
-  if (location && when) return `${location}, ${when}`;
-  if (location) return location;
+  if (place && year) return `${place}, ${year}`;
+  if (place) return place;
   return "Team photo";
 }
 
@@ -69,30 +49,6 @@ function photoWidthAtHeight(
   return Math.round(height * (w / h));
 }
 
-function CaptionField({
-  label,
-  value,
-  minWidth,
-}: {
-  label: string;
-  value: string | null;
-  minWidth?: string;
-}) {
-  const filled = Boolean(value?.trim());
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className={captionLabelClassName}>{label}</span>
-      <span
-        className={captionValueClassName(filled)}
-        style={minWidth ? { minWidth } : undefined}
-      >
-        {filled ? value : "\u00A0"}
-      </span>
-    </div>
-  );
-}
-
 /**
  * Langfuse-styled polaroid photo frame for the careers page.
  * Photo height is fixed; width follows the aspect ratio so portrait shots
@@ -101,17 +57,16 @@ function CaptionField({
 export function PolaroidFrame({
   src,
   alt,
-  description,
-  location,
+  place,
   year,
-  dateLabel = "Date",
+  dateLabel = "Year",
   ratio = "4/3",
   rotate = 0,
   className,
   priority,
 }: PolaroidFrameProps) {
-  const hasDescription = Boolean(description?.trim());
-  const dateText =
+  const hasPlace = Boolean(place?.trim());
+  const yearText =
     year !== undefined && year !== null && String(year).trim() !== ""
       ? String(year)
       : null;
@@ -137,7 +92,7 @@ export function PolaroidFrame({
         >
           <Image
             src={src}
-            alt={buildAlt(alt, description, location, year)}
+            alt={buildAlt(alt, place, year)}
             fill
             priority={priority}
             sizes={`(max-width: 768px) 50vw, ${photoWidthMd}px`}
@@ -151,18 +106,24 @@ export function PolaroidFrame({
               className={cn(
                 "font-analog text-sm font-medium leading-[110%]",
                 "border-b border-dashed border-line-divider-dash pb-1",
-                hasDescription ? "text-text-primary" : "text-text-disabled",
+                hasPlace ? "text-text-primary" : "text-text-disabled",
               )}
             >
-              {hasDescription ? description : "Description"}
+              {hasPlace ? place : "Place"}
             </p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <CaptionField
-                label={dateLabel}
-                value={dateText}
-                minWidth="3rem"
-              />
-              <CaptionField label="Location" value={location ?? null} />
+            <div className="mt-1.5 flex items-center gap-1.5">
+              <span className="font-mono text-[9px] uppercase tracking-[0.04em] text-text-tertiary">
+                {dateLabel}
+              </span>
+              <span
+                className={cn(
+                  "inline-block min-w-12 border-b border-dashed border-line-divider-dash pb-px",
+                  "font-mono text-[10px] tracking-[0.02em]",
+                  yearText ? "text-text-secondary" : "text-text-disabled",
+                )}
+              >
+                {yearText ?? "\u00A0"}
+              </span>
             </div>
           </div>
           <Image
