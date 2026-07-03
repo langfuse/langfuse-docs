@@ -194,8 +194,8 @@ export function sortPolaroidsByDateNewestFirst(
 export type OrderedPolaroidGallery = {
   /** "Langfuse is born" — always first. */
   anchor: CareersPolaroid;
-  /** Most recent photo by date — shown beside the anchor at the start. */
-  newest: CareersPolaroid;
+  /** Most recent photo by date — shown beside the anchor when distinct. */
+  newest: CareersPolaroid | null;
   /** Remaining photos, newest-first. */
   rest: CareersPolaroid[];
 };
@@ -208,9 +208,9 @@ export function orderPolaroidsForGallery(
   const anchor =
     polaroids.find((p) => p.src === LANGFUSE_IS_BORN_SRC) ??
     sorted[sorted.length - 1]!;
-  const newest = sorted.find((p) => p.src !== anchor.src) ?? sorted[0]!;
+  const newest = sorted.find((p) => p.src !== anchor.src) ?? null;
   const rest = sorted.filter(
-    (p) => p.src !== anchor.src && p.src !== newest.src,
+    (p) => p.src !== anchor.src && p.src !== newest?.src,
   );
 
   return { anchor, newest, rest };

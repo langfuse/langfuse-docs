@@ -50,8 +50,12 @@ export function PolaroidGallery() {
     >
       <CarouselContent viewportClassName="py-6" className="-ml-8 items-center">
         <PolaroidSlide polaroid={anchor} />
-        <PolaroidGalleryDivider />
-        <PolaroidSlide polaroid={newest} />
+        {newest ? (
+          <>
+            <PolaroidGalleryDivider />
+            <PolaroidSlide polaroid={newest} />
+          </>
+        ) : null}
         {rest.map((polaroid) => (
           <PolaroidSlide key={polaroid.src} polaroid={polaroid} />
         ))}
