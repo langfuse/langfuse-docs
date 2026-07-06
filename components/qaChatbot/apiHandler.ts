@@ -106,9 +106,14 @@ export const handler = async (req: Request) => {
         messages: compiledPrompt,
         tools: tools as Parameters<typeof streamText>[0]["tools"],
         stopWhen: stepCountIs(10),
-        experimental_telemetry: {
-          isEnabled: true,
-          metadata: { langfusePrompt: prompt.toJSON() },
+        runtimeContext: {
+          langfusePrompt: prompt,
+        },
+        telemetry: {
+          functionId: "qa-chatbot",
+          includeRuntimeContext: {
+            langfusePrompt: true,
+          },
         },
         onFinish: async (result) => {
           await mcpClient.close();
