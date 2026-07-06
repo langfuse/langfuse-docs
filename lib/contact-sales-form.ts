@@ -1,11 +1,6 @@
 import { z } from "zod";
 
-/**
- * Sanitizes a string for safe use in email headers by removing
- * newlines, carriage returns, and other control characters that
- * could be used for header injection attacks.
- */
-function sanitizeForEmailHeader(input: string): string {
+function sanitizeSingleLineInput(input: string): string {
   return input
     .replace(/[\r\n\t]/g, " ") // Replace newlines and tabs with spaces
     .replace(/[^\x20-\x7E\u00A0-\uFFFF]/g, "") // Remove control characters
@@ -150,25 +145,37 @@ const optionValueSchema = <T extends readonly { value: string }[]>(
     .min(1, message)
     .refine((value) => optionValues(options).includes(value), message);
 
-function escapeHtml(input: string): string {
-  return input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+export const getContactFormOptionLabel = <
+  T extends readonly { value: string; label: string }[],
+>(
+  options: T,
+  value: string,
+) => options.find((option) => option.value === value)?.label ?? value;
+
+export function getContactFormCurrentSetupLabel(data: ContactFormData) {
+  const currentSetup = getContactFormOptionLabel(
+    CURRENT_SETUP_OPTIONS,
+    data.currentSetup,
+  );
+  const otherTool = data.currentSetupOther?.trim();
+
+  if (data.currentSetup === "other-tool" && otherTool) {
+    return `${currentSetup} (${otherTool})`;
+  }
+
+  return currentSetup;
 }
 
 export const contactFormSchema = z
   .object({
     name: z.string().min(1, "Name is required").max(200),
     email: z.string().email("Invalid email address").max(254),
-    // Company is sanitized because it's used in the email subject header
+    // Company is sent to downstream systems as a single-line field.
     company: z
       .string()
       .min(1, "Company name is required")
       .max(200)
-      .transform(sanitizeForEmailHeader),
+      .transform(sanitizeSingleLineInput),
     building: optionValueSchema(
       BUILDING_OPTIONS,
       "Please select what you are building",
@@ -224,95 +231,3 @@ export const defaultFormValues: ContactFormData = {
   userCount: "",
   message: "",
 };
-
-function getEmailFields(data: ContactFormData) {
-  const getLabel = <T extends readonly { value: string; label: string }[]>(
-    options: T,
-    value: string,
-  ) => options.find((option) => option.value === value)?.label ?? value;
-
-  return [
-    { label: FORM_FIELDS.name.label, value: data.name },
-    { label: FORM_FIELDS.email.label, value: data.email },
-    { label: FORM_FIELDS.company.label, value: data.company },
-    {
-      label: FORM_FIELDS.building.label,
-      value: getLabel(BUILDING_OPTIONS, data.building),
-    },
-    {
-      label: FORM_FIELDS.currentSetup.label,
-      value:
-        getLabel(CURRENT_SETUP_OPTIONS, data.currentSetup) +
-        (data.currentSetup === "other-tool" && data.currentSetupOther
-          ? ` (${data.currentSetupOther})`
-          : ""),
-    },
-    {
-      label: "Agents/LLM features in production today",
-      value: getLabel(LLM_APP_COUNT_OPTIONS, data.productionAppCount),
-    },
-    {
-      label: "Agents/LLM features planned in the future",
-      value: getLabel(LLM_APP_COUNT_OPTIONS, data.plannedAppCount),
-    },
-    {
-      label: FORM_FIELDS.deployment.label,
-      value: getLabel(DEPLOYMENT_OPTIONS, data.deployment),
-    },
-    {
-      label: FORM_FIELDS.userCount.label,
-      value: getLabel(USER_COUNT_OPTIONS, data.userCount),
-    },
-    { label: FORM_FIELDS.message.label, value: data.message },
-  ];
-}
-
-export function formatFormDataForEmail(data: ContactFormData): string {
-  return getEmailFields(data)
-    .map((field) => `${field.label}\n${field.value}`)
-    .join("\n\n");
-}
-
-export function formatFormDataForEmailHtml(data: ContactFormData): string {
-  return getEmailFields(data)
-    .map(
-      (field) =>
-        `<p><strong>${escapeHtml(field.label)}</strong><br />${escapeHtml(
-          field.value,
-        ).replace(/\r?\n/g, "<br />")}</p>`,
-    )
-    .join("\n");
-}
-
-export function generateEmailContent(data: ContactFormData): string {
-  const formattedData = formatFormDataForEmail(data);
-
-  return `Dear ${data.name},
-
-Thanks for reaching out. We will respond shortly. Feel free to reply to this message if you want to add any additional context.
-
-Best
-Team Langfuse
-
----
-
-Your request:
-
-${formattedData}`;
-}
-
-export function generateEmailHtmlContent(data: ContactFormData): string {
-  const formattedData = formatFormDataForEmailHtml(data);
-
-  return `<p>Dear ${escapeHtml(data.name)},</p>
-
-<p>Thanks for reaching out. We will respond shortly. Feel free to reply to this message if you want to add any additional context.</p>
-
-<p>Best<br />Team Langfuse</p>
-
-<hr />
-
-<p>Your request:</p>
-
-${formattedData}`;
-}

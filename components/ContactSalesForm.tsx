@@ -38,6 +38,20 @@ function RequiredMarker({ required }: { required: boolean }) {
   return <span className="text-destructive">*</span>;
 }
 
+function getMktoTrkCookie() {
+  const match = document.cookie.match(/(?:^|;\s*)_mkto_trk=([^;]+)/);
+
+  if (!match) {
+    return null;
+  }
+
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
+}
+
 export function ContactSalesForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -82,7 +96,10 @@ export function ContactSalesForm() {
       const response = await fetch("/api/contact-sales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          mktoTrkCookie: getMktoTrkCookie(),
+        }),
       });
 
       if (!response.ok) {
@@ -105,8 +122,8 @@ export function ContactSalesForm() {
         <CheckCircle2 className="h-12 w-12 text-muted-green" />
         <h3 className="text-xl font-semibold">Thank you for reaching out!</h3>
         <p className="text-muted-foreground">
-          We&apos;ve sent a confirmation to your email. Our team will get back
-          to you shortly.
+          We&apos;ve received your request. Our team will get back to you
+          shortly.
         </p>
       </div>
     );
