@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
@@ -19,6 +19,13 @@ import {
 } from "@/lib/cloud-regions";
 import { useCloudRegionSignIn } from "@/lib/use-cloud-region-sign-in";
 import { isCloudAppHref } from "@/lib/google-ads";
+
+const REGION_SHORTCUTS: Partial<Record<CloudRegionKey, string>> = {
+  us: "U",
+  hipaa: "H",
+  eu: "E",
+  jp: "J",
+};
 
 function isEditableElement(el: Element | null): boolean {
   if (!el) return false;
@@ -128,16 +135,38 @@ function MultiRegionButton({
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
+  const visibleRegions = useMemo(
+    () =>
+      cloudRegionSelectorOrder
+        .filter((key) => signedInRegions[key])
+        .map((key) => ({ key, ...cloudRegions[key] })),
+    [signedInRegions],
+  );
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key.toLowerCase() !== "l") return;
       if (isEditableTarget(e.target)) return;
-      if (open) return;
-      e.preventDefault();
-      setOpen(true);
+
+      if (!open) {
+        if (e.key.toLowerCase() === "l") {
+          e.preventDefault();
+          setOpen(true);
+        }
+        return;
+      }
+
+      const match = visibleRegions.find(
+        ({ key }) =>
+          REGION_SHORTCUTS[key]?.toLowerCase() === e.key.toLowerCase(),
+      );
+      if (match) {
+        e.preventDefault();
+        window.location.href = match.url;
+        setOpen(false);
+      }
     },
-    [open],
+    [open, visibleRegions],
   );
 
   useEffect(() => {
@@ -164,18 +193,21 @@ function MultiRegionButton({
           triggerRef.current?.focus();
         }}
       >
-        {cloudRegionSelectorOrder.map((key) => {
-          const region = cloudRegions[key];
-          return (
-            signedInRegions[key] && (
-              <DropdownMenuItem asChild key={key}>
-                <Link href={region.url} data-launch-app-cta="">
-                  {region.label}
-                </Link>
-              </DropdownMenuItem>
-            )
-          );
-        })}
+        {visibleRegions.map(({ key, label, url }) => (
+          <DropdownMenuItem asChild key={key}>
+            <Link href={url} data-launch-app-cta="">
+              {label}
+              {REGION_SHORTCUTS[key] && (
+                <kbd
+                  className="ml-auto flex justify-center items-center not-italic shrink-0 w-[20px] h-[20px] rounded-px font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] p-0 border border-[rgba(64,61,57,0.20)] dark:border-[rgba(184,182,160,0.30)] bg-[rgba(64,61,57,0.10)] dark:bg-[rgba(184,182,160,0.12)]"
+                  aria-hidden
+                >
+                  {REGION_SHORTCUTS[key]}
+                </kbd>
+              )}
+            </Link>
+          </DropdownMenuItem>
+        ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link
