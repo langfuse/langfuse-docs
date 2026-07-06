@@ -1,0 +1,126 @@
+---
+title: Use Langfuse from Go, Java, C#, and Ruby via OpenTelemetry
+tags: [guide, integration]
+description: "Langfuse works from any language with an OpenTelemetry SDK: point the OTLP exporter at the Langfuse endpoint. Setup for Go, Java, C#/.NET, and Ruby."
+---
+
+# Use Langfuse from any language via OpenTelemetry
+
+The Langfuse SDKs cover Python and JavaScript/TypeScript, but Langfuse itself is an [OpenTelemetry backend](/integrations/native/opentelemetry): any language with an OpenTelemetry SDK can send traces to the Langfuse OTLP endpoint. If your stack is Go, Java, C#, Ruby, or anything else with OTel support, you do not need to wait for a native SDK.
+
+**TL;DR:** Configure your OpenTelemetry exporter to send OTLP over HTTP (protobuf or JSON; gRPC is not supported) to `https://cloud.langfuse.com/api/public/otel` with a Basic Auth header built from your project keys. Spans with [GenAI semantic convention](https://opentelemetry.io/docs/specs/semconv/gen-ai/) attributes (`gen_ai.*`) appear in Langfuse as generations with model, token, and cost data; other spans nest around them as regular observations.
+
+## The configuration every language shares
+
+OpenTelemetry SDKs read the same environment variables, so this block is the whole integration in most setups:
+
+```bash
+# Generate the auth string from your project API keys:
+#   echo -n "pk-lf-...:sk-lf-..." | base64
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
+# OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel" # 🇺🇸 US data region
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
+```
+
+If your SDK requires signal-specific configuration, the traces path is `/api/public/otel/v1/traces`. Details and property mapping live in the [OpenTelemetry integration docs](/integrations/native/opentelemetry).
+
+Two rules determine how your spans render in Langfuse:
+
+1. **Spans carrying `gen_ai.*` attributes become generations**, with model name, token usage, and cost mapped from the semantic conventions.
+2. **Everything else becomes a regular observation** in the trace tree. To attach user and session context, set `user.id` and `session.id` attributes on your spans.
+
+## Go
+
+Use the standard OTel Go SDK with the HTTP trace exporter; it picks up the environment variables above.
+
+```go
+import (
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+    "go.opentelemetry.io/otel/sdk/trace"
+)
+
+exp, err := otlptracehttp.New(ctx) // reads OTEL_EXPORTER_OTLP_* env vars
+tp := trace.NewTracerProvider(trace.WithBatcher(exp))
+otel.SetTracerProvider(tp)
+defer tp.Shutdown(ctx) // flush before exit; short-lived programs lose spans otherwise
+```
+
+Instrument LLM calls by setting `gen_ai.*` attributes on the spans you create around them. For automatic LLM instrumentation in Go, [OpenLIT](/docs/opentelemetry/example-openlit) provides library support that exports to Langfuse the same way.
+
+## Java
+
+The zero-code path is the OpenTelemetry Java agent: attach it to the JVM and configure it entirely through the environment variables above.
+
+```bash
+OTEL_TRACES_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
+java -javaagent:opentelemetry-javaagent.jar -jar app.jar
+```
+
+The agent instruments HTTP calls automatically; wrap your LLM client calls in spans with `gen_ai.*` attributes (or use [OpenLLMetry](/docs/opentelemetry/example-openllmetry), which extends automatic LLM instrumentation to Java) so model calls render as generations rather than generic HTTP spans.
+
+## C# / .NET
+
+Use the OpenTelemetry .NET SDK with the OTLP exporter set to the HTTP protocol:
+
+```csharp
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Exporter;
+
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .AddSource("my-llm-app")
+    .AddOtlpExporter(o => o.Protocol = OtlpExportProtocol.HttpProtobuf) // reads OTLP env vars
+    .Build();
+```
+
+Create an `ActivitySource` for your LLM calls and set `gen_ai.*` tags on those activities. Teams using Semantic Kernel or similar frameworks can also route that telemetry to Langfuse through the OTel-based instrumentation libraries listed in the [OpenTelemetry docs](/integrations/native/opentelemetry).
+
+## Ruby
+
+The OTel Ruby SDK exports OTLP over HTTP by default and honors the shared environment variables:
+
+```ruby
+require "opentelemetry/sdk"
+require "opentelemetry/exporter/otlp"
+
+OpenTelemetry::SDK.configure # reads OTEL_EXPORTER_OTLP_* env vars
+
+tracer = OpenTelemetry.tracer_provider.tracer("my-llm-app")
+tracer.in_span("chat-completion", attributes: {
+  "gen_ai.system" => "openai",
+  "gen_ai.request.model" => "gpt-4.1",
+  "user.id" => user_id,
+}) do |span|
+  # call your LLM provider here, then record usage:
+  span.set_attribute("gen_ai.usage.input_tokens", usage.prompt_tokens)
+  span.set_attribute("gen_ai.usage.output_tokens", usage.completion_tokens)
+end
+```
+
+There is no automatic LLM instrumentation ecosystem for Ruby yet, so the manual `gen_ai.*` pattern above is the standard approach.
+
+## Verifying the integration
+
+1. Send one traced request and flush the exporter (short-lived processes must shut down the tracer provider explicitly, or the last batch never leaves the process).
+2. Open the trace in Langfuse and confirm the LLM call renders as a generation with token counts, not as a generic span.
+3. If spans arrive but token usage or input/output are missing, compare your attribute names against the [property mapping table](/integrations/native/opentelemetry); near-miss attribute names are the most common cause.
+
+## FAQ
+
+### Does this work with self-hosted Langfuse?
+
+Yes. Replace the endpoint host with your deployment's domain; the OTLP endpoint path is the same.
+
+### Can I send traces from multiple languages into one project?
+
+Yes. The OTLP endpoint does not care which SDK produced the spans; a polyglot system can send Go, Java, and Python spans to the same project. Distributed traces connect across services when you propagate the W3C `traceparent` header between them.
+
+### Why does gRPC not work?
+
+Langfuse's OTLP endpoint accepts HTTP with protobuf or JSON encoding only. Configure `http/protobuf` explicitly in SDKs that default to gRPC (the Java agent and some collector pipelines).
+
+### Should I use an OpenTelemetry Collector in between?
+
+Optional but often useful: a collector lets you fan the same spans out to Langfuse and an APM backend simultaneously, apply sampling, or bridge from environments that cannot reach the internet directly.
