@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { RootProvider } from "fumadocs-ui/provider/next";
+import { AppRootProvider } from "@/components/AppRootProvider";
 import { GoogleTagManager } from "@next/third-parties/google";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
@@ -83,7 +83,7 @@ export default function RootLayout({
           <DevAriaHiddenConsoleFilter />
         )}
         <PostHogProvider>
-          <RootProvider
+          <AppRootProvider
             i18n={{
               locale: "en",
               translations: {
@@ -92,7 +92,7 @@ export default function RootLayout({
             }}
           >
             <AISearch>{children}</AISearch>
-          </RootProvider>
+          </AppRootProvider>
         </PostHogProvider>
         {process.env.NODE_ENV === "production" && (
           <>
