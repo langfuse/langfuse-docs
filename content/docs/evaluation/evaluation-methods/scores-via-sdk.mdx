@@ -520,7 +520,7 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 By default, Langfuse allows for multiple scores of the same `name` on the same trace. This is useful if you'd like to track the evolution of a score over time or if e.g. you've received multiple user feedback scores on the same trace.
 
-In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and passing this as an `id` (JS/TS) / `score_id` (Python) when creating the score, for example `trace_id-score_name`.
+In some cases, you want to prevent this behavior or overwrite an existing score. A score is identified by three fields — its `id`, its `name`, and its date (`toDate(timestamp)`) — and a new score only replaces an existing one when all three match. To achieve this, create an **idempotency key** and pass it as the `id` (JS/TS) / `score_id` (Python) when creating the score (for example `trace_id-score_name`), and keep the `name` and `timestamp` unchanged across calls. If any of the three differs, you get an additional score rather than a replacement.
 
 See [How to update traces, observations, and scores](/faq/all/tracing-data-updates) for more details on Langfuse's immutable data model.
 

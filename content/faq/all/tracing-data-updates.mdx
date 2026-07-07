@@ -36,6 +36,8 @@ UI-based updates — [tags](/docs/observability/features/tags), bookmarks, and [
 
 ## Updating scores [#updating-scores]
 
-Unlike traces and observations, scores are designed to be added and overwritten. By default, Langfuse allows multiple scores with the same `name` on the same trace. To prevent duplicates or overwrite an existing score, pass a stable idempotency key as the `id` (JS/TS) / `score_id` (Python) when creating the score — for example `trace_id-score_name`.
+Unlike traces and observations, scores are designed to be added and overwritten. By default, Langfuse allows multiple scores with the same `name` on the same trace. To overwrite an existing score rather than create a duplicate, the new score must match the original on all three fields that identify it: its `id`, its `name`, and its date (`toDate(timestamp)`).
+
+In practice, pass a stable idempotency key as the `id` (JS/TS) / `score_id` (Python) — for example `trace_id-score_name` — and keep the `name` and `timestamp` unchanged across calls. If any of the three differs, you get a new score instead of a replacement.
 
 See [Scores via SDK/API](/docs/evaluation/evaluation-methods/scores-via-sdk#preventing-duplicate-scores) for details.
