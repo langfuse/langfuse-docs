@@ -105,10 +105,6 @@ Groups are listed in the order they appear in the UI; fields within each group a
   Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group.
 </Callout>
 
-<Callout type="info">
-  For the legacy `observations` file, selecting `trace_context` has no effect: tags, release, and trace name live on the trace rather than the observation, so they are exported in the separate [`traces` file](/docs/api-and-data-platform/features/blob-storage-export-fields#traces) instead (join on `trace_id`).
-</Callout>
-
 New integrations default to all eleven groups, so behavior matches earlier exports unless you narrow the selection. Field groups apply to observation exports only — the legacy `traces` file always contains a [fixed column set](/docs/api-and-data-platform/features/blob-storage-export-fields#traces).
 
 ### Configure via REST API [#field-groups-rest-api]
