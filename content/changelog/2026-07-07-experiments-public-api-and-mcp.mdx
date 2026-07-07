@@ -1,0 +1,47 @@
+---
+date: 2026-07-07
+title: Query experiments via API and MCP
+description: Fetch experiments and their items programmatically through the new public API endpoints, or let AI agents explore experiment results via the Langfuse MCP server.
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Code, FlaskConical } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now access experiment results programmatically. The new `GET /api/public/experiments` and `GET /api/public/experiment-items` endpoints list experiments and their items with cursor-based pagination. The Langfuse MCP server exposes them as `listExperiments` and `listExperimentItems` tools.
+
+This unlocks workflows beyond the Langfuse UI:
+
+- Analyze experiments from AI agents: agents can list recent experiments, drill into individual items, and follow the deep links in MCP responses back into Langfuse.
+- Export experiment results: pull item inputs, outputs, expected outputs, and scores into a notebook or data warehouse for custom analysis.
+- Gate deployments in CI/CD: fetch the scores of an experiment run and fail the pipeline if they regress.
+
+```
+GET /api/public/experiments?fromStartTime=2026-07-01T00:00:00Z&fields=core,scores
+GET /api/public/experiment-items?experimentId=exp-123&fields=io,scores
+```
+
+## Get started
+
+<Cards num={3}>
+  <Card
+    title="Experiments documentation"
+    href="/docs/evaluation/experiments/experiments-via-sdk"
+    icon={<FlaskConical />}
+    arrow
+  />
+  <Card
+    title="API reference"
+    href="https://api.reference.langfuse.com/#tag/experiments"
+    icon={<Code />}
+    arrow
+  />
+  <Card
+    title="MCP server documentation"
+    href="/docs/api-and-data-platform/features/mcp-server"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
