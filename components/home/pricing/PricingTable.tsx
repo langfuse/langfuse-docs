@@ -160,7 +160,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
-        "SOC2 & ISO27001 reports, BAA available (HIPAA)",
+        "SOC2 & ISO27001 reports, HIPAA-ready region",
         "Prioritized in-app support",
       ],
       addOn: {
@@ -1252,7 +1252,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "HIPAA compliance",
+        name: "HIPAA-ready region",
         href: "/security/hipaa",
         tiers: {
           cloud: {
