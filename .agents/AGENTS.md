@@ -55,6 +55,17 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 4. Avoid `pnpm build` for routine edits or small UI/content changes. Prefer targeted checks or `pnpm dev`, and only run the full production build when it is necessary or explicitly requested.
 5. **Always run `pnpm run format` before committing or opening a PR if you edited any file Prettier formats** (see "Passing CI checks on the first try" below). The `format` CI job runs `pnpm run format:check` and fails the build on a single unformatted file.
 
+## Editing legal & compliance content
+
+**The subprocessor list (`content/security/subprocessors.mdx`) is a legally binding document — do not edit it casually.** It is referenced by customer Data Processing Agreements and carries GDPR Art. 28 obligations, including advance change-notification duties to customers. Adding, removing, or renaming an entry can trigger customer-notice requirements and must go through legal/compliance review.
+
+Before editing `content/security/subprocessors.mdx`:
+
+1. **Stop and print a clear warning to the user** that this is a legal document with contractual consequences, and get explicit confirmation from the Langfuse legal/compliance owner before proceeding. Never add or remove a subprocessor on your own initiative.
+2. A tool that only processes **website/marketing visitor data** (e.g. web analytics, ad pixels) generally belongs in the **Privacy Policy** (`content/marketing/privacy.mdx`, section "When and With Whom Do We Share Your Personal Information?"), **not** in the subprocessor list. The subprocessor list covers processors of Langfuse Cloud **client data**. For example, Ahrefs and Scarf are disclosed in the Privacy Policy, not as subprocessors.
+
+The same "flag it and confirm intent first" caution applies to the other legal/compliance pages, e.g. `content/marketing/privacy.mdx`, `content/security/dpa.mdx`, and `content/marketing/terms.mdx`.
+
 ## Passing CI checks on the first try
 
 CI runs three required checks on every PR. Run these locally before pushing to avoid a re-run cycle:
