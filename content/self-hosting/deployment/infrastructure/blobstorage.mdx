@@ -387,9 +387,9 @@ Over time, this data accumulates and increases storage costs.
 It is recommended to configure a bucket lifecycle (expiration) policy to automatically delete objects after a defined number of days.
 
 <Callout type="warning">
-Langfuse keeps these raw events so it can finish assembling and, if needed, reprocess records. Set your lifecycle expiration no shorter than the window over which related events for a single record may arrive — on Langfuse Cloud this is 30 days. If events expire too early, Langfuse may be unable to reconstruct the full record.
+Langfuse re-reads raw events from the bucket to retry failed ingestion jobs, for replay/disaster recovery, and — on the legacy `/api/public/ingestion` path — to combine incremental events sent for the same record. Size your lifecycle expiration to cover these needs (30 days on Langfuse Cloud). OpenTelemetry ingestion is self-contained (each span is a single complete event), so it does not depend on this retention for assembling records.
 
-Note that this retention window is not a way to update data. Traces and observations are immutable once ingested; see [How to update traces, observations, and scores?](/faq/all/tracing-data-updates) for details.
+This retention window is not a way to update data. Traces and observations are immutable once ingested; see [How to update traces, observations, and scores?](/faq/all/tracing-data-updates) for details.
 
 </Callout>
 
