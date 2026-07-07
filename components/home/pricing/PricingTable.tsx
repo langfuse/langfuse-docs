@@ -722,13 +722,25 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (metrics api)",
+        name: "Rate limit (Metrics API v2)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
             Hobby: "100 requests / day",
-            Core: "200 requests / day",
-            Pro: "2000 requests / day",
+            Core: "100 requests / hour",
+            Pro: "500 requests / hour",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "Rate limit (legacy Metrics API)",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "100 requests / day",
+            Core: "2,000 requests / day",
+            Pro: "2,000 requests / day",
             Enterprise: "Custom",
           },
         },
