@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import {
   BUILDING_OPTIONS,
   DEPLOYMENT_OPTIONS,
@@ -14,15 +13,9 @@ import {
 const MARKETO_IDENTITY =
   "https://238-FPC-317.mktorest.com/identity/oauth/token";
 const MARKETO_REST = "https://238-FPC-317.mktorest.com/rest/v1/leads.json";
-const MARKETO_ASSOCIATE = (leadId: number | string) =>
-  `https://238-FPC-317.mktorest.com/rest/v1/leads/${leadId}/associate.json`;
 
 let cachedToken: string | null = null;
 let tokenExpiresAt = 0;
-
-const submissionMetadataSchema = z.object({
-  mktoTrkCookie: z.string().max(4096).optional().nullable(),
-});
 
 class MarketoConfigError extends Error {}
 
@@ -170,43 +163,10 @@ async function submitLeadToMarketo(data: ContactFormData, token: string) {
   return leadId;
 }
 
-async function associateMktoCookie(
-  leadId: number | string,
-  mktoTrkCookie: string | null,
-  token: string,
-) {
-  if (!mktoTrkCookie) {
-    return;
-  }
-
-  try {
-    const associateUrl = new URL(MARKETO_ASSOCIATE(leadId));
-    associateUrl.searchParams.set("cookie", mktoTrkCookie);
-
-    const response = await fetch(associateUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    });
-    const result = await readResponseBody(response);
-
-    if (!response.ok || (isRecord(result) && result.success === false)) {
-      console.error("Marketo cookie association failed:", result);
-    }
-  } catch (error) {
-    console.error("Marketo cookie association failed:", error);
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validationResult = contactFormSchema.safeParse(body);
-    const metadataValidationResult = submissionMetadataSchema.safeParse({
-      mktoTrkCookie: isRecord(body) ? body.mktoTrkCookie : undefined,
-    });
 
     if (!validationResult.success) {
       return NextResponse.json(
@@ -218,23 +178,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!metadataValidationResult.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid form data",
-          details: metadataValidationResult.error.flatten(),
-        },
-        { status: 400 },
-      );
-    }
-
     const data = validationResult.data;
-    const mktoTrkCookie =
-      metadataValidationResult.data.mktoTrkCookie?.trim() || null;
     const token = await getMarketoToken();
-    const leadId = await submitLeadToMarketo(data, token);
-
-    await associateMktoCookie(leadId, mktoTrkCookie, token);
+    await submitLeadToMarketo(data, token);
 
     return NextResponse.json({ success: true });
   } catch (error) {

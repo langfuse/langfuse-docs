@@ -38,20 +38,6 @@ function RequiredMarker({ required }: { required: boolean }) {
   return <span className="text-destructive">*</span>;
 }
 
-function getMktoTrkCookie() {
-  const match = document.cookie.match(/(?:^|;\s*)_mkto_trk=([^;]+)/);
-
-  if (!match) {
-    return null;
-  }
-
-  try {
-    return decodeURIComponent(match[1]);
-  } catch {
-    return match[1];
-  }
-}
-
 export function ContactSalesForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -96,10 +82,7 @@ export function ContactSalesForm() {
       const response = await fetch("/api/contact-sales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...data,
-          mktoTrkCookie: getMktoTrkCookie(),
-        }),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
