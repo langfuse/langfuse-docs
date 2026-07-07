@@ -6,18 +6,24 @@ title: Incident Response
 
 ### Declaring an incident
 
-**Any team member** can declare an incident at any time — don't wait for certainty. When in doubt, page.
+**Any Langfuse or ClickHouse team member** can declare an incident at any time — don't wait for certainty. When in doubt, page.
 
-1. Log in to **incident.io** (Slack SSO) → **"Declare Incident"**, or use `/incident` in the **#incidents** Slack channel.
-2. Fill in a summary, affected service(s), and **always select the highest severity** — this is not published externally.
+Langfuse incidents are handled in the **ClickHouse incident.io account**.
 
-incident.io will automatically create a Slack channel, page the on-call engineer via PagerDuty, and post to **#incidents**. On-call schedules are managed in **PagerDuty** — the on-call engineer's phone will ring within 1–2 minutes.
+1. Use `/inc` in Slack or declare the incident from incident.io.
+2. Make it clear in the title and description that this is a **Langfuse** incident.
+3. Include the affected service(s), region, customer impact, and useful links to errors, dashboards, traces, or support tickets.
+4. Select the highest plausible severity — this is not published externally.
 
-**When to page:** platform outages, security issues, elevated errors, a customer seeing another customer's data.
+For urgent issues, use `/inc escalate` to page Langfuse directly. You can also tag `@langfuse-oncall` in Slack. ClickHouse teammates can find the team in `#langfuse`; if the issue is related to ClickHouse instances, also involve `#ch-sre-team`.
+
+incident.io will automatically create a Slack channel and route the escalation to the Langfuse on-call team. Salesforce support escalations should use the same Langfuse on-call flow.
+
+**When to page:** platform outages, ClickHouse instance issues affecting Langfuse, security issues, elevated errors, a broken core product flow, or a customer seeing another customer's data.
 
 ### Response
 
-The **first engineer to join** the incident channel is the **Incident Lead**. Assign yourself the role in incident.io. Pull in [DRIs](https://langfuse.com/handbook/how-we-work/ownership) of affected components or Max if needed. For customer-facing incidents, pull someone from the business side to monitor Slack channels and support tickets.
+The **first engineer to join** the incident channel is the **Incident Lead**. Assign yourself the role in incident.io. Pull in [DRIs](https://langfuse.com/handbook/how-we-work/ownership) of affected components, ClickHouse SREs, or Max if needed. For customer-facing incidents, pull someone from the business side to monitor Slack channels and support tickets.
 
 1. **Triage** — Collect evidence (screenshots, metrics, logs), publish a status page update (see below). For critical incidents, enable the product announcement banner.
 2. **Mitigate** — Restore the system first: rollback, scale up, feature-flag, hotfix. Root cause comes later.
@@ -41,7 +47,7 @@ The following should **always** have a status page:
 - Errors/latencies on public APIs
 - Login issues
 
-To publish: go to **"Status Pages"** in [incident.io](https://app.incident.io/langfuse/status-pages/01KACEF364R1KBTHMW81VH6867/overview/now), select our public status page, and hit **"Publish Incident"**. Declaring an incident via `/incident` in Slack does **not** automatically create a public status page update — you must publish it separately.
+To publish: go to **"Status Pages"** in incident.io, select our public status page, and hit **"Publish Incident"**. Declaring an incident via `/inc` in Slack does **not** automatically create a public status page update — you must publish it separately.
 
 The incident lead keeps the [status page](https://status.langfuse.com) up to date with concise and accurate information throughout the incident.
 
