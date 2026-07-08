@@ -8,7 +8,7 @@ sidebarTitle: Export Field Reference
 
 This page lists every field exported by the Langfuse blob storage integration, organized by export table. For setup instructions and configuration, see [Export to Blob Storage](/docs/api-and-data-platform/features/export-to-blob-storage).
 
-Types are described as they appear in **JSON/JSONL** exports. Timestamps use `YYYY-MM-DD HH:MM:SS.ffffff` format (e.g. `2024-05-29 13:46:19.963000`) in UTC. See [Notes on CSV exports](#csv-exports) for how types map in CSV format.
+Exports can be written as Parquet (default for new integrations), CSV, JSON, or JSONL files. Types are described as they appear in **JSON/JSONL** exports. Timestamps use `YYYY-MM-DD HH:MM:SS.ffffff` format (e.g. `2024-05-29 13:46:19.963000`) in UTC. See [Notes on CSV exports](#csv-exports) for how types map in CSV format and [Notes on Parquet exports](#parquet-exports) for Parquet-specific behavior.
 
 ## Export sources [#export-sources]
 
@@ -72,9 +72,9 @@ Each row is a single observation with trace-level context included directly — 
 | `tool_definitions`        | object                     | Tool/function schemas provided to the LLM.                                       | May be an empty object `{}` when no tools were provided.                                                                                                                |
 | `usage_pricing_tier_id`   | string or null             | ID of the pricing tier used for cost calculation.                                | Langfuse pricing tier UUID from the model definition. Null if no tiered pricing applies.                                                                                |
 | `usage_pricing_tier_name` | string or null             | Name of the pricing tier used for cost calculation.                              | User-defined tier name from the model definition. Null if no tiered pricing applies.                                                                                    |
-| `input_price`             | string or null             | Per-unit input price from the matched model definition. Decimal string.          | Null if no model definition matched. Cast to numeric in your pipeline.                                                                                                  |
-| `output_price`            | string or null             | Per-unit output price from the matched model definition. Decimal string.         | Null if no model definition matched. Cast to numeric in your pipeline.                                                                                                  |
-| `total_price`             | string or null             | Per-unit total price from the matched model definition. Decimal string.          | Null if no model definition matched. Used for models with a flat per-call price.                                                                                        |
+| `input_price`             | string or null             | Per-unit input price from the matched model definition. Decimal string.          | Null if no model definition matched. Cast to numeric in your pipeline. Not included in [Parquet exports](#parquet-exports).                                             |
+| `output_price`            | string or null             | Per-unit output price from the matched model definition. Decimal string.         | Null if no model definition matched. Cast to numeric in your pipeline. Not included in [Parquet exports](#parquet-exports).                                             |
+| `total_price`             | string or null             | Per-unit total price from the matched model definition. Decimal string.          | Null if no model definition matched. Used for models with a flat per-call price. Not included in [Parquet exports](#parquet-exports).                                   |
 | `user_id`                 | string                     | End-user identifier from the parent trace.                                       | Directly available — no JOIN needed.                                                                                                                                    |
 | `session_id`              | string                     | Session identifier from the parent trace.                                        | Directly available — no JOIN needed.                                                                                                                                    |
 | `trace_name`              | string                     | Name of the parent trace.                                                        | Group observations by their parent trace name.                                                                                                                          |
@@ -208,9 +208,9 @@ These rows contain **observation-level data only**. Trace-level fields like `use
 | `tool_call_names`         | array of strings           | Names of tools/functions called.                                                 | Quick filter/group without parsing full `tool_calls`.                                                                                                                   |
 | `tool_definitions`        | object                     | Tool/function schemas provided to the LLM.                                       | May be an empty object `{}` when no tools were provided.                                                                                                                |
 | `usage_pricing_tier_name` | string or null             | Name of the pricing tier used for cost calculation.                              | User-defined tier name from the model definition. Null if no tiered pricing applies. Unlike the enriched export, `usage_pricing_tier_id` is not included in this file.  |
-| `input_price`             | string or null             | Per-unit input price from the matched model definition. Decimal string.          | Null if no model definition matched. Cast to numeric in your pipeline.                                                                                                  |
-| `output_price`            | string or null             | Per-unit output price from the matched model definition. Decimal string.         | Null if no model definition matched. Cast to numeric in your pipeline.                                                                                                  |
-| `total_price`             | string or null             | Per-unit total price from the matched model definition. Decimal string.          | Null if no model definition matched. Used for models with a flat per-call price.                                                                                        |
+| `input_price`             | string or null             | Per-unit input price from the matched model definition. Decimal string.          | Null if no model definition matched. Cast to numeric in your pipeline. Not included in [Parquet exports](#parquet-exports).                                             |
+| `output_price`            | string or null             | Per-unit output price from the matched model definition. Decimal string.         | Null if no model definition matched. Cast to numeric in your pipeline. Not included in [Parquet exports](#parquet-exports).                                             |
+| `total_price`             | string or null             | Per-unit total price from the matched model definition. Decimal string.          | Null if no model definition matched. Used for models with a flat per-call price. Not included in [Parquet exports](#parquet-exports).                                   |
 
 ### Differences between enriched and legacy exports [#enriched-vs-legacy-differences]
 
@@ -238,23 +238,31 @@ In CSV format all values are represented as text. Key differences from JSON/JSON
 | string (timestamp) | `YYYY-MM-DD HH:MM:SS.ffffff` in UTC (e.g. `2024-05-29 13:46:19.963000`). Parse as timestamp in your pipeline. |
 
 <Callout type="info">
-  **Price fields:** `input_price`, `output_price`, and `total_price` are exported as **quoted strings** in JSON/JSONL (e.g. `"0.03"`) to preserve decimal precision. In CSV they appear as plain text. Cast these to a numeric or decimal type in your warehouse. Other cost fields (`total_cost`, `cost_details` values) are exported as JSON numbers.
+  **Price fields:** `input_price`, `output_price`, and `total_price` are exported as **quoted strings** in JSON/JSONL (e.g. `"0.03"`) to preserve decimal precision. In CSV they appear as plain text. Cast these to a numeric or decimal type in your warehouse. Other cost fields (`total_cost`, `cost_details` values) are exported as JSON numbers. The price fields are not included in [Parquet exports](#parquet-exports).
 </Callout>
 
 When loading CSV into a warehouse, cast timestamp fields to your warehouse's timestamp type, numeric fields to float/decimal, and parse JSON-encoded fields (objects, arrays) into native map/array types if your warehouse supports them.
+
+## Notes on Parquet exports [#parquet-exports]
+
+Apache Parquet is the default file type for new integrations. It is a columnar binary format that is encoded and compressed by the storage engine, so gzip compression does not apply — Parquet files are always written with a plain `.parquet` extension.
+
+Parquet observation exports (both `observations_v2/` and legacy `observations/`) do not include the per-unit model price columns `input_price`, `output_price`, and `total_price`. These columns snapshot the matched model definition's price at the time of export — not the price in effect when the observation was recorded — which limits their historical value, and they may be deprecated in the future. For cost data, use `cost_details` and `total_cost`, which capture the computed cost per observation and are included in every file type.
+
+Trace and score exports contain the same fields in all file types.
 
 ## File organization in blob storage [#file-organization]
 
 ```
 {project_id}/
 ├── observations_v2/          # Enriched observations mode (recommended)
-│   └── {timestamp}.{json|jsonl|csv}[.gz]
+│   └── {timestamp}.{parquet|json|jsonl|csv}[.gz]
 ├── scores/                   # Always exported
-│   └── {timestamp}.{json|jsonl|csv}[.gz]
+│   └── {timestamp}.{parquet|json|jsonl|csv}[.gz]
 ├── traces/                   # Traces and observations (legacy) mode only
-│   └── {timestamp}.{json|jsonl|csv}[.gz]
+│   └── {timestamp}.{parquet|json|jsonl|csv}[.gz]
 └── observations/             # Traces and observations (legacy) mode only
-    └── {timestamp}.{json|jsonl|csv}[.gz]
+    └── {timestamp}.{parquet|json|jsonl|csv}[.gz]
 ```
 
-Files are partitioned by the configured export frequency (every 20 minutes, hourly, daily, or weekly). Each file covers one time window.
+Files are partitioned by the configured export frequency (every 20 minutes, hourly, daily, or weekly). Each file covers one time window. The `.gz` suffix applies only to gzip-compressed text formats — Parquet files are never gzip-compressed.

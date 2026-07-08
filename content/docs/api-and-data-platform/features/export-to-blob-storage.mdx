@@ -31,12 +31,21 @@ To set up the export navigate to `Your Project` > `Settings` > `Integrations` > 
 
 Fill in the settings to authenticate with your vendor, enable the integration, and press save.
 An initial export starts shortly after you enable the integration and then continues on the schedule you selected.
-The export supports CSV, JSON, and JSONL file formats.
+The export supports Parquet (default), CSV, JSON, and JSONL file formats — see [File formats](#file-formats).
 Read [our blob storage documentation](/self-hosting/deployment/infrastructure/blobstorage) for more information on how to get credentials for your specific vendor.
 
 <Frame className="my-10" fullWidth>
   ![Blob Storage Integration Setup](/images/docs/blob-storage.png)
 </Frame>
+
+## File formats [#file-formats]
+
+Exports can be written as Apache Parquet, CSV, JSON, or JSONL files. New integrations default to **Parquet**.
+
+- **Parquet** is a columnar binary format that is encoded and compressed by the storage engine and can be loaded directly by most data warehouses and query engines. Because Parquet files are already compressed, gzip compression does not apply to Parquet exports.
+- **CSV, JSON, and JSONL** are text formats that can optionally be gzip-compressed.
+
+Parquet observation exports do not include the per-unit model price columns (`input_price`, `output_price`, `total_price`). These columns snapshot model definition prices at export time and may be deprecated in the future — use `cost_details` and `total_cost` for cost data, which are included in every file type. See [Notes on Parquet exports](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports) in the field reference for details.
 
 ## Export source (Fast Preview)
 
@@ -102,7 +111,7 @@ Groups are listed in the order they appear in the UI; fields within each group a
 | `tools`         | `tool_call_names`, `tool_calls`, `tool_definitions`                                                          | Same as enriched                                                                                                                 |
 
 <Callout type="info">
-  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group.
+  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group. With the Parquet file type, these three price columns are not included even when `model` is selected — see [File formats](#file-formats).
 </Callout>
 
 New integrations default to all eleven groups, so behavior matches earlier exports unless you narrow the selection. Field groups apply to observation exports only — the legacy `traces` file always contains a [fixed column set](/docs/api-and-data-platform/features/blob-storage-export-fields#traces).
@@ -113,7 +122,8 @@ New integrations default to all eleven groups, so behavior matches earlier expor
 
 - `exportSource` — `LEGACY_TRACES_OBSERVATIONS`, `OBSERVATIONS_V2`, or `LEGACY_TRACES_AND_ENRICHED_OBSERVATIONS`.
 - `exportFieldGroups` — a list of group names. Must include `core` when provided. Applies to observation exports for all export sources. When omitted on update, the existing value is preserved.
-- `compressed` — boolean; defaults to `true` for new integrations. When `true`, files are written as `.csv.gz`, `.json.gz`, or `.jsonl.gz`.
+- `fileType` — `PARQUET` (default for new integrations), `CSV`, `JSON`, or `JSONL`.
+- `compressed` — boolean; defaults to `true` for new integrations. When `true`, files are written as `.csv.gz`, `.json.gz`, or `.jsonl.gz`. Does not apply to `PARQUET` — Parquet files are compressed by the storage engine and always written as plain `.parquet` files.
 
 See the [API reference](https://api.reference.langfuse.com/#tag/blobstorageintegrations) for the full schema.
 
