@@ -45,14 +45,7 @@ Exports can be written as Apache Parquet, CSV, JSON, or JSONL files. New integra
 - **Parquet** is a columnar binary format that is encoded and compressed by the storage engine and can be loaded directly by most data warehouses and query engines. Because Parquet files are already compressed, gzip compression does not apply to Parquet exports.
 - **CSV, JSON, and JSONL** are text formats that can optionally be gzip-compressed.
 
-<Callout type="info">
-  Parquet observation exports omit the per-unit model price columns
-  (`input_price`, `output_price`, `total_price`). If you depend on these
-  columns, choose a text format or compute prices downstream from
-  `usage_details` and your model definitions. See
-  [Notes on Parquet exports](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports)
-  in the field reference for details.
-</Callout>
+Parquet observation exports do not include the per-unit model price columns (`input_price`, `output_price`, `total_price`). These columns snapshot model definition prices at export time and may be deprecated in the future — use `cost_details` and `total_cost` for cost data, which are included in every file type. See [Notes on Parquet exports](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports) in the field reference for details.
 
 ## Export source (Fast Preview)
 
@@ -113,7 +106,7 @@ For the **Enriched observations (recommended)** and **Traces and observations (l
 | `trace_context` | `tags`, `release`, `trace_name`                                                                              | Yes                        |
 
 <Callout type="info">
-  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group. With the Parquet file type, these three price columns are omitted even when `model` is selected — see [File formats](#file-formats).
+  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group. With the Parquet file type, these three price columns are not included even when `model` is selected — see [File formats](#file-formats).
 </Callout>
 
 New integrations default to all eleven groups, so behavior matches earlier exports unless you narrow the selection. The **Traces and observations (legacy)** source uses a fixed column set and ignores field groups.

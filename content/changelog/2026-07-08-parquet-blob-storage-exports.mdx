@@ -17,16 +17,7 @@ Scheduled blob storage exports to S3, GCS, and Azure can now be written as **Apa
 
 Select **Parquet** under **Project Settings → Integrations → Blob Storage**, or set it programmatically: the `fileType` field on [`GET`/`PUT /api/public/integrations/blob-storage`](https://api.reference.langfuse.com/#tag/blobstorageintegrations) now accepts `PARQUET` alongside `CSV`, `JSON`, and `JSONL`. Existing integrations keep their configured format.
 
-<Callout type="info">
-  Parquet observation exports omit the per-unit model price columns
-  (`input_price`, `output_price`, `total_price`) — they are computed in an
-  enrichment step that Parquet exports skip. Choose a text format if you need
-  them, or compute prices downstream from `usage_details` and your model
-  definitions. Trace and score exports are identical across all file types. See
-  the
-  [Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports)
-  for details.
-</Callout>
+Parquet observation exports do not include the per-unit model price columns (`input_price`, `output_price`, `total_price`). These columns snapshot model definition prices at export time and may be deprecated in the future — use `cost_details` and `total_cost` for cost data, which are included in every file type. Trace and score exports are identical across all file types. See the [Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports) for details.
 
 ## Learn more
 
