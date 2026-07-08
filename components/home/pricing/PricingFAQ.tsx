@@ -38,9 +38,9 @@ const faqs: FAQItem[] = [
       "A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing). Langfuse Cloud Credits only apply to customers with a committed-spend agreement for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed-spend agreement, please contact your account team. If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.",
   },
   {
-    question: "What is the Committed spend option on the Enterprise plan?",
+    question: "What is the Committed spend option?",
     answer:
-      "Committed spend is an annual agreement for Langfuse Cloud. You purchase Langfuse Cloud Credits that draw down against the public price list at [langfuse.com/pricing](/pricing). In exchange for the commitment, you get volume discounts, procurement and legal support (custom contracts, vendor onboarding, security reviews), upgraded support, and billing via AWS Marketplace or invoice. [Talk to us](/talk-to-us) to get started.",
+      "Committed spend is an annual agreement for Langfuse Cloud, available on every cloud plan. You purchase Langfuse Cloud Credits that draw down against the public price list at [langfuse.com/pricing](/pricing). In exchange for the commitment, you get volume discounts, procurement and legal support (custom contracts, vendor onboarding, security reviews), upgraded support, and billing via AWS Marketplace or invoice. [Talk to us](/talk-to-us) to get started.",
   },
   {
     question: "How is self-hosted Langfuse Enterprise priced?",

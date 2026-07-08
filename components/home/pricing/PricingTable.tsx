@@ -1209,8 +1209,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: "Monthly",
-            Pro: "Monthly",
+            Core: "Monthly, or annual with " + COMMITTED_SPEND,
+            Pro: "Monthly, or annual with " + COMMITTED_SPEND,
             Enterprise: "Monthly, or annual with " + COMMITTED_SPEND,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
@@ -1221,8 +1221,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: false,
-            Pro: false,
+            Core: COMMITTED_SPEND,
+            Pro: COMMITTED_SPEND,
             Enterprise: COMMITTED_SPEND,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
@@ -1363,9 +1363,9 @@ const FeatureCell = ({
               <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
-              Available with an annual committed-spend agreement on the
-              Enterprise plan. You purchase Langfuse Cloud Credits that draw
-              down against list pricing.
+              Available with an annual committed-spend agreement, on any cloud
+              plan. You purchase Langfuse Cloud Credits that draw down against
+              list pricing.
             </HoverCardContent>
           </HoverCard>
         )}
