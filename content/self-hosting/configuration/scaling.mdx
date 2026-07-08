@@ -30,8 +30,30 @@ On very high loads, it may become necessary to apply additional settings that in
 For most environments, we recommend to scale the worker containers by their CPU load as this is a straightforward metric to measure.
 A load above 50% for a 2 CPU container is an indicator that the instance is saturated and that the throughput should increase by adding more containers.
 
-In addition, the Langfuse worker also publishes queue length metrics via statsd that can be used to scale the worker containers.
+In addition, the Langfuse worker also publishes queue length metrics via StatsD (DogStatsD format) that can be used to scale the worker containers.
 `langfuse.queue.ingestion.length` is the main metric that we use to make scaling decisions.
+
+#### Configuring StatsD
+
+Langfuse uses the [`dd-trace`](https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/nodejs/) package (DataDog's tracing library) which includes a DogStatsD client. The client auto-configures using standard DataDog environment variables:
+
+| Environment Variable    | Default       | Description                                |
+| ----------------------- | ------------- | ------------------------------------------ |
+| `DD_AGENT_HOST`         | `localhost`   | StatsD agent hostname or IP                |
+| `DD_DOGSTATSD_PORT`     | `8125`        | DogStatsD server port                      |
+| `DD_ENV`                | —             | Environment tag applied to all metrics     |
+| `DD_SERVICE`            | —             | Service name tag applied to all metrics    |
+
+These variables apply to both the web and worker containers.
+
+Langfuse-specific queue metric configuration (worker container only):
+
+| Environment Variable                           | Default  | Description                                                    |
+| ---------------------------------------------- | -------- | -------------------------------------------------------------- |
+| `LANGFUSE_QUEUE_METRICS_ENABLED`               | `true`   | Master toggle for publishing queue metrics via StatsD          |
+| `LANGFUSE_QUEUE_METRICS_INTERVAL_MS`           | `1000`   | Poll interval for queue depth metrics (minimum 100ms)          |
+| `LANGFUSE_QUEUE_METRICS_SAMPLE_RATE`           | `0.3`    | Probability for recording sharded queue depth metrics (0-1)    |
+
 The queue metrics can also be published to AWS CloudWatch by setting `ENABLE_AWS_CLOUDWATCH_METRIC_PUBLISHING=true` to configure auto-scalers based on AWS metrics.
 
 ### Reducing ClickHouse reads within the ingestion processing
