@@ -93,9 +93,13 @@ async function getMarketoToken() {
 }
 
 function getMarketoLeadInput(data: ContactFormData) {
+  const [firstName, ...rest] = data.name.trim().split(" ");
+  const lastName = rest.join(" ") || firstName;
+
   return {
     email: data.email,
-    mktoName: data.name,
+    firstName,
+    lastName,
     company: data.company,
     miscBlankField1: getContactFormOptionLabel(BUILDING_OPTIONS, data.building),
     miscBlankField2: getContactFormCurrentSetupLabel(data),
