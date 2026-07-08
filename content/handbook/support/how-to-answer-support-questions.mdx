@@ -576,7 +576,7 @@ Container scanners (Wiz, Snyk, Trivy, Black Duck) regularly produce long lists o
 **Triage steps:**
 
 1. Check the version the customer scanned. If it's not the latest, ask them to scan the current image first, many CVEs are already patched in the next release.
-2. For genuine concerns, route to `security@langfuse.com` for triage.
+2. For genuine concerns, route to `security@clickhouse.com` for triage.
 3. Do not promise fix timelines. We patch on rolling cadence with each release.
 
 **Reply template:**
@@ -901,7 +901,7 @@ Best,
 
 **Triage steps:**
 
-1. Direct the customer to [langfuse.com/security/dpa](https://langfuse.com/security/dpa), the PDF there is the executed version.
+1. Direct the customer to [langfuse.com/dpa](https://langfuse.com/dpa), where the current DPA is published.
 2. If they explicitly need a counter-signed copy on their template, route to the enterprise team.
 
 **Reply template:**
@@ -909,9 +909,9 @@ Best,
 ```text
 Hi {name},
 
-Our DPA is auto-applied for all signups under the standard Terms. You can download the executed version directly here for your records:
+Our DPA is auto-applied for all signups under the standard Terms. You can find the current version here for your records:
 
-https://langfuse.com/security/dpa
+https://langfuse.com/dpa
 
 If your procurement requires a counter-signed copy on your template, let me know and I'll loop in our enterprise team.
 
@@ -925,21 +925,21 @@ Best,
 
 <summary>BAA / HIPAA</summary>
 
-HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. The BAA applies automatically to accounts on that region with a HIPAA-eligible plan (Pro, Teams, or Enterprise); no separate signature is required.
+HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Legal agreement terms for HIPAA-regulated use are not published or downloadable on langfuse.com. Route customers with legal requirements to [legal@clickhouse.com](mailto:legal@clickhouse.com) before they process PHI.
 
 **Triage steps:**
 
 1. Confirm the customer is using or about to use `hipaa.cloud.langfuse.com` (not the standard US/EU regions).
 2. **Account migration:** customers moving from EU/US must create a fresh account on `hipaa.cloud.langfuse.com`. Past trace data can be moved via the [data migration cookbook](/guides/cookbook/example_data_migration).
-3. The BAA auto-applies for eligible accounts. If the customer specifically needs a counter-signature for their procurement process, route to the enterprise team.
+3. For HIPAA-related legal requirements, route the customer to [legal@clickhouse.com](mailto:legal@clickhouse.com). Do not send public agreement text or tell customers it applies automatically.
 4. For HIPAA-region IP allowlisting (egress from Langfuse to customer infra, e.g. for LLM-as-a-judge): static IPs are `35.82.248.193`, `34.211.191.155`, `52.43.164.18` (us-west-2). Full list at [langfuse.com/security/networking](https://langfuse.com/security/networking). **Ingress** to `hipaa.cloud.langfuse.com` sits behind AWS ALBs without static IPs, we cannot publish a stable ingress IP range.
 
-**Reply template (BAA):**
+**Reply template:**
 
 ```text
 Hi {name},
 
-For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro, Teams, or Enterprise). Our BAA applies automatically once those conditions are met, no separate signature is required: https://langfuse.com/security/hipaa.
+For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro or higher). Legal agreement terms for HIPAA-regulated use are not published or downloadable on langfuse.com. Please contact legal@clickhouse.com before processing PHI.
 
 A note for completeness: HIPAA accounts are provisioned fresh on hipaa.cloud.langfuse.com. If your team is currently on us.cloud or cloud., past trace data can be moved via our data migration cookbook: https://langfuse.com/guides/cookbook/example_data_migration.
 
