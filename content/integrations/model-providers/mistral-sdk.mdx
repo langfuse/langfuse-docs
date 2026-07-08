@@ -57,7 +57,7 @@ mistral_client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
 
 ### Completions
 
-We are integrating the Mistral AI SDK with Langfuse using the [@observe decorator](https://langfuse.com/docs/observability/sdk/instrumentation#observe-wrapper), which is crucial for logging and tracing interactions with large language models (LLMs). The @observe(as_type="generation") decorator specifically logs LLM interactions, capturing inputs, outputs, and model parameters. The resulting `mistral_completion` method can then be used across your project.
+We are integrating the Mistral AI SDK with Langfuse using the [@observe decorator](https://langfuse.com/docs/observability/sdk/instrumentation#observe-wrapper), which is crucial for logging and tracing interactions with large language models (LLMs). The `@observe(as_type="generation")` decorator specifically logs LLM interactions, capturing inputs, outputs, and model parameters. The resulting `mistral_completion` method can then be used across your project.
 
 ```python
 from langfuse import observe, get_client
@@ -184,7 +184,7 @@ Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088
 
 ### Streaming Completions
 
-The following example demonstrates how to handle streaming responses from the Mistral model using the @observe(as*type="generation") decorator. The process is similar to the \_Completion* example but includes handling streamed data in real-time.
+The following example demonstrates how to handle streaming responses from the Mistral model using the `@observe(as_type="generation")` decorator. The process is similar to the _Completion_ example but includes handling streamed data in real-time.
 
 Just like in the previous example, we wrap the streaming function with the @observe decorator to capture the input, model parameters, and usage details. Additionally, the function processes the streamed output incrementally, updating the Langfuse context as each chunk is received.
 
