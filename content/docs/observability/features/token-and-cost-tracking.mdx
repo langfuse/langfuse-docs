@@ -18,7 +18,7 @@ Langfuse tracks the usage and costs of your LLM generations and provides breakdo
 
 Usage types can be arbitrary strings and differ by LLM provider. At the highest level, they can be simply `input` and `output`. As LLMs grow more sophisticated, additional usage types are necessary, such as `cached_tokens`, `audio_tokens`, `image_tokens`.
 
-In the UI, Langfuse summarizes all usage types that include the string `input` as input usage types, similarly`output` as output usage types. If no `total` usage type is ingested, Langfuse sums up all usage type units to a total.
+In the UI, Langfuse summarizes all usage types that include the string `input` as input usage types, similarly `output` as output usage types. If no `total` usage type is ingested, Langfuse sums up all usage type units to a total. For this to work, usage types must be [mutually exclusive buckets](#usage-details-contract).
 
 Both usage details and cost details can be either
 
@@ -290,9 +290,42 @@ You can also update the usage and cost via `generation.update()`.
 </Tab>
 </LangTabs>
 
-### Compatibility with OpenAI
+### Usage types are mutually exclusive buckets [#usage-details-contract]
 
-For increased compatibility with OpenAI, you can also use the OpenAI Usage schema. `prompt_tokens` will be mapped to `input`, `completion_tokens` will be mapped to `output`, and `total_tokens` will be mapped to `total`. The keys nested in `prompt_tokens_details` will be flattened with an `input_` prefix and `completion_tokens_details` will be flattened with an `output_` prefix.
+Langfuse treats every key in `usage_details` as a separate, non-overlapping bucket: each token must be counted in exactly one key. In particular, `input` must exclude tokens that are already counted in another `input_*` key (such as `input_cached_tokens` or `input_cache_creation`), and `output` must exclude tokens counted in another `output_*` key (such as `output_reasoning_tokens`).
+
+Langfuse relies on this contract in three places:
+
+- **Display**: the UI sums all usage types containing `input` to show total input usage, and all usage types containing `output` to show total output usage.
+- **Cost inference**: each usage type is matched exactly against the per-usage-type prices of the model definition, and the resulting costs are summed.
+- **Total**: if no `total` is ingested, Langfuse derives it as the sum of all buckets.
+
+If buckets overlap — for example, if `input` still contains the tokens reported in `input_cached_tokens` — those tokens are displayed twice and billed twice.
+
+Many LLM providers report **inclusive** counts. For example, OpenAI's `prompt_tokens` (Chat Completions API) and `input_tokens` (Responses API) include cached tokens. Anthropic's `input_tokens`, in contrast, already excludes cache reads and cache writes. Inclusive counts must be converted into exclusive buckets before they are stored, by subtracting the detail counts from the top-level count.
+
+For example, an OpenAI-style response with 17,903 prompt tokens of which 17,817 were cache hits:
+
+| Provider reports (inclusive)                      | Stored in Langfuse (exclusive) |
+| ------------------------------------------------- | ------------------------------ |
+| `prompt_tokens: 17903`                            | `input: 86`                    |
+| `prompt_tokens_details: { cached_tokens: 17817 }` | `input_cached_tokens: 17817`   |
+| `total_tokens: 17903`                             | `total: 17903`                 |
+
+#### When Langfuse converts for you [#usage-details-normalization]
+
+Whether you need to do this conversion yourself depends on how the usage data reaches Langfuse:
+
+- **Langfuse integrations and SDK wrappers** (e.g., the [OpenAI wrapper](/integrations/model-providers/openai-py)) capture usage from the provider response and convert it for you.
+- **OpenTelemetry semantic convention attributes** (`gen_ai.usage.*`, `llm.token_count.*`): treated as inclusive, following the OpenTelemetry GenAI semantic conventions. Langfuse normalizes them during ingestion by subtracting cache read and cache creation tokens from `input`.
+- **OpenAI usage schema** passed as usage details (nested `prompt_tokens_details` / `completion_tokens_details`, see [Compatibility with OpenAI](#openai-usage-schema)): recognized and normalized during ingestion.
+- **Langfuse-style flat keys** passed as usage details via the SDKs or the API (`usage_details` / `usageDetails`, OTel attribute `langfuse.observation.usage_details`): stored verbatim, no normalization is applied. **Values must already be exclusive.**
+
+If you write your own instrumentation that sets usage details with flat keys, check how your provider reports usage and subtract cached or detail token counts from the top-level `input`/`output` counts — exactly once — before passing them to Langfuse.
+
+### Compatibility with OpenAI [#openai-usage-schema]
+
+For increased compatibility with OpenAI, you can also use the OpenAI Usage schema. `prompt_tokens` will be mapped to `input`, `completion_tokens` will be mapped to `output`, and `total_tokens` will be mapped to `total`. The keys nested in `prompt_tokens_details` will be flattened with an `input_` prefix and `completion_tokens_details` will be flattened with an `output_` prefix. Since OpenAI reports these detail counts inclusively, Langfuse subtracts them from `input` and `output` respectively, so that the stored buckets are [mutually exclusive](#usage-details-contract).
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
