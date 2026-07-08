@@ -36,8 +36,12 @@ UI-based updates — [tags](/docs/observability/features/tags), bookmarks, and [
 
 ## Updating scores [#updating-scores]
 
-Unlike traces and observations, scores are designed to be added and overwritten. By default, Langfuse allows multiple scores with the same `name` on the same trace. To overwrite an existing score rather than create a duplicate, the new score must match the original on all three fields that identify it: its `id`, its `name`, and its date (`toDate(timestamp)`).
+Unlike traces and observations, scores can be overwritten. A score is identified by three fields: its `id`, its `name`, and its `timestamp` at date granularity (`toDate(timestamp)`). A re-ingested score overwrites the existing one only when **all three match**. If any of them differs, you get a **separate** score, not an update.
 
-In practice, pass a stable idempotency key as the `id` (JS/TS) / `score_id` (Python) — for example `trace_id-score_name` — and keep the `name` and `timestamp` unchanged across calls. If any of the three differs, you get a new score instead of a replacement.
+This is easy to trip over: sending a score with the same `id` but a different `name` — or a `timestamp` that falls on a different calendar date — creates a duplicate record instead of overwriting the original. To reliably overwrite a score, always send the same `id` (a stable idempotency key such as `trace_id-score_name`), `name`, and `timestamp`, and include the full score payload rather than only the changed fields.
+
+<Callout type="warning">
+**Deprecated:** For up to 30 days after a score is created, Langfuse may merge a re-ingested score that shares the same `id` into the existing record, backfilling any fields you leave unset. This partial-update behavior is deprecated and will be removed in a future version — do not rely on it. Always send the complete score with a matching `id`, `name`, and `timestamp`.
+</Callout>
 
 See [Scores via SDK/API](/docs/evaluation/evaluation-methods/scores-via-sdk#preventing-duplicate-scores) for details.
