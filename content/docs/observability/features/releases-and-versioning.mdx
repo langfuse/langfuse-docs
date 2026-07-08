@@ -187,9 +187,14 @@ generation.end();
 <Tab>
 
 ```python /version="1.0"/
-from langfuse.callback import CallbackHandler
+from langfuse import propagate_attributes
+from langfuse.langchain import CallbackHandler
 
-handler = CallbackHandler(version="1.0")
+handler = CallbackHandler()
+
+# Propagate version to all observations created within the scope
+with propagate_attributes(version="1.0"):
+    chain.invoke({"input": "<user_input>"}, config={"callbacks": [handler]})
 ```
 
 </Tab>

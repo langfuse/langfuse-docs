@@ -252,12 +252,7 @@ import { CallbackHandler } from "@langfuse/langchain";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI, OpenAI } from "@langchain/openai";
 
-const langfuseHandler = new CallbackHandler({
-  secretKey: "sk-lf-...",
-  publicKey: "pk-lf-...",
-  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
-  // Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
-});
+const langfuseHandler = new CallbackHandler();
 
 const langfuse = new LangfuseClient();
 ```

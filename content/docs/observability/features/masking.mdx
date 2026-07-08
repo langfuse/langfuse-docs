@@ -259,22 +259,27 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab title="LangChain (JS/TS)">
 
-When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` to the constructor:
+Masking is configured on the `LangfuseSpanProcessor` — spans created by the LangChain [CallbackHandler](/integrations/frameworks/langchain) flow through it automatically, so no LangChain-specific masking setup is needed:
 
 ```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { CallbackHandler } from "@langfuse/langchain";
 
-function maskingFunction(params: { data: any }) {
-  if (typeof params.data === "string" && params.data.startsWith("SECRET_")) {
-    return "REDACTED";
-  }
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) => {
+    if (typeof data === "string" && data.startsWith("SECRET_")) {
+      return "REDACTED";
+    }
 
-  return params.data;
-}
-
-const handler = new CallbackHandler({
-  mask: maskingFunction,
+    return data;
+  },
 });
+
+const sdk = new NodeSDK({ spanProcessors: [spanProcessor] });
+sdk.start();
+
+const handler = new CallbackHandler();
 ```
 
 </Tab>

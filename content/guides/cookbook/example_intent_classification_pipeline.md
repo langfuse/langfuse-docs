@@ -359,6 +359,8 @@ traces_df
 
 Observations in Langfuse are immutable, so tags cannot be edited after an observation was created. To tag an existing trace, add a small additional observation with the predicted intent as a tag to that trace. Tags across all observations of a trace are aggregated on the trace level.
 
+> **Note:** `trace_context.trace_id` must be a W3C-format trace ID (32 lowercase hex characters), which is what current Langfuse SDKs generate. Traces created with older SDK versions may use UUID-format IDs (with dashes) — the tagging observation cannot be attached to those. If you work with historical traces, filter for W3C-format IDs, e.g. `traces_df[traces_df["trace_id"].str.fullmatch(r"[0-9a-f]{32}")]`.
+
 
 ```python
 from langfuse import propagate_attributes

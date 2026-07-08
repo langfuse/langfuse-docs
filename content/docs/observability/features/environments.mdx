@@ -158,9 +158,9 @@ See the Python SDK tab for more details.
 </Callout>
 
 ```python
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
-# Either set the environment variable or the constructor parameter. The latter takes precedence.
+# Set the environment via environment variable before initializing the client
 os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
 handler = CallbackHandler()
 ```
@@ -169,12 +169,23 @@ handler = CallbackHandler()
 
 <Tab>
 
+The environment is configured on the `LangfuseSpanProcessor` (or via the `LANGFUSE_TRACING_ENVIRONMENT` environment variable) — LangChain spans created by the `CallbackHandler` flow through it automatically:
+
 ```ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { CallbackHandler } from "@langfuse/langchain";
 
-const handler = new CallbackHandler({
-  environment: "production",
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor({
+      environment: "production",
+    }),
+  ],
 });
+sdk.start();
+
+const handler = new CallbackHandler();
 ```
 
 See [Langchain Integration (JS/TS)](/integrations/frameworks/langchain) for more details.
