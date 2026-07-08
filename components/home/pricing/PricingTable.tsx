@@ -89,7 +89,7 @@ type Tier = {
 };
 
 const TEAMS_ADDON = "Teams add-on";
-const YEARLY_COMMITMENT = "Yearly Commitment";
+const COMMITTED_SPEND = "Committed spend";
 
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
@@ -200,13 +200,13 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Dedicated support engineer",
       ],
       addOn: {
-        name: "Yearly Commitment",
+        name: "Committed spend",
         mainFeatures: [
-          "Custom Volume Pricing",
-          "Architecture reviews",
-          "Billing via AWS Marketplace",
-          "Billing via Invoice",
-          "Vendor Onboarding",
+          "Langfuse Cloud Credits that draw down against list pricing",
+          "Volume discounts",
+          "Procurement and legal support (custom contracts, vendor onboarding)",
+          "Upgraded support",
+          "Billing via AWS Marketplace or invoice",
         ],
       },
       cta: "Talk to sales",
@@ -238,11 +238,12 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: false,
       description:
         "Dedicated Langfuse deployment with enterprise capabilities and support.",
-      price: "Custom Pricing",
+      price: "Custom pricing",
       mainFeatures: [
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
-        "Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private",
-        "Langfuse pricing is additive to your ClickHouse commercial plan",
+        "Runs on your ClickHouse deployment — we help you pick the right ClickHouse setup",
+        "Activated via license key; one key covers all of your environments",
+        "Annual agreement sized on your billable units",
         "Dedicated support engineer for deployment and hosting guidance",
         "Solutions architect support during evaluation and rollout",
         "Direct access to the product team for feedback",
@@ -407,14 +408,15 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Custom Usage Pricing",
-        description: "Custom volume based pricing for large-scale projects.",
+        name: "Volume discounts",
+        description:
+          "Volume discounts for large-scale projects, available with an annual committed-spend agreement.",
         tiers: {
           cloud: {
             Hobby: false,
             Core: false,
             Pro: false,
-            Enterprise: "Available with " + YEARLY_COMMITMENT,
+            Enterprise: "Available with " + COMMITTED_SPEND,
           },
         },
       },
@@ -808,11 +810,12 @@ const sections: Section[] = [
       {
         name: "ClickHouse deployment model",
         description:
-          "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private.",
+          "Open Source assumes you operate ClickHouse yourself. Enterprise runs on your ClickHouse deployment — we help you pick the right setup.",
         tiers: {
           selfHosted: {
             "Open Source": "Self-managed ClickHouse OSS",
-            Enterprise: "Bundled: ClickHouse Cloud / BYOC / Private",
+            Enterprise:
+              "Your ClickHouse deployment (we help you pick the right setup)",
           },
         },
       },
@@ -1184,7 +1187,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: "Self-serve",
             Pro: "Self-serve",
-            Enterprise: "Self-serve, Contact sales for " + YEARLY_COMMITMENT,
+            Enterprise: "Self-serve, contact sales for " + COMMITTED_SPEND,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -1208,7 +1211,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: "Monthly",
             Pro: "Monthly",
-            Enterprise: YEARLY_COMMITMENT,
+            Enterprise: "Monthly, or annual with " + COMMITTED_SPEND,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -1220,7 +1223,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: false,
             Pro: false,
-            Enterprise: YEARLY_COMMITMENT,
+            Enterprise: COMMITTED_SPEND,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -1283,7 +1286,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: false,
             Pro: false,
-            Enterprise: YEARLY_COMMITMENT,
+            Enterprise: COMMITTED_SPEND,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -1354,14 +1357,15 @@ const FeatureCell = ({
             </HoverCardContent>
           </HoverCard>
         )}
-        {value.includes(YEARLY_COMMITMENT) && (
+        {value.includes(COMMITTED_SPEND) && (
           <HoverCard>
             <HoverCardTrigger>
               <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
-              Available when committing to a yearly contract on the Enterprise
-              plan.
+              Available with an annual committed-spend agreement on the
+              Enterprise plan. You purchase Langfuse Cloud Credits that draw
+              down against list pricing.
             </HoverCardContent>
           </HoverCard>
         )}

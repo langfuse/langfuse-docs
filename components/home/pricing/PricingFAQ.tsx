@@ -35,7 +35,17 @@ const faqs: FAQItem[] = [
   {
     question: "What are Langfuse Cloud Credits, and how do they affect me?",
     answer:
-      "A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing). Langfuse Cloud Credits only apply to customers with a committed spend contract for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed spend contract, please contact your account team. If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.",
+      "A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing). Langfuse Cloud Credits only apply to customers with a committed-spend agreement for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed-spend agreement, please contact your account team. If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.",
+  },
+  {
+    question: "What is the Committed spend option on the Enterprise plan?",
+    answer:
+      "Committed spend is an annual agreement for Langfuse Cloud. You purchase Langfuse Cloud Credits that draw down against the public price list at [langfuse.com/pricing](/pricing). In exchange for the commitment, you get volume discounts, procurement and legal support (custom contracts, vendor onboarding, security reviews), upgraded support, and billing via AWS Marketplace or invoice. [Talk to us](/talk-to-us) to get started.",
+  },
+  {
+    question: "How is self-hosted Langfuse Enterprise priced?",
+    answer:
+      "Langfuse OSS is free (MIT license). Langfuse Enterprise (self-hosted) is an annual agreement with a flat fee sized on your [billable units](/docs/administration/billable-units) across all deployments and environments. It is activated via a license key — one key covers all of your environments. Langfuse does not actively meter self-hosted usage; usage is reviewed together at renewal. [Talk to us](/talk-to-us?deployment=self-hosted) for a quote.",
   },
   {
     question: "Can I set up alerts on the usage fees?",
@@ -50,7 +60,7 @@ const faqs: FAQItem[] = [
   {
     question: "Can I redline the contracts?",
     answer:
-      "Yes, we offer customized contracts for Langfuse Enterprise customers with a yearly commitment. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
+      "Yes, we offer customized contracts for Langfuse Enterprise customers with an annual committed-spend agreement. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
     question: "Where is the data stored?",
