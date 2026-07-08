@@ -938,9 +938,9 @@ For example, let's assume you'd like to ingest a text score to capture **reviewe
 
 ## Update Existing Scores via API/SDKs [#update]
 
-When creating a score, you can provide an optional `id` (JS/TS) / `score_id` (Python) parameter. This will update the score if it already exists within your project.
+When creating a score, you can provide an optional `id` (JS/TS) / `score_id` (Python) parameter. A re-ingested score overwrites an existing one only when its `id`, `name`, and `timestamp` (at date granularity, `toDate(timestamp)`) all match — a matching `id` alone is not sufficient, and any difference creates a duplicate instead of an update.
 
-If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter as an idempotency key when initially creating the score.
+To overwrite a score without fetching existing scores first, set a stable `id` as an idempotency key when initially creating the score, and keep the `name` and `timestamp` unchanged on subsequent calls. See [Preventing Duplicate Scores](#preventing-duplicate-scores) for details.
 
 ## Related guides
 
