@@ -80,7 +80,7 @@ def anthropic_completion(**kwargs):
           "input": response.usage.input_tokens,
           "output": response.usage.output_tokens,
           "cache_read_input_tokens": response.usage.cache_read_input_tokens
-          # "total": int,  # if not set, it is derived from input + cache_read_input_tokens + output
+          # "total": int,  # if not set, it is derived as the sum of all usage types
         },
       # Optionally, also ingest usd cost. Alternatively, you can infer it via a model definition in Langfuse.
       cost_details={
@@ -88,7 +88,7 @@ def anthropic_completion(**kwargs):
           "input": 1,
           "cache_read_input_tokens": 0.5,
           "output": 1,
-          # "total": float, # if not set, it is derived from input + cache_read_input_tokens + output
+          # "total": float, # if not set, it is derived as the sum of all usage types
       }
   )
 
@@ -135,7 +135,7 @@ with langfuse.start_as_current_observation(
             "input": response.usage.input_tokens,
             "output": response.usage.output_tokens,
             "cache_read_input_tokens": response.usage.cache_read_input_tokens
-            # "total": int,  # if not set, it is derived from input + cache_read_input_tokens + output
+            # "total": int,  # if not set, it is derived as the sum of all usage types
         },
         # Optionally, also ingest usd cost. Alternatively, you can infer it via a model definition in Langfuse.
         cost_details={
@@ -143,7 +143,7 @@ with langfuse.start_as_current_observation(
             "input": 1,
             "cache_read_input_tokens": 0.5,
             "output": 1,
-            # "total": float, # if not set, it is derived from input + cache_read_input_tokens + output
+            # "total": float, # if not set, it is derived as the sum of all usage types
         }
     )
 ```
@@ -183,7 +183,7 @@ await startActiveObservation("context-manager", async (span) => {
       output: 5,
       cache_read_input_tokens: 2,
       some_other_token_count: 10,
-      total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+      total: 27, // optional, it is derived as the sum of all usage types
     },
     costDetails: {
       // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
@@ -214,7 +214,7 @@ async function fetchData(source: string) {
         output: 5,
         cache_read_input_tokens: 2,
         some_other_token_count: 10,
-        total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+        total: 27, // optional, it is derived as the sum of all usage types
       },
       costDetails: {
         // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
@@ -264,7 +264,7 @@ generation.update({
     output: 5,
     cache_read_input_tokens: 2,
     some_other_token_count: 10,
-    total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+    total: 27, // optional, it is derived as the sum of all usage types
   },
   costDetails: {
     // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
