@@ -1,0 +1,38 @@
+---
+date: 2026-07-08
+title: "Parquet exports to blob storage"
+description: Scheduled blob storage exports can now be written as Apache Parquet files. Parquet is the default for new integrations and configurable via the public API.
+author: Niklas
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Scheduled blob storage exports to S3, GCS, and Azure can now be written as **Apache Parquet** files — available to all projects and the new default for new integrations. Parquet is a columnar binary format that loads directly into warehouses and query engines like BigQuery, Snowflake, ClickHouse, or DuckDB, with no CSV parsing or JSON casting step:
+
+- **Query exports in place.** Point DuckDB or Athena at your bucket and query the files directly — column pruning and predicate pushdown work out of the box.
+- **Skip the staging schema.** Parquet files carry typed columns, so warehouse loads don't need per-field cast logic like text formats do.
+- **Smaller files without gzip.** Parquet is compressed by the storage engine itself; the gzip option doesn't apply.
+
+Select **Parquet** under **Project Settings → Integrations → Blob Storage**, or set it programmatically: the `fileType` field on [`GET`/`PUT /api/public/integrations/blob-storage`](https://api.reference.langfuse.com/#tag/blobstorageintegrations) now accepts `PARQUET` alongside `CSV`, `JSON`, and `JSONL`. Existing integrations keep their configured format.
+
+<Callout type="info">
+  Parquet observation exports omit the per-unit model price columns
+  (`input_price`, `output_price`, `total_price`) — they are computed in an
+  enrichment step that Parquet exports skip. Choose a text format if you need
+  them, or compute prices downstream from `usage_details` and your model
+  definitions. Trace and score exports are identical across all file types. See
+  the
+  [Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports)
+  for details.
+</Callout>
+
+## Learn more
+
+import { FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Export to Blob Storage" href="/docs/api-and-data-platform/features/export-to-blob-storage" icon={<FileCode />} arrow />
+  <Card title="Export Field Reference" href="/docs/api-and-data-platform/features/blob-storage-export-fields" icon={<FileCode />} arrow />
+</Cards>
