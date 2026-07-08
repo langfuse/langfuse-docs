@@ -133,26 +133,37 @@ new LangfuseSpanProcessor({
 
 ```python
 from langfuse import Langfuse
+from langfuse.span_filter import is_default_export_span
+
+blocked = {
+    # HTTP clients
+    "opentelemetry.instrumentation.requests",
+    "opentelemetry.instrumentation.httpx",
+
+    # Web frameworks
+    "opentelemetry.instrumentation.fastapi",
+    "opentelemetry.instrumentation.starlette",
+    "flask",
+    "django",
+
+    # Databases
+    "sqlalchemy",
+    "psycopg",
+    "psycopg2",
+}
 
 langfuse = Langfuse(
-    blocked_instrumentation_scopes=[
-        # HTTP clients
-        "opentelemetry.instrumentation.requests",
-        "opentelemetry.instrumentation.httpx",
-
-        # Web frameworks
-        "opentelemetry.instrumentation.fastapi",
-        "opentelemetry.instrumentation.starlette",
-        "flask",
-        "django",
-
-        # Databases
-        "sqlalchemy",
-        "psycopg",
-        "psycopg2",
-    ]
+    should_export_span=lambda span: (
+        is_default_export_span(span)
+        and (
+            span.instrumentation_scope is None
+            or span.instrumentation_scope.name not in blocked
+        )
+    )
 )
 ```
+
+The older `blocked_instrumentation_scopes` parameter still works, but is deprecated and planned for removal — prefer expressing deny rules in `should_export_span`.
 
 </Tab>
 

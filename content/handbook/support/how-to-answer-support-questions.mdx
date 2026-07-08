@@ -227,7 +227,7 @@ This is the most sensitive billing question. Lead with empathy and _facts_, neve
 1. Open Stripe, search by email domain or org → recent invoice, subscription, billing history.
 2. Determine the source of the increase: plan change, usage increase (more traces/observations), seat increase, or one-off charge.
 3. Cross-check the org in Impersonation View → Usage tab → confirm trace/observation volume in the billing period.
-4. **Specifically check for OTEL-related overcounting.** A common case: customers had a pre-existing OTEL setup, and after wiring it to Langfuse it ingested unrelated HTTP/DB/framework spans that drove up volume. See [/faq/all/existing-otel-setup#unwanted-spans-in-langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse), the fix is `blocked_instrumentation_scopes` on the SDK.
+4. **Specifically check for OTEL-related overcounting.** A common case: customers had a pre-existing OTEL setup, and after wiring it to Langfuse it ingested unrelated HTTP/DB/framework spans that drove up volume. See [/faq/all/existing-otel-setup#unwanted-spans-in-langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse), the fix is `should_export_span` on the SDK (the older `blocked_instrumentation_scopes` parameter is deprecated).
 5. Reply with the specific reason, link the invoice or usage view.
 
 **Reply template:**
@@ -642,7 +642,7 @@ OTEL is the most common source of _over-ingestion_ surprises. The customer's exi
 **Triage steps:**
 
 1. Ask the customer how they wired Langfuse into their OTEL provider (sharing a TracerProvider? exporter-only? auto-instrumentation?).
-2. If they're sharing a global TracerProvider with HTTP / DB / framework auto-instrumentation, recommend setting `blocked_instrumentation_scopes` (Python SDK) or scope filters (JS SDK) to drop non-LLM spans.
+2. If they're sharing a global TracerProvider with HTTP / DB / framework auto-instrumentation, recommend a `should_export_span` filter (Python SDK, replaces the deprecated `blocked_instrumentation_scopes`) or `shouldExportSpan` (JS SDK) to drop non-LLM spans.
 3. For cost-double-counting on agent frameworks (notably pydantic-ai, see issue #1819): there's a known bug we're tracking. Acknowledge and offer to file/link the issue, do not promise a fix date.
 4. For `langfuse.experiment.*` attributes: customers using non-Python SDKs sometimes try to propagate experiment attributes manually and find evaluators don't run. LLM-as-a-Judge currently only runs against OTEL-ingested traces, confirm the legacy SDK path is not in use.
 
@@ -655,13 +655,22 @@ That's a common one with existing OTEL setups. Your global TracerProvider is exp
 
 Fix (Python):
   from langfuse import Langfuse
+  from langfuse.span_filter import is_default_export_span
+
+  blocked = {
+      "opentelemetry.instrumentation.fastapi",
+      "opentelemetry.instrumentation.asgi",
+      "opentelemetry.instrumentation.httpx",
+      # ... add yours
+  }
   langfuse = Langfuse(
-      blocked_instrumentation_scopes=[
-          "opentelemetry.instrumentation.fastapi",
-          "opentelemetry.instrumentation.asgi",
-          "opentelemetry.instrumentation.httpx",
-          # ... add yours
-      ],
+      should_export_span=lambda span: (
+          is_default_export_span(span)
+          and (
+              span.instrumentation_scope is None
+              or span.instrumentation_scope.name not in blocked
+          )
+      ),
   )
 
 This typically cuts ingested volume by 50–90% and only LLM/agent spans land in Langfuse.

@@ -338,36 +338,31 @@ with langfuse.start_as_current_observation(as_type="span", name="multi-step-proc
 <Tab>
 
 ```ts
-import { CallbackHandler, Langfuse } from "@langfuse/langchain";
-const langfuse = new Langfuse();
+import { CallbackHandler } from "@langfuse/langchain";
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
 
-// Get Langchain handler for a trace
-const trace = langfuse.trace();
-const langfuseHandlerTrace = new CallbackHandler({ root: trace });
+const langfuseHandler = new CallbackHandler();
 
-// Add Langfuse handler as callback (classic and LCEL)
-await chain.invoke(
-  { input: "<user_input>" },
-  { callbacks: [langfuseHandlerTrace] }
-);
+// Wrap the LangChain run in a Langfuse observation — the handler
+// automatically nests its spans under the active observation
+await startActiveObservation("multi-step-process", async (span) => {
+  span.update({ input: { query: "<user_input>" } });
 
-// Get Langchain handler for a span
-const span = trace.span();
-const langfuseHandlerSpan = new CallbackHandler({ root: span });
+  // Propagate trace attributes to all child observations
+  await propagateAttributes(
+    {
+      userId: "user-5678",
+      sessionId: "session-1234",
+    },
+    async () => {
+      const result = await chain.invoke(
+        { input: "<user_input>" },
+        { callbacks: [langfuseHandler] },
+      );
 
-// Add Langfuse handler as callback (classic and LCEL)
-await chain.invoke(
-  { input: "<user_input>" },
-  { callbacks: [langfuseHandlerSpan] }
-);
-```
-
-If you want to add the input/output of the Langchain run to the trace or span itself, use the `updateRoot` flag in the `CallbackHandler` constructor.
-
-```ts
-const langfuseHandlerTrace = new CallbackHandler({
-  root: trace,
-  updateRoot: true,
+      span.update({ output: result });
+    },
+  );
 });
 ```
 
@@ -811,17 +806,19 @@ TRACE_2
 |   |   |-- GENERATION: ChatOpenAi
 ```
 
-If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/integrations/frameworks/langchain)).
+If you still want to group multiple invocations on one trace, wrap them in an enclosing Langfuse observation ([interoperability docs](#interoperability)).
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
 
-# Get Langchain handler for a trace
-trace = langfuse.trace()
-langfuse_handler = trace.get_langchain_handler()
+langfuse = get_client()
+langfuse_handler = CallbackHandler()
 
-# langfuse_handler will use the trace for all invocations
+with langfuse.start_as_current_observation(as_type="span", name="grouped-invocations"):
+    # All invocations within this scope end up on the same trace
+    chain.invoke({"input": "<user_input_one>"}, config={"callbacks": [langfuse_handler]})
+    chain.invoke({"input": "<user_input_two>"}, config={"callbacks": [langfuse_handler]})
 ```
 
 ### JS/TS [#js]
@@ -900,12 +897,19 @@ TRACE_2
 |   |   |-- GENERATION: ChatOpenAi
 ```
 
-If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/integrations/frameworks/langchain)).
+If you still want to group multiple invocations on one trace, wrap them in an enclosing Langfuse observation ([interoperability docs](#interoperability)).
 
 ```ts
-const trace = langfuse.trace({ id: "special-id" });
-// CallbackHandler will use the trace with the id "special-id" for all invocations
-const langfuseHandler = new CallbackHandler({ root: trace });
+import { CallbackHandler } from "@langfuse/langchain";
+import { startActiveObservation } from "@langfuse/tracing";
+
+const langfuseHandler = new CallbackHandler();
+
+await startActiveObservation("grouped-invocations", async () => {
+  // All invocations within this scope end up on the same trace
+  await chain.invoke({ input: "<user_input_one>" }, { callbacks: [langfuseHandler] });
+  await chain.invoke({ input: "<user_input_two>" }, { callbacks: [langfuseHandler] });
+});
 ```
 
 ## FAQ

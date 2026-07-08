@@ -53,8 +53,9 @@ langfuse = get_client()
 
 prompt = langfuse.get_prompt("movie-critic")
 
-generation = langfuse.start_generation(
+generation = langfuse.start_observation(
     name="movie-generation",
+    as_type="generation",
     model="gpt-4o",
     prompt=prompt
 )
@@ -75,12 +76,12 @@ There are three ways to create traces with the Langfuse JS/TS SDK. For more info
 
 ```ts
 import { LangfuseClient } from "@langfuse/client";
-import { observe, startObservation } from "@langfuse/tracing";
+import { observe, updateActiveObservation } from "@langfuse/tracing";
 
 const langfuse = new LangfuseClient();
 
 const callLLM = async (input: string) => {
-  const prompt = langfuse.prompt.get("my-prompt");
+  const prompt = await langfuse.prompt.get("my-prompt");
 
   updateActiveObservation({ prompt }, { asType: "generation" });
 
@@ -94,14 +95,14 @@ export const observedCallLLM = observe(callLLM);
 
 ```ts
 import { LangfuseClient } from "@langfuse/client";
-import { updateActiveObservation } from "@langfuse/tracing";
+import { startActiveObservation } from "@langfuse/tracing";
 
 const langfuse = new LangfuseClient();
 
 startActiveObservation(
   "llm",
   async (generation) => {
-    const prompt = langfuse.prompt.get("my-prompt");
+    const prompt = await langfuse.prompt.get("my-prompt");
     generation.update({ prompt });
   },
   { asType: "generation" },
@@ -114,7 +115,7 @@ startActiveObservation(
 import { LangfuseClient } from "@langfuse/client";
 import { startObservation } from "@langfuse/tracing";
 
-const prompt = new LangfuseClient().prompt.get("my-prompt");
+const prompt = await new LangfuseClient().prompt.get("my-prompt");
 
 startObservation(
   "llm",
@@ -258,7 +259,7 @@ const langfuseHandler = new CallbackHandler({
   // Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 });
 
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 ```
 
 **Text prompts**
