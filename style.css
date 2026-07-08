@@ -912,6 +912,209 @@
   mask-repeat: no-repeat;
 }
 
+.lf-marketo-form {
+  width: 100%;
+  min-height: 24rem;
+  color: var(--text-primary);
+}
+
+.lf-marketo-form-message {
+  display: flex;
+  min-height: 18rem;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.lf-marketo-form .mktoForm {
+  width: 100% !important;
+  font-family: var(--font-sans) !important;
+  color: var(--text-primary) !important;
+}
+
+.lf-marketo-form .mktoFormRow,
+.lf-marketo-form .mktoFormCol,
+.lf-marketo-form .mktoFieldWrap {
+  width: 100% !important;
+  float: none !important;
+  clear: both !important;
+}
+
+.lf-marketo-form .mktoFormRow {
+  margin-bottom: 0.875rem !important;
+}
+
+.lf-marketo-form .mktoFormCol {
+  min-height: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.lf-marketo-form .mktoOffset,
+.lf-marketo-form .mktoGutter {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.lf-marketo-form .mktoLabel {
+  display: block !important;
+  width: auto !important;
+  float: none !important;
+  padding: 0 0 0.375rem !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  line-height: 1.25rem !important;
+}
+
+.lf-marketo-form .mktoAsterix {
+  float: none !important;
+  padding-left: 0 !important;
+  padding-right: 0.25rem !important;
+  color: hsl(var(--destructive)) !important;
+}
+
+.lf-marketo-form input[type="text"],
+.lf-marketo-form input[type="email"],
+.lf-marketo-form input[type="tel"],
+.lf-marketo-form input[type="url"],
+.lf-marketo-form input[type="number"],
+.lf-marketo-form select,
+.lf-marketo-form textarea {
+  width: 100% !important;
+  min-height: 2.5rem !important;
+  border: 1px solid var(--line-structure) !important;
+  border-radius: calc(var(--radius) - 4px) !important;
+  background: var(--surface-bg) !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.lf-marketo-form textarea {
+  min-height: 7rem !important;
+  resize: vertical !important;
+}
+
+.lf-marketo-form input:focus,
+.lf-marketo-form select:focus,
+.lf-marketo-form textarea:focus {
+  border-color: var(--line-cta) !important;
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--line-cta) 18%, transparent) !important;
+}
+
+.lf-marketo-form .mktoHtmlText,
+.lf-marketo-form .mktoInstruction,
+.lf-marketo-form .mktoErrorMsg {
+  color: var(--text-secondary) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.4 !important;
+}
+
+.lf-marketo-form .mktoErrorMsg {
+  margin-top: 0.375rem !important;
+  color: hsl(var(--destructive)) !important;
+}
+
+.lf-marketo-form .mktoButtonRow {
+  display: block !important;
+  width: 100% !important;
+  margin-top: 1rem !important;
+}
+
+.lf-marketo-form .mktoButtonWrap {
+  display: block !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+}
+
+.lf-marketo-form .mktoButton {
+  width: 100% !important;
+  min-height: 2.5rem !important;
+  border: 1px solid var(--line-cta) !important;
+  border-radius: calc(var(--radius) - 4px) !important;
+  background: var(--text-primary) !important;
+  color: var(--surface-bg) !important;
+  cursor: pointer !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  line-height: 1.25rem !important;
+  padding: 0.5rem 1rem !important;
+}
+
+.lf-marketo-form .mktoButton:hover {
+  opacity: 0.9;
+}
+
+.lf-success-panel {
+  display: flex;
+  min-height: 18rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.lf-success-icon {
+  display: flex;
+  height: 3rem;
+  width: 3rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in oklab, var(--callout-success) 35%, transparent);
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--callout-success) 12%, transparent);
+  color: var(--callout-success);
+}
+
+.lf-success-title {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+}
+
+.lf-success-body {
+  max-width: 22rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .lf-marketo-form {
+    min-height: 20rem;
+  }
+
+  .lf-marketo-form .mktoFormRow {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .lf-marketo-form input[type="text"],
+  .lf-marketo-form input[type="email"],
+  .lf-marketo-form input[type="tel"],
+  .lf-marketo-form input[type="url"],
+  .lf-marketo-form input[type="number"],
+  .lf-marketo-form select,
+  .lf-marketo-form textarea {
+    font-size: 1rem !important;
+  }
+}
+
 /* HoverCorners replacement: an absolute child span whose ::before shows on
    parent hover. The span stretches to cover its nearest positioned ancestor
    so the corners align with the container edge, not the span's own position. */
