@@ -317,7 +317,7 @@ For example, an OpenAI-style response with 17,903 prompt tokens of which 17,817 
 Whether you need to do this conversion yourself depends on how the usage data reaches Langfuse:
 
 - **Langfuse integrations and SDK wrappers** (e.g., the [OpenAI wrapper](/integrations/model-providers/openai-py)) capture usage from the provider response and convert it for you.
-- **OpenTelemetry semantic convention attributes** (`gen_ai.usage.*`, `llm.token_count.*`): treated as inclusive, following the OpenTelemetry GenAI semantic conventions. Langfuse normalizes them during ingestion by subtracting cache read and cache creation tokens from `input`.
+- **OpenTelemetry usage attributes** (`gen_ai.usage.*` as defined by the OpenTelemetry GenAI semantic conventions, plus the `llm.token_count.*` namespace used by some instrumentation libraries): treated as inclusive. Langfuse normalizes them during ingestion by subtracting cache read and cache creation tokens from `input`.
 - **OpenAI usage schema** passed as usage details (nested `prompt_tokens_details` / `completion_tokens_details`, see [Compatibility with OpenAI](#openai-usage-schema)): recognized and normalized during ingestion.
 - **Langfuse-style flat keys** passed as usage details via the SDKs or the API (`usage_details` / `usageDetails`, OTel attribute `langfuse.observation.usage_details`): stored verbatim, no normalization is applied. **Values must already be exclusive.**
 
