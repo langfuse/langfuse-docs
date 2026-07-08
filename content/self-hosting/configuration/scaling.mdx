@@ -35,11 +35,11 @@ In addition, the Langfuse worker also publishes queue length metrics via StatsD 
 
 #### Configuring StatsD
 
-Langfuse uses the [`dd-trace`](https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/nodejs/) package (DataDog's tracing library) which includes a DogStatsD client. The client auto-configures using standard DataDog environment variables:
+Langfuse uses the [`dd-trace`](https://docs.datadoghq.com/developers/dogstatsd/?tab=nodejs) package (DataDog's tracing library) which includes a DogStatsD client. The client auto-configures using standard DataDog environment variables:
 
 | Environment Variable    | Default       | Description                                |
 | ----------------------- | ------------- | ------------------------------------------ |
-| `DD_AGENT_HOST`         | `localhost`   | StatsD agent hostname or IP                |
+| `DD_AGENT_HOST`         | `localhost`   | DataDog Agent hostname or IP (must run a DogStatsD listener) |
 | `DD_DOGSTATSD_PORT`     | `8125`        | DogStatsD server port                      |
 | `DD_ENV`                | —             | Environment tag applied to all metrics     |
 | `DD_SERVICE`            | —             | Service name tag applied to all metrics    |
