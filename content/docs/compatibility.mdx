@@ -11,42 +11,42 @@ Reference for how Langfuse's server, SDK, and API versions relate across Langfus
 Langfuse Cloud runs the latest version, including both GA and preview features. New capabilities usually ship to **Langfuse Cloud** first (as preview), then become GA for **OSS / self-hosted** once validated. The current preview is the server v4 [Fast Preview](/docs/v4), an observations-first data model; self-hosted instances enable it with the `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN` environment variable ("v4 preview opt-in" below). **On Langfuse Cloud, you can ignore the self-hosted minimums and opt-in notes on this page.**
 </Callout>
 
-Status labels used on this page: **GA** (recommended, fully supported), **Preview** (Cloud first; self-hosted via opt-in), **Legacy** (still works, superseded by a newer version), **Deprecated** (will be removed; migrate to the replacement), **End of life** (unsupported, no security patches).
+Status labels used on this page: **GA** (recommended, fully supported), **Preview** (Cloud first; self-hosted via opt-in), **Deprecated** (still works but superseded; will be removed, migrate to the replacement), **End of life** (unsupported, no security patches).
 
 ## GA versions [#ga]
 
-| Component | GA version | Package / repo | Notes |
-| --- | --- | --- | --- |
-| Server | v3 | [langfuse/langfuse](https://github.com/langfuse/langfuse/releases) <a href="https://github.com/langfuse/langfuse/releases"><img className="inline" src="https://img.shields.io/github/v/release/langfuse/langfuse?style=flat-square&label=release" alt="Langfuse server release" /></a> | ClickHouse + Redis + S3/blob storage + worker |
-| Python SDK | v4 | [`langfuse`](https://pypi.org/project/langfuse/) <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi" alt="PyPI langfuse" /></a> | OpenTelemetry-based since v3. Requires Python 3.9+. |
-| JS/TS SDK | v5 | [`@langfuse/*`](https://www.npmjs.com/package/@langfuse/tracing) <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm" alt="NPM @langfuse/tracing" /></a> | OpenTelemetry-based since v4. Requires Node.js 20+. |
-| Other languages | n/a | [OpenTelemetry](/integrations/native/opentelemetry) | Any OTel SDK to the Langfuse OTel endpoint |
+| Component       | GA version | Package / repo                                                                                                                                                                                                                                                                          | Notes                                               |
+| --------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Server          | v3         | [langfuse/langfuse](https://github.com/langfuse/langfuse/releases) <a href="https://github.com/langfuse/langfuse/releases"><img className="inline" src="https://img.shields.io/github/v/release/langfuse/langfuse?style=flat-square&label=release" alt="Langfuse server release" /></a> | ClickHouse + Redis + S3/blob storage + worker       |
+| Python SDK      | v4         | [`langfuse`](https://pypi.org/project/langfuse/) <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi" alt="PyPI langfuse" /></a>                                                              | OpenTelemetry-based since v3. Requires Python 3.9+. |
+| JS/TS SDK       | v5         | [`@langfuse/*`](https://www.npmjs.com/package/@langfuse/tracing) <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm" alt="NPM @langfuse/tracing" /></a>                  | OpenTelemetry-based since v4. Requires Node.js 20+. |
+| Other languages | n/a        | [OpenTelemetry](/integrations/native/opentelemetry)                                                                                                                                                                                                                                     | Any OTel SDK to the Langfuse OTel endpoint          |
 
 ## SDK ↔ server compatibility [#sdk-server]
 
 Recent SDKs require a recent self-hosted server. Cloud always satisfies these minimums.
 
-| SDK & version | Min. self-hosted server | Status | Upgrade guide |
-| --- | --- | --- | --- |
-| Python SDK v4 | [≥ 3.125.0](https://github.com/langfuse/langfuse/releases/tag/v3.125.0) | GA | |
-| Python SDK v3 | [≥ 3.125.0](https://github.com/langfuse/langfuse/releases/tag/v3.125.0) | Legacy | [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) |
-| Python SDK v2 | server v2+ | Legacy | [Python v2 → v3](/docs/observability/sdk/upgrade-path/python-v2-to-v3) |
-| Python SDK v1 | unsupported on v3 | End of life | [All paths](/docs/observability/sdk/upgrade-path) |
-| JS/TS SDK v5 | [≥ 3.95.0](https://github.com/langfuse/langfuse/releases/tag/v3.95.0) | GA | |
-| JS/TS SDK v4 | [≥ 3.95.0](https://github.com/langfuse/langfuse/releases/tag/v3.95.0) | Legacy | [JS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) |
-| JS/TS SDK v3 / v2 | server v2+ | Legacy | [JS v3 → v4](/docs/observability/sdk/upgrade-path/js-v3-to-v4) |
-| JS/TS SDK v1 | unsupported on v3 | End of life | [All paths](/docs/observability/sdk/upgrade-path) |
+| SDK & version     | Min. self-hosted server                                                 | Status      | Upgrade guide                                                          |
+| ----------------- | ----------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------- |
+| Python SDK v4     | [≥ 3.125.0](https://github.com/langfuse/langfuse/releases/tag/v3.125.0) | GA          |                                                                        |
+| Python SDK v3     | [≥ 3.125.0](https://github.com/langfuse/langfuse/releases/tag/v3.125.0) | Deprecated  | [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) |
+| Python SDK v2     | server v2+                                                              | Deprecated  | [Python v2 → v3](/docs/observability/sdk/upgrade-path/python-v2-to-v3) |
+| Python SDK v1     | unsupported on v3                                                       | End of life | [All paths](/docs/observability/sdk/upgrade-path)                      |
+| JS/TS SDK v5      | [≥ 3.95.0](https://github.com/langfuse/langfuse/releases/tag/v3.95.0)   | GA          |                                                                        |
+| JS/TS SDK v4      | [≥ 3.95.0](https://github.com/langfuse/langfuse/releases/tag/v3.95.0)   | Deprecated  | [JS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5)         |
+| JS/TS SDK v3 / v2 | server v2+                                                              | Deprecated  | [JS v3 → v4](/docs/observability/sdk/upgrade-path/js-v3-to-v4)         |
+| JS/TS SDK v1      | unsupported on v3                                                       | End of life | [All paths](/docs/observability/sdk/upgrade-path)                      |
 
 The server is backwards compatible with older SDKs. When upgrading an SDK, run a recent server too. See the [versioning policy](/self-hosting/upgrade/versioning).
 
 ## Server versions [#server]
 
-| Version | Highlights | Status | Security patches | Upgrade guide |
-| --- | --- | --- | --- | --- |
-| v1 | PostgreSQL, synchronous ingestion. | End of life | No | [v1 → v2](/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2) |
-| v2 | PostgreSQL, synchronous ingestion. Rebuilt usage & cost tracking. Supports SDK v1+. | End of life | No | [v2 → v3](/self-hosting/upgrade/upgrade-guides/upgrade-v2-to-v3) |
-| v3 | ClickHouse + Redis + S3/blob storage + worker; asynchronous, event-driven. Requires SDK v2+. | GA | Yes | |
-| v4 ([Fast Preview](/docs/v4)) | Observations-first data model, faster at scale. GA on Cloud; self-hosted via env opt-in (migration in progress). | Preview | Yes | [Adopt](/docs/v4) |
+| Version                       | Highlights                                                                                                       | Status      | Security patches | Upgrade guide                                                    |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------- | ---------------- | ---------------------------------------------------------------- |
+| v1                            | PostgreSQL, synchronous ingestion.                                                                               | End of life | No               | [v1 → v2](/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2) |
+| v2                            | PostgreSQL, synchronous ingestion. Rebuilt usage & cost tracking. Supports SDK v1+.                              | End of life | No               | [v2 → v3](/self-hosting/upgrade/upgrade-guides/upgrade-v2-to-v3) |
+| v3                            | ClickHouse + Redis + S3/blob storage + worker; asynchronous, event-driven. Requires SDK v2+.                     | GA          | Yes              |                                                                  |
+| v4 ([Fast Preview](/docs/v4)) | Observations-first data model, faster at scale. GA on Cloud; self-hosted via env opt-in (migration in progress). | Preview     | Yes              | [Adopt](/docs/v4)                                                |
 
 v1 and v2 are end of life; upgrade is recommended. v2 → v3 is an infrastructure migration (adds ClickHouse, Redis, blob storage). Self-hosted v3 requires [PostgreSQL ≥ 12](/self-hosting/deployment/infrastructure/postgres), [ClickHouse ≥ 24.3](/self-hosting/deployment/infrastructure/clickhouse), and [Redis/Valkey ≥ 7](/self-hosting/deployment/infrastructure/cache) (`maxmemory-policy=noeviction`).
 
@@ -54,31 +54,31 @@ v1 and v2 are end of life; upgrade is recommended. v2 → v3 is an infrastructur
 
 ### Ingestion [#ingestion]
 
-| Endpoint | Status | Notes |
-| --- | --- | --- |
-| `POST /api/public/otel/v1/traces` | GA | OpenTelemetry (OTLP) endpoint, server v3+ (self-hosted ≥ 3.22.0). The path forward for all ingestion. |
-| `POST /api/public/ingestion` | Deprecated | Legacy batch ingestion; async on v3+ (returns `207`). Use the OTel endpoint. |
+| Endpoint                          | Status     | Notes                                                                                                 |
+| --------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| `POST /api/public/otel/v1/traces` | GA         | OpenTelemetry (OTLP) endpoint, server v3+ (self-hosted ≥ 3.22.0). The path forward for all ingestion. |
+| `POST /api/public/ingestion`      | Deprecated | Batch ingestion; async on v3+ (returns `207`). Use the OTel endpoint.                                 |
 
 ### Read APIs [#read-apis]
 
 GA read endpoints use cursor pagination and selective field groups.
 
-| Endpoint | Status | Notes |
-| --- | --- | --- |
-| `GET /api/public/v2/observations` | GA | Cloud; self-hosted via the v4 preview opt-in |
-| `GET /api/public/observations` | Legacy | |
-| `GET /api/public/observations/{id}` | Legacy | Superseded by `GET /api/public/v2/observations` |
-| `GET /api/public/v2/metrics` | GA | Cloud; self-hosted via the v4 preview opt-in |
-| `GET /api/public/metrics` | Legacy | |
-| `GET /api/public/v3/scores` | GA | Cloud and self-hosted |
-| `GET /api/public/scores` | Legacy | |
-| `GET /api/public/v2/scores` | Deprecated | Use `GET /api/public/v3/scores` |
-| `GET /api/public/traces/{id}` | GA | Single trace with nested observations and scores |
-| `GET /api/public/sessions` | Legacy | Not recommended for extraction; use `GET /api/public/v2/observations` with a `sessionId` filter |
-| `GET /api/public/sessions/{sessionId}` | Legacy | Single session with traces; use `GET /api/public/v2/observations` with a `sessionId` filter |
-| `/api/public/mcp` | GA | [MCP server](/docs/api-and-data-platform/features/mcp-server); its observations and metrics tools follow the v2 preview availability above |
+| Endpoint                               | Status     | Notes                                                                                                                                      |
+| -------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /api/public/v2/observations`      | GA         | Cloud; self-hosted via the v4 preview opt-in                                                                                               |
+| `GET /api/public/observations`         | Deprecated |                                                                                                                                            |
+| `GET /api/public/observations/{id}`    | Deprecated | Superseded by `GET /api/public/v2/observations`                                                                                            |
+| `GET /api/public/v2/metrics`           | GA         | Cloud; self-hosted via the v4 preview opt-in                                                                                               |
+| `GET /api/public/metrics`              | Deprecated |                                                                                                                                            |
+| `GET /api/public/v3/scores`            | GA         | Cloud and self-hosted                                                                                                                      |
+| `GET /api/public/scores`               | Deprecated |                                                                                                                                            |
+| `GET /api/public/v2/scores`            | Deprecated | Use `GET /api/public/v3/scores`                                                                                                            |
+| `GET /api/public/traces/{id}`          | GA         | Single trace with nested observations and scores                                                                                           |
+| `GET /api/public/sessions`             | Deprecated | Not recommended for extraction; use `GET /api/public/v2/observations` with a `sessionId` filter                                            |
+| `GET /api/public/sessions/{sessionId}` | Deprecated | Single session with traces; use `GET /api/public/v2/observations` with a `sessionId` filter                                                |
+| `/api/public/mcp`                      | GA         | [MCP server](/docs/api-and-data-platform/features/mcp-server); its observations and metrics tools follow the v2 preview availability above |
 
-- SDKs default to the GA resources (`api.observations`, `api.scores`, `api.metrics`); legacy versions are under `api.legacy.*` (e.g. `api.legacy.observations_v1` / `observationsV1`). On self-hosted without the v4 preview opt-in, use the legacy observations and metrics resources.
+- SDKs default to the GA resources (`api.observations`, `api.scores`, `api.metrics`); older versions are under `api.legacy.*` (e.g. `api.legacy.observations_v1` / `observationsV1`). On self-hosted without the v4 preview opt-in, use the `api.legacy.*` observations and metrics resources.
 - Metrics v2 has no `traces` view.
 
 <Callout type="warning">
@@ -89,18 +89,18 @@ See the [Observations API](/docs/api-and-data-platform/features/observations-api
 
 ## Evaluations & integrations [#evals-integrations]
 
-Each has a GA version (built on the v4 data model) and a legacy version that still works and may be deprecated later. Some capabilities also require a specific plan or edition; see [Cloud pricing](/pricing) and [self-hosting pricing](/pricing-self-host).
+Each has a GA version (built on the v4 data model) and a deprecated version that still works but will be removed. Some capabilities also require a specific plan or edition; see [Cloud pricing](/pricing) and [self-hosting pricing](/pricing-self-host).
 
-| Capability | GA | Legacy |
-| --- | --- | --- |
-| [Evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Span / observation-level (server ≥ 3.153.0; Python SDK v3+ / JS SDK v4+) | Trace-level (Python SDK v2+ / JS SDK v3+) |
-| [Dataset evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Experiment-level | Dataset-run-level |
-| [PostHog](/integrations/analytics/posthog) | Enriched observations | Traces and observations |
-| [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) | Enriched observations | Traces and observations |
-| [Mixpanel](/integrations/analytics/mixpanel) | Enriched observations | Traces and observations |
+| Capability                                                                         | GA                                                                       | Deprecated                                |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------- |
+| [Evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge)                   | Span / observation-level (server ≥ 3.153.0; Python SDK v3+ / JS SDK v4+) | Trace-level (Python SDK v2+ / JS SDK v3+) |
+| [Dataset evaluation](/docs/evaluation/evaluation-methods/llm-as-a-judge)           | Experiment-level                                                         | Dataset-run-level                         |
+| [PostHog](/integrations/analytics/posthog)                                         | Enriched observations                                                    | Traces and observations                   |
+| [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) | Enriched observations                                                    | Traces and observations                   |
+| [Mixpanel](/integrations/analytics/mixpanel)                                       | Enriched observations                                                    | Traces and observations                   |
 
 - Enriched observations are observations with trace attributes attached (v4 data model); on self-hosted these exports require the v4 preview opt-in (Cloud is unaffected).
-- On Cloud, projects created on or after 2026-05-20 can no longer select the legacy export source (existing projects and self-hosted are unaffected).
+- On Cloud, projects created on or after 2026-05-20 can no longer select the deprecated export source (existing projects and self-hosted are unaffected).
 
 ## How versioning works [#policy]
 
