@@ -100,6 +100,20 @@ If you do query ClickHouse directly:
 - Do not write directly to Langfuse tables. Use the Public API or SDKs for creating and updating Langfuse data.
 - If a missing API filter or field forces you to query ClickHouse directly, please open a [GitHub issue](https://github.com/langfuse/langfuse/issues) with your use case; APIs are the preferred long-term extension point.
 
+## Custom Schema Changes [#custom-schema-changes]
+
+We recommend running Langfuse on the unmodified ClickHouse schema.
+
+<Callout type="warning">
+
+Langfuse's ClickHouse schema and migrations are designed, tested, and versioned as a unit with each release.
+Customizing the `observations`, `events`, or other table definitions moves that schema outside of what we test against — which means keeping it compatible with future upgrades becomes your responsibility.
+We'll provide best-effort support for issues arising from custom schema changes.
+
+</Callout>
+
+If a missing column, index, or table setting makes you consider a custom schema change, please open a [GitHub issue](https://github.com/langfuse/langfuse/issues) with your use case first; improvements to the standard schema benefit all deployments and are covered by our regular testing and upgrade process.
+
 ## Deployment Options
 
 This section covers different deployment options and provides example environment variables.
