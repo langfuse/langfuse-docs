@@ -38,6 +38,14 @@ const trackMcpToolUsage = async (
   );
 };
 
+const MCP_SERVER_INSTRUCTIONS = [
+  "Use this server for Langfuse documentation, product concepts, SDK/API usage, instrumentation guidance, migration help, and current docs pages.",
+  "For project-scoped Langfuse data or actions such as prompts, datasets, scores, comments, metrics, observations, models, or feedback submission, prefer the authenticated Langfuse app MCP server when it is available.",
+  "When Langfuse agent skills are installed, use them for end-to-end workflows, repo-specific guidance, and agent setup patterns; use this docs server to fetch or verify current documentation.",
+  "Inspect the available tools and their schemas dynamically; do not assume a fixed tool list.",
+  "If the user wants to provide feedback about Langfuse docs or something is not working well, mention that they can open a GitHub issue in the langfuse-docs repository, or, when authenticated API/app-MCP tools are available, submit feedback via the Langfuse API or submitFeedback tool. Before using a feedback tool, ask permission, show the exact payload, and avoid secrets/customer data/trace payloads.",
+].join("\n");
+
 export const mcpHandler = createMcpHandler(
   (server) => {
     (server as any).tool(
@@ -178,6 +186,6 @@ export const mcpHandler = createMcpHandler(
       },
     );
   },
-  {},
+  { instructions: MCP_SERVER_INSTRUCTIONS },
   { basePath: "/api", maxDuration: 60, verboseLogs: true },
 );
