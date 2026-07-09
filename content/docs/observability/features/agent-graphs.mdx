@@ -1,6 +1,6 @@
 ---
 title: Agent Graphs
-description: Visualize and analyze complex agent workflows with Langfuse's agent graph view.
+description: Visualize and analyze complex agent workflows with Langfuse's agent graph view — as an aggregated overview or an expanded, as-it-ran DAG.
 sidebarTitle: Agent Graphs
 ---
 
@@ -26,12 +26,37 @@ The graph view is currently in beta, please feel free to share feedback.
 
 </Callout>
 
-There are currently two ways to display the graph.
-First, have an observation with any observation type except for `span`, `event` or `generation` in your trace. Then, Langfuse interprets the trace as agentic and will show a graph. The graph is automatically inferred from the observation timings as well as their nesting.
-Second, when you use the LangGraph integration the graph automatically shows in Langfuse.
+There are two ways a graph appears for a trace:
+
+1. **Inferred from observations.** Have an observation with any observation type except `span`, `event`, or `generation` in your trace. Langfuse then interprets the trace as agentic and shows a graph, inferred automatically from the observations' timings and nesting.
+2. **From the LangGraph integration.** When you use the LangGraph integration, the graph shows automatically.
 
 **Observation Types**: See all available [Observation Types](/docs/observability/features/observation-types) and how to set them.
 **LangGraph**: See the [LangGraph integration guide](/guides/cookbook/integration_langgraph) for an end-to-end example on how to natively integrate LangGraph with Langfuse for LLM Agent tracing.
+
+## View modes: Aggregated and Expanded
+
+The same trace can be drawn two ways. Switch between them with the **Aggregated / Expanded** toggle in the top-left corner of the graph; your choice is remembered across traces.
+
+The distinction is how repeated steps are treated — one node **per step name** vs. one node **per call**:
+
+| | **Aggregated** (default) | **Expanded** ("as it ran") |
+| --- | --- | --- |
+| A node is… | one **unique step name** | one **individual call** |
+| Repeated calls | collapse into a single node with a counter | appear as separate nodes |
+| Loops / cycles | drawn as **cycles** (edges loop back) | **unrolled into an acyclic graph (DAG)** |
+| Reads like | the agent's overall *shape* | the exact *run*, step by step |
+| Best for | grasping structure & complexity at a glance | following or debugging a specific execution |
+
+### Aggregated
+
+The **Aggregated** view is a compact overview. Steps that share a name are merged into a single node with a counter — `retrieve_docs (3/3)` means that step ran three times — and a loop that calls the same tool repeatedly is drawn as a cycle rather than a long chain. This keeps even a busy agent readable: you see how many *distinct* steps there are and how they connect, without every individual call on screen. It's the fastest way to answer "what does this agent do, and how complex is it?"
+
+### Expanded
+
+The **Expanded** view shows the full process **as it ran**. Every call is its own node, so three `litellm_request` calls are three distinct nodes, and loops unroll into a directed acyclic graph in execution order. It's more literal and closer to the trace tree — the right view when you want to follow a specific run end to end or pin down exactly where something happened. Larger traces naturally produce more nodes here than in the aggregated view.
+
+Neither is "correct" — they answer different questions. Reach for **Aggregated** to understand an agent's structure, and **Expanded** to walk through a single run.
 
 ## GitHub Discussions
 
