@@ -124,7 +124,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Runs on 
 | SOC2 Type II & ISO27001 reports                                                                     | --                             | Yes                                                        |
 | InfoSec/legal reviews                                                                               | --                             | Yes                                                        |
 
-_Standard contracts: [ClickHouse General Terms & Conditions](https://clickhouse.com/legal/clickhouse-general-terms-and-conditions) and the [Self-Managed Addendum](https://clickhouse.com/legal/clickhouse-self-managed-addendum). Custom or redlined contracts are available for larger committed-spend agreements._
+_Standard contracts: [ClickHouse General Terms & Conditions](https://clickhouse.com/legal/clickhouse-general-terms-and-conditions) and the [Self-Managed Addendum](https://clickhouse.com/legal/clickhouse-self-managed-addendum). Redlined contracts are available for larger committed-spend agreements._
 
 ## Discounts
 

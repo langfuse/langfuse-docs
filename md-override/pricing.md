@@ -81,8 +81,6 @@ Available on any cloud plan from a minimum annual contract size. Langfuse Cloud 
 - Upgraded support
 - Billing via AWS Marketplace or invoice
 
-Custom or redlined contracts are available for larger agreements.
-
 [Talk to sales](/talk-to-us)
 
 ## Feature Comparison (Cloud)
@@ -170,7 +168,7 @@ Custom or redlined contracts are available for larger agreements.
 | Payment methods                                                                                     | --                  | Credit card         | Credit card                                      | Credit card                                    |
 | Contract duration                                                                                   | --                  | Monthly             | Monthly                                          | Monthly                                        |
 
-_Standard contracts: [ClickHouse General Terms & Conditions](https://clickhouse.com/legal/clickhouse-general-terms-and-conditions) and the [Self-Managed Addendum](https://clickhouse.com/legal/clickhouse-self-managed-addendum). Custom or redlined contracts are available for larger committed-spend agreements._
+_Standard contracts: [ClickHouse General Terms & Conditions](https://clickhouse.com/legal/clickhouse-general-terms-and-conditions) and the [Self-Managed Addendum](https://clickhouse.com/legal/clickhouse-self-managed-addendum). Redlined contracts are available for larger committed-spend agreements._
 
 ## Graduated Usage Pricing
 
@@ -268,7 +266,7 @@ Langfuse Cloud Credits only apply to customers with a committed-spend agreement 
 If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.
 
 **What is the Committed spend option?**
-Committed spend is an annual agreement for Langfuse Cloud, available on every cloud plan from a minimum annual contract size. You purchase Langfuse Cloud Credits that draw down against the public price list at [langfuse.com/pricing](/pricing). In exchange for the commitment, you get volume discounts, procurement support (vendor onboarding, security reviews), upgraded support, and billing via AWS Marketplace or invoice. Custom or redlined contracts are available for larger agreements. [Talk to us](/talk-to-us) to get started.
+Committed spend is an annual agreement for Langfuse Cloud, available on every cloud plan from a minimum annual contract size. You purchase Langfuse Cloud Credits that draw down against the public price list at [langfuse.com/pricing](/pricing). In exchange for the commitment, you get volume discounts, procurement support (vendor onboarding, security reviews), upgraded support, and billing via AWS Marketplace or invoice. Redlined contracts are available for larger agreements. [Talk to us](/talk-to-us) to get started.
 
 **How is self-hosted Langfuse Enterprise priced?**
 Langfuse OSS is free (MIT license). Langfuse Enterprise (self-hosted) is an annual agreement with a flat fee sized on your [billable units](/docs/administration/billable-units) across all deployments and environments. It is activated via a license key -- one key covers all of your environments. Langfuse does not actively meter self-hosted usage; usage is reviewed together at renewal. [Talk to us](/talk-to-us?deployment=self-hosted) for a quote.
@@ -280,7 +278,7 @@ Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to rece
 Through the organization settings in Langfuse Cloud or the [Customer Portal](/billing-portal).
 
 **Can I redline the contracts?**
-Custom and redlined contracts are available for larger committed-spend agreements. Contact enterprise@langfuse.com. Default plans are self-serve on standard terms.
+Redlined contracts are available for larger committed-spend agreements. Contact enterprise@langfuse.com. Default plans are self-serve on standard terms.
 
 **Where is the data stored?**
 Langfuse Cloud is hosted on AWS. Data is stored in the US, EU, Japan, or the HIPAA-compliant US region depending on your selection. See [security documentation](/security) for details.

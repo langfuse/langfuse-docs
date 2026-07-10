@@ -1197,8 +1197,8 @@ const sections: Section[] = [
             >
               Self-Managed Addendum
             </Link>
-            . Custom or redlined contracts are available for larger
-            committed-spend agreements.
+            . Redlined contracts are available for larger committed-spend
+            agreements.
           </>
         ),
         tiers: {
@@ -1430,9 +1430,6 @@ export function CommittedSpendBox({ className }: { className?: string }) {
                 </li>
               ))}
             </ul>
-            <p className="text-xs text-muted-foreground">
-              Custom or redlined contracts are available for larger agreements.
-            </p>
             <Button
               variant="secondary"
               size="small"
