@@ -1178,12 +1178,14 @@ const sections: Section[] = [
     features: [
       {
         name: "Contracts",
+        description:
+          "Custom or redlined contracts are available with an annual committed-spend agreement.",
         tiers: {
           cloud: {
             Hobby: "Standard T&Cs & DPA",
             Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
-            Enterprise: "Talk to Sales",
+            Enterprise: "Standard T&Cs & DPA",
           },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -1224,12 +1226,6 @@ const sections: Section[] = [
         name: "InfoSec/legal reviews",
         href: "/security",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: COMMITTED_SPEND,
-            Pro: COMMITTED_SPEND,
-            Enterprise: COMMITTED_SPEND,
-          },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
@@ -1278,15 +1274,7 @@ const sections: Section[] = [
       },
       {
         name: "Billing via AWS Marketplace or invoice",
-        description:
-          "Available with an annual committed-spend agreement, on any cloud plan.",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: COMMITTED_SPEND,
-            Pro: COMMITTED_SPEND,
-            Enterprise: COMMITTED_SPEND,
-          },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
@@ -1389,7 +1377,7 @@ const FeatureCell = ({
 
 const committedSpendFeatures = [
   "Volume discounts",
-  "Procurement and legal support (custom contracts, vendor onboarding)",
+  "Procurement and legal support (custom contracts, vendor onboarding, security reviews)",
   "Upgraded support",
   "Billing via AWS Marketplace or invoice",
 ];

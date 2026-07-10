@@ -77,7 +77,7 @@ For large-scale teams. Enterprise-grade support and security.
 Available on every cloud plan from a minimum annual contract size. You purchase Langfuse Cloud Credits that draw down against list pricing and unlock:
 
 - Volume discounts
-- Procurement and legal support (custom contracts, vendor onboarding)
+- Procurement and legal support (custom contracts, vendor onboarding, security reviews)
 - Upgraded support
 - Billing via AWS Marketplace or invoice
 
@@ -159,16 +159,14 @@ Available on every cloud plan from a minimum annual contract size. You purchase 
 | [SCIM API (automated user provisioning)](/docs/administration/scim-and-org-api)                     | --                  | --                  | --                                               | Yes                                            |
 | [Audit logs](/docs/administration/audit-logs)                                                       | --                  | --                  | --                                               | Yes                                            |
 | **Compliance**                                                                                      |                     |                     |                                                  |                                                |
-| Contracts                                                                                           | Standard T&Cs & DPA | Standard T&Cs & DPA | Standard T&Cs & DPA                              | Talk to sales                                  |
+| Contracts                                                                                           | Standard T&Cs & DPA | Standard T&Cs & DPA | Standard T&Cs & DPA                              | Standard T&Cs & DPA                            |
 | [Data processing agreement (GDPR)](/security/dpa)                                                   | Yes                 | Yes                 | Yes                                              | Yes                                            |
 | [SOC2 Type II & ISO27001 reports](/security)                                                        | --                  | --                  | Yes                                              | Yes                                            |
 | [HIPAA compliance](/security/hipaa)                                                                 | --                  | --                  | Yes                                              | Yes                                            |
-| InfoSec/legal reviews                                                                               | --                  | Committed spend     | Committed spend                                  | Committed spend                                |
 | **Billing**                                                                                         |                     |                     |                                                  |                                                |
 | Subscription management                                                                             | --                  | Self-serve          | Self-serve                                       | Self-serve                                     |
 | Payment methods                                                                                     | --                  | Credit card         | Credit card                                      | Credit card                                    |
 | Contract duration                                                                                   | --                  | Monthly             | Monthly                                          | Monthly                                        |
-| Billing via AWS Marketplace or invoice                                                              | --                  | Committed spend     | Committed spend                                  | Committed spend                                |
 
 ## Graduated Usage Pricing
 
