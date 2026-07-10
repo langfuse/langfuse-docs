@@ -77,7 +77,7 @@ For large-scale teams. Enterprise-grade support and security.
 Available on any cloud plan from a minimum annual contract size. Langfuse Cloud Credits draw down against list pricing and unlock:
 
 - Volume discounts
-- Procurement support (vendor onboarding, security reviews)
+- Procurement support (vendor onboarding, security reviews, contract)
 - Upgraded support
 - Billing via AWS Marketplace or invoice
 

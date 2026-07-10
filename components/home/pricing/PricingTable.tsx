@@ -1398,7 +1398,7 @@ const FeatureCell = ({
 
 const committedSpendFeatures = [
   "Volume discounts",
-  "Procurement support (vendor onboarding, security reviews)",
+  "Procurement support (vendor onboarding, security reviews, contract)",
   "Upgraded support",
   "Billing via AWS Marketplace or invoice",
 ];
