@@ -1421,23 +1421,27 @@ export function CommittedSpendBox({ className }: { className?: string }) {
               Langfuse Cloud Credits draw down against list pricing and unlock:
             </p>
           </div>
-          <ul className="grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[repeat(2,max-content)]">
-            {committedSpendFeatures.map((feature) => (
-              <li key={feature} className="flex space-x-2">
-                <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                <span className="text-muted-foreground">{feature}</span>
-              </li>
-            ))}
-          </ul>
-          <Button
-            variant="secondary"
-            size="small"
-            href="/talk-to-us"
-            wrapperClassName="lg:ml-auto lg:shrink-0"
-            className="justify-center! group-hover:border-line-structure hover:border-line-cta"
-          >
-            Talk to sales
-          </Button>
+          <div className="flex flex-col gap-3 items-start lg:flex-1">
+            <ul className="grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[repeat(2,max-content)]">
+              {committedSpendFeatures.map((feature) => (
+                <li key={feature} className="flex space-x-2">
+                  <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                  <span className="text-muted-foreground">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-xs text-muted-foreground">
+              Custom or redlined contracts are available for larger agreements.
+            </p>
+            <Button
+              variant="secondary"
+              size="small"
+              href="/talk-to-us"
+              className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+            >
+              Talk to sales
+            </Button>
+          </div>
         </div>
       </CornerBox>
     </div>
