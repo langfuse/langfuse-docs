@@ -168,7 +168,7 @@ The status card on the same page also surfaces:
 
 If a worker crashes mid-export, a 2-hour safety-valve TTL ensures the badge reverts from Running to its underlying state (typically Queued) so the next scheduled run can proceed. Reload the page to see the latest status.
 
-A failed export is retried automatically on the next run; repeated failures trigger a notification.
+Langfuse retries failed exports on the next run. Repeated failures notify project admins by email and the configured Slack or webhook channel. Configure it under **Project Settings → Notifications**.
 
 ## Re-exporting data and configuration changes [#re-exporting]
 
