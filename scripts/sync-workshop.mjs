@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import posixPath from "node:path/posix";
@@ -24,10 +25,56 @@ const GITHUB_RETRY_MAX_DELAY_MS = 5_000;
 const GITHUB_ERROR_BODY_MAX_LENGTH = 1_000;
 const { WORKSHOP_DEFAULT_CHAPTER } = workshopConfig;
 
+const initialEnvKeys = new Set(Object.keys(process.env));
+
+function parseEnvValue(value) {
+  const trimmed = value.trim();
+  const quote = trimmed[0];
+  if (
+    (quote === `"` || quote === `'`) &&
+    trimmed[trimmed.length - 1] === quote
+  ) {
+    const unquoted = trimmed.slice(1, -1);
+    return quote === `"`
+      ? unquoted.replace(/\\n/g, "\n").replace(/\\"/g, `"`)
+      : unquoted;
+  }
+  return trimmed;
+}
+
+async function loadEnvFiles() {
+  for (const filename of [".env", ".env.local"]) {
+    const filePath = path.join(process.cwd(), filename);
+    if (!existsSync(filePath)) continue;
+
+    const contents = await fs.readFile(filePath, "utf8");
+    for (const line of contents.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+
+      const match = trimmed.match(
+        /^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$/,
+      );
+      if (!match) continue;
+
+      const [, key, rawValue] = match;
+      if (initialEnvKeys.has(key)) continue;
+      process.env[key] = parseEnvValue(rawValue);
+    }
+  }
+}
+
+function githubToken() {
+  return process.env.GITHUB_ACCESS_TOKEN || process.env.GITHUB_TOKEN || null;
+}
+
 function githubHeaders() {
-  return {
+  const headers = {
     "User-Agent": "langfuse-docs-workshop-sync",
   };
+  const token = githubToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
 }
 
 function encodeRepoPath(repoPath) {
@@ -730,6 +777,8 @@ async function writePage(file, content) {
 }
 
 async function main() {
+  await loadEnvFiles();
+
   const files = await collectWorkshopFiles();
   const routeBySourcePath = new Map(
     files.map((file) => [file.sourcePath, file.route]),
