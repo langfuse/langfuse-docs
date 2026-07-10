@@ -205,34 +205,30 @@ export function PricingCalculator({
               </div>
             </div>
 
-            <CornerBox className="p-4 bg-surface-1 sm:p-6 flex items-center justify-center">
+            <CornerBox className="p-4 bg-surface-1 sm:p-6 flex items-center justify-center min-w-0">
               {currentBaseFee > 0 ? (
-                <div className="w-full text-center">
-                  <div className="flex flex-col gap-3 justify-center items-center text-base font-medium sm:flex-row sm:gap-4 sm:text-lg">
+                <div className="w-full min-w-0 text-center">
+                  <div className="flex flex-col flex-wrap gap-3 justify-center items-center text-base font-medium sm:flex-row sm:gap-x-4 sm:gap-y-2 sm:text-lg">
                     <div className="text-center">
-                      <div className="text-xl font-bold text-primary sm:text-2xl">
+                      <div className="text-lg font-bold text-primary sm:text-xl whitespace-nowrap">
                         {formatCurrency(currentBaseFee)}
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground">
                         {selectedPlan} Base
                       </div>
                     </div>
-                    <div className="text-lg text-muted-foreground sm:text-xl">
-                      +
-                    </div>
+                    <div className="text-lg text-muted-foreground">+</div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-primary sm:text-2xl">
+                      <div className="text-lg font-bold text-primary sm:text-xl whitespace-nowrap">
                         {formatCurrency(calculatedPrice)}
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground">
                         Usage
                       </div>
                     </div>
-                    <div className="text-lg text-muted-foreground sm:text-xl">
-                      =
-                    </div>
+                    <div className="text-lg text-muted-foreground">=</div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-primary sm:text-2xl">
+                      <div className="text-lg font-bold text-primary sm:text-xl whitespace-nowrap">
                         {formatCurrency(calculatedPrice + currentBaseFee)}
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground">
@@ -242,8 +238,8 @@ export function PricingCalculator({
                   </div>
                 </div>
               ) : (
-                <div className="w-full text-center">
-                  <div className="text-2xl font-bold sm:text-3xl text-primary">
+                <div className="w-full min-w-0 text-center">
+                  <div className="text-2xl font-bold sm:text-3xl text-primary whitespace-nowrap">
                     {formatCurrency(calculatedPrice)}
                   </div>
                   <div className="mt-1 text-sm text-muted-foreground">
@@ -262,7 +258,7 @@ export function PricingCalculator({
                 </div>
                 <Text size="s" className="text-left text-text-secondary">
                   {isEnterprise
-                    ? "Talk to sales for help sizing your workload and vendor onboarding."
+                    ? "Talk to sales for help sizing the workloads and vendor onboarding."
                     : `At ${formatNumber(SALES_ASSISTED_UNITS_THRESHOLD)}+ billable units per month, talk to sales for help sizing the workload and a custom quote.`}
                 </Text>
               </div>
