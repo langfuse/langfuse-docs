@@ -46,8 +46,8 @@ We recommend setting up 2-3 saved views for your most common debugging workflows
 
 Use one of these ingestion paths so your data appears in the unified table in real time:
 
-- Python SDK v4: [migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4)
-- JS/TS SDK v5: [migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)
+- Python SDK v4.7.0+: [migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4)
+- JS/TS SDK v5.4.0+: [migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)
 - Direct OpenTelemetry ingestion: set `x-langfuse-ingestion-version: 4` on your OTEL span exporter. If you use OTLP HTTP environment variables, add `x-langfuse-ingestion-version=4` to `OTEL_EXPORTER_OTLP_HEADERS`. See [OpenTelemetry setup](/integrations/native/opentelemetry).
 
 <Callout type="info">
@@ -77,7 +77,7 @@ If something feels confusing, missing, or slower than expected, share feedback v
 
 The most common reason is that data is still being sent via older SDK versions or through a direct OpenTelemetry exporter without `x-langfuse-ingestion-version: 4`.
 In the new Fast Preview experience, those setups can lead to multi-minute delays before traces show up in the unified table.
-If this happens, upgrade to Python SDK v4 or JS/TS SDK v5, or add the ingestion version header to your OTEL exporter.
+If this happens, upgrade to Python SDK v4.7.0+ or JS/TS SDK v5.4.0+, or add the ingestion version header to your OTEL exporter.
 
 ### How can I get a focused view of my most important operations?
 
