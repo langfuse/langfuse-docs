@@ -75,12 +75,15 @@ By using the `@observe()` decorator, we can capture execution details of any Pyt
 - Each LLM call within the functions is logged, providing a detailed trace of the execution flow.
 
 ```python
+import os
+
 from langfuse import observe
 from langfuse.openai import openai
 
 # Create an OpenAI client pointed at Eden AI
 client = openai.OpenAI(
     base_url="https://api.edenai.run/v3",
+    api_key=os.environ["EDENAI_API_KEY"],
 )
 
 @observe()  # This decorator enables tracing of the function
