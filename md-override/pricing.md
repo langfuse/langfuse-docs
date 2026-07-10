@@ -170,6 +170,8 @@ Custom or redlined contracts are available for larger agreements.
 | Payment methods                                                                                     | --                  | Credit card         | Credit card                                      | Credit card                                    |
 | Contract duration                                                                                   | --                  | Monthly             | Monthly                                          | Monthly                                        |
 
+_Standard contracts: [ClickHouse General Terms & Conditions](https://clickhouse.com/legal/clickhouse-general-terms-and-conditions) and the [Self-Managed Addendum](https://clickhouse.com/legal/clickhouse-self-managed-addendum). Custom or redlined contracts are available for larger committed-spend agreements._
+
 ## Graduated Usage Pricing
 
 Additional usage beyond the included units is billed at graduated rates. Higher volumes automatically get lower rates:

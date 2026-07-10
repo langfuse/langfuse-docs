@@ -256,7 +256,7 @@ type Section = {
   href?: string;
   features: {
     name: string;
-    description?: string;
+    description?: React.ReactNode;
     href?: string;
     tiers: Partial<
       Record<
@@ -800,12 +800,13 @@ const sections: Section[] = [
       {
         name: "ClickHouse deployment model",
         description:
-          "Open Source assumes you operate ClickHouse yourself. Enterprise runs on your ClickHouse deployment — we help you pick the right setup.",
+          "Langfuse runs on ClickHouse OSS, ClickHouse Cloud, or ClickHouse BYOC in every edition. For Enterprise, we recommend ClickHouse BYOC or ClickHouse Cloud for the best performance and support.",
+        href: "/self-hosting/deployment/infrastructure/clickhouse",
         tiers: {
           selfHosted: {
-            "Open Source": "Self-managed ClickHouse OSS",
+            "Open Source": "ClickHouse OSS, Cloud, or BYOC",
             Enterprise:
-              "Your ClickHouse deployment (we help you pick the right setup)",
+              "ClickHouse OSS, Cloud, or BYOC (BYOC or Cloud recommended)",
           },
         },
       },
@@ -1178,8 +1179,28 @@ const sections: Section[] = [
     features: [
       {
         name: "Contracts",
-        description:
-          "Custom or redlined contracts are available for larger committed-spend agreements.",
+        description: (
+          <>
+            Standard terms are the{" "}
+            <Link
+              href="https://clickhouse.com/legal/clickhouse-general-terms-and-conditions"
+              className="underline"
+              target="_blank"
+            >
+              ClickHouse General Terms &amp; Conditions
+            </Link>{" "}
+            and the{" "}
+            <Link
+              href="https://clickhouse.com/legal/clickhouse-self-managed-addendum"
+              className="underline"
+              target="_blank"
+            >
+              Self-Managed Addendum
+            </Link>
+            . Custom or redlined contracts are available for larger
+            committed-spend agreements.
+          </>
+        ),
         tiers: {
           cloud: {
             Hobby: "Standard T&Cs & DPA",
@@ -1287,7 +1308,7 @@ const FeatureDetails = ({
   description,
   href,
 }: {
-  description?: string;
+  description?: React.ReactNode;
   href?: string;
 }) => {
   if (!description && !href) {
