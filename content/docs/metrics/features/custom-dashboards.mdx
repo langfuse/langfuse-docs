@@ -90,7 +90,29 @@ Jump-start your analytics with Langfuse-curated dashboards that focus on common 
 - **Cost Dashboard**: Track token usage and associated costs over time
 - **Usage Dashboard**: Understand your Langfuse platform utilization
 
-These pre-built dashboards can be used as-is or cloned and customized to match your specific requirements.
+These pre-built dashboards can be used as-is, or **edited freely — editing is never a dead end**. Langfuse-managed dashboards and widgets keep their full edit affordances (drag, resize, delete, add widget, edit); the first change routes through a **clone-first dialog** that copies the dashboard into your project and carries your change into the copy — so you customize a managed dashboard without touching the original.
+
+## Home dashboard
+
+Your project **Home** page is a dashboard. Out of the box it renders from a Langfuse-curated default — the classic overview (traces, model cost, latency percentiles, scores, model usage, and more), now built from regular widgets — and **each project chooses which dashboard shows on Home**:
+
+1. On **Home**, open the **dashboard selector** in the header and pick any dashboard to preview it there. The choice is reflected in the URL, so you can share the exact view.
+2. Click **Set as default** to make it the project's Home. Because this changes the page for everyone in the project, you confirm before it applies.
+
+Since Home is a normal dashboard, everything on it is a regular widget: you can drop the classic Home widgets (traces over time, model usage, latency percentiles, score analytics, …) onto any custom dashboard, or build your own Home from scratch.
+
+## Managing and sharing widgets
+
+Every widget — both on a dashboard tile and in the widget library — has a **⋯ menu**:
+
+- **Copy** — copies the widget to your clipboard; **paste it onto any dashboard** with **⌘/Ctrl+V** (it's added and scrolled into view). Paste only activates when the clipboard actually holds a Langfuse widget.
+- **Duplicate** — creates a copy of the widget in the current project.
+- **Download JSON** — exports the widget as a portable file.
+
+Widgets and dashboards use a **versioned JSON format** — a widget carries `{"$langfuseWidget": true, "version": 1}`, and a dashboard the analogous `$langfuseDashboard` envelope with each referenced widget's config inlined (so it travels without database ids). That makes them portable across projects and instances:
+
+- **Export** a single widget or a whole dashboard as a JSON file.
+- **Import** by **dragging the JSON file onto a dashboard** — Langfuse validates that it's a Langfuse widget/dashboard and recreates the widgets in your project.
 
 ## Advanced Features
 
