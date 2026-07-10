@@ -196,8 +196,17 @@ Each evaluator exposes an `evaluate` function. Langfuse passes an `EvaluationCon
 <Tab>
 
 ```python
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
+
+
+@dataclass
+class ToolCall:
+    id: str = ""
+    name: str = ""
+    arguments: Any = None
+    type: str = ""
+    index: int = 0
 
 
 @dataclass
@@ -205,6 +214,7 @@ class ObservationContext:
     input: Any = None
     output: Any = None
     metadata: Any = None
+    tool_calls: list[ToolCall] = field(default_factory=list)
 
 
 @dataclass
@@ -258,11 +268,20 @@ def evaluate(ctx: EvaluationContext) -> EvaluationResult:
 <Tab>
 
 ```ts
+type ToolCall = {
+  id: string;
+  name: string;
+  arguments: unknown;
+  type: string;
+  index: number;
+};
+
 type EvaluationContext = {
   observation: {
     input: any;
     output: any;
     metadata: any;
+    toolCalls: ToolCall[];
   };
   experiment:
     | {
@@ -306,7 +325,7 @@ type EvaluationResult = {
 };
 
 function evaluate({
-  observation: { input, output, metadata },
+  observation: { input, output, metadata, toolCalls },
   experiment,
 }: EvaluationContext): EvaluationResult {
   const itemExpectedOutput = experiment?.itemExpectedOutput;
@@ -326,6 +345,7 @@ function evaluate({
           rule: "output_present",
           hasInput: input != null,
           hasObservationMetadata: metadata != null,
+          toolCallCount: toolCalls.length,
           hasExpectedOutput: itemExpectedOutput != null,
           hasExperimentMetadata: itemMetadata != null,
         },
@@ -340,14 +360,15 @@ function evaluate({
 
 ### Context fields
 
-| Field                                                                                             | Description                                                              |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `ctx.observation.input`                                                                           | The input recorded on the observation selected by the evaluator target.  |
-| `ctx.observation.output`                                                                          | The output recorded on the observation selected by the evaluator target. |
-| `ctx.observation.metadata`                                                                        | The metadata recorded on the observation.                                |
-| `ctx.experiment`                                                                                  | Present only when the evaluator runs on an experiment.                   |
-| `ctx.experiment.item_expected_output` (Python) / `ctx.experiment.itemExpectedOutput` (TypeScript) | Expected output from the experiment item.                                |
-| `ctx.experiment.item_metadata` (Python) / `ctx.experiment.itemMetadata` (TypeScript)              | Metadata from the experiment item.                                       |
+| Field                                                                                             | Description                                                                                         |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ctx.observation.input`                                                                           | The input recorded on the observation selected by the evaluator target.                             |
+| `ctx.observation.output`                                                                          | The output recorded on the observation selected by the evaluator target.                            |
+| `ctx.observation.metadata`                                                                        | The metadata recorded on the observation.                                                           |
+| `ctx.observation.tool_calls` (Python) / `ctx.observation.toolCalls` (TypeScript)                  | Ordered calls with `id`, `name`, `arguments`, `type`, and `index`. Valid JSON arguments are parsed. |
+| `ctx.experiment`                                                                                  | Present only when the evaluator runs on an experiment.                                              |
+| `ctx.experiment.item_expected_output` (Python) / `ctx.experiment.itemExpectedOutput` (TypeScript) | Expected output from the experiment item.                                                           |
+| `ctx.experiment.item_metadata` (Python) / `ctx.experiment.itemMetadata` (TypeScript)              | Metadata from the experiment item.                                                                  |
 
 ### Score fields
 

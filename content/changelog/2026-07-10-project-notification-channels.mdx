@@ -1,0 +1,36 @@
+---
+date: 2026-07-10
+title: Route project notifications to Slack or webhooks
+description: Send blob export and evaluator deactivation alerts to Slack or a webhook.
+author: Tobias Wochinger
+ogImage: /images/changelog/2026-07-10-project-notification-channels.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Project admins can now send failure notifications to **Slack** or a **webhook**, in addition to admin emails:
+
+- A scheduled blob storage export fails.
+- Langfuse deactivates an evaluator after an unrecoverable error, such as a deleted model or LLM connection.
+
+Open **Project Settings → Notifications** to add one project notification channel.
+
+## Learn more
+
+<Cards num={2}>
+  <Card
+    title="Webhooks and Slack"
+    href="/docs/prompt-management/features/webhooks-slack-integrations"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Blob storage exports"
+    href="/docs/api-and-data-platform/features/export-to-blob-storage"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
