@@ -1447,19 +1447,25 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
           "mt-12",
           selectedTiers.length === 1
             ? "flex justify-center"
-            : "grid grid-cols-1 gap-y-6 gap-x-6 md:grid-cols-2 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
+            : "grid grid-cols-1 gap-y-6 gap-x-6 md:grid-cols-2 md:gap-x-2 md:gap-y-0 lg:gap-x-6 lg:items-stretch",
           selectedTiers.length === 4 && "lg:grid-cols-4",
           selectedTiers.length === 3 && "lg:grid-cols-3",
           selectedTiers.length === 2 && "lg:grid-cols-2",
         )}
       >
-        {selectedTiers.map((tier) => {
+        {selectedTiers.map((tier, tierIdx) => {
           return (
             <Card
               key={tier.id}
               hoverStripes
               className={cn(
                 "relative h-full flex flex-col",
+                // Subgrid keeps header/price/CTA/feature rows vertically
+                // aligned across cards regardless of text wrapping.
+                selectedTiers.length > 1 && "md:grid md:grid-rows-subgrid",
+                selectedTiers.length > 1 &&
+                  (variant === "cloud" ? "md:row-span-8" : "md:row-span-6"),
+                tierIdx >= 2 && "md:mt-6 lg:mt-0",
                 selectedTiers.length === 1 && "w-full max-w-lg",
               )}
             >
@@ -1494,11 +1500,11 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                   )}
                 </CardDescription>
               </CardHeader>
+              {/* Price information */}
               <CardContent className="p-0 px-4 lg:px-6">
-                {/* Price information */}
                 <div className="h-[60px] flex items-baseline">
                   <span className="text-3xl font-bold">{tier.price}</span>
-                  <span className="ml-1 text-sm leading-4">
+                  <span className="ml-1 text-sm leading-4 whitespace-nowrap">
                     {tier.price.includes("$")
                       ? tier.priceUnit
                         ? `/ ${tier.priceUnit}`
@@ -1506,7 +1512,9 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                       : ""}
                   </span>
                 </div>
+              </CardContent>
 
+              <CardContent className="p-0 px-4 lg:px-6">
                 <div>
                   {tier.ctaCallout ? (
                     <div className="flex gap-2">
@@ -1554,8 +1562,10 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     </Button>
                   )}
                 </div>
+              </CardContent>
 
-                {/* Callouts for different tiers - always render container for alignment */}
+              {/* Callouts for different tiers - always render container for alignment */}
+              <CardContent className="p-0 px-4 lg:px-6">
                 <div className="px-0 py-6 h-[30px] flex items-center justify-center">
                   {tier.calloutLink ? (
                     <div className="text-xs text-center text-muted-foreground whitespace-nowrap">
