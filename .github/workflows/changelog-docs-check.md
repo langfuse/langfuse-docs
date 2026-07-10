@@ -4,6 +4,9 @@ description: "Daily cross-repo check for user-facing changes in langfuse/langfus
 on:
   schedule:
     - cron: "0 7 * * *"
+  push:
+    branches:
+      - codex/changelog-docs-check
   workflow_dispatch:
 engine: claude
 permissions:
