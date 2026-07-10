@@ -124,7 +124,11 @@ export function PricingCalculator({
     () => parseInt(monthlyEvents.replace(/,/g, "")) || 0,
     [monthlyEvents],
   );
-  const shouldSuggestSales = monthlyUnits >= SALES_ASSISTED_UNITS_THRESHOLD;
+  const isEnterprise = selectedPlan === "Enterprise";
+  // Enterprise always shows the sizing callout; other plans only above the
+  // high-volume threshold.
+  const shouldSuggestSales =
+    !isEnterprise && monthlyUnits >= SALES_ASSISTED_UNITS_THRESHOLD;
 
   // Calculate pricing breakdown (single source of truth)
   const pricingBreakdown = useMemo(() => {
@@ -250,16 +254,16 @@ export function PricingCalculator({
             </CornerBox>
           </div>
 
-          {shouldSuggestSales && (
+          {(isEnterprise || shouldSuggestSales) && (
             <div className="flex flex-col gap-3 rounded-sm border border-line-structure bg-surface-1 p-4 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1">
                 <div className="text-sm font-medium text-text-primary">
-                  High-volume workload
+                  {isEnterprise ? "Enterprise plan" : "High-volume workload"}
                 </div>
                 <Text size="s" className="text-left text-text-secondary">
-                  At {formatNumber(SALES_ASSISTED_UNITS_THRESHOLD)}+ billable
-                  units per month, talk to sales for help sizing the workload
-                  and a custom quote.
+                  {isEnterprise
+                    ? "Talk to sales for help sizing your workload and vendor onboarding."
+                    : `At ${formatNumber(SALES_ASSISTED_UNITS_THRESHOLD)}+ billable units per month, talk to sales for help sizing the workload and a custom quote.`}
                 </Text>
               </div>
               <Button
