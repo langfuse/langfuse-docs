@@ -39,8 +39,8 @@ You are reviewing whether recent user-facing product changes in `langfuse/langfu
 
 - Use `tools.github` as the primary source of truth for both repositories.
 - Keep this workflow read-only. Do not open issues, edit files, or create pull requests.
-- Only use the `slack-dm-notify` safe-output job after your analysis is complete.
-- Send exactly one Slack DM per run.
+- Only use the `slack-channel-notify` safe-output job after your analysis is complete.
+- Send exactly one Slack channel message per run.
 - Prefer a short, high-signal report over exhaustive coverage.
 - Ignore internal-only changes, refactors, CI changes, test-only changes, and version bumps that do not create real documentation work.
 
@@ -105,9 +105,13 @@ For each candidate product change, decide whether it is:
 
 Deduplicate closely related PRs into a single recommendation when they represent one feature or release theme.
 
-## Slack DM output
+## Slack output
 
-Always send exactly one DM with the `slack-dm-notify` tool.
+Always send exactly one Slack channel message with the `slack-channel-notify` tool.
+
+The message is posted to `#lf-team-engineering`.
+
+Do not add any feedback footer yourself. The safe-output job appends it automatically.
 
 If there are no clear gaps, send a concise "no action needed" update.
 
@@ -121,7 +125,7 @@ If follow-up is needed, include:
   - The best evidence you found (release, PR, or file links)
   - The most likely docs surface to update in `langfuse/langfuse-docs`
 
-## Slack DM format
+## Slack message format
 
 Use this structure:
 

@@ -1,41 +1,37 @@
 ---
-description: "Shared safe-output job for sending a Slack DM to the configured docs notifier"
+description: "Shared safe-output job for posting the docs check summary to Slack"
 safe-outputs:
   jobs:
-    slack-dm-notify:
-      description: "Send a direct message to the configured Slack recipient"
+    slack-channel-notify:
+      description: "Post the summary message to the configured Slack channel"
       runs-on: ubuntu-latest
-      output: "Slack DM sent"
+      output: "Slack message sent"
       timeout-minutes: 10
       permissions:
         contents: read
       inputs:
         message:
-          description: "The message text to send in the Slack direct message"
+          description: "The message text to send in Slack"
           required: true
           type: string
       steps:
-        - name: Send Slack DM
+        - name: Send Slack message
           uses: actions/github-script@v8
           env:
             SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"
-            SLACK_NOTIFY_EMAIL: "${{ vars.SLACK_NOTIFY_EMAIL }}"
+            SLACK_NOTIFY_CHANNEL: "${{ vars.SLACK_NOTIFY_CHANNEL }}"
           with:
             script: |
               const fs = require("fs");
 
               const token = process.env.SLACK_BOT_TOKEN;
-              const email = process.env.SLACK_NOTIFY_EMAIL;
+              const configuredChannel = process.env.SLACK_NOTIFY_CHANNEL || "lf-team-engineering";
               const outputFile = process.env.GH_AW_AGENT_OUTPUT;
               const staged = process.env.GH_AW_SAFE_OUTPUTS_STAGED === "true";
+              const footer = "Feedback on quality of outputs? Share with Annabell\n#lf-team-engineering";
 
               if (!token) {
                 core.setFailed("SLACK_BOT_TOKEN secret is not configured");
-                return;
-              }
-
-              if (!email) {
-                core.setFailed("SLACK_NOTIFY_EMAIL repo variable is not configured");
                 return;
               }
 
@@ -46,23 +42,30 @@ safe-outputs:
 
               const payload = JSON.parse(fs.readFileSync(outputFile, "utf8"));
               const items = (payload.items || []).filter(
-                (item) => item.type === "slack_dm_notify"
+                (item) => item.type === "slack_channel_notify"
               );
               const messages = items
                 .map((item) => item.message)
                 .filter((message) => typeof message === "string" && message.trim().length > 0);
 
               if (messages.length === 0) {
-                core.info("No Slack DM messages found; skipping send.");
+                core.info("No Slack channel messages found; skipping send.");
                 return;
               }
 
               if (staged) {
-                core.info("Staged mode: would send Slack DM");
+                core.info("Staged mode: would send Slack channel message");
                 await core.summary
-                  .addHeading("Staged Mode: Slack DM Preview", 2)
-                  .addRaw(`**Recipient:** ${email}\n\n`)
-                  .addCodeBlock(messages.join("\n\n---\n\n"), "text")
+                  .addHeading("Staged Mode: Slack Channel Preview", 2)
+                  .addRaw(`**Channel:** ${configuredChannel}\n\n`)
+                  .addCodeBlock(
+                    messages
+                      .map((message) =>
+                        message.trim().endsWith(footer) ? message.trim() : `${message.trim()}\n\n${footer}`
+                      )
+                      .join("\n\n---\n\n"),
+                    "text"
+                  )
                   .write();
                 return;
               }
@@ -87,34 +90,57 @@ safe-outputs:
                 return data;
               };
 
+              const resolveChannelId = async () => {
+                if (/^[CDG][A-Z0-9]+$/.test(configuredChannel)) {
+                  return configuredChannel;
+                }
+
+                const normalizedChannel = configuredChannel.replace(/^#/, "");
+                let cursor = undefined;
+
+                do {
+                  const params = {
+                    exclude_archived: "true",
+                    limit: "200",
+                    types: "public_channel,private_channel",
+                  };
+
+                  if (cursor) {
+                    params.cursor = cursor;
+                  }
+
+                  const response = await slackFormRequest("conversations.list", params);
+                  const match = (response.channels || []).find(
+                    (channel) => channel.name === normalizedChannel
+                  );
+
+                  if (match && match.id) {
+                    return match.id;
+                  }
+
+                  cursor = response.response_metadata && response.response_metadata.next_cursor;
+                } while (cursor);
+
+                throw new Error(
+                  `Could not resolve Slack channel '${configuredChannel}'. Set SLACK_NOTIFY_CHANNEL to a channel ID or grant the bot read access to channels.`
+                );
+              };
+
               try {
-                const userLookup = await slackFormRequest("users.lookupByEmail", { email });
-                const userId = userLookup.user && userLookup.user.id;
-
-                if (!userId) {
-                  core.setFailed(`Slack user lookup returned no user ID for ${email}`);
-                  return;
-                }
-
-                const openConversation = await slackFormRequest("conversations.open", {
-                  users: userId,
-                });
-                const channelId = openConversation.channel && openConversation.channel.id;
-
-                if (!channelId) {
-                  core.setFailed(`Could not open a Slack DM conversation for ${email}`);
-                  return;
-                }
+                const channelId = await resolveChannelId();
 
                 for (const message of messages) {
+                  const finalMessage = message.trim().endsWith(footer)
+                    ? message.trim()
+                    : `${message.trim()}\n\n${footer}`;
                   await slackFormRequest("chat.postMessage", {
                     channel: channelId,
-                    text: message,
+                    text: finalMessage,
                   });
                 }
 
-                core.info(`Sent ${messages.length} Slack DM message(s) to ${email}`);
+                core.info(`Sent ${messages.length} Slack message(s) to ${configuredChannel}`);
               } catch (error) {
-                core.setFailed(`Failed to send Slack DM: ${error.message}`);
+                core.setFailed(`Failed to send Slack message: ${error.message}`);
               }
 ---
