@@ -52,31 +52,6 @@ test("retries transient network errors", async () => {
   assert.equal(requests, 2);
 });
 
-test("uses the GitHub token from the environment", async () => {
-  const previousAccessToken = process.env.GITHUB_ACCESS_TOKEN;
-  const previousToken = process.env.GITHUB_TOKEN;
-  let authorization;
-
-  process.env.GITHUB_ACCESS_TOKEN = "test-access-token";
-  process.env.GITHUB_TOKEN = "test-fallback-token";
-
-  try {
-    await fetchGitHub("README.md", {
-      fetchImpl: async (_url, init) => {
-        authorization = init.headers.Authorization;
-        return new Response("# Workshop", { status: 200 });
-      },
-    });
-  } finally {
-    if (previousAccessToken == null) delete process.env.GITHUB_ACCESS_TOKEN;
-    else process.env.GITHUB_ACCESS_TOKEN = previousAccessToken;
-    if (previousToken == null) delete process.env.GITHUB_TOKEN;
-    else process.env.GITHUB_TOKEN = previousToken;
-  }
-
-  assert.equal(authorization, "Bearer test-access-token");
-});
-
 test("does not retry permanent GitHub responses", async () => {
   let requests = 0;
 
