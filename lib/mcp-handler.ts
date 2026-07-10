@@ -40,14 +40,94 @@ const trackMcpToolUsage = async (
 
 const MCP_SERVER_INSTRUCTIONS = [
   "Use this server for Langfuse documentation, product concepts, SDK/API usage, instrumentation guidance, migration help, and current docs pages.",
-  "For project-scoped Langfuse data or actions such as prompts, datasets, scores, comments, metrics, observations, models, or feedback submission, prefer the authenticated Langfuse app MCP server when it is available.",
+  "For project-scoped Langfuse data or actions such as prompts, datasets, scores, comments, metrics, observations, models, or project-specific feedback, prefer the authenticated Langfuse app MCP server when it is available.",
   "When Langfuse agent skills are installed, use them for end-to-end workflows, repo-specific guidance, and agent setup patterns; use this docs server to fetch or verify current documentation.",
   "Inspect the available tools and their schemas dynamically; do not assume a fixed tool list.",
-  "If the user wants to provide feedback about Langfuse docs or something is not working well, mention that they can open a GitHub issue in the langfuse-docs repository, or, when authenticated API/app-MCP tools are available, submit feedback via the Langfuse API or submitFeedback tool. Before using a feedback tool, ask permission, show the exact payload, and avoid secrets/customer data/trace payloads.",
+  "If the user wants to provide feedback about Langfuse docs or something is not working well, ask permission, show the exact payload, avoid secrets/customer data/trace payloads, then use submitFeedback.",
 ].join("\n");
+
+const FEEDBACK_INTAKE_URL = "https://cloud.langfuse.com/api/feedback";
 
 export const mcpHandler = createMcpHandler(
   (server) => {
+    (server as any).tool(
+      "submitFeedback",
+      [
+        "Submit explicit user-approved feedback to the Langfuse team.",
+        "Before calling, ask permission and show the exact payload.",
+        "Do not include secrets, credentials, customer data, trace payloads, or unrelated context.",
+      ].join("\n"),
+      {
+        targetType: z.enum([
+          "skill",
+          "mcp-tool",
+          "cli",
+          "docs",
+          "public-api",
+          "other",
+        ]),
+        target: z.string().trim().min(1).max(200),
+        feedback: z.string().trim().min(1).max(3000),
+        goal: z.string().trim().min(1).max(1500).optional(),
+        referenceUrl: z
+          .string()
+          .url()
+          .max(2048)
+          .refine(
+            (url) => ["http:", "https:"].includes(new URL(url).protocol),
+            "referenceUrl must use http or https",
+          )
+          .optional(),
+      },
+      async (input) => {
+        try {
+          const token = process.env.LANGFUSE_FEEDBACK_INTAKE_TOKEN;
+          if (!token) throw new Error("Feedback intake is not configured");
+
+          const response = await fetch(FEEDBACK_INTAKE_URL, {
+            method: "POST",
+            redirect: "error",
+            signal: AbortSignal.timeout(5000),
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(input),
+          });
+          if (!response.ok) {
+            throw new Error(`Feedback intake returned ${response.status}`);
+          }
+
+          const result = (await response.json()) as { id: string };
+          trackMcpToolUsage("submitFeedback", "success", {
+            target_type: input.targetType,
+          });
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Feedback submitted. Reference ID: ${result.id}`,
+              },
+            ],
+          };
+        } catch (error) {
+          trackMcpToolUsage("submitFeedback", "error", {
+            error_message:
+              error instanceof Error ? error.message : "Unknown error",
+          });
+          return {
+            content: [
+              {
+                type: "text",
+                text: "Feedback submission failed. Please try again later.",
+              },
+            ],
+            isError: true,
+          };
+        }
+      },
+    );
+
     (server as any).tool(
       "searchLangfuseDocs",
       "Semantic search (RAG) over the Langfuse documentation. Use this whenever the user asks a broader question that cannot be answered by a specific single page. Returns a concise answer synthesized from relevant docs. The raw provider response is included in _meta. Prefer this before guessing. If a specific page is needed call getLangfuseDocsPage first.",
