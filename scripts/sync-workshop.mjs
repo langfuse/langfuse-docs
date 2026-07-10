@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import posixPath from "node:path/posix";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
 import workshopConfig from "../lib/workshop-config.js";
 
 const OWNER = "langfuse";
@@ -12,108 +12,133 @@ const REPO = "langfuse-workshop";
 const REF = "main";
 const REPO_SLUG = `${OWNER}/${REPO}`;
 const REPO_URL = `https://github.com/${REPO_SLUG}`;
-const API_CONTENTS_URL = `https://api.github.com/repos/${REPO_SLUG}/contents`;
 const GITHUB_BLOB_BASE = `${REPO_URL}/blob/${REF}`;
 const GITHUB_TREE_BASE = `${REPO_URL}/tree/${REF}`;
 const RAW_BASE = `https://raw.githubusercontent.com/${REPO_SLUG}/${REF}`;
 const OUTPUT_DIR = path.join(process.cwd(), "content", "workshop");
 const FENCED_CODE_BLOCK_PATTERN = /(```[\s\S]*?```|~~~[\s\S]*?~~~)/g;
+const GITHUB_FETCH_ATTEMPTS = 4;
+const GITHUB_FETCH_TIMEOUT_MS = 30_000;
+const GITHUB_RETRY_BASE_DELAY_MS = 500;
+const GITHUB_RETRY_MAX_DELAY_MS = 5_000;
+const GITHUB_ERROR_BODY_MAX_LENGTH = 1_000;
 const { WORKSHOP_DEFAULT_CHAPTER } = workshopConfig;
 
-const initialEnvKeys = new Set(Object.keys(process.env));
-
-function parseEnvValue(value) {
-  const trimmed = value.trim();
-  const quote = trimmed[0];
-  if (
-    (quote === `"` || quote === `'`) &&
-    trimmed[trimmed.length - 1] === quote
-  ) {
-    const unquoted = trimmed.slice(1, -1);
-    return quote === `"`
-      ? unquoted.replace(/\\n/g, "\n").replace(/\\"/g, `"`)
-      : unquoted;
-  }
-  return trimmed;
-}
-
-async function loadEnvFiles() {
-  for (const filename of [".env", ".env.local"]) {
-    const filePath = path.join(process.cwd(), filename);
-    if (!existsSync(filePath)) continue;
-
-    const contents = await fs.readFile(filePath, "utf8");
-    for (const line of contents.split(/\r?\n/)) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("#")) continue;
-
-      const match = trimmed.match(
-        /^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$/,
-      );
-      if (!match) continue;
-
-      const [, key, rawValue] = match;
-      if (initialEnvKeys.has(key)) continue;
-      process.env[key] = parseEnvValue(rawValue);
-    }
-  }
-}
-
-function githubToken() {
-  return process.env.GITHUB_ACCESS_TOKEN || process.env.GITHUB_TOKEN || null;
-}
-
-function githubHeaders(accept) {
-  const headers = {
-    Accept: accept,
+function githubHeaders() {
+  return {
     "User-Agent": "langfuse-docs-workshop-sync",
-    "X-GitHub-Api-Version": "2022-11-28",
   };
-  const token = githubToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
-  return headers;
 }
 
 function encodeRepoPath(repoPath) {
   return repoPath.split("/").map(encodeURIComponent).join("/");
 }
 
-function contentsUrl(repoPath) {
-  return `${API_CONTENTS_URL}/${encodeRepoPath(repoPath)}?ref=${REF}`;
+function rawUrl(repoPath) {
+  return `${RAW_BASE}/${encodeRepoPath(repoPath)}`;
 }
 
-async function fetchGitHub(repoPath, accept) {
-  const response = await fetch(contentsUrl(repoPath), {
-    headers: githubHeaders(accept),
-  });
+function isRetryableGitHubStatus(status) {
+  return status === 408 || status === 429 || status >= 500;
+}
 
-  if (!response.ok) {
-    const body = await response.text();
+function retryAfterMs(response) {
+  const value = response.headers.get("retry-after");
+  if (!value) return null;
+
+  const seconds = Number(value);
+  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1_000);
+
+  const date = Date.parse(value);
+  return Number.isNaN(date) ? null : Math.max(0, date - Date.now());
+}
+
+function retryDelayMs(response, attempt, random) {
+  const requestedDelay = response ? retryAfterMs(response) : null;
+  if (requestedDelay != null) {
+    return Math.min(requestedDelay, GITHUB_RETRY_MAX_DELAY_MS);
+  }
+
+  const exponentialDelay = Math.min(
+    GITHUB_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1),
+    GITHUB_RETRY_MAX_DELAY_MS,
+  );
+  return exponentialDelay + Math.floor(random() * 250);
+}
+
+function truncateErrorBody(body) {
+  if (body.length <= GITHUB_ERROR_BODY_MAX_LENGTH) return body;
+  return `${body.slice(0, GITHUB_ERROR_BODY_MAX_LENGTH)}\n...[response truncated]`;
+}
+
+function sleep(delayMs) {
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
+}
+
+async function fetchGitHub(repoPath, options = {}) {
+  const fetchImpl = options.fetchImpl ?? globalThis.fetch;
+  const sleepImpl = options.sleepImpl ?? sleep;
+  const random = options.random ?? Math.random;
+  const warn = options.warn ?? console.warn;
+  const url = rawUrl(repoPath);
+
+  for (let attempt = 1; attempt <= GITHUB_FETCH_ATTEMPTS; attempt += 1) {
+    let response;
+
+    try {
+      response = await fetchImpl(url, {
+        headers: githubHeaders(),
+        signal: AbortSignal.timeout(GITHUB_FETCH_TIMEOUT_MS),
+      });
+    } catch (error) {
+      if (attempt === GITHUB_FETCH_ATTEMPTS) {
+        throw new Error(
+          `Failed to fetch ${repoPath} from ${REPO_SLUG}@${REF} after ${GITHUB_FETCH_ATTEMPTS} attempts: ${error.message}`,
+          { cause: error },
+        );
+      }
+
+      const delayMs = retryDelayMs(null, attempt, random);
+      warn(
+        `GitHub request for ${repoPath} failed (${error.message}); retrying in ${delayMs}ms (${attempt}/${GITHUB_FETCH_ATTEMPTS})`,
+      );
+      await sleepImpl(delayMs);
+      continue;
+    }
+
+    if (response.ok) return response;
+
+    if (
+      isRetryableGitHubStatus(response.status) &&
+      attempt < GITHUB_FETCH_ATTEMPTS
+    ) {
+      const delayMs = retryDelayMs(response, attempt, random);
+      await response.body?.cancel();
+      warn(
+        `GitHub request for ${repoPath} returned ${response.status} ${response.statusText}; retrying in ${delayMs}ms (${attempt}/${GITHUB_FETCH_ATTEMPTS})`,
+      );
+      await sleepImpl(delayMs);
+      continue;
+    }
+
+    const body = truncateErrorBody(await response.text());
+    const details = body ? `\n${body}` : "";
     throw new Error(
-      `Failed to fetch ${repoPath} from ${REPO_SLUG}@${REF}: ${response.status} ${response.statusText}\n${body}`,
+      `Failed to fetch ${repoPath} from ${REPO_SLUG}@${REF}: ${response.status} ${response.statusText}${details}`,
     );
   }
 
-  return response;
-}
-
-async function fetchJson(repoPath) {
-  const response = await fetchGitHub(repoPath, "application/vnd.github+json");
-  return response.json();
+  throw new Error(`Failed to fetch ${repoPath} from ${REPO_SLUG}@${REF}`);
 }
 
 async function fetchMarkdown(repoPath) {
-  const response = await fetchGitHub(repoPath, "application/vnd.github.raw");
+  const response = await fetchGitHub(repoPath);
   return response.text();
 }
 
-function isMarkdownFile(entry) {
-  return entry.type === "file" && entry.name.toLowerCase().endsWith(".md");
-}
-
-function sortByName(entries) {
-  return entries.sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, {
+function sortPaths(paths) {
+  return paths.sort((a, b) =>
+    a.localeCompare(b, undefined, {
       numeric: true,
       sensitivity: "base",
     }),
@@ -124,26 +149,35 @@ function slugFromFileName(fileName) {
   return fileName.replace(/\.md$/i, "");
 }
 
-async function collectWorkshopFiles() {
-  const [learnerEntries, instructorEntries] = await Promise.all([
-    fetchJson("docs/learner"),
-    fetchJson("docs/instructor"),
-  ]);
+function extractWorkshopSourcePaths(readme) {
+  const paths = {
+    learner: new Set(),
+    instructor: new Set(),
+  };
+  const workshopLinkPattern =
+    /\]\((?:\.\/)?(docs\/(learner|instructor)\/[^)\s?#]+\.md)(?:[?#][^)\s]*)?(?:\s+["'][^)]*["'])?\)/gi;
+  let match;
 
-  const learnerFiles = sortByName(
-    learnerEntries.filter(
-      (entry) => isMarkdownFile(entry) && entry.name !== "README.md",
-    ),
-  );
-  const instructorFiles = sortByName(
-    instructorEntries.filter(
-      (entry) => isMarkdownFile(entry) && entry.name !== "README.md",
-    ),
-  );
+  while ((match = workshopLinkPattern.exec(readme)) !== null) {
+    paths[match[2].toLowerCase()].add(match[1]);
+  }
+
+  return {
+    learner: sortPaths([...paths.learner]),
+    instructor: sortPaths([...paths.instructor]),
+  };
+}
+
+async function collectWorkshopFiles() {
+  const readme = await fetchMarkdown("README.md");
+  const { learner: learnerPaths, instructor: instructorPaths } =
+    extractWorkshopSourcePaths(readme);
 
   if (
-    !learnerFiles.some(
-      (entry) => slugFromFileName(entry.name) === WORKSHOP_DEFAULT_CHAPTER,
+    !learnerPaths.some(
+      (sourcePath) =>
+        slugFromFileName(posixPath.basename(sourcePath)) ===
+        WORKSHOP_DEFAULT_CHAPTER,
     )
   ) {
     throw new Error(
@@ -151,8 +185,10 @@ async function collectWorkshopFiles() {
     );
   }
   if (
-    !instructorFiles.some(
-      (entry) => slugFromFileName(entry.name) === WORKSHOP_DEFAULT_CHAPTER,
+    !instructorPaths.some(
+      (sourcePath) =>
+        slugFromFileName(posixPath.basename(sourcePath)) ===
+        WORKSHOP_DEFAULT_CHAPTER,
     )
   ) {
     throw new Error(
@@ -166,19 +202,20 @@ async function collectWorkshopFiles() {
       outputPath: "index.mdx",
       route: "/workshop",
       shortTitle: "Overview",
+      markdown: readme,
     },
-    ...learnerFiles.map((entry) => {
-      const slug = slugFromFileName(entry.name);
+    ...learnerPaths.map((sourcePath) => {
+      const slug = slugFromFileName(posixPath.basename(sourcePath));
       return {
-        sourcePath: entry.path,
+        sourcePath,
         outputPath: `learner/${slug}.mdx`,
         route: `/workshop/learner/${slug}`,
       };
     }),
-    ...instructorFiles.map((entry) => {
-      const slug = slugFromFileName(entry.name);
+    ...instructorPaths.map((sourcePath) => {
+      const slug = slugFromFileName(posixPath.basename(sourcePath));
       return {
-        sourcePath: entry.path,
+        sourcePath,
         outputPath: `instructor/${slug}.mdx`,
         route: `/workshop/instructor/${slug}`,
       };
@@ -693,25 +730,24 @@ async function writePage(file, content) {
 }
 
 async function main() {
-  await loadEnvFiles();
-
   const files = await collectWorkshopFiles();
   const routeBySourcePath = new Map(
     files.map((file) => [file.sourcePath, file.route]),
   );
 
-  await fs.rm(OUTPUT_DIR, { recursive: true, force: true });
-  await fs.mkdir(OUTPUT_DIR, { recursive: true });
-
   const pages = await Promise.all(
     files.map(async (file) => {
-      const markdown = await fetchMarkdown(file.sourcePath);
+      const markdown = file.markdown ?? (await fetchMarkdown(file.sourcePath));
       return {
         file,
         content: buildGeneratedPage(markdown, file, routeBySourcePath),
       };
     }),
   );
+
+  // Preserve the last successful render if GitHub is temporarily unavailable.
+  await fs.rm(OUTPUT_DIR, { recursive: true, force: true });
+  await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
   for (const page of pages) {
     await writePage(page.file, page.content);
@@ -743,7 +779,14 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
+
+export { extractWorkshopSourcePaths, fetchGitHub };
