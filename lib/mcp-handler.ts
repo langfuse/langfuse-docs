@@ -46,7 +46,7 @@ const MCP_SERVER_INSTRUCTIONS = [
   "If the user wants to provide feedback about Langfuse docs or something is not working well, ask permission, show the exact payload, avoid secrets/customer data/trace payloads, then use submitFeedback.",
 ].join("\n");
 
-const FEEDBACK_INTAKE_URL = "https://cloud.langfuse.com/api/feedback";
+const FEEDBACK_INTAKE_URL = "https://cloud.langfuse.com/api/feedback/docs-mcp";
 
 export const mcpHandler = createMcpHandler(
   (server) => {
