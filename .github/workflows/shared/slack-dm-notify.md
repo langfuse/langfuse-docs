@@ -83,9 +83,20 @@ safe-outputs:
                   throw new Error(`Incoming webhook request failed: ${detail}`);
                 }
 
-                if (body.trim() !== "ok") {
-                  throw new Error(`Incoming webhook returned unexpected response: ${body.trim()}`);
+                if (body.trim() === "ok") {
+                  return;
                 }
+
+                try {
+                  const parsed = JSON.parse(body);
+                  if (parsed && parsed.ok === true) {
+                    return;
+                  }
+                } catch (_error) {
+                  // Fall through to the generic error below.
+                }
+
+                throw new Error(`Incoming webhook returned unexpected response: ${body.trim()}`);
               };
 
               try {
