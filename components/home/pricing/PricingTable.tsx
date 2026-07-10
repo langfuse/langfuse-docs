@@ -1173,59 +1173,6 @@ const sections: Section[] = [
     ],
   },
   {
-    name: "Billing",
-    features: [
-      {
-        name: "Subscription management",
-        tiers: {
-          cloud: {
-            Hobby: false,
-            Core: "Self-serve",
-            Pro: "Self-serve",
-            Enterprise: "Self-serve, contact sales for " + COMMITTED_SPEND,
-          },
-          selfHosted: { "Open Source": false, Enterprise: true },
-        },
-      },
-      {
-        name: "Payment methods",
-        tiers: {
-          cloud: {
-            Hobby: false,
-            Core: "Credit card",
-            Pro: "Credit card",
-            Enterprise: "Credit card, Invoice",
-          },
-          selfHosted: { "Open Source": false, Enterprise: true },
-        },
-      },
-      {
-        name: "Contract duration",
-        tiers: {
-          cloud: {
-            Hobby: false,
-            Core: "Monthly, or annual with " + COMMITTED_SPEND,
-            Pro: "Monthly, or annual with " + COMMITTED_SPEND,
-            Enterprise: "Monthly, or annual with " + COMMITTED_SPEND,
-          },
-          selfHosted: { "Open Source": false, Enterprise: true },
-        },
-      },
-      {
-        name: "Billing via AWS Marketplace",
-        tiers: {
-          cloud: {
-            Hobby: false,
-            Core: COMMITTED_SPEND,
-            Pro: COMMITTED_SPEND,
-            Enterprise: COMMITTED_SPEND,
-          },
-          selfHosted: { "Open Source": false, Enterprise: true },
-        },
-      },
-    ],
-  },
-  {
     name: "Compliance",
     href: "/security",
     features: [
@@ -1276,6 +1223,63 @@ const sections: Section[] = [
       {
         name: "InfoSec/legal reviews",
         href: "/security",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: COMMITTED_SPEND,
+            Pro: COMMITTED_SPEND,
+            Enterprise: COMMITTED_SPEND,
+          },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+    ],
+  },
+  {
+    name: "Billing",
+    description:
+      "All paid plans are self-serve with monthly billing via credit card. With the optional Committed spend agreement, you can switch to billing via AWS Marketplace or invoice.",
+    features: [
+      {
+        name: "Subscription management",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: "Self-serve",
+            Pro: "Self-serve",
+            Enterprise: "Self-serve",
+          },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Payment methods",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: "Credit card",
+            Pro: "Credit card",
+            Enterprise: "Credit card",
+          },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Contract duration",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: "Monthly",
+            Pro: "Monthly",
+            Enterprise: "Monthly",
+          },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Billing via AWS Marketplace or invoice",
+        description:
+          "Available with an annual committed-spend agreement, on any cloud plan.",
         tiers: {
           cloud: {
             Hobby: false,
