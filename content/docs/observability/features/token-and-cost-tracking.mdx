@@ -371,23 +371,29 @@ with langfuse.start_as_current_observation(
 <Tab>
 
 ```ts
-const generation = langfuse.generation({
-  // ...
-  usage: {
-    // usage
-    prompt_tokens: integer,
-    completion_tokens: integer,
-    total_tokens: integer,
-    prompt_tokens_details: {
-      cached_tokens: integer,
-      audio_tokens: integer,
-    },
-    completion_tokens_details: {
-      reasoning_tokens: integer,
+import { startObservation } from "@langfuse/tracing";
+
+const generation = startObservation(
+  "openai-style-generation",
+  {
+    model: "gpt-4o",
+    usageDetails: {
+      // usage (OpenAI-style schema)
+      prompt_tokens: 10,
+      completion_tokens: 25,
+      total_tokens: 35,
+      prompt_tokens_details: {
+        cached_tokens: 5,
+        audio_tokens: 2,
+      },
+      completion_tokens_details: {
+        reasoning_tokens: 15,
+      },
     },
   },
-  // ...
-});
+  { asType: "generation" },
+);
+generation.end();
 ```
 
 </Tab>

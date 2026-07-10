@@ -25,10 +25,8 @@ This guide will walk you through the process of evaluating LLM responses capture
 
 ### Install dependencies & Set environment variables
 
-_**Note:** New Python SDK available (v3) - We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
-
 ```python
-%pip install "langfuse<3.0.0" openai cleanlab-tlm
+%pip install langfuse openai cleanlab-tlm --upgrade
 ```
 
 ```python
@@ -70,9 +68,10 @@ For the sake of demonstration purposes, we'll briefly generate some traces and t
 NOTE: TLM requires the entire input to the LLM to be provided. This includes any system prompts, context, or other information that was originally provided to the LLM to generate the response. Notice below that we include the system prompt in the trace metadata since by default the trace does not include the system prompt within the input.
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client, propagate_attributes
 from openai import OpenAI
 
+langfuse = get_client()
 openai = OpenAI()
 ```
 
@@ -90,23 +89,22 @@ trivia_questions = [
 def generate_answers(trivia_question):
     system_prompt = "You are a trivia master."
 
-    # Update the trace with the question
-    langfuse_context.update_current_trace(
-        name=f"Answering question: '{trivia_question}'",
+    # Propagate the trace name, tags, and metadata to all observations of this trace
+    with propagate_attributes(
+        trace_name=f"Answering question: '{trivia_question}'",
         tags=["TLM_eval_pipeline"],
         metadata={"system_prompt": system_prompt}
-    )
+    ):
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": trivia_question},
+            ],
+        )
 
-    response = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": trivia_question},
-        ],
-    )
-
-    answer = response.choices[0].message.content
-    return answer
+        answer = response.choices[0].message.content
+        return answer
 
 
 # Generate answers
@@ -117,39 +115,11 @@ for i in range(len(trivia_questions)):
     print(f"Question {i+1}: {trivia_questions[i]}")
     print(f"Answer {i+1}:\n{answer}\n")
 
+# Ensure all traces are sent to Langfuse before we fetch them below
+langfuse.flush()
+
 print(f"Generated {len(answers)} answers and tracked them in Langfuse.")
 ```
-
-    Question 1: What is the 3rd month of the year in alphabetical order?
-    Answer 1:
-    March
-
-    Question 2: What is the capital of France?
-    Answer 2:
-    The capital of France is Paris.
-
-    Question 3: How many seconds are in 100 years?
-    Answer 3:
-    There are 31,536,000 seconds in a year (60 seconds x 60 minutes x 24 hours x 365 days). Therefore, in 100 years, there would be 3,153,600,000 seconds.
-
-    Question 4: Alice, Bob, and Charlie went to a café. Alice paid twice as much as Bob, and Bob paid three times as much as Charlie. If the total bill was $72, how much did each person pay?
-    Answer 4:
-    Let's call the amount Charlie paid x.
-    Alice paid twice as much as Bob, so she paid 2*(3x) = 6x.
-    Bob paid three times as much as Charlie, so he paid 3x.
-
-    We know the total bill was $72:
-    x + 6x + 3x = 72
-    10x = 72
-    x = 7.2
-
-    Therefore, Charlie paid $7.20, Bob paid $21.60, and Alice paid $43.20.
-
-    Question 5: When was the Declaration of Independence signed?
-    Answer 5:
-    The Declaration of Independence was signed on July 4, 1776.
-
-    Generated 5 answers and tracked them in Langfuse.
 
 Remember, the goal of this tutorial is to show you how to build an external evaluation pipeline. These pipelines will run in your CI/CD environment, or be run in a different orchestrated container service. No matter the environment you choose, three key steps always apply:
 
@@ -167,24 +137,23 @@ For the rest of the notebook, we'll have one goal:
 
 ### Download trace dataset from Langfuse
 
-Fetching traces from Langfuse is straightforward. Just set up the Langfuse client and use one of its functions to fetch the data. We'll fetch the traces and evaluate them. After that, we'll add our scores back into Langfuse.
+Fetching traces from Langfuse is straightforward. Just set up the Langfuse client and use the public API wrapper to fetch the data. We'll fetch the traces and evaluate them. After that, we'll add our scores back into Langfuse.
 
-The `fetch_traces()` function has arguments to filter the traces by tags, timestamps, and beyond. You can find more about other methods to [query traces](https://langfuse.com/docs/query-traces) in our docs.
+The `langfuse.api.trace.list()` method has arguments to filter the traces by tags, timestamps, and beyond. You can find more about other methods to [query traces](https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk) in our docs.
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 from datetime import datetime, timedelta
 
-langfuse = Langfuse()
+langfuse = get_client()
 now = datetime.now()
 one_day_ago = now - timedelta(hours=24)
 
-traces = langfuse.fetch_traces(
+traces = langfuse.api.trace.list(
     tags="TLM_eval_pipeline",
     from_timestamp=one_day_ago,
     to_timestamp=now,
 ).data
-
 ```
 
 ### Generate evaluations with TLM
@@ -419,12 +388,14 @@ for idx, row in trace_evaluations.iterrows():
     explanation = row["explanation"]
 
     # Add the trustworthiness score to the trace with the explanation as a comment
-    langfuse.score(
-            trace_id=trace_id,
-            name="trust_score",
-            value=trust_score,
-            comment=explanation
-        )
+    langfuse.create_score(
+        trace_id=trace_id,
+        name="trust_score",
+        value=trust_score,
+        comment=explanation
+    )
+
+langfuse.flush()
 ```
 
 You should now see the TLM trustworthiness score and explanation in the Langfuse UI!
