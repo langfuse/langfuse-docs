@@ -70,15 +70,18 @@ For large-scale teams. Enterprise-grade support and security.
 - Support SLA
 - Dedicated support engineer
 
-Optional **Committed spend**:
+[Contact sales](/talk-to-us?deployment=cloud) | [Enterprise FAQ](/enterprise)
 
-- Langfuse Cloud Credits that draw down against list pricing
+### Committed spend (optional, all cloud plans)
+
+Available on every cloud plan from a minimum annual contract size. You purchase Langfuse Cloud Credits that draw down against list pricing and unlock:
+
 - Volume discounts
 - Procurement and legal support (custom contracts, vendor onboarding)
 - Upgraded support
 - Billing via AWS Marketplace or invoice
 
-[Contact sales](/talk-to-us?deployment=cloud) | [Enterprise FAQ](/enterprise)
+[Talk to sales](/talk-to-us)
 
 ## Feature Comparison (Cloud)
 
@@ -96,7 +99,7 @@ Optional **Committed spend**:
 | [Custom via API](/api-and-data-platform/features/public-api)                                        | Yes                 | Yes                                     | Yes                                     | Yes                                           |
 | [Included usage](/docs/administration/billable-units)                                               | 50k units           | 100k units                              | 100k units                              | 100k units                                    |
 | [Additional usage](/docs/administration/billable-units)                                             | --                  | $8/100k units                           | $8/100k units                           | $8/100k units                                 |
-| Volume discounts                                                                                    | --                  | --                                      | --                                      | Committed spend                               |
+| Volume discounts                                                                                    | --                  | Committed spend                         | Committed spend                         | Committed spend                               |
 | [Multi-modal](/docs/observability/features/multi-modality)                                          | Free while in beta  | Free while in beta                      | Free while in beta                      | Free while in beta                            |
 | Access to historical data                                                                           | 30 days             | 90 days                                 | 3 years                                 | 3 years                                       |
 | [Ingestion throughput](/faq/all/api-limits)                                                         | 1,000 req/min       | 4,000 req/min                           | 20,000 req/min                          | Custom                                        |
@@ -165,7 +168,7 @@ Optional **Committed spend**:
 | [Data processing agreement (GDPR)](/security/dpa)                                                   | Yes                 | Yes                                     | Yes                                     | Yes                                           |
 | [SOC2 Type II & ISO27001 reports](/security)                                                        | --                  | --                                      | Yes                                     | Yes                                           |
 | [HIPAA compliance](/security/hipaa)                                                                 | --                  | --                                      | Yes                                     | Yes                                           |
-| InfoSec/legal reviews                                                                               | --                  | --                                      | --                                      | Committed spend                               |
+| InfoSec/legal reviews                                                                               | --                  | Committed spend                         | Committed spend                         | Committed spend                               |
 
 ## Graduated Usage Pricing
 
@@ -263,7 +266,7 @@ Langfuse Cloud Credits only apply to customers with a committed-spend agreement 
 If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.
 
 **What is the Committed spend option?**
-Committed spend is an annual agreement for Langfuse Cloud, available on every cloud plan. You purchase Langfuse Cloud Credits that draw down against the public price list at [langfuse.com/pricing](/pricing). In exchange for the commitment, you get volume discounts, procurement and legal support (custom contracts, vendor onboarding, security reviews), upgraded support, and billing via AWS Marketplace or invoice. [Talk to us](/talk-to-us) to get started.
+Committed spend is an annual agreement for Langfuse Cloud, available on every cloud plan from a minimum annual contract size. You purchase Langfuse Cloud Credits that draw down against the public price list at [langfuse.com/pricing](/pricing). In exchange for the commitment, you get volume discounts, procurement and legal support (custom contracts, vendor onboarding, security reviews), upgraded support, and billing via AWS Marketplace or invoice. [Talk to us](/talk-to-us) to get started.
 
 **How is self-hosted Langfuse Enterprise priced?**
 Langfuse OSS is free (MIT license). Langfuse Enterprise (self-hosted) is an annual agreement with a flat fee sized on your [billable units](/docs/administration/billable-units) across all deployments and environments. It is activated via a license key -- one key covers all of your environments. Langfuse does not actively meter self-hosted usage; usage is reviewed together at renewal. [Talk to us](/talk-to-us?deployment=self-hosted) for a quote.
