@@ -72,7 +72,7 @@ Examples that usually do not qualify:
 
 - For scheduled runs, start with the last 72 hours of activity in `langfuse/langfuse`.
 - For manual runs, you may widen the window to the last 7 days if that gives a more useful first validation pass.
-- If you widen the window, say so clearly in the Slack DM.
+- If you widen the window, say so clearly in the Slack update.
 
 ## How to review
 
@@ -109,7 +109,7 @@ Deduplicate closely related PRs into a single recommendation when they represent
 
 Always send exactly one Slack channel message with the `slack-channel-notify` tool.
 
-The message is posted to `#lf-team-engineering`.
+The message is posted to the channel configured on the Slack incoming webhook. Configure that webhook for `#lf-team-engineering`.
 
 Do not add any feedback footer yourself. The safe-output job appends it automatically.
 
