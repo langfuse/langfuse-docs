@@ -40,7 +40,7 @@ const faqs: FAQItem[] = [
   {
     question: "What is the Committed spend option?",
     answer:
-      "Committed spend is an annual agreement for Langfuse Cloud, available on every cloud plan from a minimum annual contract size. You purchase Langfuse Cloud Credits that draw down against the public price list at [langfuse.com/pricing](/pricing). In exchange for the commitment, you get volume discounts, procurement and legal support (custom contracts, vendor onboarding, security reviews), upgraded support, and billing via AWS Marketplace or invoice. [Talk to us](/talk-to-us) to get started.",
+      "Committed spend is an annual agreement for Langfuse Cloud, available on every cloud plan from a minimum annual contract size. You purchase Langfuse Cloud Credits that draw down against the public price list at [langfuse.com/pricing](/pricing). In exchange for the commitment, you get volume discounts, procurement support (vendor onboarding, security reviews), upgraded support, and billing via AWS Marketplace or invoice. Custom or redlined contracts are available for larger agreements. [Talk to us](/talk-to-us) to get started.",
   },
   {
     question: "How is self-hosted Langfuse Enterprise priced?",
@@ -60,7 +60,7 @@ const faqs: FAQItem[] = [
   {
     question: "Can I redline the contracts?",
     answer:
-      "Yes, we offer customized contracts for Langfuse Enterprise customers with an annual committed-spend agreement. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
+      "Custom and redlined contracts are available for larger committed-spend agreements. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
     question: "Where is the data stored?",

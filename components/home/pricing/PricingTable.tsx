@@ -1179,7 +1179,7 @@ const sections: Section[] = [
       {
         name: "Contracts",
         description:
-          "Custom or redlined contracts are available with an annual committed-spend agreement.",
+          "Custom or redlined contracts are available for larger committed-spend agreements.",
         tiers: {
           cloud: {
             Hobby: "Standard T&Cs & DPA",
@@ -1377,7 +1377,7 @@ const FeatureCell = ({
 
 const committedSpendFeatures = [
   "Volume discounts",
-  "Procurement and legal support (custom contracts, vendor onboarding, security reviews)",
+  "Procurement support (vendor onboarding, security reviews)",
   "Upgraded support",
   "Billing via AWS Marketplace or invoice",
 ];
@@ -1389,28 +1389,18 @@ export function CommittedSpendBox({ className }: { className?: string }) {
       <div className="absolute top-0 left-1/2 z-10 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-surface-bg text-muted-foreground">
         + optional
       </div>
-      <CornerBox className="p-4 pt-5 w-full lg:p-6 lg:pt-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-          <div className="lg:max-w-md">
+      <CornerBox className="p-4 pt-5 w-full lg:p-6 lg:pt-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-8">
+          <div className="lg:max-w-[16rem] lg:shrink-0">
             <span className="text-sm font-bold text-primary">
               Committed spend
             </span>
             <p className="mt-1 text-sm text-muted-foreground">
-              Available on every cloud plan from a minimum annual contract size.
-              You purchase Langfuse Cloud Credits that draw down against list
-              pricing and unlock:
+              Available on any cloud plan from a minimum annual contract size.
+              Langfuse Cloud Credits draw down against list pricing and unlock:
             </p>
-            <Button
-              variant="secondary"
-              size="small"
-              href="/talk-to-us"
-              wrapperClassName="mt-3 hidden lg:inline-flex"
-              className="justify-center! group-hover:border-line-structure hover:border-line-cta"
-            >
-              Talk to sales
-            </Button>
           </div>
-          <ul className="grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2 lg:flex-1">
+          <ul className="grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[repeat(2,max-content)]">
             {committedSpendFeatures.map((feature) => (
               <li key={feature} className="flex space-x-2">
                 <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
@@ -1422,7 +1412,7 @@ export function CommittedSpendBox({ className }: { className?: string }) {
             variant="secondary"
             size="small"
             href="/talk-to-us"
-            wrapperClassName="lg:hidden"
+            wrapperClassName="lg:ml-auto lg:shrink-0"
             className="justify-center! group-hover:border-line-structure hover:border-line-cta"
           >
             Talk to sales
