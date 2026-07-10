@@ -18,18 +18,18 @@ safe-outputs:
         - name: Send Slack message
           uses: actions/github-script@v8
           env:
-            SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
+            CHANGELOG_DOCS_CHECK_SLACK_WEBHOOK_URL: "${{ secrets.CHANGELOG_DOCS_CHECK_SLACK_WEBHOOK_URL }}"
           with:
             script: |
               const fs = require("fs");
 
-              const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+              const webhookUrl = process.env.CHANGELOG_DOCS_CHECK_SLACK_WEBHOOK_URL;
               const outputFile = process.env.GH_AW_AGENT_OUTPUT;
               const staged = process.env.GH_AW_SAFE_OUTPUTS_STAGED === "true";
               const footer = "Feedback on quality of outputs? Share with Annabell\n#lf-team-engineering";
 
               if (!webhookUrl) {
-                core.setFailed("SLACK_WEBHOOK_URL secret is not configured");
+                core.setFailed("CHANGELOG_DOCS_CHECK_SLACK_WEBHOOK_URL secret is not configured");
                 return;
               }
 
