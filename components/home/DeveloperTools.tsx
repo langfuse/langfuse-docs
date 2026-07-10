@@ -10,17 +10,169 @@ import {
 } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 
-const SKILL_VIDEO_SRC = "https://static.langfuse.com/docs-videos/skill.mp4";
+const ASSISTANT_VIDEO_SRC =
+  "https://static.langfuse.com/docs-videos/in-app-agent.mp4";
 
-const SKILL_HREF = "/docs/api-and-data-platform/features/agent-skill";
-const CLI_HREF = "/docs/api-and-data-platform/features/cli";
-const MCP_HREF = "/docs/api-and-data-platform/features/mcp-server";
+const ASSISTANT_HREF = "/docs/langfuse-assistant";
+
+type ToolItem = {
+  title: string;
+  description: string;
+  href: string;
+  action: string;
+  eyebrow: string;
+};
+
+const TOOL_ITEMS: ToolItem[] = [
+  {
+    title: "SKILL.md",
+    description:
+      "A ready-made skill for managing prompts, traces, and evals through natural language.",
+    href: "/docs/api-and-data-platform/features/agent-skill",
+    action: "Install the skill",
+    eyebrow: "Coding agents",
+  },
+  {
+    title: "Langfuse CLI",
+    description:
+      "Full API access from the terminal for agent workflows, scripts, and CI/CD.",
+    href: "/docs/api-and-data-platform/features/cli",
+    action: "Configure the CLI",
+    eyebrow: "Terminal",
+  },
+  {
+    title: "Platform MCP Server",
+    description:
+      "Structured access for IDE agents to manage prompts, query traces, and use Langfuse data.",
+    href: "/docs/api-and-data-platform/features/mcp-server",
+    action: "Configure MCP",
+    eyebrow: "IDE agents",
+  },
+];
+
+const ASSISTANT_USE_CASES = [
+  {
+    title: "Debug traces",
+    detail: "Find failed generations and traces with high latency",
+  },
+  {
+    title: "Optimize spend",
+    detail: "Break down token spend, cost, and latency",
+  },
+  {
+    title: "Build evals",
+    detail: "Create regression datasets and score configs",
+  },
+];
+
+function ToolCard({ tool, index }: { tool: ToolItem; index: number }) {
+  return (
+    <CornerBox
+      hoverStripes
+      className="flex h-full min-h-[180px] flex-col gap-4 p-4 sm:p-5"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-mono text-[10px] tracking-[-0.2px] text-text-tertiary">
+          0{index + 1}
+        </span>
+        <span className="rounded-[2px] border border-line-structure bg-surface-1 px-2 py-0.5 font-sans text-[11px] text-text-tertiary">
+          {tool.eyebrow}
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Link
+          href={tool.href}
+          className="text-left text-[17px] font-medium text-text-primary"
+        >
+          {tool.title}
+        </Link>
+        <Text size="s" className="max-w-[38ch] text-left">
+          {tool.description}
+        </Text>
+      </div>
+
+      <Link
+        href={tool.href}
+        className="mt-auto inline-flex w-fit items-center gap-1 font-sans text-[12px] font-medium text-text-secondary no-underline transition-colors hover:text-text-primary"
+      >
+        {tool.action} <span aria-hidden>→</span>
+      </Link>
+    </CornerBox>
+  );
+}
+
+function AssistantFeature() {
+  return (
+    <CornerBox className="flex flex-col overflow-hidden">
+      <div className="flex flex-col gap-5 p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-mono text-[10px] tracking-[-0.2px] text-text-tertiary">
+            00
+          </span>
+          <span className="rounded-[2px] border border-line-structure bg-surface-1 px-2 py-0.5 font-sans text-[11px] text-text-tertiary">
+            In-app
+          </span>
+        </div>
+
+        <div className="flex max-w-[58ch] flex-col gap-3">
+          <h3 className="text-left font-sans text-[17px] font-medium text-text-primary">
+            Langfuse Assistant
+          </h3>
+          <Text className="text-left">
+            Automate the AI engineering loop: investigate production data,
+            understand what happened, and turn findings into approved actions
+            without leaving Langfuse.
+          </Text>
+        </div>
+
+        <div className="grid border-y border-line-structure sm:grid-cols-3 sm:divide-x sm:divide-line-structure">
+          {ASSISTANT_USE_CASES.map((useCase, index) => (
+            <div
+              key={useCase.title}
+              className="flex flex-col gap-1 border-b border-line-structure py-3 last:border-b-0 sm:block sm:border-b-0 sm:px-4 sm:first:pl-0 sm:last:pr-0"
+            >
+              <Text
+                size="s"
+                className="font-medium text-left text-text-secondary"
+              >
+                {useCase.title}
+              </Text>
+              <Text size="s" className="text-left sm:mt-1">
+                {useCase.detail}
+              </Text>
+              <span className="sr-only">Step {index + 1}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="secondary" size="default" href={ASSISTANT_HREF}>
+            View documentation
+          </Button>
+        </div>
+      </div>
+
+      <div className="border-t border-line-structure bg-surface-1 p-3 sm:p-4">
+        <video
+          src={ASSISTANT_VIDEO_SRC}
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-label="The Langfuse Assistant investigating project data in the Langfuse app"
+          className="aspect-video h-auto w-full rounded-[2px] border border-line-structure object-cover shadow-sm"
+        />
+      </div>
+    </CornerBox>
+  );
+}
 
 export const DeveloperTools = () => {
   return (
     <HomeSection id="developers-agents" className="pt-[120px]">
       <div className="flex relative flex-col gap-8 md:gap-10">
-        <div className="flex max-w-[52ch] flex-col gap-4">
+        <div className="flex max-w-[58ch] flex-col gap-4">
           <Heading className="text-left max-w-[16ch] sm:max-w-none">
             Made for{" "}
             <span className="whitespace-nowrap">
@@ -31,90 +183,31 @@ export const DeveloperTools = () => {
               <TextHighlight>agents</TextHighlight>.
             </span>
           </Heading>
-          <Text className="max-w-[48ch] text-left">
-            Langfuse works by default with your coding agents. Install our MCP
-            servers and CLI to develop at the speed of thought. Let Claude Code,
-            Cursor and Codex do the hard work.
+          <Text className="max-w-[56ch] text-left">
+            Work in the app or from your IDE. The Assistant investigates
+            production and takes approved actions; SKILL.md, CLI, and MCP
+            connect coding agents to Langfuse.
           </Text>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2">
-          <CornerBox
-            hoverStripes
-            className="flex relative z-0 flex-col p-0 min-h-0 md:row-span-2"
-          >
-            <div className="flex flex-col gap-1 p-4">
-              <Link
-                href={SKILL_HREF}
-                className="text-left text-[15px] font-medium text-text-secondary"
+        <div className="grid grid-cols-1 lg:grid-cols-12">
+          <div className="lg:col-span-8">
+            <AssistantFeature />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:col-span-4 lg:grid-cols-1 lg:grid-rows-3">
+            {TOOL_ITEMS.map((tool, index) => (
+              <div
+                key={tool.title}
+                className={
+                  index === 0
+                    ? "-mt-px lg:mt-0 lg:-ml-px"
+                    : "-mt-px sm:-ml-px lg:-ml-px"
+                }
               >
-                SKILL.md
-              </Link>
-              <Text size="s" className="text-left">
-                A ready-made skill for your coding agent. Manage prompts,
-                traces, and evals through natural language — no manual API calls
-                needed.
-              </Text>
-              <div className="flex justify-center items-center mt-4">
-                <video
-                  src={SKILL_VIDEO_SRC}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  aria-label="Claude Code welcoming the user with the Langfuse skill installed"
-                  className="object-contain w-full h-auto rounded-md border border-border"
-                />
+                <ToolCard tool={tool} index={index} />
               </div>
-            </div>
-            <div className="flex flex-col items-start px-4 pb-4 -ml-1.25">
-              <Button variant="secondary" size="small" href={SKILL_HREF}>
-                Install skill
-              </Button>
-            </div>
-          </CornerBox>
-
-          <CornerBox
-            hoverStripes
-            className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:mt-0 md:-ml-px"
-          >
-            <Link
-              href={CLI_HREF}
-              className="text-left text-[15px] font-medium text-text-secondary"
-            >
-              Langfuse CLI
-            </Link>
-            <Text size="s" className="text-left">
-              Full API access from the terminal. Let coding agents manage
-              Langfuse for you, or script your workflows in CI/CD.
-            </Text>
-            <div className="flex flex-col items-start mt-4 -ml-1.25">
-              <Button variant="secondary" size="small" href={CLI_HREF}>
-                Configure CLI
-              </Button>
-            </div>
-          </CornerBox>
-
-          <CornerBox
-            hoverStripes
-            className="flex relative z-0 flex-col gap-1 p-4 -mt-px md:-ml-px"
-          >
-            <Link
-              href={MCP_HREF}
-              className="text-left text-[15px] font-medium text-text-secondary"
-            >
-              Platform MCP Server
-            </Link>
-            <Text size="s" className="text-left">
-              Interact with your Langfuse data programmatically from your IDE.
-              Manage prompts, query traces, and more.
-            </Text>
-            <div className="flex flex-col items-start mt-4 -ml-1.25">
-              <Button variant="secondary" size="small" href={MCP_HREF}>
-                Configure MCP
-              </Button>
-            </div>
-          </CornerBox>
+            ))}
+          </div>
         </div>
       </div>
     </HomeSection>
