@@ -103,6 +103,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Runs on 
 | [Onboarding & architectural guidance](/support#onboarding)                                          | --                          | Yes                                                           |
 | Solutions architect support                                                                         | --                          | Yes                                                           |
 | Product team feedback channel                                                                       | --                          | Yes                                                           |
+| [Response time SLO](https://clickhouse.com/legal/support-services-policy)                           | Best effort (community)     | 1h (24/7)                                                     |
 | [Support SLA](/enterprise#faq)                                                                      | --                          | Yes                                                           |
 | **Security**                                                                                        |                             |                                                               |
 | Sign in with Google, AzureAD, GitHub                                                                | Yes                         | Yes                                                           |

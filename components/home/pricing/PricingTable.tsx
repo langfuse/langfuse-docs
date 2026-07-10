@@ -969,13 +969,18 @@ const sections: Section[] = [
       {
         name: "Response time SLO",
         description:
-          "Target response time for support requests via supported channels",
+          "First-response targets depend on request severity. Severity levels are defined in the ClickHouse support services policy.",
+        href: "https://clickhouse.com/legal/support-services-policy",
         tiers: {
           cloud: {
             Hobby: "n/a",
-            Core: "48h",
-            Pro: "48h, Teams add-on: 24h",
-            Enterprise: "Custom",
+            Core: "Best effort",
+            Pro: "Best effort; 1 business day with " + COMMITTED_SPEND,
+            Enterprise: "1 business day; 1h (24/7) with " + COMMITTED_SPEND,
+          },
+          selfHosted: {
+            "Open Source": "Best effort (community)",
+            Enterprise: "1h (24/7)",
           },
         },
       },
