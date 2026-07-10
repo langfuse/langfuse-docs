@@ -1,9 +1,9 @@
 ---
 name: Changelog docs check
-description: "Daily cross-repo check for user-facing changes in langfuse/langfuse that may need changelog or docs coverage in langfuse/langfuse-docs"
+description: "Cross-repo check every three days for user-facing changes in langfuse/langfuse that may need changelog or docs coverage in langfuse/langfuse-docs"
 on:
   schedule:
-    - cron: "0 7 * * *"
+    - cron: "0 7 */3 * *"
   push:
     branches:
       - codex/changelog-docs-check
@@ -142,6 +142,7 @@ If no action is needed:
 `No obvious docs or changelog gaps found in the reviewed window.`
 
 If follow-up is needed:
+
 - `<short item title>` - <why it matters> - <evidence>
 - `<short item title>` - <why it matters> - <evidence>
 
