@@ -1,56 +1,9 @@
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>
 
-Use `propagate_attributes(prompt=prompt)` to link a prompt version to all generations created within its context. This works for generations created with the Langfuse SDK and for generations emitted by third-party OpenTelemetry instrumentation. This option is available in Python SDK 4.14.0 and later.
+For generations created with the Langfuse Python SDK, pass the prompt directly to the generation using the `prompt` keyword argument. This links the prompt only to the intended generation and is the recommended approach.
 
-**Langfuse SDK generations**
-
-```python /propagate_attributes(prompt=prompt)/
-from langfuse import get_client, propagate_attributes
-
-langfuse = get_client()
-prompt = langfuse.get_prompt("movie-critic")
-
-with propagate_attributes(prompt=prompt):
-    with langfuse.start_as_current_observation(
-        as_type="generation",
-        name="movie-generation",
-        model="gpt-4o",
-    ) as generation:
-        generation.update(
-            input=prompt.compile(movie="Dune 2"),
-            output="A sweeping, ambitious sequel.",
-        )
-```
-
-**Third-party instrumentation**
-
-The same pattern links generations created by instrumentation libraries where you do not create the generation through the Langfuse SDK yourself. For example, with the [LiteLLM OpenTelemetry integration](/integrations/frameworks/litellm-sdk):
-
-```python /propagate_attributes(prompt=prompt)/
-import litellm
-from langfuse import get_client, propagate_attributes
-
-langfuse = get_client()
-prompt = langfuse.get_prompt("movie-critic")
-
-litellm.callbacks = ["langfuse_otel"]
-
-with propagate_attributes(prompt=prompt):
-    response = litellm.completion(
-        model="gpt-4o",
-        messages=[
-            {
-                "role": "user",
-                "content": prompt.compile(movie="Dune 2"),
-            }
-        ],
-    )
-```
-
-This also works with the OpenAI Agents SDK and OpenInference instrumentations exported through the Langfuse Python SDK. Only generation observations are linked to the prompt. If a generation sets its own prompt explicitly, that prompt takes precedence.
-
-Alternatively, set the prompt on a specific generation with one of the following Langfuse Python SDK methods. For more information, see the [SDK documentation](/docs/observability/sdk/python/instrumentation).
+You can set the prompt on a specific generation with one of the following Langfuse Python SDK methods. For more information, see the [SDK documentation](/docs/observability/sdk/python/instrumentation).
 
 **Decorators**
 
@@ -114,6 +67,63 @@ generation = langfuse.start_observation(
 generation.update(output="LLM response")
 generation.end()  # Important: manually end the generation
 ```
+
+**Propagate a prompt to multiple generations**
+
+Use `propagate_attributes(prompt=prompt)` when multiple generations created within the same context use the same prompt version. This option is available in Python SDK 4.14.0 and later.
+
+```python /propagate_attributes(prompt=prompt)/
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+prompt = langfuse.get_prompt("movie-critic")
+
+with propagate_attributes(prompt=prompt):
+    with langfuse.start_as_current_observation(
+        as_type="generation",
+        name="movie-review",
+    ) as generation:
+        generation.update(
+            input=prompt.compile(movie="Dune 2"),
+            output="A sweeping, ambitious sequel.",
+        )
+
+    with langfuse.start_as_current_observation(
+        as_type="generation",
+        name="movie-review",
+    ) as generation:
+        generation.update(
+            input=prompt.compile(movie="Arrival"),
+            output="A thoughtful and moving science-fiction film.",
+        )
+```
+
+**Third-party instrumentation**
+
+Propagation is also useful when an instrumentation library creates generations for you and does not expose a Langfuse `prompt` argument. For example, with the [LiteLLM OpenTelemetry integration](/integrations/frameworks/litellm-sdk):
+
+```python /propagate_attributes(prompt=prompt)/
+import litellm
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+prompt = langfuse.get_prompt("movie-critic")
+
+litellm.callbacks = ["langfuse_otel"]
+
+with propagate_attributes(prompt=prompt):
+    response = litellm.completion(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt.compile(movie="Dune 2"),
+            }
+        ],
+    )
+```
+
+This also works with the OpenAI Agents SDK and OpenInference instrumentations exported through the Langfuse Python SDK. Only generation observations are linked to the prompt. If a generation sets its own prompt explicitly, that prompt takes precedence over the propagated prompt.
 
 </Tab>
 
