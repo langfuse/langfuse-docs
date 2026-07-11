@@ -137,6 +137,8 @@ export const faq = defineDocs({
 
 const integrationsFrontmatterSchema = sidebarFrontmatterSchema.extend({
   logo: z.string().nullish(),
+  logoDarkMode: z.enum(["invert"]).nullish(),
+  logoLightMode: z.enum(["invert"]).nullish(),
 });
 
 export const integrations = defineDocs({
