@@ -1,0 +1,133 @@
+---
+title: "What is an LLM gateway? When you need one (and when you don't)"
+description: "An LLM gateway is a proxy layer between your application and model providers: one API, failover, caching, cost controls. How gateways work and how to pick one."
+tags: [guide]
+---
+
+# What is an LLM gateway?
+
+An LLM gateway is a proxy layer that sits between your application and model providers. Your
+code sends requests to one endpoint in one format, and the gateway translates them to each
+provider's native API, applies policies on the way through, and returns the response. Most
+gateways expose an OpenAI-compatible API, so switching providers becomes a change of model
+string rather than a code change.
+
+**TL;DR:** Use a gateway when you call more than one provider, need failover or cost
+controls, or want central key management for many teams. Skip it when a single provider and
+an SDK are serving you fine: a gateway is one more hop and one more system to operate. The
+gateway and your observability platform are complementary layers, not substitutes; the
+gateway controls traffic, observability explains behavior.
+
+## What an LLM gateway does
+
+Across the major gateways, the recurring capabilities are:
+
+- **A unified API** translates one request format (usually OpenAI-compatible) to many
+  providers, so provider switches and A/B tests don't touch application code.
+- **Routing and failover** retries failed requests, falls back to alternate models or
+  providers, and load-balances across keys or regions.
+- **Cost controls** cache repeated requests, enforce rate limits and budgets per team or per
+  key, and attribute spend.
+- **Key management** stores provider credentials centrally so application teams hold one
+  gateway token instead of a drawer of provider keys.
+- **Policy enforcement** applies guardrails, request logging, and data-handling rules in one
+  place instead of in every service.
+
+Not every gateway ships every feature, and the depth varies a lot, which is what the
+selection below turns on.
+
+## When you need a gateway
+
+The strongest signals that a gateway earns its operational cost:
+
+1. **Multiple providers or models in production.** Hand-rolled provider switching grows into
+   an unmaintained routing library. A gateway makes it configuration.
+2. **Reliability requirements above a single provider's SLA.** Provider outages happen;
+   failover across providers is the standard mitigation, and it belongs in infrastructure
+   rather than application code.
+3. **Many teams calling LLMs.** Central key custody, per-team budgets, and one place to
+   enforce policy beat distributing provider keys across dozens of services.
+4. **Developer tooling at scale.** Routing coding agents and internal tools through a
+   gateway gives platform teams usage visibility and spend control without touching each
+   developer's setup.
+
+And the counter-case is just as real: one provider, one team, moderate volume. An SDK with
+retries covers that, and skipping the gateway removes a latency hop, an availability
+dependency, and an operational surface.
+
+## The gateway landscape
+
+A non-exhaustive map of commonly used gateways (details verified July 2026; capabilities
+move fast, check the linked docs):
+
+| Gateway                                                                | Model                                  | Notable traits                                                                               |
+| ---------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [LiteLLM](https://github.com/BerriAI/litellm)                          | Open source; Python SDK + proxy server | Calls 100+ LLM APIs in OpenAI format; the default self-hosted choice                         |
+| [OpenRouter](https://openrouter.ai/)                                   | Hosted                                 | OpenAI-compatible API over 280+ models and providers; per-request provider routing           |
+| [Portkey](https://portkey.ai/)                                         | Hosted + self-host options             | Unified interface to 250+ models with control, visibility, and security tooling              |
+| [Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/) | Hosted (Cloudflare)                    | Analytics, logging, caching, rate limiting, retries, model fallback; on all Cloudflare plans |
+| [Kong AI Gateway](https://konghq.com/)                                 | Open-core API gateway + AI plugins     | Brings existing API-gateway policy machinery (auth, rate limits) to LLM traffic              |
+| [Vercel AI Gateway](https://vercel.com/docs/ai-gateway)                | Hosted (Vercel)                        | Provider routing for apps in the Vercel ecosystem, OpenAI-compatible                         |
+| [Helicone](https://helicone.ai/)                                       | Open source                            | AI gateway to 100+ models with routing, failover, caching, and cost tracking                 |
+| [TrueFoundry](https://www.truefoundry.com/ai-gateway)                  | Enterprise                             | Gateway + control plane with governance, cost controls, and on-prem support                  |
+
+Selection usually comes down to three questions. Where must it run (a self-hosted gateway
+like LiteLLM for VPC-only environments, a hosted one when operating it is undesirable)? What
+depth of policy do you need (budgets, guardrails, audit)? And what does it do to latency and
+availability on your critical path?
+
+## Gateways and observability are different layers
+
+A gateway sees every request that passes through it, so gateway logs answer "what did we
+send and what did it cost". They stop at the request boundary. What they cannot show is why
+your application made that request: the chain of agent steps, retrieved context, tool calls,
+and intermediate model outputs that produced it.
+
+That is the observability layer's job. [Langfuse](/) traces the full application execution
+(a trace with nested [observations](/docs/observability/data-model)) and works with any
+gateway on this page, because tracing happens in your application, not in the proxy:
+
+- The [Langfuse SDKs](/docs/observability/sdk/overview) wrap your LLM calls regardless of whether they hit
+  a provider directly or a gateway URL.
+- Several gateways also emit telemetry directly: [OpenRouter's Broadcast
+  feature](/integrations/gateways/openrouter) sends traces to Langfuse without code changes,
+  and [Cloudflare AI Gateway exports OpenTelemetry
+  spans](https://developers.cloudflare.com/ai-gateway/observability/otel-integration/) that
+  Langfuse ingests on its [OTLP endpoint](/integrations/native/opentelemetry).
+- Langfuse has step-by-step integration guides for
+  [LiteLLM](/integrations/gateways/litellm), [OpenRouter](/integrations/gateways/openrouter),
+  [Portkey](/integrations/gateways/portkey), [Kong](/integrations/gateways/kong-ai-plugin),
+  [Vercel AI Gateway](/integrations/gateways/vercel-ai-gateway),
+  [Helicone](/integrations/gateways/helicone),
+  [TrueFoundry](/integrations/gateways/truefoundry), and
+  [Anannas](/integrations/gateways/anannas).
+
+The practical pattern for teams running both: route traffic through the gateway for control,
+trace from the application with Langfuse for understanding, and keep cost attribution
+consistent by passing user and session identifiers through both layers.
+
+## FAQ
+
+### Is Langfuse an LLM gateway?
+
+No. Langfuse is an [LLM observability and evaluation platform](/docs): it traces, evaluates,
+and analyzes what your application does, but your requests never pass through Langfuse on
+the way to a provider. It complements whichever gateway you choose, and works without one.
+
+### Does an LLM gateway add latency?
+
+Yes, one network hop plus processing time; how much depends on the gateway and deployment
+(a sidecar LiteLLM adds less than a cross-region hosted hop). Response caching can make
+repeated requests faster than going direct. Measure with your own traffic before and after.
+
+### Do I need a gateway to get LLM observability?
+
+No. Tracing instruments your application code and works with direct provider SDK calls.
+Gateway logs add a useful traffic-level view, but application-level traces carry the context
+(agent steps, retrievals, tool calls) that debugging and evaluation need.
+
+### Can I use multiple gateways?
+
+Teams sometimes run a self-hosted gateway inside the VPC for sensitive workloads and a hosted
+one for experimentation. It works, but every extra layer multiplies configuration and
+debugging surface, so consolidate unless there is a hard requirement.

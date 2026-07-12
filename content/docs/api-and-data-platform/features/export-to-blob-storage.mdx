@@ -4,6 +4,9 @@ description: Export traces, observations, enriched observations, and scores to B
 sidebarTitle: Export to Blob Storage
 ---
 
+import BlobStorageReExporting from "@/components-mdx/blob-storage-re-exporting.mdx";
+import BlobStorageEmptyFiles from "@/components-mdx/blob-storage-empty-files.mdx";
+
 # Export via Blob Storage Integration
 
 <AvailabilityBanner
@@ -18,7 +21,7 @@ sidebarTitle: Export to Blob Storage
 
 You can create schedule exports to a Blob Storage, e.g. S3, GCS, or Azure Blob Storage, for `traces`, `observations`, enriched observations, and `scores`.
 
-Those exports can run on an `hourly`, `daily`, or `weekly` schedule.
+Those exports can run every `20 minutes`, or on an `hourly`, `daily`, or `weekly` schedule.
 Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
 Select whether you want to use S3, a S3 compatible storage, Google Cloud Storage, or Azure Blob Storage.
 
@@ -27,13 +30,22 @@ Select whether you want to use S3, a S3 compatible storage, Google Cloud Storage
 To set up the export navigate to `Your Project` > `Settings` > `Integrations` > `Blob Storage`.
 
 Fill in the settings to authenticate with your vendor, enable the integration, and press save.
-Within an hour an initial export should start and continue based on the schedule you have selected.
-The export supports CSV, JSON, and JSONL file formats.
+An initial export starts shortly after you enable the integration and then continues on the schedule you selected.
+The export supports Parquet (default), CSV, JSON, and JSONL file formats — see [File formats](#file-formats).
 Read [our blob storage documentation](/self-hosting/deployment/infrastructure/blobstorage) for more information on how to get credentials for your specific vendor.
 
 <Frame className="my-10" fullWidth>
   ![Blob Storage Integration Setup](/images/docs/blob-storage.png)
 </Frame>
+
+## File formats [#file-formats]
+
+Exports can be written as Apache Parquet, CSV, JSON, or JSONL files. New integrations default to **Parquet**.
+
+- **Parquet** is a columnar binary format that is encoded and compressed by the storage engine and can be loaded directly by most data warehouses and query engines. Because Parquet files are already compressed, gzip compression does not apply to Parquet exports.
+- **CSV, JSON, and JSONL** are text formats that can optionally be gzip-compressed.
+
+Parquet observation exports do not include the per-unit model price columns (`input_price`, `output_price`, `total_price`). These columns snapshot model definition prices at export time and may be deprecated in the future — use `cost_details` and `total_cost` for cost data, which are included in every file type. See [Notes on Parquet exports](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports) in the field reference for details.
 
 ## Export source (Fast Preview)
 
@@ -48,16 +60,17 @@ Available options:
 - `Enriched observations (recommended)`
 
 <Callout type="warning">
-  `Traces and observations (legacy)` sources may be deprecated in the future.
-  All new export jobs should use `Enriched observations (recommended)`, and
-  existing legacy jobs are strongly recommended to upgrade.
+  The `Traces and observations (legacy)` source is deprecated and will be
+  removed in a future release. New integrations should use `Enriched
+  observations (recommended)`, and existing legacy integrations are strongly
+  recommended to [upgrade](#upgrade-path).
 </Callout>
 
 <Callout type="info">
   **Cloud projects created on or after 2026-05-20** will not see the Export Source selector — new Cloud projects export as `Enriched observations (recommended)` automatically. The REST API rejects legacy values for these projects with `400 BAD_REQUEST`. Existing projects and all self-hosted deployments are unaffected.
 </Callout>
 
-### Upgrade path for existing configurations
+### Upgrade path for existing configurations [#upgrade-path]
 
 This migration path applies to **pre-cutoff Cloud projects and self-hosted deployments**. Post-cutoff Cloud projects already use `Enriched observations (recommended)` and cannot select legacy sources.
 
@@ -69,6 +82,8 @@ To migrate safely:
 2. Validate downstream jobs and data consumers while both sources are exported (this mode creates duplicate records by design).
 3. Switch to `Enriched observations (recommended)` once validation is complete.
 
+For a field-level comparison of what changes when you switch sources, see [Differences between enriched and legacy exports](/docs/api-and-data-platform/features/blob-storage-export-fields#enriched-vs-legacy-differences).
+
 For rollout details, see the [Simplify for Scale changelog](/changelog/2026-03-10-simplify-for-scale).
 
 ## Exported fields
@@ -77,37 +92,91 @@ For a complete reference of all fields included in each export file (traces, obs
 
 ## Choose which columns are exported [#export-field-groups]
 
-For the **Enriched observations (recommended)** and **Traces and observations (legacy) and enriched observations** sources, you can choose which column groups appear in each row of the enriched observations export. Eleven groups cover the full row, ten of which are toggleable; toggle them in **Project Settings → Integrations → Blob Storage** under **Export Field Groups**.
+Field groups let you choose which column groups appear in each row of the observation exports. They apply to observation exports for **all export sources** — both the enriched `observations_v2` file and the legacy `observations` file — with different column content depending on the source. Eleven groups cover the full row, ten of which are toggleable; toggle them in **Project Settings → Integrations → Blob Storage** under **Export Field Groups**.
 
-| Group           | Columns                                                                                                      | Toggleable                 |
-| --------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------- |
-| `core`          | `id`, `trace_id`, `start_time`, `end_time`, `project_id`, `parent_observation_id`, `type`                    | Required (always exported) |
-| `basic`         | `name`, `level`, `status_message`, `version`, `environment`, `bookmarked`, `public`, `user_id`, `session_id` | Yes                        |
-| `time`          | `completion_start_time`, `created_at`, `updated_at`                                                          | Yes                        |
-| `io`            | `input`, `output`                                                                                            | Yes                        |
-| `metadata`      | `metadata`                                                                                                   | Yes                        |
-| `model`         | `provided_model_name`, `model_id`, `model_parameters`, `input_price`, `output_price`, `total_price`          | Yes                        |
-| `usage`         | `usage_details`, `cost_details`, `total_cost`, `usage_pricing_tier_id`, `usage_pricing_tier_name`            | Yes                        |
-| `prompt`        | `prompt_id`, `prompt_name`, `prompt_version`                                                                 | Yes                        |
-| `metrics`       | `latency`, `time_to_first_token`                                                                             | Yes                        |
-| `tools`         | `tool_definitions`, `tool_calls`, `tool_call_names`                                                          | Yes                        |
-| `trace_context` | `tags`, `release`, `trace_name`                                                                              | Yes                        |
+Groups are listed in the order they appear in the UI; fields within each group are sorted alphabetically. The `core` group is required and always exported.
+
+| Group           | Enriched (`observations_v2`)                                                                                 | Legacy (`observations`)                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `core`          | `end_time`, `id`, `parent_observation_id`, `project_id`, `start_time`, `trace_id`, `type`                    | Same as enriched                                                                                                                 |
+| `basic`         | `bookmarked`, `environment`, `level`, `name`, `public`, `session_id`, `status_message`, `user_id`, `version` | `environment`, `level`, `name`, `status_message`, `version`                                                                      |
+| `time`          | `completion_start_time`, `created_at`, `updated_at`                                                          | Same as enriched                                                                                                                 |
+| `io`            | `input`, `output`                                                                                            | Same as enriched                                                                                                                 |
+| `metadata`      | `metadata`                                                                                                   | Same as enriched                                                                                                                 |
+| `model`         | `input_price`, `model_id`, `model_parameters`, `output_price`, `provided_model_name`, `total_price`          | Same as enriched                                                                                                                 |
+| `usage`         | `cost_details`, `total_cost`, `usage_details`, `usage_pricing_tier_id`, `usage_pricing_tier_name`            | `cost_details`, `total_cost`, `usage_details`, `usage_pricing_tier_name`                                                         |
+| `prompt`        | `prompt_id`, `prompt_name`, `prompt_version`                                                                 | Same as enriched                                                                                                                 |
+| `metrics`       | `latency`, `time_to_first_token`                                                                             | Same as enriched                                                                                                                 |
+| `trace_context` | `release`, `tags`, `trace_name`                                                                              | Not included — available in the separate [`traces` file](/docs/api-and-data-platform/features/blob-storage-export-fields#traces) |
+| `tools`         | `tool_call_names`, `tool_calls`, `tool_definitions`                                                          | Same as enriched                                                                                                                 |
 
 <Callout type="info">
-  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group.
+  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group. With the Parquet file type, these three price columns are not included even when `model` is selected — see [File formats](#file-formats).
 </Callout>
 
-New integrations default to all eleven groups, so behavior matches earlier exports unless you narrow the selection. The **Traces and observations (legacy)** source uses a fixed column set and ignores field groups.
+New integrations default to all eleven groups, so behavior matches earlier exports unless you narrow the selection. Field groups apply to observation exports only — the legacy `traces` file always contains a [fixed column set](/docs/api-and-data-platform/features/blob-storage-export-fields#traces).
 
 ### Configure via REST API [#field-groups-rest-api]
 
 `GET` and `PUT /api/public/integrations/blob-storage` accept and return:
 
 - `exportSource` — `LEGACY_TRACES_OBSERVATIONS`, `OBSERVATIONS_V2`, or `LEGACY_TRACES_AND_ENRICHED_OBSERVATIONS`.
-- `exportFieldGroups` — a list of group names. Must include `core` when provided. Must be omitted or `null` for `LEGACY_TRACES_OBSERVATIONS` (the REST contract returns `null` on read and rejects non-null on write for that source). When omitted on update, the existing value is preserved.
-- `compressed` — boolean; defaults to `true` for new integrations. When `true`, files are written as `.csv.gz`, `.json.gz`, or `.jsonl.gz`.
+- `exportFieldGroups` — a list of group names. Must include `core` when provided. Applies to observation exports for all export sources. When omitted on update, the existing value is preserved.
+- `fileType` — `PARQUET` (default for new integrations), `CSV`, `JSON`, or `JSONL`.
+- `compressed` — boolean; defaults to `true` for new integrations. When `true`, files are written as `.csv.gz`, `.json.gz`, or `.jsonl.gz`. Does not apply to `PARQUET` — Parquet files are compressed by the storage engine and always written as plain `.parquet` files.
 
 See the [API reference](https://api.reference.langfuse.com/#tag/blobstorageintegrations) for the full schema.
+
+## Export modes [#export-modes]
+
+The **Export Mode** determines how far back the integration starts exporting from:
+
+| Mode                 | Starts from                           | When to use                                                                                                          |
+| -------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Full history**     | The earliest data in your project     | You want a complete one-time backfill of all existing data alongside ongoing exports.                                |
+| **From setup date**  | The moment you enable the integration | You only care about data going forward and don't need history — the lightest option to get started.                  |
+| **From custom date** | A start date you choose               | You want history from a specific point (for example, the start of a quarter) without exporting everything before it. |
+
+Changing the mode resets the sync position, so it's also the mechanism for re-scanning history — see [Re-exporting data and configuration changes](#re-exporting).
+
+## How exports run [#how-exports-run]
+
+Each run exports one time window of data to your bucket, then advances and exports the next window on your configured schedule.
+
+- **Export delay.** Data is exported with a short delay rather than right up to the current moment, so records still moving through ingestion are not exported half-written. Expect a brief lag between when an event is recorded and when it appears in your bucket.
+- **Catch-up / backfill.** When an integration starts from a historic point — or falls behind — it works forward through the backlog and may write many files in quick succession before settling into its normal cadence. A freshly created full-history integration does this until it catches up to the present.
+
+## Export status [#export-status]
+
+The integration settings page shows a status badge:
+
+| Badge        | Meaning                                                                                |
+| ------------ | -------------------------------------------------------------------------------------- |
+| **Active**   | Enabled and synced; the next export is scheduled for the future.                       |
+| **Running**  | An export job is currently in progress (shown with a spinner).                         |
+| **Queued**   | An export is due and waiting to run.                                                   |
+| **Pending**  | Enabled but has not run an export yet (`Data exported up to` shows `Never (pending)`). |
+| **Disabled** | The integration is turned off.                                                         |
+| **Error**    | The most recent export failed; an error message and timestamp are shown.               |
+
+The status card on the same page also surfaces:
+
+- **Data exported up to** — timestamp of the last successfully exported window (or `Never (pending)`).
+- **Next export scheduled** — when the next run will happen.
+- **Export mode** — `Full history`, `From setup date`, or `From custom date` (plus the start date where applicable).
+- A **Last export failed** alert with the error message and time when in the Error state.
+
+If a worker crashes mid-export, a 2-hour safety-valve TTL ensures the badge reverts from Running to its underlying state (typically Queued) so the next scheduled run can proceed. Reload the page to see the latest status.
+
+Langfuse retries failed exports on the next run. Repeated failures notify project admins by email and the configured Slack or webhook channel. Configure it under **Project Settings → Notifications**.
+
+## Re-exporting data and configuration changes [#re-exporting]
+
+<BlobStorageReExporting />
+
+## Empty files in your bucket [#empty-files]
+
+<BlobStorageEmptyFiles />
 
 ## Alternatives
 

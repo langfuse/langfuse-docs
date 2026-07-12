@@ -158,9 +158,9 @@ See the Python SDK tab for more details.
 </Callout>
 
 ```python
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
-# Either set the environment variable or the constructor parameter. The latter takes precedence.
+# Set the environment via environment variable before initializing the client
 os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
 handler = CallbackHandler()
 ```
@@ -169,12 +169,23 @@ handler = CallbackHandler()
 
 <Tab>
 
-```ts
-import { CallbackHandler } from "langfuse-langchain";
+The environment is configured on the `LangfuseSpanProcessor` (or via the `LANGFUSE_TRACING_ENVIRONMENT` environment variable) — LangChain spans created by the `CallbackHandler` flow through it automatically:
 
-const handler = new CallbackHandler({
-  environment: "production",
+```ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { CallbackHandler } from "@langfuse/langchain";
+
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor({
+      environment: "production",
+    }),
+  ],
 });
+sdk.start();
+
+const handler = new CallbackHandler();
 ```
 
 See [Langchain Integration (JS/TS)](/integrations/frameworks/langchain) for more details.
@@ -187,12 +198,12 @@ When using the [Vercel AI SDK Integration](/integrations/frameworks/vercel-ai-sd
 
 ```ts filename="instrumentation.ts" {/environment: "production"/}
 import { registerOTel } from "@vercel/otel";
-import { LangfuseExporter } from "langfuse-vercel";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
 
 export function register() {
   registerOTel({
     serviceName: "langfuse-vercel-ai-nextjs-example",
-    traceExporter: new LangfuseExporter({ environment: "production" }),
+    spanProcessors: [new LangfuseSpanProcessor({ environment: "production" })],
   });
 }
 ```

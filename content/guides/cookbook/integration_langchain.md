@@ -18,7 +18,7 @@ Follow the [integration guide](https://langfuse.com/integrations/frameworks/lang
 
 
 ```python
-%pip install langfuse langchain langchain_openai langchain_community --upgrade
+%pip install langfuse langchain langchain-classic langchain_openai langchain_community --upgrade
 ```
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
@@ -28,13 +28,13 @@ Initialize the Langfuse client with your API keys from the project settings in t
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = "sk-proj-.."
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-..")
 ```
 
 
@@ -57,8 +57,8 @@ langfuse_handler = CallbackHandler()
 ```python
 from operator import itemgetter
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 
 langfuse_handler = CallbackHandler()
 
@@ -125,7 +125,7 @@ async for chunk in chain2.astream({"person": "bill gates", "language": "english"
 
 ```python
 import os
-os.environ["SERPAPI_API_KEY"] = "..."
+os.environ.setdefault("SERPAPI_API_KEY", "...")
 ```
 
 
@@ -138,8 +138,8 @@ os.environ["SERPAPI_API_KEY"] = "..."
 from langchain_community.document_loaders import SeleniumURLLoader
 from langchain_chroma import Chroma
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
-from langchain.chains import RetrievalQA
+from langchain_openai import OpenAI, OpenAIEmbeddings
+from langchain_classic.chains import RetrievalQA
 
 langfuse_handler = CallbackHandler()
 
@@ -174,16 +174,16 @@ chain.invoke(query, config={"callbacks":[langfuse_handler]})
 
 
 ```python
-os.environ["AZURE_OPENAI_ENDPOINT"] = "<Azure OpenAI endpoint>"
-os.environ["AZURE_OPENAI_API_KEY"] = "<Azure OpenAI API key>"
-os.environ["OPENAI_API_TYPE"] = "azure"
-os.environ["OPENAI_API_VERSION"] = "2023-09-01-preview"
+os.environ.setdefault("AZURE_OPENAI_ENDPOINT", "<Azure OpenAI endpoint>")
+os.environ.setdefault("AZURE_OPENAI_API_KEY", "<Azure OpenAI API key>")
+os.environ.setdefault("OPENAI_API_TYPE", "azure")
+os.environ.setdefault("OPENAI_API_VERSION", "2023-09-01-preview")
 ```
 
 
 ```python
 from langchain_openai import AzureChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langfuse.langchain import CallbackHandler
  
 # Initialize Langfuse CallbackHandler for Langchain (tracing)

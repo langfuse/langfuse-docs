@@ -75,6 +75,12 @@ langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
 - The hook can only change span attributes. It cannot change the span name, IDs, parent relationship, resource attributes, events, links, or instrumentation scope.
 - The hook affects only spans exported by this Langfuse client. If the same OpenTelemetry spans are sent to another exporter, that exporter receives its own unmodified copy.
 
+<Callout type="info">
+
+`mask_otel_spans` only affects spans that pass through the Langfuse Python SDK span processor and are exported by this Langfuse client. If you also send telemetry to another observability backend through a separate OpenTelemetry span processor or exporter, that backend receives its own unmodified copy of the spans. Configure masking separately for any non-Langfuse exporter.
+
+</Callout>
+
 <Callout type="warning">
 
 `mask_otel_spans` is synchronous. It usually runs on the OpenTelemetry batch span processor worker thread, so it should not block the main caller thread of your application. During `flush()` and shutdown it may run on the caller thread.
@@ -253,22 +259,27 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab title="LangChain (JS/TS)">
 
-When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` to the constructor:
+Masking is configured on the `LangfuseSpanProcessor` — spans created by the LangChain [CallbackHandler](/integrations/frameworks/langchain) flow through it automatically, so no LangChain-specific masking setup is needed:
 
 ```typescript
-import { CallbackHandler } from "langfuse-langchain";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { CallbackHandler } from "@langfuse/langchain";
 
-function maskingFunction(params: { data: any }) {
-  if (typeof params.data === "string" && params.data.startsWith("SECRET_")) {
-    return "REDACTED";
-  }
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) => {
+    if (typeof data === "string" && data.startsWith("SECRET_")) {
+      return "REDACTED";
+    }
 
-  return params.data;
-}
-
-const handler = new CallbackHandler({
-  mask: maskingFunction,
+    return data;
+  },
 });
+
+const sdk = new NodeSDK({ spanProcessors: [spanProcessor] });
+sdk.start();
+
+const handler = new CallbackHandler();
 ```
 
 </Tab>

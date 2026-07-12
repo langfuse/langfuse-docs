@@ -42,12 +42,12 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
 ### Optional Configuration
 
-Langfuse also uses S3 for batch exports and for multi-modal tracing.
+Langfuse also uses S3 for batch exports, multi-modal tracing, and multi-modal datasets.
 Those use-cases are opt-in and can be configured separately.
 Use the following information to enable them.
 Langfuse uses the credentials to generate short-lived, pre-signed URLs that allow SDKs to upload media assets or to download batch exports.
 
-#### Multi-Modal Tracing
+#### Multi-Modal Tracing and Datasets
 
 | Variable                                        | Required / Default | Description                                                                                                          |
 | ----------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
@@ -204,7 +204,7 @@ Please follow the MinIO documentation or use a cloud provider managed blob store
 
 #### Configuring Minio for Media Uploads [#minio-media-uploads]
 
-To enable multimodal tracing, presigned URLs allow SDK clients and browsers outside the Docker network to directly upload and download media assets. Therefore, the `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` must resolve to the Docker host's address.
+To enable multi-modal tracing and multi-modal datasets, presigned URLs allow SDK clients and browsers outside the Docker network to directly upload and download media assets. Therefore, the `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` must resolve to the Docker host's address.
 
 **Development Environment:** When running `docker compose` locally, set `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` to `http://localhost:9090` to ensure presigned URLs correctly loop back to the local instance.
 
@@ -387,11 +387,9 @@ Over time, this data accumulates and increases storage costs.
 It is recommended to configure a bucket lifecycle (expiration) policy to automatically delete objects after a defined number of days.
 
 <Callout type="warning">
-Langfuse uses raw event data from the bucket to merge delta-updates into existing traces, observations, and scores.
-The bucket lifecycle expiration period determines how long these updates can be merged into existing records.
-Once the raw events are deleted by the lifecycle policy, delta-updates will create duplicate entries instead of merging.
+Langfuse re-reads raw events from the bucket to retry failed ingestion jobs, for replay/disaster recovery, and — on the legacy `/api/public/ingestion` path — to combine incremental events sent for the same record. Size your lifecycle expiration to cover these needs (30 days on Langfuse Cloud). OpenTelemetry ingestion is self-contained (each span is a single complete event), so it does not depend on this retention for assembling records.
 
-On Langfuse Cloud, this is set to 30 days. For details on update behavior, see [How to update traces, observations, and scores?](/faq/all/tracing-data-updates).
+This retention window is not a way to update data. Traces and observations are immutable once ingested; see [How to update traces, observations, and scores?](/faq/all/tracing-data-updates) for details.
 
 </Callout>
 
