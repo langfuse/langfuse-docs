@@ -19,6 +19,7 @@ import { TwitterPixel } from "@/components/analytics/twitter-ads";
 import { ConversionTracker } from "@/components/analytics/ConversionTracker";
 import { ScarfPixel } from "@/components/analytics/scarf";
 import { CommonRoom } from "@/components/analytics/common-room";
+import { AhrefsAnalytics } from "@/components/analytics/ahrefs";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
@@ -105,6 +106,7 @@ export default function RootLayout({
             <ScarfPixel />
             <Hubspot />
             <CommonRoom />
+            <AhrefsAnalytics />
             <Script
               id="cookieyes"
               type="text/javascript"

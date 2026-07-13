@@ -29,7 +29,7 @@ Thanks to the team at Promptfoo for developing this integration ([docs](https://
 
 ### Step 1: Set up Langfuse
 
-1. Install the langfuse SDK: `npm install langfuse`
+1. Install the `langfuse` npm package, which Promptfoo's Langfuse provider uses under the hood: `npm install langfuse`
 2. Visit [Langfuse](https://cloud.langfuse.com) to create an account.
 3. Create a new project and copy your Langfuse API keys.
 4. Set the `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` environment variables as desired.
@@ -88,9 +88,15 @@ If you already have a prompt with the same name, the prompt will be added as a n
 
 <Tab>
 
+This snippet uses the `@langfuse/client` package (`npm install @langfuse/client`), which is separate from the `langfuse` package required by Promptfoo itself.
+
 ```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
 // Create a text prompt
-await langfuse.createPrompt({
+await langfuse.prompt.create({
   name: "movie-critic",
   type: "text",
   prompt: "As a {{criticlevel}} critic, do you like {{movie}}?",
@@ -103,7 +109,7 @@ await langfuse.createPrompt({
 });
 
 // Create a chat prompt
-await langfuse.createPrompt({
+await langfuse.prompt.create({
   name: "movie-critic-chat",
   type: "chat",
   prompt: [
