@@ -18,7 +18,7 @@ The [`pi-langfuse`](https://www.npmjs.com/package/pi-langfuse) extension is buil
 
 ## What can this integration trace?
 
-The `pi-langfuse` extension hooks into Pi's lifecycle events and sends each session to Langfuse. You can monitor:
+The `pi-langfuse` extension hooks into Pi's lifecycle events and sends each prompt to Langfuse as its own trace, grouped by Pi session. You can monitor:
 
 - **User prompts**: every prompt you send to Pi, grouped into one trace per prompt.
 - **Agent workflow**: a root agent observation that spans the whole turn.
@@ -86,7 +86,8 @@ Or set your credentials with environment variables. Saved config takes precedenc
 ```bash
 export LANGFUSE_PUBLIC_KEY="pk-lf-..."
 export LANGFUSE_SECRET_KEY="sk-lf-..."
-export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
 
 ### Use Pi
@@ -106,6 +107,10 @@ Open your Langfuse project to see the captured traces. The structure mirrors how
 - **Agent and generations**: a root agent observation, with one generation per model response, including token usage and cost.
 - **Tool calls**: captured as tool observations with input, output, and error status, so you can spot where a turn went wrong.
 - **Scores**: trace-level scores (tool-call count, tool-success rate, turn count, error flags) for quick filtering and quality monitoring.
+
+![Example Pi Agent trace in Langfuse showing the agent root, model generations, and a read tool call with its input and output](/images/docs/pi-agent/pi-agent-example-trace.png)
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cmpy5u3fb06o5ad0j04xohhmz/traces/cd5b90328ceb3e76fbdd2d74c557e164?observation=b3b84fb6df76b9d7)_
 
 </Steps>
 
