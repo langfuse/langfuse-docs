@@ -63,7 +63,7 @@ const categoryConfig: Record<
         frontMatter: {
           title: "OpenAI (Python)",
           logo: "/images/integrations/openai_icon.svg",
-          logoDarkMode: "invert",
+          logoAppearance: "dark",
         },
         title: "OpenAI (Python)",
       },
@@ -72,6 +72,7 @@ const categoryConfig: Record<
         frontMatter: {
           title: "Vercel AI SDK",
           logo: "/images/integrations/vercel_ai_sdk_icon.png",
+          logoAppearance: "dark",
         },
         title: "Vercel AI SDK",
       },
@@ -96,7 +97,7 @@ const categoryConfig: Record<
         frontMatter: {
           title: "OpenAI Agents",
           logo: "/images/integrations/openai_icon.svg",
-          logoDarkMode: "invert",
+          logoAppearance: "dark",
         },
         title: "OpenAI Agents",
       },
@@ -143,6 +144,7 @@ type ProcessedIntegrationPage = IntegrationPage & { title: string };
 
 function IntegrationLogo({ frontMatter }: { frontMatter: any }) {
   if (!frontMatter?.logo) return null;
+  const logoAppearance = frontMatter.logoAppearance;
 
   return (
     <img
@@ -150,9 +152,8 @@ function IntegrationLogo({ frontMatter }: { frontMatter: any }) {
       alt=""
       className={cn(
         "w-5 h-5 object-contain",
-        frontMatter.logoDarkMode === "invert" &&
-          "dark:brightness-0 dark:invert",
-        frontMatter.logoLightMode === "invert" && "invert dark:invert-0",
+        logoAppearance === "dark" && "dark:brightness-0 dark:invert",
+        logoAppearance === "light" && "invert dark:invert-0",
       )}
     />
   );
@@ -224,7 +225,11 @@ function IntegrationCards({
               key={page.route}
               title={page.title}
               className=""
-              icon={<IntegrationLogo frontMatter={page.frontMatter} />}
+              icon={
+                page.frontMatter?.logo ? (
+                  <IntegrationLogo frontMatter={page.frontMatter} />
+                ) : undefined
+              }
               arrow
             >
               {""}
@@ -242,7 +247,11 @@ function IntegrationCards({
                 key={page.route}
                 title={page.title}
                 className=""
-                icon={<IntegrationLogo frontMatter={page.frontMatter} />}
+                icon={
+                  page.frontMatter?.logo ? (
+                    <IntegrationLogo frontMatter={page.frontMatter} />
+                  ) : undefined
+                }
                 arrow
               >
                 {""}

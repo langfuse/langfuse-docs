@@ -4,7 +4,7 @@ sidebarTitle: OpenAI Assistants API
 description: Use of Langfuse decorator to trace calls made to openai assistants
 category: Integrations
 logo: /images/integrations/openai_icon.svg
-logoDarkMode: invert
+logoAppearance: dark
 ---
 
 # Cookbook: Observability for OpenAI Assistants API with Langfuse
