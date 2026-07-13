@@ -154,7 +154,7 @@ A single export run writes one file per exported table — up to four, depending
 {prefix}{project-id}/manifests/{max-timestamp}.json
 ```
 
-The manifest is uploaded strictly after all table files of the run. Once it appears, every file it lists is fully available in your bucket; if any upload fails, no manifest is written and the whole run is retried (table files are overwritten under the same keys on retry). The timestamp in the manifest key is the run's `maxTimestamp` in ISO 8601 format with colons replaced by dashes — the same stem used by the run's table files (`{prefix}{project-id}/{table}/{timestamp}.{extension}`), so a run's files and its manifest sort together.
+The manifest is uploaded strictly after all table files of the run. Once it appears, every file it lists is fully available in your bucket; if any upload fails, no manifest is written and the whole run is retried (table files are overwritten under the same keys on retry). The timestamp in the manifest key is the run's `maxTimestamp` in UTC, truncated to whole seconds, with colons replaced by dashes and the milliseconds and trailing `Z` dropped (`2026-07-13T09:00:00.000Z` → `2026-07-13T09-00-00`). This is the same stem used by the run's table files (`{prefix}{project-id}/{table}/{timestamp}.{extension}`), so a run's files and its manifest sort together.
 
 Example manifest:
 
@@ -198,10 +198,10 @@ Example manifest:
 Notes on the schema:
 
 - `version` increments only on breaking changes; new fields may be added without a version bump, so ignore unknown fields when parsing.
-- `window` is the time range of data covered by the run. `maxTimestamp` duplicates `window.maxTimestamp` and matches the timestamp in the manifest file name.
+- `window` is the time range of data covered by the run. `maxTimestamp` duplicates `window.maxTimestamp`; the timestamp stem in the manifest file name is derived from it as described above.
 - `tables` and `files` reflect the selected export source; `scores` is always included regardless of the source.
 - `files[].key` is the full object key including your configured prefix, so consumers can fetch listed files without reconstructing paths.
-- `files[].format` is one of `parquet`, `json-raw`, `json-gzip`, `jsonl-raw`, `jsonl-gzip`, `csv-raw`, or `csv-gzip`.
+- `files[].fileType` is the configured file type: `JSON`, `CSV`, `JSONL`, or `PARQUET`. `files[].format` additionally encodes compression: one of `parquet`, `json-raw`, `json-gzip`, `jsonl-raw`, `jsonl-gzip`, `csv-raw`, or `csv-gzip`.
 - `files[].sizeBytes` is the uploaded size (after gzip for compressed text formats). `files[].rowCount` is the number of exported rows for text formats and `null` for Parquet files.
 - During [catch-up or backfill](#how-exports-run), each exported window is a separate run with its own manifest, so several manifests can appear in quick succession.
 
