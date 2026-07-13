@@ -17,6 +17,7 @@ import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
 import { RedditPixel } from "@/components/analytics/reddit-ads";
 import { TwitterPixel } from "@/components/analytics/twitter-ads";
 import { ConversionTracker } from "@/components/analytics/ConversionTracker";
+import { GclidPersistence } from "@/components/analytics/GclidPersistence";
 import { ScarfPixel } from "@/components/analytics/scarf";
 import { CommonRoom } from "@/components/analytics/common-room";
 import { AhrefsAnalytics } from "@/components/analytics/ahrefs";
@@ -103,6 +104,7 @@ export default function RootLayout({
             <RedditPixel />
             <TwitterPixel />
             <ConversionTracker />
+            <GclidPersistence />
             <ScarfPixel />
             <Hubspot />
             <CommonRoom />
