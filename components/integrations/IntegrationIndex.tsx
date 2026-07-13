@@ -72,7 +72,7 @@ const categoryConfig: Record<
         frontMatter: {
           title: "Vercel AI SDK",
           logo: "/images/integrations/vercel_ai_sdk_icon.png",
-          logoAppearance: "dark",
+          logoAppearance: "multicolor",
         },
         title: "Vercel AI SDK",
       },
