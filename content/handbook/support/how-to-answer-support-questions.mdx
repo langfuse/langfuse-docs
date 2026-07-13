@@ -227,7 +227,7 @@ This is the most sensitive billing question. Lead with empathy and _facts_, neve
 1. Open Stripe, search by email domain or org → recent invoice, subscription, billing history.
 2. Determine the source of the increase: plan change, usage increase (more traces/observations), seat increase, or one-off charge.
 3. Cross-check the org in Impersonation View → Usage tab → confirm trace/observation volume in the billing period.
-4. **Specifically check for OTEL-related overcounting.** A common case: customers had a pre-existing OTEL setup, and after wiring it to Langfuse it ingested unrelated HTTP/DB/framework spans that drove up volume. See [/faq/all/existing-otel-setup#unwanted-spans-in-langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse), the fix is `blocked_instrumentation_scopes` on the SDK.
+4. **Specifically check for OTEL-related overcounting.** A common case: customers had a pre-existing OTEL setup, and after wiring it to Langfuse it ingested unrelated HTTP/DB/framework spans that drove up volume. See [/faq/all/existing-otel-setup#unwanted-spans-in-langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse), the fix is `should_export_span` on the SDK (the older `blocked_instrumentation_scopes` parameter is deprecated).
 5. Reply with the specific reason, link the invoice or usage view.
 
 **Reply template:**
@@ -576,7 +576,7 @@ Container scanners (Wiz, Snyk, Trivy, Black Duck) regularly produce long lists o
 **Triage steps:**
 
 1. Check the version the customer scanned. If it's not the latest, ask them to scan the current image first, many CVEs are already patched in the next release.
-2. For genuine concerns, route to `security@langfuse.com` for triage.
+2. For genuine concerns, route to `security@clickhouse.com` for triage.
 3. Do not promise fix timelines. We patch on rolling cadence with each release.
 
 **Reply template:**
@@ -642,7 +642,7 @@ OTEL is the most common source of _over-ingestion_ surprises. The customer's exi
 **Triage steps:**
 
 1. Ask the customer how they wired Langfuse into their OTEL provider (sharing a TracerProvider? exporter-only? auto-instrumentation?).
-2. If they're sharing a global TracerProvider with HTTP / DB / framework auto-instrumentation, recommend setting `blocked_instrumentation_scopes` (Python SDK) or scope filters (JS SDK) to drop non-LLM spans.
+2. If they're sharing a global TracerProvider with HTTP / DB / framework auto-instrumentation, recommend a `should_export_span` filter (Python SDK, replaces the deprecated `blocked_instrumentation_scopes`) or `shouldExportSpan` (JS SDK) to drop non-LLM spans.
 3. For cost-double-counting on agent frameworks (notably pydantic-ai, see issue #1819): there's a known bug we're tracking. Acknowledge and offer to file/link the issue, do not promise a fix date.
 4. For `langfuse.experiment.*` attributes: customers using non-Python SDKs sometimes try to propagate experiment attributes manually and find evaluators don't run. LLM-as-a-Judge currently only runs against OTEL-ingested traces, confirm the legacy SDK path is not in use.
 
@@ -655,13 +655,22 @@ That's a common one with existing OTEL setups. Your global TracerProvider is exp
 
 Fix (Python):
   from langfuse import Langfuse
+  from langfuse.span_filter import is_default_export_span
+
+  blocked = {
+      "opentelemetry.instrumentation.fastapi",
+      "opentelemetry.instrumentation.asgi",
+      "opentelemetry.instrumentation.httpx",
+      # ... add yours
+  }
   langfuse = Langfuse(
-      blocked_instrumentation_scopes=[
-          "opentelemetry.instrumentation.fastapi",
-          "opentelemetry.instrumentation.asgi",
-          "opentelemetry.instrumentation.httpx",
-          # ... add yours
-      ],
+      should_export_span=lambda span: (
+          is_default_export_span(span)
+          and (
+              span.instrumentation_scope is None
+              or span.instrumentation_scope.name not in blocked
+          )
+      ),
   )
 
 This typically cuts ingested volume by 50–90% and only LLM/agent spans land in Langfuse.
@@ -901,7 +910,7 @@ Best,
 
 **Triage steps:**
 
-1. Direct the customer to [langfuse.com/security/dpa](https://langfuse.com/security/dpa), the PDF there is the executed version.
+1. Direct the customer to [langfuse.com/dpa](https://langfuse.com/dpa), where the current DPA is published.
 2. If they explicitly need a counter-signed copy on their template, route to the enterprise team.
 
 **Reply template:**
@@ -909,9 +918,9 @@ Best,
 ```text
 Hi {name},
 
-Our DPA is auto-applied for all signups under the standard Terms. You can download the executed version directly here for your records:
+Our DPA is auto-applied for all signups under the standard Terms. You can find the current version here for your records:
 
-https://langfuse.com/security/dpa
+https://langfuse.com/dpa
 
 If your procurement requires a counter-signed copy on your template, let me know and I'll loop in our enterprise team.
 
@@ -925,21 +934,21 @@ Best,
 
 <summary>BAA / HIPAA</summary>
 
-HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. The BAA applies automatically to accounts on that region with a HIPAA-eligible plan (Pro, Teams, or Enterprise); no separate signature is required.
+HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Legal agreement terms for HIPAA-regulated use are not published or downloadable on langfuse.com. Route customers with legal requirements to [legal@clickhouse.com](mailto:legal@clickhouse.com) before they process PHI.
 
 **Triage steps:**
 
 1. Confirm the customer is using or about to use `hipaa.cloud.langfuse.com` (not the standard US/EU regions).
 2. **Account migration:** customers moving from EU/US must create a fresh account on `hipaa.cloud.langfuse.com`. Past trace data can be moved via the [data migration cookbook](/guides/cookbook/example_data_migration).
-3. The BAA auto-applies for eligible accounts. If the customer specifically needs a counter-signature for their procurement process, route to the enterprise team.
+3. For HIPAA-related legal requirements, route the customer to [legal@clickhouse.com](mailto:legal@clickhouse.com). Do not send public agreement text or tell customers it applies automatically.
 4. For HIPAA-region IP allowlisting (egress from Langfuse to customer infra, e.g. for LLM-as-a-judge): static IPs are `35.82.248.193`, `34.211.191.155`, `52.43.164.18` (us-west-2). Full list at [langfuse.com/security/networking](https://langfuse.com/security/networking). **Ingress** to `hipaa.cloud.langfuse.com` sits behind AWS ALBs without static IPs, we cannot publish a stable ingress IP range.
 
-**Reply template (BAA):**
+**Reply template:**
 
 ```text
 Hi {name},
 
-For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro, Teams, or Enterprise). Our BAA applies automatically once those conditions are met, no separate signature is required: https://langfuse.com/security/hipaa.
+For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro or higher). Legal agreement terms for HIPAA-regulated use are not published or downloadable on langfuse.com. Please contact legal@clickhouse.com before processing PHI.
 
 A note for completeness: HIPAA accounts are provisioned fresh on hipaa.cloud.langfuse.com. If your team is currently on us.cloud or cloud., past trace data can be moved via our data migration cookbook: https://langfuse.com/guides/cookbook/example_data_migration.
 
@@ -1171,7 +1180,31 @@ Best,
 
 ---
 
-### 13. Not-actually-support inbox (filter these fast)
+### 13. Feature requests
+
+<details>
+
+<summary>"Can you add X?" / "It would be great if Langfuse could…"</summary>
+
+Feature requests are not something to resolve on the thread, they're something to route so the product team sees the demand. How you handle it depends on where the request comes from.
+
+**Paying customers (Pylon):**
+
+1. Acknowledge the request and log the +1. For example: "Agree that this would make sense! I'll add your +1 to this feature request."
+2. Create a new Linear ticket for the request, or connect an existing Linear issue to the Pylon issue so the demand is tracked against a concrete piece of work.
+
+**Community / GitHub ideas board:**
+
+1. Acknowledge the request. For example: "Thanks for adding this here!"
+2. @-mention the Langfuse product engineer who owns that product area (see [ownership](/handbook/how-we-work/ownership)) so it lands with the right person. For example: "`@nimar` FYI - feature request for faster evals."
+
+**Escalate when:** the request is tied to a deal or renewal (route to the enterprise team), or when several customers ask for the same thing in a short window, flag it to the owning product engineer directly rather than only logging +1s.
+
+</details>
+
+---
+
+### 14. Not-actually-support inbox (filter these fast)
 
 <details>
 

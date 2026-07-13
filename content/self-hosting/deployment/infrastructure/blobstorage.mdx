@@ -387,11 +387,9 @@ Over time, this data accumulates and increases storage costs.
 It is recommended to configure a bucket lifecycle (expiration) policy to automatically delete objects after a defined number of days.
 
 <Callout type="warning">
-Langfuse uses raw event data from the bucket to merge delta-updates into existing traces, observations, and scores.
-The bucket lifecycle expiration period determines how long these updates can be merged into existing records.
-Once the raw events are deleted by the lifecycle policy, delta-updates will create duplicate entries instead of merging.
+Langfuse re-reads raw events from the bucket to retry failed ingestion jobs, for replay/disaster recovery, and — on the legacy `/api/public/ingestion` path — to combine incremental events sent for the same record. Size your lifecycle expiration to cover these needs (30 days on Langfuse Cloud). OpenTelemetry ingestion is self-contained (each span is a single complete event), so it does not depend on this retention for assembling records.
 
-On Langfuse Cloud, this is set to 30 days. For details on update behavior, see [How to update traces, observations, and scores?](/faq/all/tracing-data-updates).
+This retention window is not a way to update data. Traces and observations are immutable once ingested; see [How to update traces, observations, and scores?](/faq/all/tracing-data-updates) for details.
 
 </Callout>
 

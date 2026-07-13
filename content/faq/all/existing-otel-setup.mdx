@@ -547,8 +547,14 @@ This is largely a tradeoff. You can't filter parent spans without affecting the 
 {/* PYTHON */}
 
 ```python
-with langfuse.trace(name="my-operation", user_id="user-123", session_id="session-456") as trace:
-    # Your code here
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
+    with propagate_attributes(user_id="user-123", session_id="session-456"):
+        # Your code here
+        pass
 ```
 
 </Tab>

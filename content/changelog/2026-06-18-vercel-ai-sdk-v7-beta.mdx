@@ -11,6 +11,12 @@ import { Book, Package } from "lucide-react";
 
 <ChangelogHeader />
 
+<Callout type="info">
+  AI SDK 7 and `@langfuse/vercel-ai-sdk` are now generally available. Use the
+  current [Vercel AI SDK integration docs](/integrations/frameworks/vercel-ai-sdk)
+  for new projects.
+</Callout>
+
 Langfuse now ships a beta telemetry integration for the Vercel AI SDK v7 beta. Install `@langfuse/vercel-ai-sdk@beta` with `ai@beta`, keep the regular Langfuse OpenTelemetry exporter setup in place, and register `LangfuseVercelAiSdkIntegration` once. AI SDK calls then emit OpenTelemetry spans that Langfuse maps into traces, generations, tool calls, embeddings, and reranks.
 
 Use it to migrate a chat or agent route to AI SDK v7 beta while keeping Langfuse user IDs, sessions, tags, and trace metadata via `propagateAttributes`. You can also attach route or feature metadata through `runtimeContext`, and link Langfuse Prompt Management versions to model-call observations with `runtimeContext.langfusePrompt`.

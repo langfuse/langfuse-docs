@@ -160,7 +160,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
-        "SOC2 & ISO27001 reports, BAA available (HIPAA)",
+        "SOC2 & ISO27001 reports, HIPAA-ready region",
         "Prioritized in-app support",
       ],
       addOn: {
@@ -722,13 +722,25 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (metrics api)",
+        name: "Rate limit (Metrics API v2)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
             Hobby: "100 requests / day",
-            Core: "200 requests / day",
-            Pro: "2000 requests / day",
+            Core: "100 requests / hour",
+            Pro: "500 requests / hour",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "Rate limit (legacy Metrics API)",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "100 requests / day",
+            Core: "2,000 requests / day",
+            Pro: "2,000 requests / day",
             Enterprise: "Custom",
           },
         },
@@ -1233,7 +1245,7 @@ const sections: Section[] = [
       },
       {
         name: "Data processing agreement (GDPR)",
-        href: "/security/dpa",
+        href: "/dpa",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
         },
@@ -1252,7 +1264,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "HIPAA compliance",
+        name: "HIPAA-ready region",
         href: "/security/hipaa",
         tiers: {
           cloud: {
