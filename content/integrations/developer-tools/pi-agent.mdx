@@ -118,12 +118,12 @@ _[Example trace in Langfuse](https://cloud.langfuse.com/project/cmpy5u3fb06o5ad0
 
 `pi-langfuse` redacts common secrets (API keys, bearer tokens, passwords, private keys) and hashes local absolute paths before upload. You control what payloads are sent with a privacy preset, set via `privacyPreset` in the config file or the `LANGFUSE_PRIVACY_PRESET` environment variable:
 
-| Preset | Captures |
-| ------ | -------- |
-| `metadata-only` | Metadata only; omits inputs, outputs, tool I/O, system prompt, and cwd |
-| `prompts-only` | Prompt/provider inputs plus metadata |
+| Preset          | Captures                                                                 |
+| --------------- | ------------------------------------------------------------------------ |
+| `metadata-only` | Metadata only; omits inputs, outputs, tool I/O, system prompt, and cwd   |
+| `prompts-only`  | Prompt/provider inputs plus metadata                                     |
 | `conversations` | Inputs and assistant outputs, but omits tool I/O, system prompt, and cwd |
-| `full-debug` | Full trace detail (the default) |
+| `full-debug`    | Full trace detail (the default)                                          |
 
 Fine-grained flags override the preset: `LANGFUSE_CAPTURE_INPUTS`, `LANGFUSE_CAPTURE_OUTPUTS`, `LANGFUSE_CAPTURE_TOOL_IO`, `LANGFUSE_CAPTURE_SYSTEM_PROMPT`, and `LANGFUSE_CAPTURE_CWD`. Keep `~/.pi/agent/pi-langfuse/config.json` private and never commit your API keys.
 
