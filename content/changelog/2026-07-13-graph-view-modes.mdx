@@ -20,13 +20,13 @@ The **graph view** turns an agent trace into a picture of what your agent did: n
 
 ## A rebuilt graph, on its own renderer
 
-The graph runs on our own renderer: a deterministic layout (built on ELK) drawn onto a stable, zoomable canvas. The graph lays out the *same way every time* you open a trace, with no reshuffling between renders, and the viewport stays put as you pan and zoom, so you keep your place on a big agent. The layout is built to stay readable as traces grow.
+The graph runs on our own renderer: a deterministic layout (built on ELK) drawn onto a stable, zoomable canvas. The graph lays out the _same way every time_ you open a trace, with no reshuffling between renders, and the viewport stays put as you pan and zoom, so you keep your place on a big agent. The layout is built to stay readable as traces grow.
 
 ## Two modes: Aggregated and Expanded
 
 An **Aggregated / Expanded** toggle sits in the top-left of the graph. It re-draws the same trace two ways: the difference is whether repeated work is grouped by name or shown call-by-call. Your choice is remembered across traces.
 
-- **Aggregated** (the view you've had, now named) is a **compact overview**. Steps that share a name collapse into a single node with a counter, so `retrieve_docs (3/3)` means it ran three times, and loops are drawn as cycles. It is the fastest way to see an agent's overall *shape* and complexity without every individual call on screen.
+- **Aggregated** (the view you've had, now named) is a **compact overview**. Steps that share a name collapse into a single node with a counter, so `retrieve_docs (3/3)` means it ran three times, and loops are drawn as cycles. It is the fastest way to see an agent's overall _shape_ and complexity without every individual call on screen.
 
 - **Expanded** shows the process **as it ran**. Every call is its own node, so three `litellm_request` calls are three distinct nodes, and loops unroll into an acyclic graph (a DAG) in execution order. It is the more literal view, closer to the trace tree, for following a specific run or pinning down exactly where something happened.
 

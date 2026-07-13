@@ -40,17 +40,17 @@ The same trace can be drawn two ways. Switch between them with the **Aggregated 
 
 The distinction is how repeated steps are treated — one node **per step name** vs. one node **per call**:
 
-| | **Aggregated** (default) | **Expanded** ("as it ran") |
-| --- | --- | --- |
-| A node is… | one **unique step name** | one **individual call** |
-| Repeated calls | collapse into a single node with a counter | appear as separate nodes |
-| Loops / cycles | drawn as **cycles** (edges loop back) | **unrolled into an acyclic graph (DAG)** |
-| Reads like | the agent's overall *shape* | the exact *run*, step by step |
-| Best for | grasping structure & complexity at a glance | following or debugging a specific execution |
+|                | **Aggregated** (default)                    | **Expanded** ("as it ran")                  |
+| -------------- | ------------------------------------------- | ------------------------------------------- |
+| A node is…     | one **unique step name**                    | one **individual call**                     |
+| Repeated calls | collapse into a single node with a counter  | appear as separate nodes                    |
+| Loops / cycles | drawn as **cycles** (edges loop back)       | **unrolled into an acyclic graph (DAG)**    |
+| Reads like     | the agent's overall _shape_                 | the exact _run_, step by step               |
+| Best for       | grasping structure & complexity at a glance | following or debugging a specific execution |
 
 ### Aggregated
 
-The **Aggregated** view is a compact overview. Steps that share a name are merged into a single node with a counter — `retrieve_docs (3/3)` means that step ran three times — and a loop that calls the same tool repeatedly is drawn as a cycle rather than a long chain. This keeps even a busy agent readable: you see how many *distinct* steps there are and how they connect, without every individual call on screen. It's the fastest way to answer "what does this agent do, and how complex is it?"
+The **Aggregated** view is a compact overview. Steps that share a name are merged into a single node with a counter — `retrieve_docs (3/3)` means that step ran three times — and a loop that calls the same tool repeatedly is drawn as a cycle rather than a long chain. This keeps even a busy agent readable: you see how many _distinct_ steps there are and how they connect, without every individual call on screen. It's the fastest way to answer "what does this agent do, and how complex is it?"
 
 ### Expanded
 
