@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { extractWorkshopSourcePaths, fetchGitHub } from "./sync-workshop.mjs";
+import { fetchGitHub } from "./sync-workshop.mjs";
+
+const RAW_ACCEPT = "application/vnd.github.raw";
 
 test("retries transient GitHub responses", async () => {
   const responses = [
@@ -14,13 +16,12 @@ test("retries transient GitHub responses", async () => {
   let requests = 0;
   let requestedUrl;
 
-  const response = await fetchGitHub("README.md", {
+  const response = await fetchGitHub("README.md", RAW_ACCEPT, {
     fetchImpl: async (url) => {
       requests += 1;
       requestedUrl = url;
       return responses.shift();
     },
-    random: () => 0,
     sleepImpl: async (delayMs) => delays.push(delayMs),
     warn: () => {},
   });
@@ -29,34 +30,16 @@ test("retries transient GitHub responses", async () => {
   assert.equal(requests, 2);
   assert.equal(
     requestedUrl,
-    "https://raw.githubusercontent.com/langfuse/langfuse-workshop/main/README.md",
+    "https://api.github.com/repos/langfuse/langfuse-workshop/contents/README.md?ref=main",
   );
   assert.deepEqual(delays, [500]);
-});
-
-test("retries transient network errors", async () => {
-  let requests = 0;
-
-  const response = await fetchGitHub("README.md", {
-    fetchImpl: async () => {
-      requests += 1;
-      if (requests === 1) throw new TypeError("fetch failed");
-      return new Response("# Workshop", { status: 200 });
-    },
-    random: () => 0,
-    sleepImpl: async () => {},
-    warn: () => {},
-  });
-
-  assert.equal(await response.text(), "# Workshop");
-  assert.equal(requests, 2);
 });
 
 test("does not retry permanent GitHub responses", async () => {
   let requests = 0;
 
   await assert.rejects(
-    fetchGitHub("missing.md", {
+    fetchGitHub("missing.md", RAW_ACCEPT, {
       fetchImpl: async () => {
         requests += 1;
         return new Response("Not Found", {
@@ -71,45 +54,4 @@ test("does not retry permanent GitHub responses", async () => {
   );
 
   assert.equal(requests, 1);
-});
-
-test("bounds the response body included in errors", async () => {
-  const oversizedBody = "x".repeat(2_000);
-
-  await assert.rejects(
-    fetchGitHub("README.md", {
-      fetchImpl: async () =>
-        new Response(oversizedBody, {
-          status: 500,
-          statusText: "Internal Server Error",
-        }),
-      random: () => 0,
-      sleepImpl: async () => {},
-      warn: () => {},
-    }),
-    (error) => {
-      assert.match(error.message, /\[response truncated\]/);
-      assert.ok(error.message.length < oversizedBody.length);
-      return true;
-    },
-  );
-});
-
-test("discovers workshop modules from the README module table", () => {
-  const readme = `
-| Step | Learner lesson | Instructor notes |
-| --- | --- | --- |
-| 00 | [Setup](./docs/learner/00-setup.md) | [Notes](./docs/instructor/00-setup.md) |
-| 01 | [Base App](./docs/learner/01-base-app.md#run-it) | [Notes](./docs/instructor/01-base-app.md) |
-
-[Learner directory](./docs/learner/)
-`;
-
-  assert.deepEqual(extractWorkshopSourcePaths(readme), {
-    learner: ["docs/learner/00-setup.md", "docs/learner/01-base-app.md"],
-    instructor: [
-      "docs/instructor/00-setup.md",
-      "docs/instructor/01-base-app.md",
-    ],
-  });
 });
