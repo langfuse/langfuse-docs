@@ -207,7 +207,7 @@ Notes on the schema:
 
 ## React to completed export runs [#export-events]
 
-Langfuse does not send a webhook when an export run finishes. Instead, subscribe to your storage provider's native object-created events with a prefix filter on `{prefix}{project-id}/manifests/` — because the manifest is the last object of each run, this gives you exactly one event per completed run. When the event fires, download the manifest and process the objects listed in `files[].key`.
+Langfuse does not send a webhook when an export run finishes. Instead, subscribe to your storage provider's native object-created events with a prefix filter on `{prefix}{project-id}/manifests/` — because the manifest is the last object of each run, this gives you one event per completed run. When the event fires, download the manifest and process the objects listed in `files[].key`.
 
 Provider recipes:
 
