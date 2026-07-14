@@ -121,7 +121,7 @@ function AssistantFeature() {
         </div>
 
         <div className="grid border-y border-line-structure sm:grid-cols-3 sm:divide-x sm:divide-line-structure">
-          {ASSISTANT_USE_CASES.map((useCase, index) => (
+          {ASSISTANT_USE_CASES.map((useCase) => (
             <div
               key={useCase.title}
               className="flex flex-col gap-1 border-b border-line-structure py-3 last:border-b-0 sm:block sm:border-b-0 sm:px-4 sm:first:pl-0 sm:last:pr-0"
@@ -135,7 +135,6 @@ function AssistantFeature() {
               <Text size="s" className="text-left sm:mt-1">
                 {useCase.detail}
               </Text>
-              <span className="sr-only">Step {index + 1}</span>
             </div>
           ))}
         </div>

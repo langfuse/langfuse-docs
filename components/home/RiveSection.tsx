@@ -206,6 +206,7 @@ export const RiveSection = () => {
           variant="secondary"
           size="default"
           href="/academy"
+          aria-label="Learn in Academy"
           wrapperClassName="sm:flex-none"
         >
           Learn in Academy
