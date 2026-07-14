@@ -1,13 +1,7 @@
 "use client";
 
 import { HomeSection } from "@/components/home/HomeSection";
-import {
-  Button,
-  CornerBox,
-  Heading,
-  Link,
-  TextHighlight,
-} from "@/components/ui";
+import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 
 const ASSISTANT_VIDEO_SRC =
@@ -147,9 +141,12 @@ function AssistantFeature() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="secondary" size="default" href={ASSISTANT_HREF}>
-            View documentation
-          </Button>
+          <Link
+            href={ASSISTANT_HREF}
+            className="inline-flex w-fit items-center gap-1 font-sans text-[12px] font-medium text-text-secondary no-underline transition-colors hover:text-text-primary"
+          >
+            View documentation <span aria-hidden>→</span>
+          </Link>
         </div>
       </div>
 
