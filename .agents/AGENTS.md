@@ -111,6 +111,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 ## Writing guidelines
 
 - Use sentence case for user-facing headlines, section headings, and hero copy by default. Keep title case for short standalone navigation/UI labels where it reads more naturally (for example, paired nouns like "Questions & Answers" or conventional labels like "Get Started"). Always preserve proper nouns, acronyms, and official product names.
+- Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
 
 ### Changelog entries
 
