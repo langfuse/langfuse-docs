@@ -132,6 +132,7 @@ Optional **Yearly Commitment**:
 | [Rate limit (general API)](/faq/all/api-limits)                                                     | 30 req/min          | 100 req/min         | 1,000 req/min       | Custom                       |
 | [Rate limit (datasets API)](/faq/all/api-limits)                                                    | 100 req/min         | 200 req/min         | 1,000 req/min       | Custom                       |
 | [Rate limit (Metrics API v2)](/faq/all/api-limits)                                                  | 100 req/day         | 100 req/hour        | 500 req/hour        | Custom                       |
+| [Rate limit (Observations API v2)](/faq/all/api-limits)                                             | 30 req/min          | 100 req/min         | 1,000 req/min       | Custom                       |
 | [Rate limit (legacy Metrics API)](/faq/all/api-limits)                                              | 100 req/day         | 2,000 req/day       | 2,000 req/day       | Custom                       |
 | [SLA](/enterprise#faq)                                                                              | --                  | --                  | --                  | Yes                          |
 | **Exports**                                                                                         |                     |                     |                     |                              |

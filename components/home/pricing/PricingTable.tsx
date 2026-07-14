@@ -779,6 +779,20 @@ const sections: Section[] = [
         },
       },
       {
+        name: "Rate limit (Observations API v2)",
+        description:
+          "The v2 Observations API counts toward the general API rate-limit bucket.",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "30 requests / min",
+            Core: "100 requests / min",
+            Pro: "1,000 requests / min",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
         name: "Rate limit (legacy Metrics API)",
         href: "/faq/all/api-limits",
         tiers: {
