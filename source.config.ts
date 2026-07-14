@@ -137,6 +137,7 @@ export const faq = defineDocs({
 
 const integrationsFrontmatterSchema = sidebarFrontmatterSchema.extend({
   logo: z.string().nullish(),
+  logoAppearance: z.enum(["dark", "light", "multicolor"]).optional(),
 });
 
 export const integrations = defineDocs({

@@ -89,7 +89,7 @@ To take advantage of the new data model and explore your data in real time, use 
 - **JS/TS SDK:** v5.4.0+ ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
 - **Direct OpenTelemetry ingestion:** set `x-langfuse-ingestion-version: 4` on your OTEL span exporter ([OpenTelemetry setup](/integrations/native/opentelemetry))
 
-For SDK users, the key change is that `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, and `tags` to all child observations.
+For SDK users, the key change is that `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, `tags`, and request-scoped `environment` in the Python SDK to all child observations.
 
 ### Optional: Migrate LLM-as-a-judge evaluations
 
