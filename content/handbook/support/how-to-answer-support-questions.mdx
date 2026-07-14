@@ -937,13 +937,13 @@ Best,
 
 <summary>BAA / HIPAA</summary>
 
-HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Legal agreement terms for HIPAA-regulated use are not published or downloadable on langfuse.com. Route customers with legal requirements to [legal@clickhouse.com](mailto:legal@clickhouse.com) before they process PHI.
+HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Customers must [complete and sign the BAA via DocuSign](https://powerforms.docusign.net/39437499-4b13-4604-b373-2b1f2ae6f6fd?env=eu&acct=33986eaf-fde8-48d4-8d61-cf8c0f573e98&accountId=33986eaf-fde8-48d4-8d61-cf8c0f573e98) before they process PHI.
 
 **Triage steps:**
 
 1. Confirm the customer is using or about to use `hipaa.cloud.langfuse.com` (not the standard US/EU regions).
 2. **Account migration:** customers moving from EU/US must create a fresh account on `hipaa.cloud.langfuse.com`. Past trace data can be moved via the [data migration cookbook](/guides/cookbook/example_data_migration).
-3. For HIPAA-related legal requirements, route the customer to [legal@clickhouse.com](mailto:legal@clickhouse.com). Do not send public agreement text or tell customers it applies automatically.
+3. For HIPAA-related legal requirements, direct the customer to [complete and sign the BAA via DocuSign](https://powerforms.docusign.net/39437499-4b13-4604-b373-2b1f2ae6f6fd?env=eu&acct=33986eaf-fde8-48d4-8d61-cf8c0f573e98&accountId=33986eaf-fde8-48d4-8d61-cf8c0f573e98). Do not tell customers that the BAA applies automatically.
 4. For HIPAA-region IP allowlisting (egress from Langfuse to customer infra, e.g. for LLM-as-a-judge): static IPs are `35.82.248.193`, `34.211.191.155`, `52.43.164.18` (us-west-2). Full list at [langfuse.com/security/networking](https://langfuse.com/security/networking). **Ingress** to `hipaa.cloud.langfuse.com` sits behind AWS ALBs without static IPs, we cannot publish a stable ingress IP range.
 
 **Reply template:**
@@ -951,7 +951,7 @@ HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Lega
 ```text
 Hi {name},
 
-For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro or higher). Legal agreement terms for HIPAA-regulated use are not published or downloadable on langfuse.com. Please contact legal@clickhouse.com before processing PHI.
+For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro or higher). Please complete and sign the BAA before processing PHI: https://powerforms.docusign.net/39437499-4b13-4604-b373-2b1f2ae6f6fd?env=eu&acct=33986eaf-fde8-48d4-8d61-cf8c0f573e98&accountId=33986eaf-fde8-48d4-8d61-cf8c0f573e98
 
 A note for completeness: HIPAA accounts are provisioned fresh on hipaa.cloud.langfuse.com. If your team is currently on us.cloud or cloud., past trace data can be moved via our data migration cookbook: https://langfuse.com/guides/cookbook/example_data_migration.
 
