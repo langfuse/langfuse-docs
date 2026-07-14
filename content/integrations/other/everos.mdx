@@ -1,0 +1,138 @@
+---
+title: "Langfuse Integration with EverOS"
+sidebarTitle: EverOS
+logo: /images/integrations/everos_icon.png
+description: "Observe your AI agent's memory layer (writes, LLM extraction, recall with quality scores, and reflection) in Langfuse using OpenTelemetry."
+category: Integrations
+---
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+# Observe the memory layer with EverOS and Langfuse
+
+Memory is the one layer of the agent stack that observability usually can't see. This integration makes an agent's **memory operations** visible in Langfuse: what got stored, what a query recalled, how confident that recall was, and what the memory layer cost in tokens.
+
+> **Scope of this page (v1).** This uses a thin OpenTelemetry wrapper shipped in the EverOS repo under [`examples/langfuse/`](https://github.com/EverMind-AI/EverOS/tree/main/examples/langfuse). Native, opt-in instrumentation is landing in EverOS; once it ships you'll enable tracing with a config flag and this page will be updated. The span model and Langfuse conventions are identical either way.
+
+## What is EverOS?
+
+[EverOS](https://github.com/EverMind-AI/EverOS) is an open-source (Apache-2.0), local-first memory runtime for AI agents. Conversations and agent trajectories are extracted by an LLM into user profiles, episodic memories, agent cases and reusable agent skills; stored as human-readable Markdown; indexed in SQLite + LanceDB; retrieved via hybrid BM25 + vector recall with reranking; and consolidated over time by an offline reflection engine. It runs as an HTTP service (`pip install everos`).
+
+## What is Langfuse?
+
+[Langfuse](https://langfuse.com) is the open-source platform for LLM observability, evaluation, and prompt management. It ingests OpenTelemetry traces natively, so any system that speaks OTLP, including EverOS, shows up next to the rest of your agent's traces, with model-usage/cost views, scores, and dashboards.
+
+## How it maps
+
+Each EverOS API call becomes one Langfuse trace, with the server-side pipeline stages as typed child observations:
+
+| EverOS operation | Langfuse observation | What becomes visible |
+| --- | --- | --- |
+| `POST /api/v1/memory/add` | span `everos.memory.add` | messages buffered per session |
+| `POST /api/v1/memory/flush` → LLM extraction | generation `everos.extract` | model + tokens, so Langfuse can compute the cost |
+| markdown persistence | span `everos.persist.markdown` | the `.md` files written |
+| `POST /api/v1/memory/search` | retriever `everos.memory.search` | query, top_k → episodes/facts + fused scores |
+| query embedding | embedding `everos.search.embed_query` | embedding model + tokens |
+| hybrid recall + rerank | retriever / span | BM25 + vector candidate funnel, rerank scores |
+| `POST /api/v1/ome/trigger` | agent `everos.ome.<strategy>` | reflection / consolidation / skill evolution |
+
+Index sync (SQLite → LanceDB) runs asynchronously in EverOS, so it surfaces as its own correlated trace rather than a child of `add`. Recall-quality signals are pushed as Langfuse **scores** (they're first-class objects, not span attributes).
+
+## Quick Start
+
+> **You can run this without deploying EverOS.** The example ships a mock transport that returns EverOS-API-shaped responses, so you'll see real traces in Langfuse in a couple of minutes. Point it at a real server when you're ready (see [Run against a real EverOS server](#run-against-a-real-everos-server)).
+
+<Steps>
+
+### Install
+
+```bash
+pip install opentelemetry-sdk opentelemetry-exporter-otlp requests
+```
+
+### Create a Langfuse project and get your keys
+
+Sign up for [Langfuse Cloud](https://cloud.langfuse.com) (or self-host). Create a project and copy your API keys from the project settings.
+
+### Set your environment variables
+
+```bash filename=".env"
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_HOST="https://us.cloud.langfuse.com"  # 🇪🇺 https://cloud.langfuse.com
+
+# Optional: leave unset to use the built-in mock; set to trace a real server
+# EVEROS_BASE_URL="http://localhost:8000"
+```
+
+### Get the example
+
+Both files live in the EverOS repo under [`examples/langfuse/`](https://github.com/EverMind-AI/EverOS/tree/main/examples/langfuse):
+
+- `everos_langfuse.py`: the OpenTelemetry wrapper (pure OTel SDK, no Langfuse package dependency)
+- `demo.py`: a runnable end-to-end example with a built-in mock
+
+Copy them next to your code (or clone the repo).
+
+### Run a memory lifecycle
+
+```bash
+python demo.py
+```
+
+With no `EVEROS_BASE_URL` set, `demo.py` uses the built-in mock, so you get real traces in Langfuse without deploying anything. It replays a full lifecycle: ingest → extraction → recall (including an updated fact outranking a stale one, and a deliberate miss) → an agent-skill recall → reflection. The core of `demo.py` looks like this (shown against a real server; with no `EVEROS_BASE_URL` it swaps in the built-in mock):
+
+```python
+from everos_langfuse import HTTPTransport, InstrumentedEverOS, init_tracing, force_flush
+
+init_tracing(service_name="everos")   # exports to Langfuse when LANGFUSE_* env is set
+ev = InstrumentedEverOS(HTTPTransport("http://localhost:8000"))
+
+session, user = "sess-cafe-chat-001", "alice"
+ev.add(session, [{"sender_id": user, "role": "user", "timestamp": 0,
+                  "content": "Actually, I moved from SOMA to Oakland last month."}],
+       user_id=user)
+ev.flush(session, user_id=user)                       # extraction (generation w/ tokens) → persist → index
+ev.search("Where does Alice live now?",               # recall + recall_top_score / recall_hit
+          user_id=user, session_id=session)
+ev.trigger_ome("reflect_episodes", user_id=user, session_id=session)   # reflection
+force_flush()
+```
+
+Open your Langfuse project: each call appears as a trace under the `everos` service, tagged `everos` / `memory`, grouped by `session.id` and `user.id`. Searches carry `recall_top_score` / `recall_hit` scores.
+
+</Steps>
+
+## See it in Langfuse
+
+![EverOS memory search traced in Langfuse, with recall scores on the retriever span](/images/integrations/everos_search_trace.png)
+
+![EverOS extraction as a generation, with model and token usage](/images/integrations/everos_extract_trace.png)
+
+## Run against a real EverOS server
+
+The quickstart above uses a mock by default so you can see traces immediately. To trace a real deployment, set `EVEROS_BASE_URL` to your running server; `demo.py` then routes calls through `HTTPTransport` instead of the mock.
+
+What a real server surfaces **today**: one trace per memory operation (`add` / `flush` / `search` / reflection) with real end-to-end latency and inputs/outputs, grouped by `session.id` / `user.id`, and, for `search`, real recall-quality scores (derived from the response, see below). The per-stage child observations (LLM extraction with token usage, embedding, hybrid recall, rerank) render in the mock demo and will surface for real deployments once EverOS's native, opt-in instrumentation ships (see the scope note above); the wrapper deliberately does not fabricate them from a server that doesn't expose them yet.
+
+You'll need an EverOS server with its model backends configured (an LLM for extraction/reflection, plus embedding and rerank models). See the [EverOS quickstart](https://github.com/EverMind-AI/EverOS#quickstart) to start one (`pip install everos`).
+
+## What you can see in Langfuse
+
+The mock demo shows the full picture below; a live server today shows the top-level operation spans plus real recall scores (see [Run against a real EverOS server](#run-against-a-real-everos-server)).
+
+- **The full memory lifecycle as trace trees**: `add` → `extract` → `persist`, and `search` → `embed` → `hybrid recall` → `rerank`, each stage timed.
+- **The cost of remembering**: extraction and reflection are `generation` observations carrying `model` + token usage, so Langfuse computes their cost in the model-usage views.
+- **Recall quality over time**: each search attaches proxy scores (the fused/reranked top-hit score, and a 0/1 hit against a threshold) via the scores API, derived from the search response, so this works against a live server today. These are the engine's own confidence signals, useful to plot and trend, but not ground-truth relevance. For true relevance evaluation, run an LLM-as-judge over the query + recalled content in the trace (see [Evaluation](https://langfuse.com/docs/evaluation/overview)).
+- **Per-session / per-user views**: filter and group memory activity by `session.id` and `user.id`.
+
+> **Privacy.** Traces carry non-sensitive metadata (latency, token counts, model names, scores) by default. Capturing raw query or memory content is opt-in, and the demo's `public_traces` flag is only for synthetic data; never enable it for real memory content.
+
+## Resources
+
+- [EverOS on GitHub](https://github.com/EverMind-AI/EverOS)
+- [Integration example (`examples/langfuse/`)](https://github.com/EverMind-AI/EverOS/tree/main/examples/langfuse)
+- [Raven, the self-improving agent harness built on EverOS](https://github.com/EverMind-AI/Raven)
+- [Langfuse OpenTelemetry docs](https://langfuse.com/integrations/native/opentelemetry)
+
+<LearnMore />
