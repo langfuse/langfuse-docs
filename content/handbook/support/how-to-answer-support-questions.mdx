@@ -576,8 +576,9 @@ Container scanners (Wiz, Snyk, Trivy, Black Duck) regularly produce long lists o
 **Triage steps:**
 
 1. Check the version the customer scanned. If it's not the latest, ask them to scan the current image first, many CVEs are already patched in the next release.
-2. For genuine concerns, route to `security@clickhouse.com` for triage.
-3. Do not promise fix timelines. We patch on rolling cadence with each release.
+2. For genuine concerns, direct the customer to the [ClickHouse Bugcrowd program](https://bugcrowd.com/engagements/clickhouse) for scope review and submission. Do not ask them to send sensitive proof-of-concept details through support channels.
+3. If the report suggests active exploitation or customer data exposure, page engineering on Slack `#security` in parallel.
+4. Do not promise fix timelines. We patch on rolling cadence with each release.
 
 **Reply template:**
 
@@ -587,6 +588,8 @@ Hi {name},
 Thanks for the scan output. Could you re-run the scan against the latest image ({current_version}, released {date})? Several of the high-severity CVEs in your list are already addressed in recent releases.
 
 For any that still appear after that, our security team will triage and prioritize. Most CVEs in transitive Node.js dependencies are in code paths Langfuse doesn't exercise, we don't ship a fix for every transient CVE, but we do for anything reachable.
+
+If you believe a remaining finding is exploitable, please review the scope and submit it through the ClickHouse Bugcrowd program: https://bugcrowd.com/engagements/clickhouse.
 
 Best,
 {you}
