@@ -62,7 +62,7 @@ curl "http://localhost:3030/api/health?failIfEventPropagationStuck=true"
 
 - Returns `503` when the job's last run started more than `LANGFUSE_EVENT_PROPAGATION_STUCK_THRESHOLD_MINUTES` (default `15`) ago. The response body includes diagnostics (last run time, current propagation delay).
 - The check reads only Redis and never fails on deployments where the job does not run (write mode `legacy` or `events_only`, or the queue consumer disabled), so it is safe to keep configured permanently.
-- A job that has not run yet (e.g., right after a restart) is not considered stuck.
+- A job that has never run — for example, on a deployment that has not enabled the `dual` write mode yet — is not considered stuck. The heartbeat lives in Redis, so it survives container restarts; see the probe guidance below for restarts.
 
 <Callout type="warning">
 

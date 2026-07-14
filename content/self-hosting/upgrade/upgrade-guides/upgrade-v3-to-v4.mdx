@@ -8,7 +8,7 @@ description: A guide to upgrade a Langfuse v3 setup to v4.
 <Callout type="info">
 
 We tried to make this upgrade as seamless as possible.
-Please ask in the [v4 rollout GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518) or contact [support](/support) in case you have any questions while upgrading to v4.
+Please ask in the [v4 rollout GitHub Discussion](https://github.com/orgs/langfuse/discussions/14157) or contact [support](/support) in case you have any questions while upgrading to v4.
 
 </Callout>
 
@@ -110,7 +110,7 @@ Trace-based and legacy-dataset-based LLM-as-a-Judge evaluators perform lookups o
 
 ### Batch exports and integrations [#exports]
 
-The blob storage, PostHog, and Mixpanel integrations must be configured to use the enriched observations export source ([changelog](/changelog/2026-05-20-blob-storage-enriched-default)). The classic `TRACE_OBSERVATIONS` export option does not produce any data after the [cutover](#cutover) to `events_only`.
+The blob storage, PostHog, and Mixpanel integrations must be configured to use the enriched observations export source ([changelog](/changelog/2026-05-20-blob-storage-enriched-default)). The classic `LEGACY_TRACES_OBSERVATIONS` export source ("Traces and observations (legacy)") does not produce any data after the [cutover](#cutover) to `events_only`.
 
 ## Migration overview [#overview]
 
@@ -281,14 +281,14 @@ Fresh installs need none of the above: deploy Langfuse v4 following the regular 
 
 On Langfuse v4, the new behavior is the default — these variables exist to retain v3 behaviors while your migration is in flight:
 
-| Variable                                                       | Values / v4 default                         | Use during the migration                                                                                                                                        |
-| -------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_MIGRATION_V4_WRITE_MODE`                             | `legacy` / `dual` / `events_only` (default) | `legacy` retains the full v3 behavior; `dual` writes old and new tables simultaneously and serves reads from the new ones.                                      |
-| `LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR`                  | `dual_write` / `direct` (default)           | `dual_write` retains server-side attribute propagation for OTel producers that have not adopted client-side propagation yet.                                    |
-| `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`                   | `true` (default) / `false`                  | Gates the v4 read paths (UI toggle and v2 APIs). Set `false` to keep the v3 read experience while on `legacy` or `dual`; must remain `true` with `events_only`. |
-| `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL`    | `true` (default) / `false`                  | Set `false` to defer the backfill (required while on `legacy`) or to skip it permanently for the retention-based rollover.                                      |
-| `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES` | `false` (default) / `true`                  | Set `true` after a successful backfill to drop intermediate scratch tables and free disk space.                                                                 |
-| `CLICKHOUSE_DISABLE_LAZY_MATERIALIZATION`                      | `true` / `false` (default)                  | Set `true` on ClickHouse versions below 26.6 due to incompatibility issues.                                                                                     |
+| Variable                                                       | Values / v4 default                         | Use during the migration                                                                                                                                                                                              |
+| -------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_MIGRATION_V4_WRITE_MODE`                             | `legacy` / `dual` / `events_only` (default) | `legacy` retains the full v3 behavior; `dual` writes old and new tables simultaneously and makes the new read path available (per-user UI toggle and v2 APIs, gated by `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`). |
+| `LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR`                  | `dual_write` / `direct` (default)           | `dual_write` retains server-side attribute propagation for OTel producers that have not adopted client-side propagation yet.                                                                                          |
+| `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`                   | `true` (default) / `false`                  | Gates the v4 read paths (UI toggle and v2 APIs). Set `false` to keep the v3 read experience while on `legacy` or `dual`; must remain `true` with `events_only`.                                                       |
+| `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL`    | `true` (default) / `false`                  | Set `false` to defer the backfill (required while on `legacy`) or to skip it permanently for the retention-based rollover.                                                                                            |
+| `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES` | `false` (default) / `true`                  | Set `true` after a successful backfill to drop intermediate scratch tables and free disk space.                                                                                                                       |
+| `CLICKHOUSE_DISABLE_LAZY_MATERIALIZATION`                      | `true` / `false` (default)                  | Set `true` on ClickHouse versions below 26.6 due to incompatibility issues.                                                                                                                                           |
 
 ## How the dual write works [#dual-write]
 
